@@ -329,18 +329,28 @@ class Type_Tuple : Type_BaseList {
 
 /// The type of an architectural block.
 /// Abstract base for Type_Control, Type_Parser and Type_Package
-abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {
+abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimpleNamespace {
     optional Annotations annotations = Annotations::empty;
     optional TypeParameters typeParameters = new TypeParameters;
     Annotations getAnnotations() const override { return annotations; }
     TypeParameters getTypeParameters() const override { return typeParameters; }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return typeParameters->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return typeParameters->getDeclByName(name); }
 }
 
-class Type_Package : Type_ArchBlock, IContainer {
+class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
     toString{ return cstring("package ") + externalName(); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return typeParameters->getDeclarations()->concat(constructorParams->getDeclarations()); }
+    IDeclaration getDeclByName(cstring name) const override {
+        auto decl = constructorParams->getDeclByName(name);
+        if (!decl) decl = typeParameters->getDeclByName(name);
+        return decl; }
 }
 
 class Type_Parser : Type_ArchBlock, IApply {
@@ -484,7 +494,7 @@ class Type_ActionEnum : Type {
     const IR::Type* getP4Type() const override { return nullptr; }
 }
 
-abstract Type_MethodBase : Type, IMayBeGenericType {
+abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     // we generally want type parameters visited first
     optional TypeParameters typeParameters = new TypeParameters();
     optional NullOK Type returnType = nullptr;
@@ -507,6 +517,12 @@ abstract Type_MethodBase : Type, IMayBeGenericType {
         return result;
     }
     const IR::Type* getP4Type() const override { return nullptr; }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
+    IDeclaration getDeclByName(cstring name) const override {
+        auto decl = parameters->getDeclByName(name);
+        if (!decl) decl = typeParameters->getDeclByName(name);
+        return decl; }
 }
 
 /// Type for a method or function.
@@ -542,7 +558,7 @@ class Type_Action : Type_MethodBase {
 #nodbprint
 }
 
-class Method : Declaration, IAnnotated, IFunctional {
+class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
     Type_Method type;
     optional bool isAbstract = false;
     optional Annotations annotations = Annotations::empty;
@@ -551,6 +567,11 @@ class Method : Declaration, IAnnotated, IFunctional {
     void setAbstract() { isAbstract = true; }
     Annotations getAnnotations() const override { return annotations; }
     ParameterList getParameters() const override { return type->parameters; }
+    // annotations can refer to parameters, so need to look them up in scope
+    IDeclaration getDeclByName(cstring name) const {
+        return type->parameters->getDeclByName(name); }
+    Util::Enumerator<IDeclaration> *getDeclarations() const {
+        return type->parameters->getDeclarations(); }
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
@@ -582,8 +603,9 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnn
     optional Annotations annotations = Annotations::empty;
 
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return methods.getEnumerator()->as<const IDeclaration*>()
-            ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
+        return typeParameters->getDeclarations()
+            ->concat(attributes.valueEnumerator()->as<const IDeclaration*>())
+            ->concat(methods.getEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     validate{ methods.check_null(); }
     Annotations getAnnotations() const override { return annotations; }

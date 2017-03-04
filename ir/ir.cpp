@@ -229,12 +229,6 @@ InstantiatedBlock::findParameterValue(cstring paramName) const {
     return getValue(param->getNode());
 }
 
-Util::Enumerator<const IDeclaration*>* P4Action::getDeclarations() const
-{ return body->getDeclarations(); }
-
-const IDeclaration* P4Action::getDeclByName(cstring name) const
-{ return body->components.getDeclaration(name); }
-
 Util::Enumerator<const IDeclaration*>* P4Program::getDeclarations() const {
     return objects.getEnumerator()
             ->as<const IDeclaration*>()

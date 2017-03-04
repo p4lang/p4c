@@ -89,12 +89,18 @@ class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
 
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return parserLocals.getDeclarations()->concat(states.getDeclarations()); }
+        return type->typeParameters->getDeclarations()
+                ->concat(type->applyParams->getDeclarations())
+                ->concat(constructorParams->getDeclarations())
+                ->concat(parserLocals.getDeclarations())
+                ->concat(states.getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
         auto decl = parserLocals.getDeclaration(name);
-        if (decl != nullptr)
-            return decl;
-        return states.getDeclaration(name); }
+        if (!decl) decl = states.getDeclaration(name);
+        if (!decl) decl = type->applyParams->getDeclByName(name);
+        if (!decl) decl = constructorParams->getDeclByName(name);
+        if (!decl) decl = type->typeParameters->getDeclByName(name);
+        return decl; }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
     Type_Method getConstructorMethodType() const override;
@@ -119,12 +125,19 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
 
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return controlLocals.getDeclarations(); }
+        return type->typeParameters->getDeclarations()
+                ->concat(type->applyParams->getDeclarations())
+                ->concat(constructorParams->getDeclarations())
+                ->concat(controlLocals.getDeclarations()); }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
     Type_Method getConstructorMethodType() const override;
     IDeclaration getDeclByName(cstring name) const override {
-        return controlLocals.getDeclaration(name); }
+        auto decl = controlLocals.getDeclaration(name);
+        if (!decl) decl = type->applyParams->getDeclByName(name);
+        if (!decl) decl = constructorParams->getDeclByName(name);
+        if (!decl) decl = type->typeParameters->getDeclByName(name);
+        return decl; }
     ParameterList getConstructorParameters() const override { return constructorParams; }
 #apply
     validate {
@@ -140,8 +153,10 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
     optional Annotations        annotations = Annotations::empty;
     ParameterList               parameters;
     BlockStatement              body;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override;
-    IDeclaration getDeclByName(cstring name) const override;
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return parameters->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return parameters->getDeclByName(name); }
     Annotations getAnnotations() const override { return annotations; }
     ParameterList getParameters() const override { return parameters; }
 }
@@ -488,12 +503,16 @@ class SwitchStatement : Statement {
         v.parallel_visit(cases, "cases"); }
 }
 
-class Function : Declaration, IFunctional {
+class Function : Declaration, IFunctional, ISimpleNamespace {
     Type_Method    type;
     BlockStatement body;
     ParameterList getParameters() const override {
         return type->parameters;
     }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return type->parameters->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return type->parameters->getDeclByName(name); }
 }
 
 /////////////////////////////////////////////////////////////

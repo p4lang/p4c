@@ -27,6 +27,7 @@ limitations under the License.
 #include "lib/json.h"
 
 class Visitor;
+class Visitor_Context;
 class Inspector;
 class Modifier;
 class Transform;
@@ -93,8 +94,9 @@ class Node : public virtual INode {
     Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++), clone_id(other.clone_id) {
         traceCreation(); }
     virtual ~Node() {}
-    const Node *apply(Visitor &v) const;
-    const Node *apply(Visitor &&v) const { return apply(v); }
+    const Node *apply(Visitor &v, const Visitor_Context *ctxt = nullptr) const;
+    const Node *apply(Visitor &&v, const Visitor_Context *ctxt = nullptr) const {
+        return apply(v, ctxt); }
     virtual Node *clone() const = 0;
     void dbprint(std::ostream &out) const override;
     virtual void dump_fields(std::ostream &) const { }
@@ -168,14 +170,15 @@ inline bool equiv(const INode *a, const INode *b) {
 /* only define 'apply' for a limited number of classes (those we want to call
  * visitors directly on), as defining it and making it virtual would mean that
  * NO Transform could transform the class into a sibling class */
-#define IRNODE_DECLARE_APPLY_OVERLOAD(T)                                \
-    const T *apply(Visitor &v) const;                                   \
-    const T *apply(Visitor &&v) const { return apply(v); }
+#define IRNODE_DECLARE_APPLY_OVERLOAD(T)                                        \
+    const T *apply(Visitor &v, const Visitor_Context *ctxt = nullptr) const;    \
+    const T *apply(Visitor &&v, const Visitor_Context *ctxt = nullptr) const {  \
+        return apply(v, ctxt); }
 #define IRNODE_DEFINE_APPLY_OVERLOAD(CLASS, TEMPLATE, TT)               \
     TEMPLATE                                                            \
-    const IR::CLASS TT *IR::CLASS TT::apply(Visitor &v) const {         \
+    const IR::CLASS TT *IR::CLASS TT::apply(Visitor &v, const Visitor_Context *ctxt) const { \
         const CLASS *tmp = this;                                        \
-        auto prof = v.init_apply(tmp);                                  \
+        auto prof = v.init_apply(tmp, ctxt);                            \
         v.visit(tmp);                                                   \
         v.end_apply(tmp);                                               \
         return tmp; }
