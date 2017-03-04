@@ -5,11 +5,12 @@ namespace P4 {
 const IR::Type* BindTypeVariables::getVarValue(const IR::Type_Var* var) const {
     // Lookup a type variable
     auto type = typeMap->getSubstitution(var);
-    CHECK_NULL(type);
     return getP4Type(type);
 }
 
 const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
+    if (type == nullptr)
+        return type;
     auto rtype = type->getP4Type();
     CHECK_NULL(rtype);
     return rtype;
@@ -35,6 +36,10 @@ const IR::Node* BindTypeVariables::postorder(IR::Declaration_Instance* decl) {
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : *mt->getTypeParameters()->parameters) {
         auto type = getVarValue(p);
+        if (type == nullptr) {
+            ::error("%1%: cannot infer type for type parameter %2%", decl, p);
+            return decl;
+        }
         typeArgs->push_back(type);
     }
     decl->type = new IR::Type_Specialized(
@@ -54,6 +59,10 @@ const IR::Node* BindTypeVariables::postorder(IR::MethodCallExpression* expressio
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : *mt->getTypeParameters()->parameters) {
         auto type = getVarValue(p);
+        if (type == nullptr) {
+            ::error("%1%: cannot infer type for type parameter %2%", expression, p);
+            return expression;
+        }
         typeArgs->push_back(type);
     }
     expression->typeArguments = typeArgs;
@@ -72,6 +81,10 @@ const IR::Node* BindTypeVariables::postorder(IR::ConstructorCallExpression* expr
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : *mt->getTypeParameters()->parameters) {
         auto type = getVarValue(p);
+        if (type == nullptr) {
+            ::error("%1%: cannot infer type for type parameter %2%", expression, p);
+            return expression;
+        }
         typeArgs->push_back(type);
     }
     expression->constructedType = new IR::Type_Specialized(
