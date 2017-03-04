@@ -29,8 +29,8 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
         // check to see whether we already have a substitution for leftTv
         const IR::Type* leftSubst = subst->lookup(leftTv);
         if (leftSubst == nullptr) {
-            LOG1("Binding " << leftTv << " => " << constraint->right);
-            return subst->compose(leftTv, constraint->right);
+            LOG3("Binding " << leftTv << " => " << constraint->right);
+            return subst->compose(root, leftTv, constraint->right);
         } else {
             addEqualityConstraint(leftSubst, constraint->right);
             return true;
@@ -41,8 +41,8 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
         auto rightTv = constraint->right->to<IR::ITypeVar>();
         const IR::Type* rightSubst = subst->lookup(rightTv);
         if (rightSubst == nullptr) {
-            LOG1("Binding " << rightTv << " => " << constraint->left);
-            return subst->compose(rightTv, constraint->left);
+            LOG3("Binding " << rightTv << " => " << constraint->left);
+            return subst->compose(root, rightTv, constraint->left);
         } else {
             addEqualityConstraint(constraint->left, rightSubst);
             return true;

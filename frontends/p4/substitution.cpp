@@ -19,8 +19,18 @@ limitations under the License.
 #include "typeMap.h"
 
 namespace P4 {
-bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
-    LOG1("Adding " << var->toString() << "->" << substitution->toString() << " to substitution");
+bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
+                                       const IR::ITypeVar* var, const IR::Type* substitution) {
+    LOG3("Adding " << var->toString() << "->" << substitution->toString() << " to substitution");
+
+    // Type variables that represent Type_InfInt can only be unified to bit<> types
+    // or to other Type_InfInt types.
+    if (var->is<IR::Type_InfInt>()) {
+        if (!substitution->is<IR::Type_InfInt>() && !substitution->is<IR::Type_Bits>()) {
+            ::error("%1%: Cannot unify type %2% with %3%", errorLocation, var, substitution);
+            return false;
+        }
+    }
 
     // First check whether the substitution is legal.
     // It is not if var occurs in substitution
@@ -73,7 +83,7 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* oth
     }
 }
 
-bool TypeVariableSubstitution::setBindings(const IR::Node* root,
+bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
                                            const IR::TypeParameters* params,
                                            const IR::Vector<IR::Type>* args) {
     if (params == nullptr || args == nullptr)
@@ -81,7 +91,7 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* root,
 
     if (params->parameters->size() != args->size()) {
         ::error("%1% has %2% type parameters, invoked with %3% %4%",
-                root, params->parameters->size(), args->size(), args);
+                errorLocation, params->parameters->size(), args->size(), args);
         return false;
     }
 
@@ -92,7 +102,7 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* root,
 
         bool success = setBinding(tp, t);
         if (!success) {
-            ::error("Cannot bind %1% to %2%", tp, t);
+            ::error("%1%: Cannot bind %2% to %3%", errorLocation, tp, t);
             return false;
         }
     }

@@ -1,0 +1,6 @@
+../testdata/p4_16_errors/issue345.p4(19): error: h: Cannot unify type int with H
+        H h = 0;
+        ^^^^^^^^
+../testdata/p4_16_errors/issue345.p4(17)
+control C<H>() {
+          ^

@@ -76,21 +76,11 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
  public:
     TypeVariableSubstitution() = default;
     TypeVariableSubstitution(const TypeVariableSubstitution& other) = default;
-    /* Set bindings for multiple variables at the same time.
-     * @param params   List of variables to set.
-     * @param args     List of type arguments to set to variables.
-     * @param root     P4 program element which is being processed. Used for error reporting.
-     * @return         True on success. */
-    bool setBindings(const IR::Node* root,
+    bool setBindings(const IR::Node* errorLocation,
                      const IR::TypeParameters* params,
                      const IR::Vector<IR::Type>* args);
-
-    /* Apply this additional substitution to all substitutions already present.
-     * Add this substitution to the list.
-     * @param var           Variable to substitute everywhere.
-     * @param substitution  Substitution for variable.
-     * @return              True on success.     */
-    bool compose(const IR::ITypeVar* var, const IR::Type* substitution);
+    bool compose(const IR::Node* errorLocation,
+                 const IR::ITypeVar* var, const IR::Type* substitution);
     // Simple composition: do not expect that variables from other
     // appear in the RHS of variables from this.
     void simpleCompose(const TypeVariableSubstitution* other);
