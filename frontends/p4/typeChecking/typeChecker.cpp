@@ -801,14 +801,10 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         return decl;
     }
     auto orig = getOriginal<IR::Declaration_Instance>();
-    const IR::Vector<IR::Type> *typeArguments = nullptr;
 
     auto simpleType = type;
-    if (type->is<IR::Type_SpecializedCanonical>()) {
-        auto tsc = type->to<IR::Type_SpecializedCanonical>();
-        simpleType = tsc->substituted;
-        typeArguments = tsc->arguments;
-    }
+    if (type->is<IR::Type_SpecializedCanonical>())
+        simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
     if (simpleType->is<IR::Type_Extern>()) {
         auto et = simpleType->to<IR::Type_Extern>();
