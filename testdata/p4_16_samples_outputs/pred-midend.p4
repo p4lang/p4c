@@ -4,9 +4,7 @@
 control empty();
 package top(empty e);
 control Ing() {
-    bool b;
     @name("cond") action cond_0() {
-        b = true;
     }
     table tbl_cond() {
         actions = {

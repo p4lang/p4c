@@ -27,8 +27,11 @@ namespace P4 {
    This pass is designed to be run after all declarations have received unique
    internal names.  This is important because the locals map uses only the
    declaration name, and not the full path.
+
    Requires expression types be stored inline in the expression
    (obtained by running Typechecking(updateProgram = true)).
+   Requires that all declaration names be globally unique
+   (obtained by running UniqueNames)
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
     bool                        working = false;
@@ -37,7 +40,21 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
         bool                    live = false;
         const IR::Expression    *val = nullptr;
     };
-    std::map<cstring, VarInfo>  available;
+    struct TableInfo {
+        std::set<cstring>       keyreads, actions;
+        int                                             apply_count = 0;
+        std::map<cstring, const IR::Expression *>       key_remap;
+    };
+    struct FuncInfo {
+        std::set<cstring>       reads, writes;
+    };
+    std::map<cstring, VarInfo>          available;
+    std::map<cstring, TableInfo>        &tables;
+    std::map<cstring, FuncInfo>         &actions;
+    std::map<cstring, FuncInfo>         &methods;
+    TableInfo                           *inferForTable = nullptr;
+    FuncInfo                            *inferForFunc = nullptr;
+    bool                                need_key_rewrite = false;
     DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
     void dropValuesUsing(cstring);
@@ -50,13 +67,23 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
     IR::P4Action *preorder(IR::P4Action *) override;
     IR::P4Action *postorder(IR::P4Action *) override;
+    IR::Function *preorder(IR::Function *) override;
+    IR::Function *postorder(IR::Function *) override;
     IR::P4Control *preorder(IR::P4Control *) override;
+    void apply_table(TableInfo *tbl);
+    void apply_function(FuncInfo *tbl);
+    IR::P4Table *preorder(IR::P4Table *) override;
+    IR::P4Table *postorder(IR::P4Table *) override;
     class ElimDead;
+    class RewriteTableKeys;
 
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation() { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
+    DoLocalCopyPropagation() : tables(*new std::map<cstring, TableInfo>),
+                               actions(*new std::map<cstring, FuncInfo>),
+                               methods(*new std::map<cstring, FuncInfo>)
+    { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
 };
 
 class LocalCopyPropagation : public PassManager {

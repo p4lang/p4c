@@ -42,9 +42,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<32> c_tmp_0;
     @name("c.add") action c_add(bit<32> data) {
-        c_tmp_0 = h.h.a + data;
         h.h.b = h.h.a + data;
     }
     @name("c.t") table c_t_0() {

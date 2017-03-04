@@ -12,12 +12,9 @@ struct tuple_0 {
 
 control c() {
     tuple_0 x;
-    tuple_0 y;
     action act() {
         x.field = 32w10;
         x.field_0 = false;
-        y.field = x.field;
-        y.field_0 = x.field_0;
     }
     table tbl_act() {
         actions = {

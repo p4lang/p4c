@@ -1,7 +1,5 @@
 control c(inout bit<32> x) {
-    bit<32> arg_0;
     @name("a") action a_0() {
-        arg_0 = 32w10;
         x = 32w10;
     }
     @name("t") table t() {

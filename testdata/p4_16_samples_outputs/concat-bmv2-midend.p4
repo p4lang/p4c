@@ -43,9 +43,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<64> tmp_0;
     @name("concat") action concat_0() {
-        tmp_0 = h.h.a ++ h.h.b;
         h.h.c = h.h.a ++ h.h.b;
         sm.egress_spec = 9w0;
     }

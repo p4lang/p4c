@@ -56,16 +56,8 @@ parser p1(packet_in p, out Header h) {
 
 control c(out bit<32> v) {
     bit<32> b;
-    bit<32> d_2;
     bit<32> setByAction;
     bit<32> e;
-    bool touched;
-    bit<32> tmp_17;
-    bit<32> tmp_18;
-    bool tmp_19;
-    bit<32> tmp_20;
-    bool tmp_21;
-    bit<32> tmp_22;
     @name("a1") action a1_0() {
         setByAction = 32w1;
     }
@@ -86,53 +78,19 @@ control c(out bit<32> v) {
         e = 32w1;
     }
     action act_0() {
-        d_2 = 32w1;
-        tmp_17 = b + 32w1;
-        tmp_18 = 32w2;
-        tmp_19 = e > 32w0;
-    }
-    action act_1() {
-        touched = true;
-    }
-    action act_2() {
-        tmp_20 = e + 32w1;
         e = e + 32w1;
     }
-    action act_3() {
-        tmp_21 = e > 32w0;
-    }
-    action act_4() {
-        tmp_22 = setByAction + 32w1;
-    }
     table tbl_act() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    table tbl_act_0() {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_0() {
         actions = {
-            act_2();
+            act_0();
         }
-        const default_action = act_2();
-    }
-    table tbl_act_2() {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_3() {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
+        const default_action = act_0();
     }
     table tbl_a1() {
         actions = {
@@ -140,31 +98,21 @@ control c(out bit<32> v) {
         }
         const default_action = a1_2();
     }
-    table tbl_act_4() {
-        actions = {
-            act_4();
-        }
-        const default_action = act_4();
-    }
     apply {
-        tbl_act.apply();
         if (e > 32w0) 
-            tbl_act_0.apply();
+            tbl_act.apply();
         else 
             ;
-        tbl_act_1.apply();
+        tbl_act_0.apply();
         switch (t.apply().action_run) {
             a1_0: {
-                tbl_act_2.apply();
             }
         }
 
-        tbl_act_3.apply();
         if (e > 32w0) 
             t.apply();
         else 
             tbl_a1.apply();
-        tbl_act_4.apply();
     }
 }
 

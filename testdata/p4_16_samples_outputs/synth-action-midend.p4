@@ -1,8 +1,4 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_3;
-    bit<32> tmp_4;
-    bit<32> tmp_5;
-    bool tmp_6;
     action act() {
         x = 32w12;
         x = 32w6;

@@ -1,13 +1,11 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
-    bit<32> tmp_0;
-    bit<32> x_0;
     @name("a") action a_0() {
     }
     @name("t") table t() {
         key = {
-            x_0: exact @name("x") ;
+            arg: exact @name("x") ;
         }
         actions = {
             a_0();
@@ -15,43 +13,28 @@ control c(inout bit<32> arg) {
         default_action = a_0();
     }
     action act() {
-        arg = x_0;
         arg = 32w0;
     }
     action act_0() {
-        arg = x_0;
-        tmp_0 = x_0 + 32w1;
-        arg = x_0 + 32w1;
-    }
-    action act_1() {
-        x_0 = arg;
+        arg = arg + 32w1;
     }
     table tbl_act() {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_0() {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_0() {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
     apply {
-        tbl_act.apply();
-        if (t.apply().hit) {
+        if (t.apply().hit) 
+            tbl_act.apply();
+        else 
             tbl_act_0.apply();
-        }
-        else {
-            tbl_act_1.apply();
-        }
     }
 }
 

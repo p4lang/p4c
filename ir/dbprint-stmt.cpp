@@ -48,3 +48,15 @@ void IR::MethodCallStatement::dbprint(std::ostream &out) const {
     out << Prec_Low << methodCall << setprec(prec);
     if (!prec) out << ';';
 }
+
+void IR::Function::dbprint(std::ostream &out) const {
+    if (type->returnType) out << type->returnType << ' ';
+    out << name;
+    if (type->typeParameters && !type->typeParameters->empty())
+        out << type->typeParameters;
+    out << "(" << type->parameters << ") {" << indent;
+    if (body->components)
+        for (auto s : *body->components)
+            out << endl << s;
+    out << unindent << " }";
+}

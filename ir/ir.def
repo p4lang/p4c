@@ -402,7 +402,6 @@ class SwitchStatement : Statement {
 class Function : Declaration {
     Type_Method    type;
     BlockStatement body;
-#nodbprint
 }
 
 /////////////////////////////////////////////////////////////

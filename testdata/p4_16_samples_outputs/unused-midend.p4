@@ -17,7 +17,6 @@ extern E {
 
 control c(inout S s) {
     bit<32> tmp_1;
-    bool tmp_2;
     @name("e") E() e;
     action act() {
         s.h.data3 = 32w0;
@@ -25,9 +24,6 @@ control c(inout S s) {
     action act_0() {
         tmp_1 = e.get<bit<32>>(s.h.data2);
         s.h.data1 = tmp_1;
-    }
-    action act_1() {
-        tmp_2 = s.h.data2 == 32w0;
     }
     table tbl_act() {
         actions = {
@@ -37,12 +33,6 @@ control c(inout S s) {
     }
     table tbl_act_0() {
         actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_1() {
-        actions = {
             act_0();
         }
         const default_action = act_0();
@@ -50,9 +40,8 @@ control c(inout S s) {
     apply {
         if (s.h.isValid()) 
             tbl_act.apply();
-        tbl_act_0.apply();
         if (s.h.data2 == 32w0) {
-            tbl_act_1.apply();
+            tbl_act_0.apply();
         }
     }
 }

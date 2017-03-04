@@ -7,9 +7,7 @@ control c(inout bit<16> p) {
     bit<16> tmp_1;
     @name("cntr") Virtual() cntr = {
         bit<16> f(in bit<16> ix) {
-            bit<16> tmp_2;
-            tmp_2 = ix + 16w1;
-            return tmp_2;
+            return ix + 16w1;
         }
     };
     action act() {
