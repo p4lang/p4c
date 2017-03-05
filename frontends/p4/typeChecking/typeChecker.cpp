@@ -828,8 +828,11 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         if (args != decl->arguments)
             decl->arguments = args;
     } else if (simpleType->is<IR::IContainer>()) {
-        if (decl->initializer != nullptr)
+        if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
+            prune();
+            return decl;
+        }
         auto type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         if (type == nullptr) {
             prune();
