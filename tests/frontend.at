@@ -1,0 +1,7 @@
+AT_BANNER([frontend unit tests])
+m4_define([TEST_FRONTEND_CALLGRAPH],
+[AT_SETUP([$1])
+ AT_CHECK([p4ctest $2], [0], [stdout], [])
+ AT_CLEANUP]
+)
+TEST_FRONTEND_CALLGRAPH([frontend - call graph], [test-call-graph])

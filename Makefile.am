@@ -40,7 +40,6 @@ noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
-EXTRA_DIST =                   # ...
 
 # Variables specific to our build system.
 XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
@@ -50,8 +49,11 @@ export IFAIL_TESTS
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
-p4include_HEADERS =		# p4_16 include files
-p4_14include_HEADERS =		# p4_14 include files
+p4include_HEADERS =            # p4_16 include files
+p4_14include_HEADERS =         # p4_14 include files
+tests_p4ctest_SOURCES =        # Files added to unit tests by p4c and extensions
+TESTSUITE_AT =                 # testsuite definitions
+#TESTSUITE =                    # testsuite targets
 
 ################ Subproject Makefile inclusions
 
@@ -128,7 +130,7 @@ libfrontend_la_SOURCES = \
 	$(extension_frontend_SOURCES)
 
 # unit tests
-include $(srcdir)/test/Makefile.am
+include $(srcdir)/tests/Makefile.am
 
 # Lint all header files.
 cpplint_FILES += $(noinst_HEADERS)
@@ -161,7 +163,7 @@ recheck-%:
 check-ifail:
 	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
 
-subdir = test
+subdir = tests
 
 atconfig: $(top_builddir)/config.status
 	cd $(top_builddir) && \

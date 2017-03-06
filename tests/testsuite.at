@@ -1,0 +1,8 @@
+AT_INIT
+
+m4_ifdef([AT_COLOR_TESTS], [AT_COLOR_TESTS])
+m4_include([tests/util.at])
+m4_include([tests/ir.at])
+m4_include([tests/frontend.at])
+
+m4_foreach([at_file], m4_split(m4_normalize(m4_esyscmd_s([sh -c "find -L .. -name addtestsuite.at"]))), [m4_sinclude(at_file)])

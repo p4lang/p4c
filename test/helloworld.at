@@ -1,4 +1,0 @@
-AT_SETUP([helloworld - test])
-AT_KEYWORDS([keyword-helloworld])
-
-AT_CLEANUP

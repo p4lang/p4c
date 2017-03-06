@@ -1,0 +1,13 @@
+AT_BANNER([utility library unit tests])
+
+m4_define([TEST_UTIL],
+[AT_SETUP([$1])
+ AT_CHECK([p4ctest $2], [0], [stdout], [])
+ AT_CLEANUP]
+)
+TEST_UTIL([util - default], [test-default])
+TEST_UTIL([util - enumerator], [test-enumerator])
+TEST_UTIL([util - source file], [test-source-file])
+TEST_UTIL([util - exception], [test-exception])
+TEST_UTIL([util - format], [test-format])
+TEST_UTIL([util - path], [test-path])

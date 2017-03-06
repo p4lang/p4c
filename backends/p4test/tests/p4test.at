@@ -1,0 +1,7 @@
+AT_BANNER([backend p4test unit tests])
+m4_define([TEST_BACKEND_P4TEST],
+[AT_SETUP([$1])
+ AT_CHECK([p4ctest $2], [0], [stdout], [])
+ AT_CLEANUP]
+)
+TEST_BACKEND_P4TEST([backend - p4test], [test-backend-p4test])

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "../../lib/cstring.h"
-#include "../../lib/exceptions.h"
-#include "../../lib/source_file.h"
-#include "test.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/source_file.h"
+#include "p4ctest.h"
 
 using namespace Util;
 
@@ -111,8 +111,9 @@ class TestSourceFile : public TestBase {
 };
 }  // namespace Test
 
-int main(int, char* []) {
+static void test_source_file_main(int, char* []) {
     Test::TestSourceFile test;
-    return test.run();
+    test.run();
 }
 
+P4CTEST_REGISTER("test-source-file", test_source_file_main);

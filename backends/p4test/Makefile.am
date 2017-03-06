@@ -52,3 +52,11 @@ p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 # This is issue #13
 XFAIL_TESTS += \
     p4/testdata/p4_16_samples/cast-call.p4.test
+
+# Unit tests
+tests_p4ctest_SOURCES += \
+	backends/p4test/tests/test-backend-p4test.cpp
+
+TESTSUITE_AT += \
+	backends/p4test/tests/addtestsuite.at \
+	backends/p4test/tests/p4test.at
