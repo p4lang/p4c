@@ -44,3 +44,30 @@ opeq_test_LDADD = libfrontend.la libp4ctoolkit.a
 # Compiler tests
 
 TESTS += $(check_PROGRAMS)
+
+# Driver tests
+EXTRA_DIST += \
+	$(srcdir)/testsuite.at \
+	$(TESTSUITE) \
+	$(srcdir)/test/testsuite
+
+TESTSUITE=test/testsuite
+
+check-local: atconfig $(TESTSUITE)
+	set $(SHELL) '$(TESTSUITE)' -C test; \
+	"$$@" || (test X'$(RECHECK)'=Xyes && "$$@" --recheck)
+
+AUTOTEST = $(AUTOM4TE) --language=autotest
+$(TESTSUITE): package.m4 $(srcdir)/test/testsuite.at
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	mv $@.tmp $@
+
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+	$(AM_V_GEN):;{ \
+		echo '# Signature of the current package.' && \
+		echo 'm4_define([AT_PACKAGE_NAME], [$(PACKAGE_NAME)])' && \
+		echo 'm4_define([AT_PACKAGE_TARNAME], [$(PACKAGE_TARNAME)])' && \
+		echo 'm4_define([AT_PACKAGE_VERSION], [$(PACKAGE_VERSION)])' && \
+		echo 'm4_define([AT_PACKAGE_STRING], [$(PACKAGE_STRING)])' && \
+		echo 'm4_define([AT_PACKAGE_BUGREPORT], [$(PACKAGE_BUGREPORT)])'; \
+	} >'$(srcdir)/package.m4'

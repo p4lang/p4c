@@ -1,0 +1,4 @@
+AT_INIT
+
+m4_ifdef([AT_COLOR_TESTS], [AT_COLOR_TESTS])
+m4_include([test/helloworld.at])

@@ -40,6 +40,7 @@ noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
+EXTRA_DIST =                   # ...
 
 # Variables specific to our build system.
 XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
@@ -159,3 +160,13 @@ recheck-%:
 
 check-ifail:
 	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
+
+subdir = test
+
+atconfig: $(top_builddir)/config.status
+	cd $(top_builddir) && \
+		$(SHELL) ./config.status $(subdir)/$@
+
+atlocal: $(srcdir)/atlocal.in $(top_builddir)/config.status
+	cd $(top_builddir) && \
+		$(SHELL) ./config.status $(subdir)/$@

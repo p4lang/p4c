@@ -3,8 +3,10 @@ AC_INIT([p4c], [16], [cdodd@barefootnetworks.com])
 m4_include([m4/ax_cxx_compile_stdcxx.m4])
 
 AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_TESTDIR([test])
 AM_INIT_AUTOMAKE([foreign subdir-objects 1.14])
-AM_SILENT_RULES([yes])
+AM_SILENT_RULES([no])
+AM_MISSING_PROG([AUTOM4TE], [autom4te])
 
 LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
