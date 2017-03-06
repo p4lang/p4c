@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <core.p4>
-
-control c(out bool x) {
-    table t1 {
-        key = { x : exact; }
-        actions = { NoAction; }
-        default_action = NoAction();
-    }
-    table t2 {
-        key = { x : exact; }
-        actions = { NoAction; }
-        default_action = NoAction();
-    }
-    apply {
-        x = true;
-        if (t1.apply().hit && t2.apply().hit)
-            x = false;
-    }
+control MyIngress<p>(inout bit<32> p)(bit<32> p) {
+  apply {}
 }
-
-control proto(out bool x);
-package top(proto p);
-
-top(c()) main;
