@@ -124,8 +124,18 @@ int serve(int port) {
     cv_ready.notify_one();
   }
 
-  TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
-  server.serve();
+  TThreadedServer server(processor, serverTransport, transportFactory,
+                         protocolFactory);
+  try {
+    server.serve();
+  } catch (const transport::TTransportException &e) {
+    std::cerr << "Thrift returned an exception when trying to bind to port "
+              << port << "\n"
+              << "The exception is: " << e.what() << "\n"
+              << "You may have another process already using this port, maybe "
+              << "another instance of bmv2.\n";
+    std::exit(1);
+  }
   return 0;  
 }
 

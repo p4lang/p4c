@@ -36,8 +36,21 @@ class TransportNanomsg : public TransportIface {
 
  private:
   int open_() override {
-    // TODO(antonin): catch exception
-    s.bind(addr.c_str());
+    try {
+      s.bind(addr.c_str());
+    } catch (const nn::exception &e) {
+      std::cerr << "Nanomsg returned a exception when trying to bind to "
+                << "address '" << addr << "'.\n"
+                << "The exception is: " << e.what() << "\n"
+                << "This may happen if\n"
+                << "1) the address provided is invalid,\n"
+                << "2) another instance of bmv2 is running and using the same "
+                << "address, or\n"
+                << "3) you have insufficent permissions (e.g. you are using an "
+                << "IPC socket on Unix, the file already exists and you don't "
+                << "have permission to access it)\n";
+      std::exit(1);
+    }
     // TODO(antonin): review if linger is actually needed
     int linger = 0;
     s.setsockopt(NN_SOL_SOCKET, NN_LINGER, &linger, sizeof (linger));
