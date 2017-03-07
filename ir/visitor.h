@@ -165,10 +165,7 @@ class Visitor {
     virtual bool join_flows(const IR::Node *) { return false; }
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
-#ifndef NDEBUG
-    virtual  // making this non-virtual for NDEBUG builds turns it into a noop
-#endif
-    void check_clone(const Visitor *) {}
+    virtual bool check_clone(const Visitor *) { return true; }
 
  private:
     virtual void visitor_const_error();
@@ -182,7 +179,7 @@ class Visitor {
 class Modifier : public virtual Visitor {
     ChangeTracker       *visited = nullptr;
     void visitor_const_error() override;
-    void check_clone(const Visitor *) override;
+    bool check_clone(const Visitor *) override;
  public:
     profile_t init_apply(const IR::Node *root) override;
     const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
@@ -201,7 +198,7 @@ class Modifier : public virtual Visitor {
 class Inspector : public virtual Visitor {
     typedef unordered_map<const IR::Node *, bool>       visited_t;
     visited_t   *visited = nullptr;
-    void check_clone(const Visitor *) override;
+    bool check_clone(const Visitor *) override;
  public:
     profile_t init_apply(const IR::Node *root) override;
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
@@ -221,7 +218,7 @@ class Transform : public virtual Visitor {
     ChangeTracker       *visited = nullptr;
     bool prune_flag = false;
     void visitor_const_error() override;
-    void check_clone(const Visitor *) override;
+    bool check_clone(const Visitor *) override;
 
  public:
     profile_t init_apply(const IR::Node *root) override;
