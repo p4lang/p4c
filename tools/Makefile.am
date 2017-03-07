@@ -1,5 +1,15 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
+EXTRA_DIST = \
+get_version.sh
+
+EXTRA_DIST += \
+run_valgrind.sh \
+veth_setup.sh \
+veth_teardown.sh
+
+if COND_THRIFT
+
 python_PYTHON = \
 p4dbg.py \
 runtime_CLI.py \
@@ -27,9 +37,6 @@ bm_p4dbg \
 bm_CLI \
 bm_nanomsg_events
 
-EXTRA_DIST = \
-get_version.sh
-
 EXTRA_DIST += \
 bm_p4dbg.in \
 bm_CLI.in \
@@ -37,7 +44,4 @@ bm_nanomsg_events.in
 
 CLEANFILES = $(bin_SCRIPTS)
 
-EXTRA_DIST += \
-run_valgrind.sh \
-veth_setup.sh \
-veth_teardown.sh
+endif  # COND_THRIFT

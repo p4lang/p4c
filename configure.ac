@@ -79,6 +79,19 @@ AC_ARG_ENABLE([undeterministic_tests],
 AM_CONDITIONAL([SKIP_UNDETERMINISTIC_TESTS],
                [test "x$enable_undeterministic_tests" = "xno"])
 
+AC_ARG_WITH([thrift],
+    AS_HELP_STRING([--with-thrift], [Build Thrift RPC service, if disabled then you must have some other way of controlling the switch]),
+    [want_thrift="$withval"], [want_thrift=yes])
+
+AM_CONDITIONAL([COND_THRIFT], [test "$want_thrift" = yes])
+
+want_pi=no
+AC_ARG_WITH([pi],
+    AS_HELP_STRING([--with-pi], [Build PI implementation for bmv2, this implementation is not the one included in the PI repository (which is the recommended one)]),
+    [want_pi=yes], [])
+
+AM_CONDITIONAL([COND_PI], [test "$want_pi" = yes])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -94,23 +107,39 @@ AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
 
 # Thrift
-AC_WITH([p4thrift],
-    [
+want_p4thrift=no
+AC_ARG_WITH([p4thrift],
+    AS_HELP_STRING([--with-p4thrift], [Use p4lang version of Thrift]),
+    [want_p4thrift=yes], [])
+
+AS_IF([test "$want_thrift" = no && test "$want_p4thrift" = yes],
+    [AC_MSG_ERROR(cannot use --with-p4thrift if Thrift is disabled)])
+
+AS_IF([test "$want_thrift" = no && test "$want_pdfixed" = yes],
+    [AC_MSG_ERROR(cannot use --with-pdfixed if Thrift is disabled)])
+
+AS_IF([test "$want_thrift" = yes], [
+    AS_IF([test "$want_p4thrift" = yes], [
         AC_PATH_PROG([THRIFT], [p4thrift], [])
         AC_SUBST([THRIFT_LIB], ["-lp4thrift"])
-        WITH_P4THRIFT="true"
         MY_CPPFLAGS="$MY_CPPFLAGS -DP4THRIFT"
         AC_CHECK_HEADER([p4thrift/P4Thrift.h], [], [AC_MSG_ERROR([P4Thrift headers not found. Install P4Thrift from http://github.com/p4lang/thrift/])])
-    ],
-    [
+    ], [
         AC_PATH_PROG([THRIFT], [thrift], [])
         AC_SUBST([THRIFT_LIB], ["-lthrift"])
         AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
     ])
-AM_CONDITIONAL([P4THRIFT], [test "x$WITH_P4THRIFT" != "x"])
-AS_IF([test x"$THRIFT" = x],
-[AC_MSG_ERROR([cannot find thrift])])
+    AS_IF([test x"$THRIFT" = x], [AC_MSG_ERROR([cannot find thrift])])
+    MY_CPPFLAGS="$MY_CPPFLAGS -DBMTHRIFT_ON"
+])
 
+AS_IF([test "$want_pi" = yes], [
+    PI_url=https://github.com/p4lang/PI/
+    AC_CHECK_HEADERS([PI/pi.h PI/target/pi_imp.h PI/p4info.h], [],
+                     [AC_MSG_ERROR([Cannot find PI headers, did you install $PI_url])])
+])
+
+AM_CONDITIONAL([P4THRIFT], [test "$want_p4thrift" = yes])
 
 AC_CHECK_HEADERS([algorithm array cassert cmath queue \
 cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
@@ -203,7 +232,8 @@ AC_CONFIG_FILES([Makefile
 		tests/stress_tests/Makefile
                 tools/Makefile
                 pdfixed/Makefile
-                pdfixed/include/Makefile])
+                pdfixed/include/Makefile
+                PI/Makefile])
 
 # Generate other files
 AC_CONFIG_FILES([tests/utils.cpp
@@ -220,4 +250,9 @@ AS_ECHO("Coverage enabled .............. : $coverage_enabled")
 AS_ECHO("Debugger enabled .............. : $debugger_enabled")
 AS_ECHO("Logging macros enabled ........ : $logging_macros_enabled")
 AS_ECHO("Event logger enabled .......... : $elogger_enabled")
+AS_ECHO("With Thrift ................... : $want_thrift")
+AS_IF([test "$want_thrift" = yes], [
+AS_ECHO("  With p4Thrift ............... : $want_p4thrift")
+])
 AS_ECHO("With pdfixed .................. : $want_pdfixed")
+AS_ECHO("With PI ....................... : $want_pi")

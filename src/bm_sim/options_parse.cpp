@@ -96,8 +96,10 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
       ("packet-in", po::value<std::string>(),
        "Enable receiving packet on this (nanomsg) socket. "
        "The --interface options will be ignored.")
+#ifdef BMTHRIFT_ON
       ("thrift-port", po::value<int>(),
        "TCP port on which to run the Thrift runtime server")
+#endif
       ("device-id", po::value<int>(),
        "Device ID, used to identify the device in IPC messages (default 0)")
       ("nanolog", po::value<std::string>(),
@@ -340,6 +342,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
         + std::to_string(device_id) + std::string("-debug.ipc");
   }
 
+#ifdef BMTHRIFT_ON
   int default_thrift_port = 9090;
   if (vm.count("thrift-port")) {
     thrift_port = vm["thrift-port"].as<int>();
@@ -349,6 +352,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
               << std::endl;
     thrift_port = default_thrift_port;
   }
+#endif
 
   if (vm.count("restore-state")) {
     state_file_path = vm["restore-state"].as<std::string>();

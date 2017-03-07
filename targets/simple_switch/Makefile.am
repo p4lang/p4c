@@ -1,5 +1,20 @@
 SUBDIRS = . tests
 
+THRIFT_IDL = $(srcdir)/thrift/simple_switch.thrift
+
+noinst_LTLIBRARIES = libsimpleswitch.la
+
+libsimpleswitch_la_SOURCES = simple_switch.cpp simple_switch.h primitives.cpp
+
+libsimpleswitch_la_LIBADD = \
+$(top_builddir)/src/bm_sim/libbmsim.la \
+$(top_builddir)/src/bf_lpm_trie/libbflpmtrie.la \
+$(top_builddir)/src/BMI/libbmi.la \
+$(top_builddir)/third_party/jsoncpp/libjson.la \
+-lboost_system $(THRIFT_LIB) -lboost_program_options
+
+if COND_THRIFT
+
 simple_switch_thrift_py_files = \
 gen-py/sswitch_runtime/constants.py \
 gen-py/sswitch_runtime/__init__.py \
@@ -45,18 +60,7 @@ AM_CPPFLAGS += \
 -I$(srcdir)/thrift/src/ \
 -I$(builddir)/gen-cpp
 
-libsimpleswitch_la_LIBADD = \
-$(top_builddir)/src/bm_sim/libbmsim.la \
-$(top_builddir)/src/bf_lpm_trie/libbflpmtrie.la \
-$(top_builddir)/src/BMI/libbmi.la \
-$(top_builddir)/third_party/jsoncpp/libjson.la \
--lboost_system $(THRIFT_LIB) -lboost_program_options
-
-noinst_LTLIBRARIES = libsimpleswitch.la
-
-libsimpleswitch_la_SOURCES = \
-simple_switch.cpp simple_switch.h primitives.cpp \
-thrift/src/SimpleSwitch_server.cpp
+libsimpleswitch_la_SOURCES += thrift/src/SimpleSwitch_server.cpp
 
 bin_PROGRAMS = simple_switch
 
@@ -74,8 +78,6 @@ nodist_libsimpleswitch_thrift_la_SOURCES = \
 $(simple_switch_thrift_files)
 
 # See http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
-
-THRIFT_IDL = $(srcdir)/thrift/simple_switch.thrift
 
 EXTRA_DIST += $(THRIFT_IDL)
 
@@ -119,7 +121,6 @@ gen-cpp/bm/simple_switch_constants.h \
 gen-cpp/bm/SimpleSwitch.h \
 gen-cpp/bm/simple_switch_types.h
 
-
 CLEANFILES = $(BUILT_SOURCES) \
 thrift_files.ts \
 gen-cpp/bm/SimpleSwitch_server.skeleton.cpp \
@@ -129,3 +130,5 @@ $(bin_SCRIPTS)
 # am adding the skeleton file to CLEANFILES
 clean-local:
 	rm -rf gen-py
+
+endif  # COND_THRIFT

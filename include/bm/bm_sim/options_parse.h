@@ -63,7 +63,7 @@ class OptionsParser {
   bool no_p4{false};
   InterfaceList ifaces{};
   bool pcap{false};
-  int thrift_port{};
+  int thrift_port{0};
   int device_id{};
   // if true read/write packets from files instead of interfaces
   bool use_files{false};

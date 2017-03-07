@@ -8,8 +8,17 @@ if COND_PDFIXED
     MAYBE_PDFIXED = pdfixed
 endif
 
-SUBDIRS = thrift_src third_party src include tests $(MAYBE_TARGETS) tools \
-$(MAYBE_PDFIXED)
+if COND_THRIFT
+    MAYBE_THRIFT = thrift_src
+    MAYBE_TESTS = tests
+endif
+
+if COND_PI
+    MAYBE_PI = PI
+endif
+
+SUBDIRS = $(MAYBE_THRIFT) third_party src include \
+$(MAYBE_TESTS) $(MAYBE_TARGETS) tools $(MAYBE_PDFIXED) $(MAYBE_PI)
 
 # I am leaving all style-related files (cpplint) out of dist on purpose, maybe
 # will add them later if needed
