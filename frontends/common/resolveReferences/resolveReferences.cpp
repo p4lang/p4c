@@ -180,6 +180,7 @@ ResolveReferences::ResolveReferences(ReferenceMap* refMap,
 void ResolveReferences::addToContext(const IR::INamespace* ns) {
     LOG1("Adding to context " << dbp(ns));
     BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
+    checkShadowing(ns);
     context->push(ns);
 }
 
@@ -213,24 +214,20 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     refMap->setDeclaration(path, decl);
 }
 
-void ResolveReferences::checkShadowing(const IR::INamespace*ns) const {
+void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
     if (!checkShadow) return;
-
-    auto e = ns->getDeclarations();
-    while (e->moveNext()) {
-        const IR::IDeclaration* decl = e->getCurrent();
+    for (auto decl : *ns->getDeclarations()) {
         const IR::Node* node = decl->getNode();
         auto prev = context->resolve(decl->getName(), ResolutionType::Any, !anyOrder);
         if (prev->empty()) continue;
+
         for (auto p : *prev) {
             const IR::Node* pnode = p->getNode();
             if (pnode == node) continue;
-            if (pnode->is<IR::Type_Method>() && node->is<IR::Type_Method>()) {
-                auto md = node->to<IR::Type_Method>();
-                auto mp = pnode->to<IR::Type_Method>();
-                if (md->parameters->size() != mp->parameters->size())
-                    continue;
-            }
+            if (pnode->is<IR::Type_Method>() && node->is<IR::Type_Method>())
+                // Methods can overload each other if they have a different number of arguments
+                continue;
+
             ::warning("%1% shadows %2%", decl->getName(), p->getName());
         }
     }
@@ -287,36 +284,34 @@ bool ResolveReferences::preorder(const IR::Type_Name* type) {
 
 bool ResolveReferences::preorder(const IR::P4Control *c) {
     refMap->usedName(c->name.name);
-    addToContext(c);
     addToContext(c->type->typeParameters);
     addToContext(c->type->applyParams);
     addToContext(c->constructorParams);
+    addToContext(c);  // add the locals
     return true;
 }
 
 void ResolveReferences::postorder(const IR::P4Control *c) {
+    removeFromContext(c);
     removeFromContext(c->constructorParams);
     removeFromContext(c->type->applyParams);
     removeFromContext(c->type->typeParameters);
-    removeFromContext(c);
-    checkShadowing(c);
 }
 
-bool ResolveReferences::preorder(const IR::P4Parser *c) {
-    refMap->usedName(c->name.name);
-    addToContext(c);
-    addToContext(c->type->typeParameters);
-    addToContext(c->type->applyParams);
-    addToContext(c->constructorParams);
+bool ResolveReferences::preorder(const IR::P4Parser *p) {
+    refMap->usedName(p->name.name);
+    addToContext(p->type->typeParameters);
+    addToContext(p->type->applyParams);
+    addToContext(p->constructorParams);
+    addToContext(p);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::P4Parser *c) {
-    removeFromContext(c->constructorParams);
-    removeFromContext(c->type->applyParams);
-    removeFromContext(c->type->typeParameters);
-    removeFromContext(c);
-    checkShadowing(c);
+void ResolveReferences::postorder(const IR::P4Parser *p) {
+    removeFromContext(p);
+    removeFromContext(p->constructorParams);
+    removeFromContext(p->type->applyParams);
+    removeFromContext(p->type->typeParameters);
 }
 
 bool ResolveReferences::preorder(const IR::Function* function) {
@@ -350,15 +345,14 @@ void ResolveReferences::postorder(const IR::TableProperties *p) {
 
 bool ResolveReferences::preorder(const IR::P4Action *c) {
     refMap->usedName(c->name.name);
-    addToContext(c);
     addToContext(c->parameters);
+    addToContext(c);
     return true;
 }
 
 void ResolveReferences::postorder(const IR::P4Action *c) {
-    removeFromContext(c->parameters);
     removeFromContext(c);
-    checkShadowing(c);
+    removeFromContext(c->parameters);
 }
 
 bool ResolveReferences::preorder(const IR::Type_Method *t) {
@@ -397,7 +391,6 @@ bool ResolveReferences::preorder(const IR::ParserState *s) {
 void ResolveReferences::postorder(const IR::ParserState *s) {
     removeFromContext(s);
     resolveForward.pop_back();
-    checkShadowing(s);
 }
 
 bool ResolveReferences::preorder(const IR::Declaration_MatchKind *d)
@@ -425,7 +418,7 @@ bool ResolveReferences::preorder(const IR::BlockStatement *b)
 { addToContext(b); return true; }
 
 void ResolveReferences::postorder(const IR::BlockStatement *b)
-{ removeFromContext(b); checkShadowing(b); }
+{ removeFromContext(b); }
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
     refMap->usedName(decl->name.name);

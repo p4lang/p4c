@@ -41,6 +41,11 @@ namespace P4 {
 class ValidateParsedProgram final : public Inspector {
     bool isv1;
     void container(const IR::IContainer* type);
+    // Make sure that type, apply and constructor parameters are distinct
+    void distinctParameters(
+        const IR::TypeParameters* typeParams,
+        const IR::ParameterList* apply,
+        const IR::ParameterList* constr);
 
  public:
     explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
@@ -61,10 +66,16 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::ExitStatement* statement) override;
     void postorder(const IR::Type_Package* package) override
     { container(package); }
-    void postorder(const IR::P4Control* control) override
-    { container(control); }
-    void postorder(const IR::P4Parser* parser) override
-    { container(parser); }
+    void postorder(const IR::P4Control* control) override {
+        container(control);
+        distinctParameters(control->type->typeParameters,
+                           control->type->applyParams,
+                           control->constructorParams); }
+    void postorder(const IR::P4Parser* parser) override {
+        container(parser);
+        distinctParameters(parser->type->typeParameters,
+                           parser->type->applyParams,
+                           parser->constructorParams); }
 };
 
 }  // namespace P4

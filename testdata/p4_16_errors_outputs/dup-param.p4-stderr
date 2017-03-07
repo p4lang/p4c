@@ -1,0 +1,6 @@
+../testdata/p4_16_errors/dup-param.p4(17): error: Duplicated parameter name: p and p
+control c(bit<32> p)(bool p) {
+                  ^
+../testdata/p4_16_errors/dup-param.p4(17)
+control c(bit<32> p)(bool p) {
+                          ^

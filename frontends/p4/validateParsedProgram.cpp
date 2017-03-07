@@ -79,6 +79,30 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     }
 }
 
+void ValidateParsedProgram::distinctParameters(
+    const IR::TypeParameters* typeParams,
+    const IR::ParameterList* apply,
+    const IR::ParameterList* constr) {
+    std::map<cstring, const IR::Node*> found;
+
+    for (auto p : *typeParams->parameters)
+        found.emplace(p->getName(), p);
+    for (auto p : *apply->parameters) {
+        auto it = found.find(p->getName());
+        if (it != found.end())
+            ::error("Duplicated parameter name: %1% and %2%",
+                    it->second, p);
+        else
+            found.emplace(p->getName(), p);
+    }
+    for (auto p : *constr->parameters) {
+        auto it = found.find(p->getName());
+        if (it != found.end())
+            ::error("Duplicated parameter name: %1% and %2%",
+                    it->second, p);
+    }
+}
+
 void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expression) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
