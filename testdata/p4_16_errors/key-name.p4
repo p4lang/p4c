@@ -34,4 +34,5 @@ control compute(inout hdr h) {
     }
 }
 
+/* P4TEST_IGNORE_STDERR */
 #include "arith-inline-skeleton.p4"
