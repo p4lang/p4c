@@ -232,7 +232,6 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
                 // Methods can overload each other if they have a different number of arguments
                 // Also, the constructor is supposed to have the same name as the class
                 continue;
-
             if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
                 // attribute locals often match attributes
                 continue;
