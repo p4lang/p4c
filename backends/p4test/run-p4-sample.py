@@ -241,14 +241,14 @@ def main(argv):
     options.binary = argv[0]
     if len(argv) <= 2:
         usage(options)
-        return FAILURE
+        sys.exit(FAILURE)
 
     options.compilerSrcdir = argv[1]
     argv = argv[2:]
     if not os.path.isdir(options.compilerSrcdir):
         print(options.compilerSrcdir + " is not a folder", file=sys.stderr)
         usage(options)
-        return FAILURE
+        sys.exit(FAILURE)
 
     while argv[0][0] == '-':
         if argv[0] == "-b":
@@ -263,7 +263,7 @@ def main(argv):
             if len(argv) == 0:
                 print("Missing argument for -a option")
                 usage(options)
-                sys.exit(1)
+                sys.exit(FAILURE)
             else:
                 options.compilerOptions += argv[1].split();
                 argv = argv[1:]
@@ -274,7 +274,7 @@ def main(argv):
         else:
             print("Uknown option ", argv[0], file=sys.stderr)
             usage(options)
-            sys.exit(1)
+            sys.exit(FAILURE)
         argv = argv[1:]
 
     if 'P4TEST_REPLACE' in os.environ:

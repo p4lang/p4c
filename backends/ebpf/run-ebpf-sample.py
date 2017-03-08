@@ -183,14 +183,14 @@ def main(argv):
     options.binary = argv[0]
     if len(argv) <= 2:
         usage(options)
-        return FAILURE
+        sys.exit(FAILURE)
 
     options.compilerSrcdir = argv[1]
     argv = argv[2:]
     if not os.path.isdir(options.compilerSrcdir):
         print(options.compilerSrcdir + " is not a folder", file=sys.stderr)
         usage(options)
-        return FAILURE
+        sys.exit(FAILURE)
 
     while argv[0][0] == '-':
         if argv[0] == "-b":
