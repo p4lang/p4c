@@ -34,4 +34,4 @@ control compute(inout hdr h) {
     }
 }
 
-#include "arith-inline-skeleton.p4"
+#include "../p4_16_samples/arith-inline-skeleton.p4"
