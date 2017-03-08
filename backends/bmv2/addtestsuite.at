@@ -12,9 +12,7 @@ dnl WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 dnl See the License for the specific language governing permissions and
 dnl limitations under the License.
 
-CPP_TEST_RUN([util - default], [test-default])
-CPP_TEST_RUN([util - enumerator], [test-enumerator])
-CPP_TEST_RUN([util - source file], [test-source-file])
-CPP_TEST_RUN([util - exception], [test-exception])
-CPP_TEST_RUN([util - format], [test-format])
-CPP_TEST_RUN([util - path], [test-path])
+P4TEST_RUN([bmv2], [testdata/p4_16_samples], [\"*-bmv2.p4\"], [BMV2_TEST_RUN], [/dev/null])
+P4TEST_RUN([bmv2], [testdata/p4_16_bmv_errors], [\"*-bmv2.p4\"], [BMV2_TEST_RUN], [/dev/null])
+P4TEST_RUN([bmv2], [testdata/p4_14_samples], [\"*.p4\"], [BMV2_TEST_RUN], [/dev/null])
+P4TEST_RUN([bmv2], [testdata/p4_14_samples/switch_*], [\"switch.p4\"], [BMV2_TEST_RUN], [/dev/null])

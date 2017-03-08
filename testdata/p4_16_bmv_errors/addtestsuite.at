@@ -1,0 +1,1 @@
+P4TEST_RUN([bmv2], [testdata/p4_16_bmv_errors], [\"*-bmv2.p4\"], [BMV2_TEST_RUN], [../testdata/p4_16_bmv_errors/xfails.text])

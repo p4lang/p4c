@@ -13,19 +13,34 @@
 # limitations under the License.
 
 # Unit tests
-TESTSUITE = tests/testsuite
+TESTSUITE = $(srcdir)/tests/testsuite
 
 TESTSUITE_AT += \
 	tests/testsuite.at \
 	tests/frontend.at
 
 check-local: atconfig $(TESTSUITE) $(TESTSUITE_AT)
-	set $(SHELL) '$(TESTSUITE)' -C tests $(TESTSUITEFLAGS); "$$@"
+	set $(SHELL) '$(TESTSUITE)' -C tests $(TESTSUITEFLAGS); \
+	"$$@" || (test X'$(RECHECK)' = Xyes && "$$@" --recheck)
+
+check-bmv2:
+	make check-local TESTSUITEFLAGS='-k bmv2 $(filter-out $@,$(MAKECMDGOALS))'
+
+check-frontend:
+	make check-local TESTSUITEFLAGS='-k frontend $(filter-out $@,$(MAKECMDGOALS))'
+
+check-ebpf:
+	make check-local TESTSUITEFLAGS='-k ebpf $(filter-out $@,$(MAKECMDGOALS))'
+
+clean-local:
+	@test ! -f $(TESTSUITE) || $(SHELL) $(TESTSUITE) --clean
 
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(TESTSUITE): package.m4 $(TESTSUITE_AT)
+$(TESTSUITE): package.m4 $(TESTSUITE_AT) $(XFAIL_FILES)
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	mv $@.tmp $@
+
+%.text: #do nothing
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	$(AM_V_GEN):;{ \
