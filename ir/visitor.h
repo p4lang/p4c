@@ -142,6 +142,14 @@ class Visitor {
         const Context *c = ctxt;
         return findOrigCtxt<T>(c); }
 
+    /// @return the current node - i.e., the node that was passed to preorder()
+    /// or postorder(). For Modifiers and Transforms, this is a clone of the
+    /// node returned by getOriginal().
+    const IR::Node* getCurrentNode() const { return ctxt->node; }
+    template <class T>
+    const T* getCurrentNode() const {
+        return ctxt->node ? ctxt->node->to<T>() : nullptr; }
+
  protected:
     // if visitDagOnce is set to 'false' (usually in the derived Visitor
     // class constructor), nodes that appear multiple times in the tree
