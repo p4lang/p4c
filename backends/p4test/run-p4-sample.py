@@ -134,7 +134,7 @@ def check_generated_files(options, tmpdir, expecteddir):
             shutil.copy2(produced, expected)
         else:
             result = compare_files(options, produced, expected)
-            if result != SUCCESS and file[-7:] != "-stderr":
+            if result != SUCCESS: # and file[-7:] != "-stderr":
                 return result
     return SUCCESS
 

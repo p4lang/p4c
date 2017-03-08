@@ -2,7 +2,21 @@
 control c(in X x) {
                ^
 error: Could not find type of <Type_Control>(19) c
-terminate called after throwing an instance of 'Util::CompilerBug'
-  what():  COMPILER BUG: /home/antonin/Documents/p4lang/p4c/build/ir/ir-generated.cpp:4217
-/home/antonin/Documents/p4lang/p4c/build/ir/ir-generated.cpp:4217: Null type
-
+../testdata/p4_16_errors/extern.p4(24): error: x: a parameter with an extern type cannot have a direction
+control proto(in X x);
+                   ^
+../testdata/p4_16_errors/extern.p4(24): error: Could not find type of control proto
+control proto(in X x);
+        ^^^^^
+error: Could not find type of <Type_Name>(37) proto
+../testdata/p4_16_errors/extern.p4(25): error: Could not find type of _c
+package top(proto _c);
+                  ^^
+../testdata/p4_16_errors/extern.p4(25): error: Could not find type of package top
+package top(proto _c);
+        ^^^
+../testdata/p4_16_errors/extern.p4(19): error: Could not find type of control c
+control c(in X x) {
+        ^
+error: Could not find type of <Type_Name>(45) c
+error: Could not find type of <Type_Name>(43) top

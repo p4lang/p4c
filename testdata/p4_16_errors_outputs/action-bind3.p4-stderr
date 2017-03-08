@@ -19,9 +19,3 @@
 ../testdata/p4_16_errors/action-bind3.p4(22): error: a: not enough arguments
         default_action = a(0);
                          ^^^^
-../testdata/p4_16_errors/action-bind3.p4(22): error: 0: argument does not match declaration in actions list: x
-        default_action = a(0);
-                           ^
-../testdata/p4_16_errors/action-bind3.p4(21)
-        actions = { a(x, 0); }
-                      ^

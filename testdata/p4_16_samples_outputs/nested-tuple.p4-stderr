@@ -1,0 +1,6 @@
+../testdata/p4_16_samples/nested-tuple.p4(25): warning: T shadows struct T
+extern void f<T>(in T data);
+              ^
+../testdata/p4_16_samples/nested-tuple.p4(17)
+struct T { bit f; }
+       ^

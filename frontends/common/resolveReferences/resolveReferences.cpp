@@ -218,17 +218,22 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
     if (!checkShadow) return;
     for (auto decl : *ns->getDeclarations()) {
         const IR::Node* node = decl->getNode();
+        if (node->is<IR::StructField>())
+            continue;
+
         auto prev = context->resolve(decl->getName(), ResolutionType::Any, !anyOrder);
         if (prev->empty()) continue;
 
         for (auto p : *prev) {
             const IR::Node* pnode = p->getNode();
             if (pnode == node) continue;
-            if (pnode->is<IR::Type_Method>() && node->is<IR::Type_Method>())
+            if ((pnode->is<IR::Method>() || pnode->is<IR::Type_Extern>()) &&
+                (node->is<IR::Method>() || node->is<IR::Function>()))
                 // Methods can overload each other if they have a different number of arguments
+                // Also, the constructor is supposed to have the same name as the class
                 continue;
 
-            ::warning("%1% shadows %2%", decl->getName(), p->getName());
+            ::warning("%1% shadows %2%", node, pnode);
         }
     }
 }
