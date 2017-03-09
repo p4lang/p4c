@@ -45,6 +45,7 @@ int main(int argc, char *const argv[]) {
 
     CompilerOptions options;
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
+    options.compilerVersion = "0.0.5";
 
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();
