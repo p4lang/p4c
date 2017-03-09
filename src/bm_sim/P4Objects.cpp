@@ -762,6 +762,10 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
           add_primitive_to_action(cfg_parameters[0], action_fn.get());
           parse_state->add_method_call(action_fn.get());
           parse_methods.push_back(std::move(action_fn));
+        } else if (op_type == "shift") {
+          assert(cfg_parameters.size() == 1);
+          auto shift_bytes = static_cast<size_t>(cfg_parameters[0].asInt());
+          parse_state->add_shift(shift_bytes);
         } else {
           throw json_exception(
               EFormat() << "Parser op '" << op_type << "'not supported",

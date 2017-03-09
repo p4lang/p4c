@@ -835,3 +835,18 @@ TEST(P4Objects, ImmutableEntriesBadJson) {
     check(builder, expected_error_msg);
   }
 }
+
+TEST(P4Objects, ParserShift) {
+  auto create_json = [](size_t shift_bytes, std::ostream *os) {
+    *os << "{\"parsers\":[{\"name\":\"parser\",\"id\":0,\"init_state\":"
+        << "\"start\",\"parse_states\":[{\"name\":\"start\",\"id\":0,"
+        << "\"parser_ops\":[{\"op\":\"shift\",\"parameters\":["
+        << shift_bytes << "]}],\"transition_key\":[],\"transitions\":[]}]}]}";
+  };
+
+  std::stringstream is;
+  create_json(4, &is);
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+}

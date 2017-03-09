@@ -1579,6 +1579,12 @@ TEST_F(ParserPacketTooShortTest, LookAhead) {
   parse_and_check_error(&packet, ErrorCodeMap::Core::PacketTooShort);
 }
 
+TEST_F(ParserPacketTooShortTest, Shift) {
+  auto packet = get_pkt(packet_nbytes);
+  parse_state.add_shift(packet_nbytes + 1);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::PacketTooShort);
+}
+
 TEST_F(ParserCoreErrorsTest, StackOutOfBounds) {
   HeaderType testHeaderType("test_header_t", 0);
   testHeaderType.push_back_field("f", 8);
@@ -1773,4 +1779,44 @@ TEST_F(ParserMethodCallTest, RegisterSync) {
       end - start).count();
   ASSERT_LT(expected_timedelta * 0.95, timedelta);
   ASSERT_GT(expected_timedelta * 1.2, timedelta);
+}
+
+class ParserShiftTest : public ParserTestGeneric {
+ protected:
+  ParseState parse_state;
+  HeaderType headerType;
+  header_id_t testHeader{0};
+
+  ParserShiftTest()
+      : parse_state("parse_state", 0),
+        headerType("header_type", 0) {
+    headerType.push_back_field("f8", 8);
+    phv_factory.push_back_header("test", testHeader, headerType);
+  }
+
+  Packet get_pkt(const std::string &data) {
+    assert(data.size() <= 128);
+    return Packet::make_new(data.size(),
+                            PacketBuffer(128, data.data(), data.size()),
+                            phv_source.get());
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+    parser.set_init_state(&parse_state);
+  }
+
+  // virtual void TearDown() { }
+};
+
+TEST_F(ParserShiftTest, ShiftOneByte) {
+  parse_state.add_shift(1);  // 1-byte shift
+  parse_state.add_extract(testHeader);
+
+  std::string packet_data("\xab\xcd");
+  auto packet = get_pkt(packet_data);
+  parse_and_check_no_error(&packet);
+  const auto &f = packet.get_phv()->get_field(testHeader, 0);  // f8
+  ASSERT_EQ(static_cast<unsigned char>(packet_data.at(1)),
+            f.get<unsigned char>());
 }

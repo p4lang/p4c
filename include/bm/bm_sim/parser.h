@@ -230,6 +230,8 @@ class ParseState : public NamedP4Object {
 
   void add_method_call(ActionFn *action_fn);
 
+  void add_shift(size_t shift_bytes);
+
   void set_key_builder(const ParseSwitchKeyBuilder &builder);
 
   void add_switch_case(const ByteContainer &key, const ParseState *next_state);

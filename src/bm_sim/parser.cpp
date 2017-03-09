@@ -286,6 +286,21 @@ struct ParserOpMethodCall : ParserOp {
   }
 };
 
+struct ParserOpShift : ParserOp {
+  size_t shift_bytes;
+
+  explicit ParserOpShift(size_t shift_bytes)
+      : shift_bytes(shift_bytes) { }
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    (void) data;
+    if (pkt->get_ingress_length() - *bytes_parsed < shift_bytes)
+      throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
+    *bytes_parsed += shift_bytes;
+  }
+};
+
 template <typename P, bool with_padding = true>
 class ParseVSetCommon : public ParseVSetIface {
   using Lock = std::unique_lock<std::mutex>;
@@ -670,6 +685,11 @@ void
 ParseState::add_method_call(ActionFn *action_fn) {
   action_fn->grab_register_accesses(&register_sync);
   parser_ops.emplace_back(new ParserOpMethodCall(action_fn));
+}
+
+void
+ParseState::add_shift(size_t shift_bytes) {
+  parser_ops.emplace_back(new ParserOpShift(shift_bytes));
 }
 
 void

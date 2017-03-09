@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.7*.
+The version described in this document is *2.8*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -205,7 +205,7 @@ parser. The attributes for these objects are:
   - `parser_ops`: a JSON array of the operations (set or extract) performed in
   this parse state, in the correct order. Each parser operation is represented
   by a JSON object, whose attributes are:
-    - `op`: the type of operation, either `extract`, `set` or `verify`
+    - `op`: the type of operation, either `extract`, `set`, `verify` or `shift`
     - `parameters`: a JSON array of objects encoding the parameters to the
     parser operation. Each parameter object has 2 string attributes: `type` for
     the parameter type and `value` for its value. Depending on the type of
@@ -216,10 +216,12 @@ parser. The attributes for these objects are:
     takes exactly 2 parameters. The first one needs to be of type `field` with
     the appropriate value. The second one can be of type `field`, `hexstr`,
     `lookahead` or `expression`, with the appropriate value (see [here]
-    (#the-type-value-object)). Finally, for a verify operation, we expect an
-    array with exactly 2 elements: the first should be a boolean expression
-    while the second should be an expression resolving to a valid integral value
-    for an error constant (see [here] (#errors)).
+    (#the-type-value-object)). For a verify operation, we expect an array with
+    exactly 2 elements: the first should be a boolean expression while the
+    second should be an expression resolving to a valid integral value for an
+    error constant (see [here] (#errors)). Finally for a shift operation, we
+    expect a single parameter: the number of bytes to shift (shifted packet data
+    will be discarded).
   - `transition_key`: a JSON array (in the correct order) of objects which
   describe the different fields of the parse state transition key. Each object
   has 2 attributes, `type` and `value`, where `type` can be either
