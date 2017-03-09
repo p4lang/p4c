@@ -16,5 +16,3 @@
 ../testdata/p4_16_errors/action-bind1.p4(22): error: a: not enough arguments
         default_action = a();
                          ^^^
-terminate called after throwing an instance of 'std::out_of_range'
-  what():  vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)

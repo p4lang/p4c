@@ -34,7 +34,7 @@ class Options(object):
     def __init__(self):
         self.binary = ""                # this program's name
         self.cleanupTmp = True          # if false do not remote tmp folder created
-        self.p4Filename = ""            # file that is being compiled
+        self.p4filename = ""            # file that is being compiled
         self.compilerSrcDir = ""        # path to compiler source tree
         self.verbose = False
         self.replace = False            # replace previous outputs
@@ -57,6 +57,12 @@ def usage(options):
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
+
+def ignoreStderr(options):
+    for line in open(options.p4filename):
+        if "P4TEST_IGNORE_STDERR" in line:
+            return True
+    return False
 
 class Local(object):
     # object to hold local vars accessable to nested functions
@@ -134,7 +140,7 @@ def check_generated_files(options, tmpdir, expecteddir):
             shutil.copy2(produced, expected)
         else:
             result = compare_files(options, produced, expected)
-            if result != SUCCESS and file[-7:] != "-stderr":
+            if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
                 return result
     return SUCCESS
 

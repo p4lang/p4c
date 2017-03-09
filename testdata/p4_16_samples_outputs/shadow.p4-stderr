@@ -1,7 +1,7 @@
 ../testdata/p4_16_samples/shadow.p4(22): warning: x shadows x
             bit x;
-                ^
+            ^^^^^^
 ../testdata/p4_16_samples/shadow.p4(20)
         bit x;
-            ^
+        ^^^^^^
 warning: Program does not contain a `main' module

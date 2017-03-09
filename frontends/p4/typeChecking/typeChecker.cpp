@@ -368,6 +368,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::P4Control>()) {
         auto cont = type->to<IR::P4Control>();
         auto ctype0 = getTypeType(cont->type);
+        if (ctype0 == nullptr)
+            return nullptr;
         auto ctype = ctype0->to<IR::Type_Control>();
         auto pl = canonicalizeParameters(cont->constructorParams);
         if (pl == nullptr)
@@ -379,6 +381,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::P4Parser>()) {
         auto p = type->to<IR::P4Parser>();
         auto ctype0 = getTypeType(p->type);
+        if (ctype0 == nullptr)
+            return nullptr;
         auto ctype = ctype0->to<IR::Type_Parser>();
         auto pl = canonicalizeParameters(p->constructorParams);
         if (pl == nullptr)
@@ -1090,8 +1094,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     auto canon = setTypeType(type);
     if (canon == nullptr)
         return type;
-    if (!type->sizeKnown())
-        typeError("%1%: Size of header stack type should be a constant", type);
 
     auto etype = canon->to<IR::Type_Stack>()->elementType;
     if (etype == nullptr)
@@ -2593,8 +2595,10 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
             auto actionListCall = elem->expression->to<IR::MethodCallExpression>();
             CHECK_NULL(actionListCall);
 
-            if (actionListCall->arguments->size() > default_call->arguments->size())
+            if (actionListCall->arguments->size() > default_call->arguments->size()) {
                 typeError("%1%: not enough arguments", default_call);
+                return prop;
+            }
 
             SameExpression se(refMap, typeMap);
             for (unsigned i=0; i < actionListCall->arguments->size(); i++) {

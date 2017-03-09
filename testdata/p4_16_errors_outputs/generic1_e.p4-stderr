@@ -5,7 +5,21 @@ control p1(If x)
 control p1(If x)
               ^
 error: Could not find type of <Type_Control>(31) p1
-terminate called after throwing an instance of 'Util::CompilerBug'
-  what():  COMPILER BUG: /home/antonin/Documents/p4lang/p4c/build/ir/ir-generated.cpp:4217
-/home/antonin/Documents/p4lang/p4c/build/ir/ir-generated.cpp:4217: Null type
-
+../testdata/p4_16_errors/generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
+control p2(If<int<32>, int<32>> x)
+           ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/generic1_e.p4(16)
+extern If<T>
+       ^^
+error: Could not find type of <Type_Specialized>(48)
+../testdata/p4_16_errors/generic1_e.p4(26): error: Could not find type of x
+control p2(If<int<32>, int<32>> x)
+                                ^
+error: Could not find type of <Type_Control>(52) p2
+../testdata/p4_16_errors/generic1_e.p4(36): error: h<...>: Type header h is not generic and thus it cannot be specialized using type arguments
+        h<bit> x;
+        ^^^^^^
+../testdata/p4_16_errors/generic1_e.p4(31)
+header h {}
+       ^
+error: Could not find type of <Type_Specialized>(73)

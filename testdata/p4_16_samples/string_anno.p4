@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/* P4TEST_IGNORE_STDERR */
+
 @name("original") const bit b = 1;
 @name("string \" with \" quotes") const bit c = 1;
 @name("string with

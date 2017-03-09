@@ -1,6 +1,6 @@
 ../testdata/p4_16_samples/shadow3.p4(20): warning: p shadows p
   bit<8> p = 0;
-         ^
+  ^^^^^^^^^^^^^
 ../testdata/p4_16_samples/shadow3.p4(19)
 control MyIngress(inout H p) {
                           ^
