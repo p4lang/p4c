@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <algorithm>
+
 #include "jsonconverter.h"
 #include "lib/gmputil.h"
 #include "frontends/p4/coreLibrary.h"
@@ -97,6 +99,90 @@ class ErrorCodesVisitor : public Inspector {
             BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
             map[m] = map.size();
         }
+        return false;
+    }
+};
+
+
+// This pass makes sure that when several match tables share a selector, they use the same input for
+// the selection algorithm. This is because bmv2 considers that the selection key is part of the
+// action_selector while v1model.p4 considers that it belongs to the table match key definition.
+class SharedActionSelectorCheck : public Inspector {
+    JsonConverter* converter;
+    using Input = std::vector<const IR::Expression *>;
+    std::map<const IR::Declaration_Instance *, Input> selector_input_map{};
+
+ public:
+    explicit SharedActionSelectorCheck(JsonConverter* converter) : converter(converter)
+    { CHECK_NULL(converter); }
+
+    const Input &get_selector_input(const IR::Declaration_Instance* selector) const {
+        return selector_input_map.at(selector);
+    }
+
+    bool preorder(const IR::P4Table* table) override {
+        auto v1model = converter->v1model;
+        auto refMap = converter->refMap;
+        auto typeMap = converter->typeMap;
+
+        auto implementation = table->properties->getProperty(
+            v1model.tableAttributes.tableImplementation.name);
+        if (implementation == nullptr) return false;
+        if (!implementation->value->is<IR::ExpressionValue>()) {
+          ::error("%1%: expected expression for property", implementation);
+          return false;
+        }
+        auto propv = implementation->value->to<IR::ExpressionValue>();
+        if (!propv->expression->is<IR::PathExpression>()) return false;
+        auto pathe = propv->expression->to<IR::PathExpression>();
+        auto decl = refMap->getDeclaration(pathe->path, true);
+        if (!decl->is<IR::Declaration_Instance>()) {
+            ::error("%1%: expected a reference to an instance", pathe);
+            return false;
+        }
+        const auto &apname = decl->externalName();
+        auto dcltype = typeMap->getType(pathe, true);
+        if (!dcltype->is<IR::Type_Extern>()) {
+            ::error("%1%: unexpected type for implementation", dcltype);
+            return false;
+        }
+        auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
+        if (type_extern_name != v1model.action_selector.name) return false;
+
+        auto key = table->getKey();
+        Input input;
+        for (auto ke : *key->keyElements) {
+            auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
+            BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+            if (mt->name.name != v1model.selectorMatchType.name) continue;
+            input.push_back(ke->expression);
+        }
+        auto decl_instance = decl->to<IR::Declaration_Instance>();
+        auto it = selector_input_map.find(decl_instance);
+        if (it == selector_input_map.end()) {
+            selector_input_map[decl_instance] = input;
+            return false;
+        }
+
+        // returns true if inputs are the same, false otherwise
+        auto cmp_inputs = [](const Input &i1, const Input &i2) {
+            for (auto e1 : i1) {
+                auto cmp_e = [e1](const IR::Expression *e2) {
+                    // not the best solution but the best available one given that there is no "deep
+                    // comparison" of expressions for now.
+                    return e1->toString() == e2->toString();
+                };
+                if (std::find_if(i2.begin(), i2.end(), cmp_e) == i2.end()) return false;
+            }
+            return true;
+        };
+
+        if (!cmp_inputs(it->second, input)) {
+            ::error(
+                 "Action selector '%1%' is used by multiple tables with different selector inputs",
+                 decl);
+        }
+
         return false;
     }
 };
@@ -1264,11 +1350,15 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
             ::error("%1%: unexpected type for implementation", dcltype);
             return false;
         }
-        if (dcltype->to<IR::Type_Extern>()->name != v1model.action_profile.name) {
+        auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
+        if (type_extern_name == v1model.action_profile.name) {
+            table->emplace("type", "indirect");
+        } else if (type_extern_name == v1model.action_selector.name) {
+            table->emplace("type", "indirect_ws");
+        } else {
             ::error("%1%: unexpected type for implementation", dcltype);
             return false;
         }
-        table->emplace("type", "indirect");
         isSimpleTable = false;
     } else {
         ::error("%1%: unexpected value for property", propv);
@@ -1615,6 +1705,9 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     auto action_profiles = mkArrayField(result, "action_profiles");
     auto conditionals = mkArrayField(result, "conditionals");
 
+    SharedActionSelectorCheck selector_check(this);
+    block->apply(selector_check);
+
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
             auto j = convertTable(node->to<CFG::TableNode>(), counters, action_profiles);
@@ -1724,13 +1817,38 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
                     meters->append(jmtr);
                     continue;
-                } else if (eb->type->name == v1model.action_profile.name) {
+                } else if (eb->type->name == v1model.action_profile.name ||
+                           eb->type->name == v1model.action_selector.name) {
                     auto action_profile = new Util::JsonObject();
                     action_profile->emplace("name", name);
                     action_profile->emplace("id", nextId("action_profiles"));
-                    auto sz = eb->getParameterValue(v1model.action_profile.sizeParam.name);
-                    BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
-                    action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+
+                    auto add_size = [&action_profile, &eb](const cstring &pname) {
+                      auto sz = eb->getParameterValue(pname);
+                      BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+                      action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+                    };
+
+                    if (eb->type->name == v1model.action_profile.name) {
+                        add_size(v1model.action_profile.sizeParam.name);
+                    } else {
+                        add_size(v1model.action_selector.sizeParam.name);
+                        auto selector = new Util::JsonObject();
+                        auto hash = eb->getParameterValue(
+                            v1model.action_selector.algorithmParam.name);
+                        BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
+                        auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+                        selector->emplace("algo", algo);
+                        const auto &input = selector_check.get_selector_input(
+                            c->to<IR::Declaration_Instance>());
+                        auto j_input = mkArrayField(selector, "input");
+                        for (auto expr : input) {
+                            auto jk = conv->convert(expr);
+                            j_input->append(jk);
+                        }
+                        action_profile->emplace("selector", selector);
+                    }
+
                     action_profiles->append(action_profile);
                     continue;
                 }
