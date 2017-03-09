@@ -59,7 +59,7 @@ def isError(p4filename):
     return "_errors" in p4filename
 
 def ignoreStderr(options):
-    for line in open(self.p4filename):
+    for line in open(options.p4filename):
         if "P4TEST_IGNORE_STDERR" in line:
             return True
     return False
