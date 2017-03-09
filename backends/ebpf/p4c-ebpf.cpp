@@ -63,6 +63,8 @@ int main(int argc, char *const argv[]) {
     setup_signals();
 
     EbpfOptions options;
+    options.compilerVersion = "0.0.1";
+
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();
     if (::errorCount() > 0)

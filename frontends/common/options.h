@@ -60,6 +60,8 @@ class CompilerOptions : public Util::Options {
     cstring prettyPrintFile = nullptr;
     // file to output to
     cstring outputFile = nullptr;
+    // Compiler version.
+    cstring compilerVersion;
 
     // Dump a JSON representation of the IR in the file
     cstring dumpJsonFile = nullptr;

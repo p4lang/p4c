@@ -324,14 +324,14 @@ def main(argv):
     options.binary = argv[0]
     if len(argv) <= 2:
         usage(options)
-        return FAILURE
+        sys.exit(FAILURE)
 
     options.compilerSrcDir = argv[1]
     argv = argv[2:]
     if not os.path.isdir(options.compilerSrcDir):
         print(options.compilerSrcDir + " is not a folder", file=sys.stderr)
         usage(options)
-        return FAILURE
+        sys.exit(FAILURE)
 
     while argv[0][0] == '-':
         if argv[0] == "-b":
@@ -344,7 +344,7 @@ def main(argv):
             if len(argv) == 0:
                 reportError("Missing argument for -a option")
                 usage(options)
-                sys.exit(1)
+                sys.exit(FAILURE)
             else:
                 options.compilerOptions += argv[1].split();
                 argv = argv[1:]
@@ -356,7 +356,7 @@ def main(argv):
             if len(argv) == 0:
                 reportError("Missing argument for -observation-log option")
                 usage(options)
-                sys.exit(1)
+                sys.exit(FAILURE)
             else:
                 options.observationLog = argv[1]
                 argv = argv[1:]
@@ -372,7 +372,7 @@ def main(argv):
     config = ConfigH("config.h")
     if not config.ok:
         print("Error parsing config.h")
-        return FAILURE
+        sys.exit(FAILURE)
 
     options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
     if not options.hasBMv2:
