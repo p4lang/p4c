@@ -28,7 +28,6 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/json_generator.h"
 
-static cstring version = "0.0.5";
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
 CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
@@ -38,7 +37,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--version", nullptr,
                    [this](const char*) {
                        std::cerr << binaryName << std::endl;
-                       std::cerr << "Version " << version << std::endl;
+                       std::cerr << "Version " << compilerVersion << std::endl;
                        exit(0); return false; }, "Print compiler version");
     registerOption("-I", "path",
                    [this](const char* arg) {
