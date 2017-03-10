@@ -112,6 +112,26 @@ class SharedActionSelectorCheck : public Inspector {
     using Input = std::vector<const IR::Expression *>;
     std::map<const IR::Declaration_Instance *, Input> selector_input_map{};
 
+  static bool checkSameKeyExpr(const IR::Expression* expr0, const IR::Expression* expr1) {
+      if (expr0->node_type_name() != expr1->node_type_name())
+          return false;
+      if (auto pe0 = expr0->to<IR::PathExpression>()) {
+          auto pe1 = expr1->to<IR::PathExpression>();
+          return pe0->path->name == pe1->path->name &&
+              pe0->path->absolute == pe1->path->absolute;
+      } else if (auto mem0 = expr0->to<IR::Member>()) {
+          auto mem1 = expr1->to<IR::Member>();
+          return checkSameKeyExpr(mem0->expr, mem1->expr) && mem0->member == mem1->member;
+      } else if (auto l0 = expr0->to<IR::Literal>()) {
+          auto l1 = expr1->to<IR::Literal>();
+          return *l0 == *l1;
+      } else if (auto ai0 = expr0->to<IR::ArrayIndex>()) {
+          auto ai1 = expr1->to<IR::ArrayIndex>();
+          return checkSameKeyExpr(ai0->left, ai1->left) && checkSameKeyExpr(ai0->right, ai1->right);
+      }
+      return false;
+  }
+
  public:
     explicit SharedActionSelectorCheck(JsonConverter* converter) : converter(converter)
     { CHECK_NULL(converter); }
@@ -168,9 +188,7 @@ class SharedActionSelectorCheck : public Inspector {
         auto cmp_inputs = [](const Input &i1, const Input &i2) {
             for (auto e1 : i1) {
                 auto cmp_e = [e1](const IR::Expression *e2) {
-                    // not the best solution but the best available one given that there is no "deep
-                    // comparison" of expressions for now.
-                    return e1->toString() == e2->toString();
+                    return checkSameKeyExpr(e1, e2);
                 };
                 if (std::find_if(i2.begin(), i2.end(), cmp_e) == i2.end()) return false;
             }
