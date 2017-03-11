@@ -233,6 +233,10 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
                 // Also, the constructor is supposed to have the same name as the class
                 continue;
 
+            if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
+                // attribute locals often match attributes
+                continue;
+
             ::warning("%1% shadows %2%", node, pnode);
         }
     }
