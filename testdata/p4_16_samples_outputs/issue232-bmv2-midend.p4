@@ -29,23 +29,15 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
     Key inKey;
     Key defaultKey;
-    bool same;
     Value val;
-    bool done;
-    bool ok;
-    bool tmp_1;
     bool tmp_2;
     Value val_2;
     @name("test") action test_0() {
         inKey.field1 = 32w1;
         defaultKey.field1 = 32w0;
-        tmp_1 = inKey == defaultKey;
-        same = inKey == defaultKey;
         val.field1 = 32w0;
-        done = false;
         tmp_2 = tmp_2;
         tmp_2 = inKey == defaultKey;
-        ok = tmp_2;
         val_2.field1 = (tmp_2 ? val.field1 : val_2.field1);
         val_2.field1 = (tmp_2 ? 32w8 : val_2.field1);
         val.field1 = (tmp_2 ? val_2.field1 : val.field1);

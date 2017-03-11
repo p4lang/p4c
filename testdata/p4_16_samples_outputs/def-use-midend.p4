@@ -21,7 +21,6 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     standard_metadata_t tmp;
-    bool hasReturned_0;
     @name("a") action a_0() {
     }
     @name("t") table t() {
@@ -33,9 +32,6 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         default_action = a_0();
     }
     action act() {
-        hasReturned_0 = true;
-    }
-    action act_0() {
         tmp.ingress_port = std_meta.ingress_port;
         tmp.egress_spec = std_meta.egress_spec;
         tmp.egress_port = std_meta.egress_port;
@@ -53,35 +49,18 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         std_meta.recirculate_port = tmp.recirculate_port;
         std_meta.packet_length = tmp.packet_length;
     }
-    action act_1() {
-        hasReturned_0 = false;
-    }
     table tbl_act() {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_0() {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
-        tbl_act.apply();
         switch (t.apply().action_run) {
             a_0: {
-                tbl_act_0.apply();
             }
             default: {
-                tbl_act_1.apply();
+                tbl_act.apply();
             }
         }
 

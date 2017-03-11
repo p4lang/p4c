@@ -115,11 +115,9 @@ struct tuple_0 {
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
     bit<16> tmp_4;
-    bool tmp_5;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     apply {
         tmp_4 = ipv4_checksum.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tmp_5 = hdr.ipv4.hdrChecksum == tmp_4;
         if (hdr.ipv4.hdrChecksum == tmp_4) 
             mark_to_drop();
     }
@@ -158,10 +156,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<16> tmp_7;
-    bit<32> tmp_8;
     @name("registerRound") register<bit<16>>(32w65536) registerRound;
     @name("read_round") action read_round_0() {
-        tmp_8 = hdr.myhdr.inst;
         registerRound.read(tmp_7, hdr.myhdr.inst);
         meta.local_metadata.round = tmp_7;
     }

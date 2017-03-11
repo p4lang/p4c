@@ -271,7 +271,10 @@ class Backtrack : public virtual Visitor {
 
 class P4WriteContext : public virtual Visitor {
  public:
-    bool isWrite();
+    bool isWrite(bool root_value = false);     // might write based on context
+    bool isRead(bool root_value = false);      // might read based on context
+    // note that the context might (conservatively) return true for BOTH isWrite and isRead,
+    // as it might be an 'inout' access or it might be unable to decide.
 };
 
 #endif /* _IR_VISITOR_H_ */

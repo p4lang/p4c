@@ -20,16 +20,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<1> y0;
-    bit<1> y0_2;
     @name("NoAction") action NoAction_0() {
     }
     @name("b") action b_0() {
-        y0 = meta.md.b;
-        y0 = meta.md.b + 1w1;
         meta.md.b = meta.md.b + 1w1;
-        y0_2 = meta.md.b;
-        y0_2 = meta.md.b + 1w1;
         meta.md.b = meta.md.b + 1w1;
     }
     @name("t") table t() {

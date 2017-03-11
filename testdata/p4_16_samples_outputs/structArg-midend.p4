@@ -3,19 +3,7 @@ struct S {
 }
 
 control caller() {
-    S data;
-    action act() {
-        data.f = 32w0;
-        data.f = 32w0;
-    }
-    table tbl_act() {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     apply {
-        tbl_act.apply();
     }
 }
 

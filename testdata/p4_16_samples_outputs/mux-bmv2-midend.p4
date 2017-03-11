@@ -19,24 +19,17 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    bit<32> _sub;
-    bit<64> res;
     bit<32> tmp_1;
     bit<64> tmp_2;
-    bool p_0;
     bit<64> val_0;
     @name("update") action update_0() {
-        p_0 = true;
         val_0 = tmp_2;
-        _sub = tmp_2[31:0];
         tmp_1 = tmp_2[31:0];
         tmp_1 = tmp_1;
-        _sub = tmp_1;
         val_0[31:0] = tmp_1;
         tmp_2 = val_0;
     }
     action act() {
-        res = 64w0;
         tmp_2 = 64w0;
     }
     table tbl_act() {

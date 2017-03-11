@@ -4,12 +4,10 @@
 control empty();
 package top(empty e);
 control Ing() {
-    bool b;
     bit<32> a;
     bool tmp_1;
     bool tmp_2;
     @name("cond") action cond_0() {
-        b = true;
         tmp_1 = tmp_1;
         tmp_2 = tmp_2;
         tmp_1 = tmp_1;

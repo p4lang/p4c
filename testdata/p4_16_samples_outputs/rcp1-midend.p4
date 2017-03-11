@@ -28,16 +28,12 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    bool tmp_1;
-    bool tmp_2;
     @name("input_traffic_bytes") Counter<bit<32>>(CounterType.packets_and_bytes) input_traffic_bytes;
     @name("sum_rtt_Tr") ConditionalAccumulator<bit<32>>(32w1) sum_rtt_Tr;
     @name("num_pkts_with_rtt") ConditionalAccumulator<bit<32>>(32w1) num_pkts_with_rtt;
     action act() {
         input_traffic_bytes.count();
-        tmp_1 = pkt_hdr.rtt < 32w2500;
         sum_rtt_Tr.write(pkt_hdr.rtt, pkt_hdr.rtt < 32w2500);
-        tmp_2 = pkt_hdr.rtt < 32w2500;
         num_pkts_with_rtt.write(32w1, pkt_hdr.rtt < 32w2500);
     }
     table tbl_act() {

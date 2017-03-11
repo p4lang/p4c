@@ -1,8 +1,6 @@
 control c(inout bit<16> y) {
     bit<32> x;
-    bit<32> arg_0;
     @name("a") action a_0() {
-        arg_0 = x;
         y = (bit<16>)x;
     }
     action act() {

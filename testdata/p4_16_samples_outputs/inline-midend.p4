@@ -1,42 +1,10 @@
 control p(out bit<1> y) {
-    bit<1> x_2;
-    bit<1> z;
-    bit<1> x_3;
-    bit<1> tmp_7;
-    bit<1> tmp_8;
-    bit<1> tmp_9;
-    bit<1> tmp_10;
-    bit<1> tmp_11;
-    bit<1> tmp_12;
     bit<1> tmp_13;
     bit<1> tmp_14;
-    bit<1> x0;
-    bit<1> y0;
-    bit<1> x0_2;
-    bit<1> y0_2;
-    bit<1> x_0;
-    bit<1> y_0;
     @name("b") action b_0() {
-        x_0 = tmp_13;
-        tmp_8 = tmp_13;
-        x0 = tmp_13;
-        x_2 = tmp_13;
-        tmp_7 = tmp_13 & tmp_13;
-        y0 = tmp_13 & tmp_13;
-        tmp_9 = tmp_13 & tmp_13;
-        z = tmp_13 & tmp_13;
-        tmp_10 = tmp_13 & tmp_13 & (tmp_13 & tmp_13);
-        tmp_11 = tmp_13 & tmp_13 & (tmp_13 & tmp_13);
-        x0_2 = tmp_13 & tmp_13 & (tmp_13 & tmp_13);
-        x_2 = tmp_13 & tmp_13 & (tmp_13 & tmp_13);
-        tmp_7 = tmp_13 & tmp_13 & (tmp_13 & tmp_13) & (tmp_13 & tmp_13 & (tmp_13 & tmp_13));
-        y0_2 = tmp_13 & tmp_13 & (tmp_13 & tmp_13) & (tmp_13 & tmp_13 & (tmp_13 & tmp_13));
-        tmp_12 = tmp_13 & tmp_13 & (tmp_13 & tmp_13) & (tmp_13 & tmp_13 & (tmp_13 & tmp_13));
-        y_0 = tmp_13 & tmp_13 & (tmp_13 & tmp_13) & (tmp_13 & tmp_13 & (tmp_13 & tmp_13));
         tmp_14 = tmp_13 & tmp_13 & (tmp_13 & tmp_13) & (tmp_13 & tmp_13 & (tmp_13 & tmp_13));
     }
     action act() {
-        x_3 = 1w1;
         tmp_13 = 1w1;
     }
     action act_0() {

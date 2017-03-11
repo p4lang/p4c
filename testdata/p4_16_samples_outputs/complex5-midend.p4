@@ -1,7 +1,6 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     bit<32> tmp_1;
-    bool tmp_2;
     action act() {
         r = 32w1;
     }
@@ -10,7 +9,6 @@ control c(inout bit<32> r) {
     }
     action act_1() {
         tmp_1 = f(32w2);
-        tmp_2 = tmp_1 > 32w0;
     }
     table tbl_act() {
         actions = {

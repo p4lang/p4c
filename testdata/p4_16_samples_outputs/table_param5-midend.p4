@@ -1,7 +1,6 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
-    bit<32> tmp_0;
     bit<32> x_0;
     @name("a") action a_0() {
     }
@@ -21,7 +20,6 @@ control c(inout bit<32> arg) {
         x_0 = arg;
     }
     action act_0() {
-        tmp_0 = arg + 32w1;
         arg = arg + 32w1;
     }
     action act_1() {

@@ -1,8 +1,5 @@
 control c(inout bit<32> x) {
-    bit<32> b_0;
     @name("a") action a_0(bit<32> d) {
-        b_0 = x;
-        b_0 = d;
         x = d;
     }
     @name("t") table t() {

@@ -3,16 +3,14 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     bit<32> tmp_2;
-    bool tmp_3;
     bit<32> tmp_4;
-    bit<32> r_0;
     @name("a") action a_0() {
     }
     @name("b") action b_0() {
     }
     @name("t") table t() {
         key = {
-            r_0: ternary @name("r") ;
+            tmp_4: ternary @name("r") ;
         }
         actions = {
             a_0();
@@ -28,11 +26,9 @@ control c(inout bit<32> r) {
     }
     action act_1() {
         tmp_2 = f(32w2);
-        tmp_3 = tmp_2 < 32w2;
     }
     action act_2() {
         tmp_4 = f(32w2);
-        r_0 = tmp_4;
     }
     table tbl_act() {
         actions = {

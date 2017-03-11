@@ -48,8 +48,6 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Choice c_c_0;
-    bool c_tmp_0;
     action act() {
         h.h.c = h.h.a;
     }

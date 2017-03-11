@@ -1,7 +1,4 @@
 control ctrl() {
-    bit<32> a;
-    bool tmp_0;
-    bool hasReturned_0;
     apply {
     }
 }
