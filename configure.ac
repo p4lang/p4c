@@ -1,5 +1,5 @@
 AC_PREREQ(2.64)
-AC_INIT([p4c], [16], [cdodd@barefootnetworks.com])
+AC_INIT([p4c], [16], [p4c@barefootnetworks.com])
 m4_include([m4/ax_cxx_compile_stdcxx.m4])
 
 AC_CONFIG_HEADERS(config.h)
