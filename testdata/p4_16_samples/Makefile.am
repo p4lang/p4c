@@ -1,2 +1,2 @@
 TESTSUITE_AT += \
-	testdata/p4_16_samples/addtestsuite.at
+	testdata/p4_16_samples/testsuite-p4_16_samples.at

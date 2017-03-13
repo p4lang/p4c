@@ -58,5 +58,5 @@ tests_p4ctest_SOURCES += \
 	backends/p4test/tests/test-backend-p4test.cpp
 
 TESTSUITE_AT += \
-	backends/p4test/tests/addtestsuite.at \
+	backends/p4test/tests/testsuite-p4test.at \
 	backends/p4test/tests/p4test.at

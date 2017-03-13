@@ -20,10 +20,9 @@ m4_define([BMV2_TEST_RUN],
  AT_SETUP([$1 - $2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
  AT_CHECK([
-  set -x
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  $abs_top_srcdir/backends/bmv2/run-bmv2-test.py $abs_top_srcdir $abs_top_srcdir/testdata/$3
+  ../backends/bmv2/run-bmv2-test.py .. ../testdata/$3
   ],
   [0],
   [stdout],
@@ -38,10 +37,9 @@ m4_define([EBPF_TEST_RUN],
  AT_SETUP([$1 - $2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
  AT_CHECK([
-  set -x
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  $abs_top_srcdir/backends/ebpf/run-ebpf-sample.py $abs_top_srcdir $abs_top_srcdir/testdata/$3
+  ../backends/ebpf/run-ebpf-sample.py .. ../testdata/$3
   ],
   [0],
   [stdout],
@@ -121,4 +119,4 @@ m4_include([tests/util.at])
 m4_include([tests/ir.at])
 m4_include([tests/frontend.at])
 
-m4_foreach([at_file], m4_split(m4_normalize(m4_esyscmd_s([sh -c "find -L .. -name addtestsuite.at"]))), [m4_sinclude(at_file)])
+m4_foreach([at_file], m4_split(m4_normalize(m4_esyscmd_s([sh -c "find -L .. -name testsuite-*.at"]))), [m4_sinclude(at_file)])
