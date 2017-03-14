@@ -111,8 +111,9 @@ m4_define([P4TEST_RUN],
     [dnl m4_errprintn(file)
      m4_pushdef([pathname], m4_split(file,/))
      m4_pushdef([filename], m4_car(m4_reverse(pathname)))
-     dnl signature of a test case is : "target:filename"
-     m4_pushdef([signature], m4_join([:], [$1], filename))
+     dnl signature of a test case is : "target/pathname"
+     m4_pushdef([signature], m4_join(/, [$1], m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))))
+     dnl m4_errprintn(signature)
 
      dnl m4_set_contains([xfail_cases], signature, [m4_errprintn("yes")], [m4_errprintn("no")])
      m4_set_contains([xfail_cases], signature,

@@ -1,1 +1,0 @@
-P4TEST_RUN([frontend], [testdata/p4_16_errors], [\"*.p4\"], [FRONTEND_TEST_RUN], [../testdata/p4_16_errors/xfails.text])
