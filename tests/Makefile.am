@@ -19,18 +19,46 @@ TESTSUITE_AT += \
 	tests/testsuite.at \
 	tests/frontend.at
 
+if TESTFLAGS
+EXTRA_FLAGS=$T
+endif
+
 check-local: atconfig $(TESTSUITE) $(TESTSUITE_AT)
-	set $(SHELL) '$(TESTSUITE)' -C tests $(TESTSUITEFLAGS); \
+	set $(SHELL) '$(TESTSUITE)' -C tests $(TESTSUITEFLAGS) \
+		$(filter -j%,$(MAKEFLAGS)) \
+		$(EXTRA_FLAGS); \
 	"$$@" || (test X'$(RECHECK)' = Xyes && "$$@" --recheck)
 
+# helper function rules
+recheck:
+	set $(SHELL) '$(TESTSUITE)' -C tests --recheck;
+
+check-help:
+	@echo "make check-local            : run all the tests"
+	@echo "make check-local T=[OPTION] : run with extra options"
+	@echo "  OPTIONS:"
+	@echo "  -l, --list              describe all the tests, or the selected TESTS"
+	@echo "  -k, --keywords=KEYWORDS "
+	@echo "                          select the tests matching all the comma-separated KEYWORDS"
+	@echo "                          multiple '-k' accumulates; prefixed '!' negates a KEYWORD"
+	@echo "  --recheck               select all tests that failed or passed unexpectedly last time"
+	@echo "  -v, --verbose           force more detailed output"
+	@echo "  -e, --errexit           abort as soon as a test fails"
+	@echo "  \"1 4-5 12-\"           specify range of tests to run"
+	@echo ""
+	@echo "SHORTCUTS:"
+	@echo "make check-bmv2             : run all bmv2 tests"
+	@echo "make check-frontend         : run all frontend tests"
+	@echo "make check-ebpf             : run all ebpf tests"
+
 check-bmv2:
-	make check-local TESTSUITEFLAGS='-k bmv2 $(filter-out $@,$(MAKECMDGOALS))'
+	+$(MAKE) check-local TESTSUITEFLAGS='-k bmv2 $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
 
 check-frontend:
-	make check-local TESTSUITEFLAGS='-k frontend $(filter-out $@,$(MAKECMDGOALS))'
+	+$(MAKE) check-local TESTSUITEFLAGS='-k frontend $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
 
 check-ebpf:
-	make check-local TESTSUITEFLAGS='-k ebpf $(filter-out $@,$(MAKECMDGOALS))'
+	+$(MAKE) check-local TESTSUITEFLAGS='-k ebpf $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
 
 clean-local:
 	@test ! -f $(TESTSUITE) || $(SHELL) $(TESTSUITE) --clean

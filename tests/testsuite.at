@@ -17,12 +17,12 @@ AT_INIT
 dnl unit test runner based on bmv2
 m4_define([BMV2_TEST_RUN],
 [
- AT_SETUP([$1 - $2])
+ AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  ../backends/bmv2/run-bmv2-test.py .. ../testdata/$3
+  ../backends/bmv2/run-bmv2-test.py .. $3
   ],
   [0],
   [stdout],
@@ -34,12 +34,12 @@ m4_define([BMV2_TEST_RUN],
 dnl unit test runner based on ebpf
 m4_define([EBPF_TEST_RUN],
 [
- AT_SETUP([$1 - $2])
+ AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  ../backends/ebpf/run-ebpf-sample.py .. ../testdata/$3
+  ../backends/ebpf/run-ebpf-sample.py .. $3
   ],
   [0],
   [stdout],
@@ -51,12 +51,12 @@ m4_define([EBPF_TEST_RUN],
 dnl unit test runner based on p4test
 m4_define([FRONTEND_TEST_RUN],
 [
- AT_SETUP([$1 - $2])
+ AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  ../backends/p4test/run-p4-sample.py .. ../testdata/$3
+  ../backends/p4test/run-p4-sample.py .. $3
   ],
   [0],
   [stdout],
@@ -67,11 +67,13 @@ m4_define([FRONTEND_TEST_RUN],
 
 dnl unit test runner for c++ features
 m4_define([CPP_TEST_RUN],
-[AT_SETUP([$1 - $2])
+[AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
  AT_CHECK([p4ctest $3], [0], [stdout], [stderr])
  AT_CLEANUP]
 )
+
+m4_define(removeQuote,[$1])
 
 dnl Use 'find' utility to determine which p4 program to run
 dnl e.g. find ../testdata/p4_14_samples  -type d -name "switch_*"  -prune -o -name "*.p4" -print
@@ -98,15 +100,16 @@ m4_define([P4TEST_RUN],
  dnl execute on all test programs
  m4_foreach([file], m4_set_dump([test_programs]),
     [dnl m4_errprintn(file)
-     m4_pushdef([pathname], m4_split(file, [\/]))
+     m4_pushdef([pathname], m4_split(file,/))
      m4_pushdef([filename], m4_car(m4_reverse(pathname)))
      dnl signature of a test case is : "target:filename"
      m4_pushdef([signature], m4_join([:], [$1], filename))
 
      dnl m4_set_contains([xfail_cases], signature, [m4_errprintn("yes")], [m4_errprintn("no")])
      m4_set_contains([xfail_cases], signature,
-     [$4([$1], [filename], [file], [xfail], [$2])],
-     [$4([$1], [filename], [file], [xpass], [$2])])
+     dnl m4_errprintn(m4_join(/,removeQuote(m4_cdr(pathname))))
+     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xfail], [$2])],
+     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xpass], [$2])])
 
      m4_popdef([pathname])
      m4_popdef([filename])

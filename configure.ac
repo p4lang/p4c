@@ -95,5 +95,9 @@ m4_foreach_w([ac_file],m4_esyscmd([sh -c 'find -L . -name addconfig.ac 2>/dev/nu
 [[#]] end of ac_file
 )
 
+AC_SUBST([T], [])
+AM_CONDITIONAL([TESTFLAGS], [(test ! -z T)])
+
+
 
 AC_OUTPUT

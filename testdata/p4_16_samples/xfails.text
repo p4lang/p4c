@@ -1,5 +1,5 @@
-frontend:cases.p4
-frontend:cast-call.p4
+#frontend:cases.p4
+#frontend:cast-call.p4
 frontend:chain1.p4
 frontend:complex7.p4
 frontend:constant_folding.p4
@@ -9,6 +9,7 @@ frontend:decl.p4
 frontend:default2.p4
 frontend:drop-bmv2.p4
 frontend:fold_match.p4
+frontend:inline.p4
 frontend:inline-switch.p4
 frontend:large.p4
 frontend:nested-tuple.p4
