@@ -39,13 +39,8 @@ noinst_HEADERS =               # Headers that are not installed
 noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
-#TESTS =                        # Tests to execute
 
 # Variables specific to our build system.
-#XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
-#IFAIL_TESTS =                  # intermittent failures
-#export XFAIL_TESTS
-#export IFAIL_TESTS
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
@@ -53,7 +48,7 @@ p4include_HEADERS =            # p4_16 include files
 p4_14include_HEADERS =         # p4_14 include files
 tests_p4ctest_SOURCES =        # Files added to unit tests by p4c and extensions
 TESTSUITE_AT =                 # testsuite definitions
-XFAIL_FILES =                   # xfail cases
+XFAIL_FILES =                  # xfail cases
 
 ################ Subproject Makefile inclusions
 
