@@ -63,10 +63,12 @@ check-ebpf:
 clean-local:
 	@test ! -f $(TESTSUITE) || $(SHELL) $(TESTSUITE) --clean
 
+TESTSUITE_PATCH = $(srcdir)/tests/testsuite.patch
 AUTOTEST = $(AUTOM4TE) --language=autotest
-$(TESTSUITE): package.m4 $(TESTSUITE_AT) $(XFAIL_FILES)
-	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	mv $@.tmp $@
+$(TESTSUITE): package.m4 $(TESTSUITE_AT) $(XFAIL_FILES) $(TESTSUITE_PATCH)
+	$(AUTOTEST) -I $(srcdir) $@.at -o testsuite.tmp
+	patch -p0 testsuite.tmp $(TESTSUITE_PATCH)
+	mv testsuite.tmp $@
 
 %.text: #do nothing
 
