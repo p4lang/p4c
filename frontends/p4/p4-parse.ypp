@@ -81,6 +81,7 @@ static int yylex();
     IR::Vector<IR::Type>        *types;
     IR::Vector<IR::Method>      *methods;
     IR::Vector<IR::KeyElement>  *keyElements;
+    IR::Vector<IR::Entry>       *entriesList;
     IR::ID*                     id;
     cstring                     str;
     bool                        b;
@@ -97,6 +98,7 @@ static int yylex();
     IR::Expression              *Expression;
     IR::IDeclaration            *decl;
     IR::KeyElement              *KeyElement;
+    IR::Entry                   *Entry;
     IR::Method                  *Method;
     IR::Function                *Function;
     IR::Parameter               *Parameter;
@@ -119,7 +121,7 @@ static int yylex();
 %token      LE GE SHL AND OR NE EQ
 %token      TRUE FALSE THIS
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
-            DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
+            DEFAULT DONTCARE ELSE ENTRIES ENUM T_ERROR  // There is an ERROR macro elsewhere
             EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
             PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
             TUPLE TYPEDEF VARBIT VOID
@@ -179,6 +181,8 @@ static int yylex();
 %type<keyElements>      keyElementList
 %type<ActionListElement> actionRef
 %type<actions>          actionList
+%type<Entry>            entry
+%type<entriesList>      entriesList
 
 %error-verbose
 %locations
@@ -256,6 +260,7 @@ nonTypeName
     | KEY         { $$ = new IR::ID(@1, "key"); }
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
     | STATE       { $$ = new IR::ID(@1, "state"); }
+    | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
     ;
 
 name
@@ -777,6 +782,9 @@ tableProperty
                                            auto id = IR::ID(@1, "actions");
                                            $$ = new IR::Property(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
+    | ENTRIES '=' '{' entriesList '}' { auto l = new IR::EntriesList(@4, $4); /* \todo: force CONST entries? conflicts with next rule */
+                                              auto id = IR::ID(@1+@5, "entries");
+                                              $$ = new IR::Property(@1, id, IR::Annotations::empty, l, false); }
     | optAnnotations CONST IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@5, $5);
                                             auto id = IR::ID(@3, $3);
@@ -812,6 +820,24 @@ actionRef
                                            auto mce = new IR::MethodCallExpression(
                                                @2+@4, method, new IR::Vector<IR::Type>(), $4);
                                            $$ = new IR::ActionListElement(@2, $1, mce); }
+    ;
+
+entry
+    : optAnnotations keysetExpression ':' actionRef
+                                         { if($2->is<IR::ListExpression>())
+                                             $$ = new IR::Entry(@1+@4, $1, $2, $4);
+                                           else { // if not a tuple, make it a list of 1
+                                             auto le = new IR::Vector<IR::Expression>();
+                                             le->push_back($2);
+                                             $$ = new IR::Entry(@1+@4, $1, new IR::ListExpression(@2, le), $4);
+                                           }
+                                         }
+    ;
+
+entriesList
+    : entry ';'                          { $$ = new IR::Vector<IR::Entry>();
+                                           $$->push_back($1); }
+    | entriesList entry ';'              { $$ = $1; $$->push_back($2); }
     ;
 
 /************************* ACTION ********************************/

@@ -1314,6 +1314,11 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::EntriesList* l) {
+    if(readOnly) return getOriginal();
+    return l;
+}
+
 const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     if (done()) return expression;
     bool constant = true;
@@ -2146,8 +2151,10 @@ TypeInference::actionCall(bool inActionList,
         LOG2("Action parameter " << dbp(p));
         if (it == arguments->end()) {
             params->push_back(p);
-            if ((p->direction != IR::Direction::None) || !inActionList)
-                typeError("%1%: parameter %2% must be bound", actionCall, p);
+            if(findContext<IR::EntriesList>() == nullptr) {// no checking for table entries entries
+                if ((p->direction != IR::Direction::None) || !inActionList)
+                    typeError("%1%: parameter %2% must be bound", actionCall, p);
+            }
         } else {
             auto arg = *it;
             auto paramType = getType(p);
@@ -2167,7 +2174,7 @@ TypeInference::actionCall(bool inActionList,
             it++;
         }
     }
-    if (it != arguments->end())
+    if (it != arguments->end() && findContext<IR::EntriesList>() == nullptr)
         typeError("%1% Too many arguments for action", *it);
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, nullptr, pl);

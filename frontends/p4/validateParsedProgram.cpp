@@ -65,14 +65,38 @@ void ValidateParsedProgram::container(const IR::IContainer* type) {
 }
 
 void ValidateParsedProgram::postorder(const IR::P4Table* t) {
-    auto ac = t->properties->getProperty(IR::TableProperties::actionsPropertyName);
+    auto ac = t->getActionList();
     if (ac == nullptr)
         ::error("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::actionsPropertyName);
-    auto da = t->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+    auto da = t->getDefaultAction();
     if (!isv1 && da == nullptr)
         ::warning("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::defaultActionPropertyName);
+
+    auto entriesList = t->getEntries();
+    if (entriesList != nullptr) { // list of entries is optional
+        for (auto e : *entriesList->entries) {
+            auto keyset = e->getKeys();
+            if (keyset == nullptr || !keyset->is<IR::ListExpression>())
+                ::error("%1%: key expression must be tuple", keyset);
+            else if (keyset->to<IR::ListExpression>()->components->size() < t->getKey()->keyElements->size())
+                ::error("%1%: Size of entry keyset must match the table key set size", keyset);
+            auto actionRef = e->getAction();
+            if (!actionRef->expression->is<IR::MethodCallExpression>())
+                ::error("%1%: invalid action in entries list", actionRef);
+            auto actionCall = actionRef->expression->to<IR::MethodCallExpression>();
+            auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
+            bool found = false;
+            for (auto ale: *ac->actionList)
+                if (ale->expression->to<IR::PathExpression>()->path->name == actionName) {
+                    found = true;
+                    break;
+                }
+            if (!found)
+                ::error("%1%: action not in the table action list", actionRef);
+        }
+    }
 }
 
 void ValidateParsedProgram::distinctParameters(
