@@ -23,9 +23,10 @@ if TESTFLAGS
 EXTRA_FLAGS=$T
 endif
 
+# allow -jN, but ignore -j, as -j uses all cores in testsuite
 check-local: atconfig $(TESTSUITE) $(TESTSUITE_AT)
 	'$(TESTSUITE)' -C tests $(TESTSUITEFLAGS) \
-		$(filter -j%,$(MAKEFLAGS)) \
+		$(filter-out -j,$(filter -j%,$(MAKEFLAGS))) \
 		$(EXTRA_FLAGS); \
 	"$$@" || (test X'$(RECHECK)' = Xyes && "$$@" --recheck)
 
