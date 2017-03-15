@@ -19,8 +19,8 @@ m4_define([BMV2_TEST_RUN],
 [
  AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
- AT_KEYWORDS($1)
- AT_KEYWORDS($6)
+ AT_KEYWORDS($1) dnl target
+ AT_KEYWORDS($6) dnl filename
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
@@ -41,12 +41,12 @@ m4_define([EBPF_TEST_RUN],
 [
  AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
- AT_KEYWORDS($1)
- AT_KEYWORDS($6)
+ AT_KEYWORDS($1) dnl target
+ AT_KEYWORDS($6) dnl filename
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  echo "cd $$PWD" > $1/$2.test
+  echo "cd $abs_top_srcdir/build" > $1/$2.test
   echo "../backends/ebpf/run-ebpf-sample.py .. \${*} ../$2" >> $1/$2.test
   chmod +x $1/$2.test
   ../backends/ebpf/run-ebpf-sample.py .. $3
@@ -63,14 +63,14 @@ m4_define([FRONTEND_TEST_RUN],
 [
  AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
- AT_KEYWORDS($1)
- AT_KEYWORDS($6)
+ AT_KEYWORDS($1) dnl target
+ AT_KEYWORDS($6) dnl filename
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
-  @echo "cd $$PWD" > $1/$2.test
-  @echo "../backends/p4test/run-p4-sample.py .. \${*} ../$2" >> $1/$2.test
-  @chmod +x $1/$2.test
+  echo "cd $abs_top_srcdir/build" > $1/$2.test
+  echo "../backends/p4test/run-p4-sample.py .. \${*} ../$2" >> $1/$2.test
+  chmod +x $1/$2.test
   ../backends/p4test/run-p4-sample.py .. $3
   ],
   [0],
