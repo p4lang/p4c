@@ -213,6 +213,16 @@ void Header::set_packet_id(const Debugger::PacketId *id) {
   for (Field &f : fields) f.set_packet_id(id);
 }
 
+const std::string &
+Header::get_field_name(int field_offset) const {
+  return header_type.get_field_name(field_offset);
+}
+
+const std::string
+Header::get_field_full_name(int field_offset) const {
+  return name + "." + get_field_name(field_offset);
+}
+
 bool Header::cmp(const Header &other) const {
   return (header_type.get_type_id() == other.header_type.get_type_id()) &&
       is_valid() && other.is_valid() &&

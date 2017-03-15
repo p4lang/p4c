@@ -257,6 +257,13 @@ class Header : public NamedP4Object {
 
   void set_packet_id(const Debugger::PacketId *id);
 
+  //! Returns a reference to the name of the field at the given offset.
+  const std::string &get_field_name(int field_offset) const;
+
+  //! Returns the full name of the field at the given offset as a new
+  //! string. The name is of the form <hdr_name>.<f_name>.
+  const std::string get_field_full_name(int field_offset) const;
+
   Header(const Header &other) = delete;
   Header &operator=(const Header &other) = delete;
 

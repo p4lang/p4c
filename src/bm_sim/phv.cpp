@@ -113,6 +113,11 @@ PHV::add_field_alias(const std::string &from, const std::string &to) {
   // fields_map.emplace(from, ref);
 }
 
+const std::string
+PHV::get_field_name(header_id_t header_index, int field_offset) const {
+  return get_header(header_index).get_field_full_name(field_offset);
+}
+
 
 void
 PHVFactory::push_back_header(const std::string &header_name,

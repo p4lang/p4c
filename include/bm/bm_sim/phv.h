@@ -267,6 +267,11 @@ class PHV {
   //! Returns the number of headers included in the PHV
   size_t num_headers() const { return headers.size(); }
 
+  //! Returns the full name of the field as a new string. The name is of the
+  //! form <hdr_name>.<f_name>.
+  const std::string get_field_name(header_id_t header_index,
+                                   int field_offset) const;
+
  private:
   // To  be used only by PHVFactory
   // all headers need to be pushed back in order (according to header_index) !!!
