@@ -44,10 +44,12 @@ limitations under the License.
 #include "midend/removeParameters.h"
 #include "midend/removeReturns.h"
 #include "midend/simplifyKey.h"
-#include "midend/simplifySelect.h"
+#include "midend/simplifySelectCases.h"
+#include "midend/simplifySelectList.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
 #include "midend/predication.h"
+#include "midend/expandLookahead.h"
 
 namespace BMV2 {
 
@@ -150,12 +152,14 @@ MidEnd::MidEnd(CompilerOptions& options) {
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
-        new P4::SimplifySelect(&refMap, &typeMap, true),  // require constant keysets
+        new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
+        new P4::ExpandLookahead(&refMap, &typeMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
+        new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::Predication(&refMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
@@ -172,8 +176,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
-        new LowerExpressions(&typeMap),
+        new LowerExpressions(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
+        new P4::TypeChecking(&refMap, &typeMap),
+        new RemoveExpressionsFromSelects(&refMap, &typeMap),
         new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveUnusedDeclarations(&refMap),

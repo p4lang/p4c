@@ -14,36 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_SIMPLIFYSELECT_H_
-#define _MIDEND_SIMPLIFYSELECT_H_
+#ifndef _MIDEND_SIMPLIFYSELECTCASES_H_
+#define _MIDEND_SIMPLIFYSELECTCASES_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
-class DoSimplifySelect : public Transform {
+// Analyze reachability of select cases; handles corner cases
+// (e.g., no cases).
+// If requireConstants is true this pass requires that
+// all select labels evaluate to constants.
+class DoSimplifySelectCases : public Transform {
     const TypeMap* typeMap;
     bool requireConstants;
 
     void checkSimpleConstant(const IR::Expression* expr) const;
 
  public:
-    DoSimplifySelect(const TypeMap* typeMap, bool requireConstants) :
+    DoSimplifySelectCases(const TypeMap* typeMap, bool requireConstants) :
             typeMap(typeMap), requireConstants(requireConstants)
-    { setName("DoSimplifySelect"); }
+    { setName("DoSimplifySelectCases"); }
     const IR::Node* preorder(IR::SelectExpression* expression) override;
 };
 
-class SimplifySelect : public PassManager {
+class SimplifySelectCases : public PassManager {
  public:
-    SimplifySelect(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants) {
+    SimplifySelectCases(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants) {
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoSimplifySelect(typeMap, requireConstants));
-        setName("SimplifySelect");
+        passes.push_back(new DoSimplifySelectCases(typeMap, requireConstants));
+        setName("SimplifySelectCases");
     }
 };
 
 }  // namespace P4
 
-#endif /* _MIDEND_SIMPLIFYSELECT_H_ */
+#endif /* _MIDEND_SIMPLIFYSELECTCASES_H_ */

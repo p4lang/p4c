@@ -11,7 +11,7 @@ bool ComplexValues::isNestedStruct(const IR::Type* type) {
         if (ftype->is<IR::Type_StructLike>() ||
             ftype->is<IR::Type_Tuple>() ||
             ftype->is<IR::Type_Stack>()) {
-            LOG1("Type " << dbp(type) << " is nested");
+            LOG3("Type " << dbp(type) << " is nested");
             return true;
         }
     }
@@ -35,7 +35,7 @@ void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type,
             auto clone = new IR::Declaration_Variable(
                 Util::SourceInfo(), IR::ID(newName), IR::Annotations::empty,
                 ftype->getP4Type(), nullptr);
-            LOG1("Created " << clone);
+            LOG3("Created " << clone);
             result->push_back(clone);
         }
     }
@@ -57,7 +57,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
 }
 
 const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
-    LOG1("Visiting " << dbp(getOriginal()));
+    LOG3("Visiting " << dbp(getOriginal()));
     auto parent = getContext()->node;
     auto left = values->getTranslation(expression->expr);
     if (left == nullptr)
@@ -77,7 +77,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
 }
 
 const IR::Node* RemoveNestedStructs::postorder(IR::PathExpression* expression) {
-    LOG1("Visiting " << dbp(getOriginal()));
+    LOG3("Visiting " << dbp(getOriginal()));
     auto decl = values->refMap->getDeclaration(expression->path, true);
     auto comp = values->getTranslation(decl);
     if (comp == nullptr)

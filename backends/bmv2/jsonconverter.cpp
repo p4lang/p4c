@@ -371,7 +371,7 @@ class ExpressionConverter : public Inspector {
     }
 
     void postorder(const IR::Shr* expression) override {
-        // special handling for shift of a lookahead -> current
+        // special handling for shift of a lookahead
         auto l = get(expression->left);
         if (l->is<Util::JsonObject>()) {
             auto jo = l->to<Util::JsonObject>();
@@ -412,7 +412,7 @@ class ExpressionConverter : public Inspector {
 
     void postorder(const IR::Slice* expression) override {
         // Special case for parser select: look for
-        // packet.lookahead<T>()[h:l].  Convert to current(l, h - l).
+        // packet.lookahead<T>()[h:l].  Convert to lookahead(l, h - l).
         // Only correct within a select() expression, but we cannot check that
         // since the caller invokes the converter directly with the select argument.
         auto m = get(expression->e0);
@@ -2494,6 +2494,20 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                 }
                 return result;
             }
+        } else if (minst->is<P4::BuiltInMethod>()) {
+            auto bi = minst->to<P4::BuiltInMethod>();
+            if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
+                auto mem = new IR::Member(Util::SourceInfo(), bi->appliedTo, "$valid$");
+                typeMap->setType(mem, IR::Type_Void::get());
+                auto jexpr = conv->convert(mem, true, false);
+                result->emplace("op", "set");
+                params->append(jexpr);
+
+                auto bl = new IR::BoolLiteral(bi->name == IR::Type_Header::setValid);
+                auto r = conv->convert(bl, true, true, true);
+                params->append(r);
+                return result;
+            }
         }
     }
     ::error("%1%: not supported in parser on this target", stat);
@@ -2517,6 +2531,9 @@ void JsonConverter::convertSimpleKey(const IR::Expression* keySet,
         mask = mk->right->to<IR::Constant>()->value;
     } else if (keySet->is<IR::Constant>()) {
         value = keySet->to<IR::Constant>()->value;
+        mask = -1;
+    } else if (keySet->is<IR::BoolLiteral>()) {
+        value = keySet->to<IR::BoolLiteral>()->value ? 1 : 0;
         mask = -1;
     } else {
         ::error("%1% must evaluate to a compile-time constant", keySet);

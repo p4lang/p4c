@@ -170,7 +170,7 @@ def process_file(options, argv):
     # We rely on the fact that these keys are in alphabetical order.
     rename = { "FrontEnd_11_SimplifyControlFlow": "first",
                "FrontEnd_26_FrontEndLast": "frontend",
-               "MidEnd_33_Evaluator": "midend" }
+               "MidEnd_35_Evaluator": "midend" }
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
