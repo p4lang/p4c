@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "simplifySelect.h"
+#include "simplifySelectCases.h"
 #include "frontends/p4/enumInstance.h"
 
 namespace P4 {
 
-void DoSimplifySelect::checkSimpleConstant(const IR::Expression* expr) const {
+void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::DefaultExpression>())
         return;
@@ -45,7 +45,7 @@ void DoSimplifySelect::checkSimpleConstant(const IR::Expression* expr) const {
     ::error("%1%: must be a compile-time constant", expr);
 }
 
-const IR::Node* DoSimplifySelect::preorder(IR::SelectExpression* expression) {
+const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression) {
     IR::Vector<IR::SelectCase> cases;
 
     bool seenDefault = false;

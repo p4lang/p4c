@@ -110,10 +110,13 @@ class DoSimplifyExpressions : public Transform {
         setName("DoSimplifyExpressions");
     }
 
+#if 0
     const IR::Node* preorder(IR::P4Program* program) override {
         if (refMap->isV1()) prune();  // skip for P4 v1
         return program;
     }
+#endif
+
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::P4Control* control) override;

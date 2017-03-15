@@ -36,6 +36,7 @@ class ReplacementMap {
     IR::IndexedVector<IR::Node>* getNewReplacements();
 };
 
+// Convert each Tuple type into a Struct.
 class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;
  public:

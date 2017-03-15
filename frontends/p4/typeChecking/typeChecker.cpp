@@ -2368,6 +2368,18 @@ const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
     return expression;
 }
 
+bool TypeInference::containsHeader(const IR::Type* type) {
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() || type->is<IR::Type_Union>())
+        return true;
+    if (type->is<IR::Type_Struct>()) {
+        auto st = type->to<IR::Type_Struct>();
+        for (auto f : *st->fields)
+            if (containsHeader(f->type))
+                return true;
+    }
+    return false;
+}
+
 const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     if (done()) return expression;
     auto selectType = getType(expression->select);
@@ -2382,6 +2394,9 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     for (auto ct : *tuple->components) {
         if (ct->is<IR::ITypeVar>()) {
             typeError("Cannot infer type for %1%", ct);
+            return expression;
+        } else if (containsHeader(ct)) {
+            typeError("Expression with type %1% cannot be used in select %2%", ct, expression);
             return expression;
         }
     }

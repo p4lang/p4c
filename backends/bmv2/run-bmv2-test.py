@@ -217,7 +217,7 @@ def process_file(options, argv):
         else:
             result = SUCCESS
 
-    if result == SUCCESS:
+    if result == SUCCESS and not expected_error:
         result = run_model(options, tmpdir, jsonfile);
 
     if options.cleanupTmp:

@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 // Removes nested structs.  This converts only local variables, but
-// does not change control, parser, package, and method arguments.
+// does not change the arguments of controls, parsers, packages, and methods.
 // Should be run after CopyStructures, EliminateTuples, and
 // MoveInitializers.
 
