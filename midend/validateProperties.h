@@ -31,6 +31,7 @@ class ValidateTableProperties : public Inspector {
         legalProperties.emplace("actions");
         legalProperties.emplace("default_action");
         legalProperties.emplace("key");
+        legalProperties.emplace("entries");
         for (auto l : legal)
             legalProperties.emplace(l);
     }
