@@ -147,15 +147,17 @@ autotools.
   - XFAIL tests are tolerated only transiently - these indicate known
   unfixed bugs in the compiler.
 
-* To run a subset of tests execute `make check-PATTERN`.  E.g., `make
-  check-p4`.
+* To run a subset of tests execute `make check T='-k PATTERN'`.  E.g., `make
+  check T='-k bmv2'` or `make check T='-k foo.p4'`.
 
 * To rerun the tests that failed last time run `make recheck -j3`
 
-* Add unit tests in `test/unittests`
+* Add unit tests in `tests`
 
 * Code for running various compiler back-ends on p4 files is generated
   using a simple python script `tools/gen-tests.py`.
+
+* See make check-help for more options
 
 ## Coding conventions
 
