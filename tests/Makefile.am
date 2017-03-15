@@ -24,19 +24,19 @@ EXTRA_FLAGS=$T
 endif
 
 # allow -jN, but ignore -j, as -j uses all cores in testsuite
-check-local: atconfig $(TESTSUITE) $(TESTSUITE_AT)
-	'$(TESTSUITE)' -C tests $(TESTSUITEFLAGS) \
+check-local: $(TESTSUITE) $(TESTSUITE_AT)
+	$(TESTSUITE) -C tests $(TESTSUITEFLAGS) \
 		$(filter-out -j,$(filter -j%,$(MAKEFLAGS))) \
 		$(EXTRA_FLAGS); \
 	"$$@" || (test X'$(RECHECK)' = Xyes && "$$@" --recheck)
 
 # helper function rules
 recheck:
-	set $(SHELL) '$(TESTSUITE)' -C tests --recheck;
+	$(TESTSUITE) -C tests --recheck;
 
 check-help:
-	@echo "make check-local            : run all the tests"
-	@echo "make check-local T=[OPTION] : run with extra options"
+	@echo "make check                  : run all the tests"
+	@echo "make check T=[OPTION]       : run with extra options"
 	@echo "  OPTIONS:"
 	@echo "  -l, --list              describe all the tests, or the selected TESTS"
 	@echo "  -k, --keywords=KEYWORDS "

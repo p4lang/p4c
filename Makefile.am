@@ -148,13 +148,3 @@ etags:
 	    backends extensions frontends ir lib tools midend
 	cd $(srcdir)/tools/ir-generator; ctags -e -R --langmap=Flex:+.l,YACC:+.ypp \
 	    . ../../lib
-
-subdir = tests
-
-atconfig: $(top_builddir)/config.status
-	cd $(top_builddir) && \
-		$(SHELL) ./config.status $(subdir)/$@
-
-atlocal: $(srcdir)/atlocal.in $(top_builddir)/config.status
-	cd $(top_builddir) && \
-		$(SHELL) ./config.status $(subdir)/$@
