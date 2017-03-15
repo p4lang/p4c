@@ -24,7 +24,7 @@ EXTRA_FLAGS=$T
 endif
 
 # allow -jN, but ignore -j, as -j uses all cores in testsuite
-check-local: $(TESTSUITE) $(TESTSUITE_AT)
+check-local: $(BUILT_SOURCES) all-am $(TESTSUITE) $(TESTSUITE_AT)
 	$(TESTSUITE) -C tests $(TESTSUITEFLAGS) \
 		$(filter-out -j,$(filter -j%,$(MAKEFLAGS))) \
 		$(EXTRA_FLAGS); \
@@ -53,13 +53,13 @@ check-help:
 	@echo "make check-ebpf             : run all ebpf tests"
 
 check-bmv2:
-	+$(MAKE) check-local TESTSUITEFLAGS='-k bmv2 $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
+	+$(MAKE) check TESTSUITEFLAGS='-k bmv2 $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
 
 check-frontend:
-	+$(MAKE) check-local TESTSUITEFLAGS='-k frontend $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
+	+$(MAKE) check TESTSUITEFLAGS='-k frontend $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
 
 check-ebpf:
-	+$(MAKE) check-local TESTSUITEFLAGS='-k ebpf $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
+	+$(MAKE) check TESTSUITEFLAGS='-k ebpf $(TESTSUITEFLAGS) $(EXTRA_FLAGS)'
 
 clean-local:
 	@test ! -f $(TESTSUITE) || $(SHELL) $(TESTSUITE) --clean
