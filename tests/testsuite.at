@@ -19,6 +19,8 @@ m4_define([BMV2_TEST_RUN],
 [
  AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1)
+ AT_KEYWORDS($6)
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
@@ -39,6 +41,8 @@ m4_define([EBPF_TEST_RUN],
 [
  AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1)
+ AT_KEYWORDS($6)
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
@@ -59,6 +63,8 @@ m4_define([FRONTEND_TEST_RUN],
 [
  AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1)
+ AT_KEYWORDS($6)
  AT_CHECK([
   cd $abs_top_srcdir/build
   mkdir -p $1/$5
@@ -78,6 +84,8 @@ dnl unit test runner for c++ features
 m4_define([CPP_TEST_RUN],
 [AT_SETUP([$1/$2])
  AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1)
+ AT_KEYWORDS($6)
  AT_CHECK([p4ctest $3], [0], [stdout], [stderr])
  AT_CLEANUP]
 )
@@ -118,8 +126,8 @@ m4_define([P4TEST_RUN],
      dnl m4_set_contains([xfail_cases], signature, [m4_errprintn("yes")], [m4_errprintn("no")])
      m4_set_contains([xfail_cases], signature,
      dnl m4_errprintn(m4_join(/,removeQuote(m4_cdr(pathname))))
-     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xfail], [$2])],
-     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xpass], [$2])])
+     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xfail], [$2], [filename])],
+     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xpass], [$2], [filename])])
 
      m4_popdef([pathname])
      m4_popdef([filename])

@@ -24,7 +24,7 @@ EXTRA_FLAGS=$T
 endif
 
 check-local: atconfig $(TESTSUITE) $(TESTSUITE_AT)
-	set $(SHELL) '$(TESTSUITE)' -C tests $(TESTSUITEFLAGS) \
+	'$(TESTSUITE)' -C tests $(TESTSUITEFLAGS) \
 		$(filter -j%,$(MAKEFLAGS)) \
 		$(EXTRA_FLAGS); \
 	"$$@" || (test X'$(RECHECK)' = Xyes && "$$@" --recheck)
