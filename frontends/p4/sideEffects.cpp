@@ -317,10 +317,10 @@ class DismantleExpression : public Transform {
 
         // action and table calls can have side-effects even through
         // non-arguments, so we always use copy-in/copy-out for arguments.
-        if (desc->instance->is<ActionCall>())
+        if (desc.instance->is<ActionCall>())
             useTemporaries = true;
-        else if (desc->instance->isApply() &&
-                 desc->instance->to<ApplyMethod>()->isTableApply())
+        else if (desc.instance->isApply() &&
+                 desc.instance->to<ApplyMethod>()->isTableApply())
             useTemporaries = true;
         else if (mce->arguments->size() > 1) {
             for (auto a : *mce->arguments) {

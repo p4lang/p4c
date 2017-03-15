@@ -2260,7 +2260,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             auto json = new Util::JsonObject();
             json->emplace("name", f->externalName());
             json->emplace("id", nextId("headers"));
-            json->emplace("header_type", ft->to<IR::Type_StructLike>()->name.name);
+            json->emplace("header_type", ft->to<IR::Type_StructLike>()->externalName());
             json->emplace("metadata", meta);
             headerInstances->append(json);
         } else if (ft->is<IR::Type_Stack>()) {
