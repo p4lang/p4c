@@ -84,6 +84,25 @@ class Local(object):
     # object to hold local vars accessable to nested functions
     pass
 
+def FindExe(dirname, exe):
+    dir = os.getcwd()
+    while len(dir) > 1:
+        if os.path.isdir(os.path.join(dir, dirname)):
+            rv = None
+            rv_time = 0
+            for dName, sdName, fList in os.walk(os.path.join(dir, dirname)):
+                if exe in fList:
+                    n=os.path.join(dName, exe)
+                    if os.path.isfile(n) and os.access(n, os.X_OK):
+                        n_time = os.path.getmtime(n)
+                        if n_time > rv_time:
+                            rv = n
+                            rv_time = n_time
+            if rv is not None:
+                return rv
+        dir = os.path.dirname(dir)
+    return exe
+
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
         print("Executing ", " ".join(args))
@@ -473,7 +492,8 @@ class RunBMV2(object):
         thriftPort = str(9090 + rand)
 
         try:
-            runswitch = ["simple_switch", "--log-file", self.switchLogFile, "--log-flush",
+            runswitch = [FindExe("behavioral-model", "simple_switch"),
+                         "--log-file", self.switchLogFile, "--log-flush",
                          "--use-files", str(wait), "--thrift-port", thriftPort,
                          "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
             if self.options.verbose:
@@ -499,7 +519,7 @@ class RunBMV2(object):
                 # need to wait if there are none
                 time.sleep(0.5)
 
-            runcli = ["simple_switch_CLI", "--thrift-port", thriftPort]
+            runcli = [FindExe("behavioral-model", "simple_switch_CLI"), "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
             cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
