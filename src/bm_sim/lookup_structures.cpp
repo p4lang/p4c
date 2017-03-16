@@ -160,8 +160,7 @@ class TernaryCache {
     auto it = cache.find(key_data);
     if (it != cache.end()) {
       *handle = it->second->handle;
-      // move to head, without any copies
-      entries.splice(entries.begin(), entries, it->second);
+      move_to_head(it);
       return true;
     }
     return false;
@@ -201,13 +200,39 @@ class TernaryCache {
   };
 
   std::list<CacheEntry> entries{};
+
+// I believe that g++-4.8 does not implement std::list correctly (according to
+// the C++11 standard): erase does not accept a const_iterator and splice is not
+// implemented properly (see below).
+#if defined(__clang__) || __GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ > 8)
   using entries_iterator = typename decltype(entries)::const_iterator;
+#else
+  using entries_iterator = typename decltype(entries)::iterator;
+#endif
 
   // should we avoid the 2 copies of the key by using a pointer in the map and
   // defining custom hash and eq
   std::unordered_map<ByteContainer, entries_iterator, ByteContainerKeyHash>
   cache{};
   mutable std::mutex mutex{};
+
+  // this is more complicated that it needs to be because of buggy g++-4.8
+  void move_to_head(typename decltype(cache)::iterator map_it) {
+#if defined(__clang__) || __GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ > 8)
+    // move to head, without any copies
+    entries.splice(entries.begin(), entries, map_it->second);
+#else
+    // Apparently g++-4.8 does not implement std::list::splice properly, but
+    // implements it in the C++03 way, which does not require splice to keep all
+    // iterators valid (unlike C++11).
+    auto it = map_it->second;
+    entries.push_front(*it);
+    entries.erase(it);
+    // need to update the iterator in the cache unlike with splice where the
+    // iterator is preserved
+    map_it->second = entries.begin();
+#endif
+  }
 };
 
 bool operator==(const TernaryMatchKey &k1, const TernaryMatchKey &k2) {
