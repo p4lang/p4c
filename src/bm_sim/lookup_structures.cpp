@@ -27,6 +27,8 @@
 #include <vector>
 #include <tuple>
 #include <limits>
+#include <list>
+#include <mutex>
 
 #include "lpm_trie.h"
 
@@ -140,6 +142,74 @@ class ExactMap : public ExactLookupStructure {
     entries_map{};
 };
 
+template <size_t S = 64>
+class TernaryCache {
+ public:
+  TernaryCache() {
+    cache.reserve(S);
+  }
+
+  TernaryCache(const TernaryCache& other) = delete;
+  TernaryCache &operator =(const TernaryCache& other) = delete;
+
+  TernaryCache(TernaryCache&& other)= delete;
+  TernaryCache &operator =(TernaryCache &&other) = delete;
+
+  bool lookup(const ByteContainer &key_data, internal_handle_t *handle) {
+    std::unique_lock<std::mutex> lock(mutex);
+    auto it = cache.find(key_data);
+    if (it != cache.end()) {
+      *handle = it->second->handle;
+      // move to head, without any copies
+      entries.splice(entries.begin(), entries, it->second);
+      return true;
+    }
+    return false;
+  }
+
+  bool add(const ByteContainer &key_data, internal_handle_t handle) {
+    std::unique_lock<std::mutex> lock(mutex);
+    auto it = cache.find(key_data);
+    if (it != cache.end()) return false;
+    if (cache.size() == S) {  // cache is full
+      auto evict = entries.back();
+      assert(cache.erase(evict.key) == 1);
+      entries.pop_back();
+    }
+    entries.emplace_front(handle, key_data);
+    cache.emplace(key_data, entries.begin());
+    return true;
+  }
+
+  // we are being very conservative and invalidating the whole cache every time
+  // the table is modified
+  void invalidate_all() {
+    // this lock may not be strictly needed here, since this method is only
+    // called for table operations involving the write lock
+    std::unique_lock<std::mutex> lock(mutex);
+    cache.clear();
+    entries.clear();
+  }
+
+ private:
+  struct CacheEntry {
+    CacheEntry(internal_handle_t handle, const ByteContainer &key)
+        : handle(handle), key(key) { }
+
+    internal_handle_t handle;
+    ByteContainer key;
+  };
+
+  std::list<CacheEntry> entries{};
+  using entries_iterator = typename decltype(entries)::const_iterator;
+
+  // should we avoid the 2 copies of the key by using a pointer in the map and
+  // defining custom hash and eq
+  std::unordered_map<ByteContainer, entries_iterator, ByteContainerKeyHash>
+  cache{};
+  mutable std::mutex mutex{};
+};
+
 bool operator==(const TernaryMatchKey &k1, const TernaryMatchKey &k2) {
   return (k1.data == k2.data && k1.mask == k2.mask);
 }
@@ -153,12 +223,17 @@ bool operator==(const RangeMatchKey &k1, const RangeMatchKey &k2) {
 template <typename K>
 class EntryList {
  public:
-  explicit EntryList(size_t size)
-      : entries(size) {}
+  EntryList(size_t size, bool enable_cache)
+      : entries(size), enable_cache(enable_cache) { }
 
   template <typename Compare>
   bool lookup(const ByteContainer &key_data, internal_handle_t *handle,
               Compare cmp) const {
+    if (cache_activated()) {
+      auto in_cache = cache.lookup(key_data, handle);
+      if (in_cache) return true;
+    }
+
     auto min_priority =
         std::numeric_limits<decltype(TernaryMatchKey::priority)>::max();
 
@@ -177,6 +252,7 @@ class EntryList {
 
     if (min_entry) {
       *handle = min_handle;
+      if (cache_activated()) cache.add(key_data, min_handle);
       return true;
     }
 
@@ -216,6 +292,9 @@ class EntryList {
       prev_entry.next = &entry;
       if (entry.next) entry.next->prev = &entry;
     }
+    entries_count++;
+    if (cache_activated()) cache.invalidate_all();
+    update_use_cache();
   }
 
   void delete_entry(const K &key) {
@@ -226,10 +305,16 @@ class EntryList {
     else
       head = entry->next;
     if (entry->next) entry->next->prev = entry->prev;
+    entries_count--;
+    if (cache_activated()) cache.invalidate_all();
+    update_use_cache();
   }
 
   void clear() {
     head = nullptr;
+    cache.invalidate_all();
+    entries_count = 0;
+    update_use_cache();
   }
 
  private:
@@ -242,6 +327,13 @@ class EntryList {
 
   Entry *head{nullptr};
   std::vector<Entry> entries;
+  size_t entries_count{0};
+
+  bool enable_cache;
+  bool use_cache{false};
+  mutable TernaryCache<> cache{};
+
+  static constexpr size_t cache_activation_min_entries = 16;
 
   internal_handle_t handle_from_entry(const Entry *entry) const {
     // a bit sad that this cast is needed, almost makes me want to do the
@@ -256,12 +348,20 @@ class EntryList {
     }
     return nullptr;
   }
+
+  bool cache_activated() const {
+    return use_cache;
+  }
+
+  void update_use_cache() {
+    use_cache = enable_cache && (entries_count >= cache_activation_min_entries);
+  }
 };
 
 class TernaryMap : public TernaryLookupStructure {
  public:
-  TernaryMap(size_t size, size_t nbytes_key)
-      : entry_list(size), nbytes_key(nbytes_key) {}
+  TernaryMap(size_t size, size_t nbytes_key, bool enable_cache = true)
+      : entry_list(size, enable_cache), nbytes_key(nbytes_key) {}
 
   bool lookup(const ByteContainer &key_data,
               internal_handle_t *handle) const override {
@@ -305,8 +405,8 @@ class TernaryMap : public TernaryLookupStructure {
 
 class RangeMap : public RangeLookupStructure {
  public:
-  RangeMap(size_t size, size_t nbytes_key)
-      : entry_list(size), nbytes_key(nbytes_key) {}
+  RangeMap(size_t size, size_t nbytes_key, bool enable_cache = true)
+      : entry_list(size, enable_cache), nbytes_key(nbytes_key) {}
 
   bool lookup(const ByteContainer &key_data,
               internal_handle_t *handle) const override {
@@ -362,6 +462,9 @@ class RangeMap : public RangeLookupStructure {
 
 }  // namespace
 
+LookupStructureFactory::LookupStructureFactory(bool enable_ternary_cache)
+    : enable_ternary_cache(enable_ternary_cache) { }
+
 template <>
 std::unique_ptr<LookupStructure<ExactMatchKey> >
 LookupStructureFactory::create<ExactMatchKey>(
@@ -405,13 +508,14 @@ LookupStructureFactory::create_for_LPM(size_t size, size_t nbytes_key) {
 
 std::unique_ptr<TernaryLookupStructure>
 LookupStructureFactory::create_for_ternary(size_t size, size_t nbytes_key) {
-  return std::unique_ptr<TernaryLookupStructure>(new TernaryMap(size,
-                                                                nbytes_key));
+  return std::unique_ptr<TernaryLookupStructure>(
+      new TernaryMap(size, nbytes_key, enable_ternary_cache));
 }
 
 std::unique_ptr<RangeLookupStructure>
 LookupStructureFactory::create_for_range(size_t size, size_t nbytes_key) {
-  return std::unique_ptr<RangeLookupStructure>(new RangeMap(size, nbytes_key));
+  return std::unique_ptr<RangeLookupStructure>(
+      new RangeMap(size, nbytes_key, enable_ternary_cache));
 }
 
 }  // namespace bm

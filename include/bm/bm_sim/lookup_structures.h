@@ -164,6 +164,8 @@ using RangeLookupStructure = LookupStructure<RangeMatchKey>;
 //! data structure.
 class LookupStructureFactory {
  public:
+  explicit LookupStructureFactory(bool enable_ternary_cache = true);
+
   virtual ~LookupStructureFactory() = default;
 
   //! This is a utility to call the correct `create_for_<type>` function based
@@ -188,6 +190,9 @@ class LookupStructureFactory {
   //! Create a lookup structure for range macthes
   virtual std::unique_ptr<RangeLookupStructure>
   create_for_range(size_t size, size_t nbytes_key);
+
+ private:
+  bool enable_ternary_cache;
 };
 
 

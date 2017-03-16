@@ -3043,3 +3043,185 @@ TEST_F(TableRangeMatch, TwoRanges) {
   check_one(1, 1, false);
   // TODO(antonin): more checks?
 }
+
+
+namespace {
+
+class MaskBitBuilder {
+ public:
+  MaskBitBuilder(size_t nbytes)
+      : bits_(nbytes, '\0') { }
+
+  void append_one(bool bit) {
+    int offset = nbits_ % 8;
+    if (bit) bits_[nbits_ / 8] |= (1 << (7 - offset));
+    nbits_ += 1;
+  }
+
+  const std::string &bytes() const { return bits_; }
+
+ private:
+  std::string bits_{};
+  int nbits_{0};
+};
+
+}  // namespace
+
+class TableTernaryCache : public ::testing::Test {
+ protected:
+  static constexpr size_t t_size = 1024u;
+
+  PHVFactory phv_factory;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader{0};
+  ActionFn action_fn;
+
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  TableTernaryCache()
+      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
+    testHeaderType.push_back_field("f128", 128);
+    phv_factory.push_back_header("testHdr", testHeader, testHeaderType);
+  }
+
+  Packet get_pkt(const std::string &binary_str) {
+    // dummy packet, won't be parsed
+    Packet packet = Packet::make_new(128, PacketBuffer(256), phv_source.get());
+    auto phv = packet.get_phv();
+    auto &hdr = phv->get_header(testHeader);
+    hdr.mark_valid();
+    hdr.get_field(0).set(binary_str.data(), binary_str.size());  // f128
+    return packet;
+  }
+
+  std::unique_ptr<MatchTable> create_table(LookupStructureFactory *factory) {
+    MatchKeyBuilder key_builder;
+    key_builder.push_back_field(testHeader, 0, 128,
+                                MatchKeyParam::Type::TERNARY);
+    std::unique_ptr<MUTernary> match_unit(
+        new MUTernary(t_size, key_builder, factory));
+
+    std::unique_ptr<MatchTable> table(
+        new MatchTable("test_table", 0, std::move(match_unit), false));
+    table->set_next_node(0, nullptr);
+    return table;
+  }
+
+  MatchErrorCode add_entry(MatchTable *table,
+                           const std::string &binary_key,
+                           const std::string &binary_mask,
+                           int priority, entry_handle_t *h) {
+    std::vector<MatchKeyParam> match_key;
+    match_key.emplace_back(MatchKeyParam::Type::TERNARY, binary_key,
+                           binary_mask);
+    return table->add_entry(match_key, &action_fn, ActionData(), h, priority);
+  }
+
+  // add entries of the form binary_key && 11111...0000
+  // for a key of 128 bits, there are 128 such enties
+  // the last entry has the lowest prioiry value (1), which translates into the
+  // highest priority for lookup; its handle is returned
+  void add_base_entries(MatchTable *table, const std::string &binary_key,
+                        entry_handle_t *last_handle) {
+    // cache is activated if more than 16 entries in table
+    size_t num_entries_to_add = binary_key.size() * 8;
+    MaskBitBuilder mask_builder(binary_key.size());
+    for (size_t i = 0; i < num_entries_to_add; i++) {
+      int priority = num_entries_to_add - i;
+      mask_builder.append_one(true);
+      auto rc = add_entry(table, binary_key, mask_builder.bytes(), priority,
+                          last_handle);
+      ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+    }
+  }
+
+  void lookup(MatchTable *table, const std::string &binary_key,
+              entry_handle_t *lookup_handle) {
+    bool hit;
+    auto pkt = get_pkt(binary_key);
+    table->lookup(pkt, &hit, lookup_handle);
+    ASSERT_TRUE(hit);
+  }
+
+  void run_test(bool enable_cache, size_t num_packets) {
+    LookupStructureFactory factory(enable_cache);
+    auto table = create_table(&factory);
+
+    constexpr size_t nbytes = 128 / 8;
+    const std::string binary_key(nbytes, '\xff');
+    entry_handle_t h;
+    add_base_entries(table.get(), binary_key, &h);
+
+    for (size_t i = 0; i < num_packets; i++) {
+      entry_handle_t lookup_handle;
+      lookup(table.get(), binary_key, &lookup_handle);
+      ASSERT_EQ(h, lookup_handle);
+    }
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+  }
+
+  // virtual void TearDown() { }
+};
+
+TEST_F(TableTernaryCache, LookupWithCache) {
+  run_test(true  /* with cache */, 1);
+}
+
+TEST_F(TableTernaryCache, LookupWithoutCache) {
+  run_test(false  /* without cache */, 1);
+}
+
+TEST_F(TableTernaryCache, LookupCmp) {
+  auto run = [this](bool enable_cache) {
+    using clock = std::chrono::high_resolution_clock;
+    using std::chrono::milliseconds;
+    using std::chrono::duration_cast;
+
+    auto tp1 = clock::now();
+    run_test(enable_cache, 1000);
+    auto tp2 = clock::now();
+    return duration_cast<milliseconds>(tp2 - tp1).count();
+  };
+
+  auto time_with = run(true);
+  auto time_without = run(false);
+
+  if (!WITH_VALGRIND) {
+    // on my machine, compiling with O0, time_with = 10ms, time_without = 60ms
+    EXPECT_LT(time_with, time_without);
+  }
+}
+
+// test cache correctness when an entry is added then removed
+TEST_F(TableTernaryCache, CacheUpdate) {
+    LookupStructureFactory factory(true  /* with cache */);
+    auto table = create_table(&factory);
+
+    constexpr size_t nbytes = 128 / 8;
+    const std::string binary_key(nbytes, '\xff');
+    entry_handle_t h;
+    add_base_entries(table.get(), binary_key, &h);
+
+    entry_handle_t lookup_handle;
+    lookup(table.get(), binary_key, &lookup_handle);  // cache hit
+    ASSERT_EQ(h, lookup_handle);
+
+    // add a new entry, check that it is being hit
+    entry_handle_t new_h;
+    // priority 0 is lower than all the other ones in the table
+    ASSERT_EQ(MatchErrorCode::SUCCESS,
+              add_entry(table.get(), binary_key, binary_key, 0, &new_h));
+    ASSERT_NE(h, new_h);
+    lookup(table.get(), binary_key, &lookup_handle);
+    ASSERT_EQ(new_h, lookup_handle);
+
+    // remove new entry, check that old entry is used again
+    ASSERT_EQ(MatchErrorCode::SUCCESS, table->delete_entry(new_h));
+    lookup(table.get(), binary_key, &lookup_handle);
+    ASSERT_EQ(h, lookup_handle);
+}
