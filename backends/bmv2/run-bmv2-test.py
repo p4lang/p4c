@@ -111,16 +111,6 @@ def usage(options):
     print("          -f: replace reference outputs with newly generated ones")
     print("          -observation-log <file>: save packet output to <file>")
 
-def ByteToHex(byteStr):
-    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
-
-def HexToByte(hexStr):
-    bytes = []
-    hexStr = ''.join( hexStr.split(" ") )
-    for i in range(0, len(hexStr), 2):
-        bytes.append( chr( int (hexStr[i:i+2], 16 ) ) )
-    return ''.join( bytes )
-
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
@@ -159,84 +149,6 @@ def run_timeout(options, args, timeout, stderr):
     return local.process.returncode
 
 timeout = 10 * 60
-
-def compare_files(options, produced, expected):
-    if options.replace:
-        if options.verbose:
-            print("Saving new version of ", expected)
-        shutil.copy2(produced, expected)
-        return SUCCESS
-
-    if options.verbose:
-        print("Comparing", produced, "and", expected)
-    diff = difflib.Differ().compare(open(produced).readlines(), open(expected).readlines())
-    result = SUCCESS
-
-    marker = re.compile("\?[ \t\+]*");
-    ignoreNextMarker = False
-    message = ""
-    for l in diff:
-        if l.startswith("- #include") or l.startswith("+ #include"):
-            # These can differ because the paths change
-            ignoreNextMarker = True
-            continue
-        if ignoreNextMarker:
-            ignoreNextMarker = False
-            if marker.match(l):
-                continue
-        if l[0] == ' ': continue
-        result = FAILURE
-        message += l
-
-    if message is not "":
-        print("Files ", produced, " and ", expected, " differ:", file=sys.stderr)
-        print(message, file=sys.stderr)
-
-    return result
-
-class ConcurrentInteger(object):
-    # Generates exclusive integers in a range 0-max
-    # in a way which is safe across multiple processes.
-    # It uses a simple form of locking using folder names.
-    # This is necessary because this script may be invoked
-    # concurrently many times by make, and we need the many simulator instances
-    # to use different port numbers.
-    def __init__(self, folder, max):
-        self.folder = folder
-        self.max = max
-    def lockName(self, value):
-        return "lock_" + str(value)
-    def release(self, value):
-        os.rmdir(self.lockName(value))
-    def generate(self):
-        # try 10 times
-        for i in range(0, 10):
-            index = random.randint(0, self.max)
-            file = self.lockName(index)
-            try:
-                os.makedirs(file)
-                return index
-            except:
-                time.sleep(1)
-                continue
-        return None
-
-def check_generated_files(options, tmpdir, expecteddir):
-    files = os.listdir(tmpdir)
-    for file in files:
-        if options.verbose:
-            print("Checking", file)
-        produced = tmpdir + "/" + file
-        expected = expecteddir + "/" + file
-        if not os.path.isfile(expected):
-            if options.verbose:
-                print("Expected file does not exist; creating", expected)
-            shutil.copy2(produced, expected)
-        else:
-            result = compare_files(options, produced, expected)
-            if result != SUCCESS:
-                return result
-    return SUCCESS
 
 def run_model(options, tmpdir, jsonfile):
     if not options.hasBMv2:
@@ -309,12 +221,6 @@ def process_file(options, argv):
             print("Removing", tmpdir)
         shutil.rmtree(tmpdir)
     return result
-
-def isdir(path):
-    try:
-        return stat.S_ISDIR(os.stat(path).st_mode)
-    except OSError:
-        return False;
 
 ######################### main
 
