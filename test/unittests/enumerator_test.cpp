@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ limitations under the License.
 
 #include <functional>
 
-#include "../lib/enumerator.h"
-#include "p4ctest.h"
+#include "../../lib/enumerator.h"
+#include "test.h"
 
 using namespace Util;
 
@@ -238,9 +238,8 @@ class TestEnumerator : public TestBase {
 };
 }  // namespace Test
 
-static void test_enumerator_main(int, char* []) {
+int main(int, char* []) {
     Test::TestEnumerator test;
-    test.run();
+    return test.run();
 }
 
-P4CTEST_REGISTER("test-enumerator", test_enumerator_main);

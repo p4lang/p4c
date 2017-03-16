@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "lib/path.h"
-#include "lib/exceptions.h"
-#include "lib/stringref.h"
-#include "p4ctest.h"
+#include "../../lib/path.h"
+#include "../../lib/exceptions.h"
+#include "../../lib/stringref.h"
+#include "test.h"
 
 using namespace Util;
 
@@ -99,9 +99,7 @@ class TestPath : public TestBase {
 }  // namespace Test
 
 
-static void test_path_main(int, char* []) {
+int main(int, char* []) {
     Test::TestPath test;
-    test.run();
+    return test.run();
 }
-
-P4CTEST_REGISTER("test-path", test_path_main);

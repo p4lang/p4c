@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "frontends/p4/callGraph.h"
-#include "p4ctest.h"
+#include "test.h"
+#include "../../frontends/p4/callGraph.h"
 
 namespace Test {
 
@@ -168,9 +168,7 @@ class TestCallGraph : public TestBase {
 
 }  // namespace Test
 
-static void test_call_graph_main(int, char*[]) {
+int main() {
     Test::TestCallGraph test;
-    test.run();
+    return test.run();
 }
-
-P4CTEST_REGISTER("test-call-graph", test_call_graph_main);
