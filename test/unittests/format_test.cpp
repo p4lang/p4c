@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "lib/error.h"
-#include "lib/cstring.h"
-#include "lib/stringify.h"
-#include "p4ctest.h"
+#include "../../lib/error.h"
+#include "../../lib/cstring.h"
+#include "../../lib/stringify.h"
+#include "test.h"
 
 using namespace Util;
 
@@ -72,9 +72,8 @@ class TestFormat : public TestBase {
 };
 }  // namespace Test
 
-static void test_format_main(int , char* []) {
+int main(int /*argc*/, char* /*argv*/[]) {
     Test::TestFormat test;
-    test.run();
+    return test.run();
 }
 
-P4CTEST_REGISTER("test-format", test_format_main);

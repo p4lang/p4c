@@ -25,7 +25,7 @@
 #   they are expected to be symlinks to custom back-ends.)
 
 resultMakefile="otherMakefiles.am"
-dirsToSearch="backends extensions testdata"
+dirsToSearch="backends extensions"
 
 echo "Creating $resultMakefile"
 

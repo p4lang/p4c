@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <assert.h>
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "p4ctest.h"
+#include <assert.h>
+#include <unordered_set>
+#include <iostream>
 
 static IR::Constant *c1;
 
@@ -29,11 +30,16 @@ class TestTrans : public Transform {
     }
 };
 
-static void test_transform_main(int, char*[]) {
+int main() {
     c1 = new IR::Constant(2);
-    IR::Expression *e = new IR::Add(Util::SourceInfo(), c1, c1);
-    auto *n = e->apply(TestTrans());
-    assert(n == e);
+    IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c1, c1);
+    std::stringstream ss, ss2;
+    JSONGenerator(ss) << e1 << std::endl;
+    std::cout << ss.str();
+    JSONLoader loader(ss);
+    std::cout << loader.json;
+    const IR::Node* e2 = nullptr;
+    loader >> e2;
+    JSONGenerator(std::cout) << e2 << std::endl;
+    
 }
-
-P4CTEST_REGISTER("test-transform", test_transform_main);

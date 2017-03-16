@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,37 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "../lib/default.h"
-#include "p4ctest.h"
+#include "../../lib/exceptions.h"
+#include "test.h"
 
 using namespace Util;
 
-static int num_tests = 0;
-
 namespace Test {
-class A {
- public:
-    int x;
-    A() : x(5) {}
-};
-
-class TestDefault : public TestBase {
+class TestException : public TestBase {
  public:
     int run() {
-        char* t = Default<char*>();
-        ASSERT_EQ(t, (char*)nullptr);
+        try {
+            throw CompilerBug("test");
+        }
+        catch (std::exception &ex) {
+            cstring err(ex.what());
+            ASSERT_EQ(err, "COMPILER BUG:\ntest\n");
+        }
 
-        A a = Default<A>();
-        ASSERT_EQ(a.x, 5);
+        try {
+            throw CompilationError("Testing error %1%", 1);
+        }
+        catch (std::exception &ex) {
+            cstring err(ex.what());
+            ASSERT_EQ(err, "Testing error 1\n");
+        }
 
         return SUCCESS;
     }
 };
 }  // namespace Test
 
-static void test_default_main(int, char* []) {
-    Test::TestDefault test;
-    test.run();
+int main(int /* argc*/, char* /*argv*/[]) {
+    Test::TestException test;
+    return test.run();
 }
-
-P4CTEST_REGISTER("test-default", test_default_main);
