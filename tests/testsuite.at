@@ -1,0 +1,143 @@
+dnl Copyright 2013-present Barefoot Networks, Inc. 
+dnl
+dnl Licensed under the Apache License, Version 2.0 (the "License");
+dnl you may not use this file except in compliance with the License.
+dnl You may obtain a copy of the License at
+dnl
+dnl     http://www.apache.org/licenses/LICENSE-2.0
+dnl
+dnl Unless required by applicable law or agreed to in writing, software
+dnl distributed under the License is distributed on an "AS IS" BASIS,
+dnl WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+dnl See the License for the specific language governing permissions and
+dnl limitations under the License.
+
+AT_INIT
+
+dnl unit test runner based on bmv2
+m4_define([BMV2_TEST_RUN],
+[
+ AT_SETUP([$1/$2])
+ AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1) dnl target
+ AT_KEYWORDS($6) dnl filename
+ AT_CHECK([
+  cd $abs_top_srcdir/build
+  mkdir -p $1/$5
+  echo "cd $abs_top_srcdir/build" > $1/$2.test
+  echo "../backends/bmv2/run-bmv2-test.py .. \${*} ../$2" >> $1/$2.test
+  chmod +x $1/$2.test
+  ../backends/bmv2/run-bmv2-test.py .. $3
+  ],
+  [0],
+  [stdout],
+  [stderr])
+  AT_CLEANUP
+]
+)
+
+dnl unit test runner based on ebpf
+m4_define([EBPF_TEST_RUN],
+[
+ AT_SETUP([$1/$2])
+ AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1) dnl target
+ AT_KEYWORDS($6) dnl filename
+ AT_CHECK([
+  cd $abs_top_srcdir/build
+  mkdir -p $1/$5
+  echo "cd $abs_top_srcdir/build" > $1/$2.test
+  echo "../backends/ebpf/run-ebpf-sample.py .. \${*} ../$2" >> $1/$2.test
+  chmod +x $1/$2.test
+  ../backends/ebpf/run-ebpf-sample.py .. $3
+  ],
+  [0],
+  [stdout],
+  [stderr])
+  AT_CLEANUP
+]
+)
+
+dnl unit test runner based on p4test
+m4_define([FRONTEND_TEST_RUN],
+[
+ AT_SETUP([$1/$2])
+ AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1) dnl target
+ AT_KEYWORDS($6) dnl filename
+ AT_CHECK([
+  cd $abs_top_srcdir/build
+  mkdir -p $1/$5
+  echo "cd $abs_top_srcdir/build" > $1/$2.test
+  echo "../backends/p4test/run-p4-sample.py .. \${*} ../$2" >> $1/$2.test
+  chmod +x $1/$2.test
+  ../backends/p4test/run-p4-sample.py .. $3
+  ],
+  [0],
+  [stdout],
+  [stderr])
+  AT_CLEANUP
+]
+)
+
+dnl unit test runner for c++ features
+m4_define([CPP_TEST_RUN],
+[AT_SETUP([$1/$2])
+ AT_XFAIL_IF([ test "$4" = "xfail" ])
+ AT_KEYWORDS($1)
+ AT_KEYWORDS($6)
+ AT_CHECK([p4ctest $3], [0], [stdout], [stderr])
+ AT_CLEANUP]
+)
+
+m4_define(removeQuote,[$1])
+
+dnl Use 'find' utility to determine which p4 program to run
+dnl e.g. find ../testdata/p4_14_samples  -type d -name "switch_*"  -prune -o -name "*.p4" -print
+dnl    will print p4 files except the ones in directory "switch_*"
+dnl $1 is target platform: bmv2, p4test
+dnl $2 is test case directory.
+dnl $3 is pattern to search, could be widecard or a specific p4 program.
+dnl $4 is routine to run a p4 test, typically python programs.
+dnl $5 is path to a file storing xfail test cases
+m4_define([P4TEST_RUN],
+[
+ dnl find all test cases in specific directory with search depth 1
+ m4_set_add_all([test_programs],
+                m4_split(m4_normalize(m4_esyscmd_s([sh -c "find ../$2 -maxdepth 1 -name $3 -print | sort"]))))
+ dnl there is a file $5 containing a list of all xfail cases
+ m4_foreach([xfail_case],
+    dnl read file and filter out comments ^# and empty line ^$
+    m4_split(m4_normalize(m4_esyscmd_s([sh -c "cat $5 | grep ^[^#^$]"]))),
+    [m4_set_add([xfail_cases], xfail_case, [], [])]
+ )
+ dnl m4_set_contains([xfail_cases], tofino:07-MacAddrCheck.p4, [m4_errprintn("yes")], [m4_errprintn("no")])
+ dnl m4_errprintn(m4_set_size([xfail_cases]))
+ dnl m4_errprintn(m4_set_dump(xfail_cases,[~]))
+ dnl execute on all test programs
+ m4_foreach([file], m4_set_dump([test_programs]),
+    [dnl m4_errprintn(file)
+     m4_pushdef([pathname], m4_split(file,/))
+     m4_pushdef([filename], m4_car(m4_reverse(pathname)))
+     dnl signature of a test case is : "target/pathname"
+     m4_pushdef([signature], m4_join(/, [$1], m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))))
+     dnl m4_errprintn(signature)
+
+     dnl m4_set_contains([xfail_cases], signature, [m4_errprintn("yes")], [m4_errprintn("no")])
+     m4_set_contains([xfail_cases], signature,
+     dnl m4_errprintn(m4_join(/,removeQuote(m4_cdr(pathname))))
+     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xfail], [$2], [filename])],
+     [$4([$1], [m4_flatten(m4_join(/, removeQuote(m4_cdr(pathname))))], [file], [xpass], [$2], [filename])])
+
+     m4_popdef([pathname])
+     m4_popdef([filename])
+     m4_popdef([signature])
+    ])
+])
+
+m4_ifdef([AT_COLOR_TESTS], [AT_COLOR_TESTS])
+m4_include([tests/util.at])
+m4_include([tests/ir.at])
+m4_include([tests/frontend.at])
+
+m4_foreach([at_file], m4_split(m4_normalize(m4_esyscmd_s([sh -c "find -L .. -name testsuite-*.at"]))), [m4_sinclude(at_file)])

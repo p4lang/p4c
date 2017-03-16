@@ -35,16 +35,3 @@ noinst_HEADERS += \
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
 
 ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
-
-# Tests
--include bmv2tests.mk
-
-CLEANFILES += bmv2tests.mk
-
-bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
-	      $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 \
-	      $(srcdir)/testdata/p4_16_bmv_errors/*-bmv2.p4 \
-	      $(srcdir)/testdata/p4_14_samples/*.p4 \
-	      $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4 \
-	      $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_14_samples
-	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@

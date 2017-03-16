@@ -26,6 +26,8 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 frontends/p4/p4-lex.c
 frontends/p4/p4-parse.cpp
+package.m4
+tests/testsuite
 
 # vi/emacs tags files
 

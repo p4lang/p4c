@@ -1,0 +1,6 @@
+dnl m4_define([TEST_BACKEND_P4TEST],
+dnl [AT_SETUP([$1])
+dnl  AT_CHECK([p4ctest $2], [0], [stdout], [])
+dnl  AT_CLEANUP]
+dnl )
+dnl TEST_BACKEND_P4TEST([backend - p4test], [test-backend-p4test])

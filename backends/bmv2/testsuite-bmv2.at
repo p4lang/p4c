@@ -1,0 +1,19 @@
+dnl Copyright 2013-present Barefoot Networks, Inc. 
+dnl
+dnl Licensed under the Apache License, Version 2.0 (the "License");
+dnl you may not use this file except in compliance with the License.
+dnl You may obtain a copy of the License at
+dnl
+dnl     http://www.apache.org/licenses/LICENSE-2.0
+dnl
+dnl Unless required by applicable law or agreed to in writing, software
+dnl distributed under the License is distributed on an "AS IS" BASIS,
+dnl WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+dnl See the License for the specific language governing permissions and
+dnl limitations under the License.
+dnl AT_BANNER([bmv2 unit tests])
+P4TEST_RUN([bmv2], [testdata/p4_16_samples], [\"*-bmv2.p4\"], [BMV2_TEST_RUN], [../testdata/p4_16_samples/xfails.text])
+P4TEST_RUN([bmv2], [testdata/p4_16_bmv_errors], [\"*-bmv2.p4\"], [BMV2_TEST_RUN], [/dev/null])
+P4TEST_RUN([bmv2], [testdata/p4_14_samples], [\"*.p4\"], [BMV2_TEST_RUN], [/dev/null])
+P4TEST_RUN([bmv2], [testdata/p4_14_samples/switch_20160226], [\"switch.p4\"], [BMV2_TEST_RUN], [/dev/null])
+P4TEST_RUN([bmv2], [testdata/p4_14_samples/switch_20160512], [\"switch.p4\"], [BMV2_TEST_RUN], [/dev/null])
