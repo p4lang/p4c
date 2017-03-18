@@ -101,7 +101,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
     }
-    table check_ttl() {
+    table check_ttl {
         key = {
             headers.ip.ttl: exact;
         }
@@ -128,7 +128,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     action Set_smac(EthernetAddress smac) {
         headers.ethernet.srcAddr = smac;
     }
-    table smac() {
+    table smac {
         key = {
             outCtrl.outputPort: exact;
         }
@@ -146,13 +146,13 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             return;
         }
         ipv4_match.apply(nextHop);
-        if (outCtrl.outputPort == 4w0xf) 
+        if (outCtrl.outputPort == 4w0xf)
             return;
         check_ttl.apply();
-        if (outCtrl.outputPort == 4w0xe) 
+        if (outCtrl.outputPort == 4w0xe)
             return;
         dmac.apply(nextHop);
-        if (outCtrl.outputPort == 4w0xf) 
+        if (outCtrl.outputPort == 4w0xf)
             return;
         smac.apply();
     }

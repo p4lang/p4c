@@ -12,23 +12,21 @@ parser p1(packet_in p, out Header h) {
     Header[2] stack;
     bool c_1;
     bool d;
-    bit<32> tmp_11;
-    bit<32> tmp_12;
-    bit<32> tmp_13;
-    bit<32> tmp_14;
-    bit<32> tmp_15;
-    bit<32> tmp_16;
+    bit<32> tmp_4;
+    bit<32> tmp_5;
+    bit<32> tmp_6;
+    bit<32> tmp_7;
+    bit<32> tmp_8;
     state start {
         h.data1 = 32w0;
         func(h);
-        tmp_11 = h.data2;
-        tmp_12 = h.data2;
-        tmp_13 = h.data2;
-        tmp_14 = g(tmp_12, tmp_13);
-        tmp_15 = tmp_14;
-        g(tmp_11, tmp_15);
-        tmp_16 = h.data3 + 32w1;
-        h.data2 = tmp_16;
+        tmp_4 = h.data2;
+        tmp_5 = h.data2;
+        tmp_6 = h.data2;
+        tmp_7 = g(tmp_5, tmp_6);
+        tmp_8 = tmp_7;
+        g(tmp_4, tmp_8);
+        h.data2 = h.data3 + 32w1;
         stack[1].isValid();
         transition select(h.isValid()) {
             true: next1;
@@ -55,9 +53,10 @@ parser p1(packet_in p, out Header h) {
 }
 
 control c(out bit<32> v) {
-    bit<32> b;
+    bit<32> d_2;
     bit<32> setByAction;
     bit<32> e;
+    bool touched;
     @name("a1") action a1_0() {
         setByAction = 32w1;
     }
@@ -67,7 +66,7 @@ control c(out bit<32> v) {
     @name("a2") action a2_0() {
         setByAction = 32w1;
     }
-    @name("t") table t() {
+    @name("t") table t {
         actions = {
             a1_0();
             a2_0();
@@ -78,30 +77,49 @@ control c(out bit<32> v) {
         e = 32w1;
     }
     action act_0() {
+        d_2 = 32w1;
+    }
+    action act_1() {
+        touched = true;
+    }
+    action act_2() {
         e = e + 32w1;
     }
-    table tbl_act() {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    table tbl_act_0() {
+    table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_a1() {
+    table tbl_act_0 {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    table tbl_act_1 {
+        actions = {
+            act_2();
+        }
+        const default_action = act_2();
+    }
+    table tbl_act_2 {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
+    }
+    table tbl_a1 {
         actions = {
             a1_2();
         }
         const default_action = a1_2();
     }
     apply {
-        if (e > 32w0) 
-            tbl_act.apply();
-        else 
+        tbl_act.apply();
+        if (e > 32w0)
+            tbl_act_0.apply();
+        else
             ;
         tbl_act_0.apply();
         switch (t.apply().action_run) {
@@ -109,9 +127,9 @@ control c(out bit<32> v) {
             }
         }
 
-        if (e > 32w0) 
+        if (e > 32w0)
             t.apply();
-        else 
+        else
             tbl_a1.apply();
     }
 }

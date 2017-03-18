@@ -1,7 +1,7 @@
 action nop() {
 }
 control x() {
-    table t() {
+    table t {
         actions = {
             nop;
         }
@@ -19,4 +19,3 @@ control x() {
 
     }
 }
-

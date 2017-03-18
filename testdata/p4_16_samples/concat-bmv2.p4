@@ -28,7 +28,7 @@ header hdr {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action concat()
     { h.h.c = h.h.a ++ h.h.b; sm.egress_spec = 0; }
-    table t() {
+    table t {
         actions = { concat; }
         const default_action = concat;
     }

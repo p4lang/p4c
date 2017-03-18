@@ -13,10 +13,8 @@ struct h {
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     error e_0;
-    bool tmp;
     state start {
-        tmp = meta.x == 8s0;
-        verify(tmp, error.NewError);
+        verify(meta.x == 8s0, error.NewError);
         verify(true, error.NoError);
         e_0 = error.NoError;
         verify(true, e_0);

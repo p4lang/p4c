@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ limitations under the License.
 control c() {
     action a() {}
     action b() {}
-    table t1() {
+    table t1 {
         actions = { a; b; }
         default_action = a;
     }
-    table t2() {
+    table t2 {
         actions = { a; }
         default_action = a;
     }
@@ -35,5 +35,3 @@ control c() {
 control empty();
 package top(empty e);
 top(c()) main;
-
-    

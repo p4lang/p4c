@@ -32,44 +32,54 @@ class SideEffects : public Inspector {
  private:
     ReferenceMap* refMap;
     TypeMap*      typeMap;
-    bool          hasSideEffects;
+ public:
+    const IR::Node* nodeWithSideEffect = nullptr;
+    unsigned sideEffectCount = 0;
+
     void postorder(const IR::MethodCallExpression* mce) override {
         if (refMap == nullptr || typeMap == nullptr) {
             // conservative
-            hasSideEffects = true;
+            sideEffectCount++;
+            nodeWithSideEffect = mce;
             return;
         }
         // TODO: add an annotation to indicate lack of side-effects
         auto mi = MethodInstance::resolve(mce, refMap, typeMap);
         if (!mi->is<BuiltInMethod>()) {
-            hasSideEffects = true;
+            sideEffectCount++;
+            nodeWithSideEffect = mce;
             return;
         }
         auto bim = mi->to<BuiltInMethod>();
-        if (bim->name.name != IR::Type_Header::isValid)
-            hasSideEffects = true;
+        if (bim->name.name != IR::Type_Header::isValid) {
+            sideEffectCount++;
+            nodeWithSideEffect = mce;
+        }
     }
-    void postorder(const IR::ConstructorCallExpression*) override {
-        hasSideEffects = true;
+    void postorder(const IR::ConstructorCallExpression* cce) override {
+        sideEffectCount++;
+        nodeWithSideEffect = cce;
     }
     // If you pass nullptr for these arguments the check will be more conservative
     SideEffects(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), hasSideEffects(false) { setName("SideEffects"); }
+            refMap(refMap), typeMap(typeMap) { setName("SideEffects"); }
 
- public:
     // Returns true if the expression may have side-effects.
     static bool check(const IR::Expression* expression,
                       ReferenceMap* refMap,
                       TypeMap* typeMap) {
         SideEffects se(refMap, typeMap);
         expression->apply(se);
-        return se.hasSideEffects;
+        return se.nodeWithSideEffect != nullptr;
     }
 };
 
 // convert expresions so that each expression contains at most one side-effect
-// left-values are converted to contain no side-effects
-// i.e. a[f(x)] = b
+// left-values are converted to contain no side-effects.  An important consequence
+// of this pass is that it converts function calls so that no two parameters
+// (one of which is output) can alias.  This makes the job of the inliner simpler.
+//
+// a[f(x)] = b
 // is converted to
 // tmp = f(x); a[tmp] = b
 //
@@ -94,6 +104,7 @@ class SideEffects : public Inspector {
 // An assignment statement
 // e = e1;
 // is treated as if it is a call to a function "set(out T v, in T v)"
+// This pass should be run after removing table parameters.
 // FIXME: does not handle select labels
 class DoSimplifyExpressions : public Transform {
     ReferenceMap*        refMap;
@@ -109,13 +120,6 @@ class DoSimplifyExpressions : public Transform {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
     }
-
-#if 0
-    const IR::Node* preorder(IR::P4Program* program) override {
-        if (refMap->isV1()) prune();  // skip for P4 v1
-        return program;
-    }
-#endif
 
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::Function* function) override;

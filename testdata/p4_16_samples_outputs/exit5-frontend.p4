@@ -4,7 +4,7 @@ control ctrl() {
     }
     @name("f") action f_0() {
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             e_0();
             f_0();

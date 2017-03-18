@@ -2,19 +2,15 @@ control p() {
     bit<1> z_0;
     bit<1> x_2;
     bit<1> x_3;
-    bit<1> tmp;
-    bit<1> tmp_0;
-    bit<1> tmp_1;
-    @name("b") action b_0(in bit<1> x, out bit<1> y) {
-        x_2 = x;
-        tmp = x & x_2;
-        z_0 = tmp;
-        y = z_0;
+    bit<1> y_1;
+    @name("b") action b_0(in bit<1> x_0, out bit<1> y_0) {
+        x_2 = x_0;
+        z_0 = x_0 & x_2;
+        y_0 = z_0;
     }
     apply {
         x_3 = 1w0;
-        tmp_0 = x_3;
-        b_0(tmp_0, tmp_1);
+        b_0(x_3, y_1);
     }
 }
 

@@ -8,7 +8,7 @@ control Ing() {
     @name("cond") action cond() {
         tmp_0 = tmp_0;
     }
-    @name("tbl_cond") table tbl_cond() {
+    @name("tbl_cond") table tbl_cond {
         actions = {
             cond();
         }

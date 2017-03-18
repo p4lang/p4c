@@ -33,7 +33,7 @@ control my(out H[2] s) {
         tmp_16 = f(tmp_15, 1w1);
         s[tmp_14].z = tmp_15;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

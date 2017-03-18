@@ -18,6 +18,7 @@ limitations under the License.
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
+#include "frontends/p4/sideEffects.h"
 
 namespace P4 {
 
@@ -323,7 +324,6 @@ class FindUninitialized : public Inspector {
             currentPoint = savePoint;  // restore the current point
                                     // it is modified by the inter-procedural analysis
         }
-        checkOutParameters(table, table->parameters, getCurrentDefinitions());
         return false;
     }
 
@@ -473,9 +473,17 @@ class RemoveUnused : public Transform {
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
             LOG1("Removing statement " << dbp(getOriginal()) << " " << statement);
-            if (statement->right->is<IR::MethodCallExpression>()) {
-                // keep the method for side effects
-                auto mce = statement->right->to<IR::MethodCallExpression>();
+            SideEffects se(nullptr, nullptr);
+            (void)statement->right->apply(se);
+
+            if (se.nodeWithSideEffect != nullptr) {
+                // We expect that at this point there can't be more than 1
+                // method call expression in each statement.
+                BUG_CHECK(se.sideEffectCount == 1, "%1%: too many side-effect in one expression",
+                          statement->right);
+                BUG_CHECK(se.nodeWithSideEffect->is<IR::MethodCallExpression>(),
+                          "%1%: expected method call", se.nodeWithSideEffect);
+                auto mce = se.nodeWithSideEffect->to<IR::MethodCallExpression>();
                 return new IR::MethodCallStatement(statement->srcInfo, mce);
             }
             return new IR::EmptyStatement();

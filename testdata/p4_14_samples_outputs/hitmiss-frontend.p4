@@ -15,7 +15,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -33,7 +33,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -44,7 +44,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -55,7 +55,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test3") table test3_0() {
+    @name("test3") table test3_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -67,9 +67,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (test1_0.apply().hit) 
+        if (test1_0.apply().hit)
             test2_0.apply();
-        else 
+        else
             test3_0.apply();
     }
 }

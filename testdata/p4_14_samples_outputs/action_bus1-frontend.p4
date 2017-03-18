@@ -48,7 +48,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -118,7 +118,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f8_4 = v4;
         hdr.data.f8_5 = v5;
     }
-    @name("tbl1") table tbl1_0() {
+    @name("tbl1") table tbl1_0 {
         actions = {
             set1_0();
             noop_0();
@@ -129,7 +129,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl2") table tbl2_0() {
+    @name("tbl2") table tbl2_0 {
         actions = {
             set2_0();
             noop_0();
@@ -140,7 +140,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl3") table tbl3_0() {
+    @name("tbl3") table tbl3_0 {
         actions = {
             set3_0();
             noop_0();
@@ -151,7 +151,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl4") table tbl4_0() {
+    @name("tbl4") table tbl4_0 {
         actions = {
             set4_0();
             noop_0();
@@ -162,7 +162,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl5") table tbl5_0() {
+    @name("tbl5") table tbl5_0 {
         actions = {
             set5_0();
             noop_0();
@@ -173,7 +173,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl6") table tbl6_0() {
+    @name("tbl6") table tbl6_0 {
         actions = {
             set6_0();
             noop_0();
@@ -184,7 +184,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl7") table tbl7_0() {
+    @name("tbl7") table tbl7_0 {
         actions = {
             set7_0();
             noop_0();
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl8") table tbl8_0() {
+    @name("tbl8") table tbl8_0 {
         actions = {
             set8_0();
             noop_0();

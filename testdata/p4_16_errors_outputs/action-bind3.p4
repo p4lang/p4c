@@ -2,7 +2,7 @@ control c(inout bit<32> x) {
     action a(inout bit<32> b, bit<32> d) {
         b = d;
     }
-    table t() {
+    table t {
         actions = {
             a(x, 0);
         }

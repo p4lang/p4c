@@ -6,7 +6,7 @@ struct h {
 }
 
 struct metadata {
-    @name("m") 
+    @name("m")
     h m;
 }
 
@@ -22,7 +22,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("x") action x_0() {
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             x_0();
             @default_only NoAction();
@@ -30,7 +30,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
         default_action = NoAction();
     }
     apply {
-        if (meta.m.b == 1w1) 
+        if (meta.m.b == 1w1)
             t_0.apply();
     }
 }

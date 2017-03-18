@@ -33,23 +33,16 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     Value val_0;
     bool done_0;
     bool ok_0;
-    bool tmp;
-    bool tmp_0;
-    @name("update") action update_0(inout Value val) {
-        val.field1 = 32w8;
+    @name("update") action update_0(inout Value val_1) {
+        val_1.field1 = 32w8;
     }
     @name("test") action test_0() {
         inKey_0 = { 32w1 };
         defaultKey_0 = { 32w0 };
-        tmp = inKey_0 == defaultKey_0;
-        same_0 = tmp;
+        same_0 = inKey_0 == defaultKey_0;
         val_0 = { 32w0 };
         done_0 = false;
-        if (!!done_0) 
-            tmp_0 = false;
-        else 
-            tmp_0 = same_0;
-        ok_0 = tmp_0;
+        ok_0 = !done_0 && same_0;
         if (ok_0) 
             update_0(val_0);
     }

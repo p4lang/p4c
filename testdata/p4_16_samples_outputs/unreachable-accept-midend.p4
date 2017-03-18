@@ -21,7 +21,7 @@ control Deparser(in headers_t hdr, packet_out pkt_out) {
     action act() {
         pkt_out.emit<ethernet_h>(hdr.ethernet);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

@@ -1,14 +1,12 @@
 control p(inout bit<1> bt) {
-    bit<1> tmp;
-    @name("a") action a_0(inout bit<1> y0) {
-        tmp = y0 | 1w1;
-        y0 = tmp;
+    @name("a") action a_0(inout bit<1> y0_0) {
+        y0_0 = y0_0 | 1w1;
     }
     @name("b") action b_0() {
         a_0(bt);
         a_0(bt);
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             b_0();
         }

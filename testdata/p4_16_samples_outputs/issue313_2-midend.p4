@@ -19,13 +19,13 @@ control ctrl(inout struct_t input, out bit<8> output) {
     action act() {
         output = tmp1;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }

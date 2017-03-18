@@ -9,19 +9,19 @@ control c(inout bit<32> x) {
     action act_1() {
         x = 32w10;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_0();
         }
@@ -32,7 +32,7 @@ control c(inout bit<32> x) {
         if (true) {
             tbl_act_0.apply();
         }
-        else 
+        else
             tbl_act_1.apply();
     }
 }

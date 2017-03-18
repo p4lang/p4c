@@ -4,7 +4,7 @@ control my(out bit<32> x) {
     action act() {
         x = 32w2;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

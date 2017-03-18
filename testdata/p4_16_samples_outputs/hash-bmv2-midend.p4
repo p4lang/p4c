@@ -46,7 +46,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(tmp_1, HashAlgorithm.crc16, 16w0, tmp_2, 32w65536);
         meta.hash.hash = tmp_1;
     }
-    table tbl_a() {
+    table tbl_a {
         actions = {
             a_0();
         }

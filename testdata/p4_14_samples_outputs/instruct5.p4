@@ -19,9 +19,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t     data;
-    @name("extra") 
+    @name("extra")
     data2_t[4] extra;
 }
 
@@ -66,13 +66,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.more = hdr.extra[0].more;
         hdr.extra.pop_front(1);
     }
-    @name("output") table output_0() {
+    @name("output") table output_0 {
         actions = {
             output;
         }
         const default_action = output(1);
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             noop;
             push1;

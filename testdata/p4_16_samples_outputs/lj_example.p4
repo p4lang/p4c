@@ -53,7 +53,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     action Forward(PortId outPort) {
         outCtrl.outputPort = outPort;
     }
-    table Enet_lkup() {
+    table Enet_lkup {
         key = {
             p.arpa_pak.dest: exact;
         }
@@ -66,7 +66,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     }
     apply {
         outCtrl.outputPort = DROP_PORT;
-        if (p.arpa_pak.isValid()) 
+        if (p.arpa_pak.isValid())
             Enet_lkup.apply();
     }
 }

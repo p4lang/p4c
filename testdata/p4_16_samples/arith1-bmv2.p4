@@ -28,7 +28,7 @@ header hdr {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action compare()
     { h.h.c = (bit<8>)(bit<1>)(h.h.a < h.h.b); sm.egress_spec = 0; }
-    table t() {
+    table t {
         actions = { compare; }
         const default_action = compare;
     }

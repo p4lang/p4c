@@ -3,7 +3,7 @@ control ctrl() {
     @name("e") action e_0() {
         hasExited = true;
     }
-    @name("t") table t() {
+    @name("t") table t {
         actions = {
             e_0();
         }
@@ -12,7 +12,7 @@ control ctrl() {
     action act() {
         hasExited = false;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
@@ -20,11 +20,11 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        if (t.apply().hit) 
-            if (!hasExited) 
+        if (t.apply().hit)
+            if (!hasExited)
                 t.apply();
-        else 
-            if (!hasExited) 
+        else
+            if (!hasExited)
                 t.apply();
     }
 }

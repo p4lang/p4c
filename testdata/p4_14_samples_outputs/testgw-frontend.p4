@@ -22,9 +22,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t     data;
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setf1") action setf1_0(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("routing") table routing_0() {
+    @name("routing") table routing_0 {
         actions = {
             route_eth_0();
             noop_0();
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             setf2_0();
             noop_0();
@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2_0 {
         actions = {
             setf1_0();
             noop_0();
@@ -92,9 +92,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         routing_0.apply();
-        if (hdr.data.f5 != hdr.data.f6) 
+        if (hdr.data.f5 != hdr.data.f6)
             test1_0.apply();
-        else 
+        else
             test2_0.apply();
     }
 }

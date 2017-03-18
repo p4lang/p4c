@@ -8,10 +8,8 @@ header hdr {
 }
 
 control compute(inout hdr h) {
-    bool tmp;
     apply {
-        tmp = h.a < h.b;
-        if (tmp) 
+        if (h.a < h.b) 
             h.c = 8w0;
         else 
             h.c = 8w1;

@@ -15,7 +15,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -27,15 +27,39 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+<<<<<<< 03c3c3eb92dc48804072b130de141a2114808c3b
     @name("NoAction") action NoAction_0() {
     }
     @name("setb1") action setb1_0(bit<9> port) {
+=======
+    bit<8> tmp_2;
+    bit<8> tmp_3;
+    bit<8> tmp_4;
+    bit<8> dest;
+    bit<8> dest_3;
+    bit<8> dest_4;
+    @name("NoAction") action NoAction_0() {
+    }
+    @name("setb1") action setb1_0(bit<9> port) {
+        tmp_4 = hdr.data.b1;
+        dest = hdr.data.b1;
+        tmp_3 = hdr.data.b1;
+        dest_3 = hdr.data.b1;
+        tmp_2 = hdr.data.b1;
+        dest_4 = hdr.data.b1;
+        dest_4 = hdr.data.b2;
+        tmp_2 = hdr.data.b2;
+        dest_3 = hdr.data.b2;
+        tmp_3 = hdr.data.b2;
+        dest = hdr.data.b2;
+        tmp_4 = hdr.data.b2;
+>>>>>>> Fixes for issues #355, #356; removed table parameters from the language and the associated tests
         hdr.data.b1 = hdr.data.b2;
         standard_metadata.egress_spec = port;
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1_0();
             noop_0();

@@ -29,17 +29,17 @@ struct metadata {
 }
 
 struct headers {
-    @name("cfi") 
+    @name("cfi")
     cfi_t         cfi;
-    @name("len_or_type") 
+    @name("len_or_type")
     len_or_type_t len_or_type;
-    @name("mac_da") 
+    @name("mac_da")
     mac_da_t      mac_da;
-    @name("mac_sa") 
+    @name("mac_sa")
     mac_sa_t      mac_sa;
-    @name("pcp") 
+    @name("pcp")
     pcp_t         pcp;
-    @name("vlan_id") 
+    @name("vlan_id")
     vlan_id_t     vlan_id;
 }
 
@@ -76,7 +76,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t2") table t2() {
+    @name("t2") table t2 {
         actions = {
             nop();
             @default_only NoAction();
@@ -94,7 +94,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             nop();
             @default_only NoAction();

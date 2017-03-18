@@ -57,7 +57,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     action Drop() {
         pArg1.drop = true;
     }
-    table Tinner() {
+    table Tinner {
         key = {
             pArg1.field1: ternary;
         }

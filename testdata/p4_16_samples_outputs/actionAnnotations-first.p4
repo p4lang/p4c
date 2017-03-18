@@ -3,9 +3,9 @@ control test() {
     }
     action drop() {
     }
-    table unit() {
+    table unit {
         actions = {
-            @tableOnly Set_dmac();
+            @tableOnly Set_dmac;
             @defaultOnly drop();
         }
         default_action = drop();
@@ -13,4 +13,3 @@ control test() {
     apply {
     }
 }
-

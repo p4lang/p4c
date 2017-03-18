@@ -37,7 +37,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         hdr_1_stack[0] = hdr.stack[0];
         hdr.stack[0] = hdr_1_stack[0];
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

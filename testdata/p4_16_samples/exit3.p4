@@ -19,7 +19,7 @@ control ctrl(out bit<32> c) {
         exit;
     }
 
-    table t() {
+    table t {
         actions = { e; }
         default_action = e();
     }

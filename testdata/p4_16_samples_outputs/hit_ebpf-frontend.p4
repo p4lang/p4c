@@ -48,7 +48,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    @name("Check_src_ip") table Check_src_ip_0() {
+    @name("Check_src_ip") table Check_src_ip_0 {
         key = {
             headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
@@ -65,7 +65,7 @@ control pipe(inout Headers_t headers, out bool pass) {
             pass = false;
             return;
         }
-        if (Check_src_ip_0.apply().hit) 
+        if (Check_src_ip_0.apply().hit)
             pass = pass;
     }
 }

@@ -7,31 +7,15 @@ control c(out H[2] h);
 package top(c _c);
 control my(out H[2] s) {
     bit<32> a_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
-    bit<32> tmp_1;
-    bit<32> tmp_2;
-    bit<1> tmp_3;
-    bit<1> tmp_4;
-    bit<32> tmp_5;
-    bit<1> tmp_6;
-    bit<1> tmp_7;
+    bit<1> tmp;
+    bit<1> tmp_0;
     apply {
         a_0 = 32w0;
-        tmp = a_0;
-        s[tmp].z = 1w1;
-        tmp_0 = a_0 + 32w1;
-        tmp_1 = tmp_0;
-        s[tmp_1].z = 1w0;
-        tmp_2 = a_0;
-        tmp_3 = s[tmp_2].z;
-        tmp_4 = f(tmp_3, 1w0);
-        s[tmp_2].z = tmp_3;
-        a_0 = (bit<32>)tmp_4;
-        tmp_5 = a_0;
-        tmp_6 = s[tmp_5].z;
-        tmp_7 = f(tmp_6, 1w1);
-        s[tmp_5].z = tmp_6;
+        s[a_0].z = 1w1;
+        s[a_0 + 32w1].z = 1w0;
+        tmp = f(s[a_0].z, 1w0);
+        a_0 = (bit<32>)tmp;
+        tmp_0 = f(s[a_0].z, 1w1);
     }
 }
 

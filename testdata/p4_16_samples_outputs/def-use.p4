@@ -22,7 +22,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     action a() {
     }
-    table t() {
+    table t {
         key = {
         }
         actions = {

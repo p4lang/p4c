@@ -26,7 +26,7 @@ header hdr {
 control compute(inout hdr h) {
     action add()
     { h.c = h.a + h.b; }
-    table t() {
+    table t {
         actions = { add; }
         const default_action = add;
     }

@@ -10,19 +10,19 @@ control c(inout bit<32> r) {
     action act_1() {
         tmp_1 = f(32w2);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_0();
         }
@@ -30,9 +30,9 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_1 > 32w0) 
+        if (tmp_1 > 32w0)
             tbl_act_0.apply();
-        else 
+        else
             tbl_act_1.apply();
     }
 }

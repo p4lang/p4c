@@ -7,7 +7,7 @@ struct metadata_t {
 }
 
 struct metadata {
-    @name("md") 
+    @name("md")
     metadata_t md;
 }
 
@@ -32,7 +32,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.md.field_1_1_1 = value;
         meta.md.field_2_1_1 = 1w1;
     }
-    @name("dmac") table dmac() {
+    @name("dmac") table dmac {
         actions = {
             action_1();
             @default_only NoAction_0();

@@ -21,7 +21,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("pkt") 
+    @name("pkt")
     pkt_t pkt;
 }
 
@@ -44,21 +44,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("do_nothing") action do_nothing_0() {
     }
-    @name("table_0") table table_3() {
+    @name("table_0") table table_3 {
         actions = {
             action_2();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("table_1") table table_4() {
+    @name("table_1") table table_4 {
         actions = {
             action_3();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("table_2") table table_5() {
+    @name("table_2") table table_5 {
         actions = {
             do_nothing_0();
             @default_only NoAction();
@@ -66,10 +66,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        table_3.apply();
-        table_4.apply();
-        if (hdr.pkt.field_i_8 == 8w0) 
-            table_5.apply();
+        table_3.apply;
+        table_4.apply;
+        if (hdr.pkt.field_i_8 == 8w0)
+            table_5.apply;
     }
 }
 

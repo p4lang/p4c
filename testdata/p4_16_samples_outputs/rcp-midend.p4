@@ -17,29 +17,38 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    bit<32> tmp_6;
-    bit<32> tmp_8;
-    bit<32> tmp_10;
+    bit<32> input_traffic_bytes_tmp;
+    bit<32> sum_rtt_Tr_tmp;
+    bit<32> num_pkts_with_rtt_tmp;
+    bit<32> tmp_2;
+    bit<32> tmp_3;
+    bit<32> tmp_4;
     @name("input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes;
     @name("sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr;
     @name("num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt;
     action act() {
-        sum_rtt_Tr.read(32w0, tmp_8);
-        sum_rtt_Tr.write(tmp_8 + pkt_hdr.rtt, 32w0);
-        num_pkts_with_rtt.read(32w0, tmp_10);
-        num_pkts_with_rtt.write(tmp_10 + 32w1, 32w0);
+        sum_rtt_Tr.read(32w0, tmp_3);
+        sum_rtt_Tr_tmp = tmp_3;
+        sum_rtt_Tr_tmp = tmp_3 + pkt_hdr.rtt;
+        sum_rtt_Tr.write(tmp_3 + pkt_hdr.rtt, 32w0);
+        num_pkts_with_rtt.read(32w0, tmp_4);
+        num_pkts_with_rtt_tmp = tmp_4;
+        num_pkts_with_rtt_tmp = tmp_4 + 32w1;
+        num_pkts_with_rtt.write(tmp_4 + 32w1, 32w0);
     }
     action act_0() {
-        input_traffic_bytes.read(32w0, tmp_6);
-        input_traffic_bytes.write(tmp_6 + metadata.pkt_len, 32w0);
+        input_traffic_bytes.read(32w0, tmp_2);
+        input_traffic_bytes_tmp = tmp_2;
+        input_traffic_bytes_tmp = tmp_2 + metadata.pkt_len;
+        input_traffic_bytes.write(tmp_2 + metadata.pkt_len, 32w0);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }

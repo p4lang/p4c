@@ -47,7 +47,7 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
         debug.write(32w1, n);
         standard_meta.egress_port = 9w0;
     }
-    @name("tbl_act") table tbl_act() {
+    @name("tbl_act") table tbl_act {
         actions = {
             act_0();
         }

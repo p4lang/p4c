@@ -10,7 +10,7 @@ control compute(inout hdr h) {
     @name("a") action a_0() {
         h.b = h.a;
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         key = {
             h.a + 32w1: exact @name("e") ;
         }

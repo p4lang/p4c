@@ -235,12 +235,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name("m")
     m_t m;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -485,7 +485,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_63 = 32w63;
         meta.m.field_32_64 = 32w64;
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             a1_0();
             @default_only NoAction_0();

@@ -5,7 +5,7 @@ control ctrl() {
     }
     @name("f") action f_0() {
     }
-    @name("t") table t() {
+    @name("t") table t {
         actions = {
             e_0();
             f_0();
@@ -15,7 +15,7 @@ control ctrl() {
     action act() {
         hasExited = false;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
@@ -25,11 +25,11 @@ control ctrl() {
         tbl_act.apply();
         switch (t.apply().action_run) {
             e_0: {
-                if (!hasExited) 
+                if (!hasExited)
                     t.apply();
             }
             f_0: {
-                if (!hasExited) 
+                if (!hasExited)
                     t.apply();
             }
         }

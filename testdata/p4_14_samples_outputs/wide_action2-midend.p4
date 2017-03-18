@@ -30,14 +30,14 @@ header data_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t   ingress_metadata;
-    @name("intrinsic_metadata") 
+    @name("intrinsic_metadata")
     intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.intrinsic_metadata.exclusion_id1 = exclusion_id;
     }
-    @name("bd") table bd_1() {
+    @name("bd") table bd_1 {
         actions = {
             set_bd_info_0();
             @default_only NoAction_0();

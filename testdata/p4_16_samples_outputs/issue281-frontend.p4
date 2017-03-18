@@ -46,11 +46,9 @@ parser EthernetParser(packet_in b, out ethernet_t ether) {
 }
 
 parser L2(packet_in b, out h hdr) {
-    ethernet_t tmp;
     @name("ep") EthernetParser() ep_0;
     state start {
-        ep_0.apply(b, tmp);
-        hdr.ether = tmp;
+        ep_0.apply(b, hdr.ether);
         transition accept;
     }
 }
@@ -71,8 +69,6 @@ parser VlanParser(packet_in b, out vlan_t vlan) {
 
 parser L3(packet_in b, inout h hdr) {
     bit<16> etherType_0;
-    ipv4_t tmp_0;
-    vlan_t tmp_1;
     @name("ip") Ipv4Parser() ip_0;
     @name("vp") VlanParser() vp_0;
     state start {
@@ -84,28 +80,21 @@ parser L3(packet_in b, inout h hdr) {
         }
     }
     state ipv4 {
-        ip_0.apply(b, tmp_0);
-        hdr.ipv4 = tmp_0;
+        ip_0.apply(b, hdr.ipv4);
         transition accept;
     }
     state vlan {
-        vp_0.apply(b, tmp_1);
-        hdr.vlan = tmp_1;
+        vp_0.apply(b, hdr.vlan);
         transition start;
     }
 }
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
-    h tmp_2;
-    h tmp_3;
     @name("l2") L2() l2_0;
     @name("l3") L3() l3_0;
     state start {
-        l2_0.apply(b, tmp_2);
-        hdr = tmp_2;
-        tmp_3 = hdr;
-        l3_0.apply(b, tmp_3);
-        hdr = tmp_3;
+        l2_0.apply(b, hdr);
+        l3_0.apply(b, hdr);
         transition accept;
     }
 }

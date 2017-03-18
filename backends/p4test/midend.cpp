@@ -111,7 +111,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::UniqueNames(&refMap),
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveTableParameters(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),

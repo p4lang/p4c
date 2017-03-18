@@ -40,13 +40,13 @@ header myhdr_t {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("udp") 
+    @name("udp")
     udp_t      udp;
-    @name("myhdr") 
+    @name("myhdr")
     myhdr_t    myhdr;
 }
 
@@ -56,7 +56,7 @@ struct ingress_metadata_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t local_metadata;
 }
 
@@ -102,7 +102,7 @@ control TopDeparser(packet_out packet, in headers hdr) {
 control verifyChecksum(in headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     apply {
-        if (hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
+        if (hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))
             mark_to_drop();
     }
 }
@@ -118,7 +118,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     action _drop() {
         mark_to_drop();
     }
-    table drop_tbl() {
+    table drop_tbl {
         key = {
             meta.local_metadata.set_drop: exact;
         }
@@ -139,7 +139,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     action read_round() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
-    table round_tbl() {
+    table round_tbl {
         key = {
         }
         actions = {

@@ -47,7 +47,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     @name("Forward") action Forward_0(PortId outPort) {
         outCtrl.outputPort = outPort;
     }
-    @name("Enet_lkup") table Enet_lkup() {
+    @name("Enet_lkup") table Enet_lkup {
         key = {
             p.arpa_pak.dest: exact @name("p.arpa_pak.dest") ;
         }
@@ -61,7 +61,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     action act() {
         outCtrl.outputPort = 4w0xf;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
@@ -69,7 +69,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     }
     apply {
         tbl_act.apply();
-        if (p.arpa_pak.isValid()) 
+        if (p.arpa_pak.isValid())
             Enet_lkup.apply();
     }
 }
@@ -78,7 +78,7 @@ control LJdeparse(inout Parsed_rep p, packet_out b) {
     action act_0() {
         b.emit<ARPA_hdr>(p.arpa_pak);
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act_0();
         }

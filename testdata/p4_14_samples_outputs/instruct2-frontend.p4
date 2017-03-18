@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("do_xor") action do_xor_0() {
         hdr.data.b1 = hdr.data.b2 ^ hdr.data.b3;
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             do_add_0();
             do_and_0();

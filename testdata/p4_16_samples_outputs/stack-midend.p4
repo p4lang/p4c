@@ -26,7 +26,7 @@ control c() {
         stack_2.push_front(2);
         stack_2.pop_front(2);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

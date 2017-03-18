@@ -29,14 +29,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
 }
 
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("rewrite_mac") table rewrite_mac() {
+    @name("rewrite_mac") table rewrite_mac {
         actions = {
             on_miss();
             rewrite_src_dst_mac();
@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_bd") action set_bd(bit<16> bd) {
         meta.ingress_metadata.bd = bd;
     }
-    @name("bd") table bd() {
+    @name("bd") table bd {
         actions = {
             set_vrf();
             @default_only NoAction();
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 65536;
         default_action = NoAction();
     }
-    @name("ipv4_fib") table ipv4_fib() {
+    @name("ipv4_fib") table ipv4_fib {
         actions = {
             on_miss();
             fib_hit_nexthop();
@@ -121,7 +121,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 131072;
         default_action = NoAction();
     }
-    @name("ipv4_fib_lpm") table ipv4_fib_lpm() {
+    @name("ipv4_fib_lpm") table ipv4_fib_lpm {
         actions = {
             on_miss();
             fib_hit_nexthop();
@@ -134,7 +134,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16384;
         default_action = NoAction();
     }
-    @name("nexthop") table nexthop() {
+    @name("nexthop") table nexthop {
         actions = {
             on_miss();
             set_egress_details();
@@ -146,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 32768;
         default_action = NoAction();
     }
-    @name("port_mapping") table port_mapping() {
+    @name("port_mapping") table port_mapping {
         actions = {
             set_bd();
             @default_only NoAction();
@@ -182,7 +182,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 control verifyChecksum(in headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     apply {
-        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
+        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })))
             mark_to_drop();
     }
 }

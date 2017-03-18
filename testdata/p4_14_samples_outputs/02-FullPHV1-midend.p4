@@ -235,12 +235,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name("m")
     m_t m;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -571,14 +571,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_95 = 16w95;
         meta.m.field_16_96 = 16w96;
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             a1_0();
             @default_only NoAction_0();
         }
         default_action = NoAction_0();
     }
-    @name("t2_1") table t2_1() {
+    @name("t2_1") table t2_1 {
         actions = {
             a2();
             @default_only NoAction_6();
@@ -651,7 +651,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_6();
     }
-    @name("t2_2") table t2_2() {
+    @name("t2_2") table t2_2 {
         actions = {
             a2_0();
             @default_only NoAction_7();
@@ -676,7 +676,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name("t2_3") table t2_3() {
+    @name("t2_3") table t2_3 {
         actions = {
             a2_4();
             @default_only NoAction_8();
@@ -701,7 +701,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name("t3_1") table t3_0() {
+    @name("t3_1") table t3_0 {
         actions = {
             a3();
             @default_only NoAction_9();

@@ -1,7 +1,7 @@
 control c(out bit<1> arun) {
     action a() {
     }
-    table t() {
+    table t {
         actions = {
             a;
         }

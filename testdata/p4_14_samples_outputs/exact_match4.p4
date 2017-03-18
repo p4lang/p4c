@@ -23,13 +23,13 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t  data;
-    @name("data1") 
+    @name("data1")
     data1_t data1;
-    @name("data2") 
+    @name("data2")
     data2_t data2;
-    @name("data3") 
+    @name("data3")
     data3_t data3;
 }
 
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1;
             noop;

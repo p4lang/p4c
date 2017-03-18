@@ -46,7 +46,7 @@ control MyVerifyChecksum(in my_packet hdr, inout my_metadata meta) {
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     action nop() {
     }
-    table t() {
+    table t {
         key = {
             p.stack[0].op_code: exact;
         }

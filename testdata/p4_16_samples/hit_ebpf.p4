@@ -45,7 +45,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         headers.ipv4.srcAddr = add;
     }
 
-    table Check_src_ip() {
+    table Check_src_ip {
         key = { headers.ipv4.srcAddr : exact; }
         actions = {
             Reject;

@@ -8,12 +8,10 @@ header hdr {
 }
 
 control compute(inout hdr h) {
-    bit<32> tmp;
     @name("add") action add_0() {
-        tmp = h.a + h.b;
-        h.c = (bit<64>)tmp;
+        h.c = (bit<64>)(h.a + h.b);
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             add_0();
         }

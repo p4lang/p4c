@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("hdr2") 
+    @name("hdr2")
     hdr2_t hdr2;
 }
 
@@ -34,7 +34,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("a22") action a22() {
         standard_metadata.egress_spec = 9w4;
     }
-    @name("t_ingress_2") table t_ingress_2() {
+    @name("t_ingress_2") table t_ingress_2 {
         actions = {
             a21;
             a22;

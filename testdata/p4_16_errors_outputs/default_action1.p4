@@ -5,7 +5,7 @@ control c() {
     }
     action b() {
     }
-    table t() {
+    table t {
         actions = {
             a;
             b;
@@ -15,4 +15,3 @@ control c() {
     apply {
     }
 }
-

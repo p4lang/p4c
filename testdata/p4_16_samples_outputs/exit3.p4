@@ -2,7 +2,7 @@ control ctrl(out bit<32> c) {
     action e() {
         exit;
     }
-    table t() {
+    table t {
         actions = {
             e;
         }

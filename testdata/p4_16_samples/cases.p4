@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ control ctrl() {
     action a() {}
     action b() {}
     action c() {}
-    
-    table t() {
+
+    table t {
         actions = { a; b; c; }
         default_action = a;
     }

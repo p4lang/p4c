@@ -50,10 +50,12 @@ limitations under the License.
 #include "midend/compileTimeOps.h"
 #include "midend/predication.h"
 #include "midend/expandLookahead.h"
+#include "midend/tableHit.h"
 
 namespace BMV2 {
 
 #if 0
+// This code is now obsolete, it probably should be removed
 void MidEnd::setup_for_P4_14(CompilerOptions&) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
@@ -143,10 +145,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),
+        new P4::UniqueNames(&refMap),  // needed again after inlining
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveTableParameters(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
@@ -169,6 +170,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
                                           "meters", "size", "support_timeout" }),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
+        new P4::TableHit(&refMap, &typeMap),
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         // Proper back-end

@@ -27,16 +27,16 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name("intrinsic_metadata")
     intrinsic_metadata_t intrinsic_metadata;
-    @name("metaA") 
+    @name("metaA")
     metaA_t              metaA;
-    @name("metaB") 
+    @name("metaB")
     metaB_t              metaB;
 }
 
 struct headers {
-    @name("hdrA") 
+    @name("hdrA")
     hdrA_t hdrA;
 }
 
@@ -63,7 +63,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("_clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.E2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_egress") table t_egress() {
+    @name("t_egress") table t_egress {
         actions = {
             _nop_0();
             _recirculate_0();
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("_clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.I2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_ingress_1") table t_ingress_1() {
+    @name("t_ingress_1") table t_ingress_1 {
         actions = {
             _nop_1();
             _set_port_0();
@@ -118,7 +118,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 128;
         default_action = NoAction_1();
     }
-    @name("t_ingress_2") table t_ingress_2() {
+    @name("t_ingress_2") table t_ingress_2 {
         actions = {
             _nop_4();
             _resubmit_0();

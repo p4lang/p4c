@@ -22,14 +22,14 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata") 
+    @name("counter_metadata")
     counter_metadata_t counter_metadata;
-    @name("meter_metadata") 
+    @name("meter_metadata")
     meter_metadata_t   meter_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -41,6 +41,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<32> tmp_1;
+    bit<8> tmp_2;
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_3() {
@@ -54,9 +56,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("count_entries") action count_entries_0() {
         count1.count((bit<32>)meta.counter_metadata.counter_index);
-        meter1.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, hdr.data.color_1);
+        tmp_1 = (bit<32>)meta.meter_metadata.meter_index;
+        meter1.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, tmp_2);
+        hdr.data.color_1 = tmp_2;
     }
-    @name("index_setter") table index_setter() {
+    @name("index_setter") table index_setter {
         actions = {
             set_index_0();
             @default_only NoAction_0();
@@ -68,7 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 2048;
         default_action = NoAction_0();
     }
-    @name("stats") table stats() {
+    @name("stats") table stats {
         actions = {
             count_entries_0();
             @default_only NoAction_3();

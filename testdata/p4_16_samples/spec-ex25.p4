@@ -27,8 +27,7 @@ control c(bit x)
 
     action drop() {}
 
-    table unit()
-    {
+    table unit {
         key = { x : exact; }
 
 #if 0

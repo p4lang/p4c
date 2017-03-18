@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -44,7 +44,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setb4") action setb4_0(bit<8> val) {
         hdr.data.b4 = val;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             noop_0();
             setb1_0();
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        if (hdr.data.f2 != 32w0) 
+        if (hdr.data.f2 != 32w0)
             test1.apply();
     }
 }

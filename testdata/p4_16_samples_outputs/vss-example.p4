@@ -82,18 +82,19 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     action Drop_action() {
         outCtrl.outputPort = DROP_PORT;
     }
-    action Set_nhop(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId port) {
+    IPv4Address nextHop;
+    action Set_nhop(IPv4Address ipv4_dest, PortId port) {
         nextHop = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl - 1;
         outCtrl.outputPort = port;
     }
-    table ipv4_match(out IPv4Address nextHop) {
+    table ipv4_match {
         key = {
             headers.ip.dstAddr: lpm;
         }
         actions = {
             Drop_action;
-            Set_nhop(nextHop);
+            Set_nhop;
         }
         size = 1024;
         default_action = Drop_action;
@@ -101,7 +102,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     action Send_to_cpu() {
         outCtrl.outputPort = CPU_OUT_PORT;
     }
-    table check_ttl() {
+    table check_ttl {
         key = {
             headers.ip.ttl: exact;
         }
@@ -114,7 +115,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    table dmac(in IPv4Address nextHop) {
+    table dmac {
         key = {
             nextHop: exact;
         }
@@ -128,7 +129,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     action Set_smac(EthernetAddress smac) {
         headers.ethernet.srcAddr = smac;
     }
-    table smac() {
+    table smac {
         key = {
             outCtrl.outputPort: exact;
         }
@@ -140,18 +141,17 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         default_action = Drop_action;
     }
     apply {
-        IPv4Address nextHop;
         if (parseError != error.NoError) {
             Drop_action();
             return;
         }
-        ipv4_match.apply(nextHop);
+        ipv4_match.apply();
         if (outCtrl.outputPort == DROP_PORT) 
             return;
         check_ttl.apply();
         if (outCtrl.outputPort == CPU_OUT_PORT) 
             return;
-        dmac.apply(nextHop);
+        dmac.apply();
         if (outCtrl.outputPort == DROP_PORT) 
             return;
         smac.apply();

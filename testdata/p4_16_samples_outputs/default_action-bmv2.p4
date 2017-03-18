@@ -10,7 +10,7 @@ control compute(inout hdr h) {
     action add(bit<32> data) {
         h.b = h.a + data;
     }
-    table t() {
+    table t {
         actions = {
             add;
         }

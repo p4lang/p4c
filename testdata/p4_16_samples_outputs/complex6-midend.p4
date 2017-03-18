@@ -17,31 +17,31 @@ control c(inout bit<32> r) {
     action act_3() {
         tmp_5 = f(32w2);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_3();
         }
         const default_action = act_3();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_2() {
+    table tbl_act_2 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_3() {
+    table tbl_act_3 {
         actions = {
             act_2();
         }
@@ -51,12 +51,12 @@ control c(inout bit<32> r) {
         tbl_act.apply();
         if (tmp_5 > 32w0) {
             tbl_act_0.apply();
-            if (tmp_3 < 32w2) 
+            if (tmp_3 < 32w2)
                 tbl_act_1.apply();
-            else 
+            else
                 tbl_act_2.apply();
         }
-        else 
+        else
             tbl_act_3.apply();
     }
 }

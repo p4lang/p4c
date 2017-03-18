@@ -113,7 +113,6 @@ class ResolveReferences : public Inspector {
     DECLARE(P4Action)
     DECLARE(Function)
     DECLARE(TableProperties)
-    DECLARE(P4Table)
     DECLARE(Type_Method)
     DECLARE(ParserState)
     DECLARE(Type_Extern)
@@ -124,6 +123,7 @@ class ResolveReferences : public Inspector {
     DECLARE(Property)
 #undef DECLARE
 
+    bool preorder(const IR::P4Table* table) override;
     bool preorder(const IR::Declaration_MatchKind* d) override;
     bool preorder(const IR::Declaration* d) override
     { refMap->usedName(d->getName().name); return true; }

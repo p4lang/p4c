@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -33,7 +33,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setf1") action setf1(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             noop;
             setf1;

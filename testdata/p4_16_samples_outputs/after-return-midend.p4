@@ -1,4 +1,6 @@
 control ctrl() {
+    bit<32> a;
+    bool hasReturned_0;
     apply {
     }
 }

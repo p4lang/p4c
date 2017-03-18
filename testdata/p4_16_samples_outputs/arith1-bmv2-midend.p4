@@ -47,7 +47,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = (bit<8>)(bit<1>)(h.h.a < h.h.b);
         sm.egress_spec = 9w0;
     }
-    @name("t") table t() {
+    @name("t") table t {
         actions = {
             compare_0();
         }

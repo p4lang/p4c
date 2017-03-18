@@ -5,7 +5,7 @@ control c(out bit<32> x) {
     }
     action a3() {
     }
-    table t() {
+    table t {
         actions = {
             a1;
             a2;
@@ -14,7 +14,7 @@ control c(out bit<32> x) {
     }
     apply {
         switch (t.apply().action_run) {
-            a1: 
+            a1:
             a2: {
                 return;
             }

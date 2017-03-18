@@ -29,7 +29,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control aux(inout M meta, in H hdr) {
-    @name("adjust_lkp_fields") table adjust_lkp_fields_0() {
+    @name("adjust_lkp_fields") table adjust_lkp_fields_0 {
         key = {
             hdr.ipv4.isValid(): exact @name("hdr.ipv4.isValid()") ;
         }
@@ -44,12 +44,9 @@ control aux(inout M meta, in H hdr) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    M tmp;
-    H tmp_0;
     @name("do_aux") aux() do_aux_0;
     apply {
-        tmp_0 = hdr;
-        do_aux_0.apply(tmp, tmp_0);
+        do_aux_0.apply(meta, hdr);
     }
 }
 

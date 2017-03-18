@@ -24,7 +24,7 @@ header hdr {
 
 control compute(inout hdr h) {
     action a() { h.b = h.a; }
-    table t() {
+    table t {
         key = { h.a + h.a : exact @name("e"); }
         actions = { a; NoAction; }
         default_action = NoAction;

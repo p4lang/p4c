@@ -54,8 +54,7 @@ control LjPipe(inout Parsed_rep p,
        outCtrl.outputPort = outPort;
     }
 
-    table Enet_lkup()
-    {
+    table Enet_lkup {
         key = { p.arpa_pak.dest : exact; }
 
         actions = {

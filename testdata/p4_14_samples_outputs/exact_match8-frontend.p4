@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -66,7 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.b3 = v1;
         hdr.data.b4 = v2;
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             noop_0();
             setb1_0();

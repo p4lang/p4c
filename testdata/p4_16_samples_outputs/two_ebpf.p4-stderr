@@ -1,0 +1,6 @@
+../testdata/p4_16_samples/two_ebpf.p4(42): warning: out parameter pass may be uninitialized when Check terminates
+control Check(in IPv4Address address, out bool pass) {
+                                               ^^^^
+../testdata/p4_16_samples/two_ebpf.p4(42)
+control Check(in IPv4Address address, out bool pass) {
+        ^^^^^

@@ -45,7 +45,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("c.add") action c_add(bit<32> data) {
         h.h.b = h.h.a + data;
     }
-    @name("c.t") table c_t_0() {
+    @name("c.t") table c_t_0 {
         actions = {
             c_add();
         }
@@ -54,7 +54,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action act() {
         sm.egress_spec = 9w0;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

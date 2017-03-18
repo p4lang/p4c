@@ -15,9 +15,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("h") 
+    @name("h")
     h_t        h;
 }
 
@@ -36,7 +36,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             nop;
             @default_only NoAction;

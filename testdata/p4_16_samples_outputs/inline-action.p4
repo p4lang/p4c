@@ -6,7 +6,7 @@ control p(inout bit<1> bt) {
         a(bt);
         a(bt);
     }
-    table t() {
+    table t {
         actions = {
             b;
         }

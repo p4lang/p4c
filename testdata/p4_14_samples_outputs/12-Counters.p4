@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -32,7 +32,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("count_c1_1") action count_c1_1() {
         c1.count((bit<32>)10w1);
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             count_c1_1;
             @default_only NoAction;
@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("t2") table t2() {
+    @name("t2") table t2 {
         actions = {
             count_c1_1;
             @default_only NoAction;
