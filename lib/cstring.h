@@ -24,21 +24,69 @@ limitations under the License.
 #include <string>
 #include <sstream>
 
-// cstring is a zero-terminated, constant (immutable) string
+/**
+ * A cstring is a reference to a zero-terminated, immutable, interned string.
+ * The cstring object *itself* is not immutable; you can reassign it as
+ * required, and it provides a mutable interface that copies the underlying
+ * immutable string as needed.
+ *
+ * Compared to std::string, these are the benefits that cstring provides:
+ *   - Copying and assignment are cheap. Since cstring only deals with immutable
+ *     strings, these operations only involve pointer assignment.
+ *   - Comparing cstrings for equality is cheap; interning makes it possible to
+ *     test for equality using a simple pointer comparison.
+ *   - The immutability of the underlying strings means that it's always safe to
+ *     change a cstring, even if there are other references to it elsewhere.
+ *   - The API offers a number of handy helper methods that aren't available on
+ *     std::string.
+ *
+ * On the other hand, these are the disadvantages of using cstring:
+ *   - Because cstring deals with immutable strings, any modification requires
+ *     that the complete string be copied.
+ *   - Interning has an initial cost: converting a const char*, a
+ *     std::string, or a std::stringstream to a cstring requires copying it.
+ *     Currently, this happens every time you perform the conversion, whether
+ *     the string is already interned or not.
+ *   - Interned strings can never be freed, so they'll stick around for the
+ *     lifetime of the program.
+ *   - The string interning cstring performs is currently not threadsafe, so you
+ *     can't safely use cstrings off the main thread.
+ *
+ * Given these tradeoffs, the general rule of thumb to follow is that you should
+ * try to convert strings to cstrings early and keep them in that form. That
+ * way, you benefit from cheaper copying, assignment, and equality testing in as
+ * many places as possible, and you avoid paying the cost of repeated
+ * conversion.
+ *
+ * However, when you're building or mutating a string, you should use
+ * std::string. Convert to a cstring only when the string is in its final form.
+ * This ensures that you don't pay the time and space cost of interning every
+ * intermediate version of the string.
+ *
+ * Note that cstring has implicit conversions to and from other string types.
+ * This is convenient, but in performance-sensitive code it's good to be aware
+ * that mixing the two types of strings can trigger a lot of implicit copies.
+ */
 class cstring {
     const char *str;
 
  public:
-    // cstring() = default;
     cstring() : str(0) {}
+
+    // Copy and assignment from cstrings. The underlying string doesn't have to
+    // be copied, so these are constant-time operations.
     cstring(const cstring &) = default;
     cstring(cstring &&) = default;
     cstring &operator=(const cstring &) = default;
     cstring &operator=(cstring &&) = default;
+
+    // Copy and assignment from other kinds of strings. These are linear time
+    // operations because the underlying string must be copied.
     cstring &operator=(const char *);
     cstring(const std::stringstream&);                      // NOLINT(runtime/explicit)
     cstring(const char *s) { *this = s; }                   // NOLINT(runtime/explicit)
     cstring(const std::string &a) { *this = a.c_str(); }    // NOLINT(runtime/explicit)
+
     const char *c_str() const { return str; }
     const char *find(int c) const { return str ? strchr(str, c) : nullptr; }
     const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
@@ -46,9 +94,13 @@ class cstring {
     size_t size() const { return str ? strlen(str) : 0; }
     bool isNull() const { return str == nullptr; }
     bool isNullOrEmpty() const { return str == nullptr ? true : str[0] == 0; }
+
+    // Equality tests with other cstrings. Constant time.
     bool operator==(const cstring &a) const { return str == a.str; }
-    bool operator==(const char *a) const { return str ? a && !strcmp(str, a) : !a; }
     bool operator!=(const cstring &a) const { return str != a.str; }
+
+    // Other comparisons and tests. Linear time.
+    bool operator==(const char *a) const { return str ? a && !strcmp(str, a) : !a; }
     bool operator!=(const char *a) const { return str ? !a || !!strcmp(str, a) : !!a; }
     bool operator<(const cstring &a) const { return *this < a.str; }
     bool operator<(const char *a) const { return str ? a && strcmp(str, a) < 0 : !!a; }
@@ -66,12 +118,18 @@ class cstring {
     bool operator>(const std::string &a) const { return *this > a.c_str(); }
     bool operator>=(const std::string &a) const { return *this >= a.c_str(); }
 
+    bool startsWith(const cstring& prefix) const;
+    bool endsWith(const cstring& suffix) const;
+
+    // Mutation operations. These are linear time and always trigger a copy,
+    // since the underlying string is immutable. (Note that this is true even
+    // for substr(); cstrings are always null-terminated, so a copy is
+    // required.)
     cstring operator+=(cstring a);
     cstring operator+=(const char *a);
     cstring operator+=(std::string a);
     cstring operator+=(char a);
-    bool startsWith(const cstring& prefix) const;
-    bool endsWith(const cstring& suffix) const;
+
     template<typename T>
     static cstring to_cstring(const T &t) {
         std::stringstream ss;
@@ -84,15 +142,20 @@ class cstring {
             if (begin != current) ss << delim;
             ss << *current; }
         return cstring(ss.str()); }
-    static cstring newline;
-    static cstring empty;
     template<class T> static cstring make_unique(const T &inuse, cstring base, char sep = '.');
     cstring before(const char* at) const;
     cstring substr(size_t start) const
     { return (start >= size()) ? "" : substr(start, size() - start); }
     cstring substr(size_t start, size_t length) const;
     cstring replace(char find, char replace) const;
-    static size_t cache_size(size_t &);
+
+    // Useful singletons.
+    static cstring newline;
+    static cstring empty;
+
+    /// @return the total size in bytes of all interned strings. @count is set
+    /// to the total number of interned strings.
+    static size_t cache_size(size_t &count);
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
