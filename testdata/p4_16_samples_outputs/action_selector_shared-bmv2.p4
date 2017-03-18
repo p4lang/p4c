@@ -21,7 +21,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.drop = 1;
     }
     action_selector(HashAlgorithm.identity, 32w1024, 32w10) as;
-    table indirect_ws() {
+    table indirect_ws {
         key = {
             meta.hash1: selector;
         }
@@ -32,7 +32,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = NoAction();
         @name("ap_ws") implementation = as;
     }
-    table indirect_ws_1() {
+    table indirect_ws_1 {
         key = {
             meta.hash1: selector;
         }
