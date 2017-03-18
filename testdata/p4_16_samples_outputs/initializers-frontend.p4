@@ -18,12 +18,10 @@ parser P() {
 control C() {
     bit<32> x_1;
     bit<32> y_0;
-    bit<32> tmp;
     @name("fake") Fake() fake_1;
     apply {
         x_1 = 32w0;
-        tmp = x_1 + 32w1;
-        y_0 = tmp;
+        y_0 = x_1 + 32w1;
         fake_1.call(y_0);
     }
 }

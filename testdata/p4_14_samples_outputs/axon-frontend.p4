@@ -20,20 +20,21 @@ header axon_hop_t {
 }
 
 struct metadata {
-    @name("my_metadata") 
+    @name("my_metadata")
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name("axon_head") 
+    @name("axon_head")
     axon_head_t    axon_head;
-    @name("axon_fwdHop") 
+    @name("axon_fwdHop")
     axon_hop_t[64] axon_fwdHop;
-    @name("axon_revHop") 
+    @name("axon_revHop")
     axon_hop_t[64] axon_revHop;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<64> tmp;
     @name("parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
@@ -67,7 +68,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_next_revHop;
     }
     @name("start") state start {
-        transition select((packet.lookahead<bit<64>>())[63:0]) {
+        tmp = packet.lookahead<bit<64>>();
+        transition select(tmp[63:0]) {
             64w0: parse_head;
             default: accept;
         }
@@ -91,7 +93,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_revHop.push_front(1);
         hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
-    @name("drop_pkt") table drop_pkt_0() {
+    @name("drop_pkt") table drop_pkt_0 {
         actions = {
             _drop_0();
             @default_only NoAction();
@@ -99,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-    @name("route_pkt") table route_pkt_0() {
+    @name("route_pkt") table route_pkt_0 {
         actions = {
             _drop_0();
             route_0();
@@ -113,9 +115,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
+        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen)
             drop_pkt_0.apply();
-        else 
+        else
             route_pkt_0.apply();
     }
 }

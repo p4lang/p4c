@@ -14,9 +14,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("easyroute_head") 
+    @name("easyroute_head")
     easyroute_head_t easyroute_head;
-    @name("easyroute_port") 
+    @name("easyroute_port")
     easyroute_port_t easyroute_port;
 }
 
@@ -54,7 +54,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
         hdr.easyroute_port.setInvalid();
     }
-    @name("route_pkt") table route_pkt() {
+    @name("route_pkt") table route_pkt {
         actions = {
             _drop;
             route;

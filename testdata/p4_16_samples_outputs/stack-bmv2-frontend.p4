@@ -7,10 +7,8 @@ header hdr {
 
 control compute(inout hdr h) {
     hdr[1] tmp_0;
-    bit<32> tmp;
     apply {
-        tmp = h.f + 32w1;
-        tmp_0[0].f = tmp;
+        tmp_0[0].f = h.f + 32w1;
         h.f = tmp_0[0].f;
     }
 }

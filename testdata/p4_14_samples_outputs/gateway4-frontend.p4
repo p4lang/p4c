@@ -19,9 +19,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t  data;
-    @name("data2") 
+    @name("data2")
     data2_t data2;
 }
 
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (hdr.data2.isValid()) 
+        if (hdr.data2.isValid())
             test1_0.apply();
         test2_0.apply();
     }

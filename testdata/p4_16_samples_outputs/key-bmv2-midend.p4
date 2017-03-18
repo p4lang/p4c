@@ -48,7 +48,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("c.a") action c_a() {
         h.h.b = h.h.a;
     }
-    @name("c.t") table c_t_0() {
+    @name("c.t") table c_t_0 {
         key = {
             key_0: exact @name("e") ;
         }
@@ -64,13 +64,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action act_0() {
         sm.egress_spec = 9w0;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act_0();
         }

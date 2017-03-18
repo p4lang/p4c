@@ -19,9 +19,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t     data;
-    @name("extra") 
+    @name("extra")
     extra_t[4] extra;
 }
 
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("ex1") table ex1() {
+    @name("ex1") table ex1 {
         actions = {
             set0b1();
             act1();
@@ -81,7 +81,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl1") table tbl1() {
+    @name("tbl1") table tbl1 {
         actions = {
             setb2();
             noop();
@@ -92,7 +92,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl2") table tbl2() {
+    @name("tbl2") table tbl2 {
         actions = {
             set1b1();
             noop();
@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl3") table tbl3() {
+    @name("tbl3") table tbl3 {
         actions = {
             set2b2();
             noop();
@@ -114,7 +114,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1();
             noop();

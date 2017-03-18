@@ -33,11 +33,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t    ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t        ipv4;
-    @name("vlan_tag") 
+    @name("vlan_tag")
     vlan_tag_t[2] vlan_tag;
 }
 
@@ -70,7 +70,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t2") table t2() {
+    @name("t2") table t2 {
         actions = {
             nop;
             @default_only NoAction;
@@ -88,7 +88,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             nop;
             @default_only NoAction;

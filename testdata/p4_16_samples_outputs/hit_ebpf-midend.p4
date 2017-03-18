@@ -51,7 +51,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    @name("Check_src_ip") table Check_src_ip() {
+    @name("Check_src_ip") table Check_src_ip {
         key = {
             headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
@@ -73,19 +73,19 @@ control pipe(inout Headers_t headers, out bool pass) {
     action act_1() {
         pass = pass;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_1();
         }
@@ -96,8 +96,8 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned_0) 
-            if (Check_src_ip.apply().hit) 
+        if (!hasReturned_0)
+            if (Check_src_ip.apply().hit)
                 tbl_act_1.apply();
     }
 }

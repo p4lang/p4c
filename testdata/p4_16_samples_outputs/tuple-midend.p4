@@ -16,7 +16,7 @@ control c() {
         x.field = 32w10;
         x.field_0 = false;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

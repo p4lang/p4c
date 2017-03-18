@@ -49,17 +49,16 @@ struct QArg2 {
 extern bs {}
 struct Packet_data {}
 
-control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
-    // free-floating action: defined like a type
+control T_host(inout TArg1 tArg1, in TArg2 aArg2)(bit<32> t2Size) {
     action B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
 
     action C_action(bit<9> cData) {
-        pArg1.field1 = cData;
+        tArg1.field1 = cData;
     }
 
-    table T(inout TArg1 tArg1, in TArg2 aArg2) {
+    table T {
         key = {
            tArg1.field1 : ternary;
            aArg2.field2 : exact;
@@ -73,11 +72,19 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
         const default_action = C_action(9w5);
     }
 
+    apply {
+        T.apply();
+    }
+}
+
+control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
+    T_host(t2Size) thost;
+
     action Drop() {
         pArg1.drop = true;
     }
 
-    table Tinner() {
+    table Tinner {
         key = { pArg1.field1 : ternary; }
         actions = {
             Drop; NoAction;
@@ -86,10 +93,8 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     }
 
     apply {
-        bit<9> dt;     // local variable
-
-        T.apply(pArg1, pArg2);
-        T.apply(pArg1, pArg2);
+        thost.apply(pArg1, pArg2);
+        thost.apply(pArg1, pArg2);
         Tinner.apply();
     }
 }

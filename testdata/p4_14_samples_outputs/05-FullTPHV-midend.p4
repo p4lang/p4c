@@ -288,12 +288,12 @@ header h_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name("m")
     m_t m;
 }
 
 struct headers {
-    @name("h") 
+    @name("h")
     h_t h;
 }
 
@@ -563,14 +563,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_egress_spec") action set_egress_spec_8(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             a1_0();
             @default_only NoAction_0();
         }
         default_action = NoAction_0();
     }
-    @name("use_16bit_fields_1") table use_16bit_fields_1() {
+    @name("use_16bit_fields_1") table use_16bit_fields_1 {
         actions = {
             set_egress_spec_0();
             @default_only NoAction_7();
@@ -643,7 +643,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name("use_16bit_fields_2") table use_16bit_fields_2() {
+    @name("use_16bit_fields_2") table use_16bit_fields_2 {
         actions = {
             set_egress_spec_5();
             @default_only NoAction_8();
@@ -684,7 +684,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name("use_32bit_fields_1") table use_32bit_fields_1() {
+    @name("use_32bit_fields_1") table use_32bit_fields_1 {
         actions = {
             set_egress_spec_6();
             @default_only NoAction_9();
@@ -725,7 +725,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_9();
     }
-    @name("use_32bit_fields_2") table use_32bit_fields_2() {
+    @name("use_32bit_fields_2") table use_32bit_fields_2 {
         actions = {
             set_egress_spec_7();
             @default_only NoAction_10();
@@ -765,7 +765,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_10();
     }
-    @name("use_8bit_fields") table use_8bit_fields() {
+    @name("use_8bit_fields") table use_8bit_fields {
         actions = {
             set_egress_spec_8();
             @default_only NoAction_11();

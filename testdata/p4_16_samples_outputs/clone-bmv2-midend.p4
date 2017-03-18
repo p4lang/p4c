@@ -17,7 +17,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     action act() {
         clone(CloneType.I2E, smeta.clone_spec);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

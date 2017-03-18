@@ -76,8 +76,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto props = new IR::TableProperties(Util::SourceInfo(), nm);
     // Synthesize a new table
     cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
-    auto tbl = new IR::P4Table(Util::SourceInfo(), tblName, IR::Annotations::empty,
-                               new IR::ParameterList(), props);
+    auto tbl = new IR::P4Table(Util::SourceInfo(), tblName, IR::Annotations::empty, props);
     tables.push_back(tbl);
 
     // Table invocation statement

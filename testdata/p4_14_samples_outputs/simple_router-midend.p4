@@ -27,14 +27,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("routing_metadata") 
+    @name("routing_metadata")
     routing_metadata_t routing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
 }
 
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("send_frame") table send_frame() {
+    @name("send_frame") table send_frame {
         actions = {
             rewrite_mac_0();
             _drop_0();
@@ -82,6 +82,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bool tmp_3;
     @name("NoAction") action NoAction_1() {
     }
     @name("NoAction") action NoAction_5() {
@@ -100,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_port = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("forward") table forward() {
+    @name("forward") table forward {
         actions = {
             set_dmac_0();
             _drop_1();
@@ -112,7 +113,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_1();
     }
-    @name("ipv4_lpm") table ipv4_lpm() {
+    @name("ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop_0();
             _drop_4();
@@ -124,8 +125,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_5();
     }
+    action act() {
+        tmp_3 = false;
+    }
+    action act_0() {
+        tmp_3 = hdr.ipv4.ttl > 8w0;
+    }
+    table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
     apply {
-        if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
+        if (!hdr.ipv4.isValid())
+            tbl_act.apply();
+        else
+            tbl_act_0.apply();
+        if (tmp_3) {
             ipv4_lpm.apply();
             forward.apply();
         }
@@ -154,17 +177,23 @@ struct tuple_0 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
+    bit<16> tmp_4;
+    bool tmp_5;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     apply {
-        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
+        tmp_4 = ipv4_checksum.get<tuple_0>({hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr});
+        tmp_5 = hdr.ipv4.hdrChecksum == tmp_4;
+        if (hdr.ipv4.hdrChecksum == tmp_4)
             mark_to_drop();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
+    bit<16> tmp_6;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     apply {
-        hdr.ipv4.hdrChecksum = ipv4_checksum_2.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        tmp_6 = ipv4_checksum_2.get<tuple_0>({hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr});
+        hdr.ipv4.hdrChecksum = tmp_6;
     }
 }
 

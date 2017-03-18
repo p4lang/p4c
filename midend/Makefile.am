@@ -36,7 +36,8 @@ midend_UNIFIED = \
 	midend/simplifySelectList.cpp \
 	midend/validateProperties.cpp \
 	midend/expandLookahead.cpp \
-	midend/noMatch.cpp
+	midend/noMatch.cpp \
+	midend/tableHit.cpp
 
 noinst_HEADERS += \
 	midend/actionsInlining.h \
@@ -63,6 +64,7 @@ noinst_HEADERS += \
 	midend/simplifySelectList.h \
 	midend/validateProperties.h \
 	midend/expandLookahead.h \
-	midend/noMatch.h
+	midend/noMatch.h \
+	midend/tableHit.h
 
 cpplint_FILES += $(midend_UNIFIED) $(midend_NONUNIFIED)

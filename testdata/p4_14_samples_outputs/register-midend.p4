@@ -19,14 +19,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name("intrinsic_metadata")
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta") 
+    @name("meta")
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -46,15 +46,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<32> tmp_0;
     @name("NoAction") action NoAction_0() {
     }
     @name("my_register") register<bit<32>>(32w16384) my_register;
     @name("m_action") action m_action_0(bit<8> register_idx) {
-        my_register.read(meta.meta.register_tmp, (bit<32>)register_idx);
+        my_register.read(tmp_0, (bit<32>)register_idx);
+        meta.meta.register_tmp = tmp_0;
     }
     @name("_nop") action _nop_0() {
     }
-    @name("m_table") table m_table() {
+    @name("m_table") table m_table {
         actions = {
             m_action_0();
             _nop_0();
@@ -67,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        m_table.apply();
+        m_table.apply;
     }
 }
 

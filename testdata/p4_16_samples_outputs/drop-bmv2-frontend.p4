@@ -13,11 +13,11 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     }
 }
 
-action drop(out standard_metadata_t smeta) {
-    smeta.drop = 1w1;
+action drop(out standard_metadata_t smeta_0) {
+    smeta_0.drop = 1w1;
 }
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("forward") table forward_0() {
+    @name("forward") table forward_0 {
         key = {
         }
         actions = {

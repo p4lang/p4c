@@ -13,12 +13,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name("ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -32,7 +32,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop_0() {
     }
-    @name("e_t1") table e_t1_0() {
+    @name("e_t1") table e_t1_0 {
         actions = {
             nop_0();
             @default_only NoAction();
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("smac_filter") table smac_filter_0() {
+    @name("smac_filter") table smac_filter_0 {
         actions = {
             nop_1();
             ing_drop_0();

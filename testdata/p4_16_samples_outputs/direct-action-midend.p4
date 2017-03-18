@@ -6,13 +6,13 @@ control c(inout bit<16> y) {
     action act() {
         x = 32w2;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_a() {
+    table tbl_a {
         actions = {
             a_0();
         }

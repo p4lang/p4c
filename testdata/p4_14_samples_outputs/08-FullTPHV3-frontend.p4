@@ -381,74 +381,74 @@ header h_8_4_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name("m")
     m_t m;
 }
 
 struct headers {
-    @name("h_16_1") 
+    @name("h_16_1")
     h_16_1_t  h_16_1;
-    @name("h_16_10") 
+    @name("h_16_10")
     h_16_10_t h_16_10;
-    @name("h_16_11") 
+    @name("h_16_11")
     h_16_11_t h_16_11;
-    @name("h_16_12") 
+    @name("h_16_12")
     h_16_12_t h_16_12;
-    @name("h_16_2") 
+    @name("h_16_2")
     h_16_2_t  h_16_2;
-    @name("h_16_3") 
+    @name("h_16_3")
     h_16_3_t  h_16_3;
-    @name("h_16_4") 
+    @name("h_16_4")
     h_16_4_t  h_16_4;
-    @name("h_16_5") 
+    @name("h_16_5")
     h_16_5_t  h_16_5;
-    @name("h_16_6") 
+    @name("h_16_6")
     h_16_6_t  h_16_6;
-    @name("h_16_7") 
+    @name("h_16_7")
     h_16_7_t  h_16_7;
-    @name("h_16_8") 
+    @name("h_16_8")
     h_16_8_t  h_16_8;
-    @name("h_16_9") 
+    @name("h_16_9")
     h_16_9_t  h_16_9;
-    @name("h_32_1") 
+    @name("h_32_1")
     h_32_1_t  h_32_1;
-    @name("h_32_10") 
+    @name("h_32_10")
     h_32_10_t h_32_10;
-    @name("h_32_11") 
+    @name("h_32_11")
     h_32_11_t h_32_11;
-    @name("h_32_12") 
+    @name("h_32_12")
     h_32_12_t h_32_12;
-    @name("h_32_13") 
+    @name("h_32_13")
     h_32_13_t h_32_13;
-    @name("h_32_14") 
+    @name("h_32_14")
     h_32_14_t h_32_14;
-    @name("h_32_15") 
+    @name("h_32_15")
     h_32_15_t h_32_15;
-    @name("h_32_16") 
+    @name("h_32_16")
     h_32_16_t h_32_16;
-    @name("h_32_2") 
+    @name("h_32_2")
     h_32_2_t  h_32_2;
-    @name("h_32_3") 
+    @name("h_32_3")
     h_32_3_t  h_32_3;
-    @name("h_32_4") 
+    @name("h_32_4")
     h_32_4_t  h_32_4;
-    @name("h_32_5") 
+    @name("h_32_5")
     h_32_5_t  h_32_5;
-    @name("h_32_6") 
+    @name("h_32_6")
     h_32_6_t  h_32_6;
-    @name("h_32_7") 
+    @name("h_32_7")
     h_32_7_t  h_32_7;
-    @name("h_32_8") 
+    @name("h_32_8")
     h_32_8_t  h_32_8;
-    @name("h_32_9") 
+    @name("h_32_9")
     h_32_9_t  h_32_9;
-    @name("h_8_1") 
+    @name("h_8_1")
     h_8_1_t   h_8_1;
-    @name("h_8_2") 
+    @name("h_8_2")
     h_8_2_t   h_8_2;
-    @name("h_8_3") 
+    @name("h_8_3")
     h_8_3_t   h_8_3;
-    @name("h_8_4") 
+    @name("h_8_4")
     h_8_4_t   h_8_4;
 }
 
@@ -725,14 +725,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_egress_spec") action set_egress_spec_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("t1") table t1_0() {
+    @name("t1") table t1_0 {
         actions = {
             a1_0();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("use_16bit_fields_1") table use_16bit_fields() {
+    @name("use_16bit_fields_1") table use_16bit_fields {
         actions = {
             set_egress_spec_0();
             @default_only NoAction();
@@ -805,7 +805,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("use_16bit_fields_2") table use_16bit_fields_0() {
+    @name("use_16bit_fields_2") table use_16bit_fields_0 {
         actions = {
             set_egress_spec_0();
             @default_only NoAction();
@@ -846,7 +846,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("use_32bit_fields_1") table use_32bit_fields() {
+    @name("use_32bit_fields_1") table use_32bit_fields {
         actions = {
             set_egress_spec_0();
             @default_only NoAction();
@@ -887,7 +887,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("use_32bit_fields_2") table use_32bit_fields_0() {
+    @name("use_32bit_fields_2") table use_32bit_fields_0 {
         actions = {
             set_egress_spec_0();
             @default_only NoAction();
@@ -927,7 +927,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("use_8bit_fields") table use_8bit_fields_0() {
+    @name("use_8bit_fields") table use_8bit_fields_0 {
         actions = {
             set_egress_spec_0();
             @default_only NoAction();

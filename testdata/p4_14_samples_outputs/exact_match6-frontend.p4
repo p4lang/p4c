@@ -17,12 +17,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("meta") 
+    @name("meta")
     meta_t meta;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -39,7 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             addf2_0();
             noop_0();

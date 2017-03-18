@@ -14,7 +14,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -32,7 +32,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1();
             noop();
@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test2") table test2() {
+    @name("test2") table test2 {
         actions = {
             setb1();
             noop();
@@ -55,11 +55,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (hdr.data.b2 == hdr.data.b3 || hdr.data.b4 == 8w10) 
-            if (hdr.data.b1 == hdr.data.b2 && hdr.data.b4 == 8w10) 
+        if (hdr.data.b2 == hdr.data.b3 || hdr.data.b4 == 8w10)
+            if (hdr.data.b1 == hdr.data.b2 && hdr.data.b4 == 8w10)
                 test1.apply();
-        else 
-            if (hdr.data.b1 != hdr.data.b2) 
+        else
+            if (hdr.data.b1 != hdr.data.b2)
                 test2.apply();
     }
 }

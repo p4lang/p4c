@@ -15,12 +15,10 @@ struct Meta {
 }
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<32> tmp;
     state start {
         b.extract<hdr>(h.hs.next);
         m.v = h.hs.last.f2;
-        tmp = m.v + h.hs.last.f2;
-        m.v = tmp;
+        m.v = m.v + h.hs.last.f2;
         transition select(h.hs.last.f1) {
             32w0: start;
             default: accept;
@@ -53,7 +51,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("set_port") action set_port_0() {
         sm.egress_spec = (bit<9>)m.v;
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             set_port_0();
         }

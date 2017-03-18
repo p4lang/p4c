@@ -16,7 +16,7 @@ limitations under the License.
 
 control c() {
     action a() {}
-    table t() {
+    table t {
         actions = { a(); }
         default_action = a();
     }

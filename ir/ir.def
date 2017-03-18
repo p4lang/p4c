@@ -233,7 +233,6 @@ class TableProperties : ISimpleNamespace {
 
 class P4Table : Declaration, IAnnotated, IApply {
     Annotations     annotations;
-    ParameterList   parameters;
     TableProperties properties;
 
     Annotations getAnnotations() const override { return annotations; }

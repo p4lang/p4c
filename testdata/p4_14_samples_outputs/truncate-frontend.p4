@@ -10,7 +10,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("hdrA") 
+    @name("hdrA")
     hdrA_t hdrA;
 }
 
@@ -33,7 +33,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
         truncate((bit<32>)new_length);
     }
-    @name("t_ingress") table t_ingress_0() {
+    @name("t_ingress") table t_ingress_0 {
         actions = {
             _nop_0();
             _truncate_0();

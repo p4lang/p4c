@@ -334,12 +334,7 @@ void ResolveReferences::postorder(const IR::Function* function) {
 
 bool ResolveReferences::preorder(const IR::P4Table* t) {
     refMap->usedName(t->name.name);
-    addToContext(t->parameters);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::P4Table* t) {
-    removeFromContext(t->parameters);
 }
 
 bool ResolveReferences::preorder(const IR::TableProperties *p) {

@@ -12,7 +12,7 @@ control c(bit<1> x) {
     }
     action drop() {
     }
-    table unit() {
+    table unit {
         key = {
             x: exact;
         }
@@ -26,4 +26,3 @@ control c(bit<1> x) {
     apply {
     }
 }
-

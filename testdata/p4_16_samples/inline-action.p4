@@ -23,7 +23,7 @@ control p(inout bit bt) {
         a(bt);
     }
 
-    table t() {
+    table t {
         actions = { b; }
         default_action = b;
     }

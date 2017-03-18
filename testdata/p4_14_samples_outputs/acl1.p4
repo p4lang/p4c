@@ -132,28 +132,28 @@ header data_t {
 }
 
 struct metadata {
-    @pa_solitary("ingress", "acl_metadata.if_label") @name("acl_metadata") 
+    @pa_solitary("ingress", "acl_metadata.if_label") @name("acl_metadata")
     acl_metadata_t      acl_metadata;
-    @name("fabric_metadata") 
+    @name("fabric_metadata")
     fabric_metadata_t   fabric_metadata;
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t  ingress_metadata;
-    @name("ipv4_metadata") 
+    @name("ipv4_metadata")
     ipv4_metadata_t     ipv4_metadata;
-    @name("ipv6_metadata") 
+    @name("ipv6_metadata")
     ipv6_metadata_t     ipv6_metadata;
-    @name("l2_metadata") 
+    @name("l2_metadata")
     l2_metadata_t       l2_metadata;
-    @name("l3_metadata") 
+    @name("l3_metadata")
     l3_metadata_t       l3_metadata;
-    @name("security_metadata") 
+    @name("security_metadata")
     security_metadata_t security_metadata;
-    @name("tunnel_metadata") 
+    @name("tunnel_metadata")
     tunnel_metadata_t   tunnel_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -187,7 +187,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("congestion_mirror_set") action congestion_mirror_set() {
     }
-    @name("drop_stats") table drop_stats_0() {
+    @name("drop_stats") table drop_stats_0 {
         actions = {
             drop_stats_update;
             @default_only NoAction;
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 256;
         default_action = NoAction();
     }
-    @name("system_acl") table system_acl() {
+    @name("system_acl") table system_acl {
         actions = {
             nop;
             redirect_to_cpu;

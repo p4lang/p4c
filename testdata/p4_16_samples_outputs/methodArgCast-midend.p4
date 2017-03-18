@@ -8,7 +8,7 @@ control c() {
     action act() {
         e.setValue(32w10);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

@@ -14,7 +14,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -29,7 +29,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_port") action set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             set_port;
             @default_only NoAction;

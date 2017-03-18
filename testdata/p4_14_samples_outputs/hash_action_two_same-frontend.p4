@@ -22,14 +22,14 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata") 
+    @name("counter_metadata")
     counter_metadata_t counter_metadata;
-    @name("meter_metadata") 
+    @name("meter_metadata")
     meter_metadata_t   meter_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         count1_0.count((bit<32>)meta.counter_metadata.counter_index);
         meter1_0.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, hdr.data.color_1);
     }
-    @name("index_setter") table index_setter_0() {
+    @name("index_setter") table index_setter_0 {
         actions = {
             set_index_0();
             @default_only NoAction();
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 2048;
         default_action = NoAction();
     }
-    @name("stats") table stats_0() {
+    @name("stats") table stats_0 {
         actions = {
             count_entries_0();
             @default_only NoAction();

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ control c(out bit<32> x) {
     action a1() {}
     action a2() {}
     action a3() {}
-    
-    table t() {
+
+    table t {
         actions = { a1; a2; }
         default_action = a1;
     }
-    
+
     apply {
         switch (t.apply().action_run) {
             a1:

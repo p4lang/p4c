@@ -23,7 +23,7 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     standard_metadata_t tmp;
     @name("a") action a_0() {
     }
-    @name("t") table t() {
+    @name("t") table t {
         key = {
         }
         actions = {
@@ -49,11 +49,26 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         std_meta.recirculate_port = tmp.recirculate_port;
         std_meta.packet_length = tmp.packet_length;
     }
-    table tbl_act() {
+    action act_1() {
+        hasReturned_0 = false;
+    }
+    table tbl_act {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
+    }
+    table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
+    }
+    table tbl_act_1 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
     }
     apply {
         switch (t.apply().action_run) {

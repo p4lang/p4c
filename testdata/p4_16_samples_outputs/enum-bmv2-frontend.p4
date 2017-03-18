@@ -14,11 +14,9 @@ enum Choice {
 
 control compute(inout hdr h) {
     Choice c_0;
-    bool tmp;
     apply {
         c_0 = Choice.First;
-        tmp = c_0 == Choice.Second;
-        if (tmp) 
+        if (c_0 == Choice.Second) 
             h.c = h.a;
         else 
             h.c = h.b;

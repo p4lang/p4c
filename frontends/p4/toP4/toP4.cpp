@@ -721,8 +721,8 @@ bool ToP4::preorder(const IR::SelectExpression* e) {
 bool ToP4::preorder(const IR::ListExpression* e) {
     cstring start, end;
     if (listTerminators.empty()) {
-        start = "{";
-        end = "}";
+        start = "{ ";
+        end = " }";
     } else {
         start = listTerminators.back().start;
         end = listTerminators.back().end;
@@ -1181,7 +1181,6 @@ bool ToP4::preorder(const IR::P4Table* c) {
     visit(c->annotations);
     builder.append("table ");
     builder.append(c->name);
-    visit(c->parameters);
     builder.spc();
     builder.blockStart();
     setVecSep("\n", "\n");

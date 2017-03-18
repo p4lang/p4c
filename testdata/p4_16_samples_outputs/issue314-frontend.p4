@@ -9,10 +9,8 @@ struct struct_t {
 }
 
 parser Parser(inout struct_t input) {
-    int<32> tmp;
     state start {
-        tmp = input.stack.lastIndex;
-        input.stack[tmp].field = 8w1;
+        input.stack[input.stack.lastIndex].field = 8w1;
         transition accept;
     }
 }

@@ -13,7 +13,7 @@ control c() {
         x_0.field_0 = false;
         f<tuple_0>(x_0);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

@@ -1,8 +1,6 @@
 control c(inout bit<32> y) {
-    bit<32> tmp;
     apply {
-        tmp = y + 32w1;
-        y = tmp;
+        y = y + 32w1;
     }
 }
 

@@ -51,7 +51,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("Reject") action Reject_0() {
         pass = false;
     }
-    @name("Check_ip") table Check_ip() {
+    @name("Check_ip") table Check_ip {
         key = {
             address_0: exact @name("address") ;
         }
@@ -76,25 +76,25 @@ control pipe(inout Headers_t headers, out bool pass) {
     action act_2() {
         address_0 = headers.ipv4.dstAddr;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_2() {
+    table tbl_act_2 {
         actions = {
             act_2();
         }

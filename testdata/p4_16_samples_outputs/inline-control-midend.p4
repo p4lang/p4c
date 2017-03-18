@@ -10,7 +10,7 @@ control d(out bit<32> x) {
         cinst_tmp_0 = cinst_inst_0.get();
         x = cinst_tmp_0;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

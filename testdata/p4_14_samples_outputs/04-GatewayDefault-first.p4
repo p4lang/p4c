@@ -17,12 +17,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name("ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -36,7 +36,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("e_t1") table e_t1() {
+    @name("e_t1") table e_t1 {
         actions = {
             nop();
             @default_only NoAction();
@@ -72,7 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_f4") action set_f4(bit<64> f4) {
         meta.ing_metadata.f4 = f4;
     }
-    @name("i_t1") table i_t1() {
+    @name("i_t1") table i_t1 {
         actions = {
             nop();
             ing_drop();
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("i_t2") table i_t2() {
+    @name("i_t2") table i_t2 {
         actions = {
             nop();
             set_f2();
@@ -98,7 +98,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("i_t3") table i_t3() {
+    @name("i_t3") table i_t3 {
         actions = {
             nop();
             set_f3();
@@ -109,7 +109,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("i_t4") table i_t4() {
+    @name("i_t4") table i_t4 {
         actions = {
             nop();
             set_f4();

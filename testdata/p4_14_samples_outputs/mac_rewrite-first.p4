@@ -49,16 +49,16 @@ header ipv6_t {
 }
 
 struct metadata {
-    @name("egress_metadata") 
+    @name("egress_metadata")
     egress_metadata_t egress_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("ipv6") 
+    @name("ipv6")
     ipv6_t     ipv6;
 }
 
@@ -107,7 +107,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         hdr.ethernet.dstAddr[47:32] = 16w0x0;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("mac_rewrite") table mac_rewrite() {
+    @name("mac_rewrite") table mac_rewrite {
         actions = {
             nop();
             rewrite_ipv4_unicast_mac();
@@ -125,7 +125,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         default_action = NoAction();
     }
     apply {
-        if (meta.egress_metadata.routed == 1w1) 
+        if (meta.egress_metadata.routed == 1w1)
             mac_rewrite.apply();
     }
 }
@@ -136,7 +136,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
     }
-    @name("setup") table setup() {
+    @name("setup") table setup {
         actions = {
             do_setup();
             @default_only NoAction();

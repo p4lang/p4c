@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1() {
+    @name("A1") table A1 {
         actions = {
             setb1_0();
             noop_0();
@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name("A2") table A2() {
+    @name("A2") table A2 {
         actions = {
             setb3_0();
             noop_4();
@@ -90,7 +90,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name("A3") table A3() {
+    @name("A3") table A3 {
         actions = {
             on_hit_0();
             on_miss_0();
@@ -101,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name("A4") table A4() {
+    @name("A4") table A4 {
         actions = {
             on_hit_2();
             on_miss_2();
@@ -112,7 +112,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_9();
     }
-    @name("B1") table B1() {
+    @name("B1") table B1 {
         actions = {
             setb2_0();
             noop_5();
@@ -123,7 +123,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_10();
     }
-    @name("B2") table B2() {
+    @name("B2") table B2 {
         actions = {
             setb4_0();
             noop_6();
@@ -138,7 +138,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.data.b1 == 32w0) {
             A1.apply();
             A2.apply();
-            if (hdr.data.f1 == 32w0) 
+            if (hdr.data.f1 == 32w0)
                 switch (A3.apply().action_run) {
                     on_hit_0: {
                         A4.apply();

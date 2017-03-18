@@ -24,14 +24,14 @@ header vag_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name("ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("vag") 
+    @name("vag")
     vag_t      vag;
 }
 
@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("e_t1") table e_t1() {
+    @name("e_t1") table e_t1 {
         actions = {
             nop();
             @default_only NoAction();
@@ -82,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_f4") action set_f4(bit<64> f4) {
         meta.ing_metadata.f4 = f4;
     }
-    @name("i_t1") table i_t1() {
+    @name("i_t1") table i_t1 {
         actions = {
             nop();
             ing_drop();
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t2") table i_t2() {
+    @name("i_t2") table i_t2 {
         actions = {
             nop();
             set_f2();
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t3") table i_t3() {
+    @name("i_t3") table i_t3 {
         actions = {
             nop();
             set_f3();
@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t4") table i_t4() {
+    @name("i_t4") table i_t4 {
         actions = {
             nop();
             set_f4();
@@ -136,10 +136,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         i_t1.apply();
         if (meta.ing_metadata.f1 == hdr.vag.f1) {
             i_t2.apply();
-            if (meta.ing_metadata.f2 == hdr.vag.f2) 
+            if (meta.ing_metadata.f2 == hdr.vag.f2)
                 i_t3.apply();
         }
-        else 
+        else
             i_t4.apply();
     }
 }

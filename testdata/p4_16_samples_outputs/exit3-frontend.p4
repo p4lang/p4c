@@ -1,10 +1,9 @@
 control ctrl(out bit<32> c) {
     bit<32> a_0;
-    bool tmp;
     @name("e") action e_0() {
         exit;
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             e_0();
         }
@@ -13,10 +12,9 @@ control ctrl(out bit<32> c) {
     apply {
         a_0 = 32w0;
         c = 32w2;
-        tmp = a_0 == 32w0;
-        if (tmp) 
+        if (a_0 == 32w0)
             t_0.apply();
-        else 
+        else
             t_0.apply();
         c = 32w5;
     }

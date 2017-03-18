@@ -14,7 +14,7 @@ control Ing() {
         tmp_2 = tmp_2;
         tmp_1 = tmp_1;
     }
-    table tbl_cond() {
+    table tbl_cond {
         actions = {
             cond_0();
         }

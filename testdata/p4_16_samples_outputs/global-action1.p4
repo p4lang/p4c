@@ -4,7 +4,7 @@ action Global1() {
     Global();
 }
 control c() {
-    table t() {
+    table t {
         actions = {
             Global;
         }

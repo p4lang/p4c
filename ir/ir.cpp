@@ -154,7 +154,7 @@ P4Table::getApplyMethodType() const {
     auto rettype = new IR::Type_Struct(Util::SourceInfo(), ID(name),
                                        IR::Annotations::empty, fields);
     auto applyMethod = new IR::Type_Method(Util::SourceInfo(), new TypeParameters(),
-                                           rettype, parameters);
+                                           rettype, new IR::ParameterList());
     return applyMethod;
 }
 

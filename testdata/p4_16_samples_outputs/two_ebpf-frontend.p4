@@ -47,9 +47,10 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("Reject") action Reject_0() {
         pass = false;
     }
-    @name("Check_ip") table Check_ip_0(in IPv4Address address) {
+    IPv4Address address_0;
+    @name("Check_ip") table Check_ip_0 {
         key = {
-            address: exact @name("address") ;
+            address_0: exact @name("address") ;
         }
         actions = {
             Reject_0();
@@ -64,8 +65,10 @@ control pipe(inout Headers_t headers, out bool pass) {
             pass = false;
             return;
         }
-        Check_ip_0.apply(headers.ipv4.srcAddr);
-        Check_ip_0.apply(headers.ipv4.dstAddr);
+        address_0 = headers.ipv4.srcAddr;
+        Check_ip_0.apply();
+        address_0 = headers.ipv4.dstAddr;
+        Check_ip_0.apply();
     }
 }
 

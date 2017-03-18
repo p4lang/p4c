@@ -21,7 +21,7 @@ control c(inout bit<16> p) {
     action act() {
         cntr.run(16w6);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

@@ -5,7 +5,7 @@ control ctrl() {
     }
     action c() {
     }
-    table t() {
+    table t {
         actions = {
             a;
             b;
@@ -15,13 +15,12 @@ control ctrl() {
     }
     apply {
         switch (t.apply().action_run) {
-            a: 
+            a:
             b: {
                 return;
             }
-            c: 
+            c:
         }
 
     }
 }
-

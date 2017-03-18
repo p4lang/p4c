@@ -9,7 +9,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -34,7 +34,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
         cntDum.count((bit<32>)idx);
     }
-    @name("tab1") table tab1() {
+    @name("tab1") table tab1 {
         actions = {
             act();
             @default_only NoAction();

@@ -370,6 +370,7 @@ class ExpressionConverter : public Inspector {
         BUG("%1%: unhandled case", expression);
     }
 
+#if 0
     void postorder(const IR::Shr* expression) override {
         // special handling for shift of a lookahead
         auto l = get(expression->left);
@@ -403,6 +404,7 @@ class ExpressionConverter : public Inspector {
         }
         binary(expression);
     }
+#endif
 
     void postorder(const IR::Cast* expression) override {
         // nothing to do for casts - the ArithmeticFixup pass should have handled them already
@@ -410,6 +412,7 @@ class ExpressionConverter : public Inspector {
         map.emplace(expression, j);
     }
 
+#if 0
     void postorder(const IR::Slice* expression) override {
         // Special case for parser select: look for
         // packet.lookahead<T>()[h:l].  Convert to lookahead(l, h - l).
@@ -433,6 +436,7 @@ class ExpressionConverter : public Inspector {
         }
         BUG("%1%: unhandled case", expression);
     }
+#endif
 
     void postorder(const IR::Constant* expression) override {
         auto result = new Util::JsonObject();

@@ -52,13 +52,13 @@ control pipe(inout Headers_t headers, out bool pass) {
     action act_0() {
         pass = false;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act_0();
         }
@@ -68,7 +68,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (headers.ipv4.isValid()) {
             tbl_act.apply();
         }
-        else 
+        else
             tbl_act_0.apply();
     }
 }

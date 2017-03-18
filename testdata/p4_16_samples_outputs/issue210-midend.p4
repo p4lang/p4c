@@ -9,13 +9,13 @@ control Ing(out bit<32> a) {
     action act() {
         b = true;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_cond() {
+    table tbl_cond {
         actions = {
             cond_0();
         }
