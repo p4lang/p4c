@@ -9,7 +9,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -39,7 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         default_action = NoAction();
     }

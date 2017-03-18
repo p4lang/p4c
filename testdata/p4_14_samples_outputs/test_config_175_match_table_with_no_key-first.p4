@@ -21,7 +21,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("pkt")
+    @name("pkt") 
     pkt_t pkt;
 }
 
@@ -66,10 +66,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        table_0.apply;
-        table_1.apply;
-        if (hdr.pkt.field_i_8 == 8w0)
-            table_2.apply;
+        table_0.apply();
+        table_1.apply();
+        if (hdr.pkt.field_i_8 == 8w0) 
+            table_2.apply();
     }
 }
 

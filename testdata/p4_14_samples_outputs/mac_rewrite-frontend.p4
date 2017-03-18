@@ -49,16 +49,16 @@ header ipv6_t {
 }
 
 struct metadata {
-    @name("egress_metadata")
+    @name("egress_metadata") 
     egress_metadata_t egress_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6")
+    @name("ipv6") 
     ipv6_t     ipv6;
 }
 
@@ -125,7 +125,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         default_action = NoAction();
     }
     apply {
-        if (meta.egress_metadata.routed == 1w1)
+        if (meta.egress_metadata.routed == 1w1) 
             mac_rewrite_0.apply();
     }
 }

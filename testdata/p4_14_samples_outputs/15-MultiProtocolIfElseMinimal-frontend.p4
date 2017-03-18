@@ -36,16 +36,16 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ing_metadata")
+    @name("ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("vlan_tag")
+    @name("vlan_tag") 
     vlan_tag_t vlan_tag;
 }
 
@@ -106,9 +106,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (hdr.ethernet.etherType == 16w0x800)
+        if (hdr.ethernet.etherType == 16w0x800) 
             ipv4_match_0.apply();
-        else
+        else 
             l2_match_0.apply();
     }
 }

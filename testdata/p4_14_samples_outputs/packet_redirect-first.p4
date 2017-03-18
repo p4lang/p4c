@@ -27,16 +27,16 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("metaA")
+    @name("metaA") 
     metaA_t              metaA;
-    @name("metaB")
+    @name("metaB") 
     metaB_t              metaB;
 }
 
 struct headers {
-    @name("hdrA")
+    @name("hdrA") 
     hdrA_t hdrA;
 }
 
@@ -53,7 +53,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("_recirculate") action _recirculate() {
         recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
     }
-    @name("_clone_e2e") action _clone_e2e(bit<8> mirror_id) {
+    @name("_clone_e2e") action _clone_e2e(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_egress") table t_egress {
@@ -64,8 +64,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact;
-            standard_metadata.instance_type: ternary;
+            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
         default_action = NoAction();
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("_resubmit") action _resubmit() {
         resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
     }
-    @name("_clone_i2e") action _clone_i2e(bit<8> mirror_id) {
+    @name("_clone_i2e") action _clone_i2e(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_ingress_1") table t_ingress_1 {
@@ -99,8 +99,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.hdrA.f1  : exact;
-            meta.metaA.f1: exact;
+            hdr.hdrA.f1  : exact @name("hdr.hdrA.f1") ;
+            meta.metaA.f1: exact @name("meta.metaA.f1") ;
         }
         size = 128;
         default_action = NoAction();
@@ -113,8 +113,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact;
-            standard_metadata.instance_type: ternary;
+            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
         default_action = NoAction();

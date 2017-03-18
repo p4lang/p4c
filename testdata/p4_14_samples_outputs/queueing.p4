@@ -21,14 +21,14 @@ header queueing_metadata_t {
 }
 
 struct metadata {
-    @name("queueing_metadata")
+    @name("queueing_metadata") 
     queueing_metadata_t_0 queueing_metadata;
 }
 
 struct headers {
-    @name("hdr1")
+    @name("hdr1") 
     hdr1_t              hdr1;
-    @name("queueing_hdr")
+    @name("queueing_hdr") 
     queueing_metadata_t queueing_hdr;
 }
 

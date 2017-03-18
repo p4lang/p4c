@@ -26,3 +26,4 @@ control c(bit<1> x) {
     apply {
     }
 }
+

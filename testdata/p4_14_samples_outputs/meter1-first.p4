@@ -19,14 +19,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta")
+    @name("meta") 
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -63,7 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.meter_tag: exact;
+            meta.meta.meter_tag: exact @name("meta.meta.meter_tag") ;
         }
         size = 16;
         default_action = NoAction();
@@ -83,14 +83,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         size = 16384;
         default_action = NoAction();
         meters = my_meter;
     }
     apply {
-        m_table.apply;
+        m_table.apply();
         m_filter.apply();
     }
 }

@@ -83,19 +83,18 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop_1, IPv4Address ipv4_dest, PortId port) {
-        nextHop_1 = ipv4_dest;
+    @name("Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
+        nextHop_0 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
     }
-    IPv4Address nextHop_2;
     @name("ipv4_match") table ipv4_match_0 {
         key = {
             headers.ip.dstAddr: lpm @name("headers.ip.dstAddr") ;
         }
         actions = {
             Drop_action_0();
-            Set_nhop_0(nextHop_2);
+            Set_nhop_0();
         }
         size = 1024;
         default_action = Drop_action_0();
@@ -116,10 +115,9 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    IPv4Address nextHop_3;
     @name("dmac") table dmac_0 {
         key = {
-            nextHop_3: exact @name("nextHop") ;
+            nextHop_0: exact @name("nextHop") ;
         }
         actions = {
             Drop_action_0();
@@ -148,15 +146,13 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             return;
         }
         ipv4_match_0.apply();
-        nextHop_0 = nextHop_2;
-        if (outCtrl.outputPort == 4w0xf)
+        if (outCtrl.outputPort == 4w0xf) 
             return;
         check_ttl_0.apply();
-        if (outCtrl.outputPort == 4w0xe)
+        if (outCtrl.outputPort == 4w0xe) 
             return;
-        nextHop_3 = nextHop_0;
         dmac_0.apply();
-        if (outCtrl.outputPort == 4w0xf)
+        if (outCtrl.outputPort == 4w0xf) 
             return;
         smac_0.apply();
     }

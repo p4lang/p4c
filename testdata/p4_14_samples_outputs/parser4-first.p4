@@ -40,15 +40,15 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t    ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t        ipv4;
-    @name("mpls_bos")
+    @name("mpls_bos") 
     mpls_t        mpls_bos;
-    @name("mpls")
+    @name("mpls") 
     mpls_t[3]     mpls;
-    @name("vlan_tag_")
+    @name("vlan_tag_") 
     vlan_tag_t[2] vlan_tag_;
 }
 
@@ -72,7 +72,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls") state parse_mpls {
-        transition select((packet.lookahead<bit<24>>())[23:23]) {
+        transition select((packet.lookahead<bit<24>>())[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }

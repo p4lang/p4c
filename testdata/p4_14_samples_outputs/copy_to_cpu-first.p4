@@ -20,14 +20,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("cpu_header")
+    @name("cpu_header") 
     cpu_header_t cpu_header;
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t   ethernet;
 }
 
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            standard_metadata.instance_type: exact;
+            standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
         }
         size = 16;
         default_action = NoAction();

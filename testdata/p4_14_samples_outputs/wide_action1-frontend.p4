@@ -31,12 +31,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("m")
+    @name("m") 
     metadata_t m;
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 

@@ -20,16 +20,16 @@ header axon_hop_t {
 }
 
 struct metadata {
-    @name("my_metadata")
+    @name("my_metadata") 
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name("axon_head")
+    @name("axon_head") 
     axon_head_t    axon_head;
-    @name("axon_fwdHop")
+    @name("axon_fwdHop") 
     axon_hop_t[64] axon_fwdHop;
-    @name("axon_revHop")
+    @name("axon_revHop") 
     axon_hop_t[64] axon_revHop;
 }
 
@@ -106,16 +106,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.axon_head.isValid()     : exact;
-            hdr.axon_fwdHop[0].isValid(): exact;
+            hdr.axon_head.isValid()     : exact @name("hdr.axon_head.isValid()") ;
+            hdr.axon_fwdHop[0].isValid(): exact @name("hdr.axon_fwdHop[0].isValid()") ;
         }
         size = 1;
         default_action = NoAction();
     }
     apply {
-        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen)
+        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
             drop_pkt.apply();
-        else
+        else 
             route_pkt.apply();
     }
 }

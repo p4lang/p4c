@@ -13,12 +13,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("ing_metadata")
+    @name("ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ing_drop") action ing_drop_0() {
         meta.ing_metadata.drop = 1w1;
     }
-    @name("dmac") table dmac_0() {
+    @name("dmac") table dmac_0 {
         actions = {
             nop_1();
             set_egress_port_0();

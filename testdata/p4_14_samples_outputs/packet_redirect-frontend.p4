@@ -27,16 +27,16 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("metaA")
+    @name("metaA") 
     metaA_t              metaA;
-    @name("metaB")
+    @name("metaB") 
     metaB_t              metaB;
 }
 
 struct headers {
-    @name("hdrA")
+    @name("hdrA") 
     hdrA_t hdrA;
 }
 

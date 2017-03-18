@@ -64,20 +64,20 @@ header tcp_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta")
+    @name("meta") 
     meta_t               meta;
 }
 
 struct headers {
-    @name("cpu_header")
+    @name("cpu_header") 
     cpu_header_t cpu_header;
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t   ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t       ipv4;
-    @name("tcp")
+    @name("tcp") 
     tcp_t        tcp;
 }
 
@@ -145,7 +145,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
         default_action = NoAction();
@@ -158,9 +158,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction();
     }
     apply {
-        if (standard_metadata.instance_type == 32w0)
+        if (standard_metadata.instance_type == 32w0) 
             send_frame.apply();
-        else
+        else 
             send_to_cpu.apply();
     }
 }
@@ -209,7 +209,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.nhop_ipv4: exact;
+            meta.meta.nhop_ipv4: exact @name("meta.meta.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction();
@@ -221,7 +221,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.if_index: exact;
+            meta.meta.if_index: exact @name("meta.meta.if_index") ;
         }
         default_action = NoAction();
     }
@@ -232,7 +232,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.ipv4_da: lpm;
+            meta.meta.ipv4_da: lpm @name("meta.meta.ipv4_da") ;
         }
         size = 1024;
         default_action = NoAction();
@@ -248,13 +248,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.is_ext_if: exact;
-            hdr.ipv4.isValid() : exact;
-            hdr.tcp.isValid()  : exact;
-            hdr.ipv4.srcAddr   : ternary;
-            hdr.ipv4.dstAddr   : ternary;
-            hdr.tcp.srcPort    : ternary;
-            hdr.tcp.dstPort    : ternary;
+            meta.meta.is_ext_if: exact @name("meta.meta.is_ext_if") ;
+            hdr.ipv4.isValid() : exact @name("hdr.ipv4.isValid()") ;
+            hdr.tcp.isValid()  : exact @name("hdr.tcp.isValid()") ;
+            hdr.ipv4.srcAddr   : ternary @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.dstAddr   : ternary @name("hdr.ipv4.dstAddr") ;
+            hdr.tcp.srcPort    : ternary @name("hdr.tcp.srcPort") ;
+            hdr.tcp.dstPort    : ternary @name("hdr.tcp.dstPort") ;
         }
         size = 128;
         default_action = NoAction();
@@ -282,9 +282,9 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     Checksum16() tcp_checksum;
     apply {
-        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })))
+        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
             mark_to_drop();
-        if (hdr.tcp.isValid() && hdr.tcp.checksum == (tcp_checksum.get<tuple<bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16>>>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr })))
+        if (hdr.tcp.isValid() && hdr.tcp.checksum == (tcp_checksum.get<tuple<bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16>>>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr }))) 
             mark_to_drop();
     }
 }
@@ -294,7 +294,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() tcp_checksum;
     apply {
         hdr.ipv4.hdrChecksum = ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        if (hdr.tcp.isValid())
+        if (hdr.tcp.isValid()) 
             hdr.tcp.checksum = tcp_checksum.get<tuple<bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16>>>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr });
     }
 }

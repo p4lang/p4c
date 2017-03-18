@@ -34,26 +34,32 @@ extern bs {
 struct Packet_data {
 }
 
-control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
+control T_host_0(inout TArg1 tArg1, in TArg2 aArg2) {
     @name("B_action") action B_action_0(out bit<9> barg_0, BParamType bData) {
         barg_0 = (bit<9>)bData;
     }
     @name("C_action") action C_action_0(bit<9> cData) {
+        tArg1.field1 = cData;
     }
-    TArg1 tArg1_0;
-    TArg2 aArg2_0;
     @name("T") table T_0 {
         key = {
-            tArg1_0.field1: ternary @name("tArg1.field1") ;
-            aArg2_0.field2: exact @name("aArg2.field2") ;
+            tArg1.field1: ternary @name("tArg1.field1") ;
+            aArg2.field2: exact @name("aArg2.field2") ;
         }
         actions = {
-            B_action_0(tArg1_0.field1);
+            B_action_0(tArg1.field1);
             C_action_0();
         }
         size = 32w5;
         const default_action = C_action_0(9w5);
     }
+    apply {
+        T_0.apply();
+    }
+}
+
+control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
+    @name("thost") T_host_0() thost_0;
     @name("Drop") action Drop_0() {
         pArg1.drop = true;
     }
@@ -68,14 +74,8 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
         const default_action = NoAction();
     }
     apply {
-        tArg1_0 = pArg1;
-        aArg2_0 = pArg2;
-        T_0.apply();
-        pArg1 = tArg1_0;
-        tArg1_0 = pArg1;
-        aArg2_0 = pArg2;
-        T_0.apply();
-        pArg1 = tArg1_0;
+        thost_0.apply(pArg1, pArg2);
+        thost_0.apply(pArg1, pArg2);
         Tinner_0.apply();
     }
 }

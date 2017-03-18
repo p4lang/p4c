@@ -27,14 +27,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("routing_metadata")
+    @name("routing_metadata") 
     routing_metadata_t routing_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
 }
 
@@ -137,7 +137,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     apply {
         tmp = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         tmp_0 = hdr.ipv4.hdrChecksum == tmp;
-        if (tmp_0)
+        if (tmp_0) 
             mark_to_drop();
     }
 }

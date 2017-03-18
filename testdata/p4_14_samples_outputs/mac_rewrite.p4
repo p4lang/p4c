@@ -49,16 +49,16 @@ header ipv6_t {
 }
 
 struct metadata {
-    @name("egress_metadata")
+    @name("egress_metadata") 
     egress_metadata_t egress_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6")
+    @name("ipv6") 
     ipv6_t     ipv6;
 }
 

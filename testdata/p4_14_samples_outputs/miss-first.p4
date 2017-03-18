@@ -15,7 +15,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1: ternary @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }
@@ -51,7 +51,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f3: ternary;
+            hdr.data.f3: ternary @name("hdr.data.f3") ;
         }
         default_action = NoAction();
     }
@@ -63,9 +63,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (test1.apply().hit)
+        if (test1.apply().hit) 
             ;
-        else
+        else 
             test3.apply();
         test4.apply();
     }
