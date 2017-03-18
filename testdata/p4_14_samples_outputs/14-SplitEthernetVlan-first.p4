@@ -29,17 +29,17 @@ struct metadata {
 }
 
 struct headers {
-    @name("cfi")
+    @name("cfi") 
     cfi_t         cfi;
-    @name("len_or_type")
+    @name("len_or_type") 
     len_or_type_t len_or_type;
-    @name("mac_da")
+    @name("mac_da") 
     mac_da_t      mac_da;
-    @name("mac_sa")
+    @name("mac_sa") 
     mac_sa_t      mac_sa;
-    @name("pcp")
+    @name("pcp") 
     pcp_t         pcp;
-    @name("vlan_id")
+    @name("vlan_id") 
     vlan_id_t     vlan_id;
 }
 
@@ -82,7 +82,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.mac_sa.mac: exact;
+            hdr.mac_sa.mac: exact @name("hdr.mac_sa.mac") ;
         }
         default_action = NoAction();
     }
@@ -100,8 +100,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.mac_da.mac       : exact;
-            hdr.len_or_type.value: exact;
+            hdr.mac_da.mac       : exact @name("hdr.mac_da.mac") ;
+            hdr.len_or_type.value: exact @name("hdr.len_or_type.value") ;
         }
         default_action = NoAction();
     }

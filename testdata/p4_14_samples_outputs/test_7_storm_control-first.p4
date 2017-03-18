@@ -83,12 +83,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("ingress_metadata")
+    @name("ingress_metadata") 
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -115,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.bd: exact;
-            hdr.ethernet.dstAddr    : ternary;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
+            hdr.ethernet.dstAddr    : ternary @name("hdr.ethernet.dstAddr") ;
         }
         size = 8192;
         default_action = NoAction();

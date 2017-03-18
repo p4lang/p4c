@@ -29,14 +29,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("ingress_metadata")
+    @name("ingress_metadata") 
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
 }
 
@@ -71,7 +71,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
         default_action = NoAction();
@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.bd: exact;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
         }
         size = 65536;
         default_action = NoAction();
@@ -115,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : exact;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : exact @name("hdr.ipv4.dstAddr") ;
         }
         size = 131072;
         default_action = NoAction();
@@ -128,8 +128,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : lpm;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 16384;
         default_action = NoAction();
@@ -141,7 +141,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
         default_action = NoAction();
@@ -152,7 +152,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         size = 32768;
         default_action = NoAction();
@@ -182,7 +182,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 control verifyChecksum(in headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     apply {
-        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })))
+        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
             mark_to_drop();
     }
 }

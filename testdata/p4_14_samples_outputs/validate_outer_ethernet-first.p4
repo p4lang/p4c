@@ -22,14 +22,14 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ingress_metadata")
+    @name("ingress_metadata") 
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t    ethernet;
-    @name("vlan_tag_")
+    @name("vlan_tag_") 
     vlan_tag_t[2] vlan_tag_;
 }
 
@@ -149,9 +149,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr      : ternary;
-            hdr.vlan_tag_[0].isValid(): exact;
-            hdr.vlan_tag_[1].isValid(): exact;
+            hdr.ethernet.dstAddr      : ternary @name("hdr.ethernet.dstAddr") ;
+            hdr.vlan_tag_[0].isValid(): exact @name("hdr.vlan_tag_[0].isValid()") ;
+            hdr.vlan_tag_[1].isValid(): exact @name("hdr.vlan_tag_[1].isValid()") ;
         }
         size = 64;
         default_action = NoAction();

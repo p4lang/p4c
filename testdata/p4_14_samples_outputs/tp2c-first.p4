@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1: ternary @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1: ternary @name("hdr.data.b1") ;
         }
         default_action = NoAction();
     }
@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
@@ -86,7 +86,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.b2: ternary;
+            hdr.data.b2: ternary @name("hdr.data.b2") ;
         }
         default_action = NoAction();
     }
@@ -116,7 +116,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.data.b1 == 32w0) {
             A1.apply();
             A2.apply();
-            if (hdr.data.f1 == 32w0)
+            if (hdr.data.f1 == 32w0) 
                 switch (A3.apply().action_run) {
                     on_hit: {
                         A4.apply();

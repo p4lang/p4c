@@ -22,9 +22,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t     data;
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -92,9 +92,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         routing_0.apply();
-        if (hdr.data.f5 != hdr.data.f6)
+        if (hdr.data.f5 != hdr.data.f6) 
             test1_0.apply();
-        else
+        else 
             test2_0.apply();
     }
 }

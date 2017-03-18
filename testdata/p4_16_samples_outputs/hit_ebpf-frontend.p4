@@ -44,6 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
+    bool tmp;
     @name("Reject") action Reject_0(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
@@ -65,7 +66,8 @@ control pipe(inout Headers_t headers, out bool pass) {
             pass = false;
             return;
         }
-        if (Check_src_ip_0.apply().hit)
+        tmp = Check_src_ip_0.apply().hit;
+        if (tmp) 
             pass = pass;
     }
 }

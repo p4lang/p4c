@@ -72,24 +72,24 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ing_metadata")
+    @name("ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("icmp")
+    @name("icmp") 
     icmp_t     icmp;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6")
+    @name("ipv6") 
     ipv6_t     ipv6;
-    @name("tcp")
+    @name("tcp") 
     tcp_t      tcp;
-    @name("udp")
+    @name("udp") 
     udp_t      udp;
-    @name("vlan_tag")
+    @name("vlan_tag") 
     vlan_tag_t vlan_tag;
 }
 
@@ -275,7 +275,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv4_packet: {
                 ipv4_match.apply();
             }
-            mpls_packet:
+            mpls_packet: 
             ipv6_packet: {
                 ipv6_match.apply();
             }

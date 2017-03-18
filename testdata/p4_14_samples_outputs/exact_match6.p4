@@ -17,12 +17,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("meta")
+    @name("meta") 
     meta_t meta;
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 

@@ -370,73 +370,11 @@ class ExpressionConverter : public Inspector {
         BUG("%1%: unhandled case", expression);
     }
 
-#if 0
-    void postorder(const IR::Shr* expression) override {
-        // special handling for shift of a lookahead
-        auto l = get(expression->left);
-        if (l->is<Util::JsonObject>()) {
-            auto jo = l->to<Util::JsonObject>();
-            auto type = jo->get("type");
-            if (type != nullptr && type->is<Util::JsonValue>()) {
-                auto val = type->to<Util::JsonValue>();
-                if (val->isString() && val->getString() == "lookahead") {
-                    auto r = jo->get("value");
-                    CHECK_NULL(r);
-                    auto arr = r->to<Util::JsonArray>();
-                    CHECK_NULL(arr);
-                    auto second = arr->at(1);
-                    BUG_CHECK(second->is<Util::JsonValue>(), "%1%: expected a value", second);
-                    auto max = second->to<Util::JsonValue>()->getInt();
-
-                    BUG_CHECK(expression->right->is<IR::Constant>(),
-                              "Not implemented: %1%", expression);
-                    auto amount = expression->right->to<IR::Constant>()->asInt();
-
-                    auto j = new Util::JsonObject();
-                    j->emplace("type", "lookahead");
-                    auto v = mkArrayField(j, "value");
-                    v->append(amount);
-                    v->append(max - amount);
-                    map.emplace(expression, j);
-                    return;
-                }
-            }
-        }
-        binary(expression);
-    }
-#endif
-
     void postorder(const IR::Cast* expression) override {
         // nothing to do for casts - the ArithmeticFixup pass should have handled them already
         auto j = get(expression->expr);
         map.emplace(expression, j);
     }
-
-#if 0
-    void postorder(const IR::Slice* expression) override {
-        // Special case for parser select: look for
-        // packet.lookahead<T>()[h:l].  Convert to lookahead(l, h - l).
-        // Only correct within a select() expression, but we cannot check that
-        // since the caller invokes the converter directly with the select argument.
-        auto m = get(expression->e0);
-        if (m->is<Util::JsonObject>()) {
-            auto val = m->to<Util::JsonObject>()->get("type");
-            if (val != nullptr && val->is<Util::JsonValue>() &&
-                *val->to<Util::JsonValue>() == "lookahead") {
-                int h = expression->getH();
-                int l = expression->getL();
-                auto j = new Util::JsonObject();
-                j->emplace("type", "lookahead");
-                auto bounds = mkArrayField(j, "value");
-                bounds->append(l);
-                bounds->append(h + 1);
-                map.emplace(expression, j);
-                return;
-            }
-        }
-        BUG("%1%: unhandled case", expression);
-    }
-#endif
 
     void postorder(const IR::Constant* expression) override {
         auto result = new Util::JsonObject();

@@ -10,7 +10,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("hdrA")
+    @name("hdrA") 
     hdrA_t hdrA;
 }
 

@@ -33,11 +33,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t    ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t        ipv4;
-    @name("vlan_tag")
+    @name("vlan_tag") 
     vlan_tag_t[2] vlan_tag;
 }
 

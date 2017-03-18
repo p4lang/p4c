@@ -42,7 +42,7 @@ header ipv4_option_security_t {
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
-    @length(len)
+    @length(len) 
     varbit<304> data;
 }
 
@@ -55,24 +55,24 @@ header ipv4_option_NOP_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("my_metadata")
+    @name("my_metadata") 
     my_metadata_t        my_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t              ethernet;
-    @name("ipv4_base")
+    @name("ipv4_base") 
     ipv4_base_t             ipv4_base;
-    @name("ipv4_option_security")
+    @name("ipv4_option_security") 
     ipv4_option_security_t  ipv4_option_security;
-    @name("ipv4_option_timestamp")
+    @name("ipv4_option_timestamp") 
     ipv4_option_timestamp_t ipv4_option_timestamp;
-    @name("ipv4_option_EOL")
+    @name("ipv4_option_EOL") 
     ipv4_option_EOL_t[3]    ipv4_option_EOL;
-    @name("ipv4_option_NOP")
+    @name("ipv4_option_NOP") 
     ipv4_option_NOP_t[3]    ipv4_option_NOP;
 }
 
@@ -191,7 +191,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
 control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     apply {
-        hdr.ipv4_base.hdrChecksum = ipv4_checksum.get({hdr.ipv4_base.version, hdr.ipv4_base.ihl, hdr.ipv4_base.diffserv, hdr.ipv4_base.totalLen, hdr.ipv4_base.identification, hdr.ipv4_base.flags, hdr.ipv4_base.fragOffset, hdr.ipv4_base.ttl, hdr.ipv4_base.protocol, hdr.ipv4_base.srcAddr, hdr.ipv4_base.dstAddr, hdr.ipv4_option_security, hdr.ipv4_option_NOP[0], hdr.ipv4_option_timestamp});
+        hdr.ipv4_base.hdrChecksum = ipv4_checksum.get({ hdr.ipv4_base.version, hdr.ipv4_base.ihl, hdr.ipv4_base.diffserv, hdr.ipv4_base.totalLen, hdr.ipv4_base.identification, hdr.ipv4_base.flags, hdr.ipv4_base.fragOffset, hdr.ipv4_base.ttl, hdr.ipv4_base.protocol, hdr.ipv4_base.srcAddr, hdr.ipv4_base.dstAddr, hdr.ipv4_option_security, hdr.ipv4_option_NOP[0], hdr.ipv4_option_timestamp });
     }
 }
 

@@ -14,7 +14,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -54,9 +54,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (8w1 == (8w15 & hdr.data.b2))
+        if (8w1 == (8w15 & hdr.data.b2)) 
             test1_0.apply();
-        else
+        else 
             test2_0.apply();
     }
 }

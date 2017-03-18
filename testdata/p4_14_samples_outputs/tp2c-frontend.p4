@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -116,7 +116,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.data.b1 == 32w0) {
             A1_0.apply();
             A2_0.apply();
-            if (hdr.data.f1 == 32w0)
+            if (hdr.data.f1 == 32w0) 
                 switch (A3_0.apply().action_run) {
                     on_hit_0: {
                         A4_0.apply();

@@ -20,7 +20,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -60,9 +60,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (hdr.data.x2 == 2w1 && hdr.data.x4 == 1w0)
+        if (hdr.data.x2 == 2w1 && hdr.data.x4 == 1w0) 
             test1_0.apply();
-        else
+        else 
             test2_0.apply();
     }
 }

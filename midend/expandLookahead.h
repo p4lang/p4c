@@ -42,17 +42,8 @@ class DoExpandLookahead : public Transform {
             refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoExpandLookahead"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
-    // We allow lookahead in controls too.
     const IR::Node* preorder(IR::P4Control* control) override
-    { newDecls.clear(); return control; }
-    const IR::Node* postorder(IR::P4Control* control) override {
-        if (!newDecls.empty()) {
-            auto locals = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
-            locals->append(newDecls);
-            control->controlLocals = locals;
-        }
-        return control;
-    }
+    { prune(); return control; }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { newDecls.clear(); return parser; }
     const IR::Node* postorder(IR::P4Parser* parser) override {

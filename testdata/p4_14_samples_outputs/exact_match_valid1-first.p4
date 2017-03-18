@@ -16,9 +16,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
-    @name("data2")
+    @name("data2") 
     data_t data2;
 }
 
@@ -50,8 +50,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.isValid() : exact;
-            hdr.data2.isValid(): exact;
+            hdr.data.isValid() : exact @name("hdr.data.isValid()") ;
+            hdr.data2.isValid(): exact @name("hdr.data2.isValid()") ;
         }
         default_action = NoAction();
     }

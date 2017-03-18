@@ -22,7 +22,7 @@ header ipv4_t {
     bit<16>     hdrChecksum;
     bit<32>     srcAddr;
     bit<32>     dstAddr;
-    @length(ihl << 2)
+    @length(ihl << 2) 
     varbit<352> options;
 }
 
@@ -37,11 +37,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t    ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t        ipv4;
-    @name("vlan_tag")
+    @name("vlan_tag") 
     vlan_tag_t[2] vlan_tag;
 }
 

@@ -33,11 +33,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("vlan")
+    @name("vlan") 
     vlan_t     vlan;
 }
 
@@ -78,13 +78,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.srcAddr: exact @name("hdr.ipv4.srcAddr") ;
         }
         max_size = 4096;
         default_action = NoAction();
     }
     apply {
-        table_0.apply;
+        table_0.apply();
     }
 }
 

@@ -83,20 +83,20 @@ header vlan_t {
 }
 
 struct metadata {
-    @name("egress_metadata")
+    @name("egress_metadata") 
     egress_metadata_t            egress_metadata;
-    @name("ingress_metadata")
+    @name("ingress_metadata") 
     ingress_metadata_t           ingress_metadata;
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     ingress_intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("eth")
+    @name("eth") 
     ethernet_t eth;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("vlan")
+    @name("vlan") 
     vlan_t     vlan;
 }
 
@@ -322,17 +322,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         port_0.apply();
         if (meta.ingress_metadata.oper_status == 2w1) {
             router_interface_0.apply();
-            if (meta.ingress_metadata.learning != 2w0)
+            if (meta.ingress_metadata.learning != 2w0) 
                 learn_notify_0.apply();
-            if (meta.ingress_metadata.router_mac == 1w0)
+            if (meta.ingress_metadata.router_mac == 1w0) 
                 fdb_0.apply();
             else {
                 virtual_router_0.apply();
-                if (hdr.ipv4.isValid() && meta.ingress_metadata.v4_enable != 1w0)
+                if (hdr.ipv4.isValid() && meta.ingress_metadata.v4_enable != 1w0) 
                     route_0.apply();
                 next_hop_0.apply();
             }
-            if (meta.ingress_metadata.routed != 1w0)
+            if (meta.ingress_metadata.routed != 1w0) 
                 neighbor_0.apply();
         }
     }
@@ -352,14 +352,14 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     bool tmp_1;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
     apply {
-        if (!(hdr.ipv4.ihl == 4w5))
+        if (!(hdr.ipv4.ihl == 4w5)) 
             tmp = false;
         else {
             tmp_0 = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
             tmp_1 = hdr.ipv4.checksum == tmp_0;
             tmp = tmp_1;
         }
-        if (tmp)
+        if (tmp) 
             mark_to_drop();
     }
 }
