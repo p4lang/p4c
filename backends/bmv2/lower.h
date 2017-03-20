@@ -32,7 +32,7 @@ class LowerExpressions : public Transform {
 
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
  public:
-    explicit LowerExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+    LowerExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("LowerExpressions"); }
 

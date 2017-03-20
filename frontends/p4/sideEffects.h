@@ -32,6 +32,7 @@ class SideEffects : public Inspector {
  private:
     ReferenceMap* refMap;
     TypeMap*      typeMap;
+
  public:
     const IR::Node* nodeWithSideEffect = nullptr;
     unsigned sideEffectCount = 0;
