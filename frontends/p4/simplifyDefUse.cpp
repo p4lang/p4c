@@ -467,6 +467,7 @@ class FindUninitialized : public Inspector {
 class RemoveUnused : public Transform {
     // TODO: remove transitively unused
     const HasUses* hasUses;
+
  public:
     explicit RemoveUnused(const HasUses* hasUses) : hasUses(hasUses)
     { CHECK_NULL(hasUses); setName("RemoveUnused"); }
