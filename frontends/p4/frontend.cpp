@@ -77,7 +77,7 @@ class FrontEndLast : public PassManager {
 };
 
 const IR::P4Program*
-FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
+FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program, bool skipSideEffectOrdering) {
     if (program == nullptr)
         return nullptr;
 
@@ -113,7 +113,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
-        new SideEffectOrdering(&refMap, &typeMap),
+        skipSideEffectOrdering ? nullptr : new SideEffectOrdering(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
