@@ -1,5 +1,4 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -68,6 +67,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     std::map<cstring, TableInfo>        &tables;
     std::map<cstring, FuncInfo>         &actions;
     std::map<cstring, FuncInfo>         &methods;
+    std::map<cstring, FuncInfo>         &states;
     TableInfo                           *inferForTable = nullptr;
     FuncInfo                            *inferForFunc = nullptr;
     bool                                need_key_rewrite = false;
@@ -100,6 +100,9 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void apply_function(FuncInfo *tbl);
     IR::P4Table *preorder(IR::P4Table *) override;
     IR::P4Table *postorder(IR::P4Table *) override;
+    const IR::P4Parser *postorder(IR::P4Parser *) override;
+    IR::ParserState *preorder(IR::ParserState *) override;
+    IR::ParserState *postorder(IR::ParserState *) override;
     class ElimDead;
     class RewriteTableKeys;
 
@@ -109,7 +112,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     explicit DoLocalCopyPropagation(
         std::function<bool(const Context *, const IR::Expression *)> policy)
     : tables(*new std::map<cstring, TableInfo>), actions(*new std::map<cstring, FuncInfo>),
-      methods(*new std::map<cstring, FuncInfo>), policy(policy)
+      methods(*new std::map<cstring, FuncInfo>), states(*new std::map<cstring, FuncInfo>),
+      policy(policy)
     { setName("DoLocalCopyPropagation"); }
 };
 
