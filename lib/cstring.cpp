@@ -27,6 +27,13 @@ cstring &cstring::operator=(const char *p) {
     return *this;
 }
 
+cstring& cstring::operator=(const std::string& s) {
+    if (cache == nullptr)
+        cache = new std::unordered_set<std::string>();
+    str = cache->insert(s).first->c_str();
+    return *this;
+}
+
 size_t cstring::cache_size(size_t &count) {
     size_t rv = 0;
     if (cache) {
