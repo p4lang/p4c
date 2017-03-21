@@ -210,6 +210,11 @@ ActionFn::grab_register_accesses(RegisterSync *rs) const {
   rs->merge_from(register_sync);
 }
 
+size_t
+ActionFn::get_num_params() const {
+  return num_params;
+}
+
 
 bool
 ActionOpcodesMap::register_primitive(

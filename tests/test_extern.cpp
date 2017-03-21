@@ -190,7 +190,7 @@ class ExternTest : public ::testing::Test {
 
   ExternTest()
       : testHeaderType("test_t", 0),
-        testActionFn("test_action", 0),
+        testActionFn("test_action", 0, 0),
         testActionFnEntry(&testActionFn),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f32", 32);

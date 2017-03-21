@@ -99,14 +99,17 @@ class TableSizeTwo : public ::testing::Test {
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
-  ActionFn action_fn;
+  p4object_id_t action_id{0}, action_id_1{1};
+  ActionFn action_fn, action_fn_1;
 
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   DummyNode node_miss_default{};
 
   TableSizeTwo()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0),
+        action_fn("action", action_id, 0  /* no param */),
+        action_fn_1("action_1", action_id_1, 1  /* 1 param */),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -127,14 +130,16 @@ class TableSizeTwo : public ::testing::Test {
         new MUType(t_size, key_builder, &lookup_factory));
     table = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit), true));
-    table->set_next_node(0, nullptr);
+    table->set_next_node(action_id, nullptr);
+    table->set_next_node(action_id_1, nullptr);
     table->set_next_node_miss_default(&node_miss_default);
 
     match_unit = std::unique_ptr<MUType>(
         new MUType(t_size, key_builder_w_valid, &lookup_factory));
     table_w_valid = std::unique_ptr<MatchTable>(
         new MatchTable("test_table", 0, std::move(match_unit)));
-    table_w_valid->set_next_node(0, nullptr);
+    table_w_valid->set_next_node(action_id, nullptr);
+    table_w_valid->set_next_node(action_id_1, nullptr);
     table_w_valid->set_next_node_miss_default(&node_miss_default);
   }
 
@@ -495,7 +500,7 @@ TYPED_TEST(TableSizeTwo, ConstDefaultActionFn) {
   Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
   f.set("0xaba");
 
-  ActionFn bad_action_fn("bad_action", 1);
+  ActionFn bad_action_fn("bad_action", 1, 0);
   this->table->set_next_node(1, nullptr);
 
   this->table->set_const_default_action_fn(&this->action_fn);
@@ -522,7 +527,7 @@ TYPED_TEST(TableSizeTwo, ConstDefaultEntry) {
   Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
   f.set("0xaba");
 
-  ActionFn bad_action_fn("bad_action", 1);
+  ActionFn bad_action_fn("bad_action", 1, 0);
   this->table->set_next_node(1, nullptr);
 
   auto change_default_entry = [this, &bad_action_fn](
@@ -584,8 +589,9 @@ TYPED_TEST(TableSizeTwo, ModifyEntry) {
   // we modify the entry, this time using some action data
   ActionData new_action_data;
   new_action_data.push_back_action_data(0xaba);
-  this->table->modify_entry(handle, &(this->action_fn),
-                            std::move(new_action_data));
+  rc = this->table->modify_entry(handle, &this->action_fn_1,
+                                 std::move(new_action_data));
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   const ActionEntry &entry_2 = this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_TRUE(hit);
@@ -965,7 +971,7 @@ class TableIndirect : public ::testing::Test {
 
   TableIndirect()
       : action_profile("test_act_prof", 0, false),
-        testHeaderType("test_t", 0), action_fn("actionA", 0),
+        testHeaderType("test_t", 0), action_fn("actionA", 0, 1  /* 1 param */),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -1370,7 +1376,7 @@ class TableIndirectWS : public ::testing::Test {
 
   TableIndirectWS()
       : action_profile("test_act_prof", 0, true),
-        testHeaderType("test_t", 0), action_fn("actionA", 0),
+        testHeaderType("test_t", 0), action_fn("actionA", 0, 1  /* 1 param */),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -1799,7 +1805,7 @@ class TableBigMask : public ::testing::Test {
   void make_key_builder();
 
   TableBigMask()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -2080,7 +2086,7 @@ class AdvancedTest : public ::testing::Test {
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   AdvancedTest()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -2361,7 +2367,7 @@ class TableEntryDebug : public ::testing::Test {
   int priority = 12;
 
   TableEntryDebug()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0) {
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 1  /* 1 param */) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     testHeaderType.push_back_field("f17", 17);
@@ -2678,7 +2684,7 @@ class TableDeadlock : public ::testing::Test {
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   TableDeadlock()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 1  /* 1 param */),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -2774,7 +2780,7 @@ class TableBadInputKey : public ::testing::Test {
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   TableBadInputKey()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     // non-aligned, to expose potential issues
     testHeaderType.push_back_field("f14", 14);
@@ -2936,7 +2942,7 @@ class TableRangeMatch : public ::testing::Test {
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   TableRangeMatch()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -3080,7 +3086,7 @@ class TableTernaryCache : public ::testing::Test {
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   TableTernaryCache()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : testHeaderType("test_t", 0), action_fn("actionA", 0, 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f128", 128);
     phv_factory.push_back_header("testHdr", testHeader, testHeaderType);

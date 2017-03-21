@@ -1733,7 +1733,7 @@ struct ParserTestSetField : public ActionPrimitive<Field &, const Data &> {
 REGISTER_PRIMITIVE(ParserTestSetField);
 
 TEST_F(ParserMethodCallTest, SetField) {
-  ActionFn action_fn("test_action", 0);
+  ActionFn action_fn("test_action", 0, 0);
   ParserTestSetField primitive;
   constexpr int value(97);
   action_fn.push_back_primitive(&primitive);
@@ -1752,7 +1752,7 @@ TEST_F(ParserMethodCallTest, SetField) {
 
 TEST_F(ParserMethodCallTest, RegisterSync) {
   RegisterArray register_array("register_test", 0, 128u, 32u);
-  ActionFn action_fn("test_action", 0);
+  ActionFn action_fn("test_action", 0, 0);
   auto primitive_spin = ActionOpcodesMap::get_instance()->get_primitive(
       "RegisterSpin");
   constexpr unsigned int msecs_to_sleep(1000u);

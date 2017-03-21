@@ -196,7 +196,7 @@ class ActionsTest : public ::testing::Test {
 
   ActionsTest()
       : testHeaderType("test_t", 0),
-        testActionFn("test_action", 0),
+        testActionFn("test_action", 0, 1),
         testActionFnEntry(&testActionFn),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f32", 32);
@@ -225,16 +225,9 @@ class ActionsTest : public ::testing::Test {
   virtual void TearDown() { }
 };
 
-// TODO(antonin)
-// TEST_F(ActionsTest, NumParams) {
-//   Data value(0xaba);
-//   SetField primitive;
-//   testActionFn.push_back_primitive(&primitive);
-//   testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
-//   testActionFn.parameter_push_back_const(value);
-
-//   ASSERT_EQ(2u, testActionFn.num_params());
-// }
+TEST_F(ActionsTest, NumParams) {
+  ASSERT_EQ(1u, testActionFn.get_num_params());
+}
 
 TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
@@ -765,7 +758,7 @@ class ActionsTestRegisterProtection : public ActionsTest {
         register_array_1("register_test_1", 0, register_size, register_bw),
         primitive_spin(ActionOpcodesMap::get_instance()->get_primitive(
             "RegisterSpin")),
-        testActionFn_2("test_action_2", 1),
+        testActionFn_2("test_action_2", 1, 0),
         testActionFnEntry_2(&testActionFn_2) {
     configure_one_action(&testActionFn, &register_array_1);
   }

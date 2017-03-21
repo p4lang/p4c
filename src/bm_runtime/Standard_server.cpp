@@ -89,6 +89,8 @@ public:
         return TableOperationErrorCode::NO_ACTION_PROFILE_SELECTION;
       case MatchErrorCode::IMMUTABLE_TABLE_ENTRIES:
         return TableOperationErrorCode::IMMUTABLE_TABLE_ENTRIES;
+      case MatchErrorCode::BAD_ACTION_DATA:
+        return TableOperationErrorCode::BAD_ACTION_DATA;
       case MatchErrorCode::ERROR:
         return TableOperationErrorCode::ERROR;
       default:

@@ -70,7 +70,7 @@ class AgeingTest : public ::testing::Test {
 
   AgeingTest()
       : testHeaderType("test_t", 0),
-        action_fn("actionA", 0),
+        action_fn("actionA", 0, 0),
         ageing_writer(new MemoryAccessor(4096)),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);

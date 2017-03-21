@@ -549,9 +549,12 @@ class ActionFn :  public NamedP4Object {
   friend class ActionFnEntry;
 
  public:
-  ActionFn(const std::string &name, p4object_id_t id)
-    : NamedP4Object(name, id) { }
+  ActionFn(const std::string &name, p4object_id_t id, size_t num_params)
+      : NamedP4Object(name, id), num_params(num_params) { }
 
+  // these parameter_push_back_* methods are not very well named. They are used
+  // to push arguments to the primitives; and are independent of the actual
+  // parameters for the P4 action
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
   void parameter_push_back_header_stack(header_stack_id_t header_stack);
@@ -575,6 +578,8 @@ class ActionFn :  public NamedP4Object {
 
   void grab_register_accesses(RegisterSync *register_sync) const;
 
+  size_t get_num_params() const;
+
  private:
   std::vector<ActionPrimitive_ *> primitives{};
   std::vector<ActionParam> params{};
@@ -583,6 +588,7 @@ class ActionFn :  public NamedP4Object {
   // should I store the objects in the vector, instead of pointers?
   std::vector<std::unique_ptr<ArithExpression> > expressions{};
   std::vector<std::string> strings{};
+  size_t num_params;
 
  private:
   static size_t nb_data_tmps;

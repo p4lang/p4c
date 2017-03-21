@@ -758,7 +758,8 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
         } else if (op_type == "primitive") {
           assert(cfg_parameters.size() == 1);
           const auto primitive_name = cfg_parameters[0]["op"].asString();
-          std::unique_ptr<ActionFn> action_fn(new ActionFn(primitive_name, 0));
+          std::unique_ptr<ActionFn> action_fn(new ActionFn(
+              primitive_name, 0, 0));
           add_primitive_to_action(cfg_parameters[0], action_fn.get());
           parse_state->add_method_call(action_fn.get());
           parse_methods.push_back(std::move(action_fn));
@@ -996,7 +997,8 @@ P4Objects::init_actions(const Json::Value &cfg_root) {
   for (const auto &cfg_action : cfg_actions) {
     const string action_name = cfg_action["name"].asString();
     p4object_id_t action_id = cfg_action["id"].asInt();
-    std::unique_ptr<ActionFn> action_fn(new ActionFn(action_name, action_id));
+    std::unique_ptr<ActionFn> action_fn(new ActionFn(
+        action_name, action_id, cfg_action["runtime_data"].size()));
 
     const auto &cfg_primitive_calls = cfg_action["primitives"];
     for (const auto &cfg_primitive_call : cfg_primitive_calls)
@@ -1028,9 +1030,16 @@ int get_table_size(const Json::Value &cfg_table) {
   return entries_size;
 }
 
-ActionData parse_action_data(const Json::Value &cfg_action_data) {
-  // TODO(antonin): check that the number of args match the expected number
-  // based on the action id
+ActionData parse_action_data(const ActionFn *action,
+                             const Json::Value &cfg_action_data) {
+  if (action->get_num_params() != cfg_action_data.size()) {
+    throw json_exception(
+        EFormat() << "Invalid number of arguments for action '"
+                  << action->get_name() << "': expected "
+                  << action->get_num_params() << " but got "
+                  << cfg_action_data.size(),
+        cfg_action_data);
+  }
   ActionData adata;
   for (const auto &d : cfg_action_data)
     adata.push_back_action_data(Data(d.asString()));
@@ -1388,7 +1397,8 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         if (is_action_const) simple_table->set_const_default_action_fn(action);
 
         if (cfg_default_entry.isMember("action_data")) {
-          auto adata = parse_action_data(cfg_default_entry["action_data"]);
+          auto adata = parse_action_data(action,
+                                         cfg_default_entry["action_data"]);
 
           const bool is_action_entry_const =
               cfg_default_entry.get("action_entry_const", false_value).asBool();
@@ -1422,7 +1432,8 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           auto action_id = static_cast<p4object_id_t>(
               cfg_action_entry["action_id"].asInt());
           const ActionFn *action = get_action_by_id(action_id); assert(action);
-          auto adata = parse_action_data(cfg_action_entry["action_data"]);
+          auto adata = parse_action_data(action,
+                                         cfg_action_entry["action_data"]);
 
           const auto priority = cfg_entry["priority"].asInt();
 

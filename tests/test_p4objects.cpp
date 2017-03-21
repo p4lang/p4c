@@ -579,7 +579,8 @@ class JsonBuilder {
 
   using MatchParam = std::map<std::string, std::string>;
   void add_entry_to_table(const std::string &table_name, int action_id,
-                          const std::vector<MatchParam> &mk) {
+                          const std::vector<MatchParam> &mk,
+                          const std::vector<std::string> &adata = {}) {
     (void) table_name;
     auto &pipeline = json["pipelines"][0u];
     auto &table = pipeline["tables"][0u];
@@ -589,6 +590,8 @@ class JsonBuilder {
     entry["action_entry"] = Json::Value(Json::objectValue);
     entry["action_entry"]["action_id"] = action_id;
     entry["action_entry"]["action_data"] = Json::Value(Json::arrayValue);
+    for (const auto &p : adata)
+      entry["action_entry"]["action_data"].append(p);
     entry["match_key"] = Json::Value(Json::arrayValue);
     for (const auto &mf : mk) {
       Json::Value match_field(Json::objectValue);
@@ -812,7 +815,7 @@ TEST(P4Objects, ImmutableEntriesBadJson) {
     check(builder, expected_error_msg);
   }
 
-  {  // bad key (too many bytes
+  {  // bad key (too many bytes)
     JsonBuilder builder(base_builder);
     std::map<std::string, std::string> mf = {
       {"match_type", "exact"}, {"key", "0xabcd"}
@@ -832,6 +835,17 @@ TEST(P4Objects, ImmutableEntriesBadJson) {
     builder.add_entry_to_table("t", 0 /* action_id */, {mf});
     std::string expected_error_msg(
         "Duplicate entries in table initializer\n");
+    check(builder, expected_error_msg);
+  }
+
+  {  // two many action data args
+    JsonBuilder builder(base_builder);
+    std::map<std::string, std::string> mf = {
+      {"match_type", "exact"}, {"key", "0x01"}
+    };
+    builder.add_entry_to_table("t", 0 /* action_id */, {mf}, {"0x01"});
+    std::string expected_error_msg(
+        "Invalid number of arguments for action 'a': expected 0 but got 1\n");
     check(builder, expected_error_msg);
   }
 }

@@ -202,6 +202,8 @@ ActionProfile::add_member(const ActionFn *action_fn, ActionData action_data,
                           mbr_hdl_t *mbr) {
   auto rc = MatchErrorCode::SUCCESS;
 
+  if (action_data.size() != action_fn->get_num_params())
+    return MatchErrorCode::BAD_ACTION_DATA;
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
 
   {
@@ -262,6 +264,8 @@ ActionProfile::modify_member(mbr_hdl_t mbr, const ActionFn *action_fn,
                                   ActionData action_data) {
   auto rc = MatchErrorCode::SUCCESS;
 
+  if (action_data.size() != action_fn->get_num_params())
+    return MatchErrorCode::BAD_ACTION_DATA;
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
 
   {
