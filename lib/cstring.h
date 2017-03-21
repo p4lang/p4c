@@ -87,6 +87,10 @@ class cstring {
     cstring(const char *s) { *this = s; }                   // NOLINT(runtime/explicit)
     cstring(const std::string &a) { *this = a.c_str(); }    // NOLINT(runtime/explicit)
 
+    template <typename Iter> cstring(Iter begin, Iter end) {
+        *this = std::string(begin, end);
+    }
+
     const char *c_str() const { return str; }
     const char *find(int c) const { return str ? strchr(str, c) : nullptr; }
     const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
