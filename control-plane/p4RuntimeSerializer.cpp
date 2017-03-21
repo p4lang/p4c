@@ -44,10 +44,6 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 // XXX(seth): Here are the known issues:
-// - The @id pragma is not supported for header instances and especially not for
-//   header stack instances, which currently requires allowing the programmer to
-//   provide a sequence of ids in the @id pragma. Note that @id *is* supported
-//   for header instance *fields*; this is just about the instances themselves.
 // - @id is not supported for action parameters or match fields.
 // - We don't currently distinguish between the case where the const default
 //   action has mutable params and the case where it doesn't.
@@ -94,15 +90,20 @@ struct HeaderFieldPath {
                                  const TypeMap* typeMap) {
         auto type = typeMap->getType(expression->getNode(), true);
         if (expression->is<IR::PathExpression>()) {
-            // Top-level structlike types only show up in P4Runtime names if
-            // they're metadata types. See forAllHeaderFields() for more info.
+            // Unlike other top-level structs, top-level metadata structs are
+            // fully exposed to P4Runtime and show up in P4Runtime field names.
             if (isMetadataType(type) && type->is<IR::Type_Declaration>()) {
                 auto name = type->to<IR::Type_Declaration>()->externalName();
                 return HeaderFieldPath::root(name, type);
             }
+
+            // Top-level structs and unions don't show up in P4Runtime field
+            // names, so we use a blank path component name.
             if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
                 return HeaderFieldPath::root("", type);
             }
+
+            // This is a top-level header or a non-structlike value.
             auto declaration =
                 refMap->getDeclaration(expression->to<IR::PathExpression>()->path);
             return HeaderFieldPath::root(declaration->externalName(), type);
@@ -183,42 +184,6 @@ private:
 
         return parent != nullptr ? parent->serialize(serialized)
                                  : serialized;
-    }
-};
-
-/**
- * The information about a header instance field which is necessary to generate
- * its serialized representation. The field may be synthesized, so there may be
- * no corresponding field at the IR level.
- */
-struct HeaderField {
-    // The header instance owning this field. This is a fully qualified external
-    // name of the sort stored in a P4RuntimeSymbolTable.
-    const cstring instance;
-
-    // The fully qualified external name of this field. This is *also* fully
-    // qualified - that is, this *includes* @instance.
-    const cstring name;
-
-    const size_t offset;  // This field's offset (really index) within the header.
-    const uint32_t bitwidth;
-    const boost::optional<pi_p4_id_t> id;  // Any '@id' P4 annotation for this field.
-    const IR::IAnnotated* annotations;  // If non-null, this field's annotations.
-
-    /// @return a HeaderField constructed from an instance @path and an @fieldName.
-    static HeaderField* from(const HeaderFieldPath* path, cstring fieldName,
-                             size_t offset, uint32_t bitwidth,
-                             boost::optional<uint32_t> id,
-                             const IR::IAnnotated* annotations) {
-        return new HeaderField{path->serialize(), path->append(fieldName)->serialize(),
-                               offset, bitwidth, id, annotations};
-    }
-
-    /// @return a HeaderField which has no corresponding IR field. Prefer this
-    /// method over from() so synthesized fields are documented at the callsite.
-    static HeaderField* synthesize(const HeaderFieldPath* path, cstring fieldName,
-                                   size_t offset, uint32_t bitwidth) {
-        return from(path, fieldName, offset, bitwidth, boost::none, nullptr);
     }
 };
 
@@ -433,8 +398,6 @@ enum class P4RuntimeSymbolType {
     ACTION,
     ACTION_PROFILE,
     COUNTER,
-    HEADER_FIELD_LIST,
-    HEADER_INSTANCE,
     METER,
     TABLE
 };
@@ -574,18 +537,12 @@ public:
         P4RuntimeSymbolTable symbols;
         function(symbols);
 
-        // Now that the symbol table is initialized, we can compute ids. We begin by
-        // computing ids which can be determined in isolation.
+        // Now that the symbol table is initialized, we can compute ids.
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::ACTION);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::TABLE);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::HEADER_FIELD_LIST);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::HEADER_INSTANCE);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::ACTION_PROFILE);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::COUNTER);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::METER);
-
-        // We can compute header field ids now that we have header instance ids.
-        symbols.computeIdsForHeaderFields();
 
         return symbols;
     }
@@ -605,32 +562,7 @@ public:
         }
 
         symbolTable[name] = tryToAssignId(id);
-
-        // Add this symbol to the symbol suffix set, so we can compute a minimal
-        // alias for it later. We exclude header instances because they aren't
-        // exposed directly to P4Runtime; including them would lead to more
-        // conflicts between symbols suffixes which would produce longer aliases.
-        if (type != P4RuntimeSymbolType::HEADER_INSTANCE) {
-            suffixSet.addSymbol(name);
-        }
-    }
-
-    /// Add a header instance @field to the table.
-    void addHeaderField(const HeaderField* field) {
-        const auto headerField = std::make_pair(field->instance, field->offset);
-        if (headerFields.find(headerField) != headerFields.end()) {
-            return;  // This is a duplicate, but that's OK.
-        }
-
-        headerFields[headerField] = tryToAssignId(field->id);
-        suffixSet.addSymbol(field->name);
-
-        // Although header instances aren't directly exposed to P4Runtime, we need
-        // to compute ids for them in order to compute ids for header fields.
-        add(P4RuntimeSymbolType::HEADER_INSTANCE, field->instance);
-
-        // We also index the header fields by name.
-        headerFieldsByName[field->name] = headerField;
+        suffixSet.addSymbol(name);
     }
 
     /// @return the P4Runtime id for the symbol of @type corresponding to @declaration.
@@ -647,31 +579,6 @@ public:
             BUG("Looking up symbol '%1%' without adding it to the table", name);
         }
         return symbolId->second;
-    }
-
-    /// @return the P4Runtime id for the given header instance @field.
-    pi_p4_id_t getHeaderFieldId(const HeaderField* field) const {
-        const auto headerField = std::make_pair(field->instance, field->offset);
-        const auto id = headerFields.find(headerField);
-        if (id == headerFields.end()) {
-            BUG("Looking up header field '%1%' without adding it to the table", field->name);
-        }
-        return id->second;
-    }
-
-    /// @return the P4Runtime id for the header instance field with the given
-    /// fully qualified external @name. "External" here means that all of the
-    /// components in the field's path are external names.
-    pi_p4_id_t getHeaderFieldIdByName(cstring name) const {
-        const auto headerField = headerFieldsByName.find(name);
-        if (headerField == headerFieldsByName.end()) {
-            BUG("Looking up header field '%1%' without adding it to the table", name);
-        }
-        const auto id = headerFields.find(headerField->second);
-        if (id == headerFields.end()) {
-            BUG("The symbol table entry for '%1%' is in an inconsistent state", name);
-        }
-        return id->second;
     }
 
     /// @return the alias for the given fully qualified external name. P4Runtime
@@ -755,37 +662,6 @@ private:
         }
     }
 
-    void computeIdsForHeaderFields() {
-        // The format for header field ids is:
-        //
-        //   [resource type] [header instance name hash value] [field id]
-        //    \____8_b____/   \_____________16_b____________/   \__8_b_/
-        //
-        // As above, the header instance name hash value is just bytes 3 and 4 of
-        // the header instance id. The field id is normally the offset of the header
-        // field except in the case of conflicts.
-        for (auto& headerField : headerFields) {
-            auto& instance = headerField.first.first;
-            auto& offset = headerField.first.second;
-            const uint32_t instanceIdBits =
-                (getId(P4RuntimeSymbolType::HEADER_INSTANCE, instance) & 0xffff) << 8;
-
-            // Search for an unused header field id.
-            boost::optional<pi_p4_id_t> id = probeForId(offset, [=](uint32_t offset) {
-                return (PI_FIELD_ID << 24) | instanceIdBits | (offset & 0xff);
-            });
-
-            if (!id) {
-                ::error("No available id to represent header instance %1%'s "
-                        "field %2% in P4Runtime", instance, offset);
-                break;
-            }
-
-            // Assign the id.
-            headerField.second = *id;
-        }
-    }
-
     /**
      * Construct an id from the provided @sourceValue using the provided function
      * @constructId, which is expected to be pure. If there's a collision,
@@ -836,13 +712,6 @@ private:
             case P4RuntimeSymbolType::ACTION: return PI_ACTION_ID;
             case P4RuntimeSymbolType::ACTION_PROFILE: return PI_ACT_PROF_ID;
             case P4RuntimeSymbolType::COUNTER: return PI_COUNTER_ID;
-            case P4RuntimeSymbolType::HEADER_FIELD_LIST: return PI_FIELD_LIST_ID;
-
-            // Header instances are not exposed to P4Runtime, but we still need to
-            // compute their ids because they're used internally for computing the ids
-            // of other resources.
-            case P4RuntimeSymbolType::HEADER_INSTANCE: return PI_INVALID_ID;  
-
             case P4RuntimeSymbolType::METER: return PI_METER_ID;
             case P4RuntimeSymbolType::TABLE: return PI_TABLE_ID;
         }
@@ -859,22 +728,9 @@ private:
         { P4RuntimeSymbolType::ACTION, SymbolTable() },
         { P4RuntimeSymbolType::ACTION_PROFILE, SymbolTable() },
         { P4RuntimeSymbolType::COUNTER, SymbolTable() },
-        { P4RuntimeSymbolType::HEADER_FIELD_LIST, SymbolTable() },
-        { P4RuntimeSymbolType::HEADER_INSTANCE, SymbolTable() },
         { P4RuntimeSymbolType::METER, SymbolTable() },
         { P4RuntimeSymbolType::TABLE, SymbolTable() }
     };
-
-    // Header instance fields *are* global symbols - they have a qualified name
-    // that's globally unique - but that name isn't actually used to compute or
-    // look up their ids, so it's more useful to store a tuple of
-    // (header instance, field offset).
-    std::map<std::pair<cstring, size_t>, pi_p4_id_t> headerFields;
-
-    // A mapping from fully qualified header field names to the keys for the
-    // corresponding entries in @headerFields. This allows us to look up header
-    // field ids by name.
-    std::map<cstring, std::pair<cstring, size_t>> headerFieldsByName;
 
     // A set which contains all the symbols in the program. It's used to compute
     // the shortest unique suffix of each symbol, which is the default alias we
@@ -937,15 +793,6 @@ public:
         }
 
         destination->flush();
-    }
-
-    void addHeaderField(const HeaderField* field) {
-        auto headerField = p4Info->add_header_fields();
-        headerField->mutable_preamble()->set_id(symbols.getHeaderFieldId(field));
-        headerField->mutable_preamble()->set_name(field->name);
-        headerField->mutable_preamble()->set_alias(symbols.getAlias(field->name));
-        addAnnotations(headerField->mutable_preamble(), field->annotations);
-        headerField->set_bitwidth(field->bitwidth);
     }
 
     void addCounter(const Counterlike<IR::Counter>& counterInstance) {
@@ -1111,11 +958,9 @@ public:
         size_t index = 0;
         for (const auto& field : matchFields) {
             auto match_field = table->add_match_fields();
-            auto fieldId = symbols.getHeaderFieldIdByName(field.name);
             match_field->set_id(index++);
             match_field->set_name(field.name);
             match_field->set_bitwidth(field.bitwidth);
-            match_field->set_header_field_id(fieldId);
             match_field->set_match_type(field.type);
         }
 
@@ -1138,17 +983,6 @@ public:
 
         for (const auto& table : tables) {
             profile->add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE, table));
-        }
-    }
-
-    void addHeaderFieldList(const cstring& name,
-                            const std::vector<const HeaderField*>& fields) {
-        auto fieldList = p4Info->add_header_field_lists();
-        fieldList->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::HEADER_FIELD_LIST, name));
-        fieldList->mutable_preamble()->set_name(name);
-        fieldList->mutable_preamble()->set_alias(symbols.getAlias(name));
-        for (auto& field : fields) {
-            fieldList->add_header_field_ids(symbols.getHeaderFieldId(field));
         }
     }
 
@@ -1189,144 +1023,6 @@ private:
     TypeMap* typeMap;
 };
 
-namespace detail {
-
-// These functions are used in the implementation of forAllHeaderFields() and
-// forAllTupleFields(); see their definitions below.
-
-template <typename Func>
-static void forAllFieldsInDeclaration(const HeaderFieldPath* path,
-                                      size_t offset,
-                                      const IR::IDeclaration* field,
-                                      const TypeMap* typeMap,
-                                      Func function);
-
-template <typename Func>
-static void forAllFieldsInStructlike(const HeaderFieldPath* path,
-                                     const TypeMap* typeMap,
-                                     Func function) {
-    auto structType = path->type->to<IR::Type_StructLike>();
-
-    // Iterate over the fields, recursively handling nested structures if necessary.
-    size_t offset = 0;
-    for (auto field : *structType->fields) {
-        forAllFieldsInDeclaration(path, offset++, field, typeMap, function);
-    }
-
-    if (structType->is<IR::Type_Header>()) {
-        // Synthesize a '_valid' field, which is used to implement `isValid()`.
-        function(HeaderField::synthesize(path, "_valid", offset, /* bitwidth = */ 1));
-    }
-}
-
-template <typename Func> 
-static void forAllFieldsInStack(const HeaderFieldPath* path,
-                                const TypeMap* typeMap,
-                                Func function) {
-    auto stackType = path->type->to<IR::Type_Stack>();
-    auto elementType = typeMap->getTypeType(stackType->elementType, true);
-    BUG_CHECK(elementType->is<IR::Type_Header>(),
-              "Header stack %1% has non-header element type %2%",
-              path->serialize(), elementType);
-
-    for (unsigned stackIndex = 0; stackIndex < stackType->getSize(); stackIndex++) {
-        forAllFieldsInStructlike(path->append(stackIndex, elementType),
-                                 typeMap, function);
-    }
-}
-
-template <typename Func>
-static void forAllFieldsInDeclaration(const HeaderFieldPath* path,
-                                      size_t offset,
-                                      const IR::IDeclaration* field,
-                                      const TypeMap* typeMap,
-                                      Func function) {
-    CHECK_NULL(field);
-
-    auto id = externalId(field);
-    auto name = field->externalName();
-    auto annotations = field->to<IR::IAnnotated>();
-
-    auto fieldType = typeMap->getType(field->getNode(), true);
-    if (fieldType->is<IR::Type_Boolean>()) {
-        const uint32_t bitwidth = 1;
-        function(HeaderField::from(path, name, offset, bitwidth, id, annotations));
-    } else if (fieldType->is<IR::Type_Bits>()) {
-        const uint32_t bitwidth = fieldType->to<IR::Type_Bits>()->size;
-        function(HeaderField::from(path, name, offset, bitwidth, id, annotations));
-    } else if (fieldType->is<IR::Type_StructLike>()) {
-        forAllFieldsInStructlike(path->append(name, fieldType), typeMap, function);
-    } else if (fieldType->is<IR::Type_Stack>()) {
-        forAllFieldsInStack(path->append(name, fieldType), typeMap, function);
-    } else {
-        BUG("Header field '%1%' has unhandled type %2%", name, fieldType);
-    }
-}
-
-} // namespace detail
-
-/// Invoke @function for every primitive header field reachable from
-/// @declaration by recursively expanding all composite fields.
-// XXX(seth): At the moment, think of this as a view; we're not iterating over
-// the real P4 header fields, but rather the header fields as seen from
-// P4Runtime. That means that they don't exactly match the P4-level header
-// fields in terms of naming and that certain fields don't really exist at the
-// P4 level. Long term, we want those inconsistencies to go away.
-template <typename Func>
-static void forAllHeaderFields(const IR::IDeclaration* declaration,
-                               const TypeMap* typeMap,
-                               Func function) {
-    CHECK_NULL(declaration);
-    CHECK_NULL(typeMap);
-
-    auto type = typeMap->getType(declaration->getNode(), true);
-    if (isMetadataType(type)) {
-        // Unlike other top-level structs, top-level metadata structs are fully
-        // exposed to P4Runtime and show up in P4Runtime field names.
-        BUG_CHECK(type->is<IR::Type_Struct>(), "Metadata should be a struct");
-        const cstring prefix = type->to<IR::Type_Declaration>()->externalName();
-        const auto path = HeaderFieldPath::root(prefix, type);
-        detail::forAllFieldsInStructlike(path, typeMap, function);
-        return;
-    }
-
-    // This is either a header or a structlike type that contains headers.
-    BUG_CHECK(type->is<IR::Type_StructLike>(),
-              "A header collection should be structlike");
-    const auto path = HeaderFieldPath::root("", type);
-
-    // Top-level structs and unions don't show up in P4Runtime field names; we
-    // just iterate over their fields directly.
-    if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
-        detail::forAllFieldsInStructlike(path, typeMap, function);
-        return;
-    }
-
-    // This is a top-level header.
-    const size_t offset = 0;  // A top-level entity has no field offset.
-    detail::forAllFieldsInDeclaration(path, offset, declaration, typeMap, function);
-}
-
-/// Invoke @function for every primitive header field reachable from the
-/// components of the provided tuple @type by recursively expanding all
-/// composite fields.
-// XXX(seth): See caveats on @forAllHeaderFields() for more discussion.
-template <typename Func>
-static void forAllTupleFields(const IR::Type_Tuple* type,
-                              const TypeMap* typeMap,
-                              Func function) {
-    CHECK_NULL(type);
-    CHECK_NULL(typeMap);
-
-    // Iterate over the components of the tuple and look for header fields.
-    for (auto componentType : *type->components) {
-        if (!componentType->is<IR::Type_StructLike>()) continue;
-        const cstring prefix = componentType->to<IR::Type_Declaration>()->externalName();
-        const auto path = HeaderFieldPath::root(prefix, componentType);
-        detail::forAllFieldsInStructlike(path, typeMap, function);
-    }
-}
-
 /// Invoke @function for every node of type @Node in the subtree rooted at
 /// @root. The nodes are visited in postorder.
 template <typename Node, typename Func>
@@ -1340,23 +1036,6 @@ static void forAllMatching(const IR::Node* root, Func&& function) {
     root->apply(NodeVisitor(std::forward<Func>(function)));
 }
 
-/// @return an external name generated from the first in a sequence of type
-/// arguments @args. If there aren't enough type arguments, or no name could be
-/// generated, @fallback is returned.
-static cstring externalNameFromTypeArgs(const IR::Vector<IR::Type>* args,
-                                        const ReferenceMap* refMap,
-                                        const cstring& fallback) {
-    // XXX(seth): This whole concept seems suspect. In practice this is being
-    // called with unnamed tuples and you end up with names like 'tuple_0' which
-    // aren't really useful.
-    if (args->size() != 1) return fallback;
-    auto firstArg = args->at(0);
-    if (!firstArg->is<IR::Type_Name>()) return fallback;
-    auto origType = refMap->getDeclaration(firstArg->to<IR::Type_Name>()->path, true);
-    if (!origType->is<IR::Type_Struct>()) return fallback;
-    return origType->to<IR::Type_Struct>()->externalName();
-}
-
 static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
                                   const IR::ControlBlock* controlBlock,
                                   ReferenceMap* refMap,
@@ -1366,52 +1045,11 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
     auto control = controlBlock->container;
     CHECK_NULL(control);
 
-    for (auto declaration : *control->controlLocals) {
-        // Collect the symbol for the action itself.
-        if (!declaration->is<IR::P4Action>()) continue;
-        const IR::P4Action* action = declaration->to<IR::P4Action>();
+    // Collect action symbols.
+    forAllMatching<IR::P4Action>(control->controlLocals,
+                                 [&](const IR::P4Action* action) {
         symbols.add(P4RuntimeSymbolType::ACTION, action);
-
-        // Collect the symbols for any header field lists which are passed to
-        // standard externs in the action body.
-        // XXX(seth): This is more hardcoded stuff.
-        using CallStatement = IR::MethodCallStatement;
-        forAllMatching<CallStatement>(action, [&](const CallStatement* callStatement) {
-            auto call = callStatement->methodCall;
-            auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-            if (!instance->is<P4::ExternFunction>()) return;
-            auto externFunction = instance->to<P4::ExternFunction>();
-            if (externFunction->method->name == "clone" ||
-                    externFunction->method->name == "clone3") {
-                symbols.add(P4RuntimeSymbolType::HEADER_FIELD_LIST, "fl");
-            } else if (externFunction->method->name == "resubmit") {
-                auto name = externalNameFromTypeArgs(call->typeArguments, refMap, "resubmit");
-                symbols.add(P4RuntimeSymbolType::HEADER_FIELD_LIST, name);
-            } else if (externFunction->method->name == "recirculate") {
-                auto name = externalNameFromTypeArgs(call->typeArguments, refMap, "recirculate");
-                symbols.add(P4RuntimeSymbolType::HEADER_FIELD_LIST, name);
-            }
-        });
-    }
-}
-
-static void serializeFieldList(P4RuntimeSerializer& serializer,
-                               TypeMap* typeMap,
-                               const cstring& fieldListName,
-                               const IR::Expression* fieldList) {
-    auto fieldListType = typeMap->getType(fieldList, true);
-    if (!fieldListType->is<IR::Type_Tuple>()) {
-        ::error("Expected header field list '%1%' to be of tuple type", fieldList);
-        return;
-    }
-
-    auto tuple = fieldListType->to<IR::Type_Tuple>();
-    std::vector<const HeaderField*> fields;
-    forAllTupleFields(tuple, typeMap, [&](const HeaderField* field) {
-        fields.push_back(field);
     });
-
-    serializer.addHeaderFieldList(fieldListName, fields);
 }
 
 static void serializeControl(P4RuntimeSerializer& serializer,
@@ -1425,34 +1063,11 @@ static void serializeControl(P4RuntimeSerializer& serializer,
     auto control = controlBlock->container;
     CHECK_NULL(control);
 
-    for (auto declaration : *control->controlLocals) {
-        // Serialize actions and, implicitly, their parameters.
-        if (!declaration->is<IR::P4Action>()) continue;
-        auto action = declaration->to<IR::P4Action>();
+    // Serialize actions and, implicitly, their parameters.
+    forAllMatching<IR::P4Action>(control->controlLocals,
+                                 [&](const IR::P4Action* action) {
         serializer.addAction(action);
-
-        // Serialize any header field lists which are passed to standard externs in
-        // the action body.
-        // XXX(seth): This is more hardcoded stuff.
-        using CallStatement = IR::MethodCallStatement;
-        forAllMatching<CallStatement>(action, [&](const CallStatement* callStatement) {
-            auto call = callStatement->methodCall;
-            auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-            if (!instance->is<P4::ExternFunction>()) return;
-            auto externFunction = instance->to<P4::ExternFunction>();
-            if (externFunction->method->name == "clone") {
-                serializer.addHeaderFieldList("fl", {});
-            } else if (externFunction->method->name == "clone3") {
-                serializeFieldList(serializer, typeMap, "fl", call->arguments->at(2));
-            } else if (externFunction->method->name == "resubmit") {
-                auto name = externalNameFromTypeArgs(call->typeArguments, refMap, "resubmit");
-                serializeFieldList(serializer, typeMap, name, call->arguments->at(0));
-            } else if (externFunction->method->name == "recirculate") {
-                auto name = externalNameFromTypeArgs(call->typeArguments, refMap, "recirculate");
-                serializeFieldList(serializer, typeMap, name, call->arguments->at(0));
-            }
-        });
-    };
+    });
 }
 
 static void collectExternSymbols(P4RuntimeSymbolTable& symbols,
@@ -1478,52 +1093,6 @@ static void serializeExtern(P4RuntimeSerializer& serializer,
     } else if (externBlock->type->name == CounterlikeTraits<IR::Meter>::typeName()) {
         auto meter = Counterlike<IR::Meter>::from(externBlock);
         if (meter) serializer.addMeter(*meter);
-    }
-}
-
-static void collectParserSymbols(P4RuntimeSymbolTable& symbols,
-                                 const IR::ParserBlock* parserBlock,
-                                 TypeMap* typeMap) {
-    CHECK_NULL(parserBlock);
-    CHECK_NULL(parserBlock->container);
-    CHECK_NULL(typeMap);
-
-    auto parserType = parserBlock->container->type;
-    for (auto param : *parserType->applyParams->getEnumerator()) {
-        if (param->direction != IR::Direction::Out &&
-            param->direction != IR::Direction::InOut) {
-            // This parameter isn't an output, so nothing downstream can match on it.
-            // That means that we don't need to expose it to P4Runtime.
-            continue;
-        }
-
-            // This parameter is an output; it may contain header fields.
-        forAllHeaderFields(param, typeMap, [&](const HeaderField* field) {
-            symbols.addHeaderField(field);
-        });
-    }
-}
-
-static void serializeParser(P4RuntimeSerializer& serializer,
-                            const IR::ParserBlock* parserBlock,
-                            const TypeMap* typeMap) {
-    CHECK_NULL(parserBlock);
-    CHECK_NULL(parserBlock->container);
-    CHECK_NULL(typeMap);
-
-    auto parserType = parserBlock->container->type;
-    for (auto param : *parserType->applyParams->getEnumerator()) {
-        if (param->direction != IR::Direction::Out &&
-            param->direction != IR::Direction::InOut) {
-            // This parameter isn't an output, so nothing downstream can match on it.
-            // That means that we don't need to expose it in P4Runtime.
-            continue;
-        }
-
-            // This parameter is an output; it may contain header fields.
-        forAllHeaderFields(param, typeMap, [&](const HeaderField* field) {
-            serializer.addHeaderField(field);
-        });
     }
 }
 
@@ -1899,19 +1468,12 @@ void serializeP4Runtime(std::ostream* destination,
 
     // Perform a first pass to collect all of the control plane visible symbols in
     // the program.
-    // XXX(seth): Because it will contain synthesized symbols that don't exist at
-    // the P4 level, and because the symbol names are mangled according to a
-    // fairly specific scheme derived from the BMV2 JSON format, right now this
-    // table isn't just a subset of the P4 symbol table for the same program as
-    // you'd expect. Eventually, we'd like to get to the point where it is.
     auto symbols = P4RuntimeSymbolTable::create([=](P4RuntimeSymbolTable& symbols) {
         forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
             if (block->is<IR::ControlBlock>()) {
                 collectControlSymbols(symbols, block->to<IR::ControlBlock>(), refMap, typeMap);
             } else if (block->is<IR::ExternBlock>()) {
                 collectExternSymbols(symbols, block->to<IR::ExternBlock>());
-            } else if (block->is<IR::ParserBlock>()) {
-                collectParserSymbols(symbols, block->to<IR::ParserBlock>(), typeMap);
             } else if (block->is<IR::TableBlock>()) {
                 collectTableSymbols(symbols, block->to<IR::TableBlock>(), refMap, typeMap);
             }
@@ -1925,8 +1487,6 @@ void serializeP4Runtime(std::ostream* destination,
             serializeControl(serializer, block->to<IR::ControlBlock>(), refMap, typeMap);
         } else if (block->is<IR::ExternBlock>()) {
             serializeExtern(serializer, block->to<IR::ExternBlock>(), typeMap);
-        } else if (block->is<IR::ParserBlock>()) {
-            serializeParser(serializer, block->to<IR::ParserBlock>(), typeMap);
         } else if (block->is<IR::TableBlock>()) {
             serializeTable(serializer, block->to<IR::TableBlock>(), refMap, typeMap);
         }
