@@ -46,7 +46,8 @@ limitations under the License.
  *   - Interning has an initial cost: converting a const char*, a
  *     std::string, or a std::stringstream to a cstring requires copying it.
  *     Currently, this happens every time you perform the conversion, whether
- *     the string is already interned or not.
+ *     the string is already interned or not, unless the source is an
+ *     std::string.
  *   - Interned strings can never be freed, so they'll stick around for the
  *     lifetime of the program.
  *   - The string interning cstring performs is currently not threadsafe, so you
@@ -83,9 +84,10 @@ class cstring {
     // Copy and assignment from other kinds of strings. These are linear time
     // operations because the underlying string must be copied.
     cstring &operator=(const char *);
+    cstring &operator=(const std::string&);
     cstring(const std::stringstream&);                      // NOLINT(runtime/explicit)
     cstring(const char *s) { *this = s; }                   // NOLINT(runtime/explicit)
-    cstring(const std::string &a) { *this = a.c_str(); }    // NOLINT(runtime/explicit)
+    cstring(const std::string &a) { *this = a; }            // NOLINT(runtime/explicit)
 
     template <typename Iter> cstring(Iter begin, Iter end) {
         *this = std::string(begin, end);

@@ -80,7 +80,7 @@ struct StringRef {
     template <class T> bool operator>(T a) const { return compare(a) > 0; }
     template <class T> bool operator>=(T a) const { return compare(a) >= 0; }
 
-    operator std::string() const { return std::string(p, len); }
+    explicit operator std::string() const { return std::string(p, len); }
     operator cstring() const { return std::string(p, len); }
     cstring toString() const { return std::string(p, len); }
     std::string string() const { return std::string(p, len); }
