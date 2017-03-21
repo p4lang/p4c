@@ -49,6 +49,8 @@ namespace ControlPlaneAPI {
 //   provide a sequence of ids in the @id pragma. Note that @id *is* supported
 //   for header instance *fields*; this is just about the instances themselves.
 // - @id is not supported for action parameters.
+// - We don't currently distinguish between the case where the const default
+//   action has mutable params and the case where it doesn't.
 // - Locals are intentionally not exposed, but this prevents table match keys
 //   which involve complex expressions from working, because those expressions
 //   are desugared into a match against a local. This could be fixed just by
@@ -1050,7 +1052,8 @@ public:
                   const boost::optional<Counterlike<IR::Meter>>& directMeter,
                   const boost::optional<DefaultAction>& defaultAction,
                   const std::vector<cstring>& actions,
-                  const std::vector<std::pair<cstring, MatchType>>& matchFields) {
+                  const std::vector<std::pair<cstring, MatchType>>& matchFields,
+                  bool supportsTimeout) {
         auto name = tableDeclaration->externalName();
         auto annotations = tableDeclaration->to<IR::IAnnotated>();
 
@@ -1084,6 +1087,11 @@ public:
         if (defaultAction && defaultAction->isConst) {
             auto id = symbols.getId(P4RuntimeSymbolType::ACTION, defaultAction->name);
             table->set_const_default_action_id(id);
+
+            // XXX(seth): Generally the parameters of const default actions are
+            // bound at compile time, so this is a good default, but we need to
+            // add support for the cases where they aren't.
+            table->set_const_default_action_has_mutable_params(false);
         }
 
         for (const auto& action : actions) {
@@ -1096,6 +1104,10 @@ public:
             auto id = symbols.getHeaderFieldIdByName(field.first);
             match_field->set_header_field_id(id);
             match_field->set_match_type(field.second);
+        }
+
+        if (supportsTimeout) {
+            table->set_with_entry_timeout(true);
         }
     }
 
@@ -1720,6 +1732,29 @@ getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
     return DefaultAction{actionName, defaultActionProperty->isConstant};
 }
 
+/// @return true if @table's 'support_timeout' property exists and is true. This
+/// indicates that @table supports entry ageing.
+static bool getSupportsTimeout(const IR::P4Table* table) {
+    auto timeout = table->properties->getProperty(P4V1::V1Model::instance
+                                                    .tableAttributes
+                                                    .supportTimeout.name);
+    if (timeout == nullptr) return false;
+    if (!timeout->value->is<IR::ExpressionValue>()) {
+        ::error("Unexpected value %1% for supports_timeout on table %2%",
+                timeout, table);
+        return false;
+    }
+
+    auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
+    if (!expr->is<IR::BoolLiteral>()) {
+        ::error("Unexpected non-boolean value %1% for supports_timeout "
+                "property on table %2%", timeout, table);
+        return false;
+    }
+
+    return expr->to<IR::BoolLiteral>()->value;
+}
+
 static void serializeTable(P4RuntimeSerializer& serializer,
                            const IR::TableBlock* tableBlock,
                            ReferenceMap* refMap,
@@ -1747,8 +1782,11 @@ static void serializeTable(P4RuntimeSerializer& serializer,
     auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
     auto directMeter = getDirectCounterlike<IR::Meter>(table, refMap, typeMap);
 
+    bool supportsTimeout = getSupportsTimeout(table);
+
     serializer.addTable(table, tableSize, implementation, directCounter,
-                        directMeter, defaultAction, actions, matchFields);
+                        directMeter, defaultAction, actions, matchFields,
+                        supportsTimeout);
 }
 
 /// Visit evaluated blocks under the provided top-level block. Guarantees that
