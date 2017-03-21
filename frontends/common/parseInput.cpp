@@ -25,6 +25,10 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     FILE* in = nullptr;
     if (options.doNotPreprocess) {
         in = fopen(options.file, "r");
+        if (in == nullptr) {
+            ::error("%s: No such file or directory.", options.file);
+            return nullptr;
+        }
     } else {
         options.preprocess();
         if (::errorCount() > 0 || in == nullptr)
