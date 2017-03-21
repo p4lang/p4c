@@ -48,6 +48,7 @@ namespace ControlPlaneAPI {
 //   header stack instances, which currently requires allowing the programmer to
 //   provide a sequence of ids in the @id pragma. Note that @id *is* supported
 //   for header instance *fields*; this is just about the instances themselves.
+// - @id is not supported for action parameters.
 // - Locals are intentionally not exposed, but this prevents table match keys
 //   which involve complex expressions from working, because those expressions
 //   are desugared into a match against a local. This could be fixed just by
@@ -572,9 +573,6 @@ public:
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::COUNTER);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::METER);
 
-        // We can compute action parameter ids now that we have action ids.
-        symbols.computeIdsForActionParameters();
-
         // We can compute header field ids now that we have header instance ids.
         symbols.computeIdsForHeaderFields();
 
@@ -604,14 +602,6 @@ public:
         if (type != P4RuntimeSymbolType::HEADER_INSTANCE) {
             suffixSet.addSymbol(name);
         }
-    }
-
-    /// Add an action parameter to the table. Note that only the index is tracked,
-    /// not the name of the parameter, because the name doesn't affect the
-    /// P4Runtime id of the parameter at all and is effectively just data.
-    void addActionParameter(const IR::IDeclaration* action, size_t index) {
-        auto actionParam = std::make_pair(action->externalName(), index);
-        actionParams[actionParam] = PI_INVALID_ID;
     }
 
     /// Add a header instance @field to the table.
@@ -646,18 +636,6 @@ public:
             BUG("Looking up symbol '%1%' without adding it to the table", name);
         }
         return symbolId->second;
-    }
-
-    /// @return the P4Runtime id for an action parameter, specified as an @action
-    /// and an @index within the action's parameter list.
-    pi_p4_id_t getActionParameterId(cstring action, size_t index) const {
-        const auto actionParam = std::make_pair(action, index);
-        const auto id = actionParams.find(actionParam);
-        if (id == actionParams.end()) {
-            BUG("Looking up action '%1%' parameter %2% without adding it to "
-                "the table", action, index);
-        }
-        return id->second;
     }
 
     /// @return the P4Runtime id for the given header instance @field.
@@ -763,37 +741,6 @@ private:
             // Update the resource in place with the new id.
             assignedIds.insert(*id);
             iterator->second = *id;
-        }
-    }
-
-    void computeIdsForActionParameters() {
-        // The format for action parameter ids is:
-        //
-        //   [resource type] [action name hash value] [parameter id]
-        //    \____8_b____/   \_________16_b_______/   \____8_b___/
-        //
-        // The action name hash value is just bytes 3 and 4 of the action id. The
-        // parameter id is *normally* the index of the parameter in the action's
-        // argument list, but in the case of conflicts due to e.g. hash collisions
-        // between different actions, linear probing is used to select a unique id.
-        for (auto& actionParam : actionParams) {
-            auto& action = actionParam.first.first;
-            auto& index = actionParam.first.second;
-            const uint32_t actionIdBits =
-                (getId(P4RuntimeSymbolType::ACTION, action) & 0xffff) << 8;
-
-            // Search for an unused action parameter id.
-            boost::optional<pi_p4_id_t> id = probeForId(index, [=](uint32_t index) {
-                return (PI_ACTION_PARAM_ID << 24) | actionIdBits | (index & 0xff);
-            });
-
-            if (!id) {
-                ::error("Action '%1' has too many parameters to represent in P4Runtime", action);
-                break;
-            }
-
-            // Assign the id.
-            actionParam.second = *id;
         }
     }
 
@@ -906,11 +853,6 @@ private:
         { P4RuntimeSymbolType::METER, SymbolTable() },
         { P4RuntimeSymbolType::TABLE, SymbolTable() }
     };
-
-    // Action parameters aren't global symbols, but the tuple of
-    // (action, parameter list index) *is* globally unique, so we store that
-    // instead.
-    std::map<std::pair<cstring, size_t>, pi_p4_id_t> actionParams;
 
     // Header instance fields *are* global symbols - they have a qualified name
     // that's globally unique - but that name isn't actually used to compute or
@@ -1082,7 +1024,7 @@ public:
         for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
             auto param = action->add_params();
             auto paramName = actionParam->externalName();
-            param->set_id(symbols.getActionParameterId(name, index++));
+            param->set_id(index++);
             param->set_name(paramName);
 
             auto paramType = typeMap->getType(actionParam, true);
@@ -1400,13 +1342,10 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
     CHECK_NULL(control);
 
     for (auto declaration : *control->controlLocals) {
-        // Collect the symbols for actions and action parameters.
+        // Collect the symbol for the action itself.
         if (!declaration->is<IR::P4Action>()) continue;
         const IR::P4Action* action = declaration->to<IR::P4Action>();
         symbols.add(P4RuntimeSymbolType::ACTION, action);
-        for (size_t index = 0; index < action->parameters->size(); index++) {
-            symbols.addActionParameter(action, index);
-        }
 
         // Collect the symbols for any header field lists which are passed to
         // standard externs in the action body.
