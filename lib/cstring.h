@@ -83,23 +83,27 @@ class cstring {
 
     // Copy and assignment from other kinds of strings. These are linear time
     // operations because the underlying string must be copied.
-    cstring &operator=(const char *);
-    cstring &operator=(const std::string&);
     cstring(const std::stringstream&);                      // NOLINT(runtime/explicit)
     cstring(const char *s) { *this = s; }                   // NOLINT(runtime/explicit)
     cstring(const std::string &a) { *this = a; }            // NOLINT(runtime/explicit)
+    cstring &operator=(const char *);
+    cstring &operator=(const std::string&);
 
     template <typename Iter> cstring(Iter begin, Iter end) {
         *this = std::string(begin, end);
     }
 
     const char *c_str() const { return str; }
-    const char *find(int c) const { return str ? strchr(str, c) : nullptr; }
-    const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
     operator const char *() const { return str; }
+
+    // Size tests. Constant time except for size(), which is linear time.
     size_t size() const { return str ? strlen(str) : 0; }
     bool isNull() const { return str == nullptr; }
     bool isNullOrEmpty() const { return str == nullptr ? true : str[0] == 0; }
+
+    // Search for characters. Linear time.
+    const char *find(int c) const { return str ? strchr(str, c) : nullptr; }
+    const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
 
     // Equality tests with other cstrings. Constant time.
     bool operator==(const cstring &a) const { return str == a.str; }
@@ -136,6 +140,17 @@ class cstring {
     cstring operator+=(std::string a);
     cstring operator+=(char a);
 
+    cstring before(const char* at) const;
+    cstring substr(size_t start) const
+    { return (start >= size()) ? "" : substr(start, size() - start); }
+    cstring substr(size_t start, size_t length) const;
+    cstring replace(char find, char replace) const;
+
+    // Useful singletons.
+    static cstring newline;
+    static cstring empty;
+
+    // Static factory functions.
     template<typename T>
     static cstring to_cstring(const T &t) {
         std::stringstream ss;
@@ -149,15 +164,6 @@ class cstring {
             ss << *current; }
         return cstring(ss.str()); }
     template<class T> static cstring make_unique(const T &inuse, cstring base, char sep = '.');
-    cstring before(const char* at) const;
-    cstring substr(size_t start) const
-    { return (start >= size()) ? "" : substr(start, size() - start); }
-    cstring substr(size_t start, size_t length) const;
-    cstring replace(char find, char replace) const;
-
-    // Useful singletons.
-    static cstring newline;
-    static cstring empty;
 
     /// @return the total size in bytes of all interned strings. @count is set
     /// to the total number of interned strings.
