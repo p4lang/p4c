@@ -48,7 +48,7 @@ namespace ControlPlaneAPI {
 //   header stack instances, which currently requires allowing the programmer to
 //   provide a sequence of ids in the @id pragma. Note that @id *is* supported
 //   for header instance *fields*; this is just about the instances themselves.
-// - @id is not supported for action parameters.
+// - @id is not supported for action parameters or match fields.
 // - We don't currently distinguish between the case where the const default
 //   action has mutable params and the case where it doesn't.
 // - Locals are intentionally not exposed, but this prevents table match keys
@@ -59,9 +59,6 @@ namespace ControlPlaneAPI {
 // - There is some hardcoded stuff which is tied to BMV2 and won't necessarily
 //   suit other backends. These can all be dealt with on a case-by-case basis,
 //   but they require work outside of this code.
-
-using MatchField = ::p4::config::MatchField;
-using MatchType = ::p4::config::MatchField::MatchType;
 
 /// @return true if @type has an @metadata annotation.
 static bool isMetadataType(const IR::Type* type) {
@@ -229,6 +226,16 @@ struct HeaderField {
 struct DefaultAction {
     const cstring name;  // The fully qualified external name of this action.
     const bool isConst;  // Is this a const default action?
+};
+
+/// The information about a match field which is needed to serialize it.
+struct MatchField {
+    using MatchType = ::p4::config::MatchField::MatchType;
+    using MatchTypes = ::p4::config::MatchField;  // Make short enum names visible.
+
+    const cstring name;       // The fully qualified external name of this field.
+    const MatchType type;     // The match algorithm - exact, ternary, range, etc.
+    const uint32_t bitwidth;  // How wide this field is.
 };
 
 /// The types of action profiles available in the V1 model.
@@ -1054,7 +1061,7 @@ public:
                   const boost::optional<Counterlike<IR::Meter>>& directMeter,
                   const boost::optional<DefaultAction>& defaultAction,
                   const std::vector<cstring>& actions,
-                  const std::vector<std::pair<cstring, MatchType>>& matchFields,
+                  const std::vector<MatchField>& matchFields,
                   bool supportsTimeout) {
         auto name = tableDeclaration->externalName();
         auto annotations = tableDeclaration->to<IR::IAnnotated>();
@@ -1101,11 +1108,15 @@ public:
             table->add_action_ids(id);
         }
 
+        size_t index = 0;
         for (const auto& field : matchFields) {
             auto match_field = table->add_match_fields();
-            auto id = symbols.getHeaderFieldIdByName(field.first);
-            match_field->set_header_field_id(id);
-            match_field->set_match_type(field.second);
+            auto fieldId = symbols.getHeaderFieldIdByName(field.name);
+            match_field->set_id(index++);
+            match_field->set_name(field.name);
+            match_field->set_bitwidth(field.bitwidth);
+            match_field->set_header_field_id(fieldId);
+            match_field->set_match_type(field.type);
         }
 
         if (supportsTimeout) {
@@ -1602,9 +1613,9 @@ tryCastToIsValidBuiltin(const IR::Expression* expression,
 
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
-static std::vector<std::pair<cstring, MatchType>>
+static std::vector<MatchField>
 getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
-    std::vector<std::pair<cstring, MatchType>> matchFields;
+    std::vector<MatchField> matchFields;
 
     auto key = table->getKey();
     if (!key) return matchFields;
@@ -1622,9 +1633,9 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         }
 
         bool synthesizeValidField = false;
-        MatchType matchType;
+        MatchField::MatchType matchType;
         if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
-            matchType = MatchField::EXACT;
+            matchType = MatchField::MatchTypes::EXACT;
 
             // If this is an exact match on the result of an isValid() call, we
             // desugar that to a "valid" match.
@@ -1632,12 +1643,12 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             if (callToIsValid != nullptr) {
                 expr = callToIsValid->appliedTo;
                 synthesizeValidField = true;
-                matchType = MatchField::VALID;
+                matchType = MatchField::MatchTypes::VALID;
             }
         } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
-            matchType = MatchField::LPM;
+            matchType = MatchField::MatchTypes::LPM;
         } else if (matchTypeName == P4CoreLibrary::instance.ternaryMatch.name) {
-            matchType = MatchField::TERNARY;
+            matchType = MatchField::MatchTypes::TERNARY;
 
             // If this is a ternary match on the result of an isValid() call, desugar
             // that to a ternary match against the '_valid' field of the appropriate
@@ -1650,7 +1661,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
                 synthesizeValidField = true;
             }
         } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
-            matchType = MatchField::RANGE;
+            matchType = MatchField::MatchTypes::RANGE;
         } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
             // This match type indicates that this table is using an action
             // profile. We serialize action profiles separately from the tables
@@ -1696,7 +1707,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             break;
         }
 
-        matchFields.push_back(make_pair(path->serialize(), matchType));
+        matchFields.push_back(MatchField{path->serialize(), matchType,
+                                         uint32_t(path->type->width_bits())});
     }
 
     return matchFields;
