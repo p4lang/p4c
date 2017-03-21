@@ -30,7 +30,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
             return nullptr;
         }
     } else {
-        options.preprocess();
+        in = options.preprocess();
         if (::errorCount() > 0 || in == nullptr)
             return nullptr;
     }
