@@ -54,6 +54,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-E", nullptr,
                    [this](const char*) { doNotCompile = true; return true; },
                    "Preprocess only, do not compile (prints program on stdout)");
+    registerOption("-e", nullptr,
+                   [this](const char*) { doNotPreprocess = true; return true; },
+                   "Skip preprocess, assume input file is already preprocessed.");
     registerOption("--p4-14", nullptr,
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_14;

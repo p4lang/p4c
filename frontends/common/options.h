@@ -54,6 +54,8 @@ class CompilerOptions : public Util::Options {
     cstring file = nullptr;
     // if true preprocess only
     bool doNotCompile = false;
+    // if true skip preprocess
+    bool doNotPreprocess = false;
     // debugging dumps of programs written in this folder
     cstring dumpFolder = ".";
     // Pretty-print the program in the specified file

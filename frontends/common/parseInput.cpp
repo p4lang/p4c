@@ -22,10 +22,14 @@ limitations under the License.
 #include "frontends/p4/p4-parse.h"
 
 const IR::P4Program* parseP4File(CompilerOptions& options) {
-    FILE* in = options.preprocess();
-    if (::errorCount() > 0 || in == nullptr)
-        return nullptr;
-
+    FILE* in = nullptr;
+    if (options.doNotPreprocess) {
+        in = fopen(options.file, "r");
+    } else {
+        options.preprocess();
+        if (::errorCount() > 0 || in == nullptr)
+            return nullptr;
+    }
     const IR::P4Program* result = nullptr;
     bool compiling10 = options.isv1();
     if (compiling10) {
