@@ -97,6 +97,8 @@ struct HeaderFieldPath {
                                  const TypeMap* typeMap) {
         auto type = typeMap->getType(expression->getNode(), true);
         if (expression->is<IR::PathExpression>()) {
+            // Top-level structlike types only show up in P4Runtime names if
+            // they're metadata types. See forAllHeaderFields() for more info.
             if (isMetadataType(type) && type->is<IR::Type_Declaration>()) {
                 auto name = type->to<IR::Type_Declaration>()->externalName();
                 return HeaderFieldPath::root(name, type);
