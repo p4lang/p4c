@@ -18,7 +18,9 @@ limitations under the License.
 // places a vector class in the global namespace, which breaks protobuf.
 #include "p4/config/p4info.pb.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 #include <boost/variant.hpp>
 #include <google/protobuf/util/json_util.h>
 #include <iostream>
@@ -425,6 +427,117 @@ enum class P4RuntimeSymbolType {
     TABLE
 };
 
+/**
+ * Stores a set of P4 symbol suffixes. Symbols consist of path components
+ * separated by '.'; the suffixes this set stores consist of these components
+ * rather than individual characters. The information in this set can be used
+ * determine the shortest unique suffix for a P4 symbol.
+ */
+struct P4SymbolSuffixSet {
+    /// Adds @symbol's suffixes to the set if it's not already present.
+    void addSymbol(const cstring& symbol) {
+        BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
+
+        // Check if the symbol is already in the set. This is necessary because
+        // adding the same symbol more than once will break the algorithm below.
+        // XXX(seth): In the future we may be able to eliminate this check,
+        // since we already check for duplicate symbols in P4RuntimeSymbolTable.
+        // There are some edge cases, though - for example, symbols of different
+        // types can have the same name, which can happen in P4-14 natively and
+        // in P4-16 due to annotations. Until we handle those cases more
+        // strictly and have tests for them, it's safest to ensure this
+        // precondition here.
+        {
+            auto result = symbols.insert(symbol);
+            if (!result.second) return;  // It was already present.
+        }
+
+        // Split the symbol name into dot-separated components.
+        std::vector<cstring> components;
+        const char* cSymbol = symbol.c_str();
+        boost::split(components, cSymbol, [](char c) { return c == '.'; });
+
+        // Insert the components into our tree of suffixes. We work
+        // right-to-left through the symbol name, since we're concerned with
+        // suffixes. The edges represent components, and the nodes track how
+        // many suffixes pass through that node. For example, if we have symbols
+        // "a.b.c", "b.c", and "a.d.c", the tree will look like this:
+        //   (root) -> "c" -> (3) -> "b" -> (2) -> "a" -> (1)
+        //                       \-> "d" -> (1) -> "a" -> (1)
+        // (Nodes are in parentheses, and edge labels are in quotes.)
+        auto* node = suffixesRoot;
+        for (auto& component : boost::adaptors::reverse(components)) {
+            if (node->edges.find(component) == node->edges.end()) {
+                node->edges[component] = new SuffixNode;
+            }
+            node = node->edges[component];
+            node->instances++;
+        }
+    }
+
+    cstring shortestUniqueSuffix(const cstring& symbol) const {
+        BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
+        std::vector<cstring> components;
+        const char* cSymbol = symbol.c_str();
+        boost::split(components, cSymbol, [](char c) { return c == '.'; });
+
+        // Determine how many suffix components we need to uniquely identify
+        // this symbol. For example, if we have the symbols "d.a.c" and "e.b.c",
+        // the suffixes "a.c" and "b.c" are enough to identify the symbols
+        // uniquely, so in both cases we only need two components.
+        unsigned neededComponents = 0;
+        auto* node = suffixesRoot;
+        for (auto& component : boost::adaptors::reverse(components)) {
+            if (node->edges.find(component) == node->edges.end()) {
+                BUG("Symbol is not in suffix set: %1%", symbol);
+            }
+
+            node = node->edges[component];
+            neededComponents++;
+
+            // If there's only one suffix that passes through this node, we have
+            // a unique suffix right now, and we don't need the remaining
+            // components.
+            if (node->instances < 2) break;
+        }
+
+        // Serialize the suffix components into the final unique suffix that
+        // we'll return.
+        BUG_CHECK(neededComponents <= components.size(), "Too many components?");
+        std::string uniqueSuffix;
+        std::for_each(components.end() - neededComponents, components.end(),
+                      [&](const cstring& component) {
+            if (!uniqueSuffix.empty()) uniqueSuffix.append(".");
+            uniqueSuffix.append(component);
+        });
+
+        return uniqueSuffix;
+    }
+
+private:
+    // All symbols in the set. We store these separately to make sure that no
+    // symbol is added to the tree of suffixes more than once.
+    std::set<cstring> symbols;
+
+    // A node in the tree of suffixes. The tree of suffixes is a directed graph
+    // of path components, with the edges pointing from the each component to
+    // its predecessor, so that every suffix of every symbol corresponds to a
+    // path through the tree. For example, "foo.bar[1].baz" would be represented
+    // as "baz" -> "bar[1]" -> "foo".
+    struct SuffixNode {
+        // How many suffixes pass through this node? This includes suffixes that
+        // terminate at this node.
+        unsigned instances = 0;
+        
+        // Outgoing edges from this node. The SuffixNode should never be null.
+        std::map<cstring, SuffixNode*> edges;
+    };
+
+    // The root of our tree of suffixes. Note that this is *not* the data
+    // structure known as a suffix tree.
+    SuffixNode* suffixesRoot = new SuffixNode;
+};
+
 /// A table which tracks the symbols which are visible to P4Runtime and their ids.
 class P4RuntimeSymbolTable {
 public:
@@ -483,6 +596,14 @@ public:
         }
 
         symbolTable[name] = tryToAssignId(id);
+
+        // Add this symbol to the symbol suffix set, so we can compute a minimal
+        // alias for it later. We exclude header instances because they aren't
+        // exposed directly to P4Runtime; including them would lead to more
+        // conflicts between symbols suffixes which would produce longer aliases.
+        if (type != P4RuntimeSymbolType::HEADER_INSTANCE) {
+            suffixSet.addSymbol(name);
+        }
     }
 
     /// Add an action parameter to the table. Note that only the index is tracked,
@@ -496,7 +617,12 @@ public:
     /// Add a header instance @field to the table.
     void addHeaderField(const HeaderField* field) {
         const auto headerField = std::make_pair(field->instance, field->offset);
+        if (headerFields.find(headerField) != headerFields.end()) {
+            return;  // This is a duplicate, but that's OK.
+        }
+
         headerFields[headerField] = tryToAssignId(field->id);
+        suffixSet.addSymbol(field->name);
 
         // Although header instances aren't directly exposed to P4Runtime, we need
         // to compute ids for them in order to compute ids for header fields.
@@ -545,7 +671,7 @@ public:
     }
 
     /// @return the P4Runtime id for the header instance field with the given
-    /// fully quualified external @name. "External" here means that all of the
+    /// fully qualified external @name. "External" here means that all of the
     /// components in the field's path are external names.
     pi_p4_id_t getHeaderFieldIdByName(cstring name) const {
         const auto headerField = headerFieldsByName.find(name);
@@ -557,6 +683,14 @@ public:
             BUG("The symbol table entry for '%1%' is in an inconsistent state", name);
         }
         return id->second;
+    }
+
+    /// @return the alias for the given fully qualified external name. P4Runtime
+    /// defines an alias for each object to make referring to objects easier.
+    /// By default, the alias is the shortest unique suffix of path components in
+    /// the name.
+    cstring getAlias(cstring name) const {
+        return suffixSet.shortestUniqueSuffix(name);
     }
 
 private:
@@ -739,7 +873,7 @@ private:
         // XXX(seth): It may be a bit confusing that the P4Runtime resource types
         // we're working with here have "PI" in the name. That's just the name
         // P4Runtime had while it was under development.  Hopefully things will be
-        // made more consistant at some point.
+        // made more consistent at some point.
         switch (symbolType) {
             case P4RuntimeSymbolType::ACTION: return PI_ACTION_ID;
             case P4RuntimeSymbolType::ACTION_PROFILE: return PI_ACT_PROF_ID;
@@ -788,6 +922,11 @@ private:
     // corresponding entries in @headerFields. This allows us to look up header
     // field ids by name.
     std::map<cstring, std::pair<cstring, size_t>> headerFieldsByName;
+
+    // A set which contains all the symbols in the program. It's used to compute
+    // the shortest unique suffix of each symbol, which is the default alias we
+    // use for P4Runtime objects.
+    P4SymbolSuffixSet suffixSet;
 };
 
 /// A serializer which translates the information available in the P4 IR into a
@@ -851,6 +990,7 @@ public:
         auto headerField = p4Info->add_header_fields();
         headerField->mutable_preamble()->set_id(symbols.getHeaderFieldId(field));
         headerField->mutable_preamble()->set_name(field->name);
+        headerField->mutable_preamble()->set_alias(symbols.getAlias(field->name));
         addAnnotations(headerField->mutable_preamble(), field->annotations);
         headerField->set_bitwidth(field->bitwidth);
     }
@@ -860,6 +1000,7 @@ public:
         auto id = symbols.getId(P4RuntimeSymbolType::COUNTER, counterInstance.name);
         counter->mutable_preamble()->set_id(id);
         counter->mutable_preamble()->set_name(counterInstance.name);
+        counter->mutable_preamble()->set_alias(symbols.getAlias(counterInstance.name));
         addAnnotations(counter->mutable_preamble(), counterInstance.annotations);
         counter->set_size(counterInstance.size);
 
@@ -885,6 +1026,7 @@ public:
         auto id = symbols.getId(P4RuntimeSymbolType::METER, meterInstance.name);
         meter->mutable_preamble()->set_id(id);
         meter->mutable_preamble()->set_name(meterInstance.name);
+        meter->mutable_preamble()->set_alias(symbols.getAlias(meterInstance.name));
         addAnnotations(meter->mutable_preamble(), meterInstance.annotations);
         meter->set_size(meterInstance.size);
         meter->set_type(Meter::COLOR_UNAWARE);  // A default; this isn't exposed.
@@ -929,6 +1071,7 @@ public:
         auto action = p4Info->add_actions();
         action->mutable_preamble()->set_id(id);
         action->mutable_preamble()->set_name(name);
+        action->mutable_preamble()->set_alias(symbols.getAlias(name));
         addAnnotations(action->mutable_preamble(), annotations);
 
         // XXX(seth): We add all action parameters below. However, this is not what
@@ -955,6 +1098,7 @@ public:
         auto action = p4Info->add_actions();
         action->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::ACTION, name));
         action->mutable_preamble()->set_name(name);
+        action->mutable_preamble()->set_alias(symbols.getAlias(name));
     }
 
     void addTable(const IR::P4Table* tableDeclaration,
@@ -971,6 +1115,7 @@ public:
         auto table = p4Info->add_tables();
         table->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::TABLE, name));
         table->mutable_preamble()->set_name(name);
+        table->mutable_preamble()->set_alias(symbols.getAlias(name));
         addAnnotations(table->mutable_preamble(), annotations);
         table->set_size(tableSize);
 
@@ -1019,6 +1164,7 @@ public:
                                 actionProfile.name);
         profile->mutable_preamble()->set_id(id);
         profile->mutable_preamble()->set_name(actionProfile.name);
+        profile->mutable_preamble()->set_alias(symbols.getAlias(actionProfile.name));
         profile->set_with_selector(actionProfile.type
                                      == ActionProfileType::INDIRECT_WITH_SELECTOR);
         profile->set_size(actionProfile.size);
@@ -1033,6 +1179,7 @@ public:
         auto fieldList = p4Info->add_header_field_lists();
         fieldList->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::HEADER_FIELD_LIST, name));
         fieldList->mutable_preamble()->set_name(name);
+        fieldList->mutable_preamble()->set_alias(symbols.getAlias(name));
         for (auto& field : fields) {
             fieldList->add_header_field_ids(symbols.getHeaderFieldId(field));
         }
