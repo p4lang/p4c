@@ -92,6 +92,7 @@ class ordered_set {
     bool        empty() const noexcept { return data.empty(); }
     size_type   size() const noexcept { return data_map.size(); }
     size_type   max_size() const noexcept { return data_map.max_size(); }
+    void        clear() { data.clear(); data_map.clear(); }
 
     iterator        find(const T &a) { return tr_iter(data_map.find(&a)); }
     const_iterator  find(const T &a) const { return tr_iter(data_map.find(&a)); }
