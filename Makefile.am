@@ -104,7 +104,13 @@ p4include_HEADERS += $(srcdir)/p4include/core.p4 $(srcdir)/p4include/v1model.p4
 #### For testing, install headers in the build directory
 
 all-local:
-	@$(MAKE) install-data pkgdatadir=$(builddir)
+	@$(MAKE) install-data pkgdatadir=$(abs_builddir)
+
+# install-data-hook runs after other install rules
+# for testing, p4c is regenerated to look up cfg files in build directory
+install-data-hook:
+	@sed -e 's,[@]pkgdatadir[@],$(abs_builddir),g' < $(srcdir)/tools/driver/p4c.in > $(builddir)/p4c
+	@chmod +x $(builddir)/p4c
 
 # FIXME -- should be a way of getting configure to do this automatcially? or automake?
 setup.h: $(srcdir)/setup.h.in Makefile

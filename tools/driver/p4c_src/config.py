@@ -26,7 +26,6 @@ class Config(object):
 
     def __init__(self, config_prefix):
         self.config_prefix = config_prefix or 'p4c'
-        self.site_config_name = '%s.site.cfg' % (self.config_prefix)
         self.target = []
         self.steps = {}
         self.init_func = {}

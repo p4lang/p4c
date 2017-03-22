@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bin_SCRIPTS += p4c
-CLEANFILES += $(bin_SCRIPTS)
-EXTRA_DIST += p4c.in
+""" 'p4c' compiler driver """
 
-do_substitution = sed -e 's,[@]pkgdatadir[@],$(pkgdatadir),g'
+__author__ = "Barefoot Networks"
+__email__ = "p4c@barefootnetworks.com"
+__versioninfo__ = (0, 0, 1)
+__version__ = '.'.join(str(v) for v in __versioninfo__) + 'dev'
 
-# generate the p4c for installation
-# this runs before install-data-hook
-p4c: $(srcdir)/tools/driver/p4c.in
-	@$(do_substitution) < $(srcdir)/tools/driver/p4c.in > $(builddir)/p4c
-	@chmod +x $(builddir)/p4c
+__all__ = []
 
-include $(srcdir)/tools/driver/p4c_src/Makefile.am
+from .main import main

@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bin_SCRIPTS += p4c
-CLEANFILES += $(bin_SCRIPTS)
-EXTRA_DIST += p4c.in
+p4c_PYTHON = tools/driver/p4c_src/main.py \
+			 tools/driver/p4c_src/util.py \
+			 tools/driver/p4c_src/config.py \
+			 tools/driver/p4c_src/__init__.py \
+			 tools/driver/p4c_src/p4c.bmv2.cfg \
+			 tools/driver/p4c_src/p4c.ebpf.cfg
 
-do_substitution = sed -e 's,[@]pkgdatadir[@],$(pkgdatadir),g'
-
-# generate the p4c for installation
-# this runs before install-data-hook
-p4c: $(srcdir)/tools/driver/p4c.in
-	@$(do_substitution) < $(srcdir)/tools/driver/p4c.in > $(builddir)/p4c
-	@chmod +x $(builddir)/p4c
-
-include $(srcdir)/tools/driver/p4c_src/Makefile.am
+p4cdir=$(pkgdatadir)/p4c_src
