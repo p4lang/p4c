@@ -1,3 +1,17 @@
+# Copyright 2013-present Barefoot Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/env python
 
 """
@@ -11,32 +25,20 @@ import glob
 import itertools
 import os
 import subprocess
+import shlex
 import sys
 
-import p4c.run
 import p4c.util
 import p4c.config
 
 commands = {}
 
-def init_globals():
-    commands['preprocessor'] = []
-    commands['compiler'] = []
-    commands['assembler'] = []
-    commands['linker'] = []
-
-def save_options(cmd, options):
-    for opt in options:
-        opt_split = opt.split(' ')
-        for s in opt_split:
-            commands[cmd].append(s)
-
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--version", dest="show_version",
+    parser.add_argument("-V", "--version", dest="show_version",
                         help="show version and exit",
                         action="store_true", default=False)
-    parser.add_argument("-debug", dest="debug",
+    parser.add_argument("-v", dest="debug",
                         help="verbose",
                         action="store_true", default=False)
     parser.add_argument("-###", dest="dry_run",
@@ -74,6 +76,7 @@ def main():
                         help="Only run preprocess, compile, and assemble steps",
                         action="store_true", default=True)
     parser.add_argument("-x", dest="language",
+                        choices = ["p4-14", "p4-16"],
                         help="Treat subsequent input files as having type language.",
                         action="store", default="p4-16")
     parser.add_argument("-I", dest="search_path",
@@ -96,12 +99,22 @@ def main():
     if not args:
         parser.error('No input specified.')
 
-    init_globals()
+    commands['preprocessor'] = []
+    commands['compiler'] = []
+    commands['assembler'] = []
+    commands['linker'] = []
 
-    save_options("preprocessor", opts.preprocessor_options)
-    save_options("compiler", opts.compiler_options)
-    save_options("assembler", opts.assembler_options)
-    save_options("linker", opts.linker_options)
+    for option in opts.preprocessor_options:
+        commands["preprocessor"] += shlex.split(option)
+
+    for option in opts.compiler_options:
+        commands["compiler"] += shlex.split(option)
+
+    for option in opts.assembler_options:
+        commands["assembler"] += shlex.split(option)
+
+    for option in opts.linker_options:
+        commands["linker"] += shlex.split(option)
 
     # set output directory
     if not os.path.exists(opts.output_directory):
@@ -115,7 +128,6 @@ def main():
     cfg = p4c.config.Config(config_prefix = "p4c")
     for cf in cfg_files:
         cfg.load_from_config(cf, opts.output_directory, opts.source_file)
-
 
     if opts.backend not in cfg.steps:
         print "Unknown target:", opts.backend
@@ -139,12 +151,9 @@ def main():
 
     # default search path
     for path in os.environ['P4C_INCLUDE_PATH'].split(':'):
-        if (opts.language == 'p4-16' and os.path.isdir(path + '/p4include')):
-            commands['preprocessor'].append("-I {}".format(path+'/p4include'))
-            commands['compiler'].append("-I {}".format(path+'/p4include'))
-        elif (opts.language == 'p4-14' and os.path.isdir(path + 'p4_14include')):
-            commands['preprocessor'].append("-I {}".format(path+'/p4_14include'))
-            commands['compiler'].append("-I {}".format(path+'/p4_14include'))
+        if os.path.isdir(path):
+            commands['preprocessor'].append("-I {}".format(path))
+            commands['compiler'].append("-I {}".format(path))
 
     # append search path
     for path in opts.search_path:
@@ -153,32 +162,32 @@ def main():
         commands['compiler'].append("-I")
         commands['compiler'].append(path)
 
-    # p4 version
+    # set p4 version
     if opts.language == 'p4-16':
         commands['compiler'].append("--p4v=16")
     else:
         commands['compiler'].append("--p4v=14")
 
     for idx, step in enumerate(cfg.steps[opts.backend]):
-        cmd = commands[step]
+        cmd = []
+        for c in commands[step]:
+            cmd = cmd + shlex.split(c)
         options = cfg.options[opts.backend][step]
-        cmd = cmd + options
-        # convert ['-a -b', '-c', '-d'] to ['-a', '-b', '-c', '-d']
-        cmd = list(itertools.chain.from_iterable(el.split() for el in cmd))
+        for option in options:
+            cmd = cmd + shlex.split(option)
         # check if cmd in PATH
         if (p4c.util.find_bin(cmd[0]) == None):
             print "{}: command not found".format(cmd[0])
             sys.exit(1)
-
+        # only dry-run
         if opts.dry_run:
             print "{}: {}".format(step, " ".join(cmd))
             continue
-
+        # skip if not required
         if not step_enable[idx]:
             continue
-
+        # run command
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # additional stuff
         if opts.debug:
             print 'running {}'.format(' '.join(cmd))
         out, err = p.communicate() # now wait
@@ -186,5 +195,4 @@ def main():
             print "{}\n{}".format(out, err)
             sys.exit(p.returncode)
 
-        if opts.debug:
-            print out
+        print out

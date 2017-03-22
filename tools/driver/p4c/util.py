@@ -1,3 +1,17 @@
+# Copyright 2013-present Barefoot Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 
 # recursive find, good for developer
@@ -6,7 +20,7 @@ def rec_find_bin(cwd, exe):
     for root, dirs, files in os.walk(cwd):
         for f in files:
             if f == exe:
-                return root + '/' + f
+                return os.path.join(root, f)
     cwd = os.path.abspath(os.path.join(cwd, os.pardir))
     if cwd != "/":
         found = rec_find_bin(cwd, exe)
@@ -29,6 +43,6 @@ def find_bin(exe):
         for root, dirs, files in os.walk(pp):
             for ff in files:
                 if ff == exe:
-                    found_path = pp + '/' + ff
+                    found_path = os.path.join(pp, ff)
     return found_path
 

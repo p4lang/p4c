@@ -40,6 +40,8 @@ noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
+bin_SCRIPTS =                  # Scripts built
+EXTRA_DIST =                   # Extra files to distribute
 
 # Variables specific to our build system.
 XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
@@ -56,6 +58,7 @@ p4_14include_HEADERS =		# p4_14 include files
 
 include $(srcdir)/lib/Makefile.am
 include $(srcdir)/tools/ir-generator/Makefile.am
+include $(srcdir)/tools/driver/Makefile.am
 include $(srcdir)/ir/Makefile.am
 include $(srcdir)/frontends/Makefile.am
 include $(srcdir)/midend/Makefile.am
