@@ -359,7 +359,7 @@ class RunBMV2(object):
         for t in self.json["pipelines"][1]["tables"]:
             self.tables.append(BMV2Table(t))
     def filename(self, interface, direction):
-        return self.folder + "/" + self.pcapPrefix + interface + "_" + direction + ".pcap"
+        return self.folder + "/" + self.pcapPrefix + str(interface) + "_" + direction + ".pcap"
     def interface_of_filename(self, f):
         return os.path.basename(f).rstrip('.pcap').lstrip(self.pcapPrefix).rsplit('_', 1)[0]
     def do_cli_command(self, cmd):
@@ -380,6 +380,7 @@ class RunBMV2(object):
             self.do_cli_command(self.parse_table_set_default(cmd))
         elif first == "packet":
             interface, data = nextWord(cmd)
+            interface = int(interface)
             data = ''.join(data.split())
             time.sleep(self.packetDelay)
             try:
@@ -391,6 +392,7 @@ class RunBMV2(object):
             self.packetDelay = 0
         elif first == "expect":
             interface, data = nextWord(cmd)
+            interface = int(interface)
             data = ''.join(data.split())
             if data != '':
                 self.expected.setdefault(interface, []).append(data)
@@ -464,7 +466,7 @@ class RunBMV2(object):
         # return list of interface names suitable for bmv2
         result = []
         for interface in sorted(self.interfaces):
-            result.append("-i " + interface + "@" + self.pcapPrefix + interface)
+            result.append("-i " + str(interface) + "@" + self.pcapPrefix + str(interface))
         return result
     def generate_model_inputs(self, stffile):
         self.stffile = stffile
@@ -474,6 +476,7 @@ class RunBMV2(object):
                 first, cmd = nextWord(line)
                 if first == "packet" or first == "expect":
                     interface, cmd = nextWord(cmd)
+                    interface = int(interface)
                     if not interface in self.interfaces:
                         # Can't open the interfaces yet, as that would block
                         ifname = self.interfaces[interface] = self.filename(interface, "in")
