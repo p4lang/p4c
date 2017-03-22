@@ -159,3 +159,29 @@ recheck-%:
 
 check-ifail:
 	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
+
+# DOXYGEN SUPPORT
+@DX_RULES@
+
+DOXYGEN_FILES = $(top_srcdir)/docs/doxygen/doxygen.cfg \
+	        $(top_srcdir)/docs/doxygen/bfn_header.tex \
+	        $(top_srcdir)/docs/doxygen/p4c_layout.xml \
+	        $(top_srcdir)/docs/doxygen/*.md
+
+# ensure the distribution of the doxygen configuration files
+EXTRA_DIST = $(DOXYGEN_FILES)
+
+.PHONY: docs
+if DOXYGEN_ENABLED
+# the default clean rule does not remove directories so
+# we need to override it
+mostlyclean-local:
+	-$(RM) -r $(DX_CLEANFILES)
+
+# easier to remember rule for making the documentation
+docs: $(DOXY_SOURCES)
+	@$(MAKE) doxygen-doc
+else
+docs:
+	@echo "Please enable docs building (configure with --enable-doxygen-doc)"
+endif
