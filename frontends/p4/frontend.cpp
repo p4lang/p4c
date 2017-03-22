@@ -76,8 +76,8 @@ class FrontEndLast : public PassManager {
     FrontEndLast() { setName("FrontEndLast"); }
 };
 
-const IR::P4Program*
-FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program, bool skipSideEffectOrdering) {
+const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
+                                   bool skipSideEffectOrdering) {
     if (program == nullptr)
         return nullptr;
 
