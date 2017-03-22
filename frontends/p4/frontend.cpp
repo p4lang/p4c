@@ -108,7 +108,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
         new SimplifyControlFlow(&refMap, &typeMap),
-        new RemoveAllUnusedDeclarations(&refMap),
+        new RemoveAllUnusedDeclarations(&refMap, true),
         new SimplifyParsers(&refMap),
         new ResetHeaders(&refMap, &typeMap),
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name

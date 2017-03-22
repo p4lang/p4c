@@ -1,0 +1,18 @@
+../testdata/p4_16_samples/interface.p4(31): warning: crc0: unused instance
+    Crc16<bit<32>>() crc0;
+                     ^^^^
+../testdata/p4_16_samples/interface.p4(32): warning: crc1: unused instance
+    Crc16<int<32>>(32s0) crc1;
+                         ^^^^
+../testdata/p4_16_samples/interface.p4(33): warning: crc2: unused instance
+    Crc16<int<32>>() crc2;
+                     ^^^^
+../testdata/p4_16_samples/interface.p4(31): warning: crc0: unused instance
+    Crc16<bit<32>>() crc0;
+                     ^^^^
+../testdata/p4_16_samples/interface.p4(32): warning: crc1: unused instance
+    Crc16<int<32>>(32s0) crc1;
+                         ^^^^
+../testdata/p4_16_samples/interface.p4(33): warning: crc2: unused instance
+    Crc16<int<32>>() crc2;
+                     ^^^^

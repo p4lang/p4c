@@ -82,8 +82,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* dec
 const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) {
     LOG1("Visiting " << decl);
     auto ctx = getContext();
-    if ((decl->getName().name == IR::P4Program::main ||
-        decl->getName().name == IR::ParserState::verify) &&
+    if (decl->getName().name == IR::ParserState::verify &&
         ctx->parent->node->is<IR::P4Program>())
         return decl->getNode();
     if (refMap->isUsed(getOriginal<IR::IDeclaration>()))
@@ -91,6 +90,21 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
     LOG1("Removing " << getOriginal());
     prune();  // no need to go deeper
     return nullptr;
+}
+
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* decl) {
+    // Don't delete instances; they may have consequences on the control-plane API
+    auto ctx = getContext();
+    if (decl->getName().name == IR::P4Program::main &&
+        ctx->parent->node->is<IR::P4Program>())
+        return decl;
+    if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
+        if (warn)
+            ::warning("%1%: unused instance", decl);
+    }
+    // don't scan the initializer: we don't want to delete virtual methods
+    prune();
+    return decl;
 }
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {

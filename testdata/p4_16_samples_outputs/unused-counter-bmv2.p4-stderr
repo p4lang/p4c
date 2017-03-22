@@ -1,0 +1,9 @@
+../testdata/p4_16_samples/unused-counter-bmv2.p4(51): warning: c1: unused instance
+    direct_counter(CounterType.packets) c1;
+                                        ^^
+../testdata/p4_16_samples/unused-counter-bmv2.p4(51): warning: c1: unused instance
+    direct_counter(CounterType.packets) c1;
+                                        ^^
+../testdata/p4_16_samples/unused-counter-bmv2.p4(51): warning: c1: unused instance
+    direct_counter(CounterType.packets) c1;
+                                        ^^
