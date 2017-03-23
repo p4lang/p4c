@@ -493,6 +493,7 @@ class RunBMV2(object):
             reportError("Could not find a free port for Thrift")
             return FAILURE
         thriftPort = str(9090 + rand)
+        rv = SUCCESS
 
         try:
             runswitch = [FindExe("behavioral-model", "simple_switch"),
@@ -534,25 +535,27 @@ class RunBMV2(object):
             cli.stdin.close()
             for interface, fp in self.interfaces.iteritems():
                 fp.close()
-            cli.wait()
-            if cli.returncode != 0:
-                reportError("CLI process failed with exit code", cli.returncode)
-                return FAILURE
             # Give time to the model to execute
             time.sleep(2)
+            cli.terminate()
             sw.terminate()
             sw.wait()
             # This only works on Unix: negative returncode is
             # minus the signal number that killed the process.
-            if sw.returncode != -15:  # 15 is SIGTERM
+            if sw.returncode != 0 and sw.returncode != -15:  # 15 is SIGTERM
                 reportError("simple_switch died with return code", sw.returncode);
+                rv = FAILURE
             elif self.options.verbose:
                 print("simple_switch exit code", sw.returncode)
+            cli.wait()
+            if cli.returncode != 0 and cli.returncode != -15:
+                reportError("CLI process failed with exit code", cli.returncode)
+                rv = FAILURE
         finally:
             concurrent.release(rand)
         if self.options.verbose:
             print("Execution completed")
-        return SUCCESS
+        return rv
     def comparePacket(self, expected, received):
         received = ''.join(ByteToHex(str(received)).split()).upper()
         expected = ''.join(expected.split()).upper()
