@@ -39,6 +39,7 @@ noinst_HEADERS =               # Headers that are not installed
 noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
+check_PROGRAMS =               # Test programs to build
 TESTS =                        # Tests to execute
 
 # Variables specific to our build system.
@@ -46,6 +47,7 @@ XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
 IFAIL_TESTS =                  # intermittent failures
 export XFAIL_TESTS
 export IFAIL_TESTS
+gtest_SOURCES =                # GTests
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
@@ -126,8 +128,13 @@ libfrontend_la_SOURCES = \
 	ir/ir-generated.cpp \
 	$(extension_frontend_SOURCES)
 
-# unit tests
+################ Testing
+
+# C++ unit tests.
 include $(srcdir)/test/Makefile.am
+
+# GTest unit tests.
+include $(srcdir)/test/gtest/Makefile.am
 
 # Lint all header files.
 cpplint_FILES += $(noinst_HEADERS)
