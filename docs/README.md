@@ -28,7 +28,8 @@ p4c
 ├── test                      -- test code
 │   └── unittests             -- unit test code
 ├── tools                     -- external programs used in the build/test process
-│   └── ir-generator          -- code for the IR C++ class hierarchy generator
+│   ├── driver                -- p4c compiler driver
+|   └── ir-generator          -- code for the IR C++ class hierarchy generator
 └── testdata                  -- test inputs and reference outputs
     ├── p4_16_samples         -- P4_16 input test programs
     ├── p4_16_errors          -- P4_16 negative input test programs
@@ -252,3 +253,73 @@ output:
 
   * use `ordered_map` and `ordered_set` when you need to iterate;
     they provide deterministic iterators
+
+## Compiler Driver
+
+**p4c** is a compiler driver. The goal is to provide a consistent user interface
+across different p4 backends and work flows. The compiler driver is written in 
+Python. It can be extended for custom backends.
+
+The usage of the driver is as follows:
+```
+usage: p4c [-h] [-V] [-v] [-###] [-Xpreprocessor <arg>] [-Xp4c <arg>]
+           [-Xassembler <arg>] [-Xlinker <arg>] [-b BACKEND] [-E] [-e] [-S]
+           [-c] [-x {p4-14,p4-16}] [-I SEARCH_PATH] [-o PATH] [--target-help]
+           [source_file]
+
+positional arguments:
+  source_file           File to compile
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -V, --version         show version and exit
+  -v                    verbose
+  -###                  print (but do not run) the commands
+  -Xpreprocessor <arg>  Pass <arg> to the preprocessor
+  -Xp4c <arg>           Pass <arg> to the compiler
+  -Xassembler <arg>     Pass <arg> to the assembler
+  -Xlinker <arg>        Pass <arg> to the linker
+  -b BACKEND            specify target backend
+  -E                    Only run the preprocessor
+  -e                    Skip the preprocessor
+  -S                    Only run the preprocess and compilation steps
+  -c                    Only run preprocess, compile, and assemble steps
+  -x {p4-14,p4-16}      Treat subsequent input file as having type language.
+  -I SEARCH_PATH        Add directory to include search path
+  -o PATH               Write output to the provided path
+  --target-help         Display target specific command line options.
+```
+
+To extend the driver, user needs to create a configuration file and add it to the `p4c_PYTHON`
+makefile variable.
+
+```
+# In your custom Makefile.am
+
+p4c_PYTHON += p4c.custom.cfg
+```
+
+There is an global variable `config` in p4c compiler driver that stores the build steps 
+for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
+is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is 
+identified as `bmv2-*-p4org`. The * is a wildcard to represent any architecture. User may choose
+to specify the architecture string to use different compilation flow for different backend 
+architecture.
+
+A sample configuration file looks as follows:
+```
+config.add_preprocessor_options("bmv2-psa-p4org", "-E")
+config.add_compiler_options("bmv2-psa-p4org", "{}/{}.o".format(output_dir, source_basename))
+config.add_assembler_options("bmv2-psa-p4org", "{}/{}.asm".format(output_dir, source_basename))
+config.add_linker_options("bmv2-psa-p4org", "{}/{}.json".format(output_dir, source_basename))
+
+config.add_toolchain("bmv2-psa-p4org", {"preprocessor": "cc", "compiler": "p4c-bm2-ss", "assembler": "", "linker": ""})
+config.add_compilation_steps(["preprocessor", "compiler"])
+config.target.append("bmv2-psa-p4org")
+```
+
+After adding the new configuration file, rerun `bootstrap.sh`
+
+For testing purpose, p4c will be installed in the build/ directory when executing `make`. 
+User can install `p4c` to other system path by running `make install`
+
