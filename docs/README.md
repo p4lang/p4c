@@ -258,7 +258,7 @@ output:
 
 **p4c** is a compiler driver. The goal is to provide a cnosistent user interface
 across different p4 backends and work flows. The compiler driver is written in 
-Python. It can be extended for custom backend.
+Python. It can be extended for custom backends.
 
 The usage of the driver is as follows:
 ```
@@ -268,7 +268,7 @@ usage: p4c [-h] [-V] [-v] [-###] [-Xpreprocessor <arg>] [-Xp4c <arg>]
            [source_file]
 
 positional arguments:
-  source_file           Files to compile
+  source_file           File to compile
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -284,7 +284,7 @@ optional arguments:
   -e                    Skip the preprocessor
   -S                    Only run the preprocess and compilation steps
   -c                    Only run preprocess, compile, and assemble steps
-  -x {p4-14,p4-16}      Treat subsequent input files as having type language.
+  -x {p4-14,p4-16}      Treat subsequent input file as having type language.
   -I SEARCH_PATH        Add directory to include search path
   -o PATH               Write output to the provided path
   --target-help         Display target specific command line options.
@@ -301,8 +301,8 @@ p4c_PYTHON += p4c.custom.cfg
 
 There is an global variable `config` in p4c compiler driver that stores the build steps 
 for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
-is identified with a triplet, target-arch-vendor. For example, the default bmv2 backend is 
-identified as bmv2-*-p4org. The * is a wildcard to represent any architecture. User may choose
+is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is 
+identified as `bmv2-*-p4org`. The * is a wildcard to represent any architecture. User may choose
 to specify the architecture string to use different compilation flow for different backend 
 architecture.
 
