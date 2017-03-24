@@ -185,7 +185,7 @@ DOXYGEN_FILES = $(top_srcdir)/docs/doxygen/doxygen.cfg \
 	        $(top_srcdir)/docs/doxygen/*.md
 
 # ensure the distribution of the doxygen configuration files
-EXTRA_DIST = $(DOXYGEN_FILES)
+EXTRA_DIST += $(DOXYGEN_FILES)
 
 .PHONY: docs
 if DOXYGEN_ENABLED
