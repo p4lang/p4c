@@ -256,7 +256,7 @@ output:
 
 ## Compiler Driver
 
-**p4c** is a compiler driver. The goal is to provide a cnosistent user interface
+**p4c** is a compiler driver. The goal is to provide a consistent user interface
 across different p4 backends and work flows. The compiler driver is written in 
 Python. It can be extended for custom backends.
 
