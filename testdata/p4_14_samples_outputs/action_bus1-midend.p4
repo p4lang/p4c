@@ -48,7 +48,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -76,72 +76,72 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_15() {
     }
-    @name("set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;
         hdr.data.f1_2 = v2;
         hdr.data.f1_3 = v3;
         hdr.data.f1_4 = v4;
         hdr.data.f1_5 = v5;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("noop") action noop_8() {
+    @name(".noop") action noop_8() {
     }
-    @name("noop") action noop_9() {
+    @name(".noop") action noop_9() {
     }
-    @name("noop") action noop_10() {
+    @name(".noop") action noop_10() {
     }
-    @name("noop") action noop_11() {
+    @name(".noop") action noop_11() {
     }
-    @name("noop") action noop_12() {
+    @name(".noop") action noop_12() {
     }
-    @name("noop") action noop_13() {
+    @name(".noop") action noop_13() {
     }
-    @name("noop") action noop_14() {
+    @name(".noop") action noop_14() {
     }
-    @name("set2") action set2_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set2") action set2_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f2_1 = v1;
         hdr.data.f2_2 = v2;
         hdr.data.f2_3 = v3;
         hdr.data.f2_4 = v4;
         hdr.data.f2_5 = v5;
     }
-    @name("set3") action set3_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set3") action set3_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f3_1 = v1;
         hdr.data.f3_2 = v2;
         hdr.data.f3_3 = v3;
         hdr.data.f3_4 = v4;
         hdr.data.f3_5 = v5;
     }
-    @name("set4") action set4_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set4") action set4_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f4_1 = v1;
         hdr.data.f4_2 = v2;
         hdr.data.f4_3 = v3;
         hdr.data.f4_4 = v4;
         hdr.data.f4_5 = v5;
     }
-    @name("set5") action set5_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set5") action set5_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f5_1 = v1;
         hdr.data.f5_2 = v2;
         hdr.data.f5_3 = v3;
         hdr.data.f5_4 = v4;
         hdr.data.f5_5 = v5;
     }
-    @name("set6") action set6_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set6") action set6_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f6_1 = v1;
         hdr.data.f6_2 = v2;
         hdr.data.f6_3 = v3;
         hdr.data.f6_4 = v4;
         hdr.data.f6_5 = v5;
     }
-    @name("set7") action set7_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set7") action set7_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f7_1 = v1;
         hdr.data.f7_2 = v2;
         hdr.data.f7_3 = v3;
         hdr.data.f7_4 = v4;
         hdr.data.f7_5 = v5;
     }
-    @name("set8") action set8_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name(".set8") action set8_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f8_1 = v1;
         hdr.data.f8_2 = v2;
         hdr.data.f8_3 = v3;

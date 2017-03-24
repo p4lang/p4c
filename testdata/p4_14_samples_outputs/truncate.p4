@@ -27,9 +27,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_nop") action _nop() {
+    @name("._nop") action _nop() {
     }
-    @name("_truncate") action _truncate(bit<32> new_length, bit<9> port) {
+    @name("._truncate") action _truncate(bit<32> new_length, bit<9> port) {
         standard_metadata.egress_spec = port;
         truncate((bit<32>)new_length);
     }

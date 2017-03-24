@@ -19,9 +19,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t     data;
-    @name("extra")
+    @name("extra") 
     data2_t[4] extra;
 }
 
@@ -45,18 +45,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("output") action output_0(bit<9> port) {
+    @name(".output") action output_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("push1") action push1_0(bit<24> x1) {
+    @name(".push1") action push1_0(bit<24> x1) {
         hdr.extra.push_front(1);
         hdr.extra[0].x1 = x1;
         hdr.extra[0].more = hdr.data.more;
         hdr.data.more = 8w1;
     }
-    @name("push2") action push2_0(bit<24> x1, bit<24> x2) {
+    @name(".push2") action push2_0(bit<24> x1, bit<24> x2) {
         hdr.extra.push_front(2);
         hdr.extra[0].x1 = x1;
         hdr.extra[0].more = 8w1;
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.extra[1].more = hdr.data.more;
         hdr.data.more = 8w1;
     }
-    @name("pop1") action pop1_0() {
+    @name(".pop1") action pop1_0() {
         hdr.data.more = hdr.extra[0].more;
         hdr.extra.pop_front(1);
     }

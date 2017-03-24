@@ -18,14 +18,12 @@ control c(inout bit<1> r) {
     T s_f1_field;
     T s_f1_field_0;
     T s_f2;
-    bit<1> s_z;
     action act() {
         s_f1_field.f = 1w0;
         s_f1_field_0.f = 1w1;
         s_f2.f = 1w0;
-        s_z = 1w1;
-        f<tuple_0>({s_f1_field, s_f1_field_0});
-        r = s_f2.f & s_z;
+        f<tuple_0>({ s_f1_field, s_f1_field_0 });
+        r = s_f2.f & 1w1;
     }
     table tbl_act {
         actions = {

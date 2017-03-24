@@ -78,9 +78,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop_0() {
+    @name(".nop") action nop_0() {
     }
-    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
+    @name(".set_egress_port") action set_egress_port_0(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
     @name("ipv4_match") table ipv4_match_0 {

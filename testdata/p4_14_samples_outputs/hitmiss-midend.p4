@@ -15,7 +15,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -27,29 +27,30 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bool tmp_0;
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_4() {
     }
     @name("NoAction") action NoAction_5() {
     }
-    @name("setb1") action setb1_0(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("setb1") action setb1_3(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1_3(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("setb1") action setb1_4(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1_4(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("noop") action noop_3() {
+    @name(".noop") action noop_3() {
     }
-    @name("noop") action noop_4() {
+    @name(".noop") action noop_4() {
     }
     @name("test1") table test1 {
         actions = {
@@ -84,10 +85,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_5();
     }
+    action act() {
+        tmp_0 = test1.apply().hit;
+    }
+    table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
     apply {
-        if (test1.apply().hit)
+        tbl_act.apply();
+        if (tmp_0) 
             test2.apply();
-        else
+        else 
             test3.apply();
     }
 }

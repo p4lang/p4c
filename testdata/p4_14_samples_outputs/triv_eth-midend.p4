@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -25,11 +25,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("route_eth") action route_eth_0(bit<9> egress_spec, bit<48> src_addr) {
+    @name(".route_eth") action route_eth_0(bit<9> egress_spec, bit<48> src_addr) {
         standard_metadata.egress_spec = egress_spec;
         hdr.ethernet.src_addr = src_addr;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
     @name("routing") table routing {
         actions = {

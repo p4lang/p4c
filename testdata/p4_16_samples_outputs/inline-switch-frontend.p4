@@ -12,7 +12,7 @@ control c(out bit<32> x) {
     }
     apply {
         switch (t_0.apply().action_run) {
-            a1_0:
+            a1_0: 
             a2_0: {
                 return;
             }

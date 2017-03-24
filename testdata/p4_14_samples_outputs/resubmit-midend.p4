@@ -20,14 +20,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("mymeta")
+    @name("mymeta") 
     mymeta_t             mymeta;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -56,14 +56,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_3() {
     }
-    @name("_nop") action _nop_0() {
+    @name("._nop") action _nop_0() {
     }
-    @name("_nop") action _nop_2() {
+    @name("._nop") action _nop_2() {
     }
-    @name("set_port") action set_port_0(bit<9> port) {
+    @name(".set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("_resubmit") action _resubmit_0() {
+    @name("._resubmit") action _resubmit_0() {
         meta.mymeta.f1 = 8w1;
         resubmit<tuple_0>({ standard_metadata, meta.mymeta });
     }

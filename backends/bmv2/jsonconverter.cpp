@@ -103,6 +103,12 @@ class ErrorCodesVisitor : public Inspector {
     }
 };
 
+static cstring extVisibleName(const IR::IDeclaration* decl) {
+    cstring name = decl->externalName();
+    if (name.startsWith("."))
+        return name.substr(1);
+    return name;
+}
 
 // This pass makes sure that when several match tables share a selector, they use the same input for
 // the selection algorithm. This is because bmv2 considers that the selection key is part of the
@@ -440,7 +446,7 @@ class ExpressionConverter : public Inspector {
             auto field = st->getField(expression->member);
             if (field != nullptr)
                 // field could be a method call, i.e., isValid.
-                fieldName = field->externalName();
+                fieldName = extVisibleName(field);
         }
 
         // handle the 'error' type
@@ -907,7 +913,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto parameters = mkParameters(primitive);
                         auto ctr = new Util::JsonObject();
                         ctr->emplace("type", "counter_array");
-                        ctr->emplace("value", em->object->externalName());
+                        ctr->emplace("value", extVisibleName(em->object));
                         parameters->append(ctr);
                         auto index = conv->convert(mc->arguments->at(0));
                         parameters->append(index);
@@ -920,7 +926,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto parameters = mkParameters(primitive);
                         auto mtr = new Util::JsonObject();
                         mtr->emplace("type", "meter_array");
-                        mtr->emplace("value", em->object->externalName());
+                        mtr->emplace("value", extVisibleName(em->object));
                         parameters->append(mtr);
                         auto index = conv->convert(mc->arguments->at(0));
                         parameters->append(index);
@@ -932,7 +938,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                     auto reg = new Util::JsonObject();
                     reg->emplace("type", "register_array");
-                    cstring name = em->object->externalName();
+                    cstring name = extVisibleName(em->object);
                     reg->emplace("value", name);
                     if (em->method->name == v1model.registers.read.name) {
                         auto primitive = mkPrimitive("register_read", result);
@@ -1034,7 +1040,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                             BUG_CHECK(origType->is<IR::Type_Struct>(),
                                       "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
-                            listName = st->externalName();
+                            listName = extVisibleName(st);
                         }
                     }
                     int id = createFieldList(mc->arguments->at(1), "learn_lists",
@@ -1062,7 +1068,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                             BUG_CHECK(origType->is<IR::Type_Struct>(),
                                       "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
-                            listName = st->externalName();
+                            listName = extVisibleName(st);
                         }
                     }
                     int id = createFieldList(mc->arguments->at(0), "field_lists",
@@ -1162,7 +1168,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
                 v1model.ingress.metadataParam.index);
         }
 
-        cstring name = action->externalName();
+        cstring name = extVisibleName(action);
         auto jact = new Util::JsonObject();
         jact->emplace("name", name);
         unsigned id = nextId("actions");
@@ -1303,7 +1309,7 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
             ::error("%1%: expected a reference to an instance", pathe);
             return false;
         }
-        apname = decl->externalName();
+        apname = extVisibleName(decl);
         auto dcltype = typeMap->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
             ::error("%1%: unexpected type for implementation", dcltype);
@@ -1354,7 +1360,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     auto table = node->table;
     LOG3("Processing " << dbp(table));
     auto result = new Util::JsonObject();
-    cstring name = table->externalName();
+    cstring name = extVisibleName(table);
     result->emplace("name", name);
     result->emplace("id", nextId("tables"));
     cstring table_match_type = "exact";
@@ -1553,7 +1559,9 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                 }
                 meterMap.setTable(decl, table);
                 meterMap.setSize(decl, size);
-                cstring name = decl->externalName();
+                BUG_CHECK(decl->is<IR::Declaration_Instance>(),
+                          "%1%: expected an instance", decl->getNode());
+                cstring name = extVisibleName(decl);
                 result->emplace("direct_meters", name);
             }
         } else {
@@ -1579,7 +1587,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
         auto action = decl->to<IR::P4Action>();
         unsigned id = get(structure.ids, action);
         action_ids->append(id);
-        auto name = action->externalName();
+        auto name = extVisibleName(action);
         actions->append(name);
         useActionName.emplace(action->name, name);
     }
@@ -1750,7 +1758,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         if (c->is<IR::Declaration_Instance>()) {
             auto bl = block->getValue(c);
             CHECK_NULL(bl);
-            cstring name = c->externalName();
+            cstring name = extVisibleName(c);
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 if (eb->type->name == v1model.counter.name) {
@@ -1844,7 +1852,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                         type = "both";
                     jmtr->emplace("type", type);
                     jmtr->emplace("size", info->tableSize);
-                    cstring tblname = info->table->externalName();
+                    cstring tblname = extVisibleName(info->table);
                     jmtr->emplace("binding", tblname);
                     auto result = conv->convert(info->destinationField);
                     jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
@@ -1907,7 +1915,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
 
         LOG3("Creating " << stack);
         auto json = new Util::JsonObject();
-        json->emplace("name", f->externalName());
+        json->emplace("name", extVisibleName(f));
         json->emplace("id", nextId("stack"));
         json->emplace("size", stack->getSize());
         auto type = typeMap->getTypeType(stack->elementType, true);
@@ -1922,7 +1930,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
             unsigned id = nextId("headers");
             stackMembers->append(id);
             auto header = new Util::JsonObject();
-            cstring name = f->externalName() + "[" + Util::toString(i) + "]";
+            cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
             header->emplace("name", name);
             header->emplace("id", id);
             header->emplace("header_type", header_type);
@@ -2277,9 +2285,9 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto json = new Util::JsonObject();
-            json->emplace("name", f->externalName());
+            json->emplace("name", extVisibleName(f));
             json->emplace("id", nextId("headers"));
-            json->emplace("header_type", ft->to<IR::Type_StructLike>()->externalName());
+            json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
             json->emplace("metadata", meta);
             headerInstances->append(json);
         } else if (ft->is<IR::Type_Stack>()) {
@@ -2353,7 +2361,7 @@ void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
 cstring JsonConverter::createJsonType(const IR::Type_StructLike *st) {
     if (headerTypesCreated.count(st->name)) return headerTypesCreated[st->name];
     auto typeJson = new Util::JsonObject();
-    cstring name = st->externalName();
+    cstring name = extVisibleName(st);
     headerTypesCreated[st->name] = name;
     typeJson->emplace("name", name);
     typeJson->emplace("id", nextId("header_types"));
@@ -2635,7 +2643,7 @@ Util::IJson* JsonConverter::toJson(const IR::ParserState* state) {
         return nullptr;
 
     auto result = new Util::JsonObject();
-    result->emplace("name", state->externalName());
+    result->emplace("name", extVisibleName(state));
     result->emplace("id", nextId("parse_states"));
     auto operations = mkArrayField(result, "parser_ops");
     for (auto s : *state->components) {

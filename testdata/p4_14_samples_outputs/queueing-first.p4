@@ -47,7 +47,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("copy_queueing_data") action copy_queueing_data() {
+    @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
         hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
         hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
@@ -67,10 +67,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("set_port") action set_port(bit<9> port) {
+    @name(".set_port") action set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("_drop") action _drop() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
     @name("t_ingress") table t_ingress {

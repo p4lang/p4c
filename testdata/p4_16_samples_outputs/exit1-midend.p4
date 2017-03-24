@@ -1,6 +1,4 @@
 control ctrl() {
-    bool hasExited;
-    bit<32> a;
     apply {
     }
 }

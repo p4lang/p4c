@@ -44,19 +44,20 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    IPv4Address address_0;
+    IPv4Address address;
+    bool pass_1;
     bool hasReturned_0;
     @name("NoAction") action NoAction_0() {
     }
-    @name("Reject") action Reject_0() {
-        pass = false;
+    @name("c1.Reject") action c1_Reject() {
+        pass_1 = false;
     }
-    @name("Check_ip") table Check_ip {
+    @name("c1.Check_ip") table c1_Check_ip_0 {
         key = {
-            address_0: exact @name("address") ;
+            address: exact @name("address") ;
         }
         actions = {
-            Reject_0();
+            c1_Reject();
             NoAction_0();
         }
         implementation = hash_table(32w1024);
@@ -68,13 +69,16 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     action act_0() {
         hasReturned_0 = false;
-        pass = true;
     }
     action act_1() {
-        address_0 = headers.ipv4.srcAddr;
+        address = headers.ipv4.srcAddr;
     }
     action act_2() {
-        address_0 = headers.ipv4.dstAddr;
+        pass = pass_1;
+        address = headers.ipv4.dstAddr;
+    }
+    action act_3() {
+        pass = pass_1;
     }
     table tbl_act {
         actions = {
@@ -100,6 +104,12 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_2();
     }
+    table tbl_act_3 {
+        actions = {
+            act_3();
+        }
+        const default_action = act_3();
+    }
     apply {
         tbl_act.apply();
         if (!headers.ipv4.isValid()) {
@@ -107,9 +117,10 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         if (!hasReturned_0) {
             tbl_act_1.apply();
-            Check_ip.apply();
+            c1_Check_ip_0.apply();
             tbl_act_2.apply();
-            Check_ip.apply();
+            c1_Check_ip_0.apply();
+            tbl_act_3.apply();
         }
     }
 }

@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -36,24 +36,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_7() {
     }
-    @name("setb1") action setb1_0(bit<32> val) {
+    @name(".setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("noop") action noop_4() {
+    @name(".noop") action noop_4() {
     }
-    @name("noop") action noop_5() {
+    @name(".noop") action noop_5() {
     }
-    @name("noop") action noop_6() {
+    @name(".noop") action noop_6() {
     }
-    @name("setb3") action setb3_0(bit<32> val) {
+    @name(".setb3") action setb3_0(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("setb2") action setb2_0(bit<32> val) {
+    @name(".setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4_0(bit<32> val) {
+    @name(".setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
     @name("A1") table A1 {

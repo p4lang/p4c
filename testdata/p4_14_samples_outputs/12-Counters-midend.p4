@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -33,10 +33,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("NoAction") action NoAction_3() {
     }
     @name("c1") counter(32w1024, CounterType.packets) c1;
-    @name("count_c1_1") action count_c1() {
+    @name(".count_c1_1") action count_c1() {
         c1.count(32w1);
     }
-    @name("count_c1_1") action count_c1_2() {
+    @name(".count_c1_1") action count_c1_2() {
         c1.count(32w1);
     }
     @name("t1") table t1 {

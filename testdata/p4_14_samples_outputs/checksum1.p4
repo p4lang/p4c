@@ -68,13 +68,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("drop") action drop() {
+    @name(".drop") action drop() {
     }
-    @name("forward") action forward(bit<48> to) {
+    @name(".forward") action forward(bit<48> to) {
         hdr.ethernet.dstAddr = to;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("do_setup") action do_setup() {
+    @name(".do_setup") action do_setup() {
     }
     @name("route") table route {
         actions = {

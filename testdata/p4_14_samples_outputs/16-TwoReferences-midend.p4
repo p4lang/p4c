@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -40,21 +40,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_11() {
     }
-    @name("do_b") action do_b_0() {
+    @name(".do_b") action do_b_0() {
     }
-    @name("do_d") action do_d_0() {
+    @name(".do_d") action do_d_0() {
     }
-    @name("do_e") action do_e_0() {
+    @name(".do_e") action do_e_0() {
     }
-    @name("nop") action nop_0() {
+    @name(".nop") action nop_0() {
     }
-    @name("nop") action nop_5() {
+    @name(".nop") action nop_5() {
     }
-    @name("nop") action nop_6() {
+    @name(".nop") action nop_6() {
     }
-    @name("nop") action nop_7() {
+    @name(".nop") action nop_7() {
     }
-    @name("nop") action nop_8() {
+    @name(".nop") action nop_8() {
     }
     @name("A") table A {
         actions = {

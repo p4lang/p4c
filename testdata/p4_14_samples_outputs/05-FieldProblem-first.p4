@@ -31,7 +31,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name(".nop") action nop() {
     }
     @name("e_t1") table e_t1 {
         actions = {
@@ -49,9 +49,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name(".nop") action nop() {
     }
-    @name("set_f1") action set_f1(bit<8> f1) {
+    @name(".set_f1") action set_f1(bit<8> f1) {
         meta.ing_metadata.f1 = f1;
     }
     @name("i_t1") table i_t1 {

@@ -6,7 +6,7 @@ struct ht {
 }
 
 struct metadata {
-    @name("md")
+    @name("md") 
     ht md;
 }
 
@@ -20,10 +20,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("a") action a(inout bit<1> y0) {
+    @name(".a") action a(inout bit<1> y0) {
         y0 = y0 + 1w1;
     }
-    @name("b") action b() {
+    @name(".b") action b() {
         a(meta.md.b);
         a(meta.md.b);
     }

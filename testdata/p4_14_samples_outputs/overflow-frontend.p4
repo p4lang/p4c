@@ -7,7 +7,7 @@ struct metadata_t {
 }
 
 struct metadata {
-    @name("md")
+    @name("md") 
     metadata_t md;
 }
 
@@ -26,7 +26,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("action_1_1") action action_1(bit<1> value) {
+    @name(".action_1_1") action action_1(bit<1> value) {
         meta.md.field_1_1_1 = value;
         meta.md.field_2_1_1 = 1w1;
     }

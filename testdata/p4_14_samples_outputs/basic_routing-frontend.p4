@@ -58,9 +58,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("on_miss") action on_miss_0() {
+    @name(".on_miss") action on_miss_0() {
     }
-    @name("rewrite_src_dst_mac") action rewrite_src_dst_mac_0(bit<48> smac, bit<48> dmac) {
+    @name(".rewrite_src_dst_mac") action rewrite_src_dst_mac_0(bit<48> smac, bit<48> dmac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
@@ -82,19 +82,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("set_vrf") action set_vrf_0(bit<12> vrf) {
+    @name(".set_vrf") action set_vrf_0(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;
     }
-    @name("on_miss") action on_miss_1() {
+    @name(".on_miss") action on_miss_1() {
     }
-    @name("fib_hit_nexthop") action fib_hit_nexthop_0(bit<16> nexthop_index) {
+    @name(".fib_hit_nexthop") action fib_hit_nexthop_0(bit<16> nexthop_index) {
         meta.ingress_metadata.nexthop_index = nexthop_index;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("set_egress_details") action set_egress_details_0(bit<9> egress_spec) {
+    @name(".set_egress_details") action set_egress_details_0(bit<9> egress_spec) {
         standard_metadata.egress_spec = egress_spec;
     }
-    @name("set_bd") action set_bd_0(bit<16> bd) {
+    @name(".set_bd") action set_bd_0(bit<16> bd) {
         meta.ingress_metadata.bd = bd;
     }
     @name("bd") table bd_0 {

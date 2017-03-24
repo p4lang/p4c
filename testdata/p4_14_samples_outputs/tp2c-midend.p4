@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -40,32 +40,32 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_11() {
     }
-    @name("setb1") action setb1_0(bit<32> val) {
+    @name(".setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("noop") action noop_4() {
+    @name(".noop") action noop_4() {
     }
-    @name("noop") action noop_5() {
+    @name(".noop") action noop_5() {
     }
-    @name("noop") action noop_6() {
+    @name(".noop") action noop_6() {
     }
-    @name("setb3") action setb3_0(bit<32> val) {
+    @name(".setb3") action setb3_0(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("on_hit") action on_hit_0() {
+    @name(".on_hit") action on_hit_0() {
     }
-    @name("on_hit") action on_hit_2() {
+    @name(".on_hit") action on_hit_2() {
     }
-    @name("on_miss") action on_miss_0() {
+    @name(".on_miss") action on_miss_0() {
     }
-    @name("on_miss") action on_miss_2() {
+    @name(".on_miss") action on_miss_2() {
     }
-    @name("setb2") action setb2_0(bit<32> val) {
+    @name(".setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4_0(bit<32> val) {
+    @name(".setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
     @name("A1") table A1 {
@@ -138,7 +138,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.data.b1 == 32w0) {
             A1.apply();
             A2.apply();
-            if (hdr.data.f1 == 32w0)
+            if (hdr.data.f1 == 32w0) 
                 switch (A3.apply().action_run) {
                     on_hit_0: {
                         A4.apply();

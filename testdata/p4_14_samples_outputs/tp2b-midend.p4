@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -34,19 +34,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("NoAction") action NoAction_9() {
     }
-    @name("setf1") action setf1_0(bit<32> val) {
+    @name(".setf1") action setf1_0(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name(".noop") action noop_1() {
     }
-    @name("noop") action noop_8() {
+    @name(".noop") action noop_8() {
     }
-    @name("setb1") action setb1_0(bit<32> val) {
+    @name(".setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("setb2") action setb2_0(bit<32> val) {
+    @name(".setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
     @name("E1") table E1 {
@@ -84,9 +84,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     apply {
         E1.apply();
-        if (hdr.data.f1 == 32w0)
+        if (hdr.data.f1 == 32w0) 
             EA.apply();
-        else
+        else 
             EB.apply();
     }
 }
@@ -100,24 +100,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_13() {
     }
-    @name("setb1") action setb1_1(bit<32> val) {
+    @name(".setb1") action setb1_1(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop_9() {
+    @name(".noop") action noop_9() {
     }
-    @name("noop") action noop_10() {
+    @name(".noop") action noop_10() {
     }
-    @name("noop") action noop_11() {
+    @name(".noop") action noop_11() {
     }
-    @name("noop") action noop_12() {
+    @name(".noop") action noop_12() {
     }
-    @name("setb3") action setb3_0(bit<32> val) {
+    @name(".setb3") action setb3_0(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("setb2") action setb2_1(bit<32> val) {
+    @name(".setb2") action setb2_1(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4_0(bit<32> val) {
+    @name(".setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
     @name("A1") table A1 {

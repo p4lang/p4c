@@ -1,6 +1,5 @@
 control ctrl(out bit<32> c) {
     bool hasExited;
-    bit<32> a;
     @name("e") action e_0() {
         hasExited = true;
     }
@@ -31,11 +30,11 @@ control ctrl(out bit<32> c) {
     }
     apply {
         tbl_act.apply();
-        if (true)
+        if (true) 
             t.apply();
-        else
+        else 
             t.apply();
-        if (!hasExited)
+        if (!hasExited) 
             tbl_act_0.apply();
     }
 }

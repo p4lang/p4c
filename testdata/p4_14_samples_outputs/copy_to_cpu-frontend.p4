@@ -51,10 +51,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("do_cpu_encap") action do_cpu_encap_0() {
+    @name(".do_cpu_encap") action do_cpu_encap_0() {
         hdr.cpu_header.setValid();
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;
@@ -77,7 +77,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_copy_to_cpu") action do_copy_to_cpu_0() {
+    @name(".do_copy_to_cpu") action do_copy_to_cpu_0() {
         clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name("copy_to_cpu") table copy_to_cpu_0 {

@@ -72,24 +72,24 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ing_metadata")
+    @name("ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("icmp")
+    @name("icmp") 
     icmp_t     icmp;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6")
+    @name("ipv6") 
     ipv6_t     ipv6;
-    @name("tcp")
+    @name("tcp") 
     tcp_t      tcp;
-    @name("udp")
+    @name("udp") 
     udp_t      udp;
-    @name("vlan_tag")
+    @name("vlan_tag") 
     vlan_tag_t vlan_tag;
 }
 
@@ -166,54 +166,54 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_15() {
     }
-    @name("l2_packet") action l2_packet_0() {
+    @name(".l2_packet") action l2_packet_0() {
         meta.ing_metadata.packet_type = 4w0;
     }
-    @name("ipv4_packet") action ipv4_packet_0() {
+    @name(".ipv4_packet") action ipv4_packet_0() {
         meta.ing_metadata.packet_type = 4w1;
     }
-    @name("ipv6_packet") action ipv6_packet_0() {
+    @name(".ipv6_packet") action ipv6_packet_0() {
         meta.ing_metadata.packet_type = 4w2;
     }
-    @name("mpls_packet") action mpls_packet_0() {
+    @name(".mpls_packet") action mpls_packet_0() {
         meta.ing_metadata.packet_type = 4w3;
     }
-    @name("mim_packet") action mim_packet_0() {
+    @name(".mim_packet") action mim_packet_0() {
         meta.ing_metadata.packet_type = 4w4;
     }
-    @name("nop") action nop_0() {
+    @name(".nop") action nop_0() {
     }
-    @name("nop") action nop_7() {
+    @name(".nop") action nop_7() {
     }
-    @name("nop") action nop_8() {
+    @name(".nop") action nop_8() {
     }
-    @name("nop") action nop_9() {
+    @name(".nop") action nop_9() {
     }
-    @name("nop") action nop_10() {
+    @name(".nop") action nop_10() {
     }
-    @name("nop") action nop_11() {
+    @name(".nop") action nop_11() {
     }
-    @name("nop") action nop_12() {
+    @name(".nop") action nop_12() {
     }
-    @name("drop") action drop_0() {
+    @name(".drop") action drop_0() {
         meta.ing_metadata.drop = 1w1;
     }
-    @name("drop") action drop_4() {
+    @name(".drop") action drop_4() {
         meta.ing_metadata.drop = 1w1;
     }
-    @name("drop") action drop_5() {
+    @name(".drop") action drop_5() {
         meta.ing_metadata.drop = 1w1;
     }
-    @name("set_egress_port") action set_egress_port_0(bit<9> egress_port) {
+    @name(".set_egress_port") action set_egress_port_0(bit<9> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("set_egress_port") action set_egress_port_3(bit<9> egress_port) {
+    @name(".set_egress_port") action set_egress_port_3(bit<9> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("set_egress_port") action set_egress_port_4(bit<9> egress_port) {
+    @name(".set_egress_port") action set_egress_port_4(bit<9> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("send_packet") action send_packet_0() {
+    @name(".send_packet") action send_packet_0() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
     @name("ethertype_match") table ethertype_match {
@@ -315,19 +315,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv4_packet_0: {
                 ipv4_match.apply();
             }
-            mpls_packet_0:
+            mpls_packet_0: 
             ipv6_packet_0: {
                 ipv6_match.apply();
             }
         }
 
-        if (hdr.tcp.isValid())
+        if (hdr.tcp.isValid()) 
             tcp_check.apply();
-        else
-            if (hdr.udp.isValid())
+        else 
+            if (hdr.udp.isValid()) 
                 udp_check.apply();
-            else
-                if (hdr.icmp.isValid())
+            else 
+                if (hdr.icmp.isValid()) 
                     icmp_check.apply();
         set_egress.apply();
     }

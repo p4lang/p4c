@@ -28,15 +28,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setf1") action setf1(bit<32> val) {
+    @name(".setf1") action setf1(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("noop") action noop() {
+    @name(".noop") action noop() {
     }
-    @name("setb1") action setb1(bit<32> val) {
+    @name(".setb1") action setb1(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("setb2") action setb2(bit<32> val) {
+    @name(".setb2") action setb2(bit<32> val) {
         hdr.data.b2 = val;
     }
     @name("E1") table E1 {
@@ -82,18 +82,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setb1") action setb1(bit<32> val) {
+    @name(".setb1") action setb1(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop() {
+    @name(".noop") action noop() {
     }
-    @name("setb3") action setb3(bit<32> val) {
+    @name(".setb3") action setb3(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("setb2") action setb2(bit<32> val) {
+    @name(".setb2") action setb2(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4(bit<32> val) {
+    @name(".setb4") action setb4(bit<32> val) {
         hdr.data.b4 = val;
     }
     @name("A1") table A1 {

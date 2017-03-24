@@ -1,5 +1,6 @@
 control ctrl() {
     bool hasExited;
+    bool tmp_0;
     @name("e") action e_0() {
         hasExited = true;
     }
@@ -11,6 +12,7 @@ control ctrl() {
     }
     action act() {
         hasExited = false;
+        tmp_0 = t.apply().hit;
     }
     table tbl_act {
         actions = {
@@ -20,11 +22,10 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        if (t.apply().hit)
-            if (!hasExited)
+        if (!hasExited) 
+            if (tmp_0) 
                 t.apply();
-        else
-            if (!hasExited)
+            else 
                 t.apply();
     }
 }

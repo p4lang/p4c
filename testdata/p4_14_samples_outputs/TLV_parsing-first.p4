@@ -127,25 +127,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("format_options_security") action format_options_security() {
+    @name(".format_options_security") action format_options_security() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_option_EOL.push_front(1);
         hdr.ipv4_base.ihl = 4w8;
     }
-    @name("format_options_timestamp") action format_options_timestamp() {
+    @name(".format_options_timestamp") action format_options_timestamp() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_base.ihl = (bit<4>)(8w5 + (hdr.ipv4_option_timestamp.len >> 8w3));
     }
-    @name("format_options_both") action format_options_both() {
+    @name(".format_options_both") action format_options_both() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_option_NOP.push_front(1);
         hdr.ipv4_option_NOP[0].value = 8w0x1;
         hdr.ipv4_base.ihl = (bit<4>)(8w8 + (hdr.ipv4_option_timestamp.len >> 8w2));
     }
-    @name("_nop") action _nop() {
+    @name("._nop") action _nop() {
     }
     @name("format_options") table format_options {
         actions = {

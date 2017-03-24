@@ -14,9 +14,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("easyroute_head")
+    @name("easyroute_head") 
     easyroute_head_t easyroute_head;
-    @name("easyroute_port")
+    @name("easyroute_port") 
     easyroute_port_t easyroute_port;
 }
 
@@ -50,10 +50,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("route") action route_0() {
+    @name(".route") action route_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.easyroute_port.port;
         hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
         hdr.easyroute_port.setInvalid();

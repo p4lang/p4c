@@ -496,7 +496,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("a1") action a1_0() {
+    @name(".a1") action a1_0() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -722,7 +722,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.h_8_2.setInvalid();
         hdr.h_32_15.setInvalid();
     }
-    @name("set_egress_spec") action set_egress_spec_0(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name("t1") table t1_0 {

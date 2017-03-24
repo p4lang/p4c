@@ -47,12 +47,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("my_meter") direct_meter<bit<32>>(CounterType.packets) my_meter;
-    @name("_drop") action _drop() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name("_nop") action _nop() {
+    @name("._nop") action _nop() {
     }
-    @name("m_action") action m_action(bit<9> meter_idx) {
+    @name(".m_action") action m_action(bit<9> meter_idx) {
         standard_metadata.egress_spec = meter_idx;
         standard_metadata.egress_spec = 9w1;
     }
@@ -68,12 +68,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction();
     }
-    @name("m_action") action m_action_0(bit<9> meter_idx) {
+    @name(".m_action") action m_action_0(bit<9> meter_idx) {
         standard_metadata.egress_spec = meter_idx;
         standard_metadata.egress_spec = 9w1;
         my_meter.read(meta.meta.meter_tag);
     }
-    @name("_nop") action _nop_0() {
+    @name("._nop") action _nop_0() {
         my_meter.read(meta.meta.meter_tag);
     }
     @name("m_table") table m_table {

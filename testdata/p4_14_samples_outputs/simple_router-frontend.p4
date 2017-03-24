@@ -56,10 +56,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
     @name("send_frame") table send_frame_0 {
@@ -80,13 +80,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("set_dmac") action set_dmac_0(bit<48> dmac) {
+    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("_drop") action _drop_1() {
+    @name("._drop") action _drop_1() {
         mark_to_drop();
     }
-    @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
+    @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_port = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
