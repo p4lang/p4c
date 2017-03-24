@@ -1,10 +1,10 @@
 #!/bin/sh
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -42,5 +42,5 @@ autoreconf -i
 mkdir -p build # recommended folder for build
 sourcedir=`pwd`
 cd build
-../configure CXXFLAGS="-g -O0" $*
+../configure CXXFLAGS="-g -O0" --disable-doxygen-doc $*
 echo "### Configured for building in 'build' folder"

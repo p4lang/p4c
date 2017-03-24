@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "parserCallGraph.h"
+#include "lib/ordered_set.h"
 
 namespace P4 {
 
@@ -695,7 +696,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     ComputeParserCG pcg(storageMap->refMap, &transitions);
 
     (void)parser->apply(pcg);
-    std::set<const IR::ParserState*> toRun;  // worklist
+    ordered_set<const IR::ParserState*> toRun;  // worklist
     toRun.emplace(startState);
 
     while (!toRun.empty()) {

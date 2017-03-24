@@ -16,6 +16,7 @@ p4c
 ├── extensions
 │   └── XXXX                  -- symlinks to custom back-ends
 ├── docs                      -- documentation
+│   └── doxygen               -- documentation generation support
 ├── frontends
 │   ├── common                -- common front-end code
 │   ├── p4-14                 -- P4_14 front-end
@@ -75,6 +76,36 @@ p4c
 * code has to be reviewed before it is merged
 * make sure all tests pass when you send a pull request (only PASS tests allowed)
 * make sure `make cpplint` produces no errors
+* write documentation
+
+# Writing documentation
+
+Documenting the workings of the compiler is a never-ending (many times
+overlooked) job. We can always write better documentation!
+
+In P4C, documentation is generated using Doxygen
+(http://www.stack.nl/~dimitri/doxygen/index.html). There are two main
+sources from which we generate documentation: comments in the code and
+markup documents in the docs/doxygen directory.
+
+Code comments should capture the main intent of the implementation and
+the "why", rather than the "how". The how can be read from the code,
+however, documenting the reasons why a certain implementation was
+chosen will help other contributors understand the design choices and
+enable them to reuse your code. Also important in the context of the
+compiler is to document the invariants for each pass (or groups of
+passes), since it is likely that other developers will need to insert
+additional passes, and they should understand the effects that the
+pass ordering has on the AST.
+
+Documentation in the markup documents is intended for higher level
+design documentation. The files will be automatically captured in the
+documentation in the order implied by their naming: XX_my_doc.md where
+XX is a number between 02-99. Currently, 00_revision_history.md
+contains the documentation revision history, and 01_overview.md is the
+overview of the compiler goals and architecture.
+
+Happy writing! Should you have any questions, please don't hesitate to ask.
 
 ## Git usage
 

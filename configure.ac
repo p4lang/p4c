@@ -86,6 +86,8 @@ AX_PYTHON_MODULE([tempfile], [fatal], [python])
 AX_PYTHON_MODULE([subprocess], [fatal], [python])
 AX_PYTHON_MODULE([re], [fatal], [python])
 
+DX_INIT_DOXYGEN([P4C], [$(top_srcdir)/docs/doxygen/doxygen.cfg], [$(builddir)/doxygen-out])
+
 dnl The following lines are just including all "addconfig.ac" files
 dnl found in subdirectories
 

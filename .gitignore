@@ -53,5 +53,8 @@ build/
 .project
 .settings
 
+# emacs backup
+*~
+
 # macOS files
 .DS_Store

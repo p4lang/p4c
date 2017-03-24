@@ -39,6 +39,7 @@ noinst_HEADERS =               # Headers that are not installed
 noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
+check_PROGRAMS =               # Test programs to build
 TESTS =                        # Tests to execute
 bin_SCRIPTS =                  # Scripts built
 EXTRA_DIST =                   # Extra files to distribute
@@ -48,6 +49,7 @@ XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
 IFAIL_TESTS =                  # intermittent failures
 export XFAIL_TESTS
 export IFAIL_TESTS
+gtest_SOURCES =                # GTests
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
@@ -135,8 +137,13 @@ libfrontend_la_SOURCES = \
 	ir/ir-generated.cpp \
 	$(extension_frontend_SOURCES)
 
-# unit tests
+################ Testing
+
+# C++ unit tests.
 include $(srcdir)/test/Makefile.am
+
+# GTest unit tests.
+include $(srcdir)/test/gtest/Makefile.am
 
 # Lint all header files.
 cpplint_FILES += $(noinst_HEADERS)
@@ -168,3 +175,29 @@ recheck-%:
 
 check-ifail:
 	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
+
+# DOXYGEN SUPPORT
+@DX_RULES@
+
+DOXYGEN_FILES = $(top_srcdir)/docs/doxygen/doxygen.cfg \
+	        $(top_srcdir)/docs/doxygen/bfn_header.tex \
+	        $(top_srcdir)/docs/doxygen/p4c_layout.xml \
+	        $(top_srcdir)/docs/doxygen/*.md
+
+# ensure the distribution of the doxygen configuration files
+EXTRA_DIST = $(DOXYGEN_FILES)
+
+.PHONY: docs
+if DOXYGEN_ENABLED
+# the default clean rule does not remove directories so
+# we need to override it
+mostlyclean-local:
+	-$(RM) -r $(DX_CLEANFILES)
+
+# easier to remember rule for making the documentation
+docs: $(DOXY_SOURCES)
+	@$(MAKE) doxygen-doc
+else
+docs:
+	@echo "Please enable docs building (configure with --enable-doxygen-doc)"
+endif
