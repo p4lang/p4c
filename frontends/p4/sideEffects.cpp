@@ -234,7 +234,8 @@ class DismantleExpression : public Transform {
                 cond = new IR::LNot(Util::SourceInfo(), cond);
                 typeMap->setType(cond, type);
             }
-            auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, ifFalse);
+            auto block = new IR::BlockStatement(Util::SourceInfo(),
+                                                IR::Annotations::empty, ifFalse);
             auto ifStatement = new IR::IfStatement(Util::SourceInfo(), cond, ifTrue, block);
             result->statements->push_back(ifStatement);
             result->final = path->clone();
