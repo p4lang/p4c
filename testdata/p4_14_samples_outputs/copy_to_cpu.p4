@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;
     }
-    @name("redirect") table redirect() {
+    @name("redirect") table redirect {
         actions = {
             _drop;
             do_cpu_encap;
@@ -78,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("do_copy_to_cpu") action do_copy_to_cpu() {
         clone3(CloneType.I2E, (bit<32>)32w250, { standard_metadata });
     }
-    @name("copy_to_cpu") table copy_to_cpu() {
+    @name("copy_to_cpu") table copy_to_cpu {
         actions = {
             do_copy_to_cpu;
             @default_only NoAction;

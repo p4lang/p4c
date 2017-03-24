@@ -29,14 +29,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop() {
     }
-    @name("routing") table routing() {
+    @name("routing") table routing {
         actions = {
             route_eth();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dst_addr: lpm;
+            hdr.ethernet.dst_addr: lpm @name("hdr.ethernet.dst_addr") ;
         }
         default_action = NoAction();
     }

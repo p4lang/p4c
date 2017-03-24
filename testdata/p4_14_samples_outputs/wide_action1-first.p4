@@ -57,13 +57,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.m5 = v5;
         meta.m.m6 = v6;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setmeta();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1: exact @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }

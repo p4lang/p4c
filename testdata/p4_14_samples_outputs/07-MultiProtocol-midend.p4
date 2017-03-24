@@ -72,24 +72,24 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name("ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("icmp") 
+    @name("icmp")
     icmp_t     icmp;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("ipv6") 
+    @name("ipv6")
     ipv6_t     ipv6;
-    @name("tcp") 
+    @name("tcp")
     tcp_t      tcp;
-    @name("udp") 
+    @name("udp")
     udp_t      udp;
-    @name("vlan_tag") 
+    @name("vlan_tag")
     vlan_tag_t vlan_tag;
 }
 
@@ -216,7 +216,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("send_packet") action send_packet_0() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
-    @name("ethertype_match") table ethertype_match() {
+    @name("ethertype_match") table ethertype_match {
         actions = {
             l2_packet_0();
             ipv4_packet_0();
@@ -230,7 +230,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name("icmp_check") table icmp_check() {
+    @name("icmp_check") table icmp_check {
         actions = {
             nop_0();
             drop_0();
@@ -241,7 +241,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_9();
     }
-    @name("ipv4_match") table ipv4_match() {
+    @name("ipv4_match") table ipv4_match {
         actions = {
             nop_7();
             set_egress_port_0();
@@ -252,7 +252,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_10();
     }
-    @name("ipv6_match") table ipv6_match() {
+    @name("ipv6_match") table ipv6_match {
         actions = {
             nop_8();
             set_egress_port_3();
@@ -263,7 +263,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_11();
     }
-    @name("l2_match") table l2_match() {
+    @name("l2_match") table l2_match {
         actions = {
             nop_9();
             set_egress_port_4();
@@ -274,7 +274,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_12();
     }
-    @name("set_egress") table set_egress() {
+    @name("set_egress") table set_egress {
         actions = {
             nop_10();
             send_packet_0();
@@ -285,7 +285,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_13();
     }
-    @name("tcp_check") table tcp_check() {
+    @name("tcp_check") table tcp_check {
         actions = {
             nop_11();
             drop_4();
@@ -296,7 +296,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_14();
     }
-    @name("udp_check") table udp_check() {
+    @name("udp_check") table udp_check {
         actions = {
             nop_12();
             drop_5();
@@ -315,19 +315,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv4_packet_0: {
                 ipv4_match.apply();
             }
-            mpls_packet_0: 
+            mpls_packet_0:
             ipv6_packet_0: {
                 ipv6_match.apply();
             }
         }
 
-        if (hdr.tcp.isValid()) 
+        if (hdr.tcp.isValid())
             tcp_check.apply();
-        else 
-            if (hdr.udp.isValid()) 
+        else
+            if (hdr.udp.isValid())
                 udp_check.apply();
-            else 
-                if (hdr.icmp.isValid()) 
+            else
+                if (hdr.icmp.isValid())
                     icmp_check.apply();
         set_egress.apply();
     }

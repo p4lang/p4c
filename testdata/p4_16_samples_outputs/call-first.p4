@@ -1,7 +1,7 @@
 control qp() {
     action drop() {
     }
-    table m() {
+    table m {
         actions = {
             drop();
         }
@@ -31,4 +31,3 @@ control p() {
         b(32w0);
     }
 }
-

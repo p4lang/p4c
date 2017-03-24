@@ -5,23 +5,22 @@ control empty();
 package top(empty e);
 control Ing() {
     bit<32> a;
-    bool tmp_1;
-    bool tmp_2;
+    bool tmp_0;
     @name("cond") action cond_0() {
-        tmp_1 = tmp_1;
-        tmp_2 = tmp_2;
-        tmp_1 = tmp_1;
+        b = true;
+        tmp_0 = tmp_0;
+        tmp_0 = tmp_0;
     }
     action act() {
         a = 32w2;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_cond() {
+    table tbl_cond {
         actions = {
             cond_0();
         }

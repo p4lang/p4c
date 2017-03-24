@@ -12,7 +12,7 @@ control c(inout bit<32> r) {
         tmp_3 = e_1.f(32w5);
         r = tmp_2 + tmp_3;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

@@ -34,7 +34,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("copyb1") action copyb1_0() {
         hdr.data.b1 = meta.meta.val;
     }
-    @name("output") table output_0() {
+    @name("output") table output_0 {
         actions = {
             copyb1_0();
         }
@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -63,7 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2_0 {
         actions = {
             noop_0();
             @default_only NoAction();

@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setb4") action setb4(bit<8> val) {
         hdr.data.b4 = val;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             noop();
             setb1();
@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1: exact @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }

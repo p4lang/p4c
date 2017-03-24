@@ -132,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
-    @name("validate_outer_ethernet") table validate_outer_ethernet_0() {
+    @name("validate_outer_ethernet") table validate_outer_ethernet_0 {
         actions = {
             set_valid_outer_unicast_packet_untagged_0();
             set_valid_outer_unicast_packet_single_tagged_0();

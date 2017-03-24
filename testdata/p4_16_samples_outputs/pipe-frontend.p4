@@ -34,17 +34,14 @@ extern bs {
 struct Packet_data {
 }
 
-control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
-    TArg1 tmp;
-    TArg2 tmp_0;
-    TArg1 tmp_1;
-    TArg2 tmp_2;
-    @name("B_action") action B_action_0(out bit<9> barg, BParamType bData) {
-        barg = (bit<9>)bData;
+control T_host_0(inout TArg1 tArg1, in TArg2 aArg2) {
+    @name("B_action") action B_action_0(out bit<9> barg_0, BParamType bData) {
+        barg_0 = (bit<9>)bData;
     }
     @name("C_action") action C_action_0(bit<9> cData) {
+        tArg1.field1 = cData;
     }
-    @name("T") table T_0(inout TArg1 tArg1, in TArg2 aArg2) {
+    @name("T") table T_0 {
         key = {
             tArg1.field1: ternary @name("tArg1.field1") ;
             aArg2.field2: exact @name("aArg2.field2") ;
@@ -56,10 +53,17 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
         size = 32w5;
         const default_action = C_action_0(9w5);
     }
+    apply {
+        T_0.apply();
+    }
+}
+
+control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
+    @name("thost") T_host_0() thost_0;
     @name("Drop") action Drop_0() {
         pArg1.drop = true;
     }
-    @name("Tinner") table Tinner_0() {
+    @name("Tinner") table Tinner_0 {
         key = {
             pArg1.field1: ternary @name("pArg1.field1") ;
         }
@@ -70,28 +74,16 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
         const default_action = NoAction();
     }
     apply {
-        tmp = pArg1;
-        tmp_0 = pArg2;
-        T_0.apply(tmp, tmp_0);
-        pArg1 = tmp;
-        tmp_1 = pArg1;
-        tmp_2 = pArg2;
-        T_0.apply(tmp_1, tmp_2);
-        pArg1 = tmp_1;
+        thost_0.apply(pArg1, pArg2);
+        thost_0.apply(pArg1, pArg2);
         Tinner_0.apply();
     }
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    TArg1 tmp_3;
-    TArg2 tmp_4;
     @name("p1") P_pipe_0() p1_0;
     apply {
-        tmp_3 = qArg1;
-        tmp_4 = qArg2;
-        p1_0.apply(tmp_3, tmp_4);
-        qArg1 = tmp_3;
-        qArg2 = tmp_4;
+        p1_0.apply(qArg1, qArg2);
     }
 }
 

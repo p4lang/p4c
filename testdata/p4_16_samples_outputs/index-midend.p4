@@ -6,12 +6,10 @@ header H {
 
 parser P(packet_in p, out H[2] h) {
     bit<32> x;
-    H tmp_2;
-    bit<32> tmp_3;
-    bit<32> tmp_4;
+    H tmp;
     state start {
-        p.extract<H>(tmp_2);
-        transition select(tmp_2.field) {
+        p.extract<H>(tmp);
+        transition select(tmp.field) {
             32w0: n1;
             default: n2;
         }
@@ -25,10 +23,8 @@ parser P(packet_in p, out H[2] h) {
         transition n3;
     }
     state n3 {
-        tmp_3 = x + 32w4294967295;
-        x = tmp_3;
-        tmp_4 = x;
-        p.extract<H>(h[tmp_4]);
+        x = x + 32w4294967295;
+        p.extract<H>(h[x]);
         transition accept;
     }
 }

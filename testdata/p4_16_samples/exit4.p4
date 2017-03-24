@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ control ctrl() {
         exit;
     }
 
-    table t() {
+    table t {
         actions = { e; }
         default_action = e();
     }
-    
+
     apply {
         bit<32> a;
         bit<32> b;

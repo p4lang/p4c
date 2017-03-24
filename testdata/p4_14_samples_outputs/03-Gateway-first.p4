@@ -46,13 +46,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("e_t1") table e_t1() {
+    @name("e_t1") table e_t1 {
         actions = {
             nop();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }
@@ -82,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_f4") action set_f4(bit<64> f4) {
         meta.ing_metadata.f4 = f4;
     }
-    @name("i_t1") table i_t1() {
+    @name("i_t1") table i_t1 {
         actions = {
             nop();
             ing_drop();
@@ -91,43 +91,43 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1: exact @name("hdr.vag.f1") ;
         }
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t2") table i_t2() {
+    @name("i_t2") table i_t2 {
         actions = {
             nop();
             set_f2();
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f2: exact;
+            hdr.vag.f2: exact @name("hdr.vag.f2") ;
         }
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t3") table i_t3() {
+    @name("i_t3") table i_t3 {
         actions = {
             nop();
             set_f3();
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f3: exact;
+            hdr.vag.f3: exact @name("hdr.vag.f3") ;
         }
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t4") table i_t4() {
+    @name("i_t4") table i_t4 {
         actions = {
             nop();
             set_f4();
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f4: exact;
+            hdr.vag.f4: exact @name("hdr.vag.f4") ;
         }
         size = 1024;
         default_action = NoAction();

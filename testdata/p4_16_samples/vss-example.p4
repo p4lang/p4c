@@ -100,15 +100,15 @@ control TopPipe(inout Parsed_packet headers,
       action Drop_action()
       { outCtrl.outputPort = DROP_PORT; }
 
+      IPv4Address nextHop;
+
      /**
       * Set the next hop and the output port.
       * Decrements ipv4 ttl field.
       * @param ivp4_dest ipv4 address of next hop
       * @param port output port
       */
-      action Set_nhop(out IPv4Address nextHop,
-                      IPv4Address ipv4_dest,
-                      PortId port) {
+      action Set_nhop(IPv4Address ipv4_dest, PortId port) {
           nextHop = ipv4_dest;
           headers.ip.ttl = headers.ip.ttl-1;
           outCtrl.outputPort = port;
@@ -118,13 +118,12 @@ control TopPipe(inout Parsed_packet headers,
       * Computes address of next Ipv4 hop and output port
       * based on the Ipv4 destination of the current packet.
       * Decrements packet Ipv4 TTL.
-      * @param nextHop Ipv4 address of next hop
       */
-     table ipv4_match(out IPv4Address nextHop) {
+     table ipv4_match {
          key = { headers.ip.dstAddr : lpm; }
          actions = {
               Drop_action;
-              Set_nhop(nextHop);
+              Set_nhop;
          }
 
          size = 1024;
@@ -140,7 +139,7 @@ control TopPipe(inout Parsed_packet headers,
      /**
       * Check packet TTL and send to CPU if expired.
       */
-     table check_ttl() {
+     table check_ttl {
          key = { headers.ip.ttl : exact; }
          actions = { Send_to_cpu; NoAction; }
          const default_action = NoAction; // defined in core.p4
@@ -155,9 +154,8 @@ control TopPipe(inout Parsed_packet headers,
      /**
       * Set the destination Ethernet address of the packet
       * based on the next hop IP address.
-      * @param nextHop Ipv4 address of next hop.
       */
-      table dmac(in IPv4Address nextHop) {
+      table dmac {
           key = { nextHop : exact; }
           actions = {
                Drop_action;
@@ -177,7 +175,7 @@ control TopPipe(inout Parsed_packet headers,
       /**
        * Set the source mac address based on the output port.
        */
-      table smac() {
+      table smac {
            key = { outCtrl.outputPort : exact; }
            actions = {
                 Drop_action;
@@ -188,20 +186,18 @@ control TopPipe(inout Parsed_packet headers,
       }
 
       apply {
-          IPv4Address nextHop; // temporary variable
-
           if (parseError != error.NoError) {
                Drop_action();  // invoke drop directly
                return;
           }
 
-          ipv4_match.apply(nextHop); // Match result will go into nextHop
+          ipv4_match.apply(); // Match result will go into nextHop
           if (outCtrl.outputPort == DROP_PORT) return;
 
           check_ttl.apply();
           if (outCtrl.outputPort == CPU_OUT_PORT) return;
 
-          dmac.apply(nextHop);
+          dmac.apply();
           if (outCtrl.outputPort == DROP_PORT) return;
 
           smac.apply();

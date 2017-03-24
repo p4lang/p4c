@@ -25,14 +25,17 @@ namespace BMV2 {
 
 // Convert expressions not supported on BMv2
 class LowerExpressions : public Transform {
+    P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     // Cannot shift with a value larger than 8 bits
     const int maxShiftWidth = 8;
 
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
  public:
-    explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("LowerExpressions"); }
+    LowerExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("LowerExpressions"); }
+
     const IR::Node* postorder(IR::Expression* expression) override;
     const IR::Node* postorder(IR::Shl* expression) override
     { return shift(expression); }
@@ -56,6 +59,42 @@ class FixupChecksum : public Transform {
             updateBlockName(updateBlockName)
     { setName("FixupChecksum"); }
     const IR::Node* preorder(IR::P4Control* control) override;
+};
+
+
+// If a select contains an expression which
+// looks too complicated, it is lifted into a temporary.
+class RemoveExpressionsFromSelects : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    IR::IndexedVector<IR::Declaration> newDecls;
+    IR::IndexedVector<IR::StatOrDecl>  assignments;
+
+ public:
+    RemoveExpressionsFromSelects(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
+            refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RemoveExpressionsFromSelects"); }
+    const IR::Node* postorder(IR::SelectExpression* expression) override;
+    const IR::Node* preorder(IR::ParserState* state) override
+    { assignments.clear(); return state; }
+    const IR::Node* postorder(IR::ParserState* state) override {
+        if (!assignments.empty()) {
+            auto comp = new IR::IndexedVector<IR::StatOrDecl>(*state->components);
+            comp->append(assignments);
+            state->components = comp;
+        }
+        return state;
+    }
+    const IR::Node* preorder(IR::P4Parser* parser) override
+    { newDecls.clear(); return parser; }
+    const IR::Node* postorder(IR::P4Parser* parser) override {
+        if (!newDecls.empty()) {
+            auto locals = new IR::IndexedVector<IR::Declaration>(*parser->parserLocals);
+            locals->append(newDecls);
+            parser->parserLocals = locals;
+        }
+        return parser;
+    }
 };
 
 }  // namespace BMV2

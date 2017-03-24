@@ -36,7 +36,7 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
         sum_rtt_Tr.write(pkt_hdr.rtt, pkt_hdr.rtt < 32w2500);
         num_pkts_with_rtt.write(32w1, pkt_hdr.rtt < 32w2500);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

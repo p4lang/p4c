@@ -146,7 +146,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls") state parse_mpls {
-        transition select((packet.lookahead<bit<24>>())[23:23]) {
+        transition select((packet.lookahead<bit<24>>())[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -193,13 +193,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_noop") action do_noop() {
     }
-    @name("do_nothing") table do_nothing() {
+    @name("do_nothing") table do_nothing {
         actions = {
             do_noop();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }

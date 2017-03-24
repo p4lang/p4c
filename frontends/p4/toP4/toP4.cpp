@@ -719,19 +719,24 @@ bool ToP4::preorder(const IR::SelectExpression* e) {
 }
 
 bool ToP4::preorder(const IR::ListExpression* e) {
-    ListPrint *lp;
-    if (listTerminators.empty())
-        lp = new ListPrint("{ ", " }");
-    else
-        lp = &listTerminators.back();
-    builder.append(lp->start);
+    cstring start, end;
+    if (listTerminators.empty()) {
+        start = "{ ";
+        end = " }";
+    } else {
+        start = listTerminators.back().start;
+        end = listTerminators.back().end;
+    }
+    builder.append(start);
     setVecSep(", ");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
+    setListTerm("{ ", " }");
     visit(e->components);
+    doneList();
     expressionPrecedence = prec;
     doneVec();
-    builder.append(lp->end);
+    builder.append(end);
     return false;
 }
 
@@ -1176,7 +1181,6 @@ bool ToP4::preorder(const IR::P4Table* c) {
     visit(c->annotations);
     builder.append("table ");
     builder.append(c->name);
-    visit(c->parameters);
     builder.spc();
     builder.blockStart();
     setVecSep("\n", "\n");

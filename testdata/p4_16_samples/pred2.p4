@@ -30,7 +30,7 @@ control Ing() {
         tmp_2 = (!true && !!true ? a == 32w5 : tmp_2);
         tmp_1 = (!true && !!true ? (!true && !!true ? a == 32w5 : tmp_2) : (!true && !true ? false : tmp_1));
     }
-    table tbl_cond() {
+    table tbl_cond {
         actions = {
             cond_0();
         }

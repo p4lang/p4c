@@ -34,7 +34,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     action act() {
         meta.flag = true;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

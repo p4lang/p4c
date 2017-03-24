@@ -23,54 +23,6 @@ limitations under the License.
 
 namespace P4 {
 
-// Checks to see whether an IR node includes a table.apply() sub-expression
-class HasTableApply : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
- public:
-    const IR::P4Table*  table;
-    const IR::MethodCallExpression* call;
-    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap);
-    void postorder(const IR::MethodCallExpression* expression) override;
-};
-
-// Remove table parameters by transforming them into local variables.
-// This should be run after table parameters have been given unique names.
-// control c() {
-//   table t(inout bit x) { ... }
-//   apply { t.apply(y); }
-// }
-// becomes
-// control c() {
-//    bit x;
-//    table t() { ... }
-//    apply {
-//       x = y;  // all in an inout parameters
-//       t.apply();
-//       y = x;  // all out and inout parameters
-// }}
-class DoRemoveTableParameters : public Transform {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
-    std::set<const IR::P4Table*> original;
- public:
-    DoRemoveTableParameters(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoRemoveTableParameters"); }
-
-    const IR::Node* postorder(IR::P4Table* table) override;
-    // These should be all kinds of statements that may contain a table apply
-    // after the program has been simplified
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
-    const IR::Node* postorder(IR::IfStatement* statement) override;
-    const IR::Node* postorder(IR::SwitchStatement* statement) override;
- protected:
-    void doParameters(const IR::ParameterList* params,
-                      const IR::Vector<IR::Expression>* args,
-                      IR::IndexedVector<IR::StatOrDecl>* result,
-                      bool in);
-};
-
 // For each action that is invoked keep the list of arguments that it's called with.
 // There must be only one call of each action; this is done by LocalizeActions.
 class ActionInvocation {
@@ -152,11 +104,6 @@ class DoRemoveActionParameters : public Transform {
     const IR::Node* postorder(IR::P4Action* table) override;
     const IR::Node* postorder(IR::ActionListElement* element) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-};
-
-class RemoveTableParameters : public PassManager {
- public:
-    RemoveTableParameters(ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 class RemoveActionParameters : public PassManager {

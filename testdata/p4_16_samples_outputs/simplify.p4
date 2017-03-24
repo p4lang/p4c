@@ -1,7 +1,7 @@
 #include <core.p4>
 
 control c(out bool x) {
-    table t1() {
+    table t1 {
         key = {
             x: exact;
         }
@@ -10,7 +10,7 @@ control c(out bool x) {
         }
         default_action = NoAction();
     }
-    table t2() {
+    table t2 {
         key = {
             x: exact;
         }

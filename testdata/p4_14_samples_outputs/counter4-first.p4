@@ -34,13 +34,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
         cntDum.count((bit<32>)idx);
     }
-    @name("tab1") table tab1() {
+    @name("tab1") table tab1 {
         actions = {
             act();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         size = 70000;
         default_action = NoAction();

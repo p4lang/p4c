@@ -12,9 +12,9 @@ control c(bit<1> x) {
     }
     action drop() {
     }
-    table unit() {
+    table unit {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             Set_dmac();

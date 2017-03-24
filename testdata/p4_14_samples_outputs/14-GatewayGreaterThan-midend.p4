@@ -15,9 +15,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("h") 
+    @name("h")
     h_t        h;
 }
 
@@ -38,7 +38,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nop") action nop_0() {
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             nop_0();
             @default_only NoAction_0();
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        if (hdr.h.f1 > 13w1) 
+        if (hdr.h.f1 > 13w1)
             t1.apply();
     }
 }

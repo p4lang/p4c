@@ -106,6 +106,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<24> tmp;
+    bit<4> tmp_0;
     @name("parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -146,7 +148,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls") state parse_mpls {
-        transition select((packet.lookahead<bit<24>>())[23:23]) {
+        tmp = packet.lookahead<bit<24>>();
+        transition select(tmp[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -154,7 +157,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
-        transition select((packet.lookahead<bit<4>>())[3:0]) {
+        tmp_0 = packet.lookahead<bit<4>>();
+        transition select(tmp_0[3:0]) {
             4w0x4: parse_ipv4;
             4w0x6: parse_ipv6;
             default: accept;
@@ -193,7 +197,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_noop") action do_noop_0() {
     }
-    @name("do_nothing") table do_nothing_0() {
+    @name("do_nothing") table do_nothing_0 {
         actions = {
             do_noop_0();
             @default_only NoAction();

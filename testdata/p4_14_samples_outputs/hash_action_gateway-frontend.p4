@@ -16,12 +16,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata") 
+    @name("counter_metadata")
     counter_metadata_t counter_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("count_entries") action count_entries_0() {
         count1_0.count((bit<32>)meta.counter_metadata.counter_index);
     }
-    @name("index_setter") table index_setter_0() {
+    @name("index_setter") table index_setter_0 {
         actions = {
             set_index_0();
             @default_only NoAction();
@@ -54,7 +54,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 2048;
         default_action = NoAction();
     }
-    @name("stats") table stats_0() {
+    @name("stats") table stats_0 {
         actions = {
             count_entries_0();
         }
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         index_setter_0.apply();
-        if (meta.counter_metadata.counter_run == 4w1) 
+        if (meta.counter_metadata.counter_run == 4w1)
             stats_0.apply();
     }
 }

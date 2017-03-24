@@ -66,13 +66,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.more = hdr.extra[0].more;
         hdr.extra.pop_front(1);
     }
-    @name("output") table output_2() {
+    @name("output") table output_2 {
         actions = {
             output_1();
         }
         const default_action = output_1(9w1);
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             noop_0();
             push1_0();

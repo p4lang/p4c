@@ -107,7 +107,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         hdr.ethernet.dstAddr[47:32] = 16w0x0;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("mac_rewrite") table mac_rewrite() {
+    @name("mac_rewrite") table mac_rewrite {
         actions = {
             nop();
             rewrite_ipv4_unicast_mac();
@@ -117,9 +117,9 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
             @default_only NoAction();
         }
         key = {
-            meta.egress_metadata.smac_idx: exact;
-            hdr.ipv4.isValid()           : exact;
-            hdr.ipv6.isValid()           : exact;
+            meta.egress_metadata.smac_idx: exact @name("meta.egress_metadata.smac_idx") ;
+            hdr.ipv4.isValid()           : exact @name("hdr.ipv4.isValid()") ;
+            hdr.ipv6.isValid()           : exact @name("hdr.ipv6.isValid()") ;
         }
         size = 512;
         default_action = NoAction();
@@ -136,13 +136,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
     }
-    @name("setup") table setup() {
+    @name("setup") table setup {
         actions = {
             do_setup();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.isValid(): exact;
+            hdr.ethernet.isValid(): exact @name("hdr.ethernet.isValid()") ;
         }
         default_action = NoAction();
     }

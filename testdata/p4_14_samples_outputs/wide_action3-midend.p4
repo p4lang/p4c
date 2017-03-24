@@ -31,12 +31,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name("m")
     metadata_t m;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.m5 = v5;
         meta.m.m6 = v6;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setmeta_0();
             @default_only NoAction_0();

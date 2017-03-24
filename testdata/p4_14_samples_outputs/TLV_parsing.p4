@@ -147,7 +147,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("_nop") action _nop() {
     }
-    @name("format_options") table format_options() {
+    @name("format_options") table format_options {
         actions = {
             format_options_security;
             format_options_timestamp;

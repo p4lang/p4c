@@ -26,7 +26,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.recirculate_port = smeta_0.recirculate_port;
         smeta.packet_length = smeta_0.packet_length;
     }
-    @name("forward") table forward() {
+    @name("forward") table forward {
         key = {
         }
         actions = {

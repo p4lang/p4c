@@ -107,7 +107,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         hdr.ethernet.dstAddr[47:32] = 16w0x0;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("mac_rewrite") table mac_rewrite_0() {
+    @name("mac_rewrite") table mac_rewrite_0 {
         actions = {
             nop_0();
             rewrite_ipv4_unicast_mac_0();
@@ -136,7 +136,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
     }
-    @name("setup") table setup_0() {
+    @name("setup") table setup_0 {
         actions = {
             do_setup_0();
             @default_only NoAction();

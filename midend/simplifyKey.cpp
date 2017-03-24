@@ -1,8 +1,33 @@
 #include "simplifyKey.h"
-#include "removeParameters.h"  // for HasTableApply
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
+
+namespace {
+// Checks to see whether an IR node includes a table.apply() sub-expression
+class HasTableApply : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+ public:
+    const IR::P4Table*  table;
+    const IR::MethodCallExpression* call;
+    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
+
+    void postorder(const IR::MethodCallExpression* expression) override {
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (!mi->isApply()) return;
+        auto am = mi->to<P4::ApplyMethod>();
+        if (!am->object->is<IR::P4Table>()) return;
+        BUG_CHECK(table == nullptr, "%1% and %2%: multiple table applications in one expression",
+                  table, am->object);
+        table = am->object->to<IR::P4Table>();
+        call = expression;
+        LOG3("Invoked table is " << dbp(table));
+    }
+};
+}  // namespace
 
 bool NonLeftValue::isTooComplex(const IR::Expression* expression) const {
     if (typeMap->isLeftValue(expression))
@@ -65,7 +90,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
 
 const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
                                          const IR::Expression *expression) {
-    LOG1("Visiting " << getOriginal());
+    LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     (void)expression->apply(hta);
     if (hta.table == nullptr)

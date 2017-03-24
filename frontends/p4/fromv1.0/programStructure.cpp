@@ -628,10 +628,7 @@ const IR::P4Table*
 ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                                IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
-
-    auto params = new IR::ParameterList();
     auto propvec = new IR::IndexedVector<IR::Property>(*table->properties.properties);
-
     auto actVect = new IR::IndexedVector<IR::ActionListElement>();
     auto actionList = new IR::ActionList(Util::SourceInfo(), actVect);
 
@@ -818,7 +815,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
 
     auto props = new IR::TableProperties(Util::SourceInfo(), propvec);
     auto annos = addNameAnnotation(table->name, table->annotations);
-    auto result = new IR::P4Table(table->srcInfo, newName, annos, params, props);
+    auto result = new IR::P4Table(table->srcInfo, newName, annos, props);
     return result;
 }
 

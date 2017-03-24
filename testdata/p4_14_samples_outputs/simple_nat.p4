@@ -138,7 +138,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.cpu_header.reason = 8w0xab;
         hdr.cpu_header.if_index = meta.meta.if_index;
     }
-    @name("send_frame") table send_frame() {
+    @name("send_frame") table send_frame {
         actions = {
             do_rewrites;
             _drop;
@@ -150,7 +150,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 256;
         default_action = NoAction();
     }
-    @name("send_to_cpu") table send_to_cpu() {
+    @name("send_to_cpu") table send_to_cpu {
         actions = {
             do_cpu_encap;
             @default_only NoAction;
@@ -204,7 +204,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("nat_no_nat") action nat_no_nat() {
         meta.meta.do_forward = 1w1;
     }
-    @name("forward") table forward() {
+    @name("forward") table forward {
         actions = {
             set_dmac;
             _drop;
@@ -216,7 +216,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction();
     }
-    @name("if_info") table if_info() {
+    @name("if_info") table if_info {
         actions = {
             _drop;
             set_if_info;
@@ -227,7 +227,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("ipv4_lpm") table ipv4_lpm() {
+    @name("ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop;
             _drop;
@@ -239,7 +239,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("nat") table nat() {
+    @name("nat") table nat {
         actions = {
             _drop;
             nat_miss_int_to_ext;

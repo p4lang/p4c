@@ -57,36 +57,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setf1") action setf1(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("routing") table routing() {
+    @name("routing") table routing {
         actions = {
             route_eth();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dst_addr: lpm;
+            hdr.ethernet.dst_addr: lpm @name("hdr.ethernet.dst_addr") ;
         }
         default_action = NoAction();
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setf2();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1: exact @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }
-    @name("test2") table test2() {
+    @name("test2") table test2 {
         actions = {
             setf1();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: exact;
+            hdr.data.f2: exact @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }

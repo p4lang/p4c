@@ -4,7 +4,7 @@ control c(out bool x) {
     bool tmp;
     bool tmp_0;
     bool tmp_1;
-    @name("t1") table t1_0() {
+    @name("t1") table t1_0 {
         key = {
             x: exact @name("x") ;
         }
@@ -13,7 +13,7 @@ control c(out bool x) {
         }
         default_action = NoAction();
     }
-    @name("t2") table t2_0() {
+    @name("t2") table t2_0 {
         key = {
             x: exact @name("x") ;
         }
@@ -24,17 +24,11 @@ control c(out bool x) {
     }
     apply {
         x = true;
-        if (t1_0.apply().hit) 
-            tmp = true;
-        else 
-            tmp = false;
+        tmp = t1_0.apply().hit;
         if (!tmp) 
             tmp_0 = false;
         else {
-            if (t2_0.apply().hit) 
-                tmp_1 = true;
-            else 
-                tmp_1 = false;
+            tmp_1 = t2_0.apply().hit;
             tmp_0 = tmp_1;
         }
         if (tmp_0) 

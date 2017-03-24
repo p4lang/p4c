@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.m5 = v5;
         meta.m.m6 = v6;
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             setmeta_0();
             @default_only NoAction();

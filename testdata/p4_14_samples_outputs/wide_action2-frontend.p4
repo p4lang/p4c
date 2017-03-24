@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.intrinsic_metadata.exclusion_id1 = exclusion_id;
     }
-    @name("bd") table bd_0() {
+    @name("bd") table bd_0 {
         actions = {
             set_bd_info_0();
             @default_only NoAction();

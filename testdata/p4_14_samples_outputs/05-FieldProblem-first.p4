@@ -33,13 +33,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("e_t1") table e_t1() {
+    @name("e_t1") table e_t1 {
         actions = {
             nop();
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1: exact @name("hdr.vag.f1") ;
         }
         default_action = NoAction();
     }
@@ -54,14 +54,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_f1") action set_f1(bit<8> f1) {
         meta.ing_metadata.f1 = f1;
     }
-    @name("i_t1") table i_t1() {
+    @name("i_t1") table i_t1 {
         actions = {
             nop();
             set_f1();
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1: exact @name("hdr.vag.f1") ;
         }
         size = 1024;
         default_action = NoAction();

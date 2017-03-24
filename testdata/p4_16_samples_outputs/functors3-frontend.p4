@@ -10,14 +10,10 @@ parser p1_0(out bit<1> z1) {
 }
 
 parser p_0(out bit<1> z) {
-    bit<1> tmp;
-    bit<1> tmp_0;
     @name("p1i") p1_0() p1i_0;
     state start {
         p1i_0.apply(z);
-        tmp = z & 1w0;
-        tmp_0 = tmp & 1w1;
-        z = tmp_0;
+        z = z & 1w0 & 1w1;
         transition accept;
     }
 }

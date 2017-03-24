@@ -36,7 +36,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nop") action nop() {
     }
-    @name("A") table A() {
+    @name("A") table A {
         actions = {
             do_b();
             do_d();
@@ -44,39 +44,39 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("B") table B() {
+    @name("B") table B {
         actions = {
             nop();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("C") table C() {
+    @name("C") table C {
         actions = {
             nop();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("D") table D() {
+    @name("D") table D {
         actions = {
             nop();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("E") table E() {
+    @name("E") table E {
         actions = {
             nop();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("F") table F() {
+    @name("F") table F {
         actions = {
             nop();
             @default_only NoAction();

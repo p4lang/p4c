@@ -50,7 +50,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("p1.C_action") action p1_C_action(bit<9> cData) {
     }
-    @name("p1.T") table p1_T_0() {
+    @name("p1.T") table p1_T_0 {
         key = {
             tArg1_0.field1: ternary @name("tArg1.field1") ;
             aArg2_0.field2: exact @name("aArg2.field2") ;
@@ -65,7 +65,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     @name("p1.Drop") action p1_Drop() {
         tmp.drop = true;
     }
-    @name("p1.Tinner") table p1_Tinner_0() {
+    @name("p1.Tinner") table p1_Tinner_0 {
         key = {
             tmp.field1: ternary @name("pArg1.field1") ;
         }
@@ -109,25 +109,25 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         qArg1.drop = tmp.drop;
         qArg2.field2 = tmp_0.field2;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_2() {
+    table tbl_act_2 {
         actions = {
             act_2();
         }

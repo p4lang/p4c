@@ -12,7 +12,7 @@ control caller() {
         cinst_tmp_2 = cinst_x_0.get1<bit<5>, bit<10>>(10w0, 5w0);
         f<bit<32>>((bit<32>)cinst_tmp_2);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

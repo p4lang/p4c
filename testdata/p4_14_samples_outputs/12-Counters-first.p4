@@ -32,23 +32,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("count_c1_1") action count_c1_1() {
         c1.count(32w1);
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             count_c1_1();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("t2") table t2() {
+    @name("t2") table t2 {
         actions = {
             count_c1_1();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }

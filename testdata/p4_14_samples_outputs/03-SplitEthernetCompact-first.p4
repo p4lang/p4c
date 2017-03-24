@@ -37,13 +37,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t2") table t2() {
+    @name("t2") table t2 {
         actions = {
             nop();
             @default_only NoAction();
         }
         key = {
-            hdr.mac_sa.mac: exact;
+            hdr.mac_sa.mac: exact @name("hdr.mac_sa.mac") ;
         }
         default_action = NoAction();
     }
@@ -55,14 +55,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         actions = {
             nop();
             @default_only NoAction();
         }
         key = {
-            hdr.mac_da.mac       : exact;
-            hdr.len_or_type.value: exact;
+            hdr.mac_da.mac       : exact @name("hdr.mac_da.mac") ;
+            hdr.len_or_type.value: exact @name("hdr.len_or_type.value") ;
         }
         default_action = NoAction();
     }

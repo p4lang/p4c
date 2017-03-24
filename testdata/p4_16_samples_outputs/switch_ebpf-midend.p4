@@ -50,7 +50,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    @name("Check_src_ip") table Check_src_ip() {
+    @name("Check_src_ip") table Check_src_ip {
         key = {
             headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
@@ -67,13 +67,13 @@ control pipe(inout Headers_t headers, out bool pass) {
     action act_0() {
         pass = true;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }

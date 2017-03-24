@@ -14,12 +14,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("meta") 
+    @name("meta")
     metadata_t meta;
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -34,7 +34,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("copyb1") action copyb1_0() {
         hdr.data.b1 = meta.meta.val;
     }
-    @name("output") table output() {
+    @name("output") table output {
         actions = {
             copyb1_0();
         }
@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_2() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1_0();
             noop_0();
@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name("test2") table test2() {
+    @name("test2") table test2 {
         actions = {
             noop_2();
             @default_only NoAction_3();

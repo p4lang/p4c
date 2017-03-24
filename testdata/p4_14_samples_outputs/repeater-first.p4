@@ -32,14 +32,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_egress_port") action set_egress_port(bit<9> egress_port) {
         standard_metadata.egress_spec = egress_port;
     }
-    @name("repeater") table repeater() {
+    @name("repeater") table repeater {
         actions = {
             my_drop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         default_action = NoAction();
     }

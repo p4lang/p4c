@@ -73,7 +73,7 @@ control c(out bit<32> v) {
     action a1() { setByAction = 1; }
     action a2() { setByAction = 1; }
 
-    table t() {
+    table t {
         actions = { a1; a2; }
         default_action = a1();
     }

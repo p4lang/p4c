@@ -49,7 +49,7 @@ const IR::Node* LowerExpressions::postorder(IR::Neg* expression) {
     auto sub = new IR::Sub(expression->srcInfo, zero, expression->expr);
     typeMap->setType(zero, type);
     typeMap->setType(sub, type);
-    LOG1("Replaced " << expression << " with " << sub);
+    LOG3("Replaced " << expression << " with " << sub);
     return sub;
 }
 
@@ -61,14 +61,14 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
         auto zero = new IR::Constant(srcType, 0);
         auto cmp = new IR::Equ(expression->srcInfo, expression->expr, zero);
         typeMap->setType(cmp, destType);
-        LOG1("Replaced " << expression << " with " << cmp);
+        LOG3("Replaced " << expression << " with " << cmp);
         return cmp;
     } else if (destType->is<IR::Type_Bits>() && srcType->is<IR::Type_Boolean>()) {
         auto mux = new IR::Mux(expression->srcInfo, expression->expr,
                                new IR::Constant(destType, 1),
                                new IR::Constant(destType, 0));
         typeMap->setType(mux, destType);
-        LOG1("Replaced " << expression << " with " << mux);
+        LOG3("Replaced " << expression << " with " << mux);
         return mux;
     }
     // This may be a new expression
@@ -93,7 +93,7 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     auto type = IR::Type_Bits::get(h - l + 1);
     auto result = new IR::Cast(expression->srcInfo, type, sh);
     typeMap->setType(result, type);
-    LOG1("Replaced " << expression << " with " << result);
+    LOG3("Replaced " << expression << " with " << result);
     return result;
 }
 
@@ -121,7 +121,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     typeMap->setType(result, resulttype);
     typeMap->setType(sh, resulttype);
     typeMap->setType(and0, resulttype);
-    LOG1("Replaced " << expression << " with " << result);
+    LOG3("Replaced " << expression << " with " << result);
     return result;
 }
 
@@ -345,6 +345,53 @@ const IR::Node* FixupChecksum::preorder(IR::P4Control* control) {
         return control->apply(scp);
     }
     return control;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+// Detect whether a Select expression is too complicated for BMv2
+class ComplexExpression : public Inspector {
+ public:
+    bool isComplex = false;
+    ComplexExpression() { setName("ComplexExpression"); }
+
+    void postorder(const IR::PathExpression*) override {}
+    void postorder(const IR::Member*) override {}
+    void postorder(const IR::Literal*) override {}
+    // all other expressions are complex
+    void postorder(const IR::Expression*) override { isComplex = true; }
+};
+
+}  // namespace
+
+const IR::Node*
+RemoveExpressionsFromSelects::postorder(IR::SelectExpression* expression) {
+    bool changes = true;
+    auto vec = new IR::Vector<IR::Expression>();
+    for (auto e : *expression->select->components) {
+        ComplexExpression ce;
+        (void)e->apply(ce);
+        if (ce.isComplex) {
+            changes = true;
+            auto type = typeMap->getType(e, true)->getP4Type();
+            auto name = refMap->newName("tmp");
+            auto decl = new IR::Declaration_Variable(Util::SourceInfo(), IR::ID(name),
+                                                     IR::Annotations::empty, type, nullptr);
+            newDecls.push_back(decl);
+            auto assign = new IR::AssignmentStatement(
+                Util::SourceInfo(), new IR::PathExpression(name), e);
+            assignments.push_back(assign);
+            vec->push_back(new IR::PathExpression(name));
+        } else {
+            vec->push_back(e);
+        }
+    }
+
+    if (changes)
+        expression->select = new IR::ListExpression(expression->select->srcInfo, vec);
+    return expression;
 }
 
 }  // namespace BMV2

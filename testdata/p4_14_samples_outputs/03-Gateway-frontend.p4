@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop_0() {
     }
-    @name("e_t1") table e_t1_0() {
+    @name("e_t1") table e_t1_0 {
         actions = {
             nop_0();
             @default_only NoAction();
@@ -82,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_f4") action set_f4_0(bit<64> f4) {
         meta.ing_metadata.f4 = f4;
     }
-    @name("i_t1") table i_t1_0() {
+    @name("i_t1") table i_t1_0 {
         actions = {
             nop_1();
             ing_drop_0();
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t2") table i_t2_0() {
+    @name("i_t2") table i_t2_0 {
         actions = {
             nop_1();
             set_f2_0();
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t3") table i_t3_0() {
+    @name("i_t3") table i_t3_0 {
         actions = {
             nop_1();
             set_f3_0();
@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("i_t4") table i_t4_0() {
+    @name("i_t4") table i_t4_0 {
         actions = {
             nop_1();
             set_f4_0();

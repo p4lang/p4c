@@ -47,13 +47,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("my_a") action my_a_2() {
         h.h.f = 32w1;
     }
-    table tbl_my_a() {
+    table tbl_my_a {
         actions = {
             my_a_0();
         }
         const default_action = my_a_0();
     }
-    table tbl_my_a_0() {
+    table tbl_my_a_0 {
         actions = {
             my_a_2();
         }

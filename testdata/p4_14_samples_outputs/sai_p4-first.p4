@@ -219,64 +219,64 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;
     }
-    @name("fdb") table fdb() {
+    @name("fdb") table fdb {
         actions = {
             fdb_set();
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vlan_id: exact;
-            hdr.eth.dstAddr              : exact;
+            meta.ingress_metadata.vlan_id: exact @name("meta.ingress_metadata.vlan_id") ;
+            hdr.eth.dstAddr              : exact @name("hdr.eth.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("learn_notify") table learn_notify() {
+    @name("learn_notify") table learn_notify {
         actions = {
             nop();
             generate_learn_notify();
             @default_only NoAction();
         }
         key = {
-            meta.intrinsic_metadata.ingress_port: exact;
-            meta.ingress_metadata.vlan_id       : exact;
-            hdr.eth.srcAddr                     : exact;
+            meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
+            meta.ingress_metadata.vlan_id       : exact @name("meta.ingress_metadata.vlan_id") ;
+            hdr.eth.srcAddr                     : exact @name("hdr.eth.srcAddr") ;
         }
         default_action = NoAction();
     }
-    @name("neighbor") table neighbor() {
+    @name("neighbor") table neighbor {
         actions = {
             set_dmac();
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf        : exact;
-            meta.ingress_metadata.ip_dest    : exact;
-            meta.ingress_metadata.router_intf: exact;
+            meta.ingress_metadata.vrf        : exact @name("meta.ingress_metadata.vrf") ;
+            meta.ingress_metadata.ip_dest    : exact @name("meta.ingress_metadata.ip_dest") ;
+            meta.ingress_metadata.router_intf: exact @name("meta.ingress_metadata.router_intf") ;
         }
         default_action = NoAction();
     }
-    @name("next_hop") table next_hop() {
+    @name("next_hop") table next_hop {
         actions = {
             set_next_hop();
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.nhop: exact;
+            meta.ingress_metadata.nhop: exact @name("meta.ingress_metadata.nhop") ;
         }
         default_action = NoAction();
     }
-    @name("port") table port() {
+    @name("port") table port {
         actions = {
             set_in_port();
             @default_only NoAction();
         }
         key = {
-            meta.intrinsic_metadata.ingress_port: exact;
+            meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
         }
         default_action = NoAction();
         @name("port_counters") counters = direct_counter(CounterType.packets);
     }
-    @name("route") table route() {
+    @name("route") table route {
         actions = {
             route_set_trap();
             route_set_nexthop();
@@ -284,36 +284,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : lpm;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("router_interface") table router_interface() {
+    @name("router_interface") table router_interface {
         actions = {
             set_router_interface();
             router_interface_miss();
             @default_only NoAction();
         }
         key = {
-            hdr.eth.dstAddr: exact;
+            hdr.eth.dstAddr: exact @name("hdr.eth.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("switch") table switch_0() {
+    @name("switch") table switch_0 {
         actions = {
             set_switch();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("virtual_router") table virtual_router() {
+    @name("virtual_router") table virtual_router {
         actions = {
             set_router();
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
         }
         default_action = NoAction();
     }

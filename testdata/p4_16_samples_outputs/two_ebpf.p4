@@ -43,11 +43,11 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-control pipe(inout Headers_t headers, out bool pass) {
+control Check(in IPv4Address address, out bool pass) {
     action Reject() {
         pass = false;
     }
-    table Check_ip(in IPv4Address address) {
+    table Check_ip {
         key = {
             address: exact;
         }
@@ -59,13 +59,20 @@ control pipe(inout Headers_t headers, out bool pass) {
         const default_action = NoAction;
     }
     apply {
+        Check_ip.apply();
+    }
+}
+
+control pipe(inout Headers_t headers, out bool pass) {
+    Check() c1;
+    apply {
         pass = true;
         if (!headers.ipv4.isValid()) {
             pass = false;
             return;
         }
-        Check_ip.apply(headers.ipv4.srcAddr);
-        Check_ip.apply(headers.ipv4.dstAddr);
+        c1.apply(headers.ipv4.srcAddr, pass);
+        c1.apply(headers.ipv4.dstAddr, pass);
     }
 }
 

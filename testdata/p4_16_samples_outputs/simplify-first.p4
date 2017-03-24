@@ -1,19 +1,18 @@
 #include <core.p4>
 
 control c(out bool x) {
-    bit<32> x;
-    table t1() {
+    table t1 {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             NoAction();
         }
         default_action = NoAction();
     }
-    table t2() {
+    table t2 {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             NoAction();

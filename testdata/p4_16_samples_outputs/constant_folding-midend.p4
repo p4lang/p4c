@@ -4,7 +4,7 @@ control c(out bit<32> x) {
     action act() {
         x = 32w17;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

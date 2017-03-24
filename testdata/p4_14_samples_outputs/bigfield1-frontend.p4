@@ -31,7 +31,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             setx1_0();
             noop_0();

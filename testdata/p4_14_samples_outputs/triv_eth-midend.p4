@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -31,7 +31,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_0() {
     }
-    @name("routing") table routing() {
+    @name("routing") table routing {
         actions = {
             route_eth_0();
             noop_0();

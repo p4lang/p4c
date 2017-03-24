@@ -66,9 +66,9 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     action act3(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    table test1() {
+    table test1 {
         key = {
-            hdrs.data.f1: ternary;
+            hdrs.data.f1: ternary @name("hdrs.data.f1") ;
         }
         actions = {
             setb1();
@@ -76,9 +76,9 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop();
     }
-    table ex1() {
+    table ex1 {
         key = {
-            hdrs.extra[0].h: ternary;
+            hdrs.extra[0].h: ternary @name("hdrs.extra[0].h") ;
         }
         actions = {
             setbyte(hdrs.extra[0].b1);
@@ -89,9 +89,9 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop();
     }
-    table tbl1() {
+    table tbl1 {
         key = {
-            hdrs.data.f2: ternary;
+            hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
             setbyte(hdrs.data.b2);
@@ -99,9 +99,9 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop();
     }
-    table tbl2() {
+    table tbl2 {
         key = {
-            hdrs.data.f2: ternary;
+            hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
             setbyte(hdrs.extra[1].b1);
@@ -109,9 +109,9 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop();
     }
-    table tbl3() {
+    table tbl3 {
         key = {
-            hdrs.data.f2: ternary;
+            hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
             setbyte(hdrs.extra[2].b2);

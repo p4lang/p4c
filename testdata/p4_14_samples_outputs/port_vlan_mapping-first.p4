@@ -643,7 +643,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls") state parse_mpls {
-        transition select((packet.lookahead<bit<24>>())[23:23]) {
+        transition select((packet.lookahead<bit<24>>())[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -837,7 +837,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name("port_vlan_mapping") table port_vlan_mapping() {
+    @name("port_vlan_mapping") table port_vlan_mapping {
         actions = {
             set_bd();
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags();
@@ -847,11 +847,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.ifindex: exact;
-            hdr.vlan_tag_[0].isValid()   : exact;
-            hdr.vlan_tag_[0].vid         : exact;
-            hdr.vlan_tag_[1].isValid()   : exact;
-            hdr.vlan_tag_[1].vid         : exact;
+            meta.ingress_metadata.ifindex: exact @name("meta.ingress_metadata.ifindex") ;
+            hdr.vlan_tag_[0].isValid()   : exact @name("hdr.vlan_tag_[0].isValid()") ;
+            hdr.vlan_tag_[0].vid         : exact @name("hdr.vlan_tag_[0].vid") ;
+            hdr.vlan_tag_[1].isValid()   : exact @name("hdr.vlan_tag_[1].isValid()") ;
+            hdr.vlan_tag_[1].vid         : exact @name("hdr.vlan_tag_[1].vid") ;
         }
         size = 32768;
         default_action = NoAction();

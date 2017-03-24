@@ -186,7 +186,6 @@ void IR::Key::dbprint(std::ostream &out) const {
 }
 void IR::P4Table::dbprint(std::ostream &out) const {
     out << "table " << name;
-    if (parameters) out << '(' << parameters << ')';
     out << " " << annotations << "{" << indent;
     for (auto p : *properties->properties)
         out << endl << p;

@@ -753,13 +753,8 @@ statementOrDeclaration
 /************************* TABLE *********************************/
 
 tableDeclaration
-    : optAnnotations TABLE name '(' parameterList ')' '{' tablePropertyList '}'
+    : optAnnotations TABLE name '{' tablePropertyList '}'
                                          { $$ = new IR::P4Table(@3, *$3, $1,
-                                                     new IR::ParameterList(@5, $5),
-                                                     new IR::TableProperties(@8, $8)); }
-    | optAnnotations TABLE name '{' tablePropertyList '}'
-                                         { $$ = new IR::P4Table(@3, *$3, $1,
-                                                     new IR::ParameterList(),
                                                      new IR::TableProperties(@5, $5)); }
     ;
 

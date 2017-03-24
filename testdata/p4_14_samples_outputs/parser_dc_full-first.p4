@@ -531,7 +531,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls") state parse_mpls {
-        transition select((packet.lookahead<bit<24>>())[23:23]) {
+        transition select((packet.lookahead<bit<24>>())[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: parse_payload;
@@ -625,14 +625,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.data = 8w255;
         standard_metadata.egress_spec = 9w10;
     }
-    @name("mark_check") table mark_check() {
+    @name("mark_check") table mark_check {
         actions = {
             mark_forward();
         }
         key = {
-            hdr.data.data: exact;
+            hdr.data.data: exact @name("hdr.data.data") ;
         }
-        default_action = mark_forward();
+        const default_action = mark_forward();
     }
     apply {
         mark_check.apply();

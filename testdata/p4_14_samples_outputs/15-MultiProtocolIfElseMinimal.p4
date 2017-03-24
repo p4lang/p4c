@@ -83,7 +83,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("ipv4_match") table ipv4_match() {
+    @name("ipv4_match") table ipv4_match {
         actions = {
             nop;
             set_egress_port;
@@ -94,7 +94,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("l2_match") table l2_match() {
+    @name("l2_match") table l2_match {
         actions = {
             nop;
             set_egress_port;

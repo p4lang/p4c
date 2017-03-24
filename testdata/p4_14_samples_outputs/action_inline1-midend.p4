@@ -15,7 +15,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name("data")
     data_t data;
 }
 
@@ -27,15 +27,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<8> tmp_0;
+    bit<8> dest;
     @name("NoAction") action NoAction_0() {
     }
     @name("setb1") action setb1_0(bit<8> val, bit<9> port) {
+        tmp_0 = hdr.data.b1;
+        dest = hdr.data.b1;
+        dest = val;
+        tmp_0 = val;
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
     @name("noop") action noop_0() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1_0();
             noop_0();

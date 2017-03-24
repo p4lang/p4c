@@ -32,13 +32,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("e_t1") table e_t1() {
+    @name("e_t1") table e_t1 {
         actions = {
             nop();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }
@@ -56,25 +56,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ing_drop") action ing_drop() {
         meta.ing_metadata.drop = 1w1;
     }
-    @name("dmac") table dmac() {
+    @name("dmac") table dmac {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("smac_filter") table smac_filter() {
+    @name("smac_filter") table smac_filter {
         actions = {
             nop();
             ing_drop();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }

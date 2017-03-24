@@ -24,7 +24,8 @@ limitations under the License.
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
-#include "midend/simplifySelect.h"
+#include "midend/simplifySelectCases.h"
+#include "midend/simplifySelectList.h"
 #include "midend/validateProperties.h"
 #include "midend/eliminateTuples.h"
 #include "midend/noMatch.h"
@@ -94,22 +95,22 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),
+        new P4::UniqueNames(&refMap),  // needed again after inlining
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::ClearTypeMap(&typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveTableParameters(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::RemoveExits(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::SimplifySelect(&refMap, &typeMap, false),  // accept non-constant keysets
+        new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
+        new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ValidateTableProperties({"implementation"}),

@@ -56,26 +56,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.mymeta.f1 = 8w1;
         resubmit<tuple<standard_metadata_t, mymeta_t>>({ standard_metadata, meta.mymeta });
     }
-    @name("t_ingress_1") table t_ingress_1() {
+    @name("t_ingress_1") table t_ingress_1 {
         actions = {
             _nop();
             set_port();
             @default_only NoAction();
         }
         key = {
-            meta.mymeta.f1: exact;
+            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction();
     }
-    @name("t_ingress_2") table t_ingress_2() {
+    @name("t_ingress_2") table t_ingress_2 {
         actions = {
             _nop();
             _resubmit();
             @default_only NoAction();
         }
         key = {
-            meta.mymeta.f1: exact;
+            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction();

@@ -18,13 +18,13 @@ control pipe(inout Headers_t headers, out bool pass) {
     action act() {
         x = true;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_Reject() {
+    table tbl_Reject {
         actions = {
             Reject_0();
         }

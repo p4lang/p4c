@@ -8,7 +8,7 @@ control c(out bool x) {
     }
     @name("NoAction") action NoAction_3() {
     }
-    @name("t1") table t1() {
+    @name("t1") table t1 {
         key = {
             x: exact @name("x") ;
         }
@@ -17,7 +17,7 @@ control c(out bool x) {
         }
         default_action = NoAction_0();
     }
-    @name("t2") table t2() {
+    @name("t2") table t2 {
         key = {
             x: exact @name("x") ;
         }
@@ -50,49 +50,49 @@ control c(out bool x) {
     action act_6() {
         x = false;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_2() {
+    table tbl_act_2 {
         actions = {
             act_2();
         }
         const default_action = act_2();
     }
-    table tbl_act_3() {
+    table tbl_act_3 {
         actions = {
             act_3();
         }
         const default_action = act_3();
     }
-    table tbl_act_4() {
+    table tbl_act_4 {
         actions = {
             act_4();
         }
         const default_action = act_4();
     }
-    table tbl_act_5() {
+    table tbl_act_5 {
         actions = {
             act_5();
         }
         const default_action = act_5();
     }
-    table tbl_act_6() {
+    table tbl_act_6 {
         actions = {
             act_6();
         }
@@ -100,20 +100,20 @@ control c(out bool x) {
     }
     apply {
         tbl_act.apply();
-        if (t1.apply().hit) 
+        if (t1.apply().hit)
             tbl_act_0.apply();
-        else 
+        else
             tbl_act_1.apply();
-        if (!tmp_2) 
+        if (!tmp_2)
             tbl_act_2.apply();
         else {
-            if (t2.apply().hit) 
+            if (t2.apply().hit)
                 tbl_act_3.apply();
-            else 
+            else
                 tbl_act_4.apply();
             tbl_act_5.apply();
         }
-        if (tmp_3) 
+        if (tmp_3)
             tbl_act_6.apply();
     }
 }

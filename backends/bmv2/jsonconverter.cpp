@@ -370,68 +370,10 @@ class ExpressionConverter : public Inspector {
         BUG("%1%: unhandled case", expression);
     }
 
-    void postorder(const IR::Shr* expression) override {
-        // special handling for shift of a lookahead -> current
-        auto l = get(expression->left);
-        if (l->is<Util::JsonObject>()) {
-            auto jo = l->to<Util::JsonObject>();
-            auto type = jo->get("type");
-            if (type != nullptr && type->is<Util::JsonValue>()) {
-                auto val = type->to<Util::JsonValue>();
-                if (val->isString() && val->getString() == "lookahead") {
-                    auto r = jo->get("value");
-                    CHECK_NULL(r);
-                    auto arr = r->to<Util::JsonArray>();
-                    CHECK_NULL(arr);
-                    auto second = arr->at(1);
-                    BUG_CHECK(second->is<Util::JsonValue>(), "%1%: expected a value", second);
-                    auto max = second->to<Util::JsonValue>()->getInt();
-
-                    BUG_CHECK(expression->right->is<IR::Constant>(),
-                              "Not implemented: %1%", expression);
-                    auto amount = expression->right->to<IR::Constant>()->asInt();
-
-                    auto j = new Util::JsonObject();
-                    j->emplace("type", "lookahead");
-                    auto v = mkArrayField(j, "value");
-                    v->append(amount);
-                    v->append(max - amount);
-                    map.emplace(expression, j);
-                    return;
-                }
-            }
-        }
-        binary(expression);
-    }
-
     void postorder(const IR::Cast* expression) override {
         // nothing to do for casts - the ArithmeticFixup pass should have handled them already
         auto j = get(expression->expr);
         map.emplace(expression, j);
-    }
-
-    void postorder(const IR::Slice* expression) override {
-        // Special case for parser select: look for
-        // packet.lookahead<T>()[h:l].  Convert to current(l, h - l).
-        // Only correct within a select() expression, but we cannot check that
-        // since the caller invokes the converter directly with the select argument.
-        auto m = get(expression->e0);
-        if (m->is<Util::JsonObject>()) {
-            auto val = m->to<Util::JsonObject>()->get("type");
-            if (val != nullptr && val->is<Util::JsonValue>() &&
-                *val->to<Util::JsonValue>() == "lookahead") {
-                int h = expression->getH();
-                int l = expression->getL();
-                auto j = new Util::JsonObject();
-                j->emplace("type", "lookahead");
-                auto bounds = mkArrayField(j, "value");
-                bounds->append(l);
-                bounds->append(h + 1);
-                map.emplace(expression, j);
-                return;
-            }
-        }
-        BUG("%1%: unhandled case", expression);
     }
 
     void postorder(const IR::Constant* expression) override {
@@ -2260,7 +2202,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             auto json = new Util::JsonObject();
             json->emplace("name", f->externalName());
             json->emplace("id", nextId("headers"));
-            json->emplace("header_type", ft->to<IR::Type_StructLike>()->name.name);
+            json->emplace("header_type", ft->to<IR::Type_StructLike>()->externalName());
             json->emplace("metadata", meta);
             headerInstances->append(json);
         } else if (ft->is<IR::Type_Stack>()) {
@@ -2494,6 +2436,20 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                 }
                 return result;
             }
+        } else if (minst->is<P4::BuiltInMethod>()) {
+            auto bi = minst->to<P4::BuiltInMethod>();
+            if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
+                auto mem = new IR::Member(Util::SourceInfo(), bi->appliedTo, "$valid$");
+                typeMap->setType(mem, IR::Type_Void::get());
+                auto jexpr = conv->convert(mem, true, false);
+                result->emplace("op", "set");
+                params->append(jexpr);
+
+                auto bl = new IR::BoolLiteral(bi->name == IR::Type_Header::setValid);
+                auto r = conv->convert(bl, true, true, true);
+                params->append(r);
+                return result;
+            }
         }
     }
     ::error("%1%: not supported in parser on this target", stat);
@@ -2517,6 +2473,9 @@ void JsonConverter::convertSimpleKey(const IR::Expression* keySet,
         mask = mk->right->to<IR::Constant>()->value;
     } else if (keySet->is<IR::Constant>()) {
         value = keySet->to<IR::Constant>()->value;
+        mask = -1;
+    } else if (keySet->is<IR::BoolLiteral>()) {
+        value = keySet->to<IR::BoolLiteral>()->value ? 1 : 0;
         mask = -1;
     } else {
         ::error("%1% must evaluate to a compile-time constant", keySet);

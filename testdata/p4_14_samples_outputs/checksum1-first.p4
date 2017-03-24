@@ -76,24 +76,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("do_setup") action do_setup() {
     }
-    @name("route") table route() {
+    @name("route") table route {
         actions = {
             drop();
             forward();
             @default_only NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: ternary;
+            hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("setup") table setup() {
+    @name("setup") table setup {
         actions = {
             do_setup();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.isValid(): exact;
+            hdr.ethernet.isValid(): exact @name("hdr.ethernet.isValid()") ;
         }
         default_action = NoAction();
     }

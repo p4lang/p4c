@@ -33,14 +33,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
         truncate((bit<32>)new_length);
     }
-    @name("t_ingress") table t_ingress() {
+    @name("t_ingress") table t_ingress {
         actions = {
             _nop();
             _truncate();
             @default_only NoAction();
         }
         key = {
-            hdr.hdrA.f1: exact;
+            hdr.hdrA.f1: exact @name("hdr.hdrA.f1") ;
         }
         size = 128;
         default_action = NoAction();

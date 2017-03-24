@@ -99,7 +99,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("_drop") action _drop() {
         mark_to_drop();
     }
-    @name("send_frame") table send_frame() {
+    @name("send_frame") table send_frame {
         actions = {
             rewrite_mac;
             _drop;
@@ -145,7 +145,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.flowlet_id = meta.ingress_metadata.flowlet_id + 16w1;
         flowlet_id.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
     }
-    @name("ecmp_group") table ecmp_group() {
+    @name("ecmp_group") table ecmp_group {
         actions = {
             _drop;
             set_ecmp_select;
@@ -157,7 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("ecmp_nhop") table ecmp_nhop() {
+    @name("ecmp_nhop") table ecmp_nhop {
         actions = {
             _drop;
             set_nhop;
@@ -169,14 +169,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16384;
         default_action = NoAction();
     }
-    @name("flowlet") table flowlet() {
+    @name("flowlet") table flowlet {
         actions = {
             lookup_flowlet_map;
             @default_only NoAction;
         }
         default_action = NoAction();
     }
-    @name("forward") table forward() {
+    @name("forward") table forward {
         actions = {
             set_dmac;
             _drop;
@@ -188,7 +188,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction();
     }
-    @name("new_flowlet") table new_flowlet() {
+    @name("new_flowlet") table new_flowlet {
         actions = {
             update_flowlet_id;
             @default_only NoAction;

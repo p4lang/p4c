@@ -30,19 +30,21 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     Key inKey;
     Key defaultKey;
     Value val;
-    bool tmp_2;
+    bool done;
+    bool ok;
     Value val_2;
     @name("test") action test_0() {
         inKey.field1 = 32w1;
         defaultKey.field1 = 32w0;
+        same = inKey == defaultKey;
         val.field1 = 32w0;
-        tmp_2 = tmp_2;
-        tmp_2 = inKey == defaultKey;
-        val_2.field1 = (tmp_2 ? val.field1 : val_2.field1);
-        val_2.field1 = (tmp_2 ? 32w8 : val_2.field1);
-        val.field1 = (tmp_2 ? val_2.field1 : val.field1);
+        done = false;
+        ok = inKey == defaultKey;
+        val_2.field1 = (inKey == defaultKey ? val.field1 : val_2.field1);
+        val_2.field1 = (inKey == defaultKey ? 32w8 : val_2.field1);
+        val.field1 = (inKey == defaultKey ? val_2.field1 : val.field1);
     }
-    table tbl_test() {
+    table tbl_test {
         actions = {
             test_0();
         }

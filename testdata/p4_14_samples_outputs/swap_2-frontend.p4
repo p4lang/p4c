@@ -34,7 +34,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("a22") action a22_0() {
         standard_metadata.egress_spec = 9w4;
     }
-    @name("t_ingress_2") table t_ingress() {
+    @name("t_ingress_2") table t_ingress {
         actions = {
             a21_0();
             a22_0();

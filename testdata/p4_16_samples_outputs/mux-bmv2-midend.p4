@@ -32,13 +32,13 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     action act() {
         tmp_2 = 64w0;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_update() {
+    table tbl_update {
         actions = {
             update_0();
         }

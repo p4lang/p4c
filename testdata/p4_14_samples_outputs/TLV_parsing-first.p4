@@ -147,7 +147,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("_nop") action _nop() {
     }
-    @name("format_options") table format_options() {
+    @name("format_options") table format_options {
         actions = {
             format_options_security();
             format_options_timestamp();
@@ -156,8 +156,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.ipv4_option_security.isValid() : exact;
-            hdr.ipv4_option_timestamp.isValid(): exact;
+            hdr.ipv4_option_security.isValid() : exact @name("hdr.ipv4_option_security.isValid()") ;
+            hdr.ipv4_option_timestamp.isValid(): exact @name("hdr.ipv4_option_timestamp.isValid()") ;
         }
         size = 4;
         default_action = NoAction();

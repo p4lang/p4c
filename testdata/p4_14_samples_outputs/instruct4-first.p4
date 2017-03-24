@@ -33,14 +33,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setf4();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1: exact @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }

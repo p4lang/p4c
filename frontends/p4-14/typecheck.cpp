@@ -417,7 +417,7 @@ TypeCheck::TypeCheck() : PassManager({
         new InferActionArgsTopDown(*this),
         new AssignActionArgTypes(*this)
     }))->setRepeats(100)   // avoid infinite loop if there's a bug
-}) { setStopOnError(true); }
+}) { setStopOnError(true); setName("TypeCheck"); }
 
 const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
     LOG5("Before Typecheck:\n" << dumpToString(n));

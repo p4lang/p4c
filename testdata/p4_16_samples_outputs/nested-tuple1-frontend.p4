@@ -12,12 +12,10 @@ extern void f<D>(in D data);
 control c(inout bit<1> r) {
     S s;
     bit<1> tmp_0;
-    bit<1> tmp;
     apply {
-        s = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
+        s = {{ { 1w0 }, { 1w1 } }, { 1w0 }, 1w1};
         f<tuple<T, T>>(s.f1);
-        tmp = s.f2.f & s.z;
-        tmp_0 = tmp;
+        tmp_0 = s.f2.f & s.z;
         r = tmp_0;
     }
 }

@@ -176,7 +176,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("send_packet") action send_packet() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
-    @name("ethertype_match") table ethertype_match() {
+    @name("ethertype_match") table ethertype_match {
         actions = {
             l2_packet();
             ipv4_packet();
@@ -186,84 +186,84 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
         }
         default_action = NoAction();
     }
-    @name("icmp_check") table icmp_check() {
+    @name("icmp_check") table icmp_check {
         actions = {
             nop();
             drop();
             @default_only NoAction();
         }
         key = {
-            hdr.icmp.typeCode: exact;
+            hdr.icmp.typeCode: exact @name("hdr.icmp.typeCode") ;
         }
         default_action = NoAction();
     }
-    @name("ipv4_match") table ipv4_match() {
+    @name("ipv4_match") table ipv4_match {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("ipv6_match") table ipv6_match() {
+    @name("ipv6_match") table ipv6_match {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ipv6.dstAddr: exact;
+            hdr.ipv6.dstAddr: exact @name("hdr.ipv6.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("l2_match") table l2_match() {
+    @name("l2_match") table l2_match {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("set_egress") table set_egress() {
+    @name("set_egress") table set_egress {
         actions = {
             nop();
             send_packet();
             @default_only NoAction();
         }
         key = {
-            meta.ing_metadata.drop: exact;
+            meta.ing_metadata.drop: exact @name("meta.ing_metadata.drop") ;
         }
         default_action = NoAction();
     }
-    @name("tcp_check") table tcp_check() {
+    @name("tcp_check") table tcp_check {
         actions = {
             nop();
             drop();
             @default_only NoAction();
         }
         key = {
-            hdr.tcp.dstPort: exact;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
         }
         default_action = NoAction();
     }
-    @name("udp_check") table udp_check() {
+    @name("udp_check") table udp_check {
         actions = {
             nop();
             drop();
             @default_only NoAction();
         }
         key = {
-            hdr.udp.dstPort: exact;
+            hdr.udp.dstPort: exact @name("hdr.udp.dstPort") ;
         }
         default_action = NoAction();
     }

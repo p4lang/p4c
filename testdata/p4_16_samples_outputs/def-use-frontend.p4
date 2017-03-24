@@ -20,12 +20,9 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    H tmp;
-    M tmp_0;
-    standard_metadata_t tmp_1;
     @name("a") action a_0() {
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         key = {
         }
         actions = {
@@ -40,9 +37,7 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
                 return;
             }
             default: {
-                tmp_1 = std_meta;
-                do_0.apply(tmp, tmp_0, tmp_1);
-                std_meta = tmp_1;
+                do_0.apply(hdr, meta, std_meta);
             }
         }
 

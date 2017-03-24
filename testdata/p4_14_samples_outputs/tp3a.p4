@@ -39,7 +39,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("setb1") action setb1(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("E1") table E1() {
+    @name("E1") table E1 {
         actions = {
             setf1;
             noop;
@@ -50,7 +50,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("E2") table E2() {
+    @name("E2") table E2 {
         actions = {
             setb4;
             noop;
@@ -61,7 +61,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("EA") table EA() {
+    @name("EA") table EA {
         actions = {
             setb1;
             noop;
@@ -72,7 +72,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("EB") table EB() {
+    @name("EB") table EB {
         actions = {
             setb1;
             noop;
@@ -110,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setb4") action setb4(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1() {
+    @name("A1") table A1 {
         actions = {
             setb1;
             noop;
@@ -121,7 +121,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("A2") table A2() {
+    @name("A2") table A2 {
         actions = {
             setb3;
             noop;
@@ -132,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("A3") table A3() {
+    @name("A3") table A3 {
         actions = {
             setb1;
             noop;
@@ -143,7 +143,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B1") table B1() {
+    @name("B1") table B1 {
         actions = {
             setb2;
             noop;
@@ -154,7 +154,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B2") table B2() {
+    @name("B2") table B2 {
         actions = {
             setb4;
             noop;

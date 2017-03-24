@@ -118,7 +118,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f8_4 = v4;
         hdr.data.f8_5 = v5;
     }
-    @name("tbl1") table tbl1() {
+    @name("tbl1") table tbl1 {
         actions = {
             set1;
             noop;
@@ -129,7 +129,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl2") table tbl2() {
+    @name("tbl2") table tbl2 {
         actions = {
             set2;
             noop;
@@ -140,7 +140,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl3") table tbl3() {
+    @name("tbl3") table tbl3 {
         actions = {
             set3;
             noop;
@@ -151,7 +151,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl4") table tbl4() {
+    @name("tbl4") table tbl4 {
         actions = {
             set4;
             noop;
@@ -162,7 +162,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl5") table tbl5() {
+    @name("tbl5") table tbl5 {
         actions = {
             set5;
             noop;
@@ -173,7 +173,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl6") table tbl6() {
+    @name("tbl6") table tbl6 {
         actions = {
             set6;
             noop;
@@ -184,7 +184,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl7") table tbl7() {
+    @name("tbl7") table tbl7 {
         actions = {
             set7;
             noop;
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl8") table tbl8() {
+    @name("tbl8") table tbl8 {
         actions = {
             set8;
             noop;

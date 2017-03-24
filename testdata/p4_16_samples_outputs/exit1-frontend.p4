@@ -1,10 +1,8 @@
 control ctrl() {
     bit<32> a_0;
-    bool tmp;
     apply {
         a_0 = 32w0;
-        tmp = a_0 == 32w0;
-        if (tmp) 
+        if (a_0 == 32w0) 
             exit;
         else 
             exit;

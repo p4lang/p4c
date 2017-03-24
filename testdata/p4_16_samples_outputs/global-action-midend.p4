@@ -1,7 +1,7 @@
 control c() {
     @name("Global_1") action Global() {
     }
-    @name("t") table t() {
+    @name("t") table t {
         actions = {
             Global();
         }

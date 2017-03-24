@@ -1,17 +1,29 @@
 control p() {
-    bit<1> tmp_3;
+    bit<1> z;
+    bit<1> x_0;
+    bit<1> x_1;
+    bit<1> tmp_1;
+    bit<1> tmp_2;
+    bit<1> x_2;
+    bit<1> y_0;
     @name("b") action b_0() {
+        x_2 = tmp_1;
+        x_0 = tmp_1;
+        z = tmp_1 & tmp_1;
+        y_0 = tmp_1 & tmp_1;
+        tmp_2 = tmp_1 & tmp_1;
     }
     action act() {
-        tmp_3 = 1w0;
+        x_1 = 1w0;
+        tmp_1 = 1w0;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_b() {
+    table tbl_b {
         actions = {
             b_0();
         }

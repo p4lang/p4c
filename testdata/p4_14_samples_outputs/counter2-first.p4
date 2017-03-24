@@ -32,13 +32,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("act") action act(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("tab1") table tab1() {
+    @name("tab1") table tab1 {
         actions = {
             act();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: ternary;
+            hdr.ethernet.dstAddr: ternary @name("hdr.ethernet.dstAddr") ;
         }
         size = 6100;
         default_action = NoAction();

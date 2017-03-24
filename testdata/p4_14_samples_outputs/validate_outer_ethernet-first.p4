@@ -132,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
-    @name("validate_outer_ethernet") table validate_outer_ethernet() {
+    @name("validate_outer_ethernet") table validate_outer_ethernet {
         actions = {
             set_valid_outer_unicast_packet_untagged();
             set_valid_outer_unicast_packet_single_tagged();
@@ -149,9 +149,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr      : ternary;
-            hdr.vlan_tag_[0].isValid(): exact;
-            hdr.vlan_tag_[1].isValid(): exact;
+            hdr.ethernet.dstAddr      : ternary @name("hdr.ethernet.dstAddr") ;
+            hdr.vlan_tag_[0].isValid(): exact @name("hdr.vlan_tag_[0].isValid()") ;
+            hdr.vlan_tag_[1].isValid(): exact @name("hdr.vlan_tag_[1].isValid()") ;
         }
         size = 64;
         default_action = NoAction();

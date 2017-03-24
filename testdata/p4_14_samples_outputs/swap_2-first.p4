@@ -34,14 +34,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("a22") action a22() {
         standard_metadata.egress_spec = 9w4;
     }
-    @name("t_ingress_2") table t_ingress_2() {
+    @name("t_ingress_2") table t_ingress_2 {
         actions = {
             a21();
             a22();
             @default_only NoAction();
         }
         key = {
-            hdr.hdr2.f1: exact;
+            hdr.hdr2.f1: exact @name("hdr.hdr2.f1") ;
         }
         size = 64;
         default_action = NoAction();

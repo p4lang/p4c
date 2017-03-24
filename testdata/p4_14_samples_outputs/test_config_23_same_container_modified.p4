@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("action_1") action action_1(bit<8> my_param2) {
         hdr.ipv4.totalLen = hdr.ipv4.totalLen;
     }
-    @name("table_0") table table_0() {
+    @name("table_0") table table_0 {
         actions = {
             action_0;
             action_1;

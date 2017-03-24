@@ -11,7 +11,7 @@ control c(inout bit<32> r) {
         tmp_12 = f(tmp_6, tmp_10);
         r = tmp_12;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

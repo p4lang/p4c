@@ -25,7 +25,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("drop") action drop_3() {
         smeta.drop = 1w1;
     }
-    @name("indirect") table indirect() {
+    @name("indirect") table indirect {
         key = {
         }
         actions = {
@@ -35,7 +35,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = NoAction_0();
         @name("ap") implementation = action_profile(32w128);
     }
-    @name("indirect_ws") table indirect_ws() {
+    @name("indirect_ws") table indirect_ws {
         key = {
             meta.hash1: selector @name("meta.hash1") ;
         }

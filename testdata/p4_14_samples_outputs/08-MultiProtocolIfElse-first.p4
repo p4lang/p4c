@@ -155,36 +155,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("ipv4_match") table ipv4_match() {
+    @name("ipv4_match") table ipv4_match {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.srcAddr: exact @name("hdr.ipv4.srcAddr") ;
         }
         default_action = NoAction();
     }
-    @name("ipv6_match") table ipv6_match() {
+    @name("ipv6_match") table ipv6_match {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ipv6.srcAddr: exact;
+            hdr.ipv6.srcAddr: exact @name("hdr.ipv6.srcAddr") ;
         }
         default_action = NoAction();
     }
-    @name("l2_match") table l2_match() {
+    @name("l2_match") table l2_match {
         actions = {
             nop();
             set_egress_port();
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }

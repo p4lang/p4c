@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("_nop") action _nop_0() {
     }
-    @name("m_table") table m_table_0() {
+    @name("m_table") table m_table_0 {
         actions = {
             m_action_0();
             _nop_0();

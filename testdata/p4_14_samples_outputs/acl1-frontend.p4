@@ -187,7 +187,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("congestion_mirror_set") action congestion_mirror_set_0() {
     }
-    @name("drop_stats") table drop_stats_4() {
+    @name("drop_stats") table drop_stats_4 {
         actions = {
             drop_stats_update_0();
             @default_only NoAction();
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 256;
         default_action = NoAction();
     }
-    @name("system_acl") table system_acl_0() {
+    @name("system_acl") table system_acl_0 {
         actions = {
             nop_0();
             redirect_to_cpu_0();

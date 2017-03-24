@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_revHop.push_front(1);
         hdr.axon_revHop[0].port = standard_metadata.ingress_port;
     }
-    @name("drop_pkt") table drop_pkt() {
+    @name("drop_pkt") table drop_pkt {
         actions = {
             _drop;
             @default_only NoAction;
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-    @name("route_pkt") table route_pkt() {
+    @name("route_pkt") table route_pkt {
         actions = {
             _drop;
             route;

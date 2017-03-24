@@ -83,12 +83,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -110,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ing_meter_set") action ing_meter_set_0(bit<16> meter_) {
         meta.ingress_metadata.ing_meter = meter_;
     }
-    @name("storm_control") table storm_control() {
+    @name("storm_control") table storm_control {
         actions = {
             no_action_0();
             ing_meter_set_0();

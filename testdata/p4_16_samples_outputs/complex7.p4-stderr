@@ -1,6 +1,0 @@
-../testdata/p4_16_samples/complex7.p4(24): warning: r shadows r
-    table t(in bit<32> r) {
-                       ^
-../testdata/p4_16_samples/complex7.p4(21)
-control c(inout bit<32> r) {
-                        ^

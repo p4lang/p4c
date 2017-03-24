@@ -52,28 +52,28 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action act_1() {
         sm.egress_spec = 9w0;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0() {
+    table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_1() {
+    table tbl_act_1 {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
     apply {
-        if (h.h.a < h.h.b) 
+        if (h.h.a < h.h.b)
             tbl_act.apply();
-        else 
+        else
             tbl_act_0.apply();
         tbl_act_1.apply();
     }

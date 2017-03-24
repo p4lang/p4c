@@ -39,7 +39,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("E1") table E1_0() {
+    @name("E1") table E1_0 {
         actions = {
             setf1_0();
             noop_0();
@@ -50,7 +50,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("EA") table EA_0() {
+    @name("EA") table EA_0 {
         actions = {
             setb1_0();
             noop_0();
@@ -61,7 +61,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("EB") table EB_0() {
+    @name("EB") table EB_0 {
         actions = {
             setb2_0();
             noop_0();
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1_0() {
+    @name("A1") table A1_0 {
         actions = {
             setb1_1();
             noop_1();
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("A2") table A2_0() {
+    @name("A2") table A2_0 {
         actions = {
             setb3_0();
             noop_1();
@@ -118,7 +118,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B1") table B1_0() {
+    @name("B1") table B1_0 {
         actions = {
             setb2_1();
             noop_1();
@@ -129,7 +129,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B2") table B2_0() {
+    @name("B2") table B2_0 {
         actions = {
             setb4_0();
             noop_1();

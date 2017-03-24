@@ -13,11 +13,9 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
-    bit<3> tmp;
     state start {
         meta.counter = 3w4;
-        tmp = meta.counter + 3w7;
-        meta.counter = tmp;
+        meta.counter = meta.counter + 3w7;
         transition accept;
     }
 }

@@ -33,15 +33,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             setb1();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.isValid(): ternary;
-            hdr.data.f1       : ternary;
+            hdr.data.isValid(): ternary @name("hdr.data.isValid()") ;
+            hdr.data.f1       : ternary @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }

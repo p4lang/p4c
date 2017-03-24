@@ -2,7 +2,7 @@ control ctrl() {
     action e() {
         exit;
     }
-    table t() {
+    table t {
         actions = {
             e();
         }

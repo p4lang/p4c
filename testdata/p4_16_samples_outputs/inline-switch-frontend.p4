@@ -3,7 +3,7 @@ control c(out bit<32> x) {
     }
     @name("a2") action a2_0() {
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             a1_0();
             a2_0();
@@ -12,7 +12,7 @@ control c(out bit<32> x) {
     }
     apply {
         switch (t_0.apply().action_run) {
-            a1_0: 
+            a1_0:
             a2_0: {
                 return;
             }

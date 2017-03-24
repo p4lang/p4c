@@ -17,7 +17,6 @@ parser p1(packet_in p, out Header h) {
     bit<32> tmp_1;
     bit<32> tmp_2;
     bit<32> tmp_3;
-    bit<32> tmp_4;
     state start {
         h.data1 = 32w0;
         func(h);
@@ -27,8 +26,7 @@ parser p1(packet_in p, out Header h) {
         tmp_2 = g(tmp_0, tmp_1);
         tmp_3 = tmp_2;
         g(tmp, tmp_3);
-        tmp_4 = h.data3 + 32w1;
-        h.data2 = tmp_4;
+        h.data2 = h.data3 + 32w1;
         stack_0[1].isValid();
         transition select(h.isValid()) {
             true: next1;
@@ -50,24 +48,17 @@ parser p1(packet_in p, out Header h) {
 }
 
 control c(out bit<32> v) {
-    bit<32> b_1;
     bit<32> d_1;
     bit<32> setByAction_0;
     bit<32> e_0;
     bool touched_0;
-    bit<32> tmp_5;
-    bit<32> tmp_6;
-    bool tmp_7;
-    bit<32> tmp_8;
-    bool tmp_9;
-    bit<32> tmp_10;
     @name("a1") action a1_0() {
         setByAction_0 = 32w1;
     }
     @name("a2") action a2_0() {
         setByAction_0 = 32w1;
     }
-    @name("t") table t_0() {
+    @name("t") table t_0 {
         actions = {
             a1_0();
             a2_0();
@@ -76,27 +67,21 @@ control c(out bit<32> v) {
     }
     apply {
         d_1 = 32w1;
-        tmp_5 = b_1 + 32w1;
-        tmp_6 = d_1 + 32w1;
-        tmp_7 = e_0 > 32w0;
-        if (tmp_7) 
+        if (e_0 > 32w0)
             e_0 = 32w1;
-        else 
+        else
             ;
-        tmp_8 = e_0 + 32w1;
-        e_0 = tmp_8;
+        e_0 = e_0 + 32w1;
         switch (t_0.apply().action_run) {
             a1_0: {
                 touched_0 = true;
             }
         }
 
-        tmp_9 = e_0 > 32w0;
-        if (tmp_9) 
+        if (e_0 > 32w0)
             t_0.apply();
-        else 
+        else
             a1_0();
-        tmp_10 = setByAction_0 + 32w1;
     }
 }
 

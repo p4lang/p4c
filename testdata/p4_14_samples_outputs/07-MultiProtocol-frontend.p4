@@ -176,7 +176,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("send_packet") action send_packet_0() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
-    @name("ethertype_match") table ethertype_match_0() {
+    @name("ethertype_match") table ethertype_match_0 {
         actions = {
             l2_packet_0();
             ipv4_packet_0();
@@ -190,7 +190,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("icmp_check") table icmp_check_0() {
+    @name("icmp_check") table icmp_check_0 {
         actions = {
             nop_0();
             drop_0();
@@ -201,7 +201,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("ipv4_match") table ipv4_match_0() {
+    @name("ipv4_match") table ipv4_match_0 {
         actions = {
             nop_0();
             set_egress_port_0();
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("ipv6_match") table ipv6_match_0() {
+    @name("ipv6_match") table ipv6_match_0 {
         actions = {
             nop_0();
             set_egress_port_0();
@@ -223,7 +223,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("l2_match") table l2_match_0() {
+    @name("l2_match") table l2_match_0 {
         actions = {
             nop_0();
             set_egress_port_0();
@@ -234,7 +234,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("set_egress") table set_egress_0() {
+    @name("set_egress") table set_egress_0 {
         actions = {
             nop_0();
             send_packet_0();
@@ -245,7 +245,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tcp_check") table tcp_check_0() {
+    @name("tcp_check") table tcp_check_0 {
         actions = {
             nop_0();
             drop_0();
@@ -256,7 +256,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("udp_check") table udp_check_0() {
+    @name("udp_check") table udp_check_0 {
         actions = {
             nop_0();
             drop_0();

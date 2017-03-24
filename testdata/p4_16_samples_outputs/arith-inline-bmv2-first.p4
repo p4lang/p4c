@@ -11,7 +11,7 @@ control compute(inout hdr h) {
     action add() {
         h.c = (bit<64>)(h.a + h.b);
     }
-    table t() {
+    table t {
         actions = {
             add();
         }

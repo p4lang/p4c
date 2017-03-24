@@ -33,22 +33,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setf1") action setf1(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1 {
         actions = {
             noop();
             setf1();
             @default_only NoAction();
         }
         key = {
-            hdr.data.b1: ternary;
-            hdr.data.f1: selector;
-            hdr.data.f2: selector;
-            hdr.data.f3: selector;
-            hdr.data.f4: selector;
+            hdr.data.b1: ternary @name("hdr.data.b1") ;
+            hdr.data.f1: selector @name("hdr.data.f1") ;
+            hdr.data.f2: selector @name("hdr.data.f2") ;
+            hdr.data.f3: selector @name("hdr.data.f3") ;
+            hdr.data.f4: selector @name("hdr.data.f4") ;
         }
         size = 1024;
         default_action = NoAction();
-        @name("sel_profile") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
+        @name("sel_profile") @mode("fair") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
     }
     apply {
         test1.apply();

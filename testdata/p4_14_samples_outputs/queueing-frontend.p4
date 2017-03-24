@@ -54,7 +54,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
         hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
     }
-    @name("t_egress") table t_egress_0() {
+    @name("t_egress") table t_egress_0 {
         actions = {
             copy_queueing_data_0();
             @default_only NoAction();
@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("t_ingress") table t_ingress_0() {
+    @name("t_ingress") table t_ingress_0 {
         actions = {
             set_port_0();
             _drop_0();

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,14 +16,10 @@ limitations under the License.
 
 control test()
 {
-    action Set_dmac()
-    {
-    }
-
+    action Set_dmac() {}
     action drop() {}
 
-    table unit()
-    {
+    table unit {
         actions = {
             @tableOnly Set_dmac;
             @defaultOnly drop;
@@ -31,7 +27,5 @@ control test()
         default_action = drop;
     }
 
-    apply
-    {
-    }
+    apply {}
 }

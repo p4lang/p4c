@@ -99,14 +99,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("_drop") action _drop() {
         mark_to_drop();
     }
-    @name("send_frame") table send_frame() {
+    @name("send_frame") table send_frame {
         actions = {
             rewrite_mac();
             _drop();
             NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
         default_action = NoAction();
@@ -145,50 +145,50 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.flowlet_id = meta.ingress_metadata.flowlet_id + 16w1;
         flowlet_id.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
     }
-    @name("ecmp_group") table ecmp_group() {
+    @name("ecmp_group") table ecmp_group {
         actions = {
             _drop();
             set_ecmp_select();
             NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 1024;
         default_action = NoAction();
     }
-    @name("ecmp_nhop") table ecmp_nhop() {
+    @name("ecmp_nhop") table ecmp_nhop {
         actions = {
             _drop();
             set_nhop();
             NoAction();
         }
         key = {
-            meta.ingress_metadata.ecmp_offset: exact;
+            meta.ingress_metadata.ecmp_offset: exact @name("meta.ingress_metadata.ecmp_offset") ;
         }
         size = 16384;
         default_action = NoAction();
     }
-    @name("flowlet") table flowlet() {
+    @name("flowlet") table flowlet {
         actions = {
             lookup_flowlet_map();
             NoAction();
         }
         default_action = NoAction();
     }
-    @name("forward") table forward() {
+    @name("forward") table forward {
         actions = {
             set_dmac();
             _drop();
             NoAction();
         }
         key = {
-            meta.ingress_metadata.nhop_ipv4: exact;
+            meta.ingress_metadata.nhop_ipv4: exact @name("meta.ingress_metadata.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction();
     }
-    @name("new_flowlet") table new_flowlet() {
+    @name("new_flowlet") table new_flowlet {
         actions = {
             update_flowlet_id();
             NoAction();

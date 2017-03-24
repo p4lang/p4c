@@ -9,6 +9,8 @@ package top(c _c);
 control my() {
     bit<1> a;
     H[2] s;
+    bit<1> tmp_15;
+    bit<1> tmp_16;
     bit<1> tmp_17;
     bit<1> tmp_18;
     bit<1> tmp_20;
@@ -18,30 +20,33 @@ control my() {
     bit<1> tmp_26;
     bit<1> tmp_28;
     bit<1> tmp_30;
-    bit<1> tmp_31;
-    bit<1> tmp_32;
     action act() {
         a = 1w0;
-        tmp_17 = 1w0;
-        tmp_18 = g(a);
-        tmp_20 = f(tmp_17, tmp_18);
-        a = tmp_20;
-        tmp_22 = s[tmp_20].z;
+        tmp_15 = 1w0;
+        tmp_16 = g(a);
+        tmp_17 = tmp_16;
+        tmp_18 = f(tmp_15, tmp_16);
+        a = tmp_18;
+        tmp_19 = s[tmp_18].z;
+        tmp_20 = g(a);
+        tmp_21 = tmp_20;
+        tmp_22 = f(tmp_19, tmp_20);
+        s[a].z = tmp_19;
+        a = tmp_22;
         tmp_23 = g(a);
-        tmp_25 = f(tmp_22, tmp_23);
-        s[tmp_20].z = tmp_22;
-        a = tmp_25;
-        tmp_26 = g(a);
-        tmp_28 = s[tmp_26].z;
-        tmp_30 = f(tmp_28, a);
-        s[tmp_26].z = tmp_28;
-        a = tmp_30;
-        tmp_31 = g(a);
-        a = tmp_31;
-        tmp_32 = g(a[0:0]);
-        a[0:0] = tmp_32;
+        tmp_24 = tmp_23;
+        tmp_25 = s[tmp_23].z;
+        tmp_26 = a;
+        tmp_27 = f(tmp_25, a);
+        s[tmp_24].z = tmp_25;
+        a = tmp_27;
+        tmp_28 = g(a);
+        a = tmp_28;
+        tmp_29 = g(a[0:0]);
+        a[0:0] = tmp_29;
+        tmp_30 = g(a);
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

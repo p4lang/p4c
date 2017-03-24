@@ -108,15 +108,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ing_meter_set") action ing_meter_set(bit<16> meter_) {
         meta.ingress_metadata.ing_meter = meter_;
     }
-    @name("storm_control") table storm_control() {
+    @name("storm_control") table storm_control {
         actions = {
             no_action();
             ing_meter_set();
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.bd: exact;
-            hdr.ethernet.dstAddr    : ternary;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
+            hdr.ethernet.dstAddr    : ternary @name("hdr.ethernet.dstAddr") ;
         }
         size = 8192;
         default_action = NoAction();

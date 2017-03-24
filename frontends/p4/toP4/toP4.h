@@ -209,6 +209,9 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Property* p) override;
     bool preorder(const IR::TableProperties* t) override;
     bool preorder(const IR::P4Table* c) override;
+
+    // in case it is accidentally called on a V1Program
+    bool preorder(const IR::V1Program*) override { return false; }
 };
 
 }  // namespace P4

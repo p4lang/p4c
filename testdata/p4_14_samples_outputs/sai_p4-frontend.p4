@@ -219,7 +219,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;
     }
-    @name("fdb") table fdb_0() {
+    @name("fdb") table fdb_0 {
         actions = {
             fdb_set_0();
             @default_only NoAction();
@@ -230,7 +230,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("learn_notify") table learn_notify_0() {
+    @name("learn_notify") table learn_notify_0 {
         actions = {
             nop_0();
             generate_learn_notify_0();
@@ -243,7 +243,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("neighbor") table neighbor_0() {
+    @name("neighbor") table neighbor_0 {
         actions = {
             set_dmac_0();
             @default_only NoAction();
@@ -255,7 +255,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("next_hop") table next_hop_0() {
+    @name("next_hop") table next_hop_0 {
         actions = {
             set_next_hop_0();
             @default_only NoAction();
@@ -265,7 +265,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("port") table port_0() {
+    @name("port") table port_0 {
         actions = {
             set_in_port_0();
             @default_only NoAction();
@@ -276,7 +276,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
         @name("port_counters") counters = direct_counter(CounterType.packets);
     }
-    @name("route") table route_0() {
+    @name("route") table route_0 {
         actions = {
             route_set_trap_0();
             route_set_nexthop_0();
@@ -289,7 +289,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("router_interface") table router_interface_0() {
+    @name("router_interface") table router_interface_0 {
         actions = {
             set_router_interface_0();
             router_interface_miss_0();
@@ -300,14 +300,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("switch") table switch_1() {
+    @name("switch") table switch_1 {
         actions = {
             set_switch_0();
             @default_only NoAction();
         }
         default_action = NoAction();
     }
-    @name("virtual_router") table virtual_router_0() {
+    @name("virtual_router") table virtual_router_0 {
         actions = {
             set_router_0();
             @default_only NoAction();
@@ -347,18 +347,31 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
+    bool tmp;
+    bit<16> tmp_0;
+    bool tmp_1;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
     apply {
-        if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.checksum == (ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
+        if (!(hdr.ipv4.ihl == 4w5)) 
+            tmp = false;
+        else {
+            tmp_0 = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+            tmp_1 = hdr.ipv4.checksum == tmp_0;
+            tmp = tmp_1;
+        }
+        if (tmp) 
             mark_to_drop();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
+    bit<16> tmp_2;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
     apply {
-        if (hdr.ipv4.ihl == 4w5) 
-            hdr.ipv4.checksum = ipv4_checksum_1.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        if (hdr.ipv4.ihl == 4w5) {
+            tmp_2 = ipv4_checksum_1.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+            hdr.ipv4.checksum = tmp_2;
+        }
     }
 }
 

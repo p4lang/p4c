@@ -76,7 +76,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("do_setup") action do_setup() {
     }
-    @name("route") table route() {
+    @name("route") table route {
         actions = {
             drop;
             forward;
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("setup") table setup() {
+    @name("setup") table setup {
         actions = {
             do_setup;
             @default_only NoAction;

@@ -39,7 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f3 = v3;
         hdr.data.f4 = v4;
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1_0 {
         actions = {
             noop_0();
             setf1_0();

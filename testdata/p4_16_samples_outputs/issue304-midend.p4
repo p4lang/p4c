@@ -3,7 +3,7 @@ control t(inout bit<32> b) {
         b = b + 32w1;
         b = b + 32w1;
     }
-    table tbl_act() {
+    table tbl_act {
         actions = {
             act();
         }

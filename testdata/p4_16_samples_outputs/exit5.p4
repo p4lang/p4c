@@ -4,7 +4,7 @@ control ctrl() {
     }
     action f() {
     }
-    table t() {
+    table t {
         actions = {
             e;
             f;

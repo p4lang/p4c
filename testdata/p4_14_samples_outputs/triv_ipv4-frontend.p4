@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         standard_metadata.egress_spec = egress_spec;
     }
-    @name("routing") table routing_0() {
+    @name("routing") table routing_0 {
         actions = {
             do_drop_0();
             route_ipv4_0();

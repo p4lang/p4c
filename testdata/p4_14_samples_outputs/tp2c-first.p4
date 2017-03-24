@@ -46,69 +46,69 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setb4") action setb4(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1() {
+    @name("A1") table A1 {
         actions = {
             setb1();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1: ternary @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }
-    @name("A2") table A2() {
+    @name("A2") table A2 {
         actions = {
             setb3();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1: ternary @name("hdr.data.b1") ;
         }
         default_action = NoAction();
     }
-    @name("A3") table A3() {
+    @name("A3") table A3 {
         actions = {
             on_hit();
             on_miss();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
-    @name("A4") table A4() {
+    @name("A4") table A4 {
         actions = {
             on_hit();
             on_miss();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
-    @name("B1") table B1() {
+    @name("B1") table B1 {
         actions = {
             setb2();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
-    @name("B2") table B2() {
+    @name("B2") table B2 {
         actions = {
             setb4();
             noop();
             @default_only NoAction();
         }
         key = {
-            hdr.data.b2: ternary;
+            hdr.data.b2: ternary @name("hdr.data.b2") ;
         }
         default_action = NoAction();
     }
