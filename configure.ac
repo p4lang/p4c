@@ -17,6 +17,8 @@ AC_PROG_RANLIB
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_LANG(C++)
 
+AM_PATH_PYTHON
+
 AC_CHECK_FUNCS([clock_gettime])
 AC_CHECK_FUNCS([memchr])
 AC_CHECK_FUNCS([memrchr])

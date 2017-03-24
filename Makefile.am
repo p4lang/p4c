@@ -41,6 +41,8 @@ noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 check_PROGRAMS =               # Test programs to build
 TESTS =                        # Tests to execute
+bin_SCRIPTS =                  # Scripts built
+EXTRA_DIST =                   # Extra files to distribute
 
 # Variables specific to our build system.
 XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
@@ -58,6 +60,7 @@ p4_14include_HEADERS =		# p4_14 include files
 
 include $(srcdir)/lib/Makefile.am
 include $(srcdir)/tools/ir-generator/Makefile.am
+include $(srcdir)/tools/driver/Makefile.am
 include $(srcdir)/ir/Makefile.am
 include $(srcdir)/frontends/Makefile.am
 include $(srcdir)/midend/Makefile.am
@@ -103,7 +106,13 @@ p4include_HEADERS += $(srcdir)/p4include/core.p4 $(srcdir)/p4include/v1model.p4
 #### For testing, install headers in the build directory
 
 all-local:
-	@$(MAKE) install-data pkgdatadir=$(builddir)
+	@$(MAKE) install-data pkgdatadir=$(abs_builddir)
+
+# install-data-hook runs after other install rules
+# for testing, p4c is regenerated to look up cfg files in build directory
+install-data-hook:
+	@sed -e 's,[@]pkgdatadir[@],$(abs_builddir),g' < $(srcdir)/tools/driver/p4c.in > $(builddir)/p4c
+	@chmod +x $(builddir)/p4c
 
 # FIXME -- should be a way of getting configure to do this automatcially? or automake?
 setup.h: $(srcdir)/setup.h.in Makefile
