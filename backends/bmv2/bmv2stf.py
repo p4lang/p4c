@@ -361,7 +361,7 @@ class RunBMV2(object):
     def filename(self, interface, direction):
         return self.folder + "/" + self.pcapPrefix + str(interface) + "_" + direction + ".pcap"
     def interface_of_filename(self, f):
-        return os.path.basename(f).rstrip('.pcap').lstrip(self.pcapPrefix).rsplit('_', 1)[0]
+        return int(os.path.basename(f).rstrip('.pcap').lstrip(self.pcapPrefix).rsplit('_', 1)[0])
     def do_cli_command(self, cmd):
         if self.options.verbose:
             print(cmd)
@@ -594,26 +594,41 @@ class RunBMV2(object):
             if self.options.observationLog:
                 observationLog = open(self.options.observationLog, 'w')
                 for pkt in packets:
-                    observationLog.write('%s %s\n' % (
+                    observationLog.write('%d %s\n' % (
                         interface,
                         ''.join(ByteToHex(str(pkt)).split()).upper()))
                 observationLog.close()
 
             # Check for expected packets.
             if interface not in self.expected:
+                # This continue can falsely make a test succeed, if the
+                # interface type is not the one stored in expected. We need to
+                # be more careful on declaring success.
+                #
+                # One possible fix is to check for all expected and determine
+                # which file to look into, or, remove the ones we found from the
+                # self.expected list, and return success only if the list is
+                # empty. The latter is what is implemented below.
                 continue
             expected = self.expected[interface]
             if len(expected) != len(packets):
-                reportError("Expected", len(expected), "packets on port", interface,
+                reportError("Expected", len(expected), "packets on port", str(interface),
                             "got", len(packets))
                 self.showLog()
                 return FAILURE
             for i in range(0, len(expected)):
                 cmp = self.comparePacket(expected[i], packets[i])
                 if cmp != SUCCESS:
-                    reportError("Packet", i, "on port", interface, "differs")
+                    reportError("Packet", i, "on port", str(interface), "differs")
                     return FAILURE
-        return SUCCESS
+            # remove successfully checked interfaces
+            del self.expected[interface]
+        if len(self.expected) != 0:
+            # didn't find all the expects we were expecting
+            reportError("Expected packects on ports", self.expected.keys(), "not received")
+            return FAILURE
+        else:
+            return SUCCESS
 
 def run_model(options, tmpdir, jsonfile, testfile):
     bmv2 = RunBMV2(tmpdir, options, jsonfile)
