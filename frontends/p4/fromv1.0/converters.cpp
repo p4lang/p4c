@@ -531,8 +531,8 @@ Converter::Converter() {
 
     // Discover types using P4 v1.1 type-checker
     passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
-    passes.emplace_back(new CheckHeaderTypes);
-    passes.emplace_back(new TypeCheck);
+    passes.emplace_back(new CheckHeaderTypes());
+    passes.emplace_back(new TypeCheck());
     // Convert
     passes.emplace_back(new DiscoverStructure(&structure));
     passes.emplace_back(new ComputeCallGraph(&structure));

@@ -43,8 +43,12 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
     if (mce->method->is<IR::Member>()) {
         auto mem = mce->method->to<IR::Member>();
         auto basetype = typeMap->getType(mem->expr);
-        if (basetype == nullptr && useExpressionType)
-            basetype = mem->expr->type;
+        if (basetype == nullptr) {
+            if (useExpressionType)
+                basetype = mem->expr->type;
+            else
+                BUG("Could not find type for %1%", mem->expr);
+        }
         if (basetype->is<IR::Type_Header>()) {
             if (mem->member == IR::Type_Header::setValid ||
                 mem->member == IR::Type_Header::setInvalid ||
@@ -62,7 +66,8 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
                 decl = refMap->getDeclaration(th, true);
             } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
-                type = typeMap->getType(decl->getNode()); }
+                type = typeMap->getType(decl->getNode());
+            }
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);

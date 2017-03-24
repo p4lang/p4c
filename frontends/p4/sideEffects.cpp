@@ -91,27 +91,28 @@ class DismantleExpression : public Transform {
 
     const IR::Node* preorder(IR::ArrayIndex* expression) override {
         LOG3("Visiting " << dbp(expression));
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap))
-            return expression;
-
         auto type = typeMap->getType(getOriginal(), true);
-        visit(expression->left);
-        auto left = result->final;
-        CHECK_NULL(left);
-        bool save = leftValue;
-        leftValue = false;
-        visit(expression->right);
-        auto right = result->final;
-        CHECK_NULL(right);
-        leftValue = save;
-        if (!right->is<IR::Constant>()) {
-            auto indexType = typeMap->getType(expression->right, true);
-            auto tmp = result->createTemporary(indexType);
-            right = result->addAssignment(tmp, right);
-            typeMap->setType(right, indexType);
-        }
+        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+            result->final = expression;
+        } else {
+            visit(expression->left);
+            auto left = result->final;
+            CHECK_NULL(left);
+            bool save = leftValue;
+            leftValue = false;
+            visit(expression->right);
+            auto right = result->final;
+            CHECK_NULL(right);
+            leftValue = save;
+            if (!right->is<IR::Constant>()) {
+                auto indexType = typeMap->getType(expression->right, true);
+                auto tmp = result->createTemporary(indexType);
+                right = result->addAssignment(tmp, right);
+                typeMap->setType(right, indexType);
+            }
 
-        result->final = new IR::ArrayIndex(expression->srcInfo, left, right);
+            result->final = new IR::ArrayIndex(expression->srcInfo, left, right);
+        }
         typeMap->setType(result->final, type);
         if (leftValue)
             typeMap->setLeftValue(result->final);
@@ -122,25 +123,34 @@ class DismantleExpression : public Transform {
     const IR::Node* preorder(IR::Member* expression) override {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
-        visit(expression->expr);
-        auto left = result->final;
-        CHECK_NULL(left);
-        result->final = new IR::Member(expression->srcInfo, left, expression->member);
+        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+            result->final = expression;
+        } else {
+            visit(expression->expr);
+            auto left = result->final;
+            CHECK_NULL(left);
+            result->final = new IR::Member(expression->srcInfo, left, expression->member);
+            typeMap->setType(result->final, type);
+            if (leftValue)
+                typeMap->setLeftValue(result->final);
+
+            // Special case for table.apply().hit, which is not dismantled by
+            // the MethodCallExpression.
+            if (TableApplySolver::isHit(expression, refMap, typeMap)) {
+                BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
+                auto tmp = result->createTemporary(type);
+                auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
+                auto stat = new IR::AssignmentStatement(Util::SourceInfo(), path, result->final);
+                result->statements->push_back(stat);
+                result->final = path->clone();
+                typeMap->setType(result->final, type);
+            }
+            prune();
+            return result->final;
+        }
         typeMap->setType(result->final, type);
         if (leftValue)
             typeMap->setLeftValue(result->final);
-
-        // Special case for table.apply().hit, which is not dismantled by
-        // the MethodCallExpression.
-        if (TableApplySolver::isHit(expression, refMap, typeMap)) {
-            BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
-            auto tmp = result->createTemporary(type);
-            auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
-            auto stat = new IR::AssignmentStatement(Util::SourceInfo(), path, result->final);
-            result->statements->push_back(stat);
-            result->final = path->clone();
-            typeMap->setType(result->final, type);
-        }
         prune();
         return result->final;
     }
@@ -169,64 +179,67 @@ class DismantleExpression : public Transform {
 
     const IR::Node* preorder(IR::Operation_Binary* expression) override {
         LOG3("Visiting " << dbp(expression));
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap))
-            return expression;
         auto type = typeMap->getType(getOriginal(), true);
-        visit(expression->left);
-        auto left = result->final;
-        CHECK_NULL(left);
-        visit(expression->right);
-        auto right = result->final;
-        auto clone = expression->clone();
-        clone->left = left;
-        clone->right = right;
-        typeMap->setType(clone, type);
-        auto tmp = result->createTemporary(type);
-        auto path = result->addAssignment(tmp, clone);
-        typeMap->setType(path, type);
-        result->final = path;
+        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+            result->final = expression;
+        } else {
+            visit(expression->left);
+            auto left = result->final;
+            CHECK_NULL(left);
+            visit(expression->right);
+            auto right = result->final;
+            auto clone = expression->clone();
+            clone->left = left;
+            clone->right = right;
+            typeMap->setType(clone, type);
+            auto tmp = result->createTemporary(type);
+            auto path = result->addAssignment(tmp, clone);
+            result->final = path;
+        }
+        typeMap->setType(result->final, type);
         prune();
         return result->final;
     }
 
     const IR::Node* shortCircuit(IR::Operation_Binary* expression) {
         LOG3("Visiting " << dbp(expression));
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap))
-            return expression;
         auto type = typeMap->getType(getOriginal(), true);
-        visit(expression->left);
-        auto cond = result->final;
-        CHECK_NULL(cond);
+        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+            result->final = expression;
+        } else {
+            visit(expression->left);
+            auto cond = result->final;
+            CHECK_NULL(cond);
 
-        // e1 && e2
-        // becomes roughly:
-        // if (!simplify(e1))
-        //    tmp = false;
-        // else
-        //    tmp = simplify(e2);
+            // e1 && e2
+            // becomes roughly:
+            // if (!simplify(e1))
+            //    tmp = false;
+            // else
+            //    tmp = simplify(e2);
 
-        bool land = expression->is<IR::LAnd>();
-        auto constant = new IR::BoolLiteral(Util::SourceInfo(), !land);
-        auto tmp = result->createTemporary(type);
-        auto ifTrue = new IR::AssignmentStatement(
-            Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
-        auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
+            bool land = expression->is<IR::LAnd>();
+            auto constant = new IR::BoolLiteral(Util::SourceInfo(), !land);
+            auto tmp = result->createTemporary(type);
+            auto ifTrue = new IR::AssignmentStatement(
+                Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
+            auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
 
-        auto save = result->statements;
-        result->statements = ifFalse;
-        visit(expression->right);
-        auto path = result->addAssignment(tmp, result->final);
-        result->statements = save;
-        if (land) {
-            cond = new IR::LNot(Util::SourceInfo(), cond);
-            typeMap->setType(cond, type);
+            auto save = result->statements;
+            result->statements = ifFalse;
+            visit(expression->right);
+            auto path = result->addAssignment(tmp, result->final);
+            result->statements = save;
+            if (land) {
+                cond = new IR::LNot(Util::SourceInfo(), cond);
+                typeMap->setType(cond, type);
+            }
+            auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, ifFalse);
+            auto ifStatement = new IR::IfStatement(Util::SourceInfo(), cond, ifTrue, block);
+            result->statements->push_back(ifStatement);
+            result->final = path->clone();
         }
-        auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, ifFalse);
-        auto ifStatement = new IR::IfStatement(Util::SourceInfo(), cond, ifTrue, block);
-        result->statements->push_back(ifStatement);
-        result->final = path->clone();
         typeMap->setType(result->final, type);
-
         prune();
         return result->final;
     }
