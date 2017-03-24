@@ -20,6 +20,7 @@ sys.path.insert(1, '@pkgdatadir@')
 os.environ['P4C_CFG_PATH'] = "@pkgdatadir@/p4c_src"
 os.environ['P4C_16_INCLUDE_PATH'] = "@pkgdatadir@/p4include"
 os.environ['P4C_14_INCLUDE_PATH'] = "@pkgdatadir@/p4_14include"
+os.environ['PATH'] += ":@pkgdatadir@"
 
 from p4c_src.main import main
 if __name__ == '__main__':
