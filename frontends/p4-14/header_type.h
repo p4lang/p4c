@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ limitations under the License.
 
 class CheckHeaderTypes : public Modifier {
     const IR::V1Program    *global;
+ public:
+    CheckHeaderTypes() { setName("CheckHeaderTypes"); }
     bool preorder(IR::V1Program *glob) override { global = glob; return true; }
     bool preorder(IR::Metadata *meta) override {
         if (auto type = global->get<IR::v1HeaderType>(meta->type_name))

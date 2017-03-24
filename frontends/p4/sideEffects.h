@@ -136,9 +136,11 @@ class DoSimplifyExpressions : public Transform {
 
 class SideEffectOrdering : public PassManager {
  public:
-    SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
+    SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering) {
+        if (!skipSideEffectOrdering) {
+            passes.push_back(new TypeChecking(refMap, typeMap));
+            passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
+        }
         setName("SideEffectOrdering");
     }
 };
