@@ -1386,7 +1386,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
     }
 
     // Save the original action name in an annotation.
-    // The leading dot indicates a global annotation
+    // The leading dot indicates a global action
     auto annos = addNameAnnotation(cstring(".") + action->name, action->annotations);
     auto result = new IR::P4Action(
         action->srcInfo, newName, annos, new IR::ParameterList(params),
