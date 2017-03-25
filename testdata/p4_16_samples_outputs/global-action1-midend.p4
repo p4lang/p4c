@@ -1,5 +1,5 @@
 control c() {
-    @name("Global_1") action Global() {
+    @name(".Global") action Global() {
     }
     @name("t") table t {
         actions = {

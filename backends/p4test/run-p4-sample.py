@@ -26,6 +26,7 @@ import tempfile
 import shutil
 import difflib
 import subprocess
+import glob
 
 SUCCESS = 0
 FAILURE = 1
@@ -169,8 +170,8 @@ def process_file(options, argv):
 
     # We rely on the fact that these keys are in alphabetical order.
     rename = { "FrontEnd_12_SimplifyControlFlow": "first",
-               "FrontEnd_27_FrontEndLast": "frontend",
-               "MidEnd_34_Evaluator": "midend" }
+               "FrontEndLast": "frontend",
+               "MidEndLast": "midend" }
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
@@ -211,11 +212,15 @@ def process_file(options, argv):
     lastFile = None
 
     for k in sorted(rename.keys()):
-        file = file_name(tmpdir, base, k, ext)
-        if os.path.isfile(file):
-            newName = file_name(tmpdir, base, rename[k], ext)
-            os.rename(file, newName)
-            lastFile = newName
+        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4");
+        if len(files) > 1:
+            print("Multiple files matching", k);
+        elif len(files) == 1:
+            file = files[0]
+            if os.path.isfile(file):
+                newName = file_name(tmpdir, base, rename[k], ext)
+                os.rename(file, newName)
+                lastFile = newName
 
     if (result == SUCCESS):
         result = check_generated_files(options, tmpdir, expected_dirname);

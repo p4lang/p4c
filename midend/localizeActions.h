@@ -139,7 +139,7 @@ class DuplicateActions : public Transform {
 // Add a @name annotation on each global action that does not have one
 class TagGlobalActions : public Transform {
  public:
-    TagGlobalActions() = default;
+    TagGlobalActions() { setName("TagGlobalActions"); }
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::P4Parser* parser) override
     { prune(); return parser; }

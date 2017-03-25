@@ -51,6 +51,7 @@ limitations under the License.
 #include "midend/predication.h"
 #include "midend/expandLookahead.h"
 #include "midend/tableHit.h"
+#include "midend/midEndLast.h"
 
 namespace BMV2 {
 
@@ -186,7 +187,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new P4::MidEndLast()
     });
 }
 

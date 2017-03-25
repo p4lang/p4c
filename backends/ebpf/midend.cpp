@@ -30,6 +30,7 @@ limitations under the License.
 #include "midend/eliminateTuples.h"
 #include "midend/noMatch.h"
 #include "midend/convertEnums.h"
+#include "midend/midEndLast.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeMap.h"
@@ -115,6 +116,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ValidateTableProperties({"implementation"}),
         evaluator,
+        new P4::MidEndLast()
     };
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);

@@ -15,7 +15,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     standard_metadata_t smeta_1;
-    @name("drop_1") action drop_0() {
+    @name(".drop") action drop_0() {
         smeta_1.drop = 1w1;
         smeta.ingress_port = smeta_1.ingress_port;
         smeta.egress_spec = smeta_1.egress_spec;

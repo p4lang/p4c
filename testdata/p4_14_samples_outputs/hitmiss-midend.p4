@@ -86,7 +86,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_5();
     }
     action act() {
-        tmp_0 = test1.apply().hit;
+        tmp_0 = true;
+    }
+    action act_0() {
+        tmp_0 = false;
     }
     table tbl_act {
         actions = {
@@ -94,8 +97,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         const default_action = act();
     }
+    table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
     apply {
-        tbl_act.apply();
+        if (test1.apply().hit) 
+            tbl_act.apply();
+        else 
+            tbl_act_0.apply();
         if (tmp_0) 
             test2.apply();
         else 

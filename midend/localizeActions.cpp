@@ -50,7 +50,6 @@ const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
     return action;
 }
 
-
 bool FindGlobalActionUses::preorder(const IR::P4Action* action) {
     if (findContext<IR::P4Control>() == nullptr)
         globalActions.emplace(action);

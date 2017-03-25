@@ -65,6 +65,7 @@ noinst_HEADERS += \
 	midend/validateProperties.h \
 	midend/expandLookahead.h \
 	midend/noMatch.h \
-	midend/tableHit.h
+	midend/tableHit.h \
+	midend/midEndLast.h
 
 cpplint_FILES += $(midend_UNIFIED) $(midend_NONUNIFIED)

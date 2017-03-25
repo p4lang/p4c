@@ -57,9 +57,9 @@ struct tuple_0 {
 control VerifyChecksumI(in H hdr, inout M meta) {
     bit<16> tmp_3;
     bit<16> tmp_4;
-    @name("drop_1") action drop_0() {
+    @name(".drop") action drop_0() {
     }
-    @name("drop_2") action drop_3() {
+    @name(".drop") action drop_3() {
     }
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
