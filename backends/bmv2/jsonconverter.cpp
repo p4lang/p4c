@@ -1353,7 +1353,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                             Util::JsonArray* counters,
                             Util::JsonArray* action_profiles) {
     auto table = node->table;
-    LOG1("Processing " << table);
+    LOG3("Processing " << dbp(table));
     auto result = new Util::JsonObject();
     cstring name = table->externalName();
     result->emplace("name", name);
@@ -1454,14 +1454,50 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     result->emplace("max_size", size);
     auto ctrs = table->properties->getProperty(v1model.tableAttributes.directCounter.name);
     if (ctrs != nullptr) {
-        result->emplace("with_counters", true);
-        auto jctr = new Util::JsonObject();
-        cstring ctrname = ctrs->externalName("counter");
-        jctr->emplace("name", ctrname);
-        jctr->emplace("id", nextId("counter_arrays"));
-        jctr->emplace("is_direct", true);
-        jctr->emplace("binding", name);
-        counters->append(jctr);
+        if (ctrs->value->is<IR::ExpressionValue>()) {
+            auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
+            if (expr->is<IR::ConstructorCallExpression>()) {
+                auto type = typeMap->getType(expr, true);
+                if (type == nullptr)
+                    return result;
+                if (!type->is<IR::Type_Extern>()) {
+                    ::error("%1%: Unexpected type %2% for property", ctrs, type);
+                    return result;
+                }
+                auto te = type->to<IR::Type_Extern>();
+                if (te->name != v1model.directCounter.name && te->name != v1model.counter.name) {
+                    ::error("%1%: Unexpected type %2% for property", ctrs, type);
+                    return result;
+                }
+                result->emplace("with_counters", true);
+                auto jctr = new Util::JsonObject();
+                cstring ctrname = ctrs->externalName("counter");
+                jctr->emplace("name", ctrname);
+                jctr->emplace("id", nextId("counter_arrays"));
+                bool direct = te->name == v1model.directCounter.name;
+                jctr->emplace("is_direct", direct);
+                jctr->emplace("binding", name);
+                counters->append(jctr);
+            } else if (expr->is<IR::PathExpression>()) {
+                auto pe = expr->to<IR::PathExpression>();
+                auto decl = refMap->getDeclaration(pe->path, true);
+                if (!decl->is<IR::Declaration_Instance>()) {
+                    ::error("%1%: expected an instance", decl->getNode());
+                    return result;
+                }
+                cstring ctrname = decl->externalName();
+                auto it = directCountersMap.find(ctrname);
+                LOG3("Looking up " << ctrname);
+                if (it != directCountersMap.end()) {
+                    ::error("%1%: Direct cannot be attached to multiple tables %2% and %3%",
+                            decl, it->second, table);
+                    return result;
+                }
+                directCountersMap.emplace(ctrname, table);
+            } else {
+                ::error("%1%: expected a counter", ctrs);
+            }
+        }
     } else {
         result->emplace("with_counters", false);
     }
@@ -1491,15 +1527,31 @@ JsonConverter::convertTable(const CFG::TableNode* node,
             } else {
                 auto pe = expr->to<IR::PathExpression>();
                 auto decl = refMap->getDeclaration(pe->path, true);
+                auto type = typeMap->getType(expr, true);
+                if (type == nullptr)
+                    return result;
+                if (type->is<IR::Type_SpecializedCanonical>())
+                    type = type->to<IR::Type_SpecializedCanonical>()->baseType;
+                if (!type->is<IR::Type_Extern>()) {
+                    ::error("%1%: Unexpected type %2% for property", dm, type);
+                    return result;
+                }
+                auto te = type->to<IR::Type_Extern>();
+                if (te->name != v1model.directMeter.name) {
+                    ::error("%1%: Unexpected type %2% for property", dm, type);
+                    return result;
+                }
+                if (!decl->is<IR::Declaration_Instance>()) {
+                    ::error("%1%: expected an instance", decl->getNode());
+                    return result;
+                }
                 meterMap.setTable(decl, table);
                 meterMap.setSize(decl, size);
-                BUG_CHECK(decl->is<IR::Declaration_Instance>(),
-                          "%1%: expected an instance", decl->getNode());
                 cstring name = decl->externalName();
                 result->emplace("direct_meters", name);
             }
         } else {
-            ::error("%1%: expected a Boolean", timeout);
+            ::error("%1%: expected a meter", dm);
         }
     } else {
         result->emplace("direct_meters", Util::JsonValue::null);
@@ -1645,7 +1697,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     userMetadataParameter = cont->type->applyParams->getParameter(
         v1model.ingress.metadataParam.index);
 
-    LOG1("Processing " << cont);
+    LOG3("Processing " << dbp(cont));
     auto result = new Util::JsonObject();
     result->emplace("name", name);
     result->emplace("id", nextId("control"));
@@ -1668,6 +1720,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     SharedActionSelectorCheck selector_check(this);
     block->apply(selector_check);
 
+    // Tables are created prior to the other local declarations
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
             auto j = convertTable(node->to<CFG::TableNode>(), counters, action_profiles);
@@ -1746,6 +1799,20 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                         ::error("%1%: unknown width", st->arguments->at(0));
                     jreg->emplace("bitwidth", width);
                     registers->append(jreg);
+                    continue;
+                } else if (eb->type->name == v1model.directCounter.name) {
+                    auto it = directCountersMap.find(name);
+                    if (it == directCountersMap.end()) {
+                        ::warning("%1%: Direct counter not used; ignoring", c);
+                    } else {
+                        auto jctr = new Util::JsonObject();
+                        LOG3("Created direct counter " << name);
+                        jctr->emplace("name", name);
+                        jctr->emplace("id", nextId("counter_arrays"));
+                        jctr->emplace("is_direct", true);
+                        jctr->emplace("binding", it->second->externalName());
+                        counters->append(jctr);
+                    }
                     continue;
                 } else if (eb->type->name == v1model.directMeter.name) {
                     auto info = meterMap.getInfo(c);
@@ -1832,7 +1899,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         if (stack == nullptr)
             continue;
 
-        LOG1("Creating " << stack);
+        LOG3("Creating " << stack);
         auto json = new Util::JsonObject();
         json->emplace("name", f->externalName());
         json->emplace("id", nextId("stack"));
@@ -1863,15 +1930,11 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
 void JsonConverter::addLocals() {
     // We synthesize a "header_type" for each local which has a struct type
     // and we pack all the scalar-typed locals into a scalarsStruct
-    scalarsStruct = new Util::JsonObject();
-    scalarsName = refMap->newName("scalars");
-    scalarsStruct->emplace("name", scalarsName);
-    scalarsStruct->emplace("id", nextId("header_types"));
-    scalars_width = 0;
-    auto scalarFields = mkArrayField(scalarsStruct, "fields");
+    auto scalarFields = scalarsStruct->get("fields")->to<Util::JsonArray>();
+    CHECK_NULL(scalarFields);
 
     for (auto v : structure.variables) {
-        LOG1("Creating local " << v);
+        LOG3("Creating local " << v);
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto name = createJsonType(st);
@@ -2019,6 +2082,13 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     (void)nextId("field_lists");  // field list IDs must start at 1; 0 is reserved
     (void)nextId("learn_lists");  // idem
 
+    scalarsStruct = new Util::JsonObject();
+    scalarsName = refMap->newName("scalars");
+    scalarsStruct->emplace("name", scalarsName);
+    scalarsStruct->emplace("id", nextId("header_types"));
+    scalars_width = 0;
+    auto scalarFields = mkArrayField(scalarsStruct, "fields");
+
     headerTypesCreated.clear();
     addTypesAndInstances(ht, false);
     addHeaderStacks(ht);
@@ -2035,6 +2105,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
         ::error("Expected metadata %1% to be a struct", mdType);
         return;
     }
+
     addLocals();
     addTypesAndInstances(mt, true);
     padScalars();
@@ -2526,7 +2597,7 @@ unsigned JsonConverter::combine(const IR::Expression* keySet,
                 mask = Util::shift_left(mask, w) + mask_value;
                 noMask = false;
             }
-            LOG1("Shifting " << " into key " << key_value << " &&& " << mask_value <<
+            LOG3("Shifting " << " into key " << key_value << " &&& " << mask_value <<
                  " result is " << value << " &&& " << mask);
             index++;
         }

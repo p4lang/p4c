@@ -65,6 +65,7 @@ class JsonConverter final {
     const IR::ToplevelBlock* toplevelBlock;
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
+    std::map<cstring, const IR::P4Table*> directCountersMap;  // map counter name to table
     const IR::Parameter*   headerParameter;
     const IR::Parameter*   userMetadataParameter;
     const IR::Parameter*   stdMetadataParameter;

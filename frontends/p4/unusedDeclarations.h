@@ -25,9 +25,10 @@ namespace P4 {
 class RemoveUnusedDeclarations : public Transform {
     const ReferenceMap* refMap;
     const IR::Node* process(const IR::IDeclaration* decl);
+    bool warn;
 
  public:
-    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap) : refMap(refMap)
+    RemoveUnusedDeclarations(const ReferenceMap* refMap, bool warn) : refMap(refMap), warn(warn)
     { setName("RemoveUnusedDeclarations"); }
 
     using Transform::postorder;
@@ -42,9 +43,9 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::ParserState* state)  override;
     const IR::Node* preorder(IR::Type_Enum* type)  override;
 
-    const IR::Node* preorder(IR::Declaration_Instance* decl) override
-    // don't scan the initializer
-    { auto result = process(decl); prune(); return result; }
+    const IR::Node* preorder(IR::Declaration_Instance* decl) override;
+
+    // Do not delete the following even if unused
     const IR::Node* preorder(IR::Type_Error* type) override
     { prune(); return type; }
     const IR::Node* preorder(IR::Declaration_MatchKind* decl) override
@@ -65,12 +66,12 @@ class RemoveUnusedDeclarations : public Transform {
 // Iterates RemoveUnusedDeclarations until convergence.
 class RemoveAllUnusedDeclarations : public PassManager {
  public:
-    explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap) {
+    explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool warn = false) {
         CHECK_NULL(refMap);
         passes.emplace_back(
             new PassRepeated {
                 new ResolveReferences(refMap),
-                new RemoveUnusedDeclarations(refMap)
+                new RemoveUnusedDeclarations(refMap, warn)
              });
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);

@@ -184,7 +184,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new RemoveExpressionsFromSelects(&refMap, &typeMap),
         new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveUnusedDeclarations(&refMap),
+        new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
     });

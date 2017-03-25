@@ -16,8 +16,7 @@ limitations under the License.
 
 #include <core.p4>
 
-extern Crc16 <T>
-{
+extern Crc16 <T> {
         Crc16();
         Crc16(in int<32> x);
         void initialize<U>(in U input_data);
@@ -28,8 +27,7 @@ extern Crc16 <T>
         );
 }
 
-control p()
-{
+control p() {
     Crc16<bit<32>>() crc0;
     Crc16<int<32>>(32s0) crc1;
     Crc16<int<32>>()  crc2;
