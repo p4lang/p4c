@@ -36,6 +36,21 @@ class ParamCloner : public ClonePathExpressions {
 
 }  // namespace
 
+const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
+    if (findContext<IR::P4Control>() == nullptr) {
+        auto annos = action->annotations;
+        if (annos == nullptr)
+            annos = IR::Annotations::empty;
+        cstring name = cstring(".") + action->name;
+        annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                          new IR::StringLiteral(Util::SourceInfo(), name));
+        action->annotations = annos;
+    }
+    prune();
+    return action;
+}
+
+
 bool FindGlobalActionUses::preorder(const IR::P4Action* action) {
     if (findContext<IR::P4Control>() == nullptr)
         globalActions.emplace(action);
