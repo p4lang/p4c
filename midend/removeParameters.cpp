@@ -76,8 +76,7 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
-const IR::Node* DoRemoveActionParameters::preorder(IR::EntriesList *list)
-{
+const IR::Node* DoRemoveActionParameters::preorder(IR::EntriesList *list) {
     prune();
     return list;
 }

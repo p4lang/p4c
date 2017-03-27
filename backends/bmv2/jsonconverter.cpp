@@ -1235,76 +1235,79 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
 
 */
 void JsonConverter::convertTableEntries(const IR::P4Table *table,
-                                        Util::JsonObject *jsonTable)
-{
+                                        Util::JsonObject *jsonTable) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
 
     auto entries = mkArrayField(jsonTable, "entries");
-    int entryPriority = 1; // priority is defined by index position
+    int entryPriority = 1;  // priority is defined by index position
     for (auto e : *entriesList->entries) {
         auto entry = new Util::JsonObject();
 
         auto keyset = e->getKeys();
         auto matchKeys = mkArrayField(entry, "match_key");
         int keyIndex = 0;
-        for (auto k: *keyset->components) {
+        for (auto k : *keyset->components) {
             auto key = new Util::JsonObject();
             auto tableKey = table->getKey()->keyElements->at(keyIndex);
             unsigned keyWidth = tableKey->expression->type->width_bits();
+            auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
             key->emplace("match_type", matchType);
             if (matchType == "valid") {
-                if(k->is<IR::BoolLiteral>())
+                if (k->is<IR::BoolLiteral>())
                     key->emplace("key", k->to<IR::BoolLiteral>()->toString());
                 else
                     ::error("%1% invalid 'valid' key expression", k);
             } else if (matchType == corelib.exactMatch.name) {
-                if(k->is<IR::Constant>())
-                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
+                if (k->is<IR::Constant>())
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                 else
                     ::error("%1% invalid exact key expression", k);
             } else if (matchType == corelib.ternaryMatch.name) {
                 if (k->is<IR::Mask>()) {
-                    key->emplace("key", stringRepr(k->to<IR::Mask>()->left->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
-                    key->emplace("mask", stringRepr(k->to<IR::Mask>()->right->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
+                    auto km = k->to<IR::Mask>();
+                    key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", stringRepr(km->right->to<IR::Constant>()->value, k8));
                 } else if (k->is<IR::Constant>()) {
-                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                     unsigned long mask = (1ULL << keyWidth)-1;
-                    key->emplace("mask", stringRepr(mask, ROUNDUP(keyWidth, 8)));
+                    key->emplace("mask", stringRepr(mask, k8));
                 } else if (k->is<IR::DefaultExpression>()) {
-                    key->emplace("key", stringRepr(0, ROUNDUP(keyWidth, 8)));
-                    key->emplace("mask", stringRepr(0, ROUNDUP(keyWidth, 8)));
+                    key->emplace("key", stringRepr(0, k8));
+                    key->emplace("mask", stringRepr(0, k8));
                 } else {
                     ::error("%1% invalid ternary key expression", k);
                 }
             } else if (matchType == corelib.lpmMatch.name) {
                 if (k->is<IR::Mask>()) {
-                    key->emplace("key", stringRepr(k->to<IR::Mask>()->left->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
+                    auto km = k->to<IR::Mask>();
+                    key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
                     auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
-                    auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0; };
-                    unsigned long mask = k->to<IR::Mask>()->right->to<IR::Constant>()->value.get_ui();
+                    auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
+                    unsigned long mask = km->right->to<IR::Constant>()->value.get_ui();
                     auto len = trailing_zeros(mask);
-                    if(len + count_ones(mask) != keyWidth) // any remaining 0s in the prefix?
+                    if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
                         ::error("%1% invalid mask for LPM key", k);
                     else
                         key->emplace("prefix_length", keyWidth - len);
                 } else if (k->is<IR::Constant>()) {
-                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                     key->emplace("prefix_length", keyWidth);
                 } else if (k->is<IR::DefaultExpression>()) {
-                    key->emplace("key", stringRepr(0, ROUNDUP(keyWidth, 8)));
+                    key->emplace("key", stringRepr(0, k8));
                     key->emplace("prefix_length", 0);
                 } else {
                     ::error("%1% invalid LPM key expression", k);
                 }
             } else if (matchType == "range") {
                 if (k->is<IR::Range>()) {
-                    key->emplace("start", stringRepr(k->to<IR::Range>()->left->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
-                    key->emplace("end", stringRepr(k->to<IR::Range>()->right->to<IR::Constant>()->value, ROUNDUP(keyWidth, 8)));
+                    auto kr = k->to<IR::Range>();
+                    key->emplace("start", stringRepr(kr->left->to<IR::Constant>()->value, k8));
+                    key->emplace("end", stringRepr(kr->right->to<IR::Constant>()->value, k8));
                 } else if (k->is<IR::DefaultExpression>()) {
-                    key->emplace("start", stringRepr(0, ROUNDUP(keyWidth, 8)));
-                    key->emplace("end", stringRepr((1<<keyWidth)-1, ROUNDUP(keyWidth, 8))); // 2^N -1
+                    key->emplace("start", stringRepr(0, k8));
+                    key->emplace("end", stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
                 } else {
                     ::error("%1% invalid range key expression", k);
                 }
@@ -1325,24 +1328,25 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
         unsigned id = get(structure.ids, actionDecl);
         action->emplace("action_id", id);
         auto actionData = mkArrayField(action, "action_data");
-        for (auto arg: *actionCall->arguments) {
+        for (auto arg : *actionCall->arguments) {
             actionData->append(stringRepr(arg->to<IR::Constant>()->value, 0));
         }
         entry->emplace("action_entry", action);
 
         if (e->getAnnotations() != IR::Annotations::empty) {
-            for (auto p: e->getAnnotations()->annotations) {
+            for (auto p : e->getAnnotations()->annotations) {
                 if (p->name == "priority") {
                     if (p->expr.size() > 1)
                         ::error("invalid priority value %1%", p->expr);
                     auto priValue = p->expr.front();
-                    if (! priValue->is<IR::Constant>())
+                    if ( !priValue->is<IR::Constant>())
                         ::error("invalid priority value %1%. must be constant", p->expr);
                     entry->emplace("priority", priValue->to<IR::Constant>()->value);
                 }
             }
-        } else
+        } else {
             entry->emplace("priority", entryPriority);
+        }
         entryPriority += 1;
 
         entries->append(entry);
@@ -1488,8 +1492,7 @@ If the key expression invokes .isValid(), we return "valid".
 @param ke A table match key element
 @return the key type
 */
-cstring JsonConverter::getKeyMatchType(const IR::KeyElement *ke)
-{
+cstring JsonConverter::getKeyMatchType(const IR::KeyElement *ke) {
     auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
     auto expr = ke->expression;
@@ -1514,8 +1517,7 @@ cstring JsonConverter::getKeyMatchType(const IR::KeyElement *ke)
 Util::IJson*
 JsonConverter::convertTable(const CFG::TableNode* node,
                             Util::JsonArray* counters,
-                            Util::JsonArray* action_profiles)
-{
+                            Util::JsonArray* action_profiles) {
     auto table = node->table;
     LOG3("Processing " << dbp(table));
     auto result = new Util::JsonObject();
@@ -1541,9 +1543,11 @@ JsonConverter::convertTable(const CFG::TableNode* node,
             if (match_type != table_match_type) {
                 if (match_type == v1model.rangeMatchType.name)
                     table_match_type = v1model.rangeMatchType.name;
-                if (match_type == corelib.ternaryMatch.name && table_match_type != v1model.rangeMatchType.name)
+                if (match_type == corelib.ternaryMatch.name &&
+                    table_match_type != v1model.rangeMatchType.name)
                     table_match_type = corelib.ternaryMatch.name;
-                if (match_type == corelib.lpmMatch.name && table_match_type == corelib.exactMatch.name)
+                if (match_type == corelib.lpmMatch.name &&
+                    table_match_type == corelib.exactMatch.name)
                     table_match_type = corelib.lpmMatch.name;
             } else if (match_type == corelib.lpmMatch.name) {
                 ::error("%1%, Multiple LPM keys in table", table);
@@ -1566,7 +1570,8 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                 mask = Util::maskFromSlice(h, l);
             }
             if (match_type == "valid") {
-                auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
+                auto mt = refMap->getDeclaration(ke->matchType->path, true)
+                          ->to<IR::Declaration_ID>();
                 if (expr->is<IR::MethodCallExpression>()) {
                     auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
                                                           refMap, typeMap);
@@ -1578,7 +1583,8 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                                                       "$valid$");
                                 typeMap->setType(expr, expr->type);
                                 match_type = corelib.ternaryMatch.name;
-                                if (match_type != table_match_type && table_match_type != v1model.rangeMatchType.name)
+                                if (match_type != table_match_type &&
+                                    table_match_type != v1model.rangeMatchType.name)
                                     table_match_type = corelib.ternaryMatch.name;
                             } else {
                                 expr = bim->appliedTo; }}}}

@@ -75,12 +75,13 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
                 t->name, IR::TableProperties::defaultActionPropertyName);
 
     auto entriesList = t->getEntries();
-    if (entriesList != nullptr) { // list of entries is optional
+    if (entriesList != nullptr) {  // list of entries is optional
         for (auto e : *entriesList->entries) {
             auto keyset = e->getKeys();
             if (keyset == nullptr || !keyset->is<IR::ListExpression>())
                 ::error("%1%: key expression must be tuple", keyset);
-            else if (keyset->to<IR::ListExpression>()->components->size() < t->getKey()->keyElements->size())
+            else if (keyset->to<IR::ListExpression>()->components->size() <
+                     t->getKey()->keyElements->size())
                 ::error("%1%: Size of entry keyset must match the table key set size", keyset);
             auto actionRef = e->getAction();
             if (!actionRef->expression->is<IR::MethodCallExpression>())
@@ -88,7 +89,7 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
             auto actionCall = actionRef->expression->to<IR::MethodCallExpression>();
             auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
             bool found = false;
-            for (auto ale: *ac->actionList) {
+            for (auto ale : *ac->actionList) {
                 auto expr = ale->expression;
                 if (expr->is<IR::MethodCallExpression>())
                     expr = expr->to<IR::MethodCallExpression>()->method;
