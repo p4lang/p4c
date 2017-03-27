@@ -825,7 +825,7 @@ actionRef
 entry
     : optAnnotations keysetExpression ':' actionRef
                                          { if($2->is<IR::ListExpression>())
-                                             $$ = new IR::Entry(@1+@4, $1, $2, $4);
+                                             $$ = new IR::Entry(@1+@4, $1, $2->to<IR::ListExpression>(), $4);
                                            else { // if not a tuple, make it a list of 1
                                              auto le = new IR::Vector<IR::Expression>();
                                              le->push_back($2);

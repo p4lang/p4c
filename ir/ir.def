@@ -213,11 +213,11 @@ class Key : PropertyValue {
 /// Pre-defined entry in a table
 class Entry : IAnnotated {
     Annotations         annotations;  /// annotations are optional (supported annotations: @priority(value))
-    Expression          keys;         /// must be a tuple expression
+    ListExpression      keys;         /// must be a tuple expression
     ActionListElement   action;       /// action must be defined in action list
 
     Annotations getAnnotations() const override { return annotations; }
-    Expression  getKeys() const { return keys; }
+    ListExpression  getKeys() const { return keys; }
     ActionListElement getAction() const { return action; }
     dbprint { out << annotations << keys << action; }
 }

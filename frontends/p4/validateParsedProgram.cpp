@@ -88,11 +88,16 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
             auto actionCall = actionRef->expression->to<IR::MethodCallExpression>();
             auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
             bool found = false;
-            for (auto ale: *ac->actionList)
-                if (ale->expression->to<IR::PathExpression>()->path->name == actionName) {
+            for (auto ale: *ac->actionList) {
+                auto expr = ale->expression;
+                if (expr->is<IR::MethodCallExpression>())
+                    expr = expr->to<IR::MethodCallExpression>()->method;
+                if (expr->is<IR::PathExpression>() &&
+                    expr->to<IR::PathExpression>()->path->name == actionName) {
                     found = true;
                     break;
                 }
+            }
             if (!found)
                 ::error("%1%: action not in the table action list", actionRef);
         }
