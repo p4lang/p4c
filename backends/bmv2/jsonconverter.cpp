@@ -1245,7 +1245,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
     for (auto e : *entriesList->entries) {
         auto entry = new Util::JsonObject();
 
-        auto keyset = e->getKeys()->to<IR::ListExpression>();
+        auto keyset = e->getKeys();
         auto matchKeys = mkArrayField(entry, "match_key");
         int keyIndex = 0;
         for (auto k: *keyset->components) {

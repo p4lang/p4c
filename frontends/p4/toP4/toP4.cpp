@@ -1176,6 +1176,36 @@ bool ToP4::preorder(const IR::TableProperties* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::EntriesList *l) {
+    dump(1);
+    // if (l->isConstant)
+    //     builder.append("const ");
+    builder.append("{");
+    builder.newline();
+    builder.increaseIndent();
+    visit(l->entries);
+    builder.decreaseIndent();
+    builder.emitIndent();
+    builder.append("}");
+    builder.newline();
+    return false;
+}
+
+bool ToP4::preorder(const IR::Entry *e) {
+    builder.emitIndent();
+    visit(e->annotations);
+    if (e->keys->components->size() == 1)
+        setListTerm("", "");
+    else
+        setListTerm("(", ")");
+    visit(e->keys);
+    builder.append(" : ");
+    visit(e->action);
+    builder.append(";");
+    builder.newline();
+    return false;
+}
+
 bool ToP4::preorder(const IR::P4Table* c) {
     dump(2);
     visit(c->annotations);
