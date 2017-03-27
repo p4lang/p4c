@@ -1315,7 +1315,7 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
 }
 
 const IR::Node* TypeInference::postorder(IR::EntriesList* l) {
-    if(readOnly) return getOriginal();
+    if (readOnly) return getOriginal();
     return l;
 }
 
@@ -2151,7 +2151,8 @@ TypeInference::actionCall(bool inActionList,
         LOG2("Action parameter " << dbp(p));
         if (it == arguments->end()) {
             params->push_back(p);
-            if(findContext<IR::EntriesList>() == nullptr) {// no checking for table entries entries
+            if (findContext<IR::EntriesList>() == nullptr) {
+                // no checking for table entries entries
                 if ((p->direction != IR::Direction::None) || !inActionList)
                     typeError("%1%: parameter %2% must be bound", actionCall, p);
             }

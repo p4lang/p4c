@@ -782,9 +782,13 @@ tableProperty
                                            auto id = IR::ID(@1, "actions");
                                            $$ = new IR::Property(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
-    | ENTRIES '=' '{' entriesList '}' { auto l = new IR::EntriesList(@4, $4); /* \todo: force CONST entries? conflicts with next rule */
+    /* \todo: force CONST entries? conflicts with next rule */
+
+    | ENTRIES '=' '{' entriesList '}' { auto l = new IR::EntriesList(@4, $4);
                                               auto id = IR::ID(@1+@5, "entries");
-                                              $$ = new IR::Property(@1, id, IR::Annotations::empty, l, false); }
+                                              $$ = new IR::Property(@1, id,
+                                                                    IR::Annotations::empty,
+                                                                    l, false); }
     | optAnnotations CONST IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@5, $5);
                                             auto id = IR::ID(@3, $3);
@@ -824,12 +828,15 @@ actionRef
 
 entry
     : optAnnotations keysetExpression ':' actionRef
-                                         { if($2->is<IR::ListExpression>())
-                                             $$ = new IR::Entry(@1+@4, $1, $2->to<IR::ListExpression>(), $4);
-                                           else { // if not a tuple, make it a list of 1
+                                         { if ($2->is<IR::ListExpression>())
+                                             $$ = new IR::Entry(@1+@4, $1,
+                                                                $2->to<IR::ListExpression>(), $4);
+                                           else {  // if not a tuple, make it a list of 1
                                              auto le = new IR::Vector<IR::Expression>();
                                              le->push_back($2);
-                                             $$ = new IR::Entry(@1+@4, $1, new IR::ListExpression(@2, le), $4);
+                                             $$ = new IR::Entry(@1+@4, $1,
+                                                                new IR::ListExpression(@2, le),
+                                                                $4);
                                            }
                                          }
     ;
