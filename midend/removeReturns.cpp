@@ -132,7 +132,8 @@ const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
             ret = r;
         }
     }
-    set(ret);
+    if (!stack.empty())
+        set(ret);
     prune();
     return new IR::BlockStatement(statement->srcInfo, statement->annotations, body);
 }
@@ -311,7 +312,8 @@ const IR::Node* DoRemoveExits::preorder(IR::BlockStatement* statement) {
             ret = r;
         }
     }
-    set(ret);
+    if (!stack.empty())
+        set(ret);
     prune();
     return new IR::BlockStatement(statement->srcInfo, statement->annotations, body);
 }
