@@ -1,9 +1,9 @@
-../testdata/p4_16_errors/issue-401.p4(27): error: cast: Cannot unify Tuple(1) to bit<1>
+../testdata/p4_16_errors/issue401.p4(27): error: cast: Cannot unify Tuple(1) to bit<1>
     bit<1> b = (bit<1>) { 0 };
                ^^^^^^^^^^^^^^
-../testdata/p4_16_errors/issue-401.p4(27): error: cast: Illegal cast from Tuple(1) to bit<1>
+../testdata/p4_16_errors/issue401.p4(27): error: cast: Illegal cast from Tuple(1) to bit<1>
     bit<1> b = (bit<1>) { 0 };
                ^^^^^^^^^^^^^^
-../testdata/p4_16_errors/issue-401.p4(27)
+../testdata/p4_16_errors/issue401.p4(27)
     bit<1> b = (bit<1>) { 0 };
                         ^^^^^
