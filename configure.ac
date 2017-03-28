@@ -62,9 +62,11 @@ AC_COMPILE_IFELSE(
 [CLANG=yes], [CLANG=no])
 AC_MSG_RESULT([$CLANG])
 
+EXTRA_WARNING_FLAGS=""
 if test "x$CLANG" = "xyes"; then
-   CXXFLAGS="$CXXFLAGS -Wno-deprecated-register -Wuninitialized -Wsometimes-uninitialized"
+  EXTRA_WARNING_FLAGS="-Wno-deprecated-register -Wuninitialized -Wsometimes-uninitialized"
 fi
+AC_SUBST([EXTRA_WARNING_FLAGS])
 
 PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 3.0.0])
 AC_SUBST([PROTOBUF_CFLAGS])

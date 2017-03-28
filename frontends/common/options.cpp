@@ -95,7 +95,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
     registerOption("--p4runtime-as-json", nullptr,
-                   [this](const char* arg) { p4RuntimeAsJson = true; return true; },
+                   [this](const char*) { p4RuntimeAsJson = true; return true; },
                    "Write out the P4Runtime API description as human-readable JSON.");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },

@@ -196,7 +196,6 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
 
 // bottom up type inferencing -- set the types of expression nodes based on operands
 class TypeCheck::InferExpressionsBottomUp : public Modifier {
-    TypeCheck           &self;
     void setType(IR::Expression* currentNode, const IR::Type* type) {
         BUG_CHECK(currentNode == getCurrentNode<IR::Expression>(),
                   "Expected to be called on the visitor's current node");
@@ -241,9 +240,6 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
         setType(op, IR::Type::Boolean::get()); }
     void postorder(IR::Operation_Relation *op) override {
         setType(op, IR::Type::Boolean::get()); }
-
- public:
-    explicit InferExpressionsBottomUp(TypeCheck &s) : self(s) {}
 };
 
 static const IR::Type*
@@ -267,7 +263,6 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
                 }
             } else if (auto infer = prim->inferOperandTypes()) {
                 if ((infer >> (ctxt->child_index)) & 1) {
-                    unsigned i = 0;
                     for (auto o : prim->operands) {
                         if ((infer & 1) && o->type != rv) {
                             rv = o->type;
@@ -280,7 +275,6 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
 
 // top down type inferencing -- set the type of expression nodes based on their uses.
 class TypeCheck::InferExpressionsTopDown : public Modifier {
-    TypeCheck           &self;
     const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
@@ -295,9 +289,6 @@ class TypeCheck::InferExpressionsTopDown : public Modifier {
             }
         }
         return true; }
-
- public:
-    explicit InferExpressionsTopDown(TypeCheck &s) : self(s) { }
 };
 
 class TypeCheck::InferActionArgsBottomUp : public Inspector {
@@ -411,8 +402,8 @@ class TypeCheck::AssignActionArgTypes : public Modifier {
 TypeCheck::TypeCheck() : PassManager({
     new AssignInitialTypes,
     (new PassRepeated({
-        new InferExpressionsBottomUp(*this),
-        new InferExpressionsTopDown(*this),
+        new InferExpressionsBottomUp,
+        new InferExpressionsTopDown,
         new InferActionArgsBottomUp(*this),
         new InferActionArgsTopDown(*this),
         new AssignActionArgTypes(*this)
