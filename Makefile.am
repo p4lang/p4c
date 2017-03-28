@@ -13,11 +13,16 @@
 # limitations under the License.
 
 ACLOCAL_AMFLAGS = -I m4
-AM_CFLAGS = -Wall -Wextra -Wno-overloaded-virtual -Wno-deprecated
+WARNING_FLAGS = -Wall \
+		-Wextra \
+		-Wno-overloaded-virtual \
+		-Wno-deprecated \
+		$(EXTRA_WARNING_FLAGS)
+AM_CFLAGS = $(WARNING_FLAGS)
+AM_CXXFLAGS = $(WARNING_FLAGS)
 AM_CPPFLAGS = -I$(srcdir)/frontends \
 	      -I$(srcdir)/backends \
 	      -I$(srcdir)/extensions
-
 AM_YFLAGS = -v
 
 TOOLSDIR=$(srcdir)/tools

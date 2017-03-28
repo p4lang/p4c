@@ -55,4 +55,4 @@ noinst_HEADERS += \
 # fixed in v.3.1, but unfortunately there are p4c extensions which use Google's
 # or-tools library, and there is no release of or-tools which is compatible with
 # protoc v.3.1 at this time.
-libcontrolplane_la_CFLAGS = -Wno-unused-parameters $(AM_CFLAGS)
+libcontrolplane_la_CXXFLAGS = $(AM_CXXFLAGS) -Wno-unused-parameter
