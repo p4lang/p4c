@@ -71,7 +71,7 @@ class BaseLocation : public StorageLocation {
                 || type-is<IR::Type_Error>() || type->is<IR::Type_Var>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
-    void addLastIndexField(LocationSet* result) const override {}
+    void addLastIndexField(LocationSet*) const override {}
     void removeHeaders(LocationSet* result) const override;
 };
 

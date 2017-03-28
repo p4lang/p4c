@@ -178,7 +178,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
-        new LowerExpressions(&refMap, &typeMap),
+        new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
         new RemoveExpressionsFromSelects(&refMap, &typeMap),

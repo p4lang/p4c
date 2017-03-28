@@ -201,6 +201,8 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
         LOG1("  address = " << hex(info->si_addr));
 #if HAVE_UCONTEXT_H
     dumpregs(&(static_cast<ucontext_t *>(uctxt)->uc_mcontext));
+#else
+    (void) uctxt;  // Suppress unused parameter warning.
 #endif
 #if HAVE_EXECINFO_H
     if (LOGGING(1)) {
