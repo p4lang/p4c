@@ -76,11 +76,6 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
-const IR::Node* DoRemoveActionParameters::preorder(IR::EntriesList *list) {
-    prune();
-    return list;
-}
-
 const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     LOG1("Visiting " << dbp(action));
     BUG_CHECK(getContext()->node->is<IR::IndexedVector<IR::Declaration>>(),
