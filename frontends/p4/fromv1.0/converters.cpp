@@ -43,12 +43,15 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
     auto exp = expression->left;
     auto cst = expression->right->to<IR::Constant>();
     mpz_class value = cst->value;
-    while (value != 0) {
-        auto range = Util::findOnes(value);
-        value = value - range.value;
+    auto range = Util::findOnes(value);
+    if (value != range.value) {
+        /* FIXME -- can't represent the mask as a single slice -- no way to express this
+         * valid P4_14 code in P4_16? */
+        return expression; }
+    if (exp->type->is<IR::Type::Unknown>() || range.lowIndex != 0 ||
+        range.highIndex < exp->type->width_bits() - 1U) {
         exp = new IR::Slice(Util::SourceInfo(), exp,
-                            new IR::Constant(range.highIndex), new IR::Constant(range.lowIndex));
-    }
+                            new IR::Constant(range.highIndex), new IR::Constant(range.lowIndex)); }
     return exp;
 }
 
@@ -111,9 +114,8 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
         BUG_CHECK(primitive->operands.size() == 1, "Expected 1 operand for %1%", primitive);
         auto base = primitive->operands.at(0);
         auto method = new IR::Member(primitive->srcInfo, base, IR::ID(IR::Type_Header::isValid));
-        auto result = new IR::MethodCallExpression(
-            primitive->srcInfo, method, new IR::Vector<IR::Type>(),
-            new IR::Vector<IR::Expression>());
+        auto result = new IR::MethodCallExpression(primitive->srcInfo, IR::Type::Boolean::get(),
+            method, new IR::Vector<IR::Type>(), new IR::Vector<IR::Expression>());
         return result;
     }
     BUG("Unexpected primitive %1%", primitive);
