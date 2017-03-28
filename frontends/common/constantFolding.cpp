@@ -151,7 +151,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
     }
 
     mpz_class value = -cst->value;
-    auto result = new IR::Constant(cst->srcInfo, t, value, cst->base, true); //don't warn about overflow
+    auto result = new IR::Constant(cst->srcInfo, t, value, cst->base, true);
     setConstant(e, result);
     return result;
 }
@@ -633,9 +633,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             auto result = new IR::Constant(e->srcInfo, type, v, 10);
             setConstant(e, result);
             return result;
-	} else { /* expr is a list literal */
-	  return e;
-	}
+        } else { /* expr is a list literal */
+            return e;
+        }
     } else if (etype->is<IR::Type_StructLike>()) {
         auto result = expr->clone();
         auto origtype = typeMap->getType(getOriginal());
