@@ -627,13 +627,14 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             auto result = cast(arg, arg->base, type);
             setConstant(e, result);
             return result;
-        } else {
-            BUG_CHECK(expr->is<IR::BoolLiteral>(), "%1%: expected a boolean literal", expr);
+        } else if (expr -> is<IR::BoolLiteral>()) {
             auto arg = expr->to<IR::BoolLiteral>();
             int v = arg->value ? 1 : 0;
             auto result = new IR::Constant(e->srcInfo, type, v, 10);
             setConstant(e, result);
             return result;
+        } else { /* expr is a list literal */
+            return e;
         }
     } else if (etype->is<IR::Type_StructLike>()) {
         auto result = expr->clone();
