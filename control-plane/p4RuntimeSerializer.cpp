@@ -64,6 +64,8 @@ static bool isMetadataType(const IR::Type* type) {
     return metadataAnnotation != nullptr;
 }
 
+/// @return a version of @name which has been sanitized for exposure to the
+/// control plane.
 static cstring controlPlaneName(const cstring& name) {
     // A leading '.' in a symbol name indicates that the name is absolute -
     // in other words, that it's a top-level name. That information isn't
@@ -75,19 +77,8 @@ static cstring controlPlaneName(const cstring& name) {
 /// @return a version of @node's external name which has been sanitized for
 /// exposure to the control plane.
 template <typename Node>
-static cstring controlPlaneName(const Node node) {
+static cstring controlPlaneName(const Node* node) {
     return controlPlaneName(node->externalName());
-}
-
-
-/// @return a version of @name which has been sanitized for exposure to the
-/// control plane.
-template<> cstring controlPlaneName(const cstring& name) {
-    // A leading '.' in a symbol name indicates that the name is absolute -
-    // in other words, that it's a top-level name. That information isn't
-    // relevant to the control plane, which only cares about the final name,
-    // so we strip the dot off here.
-    return name.startsWith(".") ? name.substr(1) : name;
 }
 
 /**
@@ -774,14 +765,11 @@ class P4RuntimeSerializer {
 
 public:
     P4RuntimeSerializer(const P4RuntimeSymbolTable& symbols,
-                        ReferenceMap* refMap,
                         TypeMap* typeMap)
         : p4Info(new P4Info)
         , symbols(symbols)
-        , refMap(refMap)
         , typeMap(typeMap)
     {
-        CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
 
@@ -1045,7 +1033,6 @@ private:
     P4Info* p4Info;  // P4Runtime's representation of a program's control plane API.
     const P4RuntimeSymbolTable& symbols;  // The symbols used in the API and their ids.
     std::set<pi_p4_id_t> serializedActions;  // The actions we've serialized so far.
-    ReferenceMap* refMap;
     TypeMap* typeMap;
 };
 
@@ -1064,7 +1051,6 @@ static void forAllMatching(const IR::Node* root, Func&& function) {
 
 static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
                                   const IR::ControlBlock* controlBlock,
-                                  ReferenceMap* refMap,
                                   TypeMap* typeMap) {
     CHECK_NULL(controlBlock);
 
@@ -1497,7 +1483,7 @@ void serializeP4Runtime(std::ostream* destination,
     auto symbols = P4RuntimeSymbolTable::create([=](P4RuntimeSymbolTable& symbols) {
         forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
             if (block->is<IR::ControlBlock>()) {
-                collectControlSymbols(symbols, block->to<IR::ControlBlock>(), refMap, typeMap);
+                collectControlSymbols(symbols, block->to<IR::ControlBlock>(), typeMap);
             } else if (block->is<IR::ExternBlock>()) {
                 collectExternSymbols(symbols, block->to<IR::ExternBlock>());
             } else if (block->is<IR::TableBlock>()) {
@@ -1507,7 +1493,7 @@ void serializeP4Runtime(std::ostream* destination,
     });
 
     // Construct and serialize a P4Runtime control plane API from the program.
-    P4RuntimeSerializer serializer(symbols, refMap, typeMap);
+    P4RuntimeSerializer serializer(symbols, typeMap);
     forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::ControlBlock>()) {
             serializeControl(serializer, block->to<IR::ControlBlock>(), refMap, typeMap);

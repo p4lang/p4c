@@ -160,7 +160,6 @@ class SharedActionSelectorCheck : public Inspector {
             ::error("%1%: expected a reference to an instance", pathe);
             return false;
         }
-        const auto &apname = decl->externalName();
         auto dcltype = typeMap->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
             ::error("%1%: unexpected type for implementation", dcltype);
@@ -2087,7 +2086,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     scalarsStruct->emplace("name", scalarsName);
     scalarsStruct->emplace("id", nextId("header_types"));
     scalars_width = 0;
-    auto scalarFields = mkArrayField(scalarsStruct, "fields");
+    mkArrayField(scalarsStruct, "fields");
 
     headerTypesCreated.clear();
     addTypesAndInstances(ht, false);

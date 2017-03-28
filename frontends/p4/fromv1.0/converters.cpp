@@ -485,7 +485,6 @@ class ComputeCallGraph : public Inspector {
         }
     }
     void postorder(const IR::GlobalRef *gref) override {
-        const Context *ctxt = nullptr;
         cstring caller;
         if (auto af = findContext<IR::ActionFunction>()) {
             caller = af->name;
