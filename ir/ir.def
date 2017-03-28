@@ -214,11 +214,12 @@ class Key : PropertyValue {
 class Entry : IAnnotated {
     Annotations         annotations;  /// annotations are optional (supported annotations: @priority(value))
     ListExpression      keys;         /// must be a tuple expression
-    ActionListElement   action;       /// action must be defined in action list
+    Expression          action;       /// typically a MethodCallExpression.
+                                      /// The action must be defined in action list
 
-    Annotations getAnnotations() const override { return annotations; }
+    Annotations     getAnnotations() const override { return annotations; }
     ListExpression  getKeys() const { return keys; }
-    ActionListElement getAction() const { return action; }
+    Expression      getAction() const { return action; }
     dbprint { out << annotations << keys << action; }
 }
 

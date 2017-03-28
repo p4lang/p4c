@@ -1314,9 +1314,112 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     return expression;
 }
 
-const IR::Node* TypeInference::postorder(IR::EntriesList* l) {
-    if (readOnly) return getOriginal();
-    return l;
+const IR::Node* TypeInference::postorder(IR::Key* key) {
+    LOG1("TypeInference: visiting " << dbp(key));
+    // compute the type and store it in typeMap
+    auto vec = new IR::Vector<IR::Type>();
+    for (auto ke : *key->keyElements) {
+        auto kt = typeMap->getType(ke->expression);
+        if (kt == nullptr) {
+            LOG2("Bailing out for " << dbp(ke));
+            return key;
+        }
+        vec->push_back(kt);
+    }
+    auto keyTuple = new IR::Type_Tuple(Util::SourceInfo(), vec);
+    LOG2("Setting key type to " << dbp(keyTuple));
+    setType(key, keyTuple);
+    // installing also for the original because we cannot tell which one will survive in the ir
+    // \TODO: figure out the rules of survivorship
+    LOG2("Setting key type to " << dbp(getOriginal()));
+    setType(getOriginal(), keyTuple);
+    return key;
+}
+
+/**
+    typecheck a table initializer entry list
+
+    The invariants are:
+    - table keys must have been type checked before entries
+*/
+const IR::Node* TypeInference::postorder(IR::EntriesList* el) {
+    LOG1("TypeInference: visiting: " << el);
+    if (done()) return el;
+    auto table = findContext<IR::P4Table>();
+    BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
+    const IR::Key* key = table->getKey();
+    if (key == nullptr) {
+        ::error("Could not find key for table %1%", table);
+        return el;
+    }
+
+    // the key must have been typechecked already.
+    if (!typeMap->contains(key)) {
+        ::error("Table initializer entries must occur after key definitions (table %1%)", table);
+        return el;
+    }
+    return el;
+}
+/**
+    typecheck a table initializer entry
+
+    The invariants are:
+    - table keys and entry keys must have the same length
+    - entry key elements must be compile time constants
+    - actionRefs in entries must be in the action list
+
+    Moreover, the EntriesList visitor should have checked for the table
+    invariants, and thus, those checks are now bug checks.
+*/
+const IR::Node* TypeInference::postorder(IR::Entry* entry) {
+    LOG1("TypeInference: visiting: " << entry);
+    if (done()) return entry;
+    auto table = findContext<IR::P4Table>();
+    BUG_CHECK(table != nullptr, "%1% entries not within a table", entry);
+    const IR::Key* key = table->getKey();
+    BUG_CHECK(key != nullptr, "table %1% has no keys", table);
+    auto keyTuple = getType(key);
+    BUG_CHECK(keyTuple != nullptr, "table %1% has no types for keys", table);
+    auto entryKeyType = getType(entry->keys);
+    if (entryKeyType == nullptr)
+        return entry;
+    if (entryKeyType->is<IR::Type_Set>())
+        entryKeyType = entryKeyType->to<IR::Type_Set>()->elementType;
+
+    auto tvs = unify(entry, keyTuple, entryKeyType, true);  // TypeVariableSubstitution
+    if (tvs == nullptr)
+        return entry;
+    ConstantTypeSubstitution cts(tvs, typeMap);
+    auto ks = cts.convert(entry->keys);
+
+    for (auto ke : *ks->to<IR::ListExpression>()->components)
+        if (!isCompileTimeConstant(ke))
+            ::error("Key entry must be a compile time constant: %1%", ke);
+
+    if (ks != entry->keys)
+        entry = new IR::Entry(entry->srcInfo, entry->annotations,
+                              ks->to<IR::ListExpression>(), entry->action);
+
+    auto actionRef = entry->getAction();
+    if (!actionRef->is<IR::MethodCallExpression>())
+     ::error("Invalid action %1% in entry");
+    auto actionCall = actionRef->to<IR::MethodCallExpression>();
+    auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
+    bool found = false;
+    for (auto ale : *table->getActionList()->actionList) {
+     auto expr = ale->expression;
+     if (expr->is<IR::MethodCallExpression>())
+         expr = expr->to<IR::MethodCallExpression>()->method;
+     if (expr->is<IR::PathExpression>() &&
+         expr->to<IR::PathExpression>()->path->name == actionName) {
+         found = true;
+         break;
+     }
+    }
+    if (!found)
+         ::error("%1%: action not in the table action list", actionRef);
+
+    return entry;
 }
 
 const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
@@ -1594,6 +1697,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         CHECK_NULL(cst);
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
         setType(e->left, rtype);
+        setCompileTimeConstant(e->left);
         expression = e;
         resultType = rtype;
     } else if (bl != nullptr && br == nullptr) {
@@ -1602,6 +1706,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         CHECK_NULL(cst);
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
         setType(e->right, ltype);
+        setCompileTimeConstant(e->right);
         expression = e;
         resultType = ltype;
     }
@@ -1616,6 +1721,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
 
 // Handle .. and &&&
 const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
+    LOG1("TypeInference::typeSet visiting " << expression);
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -1646,6 +1752,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         auto e = expression->clone();
         auto cst = expression->left->to<IR::Constant>();
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
         setType(e->left, sameType);
@@ -1653,6 +1760,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         auto e = expression->clone();
         auto cst = expression->right->to<IR::Constant>();
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        setCompileTimeConstant(e->right);
         expression = e;
         sameType = ltype;
         setType(e->right, sameType);
@@ -1661,6 +1769,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         // set after unification
         auto r = expression->right->clone();
         auto e = expression->clone();
+        if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(r);
         e->right = r;
         expression = e;
         setType(r, sameType);
@@ -1669,6 +1778,12 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     auto resultType = new IR::Type_Set(sameType->srcInfo, sameType);
     typeMap->setType(expression, resultType);
     typeMap->setType(getOriginal(), resultType);
+
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
+
     return expression;
 }
 
@@ -2151,11 +2266,8 @@ TypeInference::actionCall(bool inActionList,
         LOG2("Action parameter " << dbp(p));
         if (it == arguments->end()) {
             params->push_back(p);
-            if (findContext<IR::EntriesList>() == nullptr) {
-                // no checking for table entries entries
-                if ((p->direction != IR::Direction::None) || !inActionList)
-                    typeError("%1%: parameter %2% must be bound", actionCall, p);
-            }
+            if ((p->direction != IR::Direction::None) || !inActionList)
+                typeError("%1%: parameter %2% must be bound", actionCall, p);
         } else {
             auto arg = *it;
             auto paramType = getType(p);
@@ -2175,7 +2287,7 @@ TypeInference::actionCall(bool inActionList,
             it++;
         }
     }
-    if (it != arguments->end() && findContext<IR::EntriesList>() == nullptr)
+    if (it != arguments->end())
         typeError("%1% Too many arguments for action", *it);
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, nullptr, pl);

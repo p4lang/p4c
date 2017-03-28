@@ -83,24 +83,6 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
             else if (keyset->to<IR::ListExpression>()->components->size() <
                      t->getKey()->keyElements->size())
                 ::error("%1%: Size of entry keyset must match the table key set size", keyset);
-            auto actionRef = e->getAction();
-            if (!actionRef->expression->is<IR::MethodCallExpression>())
-                ::error("%1%: invalid action in entries list", actionRef);
-            auto actionCall = actionRef->expression->to<IR::MethodCallExpression>();
-            auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
-            bool found = false;
-            for (auto ale : *ac->actionList) {
-                auto expr = ale->expression;
-                if (expr->is<IR::MethodCallExpression>())
-                    expr = expr->to<IR::MethodCallExpression>()->method;
-                if (expr->is<IR::PathExpression>() &&
-                    expr->to<IR::PathExpression>()->path->name == actionName) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                ::error("%1%: action not in the table action list", actionRef);
         }
     }
 }

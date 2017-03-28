@@ -79,8 +79,6 @@ class FindActionParameters : public Inspector {
         CHECK_NULL(refMap); CHECK_NULL(invocations); CHECK_NULL(typeMap);
         setName("FindActionParameters"); }
 
-    bool preorder(const IR::EntriesList *list) override { return false; };
-
     void postorder(const IR::ActionListElement* element) override;
     void postorder(const IR::MethodCallExpression* expression) override;
 };
@@ -104,8 +102,6 @@ class DoRemoveActionParameters : public Transform {
     explicit DoRemoveActionParameters(ActionInvocation* invocations) :
             invocations(invocations)
     { CHECK_NULL(invocations); setName("DoRemoveActionParameters"); }
-
-    const IR::Node* preorder(IR::EntriesList *list) override;
 
     const IR::Node* postorder(IR::P4Action* table) override;
     const IR::Node* postorder(IR::ActionListElement* element) override;

@@ -1240,7 +1240,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
     if (entriesList == nullptr) return;
 
     auto entries = mkArrayField(jsonTable, "entries");
-    int entryPriority = 1;  // priority is defined by index position
+    int entryPriority = 1;  // default priority is defined by index position
     for (auto e : *entriesList->entries) {
         auto entry = new Util::JsonObject();
 
@@ -1250,7 +1250,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
         for (auto k : *keyset->components) {
             auto key = new Util::JsonObject();
             auto tableKey = table->getKey()->keyElements->at(keyIndex);
-            unsigned keyWidth = tableKey->expression->type->width_bits();
+            auto keyWidth = tableKey->expression->type->width_bits();
             auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
             key->emplace("match_type", matchType);
@@ -1271,8 +1271,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
                     key->emplace("mask", stringRepr(km->right->to<IR::Constant>()->value, k8));
                 } else if (k->is<IR::Constant>()) {
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
-                    unsigned long mask = (1ULL << keyWidth)-1;
-                    key->emplace("mask", stringRepr(mask, k8));
+                    key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
                 } else if (k->is<IR::DefaultExpression>()) {
                     key->emplace("key", stringRepr(0, k8));
                     key->emplace("mask", stringRepr(0, k8));
@@ -1320,10 +1319,11 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
 
         auto action = new Util::JsonObject();
         auto actionRef = e->getAction();
-        if (!actionRef->expression->is<IR::MethodCallExpression>())
+        if (!actionRef->is<IR::MethodCallExpression>())
             ::error("%1%: invalid action in entries list", actionRef);
-        auto actionCall = actionRef->expression->to<IR::MethodCallExpression>();
-        auto decl = refMap->getDeclaration(actionRef->getPath(), true);
+        auto actionCall = actionRef->to<IR::MethodCallExpression>();
+        auto method = actionCall->method->to<IR::PathExpression>()->path;
+        auto decl = refMap->getDeclaration(method, true);
         auto actionDecl = decl->to<IR::P4Action>();
         unsigned id = get(structure.ids, actionDecl);
         action->emplace("action_id", id);
@@ -1333,17 +1333,14 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
         }
         entry->emplace("action_entry", action);
 
-        if (e->getAnnotations() != IR::Annotations::empty) {
-            for (auto p : e->getAnnotations()->annotations) {
-                if (p->name == "priority") {
-                    if (p->expr.size() > 1)
-                        ::error("invalid priority value %1%", p->expr);
-                    auto priValue = p->expr.front();
-                    if ( !priValue->is<IR::Constant>())
-                        ::error("invalid priority value %1%. must be constant", p->expr);
-                    entry->emplace("priority", priValue->to<IR::Constant>()->value);
-                }
-            }
+        auto priorityAnnotation = e->getAnnotations()->getSingle("priority");
+        if (priorityAnnotation != nullptr) {
+            if (priorityAnnotation->expr.size() > 1)
+                ::error("invalid priority value %1%", priorityAnnotation->expr);
+            auto priValue = priorityAnnotation->expr.front();
+            if ( !priValue->is<IR::Constant>())
+                ::error("invalid priority value %1%. must be constant", priorityAnnotation->expr);
+            entry->emplace("priority", priValue->to<IR::Constant>()->value);
         } else {
             entry->emplace("priority", entryPriority);
         }
@@ -2207,7 +2204,7 @@ void JsonConverter::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
   static constexpr int version_major = 2;
-  static constexpr int version_minor = 6;
+  static constexpr int version_minor = 7;
   auto version = mkArrayField(meta, "version");
   version->append(version_major);
   version->append(version_minor);
