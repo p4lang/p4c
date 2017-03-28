@@ -57,7 +57,12 @@ void ReferenceMap::setDeclaration(const IR::This* pointer, const IR::IDeclaratio
 const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::This* pointer, bool notNull) const {
     CHECK_NULL(pointer);
     auto result = get(thisToDeclaration, pointer);
-    LOG1("Looking up " << pointer << " found " << result->getNode());
+
+    if (result)
+        LOG1("Looking up " << pointer << " found " << result->getNode());
+    else
+        LOG1("Looking up " << pointer << " found nothing");
+
     if (notNull)
         BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
     return result;
@@ -66,7 +71,12 @@ const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::This* pointer, bo
 const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::Path* path, bool notNull) const {
     CHECK_NULL(path);
     auto result = get(pathToDeclaration, path);
-    LOG1("Looking up " << path << " found " << result->getNode());
+
+    if (result)
+        LOG1("Looking up " << path << " found " << result->getNode());
+    else
+        LOG1("Looking up " << path << " found nothing");
+
     if (notNull)
         BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", path);
     return result;
