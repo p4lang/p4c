@@ -633,7 +633,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             auto result = new IR::Constant(e->srcInfo, type, v, 10);
             setConstant(e, result);
             return result;
-	} else {
+	} else { /* expr is a list literal */
 	  return e;
 	}
     } else if (etype->is<IR::Type_StructLike>()) {
