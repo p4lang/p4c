@@ -1535,9 +1535,7 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
 }
 
 void
-P4Objects::init_learn_lists(
-    const Json::Value &cfg_root,
-    std::shared_ptr<TransportIface> notifications_transport) {
+P4Objects::init_learn_lists(const Json::Value &cfg_root) {
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
   if (cfg_learn_lists.size() > 0) {
@@ -1612,8 +1610,10 @@ P4Objects::init_objects(std::istream *is,
   (*is) >> cfg_root;
 
   if (!notifications_transport) {
-    notifications_transport = std::shared_ptr<TransportIface>(
+    this->notifications_transport = std::shared_ptr<TransportIface>(
         TransportIface::make_dummy());
+  } else {
+    this->notifications_transport = notifications_transport;
   }
 
   InitState init_state;
@@ -1672,7 +1672,7 @@ P4Objects::init_objects(std::istream *is,
 
     learn_engine = LearnEngineIface::make(device_id, cxt_id);
 
-    init_learn_lists(cfg_root, notifications_transport);
+    init_learn_lists(cfg_root);
 
     init_field_lists(cfg_root);
 

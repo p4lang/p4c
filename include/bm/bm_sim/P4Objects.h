@@ -106,6 +106,10 @@ class P4Objects {
 
   LearnEngineIface *get_learn_engine() { return learn_engine.get(); }
 
+  TransportIface *get_notifications_transport() {
+    return notifications_transport.get();
+  }
+
   AgeingMonitorIface *get_ageing_monitor() { return ageing_monitor.get(); }
 
   void reset_state();
@@ -313,8 +317,7 @@ class P4Objects {
   void init_pipelines(const Json::Value &root, LookupStructureFactory *,
                       InitState *);
   void init_checksums(const Json::Value &root);
-  void init_learn_lists(const Json::Value &root,
-                        std::shared_ptr<TransportIface>);
+  void init_learn_lists(const Json::Value &root);
   void init_field_lists(const Json::Value &root);
 
   void build_expression(const Json::Value &json_expression, Expression *expr);
@@ -392,6 +395,7 @@ class P4Objects {
   std::unordered_map<std::string, std::unique_ptr<Deparser> > deparsers{};
 
   std::unique_ptr<LearnEngineIface> learn_engine{};
+  std::shared_ptr<TransportIface> notifications_transport{};
 
   std::unique_ptr<AgeingMonitorIface> ageing_monitor{};
 
