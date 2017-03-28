@@ -42,6 +42,19 @@ class NonLeftValue : public KeyIsComplex {
     bool isTooComplex(const IR::Expression* expression) const;
 };
 
+// Policy that allows masked lvalues as well as simple lvalues or isValid()
+class NonMaskLeftValue : public NonLeftValue {
+ public:
+    NonMaskLeftValue(ReferenceMap* refMap, TypeMap* typeMap) : NonLeftValue(refMap, typeMap) {}
+    bool isTooComplex(const IR::Expression* expression) const {
+        if (auto mask = expression->to<IR::BAnd>()) {
+            if (mask->right->is<IR::Constant>())
+                expression = mask->left;
+            else if (mask->left->is<IR::Constant>())
+                expression = mask->right; }
+        return NonLeftValue::isTooComplex(expression); }
+};
+
 class TableInsertions {
  public:
     std::vector<const IR::Declaration_Variable*> declarations;

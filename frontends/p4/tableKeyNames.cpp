@@ -57,6 +57,17 @@ class KeyNameGenerator : public Inspector {
         name.emplace(expression, l + "[" + r + "]");
     }
 
+    void postorder(const IR::BAnd *expression) override {
+        if (expression->right->is<IR::Constant>()) {
+            if (cstring l = getName(expression->left))
+                name.emplace(expression, l);
+        } else if (expression->left->is<IR::Constant>()) {
+            if (cstring r = getName(expression->right))
+                name.emplace(expression, r);
+        } else {
+            error(expression); }
+    }
+
     void postorder(const IR::Constant* expression) override {
         name.emplace(expression, expression->toString());
     }

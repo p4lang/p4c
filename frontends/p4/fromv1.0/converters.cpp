@@ -44,15 +44,12 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
     auto cst = expression->right->to<IR::Constant>();
     mpz_class value = cst->value;
     auto range = Util::findOnes(value);
-    if (value != range.value) {
-        /* FIXME -- can't represent the mask as a single slice -- no way to express this
-         * valid P4_14 code in P4_16? */
-        return expression; }
-    if (exp->type->is<IR::Type::Unknown>() || range.lowIndex != 0 ||
-        range.highIndex < exp->type->width_bits() - 1U) {
-        exp = new IR::Slice(Util::SourceInfo(), exp,
-                            new IR::Constant(range.highIndex), new IR::Constant(range.lowIndex)); }
-    return exp;
+    if (range.lowIndex == 0 && range.highIndex >= exp->type->width_bits() - 1U)
+        return exp;
+    if (value != range.value)
+        return new IR::BAnd(expression->srcInfo, exp, cst);
+    return new IR::Slice(Util::SourceInfo(), exp,
+                         new IR::Constant(range.highIndex), new IR::Constant(range.lowIndex));
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {

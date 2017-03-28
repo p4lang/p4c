@@ -150,7 +150,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
-                            new P4::NonLeftValue(&refMap, &typeMap)),
+                            new P4::NonMaskLeftValue(&refMap, &typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets

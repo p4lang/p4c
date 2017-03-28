@@ -248,11 +248,15 @@ class ArrayIndex : Operation_Binary {
 class Range : Operation_Binary {
     stringOp = "..";
     precedence = DBPrint::Prec_Low;
+    Range { if (left && type == left->type && !left->type->is<Type::Unknown>())
+                type = new Type_Set(left->type); }
 }
 
 class Mask : Operation_Binary {
     stringOp = "&&&";
     precedence = DBPrint::Prec_Low;
+    Mask { if (left && type == left->type && !left->type->is<Type::Unknown>())
+                type = new Type_Set(left->type); }
 }
 
 class Mux : Operation_Ternary {
