@@ -33,7 +33,7 @@ class EBPFType : public EBPFObject {
     virtual void emit(CodeBuilder* builder) = 0;
     virtual void declare(CodeBuilder* builder, cstring id, bool asPointer) = 0;
     virtual void emitInitializer(CodeBuilder* builder) = 0;
-    virtual void declareArray(CodeBuilder* builder, const char* /*id*/, unsigned /*size*/)
+    virtual void declareArray(CodeBuilder* /*builder*/, const char* /*id*/, unsigned /*size*/)
     { BUG("Arrays of %1% not supported", type); }
     template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
     template<typename T> T *to() { return dynamic_cast<T*>(this); }
@@ -115,7 +115,7 @@ class EBPFStructType : public EBPFType, public IHasWidth {
         const IR::StructField* field;
 
         EBPFField(EBPFType* type, const IR::StructField* field, cstring comment = nullptr) :
-                type(type), field(field), comment(comment) {}
+            comment(comment), type(type), field(field) {}
     };
 
  public:

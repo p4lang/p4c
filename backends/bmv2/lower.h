@@ -25,16 +25,14 @@ namespace BMV2 {
 
 // Convert expressions not supported on BMv2
 class LowerExpressions : public Transform {
-    P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     // Cannot shift with a value larger than 8 bits
     const int maxShiftWidth = 8;
 
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
  public:
-    LowerExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("LowerExpressions"); }
+    explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); setName("LowerExpressions"); }
 
     const IR::Node* postorder(IR::Expression* expression) override;
     const IR::Node* postorder(IR::Shl* expression) override

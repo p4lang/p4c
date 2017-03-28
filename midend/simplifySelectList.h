@@ -50,7 +50,6 @@ class SubstituteStructures : public Transform {
 //     (0, 0, default, default): accept;
 // }
 class UnnestSelectList : public Transform {
-    TypeMap* typeMap;
     // Represent the nesting of lists inside of a selectExpression.
     // E.g.: [__[__]_] for two nested lists.
     cstring nesting;
@@ -59,8 +58,7 @@ class UnnestSelectList : public Transform {
     void flatten(const IR::Expression* expression, unsigned* nestingIndex,
                  IR::Vector<IR::Expression> *output);
  public:
-    explicit UnnestSelectList(TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("UnnestSelectList"); }
+    UnnestSelectList() { setName("UnnestSelectList"); }
 
     const IR::Node* preorder(IR::SelectExpression* expression) override;
     const IR::Node* preorder(IR::P4Control* control) override
@@ -73,7 +71,7 @@ class SimplifySelectList : public PassManager {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new SubstituteStructures(typeMap));
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new UnnestSelectList(typeMap));
+        passes.push_back(new UnnestSelectList);
         setName("SimplifySelectList");
     }
 };
