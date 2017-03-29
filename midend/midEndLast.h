@@ -24,7 +24,7 @@ namespace P4 {
 class MidEndLast : public Inspector {
  public:
     MidEndLast() { setName("MidEndLast"); }
-    bool preorder(const IR::P4Program* program) override
+    bool preorder(const IR::P4Program*) override
     { return false; }
 };
 
