@@ -106,8 +106,8 @@ class P4Objects {
 
   LearnEngineIface *get_learn_engine() { return learn_engine.get(); }
 
-  TransportIface *get_notifications_transport() {
-    return notifications_transport.get();
+  std::shared_ptr<TransportIface> get_notifications_transport() {
+    return notifications_transport;
   }
 
   AgeingMonitorIface *get_ageing_monitor() { return ageing_monitor.get(); }
