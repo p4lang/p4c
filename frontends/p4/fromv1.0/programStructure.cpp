@@ -1427,16 +1427,29 @@ const IR::Type_Control* ProgramStructure::controlType(IR::ID name) {
 
 const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm) const {
     IR::ID kind;
-    if (cm->type == IR::CounterType::PACKETS)
-        kind = v1model.counterOrMeter.counterType.packets.Id();
-    else if (cm->type == IR::CounterType::BYTES)
-        kind = v1model.counterOrMeter.counterType.bytes.Id();
-    else if (cm->type == IR::CounterType::BOTH)
-        kind = v1model.counterOrMeter.counterType.both.Id();
-    else
-        BUG("%1%: unsupported", cm);
+    IR::ID enumName;
+    if (cm->is<IR::Counter>()) {
+        enumName = v1model.counterOrMeter.counterType.Id();
+        if (cm->type == IR::CounterType::PACKETS)
+            kind = v1model.counterOrMeter.counterType.packets.Id();
+        else if (cm->type == IR::CounterType::BYTES)
+            kind = v1model.counterOrMeter.counterType.bytes.Id();
+        else if (cm->type == IR::CounterType::BOTH)
+            kind = v1model.counterOrMeter.counterType.both.Id();
+        else
+            BUG("%1%: unsupported", cm);
+    } else {
+        BUG_CHECK(cm->is<IR::Meter>(), "%1%: expected a meter", cm);
+        enumName = v1model.counterOrMeter.meterType.Id();
+        if (cm->type == IR::CounterType::PACKETS)
+            kind = v1model.counterOrMeter.meterType.packets.Id();
+        else if (cm->type == IR::CounterType::BYTES)
+            kind = v1model.counterOrMeter.meterType.bytes.Id();
+        else
+            BUG("%1%: unsupported", cm);
+    }
     auto enumref = new IR::TypeNameExpression(Util::SourceInfo(),
-        new IR::Type_Name(new IR::Path(v1model.counterOrMeter.counterType.Id())));
+        new IR::Type_Name(new IR::Path(enumName)));
     return new IR::Member(Util::SourceInfo(), enumref, kind);
 }
 
