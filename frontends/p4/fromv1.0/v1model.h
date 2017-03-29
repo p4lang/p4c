@@ -81,6 +81,13 @@ struct CounterType_Model : public ::Model::Enum_Model {
     ::Model::Elem both;
 };
 
+struct MeterType_Model : public ::Model::Enum_Model {
+    MeterType_Model() : ::Model::Enum_Model("MeterType"),
+                        packets("packets"), bytes("bytes") {}
+    ::Model::Elem packets;
+    ::Model::Elem bytes;
+};
+
 struct Checksum16_Model : public ::Model::Extern_Model {
     Checksum16_Model() : Extern_Model("Checksum16"), get("get"),
                          resultType(IR::Type_Bits::get(32)) {}
@@ -130,6 +137,7 @@ struct CounterOrMeter_Model : public ::Model::Extern_Model {
     const IR::Type* size_type;
     const IR::Type* index_type;
     CounterType_Model counterType;
+    MeterType_Model meterType;
 };
 
 struct Register_Model : public ::Model::Extern_Model {

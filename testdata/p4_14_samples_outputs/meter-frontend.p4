@@ -46,8 +46,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+<<<<<<< 67888dd5b308b6027937beeec233a9144edb9f69
     @name("my_meter") meter(32w16384, CounterType.packets) my_meter_0;
     @name("._drop") action _drop_0() {
+=======
+    @name("my_meter") meter(32w16384, MeterType.packets) my_meter_0;
+    @name("_drop") action _drop_0() {
+>>>>>>> Fix for issue #379
         mark_to_drop();
     }
     @name("._nop") action _nop_0() {
