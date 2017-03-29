@@ -392,7 +392,6 @@ class SwitchCase {
 class SwitchStatement : Statement {
     Expression expression;
     inline Vector<SwitchCase> cases;
-#nodbprint
     visit_children {
         v.visit(expression, "expression");
         cases.parallel_visit_children(v); }
