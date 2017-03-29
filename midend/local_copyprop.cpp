@@ -88,6 +88,7 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
     IR::P4Table *preorder(IR::P4Table *tbl) {
         BUG_CHECK(table == nullptr, "corrupt internal state");
         table = &self.tables[tbl->name];
+        LOG3("RewriteTableKeys for table " << tbl->name);
         return tbl; }
     IR::P4Table *postorder(IR::P4Table *tbl) {
         BUG_CHECK(table == &self.tables[tbl->name], "corrupt internal state");
@@ -96,9 +97,11 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
     const IR::Expression *preorder(IR::PathExpression *path) {
         if (table) {
             const Visitor::Context *ctxt = nullptr;
-            if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1)
-                if (table->key_remap.count(path->path->name))
-                    return table->key_remap.at(path->path->name); }
+            if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
+                if (table->key_remap.count(path->path->name)) {
+                    LOG4("  rewriting key " << path->path->name << " : " <<
+                         table->key_remap.at(path->path->name));
+                    return table->key_remap.at(path->path->name); } } }
         return path; }
 
  public:
@@ -116,6 +119,7 @@ void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
                 var.second.live = true;
         } else {
             var.second.val = nullptr; } }
+    need_key_rewrite |= a.need_key_rewrite;
 }
 
 void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
@@ -123,10 +127,12 @@ void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
     for (auto &var : available) {
         LOG7("  checking " << var.first << " = " << var.second.val);
         if (var.first == name) {
-            LOG4("   dropping " << name << " as it is being assigned to");
+            LOG4("   dropping " << (var.second.val ? "" : "(nop) ") << name <<
+                 " as it is being assigned to");
             var.second.val = nullptr;
         } else if (var.second.val && exprUses(var.second.val, name)) {
-            LOG4("   dropping " << var.first << " as it uses " << name);
+            LOG4("   dropping " << (var.second.val ? "" : "(nop) ") << var.first <<
+                 " as it uses " << name);
             var.second.val = nullptr; } }
 }
 
@@ -350,7 +356,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     tbl->key_remap.erase(key);
                     var->live = true;
                 } else {
-                    LOG3("  propagating value into table key " << key << ": " << var->val);
+                    LOG3("  will propagate value into table key " << key << ": " << var->val);
                     tbl->key_remap.emplace(key, var->val);
                     need_key_rewrite = true; }
             } else {

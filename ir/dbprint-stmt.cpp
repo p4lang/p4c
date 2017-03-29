@@ -60,3 +60,20 @@ void IR::Function::dbprint(std::ostream &out) const {
             out << endl << s;
     out << unindent << " }";
 }
+
+void IR::SwitchStatement::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << Prec_Low << "switch (" << expression << ") {" << indent;
+    bool fallthrough = false;
+    for (auto c : cases) {
+        if (!fallthrough) out << endl;
+        out << Prec_Low << c->label << ": " << setprec(0);
+        if (c->statement) {
+            out << c->statement;
+            fallthrough = false;
+        } else {
+            fallthrough = true;
+        }
+    }
+    out << unindent << " }" << setprec(prec);
+}
