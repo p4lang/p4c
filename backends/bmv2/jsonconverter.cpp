@@ -1368,13 +1368,20 @@ JsonConverter::convertTable(const CFG::TableNode* node,
             BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
             auto expr = ke->expression;
             mpz_class mask;
-            if (expr->is<IR::Slice>()) {
-                auto slice = expr->to<IR::Slice>();
+            if (auto mexp = expr->to<IR::BAnd>()) {
+                if (mexp->right->is<IR::Constant>()) {
+                    mask = mexp->right->to<IR::Constant>()->value;
+                    expr = mexp->left;
+                } else if (mexp->left->is<IR::Constant>()) {
+                    mask = mexp->left->to<IR::Constant>()->value;
+                    expr = mexp->right;
+                } else {
+                    ::error("%1%: key mask must be a constant", expr); }
+            } else if (auto slice = expr->to<IR::Slice>()) {
                 expr = slice->e0;
                 int h = slice->getH();
                 int l = slice->getL();
-                mask = Util::maskFromSlice(h, l);
-            }
+                mask = Util::maskFromSlice(h, l); }
 
             cstring match_type = mt->name.name;
             if (mt->name.name == corelib.exactMatch.name) {
@@ -1420,7 +1427,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
             auto jk = conv->convert(expr);
             keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
             if (mask != 0)
-                keyelement->emplace("mask", stringRepr(mask));
+                keyelement->emplace("mask", stringRepr(mask, (expr->type->width_bits() + 7) / 8));
             else
                 keyelement->emplace("mask", Util::JsonValue::null);
             tkey->append(keyelement);
