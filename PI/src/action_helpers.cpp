@@ -46,7 +46,7 @@ bm::ActionData build_action_data(const pi_action_data_t *action_data,
                                                             &num_params);
   for (size_t i = 0; i < num_params; i++) {
     pi_p4_id_t p_id = param_ids[i];
-    size_t p_bw = pi_p4info_action_param_bitwidth(p4info, p_id);
+    size_t p_bw = pi_p4info_action_param_bitwidth(p4info, action_id, p_id);
     size_t nbytes = (p_bw + 7) / 8;
     data.push_back_action_data(ad_data, nbytes);
     ad_data += nbytes;
@@ -66,7 +66,8 @@ char *dump_action_data(const pi_p4info_t *p4info, char *data,
       p4info, action_id, &num_params);
   assert(num_params == action_data.size());
   for (size_t i = 0; i < num_params; i++) {
-    size_t bitwidth = pi_p4info_action_param_bitwidth(p4info, param_ids[i]);
+    size_t bitwidth = pi_p4info_action_param_bitwidth(
+        p4info, action_id, param_ids[i]);
     size_t nbytes = (bitwidth + 7) / 8;
     const auto s = action_data.get(i).get_string();
     assert(nbytes >= s.size());

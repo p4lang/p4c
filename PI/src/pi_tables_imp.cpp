@@ -50,12 +50,11 @@ std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
   size_t num_match_fields = pi_p4info_table_num_match_fields(p4info, table_id);
   key.reserve(num_match_fields);
   for (size_t i = 0; i < num_match_fields; i++) {
-    pi_p4info_match_field_info_t finfo;
-    pi_p4info_table_match_field_info(p4info, table_id, i, &finfo);
-    size_t f_bw = finfo.bitwidth;
+    auto finfo = pi_p4info_table_match_field_info(p4info, table_id, i);
+    size_t f_bw = finfo->bitwidth;
     size_t nbytes = (f_bw + 7) / 8;
 
-    switch (finfo.match_type) {
+    switch (finfo->match_type) {
       case PI_P4INFO_MATCH_TYPE_VALID:
         key.emplace_back(
             bm::MatchKeyParam::Type::VALID,
@@ -247,7 +246,7 @@ void build_action_entry<bm::MatchTable::Entry>(
   const pi_p4_id_t action_id = pi_p4info_action_id_from_name(
       p4info, entry.action_fn->get_name().c_str());
 
-  const auto adata_size = get_action_data_size(p4info, action_id);
+  const auto adata_size = pi_p4info_action_data_size(p4info, action_id);
   // no alignment issue with new[]
   char *data_ = new char[sizeof(pi_action_data_t) + adata_size];
   pi_action_data_t *adata = reinterpret_cast<pi_action_data_t *>(data_);
@@ -346,7 +345,7 @@ void build_action_entry_2<bm::MatchTable::Entry>(
   const pi_p4_id_t action_id = pi_p4info_action_id_from_name(
       p4info, entry.action_fn->get_name().c_str());
 
-  const auto adata_size = get_action_data_size(p4info, action_id);
+  const auto adata_size = pi_p4info_action_data_size(p4info, action_id);
 
   emit_p4_id(buffer->extend(sizeof(s_pi_p4_id_t)), action_id);
   emit_uint32(buffer->extend(sizeof(uint32_t)), adata_size);
@@ -395,7 +394,7 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
   const auto entries = std::bind(GetFn, pibmv2::switch_, 0, t_name)();
 
   res->num_entries = entries.size();
-  res->mkey_nbytes = get_match_key_size(p4info, table_id);
+  res->mkey_nbytes = pi_p4info_table_match_key_size(p4info, table_id);
 
   Buffer buffer;
   for (const auto &e : entries) {
@@ -608,11 +607,15 @@ pi_status_t _pi_table_default_action_set(pi_session_handle_t session_handle,
 
       // TODO(antonin): equivalent for indirect?
       // TODO(antonin): move to common PI code?
+
       if (pi_p4info_table_has_const_default_action(p4info, table_id)) {
-        const pi_p4_id_t default_action_id =
-            pi_p4info_table_get_const_default_action(p4info, table_id);
+        bool has_mutable_action_params;
+        auto default_action_id = pi_p4info_table_get_const_default_action(
+            p4info, table_id, &has_mutable_action_params);
         if (default_action_id != adata->action_id)
           return PI_STATUS_CONST_DEFAULT_ACTION;
+        if (!has_mutable_action_params)
+          return PI_STATUS_CONST_DEFAULT_ACTION_NON_MUTABLE_PARAMS;
       }
 
       set_default_entry(p4info, dev_tgt, t_name, adata);

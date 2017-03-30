@@ -207,7 +207,7 @@ pi_status_t _pi_act_prof_entries_fetch(pi_session_handle_t session_handle,
                            mbr.mbr);
       const pi_p4_id_t action_id = pi_p4info_action_id_from_name(
           p4info, mbr.action_fn->get_name().c_str());
-      const auto adata_size = get_action_data_size(p4info, action_id);
+      const auto adata_size = pi_p4info_action_data_size(p4info, action_id);
       emit_p4_id(buffer.extend(sizeof(s_pi_p4_id_t)), action_id);
       emit_uint32(buffer.extend(sizeof(uint32_t)), adata_size);
       pibmv2::dump_action_data(p4info, buffer.extend(adata_size), action_id,
