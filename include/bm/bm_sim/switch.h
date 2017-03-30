@@ -211,8 +211,18 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! @code
   //! <my_target_exe> prog.json -i 0@eth0 -- --my-option v
   //! @endcode
-  int init_from_command_line_options(int argc, char *argv[],
-                                     TargetParserIface *tp = nullptr);
+  //! If you wish to use your own TransportIface implementation for
+  //! notifications instead of the default nanomsg one, you can provide
+  //! one. Similarly if you want to provide your own DevMgrIface implementation
+  //! for packet I/O, you can do so. Note that even when using your own
+  //! DevMgrIface implementation, you can still use the `--interface` (or `-i`)
+  //! command-line option; we will call port_add on your implementation
+  //! appropriately.
+  int init_from_command_line_options(
+      int argc, char *argv[],
+      TargetParserIface *tp = nullptr,
+      std::shared_ptr<TransportIface> my_transport = nullptr,
+      std::unique_ptr<DevMgrIface> my_dev_mgr = nullptr);
 
   //! Retrieve the shared pointer to an object of type `T` previously added to
   //! the switch using add_component().
@@ -277,6 +287,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   ErrorCodeMap get_error_codes(size_t cxt_id) const {
     return contexts.at(cxt_id).get_error_codes();
   }
+
+  // meant for testing
+  int transport_send_probe(uint64_t x) const;
 
   // ---------- RuntimeInterface ----------
 

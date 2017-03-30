@@ -180,15 +180,21 @@ SwitchWContexts::init_objects_empty(int dev_id,
 }
 
 int
-SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
-                                                TargetParserIface *tp) {
+SwitchWContexts::init_from_command_line_options(
+    int argc, char *argv[], TargetParserIface *tp,
+    std::shared_ptr<TransportIface> my_transport,
+    std::unique_ptr<DevMgrIface> my_dev_mgr) {
   int status = 0;
   OptionsParser parser;
   parser.parse(argc, argv, tp);
 
-  notifications_addr = parser.notifications_addr;
-  auto transport = std::shared_ptr<TransportIface>(
-      TransportIface::make_nanomsg(notifications_addr));
+  auto transport = my_transport;
+  if (transport == nullptr) {
+    notifications_addr = parser.notifications_addr;
+    transport = std::shared_ptr<TransportIface>(
+        TransportIface::make_nanomsg(notifications_addr));
+  }
+  // won't hurt if transport has already been opened
   transport->open();
 
 #ifdef BMDEBUG_ON
@@ -216,7 +222,9 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
     status = init_objects(parser.config_file_path, parser.device_id, transport);
   if (status != 0) return status;
 
-  if (parser.use_files)
+  if (my_dev_mgr != nullptr)
+    set_dev_mgr(std::move(my_dev_mgr));
+  else if (parser.use_files)
     set_dev_mgr_files(parser.wait_time);
   else if (parser.packet_in)
     set_dev_mgr_packet_in(device_id, parser.packet_in_addr, transport);
@@ -457,6 +465,23 @@ SwitchWContexts::new_packet(size_t cxt_id, int ingress_port, packet_id_t id,
   boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
   return Packet(cxt_id, ingress_port, id, 0u, ingress_length,
                 std::move(buffer), phv_source.get());
+}
+
+int
+SwitchWContexts::transport_send_probe(uint64_t x) const {
+  struct msg_t {
+    char sub_topic[4];
+    int switch_id;
+    uint64_t x;
+    char _padding[16];  // the header size for notifications is always 32 bytes
+  } __attribute__((packed));
+  msg_t msg;
+  char *msg_ = reinterpret_cast<char *>(&msg);
+  memset(msg_, 0, sizeof(msg));
+  memcpy(msg_, "TST|", 4);
+  msg.switch_id = device_id;
+  msg.x = x;
+  return notifications_transport->send(msg_, static_cast<int>(sizeof(msg)));
 }
 
 // Switch convenience class

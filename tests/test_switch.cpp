@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <map>
 
 #include "utils.h"
 
@@ -233,4 +234,67 @@ TEST(Switch, ExternSafeAccess) {
   auto extern_wrapper = context->get_extern_instance("extern_1");
   auto extern_instance = extern_wrapper.get();
   ASSERT_NE(nullptr, extern_instance);
+}
+
+namespace {
+
+// dummy DevMgrIface implementation for testing
+class MyDevMgr : public DevMgrIface {
+ public:
+  MyDevMgr() { p_monitor = PortMonitorIface::make_dummy(); }
+
+ private:
+  bool port_is_up_(port_t) const override { return true; }
+  std::map<port_t, PortInfo> get_port_info_() const override {
+    return {{99, PortInfo(99, "dummy_port")}};
+  }
+  ReturnCode port_add_(const std::string &, port_t,
+                       const char *, const char *) override {
+    return ReturnCode::SUCCESS;
+  }
+  ReturnCode port_remove_(port_t) override { return ReturnCode::SUCCESS; }
+  ReturnCode set_packet_handler_(const PacketHandler &, void *) override {
+    return ReturnCode::SUCCESS;
+  }
+  void transmit_fn_(int, const char *, int) override { }
+  void start_() override { }
+};
+
+}  // namespace
+
+TEST(Switch, MyDevMgr) {
+  std::unique_ptr<MyDevMgr> my_dev_mgr(new MyDevMgr());
+  SwitchTest sw;
+  int argc = 2;
+  char argv0[] = "switch_test";
+  char argv1[] = "--no-p4";
+  char *argv[] = {argv0, argv1};
+  sw.init_from_command_line_options(
+      argc, argv, nullptr, nullptr, std::move(my_dev_mgr));
+
+  auto port_info = sw.get_port_info();
+  auto dummy_port = port_info.begin()->first;
+  EXPECT_EQ(99, dummy_port);
+}
+
+TEST(Switch, MyTransport) {
+  auto transport = std::make_shared<MemoryAccessor>(1024);
+  std::unique_ptr<MyDevMgr> my_dev_mgr(new MyDevMgr());
+  SwitchTest sw;
+  int argc = 2;
+  char argv0[] = "switch_test";
+  char argv1[] = "--no-p4";
+  char *argv[] = {argv0, argv1};
+  sw.init_from_command_line_options(
+      argc, argv, nullptr, transport, std::move(my_dev_mgr));
+  sw.transport_send_probe(0xaba);
+  struct msg_t {
+    char sub_topic[4];
+    int switch_id;
+    uint64_t x;
+    char _padding[16];  // the header size for notifications is always 32 bytes
+  } __attribute__((packed));
+  msg_t msg;
+  transport->read(reinterpret_cast<char *>(&msg), sizeof(msg));
+  EXPECT_EQ(0xaba, msg.x);
 }
