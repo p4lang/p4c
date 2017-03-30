@@ -42,6 +42,9 @@ AC_SUBST([GRPC_CFLAGS])
 AC_SUBST([GRPC_LIBS])
 
 # Generate makefiles
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+                 tests/Makefile])
+
+AC_CONFIG_FILES([tests/test.run], [chmod +x tests/test.run])
 
 AC_OUTPUT

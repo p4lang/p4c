@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+json=@srcdir@/testdata/simple_router.json
+
+@builddir@/../simple_switch_grpc --log-console $json &
+switch_PID=$!
+# making sure switch is ready
+echo "Sleeping 10 seconds..."
+sleep 10
+
+@builddir@/test
+test_status=$?
+
+kill $switch_PID
+
+exit $test_status

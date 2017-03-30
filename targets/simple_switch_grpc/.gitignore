@@ -4,3 +4,6 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 
 simple_switch_grpc
+
+tests/test
+tests/test.run
