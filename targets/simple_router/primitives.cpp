@@ -45,7 +45,7 @@ REGISTER_PRIMITIVE(add_to_field);
 
 class drop : public ActionPrimitive<> {
   void operator ()() {
-    get_field("standard_metadata.egress_port").set(511);
+    get_field("standard_metadata.egress_spec").set(511);
   }
 };
 
