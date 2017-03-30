@@ -47,10 +47,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("my_register") register<bit<32>>(32w16384) my_register_0;
-    @name("m_action") action m_action_0(bit<8> register_idx) {
+    @name(".m_action") action m_action_0(bit<8> register_idx) {
         my_register_0.read(meta.meta.register_tmp, (bit<32>)register_idx);
     }
-    @name("_nop") action _nop_0() {
+    @name("._nop") action _nop_0() {
     }
     @name("m_table") table m_table_0 {
         actions = {

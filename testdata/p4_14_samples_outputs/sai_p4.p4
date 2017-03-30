@@ -137,27 +137,27 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
+    @name(".fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
         standard_metadata.egress_spec = port_id;
         meta.ingress_metadata.routed = 1w0;
     }
-    @name("nop") action nop() {
+    @name(".nop") action nop() {
     }
-    @name("generate_learn_notify") action generate_learn_notify() {
+    @name(".generate_learn_notify") action generate_learn_notify() {
         digest<mac_learn_digest>((bit<32>)1024, { meta.ingress_metadata.vlan_id, hdr.eth.srcAddr, meta.intrinsic_metadata.ingress_port, meta.ingress_metadata.learning });
     }
-    @name("set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
+    @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
         hdr.eth.srcAddr = meta.ingress_metadata.def_smac;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
         standard_metadata.egress_spec = port_id;
     }
-    @name("set_next_hop") action set_next_hop(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
+    @name(".set_next_hop") action set_next_hop(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
         meta.ingress_metadata.router_intf = router_interface_id;
     }
-    @name("set_in_port") action set_in_port(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
+    @name(".set_in_port") action set_in_port(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
         meta.ingress_metadata.port_lag = port;
         meta.ingress_metadata.mac_limit = max_learned_address;
         meta.ingress_metadata.port_type = type_;
@@ -174,26 +174,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.vlan_id = default_vlan;
     }
-    @name("copy_to_cpu") action copy_to_cpu() {
+    @name(".copy_to_cpu") action copy_to_cpu() {
         meta.ingress_metadata.copy_to_cpu = 1w1;
     }
-    @name("route_set_trap") action route_set_trap(bit<3> trap_priority) {
+    @name(".route_set_trap") action route_set_trap(bit<3> trap_priority) {
         meta.ingress_metadata.pri = trap_priority;
         copy_to_cpu();
     }
-    @name("route_set_nexthop") action route_set_nexthop(bit<16> next_hop_id) {
+    @name(".route_set_nexthop") action route_set_nexthop(bit<16> next_hop_id) {
         meta.ingress_metadata.nhop = next_hop_id;
         meta.ingress_metadata.routed = 1w1;
         meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("route_set_nexthop_group") action route_set_nexthop_group(bit<16> next_hop_group_id) {
+    @name(".route_set_nexthop_group") action route_set_nexthop_group(bit<16> next_hop_group_id) {
         meta.ingress_metadata.ecmp_nhop = next_hop_group_id;
         meta.ingress_metadata.routed = 1w1;
         meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("set_router_interface") action set_router_interface(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
+    @name(".set_router_interface") action set_router_interface(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
         meta.ingress_metadata.vrf = virtual_router_id;
         meta.ingress_metadata.interface_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -204,10 +204,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.router_mac = 1w1;
     }
-    @name("router_interface_miss") action router_interface_miss() {
+    @name(".router_interface_miss") action router_interface_miss() {
         meta.ingress_metadata.router_mac = 1w0;
     }
-    @name("set_switch") action set_switch(bit<8> port_number, bit<16> cpu_port, bit<8> max_virtual_routers, bit<8> fdb_table_size, bit<8> on_link_route_supported, bit<2> oper_status, bit<8> max_temp, bit<8> switching_mode, bit<8> cpu_flood_enable, bit<8> ttl1_action, bit<12> port_vlan_id, bit<48> src_mac_address, bit<8> fdb_aging_time, bit<8> fdb_unicast_miss_action, bit<8> fdb_broadcast_miss_action, bit<8> fdb_multicast_miss_action, bit<8> ecmp_hash_seed, bit<8> ecmp_hash_type, bit<8> ecmp_hash_fields, bit<8> ecmp_max_paths, bit<16> vr_id) {
+    @name(".set_switch") action set_switch(bit<8> port_number, bit<16> cpu_port, bit<8> max_virtual_routers, bit<8> fdb_table_size, bit<8> on_link_route_supported, bit<2> oper_status, bit<8> max_temp, bit<8> switching_mode, bit<8> cpu_flood_enable, bit<8> ttl1_action, bit<12> port_vlan_id, bit<48> src_mac_address, bit<8> fdb_aging_time, bit<8> fdb_unicast_miss_action, bit<8> fdb_broadcast_miss_action, bit<8> fdb_multicast_miss_action, bit<8> ecmp_hash_seed, bit<8> ecmp_hash_type, bit<8> ecmp_hash_fields, bit<8> ecmp_max_paths, bit<16> vr_id) {
         meta.ingress_metadata.def_vlan = port_vlan_id;
         meta.ingress_metadata.vrf = vr_id;
         meta.ingress_metadata.def_smac = src_mac_address;
@@ -216,7 +216,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.oper_status = oper_status;
         meta.intrinsic_metadata.ingress_port = standard_metadata.ingress_port;
     }
-    @name("set_router") action set_router(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
+    @name(".set_router") action set_router(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
         meta.ingress_metadata.def_smac = src_mac_address;
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;

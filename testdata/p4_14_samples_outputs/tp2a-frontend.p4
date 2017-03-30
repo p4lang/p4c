@@ -28,18 +28,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setb1") action setb1_0(bit<32> val) {
+    @name(".setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("setb3") action setb3_0(bit<32> val) {
+    @name(".setb3") action setb3_0(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("setb2") action setb2_0(bit<32> val) {
+    @name(".setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4_0(bit<32> val) {
+    @name(".setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
     @name("A1") table A1_0 {

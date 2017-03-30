@@ -17,12 +17,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("meta")
+    @name("meta") 
     meta_t meta;
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -36,10 +36,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("addf2") action addf2_0() {
+    @name(".addf2") action addf2_0() {
         meta.meta.sum = hdr.data.f2 + 32w100;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
     @name("test1") table test1 {
         actions = {

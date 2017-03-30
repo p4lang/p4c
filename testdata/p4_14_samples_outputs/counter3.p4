@@ -29,7 +29,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("act") action act(bit<9> port) {
+    @name(".act") action act(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name("tab1") table tab1 {

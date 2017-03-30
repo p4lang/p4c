@@ -82,10 +82,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("route") action route_0() {
+    @name(".route") action route_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);

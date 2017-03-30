@@ -28,13 +28,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_b") action do_b_0() {
+    @name(".do_b") action do_b_0() {
     }
-    @name("do_d") action do_d_0() {
+    @name(".do_d") action do_d_0() {
     }
-    @name("do_e") action do_e_0() {
+    @name(".do_e") action do_e_0() {
     }
-    @name("nop") action nop_0() {
+    @name(".nop") action nop_0() {
     }
     @name("A") table A_0 {
         actions = {

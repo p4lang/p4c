@@ -26,9 +26,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data1")
+    @name("data1") 
     data1_t data1;
-    @name("data2")
+    @name("data2") 
     data2_t data2;
 }
 
@@ -49,7 +49,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
     @name("test1") table test1 {
         actions = {

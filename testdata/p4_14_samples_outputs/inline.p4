@@ -6,7 +6,7 @@ struct h {
 }
 
 struct metadata {
-    @name("m")
+    @name("m") 
     h m;
 }
 
@@ -20,7 +20,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("x") action x() {
+    @name(".x") action x() {
     }
     @name("t") table t {
         actions = {

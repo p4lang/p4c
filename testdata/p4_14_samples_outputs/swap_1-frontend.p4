@@ -27,10 +27,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("a11") action a11_0() {
+    @name(".a11") action a11_0() {
         standard_metadata.egress_spec = 9w1;
     }
-    @name("a12") action a12_0() {
+    @name(".a12") action a12_0() {
         standard_metadata.egress_spec = 9w2;
     }
     @name("t_ingress_1") table t_ingress {

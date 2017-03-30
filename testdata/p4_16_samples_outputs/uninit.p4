@@ -82,9 +82,9 @@ control c(out bit<32> v) {
         }
 
         touched = !touched;
-        if (e > 0)
+        if (e > 0) 
             t.apply();
-        else
+        else 
             a1();
         setByAction = setByAction + 1;
     }

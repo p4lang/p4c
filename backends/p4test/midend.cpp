@@ -33,7 +33,9 @@ limitations under the License.
 #include "midend/copyStructures.h"
 #include "midend/predication.h"
 #include "midend/noMatch.h"
+#include "midend/tableHit.h"
 #include "midend/expandLookahead.h"
+#include "midend/midEndLast.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -132,10 +134,12 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
+        new P4::TableHit(&refMap, &typeMap),
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new P4::MidEndLast()
     });
 }
 

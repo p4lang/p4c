@@ -16,12 +16,8 @@ parser P() {
 }
 
 control C() {
-    bit<32> x_2;
-    bit<32> y;
     @name("fake") Fake() fake_2;
     action act() {
-        x_2 = 32w0;
-        y = 32w1;
         fake_2.call(32w1);
     }
     table tbl_act {

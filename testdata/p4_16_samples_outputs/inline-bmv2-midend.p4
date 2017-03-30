@@ -40,15 +40,6 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         }
         default_action = NoAction_0();
     }
-    action act() {
-        tmp_ipv4 = hdr.ipv4;
-    }
-    table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     apply {
         do_aux_adjust_lkp_fields_0.apply();
     }

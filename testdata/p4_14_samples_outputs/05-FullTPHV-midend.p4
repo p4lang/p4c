@@ -288,12 +288,12 @@ header h_t {
 }
 
 struct metadata {
-    @name("m")
+    @name("m") 
     m_t m;
 }
 
 struct headers {
-    @name("h")
+    @name("h") 
     h_t h;
 }
 
@@ -322,7 +322,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_11() {
     }
-    @name("a1") action a1_0() {
+    @name(".a1") action a1_0() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -548,19 +548,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_63 = 32w63;
         hdr.h.setInvalid();
     }
-    @name("set_egress_spec") action set_egress_spec_0(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("set_egress_spec") action set_egress_spec_5(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec_5(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("set_egress_spec") action set_egress_spec_6(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec_6(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("set_egress_spec") action set_egress_spec_7(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec_7(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("set_egress_spec") action set_egress_spec_8(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec_8(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name("t1") table t1 {

@@ -47,12 +47,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("my_meter") meter(32w16384, CounterType.packets) my_meter_0;
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("_nop") action _nop_0() {
+    @name("._nop") action _nop_0() {
     }
-    @name("m_action") action m_action_0(bit<14> meter_idx) {
+    @name(".m_action") action m_action_0(bit<14> meter_idx) {
         my_meter_0.execute_meter<bit<32>>((bit<32>)meter_idx, meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }

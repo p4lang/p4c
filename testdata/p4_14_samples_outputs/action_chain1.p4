@@ -40,30 +40,30 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("set0b1") action set0b1(bit<8> val) {
+    @name(".set0b1") action set0b1(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act1") action act1(bit<8> val) {
+    @name(".act1") action act1(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act2") action act2(bit<8> val) {
+    @name(".act2") action act2(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act3") action act3(bit<8> val) {
+    @name(".act3") action act3(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("noop") action noop() {
+    @name(".noop") action noop() {
     }
-    @name("setb2") action setb2(bit<8> val) {
+    @name(".setb2") action setb2(bit<8> val) {
         hdr.data.b2 = val;
     }
-    @name("set1b1") action set1b1(bit<8> val) {
+    @name(".set1b1") action set1b1(bit<8> val) {
         hdr.extra[1].b1 = val;
     }
-    @name("set2b2") action set2b2(bit<8> val) {
+    @name(".set2b2") action set2b2(bit<8> val) {
         hdr.extra[2].b2 = val;
     }
-    @name("setb1") action setb1(bit<9> port, bit<8> val) {
+    @name(".setb1") action setb1(bit<9> port, bit<8> val) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }

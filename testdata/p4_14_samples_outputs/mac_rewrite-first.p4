@@ -85,24 +85,24 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name(".nop") action nop() {
     }
-    @name("rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac(bit<48> smac) {
+    @name(".rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac(bit<48> smac) {
+    @name(".rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr[47:23] = 25w0x0;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac(bit<48> smac) {
+    @name(".rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac(bit<48> smac) {
+    @name(".rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr[47:32] = 16w0x0;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
@@ -131,7 +131,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_setup") action do_setup(bit<9> idx, bit<1> routed) {
+    @name(".do_setup") action do_setup(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;

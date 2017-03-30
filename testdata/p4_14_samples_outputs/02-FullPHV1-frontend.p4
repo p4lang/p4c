@@ -257,7 +257,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("a1") action a1_0() {
+    @name(".a1") action a1_0() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -458,7 +458,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_38 = 32w38;
         meta.m.field_32_39 = 32w39;
     }
-    @name("a2_1") action a2() {
+    @name(".a2_1") action a2() {
         meta.m.field_16_01 = 16w1;
         meta.m.field_16_02 = 16w2;
         meta.m.field_16_03 = 16w3;
@@ -508,7 +508,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_47 = 16w47;
         meta.m.field_16_48 = 16w48;
     }
-    @name("a2_2") action a2_0() {
+    @name(".a2_2") action a2_0() {
         meta.m.field_16_49 = 16w49;
         meta.m.field_16_50 = 16w50;
         meta.m.field_16_51 = 16w51;
@@ -525,7 +525,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_62 = 16w62;
         meta.m.field_16_63 = 16w63;
     }
-    @name("a2_3") action a2_4() {
+    @name(".a2_3") action a2_4() {
         meta.m.field_16_65 = 16w65;
         meta.m.field_16_66 = 16w66;
         meta.m.field_16_67 = 16w67;
@@ -542,7 +542,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_78 = 16w78;
         meta.m.field_16_79 = 16w79;
     }
-    @name("a3_1") action a3() {
+    @name(".a3_1") action a3() {
         meta.m.field_16_80 = 16w80;
         meta.m.field_16_81 = 16w81;
         meta.m.field_16_82 = 16w82;

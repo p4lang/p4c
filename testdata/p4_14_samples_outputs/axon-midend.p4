@@ -20,16 +20,16 @@ header axon_hop_t {
 }
 
 struct metadata {
-    @name("my_metadata")
+    @name("my_metadata") 
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name("axon_head")
+    @name("axon_head") 
     axon_head_t    axon_head;
-    @name("axon_fwdHop")
+    @name("axon_fwdHop") 
     axon_hop_t[64] axon_fwdHop;
-    @name("axon_revHop")
+    @name("axon_revHop") 
     axon_hop_t[64] axon_revHop;
 }
 
@@ -86,13 +86,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_3() {
     }
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("_drop") action _drop_2() {
+    @name("._drop") action _drop_2() {
         mark_to_drop();
     }
-    @name("route") action route_0() {
+    @name(".route") action route_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);
@@ -122,9 +122,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen)
+        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
             drop_pkt.apply();
-        else
+        else 
             route_pkt.apply();
     }
 }

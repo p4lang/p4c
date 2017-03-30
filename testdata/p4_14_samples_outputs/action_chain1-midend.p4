@@ -19,9 +19,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t     data;
-    @name("extra")
+    @name("extra") 
     extra_t[4] extra;
 }
 
@@ -50,38 +50,38 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_9() {
     }
-    @name("set0b1") action set0b1_0(bit<8> val) {
+    @name(".set0b1") action set0b1_0(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act1") action act1_0(bit<8> val) {
+    @name(".act1") action act1_0(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act2") action act2_0(bit<8> val) {
+    @name(".act2") action act2_0(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act3") action act3_0(bit<8> val) {
+    @name(".act3") action act3_0(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("noop") action noop_0() {
+    @name(".noop") action noop_0() {
     }
-    @name("noop") action noop_5() {
+    @name(".noop") action noop_5() {
     }
-    @name("noop") action noop_6() {
+    @name(".noop") action noop_6() {
     }
-    @name("noop") action noop_7() {
+    @name(".noop") action noop_7() {
     }
-    @name("noop") action noop_8() {
+    @name(".noop") action noop_8() {
     }
-    @name("setb2") action setb2_0(bit<8> val) {
+    @name(".setb2") action setb2_0(bit<8> val) {
         hdr.data.b2 = val;
     }
-    @name("set1b1") action set1b1_0(bit<8> val) {
+    @name(".set1b1") action set1b1_0(bit<8> val) {
         hdr.extra[1].b1 = val;
     }
-    @name("set2b2") action set2b2_0(bit<8> val) {
+    @name(".set2b2") action set2b2_0(bit<8> val) {
         hdr.extra[2].b2 = val;
     }
-    @name("setb1") action setb1_0(bit<9> port, bit<8> val) {
+    @name(".setb1") action setb1_0(bit<9> port, bit<8> val) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }

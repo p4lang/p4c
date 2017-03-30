@@ -15,12 +15,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata")
+    @name("counter_metadata") 
     counter_metadata_t counter_metadata;
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -33,11 +33,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
-    @name("set_index") action set_index(bit<16> index, bit<9> port) {
+    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
         standard_metadata.egress_spec = port;
     }
-    @name("count_entries") action count_entries() {
+    @name(".count_entries") action count_entries() {
         count1.count((bit<32>)meta.counter_metadata.counter_index);
     }
     @name("index_setter") table index_setter {

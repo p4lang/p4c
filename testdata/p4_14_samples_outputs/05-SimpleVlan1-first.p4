@@ -42,7 +42,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name(".nop") action nop() {
     }
     @name("t2") table t2 {
         actions = {
@@ -60,7 +60,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name(".nop") action nop() {
     }
     @name("t1") table t1 {
         actions = {

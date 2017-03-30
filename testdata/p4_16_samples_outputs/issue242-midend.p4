@@ -74,27 +74,14 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bit<32> inc;
     bit<32> tmp_1;
     bit<32> tmp_2;
-    bool cond;
-    bool pred;
-    bool cond_0;
-    bool pred_0;
     @name("debug") register<bit<32>>(32w100) debug;
     @name("reg") register<bit<32>>(32w1) reg;
     @name("test") action test_0() {
         val.field1 = 32w0;
-        _pred = val.field1 != 32w0;
-        cond = val.field1 != 32w0;
-        pred = val.field1 != 32w0;
         tmp_1 = (val.field1 != 32w0 ? 32w1 : tmp_1);
-        cond = !(val.field1 != 32w0);
-        pred = !(val.field1 != 32w0);
         tmp_1 = (!(val.field1 != 32w0) ? 32w0 : tmp_1);
         inc = tmp_1;
-        cond_0 = val.field1 != 32w0;
-        pred_0 = val.field1 != 32w0;
         tmp_2 = (val.field1 != 32w0 ? 32w1 : tmp_2);
-        cond_0 = !(val.field1 != 32w0);
-        pred_0 = !(val.field1 != 32w0);
         tmp_2 = (!(val.field1 != 32w0) ? 32w0 : tmp_2);
         debug.write(32w0, tmp_2);
         debug.write(32w1, inc);

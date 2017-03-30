@@ -19,14 +19,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta")
+    @name("meta") 
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -51,10 +51,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("NoAction") action NoAction_3() {
     }
     @name("my_meter") direct_meter<bit<32>>(CounterType.packets) my_meter;
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("_nop") action _nop_1() {
+    @name("._nop") action _nop_1() {
     }
     @name("m_filter") table m_filter {
         actions = {
@@ -68,11 +68,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction_0();
     }
-    @name("m_action") action m_action(bit<9> meter_idx) {
+    @name(".m_action") action m_action(bit<9> meter_idx) {
         standard_metadata.egress_spec = 9w1;
         my_meter.read(meta.meta.meter_tag);
     }
-    @name("_nop") action _nop_2() {
+    @name("._nop") action _nop_2() {
         my_meter.read(meta.meta.meter_tag);
     }
     @name("m_table") table m_table {
@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meters = my_meter;
     }
     apply {
-        m_table.apply;
+        m_table.apply();
         m_filter.apply();
     }
 }

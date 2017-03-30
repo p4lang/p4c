@@ -22,14 +22,14 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata")
+    @name("counter_metadata") 
     counter_metadata_t counter_metadata;
-    @name("meter_metadata")
+    @name("meter_metadata") 
     meter_metadata_t   meter_metadata;
 }
 
 struct headers {
-    @name("data")
+    @name("data") 
     data_t data;
 }
 
@@ -41,24 +41,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<32> tmp_1;
-    bit<8> tmp_2;
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_3() {
     }
     @name("count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
     @name("meter1") meter(32w1024, CounterType.bytes) meter1;
-    @name("set_index") action set_index_0(bit<16> index, bit<9> port) {
+    @name(".set_index") action set_index_0(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
         meta.meter_metadata.meter_index = index;
         standard_metadata.egress_spec = port;
     }
-    @name("count_entries") action count_entries_0() {
+    @name(".count_entries") action count_entries_0() {
         count1.count((bit<32>)meta.counter_metadata.counter_index);
-        tmp_1 = (bit<32>)meta.meter_metadata.meter_index;
-        meter1.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, tmp_2);
-        hdr.data.color_1 = tmp_2;
+        meter1.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, hdr.data.color_1);
     }
     @name("index_setter") table index_setter {
         actions = {

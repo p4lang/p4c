@@ -38,13 +38,13 @@ header myhdr_t {
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
-    @name("ipv4")
+    @name("ipv4") 
     ipv4_t     ipv4;
-    @name("udp")
+    @name("udp") 
     udp_t      udp;
-    @name("myhdr")
+    @name("myhdr") 
     myhdr_t    myhdr;
 }
 
@@ -54,7 +54,7 @@ struct ingress_metadata_t {
 }
 
 struct metadata {
-    @name("ingress_metadata")
+    @name("ingress_metadata") 
     ingress_metadata_t local_metadata;
 }
 
@@ -101,7 +101,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     apply {
         tmp = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         tmp_0 = hdr.ipv4.hdrChecksum == tmp;
-        if (tmp_0)
+        if (tmp_0) 
             mark_to_drop();
     }
 }
@@ -150,8 +150,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = read_round_0();
     }
     apply {
-        if (hdr.ipv4.isValid())
-            if (hdr.myhdr.isValid())
+        if (hdr.ipv4.isValid()) 
+            if (hdr.myhdr.isValid()) 
                 round_tbl_0.apply();
     }
 }

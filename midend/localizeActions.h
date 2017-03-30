@@ -136,11 +136,23 @@ class DuplicateActions : public Transform {
     const IR::Node* postorder(IR::P4Control* control) override;
 };
 
+// Add a @name annotation on each global action that does not have one
+class TagGlobalActions : public Transform {
+ public:
+    TagGlobalActions() { setName("TagGlobalActions"); }
+    const IR::Node* preorder(IR::P4Action* action) override;
+    const IR::Node* preorder(IR::P4Parser* parser) override
+    { prune(); return parser; }
+    const IR::Node* preorder(IR::P4Control* control) override
+    { prune(); return control; }
+};
+
 class LocalizeAllActions : public PassManager {
     GlobalActionReplacements globalReplacements;
     ActionReplacement        localReplacements;
  public:
     explicit LocalizeAllActions(ReferenceMap* refMap) {
+        passes.emplace_back(new TagGlobalActions());
         passes.emplace_back(new PassRepeated {
             new ResolveReferences(refMap),
             new FindGlobalActionUses(refMap, &globalReplacements),

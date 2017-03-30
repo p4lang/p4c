@@ -184,6 +184,7 @@ class ComputeNewNames : public Inspector {
     cstring           prefix;
     P4::ReferenceMap* refMap;
     SymRenameMap*     renameMap;
+
  public:
     ComputeNewNames(cstring prefix, P4::ReferenceMap* refMap, SymRenameMap* renameMap) :
             prefix(prefix), refMap(refMap), renameMap(renameMap) {
@@ -194,7 +195,12 @@ class ComputeNewNames : public Inspector {
     void rename(const IR::Declaration* decl) {
         BUG_CHECK(decl->is<IR::IAnnotated>(), "%1%: no annotations", decl);
         cstring name = decl->externalName();
-        cstring extName = prefix + "." + name;
+        cstring extName;
+        if (name.startsWith("."))
+            // Do not change the external name of objects starting with a leading dot
+            extName = name;
+        else
+            extName = prefix + "." + name;
         cstring baseName = extName.replace('.', '_');
         cstring newName = refMap->newName(baseName);
         renameMap->setNewName(decl, newName, extName);

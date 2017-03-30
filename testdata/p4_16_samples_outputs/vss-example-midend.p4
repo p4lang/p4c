@@ -84,8 +84,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    IPv4Address nextHop_1;
-    IPv4Address nextHop_2;
+    IPv4Address nextHop;
     bool hasReturned_0;
     @name("NoAction") action NoAction_0() {
     }
@@ -102,10 +101,9 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         outCtrl.outputPort = 4w0xf;
     }
     @name("Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
-        nextHop_0 = ipv4_dest;
+        nextHop = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
-        nextHop_2 = ipv4_dest;
     }
     @name("ipv4_match") table ipv4_match {
         key = {
@@ -136,7 +134,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("dmac") table dmac_1 {
         key = {
-            nextHop_1: exact @name("nextHop") ;
+            nextHop: exact @name("nextHop") ;
         }
         actions = {
             Drop_action_4();
@@ -169,15 +167,9 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         hasReturned_0 = true;
     }
     action act_2() {
-        nextHop_1 = nextHop_2;
-    }
-    action act_3() {
         hasReturned_0 = true;
     }
-    action act_4() {
-        nextHop_3 = nextHop_1;
-    }
-    action act_5() {
+    action act_3() {
         hasReturned_0 = true;
     }
     table tbl_act {
@@ -200,33 +192,21 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table tbl_act_1 {
         actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
-    table tbl_act_2 {
-        actions = {
             act_1();
         }
         const default_action = act_1();
+    }
+    table tbl_act_2 {
+        actions = {
+            act_2();
+        }
+        const default_action = act_2();
     }
     table tbl_act_3 {
         actions = {
             act_3();
         }
         const default_action = act_3();
-    }
-    table tbl_act_4 {
-        actions = {
-            act_4();
-        }
-        const default_action = act_4();
-    }
-    table tbl_act_5 {
-        actions = {
-            act_5();
-        }
-        const default_action = act_5();
     }
     apply {
         tbl_act.apply();
@@ -236,22 +216,20 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         if (!hasReturned_0) {
             ipv4_match.apply();
-            tbl_act_1.apply();
-            if (outCtrl.outputPort == 4w0xf)
-                tbl_act_2.apply();
+            if (outCtrl.outputPort == 4w0xf) 
+                tbl_act_1.apply();
         }
         if (!hasReturned_0) {
             check_ttl.apply();
-            if (outCtrl.outputPort == 4w0xe)
-                tbl_act_3.apply();
+            if (outCtrl.outputPort == 4w0xe) 
+                tbl_act_2.apply();
         }
         if (!hasReturned_0) {
-            tbl_act_4.apply();
             dmac_1.apply();
-            if (outCtrl.outputPort == 4w0xf)
-                tbl_act_5.apply();
+            if (outCtrl.outputPort == 4w0xf) 
+                tbl_act_3.apply();
         }
-        if (!hasReturned_0)
+        if (!hasReturned_0) 
             smac_1.apply();
     }
 }
@@ -259,43 +237,43 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     bit<16> tmp_6;
     @name("ck") Ck16() ck_2;
-    action act_6() {
+    action act_4() {
         ck_2.clear();
         p.ip.hdrChecksum = 16w0;
         ck_2.update<Ipv4_h>(p.ip);
         tmp_6 = ck_2.get();
         p.ip.hdrChecksum = tmp_6;
     }
-    action act_7() {
+    action act_5() {
         b.emit<Ethernet_h>(p.ethernet);
     }
-    action act_8() {
+    action act_6() {
         b.emit<Ipv4_h>(p.ip);
     }
-    table tbl_act_6 {
+    table tbl_act_4 {
         actions = {
-            act_7();
+            act_5();
         }
-        const default_action = act_7();
+        const default_action = act_5();
     }
-    table tbl_act_7 {
+    table tbl_act_5 {
+        actions = {
+            act_4();
+        }
+        const default_action = act_4();
+    }
+    table tbl_act_6 {
         actions = {
             act_6();
         }
         const default_action = act_6();
     }
-    table tbl_act_8 {
-        actions = {
-            act_8();
-        }
-        const default_action = act_8();
-    }
     apply {
-        tbl_act_6.apply();
+        tbl_act_4.apply();
         if (p.ip.isValid()) {
-            tbl_act_7.apply();
+            tbl_act_5.apply();
         }
-        tbl_act_8.apply();
+        tbl_act_6.apply();
     }
 }
 

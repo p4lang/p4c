@@ -64,7 +64,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     @name("debug") register<bit<32>>(32w100) debug_0;
     @name("reg") register<bit<32>>(32w1) reg_0;
     @name("test") action test_0() {
-        val_0 = {32w0};
+        val_0 = { 32w0 };
         _pred_0 = val_0.field1 != 32w0;
         if (_pred_0) 
             tmp = 32w1;

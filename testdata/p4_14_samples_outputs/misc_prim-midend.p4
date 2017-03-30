@@ -36,53 +36,68 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<32> tmp_4;
+    bit<32> tmp_5;
+    bit<32> tmp_6;
+    int<32> tmp_7;
+    int<32> tmp_8;
     @name("NoAction") action NoAction_0() {
     }
-    @name("action_0") action action_14() {
+    @name(".action_0") action action_14() {
         hdr.pkt.field_a_32 = (bit<32>)~(hdr.pkt.field_b_32 | (int<32>)hdr.pkt.field_c_32);
     }
-    @name("action_1") action action_15(bit<32> param0) {
+    @name(".action_1") action action_15(bit<32> param0) {
         hdr.pkt.field_a_32 = ~(param0 & hdr.pkt.field_c_32);
     }
-    @name("action_2") action action_16(bit<32> param0) {
+    @name(".action_2") action action_16(bit<32> param0) {
         hdr.pkt.field_a_32 = (bit<32>)~(hdr.pkt.field_b_32 ^ (int<32>)param0);
     }
-    @name("action_3") action action_17() {
+    @name(".action_3") action action_17() {
         hdr.pkt.field_a_32 = ~hdr.pkt.field_d_32;
     }
-    @name("action_4") action action_18(bit<32> param0) {
-        hdr.pkt.field_a_32 = (hdr.pkt.field_d_32 <= param0 ? hdr.pkt.field_d_32 : param0);
+    @name(".action_4") action action_18(bit<32> param0) {
+        tmp_4 = (hdr.pkt.field_d_32 <= param0 ? hdr.pkt.field_d_32 : tmp_4);
+        tmp_4 = (!(hdr.pkt.field_d_32 <= param0) ? param0 : tmp_4);
+        hdr.pkt.field_a_32 = tmp_4;
     }
-    @name("action_5") action action_19(bit<32> param0) {
-        hdr.pkt.field_a_32 = (param0 >= hdr.pkt.field_d_32 ? param0 : hdr.pkt.field_d_32);
+    @name(".action_5") action action_19(bit<32> param0) {
+        tmp_5 = (param0 >= hdr.pkt.field_d_32 ? param0 : tmp_5);
+        tmp_5 = (!(param0 >= hdr.pkt.field_d_32) ? hdr.pkt.field_d_32 : tmp_5);
+        hdr.pkt.field_a_32 = tmp_5;
     }
-    @name("action_6") action action_20() {
-        hdr.pkt.field_b_32 = (int<32>)(hdr.pkt.field_d_32 <= 32w7 ? hdr.pkt.field_d_32 : 32w7);
+    @name(".action_6") action action_20() {
+        tmp_6 = (hdr.pkt.field_d_32 <= 32w7 ? hdr.pkt.field_d_32 : tmp_6);
+        tmp_6 = (!(hdr.pkt.field_d_32 <= 32w7) ? 32w7 : tmp_6);
+        hdr.pkt.field_b_32 = (int<32>)tmp_6;
     }
-    @name("action_7") action action_21(int<32> param0) {
-        hdr.pkt.field_b_32 = (param0 >= (int<32>)hdr.pkt.field_d_32 ? param0 : (int<32>)hdr.pkt.field_d_32);
+    @name(".action_7") action action_21(int<32> param0) {
+        tmp_7 = (param0 >= (int<32>)hdr.pkt.field_d_32 ? param0 : tmp_7);
+        tmp_7 = (!(param0 >= (int<32>)hdr.pkt.field_d_32) ? (int<32>)hdr.pkt.field_d_32 : tmp_7);
+        hdr.pkt.field_b_32 = tmp_7;
     }
-    @name("action_8") action action_22(int<32> param0) {
-        hdr.pkt.field_x_32 = (hdr.pkt.field_x_32 >= param0 ? hdr.pkt.field_x_32 : param0);
+    @name(".action_8") action action_22(int<32> param0) {
+        tmp_8 = (hdr.pkt.field_x_32 >= param0 ? hdr.pkt.field_x_32 : tmp_8);
+        tmp_8 = (!(hdr.pkt.field_x_32 >= param0) ? param0 : tmp_8);
+        hdr.pkt.field_x_32 = tmp_8;
     }
-    @name("action_9") action action_23() {
+    @name(".action_9") action action_23() {
         hdr.pkt.field_x_32 = hdr.pkt.field_x_32 >> 7;
     }
-    @name("action_10") action action_24(bit<32> param0) {
+    @name(".action_10") action action_24(bit<32> param0) {
         hdr.pkt.field_a_32 = ~param0 & hdr.pkt.field_a_32;
     }
-    @name("action_11") action action_25(bit<32> param0) {
+    @name(".action_11") action action_25(bit<32> param0) {
         hdr.pkt.field_a_32 = param0 & ~hdr.pkt.field_a_32;
     }
-    @name("action_12") action action_26(bit<32> param0) {
+    @name(".action_12") action action_26(bit<32> param0) {
         hdr.pkt.field_a_32 = ~param0 | hdr.pkt.field_a_32;
     }
-    @name("action_13") action action_27(bit<32> param0) {
+    @name(".action_13") action action_27(bit<32> param0) {
         hdr.pkt.field_a_32 = param0 | ~hdr.pkt.field_a_32;
     }
-    @name("do_nothing") action do_nothing_0() {
+    @name(".do_nothing") action do_nothing_0() {
     }
-    @name("table_0") table table_0() {
+    @name("table_0") table table_0 {
         actions = {
             action_14();
             action_15();

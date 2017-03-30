@@ -48,7 +48,6 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Choice c_c_0;
     action act() {
         h.h.c = h.h.a;
     }
@@ -77,9 +76,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = act_1();
     }
     apply {
-        if (false)
+        if (false) 
             tbl_act.apply();
-        else
+        else 
             tbl_act_0.apply();
         tbl_act_1.apply();
     }

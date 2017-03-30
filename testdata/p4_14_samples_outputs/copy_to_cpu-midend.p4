@@ -20,14 +20,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("cpu_header")
+    @name("cpu_header") 
     cpu_header_t cpu_header;
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t   ethernet;
 }
 
@@ -53,10 +53,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("_drop") action _drop_0() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("do_cpu_encap") action do_cpu_encap_0() {
+    @name(".do_cpu_encap") action do_cpu_encap_0() {
         hdr.cpu_header.setValid();
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;
@@ -85,8 +85,8 @@ struct tuple_0 {
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_1() {
     }
-    @name("do_copy_to_cpu") action do_copy_to_cpu_0() {
-        clone3<tuple_0>(CloneType.I2E, 32w250, {standard_metadata});
+    @name(".do_copy_to_cpu") action do_copy_to_cpu_0() {
+        clone3<tuple_0>(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name("copy_to_cpu") table copy_to_cpu {
         actions = {

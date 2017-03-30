@@ -41,69 +41,69 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     bit<32> tmp_1;
     int<32> tmp_2;
     int<32> tmp_3;
-    @name("action_0") action action_14() {
+    @name(".action_0") action action_14() {
         hdr.pkt.field_a_32 = (bit<32>)~(hdr.pkt.field_b_32 | (int<32>)hdr.pkt.field_c_32);
     }
-    @name("action_1") action action_15(bit<32> param0) {
+    @name(".action_1") action action_15(bit<32> param0) {
         hdr.pkt.field_a_32 = ~(param0 & hdr.pkt.field_c_32);
     }
-    @name("action_2") action action_16(bit<32> param0) {
+    @name(".action_2") action action_16(bit<32> param0) {
         hdr.pkt.field_a_32 = (bit<32>)~(hdr.pkt.field_b_32 ^ (int<32>)param0);
     }
-    @name("action_3") action action_17() {
+    @name(".action_3") action action_17() {
         hdr.pkt.field_a_32 = ~hdr.pkt.field_d_32;
     }
-    @name("action_4") action action_18(bit<32> param0) {
+    @name(".action_4") action action_18(bit<32> param0) {
         if (hdr.pkt.field_d_32 <= param0) 
             tmp = hdr.pkt.field_d_32;
         else 
             tmp = param0;
         hdr.pkt.field_a_32 = tmp;
     }
-    @name("action_5") action action_19(bit<32> param0) {
+    @name(".action_5") action action_19(bit<32> param0) {
         if (param0 >= hdr.pkt.field_d_32) 
             tmp_0 = param0;
         else 
             tmp_0 = hdr.pkt.field_d_32;
         hdr.pkt.field_a_32 = tmp_0;
     }
-    @name("action_6") action action_20() {
+    @name(".action_6") action action_20() {
         if (hdr.pkt.field_d_32 <= 32w7) 
             tmp_1 = hdr.pkt.field_d_32;
         else 
             tmp_1 = 32w7;
         hdr.pkt.field_b_32 = (int<32>)tmp_1;
     }
-    @name("action_7") action action_21(int<32> param0) {
+    @name(".action_7") action action_21(int<32> param0) {
         if (param0 >= (int<32>)hdr.pkt.field_d_32) 
             tmp_2 = param0;
         else 
             tmp_2 = (int<32>)hdr.pkt.field_d_32;
         hdr.pkt.field_b_32 = tmp_2;
     }
-    @name("action_8") action action_22(int<32> param0) {
+    @name(".action_8") action action_22(int<32> param0) {
         if (hdr.pkt.field_x_32 >= param0) 
             tmp_3 = hdr.pkt.field_x_32;
         else 
             tmp_3 = param0;
         hdr.pkt.field_x_32 = tmp_3;
     }
-    @name("action_9") action action_23() {
+    @name(".action_9") action action_23() {
         hdr.pkt.field_x_32 = hdr.pkt.field_x_32 >> 7;
     }
-    @name("action_10") action action_24(bit<32> param0) {
+    @name(".action_10") action action_24(bit<32> param0) {
         hdr.pkt.field_a_32 = ~param0 & hdr.pkt.field_a_32;
     }
-    @name("action_11") action action_25(bit<32> param0) {
+    @name(".action_11") action action_25(bit<32> param0) {
         hdr.pkt.field_a_32 = param0 & ~hdr.pkt.field_a_32;
     }
-    @name("action_12") action action_26(bit<32> param0) {
+    @name(".action_12") action action_26(bit<32> param0) {
         hdr.pkt.field_a_32 = ~param0 | hdr.pkt.field_a_32;
     }
-    @name("action_13") action action_27(bit<32> param0) {
+    @name(".action_13") action action_27(bit<32> param0) {
         hdr.pkt.field_a_32 = param0 | ~hdr.pkt.field_a_32;
     }
-    @name("do_nothing") action do_nothing_0() {
+    @name(".do_nothing") action do_nothing_0() {
     }
     @name("table_0") table table_1 {
         actions = {

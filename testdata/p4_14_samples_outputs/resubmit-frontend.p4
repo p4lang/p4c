@@ -47,12 +47,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_nop") action _nop_0() {
+    @name("._nop") action _nop_0() {
     }
-    @name("set_port") action set_port_0(bit<9> port) {
+    @name(".set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("_resubmit") action _resubmit_0() {
+    @name("._resubmit") action _resubmit_0() {
         meta.mymeta.f1 = 8w1;
         resubmit<tuple<standard_metadata_t, mymeta_t>>({ standard_metadata, meta.mymeta });
     }
