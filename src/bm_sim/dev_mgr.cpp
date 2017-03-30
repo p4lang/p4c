@@ -21,7 +21,6 @@
 #include <bm/bm_sim/dev_mgr.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/pcap_file.h>
-#include <bm/bm_sim/nn.h>
 
 #include <cassert>
 #include <algorithm>  // std::min
