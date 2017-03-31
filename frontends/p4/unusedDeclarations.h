@@ -24,16 +24,23 @@ namespace P4 {
 
 class RemoveUnusedDeclarations : public Transform {
     const ReferenceMap* refMap;
+    // If non-null give warnings about unused declarations
+    std::set<const IR::Node*>* warned;
     const IR::Node* process(const IR::IDeclaration* decl);
-    bool warn;
 
  public:
-    RemoveUnusedDeclarations(const ReferenceMap* refMap, bool warn) : refMap(refMap), warn(warn)
-    { setName("RemoveUnusedDeclarations"); }
+    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap,
+                                      std::set<const IR::Node*>* warned = nullptr) :
+            refMap(refMap), warned(warned)
+    { CHECK_NULL(refMap); setName("RemoveUnusedDeclarations"); }
 
     using Transform::postorder;
     using Transform::preorder;
     using Transform::init_apply;
+
+    // True if we should report a warning; the node is
+    // added to warned in this case
+    bool giveWarning(const IR::Node* node);
 
     Visitor::profile_t init_apply(const IR::Node *root) override;
 
@@ -68,10 +75,13 @@ class RemoveAllUnusedDeclarations : public PassManager {
  public:
     explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool warn = false) {
         CHECK_NULL(refMap);
+        std::set<const IR::Node*> *warned = nullptr;
+        if (warn)
+            warned = new std::set<const IR::Node*>();
         passes.emplace_back(
             new PassRepeated {
                 new ResolveReferences(refMap),
-                new RemoveUnusedDeclarations(refMap, warn)
+                new RemoveUnusedDeclarations(refMap, warned)
              });
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);
