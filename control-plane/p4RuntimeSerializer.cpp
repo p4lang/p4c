@@ -892,7 +892,7 @@ public:
         // the BMV2 JSON converter does; it strips out parameters which aren't used.
         // Unless there's a good reason to do otherwise, we should probably either
         // retain the parameters or strip them out a separate compiler pass.
-        size_t index = 0;
+        size_t index = 1;
         for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
             auto param = action->add_params();
             auto paramName = controlPlaneName(actionParam);
@@ -969,7 +969,7 @@ public:
             table->add_action_ids(id);
         }
 
-        size_t index = 0;
+        size_t index = 1;
         for (const auto& field : matchFields) {
             auto match_field = table->add_match_fields();
             match_field->set_id(index++);
