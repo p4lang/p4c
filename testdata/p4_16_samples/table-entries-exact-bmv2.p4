@@ -49,28 +49,22 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     table t_exact {
 
-  	  key = {
-        h.h.e : exact;
-      }
+  	key = {
+            h.h.e : exact;
+        }
 
-	  actions = {
-        a;
-        a_with_control_params;
-      }
+	actions = {
+            a;
+            a_with_control_params;
+        }
 
-	  default_action = a;
+	default_action = a;
 
-      entries = {
-        0x01 : a_with_control_params(1);
-        0x02 : a_with_control_params(2);
-#ifdef ENABLE_NEGATIVE_TESTS
-        // test default entries
-        _ : a_with_control_params(3);
-        // negative tests:
-        (0x1111 &&& 0xF, 0x1   ) : a(); // invalid exact key
-#endif
-      }
-   }
+        entries = {
+            0x01 : a_with_control_params(1);
+            0x02 : a_with_control_params(2);
+        }
+    }
 
     apply {
         t_exact.apply();

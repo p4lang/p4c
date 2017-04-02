@@ -47,29 +47,25 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     action a() { standard_meta.egress_spec = 0; }
     action a_with_control_params(bit<9> x) { standard_meta.egress_spec = x; }
 
-   table t_range {
+    table t_range {
 
- 	  key = {
-         h.h.r : range;
-      }
+ 	key = {
+            h.h.r : range;
+        }
 
-      actions = {
-        a;
-        a_with_control_params;
-      }
+        actions = {
+            a;
+            a_with_control_params;
+        }
 
-      default_action = a;
+        default_action = a;
 
-      entries = {
-       1..8 : a_with_control_params(21);
-       6..12: a_with_control_params(22);
-       _    : a_with_control_params(23);
-#ifdef ENABLE_NEGATIVE_TESTS
-       // negative tests:
-       (0x18, 0xF) : a_with_control_params(24); // not a range
-#endif
-     }
-   }
+        entries = {
+            1..8 : a_with_control_params(21);
+            6..12: a_with_control_params(22);
+            _    : a_with_control_params(23);
+        }
+    }
 
     apply {
         t_range.apply();
