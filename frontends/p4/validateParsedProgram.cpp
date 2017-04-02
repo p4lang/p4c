@@ -73,18 +73,6 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     if (!isv1 && da == nullptr)
         ::warning("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::defaultActionPropertyName);
-
-    auto entriesList = t->getEntries();
-    if (entriesList != nullptr) {  // list of entries is optional
-        for (auto e : *entriesList->entries) {
-            auto keyset = e->getKeys();
-            if (keyset == nullptr || !keyset->is<IR::ListExpression>())
-                ::error("%1%: key expression must be tuple", keyset);
-            else if (keyset->to<IR::ListExpression>()->components->size() <
-                     t->getKey()->keyElements->size())
-                ::error("%1%: Size of entry keyset must match the table key set size", keyset);
-        }
-    }
 }
 
 void ValidateParsedProgram::distinctParameters(

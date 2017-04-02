@@ -1342,7 +1342,7 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
     The invariants are:
     - table keys must have been type checked before entries
 */
-const IR::Node* TypeInference::postorder(IR::EntriesList* el) {
+const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     LOG1("TypeInference: visiting: " << el);
     if (done()) return el;
     auto table = findContext<IR::P4Table>();
@@ -1375,46 +1375,65 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     LOG1("TypeInference: visiting: " << entry);
     if (done()) return entry;
     auto table = findContext<IR::P4Table>();
-    BUG_CHECK(table != nullptr, "%1% entries not within a table", entry);
+    if (table == nullptr)
+        return entry;
     const IR::Key* key = table->getKey();
-    BUG_CHECK(key != nullptr, "table %1% has no keys", table);
+    if (key == nullptr)
+        return entry;
     auto keyTuple = getType(key);
-    BUG_CHECK(keyTuple != nullptr, "table %1% has no types for keys", table);
+    if (keyTuple == nullptr)
+        return entry;
     auto entryKeyType = getType(entry->keys);
     if (entryKeyType == nullptr)
         return entry;
     if (entryKeyType->is<IR::Type_Set>())
         entryKeyType = entryKeyType->to<IR::Type_Set>()->elementType;
 
-    auto tvs = unify(entry, keyTuple, entryKeyType, true);  // TypeVariableSubstitution
+    auto keyset = entry->getKeys();
+    if (keyset == nullptr || !keyset->is<IR::ListExpression>()) {
+        ::error("%1%: key expression must be tuple", keyset);
+        return entry;
+    } else if (keyset->components->size() < key->keyElements->size()) {
+        ::error("%1%: Size of entry keyset must match the table key set size", keyset);
+        return entry;
+    }
+
+    bool nonConstantKeys = false;
+    for (auto ke : *keyset->components)
+        if (!isCompileTimeConstant(ke)) {
+            ::error("Key entry must be a compile time constant: %1%", ke);
+            nonConstantKeys = true;
+        }
+    if (nonConstantKeys)
+        return entry;
+
+    TypeVariableSubstitution *tvs = unify(entry, keyTuple, entryKeyType, true);
     if (tvs == nullptr)
         return entry;
     ConstantTypeSubstitution cts(tvs, typeMap);
-    auto ks = cts.convert(entry->keys);
+    auto ks = cts.convert(keyset);
 
-    for (auto ke : *ks->to<IR::ListExpression>()->components)
-        if (!isCompileTimeConstant(ke))
-            ::error("Key entry must be a compile time constant: %1%", ke);
-
-    if (ks != entry->keys)
+    if (ks != keyset)
         entry = new IR::Entry(entry->srcInfo, entry->annotations,
                               ks->to<IR::ListExpression>(), entry->action);
 
     auto actionRef = entry->getAction();
-    if (!actionRef->is<IR::MethodCallExpression>())
-     ::error("Invalid action %1% in entry");
+    if (!actionRef->is<IR::MethodCallExpression>()) {
+        ::error("Invalid action %1% in entry");
+        return entry;
+    }
     auto actionCall = actionRef->to<IR::MethodCallExpression>();
     auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
     bool found = false;
     for (auto ale : *table->getActionList()->actionList) {
-     auto expr = ale->expression;
-     if (expr->is<IR::MethodCallExpression>())
-         expr = expr->to<IR::MethodCallExpression>()->method;
-     if (expr->is<IR::PathExpression>() &&
-         expr->to<IR::PathExpression>()->path->name == actionName) {
-         found = true;
-         break;
-     }
+        auto expr = ale->expression;
+        if (expr->is<IR::MethodCallExpression>())
+            expr = expr->to<IR::MethodCallExpression>()->method;
+        if (expr->is<IR::PathExpression>() &&
+            expr->to<IR::PathExpression>()->path->name == actionName) {
+            found = true;
+            break;
+        }
     }
     if (!found)
          ::error("%1%: action not in the table action list", actionRef);
@@ -1769,7 +1788,8 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         // set after unification
         auto r = expression->right->clone();
         auto e = expression->clone();
-        if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(r);
+        if (isCompileTimeConstant(expression->right))
+            setCompileTimeConstant(r);
         e->right = r;
         expression = e;
         setType(r, sameType);

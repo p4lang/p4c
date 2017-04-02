@@ -1531,7 +1531,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
             auto match_type = getKeyMatchType(ke);
             if (match_type == v1model.selectorMatchType.name)
                     continue;
-            // Decreasing order of precedence:
+            // Decreasing order of precedence (bmv2 specification):
             // 0) more than one LPM field is an error
             // 1) if there is at least one RANGE field, then the table is RANGE
             // 2) if there is at least one TERNARY field, then the table is TERNARY

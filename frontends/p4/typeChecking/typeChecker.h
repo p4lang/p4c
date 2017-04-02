@@ -171,6 +171,8 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Function* function) override;
     const IR::Node* preorder(IR::P4Program* program) override;
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
+    // check invariants for entire list before checking the entries
+    const IR::Node* preorder(IR::EntriesList* el) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
@@ -205,7 +207,6 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::P4Table* type) override;
     const IR::Node* postorder(IR::P4Action* type) override;
     const IR::Node* postorder(IR::Key* key) override;
-    const IR::Node* postorder(IR::EntriesList* el) override;
     const IR::Node* postorder(IR::Entry* e) override;
 
     const IR::Node* postorder(IR::Parameter* param) override;
