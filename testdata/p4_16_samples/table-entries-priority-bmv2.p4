@@ -50,26 +50,26 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     table t_ternary {
 
-  	  key = {
-        h.h.t : ternary;
-      }
+  	key = {
+            h.h.t : ternary;
+        }
 
-	  actions = {
-        a;
-        a_with_control_params;
-      }
+	actions = {
+            a;
+            a_with_control_params;
+        }
 
-	  default_action = a;
+	default_action = a;
 
-      // test for priority swap
-      entries = {
-        @priority(3)
-        0x1111 &&& 0xF    : a_with_control_params(1);
-        0x1181            : a_with_control_params(2);
-        @priority(1)
-        0x1181 &&& 0xF00F : a_with_control_params(3);
-      }
-   }
+        // test for priority swap
+        entries = {
+            @priority(3)
+            0x1111 &&& 0xF    : a_with_control_params(1);
+            0x1181            : a_with_control_params(2);
+            @priority(1)
+            0x1181 &&& 0xF00F : a_with_control_params(3);
+        }
+    }
 
     apply {
         t_ternary.apply();

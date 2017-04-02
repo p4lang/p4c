@@ -49,28 +49,23 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     table t_lpm {
 
-  	  key = {
-        h.h.l : lpm;
-      }
+  	key = {
+            h.h.l : lpm;
+        }
 
-	  actions = {
-        a;
-        a_with_control_params;
-      }
+	actions = {
+            a;
+            a_with_control_params;
+        }
 
-	  default_action = a;
+	default_action = a;
 
-      entries = {
-        0x11 &&& 0xF0 : a_with_control_params(11);
-        0x12          : a_with_control_params(12);
-        _             : a_with_control_params(13);
-#ifdef ENABLE_NEGATIVE_TESTS
-        // negative tests:
-        0x11 &&& 0x0F: a_with_control_params(14); // invalid mask
-        (0x1, 0x11 &&& 0xF0): a(); // invalid keyset
-#endif
-      }
-   }
+        entries = {
+            0x11 &&& 0xF0 : a_with_control_params(11);
+            0x12          : a_with_control_params(12);
+            _             : a_with_control_params(13);
+        }
+    }
 
     apply {
         t_lpm.apply();

@@ -49,31 +49,26 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     table t_exact_ternary {
 
-  	  key = {
-        h.h.e : exact;
-        h.h.t : ternary;
-      }
+  	key = {
+            h.h.e : exact;
+            h.h.t : ternary;
+        }
 
-	  actions = {
-        a;
-        a_with_control_params;
-      }
+	actions = {
+            a;
+            a_with_control_params;
+        }
 
-	  default_action = a;
+	default_action = a;
 
-      entries = {
-        (0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
-        (0x02, 0x1181           ) : a_with_control_params(2);
-        (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
-        // test default entries
-        (0x04, _                ) : a_with_control_params(4);
-#ifdef ENABLE_NEGATIVE_TESTS
-        // negative tests:
-        (0x1111 &&& 0xF   ) : a(); // invalid exact key
-         0x1 : a();                // invalid keyset
-#endif
-      }
-   }
+        entries = {
+            (0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
+            (0x02, 0x1181           ) : a_with_control_params(2);
+            (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
+            // test default entries
+            (0x04, _                ) : a_with_control_params(4);
+        }
+    }
 
     apply {
         t_exact_ternary.apply();

@@ -50,30 +50,25 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     table t_ternary {
 
-  	  key = {
-        h.h.t : ternary;
-      }
+  	key = {
+            h.h.t : ternary;
+        }
 
-	  actions = {
-        a;
-        a_with_control_params;
-      }
+	actions = {
+            a;
+            a_with_control_params;
+        }
 
-	  default_action = a;
+	default_action = a;
 
-      entries = {
-        0x1111 &&& 0xF    : a_with_control_params(1);
-        0x1187            : a_with_control_params(2);
-        0x1111 &&& 0xF000 : a_with_control_params(3);
-        // test default entries
-        _                 : a_with_control_params(4);
-#ifdef ENABLE_NEGATIVE_TESTS
-        // negative tests:
-        1..2 : a(); // invalid ternary key
-        (0x2 , 0x3) : a(); // invalid keyset
-#endif
-      }
-   }
+        entries = {
+            0x1111 &&& 0xF    : a_with_control_params(1);
+            0x1187            : a_with_control_params(2);
+            0x1111 &&& 0xF000 : a_with_control_params(3);
+            // test default entries
+            _                 : a_with_control_params(4);
+        }
+    }
 
     apply {
         t_ternary.apply();
