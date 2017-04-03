@@ -19,14 +19,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata")
+    @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta")
+    @name("meta") 
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet")
+    @name("ethernet") 
     ethernet_t ethernet;
 }
 
@@ -69,9 +69,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     @name(".m_action") action m_action_0(bit<9> meter_idx) {
+        my_meter.read(meta.meta.meter_tag);
         standard_metadata.egress_spec = meter_idx;
         standard_metadata.egress_spec = 9w1;
-        my_meter.read(meta.meta.meter_tag);
     }
     @name("._nop") action _nop_0() {
         my_meter.read(meta.meta.meter_tag);

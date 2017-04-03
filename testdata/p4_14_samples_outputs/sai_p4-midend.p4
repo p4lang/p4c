@@ -153,6 +153,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_17() {
     }
+    @name("port_counters") direct_counter(CounterType.packets) port_counters;
     @name(".fdb_set") action fdb_set_0(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -172,23 +173,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_next_hop") action set_next_hop_0(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
         meta.ingress_metadata.router_intf = router_interface_id;
-    }
-    @name(".set_in_port") action set_in_port_0(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
-        meta.ingress_metadata.port_lag = port;
-        meta.ingress_metadata.mac_limit = max_learned_address;
-        meta.ingress_metadata.port_type = type_;
-        meta.ingress_metadata.oper_status = oper_status;
-        meta.ingress_metadata.flow_ctrl = global_flow_control;
-        meta.ingress_metadata.port_speed = speed;
-        meta.ingress_metadata.drop_vlan = ingress_filtering;
-        meta.ingress_metadata.drop_tagged = drop_tagged;
-        meta.ingress_metadata.drop_untagged = drop_untagged;
-        meta.ingress_metadata.port_mode = port_loopback_mode;
-        meta.ingress_metadata.learning = fdb_learning;
-        meta.ingress_metadata.stp_state = stp_state;
-        meta.ingress_metadata.update_dscp = update_dscp;
-        meta.ingress_metadata.mtu = mtu;
-        meta.ingress_metadata.vlan_id = default_vlan;
     }
     @name(".route_set_trap") action route_set_trap_0(bit<3> trap_priority) {
         meta.ingress_metadata.pri = trap_priority;
@@ -280,9 +264,27 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_12();
     }
+    @name(".set_in_port") action set_in_port(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
+        port_counters.count();
+        meta.ingress_metadata.port_lag = port;
+        meta.ingress_metadata.mac_limit = max_learned_address;
+        meta.ingress_metadata.port_type = type_;
+        meta.ingress_metadata.oper_status = oper_status;
+        meta.ingress_metadata.flow_ctrl = global_flow_control;
+        meta.ingress_metadata.port_speed = speed;
+        meta.ingress_metadata.drop_vlan = ingress_filtering;
+        meta.ingress_metadata.drop_tagged = drop_tagged;
+        meta.ingress_metadata.drop_untagged = drop_untagged;
+        meta.ingress_metadata.port_mode = port_loopback_mode;
+        meta.ingress_metadata.learning = fdb_learning;
+        meta.ingress_metadata.stp_state = stp_state;
+        meta.ingress_metadata.update_dscp = update_dscp;
+        meta.ingress_metadata.mtu = mtu;
+        meta.ingress_metadata.vlan_id = default_vlan;
+    }
     @name("port") table port_1 {
         actions = {
-            set_in_port_0();
+            set_in_port();
             @default_only NoAction_13();
         }
         key = {

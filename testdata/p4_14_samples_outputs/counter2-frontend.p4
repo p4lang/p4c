@@ -29,12 +29,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".act") action act_0(bit<9> port) {
+    @name("cnt") direct_counter(CounterType.packets) cnt_0;
+    @name(".act") action act(bit<9> port) {
+        cnt_0.count();
         standard_metadata.egress_spec = port;
     }
     @name("tab1") table tab1_0 {
         actions = {
-            act_0();
+            act();
             @default_only NoAction();
         }
         key = {

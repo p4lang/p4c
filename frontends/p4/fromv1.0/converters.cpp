@@ -229,10 +229,14 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
                     converted[a.second] = cases.size();
                     stat = conv.convert(a.second); }
                 const IR::Expression* destination;
-                if (a.first == "default")
+                if (a.first == "default") {
                     destination = new IR::DefaultExpression(Util::SourceInfo());
-                else
-                    destination = new IR::PathExpression(IR::ID(a.first));
+                } else {
+                    cstring act_name = a.first;
+                    cstring full_name = table->name + '.' + act_name;
+                    if (renameMap->count(full_name))
+                        act_name = renameMap->at(full_name);
+                    destination = new IR::PathExpression(IR::ID(act_name)); }
                 auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
                 cases.insert(insert_at, swcase); }
             auto check = new IR::Member(Util::SourceInfo(), call, IR::Type_Table::action_run);
