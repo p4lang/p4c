@@ -626,7 +626,8 @@ void ProgramStructure::createDeparser() {
 
 const IR::P4Table*
 ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
-                               IR::IndexedVector<IR::Declaration>* stateful) {
+                               IR::IndexedVector<IR::Declaration>* stateful,
+                               std::map<cstring, cstring> &mapNames) {
     ExpressionConverter conv(this);
     auto propvec = new IR::IndexedVector<IR::Property>(*table->properties.properties);
     auto actVect = new IR::IndexedVector<IR::ActionListElement>();
@@ -645,16 +646,19 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     }
 
     auto mtr = get(directMeters, table->name);
+    auto ctr = get(directCounters, table->name);
     const std::vector<IR::ID> &actionsToDo =
             action_profile ? action_profile->actions : table->actions;
     for (auto a : actionsToDo) {
         auto action = actions.get(a);
         cstring newname;
-        if (mtr != nullptr) {
-            // we must synthesize a new action, which has a writeback to the meter
+        if (mtr != nullptr || ctr != nullptr) {
+            // we must synthesize a new action, which has a writeback to
+            // the meter/counter
             newname = makeUniqueName(a);
-            auto actCont = convertAction(action, newname, mtr);
+            auto actCont = convertAction(action, newname, mtr, ctr);
             stateful->push_back(actCont);
+            mapNames[table->name + '.' + a] = newname;
         } else {
             newname = actions.get(action);
         }
@@ -788,7 +792,6 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         propvec->push_back(prop);
     }
 
-    auto ctr = get(directCounters, table->name);
     if (!ctr.isNullOrEmpty()) {
         auto counter = counters.get(ctr);
         auto kindarg = counterType(counter);
@@ -1358,7 +1361,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
 
 const IR::P4Action*
 ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName,
-                                const IR::Meter* meterToAccess) {
+                                const IR::Meter* meterToAccess,
+                                cstring counterToAccess) {
     LOG1("Converting action " << action->name);
     auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto params = new IR::IndexedVector<IR::Parameter>();
@@ -1380,13 +1384,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
         auto param = new IR::Parameter(p->srcInfo, p->name, IR::Annotations::empty,
                                        direction, type);
         LOG2("  " << p << " is " << direction << " " << param);
-        params->push_back(param);
-    }
-    for (auto p : action->action) {
-        auto stat = convertPrimitive(p);
-        if (stat != nullptr)
-            body->push_back(stat);
-    }
+        params->push_back(param); }
 
     if (meterToAccess != nullptr) {
         ExpressionConverter conv(this);
@@ -1399,13 +1397,27 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
         auto arg = conv.convert(meterToAccess->result);
         if (arg != nullptr)
             args->push_back(arg);
-        auto mc = new IR::MethodCallExpression(Util::SourceInfo(), method,
-                                               emptyTypeArguments, args);
+        auto mc = new IR::MethodCallExpression(method, emptyTypeArguments, args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
-        body->push_back(stat);
-    }
+        body->push_back(stat); }
 
-    // Save the original action name in an annotation.
+    if (counterToAccess != nullptr) {
+        ExpressionConverter conv(this);
+        auto decl = get(counterMap, counterToAccess);
+        CHECK_NULL(decl);
+        auto extObj = new IR::PathExpression(decl->name);
+        auto method = new IR::Member(extObj, v1model.directCounter.count.Id());
+        auto args = new IR::Vector<IR::Expression>();
+        auto mc = new IR::MethodCallExpression(method, emptyTypeArguments, args);
+        auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+        body->push_back(stat); }
+
+    for (auto p : action->action) {
+        auto stat = convertPrimitive(p);
+        if (stat != nullptr)
+            body->push_back(stat); }
+
+    // Save the original action name in an annotation
     // The leading dot indicates a global action
     auto annos = addNameAnnotation(cstring(".") + action->name, action->annotations);
     auto result = new IR::P4Action(
@@ -1560,6 +1572,22 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     return decl;
 }
 
+const IR::Declaration_Instance*
+ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
+    LOG1("Synthesizing " << c);
+
+    IR::ID ext = v1model.directCounter.Id();
+    auto typepath = new IR::Path(ext);
+    auto type = new IR::Type_Name(typepath);
+    auto args = new IR::Vector<IR::Expression>();
+    auto kindarg = counterType(c);
+    args->push_back(kindarg);
+    auto annos = addNameAnnotation(c->name, c->annotations);
+    auto decl = new IR::Declaration_Instance(
+        Util::SourceInfo(), newName, annos, type, args, nullptr);
+    return decl;
+}
+
 const IR::P4Control*
 ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) {
     IR::ID name = newName;
@@ -1598,8 +1626,15 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
                 ::error("Cannot locate table %1%", c.first->table.name);
                 return nullptr;
             }
-            if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end())
-                directCounters.emplace(c.first->table.name, c.first->name);
+            if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end()) {
+                auto counter = counters.get(c.second);
+                auto extcounter = convertDirectCounter(counter, c.second);
+                if (extcounter != nullptr) {
+                    stateful->push_back(extcounter);
+                    directCounters.emplace(c.first->table.name, c.first->name);
+                    counterMap.emplace(c.first->name, extcounter);
+                }
+            }
         }
     }
     for (auto c : countersToDo) {
@@ -1666,21 +1701,21 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             ::error("Cannot locate action %1%", a);
             return nullptr;
         }
-        auto action = convertAction(act, actions.get(act), nullptr);
+        auto action = convertAction(act, actions.get(act), nullptr, nullptr);
         stateful->push_back(action);
     }
 
     std::set<cstring> tablesDone;
+    std::map<cstring, cstring> instanceNames;
     for (auto t : usedTables) {
         if (tablesDone.find(t->name.name) != tablesDone.end())
             continue;
-        auto tbl = convertTable(t, tables.get(t), stateful);
+        auto tbl = convertTable(t, tables.get(t), stateful, instanceNames);
         if (tbl != nullptr)
             stateful->push_back(tbl);
         tablesDone.emplace(t->name.name);
     }
 
-    std::map<cstring, cstring> instanceNames;
     if (calledControls.isCaller(name.name)) {
         for (auto cc : *calledControls.getCallees(name.name)) {
             if (instanceNames.find(cc) != instanceNames.end()) continue;
