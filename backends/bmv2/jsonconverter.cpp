@@ -1759,6 +1759,11 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
             auto bl = block->getValue(c);
             CHECK_NULL(bl);
             cstring name = extVisibleName(c);
+            if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
+                // Since this block has not been inlined, it is probably unused
+                // So we don't do anything.
+                continue;
+
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 if (eb->type->name == v1model.counter.name) {
