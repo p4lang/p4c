@@ -1,4 +1,7 @@
 /* -*-C++-*- */
+/** \addtogroup irdefs
+  * @{
+  */
 /*
    This file contains IR related to representating the type hierarchy.
    Some of these classes never appear in the IR tree, they are just
@@ -44,13 +47,13 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 }
 #end
 
-// Represents the type of a type.
-// For example, in a declaration like
-// bit<32> x;
-// The type of x is Type_Bits(32);
-// The type of 'bit<32>' is Type_Type(Type_Bits(32))
-// TypeType should not appear in the program IR, just in the TypeMap produced
-// by type-checking.
+/// Represents the type of a type.
+/// For example, in a declaration like
+/// bit<32> x;
+/// The type of x is Type_Bits(32);
+/// The type of 'bit<32>' is Type_Type(Type_Bits(32))
+/// TypeType should not appear in the program IR, just in the TypeMap produced
+/// by type-checking.
 class Type_Type : Type {
     Type type;
     toString { return "Type(" + type->toString() + ")"; }
@@ -66,14 +69,14 @@ class Type_Boolean : Type_Base {
     dbprint { out << "bool"; }
 }
 
-// The type of a parser state
+/// The type of a parser state
 class Type_State : Type_Base {
     static Type_State get();
     toString{ return "state"; }
     dbprint { out << "state"; }
 }
 
-// Represents both bit<> and int<> types in P4 v1.1+
+/// Represents both bit<> and int<> types in P4 v1.1+
 class Type_Bits : Type_Base {
     int size;
     bool isSigned;
@@ -82,7 +85,7 @@ class Type_Bits : Type_Base {
     cstring baseName() const { return isSigned ? "int" : "bit"; }
     int width_bits() const override { return size; }
 
-    // canonical types: no source-level information
+    /// canonical types: no source-level information
     static std::map<int, IR::Type_Bits> *signedTypes;
     static std::map<int, IR::Type_Bits> *unsignedTypes;
     toString{ return baseName() + "<" + Util::toString(size) + ">"; }
@@ -140,17 +143,17 @@ class ParameterList : ISimpleNamespace {
 #end
 }
 
-// Represents a type variable written by the user
+/// Represents a type variable written by the user
 class Type_Var : Type_Declaration, ITypeVar {
     cstring getVarName() const override { return getName(); }
     int getDeclId() const override { return declid; }
     dbprint { out << name; }
 }
 
-// This stands for the 'int' type: infinite precision constant
-// However, we represent it as a type variable, because we use
-// type unification to discover the correct type for the constants
-// in some contexts.
+/// Stands for the 'int' type: infinite precision constant
+/// However, we represent it as a type variable, because we use
+/// type unification to discover the correct type for the constants
+/// in some contexts.
 class Type_InfInt : Type, ITypeVar {
     int declid = nextId++;
  private:
@@ -242,7 +245,7 @@ class Type_Struct : Type_StructLike {
 class Type_Union : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + externalName(); }
-    // this makes some assumptions on padding
+    /// this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
         for (auto f : *fields)
@@ -264,12 +267,12 @@ class Type_Set : Type {
     toString { return cstring("set<") + elementType->toString() + ">"; }
     const Type* getP4Type() const override { return nullptr; }
     int width_bits() const override {
-        // returning the width of the set elements, not the set itself, which doesn't
-        // really have a sensible size
+        /// returning the width of the set elements, not the set itself, which doesn't
+        /// really have a sensible size
         return elementType->width_bits(); }
 }
 
-// The type of an expressionList
+/// The type of an expressionList
 class Type_Tuple : Type {
     Vector<Type> components;
     toString{ return "Tuple(" + Util::toString(components->size()) + ")"; }
@@ -277,8 +280,8 @@ class Type_Tuple : Type {
     const Type* getP4Type() const override { return this; }
 }
 
-// The type of an architectural block.
-// Abstract base for Type_Control, Type_Parser and Type_Package
+/// The type of an architectural block.
+/// Abstract base for Type_Control, Type_Parser and Type_Package
 abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {
     Annotations    annotations;
     TypeParameters typeParameters;
@@ -305,7 +308,7 @@ class Type_Control : Type_ArchBlock, IApply {
     toString { return cstring("control ") + externalName(); }
 }
 
-// A type referred by name
+/// A type referred by name
 class Type_Name : Type {
     Path path;
     Type_Name(IR::ID id) : Type(id.srcInfo), path(new IR::Path(id)) {}
@@ -331,7 +334,7 @@ class Type_Stack : Type {
     { return new IR::Type_Stack(srcInfo, elementType->getP4Type(), size); }
 }
 
-/* Given a declaration
+/** Given a declaration
    extern E<T> { ... }
    Type_Specialized represents a type such
    E<bit<32>>
@@ -344,13 +347,13 @@ class Type_Specialized : Type {
     const Type* getP4Type() const override;
 }
 
-/* Canonical representation of a Type_Specialized;
+/** Canonical representation of a Type_Specialized;
    only used by the type-checker, never in the IR tree. */
 class Type_SpecializedCanonical : Type {
-    Type         baseType;     // canonical baseType; always IMayBeGenericType
-    Vector<Type> arguments;    // canonical type arguments
-    // 'substituted' is baseType with all type
-    // variables substituted with the arguments.
+    Type         baseType;     /// canonical baseType; always IMayBeGenericType
+    Vector<Type> arguments;    /// canonical type arguments
+    /// 'substituted' is baseType with all type
+    /// variables substituted with the arguments.
     Type         substituted;  // always IMayBeGenericType
 #nodbprint
     validate{
@@ -361,12 +364,12 @@ class Type_SpecializedCanonical : Type {
     const Type* getP4Type() const override;
 }
 
-// A declaration that consists of just an identifier, e.g., an enum member
+/// A declaration that consists of just an identifier, e.g., an enum member
 class Declaration_ID : Declaration, CompileTimeValue {
 #nodbprint
 }
 
-// The type of a string literal
+/// The type of a string literal
 class Type_String : Type_Base {
 #nodbprint
     static Type_String get();
@@ -386,17 +389,17 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
 class Type_Table : Type, IApply {
     P4Table  table;
     Type_Method getApplyMethodType() const override;
-    // names for the fields of the struct returned
-    // by applying a table
+    /// names for the fields of the struct returned
+    /// by applying a table
     static const ID hit;
     static const ID action_run;
     const IR::Type* getP4Type() const override { return nullptr; }
     dbprint { out << table->name; }
 }
 
-// A special enum-like anonymous type that
-// represents all actions in a table's action list.
-// Used for 'switch' statements.
+/// A special enum-like anonymous type that
+/// represents all actions in a table's action list.
+/// Used for 'switch' statements.
 class Type_ActionEnum : Type {
     ActionList actionList;
     bool contains(cstring name) const;
@@ -428,13 +431,13 @@ abstract Type_MethodBase : Type, IMayBeGenericType {
     const IR::Type* getP4Type() const override { return nullptr; }
 }
 
-// Type for a method or function.
+/// Type for a method or function.
 class Type_Method : Type_MethodBase {
 #nodbprint
 }
 
-// Describes an argument of a MethodCall
-// Never used in the program IR; only used by typechecker.
+/// Describes an argument of a MethodCall
+/// Never used in the program IR; only used by typechecker.
 class ArgumentInfo {
     bool leftValue;
     bool compileTimeConstant;
@@ -442,9 +445,9 @@ class ArgumentInfo {
 #nodbprint
 }
 
-// Used to represent the type of a MethodCallExpression
-// for unification.
-// Never appears in the program IR; only used by the typechecker.
+/// Used to represent the type of a MethodCallExpression
+/// for unification.
+/// Never appears in the program IR; only used by the typechecker.
 class Type_MethodCall : Type {
     Vector<Type>         typeArguments;
     Type_Var             returnType;
@@ -453,8 +456,8 @@ class Type_MethodCall : Type {
     const Type* getP4Type() const override { return nullptr; }
 }
 
-// Actions look a lot like methods in many respects.
-// However, invoking an action returns another action
+/// Actions look a lot like methods in many respects.
+/// However, invoking an action returns another action
 class Type_Action : Type_MethodBase {
 #nodbprint
 }
@@ -475,7 +478,7 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 #nodbprint
 }
 
-// An 'extern' black-box (not a function)
+/// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     optional TypeParameters typeParameters = new TypeParameters;
     Vector<Method> methods;  // methods can be overloaded, so this is not IndexedVector
@@ -489,3 +492,5 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     Method lookupMethod(cstring name, int argCount) const;
     validate{ methods->check_null(); }
 }
+
+/** @} *//* end group irdefs */

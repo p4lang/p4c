@@ -1,6 +1,11 @@
 /* -*-C++-*- */
 
-/*
+
+/** \addtogroup irdefs
+  * @{
+  */
+
+/**
   P4 compiler IR definition file.
   To understand this you really have to understand the shape of the generated IR code.
 
@@ -484,3 +489,4 @@ class ToplevelBlock : Block {
 #nodbprint
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }
+/** @} *//* end group irdefs */
