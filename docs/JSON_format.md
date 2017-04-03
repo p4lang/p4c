@@ -132,7 +132,14 @@ item has the following attributes:
 bits). Note that the JSON 2-tuples can optionally be JSON 3-tuples if you want
 to experiment with signed fields support. In this case, the third element of the
 tuples is a boolean value, which is `true` iff the field is signed. A signed
-field needs to have a bitwidth of at least 2!
+field needs to have a bitwidth of at least 2! For variable length fields, the
+field width is `"*"`. There can be at most one variable-length field in a header
+type. When a variable-length field is present, the header type is required to
+have the `length_exp` attribute.
+- `length_exp`: this attribute is only present when the header type includes a
+variable-length field, in which case this attribute must be an expression
+resolving to an integral value, corresponding to the variable-length field's
+bitwidth.
 
 ### `headers`
 
