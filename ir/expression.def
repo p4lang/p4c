@@ -2,6 +2,10 @@
 /* This file contains the IR classes for all expressions.
    The base classes are in base.def */
 
+/** \addtogroup irdefs
+  * @{
+  */
+
 abstract Operation_Unary : Operation {
     Expression expr;
     Operation_Unary {
@@ -122,12 +126,12 @@ abstract Literal : Expression, CompileTimeValue {
 #nodbprint
 }
 
-// This is an integer literal on arbitrary-precision.
+/// This is an integer literal on arbitrary-precision.
 class Constant : Literal {
     mpz_class value;
-    optional unsigned  base;  // base used when reading/writing
+    optional unsigned  base;  /// base used when reading/writing
 #noconstructor
-    // if noWarning is true, no warning is emitted
+    /// if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
     Constant(intmax_t v, unsigned base = 10) :
             Literal(new Type_InfInt()), value(v), base(base) {}
@@ -283,9 +287,9 @@ class This : Expression {
 
 class Cast : Operation_Unary {
     Type destType = type;
-    // These will generally always be the same, except when a cast to a type argument of
-    // a generic occurs.  Then at some point, the 'destType' will be specialized to a concrete
-    // type, and 'type' will only be updated later when type inferencing occurs
+    /// These will generally always be the same, except when a cast to a type argument of
+    /// a generic occurs.  Then at some point, the 'destType' will be specialized to a concrete
+    /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
     toString{ return "cast"; }
@@ -324,10 +328,12 @@ class ConstructorCallExpression : Expression {
         arguments->check_null(); }
 }
 
-// Represents a list of expressions separated by commas
+/// Represents a list of expressions separated by commas
 class ListExpression : Expression {
     Vector<Expression> components;
     validate {
         components->check_null();
     }
 }
+
+/** @} *//* end group irdefs */
