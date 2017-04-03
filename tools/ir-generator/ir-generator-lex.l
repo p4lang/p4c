@@ -12,6 +12,7 @@
 static int              block_depth;
 static std::string      block_buffer;
 static YYLTYPE          block_start;
+static std::string      comment_block;
 
 
 %}
@@ -44,12 +45,17 @@ static YYLTYPE          block_start;
                             return EMITBLOCK; }
 <EMIT>.*                  { block_buffer += yytext; }
 
-"/*"            { yy_push_state(COMMENT); }
-<COMMENT>"*/"   { yy_pop_state(); }
-<COMMENT>.              ;
-<COMMENT>[\n]           ;
+"/*"            { comment_block.clear();
+                  comment_block += yytext;
+                  yy_push_state(COMMENT); }
+<COMMENT>"*/"   { yy_pop_state();
+                  comment_block += yytext;
+                  yylval.str = comment_block;
+                  return COMMENTBLOCK; }
+<COMMENT>.      { comment_block += yytext; }
+<COMMENT>[\n]   { comment_block += yytext; }
 
-"//".*                  ;
+"//".*           { yylval.str = yytext; return COMMENTBLOCK; }
 
 "::"            { return DBLCOL; }
 "abstract"      { return ABSTRACT; }
