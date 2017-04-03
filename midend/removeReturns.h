@@ -23,21 +23,23 @@ limitations under the License.
 
 namespace P4 {
 
-// This replaces 'returns' by ifs:
-// e.g.
-// control c(inout bit x) { apply {
-//   if (x) return;
-//   x = !x;
-// }}
-// becomes:
-// control c(inout bit x) {
-//   bool hasReturned;
-//   apply {
-//     hasReturned = false;
-//     if (x) hasReturned = true;
-//     if (!hasReturned)
-//       x = !x;
-// }}
+/**
+This visitor replaces 'returns' by ifs:
+e.g.
+control c(inout bit x) { apply {
+   if (x) return;
+   x = !x;
+}}
+becomes:
+control c(inout bit x) {
+   bool hasReturned;
+   apply {
+     hasReturned = false;
+     if (x) hasReturned = true;
+     if (!hasReturned)
+        x = !x;
+}}
+*/
 class DoRemoveReturns : public Transform {
  protected:
     P4::ReferenceMap* refMap;
@@ -75,13 +77,16 @@ class DoRemoveReturns : public Transform {
     { prune(); return parser; }
 };
 
-// This removes "exit" calls.  It is significantly more involved than return removal,
-// since an exit in an action causes the calling control to terminate.
-// This pass assumes that each statement in a control block can
-// exit only once - so it should be run after a pass that enforces this.
-// (E.g., it does not handle:
-// if (t1.apply().hit && t2.apply().hit) { ... }
-// It also assumes that there are no global actions and that action calls have been inlined.
+/**
+This visitor removes "exit" calls.  It is significantly more involved than return removal,
+since an exit in an action causes the calling control to terminate.
+This pass assumes that each statement in a control block can
+exit only once -- so it should be run after a pass that enforces this,
+e.g., SideEffectOrdering.
+(E.g., it does not handle:
+if (t1.apply().hit && t2.apply().hit) { ... }
+It also assumes that there are no global actions and that action calls have been inlined.
+*/
 class DoRemoveExits : public DoRemoveReturns {
     TypeMap* typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
