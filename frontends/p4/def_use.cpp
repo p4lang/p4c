@@ -390,7 +390,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     }
     definitions->set(entryPoint, defs);
     currentDefinitions = defs;
-    LOG1("Definitions at " << entryPoint << ":" << currentDefinitions);
+    LOG3("Definitions at " << entryPoint << ":" << currentDefinitions);
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
@@ -601,7 +601,7 @@ bool ComputeWriteSet::preorder(const IR::Operation_Unary* expression) {
 }
 
 bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
-    LOG2("CWS Visiting " << dbp(expression));
+    LOG3("CWS Visiting " << dbp(expression));
     bool save = lhs;
     lhs = true;
     // The method call may modify the object, which is part of the method
@@ -647,7 +647,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     }
 
     if (callee != nullptr) {
-        LOG1("Analyzing " << dbp(callee));
+        LOG3("Analyzing " << dbp(callee));
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         (void)callee->apply(cw);
@@ -687,7 +687,7 @@ bool ComputeWriteSet::preorder(const IR::ParserState* state) {
 
 // Symbolic execution of the parser
 bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
-    LOG1("CWS Visiting " << dbp(parser));
+    LOG3("CWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
     enterScope(parser->type->applyParams, parser->parserLocals, startPoint);
@@ -706,7 +706,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     while (!toRun.empty()) {
         auto state = *toRun.begin();
         toRun.erase(state);
-        LOG1("Traversing " << dbp(state));
+        LOG3("Traversing " << dbp(state));
 
         // We need a new visitor to visit the state,
         // but we use the same data structures
@@ -733,7 +733,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
-    LOG1("CWS Visiting " << dbp(control));
+    LOG3("CWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
     enterScope(control->type->applyParams, control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
@@ -787,7 +787,7 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement*) {
 }
 
 bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
-    LOG1("CWS Visiting " << dbp(statement) << " " << statement);
+    LOG3("CWS Visiting " << dbp(statement) << " " << statement);
     lhs = true;
     visit(statement->left);
     lhs = false;
@@ -801,7 +801,7 @@ bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
-    LOG1("CWS Visiting " << dbp(statement));
+    LOG3("CWS Visiting " << dbp(statement));
     visit(statement->expression);
     auto locs = get(statement->expression);
     auto defs = currentDefinitions->writes(getProgramPoint(), locs);
@@ -828,7 +828,10 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Action* action) {
-    LOG1("CWS Visiting " << dbp(action));
+    LOG3("CWS Visiting " << dbp(action));
+    auto saveReturned = returnedDefinitions;
+    returnedDefinitions = new Definitions();
+
     auto decls = new IR::IndexedVector<IR::Declaration>();
     // We assume that there are no declarations in inner scopes
     // inside the action body.
@@ -840,6 +843,8 @@ bool ComputeWriteSet::preorder(const IR::P4Action* action) {
     enterScope(action->parameters, decls, pt, false);
     visit(action->body);
     exitScope(action->parameters, decls);
+    currentDefinitions = currentDefinitions->join(returnedDefinitions);
+    returnedDefinitions = saveReturned;
     return false;
 }
 
@@ -860,7 +865,7 @@ class GetDeclarations : public Inspector {
 }  // namespace
 
 bool ComputeWriteSet::preorder(const IR::Function* function) {
-    LOG1("CWS Visiting " << dbp(function));
+    LOG3("CWS Visiting " << dbp(function));
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
@@ -873,12 +878,12 @@ bool ComputeWriteSet::preorder(const IR::Function* function) {
     exitScope(function->type->parameters, locals);
 
     returnedDefinitions = saveReturned;
-    LOG1("Done " << dbp(function));
+    LOG3("Done " << dbp(function));
     return false;
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Table* table) {
-    LOG1("CWS Visiting " << dbp(table));
+    LOG3("CWS Visiting " << dbp(table));
     ProgramPoint pt(callingContext, table);
     enterScope(nullptr, nullptr, pt, false);
 
