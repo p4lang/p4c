@@ -51,6 +51,7 @@ args = parser.parse_args()
 class FieldMap:
     def __init__(self):
         self.reset()
+        self.hidden_fields = [("$valid$", 1, False)]
 
     def reset(self):
         self.fields = {}
@@ -71,14 +72,23 @@ class FieldMap:
             header_types_map[header_type] = h
 
         header_instances = json_["headers"]
+
+        def add_field(idx, t):
+            f_name, f_nbits = t[0], t[1]
+            e = (".".join([header, f_name]), f_nbits)
+            self.fields[(h["id"], idx)] = e
+            self.fields_rev[e[0]] = (h["id"], idx)
+
         for h in header_instances:
             header = h["name"]
             header_type = header_types_map[h["header_type"]]
-            for idx, t in enumerate(header_type["fields"]):
-                f_name, f_nbits = t[0], t[1]
-                e = (".".join([header, f_name]), f_nbits)
-                self.fields[(h["id"], idx)] = e
-                self.fields_rev[e[0]] = (h["id"], idx)
+            idx = 0
+            for t in header_type["fields"]:
+                add_field(idx, t)
+                idx += 1
+            for t in self.hidden_fields:
+                add_field(idx, t)
+                idx += 1
 
     def get_name(self, header_id, offset):
         return self.fields[(header_id, offset)][0]
