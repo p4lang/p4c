@@ -141,6 +141,7 @@ static int yylex();
                         tupleType typeArg
 %type<Type_Name>        typeName
 %type<Parameter>        parameter
+%type<b>                optCONST
 %type<annos>            optAnnotations
 %type<annoVec>          annotations
 %type<Annotation>       annotation
@@ -268,6 +269,11 @@ nonTypeName
 name
     : nonTypeName { $$ = $1; }
     | TYPE      { $$ = new IR::ID(@1, $1); }
+    ;
+
+optCONST
+    : /* empty */ { $$ = false; }
+    | CONST       { $$ = true; }
     ;
 
 optAnnotations
@@ -784,21 +790,14 @@ tableProperty
                                            auto id = IR::ID(@1, "actions");
                                            $$ = new IR::Property(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
-    /* \todo: force CONST entries? conflicts with next rule */
-
-    | ENTRIES '=' '{' entriesList '}' { auto l = new IR::EntriesList(@4, $4);
-                                              auto id = IR::ID(@1+@5, "entries");
-                                              $$ = new IR::Property(@1, id,
-                                                                    IR::Annotations::empty,
-                                                                    l, false); }
-    | optAnnotations CONST IDENTIFIER '=' initializer ';'
+    | optAnnotations optCONST ENTRIES '=' '{' entriesList '}' {
+                                            auto l = new IR::EntriesList(@6, $6);
+                                            auto id = IR::ID(@3+@7, "entries");
+                                            $$ = new IR::Property(@3, id, $1, l, $2); }
+    | optAnnotations optCONST IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@5, $5);
                                             auto id = IR::ID(@3, $3);
-                                            $$ = new IR::Property(@3, id, $1, v, true); }
-    | optAnnotations IDENTIFIER '=' initializer ';'
-                                         { auto v = new IR::ExpressionValue(@4, $4);
-                                           auto id = IR::ID(@2, $2);
-                                           $$ = new IR::Property(@2, id, $1, v, false); }
+                                            $$ = new IR::Property(@3, id, $1, v, $2); }
     ;
 
 keyElementList
