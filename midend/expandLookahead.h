@@ -18,6 +18,8 @@ limitations under the License.
 #define _MIDEND_EXPANDLOOKAHEAD_H_
 
 #include "ir/ir.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 
 namespace P4 {

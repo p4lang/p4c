@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "uniqueNames.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
