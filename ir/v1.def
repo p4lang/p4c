@@ -4,6 +4,9 @@
   This file contains IR classes needed just for the P4 v1.0/v1.1 front-end.
 */
 
+/** \addtogroup irdefs
+  * @{
+  */
 #emit
 namespace IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
@@ -486,3 +489,4 @@ class V1Program {
     void add(cstring name, const Node *n) { scope.add(name, n); }
 #apply
 }
+/** @} *//* end group irdefs */

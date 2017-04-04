@@ -1029,7 +1029,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto left = conv.convert(primitive->operands.at(0));
         auto right = conv.convert(primitive->operands.at(1));
         return new IR::AssignmentStatement(primitive->srcInfo, left, right);
-    } else if (primitive->name == "drop") {
+    } else if (primitive->name == "drop" || primitive->name == "mark_for_drop") {
         auto method = new IR::PathExpression(v1model.drop.Id());
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments,

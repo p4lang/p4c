@@ -74,7 +74,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 
 %token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE INLINE INTERFACE NAMESPACE NEW
                 NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VIRTUAL
-%token<str>     BLOCK IDENTIFIER INTEGER NO STRING ZERO
+%token<str>     BLOCK COMMENTBLOCK IDENTIFIER INTEGER NO STRING ZERO
 %token<emit>    EMITBLOCK
 
 %type<type>                     type nonRefType
@@ -103,6 +103,7 @@ symbol_print(FILE* file, int type, YYSTYPE value)
         fprintf(file, "%s%s", value.emit.impl ? "/*impl*/ " : "", value.emit.block.c_str());
         break;
     case BLOCK:
+    case COMMENTBLOCK:
     case IDENTIFIER:
     case STRING:
     case NO:
@@ -136,6 +137,7 @@ input
 
 element
     : irclass           { global.push_back($1); }
+    | COMMENTBLOCK      { global.push_back(new CommentBlock(@1, $1)); }
     | EMITBLOCK         { global.push_back(new EmitBlock(@1, $1.impl, $1.block)); }
     | NAMESPACE { BEGIN(PARSE_BRACKET); }
       IDENTIFIER { current_namespace = IrNamespace::get(current_namespace, $3); }
@@ -194,6 +196,7 @@ part
     | CLASS           { BEGIN(PARSE_BRACKET); }
       IDENTIFIER '{'  { $<irClass>$ = new IrClass(@2, &$<irClass>0->local, NodeKind::Nested, $3); }
       partList '}'    { $$ = $<irClass>5; }
+    | COMMENTBLOCK    { $$ = new CommentBlock(@1, $1); }
     ;
 
 method
