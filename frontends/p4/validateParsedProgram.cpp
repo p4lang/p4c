@@ -129,6 +129,22 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
     if (decl->name.isDontCare())
         ::error("%1%: illegal constant name", decl);
 }
+/**
+  * check that an entries list is declared as constant
+  * The current specification supports only const entries, and we chose
+  * to implement optCONST in the grammar, in part because we can provide
+  * a more informative message here, and in part because it more uniform
+  * handling with the rest of the properties defined for tables.
+  */
+void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
+    auto table = findContext<IR::P4Table>();
+    if (table == nullptr)
+        ::error("%1%: table initialziers must belong to a table", l);
+    auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
+    if (!ep->isConstant)
+        ::error("%1%: table initializers must be constant", l);
+}
+
 
 void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     auto inAction = findContext<IR::P4Action>();

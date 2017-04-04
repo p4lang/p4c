@@ -52,7 +52,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         standard_meta.egress_spec = x;
     }
     table t_ternary {
-        entries = {
+        const entries = {
             @priority(3) 0x1111 &&& 0xf : a_with_control_params(1);
             0x1181 : a_with_control_params(2);
             @priority(1) 0x1181 &&& 0xf00f : a_with_control_params(3);

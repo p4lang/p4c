@@ -49,10 +49,9 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     action a() { standard_meta.egress_spec = 0; }
     action a_with_control_params(bit<9> x) { standard_meta.egress_spec = x; }
 
-    table t_exact_ternary {
+    table t_ternary {
 
   	key = {
-            h.h.e : exact;
             h.h.t : ternary;
         }
 
@@ -62,23 +61,21 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
 
 	default_action = a;
-
-        const entries = {
-            (0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
-            (0x02, 0x1181           ) : a_with_control_params(2);
-            (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
-            // test default entries
-            (0x04, _                ) : a_with_control_params(4);
-#ifdef ENABLE_NEGATIVE_TESTS
-            // negative tests:
-            (0x1111 &&& 0xF   ) : a(); // invalid exact key
-            0x1 : a();                // invalid keyset
-#endif
-        }
     }
 
+#if ENABLE_NEGATIVE_TESTS
+        // test that the entries list is declared within a table
+    const entries = {
+            @priority(3)
+            0x1111 &&& 0xF    : a_with_control_params(1);
+            0x1181            : a_with_control_params(2);
+            @priority(1)
+            0x1181 &&& 0xF00F : a_with_control_params(3);
+        }
+#endif
+
     apply {
-        t_exact_ternary.apply();
+        t_ternary.apply();
     }
 }
 

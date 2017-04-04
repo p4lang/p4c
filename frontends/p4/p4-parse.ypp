@@ -791,7 +791,7 @@ tableProperty
                                            $$ = new IR::Property(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | optAnnotations optCONST ENTRIES '=' '{' entriesList '}' {
-                                            auto l = new IR::EntriesList(@6, $6);
+                                            auto l = new IR::EntriesList(@3, $6);
                                             auto id = IR::ID(@3+@7, "entries");
                                             $$ = new IR::Property(@3, id, $1, l, $2); }
     | optAnnotations optCONST IDENTIFIER '=' initializer ';'

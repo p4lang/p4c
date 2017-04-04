@@ -61,7 +61,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
 	default_action = a;
 
-        entries = {
+        const entries = {
             0x1111 &&& 0xF    : a_with_control_params(1);
             0x1187            : a_with_control_params(2);
             0x1111 &&& 0xF000 : a_with_control_params(3);
