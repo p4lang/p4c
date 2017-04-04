@@ -55,10 +55,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 #if ENABLE_NEGATIVE_TESTS
         // test that the entries list does not occur before the key decl
         const entries = {
-            @priority(3)
             0x1111 &&& 0xF    : a_with_control_params(1);
             0x1181            : a_with_control_params(2);
-            @priority(1)
             0x1181 &&& 0xF00F : a_with_control_params(3);
         }
 #endif
