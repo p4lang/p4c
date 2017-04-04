@@ -20,6 +20,14 @@ limitations under the License.
 namespace P4 {
 
 namespace {
+/**
+This inspector detects whether an IR tree contains
+'return' or 'exit' statements.
+It sets a boolean flag for each of them.
+
+It treats exceptionally Functions - it claims that
+returns do not exist in Functions.
+*/
 class HasExits : public Inspector {
  public:
     bool hasExits;
@@ -43,6 +51,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
         prune();
         return action;
     }
+    LOG3("Processing " << dbp(action));
     cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var, nullptr);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
@@ -65,6 +74,8 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
+    visit(control->controlLocals);
+
     HasExits he;
     (void)control->body->apply(he);
     if (!he.hasReturns) {
