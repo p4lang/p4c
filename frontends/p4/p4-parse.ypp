@@ -403,6 +403,7 @@ parserStatements
 parserStatement
     : assignmentOrMethodCallStatement { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
+    | constantDeclaration             { $$ = $1; }
     | parserBlockStatement            { $$ = $1; }
     ;
 

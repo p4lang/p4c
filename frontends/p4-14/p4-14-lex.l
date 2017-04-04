@@ -52,7 +52,9 @@ static int saveState = -1;
                   yylval.str = StringRef(yytext+7).trim();
                   BEGIN((saveState = PRAGMA_LINE));
                   return PRAGMA; }
-
+"@pragma"[ \t]* { yylval.str = "pragma";
+                  BEGIN((saveState = PRAGMA_LINE));
+                  return PRAGMA; }
 
 "action"        { yylval.str = yytext; BEGIN(saveState); return ACTION; }
 "actions"       { yylval.str = yytext; BEGIN(saveState); return ACTIONS; }

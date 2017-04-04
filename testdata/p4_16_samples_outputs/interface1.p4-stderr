@@ -4,9 +4,3 @@
 ../testdata/p4_16_samples/interface1.p4(25): warning: y: unused instance
     Y() y;
         ^
-../testdata/p4_16_samples/interface1.p4(24): warning: x: unused instance
-    X<int<32>>() x;
-                 ^
-../testdata/p4_16_samples/interface1.p4(25): warning: y: unused instance
-    Y() y;
-        ^
