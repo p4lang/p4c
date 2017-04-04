@@ -20,14 +20,22 @@ limitations under the License.
 namespace P4 {
 
 Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node* node) {
-    LOG2("Reference map " << refMap);
+    LOG4("Reference map " << refMap);
     return Transform::init_apply(node);
+}
+
+bool RemoveUnusedDeclarations::giveWarning(const IR::Node* node) {
+    if (warned == nullptr)
+        return false;
+    auto p = warned->emplace(node);
+    LOG3("Warn about " << dbp(node) << " " << p.second);
+    return p.second;
 }
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
     prune();  // never remove individual enum members
     if (!refMap->isUsed(getOriginal<IR::Type_Enum>())) {
-        LOG1("Removing " << type);
+        LOG3("Removing " << type);
         return nullptr;
     }
 
@@ -36,7 +44,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
-        LOG1("Removing " << cont);
+        LOG3("Removing " << cont);
         prune();
         return nullptr;
     }
@@ -49,7 +57,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
-        LOG1("Removing " << cont);
+        LOG3("Removing " << cont);
         prune();
         return nullptr;
     }
@@ -60,14 +68,15 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
     return cont;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* cont) {
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* table) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
-        ::warning("Table %1% is not used; removing", cont);
-        LOG1("Removing " << cont);
-        cont = nullptr;
+        if (giveWarning(getOriginal()))
+            ::warning("Table %1% is not used; removing", table);
+        LOG3("Removing " << table);
+        table = nullptr;
     }
     prune();
-    return cont;
+    return table;
 }
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* decl) {
@@ -80,14 +89,14 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* dec
 }
 
 const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) {
-    LOG1("Visiting " << decl);
+    LOG3("Visiting " << decl);
     auto ctx = getContext();
     if (decl->getName().name == IR::ParserState::verify &&
         ctx->parent->node->is<IR::P4Program>())
         return decl->getNode();
     if (refMap->isUsed(getOriginal<IR::IDeclaration>()))
         return decl->getNode();
-    LOG1("Removing " << getOriginal());
+    LOG3("Removing " << getOriginal());
     prune();  // no need to go deeper
     return nullptr;
 }
@@ -99,7 +108,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* dec
         ctx->parent->node->is<IR::P4Program>())
         return decl;
     if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
-        if (warn)
+        if (giveWarning(getOriginal()))
             ::warning("%1%: unused instance", decl);
     }
     // don't scan the initializer: we don't want to delete virtual methods
@@ -114,7 +123,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
         return state;
     if (refMap->isUsed(getOriginal<IR::ParserState>()))
         return state;
-    LOG1("Removing " << state);
+    LOG3("Removing " << state);
     prune();
     return nullptr;
 }

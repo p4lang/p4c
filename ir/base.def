@@ -1,13 +1,21 @@
-/* -*-C++-*-
+/* -*-C++-*- */
+
+/** \defgroup irdefs Intermediate Representation */
+/** \addtogroup irdefs
+  * @{
+  */
+
+/*
    This file contains the base classes needed for the compiler IR:
    - all interfaces
    - most basic abstract classes
    - some simple leaf classes used frequently
 */
 
-// a value that can be evaluated at compile-time
+/// a value that can be evaluated at compile-time
 interface CompileTimeValue {}
 
+/// Base class for P4 types
 abstract Type {
 #emit
     typedef Type_Unknown        Unknown;
@@ -17,20 +25,20 @@ abstract Type {
     typedef Type_Varbits        Varbits;
     typedef Type_Void           Void;
 #end
-    // This is well-defined only for types with fixed width
+    /// Well-defined only for types with fixed width
     virtual int width_bits() const { return 0; }
-    // If possible returns the corresponding type that can be inserted
-    // in a P4 program; may return a Type_Name
+    /// When possible returns the corresponding type that can be inserted
+    /// in a P4 program; may return a Type_Name
     virtual const Type* getP4Type() const = 0;
 }
 
-// Implemented by all types that may be generic
+/// Implemented by all types that may be generic
 interface IMayBeGenericType {
     virtual const TypeParameters* getTypeParameters() const = 0;
     const Type* toType() const { return to<Type>(); }
 }
 
-// Implemented by objects with an 'apply' method
+/// Implemented by objects with an 'apply' method
 interface IApply {
     static const cstring applyMethodName;
     virtual const Type_Method* getApplyMethodType() const = 0;
@@ -40,51 +48,51 @@ interface INamespace {
     virtual Util::Enumerator<IDeclaration> *getDeclarations() const = 0;
 }
 
-// Does not allow two declarations with the same name
+/// Does not allow two declarations with the same name
 interface ISimpleNamespace : INamespace {
     virtual IDeclaration getDeclByName(cstring name) const = 0;
 }
 
-// A general namespace can have multiple declarations with the same name
-// E.g., an extern can have multiple methods with the same name.
+/// A general namespace can have multiple declarations with the same name
+/// E.g., an extern can have multiple methods with the same name.
 interface IGeneralNamespace : INamespace {
     virtual Util::Enumerator<IDeclaration>* getDeclsByName(cstring name) const;
     void checkDuplicateDeclarations() const;
     validate{ checkDuplicateDeclarations(); }
 }
 
-// Implemented by things that look like type variables
+/// Implemented by things that look like type variables
 interface ITypeVar {
     virtual cstring getVarName() const = 0;
     inline Type asType() const { return to<Type>(); }
     virtual int getDeclId() const = 0;
 }
 
-// Implemented by P4Parser, P4Control and Type_Package
+/// Implemented by P4Parser, P4Control and Type_Package
 interface IContainer : IMayBeGenericType, IDeclaration {
-    // The type of the constructor as a method
+    /// The type of the constructor as a method
     virtual Type_Method getConstructorMethodType() const = 0;
     virtual ParameterList getConstructorParameters() const = 0;
 }
 
-// This represents a primitive type
-// (called base type in the spec)
+/// This represents a primitive type
+/// (called base type in the spec)
 abstract Type_Base : Type {
     const Type* getP4Type() const override { return this; }
 }
 
-// This is needed by Expression
+/// This is needed by Expression
 class Type_Unknown : Type_Base {
 #nodbprint
     static Type_Unknown get();
     toString{ return "Unknown type"; }
 }
 
-// A statement or a declaration
+/// A statement or a declaration
 abstract StatOrDecl {}
 
-// Two declarations with the same name are not necessarily the same declaration.
-// That's why declid is used to distinguish them.
+/// Two declarations with the same name are not necessarily the same declaration.
+/// That's why declid is used to distinguish them.
 abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
     int declid = nextId++;
@@ -95,11 +103,11 @@ abstract Declaration : StatOrDecl, IDeclaration {
     toString { return externalName(); }
 }
 
-// A declaration which introduces a type.
-// Two declarations with the same name are not the same declaration
-// That's why declid is used to distinguish them.
-// (We don't use multiple inheritance, so we can't
-// inherit both Type and Declaration.)
+/// A declaration which introduces a type.
+/// Two declarations with the same name are not the same declaration
+/// That's why declid is used to distinguish them.
+/// (We don't use multiple inheritance, so we can't
+/// inherit both Type and Declaration.)
 abstract Type_Declaration : Type, IDeclaration {
     ID name;
     int declid = nextId++;
@@ -112,11 +120,11 @@ abstract Type_Declaration : Type, IDeclaration {
 }
 
 abstract Expression {
-    // Note that the type field is not visited.
-    // Most P4_16 passes don't use this field.
-    // It is a used to hold the result of TypeInferencing for the expression.
-    // It is used by the P4_14 front-end and by some back-ends.
-    // It is not visited by the visitors by default (can be visited explicitly in preorder)
+    /// Note that the type field is not visited.
+    /// Most P4_16 passes don't use this field.
+    /// It is a used to hold the result of TypeInferencing for the expression.
+    /// It is used by the P4_14 front-end and by some back-ends.
+    /// It is not visited by the visitors by default (can be visited explicitly in preorder)
     optional Type type = Type::Unknown::get();
     visit_children { (void)v; }
 #apply
@@ -154,6 +162,8 @@ class Path {
     validate { BUG_CHECK(!name.name.isNullOrEmpty(), "Empty path"); }
 }
 
+/// Annotations are used to provide additional information to the compiler
+/// Most P4 entities can be optionally annotated
 class Annotation {
     ID name;
     inline Vector<Expression> expr;
@@ -163,13 +173,13 @@ class Annotation {
     Annotation(ID n, const std::initializer_list<const IR::Expression *> &a) : name(n), expr(a) {}
     Annotation(ID n, intmax_t v) : name(n) {
         expr.push_back(new IR::Constant(v)); }
-    // Predefined annotations used by the compiler
+    /// Predefined annotations used by the compiler
     static const cstring nameAnnotation;
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 }
 
-// There can be several annotations with the same "name", so this is a vector.
+/// There can be several annotations with the same "name", so this is a vector.
 // FIXME -- get rid of this class -- classes with annotations should have an
 // inline Vector<Annotation> instead (remove useless indirection)
 class Annotations {
@@ -215,7 +225,7 @@ class Annotations {
     dbprint { for (auto a : annotations) out << a << ' '; }
 }
 
-// Implemented by all objects that can have annotations
+/// Implemented by all objects that can have annotations
 interface IAnnotated {
     virtual Annotations getAnnotations() const = 0;
 }
@@ -224,3 +234,5 @@ interface IInstance {
     virtual cstring Name() const = 0;
     virtual Type getType() const = 0;
 }
+
+/** @} *//* end group irdefs */
