@@ -993,7 +993,7 @@ const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
     return new IR::P4Program(declarations->srcInfo, declarations);
 }
 
-const IR::P4Program *parse_string(std::string &pgm) {
+const IR::P4Program *parse_string(const std::string &pgm) {
     int errors = 0;
     declarations = new IR::IndexedVector<IR::Node>();
     YY_BUFFER_STATE state = yy_scan_string(pgm.c_str());
