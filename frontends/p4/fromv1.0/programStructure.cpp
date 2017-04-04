@@ -1230,6 +1230,15 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
                                                emptyTypeArguments, args);
         auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
         return result;
+    } else if (primitive->name == "modify_field_conditionally") {
+        OPS_CK(primitive, 3);
+        auto dest = conv.convert(primitive->operands.at(0));
+        auto cond = conv.convert(primitive->operands.at(1));
+        auto src = conv.convert(primitive->operands.at(2));
+        if (!cond->type->is<IR::Type::Boolean>())
+            cond = new IR::Neq(cond, new IR::Constant(0));
+        src = new IR::Mux(primitive->srcInfo, cond, src, dest);
+        return new IR::AssignmentStatement(primitive->srcInfo, dest, src);
     } else if (primitive->name == "generate_digest") {
         OPS_CK(primitive, 2);
         auto args = new IR::Vector<IR::Expression>();
@@ -1314,6 +1323,17 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments, args);
         return new IR::MethodCallStatement(mc->srcInfo, mc);
+    } else if (primitive->name == "exit") {
+        OPS_CK(primitive, 0);
+        return new IR::ExitStatement(primitive->srcInfo);
+    } else if (primitive->name == "funnel_shift_right") {
+        OPS_CK(primitive, 4);
+        auto dest = conv.convert(primitive->operands.at(0));
+        auto hi = conv.convert(primitive->operands.at(1));
+        auto lo = conv.convert(primitive->operands.at(2));
+        auto shift = conv.convert(primitive->operands.at(3));
+        auto src = new IR::Shr(new IR::Concat(hi, lo), shift);
+        return new IR::AssignmentStatement(primitive->srcInfo, dest, src);
     }
 
     // If everything else failed maybe we are invoking an action
