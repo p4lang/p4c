@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,5 +23,6 @@ limitations under the License.
 namespace IR { class Global; }
 
 const IR::P4Program *parse_P4_16_file(const char *name, FILE *in);
+const IR::P4Program *parse_string(std::string &pgm);
 
 #endif /* _P4_P4_PARSE_H_ */

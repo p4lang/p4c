@@ -993,6 +993,18 @@ const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
     return new IR::P4Program(declarations->srcInfo, declarations);
 }
 
+const IR::P4Program *parse_string(std::string &pgm) {
+    int errors = 0;
+    declarations = new IR::IndexedVector<IR::Node>();
+    YY_BUFFER_STATE state = yy_scan_string(pgm.c_str());
+    errors |= yyparse();
+    yy_delete_buffer(state);
+    if (errors) {
+        return nullptr;
+    }
+    return new IR::P4Program(declarations->srcInfo, declarations);
+}
+
 // check that right shift >>
 // has the two tokens at consecutive positions
 // (not separated by anything else)
