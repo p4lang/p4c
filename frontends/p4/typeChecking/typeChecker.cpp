@@ -130,12 +130,10 @@ bool TypeInference::done() const {
     return done;
 }
 
-const IR::Type* TypeInference::getType(const IR::Node* element) const {
+const IR::Type* TypeInference::getType(const IR::Node* element, bool verbose) const {
     const IR::Type* result = typeMap->getType(element);
-    if (result == nullptr) {
+    if (result == nullptr && verbose)
         typeError("Could not find type of %1%", element);
-        return nullptr;
-    }
     return result;
 }
 
@@ -1314,6 +1312,10 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     return expression;
 }
 
+/**
+ * compute the type of table keys.
+ * Used to typecheck pre-defined entries.
+ */
 const IR::Node* TypeInference::postorder(IR::Key* key) {
     LOG1("TypeInference: visiting " << dbp(key));
     // compute the type and store it in typeMap
@@ -1337,11 +1339,8 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
 }
 
 /**
-    typecheck a table initializer entry list
-
-    The invariants are:
-    - table keys must have been type checked before entries
-*/
+ *  typecheck a table initializer entry list
+ */
 const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     LOG1("TypeInference: visiting: " << el);
     if (done()) return el;
@@ -1350,27 +1349,30 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     const IR::Key* key = table->getKey();
     if (key == nullptr) {
         ::error("Could not find key for table %1%", table);
+        prune();
         return el;
     }
-
-    // the key must have been typechecked already.
-    if (!typeMap->contains(key)) {
-        ::error("Table initializer entries must occur after key definitions (table %1%)", table);
+    auto keyTuple = getType(key, false);
+    if (keyTuple == nullptr) {
+        ::error("Could not find type for table key %1%", key);
+        prune();
         return el;
     }
     return el;
 }
 /**
-    typecheck a table initializer entry
-
-    The invariants are:
-    - table keys and entry keys must have the same length
-    - entry key elements must be compile time constants
-    - actionRefs in entries must be in the action list
-
-    Moreover, the EntriesList visitor should have checked for the table
-    invariants, and thus, those checks are now bug checks.
-*/
+ *  typecheck a table initializer entry
+ *
+ *  The invariants are:
+ *  - table keys and entry keys must have the same length
+ *  - entry key elements must be compile time constants
+ *  - actionRefs in entries must be in the action list
+ *  - table keys must have been type checked before entries
+ *
+ *  Moreover, the EntriesList visitor should have checked for the table
+ *  invariants.
+ *
+ */
 const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     LOG1("TypeInference: visiting: " << entry);
     if (done()) return entry;
@@ -1381,8 +1383,9 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     if (key == nullptr)
         return entry;
     auto keyTuple = getType(key);
-    if (keyTuple == nullptr)
+    if (keyTuple == nullptr) {
         return entry;
+    }
     auto entryKeyType = getType(entry->keys);
     if (entryKeyType == nullptr)
         return entry;
