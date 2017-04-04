@@ -50,7 +50,7 @@ class ConstantTypeSubstitution : public Transform {
         auto repl = subst->get(cstType->to<IR::ITypeVar>());
         if (repl != nullptr && !repl->is<IR::ITypeVar>()) {
             // maybe the substitution could not infer a width...
-            LOG1("Inferred type " << repl << " for " << cst);
+            LOG2("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
             typeMap->setType(cst, repl);
             typeMap->setCompileTimeConstant(cst);
@@ -108,7 +108,7 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOn
 Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     if (node->is<IR::P4Program>()) {
         LOG2("Reference map for type checker:" << std::endl << refMap);
-        LOG1("TypeInference for " << dbp(node));
+        LOG2("TypeInference for " << dbp(node));
     }
     initialNode = node;
     refMap->validateMap(node);
@@ -247,14 +247,14 @@ const IR::Type* TypeInference::specialize(const IR::IMayBeGenericType* type,
     if (!success)
         return nullptr;
 
-    LOG1("Translation map\n" << bindings);
+    LOG2("Translation map\n" << bindings);
 
     TypeVariableSubstitutionVisitor tsv(bindings);
     const IR::Node* result = type->getNode()->apply(tsv);
     if (result == nullptr)
         return nullptr;
 
-    LOG1("Specialized " << type << "\n\tinto " << result);
+    LOG2("Specialized " << type << "\n\tinto " << result);
     return result->to<IR::Type>();
 }
 
@@ -503,7 +503,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto result = new IR::Type_SpecializedCanonical(
             type->srcInfo, baseCanon, args, specialized);
         // learn the types of all components of the specialized type
-        LOG1("Scanning the specialized type");
+        LOG2("Scanning the specialized type");
         TypeInference tc(refMap, typeMap, true);
         (void)result->apply(tc);
         return result;
@@ -520,7 +520,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
 const IR::Node* TypeInference::preorder(IR::P4Program* program) {
     if (typeMap->checkMap(getOriginal()) && readOnly) {
-        LOG1("No need to typecheck");
+        LOG2("No need to typecheck");
         prune();
     }
     return program;
@@ -587,13 +587,22 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
         }
     }
 
+    if (type->is<IR::Type_SpecializedCanonical>())
+        type = type->to<IR::Type_SpecializedCanonical>()->baseType;
+
+    if (type->is<IR::IContainer>() || type->is<IR::Type_Extern>()) {
+        typeError("%1%: cannot declare variables of type %2% (consider using an instantiation)",
+                  decl, type);
+        return decl;
+    }
+
     auto orig = getOriginal<IR::Declaration_Variable>();
     if (decl->initializer != nullptr) {
         auto init = assignment(decl, type, decl->initializer);
         if (decl->initializer != init) {
             decl->type = type;
             decl->initializer = init;
-            LOG1("Created new declaration " << decl);
+            LOG2("Created new declaration " << decl);
         }
     }
     setType(decl, type);
@@ -637,7 +646,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         return sourceExpression;
 
     if (canCastBetween(destType, initType)) {
-        LOG1("Inserting cast in " << sourceExpression);
+        LOG2("Inserting cast in " << sourceExpression);
         bool isConst = isCompileTimeConstant(sourceExpression);
         sourceExpression = new IR::Cast(sourceExpression->srcInfo, destType, sourceExpression);
         setType(sourceExpression, destType);
@@ -761,7 +770,7 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance* inst,
     for (auto d : *inst->initializer->components) {
         if (d->is<IR::Function>()) {
             auto func = d->to<IR::Function>();
-            LOG1("Type checking " << func);
+            LOG2("Type checking " << func);
             if (func->type->typeParameters->size() != 0) {
                 typeError("%1%: abstract method implementations cannot be generic", func);
                 return false;
@@ -2003,7 +2012,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             setLeftValue(expression);
             setLeftValue(getOriginal<IR::Expression>());
         } else {
-            LOG1("No left value " << expression->expr);
+            LOG2("No left value " << expression->expr);
         }
         if (isCompileTimeConstant(expression->expr)) {
             setCompileTimeConstant(expression);
@@ -2115,13 +2124,13 @@ TypeInference::actionCall(bool inActionList,
     // If a is an action with signature _(arg1, arg2, arg3)
     // Then the call a(arg1, arg2) is also an
     // action, with signature _(arg3)
-    LOG1("Processing action " << dbp(actionCall));
+    LOG2("Processing action " << dbp(actionCall));
     auto method = actionCall->method;
     auto methodType = getType(method);
     if (!methodType->is<IR::Type_Action>())
         typeError("%1%: must be an action", method);
     auto baseType = methodType->to<IR::Type_Action>();
-    LOG1("Action type " << baseType);
+    LOG2("Action type " << baseType);
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     auto arguments = actionCall->arguments;
     BUG_CHECK(baseType->returnType == nullptr,
@@ -2172,7 +2181,7 @@ TypeInference::actionCall(bool inActionList,
 
     ConstantTypeSubstitution cts(tvs, typeMap);
     actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
-    LOG1("Converted action " << actionCall);
+    LOG2("Converted action " << actionCall);
     setType(actionCall, resultType);
     return actionCall;
 }
@@ -2181,7 +2190,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done()) return expression;
     methodArguments.pop_back();
 
-    LOG1("Solving method call " << dbp(expression));
+    LOG2("Solving method call " << dbp(expression));
     auto methodType = getType(expression->method);
     if (methodType == nullptr)
         return expression;
@@ -2229,7 +2238,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         if (tvs == nullptr)
             return expression;
 
-        LOG1("Method type before specialization " << methodType);
+        LOG2("Method type before specialization " << methodType);
         TypeVariableSubstitutionVisitor substVisitor(tvs);
         auto specMethodType = methodType->apply(substVisitor);
 
@@ -2244,7 +2253,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         auto functionType = specMethodType->to<IR::Type_MethodBase>();
         BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
-        LOG1("Method type after specialization " << specMethodType);
+        LOG2("Method type after specialization " << specMethodType);
 
         if (!functionType->is<IR::Type_Method>())
             BUG("Unexpected type for function %1%", functionType);
@@ -2509,7 +2518,7 @@ const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
 
     if (!isLeftValue(assign->left)) {
         typeError("Expression %1% cannot be the target of an assignment", assign->left);
-        LOG1(assign->left);
+        LOG2(assign->left);
         return assign;
     }
 
