@@ -4285,7 +4285,7 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
 }
 
 control process_storm_control(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("storm_control_meter") meter(32w1024, CounterType.bytes) storm_control_meter;
+    @name("storm_control_meter") meter(32w1024, MeterType.bytes) storm_control_meter;
     @name(".nop") action nop() {
     }
     @name(".set_storm_control_meter") action set_storm_control_meter(bit<16> meter_idx) {
@@ -5216,7 +5216,7 @@ control process_multicast(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_meter_index(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("meter_index") direct_meter<bit<2>>(CounterType.bytes) meter_index;
+    @name("meter_index") direct_meter<bit<2>>(MeterType.bytes) meter_index;
     @name(".nop") action nop() {
     }
     @name(".nop") action nop_0() {

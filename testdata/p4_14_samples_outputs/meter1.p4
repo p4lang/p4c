@@ -19,14 +19,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name("intrinsic_metadata")
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta") 
+    @name("meta")
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -46,7 +46,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("my_meter") direct_meter<bit<32>>(CounterType.packets) my_meter;
+    @name("my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
     @name("._drop") action _drop() {
         mark_to_drop();
     }

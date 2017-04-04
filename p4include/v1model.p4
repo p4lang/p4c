@@ -51,6 +51,11 @@ enum CounterType {
     packets_and_bytes
 }
 
+enum MeterType {
+    packets,
+    bytes
+}
+
 extern counter {
     counter(bit<32> size, CounterType type);
     void count(in bit<32> index);
@@ -61,12 +66,12 @@ extern direct_counter {
 }
 
 extern meter {
-    meter(bit<32> size, CounterType type);
+    meter(bit<32> size, MeterType type);
     void execute_meter<T>(in bit<32> index, out T result);
 }
 
 extern direct_meter<T> {
-    direct_meter(CounterType type);
+    direct_meter(MeterType type);
     void read(out T result);
 }
 

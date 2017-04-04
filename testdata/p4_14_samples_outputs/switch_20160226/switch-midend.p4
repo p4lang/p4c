@@ -3323,7 +3323,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_119();
     }
-    @name("process_storm_control.storm_control_meter") meter(32w1024, CounterType.bytes) process_storm_control_storm_control_meter_0;
+    @name("process_storm_control.storm_control_meter") meter(32w1024, MeterType.bytes) process_storm_control_storm_control_meter_0;
     @name(".nop") action _nop_19() {
     }
     @name(".set_storm_control_meter") action _set_storm_control_meter(bit<10> meter_idx) {

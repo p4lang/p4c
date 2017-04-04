@@ -1791,13 +1791,13 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     CHECK_NULL(mkind);
                     BUG_CHECK(mkind->is<IR::Declaration_ID>(), "%1%: expected a member", mkind);
                     cstring name = mkind->to<IR::Declaration_ID>()->name;
-                    cstring type;
-                    if (name == v1model.meter.counterType.packets.name)
+                    cstring type = "?";
+                    if (name == v1model.meter.meterType.packets.name)
                         type = "packets";
-                    else if (name == v1model.meter.counterType.bytes.name)
+                    else if (name == v1model.meter.meterType.bytes.name)
                         type = "bytes";
                     else
-                        type = "both";
+                        ::error("Unexpected meter type %1%", mkind);
                     jmtr->emplace("type", type);
                     meters->append(jmtr);
                     continue;
@@ -1848,13 +1848,13 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     CHECK_NULL(mkind);
                     BUG_CHECK(mkind->is<IR::Declaration_ID>(), "%1%: expected a member", mkind);
                     cstring name = mkind->to<IR::Declaration_ID>()->name;
-                    cstring type;
-                    if (name == v1model.meter.counterType.packets.name)
+                    cstring type = "?";
+                    if (name == v1model.meter.meterType.packets.name)
                         type = "packets";
-                    else if (name == v1model.meter.counterType.bytes.name)
+                    else if (name == v1model.meter.meterType.bytes.name)
                         type = "bytes";
                     else
-                        type = "both";
+                        ::error("%1%: unexpected meter type", mkind);
                     jmtr->emplace("type", type);
                     jmtr->emplace("size", info->tableSize);
                     cstring tblname = extVisibleName(info->table);

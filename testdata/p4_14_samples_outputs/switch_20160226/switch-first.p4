@@ -3142,7 +3142,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
 }
 
 control process_storm_control(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("storm_control_meter") meter(32w1024, CounterType.bytes) storm_control_meter;
+    @name("storm_control_meter") meter(32w1024, MeterType.bytes) storm_control_meter;
     @name(".nop") action nop() {
     }
     @name(".set_storm_control_meter") action set_storm_control_meter(bit<10> meter_idx) {

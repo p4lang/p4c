@@ -50,7 +50,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_3() {
     }
-    @name("my_meter") meter(32w16384, CounterType.packets) my_meter;
+    @name("my_meter") meter(32w16384, MeterType.packets) my_meter;
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
