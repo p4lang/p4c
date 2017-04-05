@@ -210,6 +210,26 @@ class Key : PropertyValue {
     validate { keyElements->check_null(); }
 }
 
+/// Pre-defined entry in a table
+class Entry : IAnnotated {
+    Annotations         annotations;  /// annotations are optional (supported annotations: @priority(value))
+    ListExpression      keys;         /// must be a tuple expression
+    Expression          action;       /// typically a MethodCallExpression.
+                                      /// The action must be defined in action list
+
+    Annotations     getAnnotations() const override { return annotations; }
+    ListExpression  getKeys() const { return keys; }
+    Expression      getAction() const { return action; }
+    dbprint { out << annotations << keys << action; }
+}
+
+/// List of predefined entries. Part of table properties
+class EntriesList : PropertyValue {
+    Vector<Entry> entries;
+    size_t size() const { return entries->size(); }
+    dbprint { out << "{ " << entries << "}"; }
+}
+
 class Property : Declaration, IAnnotated {
     optional Annotations   annotations = Annotations::empty;
     PropertyValue value;
@@ -232,6 +252,7 @@ class TableProperties : ISimpleNamespace {
     static const cstring actionsPropertyName;
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
+    static const cstring entriesPropertyName;
 #nodbprint
     validate{ properties->check_null(); }
 }
@@ -273,6 +294,16 @@ class P4Table : Declaration, IAnnotated, IApply {
                     return k; } }
             error("%1% must be a constant expression", d); }
         return nullptr; }
+    EntriesList getEntries() const {
+        auto ep = properties->getProperty(TableProperties::entriesPropertyName);
+        if (ep == nullptr)
+            return nullptr;
+        if (!ep->value->is<IR::EntriesList>()) {
+            ::error("%1% must be a list of entries", ep);
+            return nullptr;
+        }
+        return ep->value->to<IR::EntriesList>();
+    }
 }
 
 class Declaration_Variable : Declaration, IAnnotated {

@@ -78,6 +78,7 @@ std::string stringLiteral;
 "control"       { BEGIN(NORMAL); return CONTROL; }
 "default"       { BEGIN(NORMAL); return DEFAULT; }
 "else"          { BEGIN(NORMAL); return ELSE; }
+"entries"       { BEGIN(NORMAL); return ENTRIES; }
 "enum"          { BEGIN(NORMAL); return ENUM; }
 "error"         { BEGIN(NORMAL); return T_ERROR; }
 "exit"          { BEGIN(NORMAL); return EXIT; }

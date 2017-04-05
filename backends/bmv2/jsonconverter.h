@@ -126,6 +126,8 @@ class JsonConverter final {
                                    const IR::Key* key,
                                    Util::JsonObject* table,
                                    Util::JsonArray* action_profiles);
+    void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
+    cstring getKeyMatchType(const IR::KeyElement *ke);
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
     // returns id of created field list
     int createFieldList(const IR::Expression* expr, cstring group,

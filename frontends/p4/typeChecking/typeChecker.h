@@ -81,7 +81,7 @@ class TypeInference : public Transform {
                   bool readOnly = false);
 
  protected:
-    const IR::Type* getType(const IR::Node* element) const;
+    const IR::Type* getType(const IR::Node* element, bool verbose = true) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
     void setLeftValue(const IR::Expression* expression)
@@ -171,6 +171,8 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Function* function) override;
     const IR::Node* preorder(IR::P4Program* program) override;
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
+    // check invariants for entire list before checking the entries
+    const IR::Node* preorder(IR::EntriesList* el) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
@@ -204,6 +206,8 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_ActionEnum* type) override;
     const IR::Node* postorder(IR::P4Table* type) override;
     const IR::Node* postorder(IR::P4Action* type) override;
+    const IR::Node* postorder(IR::Key* key) override;
+    const IR::Node* postorder(IR::Entry* e) override;
 
     const IR::Node* postorder(IR::Parameter* param) override;
     const IR::Node* postorder(IR::Constant* expression) override;

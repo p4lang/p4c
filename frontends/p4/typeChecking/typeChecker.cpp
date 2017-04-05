@@ -130,12 +130,10 @@ bool TypeInference::done() const {
     return done;
 }
 
-const IR::Type* TypeInference::getType(const IR::Node* element) const {
+const IR::Type* TypeInference::getType(const IR::Node* element, bool verbose) const {
     const IR::Type* result = typeMap->getType(element);
-    if (result == nullptr) {
+    if (result == nullptr && verbose)
         typeError("Could not find type of %1%", element);
-        return nullptr;
-    }
     return result;
 }
 
@@ -1314,6 +1312,138 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     return expression;
 }
 
+/**
+ * compute the type of table keys.
+ * Used to typecheck pre-defined entries.
+ */
+const IR::Node* TypeInference::postorder(IR::Key* key) {
+    LOG1("TypeInference: visiting " << dbp(key));
+    // compute the type and store it in typeMap
+    auto vec = new IR::Vector<IR::Type>();
+    for (auto ke : *key->keyElements) {
+        auto kt = typeMap->getType(ke->expression);
+        if (kt == nullptr) {
+            LOG2("Bailing out for " << dbp(ke));
+            return key;
+        }
+        vec->push_back(kt);
+    }
+    auto keyTuple = new IR::Type_Tuple(Util::SourceInfo(), vec);
+    LOG2("Setting key type to " << dbp(keyTuple));
+    setType(key, keyTuple);
+    // installing also for the original because we cannot tell which one will survive in the ir
+    // \TODO: figure out the rules of survivorship
+    LOG2("Setting key type to " << dbp(getOriginal()));
+    setType(getOriginal(), keyTuple);
+    return key;
+}
+
+/**
+ *  typecheck a table initializer entry list
+ */
+const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
+    LOG1("TypeInference: visiting: " << el);
+    if (done()) return el;
+    auto table = findContext<IR::P4Table>();
+    BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
+    const IR::Key* key = table->getKey();
+    if (key == nullptr) {
+        ::error("Could not find key for table %1%", table);
+        prune();
+        return el;
+    }
+    auto keyTuple = getType(key, false);
+    if (keyTuple == nullptr) {
+        ::error("Could not find type for table key %1%", key);
+        prune();
+        return el;
+    }
+    return el;
+}
+/**
+ *  typecheck a table initializer entry
+ *
+ *  The invariants are:
+ *  - table keys and entry keys must have the same length
+ *  - entry key elements must be compile time constants
+ *  - actionRefs in entries must be in the action list
+ *  - table keys must have been type checked before entries
+ *
+ *  Moreover, the EntriesList visitor should have checked for the table
+ *  invariants.
+ *
+ */
+const IR::Node* TypeInference::postorder(IR::Entry* entry) {
+    LOG1("TypeInference: visiting: " << entry);
+    if (done()) return entry;
+    auto table = findContext<IR::P4Table>();
+    if (table == nullptr)
+        return entry;
+    const IR::Key* key = table->getKey();
+    if (key == nullptr)
+        return entry;
+    auto keyTuple = getType(key);
+    if (keyTuple == nullptr) {
+        return entry;
+    }
+    auto entryKeyType = getType(entry->keys);
+    if (entryKeyType == nullptr)
+        return entry;
+    if (entryKeyType->is<IR::Type_Set>())
+        entryKeyType = entryKeyType->to<IR::Type_Set>()->elementType;
+
+    auto keyset = entry->getKeys();
+    if (keyset == nullptr || !keyset->is<IR::ListExpression>()) {
+        ::error("%1%: key expression must be tuple", keyset);
+        return entry;
+    } else if (keyset->components->size() < key->keyElements->size()) {
+        ::error("%1%: Size of entry keyset must match the table key set size", keyset);
+        return entry;
+    }
+
+    bool nonConstantKeys = false;
+    for (auto ke : *keyset->components)
+        if (!isCompileTimeConstant(ke)) {
+            ::error("Key entry must be a compile time constant: %1%", ke);
+            nonConstantKeys = true;
+        }
+    if (nonConstantKeys)
+        return entry;
+
+    TypeVariableSubstitution *tvs = unify(entry, keyTuple, entryKeyType, true);
+    if (tvs == nullptr)
+        return entry;
+    ConstantTypeSubstitution cts(tvs, typeMap);
+    auto ks = cts.convert(keyset);
+
+    if (ks != keyset)
+        entry = new IR::Entry(entry->srcInfo, entry->annotations,
+                              ks->to<IR::ListExpression>(), entry->action);
+
+    auto actionRef = entry->getAction();
+    if (!actionRef->is<IR::MethodCallExpression>()) {
+        ::error("Invalid action %1% in entry");
+        return entry;
+    }
+    auto actionCall = actionRef->to<IR::MethodCallExpression>();
+    auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
+    bool found = false;
+    for (auto ale : *table->getActionList()->actionList) {
+        auto expr = ale->expression;
+        if (expr->is<IR::MethodCallExpression>())
+            expr = expr->to<IR::MethodCallExpression>()->method;
+        if (expr->is<IR::PathExpression>() &&
+            expr->to<IR::PathExpression>()->path->name == actionName) {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+         ::error("%1%: action not in the table action list", actionRef);
+
+    return entry;
+}
+
 const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     if (done()) return expression;
     bool constant = true;
@@ -1589,6 +1719,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         CHECK_NULL(cst);
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
         setType(e->left, rtype);
+        setCompileTimeConstant(e->left);
         expression = e;
         resultType = rtype;
     } else if (bl != nullptr && br == nullptr) {
@@ -1597,6 +1728,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         CHECK_NULL(cst);
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
         setType(e->right, ltype);
+        setCompileTimeConstant(e->right);
         expression = e;
         resultType = ltype;
     }
@@ -1611,6 +1743,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
 
 // Handle .. and &&&
 const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
+    LOG1("TypeInference::typeSet visiting " << expression);
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -1641,6 +1774,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         auto e = expression->clone();
         auto cst = expression->left->to<IR::Constant>();
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
         setType(e->left, sameType);
@@ -1648,6 +1782,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         auto e = expression->clone();
         auto cst = expression->right->to<IR::Constant>();
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        setCompileTimeConstant(e->right);
         expression = e;
         sameType = ltype;
         setType(e->right, sameType);
@@ -1656,6 +1791,8 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         // set after unification
         auto r = expression->right->clone();
         auto e = expression->clone();
+        if (isCompileTimeConstant(expression->right))
+            setCompileTimeConstant(r);
         e->right = r;
         expression = e;
         setType(r, sameType);
@@ -1664,6 +1801,12 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     auto resultType = new IR::Type_Set(sameType->srcInfo, sameType);
     typeMap->setType(expression, resultType);
     typeMap->setType(getOriginal(), resultType);
+
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
+
     return expression;
 }
 

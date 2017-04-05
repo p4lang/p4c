@@ -1221,6 +1221,135 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     return result;
 }
 
+/**
+    Converts a list of P4 defined table entries to JSON.
+
+    Assumes that all the checking on the entries being valid has been
+    done in the validateParsedProgram pass, so this is simply the serialization.
+
+    This function still checks and reports errors in key entry expressions.
+    The JSON generated after a reported error will not be accepted in BMv2.
+
+    @param table A P4 table IR node
+    @param jsonTable the JSON table object to add predefined entries
+
+*/
+void JsonConverter::convertTableEntries(const IR::P4Table *table,
+                                        Util::JsonObject *jsonTable) {
+    auto entriesList = table->getEntries();
+    if (entriesList == nullptr) return;
+
+    auto entries = mkArrayField(jsonTable, "entries");
+    int entryPriority = 1;  // default priority is defined by index position
+    for (auto e : *entriesList->entries) {
+        auto entry = new Util::JsonObject();
+
+        auto keyset = e->getKeys();
+        auto matchKeys = mkArrayField(entry, "match_key");
+        int keyIndex = 0;
+        for (auto k : *keyset->components) {
+            auto key = new Util::JsonObject();
+            auto tableKey = table->getKey()->keyElements->at(keyIndex);
+            auto keyWidth = tableKey->expression->type->width_bits();
+            auto k8 = ROUNDUP(keyWidth, 8);
+            auto matchType = getKeyMatchType(tableKey);
+            key->emplace("match_type", matchType);
+            if (matchType == "valid") {
+                if (k->is<IR::BoolLiteral>())
+                    key->emplace("key", k->to<IR::BoolLiteral>()->toString());
+                else
+                    ::error("%1% invalid 'valid' key expression", k);
+            } else if (matchType == corelib.exactMatch.name) {
+                if (k->is<IR::Constant>())
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                else
+                    ::error("%1% invalid exact key expression", k);
+            } else if (matchType == corelib.ternaryMatch.name) {
+                if (k->is<IR::Mask>()) {
+                    auto km = k->to<IR::Mask>();
+                    key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", stringRepr(km->right->to<IR::Constant>()->value, k8));
+                } else if (k->is<IR::Constant>()) {
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("key", stringRepr(0, k8));
+                    key->emplace("mask", stringRepr(0, k8));
+                } else {
+                    ::error("%1% invalid ternary key expression", k);
+                }
+            } else if (matchType == corelib.lpmMatch.name) {
+                if (k->is<IR::Mask>()) {
+                    auto km = k->to<IR::Mask>();
+                    key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
+                    auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
+                    auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
+                    unsigned long mask = km->right->to<IR::Constant>()->value.get_ui();
+                    auto len = trailing_zeros(mask);
+                    if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
+                        ::error("%1% invalid mask for LPM key", k);
+                    else
+                        key->emplace("prefix_length", keyWidth - len);
+                } else if (k->is<IR::Constant>()) {
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("prefix_length", keyWidth);
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("key", stringRepr(0, k8));
+                    key->emplace("prefix_length", 0);
+                } else {
+                    ::error("%1% invalid LPM key expression", k);
+                }
+            } else if (matchType == "range") {
+                if (k->is<IR::Range>()) {
+                    auto kr = k->to<IR::Range>();
+                    key->emplace("start", stringRepr(kr->left->to<IR::Constant>()->value, k8));
+                    key->emplace("end", stringRepr(kr->right->to<IR::Constant>()->value, k8));
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("start", stringRepr(0, k8));
+                    key->emplace("end", stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
+                } else {
+                    ::error("%1% invalid range key expression", k);
+                }
+            } else {
+                ::error("unkown key type %1% for key %2%", matchType, k);
+            }
+            matchKeys->append(key);
+            keyIndex++;
+        }
+
+        auto action = new Util::JsonObject();
+        auto actionRef = e->getAction();
+        if (!actionRef->is<IR::MethodCallExpression>())
+            ::error("%1%: invalid action in entries list", actionRef);
+        auto actionCall = actionRef->to<IR::MethodCallExpression>();
+        auto method = actionCall->method->to<IR::PathExpression>()->path;
+        auto decl = refMap->getDeclaration(method, true);
+        auto actionDecl = decl->to<IR::P4Action>();
+        unsigned id = get(structure.ids, actionDecl);
+        action->emplace("action_id", id);
+        auto actionData = mkArrayField(action, "action_data");
+        for (auto arg : *actionCall->arguments) {
+            actionData->append(stringRepr(arg->to<IR::Constant>()->value, 0));
+        }
+        entry->emplace("action_entry", action);
+
+        auto priorityAnnotation = e->getAnnotations()->getSingle("priority");
+        if (priorityAnnotation != nullptr) {
+            if (priorityAnnotation->expr.size() > 1)
+                ::error("invalid priority value %1%", priorityAnnotation->expr);
+            auto priValue = priorityAnnotation->expr.front();
+            if ( !priValue->is<IR::Constant>())
+                ::error("invalid priority value %1%. must be constant", priorityAnnotation->expr);
+            entry->emplace("priority", priValue->to<IR::Constant>()->value);
+        } else {
+            entry->emplace("priority", entryPriority);
+        }
+        entryPriority += 1;
+
+        entries->append(entry);
+    }
+}
+
 bool JsonConverter::handleTableImplementation(const IR::Property* implementation,
                                               const IR::Key* key,
                                               Util::JsonObject* table,
@@ -1353,6 +1482,35 @@ cstring JsonConverter::convertHashAlgorithm(cstring algorithm) const {
     return result;
 }
 
+/**
+ Computes the type of the key based on the declaration in the path.
+
+If the key expression invokes .isValid(), we return "valid".
+@param ke A table match key element
+@return the key type
+*/
+cstring JsonConverter::getKeyMatchType(const IR::KeyElement *ke) {
+    auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
+    BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+    auto expr = ke->expression;
+
+    cstring match_type = mt->name.name;
+    if (mt->name.name == corelib.exactMatch.name || mt->name.name == corelib.ternaryMatch.name) {
+        if (expr->is<IR::MethodCallExpression>()) {
+            auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                                                  refMap, typeMap);
+            if (mi->is<P4::BuiltInMethod>())
+                if (mi->to<P4::BuiltInMethod>()->name == IR::Type_Header::isValid)
+                    match_type = "valid";
+        }
+    } else if (mt->name.name != corelib.lpmMatch.name &&
+               mt->name.name != v1model.rangeMatchType.name &&
+               mt->name.name != v1model.selectorMatchType.name) {
+        ::error("%1%: match type not supported on this target", mt);
+    }
+    return match_type;
+}
+
 Util::IJson*
 JsonConverter::convertTable(const CFG::TableNode* node,
                             Util::JsonArray* counters,
@@ -1363,15 +1521,34 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     cstring name = extVisibleName(table);
     result->emplace("name", name);
     result->emplace("id", nextId("tables"));
-    cstring table_match_type = "exact";
+    cstring table_match_type = corelib.exactMatch.name;
     auto key = table->getKey();
     auto tkey = mkArrayField(result, "key");
     conv->simpleExpressionsOnly = true;
 
     if (key != nullptr) {
         for (auto ke : *key->keyElements) {
-            auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
-            BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+            auto match_type = getKeyMatchType(ke);
+            if (match_type == v1model.selectorMatchType.name)
+                    continue;
+            // Decreasing order of precedence (bmv2 specification):
+            // 0) more than one LPM field is an error
+            // 1) if there is at least one RANGE field, then the table is RANGE
+            // 2) if there is at least one TERNARY field, then the table is TERNARY
+            // 3) if there is a LPM field, then the table is LPM
+            // 4) otherwise the table is EXACT
+            if (match_type != table_match_type) {
+                if (match_type == v1model.rangeMatchType.name)
+                    table_match_type = v1model.rangeMatchType.name;
+                if (match_type == corelib.ternaryMatch.name &&
+                    table_match_type != v1model.rangeMatchType.name)
+                    table_match_type = corelib.ternaryMatch.name;
+                if (match_type == corelib.lpmMatch.name &&
+                    table_match_type == corelib.exactMatch.name)
+                    table_match_type = corelib.lpmMatch.name;
+            } else if (match_type == corelib.lpmMatch.name) {
+                ::error("%1%, Multiple LPM keys in table", table);
+            }
             auto expr = ke->expression;
             mpz_class mask;
             if (auto mexp = expr->to<IR::BAnd>()) {
@@ -1387,45 +1564,27 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                 expr = slice->e0;
                 int h = slice->getH();
                 int l = slice->getL();
-                mask = Util::maskFromSlice(h, l); }
-
-            cstring match_type = mt->name.name;
-            if (mt->name.name == corelib.exactMatch.name) {
+                mask = Util::maskFromSlice(h, l);
+            }
+            if (match_type == "valid") {
+                auto mt = refMap->getDeclaration(ke->matchType->path, true)
+                          ->to<IR::Declaration_ID>();
                 if (expr->is<IR::MethodCallExpression>()) {
                     auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
                                                           refMap, typeMap);
                     if (mi->is<P4::BuiltInMethod>()) {
                         auto bim = mi->to<P4::BuiltInMethod>();
                         if (bim->name == IR::Type_Header::isValid) {
-                            expr = bim->appliedTo;
-                            match_type = "valid";
-                        }
-                    }
-                }
-            } else if (mt->name.name == corelib.ternaryMatch.name) {
-                if (table_match_type == "exact")
-                    table_match_type = "ternary";
-                if (expr->is<IR::MethodCallExpression>()) {
-                    auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                                                          refMap, typeMap);
-                    if (mi->is<P4::BuiltInMethod>()) {
-                        auto bim = mi->to<P4::BuiltInMethod>();
-                        if (bim->name == IR::Type_Header::isValid) {
-                            expr = new IR::Member(IR::Type::Boolean::get(), bim->appliedTo,
-                                                  "$valid$");
-                            typeMap->setType(expr, expr->type);
-                        }
-                    }
-                }
-            } else if (mt->name.name == corelib.lpmMatch.name) {
-                if (table_match_type != "lpm")
-                    table_match_type = "lpm";
-            } else if (mt->name.name == v1model.rangeMatchType.name) {
-                continue;
-            } else if (mt->name.name == v1model.selectorMatchType.name) {
-                continue;
-            } else {
-                ::error("%1%: match type not supported on this target", mt);
+                            if (mt->name.name == corelib.ternaryMatch.name) {
+                                expr = new IR::Member(IR::Type::Boolean::get(), bim->appliedTo,
+                                                      "$valid$");
+                                typeMap->setType(expr, expr->type);
+                                match_type = corelib.ternaryMatch.name;
+                                if (match_type != table_match_type &&
+                                    table_match_type != v1model.rangeMatchType.name)
+                                    table_match_type = corelib.ternaryMatch.name;
+                            } else {
+                                expr = bim->appliedTo; }}}}
             }
 
             auto keyelement = new Util::JsonObject();
@@ -1698,6 +1857,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
         entry->emplace("action_entry_const", defact->isConstant);
         result->emplace("default_entry", entry);
     }
+    convertTableEntries(table, result);
     return result;
 }
 
@@ -2044,7 +2204,7 @@ void JsonConverter::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
   static constexpr int version_major = 2;
-  static constexpr int version_minor = 6;
+  static constexpr int version_minor = 7;
   auto version = mkArrayField(meta, "version");
   version->append(version_major);
   version->append(version_minor);
