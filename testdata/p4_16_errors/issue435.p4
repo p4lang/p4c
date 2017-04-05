@@ -12,9 +12,7 @@ control c() {
     apply {}
 }
 
-#if 0
 control ct();
 package top(ct c);
 
 top(c()) main;
-#endif
