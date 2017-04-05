@@ -13,3 +13,6 @@ control c() {
     }
 }
 
+control ct();
+package top(ct c);
+top(c()) main;
