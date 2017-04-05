@@ -60,7 +60,6 @@ static Util::ProgramStructure structure;
 
 namespace {  // anonymous namespace
 static int yylex();
-
 %}
 
 %union {
@@ -999,9 +998,10 @@ const IR::P4Program *parse_string(const std::string &pgm) {
     YY_BUFFER_STATE state = yy_scan_string(pgm.c_str());
     errors |= yyparse();
     yy_delete_buffer(state);
-    if (errors) {
+    if (errors)
         return nullptr;
-    }
+    structure.clear();
+    allErrors = nullptr;
     return new IR::P4Program(declarations->srcInfo, declarations);
 }
 

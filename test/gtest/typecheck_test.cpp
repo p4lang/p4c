@@ -34,7 +34,6 @@ limitations under the License.
 using namespace P4;
 
 TEST(UNITTEST, helloworld) {
-
     std::string program = with_core_p4(
         "parser Parser<H, M> (packet_in p){ state start{} };\n"
         "control empty() { apply {} };\n"
@@ -57,6 +56,18 @@ TEST(UNITTEST, helloworld) {
     };
 
     pgm = pgm->apply(passes);
+
+    ASSERT_NE(nullptr, pgm);
+}
+
+TEST(UNITTEST, package) {
+    std::string program = with_core_p4(
+        "parser Parser<H, M> (packet_in p){ state start{} };\n"
+        "control empty() { apply {} };\n"
+        "package top(empty e);\n"
+        "top(empty()) main;\n");
+
+    const IR::P4Program* pgm = parse_string(program);
 
     ASSERT_NE(nullptr, pgm);
 }

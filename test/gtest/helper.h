@@ -18,34 +18,8 @@ limitations under the License.
 
 /* preprocessing by prepending the content of core.p4 to test program */
 std::string with_core_p4 (const std::string& pgm) {
-    const std::string core_p4 = " \
-error { \
-    NoError, \
-    PacketTooShort, \
-    NoMatch, \
-    StackOutOfBounds, \
-    OverwritingHeader, \
-    HeaderTooShort, \
-    ParserTimeout \
-} \
-extern packet_in { \
-    void extract<T>(out T hdr); \
-    void extract<T>(out T variableSizeHeader, \
-                    in bit<32> variableFieldSizeInBits); \
-    T lookahead<T>(); \
-    void advance(in bit<32> sizeInBits); \
-    bit<32> length(); \
-} \
-extern packet_out { \
-    void emit<T>(in T hdr); \
-    void emit<T>(in bool condition, in T data); \
-} \
-@name(\"NoAction\") \
-action NoAction() {} \
-match_kind { \
-    exact, \
-    ternary, \
-    lpm \
-} \n";
-    return core_p4 + pgm;
+    std::ifstream input("p4include/core.p4");
+    std::stringstream sstr;
+    while(input >> sstr.rdbuf());
+    return sstr.str() + pgm;
 }
