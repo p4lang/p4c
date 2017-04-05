@@ -42,7 +42,7 @@ TEST(UNITTEST, helloworld) {
         "top(empty()) main;\n");
 
     const IR::P4Program* pgm = parse_string(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_NE(nullptr, pgm);
 
     ReferenceMap  refMap;
     TypeMap       typeMap;
@@ -58,5 +58,5 @@ TEST(UNITTEST, helloworld) {
 
     pgm = pgm->apply(passes);
 
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_NE(nullptr, pgm);
 }

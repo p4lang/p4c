@@ -17,7 +17,7 @@ limitations under the License.
 #include <string>
 
 /* preprocessing by prepending the content of core.p4 to test program */
-std::string with_core_p4 (std::string pgm) {
+std::string with_core_p4 (const std::string pgm) {
     const std::string core_p4 = " \
 error { \
     NoError, \

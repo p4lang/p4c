@@ -23,6 +23,6 @@ limitations under the License.
 namespace IR { class Global; }
 
 const IR::P4Program *parse_P4_16_file(const char *name, FILE *in);
-const IR::P4Program *parse_string(std::string &pgm);
+const IR::P4Program *parse_string(const std::string &pgm);
 
 #endif /* _P4_P4_PARSE_H_ */
