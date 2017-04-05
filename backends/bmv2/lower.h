@@ -23,7 +23,9 @@ limitations under the License.
 
 namespace BMV2 {
 
-// Convert expressions not supported on BMv2
+/**
+  This pass rewrites expressions which are not supported natively on BMv2.
+*/
 class LowerExpressions : public Transform {
     P4::TypeMap* typeMap;
     // Cannot shift with a value larger than 8 bits
@@ -47,9 +49,15 @@ class LowerExpressions : public Transform {
     { prune(); return table; }  // don't simplify expressions in table
 };
 
-// This pass is a hack to work around current BMv2 limitations:
-// checksum computations must be expressed in a restricted way, since
-// the JSON code generator uses simple pattern-matching.
+/**
+This pass is a hack to work around current BMv2 limitations:
+checksum computations must be expressed in a restricted way, since
+the JSON code generator uses simple pattern-matching.
+
+The real solution to this problem is to have the BMv2 simulator use a
+real extern for computing and verifying checksums.  Then this hack
+would not be necessary anymore.
+*/
 class FixupChecksum : public Transform {
     const cstring* updateBlockName;
  public:
@@ -60,18 +68,28 @@ class FixupChecksum : public Transform {
 };
 
 
-// If a select contains an expression which
-// looks too complicated, it is lifted into a temporary.
-class RemoveExpressionsFromSelects : public Transform {
+/**
+BMv2 does not support complex expressions for a select
+or as arguments to external functions.
+Such expressions are lifted into a temporaries.
+*/
+class RemoveComplexExpressions : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+    const cstring *ingressName;
+    const cstring *egressName;
     IR::IndexedVector<IR::Declaration> newDecls;
     IR::IndexedVector<IR::StatOrDecl>  assignments;
 
+    const IR::PathExpression* createTemporary(const IR::Expression* expression);
+    const IR::Vector<IR::Expression>* simplifyExpressions(const IR::Vector<IR::Expression>* vec);
+
  public:
-    RemoveExpressionsFromSelects(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RemoveExpressionsFromSelects"); }
+    RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                             const cstring* ingressName, const cstring* egressName):
+            refMap(refMap), typeMap(typeMap), ingressName(ingressName), egressName(egressName) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(ingressName); CHECK_NULL(egressName);
+        setName("RemoveComplexExpressions"); }
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* preorder(IR::ParserState* state) override
     { assignments.clear(); return state; }
@@ -83,6 +101,7 @@ class RemoveExpressionsFromSelects : public Transform {
         }
         return state;
     }
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* preorder(IR::P4Parser* parser) override
     { newDecls.clear(); return parser; }
     const IR::Node* postorder(IR::P4Parser* parser) override {
@@ -93,6 +112,16 @@ class RemoveExpressionsFromSelects : public Transform {
         }
         return parser;
     }
+    const IR::Node* preorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::P4Control* control) override {
+        if (!newDecls.empty()) {
+            auto locals = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
+            locals->append(newDecls);
+            control->controlLocals = locals;
+        }
+        return control;
+    }
+    const IR::Node* postorder(IR::Statement* statement) override;
 };
 
 }  // namespace BMV2

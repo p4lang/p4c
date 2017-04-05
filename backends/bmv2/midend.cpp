@@ -109,7 +109,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
-    auto v1controls = new std::set<cstring>();
+    auto skipv1controls = new std::set<cstring>();  // in these controls we don't synthesize actions
 
     addPasses({
         convertEnums,
@@ -119,7 +119,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-        new VisitFunctor([this, v1controls, evaluator](const IR::Node *root) -> const IR::Node* {
+        new VisitFunctor([this, skipv1controls, evaluator](const IR::Node *root) ->
+                         const IR::Node* {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
             if (main == nullptr)
@@ -128,20 +129,26 @@ MidEnd::MidEnd(CompilerOptions& options) {
             // We save the names of some control blocks for special processing later
             if (main->getConstructorParameters()->size() != 6)
                 ::error("%1%: Expected 6 arguments for main package", main);
+            auto ingress = main->getParameterValue(P4V1::V1Model::instance.sw.ingress.name);
+            auto egress = main->getParameterValue(P4V1::V1Model::instance.sw.egress.name);
             auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
             auto update = main->getParameterValue(P4V1::V1Model::instance.sw.update.name);
             auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
             if (verify == nullptr || update == nullptr || deparser == nullptr ||
+                ingress == nullptr || egress == nullptr ||
                 !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
-                !deparser->is<IR::ControlBlock>()) {
+                !deparser->is<IR::ControlBlock>() || !ingress->is<IR::ControlBlock>() ||
+                !egress->is<IR::ControlBlock>()) {
                 ::error("%1%: main package does not match the expected model %2%",
                         main, P4V1::V1Model::instance.file.toString());
                 return nullptr;
             }
+            ingressControlBlockName = ingress->to<IR::ControlBlock>()->container->name;
+            egressControlBlockName = egress->to<IR::ControlBlock>()->container->name;
             updateControlBlockName = update->to<IR::ControlBlock>()->container->name;
-            v1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
-            v1controls->emplace(updateControlBlockName);
-            v1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
+            skipv1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
+            skipv1controls->emplace(updateControlBlockName);
+            skipv1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
             return root; }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
@@ -172,7 +179,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
-        new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
+        new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         // Proper back-end
         new P4::TypeChecking(&refMap, &typeMap),
@@ -182,7 +189,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
-        new RemoveExpressionsFromSelects(&refMap, &typeMap),
+        new RemoveComplexExpressions(&refMap, &typeMap,
+                                     &ingressControlBlockName, &egressControlBlockName),
         new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
