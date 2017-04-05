@@ -18,7 +18,6 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "p4/p4-parse.h"
-#include "p4/createBuiltins.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/typeChecking/bindVariables.h"
@@ -64,10 +63,15 @@ TEST(UNITTEST, package) {
     std::string program = with_core_p4(
         "parser Parser<H, M> (packet_in p){ state start{} };\n"
         "control empty() { apply {} };\n"
-        "package top(empty e);\n"
-        "top(empty()) main;\n");
+        "package top(empty e);\n");
 
     const IR::P4Program* pgm = parse_string(program);
 
     ASSERT_NE(nullptr, pgm);
+
+    PassManager passes = {
+        new CreateBuiltins(),
+    };
+    pgm = pgm->apply(passes);
+    dump(pgm);
 }
