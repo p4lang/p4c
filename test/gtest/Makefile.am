@@ -15,7 +15,8 @@
 # General GTest unit tests. Add tests here if they don't have a logical home
 # elsewhere in the codebase.
 gtest_unittest_UNIFIED = \
-	test/gtest/opeq_test.cpp
+	test/gtest/opeq_test.cpp \
+	test/gtest/typecheck_test.cpp
 
 cpplint_FILES += $(gtest_unittest_UNIFIED)
 gtest_SOURCES += $(gtest_unittest_SOURCES)

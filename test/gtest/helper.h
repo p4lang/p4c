@@ -14,15 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_P4_PARSE_H_
-#define _P4_P4_PARSE_H_
+#include <string>
 
-#include <memory>
-#include "ir/ir.h"
-
-namespace IR { class Global; }
-
-const IR::P4Program *parse_P4_16_file(const char *name, FILE *in);
-const IR::P4Program *parse_string(const std::string &pgm);
-
-#endif /* _P4_P4_PARSE_H_ */
+/* preprocessing by prepending the content of core.p4 to test program */
+std::string with_core_p4 (const std::string& pgm) {
+    std::ifstream input("p4include/core.p4");
+    std::stringstream sstr;
+    while(input >> sstr.rdbuf());
+    return sstr.str() + pgm;
+}

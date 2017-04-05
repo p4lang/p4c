@@ -78,6 +78,7 @@ class ProgramStructure final {
     void endParse();
 
     cstring toString() const;
+    void clear();
 };
 
 }  // namespace Util
