@@ -87,11 +87,16 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     // This is in a RHS expression a[m:l]  ->  (cast)(a >> l)
     int h = expression->getH();
     int l = expression->getL();
-    auto sh = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l));
-    auto e0type = typeMap->getType(expression->e0, true);
-    typeMap->setType(sh, e0type);
+    const IR::Expression* expr;
+    if (l != 0) {
+        expr = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l));
+        auto e0type = typeMap->getType(expression->e0, true);
+        typeMap->setType(expr, e0type);
+    } else {
+        expr = expression->e0;
+    }
     auto type = IR::Type_Bits::get(h - l + 1);
-    auto result = new IR::Cast(expression->srcInfo, type, sh);
+    auto result = new IR::Cast(expression->srcInfo, type, expr);
     typeMap->setType(result, type);
     LOG3("Replaced " << expression << " with " << result);
     return result;
@@ -129,6 +134,11 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
 
 namespace {
 
+/**
+A list of assignments that all write to a "variable".
+This really only handles scalar variables.
+It is customized for the needs of FixupChecksum.
+*/
 struct VariableWriters {
     std::set<const IR::AssignmentStatement*> writers;
     VariableWriters() = default;
@@ -141,8 +151,10 @@ struct VariableWriters {
             result->writers.emplace(e);
         return result;
     }
-    // Non-null only if there is exaclty one writer statement.
-    // Return the RHS of the assignment
+    /**
+       This function returns a non-null value only if there is exaclty one writer statement.
+       In that case it returns the RHS of the assignment
+    */
     const IR::Expression* substitution() const {
         if (writers.size() != 1)
             return nullptr;
@@ -151,6 +163,10 @@ struct VariableWriters {
     }
 };
 
+/**
+Maintains a map from variable names to VariableWriters
+It is customized for the needs of FixupChecksum.
+*/
 struct VariableDefinitions {
     std::map<cstring, const VariableWriters*> writers;
     VariableDefinitions(const VariableDefinitions& other) = default;
@@ -186,6 +202,10 @@ struct VariableDefinitions {
     }
 };
 
+/**
+Maintain def-use information.
+It is customized for the needs of FixupChecksum.
+*/
 struct PathSubstitutions {
     std::map<const IR::PathExpression*, const IR::Expression*> definitions;
     std::set<const IR::AssignmentStatement*> haveUses;
@@ -209,9 +229,11 @@ struct PathSubstitutions {
     }
 };
 
-// See the SimpleCopyProp pass below for the context in which this
-// analysis is run.  We take advantage that some more complex code
-// patterns have already been eliminated.
+/**
+See the SimpleCopyProp pass below for the context in which this
+analysis is run.  We take advantage that some more complex code
+patterns have already been eliminated.
+*/
 class Accesses : public Inspector {
     PathSubstitutions* substitutions;
     VariableDefinitions* currentDefinitions;
@@ -291,7 +313,7 @@ class Replace : public Transform {
     const PathSubstitutions* substitutions;
  public:
     explicit Replace(const PathSubstitutions* substitutions): substitutions(substitutions) {
-        CHECK_NULL(substitutions); setName("Accesses"); }
+        CHECK_NULL(substitutions); setName("Replace"); }
 
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!substitutions->hasUses(getOriginal<IR::AssignmentStatement>()))
@@ -310,23 +332,26 @@ class Replace : public Transform {
     }
 };
 
-// This analysis is only executed on the control which performs
-// checksum update computations.
-//
-// This is a simpler variant of copy propagation; it just finds
-// patterns of the form:
-// tmp = X;
-// ...
-// out = tmp;
-// then it substitutes the definition into the use.
-// The LocalCopyPropagation pass does not do this, because
-// it won't consider replacing definitions where the RHS has side-effects.
-// Since the only method call we accept in the checksum update block
-// is a checksum unit "get" method (this is not checked here, but
-// in the json code generator), we know that this method has no side-effects,
-// so we can safely reorder calls to methods.
-// Also, this is run after eliminating struct and tuple operations,
-// so we know that all assignments operate on scalar values.
+/**
+This analysis is only executed on the control which performs
+checksum update computations.
+
+This is a simpler variant of copy propagation; it just finds
+patterns of the form:
+tmp = X;
+...
+out = tmp;
+
+then it substitutes the definition into the use.
+The LocalCopyPropagation pass does not do this, because
+it won't consider replacing definitions where the RHS has side-effects.
+Since the only method call we accept in the checksum update block
+is a checksum unit "get" method (this is not checked here, but
+in the json code generator), we know that this method has no side-effects,
+so we can safely reorder calls to methods.
+Also, this is run after eliminating struct and tuple operations,
+so we know that all assignments operate on scalar values.
+*/
 class SimpleCopyProp : public PassManager {
     PathSubstitutions substitutions;
  public:
@@ -351,12 +376,18 @@ const IR::Node* FixupChecksum::preorder(IR::P4Control* control) {
 
 namespace {
 
-// Detect whether a Select expression is too complicated for BMv2
+/**
+Detect whether a Select expression is too complicated for BMv2.
+Also used to detect complex expressions that are arguments
+to method calls.
+*/
 class ComplexExpression : public Inspector {
  public:
     bool isComplex = false;
     ComplexExpression() { setName("ComplexExpression"); }
 
+    void postorder(const IR::ArrayIndex*) override {}
+    void postorder(const IR::TypeNameExpression*) override {}
     void postorder(const IR::PathExpression*) override {}
     void postorder(const IR::Member*) override {}
     void postorder(const IR::Literal*) override {}
@@ -366,32 +397,100 @@ class ComplexExpression : public Inspector {
 
 }  // namespace
 
-const IR::Node*
-RemoveExpressionsFromSelects::postorder(IR::SelectExpression* expression) {
+const IR::PathExpression*
+RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
+    auto type = typeMap->getType(expression, true);
+    auto name = refMap->newName("tmp");
+    auto decl = new IR::Declaration_Variable(Util::SourceInfo(), IR::ID(name),
+                                             IR::Annotations::empty, type->getP4Type(), nullptr);
+    newDecls.push_back(decl);
+    typeMap->setType(decl, type);
+    auto assign = new IR::AssignmentStatement(
+        Util::SourceInfo(), new IR::PathExpression(name), expression);
+    assignments.push_back(assign);
+    return new IR::PathExpression(name);
+}
+
+const IR::Vector<IR::Expression>*
+RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* vec) {
+    // This is more complicated than I'd like.  If an expression is
+    // a list expression, then we actually simplify the elements
+    // of the list.  Otherwise we simplify the argument itself.
+    // This is mostly for functions that take FieldLists - these
+    // should still take a list as argument.
     bool changes = true;
-    auto vec = new IR::Vector<IR::Expression>();
-    for (auto e : *expression->select->components) {
-        ComplexExpression ce;
-        (void)e->apply(ce);
-        if (ce.isComplex) {
-            changes = true;
-            auto type = typeMap->getType(e, true)->getP4Type();
-            auto name = refMap->newName("tmp");
-            auto decl = new IR::Declaration_Variable(Util::SourceInfo(), IR::ID(name),
-                                                     IR::Annotations::empty, type, nullptr);
-            newDecls.push_back(decl);
-            auto assign = new IR::AssignmentStatement(
-                Util::SourceInfo(), new IR::PathExpression(name), e);
-            assignments.push_back(assign);
-            vec->push_back(new IR::PathExpression(name));
+    auto result = new IR::Vector<IR::Expression>();
+    for (auto e : *vec) {
+        if (e->is<IR::ListExpression>()) {
+            auto list = e->to<IR::ListExpression>();
+            auto simpl = simplifyExpressions(list->components);
+            if (simpl != list->components) {
+                changes = true;
+                auto l = new IR::ListExpression(e->srcInfo, simpl);
+                result->push_back(l);
+            } else {
+                result->push_back(e);
+            }
         } else {
-            vec->push_back(e);
+            ComplexExpression ce;
+            (void)e->apply(ce);
+            if (ce.isComplex) {
+                changes = true;
+                LOG3("Moved into temporary " << dbp(e));
+                auto tmp = createTemporary(e);
+                result->push_back(tmp);
+            } else {
+                result->push_back(e);
+            }
         }
     }
-
     if (changes)
+        return result;
+    return vec;
+}
+
+const IR::Node*
+RemoveComplexExpressions::postorder(IR::SelectExpression* expression) {
+    auto vec = simplifyExpressions(expression->select->components);
+    if (vec != expression->select->components)
         expression->select = new IR::ListExpression(expression->select->srcInfo, vec);
     return expression;
+}
+
+const IR::Node*
+RemoveComplexExpressions::preorder(IR::P4Control* control) {
+    // we only do this for the ingress or egress
+    if (control->name != *ingressName && control->name != *egressName) {
+        prune();
+        return control;
+    }
+    newDecls.clear();
+    return control;
+}
+
+const IR::Node*
+RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
+    if (expression->arguments->size() == 0)
+        return expression;
+    auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+    if (mi->isApply() || mi->is<P4::BuiltInMethod>())
+        return expression;
+
+    auto vec = simplifyExpressions(expression->arguments);
+    if (vec != expression->arguments)
+        expression->arguments = vec;
+    return expression;
+}
+
+const IR::Node*
+RemoveComplexExpressions::postorder(IR::Statement* statement) {
+    if (assignments.empty())
+        return statement;
+    auto vec = new IR::IndexedVector<IR::StatOrDecl>(assignments);
+    vec->push_back(statement);
+    auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, vec);
+    assignments.clear();
+    return block;
 }
 
 }  // namespace BMV2
