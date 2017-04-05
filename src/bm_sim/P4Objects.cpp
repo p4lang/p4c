@@ -909,6 +909,10 @@ P4Objects::init_calculations(const Json::Value &cfg_root) {
         builder.push_back_header(header_id);
       } else if (type == "payload") {
         builder.append_payload();
+      } else {
+        throw json_exception(
+            EFormat() << "Unsupported input type '" << type
+                      << "' for calculation '" << name << "'", cfg_field);
       }
     }
 
