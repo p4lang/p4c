@@ -110,10 +110,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto v1controls = new std::set<cstring>();
+    enumMap = convertEnums->getEnumMapping();
 
     addPasses({
         convertEnums,
-        new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
