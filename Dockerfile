@@ -1,4 +1,4 @@
-FROM p4lang/third-party:latest
+FROM p4lang/third-party:stable
 MAINTAINER Seth Fowler <seth.fowler@barefootnetworks.com>
 
 # Select the type of image we're building. Use `build` for a normal build, which
@@ -19,9 +19,9 @@ ENV BM_DEPS automake \
             libboost-filesystem-dev \
             libboost-thread-dev \
             libtool
-ENV BM_RUNTIME_DEPS libboost-program-options1.54.0 \
-                    libboost-system1.54.0 \
-                    libboost-thread1.54.0 \
+ENV BM_RUNTIME_DEPS libboost-program-options1.58.0 \
+                    libboost-system1.58.0 \
+                    libboost-thread1.58.0 \
                     libgmp10 libjudydebian1 \
                     libpcap0.8 \
                     python
