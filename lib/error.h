@@ -421,7 +421,7 @@ class ErrorReporter final {
     unsigned getWarningCount() const {
         return warningCount;
     }
- 
+
     // Resets this ErrorReporter to its initial state.
     void clear() {
       errorCount = 0;
