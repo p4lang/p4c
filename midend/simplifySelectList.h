@@ -24,9 +24,11 @@ limitations under the License.
 
 namespace P4 {
 
-// Replace a reference to a structure with a list of all its fields
-// if the reference occurs in a select expression.  This should be run
-// after tuple elimination, so we only need to deal with structs.
+/**
+Replace a reference to a structure with a list of all its fields
+if the reference occurs in a select expression.  This should be run
+after tuple elimination, so we only need to deal with structs.
+*/
 class SubstituteStructures : public Transform {
     TypeMap* typeMap;
 
@@ -39,21 +41,23 @@ class SubstituteStructures : public Transform {
     const IR::Node* postorder(IR::PathExpression* expression) override;
 };
 
-// Remove nested ListExpressions; this must be run after tuples have been eliminated
-// This is complicated because select labels have to be flattened too,
-// and a default expression in a select label can match a whole list.
-// For example, consider this example:
-// transition select(a, b, {c, d}) {
-//     default: accept;
-//     (0, 0, default): accept;
-//     (0, 0, {default, default}): accept;
-// }
-// This is converted to:
-// transition select(a, b, c, d) {
-//     default: accept;
-//     (0, 0, default, default): accept;
-//     (0, 0, default, default): accept;
-// }
+/**
+Remove nested ListExpressions; this must be run after tuples have been eliminated
+This is complicated because select labels have to be flattened too,
+and a default expression in a select label can match a whole list.
+For example, consider this example:
+transition select(a, b, {c, d}) {
+    default: accept;
+    (0, 0, default): accept;
+    (0, 0, {default, default}): accept;
+}
+This is converted to:
+transition select(a, b, c, d) {
+    default: accept;
+    (0, 0, default, default): accept;
+    (0, 0, default, default): accept;
+}
+*/
 class UnnestSelectList : public Transform {
     // Represent the nesting of lists inside of a selectExpression.
     // E.g.: [__[__]_] for two nested lists.
