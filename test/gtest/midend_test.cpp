@@ -31,7 +31,7 @@ class EnumOn32Bits : public ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum*) const override {
         return true;
     }
-    unsigned enumSize (unsigned) const override {
+    unsigned enumSize(unsigned) const override {
         return 32;
     }
 };
@@ -47,7 +47,7 @@ TEST(midend, convertEnums_pass) {
     ASSERT_NE(nullptr, pgm);
 
     // Example to enable logging in source
-    //Log::addDebugSpec("convertEnums:0");
+    // Log::addDebugSpec("convertEnums:0");
     ReferenceMap  refMap;
     TypeMap       typeMap;
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
@@ -96,8 +96,6 @@ TEST(midend, getEnumMapping) {
     ASSERT_NE(nullptr, pgm);
 
     enumMap = convertEnums->getEnumMapping();
-    for (auto a : enumMap) {
-        LOG1(a.first << " " << a.second);
-    }
+    ASSERT_EQ(enumMap.size(), 1);
 }
 
