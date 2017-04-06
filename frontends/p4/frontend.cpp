@@ -45,6 +45,7 @@ limitations under the License.
 #include "specialize.h"
 #include "tableKeyNames.h"
 #include "parserControlFlow.h"
+#include "uselessCasts.h"
 
 namespace P4 {
 
@@ -107,6 +108,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
+        new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new RemoveAllUnusedDeclarations(&refMap, true),
         new SimplifyParsers(&refMap),

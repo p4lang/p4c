@@ -28,6 +28,7 @@ limitations under the License.
 #include "midend/parserUnroll.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
+#include "midend/removeSelectBooleans.h"
 #include "midend/eliminateTuples.h"
 #include "midend/nestedStructs.h"
 #include "midend/copyStructures.h"
@@ -127,6 +128,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),
+        new P4::RemoveSelectBooleans(&refMap, &typeMap),
         new P4::Predication(&refMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),

@@ -27,10 +27,6 @@ limitations under the License.
 namespace BMV2 {
 
 class MidEnd : public PassManager {
-#if 0
-    void setup_for_P4_14(CompilerOptions& options);
-    void setup_for_P4_16(CompilerOptions& options);
-#endif
     P4::InlineWorkList controlsToInline;
     P4::ActionsInlineList actionsToInline;
     cstring updateControlBlockName;

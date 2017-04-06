@@ -40,7 +40,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     @name("NoAction") action NoAction_0() {
     }
     @name("p1.thost.B_action") action p1_thost_B_action(BParamType bData) {
-        p1_tArg1_0.field1 = (bit<9>)bData;
+        p1_tArg1_0.field1 = bData;
     }
     @name("p1.thost.C_action") action p1_thost_C_action(bit<9> cData) {
         p1_tArg1_0.field1 = cData;

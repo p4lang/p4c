@@ -48,7 +48,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
 
 // This has to be called from a visitor method - it calls getOriginal()
 void DoConstantFolding::setConstant(const IR::Node* node, const IR::Expression* result) {
-    LOG1("Folding " << node << " to " << result << " (" << result->id << ")");
+    LOG2("Folding " << node << " to " << result << " (" << result->id << ")");
     auto orig = getOriginal();
     constants.emplace(node, result);
     constants.emplace(orig, result);
@@ -633,8 +633,38 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             auto result = new IR::Constant(e->srcInfo, type, v, 10);
             setConstant(e, result);
             return result;
-        } else { /* expr is a list literal */
+        } else {
             return e;
+        }
+    } else if (etype->is<IR::Type_Boolean>()) {
+        if (expr->is<IR::BoolLiteral>())
+            return expr;
+        if (expr->is<IR::Constant>()) {
+            auto cst = expr->to<IR::Constant>();
+            auto ctype = cst->type;
+            if (ctype->is<IR::Type_Bits>()) {
+                auto tb = ctype->to<IR::Type_Bits>();
+                if (tb->isSigned) {
+                    ::error("%1%: Cannot cast signed value to boolean", e);
+                    return e;
+                }
+                if (tb->size != 1) {
+                    ::error("%1%: Only bit<1> values can be cast to bool", e);
+                    return e;
+                }
+            } else {
+                BUG_CHECK(ctype->is<IR::Type_InfInt>(), "%1%: unexpected type %2% for constant",
+                          cst, ctype);
+            }
+
+            int v = cst->asInt();
+            if (v < 0 || v > 1) {
+                ::error("%1%: Only 0 and 1 can be cast to booleans", e);
+                return e;
+            }
+            auto lit = new IR::BoolLiteral(e->srcInfo, v == 1);
+            setConstant(e, lit);
+            return lit;
         }
     } else if (etype->is<IR::Type_StructLike>()) {
         auto result = expr->clone();

@@ -47,7 +47,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("counters") CounterArray(32w10, true) counters_0;
     apply {
         if (headers.ipv4.isValid()) {
-            counters_0.increment((bit<32>)headers.ipv4.dstAddr);
+            counters_0.increment(headers.ipv4.dstAddr);
             pass = true;
         }
         else 
