@@ -421,6 +421,12 @@ class ErrorReporter final {
     unsigned getWarningCount() const {
         return warningCount;
     }
+ 
+    // Resets this ErrorReporter to its initial state.
+    void clear() {
+      errorCount = 0;
+      warningCount = 0;
+    }
 
     // Special error functions to be called from the parser only.
     // In the parser the IR objects don't yet have position information.
@@ -467,6 +473,10 @@ inline unsigned errorCount() { return ErrorReporter::instance.getErrorCount(); }
 template <typename... T>
 inline void warning(const char* format, T... args) {
     ErrorReporter::instance.warning(format, args...);
+}
+
+inline void clearErrorReporter() {
+  ErrorReporter::instance.clear();
 }
 
 #endif /* P4C_LIB_ERROR_H_ */
