@@ -20,8 +20,6 @@
 
 #include "common.h"
 
-#include <bm/Standard.h>
-
 #include <algorithm>  // for std::copy
 
 namespace pibmv2 {

@@ -63,9 +63,11 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   // the simple_switch target detaches threads
   static void SetUpTestCase() {
     // bm::Logger::set_logger_console();
+#ifdef BMELOG_ON
     auto event_transport = bm::TransportIface::make_nanomsg(event_logger_addr);
     event_transport->open();
     bm::EventLogger::init(std::move(event_transport));
+#endif
 
     test_switch = new SimpleSwitch(8);  // 8 ports
 

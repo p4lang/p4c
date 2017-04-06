@@ -18,6 +18,8 @@
  *
  */
 
+#ifdef BMNANOMSG_ON
+
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/ageing.h>
@@ -203,3 +205,5 @@ TEST_F(NotificationsTest, PortEvent) {
   test(1, PortStatus::PORT_DOWN, true, PortEvent::PORT_DOWN);
   test(1, PortStatus::PORT_UP, true, PortEvent::PORT_UP);
 }
+
+#endif  // BMNANOMSG_ON

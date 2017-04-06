@@ -19,6 +19,8 @@
  */
 
 #include <bm/bm_sim/debugger.h>
+
+#ifdef BMDEBUG_ON
 #include <bm/bm_sim/nn.h>
 
 // temporary deps?
@@ -38,6 +40,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+#endif  // BMDEBUG_ON
 
 namespace bm {
 
@@ -86,6 +89,8 @@ class DebuggerDummy final : public DebuggerIface {
     return "";
   }
 };
+
+#ifdef BMDEBUG_ON
 
 class DebuggerNN final : public DebuggerIface {
  public:
@@ -906,7 +911,8 @@ DebuggerNN::request_in() {
   }
 }
 
-// TODO(antonin): check if allowed by Google style guidelines
+#endif  // BMDEBUG_ON
+
 DebuggerIface *Debugger::debugger = new DebuggerDummy();
 
 bool Debugger::is_init = false;
@@ -915,12 +921,16 @@ void
 Debugger::init_debugger(const std::string &addr) {
   if (is_init) return;
   is_init = true;
+#ifdef BMDEBUG_ON
   DebuggerDummy *dummy = dynamic_cast<DebuggerDummy *>(debugger);
   assert(dummy);
   delete dummy;
   DebuggerNN *debugger_nn = new DebuggerNN(addr);
   debugger_nn->open();
   debugger = debugger_nn;
+#else
+  (void) addr;
+#endif
 }
 
 std::string

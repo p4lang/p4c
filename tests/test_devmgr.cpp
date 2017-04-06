@@ -255,6 +255,8 @@ class PacketInReceiver {
   mutable std::condition_variable can_read{};
 };
 
+#ifdef BMNANOMSG_ON
+
 // is here because DevMgr has a protected destructor
 class PacketInSwitch : public DevMgr { };
 
@@ -442,6 +444,8 @@ TEST_F(PacketInDevMgrPortStatusTest, Status) {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   check_and_reset_counts(0u, 1u, 0u, 0u);
 }
+
+#endif  // BMNANOMSG_ON
 
 struct PMActive { };
 struct PMPassive { };

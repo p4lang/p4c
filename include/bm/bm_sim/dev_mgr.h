@@ -145,12 +145,14 @@ class DevMgr : public PacketDispatcherIface {
   // wait before starting to process packets.
   void set_dev_mgr_files(unsigned wait_time_in_seconds);
 
+#ifdef BMNANOMSG_ON
   // if enforce ports is set to true, packets coming in on un-registered ports
   // are dropped
   void set_dev_mgr_packet_in(
       int device_id, const std::string &addr,
       std::shared_ptr<TransportIface> notifications_transport = nullptr,
       bool enforce_ports = false);
+#endif
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
                       const char *in_pcap, const char *out_pcap);

@@ -4,14 +4,21 @@ if COND_THRIFT
 MAYBE_BM_RUNTIME = bm_runtime
 endif
 
-SUBDIRS = bf_lpm_trie BMI bm_sim $(MAYBE_BM_RUNTIME) bm_apps
+if COND_NANOMSG
+MAYBE_BM_APPS = bm_apps
+endif
 
-lib_LTLIBRARIES = libbmp4apps.la libbmall.la
+SUBDIRS = bf_lpm_trie BMI bm_sim $(MAYBE_BM_RUNTIME) $(MAYBE_BM_APPS)
 
+lib_LTLIBRARIES = libbmall.la
+
+if COND_NANOMSG
+lib_LTLIBRARIES += libbmp4apps.la
 libbmp4apps_la_SOURCES =
 # Dummy C++ source to cause C++ linking.
 nodist_EXTRA_libbmp4apps_la_SOURCES = dummy.cpp
 libbmp4apps_la_LIBADD = bm_apps/libbmapps.la
+endif
 
 libbmall_la_SOURCES =
 # Dummy C++ source to cause C++ linking.

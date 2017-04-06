@@ -46,12 +46,22 @@ AM_CONDITIONAL([COND_PDFIXED], [test "$want_pdfixed" = yes])
 
 MY_CPPFLAGS=""
 
+AC_ARG_WITH([nanomsg],
+    AS_HELP_STRING([--with-nanomsg], [Build Nanomsg RPC service, if disabled then you must have some other way of controlling the switch]),
+    [want_nanomsg="$withval"], [want_nanomsg=yes])
+
+AM_CONDITIONAL([COND_NANOMSG], [test "$want_nanomsg" = yes])
+
 debugger_enabled=no
 AC_ARG_ENABLE([debugger],
     AS_HELP_STRING([--enable-debugger], [Enable bmv2 remote debugger]))
 AS_IF([test "x$enable_debugger" = "xyes"], [
-    debugger_enabled=yes
-    MY_CPPFLAGS="$MY_CPPFLAGS -DBMDEBUG_ON"
+    AS_IF([test "$want_nanomsg" = "yes"], [
+        debugger_enabled=yes
+        MY_CPPFLAGS="$MY_CPPFLAGS -DBMDEBUG_ON"
+    ], [
+        AC_MSG_ERROR([Cannot use debugger without nanomsg])
+    ])
 ])
 
 logging_macros_enabled=no
@@ -68,9 +78,14 @@ elogger_enabled=no
 AC_ARG_ENABLE([elogger],
     AS_HELP_STRING([--disable-elogger],
                    [Disable nanomsg event logger (some unit tests may fail)]))
+
 AS_IF([test "x$enable_elogger" != "xno"], [
-    elogger_enabled=yes
-    MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
+    AS_IF([test "$want_nanomsg" = "yes"], [
+        elogger_enabled=yes
+        MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
+    ], [
+        AC_MSG_WARN([Cannot use elogger without nanomsg])
+    ])
 ])
 
 AC_ARG_ENABLE([undeterministic_tests],
@@ -145,11 +160,15 @@ AC_CHECK_HEADERS([algorithm array cassert cmath queue \
 cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
 utility vector], [], [AC_MSG_ERROR([Missing header file])])
 
-# Check for pthread, libjudy, libgmp, libnanomsg, libpcap
+AS_IF([test "$want_nanomsg" = yes], [
+    AC_CHECK_LIB([nanomsg], [nn_errno], [], [AC_MSG_ERROR([Missing libnanomsg])])
+    MY_CPPFLAGS="$MY_CPPFLAGS -DBMNANOMSG_ON"
+])
+
+# Check for pthread, libjudy, libgmp, libpcap
 AX_PTHREAD([], [AC_MSG_ERROR([Missing pthread library])])
 AC_CHECK_LIB([Judy], [Judy1Next], [], [AC_MSG_ERROR([Missing libJudy])])
 AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([Missing libgmp])])
-AC_CHECK_LIB([nanomsg], [nn_errno], [], [AC_MSG_ERROR([Missing libnanomsg])])
 AC_CHECK_LIB([pcap], [pcap_create], [], [AC_MSG_ERROR([Missing libpcap])])
 AC_CHECK_LIB([pcap], [pcap_set_immediate_mode], [pcap_fix=yes], [pcap_fix=no])
 if test -n "$COVERAGE_FLAGS"; then
@@ -247,9 +266,10 @@ AC_OUTPUT
 AS_ECHO("")
 AS_ECHO("Features recap ......................")
 AS_ECHO("Coverage enabled .............. : $coverage_enabled")
-AS_ECHO("Debugger enabled .............. : $debugger_enabled")
 AS_ECHO("Logging macros enabled ........ : $logging_macros_enabled")
+AS_ECHO("With Nanomsg .................. : $want_nanomsg")
 AS_ECHO("Event logger enabled .......... : $elogger_enabled")
+AS_ECHO("Debugger enabled .............. : $debugger_enabled")
 AS_ECHO("With Thrift ................... : $want_thrift")
 AS_IF([test "$want_thrift" = yes], [
 AS_ECHO("  With p4Thrift ............... : $want_p4thrift")

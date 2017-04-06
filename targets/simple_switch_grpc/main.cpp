@@ -69,11 +69,13 @@ main(int argc, char* argv[]) {
 
   simple_switch->start_and_return();
 
+#ifdef PI_INTERNAL_RPC
   char *opt_rpc_addr = NULL;
   char *opt_notifications_addr = NULL;
   pi_remote_addr_t remote_addr = {opt_rpc_addr, opt_notifications_addr};
   std::thread pi_CLI_thread(
       [&remote_addr] { pi_rpc_server_run(&remote_addr); });
+#endif
 
   PIGrpcServerWait();
   PIGrpcServerCleanup();

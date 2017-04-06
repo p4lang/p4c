@@ -1,12 +1,16 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
-nobase_include_HEADERS = \
+nobase_include_HEADERS =
+
+if COND_NANOMSG
+nobase_include_HEADERS += \
 bm/bm_apps/notifications.h \
 bm/bm_apps/packet_pipe.h
 if COND_THRIFT
 nobase_include_HEADERS += \
 bm/bm_apps/learn.h
-endif
+endif  # COND_THRIFT
+endif  # COND_NANOMSG
 
 if COND_THRIFT
 nobase_include_HEADERS += \

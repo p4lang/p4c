@@ -59,7 +59,9 @@ class TransportIface {
     return send_msgs_(msgs);
   }
 
+#ifdef BMNANOMSG_ON
   static std::unique_ptr<TransportIface> make_nanomsg(const std::string &addr);
+#endif
   static std::unique_ptr<TransportIface> make_dummy();
   static std::unique_ptr<TransportIface> make_stdout();
 

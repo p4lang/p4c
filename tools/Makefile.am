@@ -9,6 +9,7 @@ veth_setup.sh \
 veth_teardown.sh
 
 if COND_THRIFT
+if COND_NANOMSG
 
 python_PYTHON = \
 p4dbg.py \
@@ -44,4 +45,5 @@ bm_nanomsg_events.in
 
 CLEANFILES = $(bin_SCRIPTS)
 
+endif  # COND_NANOMSG
 endif  # COND_THRIFT

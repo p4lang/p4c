@@ -93,9 +93,11 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
        "(interface X corresponds to two files X_in.pcap and X_out.pcap).  "
        "Argument is the time to wait (in seconds) before starting to process "
        "the packet files.")
+#ifdef BMNANOMSG_ON
       ("packet-in", po::value<std::string>(),
        "Enable receiving packet on this (nanomsg) socket. "
        "The --interface options will be ignored.")
+#endif
 #ifdef BMTHRIFT_ON
       ("thrift-port", po::value<int>(),
        "TCP port on which to run the Thrift runtime server")
@@ -114,10 +116,12 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
        "'trace', 'debug', 'info', 'warn', 'error', off'; default is 'trace'")
       ("log-flush", "If used with '--log-file', the logger will flush to disk "
        "after every log message")
+#ifdef BMNANOMSG_ON
       ("notifications-addr", po::value<std::string>(),
        "Specify the nanomsg address to use for notifications "
        "(e.g. learning, ageing, ...); "
        "default is ipc:///tmp/bmv2-<device-id>-notifications.ipc")
+#endif
 #ifdef BMDEBUG_ON
       ("debugger", "Activate debugger")
       ("debugger-addr", po::value<std::string>(),
@@ -220,12 +224,14 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
     device_id = vm["device-id"].as<int>();
   }
 
+#ifdef BMNANOMSG_ON
   if (vm.count("notifications-addr")) {
     notifications_addr = vm["notifications-addr"].as<std::string>();
   } else {
     notifications_addr = std::string("ipc:///tmp/bmv2-")
         + std::to_string(device_id) + std::string("-notifications.ipc");
   }
+#endif
 
   if (vm.count("nanolog")) {
 #ifndef BMELOG_ON
@@ -321,12 +327,14 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
       wait_time = 0;
   }
 
+#ifdef BMNANOMSG_ON
   if (vm.count("packet-in")) {
     packet_in = true;
     packet_in_addr = vm["packet-in"].as<std::string>();
     // very important to clear interface list
     ifaces.clear();
   }
+#endif
 
   if (use_files && packet_in) {
     std::cout << "Error: --use-files and --packet-in are exclusive\n";

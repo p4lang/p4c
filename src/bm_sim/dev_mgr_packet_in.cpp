@@ -18,6 +18,8 @@
  *
  */
 
+#ifdef BMNANOMSG_ON
+
 #include <bm/bm_sim/dev_mgr.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/nn.h>
@@ -323,3 +325,5 @@ DevMgr::set_dev_mgr_packet_in(
 }
 
 }  // namespace bm
+
+#endif  // BMNANOMSG_ON

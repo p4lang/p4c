@@ -1,4 +1,8 @@
-SUBDIRS = . tests
+if COND_NANOMSG
+MAYBE_TESTS = tests
+endif
+
+SUBDIRS = . $(MAYBE_TESTS)
 
 THRIFT_IDL = $(srcdir)/thrift/simple_switch.thrift
 

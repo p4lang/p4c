@@ -190,9 +190,14 @@ SwitchWContexts::init_from_command_line_options(
 
   auto transport = my_transport;
   if (transport == nullptr) {
+#ifdef BMNANOMSG_ON
     notifications_addr = parser.notifications_addr;
     transport = std::shared_ptr<TransportIface>(
         TransportIface::make_nanomsg(notifications_addr));
+#else
+    notifications_addr = "";
+    transport = std::shared_ptr<TransportIface>(TransportIface::make_dummy());
+#endif
   }
   // won't hurt if transport has already been opened
   transport->open();
@@ -226,8 +231,10 @@ SwitchWContexts::init_from_command_line_options(
     set_dev_mgr(std::move(my_dev_mgr));
   else if (parser.use_files)
     set_dev_mgr_files(parser.wait_time);
+#ifdef BMNANOMSG_ON
   else if (parser.packet_in)
     set_dev_mgr_packet_in(device_id, parser.packet_in_addr, transport);
+#endif
   else
     set_dev_mgr_bmi(device_id, transport);
 
@@ -404,7 +411,9 @@ SwitchWContexts::do_swap() {
       phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
     rc &= swap_done;
   }
+#ifdef BMDEBUG_ON
   Debugger::get()->config_change();
+#endif
   BMELOG(config_change);
   return rc;
 }
