@@ -67,8 +67,8 @@ before_install:
 
 install:
   - ./autogen.sh
-  - if [ "$GCOV" != "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests --enable-coverage; fi
-  - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests; fi
+  - if [ "$GCOV" != "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests --enable-debugger --enable-coverage; fi
+  - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests --enable-debugger; fi
   - make all -j2
 
 script:
