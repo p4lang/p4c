@@ -58,7 +58,6 @@ TEST(midend, convertEnums_pass) {
     ASSERT_NE(nullptr, pgm);
 }
 
-// use enum before declaration should fail
 TEST(midend, convertEnums_used_before_declare) {
     std::string program =
         "const bool a = E.A == E.B;\n"
@@ -72,9 +71,9 @@ TEST(midend, convertEnums_used_before_declare) {
     PassManager passes = {
         convertEnums
     };
-    pgm = pgm->apply(passes);
-    // expected pgm == nullptr
-    ASSERT_EQ(nullptr, pgm);
+    auto result = pgm->apply(passes);
+    // use enum before declaration should fail
+    ASSERT_EQ(nullptr, result);
 }
 
 // use enumMap in convertEnums directly
@@ -87,15 +86,14 @@ TEST(midend, getEnumMapping) {
 
     ReferenceMap  refMap;
     TypeMap       typeMap;
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     P4::ConvertEnums::EnumMapping enumMap;
-    PassManager passes = {
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
+    PassManager passes_ = {
         convertEnums
     };
-    pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    auto result = pgm->apply(passes_);
+    ASSERT_NE(nullptr, result);
 
     enumMap = convertEnums->getEnumMapping();
-    ASSERT_EQ(enumMap.size(), 1);
+    ASSERT_EQ(enumMap.size(), (unsigned long)1);
 }
-

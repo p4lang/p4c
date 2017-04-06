@@ -1035,14 +1035,16 @@ const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
 
 const IR::P4Program *parse_string(const std::string &pgm) {
     int errors = 0;
+    clearErrorReporter();
     declarations = new IR::IndexedVector<IR::Node>();
     YY_BUFFER_STATE state = yy_scan_string(pgm.c_str());
     errors |= yyparse();
     yy_delete_buffer(state);
     structure.clear();
     allErrors = nullptr;
-    if (errors)
+    if (errors) {
         return nullptr;
+    }
     return new IR::P4Program(declarations->srcInfo, declarations);
 }
 
