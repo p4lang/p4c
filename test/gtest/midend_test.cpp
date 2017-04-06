@@ -26,26 +26,28 @@ limitations under the License.
 #include "p4/p4-parse.h"
 
 using namespace P4;
-using namespace std;
 
 class EnumOn32Bits : public ChooseEnumRepresentation {
-    bool convert(const IR::Type_Enum* ) const override {
+    bool convert(const IR::Type_Enum*) const override {
         return true;
     }
-    unsigned enumSize (unsigned ) const override {
+    unsigned enumSize (unsigned) const override {
         return 32;
     }
 };
 
+// test various way of using enum
 TEST(midend, convertEnums_pass) {
-    string program =
+    std::string program =
         "enum E { A, B, C, D };\n"
         "const bool a = E.A == E.B;\n"
         "extern C { C(E e); }\n"
         "control m() { C(E.A) ctr; apply{} }\n";
     const IR::P4Program* pgm = parse_string(program);
     ASSERT_NE(nullptr, pgm);
-    Log::addDebugSpec("convertEnums:0");
+
+    // Example to enable logging in source
+    //Log::addDebugSpec("convertEnums:0");
     ReferenceMap  refMap;
     TypeMap       typeMap;
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
@@ -56,12 +58,14 @@ TEST(midend, convertEnums_pass) {
     ASSERT_NE(nullptr, pgm);
 }
 
+// use enum before declaration should fail
 TEST(midend, convertEnums_used_before_declare) {
-    string program =
+    std::string program =
         "const bool a = E.A == E.B;\n"
         "enum E { A, B, C, D };\n";
     const IR::P4Program* pgm = parse_string(program);
     ASSERT_NE(nullptr, pgm);
+
     ReferenceMap  refMap;
     TypeMap       typeMap;
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
@@ -69,15 +73,18 @@ TEST(midend, convertEnums_used_before_declare) {
         convertEnums
     };
     pgm = pgm->apply(passes);
+    // expected pgm == nullptr
     ASSERT_EQ(nullptr, pgm);
 }
 
+// use enumMap in convertEnums directly
 TEST(midend, getEnumMapping) {
-    string program =
+    std::string program =
         "enum E { A, B, C, D };\n"
         "const bool a = E.A == E.B;\n";
     const IR::P4Program* pgm = parse_string(program);
     ASSERT_NE(nullptr, pgm);
+
     ReferenceMap  refMap;
     TypeMap       typeMap;
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
@@ -87,6 +94,7 @@ TEST(midend, getEnumMapping) {
     };
     pgm = pgm->apply(passes);
     ASSERT_NE(nullptr, pgm);
+
     enumMap = convertEnums->getEnumMapping();
     for (auto a : enumMap) {
         LOG1(a.first << " " << a.second);
