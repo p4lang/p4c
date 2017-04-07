@@ -21,4 +21,5 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS && \
     ./bootstrap.sh && \
     cd build && \
-    make
+    make && \
+    make install
