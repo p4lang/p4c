@@ -218,6 +218,7 @@ class IrClass : public IrElement {
             return IrClass::nodeClass;
         return concreteParent; }
 
+    std::vector<const CommentBlock *> comments;
     std::vector<IrElement *> elements;
     IrNamespace *containedIn, local;
     const NodeKind kind;

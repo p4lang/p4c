@@ -261,6 +261,7 @@ void IrClass::generate_hdr(std::ostream &out) const {
     if (kind != NodeKind::Nested) {
         out << "namespace IR {" << std::endl;
         enter_namespace(out, containedIn); }
+    for (auto cblock : comments) cblock->generate_hdr(out);
     out << "class " << name;
 
     bool concreteParent = false;
