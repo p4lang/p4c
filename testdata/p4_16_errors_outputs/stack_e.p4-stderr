@@ -1,7 +1,7 @@
 ../testdata/p4_16_errors/stack_e.p4(23): error: Header stack struct s[] used with non-header type struct s
         s[5] stack1;
         ^^^^
-../testdata/p4_16_errors/stack_e.p4(23): error: Header stack s[] used with non-header type struct s
+../testdata/p4_16_errors/stack_e.p4(23): error: Could not find type of s[]
         s[5] stack1;
         ^^^^
 ../testdata/p4_16_errors/stack_e.p4(26): error: Index too large: 1231092310293
