@@ -1,0 +1,7 @@
+**/.git
+**/.gitmodules
+**/.travis.yml
+**/Dockerfile
+**/*.md
+
+docs
