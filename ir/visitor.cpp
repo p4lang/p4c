@@ -19,36 +19,58 @@ limitations under the License.
 #include "lib/log.h"
 
 class Visitor::ChangeTracker {
-    // FIXME -- this code is really incomprehensible due to all the pairs/first/second stuff
-    // unfortunatelly maps use pairs all over the place, which is where they come from.
-    typedef unordered_map<const IR::Node *, std::pair<bool, const IR::Node *>>  visited_t;
+    struct visit_info_t {
+        bool visit_finished;
+        const IR::Node *result;
+    };
+    // typedef unordered_map<const IR::Node *, std::pair<bool, const IR::Node *>>  visited_t;
+    typedef unordered_map<const IR::Node *, visit_info_t>  visited_t;
     visited_t           visited;
 
  public:
     struct change_t {
-        bool                                    valid;
-        std::pair<visited_t::iterator, bool>    state;  // result of visited.emplace
+        // std::pair<visited_t::iterator, bool>    state;  // result of visited.emplace
+        bool           valid;
+        bool           already_present;
+        const IR::Node *original_node;
+        visit_info_t   *visit_info;    // Points into ChangeTracker.visited.
+
         change_t() : valid(false) {}
-        change_t(visited_t *visited, const IR::Node *n) : valid(true),
-            state(visited->emplace(n, std::make_pair(false, n))) {
-                if (!state.second && !state.first->second.first)
+        change_t(visited_t *visited, const IR::Node *n) : valid(true) {
+                // Initialization
+                visited_t::iterator visited_it;
+                bool inserted;
+                std::tie(visited_it, inserted) =
+                    visited->emplace(n, visit_info_t({false,n}));
+                already_present = !inserted;
+                original_node = visited_it->first;
+                visit_info = &(visited_it->second);
+
+                // Sanity check for IR loops
+                if (!inserted && !visit_info->visit_finished)
                     BUG("IR loop detected "); }
+
         explicit operator bool() { return valid; }
-        bool done() { return !state.second; }
-        const IR::Node *orig() { return state.first->first; }
-        const IR::Node *result() { return state.first->second.second; }
+        bool done() { return already_present; }
+        const IR::Node *orig() { return original_node; }
+        const IR::Node *result() { return visit_info->result; }
     };
-    bool done(const IR::Node *n) const { return visited.count(n) && visited.at(n).first; }
-    const IR::Node *result(IR::Node *n) const { return visited.at(n).second; }
+
+    bool done(const IR::Node *n) const {
+        return visited.count(n) && visited.at(n).visit_finished;
+    }
+    const IR::Node *result(IR::Node *n) const { return visited.at(n).result; }
+
     change_t track(const IR::Node *n) { return change_t(&visited, n); }
-    void start(change_t &change) { change.state.first->second.first = false; }
+    void start(change_t &change) { change.visit_info->visit_finished = false; }
     bool finish(change_t &change, const IR::Node *orig, const IR::Node *final) {
-        if (!change.valid || (change.state.first = visited.find(orig)) == visited.end())
+        auto it = visited.find(orig);
+        if (!change.valid || it == visited.end() || change.original_node != it->first)
             BUG("visitor state tracker corrupted");
-        change.state.first->second.first = true;
+        change.visit_info->visit_finished = true;
         if (!final || *final != *orig) {
-            change.state.first->second.second = final;
-            visited.emplace(final, std::make_pair(true, final));
+            change.visit_info->result = final;
+            visited.emplace(final, visit_info_t({true,final}));
             return true;
         } else {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
@@ -59,11 +81,12 @@ class Visitor::ChangeTracker {
         auto it = visited.find(n);
         if (it == visited.end())
             return n;
-        if (!it->second.first) BUG("IR loop detected");
-        return it->second.second; }
+        if (!it->second.visit_finished)
+            BUG("IR loop detected");
+        return it->second.result; }
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
-            if (it->second.first)
+            if (it->second.visit_finished)
                 it = visited.erase(it);
             else
                 ++it; } }
