@@ -203,7 +203,9 @@ mostlyclean-local:
 	-$(RM) -r $(DX_CLEANFILES)
 
 # easier to remember rule for making the documentation
-docs: $(DOXY_SOURCES)
+# also depends on the ir-generated.h (part of BUILT_SOURCES)
+# and force rebuilding documentation when sources change
+docs: $(BUILT_SOURCES) $(DOXY_SOURCES)
 	@$(MAKE) doxygen-doc
 else
 docs:
