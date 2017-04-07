@@ -21,9 +21,14 @@ limitations under the License.
 
 namespace P4 {
 
-/*
-   Run immediately after parsing. There is no type information at this
-   point, so we do only simple checks.
+/**
+   This pass performs some simple semantic checks on the program;
+   since the grammar accepts many programs that are actually illegal,
+   this pass does some additional validation.
+
+   This pass is run immediately after parsing. There is no type
+   information at this point, so it only does simple checks.
+
    - integer constants have valid types
    - don't care _ is not used as a name for methods, fields, variables, instances
    - unions have at least one field
@@ -32,11 +37,11 @@ namespace P4 {
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
    - tables have an actions and a default_action properties
-   - table parameters are never directionless
    - instantiations appear at the top-level only
    - switch statements do not occur in actions
    - instantiations do not occur in actions
    - constructors are not invoked in actions
+   - extern constructors have the same name as the enclosing extern
  */
 class ValidateParsedProgram final : public Inspector {
     bool isv1;
