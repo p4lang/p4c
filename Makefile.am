@@ -181,6 +181,9 @@ recheck-%:
 check-ifail:
 	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
 
+gtest:
+	@$(MAKE) gtestp4c
+
 # DOXYGEN SUPPORT
 @DX_RULES@
 
