@@ -177,6 +177,7 @@ class bitvec {
             data |= (uintptr_t)1 << idx;
         return true; }
     void setrange(size_t idx, size_t sz) {
+        if (sz == 0) return;
         if (idx+sz > size * bits_per_unit) expand(1 + (idx+sz-1)/bits_per_unit);
         if (size == 1) {
             data |= ~(~(uintptr_t)1 << (sz-1)) << idx;
@@ -214,6 +215,7 @@ class bitvec {
             data &= ~((uintptr_t)1 << idx);
         return false; }
     void clrrange(size_t idx, size_t sz) {
+        if (sz == 0) return;
         if (idx >= size * bits_per_unit) return;
         if (size == 1) {
             if (idx + sz < bits_per_unit)

@@ -13,14 +13,38 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-extern C { bool get(); }
-
-control X(out bool b) {
-    C c;
-    apply { b = c.get(); }
+header_type ethernet_t {
+    fields {
+        dstAddr : 48;
+        srcAddr : 48;
+        ethertype : 16;
+    }
 }
 
-control Z(out bool a);
-package top(Z z);
+header ethernet_t ethernet;
 
-top(X()) main;
+parser start {
+    extract(ethernet);
+    return ingress;
+}
+
+action set_egress_port(port) {
+    modify_field(standard_metadata.egress_spec, port);
+}
+
+table t1 {
+    reads {
+         ethernet.dstAddr : lpm;
+         ethernet.srcAddr : lpm;
+    }
+    actions {
+         set_egress_port;
+    }
+}
+
+control ingress {
+    apply(t1);
+}
+
+control egress {
+}
