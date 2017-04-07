@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#ifndef _TEST_GTEST_HELPER_
+#define _TEST_GTEST_HELPER_
+
 #include <string>
 
 /* preprocessing by prepending the content of core.p4 to test program */
@@ -23,3 +26,5 @@ std::string with_core_p4 (const std::string& pgm) {
     while(input >> sstr.rdbuf());
     return sstr.str() + pgm;
 }
+
+#endif

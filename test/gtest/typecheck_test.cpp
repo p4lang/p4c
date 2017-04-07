@@ -53,7 +53,6 @@ TEST(UNITTEST, helloworld) {
       new ResolveReferences(&refMap),
 //      new TypeInference(&refMap, &typeMap),
     };
-
     pgm = pgm->apply(passes);
 
     ASSERT_NE(nullptr, pgm);
@@ -73,5 +72,4 @@ TEST(UNITTEST, package) {
         new CreateBuiltins(),
     };
     pgm = pgm->apply(passes);
-    dump(pgm);
 }
