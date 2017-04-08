@@ -16,8 +16,8 @@
 # elsewhere in the codebase.
 gtest_unittest_UNIFIED = \
 	test/gtest/opeq_test.cpp \
-	test/gtest/typecheck_test.cpp \
-	test/gtest/midend_test.cpp
+	test/gtest/midend_test.cpp \
+	test/gtest/arch_test.cpp
 
 cpplint_FILES += $(gtest_unittest_UNIFIED)
 gtest_SOURCES += $(gtest_unittest_SOURCES)
