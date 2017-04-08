@@ -638,7 +638,7 @@ table_body: /* epsilon */ { $$ = new IR::V1Table(getPragmas()); }
         $$->default_action_args = $6; }
     | table_body IDENTIFIER ':' expression ';'
       { auto exp = new IR::ExpressionValue(@4, $4);
-        auto prop = new IR::Property(@2, IR::ID(@2, $2), IR::Annotations::empty, exp, false);
+        auto prop = new IR::Property(@2, IR::ID(@2, $2), exp, false);
         $1->addProperty(prop);
         $$ = $1; }
     | table_body error ';' { $$=$1; }

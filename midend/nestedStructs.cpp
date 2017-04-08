@@ -32,9 +32,7 @@ void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type,
             cstring newName = refMap->newName(fname);
             auto comp = new FinalName(newName);
             map->members.emplace(f->name.name, comp);
-            auto clone = new IR::Declaration_Variable(
-                Util::SourceInfo(), IR::ID(newName), IR::Annotations::empty,
-                ftype->getP4Type(), nullptr);
+            auto clone = new IR::Declaration_Variable(IR::ID(newName), ftype->getP4Type());
             LOG3("Created " << clone);
             result->push_back(clone);
         }

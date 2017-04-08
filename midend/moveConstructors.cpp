@@ -87,8 +87,7 @@ class MoveConstructorsImpl : public Transform {
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto decl = new IR::Declaration_Instance(
-                    cce->srcInfo, e.second, IR::Annotations::empty,
-                    cce->constructedType, cce->arguments, nullptr);
+                    cce->srcInfo, e.second, cce->constructedType, cce->arguments);
                 result->push_back(decl);
                 changes = true;
             }
@@ -108,8 +107,7 @@ class MoveConstructorsImpl : public Transform {
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
-                cce->srcInfo, e.second, IR::Annotations::empty, cce->constructedType,
-                cce->arguments, nullptr);
+                cce->srcInfo, e.second, cce->constructedType, cce->arguments);
             newDecls->push_back(decl);
         }
         newDecls->append(*parser->parserLocals);
@@ -128,8 +126,7 @@ class MoveConstructorsImpl : public Transform {
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto inst = new IR::Declaration_Instance(
-                    cce->srcInfo, e.second, IR::Annotations::empty, cce->constructedType,
-                    cce->arguments, nullptr);
+                    cce->srcInfo, e.second, cce->constructedType, cce->arguments);
                 newDecls->push_back(inst);
                 changes = true;
             }
@@ -156,8 +153,7 @@ class MoveConstructorsImpl : public Transform {
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
-                cce->srcInfo, e.second, IR::Annotations::empty, cce->constructedType,
-                cce->arguments, nullptr);
+                cce->srcInfo, e.second, cce->constructedType, cce->arguments);
             newDecls->push_back(decl);
         }
         newDecls->append(*control->controlLocals);

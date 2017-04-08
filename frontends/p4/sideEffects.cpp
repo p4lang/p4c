@@ -45,8 +45,7 @@ struct EvaluationOrder {
 
     cstring createTemporary(const IR::Type* type) {
         auto tmp = refMap->newName("tmp");
-        auto decl = new IR::Declaration_Variable(
-            Util::SourceInfo(), IR::ID(tmp, nullptr), IR::Annotations::empty, type, nullptr);
+        auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
         temporaries->push_back(decl);
         return tmp;
     }
@@ -54,7 +53,7 @@ struct EvaluationOrder {
     const IR::Expression* addAssignment(
         cstring varName, const IR::Expression* expression) {
         auto left = new IR::PathExpression(IR::ID(varName, nullptr));
-        auto stat = new IR::AssignmentStatement(Util::SourceInfo(), left, expression);
+        auto stat = new IR::AssignmentStatement(left, expression);
         statements->push_back(stat);
         auto result = left->clone();
         return result;
@@ -140,7 +139,7 @@ class DismantleExpression : public Transform {
                 BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
                 auto tmp = result->createTemporary(type);
                 auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto stat = new IR::AssignmentStatement(Util::SourceInfo(), path, result->final);
+                auto stat = new IR::AssignmentStatement(path, result->final);
                 result->statements->push_back(stat);
                 result->final = path->clone();
                 typeMap->setType(result->final, type);
@@ -219,10 +218,10 @@ class DismantleExpression : public Transform {
             //    tmp = simplify(e2);
 
             bool land = expression->is<IR::LAnd>();
-            auto constant = new IR::BoolLiteral(Util::SourceInfo(), !land);
+            auto constant = new IR::BoolLiteral(!land);
             auto tmp = result->createTemporary(type);
             auto ifTrue = new IR::AssignmentStatement(
-                Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
+                new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
             auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
 
             auto save = result->statements;
@@ -231,12 +230,11 @@ class DismantleExpression : public Transform {
             auto path = result->addAssignment(tmp, result->final);
             result->statements = save;
             if (land) {
-                cond = new IR::LNot(Util::SourceInfo(), cond);
+                cond = new IR::LNot(cond);
                 typeMap->setType(cond, type);
             }
-            auto block = new IR::BlockStatement(Util::SourceInfo(),
-                                                IR::Annotations::empty, ifFalse);
-            auto ifStatement = new IR::IfStatement(Util::SourceInfo(), cond, ifTrue, block);
+            auto block = new IR::BlockStatement(ifFalse);
+            auto ifStatement = new IR::IfStatement(cond, ifTrue, block);
             result->statements->push_back(ifStatement);
             result->final = path->clone();
         }
@@ -267,9 +265,7 @@ class DismantleExpression : public Transform {
         result->statements = save;
 
         auto ifStatement = new IR::IfStatement(
-            Util::SourceInfo(), e0,
-            new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, ifTrue),
-            new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, ifFalse));
+            e0, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
         result->statements->push_back(ifStatement);
         result->final = path->clone();
         typeMap->setType(result->final, type);
@@ -405,14 +401,11 @@ class DismantleExpression : public Transform {
                 // declare temporary variable
                 auto tmp = refMap->newName("tmp");
                 argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto decl = new IR::Declaration_Variable(
-                    Util::SourceInfo(), IR::ID(tmp, nullptr),
-                    IR::Annotations::empty, paramtype, nullptr);
+                auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), paramtype);
                 result->temporaries->push_back(decl);
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();
-                    auto stat = new IR::AssignmentStatement(
-                        Util::SourceInfo(), clone, newarg);
+                    auto stat = new IR::AssignmentStatement(clone, newarg);
                     LOG3(clone << " = " << newarg);
                     result->statements->push_back(stat);
                     typeMap->setType(clone, paramtype);
@@ -423,7 +416,7 @@ class DismantleExpression : public Transform {
             }
             if (leftValue && useTemp) {
                 auto assign = new IR::AssignmentStatement(
-                    Util::SourceInfo(), cloner.clone<IR::Expression>(newarg),
+                    cloner.clone<IR::Expression>(newarg),
                     cloner.clone<IR::Expression>(argValue));
                 copyBack->push_back(assign);
                 LOG3("Will copy out value " << dbp(assign));
@@ -455,13 +448,10 @@ class DismantleExpression : public Transform {
             !tbl_apply &&                  // not a table.apply call
             !resultNotUsed) {              // result of call is not used
             auto tmp = refMap->newName("tmp");
-            auto decl = new IR::Declaration_Variable(
-                Util::SourceInfo(), IR::ID(tmp, nullptr), IR::Annotations::empty,
-                type, nullptr);
+            auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
             result->temporaries->push_back(decl);
             auto left = new IR::PathExpression(IR::ID(tmp, nullptr));
-            auto stat = new IR::AssignmentStatement(
-                Util::SourceInfo(), left, simplified);
+            auto stat = new IR::AssignmentStatement(left, simplified);
             result->statements->push_back(stat);
             result->final = left->clone();
             typeMap->setType(result->final, type);
@@ -507,8 +497,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::Function* function) {
         locals->push_back(a);
     for (auto s : *function->body->components)
         locals->push_back(s);
-    function->body = new IR::BlockStatement(
-        function->body->srcInfo, IR::Annotations::empty, locals);
+    function->body = new IR::BlockStatement(function->body->srcInfo, locals);
     toInsert.clear();
     return function;
 }
@@ -541,7 +530,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::P4Action* action) {
         locals->push_back(a);
     for (auto s : *action->body->components)
         locals->push_back(s);
-    action->body = new IR::BlockStatement(action->body->srcInfo, IR::Annotations::empty, locals);
+    action->body = new IR::BlockStatement(action->body->srcInfo, locals);
     toInsert.clear();
     return action;
 }
@@ -572,8 +561,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::AssignmentStatement* statem
     auto right = parts->final;
     CHECK_NULL(right);
     parts->statements->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
-    auto block = new IR::BlockStatement(
-        Util::SourceInfo(), IR::Annotations::empty, parts->statements);
+    auto block = new IR::BlockStatement(parts->statements);
     return block;
 }
 
@@ -584,8 +572,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::MethodCallStatement* statem
     if (parts->simple())
         return statement;
     toInsert.append(*parts->temporaries);
-    auto block = new IR::BlockStatement(
-        Util::SourceInfo(), IR::Annotations::empty, parts->statements);
+    auto block = new IR::BlockStatement(parts->statements);
     return block;
 }
 
@@ -600,8 +587,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::ReturnStatement* statement)
     toInsert.append(*parts->temporaries);
     auto expr = parts->final;
     parts->statements->push_back(new IR::ReturnStatement(statement->srcInfo, expr));
-    auto block = new IR::BlockStatement(
-        Util::SourceInfo(), IR::Annotations::empty, parts->statements);
+    auto block = new IR::BlockStatement(parts->statements);
     return block;
 }
 
@@ -615,8 +601,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::IfStatement* statement) {
     auto expr = parts->final;
     parts->statements->push_back(new IR::IfStatement(statement->srcInfo, expr,
                                                      statement->ifTrue, statement->ifFalse));
-    auto block = new IR::BlockStatement(
-        Util::SourceInfo(), IR::Annotations::empty, parts->statements);
+    auto block = new IR::BlockStatement(parts->statements);
     return block;
 }
 
@@ -630,8 +615,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::SwitchStatement* statement)
     auto expr = parts->final;
     parts->statements->push_back(
         new IR::SwitchStatement(statement->srcInfo, expr, std::move(statement->cases)));
-    auto block = new IR::BlockStatement(
-        Util::SourceInfo(), IR::Annotations::empty, parts->statements);
+    auto block = new IR::BlockStatement(parts->statements);
     return block;
 }
 

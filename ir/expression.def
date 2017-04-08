@@ -311,9 +311,9 @@ class SelectExpression : Expression {
 }
 
 class MethodCallExpression : Expression {
-    Expression         method;
-    Vector<Type>       typeArguments;
-    Vector<Expression> arguments;
+    Expression                  method;
+    optional Vector<Type>       typeArguments = new Vector<Type>;
+    optional Vector<Expression> arguments = new Vector<Expression>;
     toString{ return method->toString(); }
     validate{ typeArguments->check_null(); arguments->check_null(); }
 }

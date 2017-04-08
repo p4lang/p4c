@@ -35,15 +35,15 @@ int IR::Declaration::nextId = 0;
 int IR::This::nextId = 0;
 
 const Type_Method* P4Control::getConstructorMethodType() const {
-    return new Type_Method(Util::SourceInfo(), getTypeParameters(), type, constructorParams);
+    return new Type_Method(getTypeParameters(), type, constructorParams);
 }
 
 const Type_Method* P4Parser::getConstructorMethodType() const {
-    return new Type_Method(Util::SourceInfo(), getTypeParameters(), type, constructorParams);
+    return new Type_Method(getTypeParameters(), type, constructorParams);
 }
 
 const Type_Method* Type_Package::getConstructorMethodType() const {
-    return new Type_Method(Util::SourceInfo(), getTypeParameters(), this, constructorParams);
+    return new Type_Method(getTypeParameters(), this, constructorParams);
 }
 
 Util::Enumerator<const IR::IDeclaration*>* IGeneralNamespace::getDeclsByName(cstring name) const {
@@ -115,12 +115,12 @@ const Method* Type_Extern::lookupMethod(cstring name, int paramCount) const {
 
 const Type_Method*
 Type_Parser::getApplyMethodType() const {
-    return new Type_Method(Util::SourceInfo(), new IR::TypeParameters(), nullptr, applyParams);
+    return new Type_Method(applyParams);
 }
 
 const Type_Method*
 Type_Control::getApplyMethodType() const {
-    return new Type_Method(Util::SourceInfo(), new IR::TypeParameters(), nullptr, applyParams);
+    return new Type_Method(applyParams);
 }
 
 const IR::Path* ActionListElement::getPath() const {
@@ -145,17 +145,12 @@ P4Table::getApplyMethodType() const {
             actions);
     auto alv = actions->value->to<IR::ActionList>();
     auto fields = new IR::IndexedVector<IR::StructField>();
-    auto hit = new IR::StructField(Util::SourceInfo(), IR::Type_Table::hit,
-                                   IR::Annotations::empty, IR::Type_Boolean::get());
+    auto hit = new IR::StructField(IR::Type_Table::hit, IR::Type_Boolean::get());
     fields->push_back(hit);
-    auto label = new IR::StructField(Util::SourceInfo(), IR::Type_Table::action_run,
-                                     IR::Annotations::empty,
-                                     new IR::Type_ActionEnum(Util::SourceInfo(), alv));
+    auto label = new IR::StructField(IR::Type_Table::action_run, new IR::Type_ActionEnum(alv));
     fields->push_back(label);
-    auto rettype = new IR::Type_Struct(Util::SourceInfo(), ID(name),
-                                       IR::Annotations::empty, fields);
-    auto applyMethod = new IR::Type_Method(Util::SourceInfo(), new TypeParameters(),
-                                           rettype, new IR::ParameterList());
+    auto rettype = new IR::Type_Struct(ID(name), fields);
+    auto applyMethod = new IR::Type_Method(rettype, new IR::ParameterList());
     return applyMethod;
 }
 

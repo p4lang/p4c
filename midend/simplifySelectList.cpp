@@ -24,7 +24,7 @@ void SubstituteStructures::explode(
     if (type->is<IR::Type_Struct>()) {
         auto st = type->to<IR::Type_Struct>();
         for (auto f : *st->fields) {
-            auto e = new IR::Member(Util::SourceInfo(), expression, f->name);
+            auto e = new IR::Member(expression, f->name);
             auto t = typeMap->getTypeType(f->type, true);
             explode(e, t, output);
         }
