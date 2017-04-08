@@ -15,6 +15,7 @@
 # General GTest unit tests. Add tests here if they don't have a logical home
 # elsewhere in the codebase.
 gtest_unittest_UNIFIED = \
+	test/gtest/helpers.cpp \
 	test/gtest/opeq_test.cpp \
 	test/gtest/midend_test.cpp \
 	test/gtest/arch_test.cpp

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "gtest/gtest.h"
 #include "ir/ir.h"
-#include "helper.h"
+#include "helpers.h"
 #include "lib/log.h"
 
 #include "frontends/p4/typeMap.h"
@@ -144,7 +144,7 @@ TEST(arch, instantiation) {
     ASSERT_NE(nullptr, pgm);
 }
 
-TEST(arch, package_with_body) {
+TEST(arch, psa_package_with_body) {
     std::string program = R"(
         // simplified core.p4
         // simplified v1model.p4
@@ -175,7 +175,7 @@ TEST(arch, package_with_body) {
     ASSERT_EQ(nullptr, pgm);
 }
 
-TEST(arch, control_in_control) {
+TEST(arch, psa_control_in_control) {
     std::string program = R"(
         // simplified core.p4
         // simplified v1model.p4
@@ -269,8 +269,6 @@ TEST(arch, psa_clone_as_param_to_control) {
     });
     pgm = pgm->apply(passes);
     ASSERT_NE(nullptr, pgm);
-
-    dump(pgm);
 }
 
 TEST(arch, psa_clone_as_param_to_extern) {
@@ -303,6 +301,38 @@ TEST(arch, psa_clone_as_param_to_extern) {
         }
         PRE<bit<32>>() pre;
         MyIngress(pre) ig;
+        PSA(ig) main;
+    )";
+    const IR::P4Program* pgm = parse_string(program);
+
+    ReferenceMap refMap;
+    TypeMap      typeMap;
+    PassManager  passes ({
+        new TypeChecking(&refMap, &typeMap)
+    });
+    pgm = pgm->apply(passes);
+    ASSERT_NE(nullptr, pgm);
+}
+
+TEST(arch, clone_as_extern_method) {
+    std::string program = R"(
+        extern void clone(in bit<32> sessions);
+        extern void clone3<T>(in bit<32> sessions, in T data);
+        control ingress<H, M> (inout H hdr, inout M meta);
+        package PSA<H, M> (ingress<H,M> ig);
+        // user program
+        struct ParsedHeaders {
+            bit<32> hdr;
+        }
+        struct Metadata {
+            bit<32> md;
+        }
+        control MyIngress (inout ParsedHeaders p, inout Metadata m) {
+            apply{
+                // invoke clone3 triggers a compiler bug.
+            }
+        }
+        MyIngress() ig;
         PSA(ig) main;
     )";
     const IR::P4Program* pgm = parse_string(program);
