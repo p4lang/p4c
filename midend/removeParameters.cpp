@@ -124,8 +124,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     initializers->append(*postamble);
 
     action->parameters = new IR::ParameterList(action->parameters->srcInfo, leftParams);
-    action->body = new IR::BlockStatement(
-        action->body->srcInfo, IR::Annotations::empty, initializers);
+    action->body = new IR::BlockStatement(action->body->srcInfo, initializers);
     LOG1("To replace " << dbp(action));
     result->push_back(action);
     return result;

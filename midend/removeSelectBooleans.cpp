@@ -29,7 +29,7 @@ DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression* expression) {
             auto type = typeMap->getType(e, true);
             if (type->is<IR::Type_Boolean>()) {
                 changes = true;
-                auto cast = new IR::Cast(Util::SourceInfo(), IR::Type_Bits::get(1), e);
+                auto cast = new IR::Cast(IR::Type_Bits::get(1), e);
                 vec->push_back(cast);
             } else {
                 vec->push_back(e);
@@ -41,7 +41,7 @@ DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression* expression) {
     } else {
         auto type = typeMap->getType(expression, true);
         if (type->is<IR::Type_Boolean>())
-            expression = new IR::Cast(Util::SourceInfo(), IR::Type_Bits::get(1), expression);
+            expression = new IR::Cast(IR::Type_Bits::get(1), expression);
         return expression;
     }
 }

@@ -39,7 +39,7 @@ class ArithmeticFixup : public Transform {
     const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type) {
         unsigned width = type->size;
         if (!type->isSigned) {
-            auto mask = new IR::Constant(Util::SourceInfo(), type, Util::mask(width), 16);
+            auto mask = new IR::Constant(type, Util::mask(width), 16);
             typeMap->setType(mask, type);
             auto result = new IR::BAnd(expr->srcInfo, expr, mask);
             typeMap->setType(result, type);
@@ -817,12 +817,12 @@ cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fie
         auto type = typeMap->getType(fields, true);
         BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: expected a struct", fields);
         for (auto f : *type->to<IR::Type_StructLike>()->fields) {
-            auto e = new IR::Member(Util::SourceInfo(), fields, f->name);
+            auto e = new IR::Member(fields, f->name);
             auto ftype = typeMap->getType(f);
             typeMap->setType(e, ftype);
             vec->push_back(e);
         }
-        fields = new IR::ListExpression(Util::SourceInfo(), vec);
+        fields = new IR::ListExpression(vec);
         typeMap->setType(fields, type);
     }
     auto jright = conv->convert(fields);
@@ -982,8 +982,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     if (ef->method->name == v1model.clone.name) {
                         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                         cstring name = refMap->newName("fl");
-                        auto emptylist = new IR::ListExpression(
-                            Util::SourceInfo(), new IR::Vector<IR::Expression>());
+                        auto emptylist = new IR::ListExpression(new IR::Vector<IR::Expression>());
                         id = createFieldList(emptylist, "field_lists", name, fieldLists);
                     } else {
                         BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
@@ -1129,7 +1128,7 @@ void JsonConverter::addToFieldList(const IR::Expression* expr, Util::JsonArray* 
         // recursively add all fields
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : *st->fields) {
-            auto member = new IR::Member(Util::SourceInfo(), expr, f->name);
+            auto member = new IR::Member(expr, f->name);
             typeMap->setType(member, typeMap->getType(f, true));
             addToFieldList(member, fl);
         }
@@ -2695,7 +2694,7 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
         } else if (minst->is<P4::BuiltInMethod>()) {
             auto bi = minst->to<P4::BuiltInMethod>();
             if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
-                auto mem = new IR::Member(Util::SourceInfo(), bi->appliedTo, "$valid$");
+                auto mem = new IR::Member(bi->appliedTo, "$valid$");
                 typeMap->setType(mem, IR::Type_Void::get());
                 auto jexpr = conv->convert(mem, true, false);
                 result->emplace("op", "set");

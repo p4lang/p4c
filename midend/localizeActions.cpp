@@ -43,7 +43,7 @@ const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
             annos = IR::Annotations::empty;
         cstring name = cstring(".") + action->name;
         annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                          new IR::StringLiteral(Util::SourceInfo(), name));
+                                          new IR::StringLiteral(name));
         action->annotations = annos;
     }
     prune();
@@ -77,7 +77,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
         if (annos == nullptr)
             annos = IR::Annotations::empty;
         annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                  new IR::StringLiteral(Util::SourceInfo(), action->name));
+                                  new IR::StringLiteral(action->name));
         auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
                                             annos, params, replBody);
         repl->addReplacement(action, control, replacement);
@@ -165,7 +165,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
         if (annos == nullptr)
             annos = IR::Annotations::empty;
         annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                  new IR::StringLiteral(Util::SourceInfo(), action->name));
+                                  new IR::StringLiteral(action->name));
         replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
                                        annos, params, replBody);
         repl->createReplacement(action, actionUser, replacement);

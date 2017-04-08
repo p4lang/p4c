@@ -345,7 +345,10 @@ expression
     | NEW name                          { $$ = "new " + $2; }
     ;
 
-name: IDENTIFIER | name DBLCOL IDENTIFIER { $$ = $1 + "::" + $3; }
+name: IDENTIFIER
+    | name DBLCOL IDENTIFIER    { $$ = $1 + "::" + $3; }
+    | name '<' name '>'         { $$ = $1 + "<" + $3 + ">"; }
+    ;
 
 /*****************************************************************************/
 

@@ -66,7 +66,7 @@ class ComplexValues final {
                 auto e = m.second->convertToExpression();
                 vec->push_back(e);
             }
-            return new IR::ListExpression(Util::SourceInfo(), vec);
+            return new IR::ListExpression(vec);
         }
         Component* get(cstring name) override
         { return ::get(members, name); }

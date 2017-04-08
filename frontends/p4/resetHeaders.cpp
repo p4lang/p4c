@@ -24,14 +24,13 @@ void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : *sl->fields) {
             auto ftype = typeMap->getType(f, true);
-            auto member = new IR::Member(Util::SourceInfo(), expr, f->name);
+            auto member = new IR::Member(expr, f->name);
             generateResets(typeMap, ftype, member, resets);
         }
     } else if (type->is<IR::Type_Header>()) {
         auto method = new IR::Member(expr->srcInfo, expr, IR::Type_Header::setInvalid);
         auto args = new IR::Vector<IR::Expression>();
-        auto mc = new IR::MethodCallExpression(expr->srcInfo, method,
-                                               new IR::Vector<IR::Type>(), args);
+        auto mc = new IR::MethodCallExpression(expr->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
         resets->push_back(stat);
     } else if (type->is<IR::Type_Stack>()) {
@@ -42,7 +41,7 @@ void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type
         }
         for (unsigned i = 0; i < tstack->getSize(); i++) {
             auto index = new IR::Constant(i);
-            auto elem = new IR::ArrayIndex(Util::SourceInfo(), expr, index);
+            auto elem = new IR::ArrayIndex(expr, index);
             generateResets(typeMap, tstack->elementType, elem, resets);
         }
     }
