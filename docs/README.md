@@ -8,7 +8,7 @@ The code and documentation are hosted in the following repository: https://githu
 ```
 p4c
 ├── build                     -- recommended place to build binary
-├── p4include                 -- standard P4 files needed by the compiler
+├── p4include                 -- standard P4 files needed by the compiler (e.g., core.p4)
 ├── backends
 │   ├── p4test                -- "fake" back-end for testing
 │   ├── ebpf                  -- extended Berkeley Packet Filters back-end
@@ -24,7 +24,6 @@ p4c
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
 ├── midend                    -- code that may be useful for writing mid-ends
-├── p4include                 -- p4 include files (e.g., core.p4)
 ├── test                      -- test code
 │   └── unittests             -- unit test code
 ├── tools                     -- external programs used in the build/test process
