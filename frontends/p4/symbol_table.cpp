@@ -244,5 +244,7 @@ cstring ProgramStructure::toString() const {
 
 void ProgramStructure::clear() {
     rootNamespace->clear();
+    currentNamespace = rootNamespace;
+    debugStream = stderr;
 }
 }  // namespace Util

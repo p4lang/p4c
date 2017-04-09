@@ -62,6 +62,11 @@ InputSources::InputSources() :
     this->contents.push_back("");
 }
 
+/* static */
+void InputSources::reset() {
+    instance = new InputSources;
+}
+
 // prevent further changes
 void InputSources::seal() {
     if (this->sealed)
