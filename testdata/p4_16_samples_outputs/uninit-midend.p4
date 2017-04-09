@@ -28,9 +28,9 @@ parser p1(packet_in p, out Header h) {
         g(tmp_4, tmp_8);
         h.data2 = h.data3 + 32w1;
         stack[1].isValid();
-        transition select(h.isValid()) {
-            true: next1;
-            false: next2;
+        transition select((bit<1>)h.isValid()) {
+            1w1: next1;
+            1w0: next2;
             default: noMatch;
         }
     }

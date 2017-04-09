@@ -46,6 +46,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
+#include "midend/removeSelectBooleans.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
 #include "midend/predication.h"
@@ -55,26 +56,11 @@ limitations under the License.
 
 namespace BMV2 {
 
-#if 0
-// This code is now obsolete, it probably should be removed
-void MidEnd::setup_for_P4_14(CompilerOptions&) {
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
-    // specialized code path, which also generates slighly nicer
-    // human-readable results.
-    addPasses({
-        evaluator,
-        new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap)),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-        new P4::TypeChecking(&refMap, &typeMap),
-        new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
-        new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap)),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-    });
-}
-#endif
-
+/**
+This class implements a policy suitable for the ConvertEnums pass.
+The policy is: convert all enums that are not part of the v1model.
+Use 32-bit values for all enums.
+*/
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum* type) const override {
         if (type->srcInfo.isValid()) {
@@ -91,7 +77,15 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     { return 32; }
 };
 
+/**
+This class implements a policy suitable for the SynthesizeActions pass.
+The policy is: do not synthesize actions for the controls whose names
+are in the specified set.
+For example, we expect that the code in the deparser will not use any
+tables or actions.
+*/
 class SkipControls : public P4::ActionSynthesisPolicy {
+    // set of controls where actions are not synthesized
     const std::set<cstring> *skip;
 
  public:
@@ -109,7 +103,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
-    auto v1controls = new std::set<cstring>();
+    auto skipv1controls = new std::set<cstring>();  // in these controls we don't synthesize actions
 
     addPasses({
         convertEnums,
@@ -119,7 +113,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-        new VisitFunctor([this, v1controls, evaluator](const IR::Node *root) -> const IR::Node* {
+        new VisitFunctor([this, skipv1controls, evaluator](const IR::Node *root) ->
+                         const IR::Node* {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
             if (main == nullptr)
@@ -128,20 +123,26 @@ MidEnd::MidEnd(CompilerOptions& options) {
             // We save the names of some control blocks for special processing later
             if (main->getConstructorParameters()->size() != 6)
                 ::error("%1%: Expected 6 arguments for main package", main);
+            auto ingress = main->getParameterValue(P4V1::V1Model::instance.sw.ingress.name);
+            auto egress = main->getParameterValue(P4V1::V1Model::instance.sw.egress.name);
             auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
             auto update = main->getParameterValue(P4V1::V1Model::instance.sw.update.name);
             auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
             if (verify == nullptr || update == nullptr || deparser == nullptr ||
+                ingress == nullptr || egress == nullptr ||
                 !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
-                !deparser->is<IR::ControlBlock>()) {
+                !deparser->is<IR::ControlBlock>() || !ingress->is<IR::ControlBlock>() ||
+                !egress->is<IR::ControlBlock>()) {
                 ::error("%1%: main package does not match the expected model %2%",
                         main, P4V1::V1Model::instance.file.toString());
                 return nullptr;
             }
+            ingressControlBlockName = ingress->to<IR::ControlBlock>()->container->name;
+            egressControlBlockName = egress->to<IR::ControlBlock>()->container->name;
             updateControlBlockName = update->to<IR::ControlBlock>()->container->name;
-            v1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
-            v1controls->emplace(updateControlBlockName);
-            v1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
+            skipv1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
+            skipv1controls->emplace(updateControlBlockName);
+            skipv1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
             return root; }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
@@ -162,6 +163,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),
+        new P4::RemoveSelectBooleans(&refMap, &typeMap),
         new P4::Predication(&refMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
@@ -172,7 +174,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
-        new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
+        new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         // Proper back-end
         new P4::TypeChecking(&refMap, &typeMap),
@@ -182,7 +184,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
-        new RemoveExpressionsFromSelects(&refMap, &typeMap),
+        new RemoveComplexExpressions(&refMap, &typeMap,
+                                     &ingressControlBlockName, &egressControlBlockName),
         new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),

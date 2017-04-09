@@ -7,9 +7,9 @@ parser p(out bit<32> b) {
     bit<32> tmp_4;
     state start {
         a = 32w1;
-        transition select(a == 32w0) {
-            true: start_true;
-            false: start_false;
+        transition select((bit<1>)(a == 32w0)) {
+            1w1: start_true;
+            1w0: start_false;
             default: noMatch;
         }
     }
@@ -24,16 +24,16 @@ parser p(out bit<32> b) {
     state start_join {
         b = tmp_2;
         b = b + 32w1;
-        transition select(a > 32w0) {
-            true: start_true_0;
-            false: start_false_0;
+        transition select((bit<1>)(a > 32w0)) {
+            1w1: start_true_0;
+            1w0: start_false_0;
             default: noMatch;
         }
     }
     state start_true_0 {
-        transition select(a > 32w1) {
-            true: start_true_0_true;
-            false: start_true_0_false;
+        transition select((bit<1>)(a > 32w1)) {
+            1w1: start_true_0_true;
+            1w0: start_true_0_false;
             default: noMatch;
         }
     }

@@ -1205,7 +1205,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control process_replication(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_1() {
+    @name(".nop") action nop_4() {
     }
     @name(".set_replica_copy_bridged") action set_replica_copy_bridged_0() {
         meta.egress_metadata.routed = 1w0;
@@ -1232,7 +1232,7 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
     }
     @name("replica_type") table replica_type_0 {
         actions = {
-            nop_1();
+            nop_4();
             set_replica_copy_bridged_0();
             @default_only NoAction();
         }
@@ -1245,7 +1245,7 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
     }
     @name("rid") table rid_0 {
         actions = {
-            nop_1();
+            nop_4();
             outer_replica_from_rid_0();
             inner_replica_from_rid_0();
             @default_only NoAction();
@@ -1265,7 +1265,7 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
 }
 
 control process_vlan_decap(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_2() {
+    @name(".nop") action nop_5() {
     }
     @name(".remove_vlan_single_tagged") action remove_vlan_single_tagged_0() {
         hdr.ethernet.etherType = hdr.vlan_tag_[0].etherType;
@@ -1278,7 +1278,7 @@ control process_vlan_decap(inout headers hdr, inout metadata meta, inout standar
     }
     @name("vlan_decap") table vlan_decap_0 {
         actions = {
-            nop_2();
+            nop_5();
             remove_vlan_single_tagged_0();
             remove_vlan_double_tagged_0();
             @default_only NoAction();
@@ -1589,7 +1589,7 @@ control process_tunnel_decap(inout headers hdr, inout metadata meta, inout stand
 }
 
 control process_rewrite(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_3() {
+    @name(".nop") action nop_6() {
     }
     @name(".set_l2_rewrite") action set_l2_rewrite_0() {
         meta.egress_metadata.routed = 1w0;
@@ -1657,7 +1657,7 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name("rewrite") table rewrite_0 {
         actions = {
-            nop_3();
+            nop_6();
             set_l2_rewrite_0();
             set_l2_rewrite_with_tunnel_0();
             set_l3_rewrite_0();
@@ -1676,7 +1676,7 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name("rewrite_multicast") table rewrite_multicast_0 {
         actions = {
-            nop_3();
+            nop_6();
             rewrite_ipv4_multicast_0();
             rewrite_ipv6_multicast_0();
             @default_only NoAction();
@@ -1698,14 +1698,14 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
 }
 
 control process_egress_bd(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_4() {
+    @name(".nop") action nop_7() {
     }
     @name(".set_egress_bd_properties") action set_egress_bd_properties_0(bit<9> smac_idx) {
         meta.egress_metadata.smac_idx = smac_idx;
     }
     @name("egress_bd_map") table egress_bd_map_0 {
         actions = {
-            nop_4();
+            nop_7();
             set_egress_bd_properties_0();
             @default_only NoAction();
         }
@@ -1721,7 +1721,7 @@ control process_egress_bd(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_5() {
+    @name(".nop") action nop_8() {
     }
     @name(".ipv4_unicast_rewrite") action ipv4_unicast_rewrite_0() {
         hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
@@ -1748,7 +1748,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     }
     @name("l3_rewrite") table l3_rewrite_0 {
         actions = {
-            nop_5();
+            nop_8();
             ipv4_unicast_rewrite_0();
             ipv4_multicast_rewrite_0();
             ipv6_unicast_rewrite_0();
@@ -1839,7 +1839,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     @name(".int_set_header_7_bos") action int_set_header_7_bos_0() {
         hdr.int_egress_port_tx_utilization_header.bos = 1w1;
     }
-    @name(".nop") action nop_6() {
+    @name(".nop") action nop_9() {
     }
     @name(".int_transit") action int_transit_0(bit<32> switch_id) {
         meta.int_metadata.insert_cnt = hdr.int_header.max_hop_cnt - hdr.int_header.total_hop_cnt;
@@ -2053,7 +2053,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
             int_set_header_5_bos_0();
             int_set_header_6_bos_0();
             int_set_header_7_bos_0();
-            nop_6();
+            nop_9();
             @default_only NoAction();
         }
         key = {
@@ -2125,7 +2125,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
             int_set_header_0407_i13_0();
             int_set_header_0407_i14_0();
             int_set_header_0407_i15_0();
-            nop_6();
+            nop_9();
             @default_only NoAction();
         }
         key = {
@@ -2136,7 +2136,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     }
     @name("int_inst_0811") table int_inst_1 {
         actions = {
-            nop_6();
+            nop_9();
             @default_only NoAction();
         }
         key = {
@@ -2147,7 +2147,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     }
     @name("int_inst_1215") table int_inst_2 {
         actions = {
-            nop_6();
+            nop_9();
             @default_only NoAction();
         }
         key = {
@@ -2186,11 +2186,13 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
 }
 
 control process_egress_bd_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_7() {
+    @name("egress_bd_stats") direct_counter(CounterType.packets_and_bytes) egress_bd_stats_1;
+    @name(".nop") action nop_10() {
+        egress_bd_stats_1.count();
     }
-    @name("egress_bd_stats") table egress_bd_stats {
+    @name("egress_bd_stats") table egress_bd_stats_2 {
         actions = {
-            nop_7();
+            nop_10();
             @default_only NoAction();
         }
         key = {
@@ -2202,12 +2204,12 @@ control process_egress_bd_stats(inout headers hdr, inout metadata meta, inout st
         @name("egress_bd_stats") counters = direct_counter(CounterType.packets_and_bytes);
     }
     apply {
-        egress_bd_stats.apply();
+        egress_bd_stats_2.apply();
     }
 }
 
 control process_tunnel_encap(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_8() {
+    @name(".nop") action nop_11() {
     }
     @name(".set_egress_tunnel_vni") action set_egress_tunnel_vni_0(bit<24> vnid) {
         meta.tunnel_metadata.vnid = vnid;
@@ -2579,7 +2581,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("egress_vni") table egress_vni_0 {
         actions = {
-            nop_8();
+            nop_11();
             set_egress_tunnel_vni_0();
             @default_only NoAction();
         }
@@ -2592,7 +2594,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("tunnel_dmac_rewrite") table tunnel_dmac_rewrite_0 {
         actions = {
-            nop_8();
+            nop_11();
             rewrite_tunnel_dmac_0();
             @default_only NoAction();
         }
@@ -2604,7 +2606,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("tunnel_dst_rewrite") table tunnel_dst_rewrite_0 {
         actions = {
-            nop_8();
+            nop_11();
             rewrite_tunnel_ipv4_dst_0();
             rewrite_tunnel_ipv6_dst_0();
             @default_only NoAction();
@@ -2640,7 +2642,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("tunnel_encap_process_outer") table tunnel_encap_process_outer_0 {
         actions = {
-            nop_8();
+            nop_11();
             ipv4_vxlan_rewrite_0();
             ipv4_genv_rewrite_0();
             ipv4_nvgre_rewrite_0();
@@ -2684,7 +2686,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("tunnel_rewrite") table tunnel_rewrite_0 {
         actions = {
-            nop_8();
+            nop_11();
             set_tunnel_rewrite_details_0();
             set_mpls_rewrite_push1_0();
             set_mpls_rewrite_push2_0();
@@ -2702,7 +2704,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("tunnel_smac_rewrite") table tunnel_smac_rewrite_0 {
         actions = {
-            nop_8();
+            nop_11();
             rewrite_tunnel_smac_0();
             @default_only NoAction();
         }
@@ -2714,7 +2716,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("tunnel_src_rewrite") table tunnel_src_rewrite_0 {
         actions = {
-            nop_8();
+            nop_11();
             rewrite_tunnel_ipv4_src_0();
             rewrite_tunnel_ipv6_src_0();
             @default_only NoAction();
@@ -2756,13 +2758,13 @@ control process_int_outer_encap(inout headers hdr, inout metadata meta, inout st
         hdr.ipv4.totalLen = hdr.ipv4.totalLen + meta.int_metadata.insert_byte_cnt;
         hdr.udp.length_ = hdr.udp.length_ + meta.int_metadata.insert_byte_cnt;
     }
-    @name(".nop") action nop_9() {
+    @name(".nop") action nop_12() {
     }
     @name("int_outer_encap") table int_outer_encap_0 {
         actions = {
             int_update_vxlan_gpe_ipv4_0();
             int_add_update_vxlan_gpe_ipv4_0();
-            nop_9();
+            nop_12();
             @default_only NoAction();
         }
         key = {
@@ -2849,11 +2851,11 @@ control process_egress_filter(inout headers hdr, inout metadata meta, inout stan
 }
 
 control process_egress_acl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_10() {
+    @name(".nop") action nop_13() {
     }
     @name(".egress_mirror") action egress_mirror_0(bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
     @name(".egress_mirror_drop") action egress_mirror_drop_0(bit<32> session_id) {
         egress_mirror_0(session_id);
@@ -2869,7 +2871,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name("egress_acl") table egress_acl_0 {
         actions = {
-            nop_10();
+            nop_13();
             egress_mirror_0();
             egress_mirror_drop_0();
             egress_redirect_to_cpu_0();
@@ -2904,7 +2906,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta.tunnel_metadata.egress_tunnel_type = 5w16;
         meta.egress_metadata.ifindex = ifindex;
     }
-    @name(".nop") action nop_11() {
+    @name(".nop") action nop_14() {
     }
     @name(".set_mirror_nhop") action set_mirror_nhop_0(bit<16> nhop_idx) {
         meta.l3_metadata.nexthop_index = nhop_idx;
@@ -2931,7 +2933,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("mirror") table mirror_0 {
         actions = {
-            nop_11();
+            nop_14();
             set_mirror_nhop_0();
             set_mirror_bd_0();
             sflow_pkt_to_cpu_0();
@@ -3318,14 +3320,14 @@ control process_spanning_tree(inout headers hdr, inout metadata meta, inout stan
 }
 
 control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_0() {
+    @name(".on_miss") action on_miss_2() {
     }
     @name(".ipsg_miss") action ipsg_miss_0() {
         meta.security_metadata.ipsg_check_fail = 1w1;
     }
     @name("ipsg") table ipsg_0 {
         actions = {
-            on_miss_0();
+            on_miss_2();
             @default_only NoAction();
         }
         key = {
@@ -3353,7 +3355,7 @@ control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout sta
     apply {
         if (meta.ingress_metadata.port_type == 2w0 && meta.security_metadata.ipsg_enabled == 1w1) 
             switch (ipsg_0.apply().action_run) {
-                on_miss_0: {
+                on_miss_2: {
                     ipsg_permit_special_0.apply();
                 }
             }
@@ -3368,7 +3370,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
         hdr.ipv4.totalLen = hdr.ipv4.totalLen - meta.int_metadata.insert_byte_cnt;
         hdr.udp.length_ = hdr.udp.length_ - meta.int_metadata.insert_byte_cnt;
     }
-    @name(".nop") action nop_12() {
+    @name(".nop") action nop_15() {
     }
     @name(".int_set_src") action int_set_src_0() {
         meta.int_metadata_i2e.source = 1w1;
@@ -3379,7 +3381,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
     @name(".int_sink") action int_sink_0(bit<32> mirror_id_0) {
         meta.int_metadata_i2e.sink = 1w1;
         meta.i2e_metadata.mirror_session_id = (bit<16>)mirror_id_0;
-        clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, (bit<32>)mirror_id_0, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, mirror_id_0, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
         hdr.int_header.setInvalid();
         hdr.int_val[0].setInvalid();
         hdr.int_val[1].setInvalid();
@@ -3416,7 +3418,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
     @name("int_sink_update_outer") table int_sink_update_outer_0 {
         actions = {
             int_sink_update_vxlan_gpe_v4_0();
-            nop_12();
+            nop_15();
             @default_only NoAction();
         }
         key = {
@@ -3473,7 +3475,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
 }
 
 control process_ingress_fabric(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_13() {
+    @name(".nop") action nop_16() {
     }
     @name(".terminate_cpu_packet") action terminate_cpu_packet_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.fabric_header.dstPortOrGroup;
@@ -3543,7 +3545,7 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
     }
     @name("fabric_ingress_dst_lkp") table fabric_ingress_dst_lkp_0 {
         actions = {
-            nop_13();
+            nop_16();
             terminate_cpu_packet_0();
             switch_fabric_unicast_packet_0();
             terminate_fabric_unicast_packet_0();
@@ -3558,7 +3560,7 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
     }
     @name("fabric_ingress_src_lkp") table fabric_ingress_src_lkp_0 {
         actions = {
-            nop_13();
+            nop_16();
             set_ingress_ifindex_properties_0();
             @default_only NoAction();
         }
@@ -3596,7 +3598,7 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
 }
 
 control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_14() {
+    @name(".nop") action nop_17() {
     }
     @name(".set_tunnel_termination_flag") action set_tunnel_termination_flag_0() {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
@@ -3605,14 +3607,14 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
         meta.tunnel_metadata.tunnel_vni = tunnel_vni;
         meta.tunnel_metadata.tunnel_terminate = 1w1;
     }
-    @name(".on_miss") action on_miss_1() {
+    @name(".on_miss") action on_miss_3() {
     }
     @name(".src_vtep_hit") action src_vtep_hit_0(bit<16> ifindex) {
         meta.ingress_metadata.ifindex = ifindex;
     }
     @name("ipv4_dest_vtep") table ipv4_dest_vtep_0 {
         actions = {
-            nop_14();
+            nop_17();
             set_tunnel_termination_flag_0();
             set_tunnel_vni_and_termination_flag_0();
             @default_only NoAction();
@@ -3627,7 +3629,7 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
     }
     @name("ipv4_src_vtep") table ipv4_src_vtep_0 {
         actions = {
-            on_miss_1();
+            on_miss_3();
             src_vtep_hit_0();
             @default_only NoAction();
         }
@@ -3650,7 +3652,7 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_15() {
+    @name(".nop") action nop_18() {
     }
     @name(".set_tunnel_termination_flag") action set_tunnel_termination_flag_1() {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
@@ -3659,14 +3661,14 @@ control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard
         meta.tunnel_metadata.tunnel_vni = tunnel_vni;
         meta.tunnel_metadata.tunnel_terminate = 1w1;
     }
-    @name(".on_miss") action on_miss_2() {
+    @name(".on_miss") action on_miss_4() {
     }
     @name(".src_vtep_hit") action src_vtep_hit_1(bit<16> ifindex) {
         meta.ingress_metadata.ifindex = ifindex;
     }
     @name("ipv6_dest_vtep") table ipv6_dest_vtep_0 {
         actions = {
-            nop_15();
+            nop_18();
             set_tunnel_termination_flag_1();
             set_tunnel_vni_and_termination_flag_1();
             @default_only NoAction();
@@ -3681,7 +3683,7 @@ control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard
     }
     @name("ipv6_src_vtep") table ipv6_src_vtep_0 {
         actions = {
-            on_miss_2();
+            on_miss_4();
             src_vtep_hit_1();
             @default_only NoAction();
         }
@@ -3774,9 +3776,9 @@ control process_mpls(inout headers hdr, inout metadata meta, inout standard_meta
 }
 
 control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_16() {
+    @name(".nop") action nop_19() {
     }
-    @name(".on_miss") action on_miss_3() {
+    @name(".on_miss") action on_miss_5() {
     }
     @name(".outer_multicast_route_s_g_hit") action outer_multicast_route_s_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
         meta.intrinsic_metadata.mcast_grp = mc_index;
@@ -3810,8 +3812,8 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
     }
     @name("outer_ipv4_multicast") table outer_ipv4_multicast_0 {
         actions = {
-            nop_16();
-            on_miss_3();
+            nop_19();
+            on_miss_5();
             outer_multicast_route_s_g_hit_0();
             outer_multicast_bridge_s_g_hit_0();
             @default_only NoAction();
@@ -3827,7 +3829,7 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
     }
     @name("outer_ipv4_multicast_star_g") table outer_ipv4_multicast_star_g_0 {
         actions = {
-            nop_16();
+            nop_19();
             outer_multicast_route_sm_star_g_hit_0();
             outer_multicast_route_bidir_star_g_hit_0();
             outer_multicast_bridge_star_g_hit_0();
@@ -3843,7 +3845,7 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
     }
     apply {
         switch (outer_ipv4_multicast_0.apply().action_run) {
-            on_miss_3: {
+            on_miss_5: {
                 outer_ipv4_multicast_star_g_0.apply();
             }
         }
@@ -3852,9 +3854,9 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
 }
 
 control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_17() {
+    @name(".nop") action nop_20() {
     }
-    @name(".on_miss") action on_miss_4() {
+    @name(".on_miss") action on_miss_6() {
     }
     @name(".outer_multicast_route_s_g_hit") action outer_multicast_route_s_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
         meta.intrinsic_metadata.mcast_grp = mc_index;
@@ -3888,8 +3890,8 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
     }
     @name("outer_ipv6_multicast") table outer_ipv6_multicast_0 {
         actions = {
-            nop_17();
-            on_miss_4();
+            nop_20();
+            on_miss_6();
             outer_multicast_route_s_g_hit_1();
             outer_multicast_bridge_s_g_hit_1();
             @default_only NoAction();
@@ -3905,7 +3907,7 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
     }
     @name("outer_ipv6_multicast_star_g") table outer_ipv6_multicast_star_g_0 {
         actions = {
-            nop_17();
+            nop_20();
             outer_multicast_route_sm_star_g_hit_1();
             outer_multicast_route_bidir_star_g_hit_1();
             outer_multicast_bridge_star_g_hit_1();
@@ -3921,7 +3923,7 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
     }
     apply {
         switch (outer_ipv6_multicast_0.apply().action_run) {
-            on_miss_4: {
+            on_miss_6: {
                 outer_ipv6_multicast_star_g_0.apply();
             }
         }
@@ -3949,12 +3951,12 @@ control process_outer_multicast(inout headers hdr, inout metadata meta, inout st
 }
 
 control process_tunnel(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_5() {
+    @name(".on_miss") action on_miss_7() {
     }
     @name(".outer_rmac_hit") action outer_rmac_hit_0() {
         meta.l3_metadata.rmac_hit = 1w1;
     }
-    @name(".nop") action nop_18() {
+    @name(".nop") action nop_21() {
     }
     @name(".tunnel_lookup_miss") action tunnel_lookup_miss_1() {
     }
@@ -4063,7 +4065,7 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name("outer_rmac") table outer_rmac_0 {
         actions = {
-            on_miss_5();
+            on_miss_7();
             outer_rmac_hit_0();
             @default_only NoAction();
         }
@@ -4076,7 +4078,7 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name("tunnel") table tunnel_0 {
         actions = {
-            nop_18();
+            nop_21();
             tunnel_lookup_miss_1();
             terminate_tunnel_inner_non_ip_0();
             terminate_tunnel_inner_ethernet_ipv4_0();
@@ -4139,7 +4141,7 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
                             if (hdr.mpls[0].isValid()) 
                                 process_mpls_1.apply(hdr, meta, standard_metadata);
                 }
-                on_miss_5: {
+                on_miss_7: {
                     process_outer_multicast_1.apply(hdr, meta, standard_metadata);
                 }
             }
@@ -4157,21 +4159,26 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
 }
 
 control process_ingress_sflow(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_19() {
-    }
-    @name(".sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu_0(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
-        meta.fabric_metadata.reason_code = reason_code;
-        meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
-        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, (bit<32>)sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
+    @name("sflow_ingress_session_pkt_counter") direct_counter(CounterType.packets) sflow_ingress_session_pkt_counter_0;
+    @name(".nop") action nop_22() {
     }
     @name(".sflow_ing_session_enable") action sflow_ing_session_enable_0(bit<32> rate_thr, bit<16> session_id) {
         meta.ingress_metadata.sflow_take_sample = rate_thr + meta.ingress_metadata.sflow_take_sample;
         meta.sflow_metadata.sflow_session_id = session_id;
     }
+    @name(".nop") action nop_23() {
+        sflow_ingress_session_pkt_counter_0.count();
+    }
+    @name(".sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
+        sflow_ingress_session_pkt_counter_0.count();
+        meta.fabric_metadata.reason_code = reason_code;
+        meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
+        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
+    }
     @name("sflow_ing_take_sample") table sflow_ing_take_sample_0 {
         actions = {
-            nop_19();
-            sflow_ing_pkt_to_cpu_0();
+            nop_23();
+            sflow_ing_pkt_to_cpu();
             @default_only NoAction();
         }
         key = {
@@ -4183,7 +4190,7 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
     }
     @name("sflow_ingress") table sflow_ingress_0 {
         actions = {
-            nop_19();
+            nop_22();
             sflow_ing_session_enable_0();
             @default_only NoAction();
         }
@@ -4204,7 +4211,7 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
 
 control process_storm_control(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("storm_control_meter") meter(32w1024, MeterType.bytes) storm_control_meter_0;
-    @name(".nop") action nop_20() {
+    @name(".nop") action nop_24() {
     }
     @name(".set_storm_control_meter") action set_storm_control_meter_0(bit<16> meter_idx) {
         storm_control_meter_0.execute_meter<bit<2>>((bit<32>)meter_idx, meta.meter_metadata.meter_color);
@@ -4212,7 +4219,7 @@ control process_storm_control(inout headers hdr, inout metadata meta, inout stan
     }
     @name("storm_control") table storm_control_0 {
         actions = {
-            nop_20();
+            nop_24();
             set_storm_control_meter_0();
             @default_only NoAction();
         }
@@ -4230,7 +4237,7 @@ control process_storm_control(inout headers hdr, inout metadata meta, inout stan
 }
 
 control process_validate_packet(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_21() {
+    @name(".nop") action nop_25() {
     }
     @name(".set_unicast") action set_unicast_0() {
         meta.l2_metadata.lkp_pkt_type = 3w1;
@@ -4258,7 +4265,7 @@ control process_validate_packet(inout headers hdr, inout metadata meta, inout st
     }
     @name("validate_packet") table validate_packet_0 {
         actions = {
-            nop_21();
+            nop_25();
             set_unicast_0();
             set_unicast_and_ipv6_src_is_link_local_0();
             set_multicast_0();
@@ -4286,7 +4293,7 @@ control process_validate_packet(inout headers hdr, inout metadata meta, inout st
 }
 
 control process_mac(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_22() {
+    @name(".nop") action nop_26() {
     }
     @name(".dmac_hit") action dmac_hit_0(bit<16> ifindex) {
         meta.ingress_metadata.egress_ifindex = ifindex;
@@ -4322,7 +4329,7 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
     @name("dmac") table dmac_0 {
         support_timeout = true;
         actions = {
-            nop_22();
+            nop_26();
             dmac_hit_0();
             dmac_multicast_hit_0();
             dmac_miss_0();
@@ -4340,7 +4347,7 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
     }
     @name("smac") table smac_0 {
         actions = {
-            nop_22();
+            nop_26();
             smac_miss_0();
             smac_hit_0();
             @default_only NoAction();
@@ -4361,7 +4368,7 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
 }
 
 control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_23() {
+    @name(".nop") action nop_27() {
     }
     @name(".acl_deny") action acl_deny_0(bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta.acl_metadata.acl_deny = 1w1;
@@ -4379,7 +4386,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     @name(".acl_mirror") action acl_mirror_0(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -4403,7 +4410,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name("mac_acl") table mac_acl_0 {
         actions = {
-            nop_23();
+            nop_27();
             acl_deny_0();
             acl_permit_0();
             acl_mirror_0();
@@ -4428,7 +4435,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
 }
 
 control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_24() {
+    @name(".nop") action nop_28() {
     }
     @name(".acl_deny") action acl_deny_1(bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta.acl_metadata.acl_deny = 1w1;
@@ -4446,7 +4453,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     @name(".acl_mirror") action acl_mirror_1(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -4470,7 +4477,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name("ip_acl") table ip_acl_0 {
         actions = {
-            nop_24();
+            nop_28();
             acl_deny_1();
             acl_permit_1();
             acl_mirror_1();
@@ -4494,7 +4501,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name("ipv6_acl") table ipv6_acl_0 {
         actions = {
-            nop_24();
+            nop_28();
             acl_deny_1();
             acl_permit_1();
             acl_mirror_1();
@@ -4527,7 +4534,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
 }
 
 control process_qos(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_25() {
+    @name(".nop") action nop_29() {
     }
     @name(".apply_cos_marking") action apply_cos_marking_0(bit<3> cos) {
         meta.qos_metadata.marked_cos = cos;
@@ -4540,7 +4547,7 @@ control process_qos(inout headers hdr, inout metadata meta, inout standard_metad
     }
     @name("qos") table qos_0 {
         actions = {
-            nop_25();
+            nop_29();
             apply_cos_marking_0();
             apply_dscp_marking_0();
             apply_tc_marking_0();
@@ -4564,7 +4571,7 @@ control process_qos(inout headers hdr, inout metadata meta, inout standard_metad
 }
 
 control process_ipv4_racl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_26() {
+    @name(".nop") action nop_30() {
     }
     @name(".racl_deny") action racl_deny_0(bit<14> acl_stats_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta.acl_metadata.racl_deny = 1w1;
@@ -4595,7 +4602,7 @@ control process_ipv4_racl(inout headers hdr, inout metadata meta, inout standard
     }
     @name("ipv4_racl") table ipv4_racl_0 {
         actions = {
-            nop_26();
+            nop_30();
             racl_deny_0();
             racl_permit_0();
             racl_redirect_nexthop_0();
@@ -4619,7 +4626,7 @@ control process_ipv4_racl(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_6() {
+    @name(".on_miss") action on_miss_8() {
     }
     @name(".ipv4_urpf_hit") action ipv4_urpf_hit_0(bit<16> urpf_bd_group) {
         meta.l3_metadata.urpf_hit = 1w1;
@@ -4631,7 +4638,7 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
     }
     @name("ipv4_urpf") table ipv4_urpf_0 {
         actions = {
-            on_miss_6();
+            on_miss_8();
             ipv4_urpf_hit_0();
             @default_only NoAction();
         }
@@ -4658,7 +4665,7 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
     apply {
         if (meta.ipv4_metadata.ipv4_urpf_mode != 2w0) 
             switch (ipv4_urpf_0.apply().action_run) {
-                on_miss_6: {
+                on_miss_8: {
                     ipv4_urpf_lpm_0.apply();
                 }
             }
@@ -4667,7 +4674,7 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_7() {
+    @name(".on_miss") action on_miss_9() {
     }
     @name(".fib_hit_nexthop") action fib_hit_nexthop_0(bit<16> nexthop_index) {
         meta.l3_metadata.fib_hit = 1w1;
@@ -4681,7 +4688,7 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
     }
     @name("ipv4_fib") table ipv4_fib_0 {
         actions = {
-            on_miss_7();
+            on_miss_9();
             fib_hit_nexthop_0();
             fib_hit_ecmp_0();
             @default_only NoAction();
@@ -4695,7 +4702,7 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
     }
     @name("ipv4_fib_lpm") table ipv4_fib_lpm_0 {
         actions = {
-            on_miss_7();
+            on_miss_9();
             fib_hit_nexthop_0();
             fib_hit_ecmp_0();
             @default_only NoAction();
@@ -4709,7 +4716,7 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
     }
     apply {
         switch (ipv4_fib_0.apply().action_run) {
-            on_miss_7: {
+            on_miss_9: {
                 ipv4_fib_lpm_0.apply();
             }
         }
@@ -4718,7 +4725,7 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
 }
 
 control process_ipv6_racl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_27() {
+    @name(".nop") action nop_31() {
     }
     @name(".racl_deny") action racl_deny_1(bit<14> acl_stats_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta.acl_metadata.racl_deny = 1w1;
@@ -4749,7 +4756,7 @@ control process_ipv6_racl(inout headers hdr, inout metadata meta, inout standard
     }
     @name("ipv6_racl") table ipv6_racl_0 {
         actions = {
-            nop_27();
+            nop_31();
             racl_deny_1();
             racl_permit_1();
             racl_redirect_nexthop_1();
@@ -4773,7 +4780,7 @@ control process_ipv6_racl(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_8() {
+    @name(".on_miss") action on_miss_10() {
     }
     @name(".ipv6_urpf_hit") action ipv6_urpf_hit_0(bit<16> urpf_bd_group) {
         meta.l3_metadata.urpf_hit = 1w1;
@@ -4785,7 +4792,7 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
     }
     @name("ipv6_urpf") table ipv6_urpf_0 {
         actions = {
-            on_miss_8();
+            on_miss_10();
             ipv6_urpf_hit_0();
             @default_only NoAction();
         }
@@ -4812,7 +4819,7 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
     apply {
         if (meta.ipv6_metadata.ipv6_urpf_mode != 2w0) 
             switch (ipv6_urpf_0.apply().action_run) {
-                on_miss_8: {
+                on_miss_10: {
                     ipv6_urpf_lpm_0.apply();
                 }
             }
@@ -4821,7 +4828,7 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
 }
 
 control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_9() {
+    @name(".on_miss") action on_miss_11() {
     }
     @name(".fib_hit_nexthop") action fib_hit_nexthop_1(bit<16> nexthop_index) {
         meta.l3_metadata.fib_hit = 1w1;
@@ -4835,7 +4842,7 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
     }
     @name("ipv6_fib") table ipv6_fib_0 {
         actions = {
-            on_miss_9();
+            on_miss_11();
             fib_hit_nexthop_1();
             fib_hit_ecmp_1();
             @default_only NoAction();
@@ -4849,7 +4856,7 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
     }
     @name("ipv6_fib_lpm") table ipv6_fib_lpm_0 {
         actions = {
-            on_miss_9();
+            on_miss_11();
             fib_hit_nexthop_1();
             fib_hit_ecmp_1();
             @default_only NoAction();
@@ -4863,7 +4870,7 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
     }
     apply {
         switch (ipv6_fib_0.apply().action_run) {
-            on_miss_9: {
+            on_miss_11: {
                 ipv6_fib_lpm_0.apply();
             }
         }
@@ -4872,14 +4879,14 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
 }
 
 control process_urpf_bd(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_28() {
+    @name(".nop") action nop_32() {
     }
     @name(".urpf_bd_miss") action urpf_bd_miss_0() {
         meta.l3_metadata.urpf_check_fail = 1w1;
     }
     @name("urpf_bd") table urpf_bd_0 {
         actions = {
-            nop_28();
+            nop_32();
             urpf_bd_miss_0();
             @default_only NoAction();
         }
@@ -4897,42 +4904,23 @@ control process_urpf_bd(inout headers hdr, inout metadata meta, inout standard_m
 }
 
 control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_10() {
+    @name("ipv4_multicast_route_s_g_stats") direct_counter(CounterType.packets) ipv4_multicast_route_s_g_stats_0;
+    @name("ipv4_multicast_route_star_g_stats") direct_counter(CounterType.packets) ipv4_multicast_route_star_g_stats_0;
+    @name(".on_miss") action on_miss_12() {
     }
     @name(".multicast_bridge_s_g_hit") action multicast_bridge_s_g_hit_0(bit<16> mc_index) {
         meta.multicast_metadata.multicast_bridge_mc_index = mc_index;
         meta.multicast_metadata.mcast_bridge_hit = 1w1;
     }
-    @name(".nop") action nop_29() {
+    @name(".nop") action nop_33() {
     }
     @name(".multicast_bridge_star_g_hit") action multicast_bridge_star_g_hit_0(bit<16> mc_index) {
         meta.multicast_metadata.multicast_bridge_mc_index = mc_index;
         meta.multicast_metadata.mcast_bridge_hit = 1w1;
     }
-    @name(".multicast_route_s_g_hit") action multicast_route_s_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
-        meta.multicast_metadata.multicast_route_mc_index = mc_index;
-        meta.multicast_metadata.mcast_mode = 2w1;
-        meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-    }
-    @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_0() {
-        meta.l3_metadata.l3_copy = 1w1;
-    }
-    @name(".multicast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
-        meta.multicast_metadata.mcast_mode = 2w1;
-        meta.multicast_metadata.multicast_route_mc_index = mc_index;
-        meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-    }
-    @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
-        meta.multicast_metadata.mcast_mode = 2w2;
-        meta.multicast_metadata.multicast_route_mc_index = mc_index;
-        meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
-    }
     @name("ipv4_multicast_bridge") table ipv4_multicast_bridge_0 {
         actions = {
-            on_miss_10();
+            on_miss_12();
             multicast_bridge_s_g_hit_0();
             @default_only NoAction();
         }
@@ -4946,7 +4934,7 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
     }
     @name("ipv4_multicast_bridge_star_g") table ipv4_multicast_bridge_star_g_0 {
         actions = {
-            nop_29();
+            nop_33();
             multicast_bridge_star_g_hit_0();
             @default_only NoAction();
         }
@@ -4957,10 +4945,20 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         size = 1024;
         default_action = NoAction();
     }
+    @name(".on_miss") action on_miss_13() {
+        ipv4_multicast_route_s_g_stats_0.count();
+    }
+    @name(".multicast_route_s_g_hit") action multicast_route_s_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv4_multicast_route_s_g_stats_0.count();
+        meta.multicast_metadata.multicast_route_mc_index = mc_index;
+        meta.multicast_metadata.mcast_mode = 2w1;
+        meta.multicast_metadata.mcast_route_hit = 1w1;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+    }
     @name("ipv4_multicast_route") table ipv4_multicast_route_0 {
         actions = {
-            on_miss_10();
-            multicast_route_s_g_hit_0();
+            on_miss_13();
+            multicast_route_s_g_hit();
             @default_only NoAction();
         }
         key = {
@@ -4972,11 +4970,29 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         default_action = NoAction();
         @name("ipv4_multicast_route_s_g_stats") counters = direct_counter(CounterType.packets);
     }
+    @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss() {
+        ipv4_multicast_route_star_g_stats_0.count();
+        meta.l3_metadata.l3_copy = 1w1;
+    }
+    @name(".multicast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv4_multicast_route_star_g_stats_0.count();
+        meta.multicast_metadata.mcast_mode = 2w1;
+        meta.multicast_metadata.multicast_route_mc_index = mc_index;
+        meta.multicast_metadata.mcast_route_hit = 1w1;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+    }
+    @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv4_multicast_route_star_g_stats_0.count();
+        meta.multicast_metadata.mcast_mode = 2w2;
+        meta.multicast_metadata.multicast_route_mc_index = mc_index;
+        meta.multicast_metadata.mcast_route_hit = 1w1;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+    }
     @name("ipv4_multicast_route_star_g") table ipv4_multicast_route_star_g_0 {
         actions = {
-            multicast_route_star_g_miss_0();
-            multicast_route_sm_star_g_hit_0();
-            multicast_route_bidir_star_g_hit_0();
+            multicast_route_star_g_miss();
+            multicast_route_sm_star_g_hit();
+            multicast_route_bidir_star_g_hit();
             @default_only NoAction();
         }
         key = {
@@ -4990,14 +5006,14 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
     apply {
         if ((meta.ingress_metadata.bypass_lookups & 16w0x1) == 16w0) 
             switch (ipv4_multicast_bridge_0.apply().action_run) {
-                on_miss_10: {
+                on_miss_12: {
                     ipv4_multicast_bridge_star_g_0.apply();
                 }
             }
 
         if ((meta.ingress_metadata.bypass_lookups & 16w0x2) == 16w0 && meta.multicast_metadata.ipv4_multicast_enabled == 1w1) 
             switch (ipv4_multicast_route_0.apply().action_run) {
-                on_miss_10: {
+                on_miss_13: {
                     ipv4_multicast_route_star_g_0.apply();
                 }
             }
@@ -5006,42 +5022,23 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
 }
 
 control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".on_miss") action on_miss_11() {
+    @name("ipv6_multicast_route_s_g_stats") direct_counter(CounterType.packets) ipv6_multicast_route_s_g_stats_0;
+    @name("ipv6_multicast_route_star_g_stats") direct_counter(CounterType.packets) ipv6_multicast_route_star_g_stats_0;
+    @name(".on_miss") action on_miss_14() {
     }
     @name(".multicast_bridge_s_g_hit") action multicast_bridge_s_g_hit_1(bit<16> mc_index) {
         meta.multicast_metadata.multicast_bridge_mc_index = mc_index;
         meta.multicast_metadata.mcast_bridge_hit = 1w1;
     }
-    @name(".nop") action nop_30() {
+    @name(".nop") action nop_34() {
     }
     @name(".multicast_bridge_star_g_hit") action multicast_bridge_star_g_hit_1(bit<16> mc_index) {
         meta.multicast_metadata.multicast_bridge_mc_index = mc_index;
         meta.multicast_metadata.mcast_bridge_hit = 1w1;
     }
-    @name(".multicast_route_s_g_hit") action multicast_route_s_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
-        meta.multicast_metadata.multicast_route_mc_index = mc_index;
-        meta.multicast_metadata.mcast_mode = 2w1;
-        meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-    }
-    @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_1() {
-        meta.l3_metadata.l3_copy = 1w1;
-    }
-    @name(".multicast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
-        meta.multicast_metadata.mcast_mode = 2w1;
-        meta.multicast_metadata.multicast_route_mc_index = mc_index;
-        meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-    }
-    @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
-        meta.multicast_metadata.mcast_mode = 2w2;
-        meta.multicast_metadata.multicast_route_mc_index = mc_index;
-        meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
-    }
     @name("ipv6_multicast_bridge") table ipv6_multicast_bridge_0 {
         actions = {
-            on_miss_11();
+            on_miss_14();
             multicast_bridge_s_g_hit_1();
             @default_only NoAction();
         }
@@ -5055,7 +5052,7 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
     }
     @name("ipv6_multicast_bridge_star_g") table ipv6_multicast_bridge_star_g_0 {
         actions = {
-            nop_30();
+            nop_34();
             multicast_bridge_star_g_hit_1();
             @default_only NoAction();
         }
@@ -5066,10 +5063,20 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         size = 1024;
         default_action = NoAction();
     }
+    @name(".on_miss") action on_miss_15() {
+        ipv6_multicast_route_s_g_stats_0.count();
+    }
+    @name(".multicast_route_s_g_hit") action multicast_route_s_g_hit_2(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv6_multicast_route_s_g_stats_0.count();
+        meta.multicast_metadata.multicast_route_mc_index = mc_index;
+        meta.multicast_metadata.mcast_mode = 2w1;
+        meta.multicast_metadata.mcast_route_hit = 1w1;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+    }
     @name("ipv6_multicast_route") table ipv6_multicast_route_0 {
         actions = {
-            on_miss_11();
-            multicast_route_s_g_hit_1();
+            on_miss_15();
+            multicast_route_s_g_hit_2();
             @default_only NoAction();
         }
         key = {
@@ -5081,11 +5088,29 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         default_action = NoAction();
         @name("ipv6_multicast_route_s_g_stats") counters = direct_counter(CounterType.packets);
     }
+    @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_2() {
+        ipv6_multicast_route_star_g_stats_0.count();
+        meta.l3_metadata.l3_copy = 1w1;
+    }
+    @name(".multicast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit_2(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv6_multicast_route_star_g_stats_0.count();
+        meta.multicast_metadata.mcast_mode = 2w1;
+        meta.multicast_metadata.multicast_route_mc_index = mc_index;
+        meta.multicast_metadata.mcast_route_hit = 1w1;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+    }
+    @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_2(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv6_multicast_route_star_g_stats_0.count();
+        meta.multicast_metadata.mcast_mode = 2w2;
+        meta.multicast_metadata.multicast_route_mc_index = mc_index;
+        meta.multicast_metadata.mcast_route_hit = 1w1;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+    }
     @name("ipv6_multicast_route_star_g") table ipv6_multicast_route_star_g_0 {
         actions = {
-            multicast_route_star_g_miss_1();
-            multicast_route_sm_star_g_hit_1();
-            multicast_route_bidir_star_g_hit_1();
+            multicast_route_star_g_miss_2();
+            multicast_route_sm_star_g_hit_2();
+            multicast_route_bidir_star_g_hit_2();
             @default_only NoAction();
         }
         key = {
@@ -5099,14 +5124,14 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
     apply {
         if ((meta.ingress_metadata.bypass_lookups & 16w0x1) == 16w0) 
             switch (ipv6_multicast_bridge_0.apply().action_run) {
-                on_miss_11: {
+                on_miss_14: {
                     ipv6_multicast_bridge_star_g_0.apply();
                 }
             }
 
         if ((meta.ingress_metadata.bypass_lookups & 16w0x2) == 16w0 && meta.multicast_metadata.ipv6_multicast_enabled == 1w1) 
             switch (ipv6_multicast_route_0.apply().action_run) {
-                on_miss_11: {
+                on_miss_15: {
                     ipv6_multicast_route_star_g_0.apply();
                 }
             }
@@ -5135,12 +5160,12 @@ control process_multicast(inout headers hdr, inout metadata meta, inout standard
 
 control process_meter_index(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("meter_index") direct_meter<bit<2>>(MeterType.bytes) meter_index_1;
-    @name(".nop") action nop_31() {
+    @name(".nop") action nop_35() {
         meter_index_1.read(meta.meter_metadata.meter_color);
     }
     @name("meter_index") table meter_index_2 {
         actions = {
-            nop_31();
+            nop_35();
             @default_only NoAction();
         }
         key = {
@@ -5251,15 +5276,18 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
 }
 
 control process_meter_action(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".meter_permit") action meter_permit_0() {
+    @name("meter_stats") direct_counter(CounterType.packets) meter_stats_0;
+    @name(".meter_permit") action meter_permit() {
+        meter_stats_0.count();
     }
-    @name(".meter_deny") action meter_deny_0() {
+    @name(".meter_deny") action meter_deny() {
+        meter_stats_0.count();
         mark_to_drop();
     }
     @name("meter_action") table meter_action_0 {
         actions = {
-            meter_permit_0();
-            meter_deny_0();
+            meter_permit();
+            meter_deny();
             @default_only NoAction();
         }
         key = {
@@ -5313,11 +5341,13 @@ control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout 
 }
 
 control process_storm_control_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_32() {
+    @name("storm_control_stats") direct_counter(CounterType.packets) storm_control_stats_1;
+    @name(".nop") action nop_36() {
+        storm_control_stats_1.count();
     }
-    @name("storm_control_stats") table storm_control_stats {
+    @name("storm_control_stats") table storm_control_stats_2 {
         actions = {
-            nop_32();
+            nop_36();
             @default_only NoAction();
         }
         key = {
@@ -5329,12 +5359,12 @@ control process_storm_control_stats(inout headers hdr, inout metadata meta, inou
         @name("storm_control_stats") counters = direct_counter(CounterType.packets);
     }
     apply {
-        storm_control_stats.apply();
+        storm_control_stats_2.apply();
     }
 }
 
 control process_fwd_results(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_33() {
+    @name(".nop") action nop_37() {
     }
     @name(".set_l2_redirect_action") action set_l2_redirect_action_0() {
         meta.l3_metadata.nexthop_index = meta.l2_metadata.l2_nexthop;
@@ -5395,7 +5425,7 @@ control process_fwd_results(inout headers hdr, inout metadata meta, inout standa
     }
     @name("fwd_result") table fwd_result_0 {
         actions = {
-            nop_33();
+            nop_37();
             set_l2_redirect_action_0();
             set_fib_redirect_action_0();
             set_cpu_redirect_action_0();
@@ -5432,7 +5462,7 @@ control process_fwd_results(inout headers hdr, inout metadata meta, inout standa
 }
 
 control process_nexthop(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_34() {
+    @name(".nop") action nop_38() {
     }
     @name(".set_ecmp_nexthop_details") action set_ecmp_nexthop_details_0(bit<16> ifindex, bit<16> bd, bit<16> nhop_index, bit<1> tunnel) {
         meta.ingress_metadata.egress_ifindex = ifindex;
@@ -5462,7 +5492,7 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name("ecmp_group") table ecmp_group_0 {
         actions = {
-            nop_34();
+            nop_38();
             set_ecmp_nexthop_details_0();
             set_ecmp_nexthop_details_for_post_routed_flood_0();
             @default_only NoAction();
@@ -5477,7 +5507,7 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name("nexthop") table nexthop_0 {
         actions = {
-            nop_34();
+            nop_38();
             set_nexthop_details_0();
             set_nexthop_details_for_post_routed_flood_0();
             @default_only NoAction();
@@ -5497,14 +5527,14 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
 }
 
 control process_multicast_flooding(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_35() {
+    @name(".nop") action nop_39() {
     }
     @name(".set_bd_flood_mc_index") action set_bd_flood_mc_index_0(bit<16> mc_index) {
         meta.intrinsic_metadata.mcast_grp = mc_index;
     }
     @name("bd_flood") table bd_flood_0 {
         actions = {
-            nop_35();
+            nop_39();
             set_bd_flood_mc_index_0();
             @default_only NoAction();
         }
@@ -5557,14 +5587,14 @@ control process_lag(inout headers hdr, inout metadata meta, inout standard_metad
 }
 
 control process_mac_learning(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_36() {
+    @name(".nop") action nop_40() {
     }
     @name(".generate_learn_notify") action generate_learn_notify_0() {
         digest<mac_learn_digest>(32w1024, { meta.ingress_metadata.bd, meta.l2_metadata.lkp_mac_sa, meta.ingress_metadata.ifindex });
     }
     @name("learn_notify") table learn_notify_0 {
         actions = {
-            nop_36();
+            nop_40();
             generate_learn_notify_0();
             @default_only NoAction();
         }
@@ -5583,7 +5613,7 @@ control process_mac_learning(inout headers hdr, inout metadata meta, inout stand
 }
 
 control process_fabric_lag(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_37() {
+    @name(".nop") action nop_41() {
     }
     @name(".set_fabric_lag_port") action set_fabric_lag_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
@@ -5593,7 +5623,7 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
     }
     @name("fabric_lag") table fabric_lag_0 {
         actions = {
-            nop_37();
+            nop_41();
             set_fabric_lag_port_0();
             set_fabric_multicast_0();
             @default_only NoAction();
@@ -5616,7 +5646,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     @name(".drop_stats_update") action drop_stats_update_0() {
         drop_stats_3.count((bit<32>)meta.ingress_metadata.drop_reason);
     }
-    @name(".nop") action nop_38() {
+    @name(".nop") action nop_42() {
     }
     @name(".copy_to_cpu_with_reason") action copy_to_cpu_with_reason_0(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
@@ -5638,7 +5668,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         mark_to_drop();
     }
     @name(".negative_mirror") action negative_mirror_0(bit<32> session_id) {
-        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
+        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop();
     }
     @name("drop_stats") table drop_stats_4 {
@@ -5651,7 +5681,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name("system_acl") table system_acl_0 {
         actions = {
-            nop_38();
+            nop_42();
             redirect_to_cpu_0();
             copy_to_cpu_with_reason_0();
             copy_to_cpu_0();

@@ -41,6 +41,12 @@ limitations under the License.
 #include "p4RuntimeSerializer.h"
 
 namespace P4 {
+
+/** \defgroup control_plane Control Plane API Generation */
+/** \addtogroup control_plane
+ *  @{
+ */
+/// XXX(seth) High level goals of the generator go here!!
 namespace ControlPlaneAPI {
 
 // XXX(seth): Here are the known issues:
@@ -103,7 +109,7 @@ struct HeaderFieldPath {
      *         invalid or too complex.
      */
     static HeaderFieldPath* from(const IR::Expression* expression,
-                                 const ReferenceMap* refMap, 
+                                 const ReferenceMap* refMap,
                                  const TypeMap* typeMap) {
         auto type = typeMap->getType(expression->getNode(), true);
         if (expression->is<IR::PathExpression>()) {
@@ -245,7 +251,7 @@ static int64_t getTableSize(const IR::P4Table* table) {
 
     auto sizeProperty = table->properties->getProperty("size");
     if (sizeProperty == nullptr) {
-        return defaultTableSize;  
+        return defaultTableSize;
     }
 
     if (!sizeProperty->value->is<IR::ExpressionValue>()) {
@@ -304,7 +310,7 @@ struct Counterlike {
     /// The name of the instance.
     const cstring name;
     /// If non-null, the instance's annotations.
-    const IR::IAnnotated* annotations;  
+    const IR::IAnnotated* annotations;
     /// The units parameter to the instance; valid values vary depending on @Kind.
     const cstring unit;
     /// The size parameter to the instance.
@@ -520,7 +526,7 @@ private:
         // How many suffixes pass through this node? This includes suffixes that
         // terminate at this node.
         unsigned instances = 0;
-        
+
         // Outgoing edges from this node. The SuffixNode should never be null.
         std::map<cstring, SuffixNode*> edges;
     };
@@ -1512,4 +1518,5 @@ void serializeP4Runtime(std::ostream* destination,
     }
 }
 
+/** @} *//* end group control_plane */
 }  // namespace P4

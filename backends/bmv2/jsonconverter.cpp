@@ -967,6 +967,12 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         // Do not generate any code for this operation
                         continue;
                     }
+                } else if (em->originalExternType->name == v1model.directCounter.name) {
+                    if (em->method->name == v1model.directCounter.count.name) {
+                        BUG_CHECK(mc->arguments->size() == 0, "Expected 0 argument for %1%", mc);
+                        // Do not generate any code for this operation
+                        continue;
+                    }
                 }
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();

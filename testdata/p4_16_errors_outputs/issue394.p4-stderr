@@ -1,18 +1,18 @@
-../testdata/p4_16_errors/issue394.p4(4): error: c: cannot declare variables of type C (consider using an instantiation)
+../testdata/p4_16_errors/issue394.p4(19): error: c: cannot declare variables of type C (consider using an instantiation)
     C c;
     ^^^^
-../testdata/p4_16_errors/issue394.p4(1)
+../testdata/p4_16_errors/issue394.p4(16)
 extern C { bool get(); }
        ^
-../testdata/p4_16_errors/issue394.p4(4): error: Could not find type of c
+../testdata/p4_16_errors/issue394.p4(19): error: Could not find type of c
     C c;
     ^^^^
-../testdata/p4_16_errors/issue394.p4(5): error: Could not find type of c
+../testdata/p4_16_errors/issue394.p4(20): error: Could not find type of c
     apply { b = c.get(); }
                 ^
-../testdata/p4_16_errors/issue394.p4(5): error: Could not find type of c.get
+../testdata/p4_16_errors/issue394.p4(20): error: Could not find type of c.get
     apply { b = c.get(); }
                 ^^^^^
-../testdata/p4_16_errors/issue394.p4(5): error: Could not find type of c.get
+../testdata/p4_16_errors/issue394.p4(20): error: Could not find type of c.get
     apply { b = c.get(); }
                 ^^^^^^^

@@ -18,6 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
+/// Check that the type of a constant is either bit<>, int<> or int
 void ValidateParsedProgram::postorder(const IR::Constant* c) {
     if (c->type != nullptr &&
         !c->type->is<IR::Type_Unknown>() &&
@@ -26,25 +27,41 @@ void ValidateParsedProgram::postorder(const IR::Constant* c) {
         BUG("Invalid type %1% for constant %2%", c->type, c);
 }
 
+/// Check that underscore is not a method name
+/// Check that constructors do not have a return type
+/// Check that extern constructor names match the enclosing extern
 void ValidateParsedProgram::postorder(const IR::Method* m) {
     if (m->name.isDontCare())
         ::error("%1%: Illegal method/function name", m->name);
     if (auto ext = findContext<IR::Type_Extern>()) {
         if (m->name == ext->name && m->type->returnType != nullptr)
             ::error("%1%: Constructor cannot have a return type", m);
+        if (m->type->returnType == nullptr) {
+            if (m->name != ext->name) {
+                ::error("%1%: Method has no return type", m);
+                return;
+            }
+            for (auto p : *m->type->parameters)
+                if (p->direction != IR::Direction::None)
+                    ::error("%1%: constructor parameters cannot have a direction", p);
+        }
     }
 }
 
+/// Struct field names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::StructField* f) {
     if (f->name.isDontCare())
         ::error("%1%: Illegal field name", f->name);
 }
 
+/// Unions must have at least one field
 void ValidateParsedProgram::postorder(const IR::Type_Union* type) {
     if (type->fields->size() == 0)
         ::error("%1%: empty union", type);
 }
 
+/// Width of a bit<> type is at least 0
+/// Width of an int<> type is at least 1
 void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
     if (type->size <= 0)
         ::error("%1%: Illegal bit size", type);
@@ -52,18 +69,23 @@ void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
         ::error("%1%: Signed types cannot be 1-bit wide", type);
 }
 
+/// The accept and reject states cannot be implemented
 void ValidateParsedProgram::postorder(const IR::ParserState* s) {
     if (s->name == IR::ParserState::accept ||
         s->name == IR::ParserState::reject)
         ::error("%1%: parser state should not be implemented, it is built-in", s->name);
 }
 
+/// All parameters of a constructor must be directionless.
+/// This only checks controls, parsers and packages
 void ValidateParsedProgram::container(const IR::IContainer* type) {
     for (auto p : *type->getConstructorParameters()->parameters)
         if (p->direction != IR::Direction::None)
             ::error("%1%: constructor parameters cannot have a direction", p);
 }
 
+/// Tables must have an 'actions' and a 'default_action' properties.
+/// The latter is just a warning.
 void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     auto ac = t->getActionList();
     if (ac == nullptr)
@@ -75,6 +97,8 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
                 t->name, IR::TableProperties::defaultActionPropertyName);
 }
 
+/// Checks that the names of the three parameter lists for some constructs
+/// are all distinct (type parameters, apply parameters, constructor parameters)
 void ValidateParsedProgram::distinctParameters(
     const IR::TypeParameters* typeParams,
     const IR::ParameterList* apply,
@@ -99,17 +123,21 @@ void ValidateParsedProgram::distinctParameters(
     }
 }
 
+/// Cannot invoke constructors in actions
 void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expression) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error("%1%: Constructor calls not allowed in actions", expression);
 }
 
+/// Variable names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::Declaration_Variable* decl) {
     if (decl->name.isDontCare())
         ::error("%1%: illegal variable name", decl);
 }
 
+/// Instance names cannot be don't care
+/// Do not declare instances in apply {} blocks, parser states or actions
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     if (decl->name.isDontCare())
         ::error("%1%: illegal instance name", decl);
@@ -125,10 +153,12 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
         ::error("%1%: Instantiations not allowed in actions", decl);
 }
 
+/// Constant names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
     if (decl->name.isDontCare())
         ::error("%1%: illegal constant name", decl);
 }
+
 /**
   * check that an entries list is declared as constant
   * The current specification supports only const entries, and we chose
@@ -145,19 +175,21 @@ void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
         ::error("%1%: table initializers must be constant", l);
 }
 
-
+/// Switch statements are not allowed in actions
 void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error("%1%: switch statements not allowed in actions", statement);
 }
 
+/// Return statements are not allowed in parsers
 void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error("%1%: return statements not allowed in parsers", statement);
 }
 
+/// Exit statements are not allowed in parsers
 void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)

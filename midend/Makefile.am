@@ -34,6 +34,7 @@ midend_UNIFIED = \
 	midend/simplifyKey.cpp \
 	midend/simplifySelectCases.cpp \
 	midend/simplifySelectList.cpp \
+        midend/removeSelectBooleans.cpp \
 	midend/validateProperties.cpp \
 	midend/expandLookahead.cpp \
 	midend/noMatch.cpp \
@@ -62,6 +63,7 @@ noinst_HEADERS += \
 	midend/simplifyKey.h \
 	midend/simplifySelectCases.h \
 	midend/simplifySelectList.h \
+        midend/removeSelectBooleans.h \
 	midend/validateProperties.h \
 	midend/expandLookahead.h \
 	midend/noMatch.h \

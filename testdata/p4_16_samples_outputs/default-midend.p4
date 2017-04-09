@@ -9,16 +9,16 @@ parser p0(packet_in p, out Header h) {
     state start {
         b = true;
         p.extract<Header>(h);
-        transition select(h.data, b) {
-            (default, true): next;
+        transition select(h.data, (bit<1>)b) {
+            (default, 1w1): next;
             (default, default): reject;
             default: noMatch;
         }
     }
     state next {
         p.extract<Header>(h);
-        transition select(h.data, b) {
-            (default, true): accept;
+        transition select(h.data, (bit<1>)b) {
+            (default, 1w1): accept;
             (default, default): reject;
             default: reject;
         }

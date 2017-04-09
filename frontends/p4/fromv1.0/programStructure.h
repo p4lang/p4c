@@ -128,6 +128,7 @@ class ProgramStructure {
     // map table name to direct meter
     std::map<cstring, const IR::Meter*> directMeters;
     std::map<const IR::Meter*, const IR::Declaration_Instance*> meterMap;
+    std::map<cstring, const IR::Declaration_Instance*> counterMap;
 
     std::map<const IR::V1Table*, const IR::V1Control*> tableMapping;
     std::map<const IR::V1Table*, const IR::Apply*> tableInvocation;
@@ -162,15 +163,16 @@ class ProgramStructure {
     const IR::Statement* convertParserStatement(const IR::Expression* expr);
     const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
+    const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
     const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
     const IR::Declaration_Instance*
     convertExtern(const IR::Declaration_Instance* ext, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
-                 IR::IndexedVector<IR::Declaration>* stateful);
+                 IR::IndexedVector<IR::Declaration>* stateful, std::map<cstring, cstring> &);
     const IR::P4Action* convertAction(const IR::ActionFunction* action, cstring newName,
-                                             const IR::Meter* meterToAccess);
+                                      const IR::Meter* meterToAccess, cstring counterToAccess);
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
     const IR::Declaration_Instance* checksumUnit(const IR::FieldListCalculation* flc);
