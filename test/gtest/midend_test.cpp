@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "gtest/gtest.h"
 #include "ir/ir.h"
-#include "helper.h"
+#include "helpers.h"
 #include "lib/log.h"
 
 #include "frontends/p4/typeMap.h"

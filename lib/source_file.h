@@ -271,6 +271,9 @@ class InputSources final {
 
     cstring toDebugString() const;
 
+    // Reset all source information, so that a new file can be parsed.
+    static void reset();
+
     static InputSources* instance;
 
  private:
