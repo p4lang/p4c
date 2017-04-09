@@ -52,7 +52,7 @@ TEST(arch, packet_out) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
 
@@ -86,7 +86,7 @@ TEST(arch, duplicatedDeclarationBug) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
 
@@ -136,7 +136,7 @@ TEST(arch, instantiation) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
 
@@ -168,7 +168,7 @@ TEST(arch, psa_package_with_body) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
@@ -204,7 +204,7 @@ TEST(arch, psa_control_in_control) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
@@ -229,7 +229,7 @@ TEST(arch, psa_clone_as_param_to_package) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
@@ -264,7 +264,7 @@ TEST(arch, psa_clone_as_param_to_control) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
@@ -307,7 +307,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
@@ -339,7 +339,7 @@ TEST(arch, clone_as_extern_method) {
 
     ReferenceMap refMap;
     TypeMap      typeMap;
-    PassManager  passes ({
+    PassManager  passes({
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
