@@ -27,7 +27,6 @@ class Visitor::ChangeTracker {
     visited_t           visited;
 
  public:
-
     /* Begin tracking `n` during a visiting pass.  Use `finish` to mark `n` as
      * visited once the pass completes.
     */
@@ -36,13 +35,13 @@ class Visitor::ChangeTracker {
         visited_t::iterator visited_it;
         bool inserted;
         std::tie(visited_it, inserted) =
-            visited.emplace(n, visit_info_t({true,n}));
+            visited.emplace(n, visit_info_t{true, n});
 
         // Sanity check for IR loops
         bool already_present = !inserted;
         visit_info_t *visit_info = &(visited_it->second);
         if (already_present && visit_info->visit_in_progress)
-            BUG("IR loop detected "); 
+            BUG("IR loop detected ");
     }
 
     /* Mark `n` as finished.  `done(n)` will return true, and `result(n)` will
@@ -56,7 +55,7 @@ class Visitor::ChangeTracker {
         visit_info->visit_in_progress = false;
         if (!final || *final != *orig) {
             visit_info->result = final;
-            visited.emplace(final, visit_info_t({false,final}));
+            visited.emplace(final, visit_info_t{false, final});
             return true;
         } else {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
@@ -81,7 +80,6 @@ class Visitor::ChangeTracker {
 
     /* Fails with out_of_range exception if n has not been tracked. */
     const IR::Node *result(const IR::Node *n) const { return visited.at(n).result; }
-
 };
 
 Visitor::profile_t Visitor::init_apply(const IR::Node *root) {
@@ -183,7 +181,7 @@ class ForwardChildren : public Visitor {
  public:
     explicit ForwardChildren(const ChangeTracker &v) : visited(v) {}
 };
-}
+}    // namespace
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
@@ -271,7 +269,9 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             if (!prune_flag) {
                 copy->visit_children(*this);
                 final_result = copy->apply_visitor_postorder(*this); }
-            if (final_result && final_result != preorder_result && *final_result == *preorder_result)
+            if (final_result
+                && final_result != preorder_result
+                && *final_result == *preorder_result)
                 final_result = preorder_result;
             if (visited->finish(n, final_result) && (n = final_result))
                 final_result->validate();
