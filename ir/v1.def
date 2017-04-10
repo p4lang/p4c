@@ -223,12 +223,12 @@ class FieldList {
 }
 
 class FieldListCalculation {
-    optional ID         name;
-    NullOK NameList     input = nullptr;
-    NullOK FieldList    input_fields = nullptr;
-    ID                  algorithm = {};
-    int                 output_width = 0;
-    Annotations         annotations;
+    optional ID          name;
+    NullOK NameList      input = nullptr;
+    NullOK FieldList     input_fields = nullptr;
+    ID                   algorithm = {};
+    int                  output_width = 0;
+    optional Annotations annotations = Annotations::empty;
 }
 
 class CalculatedField {

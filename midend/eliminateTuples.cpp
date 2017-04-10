@@ -15,8 +15,7 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
             auto cftype = convertType(ftype);
             if (cftype != ftype)
                 changes = true;
-            auto field = new IR::StructField(Util::SourceInfo(), f->name,
-                                             f->annotations, cftype->getP4Type());
+            auto field = new IR::StructField(f->name, f->annotations, cftype->getP4Type());
             fields->push_back(field);
         }
         if (changes) {
@@ -33,11 +32,10 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
         for (auto t : *type->to<IR::Type_Tuple>()->components) {
             auto ftype = convertType(t);
             auto fname = ng->newName("field");
-            auto field = new IR::StructField(Util::SourceInfo(), IR::ID(fname),
-                                             IR::Annotations::empty, ftype->getP4Type());
+            auto field = new IR::StructField(IR::ID(fname), ftype->getP4Type());
             fields->push_back(field);
         }
-        auto result = new IR::Type_Struct(Util::SourceInfo(), name, IR::Annotations::empty, fields);
+        auto result = new IR::Type_Struct(name, fields);
         LOG3("Converted " << dbp(type) << " to " << dbp(result));
         replacement.emplace(type, result);
         return result;

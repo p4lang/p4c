@@ -40,15 +40,12 @@ const IR::Node* DoHandleNoMatch::preorder(IR::P4Parser* parser) {
     auto args = new IR::Vector<IR::Expression>();
     args->push_back(new IR::BoolLiteral(false));
     args->push_back(new IR::Member(
-        Util::SourceInfo(),
         new IR::TypeNameExpression(IR::Type_Error::error),
         lib.noMatch.Id()));
     auto verify = new IR::MethodCallExpression(
-        Util::SourceInfo(), new IR::PathExpression(IR::ID(IR::ParserState::verify)),
-        new IR::Vector<IR::Type>(), args);
+        new IR::PathExpression(IR::ID(IR::ParserState::verify)), args);
     vec->push_back(new IR::MethodCallStatement(verify));
-    noMatch = new IR::ParserState(Util::SourceInfo(), IR::ID(name),
-                                  IR::Annotations::empty, vec,
+    noMatch = new IR::ParserState(IR::ID(name), vec,
                                   new IR::PathExpression(IR::ID(IR::ParserState::reject)));
     auto comp = new IR::IndexedVector<IR::ParserState>(*parser->states);
     comp->push_back(noMatch);

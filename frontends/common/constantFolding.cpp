@@ -524,7 +524,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
         return e;
     }
 
-    auto resultType = IR::Type_Bits::get(Util::SourceInfo(), lt->size + rt->size, lt->isSigned);
+    auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
     mpz_class value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
     auto result = new IR::Constant(e->srcInfo, resultType, value, left->base);
     setConstant(e, result);
@@ -785,8 +785,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
             changes = true;
             finished = true;
             if (someUnknown) {
-                auto newc = new IR::SelectCase(
-                    c->srcInfo, new IR::DefaultExpression(Util::SourceInfo()), c->state);
+                auto newc = new IR::SelectCase(c->srcInfo, new IR::DefaultExpression(), c->state);
                 cases.push_back(newc);
             } else {
                 // This is the result.

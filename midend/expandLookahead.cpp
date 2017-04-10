@@ -28,14 +28,12 @@ void DoExpandLookahead::expandSetValid(const IR::Expression* base, const IR::Typ
             auto t = typeMap->getTypeType(f->type, true);
             if (t == nullptr)
                 return;
-            auto mem = new IR::Member(Util::SourceInfo(), base, f->name);
+            auto mem = new IR::Member(base, f->name);
             expandSetValid(mem, t, output);
         }
     } else if (type->is<IR::Type_Header>()) {
-        auto setValid = new IR::Member(Util::SourceInfo(), base, IR::Type_Header::setValid);
-        auto mc = new IR::MethodCallExpression(
-            Util::SourceInfo(), setValid, new IR::Vector<IR::Type>(),
-            new IR::Vector<IR::Expression>());
+        auto setValid = new IR::Member(base, IR::Type_Header::setValid);
+        auto mc = new IR::MethodCallExpression(setValid);
         output->push_back(new IR::MethodCallStatement(mc));
     }
 }
@@ -52,12 +50,11 @@ const IR::Expression* DoExpandLookahead::expand(
             auto e = expand(base, t, offset);
             vec->push_back(e);
         }
-        return new IR::ListExpression(Util::SourceInfo(), vec);
+        return new IR::ListExpression(vec);
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
-        auto expression = new IR::Slice(
-            Util::SourceInfo(), base->clone(), *offset + size - 1, *offset);
+        auto expression = new IR::Slice(base->clone(), *offset + size - 1, *offset);
         *offset += size;
         return expression;
     } else {
@@ -96,8 +93,7 @@ const IR::Node* DoExpandLookahead::postorder(IR::AssignmentStatement* statement)
 
     auto bittype = IR::Type_Bits::get(width);
     auto name = refMap->newName("tmp");
-    auto decl = new IR::Declaration_Variable(Util::SourceInfo(), IR::ID(name),
-                                             IR::Annotations::empty, bittype, nullptr);
+    auto decl = new IR::Declaration_Variable(IR::ID(name), bittype, nullptr);
     newDecls.push_back(decl);
 
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
@@ -116,7 +112,7 @@ const IR::Node* DoExpandLookahead::postorder(IR::AssignmentStatement* statement)
     auto assignment = new IR::AssignmentStatement(statement->srcInfo, statement->left, init);
     vec->push_back(assignment);
 
-    auto result = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, vec);
+    auto result = new IR::BlockStatement(vec);
     return result;
 }
 

@@ -93,6 +93,9 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %error-verbose
 %locations
 
+%nonassoc COMMENTBLOCK
+%nonassoc ABSTRACT CLASS INTERFACE
+
 %{
 static void
 symbol_print(FILE* file, int type, YYSTYPE value)
@@ -138,6 +141,9 @@ input
 element
     : irclass           { global.push_back($1); }
     | COMMENTBLOCK      { global.push_back(new CommentBlock(@1, $1)); }
+    | COMMENTBLOCK irclass {
+            $2->comments.push_back(new CommentBlock(@1, $1));
+            global.push_back($2); }
     | EMITBLOCK         { global.push_back(new EmitBlock(@1, $1.impl, $1.block)); }
     | NAMESPACE { BEGIN(PARSE_BRACKET); }
       IDENTIFIER { current_namespace = IrNamespace::get(current_namespace, $3); }
@@ -339,7 +345,10 @@ expression
     | NEW name                          { $$ = "new " + $2; }
     ;
 
-name: IDENTIFIER | name DBLCOL IDENTIFIER { $$ = $1 + "::" + $3; }
+name: IDENTIFIER
+    | name DBLCOL IDENTIFIER    { $$ = $1 + "::" + $3; }
+    | name '<' name '>'         { $$ = $1 + "<" + $3 + ">"; }
+    ;
 
 /*****************************************************************************/
 

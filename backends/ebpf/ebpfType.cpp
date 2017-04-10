@@ -34,7 +34,7 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
         auto path = new IR::Path(type->to<IR::Type_Typedef>()->name);
-        result = new EBPFTypeName(new IR::Type_Name(Util::SourceInfo(), path), result);
+        result = new EBPFTypeName(new IR::Type_Name(path), result);
     } else if (type->is<IR::Type_Name>()) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);

@@ -172,6 +172,11 @@ struct DirectMeter_Model : public CounterOrMeter_Model {
     ::Model::Elem read;
 };
 
+struct DirectCounter_Model : public CounterOrMeter_Model {
+    DirectCounter_Model() : CounterOrMeter_Model("direct_counter"), count("count") {}
+    ::Model::Elem count;
+};
+
 struct StandardMetadataType_Model : public ::Model::Type_Model {
     explicit StandardMetadataType_Model(cstring name) :
             ::Model::Type_Model(name), dropBit("drop"), recirculate("recirculate_port"),
@@ -254,8 +259,8 @@ class V1Model : public ::Model::Model {
             tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
             verify("verifyChecksum", headersType), update("computeChecksum", headersType),
             ck16(), digest_receiver(), hash(), algorithm(),
-            directCounter("direct_counter"), registers(), drop("mark_to_drop"),
-            recirculate("recirculate"), directMeter()
+            registers(), drop("mark_to_drop"),
+            recirculate("recirculate"), directMeter(), directCounter()
     {}
 
  public:
@@ -287,11 +292,11 @@ class V1Model : public ::Model::Model {
     DigestReceiver_Model digest_receiver;
     Hash_Model          hash;
     Algorithm_Model     algorithm;
-    ::Model::Elem       directCounter;
     Register_Model      registers;
     ::Model::Elem       drop;
     ::Model::Elem       recirculate;
     DirectMeter_Model   directMeter;
+    DirectCounter_Model directCounter;
 
     static V1Model instance;
 };

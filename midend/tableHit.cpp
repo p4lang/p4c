@@ -25,11 +25,11 @@ const IR::Node* DoTableHit::postorder(IR::AssignmentStatement* statement) {
         return statement;
 
     auto tstat = new IR::AssignmentStatement(
-        Util::SourceInfo(), statement->left->clone(), new IR::BoolLiteral(true));
+        statement->left->clone(), new IR::BoolLiteral(true));
     auto fstat = new IR::AssignmentStatement(
-        Util::SourceInfo(), statement->left->clone(), new IR::BoolLiteral(false));
+        statement->left->clone(), new IR::BoolLiteral(false));
     auto ifStatement = new IR::IfStatement(
-        Util::SourceInfo(), statement->right, tstat, fstat);
+        statement->right, tstat, fstat);
     return ifStatement;
 }
 

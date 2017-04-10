@@ -48,17 +48,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
+    @name("my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter;
     @name("my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
-    @name(".m_action") action m_action_0(bit<14> idx) {
+    @name(".m_action") action m_action(bit<14> idx) {
+        my_direct_counter.count();
         my_indirect_counter.count((bit<32>)idx);
         mark_to_drop();
     }
-    @name("._nop") action _nop_0() {
+    @name("._nop") action _nop() {
+        my_direct_counter.count();
     }
     @name("m_table") table m_table {
         actions = {
-            m_action_0();
-            _nop_0();
+            m_action();
+            _nop();
             @default_only NoAction_0();
         }
         key = {
