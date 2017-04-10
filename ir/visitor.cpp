@@ -35,7 +35,9 @@ class Visitor::ChangeTracker {
         visited_t::iterator visited_it;
         bool inserted;
         std::tie(visited_it, inserted) =
-            visited.emplace(n, visit_info_t{true, n});
+            visited.emplace(
+                n,
+                visit_info_t{.visit_in_progress=true, .result=n});
 
         // Sanity check for IR loops
         bool already_present = !inserted;
@@ -51,11 +53,15 @@ class Visitor::ChangeTracker {
         if (it == visited.end())
             BUG("visitor state tracker corrupted");
 
-        visit_info_t *visit_info = &(it->second);
-        visit_info->visit_in_progress = false;
-        if (!final || *final != *orig) {
-            visit_info->result = final;
-            visited.emplace(final, visit_info_t{false, final});
+        visit_info_t *orig_visit_info = &(it->second);
+        orig_visit_info->visit_in_progress = false;
+        orig_visit_info->result = final;
+        if (!final)
+            return true;
+        else if (final != orig && *final != *orig) {
+            visited.emplace(
+                final,
+                visit_info_t{.visit_in_progress=false, .result=final});
             return true;
         } else {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
@@ -79,7 +85,9 @@ class Visitor::ChangeTracker {
     }
 
     /* Fails with out_of_range exception if n has not been tracked. */
-    const IR::Node *result(const IR::Node *n) const { return visited.at(n).result; }
+    const IR::Node *result(const IR::Node *n) const {
+        return visited.at(n).result;
+    }
 };
 
 Visitor::profile_t Visitor::init_apply(const IR::Node *root) {
