@@ -1035,13 +1035,18 @@ const IR::P4Program *parse_string(const std::string &pgm) {
     clearErrorReporter();
     structure.clear();
     allErrors = nullptr;
+    yylloc = Util::SourceInfo();
     declarations = new IR::IndexedVector<IR::Node>();
+    parsing = true;
+    BEGIN(INITIAL);
     YY_BUFFER_STATE state = yy_scan_string(pgm.c_str());
     errors |= yyparse();
+    parsing = false;
     yy_delete_buffer(state);
     if (errors) {
         return nullptr;
     }
+    structure.endParse();
     return new IR::P4Program(declarations->srcInfo, declarations);
 }
 

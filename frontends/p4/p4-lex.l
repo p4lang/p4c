@@ -16,6 +16,7 @@ static cstring lineDirectiveFile;
 void parseLineNumber(const char* text)
 {
     char* last;
+    errno = 0;
     ::lineDirectiveLine = strtol(text, &last, 10);
     if (errno != 0 ||
         // we have not parsed the complete string

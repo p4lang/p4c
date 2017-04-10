@@ -29,7 +29,7 @@ limitations under the License.
 using namespace P4;
 
 TEST(arch, packet_out) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         // simplified core.p4
         extern packet_out {
             void emit<T> (in T hdr);
@@ -47,7 +47,7 @@ TEST(arch, packet_out) {
             }
         }
         PSA(MyDeparser()) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -62,7 +62,7 @@ TEST(arch, packet_out) {
 
 // Potential bug
 TEST(arch, duplicatedDeclarationBug) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         // simplified core.p4
         extern packet_out {
             void emit<T> (in T hdr);
@@ -81,7 +81,7 @@ TEST(arch, duplicatedDeclarationBug) {
             }
         }
         PSA(Deparser()) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -95,7 +95,7 @@ TEST(arch, duplicatedDeclarationBug) {
 }
 
 TEST(arch, instantiation) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         // simplified core.p4
         extern packet_in {
             void extract<T> (out T hdr);
@@ -131,7 +131,7 @@ TEST(arch, instantiation) {
         MyIngress() ig;
         MyDeparser() dp;
         PSA(p, ig, dp) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -145,7 +145,7 @@ TEST(arch, instantiation) {
 }
 
 TEST(arch, psa_package_with_body) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         // simplified core.p4
         // simplified v1model.p4
         control Ingress<H, M> (inout H hdr, inout M meta);
@@ -163,7 +163,7 @@ TEST(arch, psa_package_with_body) {
         }
         MyIngress(2) ig;
         PSA(ig) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -176,7 +176,7 @@ TEST(arch, psa_package_with_body) {
 }
 
 TEST(arch, psa_control_in_control) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         // simplified core.p4
         // simplified v1model.p4
         control Ingress<H, M> (inout H hdr, inout M meta);
@@ -199,7 +199,7 @@ TEST(arch, psa_control_in_control) {
         MyIngress() ig;
         MyEgress(ig) eg;
         PSA(ig) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -212,7 +212,7 @@ TEST(arch, psa_control_in_control) {
 }
 
 TEST(arch, psa_clone_as_param_to_package) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         extern clone {
             clone();
             void execute(in bit<32> sessions);
@@ -224,7 +224,7 @@ TEST(arch, psa_clone_as_param_to_package) {
         }
         clone() c;
         PSA(c) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -237,7 +237,7 @@ TEST(arch, psa_clone_as_param_to_package) {
 }
 
 TEST(arch, psa_clone_as_param_to_control) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         extern clone<T> {
             // constructor
             clone();
@@ -259,7 +259,7 @@ TEST(arch, psa_clone_as_param_to_control) {
         }
         MyIngress(clone<bit<32>>()) ig;
         PSA(ig) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -272,7 +272,7 @@ TEST(arch, psa_clone_as_param_to_control) {
 }
 
 TEST(arch, psa_clone_as_param_to_extern) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         extern clone<T> {
             // constructor
             clone();
@@ -302,7 +302,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
         PRE<bit<32>>() pre;
         MyIngress(pre) ig;
         PSA(ig) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
@@ -315,7 +315,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
 }
 
 TEST(arch, clone_as_extern_method) {
-    std::string program = R"(
+    std::string program = P4_SOURCE(R"(
         extern void clone(in bit<32> sessions);
         extern void clone3<T>(in bit<32> sessions, in T data);
         control ingress<H, M> (inout H hdr, inout M meta);
@@ -334,7 +334,7 @@ TEST(arch, clone_as_extern_method) {
         }
         MyIngress() ig;
         PSA(ig) main;
-    )";
+    )");
     const IR::P4Program* pgm = parse_string(program);
 
     ReferenceMap refMap;
