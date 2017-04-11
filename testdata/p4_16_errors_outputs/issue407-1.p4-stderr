@@ -1,7 +1,7 @@
 ../testdata/p4_16_errors/issue407-1.p4(47): error: Field x7 of header H cannot have type error
     error x7;
           ^^
-/home/mbudiu/git/p4c/build/p4include/core.p4(22)
+/p4c/build/p4include/core.p4(22)
 error {
 ^
 ../testdata/p4_16_errors/issue407-1.p4(48): error: Field x8 of header H cannot have type bool
