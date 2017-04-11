@@ -42,16 +42,28 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
 
 }  // namespace detail
 
-// A macro which should be used by unit tests to define P4 source code. It adds
-// additional information to the source code to aid in debugging; see
-// makeP4Source for more information.
-#define P4_SOURCE(SRC) detail::makeP4Source(__FILE__, __LINE__, SRC)
-
-/* preprocessing by prepending the content of core.p4 to test program */
-std::string with_core_p4(const std::string& pgm) {
-    std::ifstream input("p4include/core.p4");
-    std::stringstream sstr;
-    while (input >> sstr.rdbuf()) continue;
-    return sstr.str() + pgm;
+/* static */ P4CTestEnvironment* P4CTestEnvironment::get() {
+    static P4CTestEnvironment* instance = new P4CTestEnvironment;
+    return instance;
 }
 
+void P4CTestEnvironment::SetUp() {
+    // Open core.p4. XXX(seth): It'd be ideal to locate the file more robustly.
+    const char* coreP4File = "p4include/core.p4";
+    std::ifstream input(coreP4File);
+    ASSERT_TRUE(input.good());
+
+    // Initialize a buffer with a #line preprocessor directive. This ensures
+    // that any errors we encounter in core.p4 will reference the correct file
+    // and line.
+    std::stringstream buffer;
+    buffer << "#line 1 \"" << coreP4File << "\"" << std::endl;
+
+    // Read the contents of core.p4 into the buffer and store it for use by tests.
+    while (input >> buffer.rdbuf()) continue;
+    _coreP4 = buffer.str();
+}
+
+std::string with_core_p4(const std::string& pgm) {
+    return P4CTestEnvironment::get()->coreP4() + pgm;
+}
