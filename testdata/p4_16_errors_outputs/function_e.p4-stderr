@@ -1,12 +1,12 @@
 ../testdata/p4_16_errors/function_e.p4(22): error: f: Not enough arguments for call
-        f();
+        f(); // not enough arguments
         ^^^
 ../testdata/p4_16_errors/function_e.p4(23): error: f: Passing 2 arguments when 1 expected
-        f(1w1, 1w0);
+        f(1w1, 1w0); // too many arguments
         ^^^^^^^^^^^
 ../testdata/p4_16_errors/function_e.p4(24): error: f has 0 type parameters, but is invoked with 1 type arguments
-        f<bit>(1w0);
+        f<bit>(1w0); // too many type arguments
         ^^^^^^^^^^^
 ../testdata/p4_16_errors/function_e.p4(25): error: g has 1 type parameters, but is invoked with 2 type arguments
-        g<bit, bit>();
+        g<bit, bit>(); // too many type arguments
         ^^^^^^^^^^^^^
