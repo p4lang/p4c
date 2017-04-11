@@ -23,6 +23,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/options.h"
 #include "ir/ir.h"  // for DebugHook definition
+// for p4::P4RuntimeFormat definition
+#include "control-plane/p4RuntimeSerializer.h"
 
 // Base class for compiler options.
 // This class contains the options for the front-ends.
@@ -74,6 +76,9 @@ class CompilerOptions : public Util::Options {
     // Write a P4Runtime control plane API description to the specified file.
     cstring p4RuntimeFile = nullptr;
 
+    // Choose format for P4Runtime API description.
+    P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
+    // TODO: Deprecated, remove and use p4RuntimeFormat instead
     // If true, write out the P4Runtime API description as human-readable JSON.
     bool p4RuntimeAsJson = false;
 
