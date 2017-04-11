@@ -15,8 +15,10 @@ limitations under the License.
 */
 
 #include "gtest/gtest.h"
+#include "helpers.h"
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
+    ::testing::AddGlobalTestEnvironment(P4CTestEnvironment::get());
     return RUN_ALL_TESTS();
 }

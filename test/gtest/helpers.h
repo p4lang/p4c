@@ -18,6 +18,7 @@ limitations under the License.
 #define TEST_GTEST_HELPERS_H_
 
 #include <string>
+#include "gtest/gtest.h"
 
 namespace detail {
 
@@ -35,6 +36,20 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
 // additional information to the source code to aid in debugging; see
 // makeP4Source for more information.
 #define P4_SOURCE(SRC) detail::makeP4Source(__FILE__, __LINE__, SRC)
+
+class P4CTestEnvironment : public ::testing::Environment {
+public:
+    /// @return the global instance of P4CTestEnvironment.
+    static P4CTestEnvironment* get();
+
+    void SetUp() override;
+
+    /// @return a string containing the "core.p4" P4 standard library.
+    const std::string& coreP4() const { return _coreP4; }
+
+private:
+    std::string _coreP4;
+};
 
 /* preprocessing by prepending the content of core.p4 to test program */
 std::string with_core_p4(const std::string& pgm);
