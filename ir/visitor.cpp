@@ -18,6 +18,14 @@ limitations under the License.
 #include "ir.h"
 #include "lib/log.h"
 
+/** @class Visitor::ChangeTracker
+ *  @brief Assists visitors in traversing the IR.
+
+ *  A ChangeTracker object assists visitors traversing the IR by tracking each
+ *  node.  The `start` method begins tracking, and `finish` ends it.  The
+ *  `done` method determines whether the node has been visited, and `result`
+ *  returns the new IR if it changed.
+ */
 class Visitor::ChangeTracker {
     struct visit_info_t {
         bool visit_in_progress;
@@ -27,9 +35,9 @@ class Visitor::ChangeTracker {
     visited_t           visited;
 
  public:
-    /* Begin tracking `n` during a visiting pass.  Use `finish` to mark `n` as
+    /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
-    */
+     */
     void start(const IR::Node *n) {
         // Initialization
         visited_t::iterator visited_it;
@@ -37,7 +45,7 @@ class Visitor::ChangeTracker {
         std::tie(visited_it, inserted) =
             visited.emplace(
                 n,
-                visit_info_t{.visit_in_progress=true, .result=n});
+                visit_info_t{.visit_in_progress = true, .result = n});
 
         // Sanity check for IR loops
         bool already_present = !inserted;
@@ -46,8 +54,19 @@ class Visitor::ChangeTracker {
             BUG("IR loop detected ");
     }
 
-    /* Mark `n` as finished.  `done(n)` will return true, and `result(n)` will
-     * return the resulting node, if any. */
+    /** Mark the process of visiting @orig as finished, with @final being the
+     * final state of the node, or nullptr if the node was removed from the
+     * tree.  `done(@orig)` will return true, and `result(@orig)` will return
+     * the resulting node, if any.
+     *
+     * If @final is a new node, that node is marked as finished as well, as if
+     * `start(@final); finish(@final);` were invoked.
+     *
+     * @return true if the node has changed or been removed.
+     * 
+     * @exception Util::CompilerBug This method fails if `start(@orig)` has not
+     * previously been invoked.
+     */
     bool finish(const IR::Node *orig, const IR::Node *final) {
         auto it = visited.find(orig);
         if (it == visited.end())
@@ -56,12 +75,12 @@ class Visitor::ChangeTracker {
         visit_info_t *orig_visit_info = &(it->second);
         orig_visit_info->visit_in_progress = false;
         orig_visit_info->result = final;
-        if (!final)
+        if (!final) {
             return true;
-        else if (final != orig && *final != *orig) {
+        } else if (final != orig && *final != *orig) {
             visited.emplace(
                 final,
-                visit_info_t{.visit_in_progress=false, .result=final});
+                visit_info_t{.visit_in_progress = false, .result = final});
             return true;
         } else {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
@@ -69,7 +88,7 @@ class Visitor::ChangeTracker {
             //     --IR::Node::currentId;
             return false; } }
 
-    /* Forget nodes that have already been visited, allowing them to be visited
+    /** Forget nodes that have already been visited, allowing them to be visited
      * again. */
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
@@ -78,14 +97,24 @@ class Visitor::ChangeTracker {
             else
                 ++it; } }
 
-    /* False if n has never been visited or is currently being visited.
-     * True if n has been visited and the visitor has finished. */
+    /** Determine whether @n has been visited and the visitor has finished.
+     * That is, `start(@n)` has been invoked, followed by `finish(@n)`.
+     * 
+     * @return true if @n has been visited and the visitor is finished.
+     */
     bool done(const IR::Node *n) const {
         return visited.count(n) && !visited.at(n).visit_in_progress;
     }
 
-    /* Fails with out_of_range exception if n has not been tracked. */
+    /** Produce the result of visiting @n.
+     *
+     * @return The result of visiting @n, or the intermediate result of
+     * visiting @n if `start(@n)` has been invoked but not `finish(@n)`, or @n
+     * if `start(@n)` has not been invoked.
+     */
     const IR::Node *result(const IR::Node *n) const {
+        if (!visited.count(n))
+            return n;
         return visited.at(n).result;
     }
 };
