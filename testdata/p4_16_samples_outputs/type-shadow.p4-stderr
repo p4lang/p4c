@@ -1,5 +1,5 @@
 ../testdata/p4_16_samples/type-shadow.p4(18): warning: D shadows D
-   void f<D>(in D d);
+   void f<D>(in D d); // D shadows D
           ^
 ../testdata/p4_16_samples/type-shadow.p4(16)
 extern X<D>

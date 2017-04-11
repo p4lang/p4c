@@ -2,17 +2,17 @@
 struct s {}
        ^
 ../testdata/p4_16_errors/struct_e.p4(24)
-        v.data = 1w0;
+        v.data = 1w0; // no such field
           ^^^^
 ../testdata/p4_16_errors/struct_e.p4(24): error: Could not find type of v.data
-        v.data = 1w0;
+        v.data = 1w0; // no such field
         ^^^^^^
 ../testdata/p4_16_errors/struct_e.p4(25): error: Cannot extract field data from b which has type bit<1>
-        b.data = 5;
+        b.data = 5; // no such field
           ^^^^
 ../testdata/p4_16_errors/struct_e.p4(25)
-        b.data = 5;
+        b.data = 5; // no such field
         ^
 ../testdata/p4_16_errors/struct_e.p4(25): error: Could not find type of b.data
-        b.data = 5;
+        b.data = 5; // no such field
         ^^^^^^
