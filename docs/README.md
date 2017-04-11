@@ -12,7 +12,7 @@ p4c
 │   ├── p4test                -- "fake" back-end for testing
 │   ├── ebpf                  -- extended Berkeley Packet Filters back-end
 │   └── bmv2                  -- behavioral model version 2 (switch simulator) back-end
-├── control-plane
+├── control-plane             -- control plane API
 ├── docs                      -- documentation
 │   └── doxygen               -- documentation generation support
 ├── extensions
@@ -23,7 +23,7 @@ p4c
 │   └── p4                    -- P4_16 front-end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
-├── m4
+├── m4                        -- gnu m4 macro
 ├── midend                    -- code that may be useful for writing mid-ends
 ├── p4include                 -- standard P4 files needed by the compiler (e.g., core.p4)
 ├── test                      -- test code
