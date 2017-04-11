@@ -19,6 +19,9 @@ limitations under the License.
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
-    ::testing::AddGlobalTestEnvironment(P4CTestEnvironment::get());
+
+    // Initialize the global test environment.
+    (void) P4CTestEnvironment::get();
+
     return RUN_ALL_TESTS();
 }

@@ -14,12 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <stdexcept>
 #include "helpers.h"
 
 namespace detail {
 
-std::string makeP4Source(const char* file, unsigned line, const char* rawSource) {
+std::string makeP4Source(const char* file, unsigned line,
+                         P4Headers headers, const char* rawSource) {
     std::stringstream source;
+
+    // Prepend any requested headers.
+    switch (headers) {
+        case P4Headers::NONE: break;
+        case P4Headers::CORE:
+            source << P4CTestEnvironment::get()->coreP4();
+            break;
+        case P4Headers::V1MODEL:
+            source << P4CTestEnvironment::get()->coreP4();
+            source << P4CTestEnvironment::get()->v1Model();
+            break;
+    }
 
     unsigned lineCount = 0;
     for (auto iter = rawSource; *iter; ++iter) {
@@ -40,6 +54,10 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
     return source.str();
 }
 
+std::string makeP4Source(const char* file, unsigned line, const char* rawSource) {
+    return makeP4Source(file, line, P4Headers::NONE, rawSource);
+}
+
 }  // namespace detail
 
 /* static */ P4CTestEnvironment* P4CTestEnvironment::get() {
@@ -47,23 +65,26 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
     return instance;
 }
 
-void P4CTestEnvironment::SetUp() {
-    // Open core.p4. XXX(seth): It'd be ideal to locate the file more robustly.
-    const char* coreP4File = "p4include/core.p4";
-    std::ifstream input(coreP4File);
-    ASSERT_TRUE(input.good());
+P4CTestEnvironment::P4CTestEnvironment() {
+    auto readHeader = [](const char* filename) {
+        std::ifstream input(filename);
+        if (!input.good()) {
+          throw std::runtime_error(std::string("Couldn't read standard header ")
+                                     + filename);
+        }
 
-    // Initialize a buffer with a #line preprocessor directive. This ensures
-    // that any errors we encounter in core.p4 will reference the correct file
-    // and line.
-    std::stringstream buffer;
-    buffer << "#line 1 \"" << coreP4File << "\"" << std::endl;
+        // Initialize a buffer with a #line preprocessor directive. This ensures
+        // that any errors we encounter in this header will reference the
+        // correct file and line.
+        std::stringstream buffer;
+        buffer << "#line 1 \"" << filename << "\"" << std::endl;
 
-    // Read the contents of core.p4 into the buffer and store it for use by tests.
-    while (input >> buffer.rdbuf()) continue;
-    _coreP4 = buffer.str();
-}
+        // Read the header into the buffer and return it.
+        while (input >> buffer.rdbuf()) continue;
+        return buffer.str();
+    };
 
-std::string with_core_p4(const std::string& pgm) {
-    return P4CTestEnvironment::get()->coreP4() + pgm;
+    // XXX(seth): We should find a more robust way to locate these headers.
+    _coreP4 = readHeader("p4include/core.p4");
+    _v1Model = readHeader("p4include/v1model.p4");
 }
