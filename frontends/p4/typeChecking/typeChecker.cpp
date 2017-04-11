@@ -2260,6 +2260,11 @@ TypeInference::actionCall(bool inActionList,
     // Then the call a(arg1, arg2) is also an
     // action, with signature _(arg3)
     LOG2("Processing action " << dbp(actionCall));
+
+    if (findContext<IR::P4Parser>()) {
+        typeError("%1%: Action calls are not allowed within parsers", actionCall);
+        return actionCall;
+    }
     auto method = actionCall->method;
     auto methodType = getType(method);
     if (!methodType->is<IR::Type_Action>())
@@ -2302,8 +2307,10 @@ TypeInference::actionCall(bool inActionList,
             it++;
         }
     }
-    if (it != arguments->end())
+    if (it != arguments->end()) {
         typeError("%1% Too many arguments for action", *it);
+        return actionCall;
+    }
     auto pl = new IR::ParameterList(params);
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, nullptr, pl);
 
