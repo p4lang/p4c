@@ -42,10 +42,9 @@ class Visitor::ChangeTracker {
         // Initialization
         visited_t::iterator visited_it;
         bool inserted;
+        bool visit_in_progress = true;
         std::tie(visited_it, inserted) =
-            visited.emplace(
-                n,
-                visit_info_t{.visit_in_progress = true, .result = n});
+            visited.emplace(n, visit_info_t{visit_in_progress, n});
 
         // Sanity check for IR loops
         bool already_present = !inserted;
@@ -78,10 +77,9 @@ class Visitor::ChangeTracker {
             orig_visit_info->result = final;
             return true;
         } else if (final != orig && *final != *orig) {
+            bool visit_in_progress = false;
             orig_visit_info->result = final;
-            visited.emplace(
-                final,
-                visit_info_t{.visit_in_progress = false, .result = final});
+            visited.emplace(final, visit_info_t{visit_in_progress, final});
             return true;
         } else {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
