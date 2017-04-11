@@ -108,12 +108,6 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        }
                        return true; },
                    "Choose output format for the P4Runtime API description (default is binary).");
-    registerOption("--p4runtime-as-json", nullptr,
-                   [this](const char*) {
-                       p4RuntimeAsJson = true;
-                       p4RuntimeFormat = P4::P4RuntimeFormat::JSON;
-                       return true; },
-                   "[Deprecated] Write out the P4Runtime API description as human-readable JSON.");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
