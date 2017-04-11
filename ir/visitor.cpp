@@ -74,10 +74,11 @@ class Visitor::ChangeTracker {
 
         visit_info_t *orig_visit_info = &(it->second);
         orig_visit_info->visit_in_progress = false;
-        orig_visit_info->result = final;
         if (!final) {
+            orig_visit_info->result = final;
             return true;
         } else if (final != orig && *final != *orig) {
+            orig_visit_info->result = final;
             visited.emplace(
                 final,
                 visit_info_t{.visit_in_progress = false, .result = final});
