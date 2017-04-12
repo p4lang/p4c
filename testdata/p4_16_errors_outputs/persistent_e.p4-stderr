@@ -1,3 +1,3 @@
 ../testdata/p4_16_errors/persistent_e.p4(23): error: z: cannot evaluate to a compile-time constant
-    p(z) p1;
+    p(z) p1; // argument is not constant
       ^

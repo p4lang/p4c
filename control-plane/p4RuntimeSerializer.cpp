@@ -22,6 +22,7 @@ limitations under the License.
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/variant.hpp>
+#include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
 #include <iostream>
 #include <typeinfo>
@@ -815,6 +816,29 @@ public:
         destination->flush();
     }
 
+    /// Serialize the control plane API to @destination as a message in the text
+    /// protocol buffers format. This is intended for debugging and testing.
+    void writeTextTo(std::ostream* destination) {
+        CHECK_NULL(destination);
+
+        // According to the protobuf documentation, it would be better to use
+        // Print with a FileOutputStream object for performance reasons. However
+        // all we have here is a std::ostream and performance is not a concern.
+        std::string output;
+        if (!google::protobuf::TextFormat::PrintToString(*p4Info, &output)) {
+            ::error("Failed to serialize the P4Runtime API to text");
+            return;
+        }
+
+        *destination << output;
+        if (!destination->good()) {
+            ::error("Failed to write the P4Runtime text to the output");
+            return;
+        }
+
+        destination->flush();
+    }
+
     void addCounter(const Counterlike<IR::Counter>& counterInstance) {
         auto counter = p4Info->add_counters();
         auto id = symbols.getId(P4RuntimeSymbolType::COUNTER, counterInstance.name);
@@ -1515,6 +1539,7 @@ void serializeP4Runtime(std::ostream* destination,
     switch (format) {
         case P4RuntimeFormat::BINARY: serializer.writeTo(destination); break;
         case P4RuntimeFormat::JSON: serializer.writeJsonTo(destination); break;
+        case P4RuntimeFormat::TEXT: serializer.writeTextTo(destination); break;
     }
 }
 

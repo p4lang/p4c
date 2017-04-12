@@ -94,9 +94,26 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
+    registerOption("--p4runtime-format", "{binary,json,text}",
+                   [this](const char* arg) {
+                       if (!strcmp(arg, "binary")) {
+                           p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
+                       } else if (!strcmp(arg, "json")) {
+                           p4RuntimeFormat = P4::P4RuntimeFormat::JSON;
+                       } else if (!strcmp(arg, "text")) {
+                           p4RuntimeFormat = P4::P4RuntimeFormat::TEXT;
+                       } else {
+                           ::error("Illegal P4Runtime format %1%", arg);
+                           return false;
+                       }
+                       return true; },
+                   "Choose output format for the P4Runtime API description (default is binary).");
     registerOption("--p4runtime-as-json", nullptr,
-                   [this](const char*) { p4RuntimeAsJson = true; return true; },
-                   "Write out the P4Runtime API description as human-readable JSON.");
+                   [this](const char*) {
+                       p4RuntimeAsJson = true;
+                       p4RuntimeFormat = P4::P4RuntimeFormat::JSON;
+                       return true; },
+                   "[Deprecated] Write out the P4Runtime API description as human-readable JSON.");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
@@ -209,7 +226,7 @@ FILE* CompilerOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
-        cmd += cstring(" -undef -nostdinc") + " " + preprocessor_options
+        cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options
             + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
