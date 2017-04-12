@@ -16,7 +16,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("aux.a") action aux_a() {
     }
-    table tbl_aux_a {
+    @hidden table tbl_aux_a {
         actions = {
             aux_a();
         }

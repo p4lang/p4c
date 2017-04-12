@@ -29,10 +29,10 @@ struct tuple_0 {
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     bit<32> x;
-    action act() {
+    @hidden action act() {
         hash<bit<32>, bit<32>, tuple_0, bit<32>>(x, HashAlgorithm.crc32, 32w0, { p.h.f ^ 32w0xffff }, 32w65536);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

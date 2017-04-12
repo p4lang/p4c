@@ -20,7 +20,7 @@ control my() {
     bit<1> tmp_27;
     bit<1> tmp_28;
     bit<1> tmp_29;
-    action act() {
+    @hidden action act() {
         a = 1w0;
         tmp_15 = 1w0;
         tmp_16 = g(a);
@@ -41,7 +41,7 @@ control my() {
         tmp_29 = g(a[0:0]);
         a[0:0] = tmp_29;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

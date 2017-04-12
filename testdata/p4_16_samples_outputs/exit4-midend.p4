@@ -10,28 +10,28 @@ control ctrl() {
         }
         default_action = e_0();
     }
-    action act() {
+    @hidden action act() {
         tmp_0 = true;
     }
-    action act_0() {
+    @hidden action act_0() {
         tmp_0 = false;
     }
-    action act_1() {
+    @hidden action act_1() {
         hasExited = false;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1 {
+    @hidden table tbl_act_1 {
         actions = {
             act_0();
         }

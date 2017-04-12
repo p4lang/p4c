@@ -6,16 +6,16 @@ control Ing(out bit<32> a) {
         a = (b ? 32w5 : a);
         a = (!b ? 32w10 : a);
     }
-    action act() {
+    @hidden action act() {
         b = true;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_cond {
+    @hidden table tbl_cond {
         actions = {
             cond_0();
         }

@@ -2,16 +2,16 @@ control p() {
     bit<1> x_1;
     @name("b") action b_0() {
     }
-    action act() {
+    @hidden action act() {
         x_1 = 1w0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_b {
+    @hidden table tbl_b {
         actions = {
             b_0();
         }

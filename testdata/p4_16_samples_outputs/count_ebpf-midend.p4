@@ -45,20 +45,20 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     @name("counters") CounterArray(32w10, true) counters;
-    action act() {
+    @hidden action act() {
         counters.increment(headers.ipv4.dstAddr);
         pass = true;
     }
-    action act_0() {
+    @hidden action act_0() {
         pass = false;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }
