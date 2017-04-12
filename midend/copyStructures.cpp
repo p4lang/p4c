@@ -28,7 +28,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
             unsigned index = 0;
             for (auto f : *strct->fields) {
                 auto right = list->components->at(index);
-                auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
+                auto left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
                 index++;
             }
@@ -43,8 +43,8 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                           statement->right->is<IR::ArrayIndex>(),
                           "%1%: Unexpected operation when eliminating struct copying",
                           statement->right);
-                auto right = new IR::Member(Util::SourceInfo(), statement->right, f->name);
-                auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
+                auto right = new IR::Member(statement->right, f->name);
+                auto left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
             }
         }
@@ -58,8 +58,8 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                       statement->right->is<IR::Member>(),
                       "%1%: Unexpected operation when eliminating struct copying",
                       statement->right);
-            auto right = new IR::ArrayIndex(Util::SourceInfo(), statement->right, index);
-            auto left = new IR::ArrayIndex(Util::SourceInfo(), statement->left, index->clone());
+            auto right = new IR::ArrayIndex(statement->right, index);
+            auto left = new IR::ArrayIndex(statement->left, index->clone());
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
         return retval;

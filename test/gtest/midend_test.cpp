@@ -38,11 +38,12 @@ class EnumOn32Bits : public ChooseEnumRepresentation {
 
 // test various way of using enum
 TEST(midend, convertEnums_pass) {
-    std::string program =
-        "enum E { A, B, C, D };\n"
-        "const bool a = E.A == E.B;\n"
-        "extern C { C(E e); }\n"
-        "control m() { C(E.A) ctr; apply{} }\n";
+    std::string program = P4_SOURCE(R"(
+        enum E { A, B, C, D };
+        const bool a = E.A == E.B;
+        extern C { C(E e); }
+        control m() { C(E.A) ctr; apply{} }
+    )");
     const IR::P4Program* pgm = parse_string(program);
     ASSERT_NE(nullptr, pgm);
 
@@ -59,9 +60,10 @@ TEST(midend, convertEnums_pass) {
 }
 
 TEST(midend, convertEnums_used_before_declare) {
-    std::string program =
-        "const bool a = E.A == E.B;\n"
-        "enum E { A, B, C, D };\n";
+    std::string program = P4_SOURCE(R"(
+        const bool a = E.A == E.B;
+        enum E { A, B, C, D };
+    )");
     const IR::P4Program* pgm = parse_string(program);
     ASSERT_NE(nullptr, pgm);
 
@@ -78,9 +80,10 @@ TEST(midend, convertEnums_used_before_declare) {
 
 // use enumMap in convertEnums directly
 TEST(midend, getEnumMapping) {
-    std::string program =
-        "enum E { A, B, C, D };\n"
-        "const bool a = E.A == E.B;\n";
+    std::string program = P4_SOURCE(R"(
+        enum E { A, B, C, D };
+        const bool a = E.A == E.B;
+    )");
     const IR::P4Program* pgm = parse_string(program);
     ASSERT_NE(nullptr, pgm);
 

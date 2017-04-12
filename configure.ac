@@ -8,15 +8,45 @@ AM_SILENT_RULES([yes])
 
 LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
+
 AC_PROG_CXX(clang++ g++ c++)
+AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+AC_LANG(C++)
+
+AC_MSG_CHECKING([if compiler is new enough])
+AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([], [[
+#if defined(__clang__)
+
+#define CLANG_VERSION (__clang_major__ * 10000 \
+                       + __clang_minor__ * 100 \
+                       + __clang_patchlevel__)
+#if CLANG_VERSION < 30300
+#error
+#endif
+
+#else
+
+#define GCC_VERSION (__GNUC__ * 10000 \
+                     + __GNUC_MINOR__ * 100 \
+                     + __GNUC_PATCHLEVEL__)
+#if GCC_VERSION < 40900
+#error
+#endif
+
+#endif
+]])],
+[COMPILER_OK=yes], [COMPILER_OK=no])
+AC_MSG_RESULT([$COMPILER_OK])
+if test "x$COMPILER_OK" = "xno"; then
+  AC_MSG_ERROR([compiler is too old; GCC 4.9 or later and Clang 3.3 or later are supported])
+fi
+
 AC_PROG_RANLIB
 AC_PROG_CC
 AC_PROG_LEX
 AC_PROG_YACC
 AC_PROG_RANLIB
-AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
-AC_LANG(C++)
-
 AM_PATH_PYTHON
 
 AC_CHECK_FUNCS([clock_gettime])

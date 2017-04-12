@@ -157,9 +157,8 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         cstring newName = refMap->newName(param->name);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
-                                                        param->annotations, param->type,
-                                                        initializer);
+            auto vardecl = new IR::Declaration_Variable(newName, param->annotations,
+                                                        param->type, initializer);
             body->push_back(vardecl);
             subst.add(param, new IR::PathExpression(newName));
         } else if (param->direction == IR::Direction::None) {
@@ -168,8 +167,8 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
             subst.add(param, initializer);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
-                                                        param->annotations, param->type, nullptr);
+            auto vardecl = new IR::Declaration_Variable(newName,
+                                                        param->annotations, param->type);
             subst.add(param, new IR::PathExpression(newName));
             body->push_back(vardecl);
         }
@@ -192,7 +191,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(Util::SourceInfo(), left, right);
+            auto copyout = new IR::AssignmentStatement(left, right);
             body->push_back(copyout);
         }
         ++it;

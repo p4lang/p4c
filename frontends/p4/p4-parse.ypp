@@ -322,11 +322,10 @@ packageTypeDeclaration
 instantiation
       : annotations typeRef '(' argumentList ')' name ';'
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
-                                                         $2, $4, nullptr);
+                                                         $2, $4);
                        structure.declareObject(*$6); }
       | typeRef '(' argumentList ')' name ';'
-                     { $$ = new IR::Declaration_Instance(@5, *$5, IR::Annotations::empty,
-                                                         $1, $3, nullptr);
+                     { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
                        structure.declareObject(*$5); }
       /* experimental */
       | annotations typeRef '(' argumentList ')' name '=' objInitializer ';'
@@ -335,8 +334,7 @@ instantiation
                        structure.declareObject(*$6); }
       /* experimental */
       | typeRef '(' argumentList ')' name '=' objInitializer ';'
-                     { $$ = new IR::Declaration_Instance(@5, *$5, IR::Annotations::empty,
-                                                         $1, $3, $7);
+                     { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3, $7);
                        structure.declareObject(*$5); }
     ;
 
@@ -344,7 +342,7 @@ instantiation
 objInitializer
     : '{' { structure.pushNamespace(@1, false); } objDeclarations '}'
                                { structure.pop();
-                                 $$ = new IR::BlockStatement(@1+@4, IR::Annotations::empty, $3); }
+                                 $$ = new IR::BlockStatement(@1+@4, $3); }
     ;
 
 objDeclarations
@@ -677,11 +675,11 @@ typedefDeclaration
     : annotations TYPEDEF typeRef name   { structure.declareType(*$4);
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | TYPEDEF typeRef name               { structure.declareType(*$3);
-          $$ = new IR::Type_Typedef(@3, *$3, IR::Annotations::empty, $2); }
+          $$ = new IR::Type_Typedef(@3, *$3, $2); }
     | annotations TYPEDEF derivedTypeDeclaration name   { structure.declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | TYPEDEF derivedTypeDeclaration name { structure.declareType(*$3);
-                        $$ = new IR::Type_Typedef(@3, *$3, IR::Annotations::empty, $2); }
+                        $$ = new IR::Type_Typedef(@3, *$3, $2); }
     ;
 
 /*************************** STATEMENTS *************************/
@@ -784,11 +782,11 @@ tableProperty
     : KEY '=' '{' keyElementList '}'     { auto v = new IR::Key(@4, $4);
                                            auto id = IR::ID(@1, "key");
                                            $$ = new IR::Property(
-                                               @1 + @5, id, IR::Annotations::empty, v, false); }
+                                               @1 + @5, id, v, false); }
     | ACTIONS '=' '{' actionList '}'     { auto v = new IR::ActionList(@4, $4);
                                            auto id = IR::ID(@1, "actions");
                                            $$ = new IR::Property(
-                                               @1 + @5, id, IR::Annotations::empty, v, false); }
+                                               @1 + @5, id, v, false); }
     | optAnnotations optCONST ENTRIES '=' '{' entriesList '}' {
                                             auto l = new IR::EntriesList(@3, $6);
                                             auto id = IR::ID(@3+@7, "entries");
@@ -830,9 +828,8 @@ entry
     : keysetExpression ':' actionBinding optAnnotations ';'
                                          {
                                            assert($3->is<IR::MethodCallExpression>());
-                                           if ($1->is<IR::ListExpression>())
-                                             $$ = new IR::Entry(@1+@4, $4,
-                                                                $1->to<IR::ListExpression>(), $3);
+                                           if (auto l = $1->to<IR::ListExpression>())
+                                             $$ = new IR::Entry(@1+@4, $4, l, $3);
                                            else {  // if not a tuple, make it a list of 1
                                              auto le = new IR::Vector<IR::Expression>();
                                              le->push_back($1);
@@ -871,8 +868,7 @@ variableDeclaration
                                        $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
                                        structure.declareObject(*$3); }
     | typeRef name optInitializer ';'
-                                     { $$ = new IR::Declaration_Variable(
-                                         @1+@4, *$2, IR::Annotations::empty, $1, $3);
+                                     { $$ = new IR::Declaration_Variable(@1+@4, *$2, $1, $3);
                                        structure.declareObject(*$2); }
     ;
 
@@ -1039,13 +1035,18 @@ const IR::P4Program *parse_string(const std::string &pgm) {
     clearErrorReporter();
     structure.clear();
     allErrors = nullptr;
+    yylloc = Util::SourceInfo();
     declarations = new IR::IndexedVector<IR::Node>();
+    parsing = true;
+    BEGIN(INITIAL);
     YY_BUFFER_STATE state = yy_scan_string(pgm.c_str());
     errors |= yyparse();
+    parsing = false;
     yy_delete_buffer(state);
     if (errors) {
         return nullptr;
     }
+    structure.endParse();
     return new IR::P4Program(declarations->srcInfo, declarations);
 }
 

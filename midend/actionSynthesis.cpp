@@ -47,15 +47,14 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto actionPath = new IR::PathExpression(IR::ID(mc->srcInfo, ac->action->name));
     auto call = new IR::MethodCallExpression(mc->srcInfo, actionPath,
                                              new IR::Vector<IR::Type>(), directionArgs);
-    auto actinst = new IR::ActionListElement(statement->srcInfo, IR::Annotations::empty, call);
+    auto actinst = new IR::ActionListElement(statement->srcInfo, call);
     auto actions = new IR::IndexedVector<IR::ActionListElement>();
     actions->push_back(actinst);
     // Action list property
-    auto actlist = new IR::ActionList(Util::SourceInfo(), actions);
+    auto actlist = new IR::ActionList(actions);
     auto prop = new IR::Property(
-        Util::SourceInfo(),
         IR::ID(IR::TableProperties::actionsPropertyName, nullptr),
-        IR::Annotations::empty, actlist, false);
+        actlist, false);
     // default action property
     auto otherArgs = new IR::Vector<IR::Expression>();
     for (; it != action->parameters->parameters->end(); ++it) {
@@ -64,24 +63,24 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     }
     BUG_CHECK(arg == mc->arguments->end(), "%1%: mismatched arguments", mc);
     auto amce = new IR::MethodCallExpression(mc->srcInfo, mc->method, mc->typeArguments, otherArgs);
-    auto defactval = new IR::ExpressionValue(Util::SourceInfo(), amce);
+    auto defactval = new IR::ExpressionValue(amce);
     auto defprop = new IR::Property(
-        Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
-        IR::Annotations::empty, defactval, true);
+        IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
+        defactval, true);
 
     // List of table properties
     auto nm = new IR::IndexedVector<IR::Property>();
     nm->push_back(prop);
     nm->push_back(defprop);
-    auto props = new IR::TableProperties(Util::SourceInfo(), nm);
+    auto props = new IR::TableProperties(nm);
     // Synthesize a new table
     cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
-    auto tbl = new IR::P4Table(Util::SourceInfo(), tblName, IR::Annotations::empty, props);
+    auto tbl = new IR::P4Table(tblName, props);
     tables.push_back(tbl);
 
     // Table invocation statement
     auto tblpath = new IR::PathExpression(tblName);
-    auto method = new IR::Member(Util::SourceInfo(), tblpath, IR::IApply::applyMethodName);
+    auto method = new IR::Member(tblpath, IR::IApply::applyMethodName);
     auto mce = new IR::MethodCallExpression(
         statement->srcInfo, method, new IR::Vector<IR::Type>(),
         new IR::Vector<IR::Expression>());
@@ -164,8 +163,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         }
 
         if (!actbody->empty()) {
-            auto block = new IR::BlockStatement(
-                Util::SourceInfo(), IR::Annotations::empty, actbody);
+            auto block = new IR::BlockStatement(actbody);
             auto action = createAction(block);
             left->push_back(action);
             actbody = new IR::IndexedVector<IR::StatOrDecl>();
@@ -173,8 +171,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         left->push_back(c);
     }
     if (!actbody->empty()) {
-        auto block = new IR::BlockStatement(
-            Util::SourceInfo(), IR::Annotations::empty, actbody);
+        auto block = new IR::BlockStatement(actbody);
         auto action = createAction(block);
         left->push_back(action);
     }
@@ -183,7 +180,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         // Since we have only one 'changes' per P4Control, this may
         // be conservatively creating a new block when it hasn't changed.
         // But the result should be correct.
-        auto result = new IR::BlockStatement(Util::SourceInfo(), statement->annotations, left);
+        auto result = new IR::BlockStatement(statement->annotations, left);
         return result;
     }
     return statement;
@@ -198,16 +195,12 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     } else {
         auto b = new IR::IndexedVector<IR::StatOrDecl>();
         b->push_back(toAdd);
-        body = new IR::BlockStatement(toAdd->srcInfo, IR::Annotations::empty, b);
+        body = new IR::BlockStatement(toAdd->srcInfo, b);
     }
-    auto action = new IR::P4Action(Util::SourceInfo(), name,
-                                   IR::Annotations::empty,
-                                   new IR::ParameterList(), body);
+    auto action = new IR::P4Action(name, new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);
-    auto repl = new IR::MethodCallExpression(Util::SourceInfo(), actpath,
-                                             new IR::Vector<IR::Type>(),
-                                             new IR::Vector<IR::Expression>());
+    auto repl = new IR::MethodCallExpression(actpath);
     auto result = new IR::MethodCallStatement(repl->srcInfo, repl);
     return result;
 }

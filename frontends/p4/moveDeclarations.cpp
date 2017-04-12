@@ -128,8 +128,7 @@ const IR::Node* MoveInitializers::postorder(IR::P4Control* control) {
     if (toMove->empty())
         return control;
     toMove->append(*control->body->components);
-    auto newBody = new IR::BlockStatement(
-        Util::SourceInfo(), control->body->annotations, toMove);
+    auto newBody = new IR::BlockStatement(control->body->annotations, toMove);
     control->body = newBody;
     toMove = new IR::IndexedVector<IR::StatOrDecl>();
     return control;

@@ -1,6 +1,6 @@
 ../testdata/p4_16_samples/drop-bmv2.p4(27): warning: out parameter smeta may be uninitialized when drop terminates
-action drop(out standard_metadata_t smeta) { smeta.drop = 1; }
+action drop(out standard_metadata_t smeta) { smeta.drop = 1; } // this global action seems to cause the problem
                                     ^^^^^
 ../testdata/p4_16_samples/drop-bmv2.p4(27)
-action drop(out standard_metadata_t smeta) { smeta.drop = 1; }
+action drop(out standard_metadata_t smeta) { smeta.drop = 1; } // this global action seems to cause the problem
        ^^^^

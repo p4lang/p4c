@@ -47,28 +47,28 @@ const Type_Bits* Type_Bits::get(int width, bool isSigned) {
         map = new std::map<int, const IR::Type_Bits*>();
     auto &result = (*map)[width];
     if (!result)
-        result = new Type_Bits(Util::SourceInfo(), width, isSigned);
+        result = new Type_Bits(width, isSigned);
     return result;
 }
 
 const Type::Unknown *Type::Unknown::get() {
     static const Type::Unknown *singleton = nullptr;
     if (!singleton)
-        singleton = (new Type::Unknown(Util::SourceInfo()));
+        singleton = (new Type::Unknown());
     return singleton;
 }
 
 const Type::Boolean *Type::Boolean::get() {
     static const Type::Boolean *singleton = nullptr;
     if (!singleton)
-        singleton = (new Type::Boolean(Util::SourceInfo()));
+        singleton = (new Type::Boolean());
     return singleton;
 }
 
 const Type_String *Type_String::get() {
     static const Type_String *singleton = nullptr;
     if (!singleton)
-        singleton = (new Type_String(Util::SourceInfo()));
+        singleton = (new Type_String());
     return singleton;
 }
 
@@ -85,34 +85,34 @@ const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {
 }
 
 const Type::Varbits *Type::Varbits::get() {
-    return new Type::Varbits(Util::SourceInfo(), 0);
+    return new Type::Varbits(0);
 }
 
 const Type_Dontcare *Type_Dontcare::get() {
     static const Type_Dontcare *singleton;
     if (!singleton)
-        singleton = (new Type_Dontcare(Util::SourceInfo()));
+        singleton = (new Type_Dontcare());
     return singleton;
 }
 
 const Type_State *Type_State::get() {
     static const Type_State *singleton;
     if (!singleton)
-        singleton = (new Type_State(Util::SourceInfo()));
+        singleton = (new Type_State());
     return singleton;
 }
 
 const Type_Void *Type_Void::get() {
     static const Type_Void *singleton;
     if (!singleton)
-        singleton = (new Type_Void(Util::SourceInfo()));
+        singleton = (new Type_Void());
     return singleton;
 }
 
 const Type_MatchKind *Type_MatchKind::get() {
     static const Type_MatchKind *singleton;
     if (!singleton)
-        singleton = (new Type_MatchKind(Util::SourceInfo()));
+        singleton = (new Type_MatchKind());
     return singleton;
 }
 

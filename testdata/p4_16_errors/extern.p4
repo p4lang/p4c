@@ -16,7 +16,7 @@ limitations under the License.
 
 extern X {}
 
-control c(in X x) { // Cannot have externs with direciton
+control c(in X x) { // Cannot have externs with direction
     apply {
     }
 }

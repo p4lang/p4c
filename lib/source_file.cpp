@@ -62,8 +62,7 @@ InputSources::InputSources() :
     this->contents.push_back("");
 }
 
-/* static */
-void InputSources::reset() {
+/* static */ void InputSources::reset() {
     instance = new InputSources;
 }
 

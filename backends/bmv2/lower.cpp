@@ -401,12 +401,10 @@ const IR::PathExpression*
 RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
     auto name = refMap->newName("tmp");
-    auto decl = new IR::Declaration_Variable(Util::SourceInfo(), IR::ID(name),
-                                             IR::Annotations::empty, type->getP4Type(), nullptr);
+    auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);
-    auto assign = new IR::AssignmentStatement(
-        Util::SourceInfo(), new IR::PathExpression(name), expression);
+    auto assign = new IR::AssignmentStatement(new IR::PathExpression(name), expression);
     assignments.push_back(assign);
     return new IR::PathExpression(name);
 }
@@ -488,7 +486,7 @@ RemoveComplexExpressions::postorder(IR::Statement* statement) {
         return statement;
     auto vec = new IR::IndexedVector<IR::StatOrDecl>(assignments);
     vec->push_back(statement);
-    auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, vec);
+    auto block = new IR::BlockStatement(vec);
     assignments.clear();
     return block;
 }

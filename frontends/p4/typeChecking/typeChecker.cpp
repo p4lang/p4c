@@ -540,7 +540,7 @@ const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
 
 const IR::Node* TypeInference::postorder(IR::P4Table* table) {
     if (done()) return table;
-    auto type = new IR::Type_Table(Util::SourceInfo(), table);
+    auto type = new IR::Type_Table(table);
     setType(getOriginal(), type);
     setType(table, type);
     return table;
@@ -551,8 +551,7 @@ const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     auto pl = canonicalizeParameters(action->parameters);
     if (pl == nullptr)
         return action;
-    auto type = new IR::Type_Action(Util::SourceInfo(), new IR::TypeParameters(),
-                                    nullptr, pl);
+    auto type = new IR::Type_Action(new IR::TypeParameters(), nullptr, pl);
 
     bool foundDirectionless = false;
     for (auto p : *action->parameters->parameters) {
@@ -882,7 +881,7 @@ TypeInference::containerInstantiation(
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType);
         args->push_back(argInfo);
     }
-    auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R"), nullptr));
+    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R")));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
     auto callType = new IR::Type_MethodCall(node->srcInfo,
@@ -1298,8 +1297,7 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     }
     auto bl = ltype->to<IR::Type_Bits>();
     auto br = rtype->to<IR::Type_Bits>();
-    const IR::Type* resultType = IR::Type_Bits::get(Util::SourceInfo(),
-                                                    bl->size + br->size, bl->isSigned);
+    const IR::Type* resultType = IR::Type_Bits::get(bl->size + br->size, bl->isSigned);
     resultType = canonicalize(resultType);
     if (resultType != nullptr) {
         setType(getOriginal(), resultType);
@@ -1328,7 +1326,7 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
         }
         vec->push_back(kt);
     }
-    auto keyTuple = new IR::Type_Tuple(Util::SourceInfo(), vec);
+    auto keyTuple = new IR::Type_Tuple(vec);
     LOG2("Setting key type to " << dbp(keyTuple));
     setType(key, keyTuple);
     // installing also for the original because we cannot tell which one will survive in the ir
@@ -2111,9 +2109,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         if (type->is<IR::Type_Header>()) {
             if (member == IR::Type_Header::isValid) {
                 // Built-in method
-                auto type = new IR::Type_Method(
-                    Util::SourceInfo(), new IR::TypeParameters(),
-                    IR::Type_Boolean::get(), new IR::ParameterList());
+                auto type = new IR::Type_Method(IR::Type_Boolean::get(), new IR::ParameterList());
                 auto ctype = canonicalize(type);
                 if (ctype == nullptr)
                     return expression;
@@ -2126,9 +2122,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                     ::error("%1%: must be applied to a left-value", expression);
                 // Built-in method
                 auto params = new IR::IndexedVector<IR::Parameter>();
-                auto type = new IR::Type_Method(
-                    Util::SourceInfo(), new IR::TypeParameters(), IR::Type_Void::get(),
-                    new IR::ParameterList(Util::SourceInfo(), params));
+                auto type = new IR::Type_Method(IR::Type_Void::get(),
+                    new IR::ParameterList(params));
                 auto ctype = canonicalize(type);
                 if (ctype == nullptr)
                     return expression;
@@ -2212,14 +2207,11 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             if (!isLeftValue(expression->expr))
                 ::error("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
-            auto param = new IR::Parameter(Util::SourceInfo(), IR::ID("count", nullptr),
-                                           IR::Annotations::empty, IR::Direction::In,
+            auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::In,
                                            new IR::Type_InfInt());
             setType(param, param->type);
             params->push_back(param);
-            auto type = new IR::Type_Method(Util::SourceInfo(), new IR::TypeParameters(),
-                                            IR::Type_Void::get(),
-                                            new IR::ParameterList(Util::SourceInfo(), params));
+            auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(params));
             auto canon = canonicalize(type);
             if (canon == nullptr)
                 return expression;
@@ -2312,7 +2304,7 @@ TypeInference::actionCall(bool inActionList,
     }
     if (it != arguments->end())
         typeError("%1% Too many arguments for action", *it);
-    auto pl = new IR::ParameterList(Util::SourceInfo(), params);
+    auto pl = new IR::ParameterList(params);
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, nullptr, pl);
 
     setType(getOriginal(), resultType);
@@ -2354,7 +2346,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     } else {
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R"), nullptr));
+        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), nullptr));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         for (auto arg : *expression->arguments) {
             auto argType = getType(arg);

@@ -31,7 +31,8 @@ class TypeMap;
 
 enum class P4RuntimeFormat {
   BINARY,
-  JSON
+  JSON,
+  TEXT
 };
 
 void serializeP4Runtime(std::ostream* destination,

@@ -66,8 +66,8 @@ const IR::Expression* SpecializationMap::convertArgument(
         auto cce = arg->to<IR::ConstructorCallExpression>();
         cstring nName = refMap->newName("inst");
         auto decl = new IR::Declaration_Instance(
-            Util::SourceInfo(), IR::ID(nName, nullptr), IR::Annotations::empty,
-            cce->constructedType, cce->arguments, nullptr);
+            IR::ID(nName, nullptr),
+            cce->constructedType, cce->arguments);
         spec->declarations->push_back(decl);
         auto path = new IR::PathExpression(IR::ID(nName, nullptr));
         return path;
