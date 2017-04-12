@@ -80,10 +80,8 @@ int main(int argc, char *const argv[]) {
     if (!options.p4RuntimeFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.p4RuntimeFile, false);
         if (out != nullptr) {
-            auto format = options.p4RuntimeAsJson ? P4::P4RuntimeFormat::JSON
-                                                  : P4::P4RuntimeFormat::BINARY;
             serializeP4Runtime(out, program, toplevel, &midEnd.refMap,
-                               &midEnd.typeMap, format);
+                               &midEnd.typeMap, options.p4RuntimeFormat);
         }
     }
 
