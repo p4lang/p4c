@@ -18,36 +18,33 @@
  *
  */
 
+#ifndef BM_BM_SIM_CORE_PRIMITIVES_H_
+#define BM_BM_SIM_CORE_PRIMITIVES_H_
+
 #include <bm/bm_sim/actions.h>
-#include <bm/bm_sim/core/primitives.h>
 
-template <typename... Args>
-using ActionPrimitive = bm::ActionPrimitive<Args...>;
+namespace bm {
 
-using bm::Data;
-using bm::Field;
-using bm::Header;
+namespace core {
 
-class modify_field : public ActionPrimitive<Field &, const Data &> {
-  void operator ()(Field &f, const Data &d) {
-    bm::core::assign()(f, d);
+struct assign : public ActionPrimitive<Data &, const Data &> {
+  void operator ()(Data &dst, const Data &src) {
+    dst.set(src);
   }
 };
 
-REGISTER_PRIMITIVE(modify_field);
-
-class add_to_field : public ActionPrimitive<Field &, const Data &> {
-  void operator ()(Field &f, const Data &d) {
-    f.add(f, d);
+struct assign_VL : public ActionPrimitive<Field &, const Field &> {
+  void operator ()(Field &dst, const Field &src) {
+    dst.assign_VL(src);
   }
 };
 
-REGISTER_PRIMITIVE(add_to_field);
-
-class drop : public ActionPrimitive<> {
-  void operator ()() {
-    get_field("standard_metadata.egress_spec").set(511);
-  }
+struct assign_header : public ActionPrimitive<Header &, const Header &> {
+  void operator ()(Header &dst, const Header &src);
 };
 
-REGISTER_PRIMITIVE(drop);
+}  // namespace core
+
+}  // namespace bm
+
+#endif  // BM_BM_SIM_CORE_PRIMITIVES_H_

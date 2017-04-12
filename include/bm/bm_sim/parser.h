@@ -211,6 +211,9 @@ class ParseState : public NamedP4Object {
   ParseState(const std::string &name, p4object_id_t id);
 
   void add_extract(header_id_t header);
+  void add_extract_VL(header_id_t header,
+                      const ArithExpression &field_length_expr,
+                      size_t max_header_bytes);
   void add_extract_to_stack(header_stack_id_t header_stack);
 
   void add_set_from_field(header_id_t dst_header, int dst_offset,

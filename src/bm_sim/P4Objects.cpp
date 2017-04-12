@@ -501,16 +501,19 @@ P4Objects::init_header_types(const Json::Value &cfg_root) {
       if (cfg_field.size() > 2)
         is_signed = cfg_field[2].asBool();
       if (cfg_field[1].asString() == "*") {  // VL field
-        ArithExpression raw_expr;
-        assert(cfg_header_type.isMember("length_exp"));
-        const Json::Value &cfg_length_exp = cfg_header_type["length_exp"];
-        assert(!cfg_length_exp.isNull());
-        build_expression(cfg_length_exp, &raw_expr);
-        raw_expr.build();
-        std::unique_ptr<VLHeaderExpression> VL_expr(
-          new VLHeaderExpression(raw_expr));
-        header_type->push_back_VL_field(field_name, std::move(VL_expr),
-                                        is_signed);
+        std::unique_ptr<VLHeaderExpression> VL_expr(nullptr);
+        if (!cfg_header_type.isMember("length_exp")) {
+          const Json::Value &cfg_length_exp = cfg_header_type["length_exp"];
+          ArithExpression raw_expr;
+          build_expression(cfg_length_exp, &raw_expr);
+          raw_expr.build();
+          VL_expr.reset(new VLHeaderExpression(raw_expr));
+        }
+        int max_header_bytes = 0;
+        if (!cfg_header_type.isMember("max_length"))
+          max_header_bytes = cfg_header_type["max_length"].asInt();
+        header_type->push_back_VL_field(
+            field_name, max_header_bytes, std::move(VL_expr), is_signed);
       } else {
         int field_bit_width = cfg_field[1].asInt();
         header_type->push_back_field(field_name, field_bit_width, is_signed);
@@ -690,14 +693,38 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
           const string extract_header = cfg_extract["value"].asString();
           if (extract_type == "regular") {
             header_id_t header_id = get_header_id(extract_header);
+            const auto &header_type = phv_factory.get_header_type(header_id);
+            if (header_type.is_VL_header() && !header_type.has_VL_expr()) {
+              throw json_exception(
+                  EFormat() << "Cannot use 'extract' parser op with a VL header"
+                            << " for which no length expression was provided,"
+                            << " use 'extract_VL' instead",
+                  cfg_parser_op);
+            }
             parse_state->add_extract(header_id);
           } else if (extract_type == "stack") {
             header_stack_id_t header_stack_id =
               get_header_stack_id(extract_header);
             parse_state->add_extract_to_stack(header_stack_id);
           } else {
-            assert(0 && "parser extract op not supported");
+            throw json_exception(
+                EFormat() << "Extract type '" << extract_type
+                          << "' not supported",
+                cfg_parser_op);
           }
+        } else if (op_type == "extract_VL") {
+          assert(cfg_parameters.size() == 2);
+          const Json::Value &cfg_extract = cfg_parameters[0];
+          const Json::Value &cfg_VL_expr = cfg_parameters[1];
+          assert(cfg_extract["type"].asString() == "regular");
+          assert(cfg_VL_expr["type"].asString() == "expression");
+          auto header_id = get_header_id(cfg_extract["value"].asString());
+          const auto &header_type = phv_factory.get_header_type(header_id);
+          ArithExpression VL_expr;
+          build_expression(cfg_VL_expr["value"], &VL_expr);
+          VL_expr.build();
+          parse_state->add_extract_VL(header_id, VL_expr,
+                                      header_type.get_VL_max_header_bytes());
         } else if (op_type == "set") {
           assert(cfg_parameters.size() == 2);
           const Json::Value &cfg_dest = cfg_parameters[0];
@@ -1205,8 +1232,8 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         if (match_type == "lpm") {
           if (has_lpm) {
             throw json_exception(
-                EFormat() << "Table " << table_name
-                          << "features 2 LPM match fields",
+                EFormat() << "Table '" << table_name
+                          << "' features 2 LPM match fields",
                 cfg_match_key);
           }
           has_lpm = true;

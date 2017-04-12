@@ -215,6 +215,16 @@ ActionFn::get_num_params() const {
   return num_params;
 }
 
+namespace core {
+
+extern int _bm_core_primitives_import();
+
+}  // namespace core
+
+ActionOpcodesMap::ActionOpcodesMap() {
+  // ensures that core primitives are registered properly
+  core::_bm_core_primitives_import();
+}
 
 bool
 ActionOpcodesMap::register_primitive(

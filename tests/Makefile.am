@@ -62,42 +62,44 @@ test_target_parser \
 test_runtime_iface \
 test_bm_apps \
 test_stateful \
-test_enums
+test_enums \
+test_core_primitives
 
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
-test_actions_SOURCES       = $(common_source) test_actions.cpp
-test_checksums_SOURCES     = $(common_source) test_checksums.cpp
-test_expressions_SOURCES   = $(common_source) test_expressions.cpp
-test_conditionals_SOURCES  = $(common_source) test_conditionals.cpp
-test_data_SOURCES          = $(common_source) test_data.cpp
-test_handle_mgr_SOURCES    = $(common_source) test_handle_mgr.cpp
-test_p4objects_SOURCES     = $(common_source) test_p4objects.cpp
-test_parser_SOURCES        = $(common_source) test_parser.cpp
-test_phv_SOURCES           = $(common_source) test_phv.cpp
-test_queue_SOURCES         = $(common_source) test_queue.cpp
-test_queueing_SOURCES      = $(common_source) test_queueing.cpp
-test_tables_SOURCES        = $(common_source) test_tables.cpp
-test_learning_SOURCES      = $(common_source) test_learning.cpp
-test_pre_SOURCES           = $(common_source) test_pre.cpp
-test_calculations_SOURCES  = $(common_source) test_calculations.cpp
-test_headers_SOURCES       = $(common_source) test_headers.cpp
-test_header_stacks_SOURCES = $(common_source) test_header_stacks.cpp
-test_meters_SOURCES        = $(common_source) test_meters.cpp
-test_ageing_SOURCES        = $(common_source) test_ageing.cpp
-test_counters_SOURCES      = $(common_source) test_counters.cpp
-test_fields_SOURCES   	   = $(common_source) test_fields.cpp
-test_pcap_SOURCES          = $(common_source) test_pcap.cpp
-test_devmgr_SOURCES        = $(common_source) test_devmgr.cpp
-test_packet_SOURCES        = $(common_source) test_packet.cpp
-test_extern_SOURCES        = $(common_source) test_extern.cpp
-test_switch_SOURCES        = $(common_source) test_switch.cpp
-test_target_parser_SOURCES = $(common_source) test_target_parser.cpp
-test_runtime_iface_SOURCES = $(common_source) test_runtime_iface.cpp
-test_bm_apps_SOURCES       = $(common_source) test_bm_apps.cpp
-test_stateful_SOURCES      = $(common_source) test_stateful.cpp
-test_enums_SOURCES         = $(common_source) test_enums.cpp
+test_actions_SOURCES         = $(common_source) test_actions.cpp
+test_checksums_SOURCES       = $(common_source) test_checksums.cpp
+test_expressions_SOURCES     = $(common_source) test_expressions.cpp
+test_conditionals_SOURCES    = $(common_source) test_conditionals.cpp
+test_data_SOURCES            = $(common_source) test_data.cpp
+test_handle_mgr_SOURCES      = $(common_source) test_handle_mgr.cpp
+test_p4objects_SOURCES       = $(common_source) test_p4objects.cpp
+test_parser_SOURCES          = $(common_source) test_parser.cpp
+test_phv_SOURCES             = $(common_source) test_phv.cpp
+test_queue_SOURCES           = $(common_source) test_queue.cpp
+test_queueing_SOURCES        = $(common_source) test_queueing.cpp
+test_tables_SOURCES          = $(common_source) test_tables.cpp
+test_learning_SOURCES        = $(common_source) test_learning.cpp
+test_pre_SOURCES             = $(common_source) test_pre.cpp
+test_calculations_SOURCES    = $(common_source) test_calculations.cpp
+test_headers_SOURCES         = $(common_source) test_headers.cpp
+test_header_stacks_SOURCES   = $(common_source) test_header_stacks.cpp
+test_meters_SOURCES          = $(common_source) test_meters.cpp
+test_ageing_SOURCES          = $(common_source) test_ageing.cpp
+test_counters_SOURCES        = $(common_source) test_counters.cpp
+test_fields_SOURCES          = $(common_source) test_fields.cpp
+test_pcap_SOURCES            = $(common_source) test_pcap.cpp
+test_devmgr_SOURCES          = $(common_source) test_devmgr.cpp
+test_packet_SOURCES          = $(common_source) test_packet.cpp
+test_extern_SOURCES          = $(common_source) test_extern.cpp
+test_switch_SOURCES          = $(common_source) test_switch.cpp
+test_target_parser_SOURCES   = $(common_source) test_target_parser.cpp
+test_runtime_iface_SOURCES   = $(common_source) test_runtime_iface.cpp
+test_bm_apps_SOURCES         = $(common_source) test_bm_apps.cpp
+test_stateful_SOURCES        = $(common_source) test_stateful.cpp
+test_enums_SOURCES           = $(common_source) test_enums.cpp
+test_core_primitives_SOURCES = $(common_source) test_core_primitives.cpp
 
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
@@ -130,7 +132,8 @@ test_target_parser.cpp \
 test_runtime_iface.cpp \
 test_bm_apps.cpp \
 test_stateful.cpp \
-test_enums.cpp
+test_enums.cpp \
+test_core_primitives.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \

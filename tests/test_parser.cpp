@@ -82,6 +82,11 @@ class ParserTestGeneric : public ::testing::Test {
     ASSERT_EQ(no_error, packet->get_error_code());
   }
 
+  void parse_and_check_error(Packet *packet, ErrorCodeMap::Core core) {
+    parser.parse(packet);
+    ASSERT_EQ(error_codes.from_core(core), packet->get_error_code());
+  }
+
  private:
   ErrorCode no_error;
 };
@@ -1142,7 +1147,8 @@ class IPv4VLParsingTest : public ParserTestGeneric,
     raw_expr.push_back_op(ExprOpcode::MUL);  // to bits
     raw_expr.build();
     std::unique_ptr<VLHeaderExpression> expr(new VLHeaderExpression(raw_expr));
-    ipv4HeaderType.push_back_VL_field("options", std::move(expr));
+    ipv4HeaderType.push_back_VL_field("options", 320  /* max header bytes */,
+                                      std::move(expr));
 
     phv_factory.push_back_header("ethernet", ethernetHeader,
                                  ethernetHeaderType);
@@ -1819,4 +1825,99 @@ TEST_F(ParserShiftTest, ShiftOneByte) {
   const auto &f = packet.get_phv()->get_field(testHeader, 0);  // f8
   ASSERT_EQ(static_cast<unsigned char>(packet_data.at(1)),
             f.get<unsigned char>());
+}
+
+
+class ParserExtractVLTest : public ParserTestGeneric {
+ protected:
+  ParseState parse_state;
+  HeaderType headerType;
+  header_id_t testHeader{0};
+
+  static constexpr size_t max_header_bytes = 4;
+
+  ParserExtractVLTest()
+      : parse_state("parse_state", 0),
+        headerType("header_type", 0) {
+    headerType.push_back_VL_field("fVL", max_header_bytes, nullptr);
+    phv_factory.push_back_header("test", testHeader, headerType);
+  }
+
+  Packet get_pkt(const std::string &data) {
+    assert(data.size() <= 128);
+    return Packet::make_new(data.size(),
+                            PacketBuffer(128, data.data(), data.size()),
+                            phv_source.get());
+  }
+
+  ArithExpression make_expr(size_t nbits) {
+    ArithExpression expr;
+    expr.push_back_load_const(Data(nbits));
+    expr.build();
+    return expr;
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+    parser.set_init_state(&parse_state);
+  }
+};
+
+constexpr size_t ParserExtractVLTest::max_header_bytes;
+
+TEST_F(ParserExtractVLTest, Basic) {
+  parse_state.add_extract_VL(testHeader, make_expr(max_header_bytes * 8),
+                             max_header_bytes);
+  std::string packet_data(max_header_bytes, '\xaa');
+  auto packet = get_pkt(packet_data);
+  parse_and_check_no_error(&packet);
+  const auto &f = packet.get_phv()->get_field(testHeader, 0);  // fVL
+  ASSERT_EQ(packet_data, f.get_string());
+}
+
+TEST_F(ParserExtractVLTest, MultiplePackets) {
+  parse_state.add_extract_VL(testHeader, make_expr(max_header_bytes * 8),
+                             max_header_bytes);
+  std::string packet_data(max_header_bytes, '\xaa');
+  for (size_t i = 0; i < 10; i++) {
+    auto packet = get_pkt(packet_data);
+    parse_and_check_no_error(&packet);
+    const auto &f = packet.get_phv()->get_field(testHeader, 0);  // fVL
+    ASSERT_EQ(packet_data, f.get_string());
+  }
+}
+
+TEST_F(ParserExtractVLTest, OverwritingHeader) {
+  constexpr size_t expr_bytes = max_header_bytes / 2;
+  constexpr size_t packet_bytes = max_header_bytes;
+  parse_state.add_extract_VL(testHeader, make_expr(expr_bytes * 8),
+                             max_header_bytes);
+  parse_state.add_extract_VL(testHeader, make_expr(expr_bytes * 8),
+                             max_header_bytes);
+  std::string packet_data(packet_bytes, '\xaa');
+  auto packet = get_pkt(packet_data);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::OverwritingHeader);
+}
+
+TEST_F(ParserExtractVLTest, PacketTooShort) {
+  // packet is half the required size
+  constexpr size_t expr_bytes = max_header_bytes;
+  constexpr size_t packet_bytes = max_header_bytes / 2;
+  parse_state.add_extract_VL(testHeader, make_expr(expr_bytes * 8),
+                             max_header_bytes);
+  std::string packet_data(packet_bytes, '\xaa');
+  auto packet = get_pkt(packet_data);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::PacketTooShort);
+}
+
+TEST_F(ParserExtractVLTest, HeaderTooShort) {
+  // the VL expression returns a value which is twice the maximum number of
+  // bytes for the field / header
+  constexpr size_t expr_bytes = max_header_bytes * 2;
+  constexpr size_t packet_bytes = max_header_bytes * 2;
+  parse_state.add_extract_VL(testHeader, make_expr(expr_bytes * 8),
+                             max_header_bytes);
+  std::string packet_data(packet_bytes, '\xaa');
+  auto packet = get_pkt(packet_data);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::HeaderTooShort);
 }

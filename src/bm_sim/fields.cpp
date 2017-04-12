@@ -19,12 +19,54 @@
  */
 
 #include <bm/bm_sim/fields.h>
+#include <bm/bm_sim/headers.h>
+
+#include <algorithm>  // for std::swap
 
 #include "extract.h"
 
 namespace bm {
 
-int Field::extract(const char *data, int hdr_offset) {
+Field::Field(int nbits, Header *parent_hdr, bool arith_flag, bool is_signed,
+             bool hidden, bool VL)
+    : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes),
+      parent_hdr(parent_hdr),
+      is_signed(is_signed), hidden(hidden), VL(VL) {
+  arith = arith_flag;
+  // TODO(antonin) ?
+  // should I only do that for arith fields ?
+  mask <<= nbits; mask -= 1;
+  if (is_signed) {
+    assert(nbits > 1);
+    max <<= (nbits - 1); max -= 1;
+    min <<= (nbits - 1); min *= -1;
+  }
+}
+
+void
+Field::reserve_VL(size_t max_bytes) {
+  if (VL) bytes.reserve(max_bytes);
+}
+
+void
+Field::swap_values(Field *other) {
+  // do not swap arith!
+  std::swap(value, other->value);
+  std::swap(bytes, other->bytes);
+  if (VL) {
+    std::swap(nbits, other->nbits);
+    std::swap(nbytes, other->nbytes);
+    std::swap(mask, other->mask);
+    assert(is_signed == other->is_signed);
+    if (is_signed) {
+      std::swap(max, other->max);
+      std::swap(min, other->min);
+    }
+  }
+}
+
+int
+Field::extract(const char *data, int hdr_offset) {
   extract::generic_extract(data, hdr_offset, nbits, bytes.data());
 
   if (arith) sync_value();
@@ -32,21 +74,70 @@ int Field::extract(const char *data, int hdr_offset) {
   return nbits;
 }
 
-int Field::extract_VL(const char *data, int hdr_offset, int computed_nbits) {
+int
+Field::extract_VL(const char *data, int hdr_offset, int computed_nbits) {
   nbits = computed_nbits;
   nbytes = (nbits + 7) / 8;
   mask = (1 << nbits); mask -= 1;
   bytes.resize(nbytes);
+  if (is_signed) {
+    assert(nbits > 1);
+    max <<= (nbits - 1); max -= 1;
+    min <<= (nbits - 1); min *= -1;
+  }
   return Field::extract(data, hdr_offset);
 }
 
-int Field::deparse(char *data, int hdr_offset) const {
+int
+Field::deparse(char *data, int hdr_offset) const {
   // this does not work for empty variable-length fields, as we assert in the
   // ByteContainer's [] operator. The right thing to do would probably be to add
   // a at() method to ByteContainer and not perform any check in [].
   // extract::generic_deparse(&bytes[0], nbits, data, hdr_offset);
   extract::generic_deparse(bytes.data(), nbits, data, hdr_offset);
   return nbits;
+}
+
+void
+Field::assign_VL(const Field &src) {
+  assert(VL);
+  nbits = src.nbits;
+  nbytes = src.nbytes;
+  bytes.resize(nbytes);
+  mask = src.mask;
+  max = src.max;
+  min = src.min;
+  set(src);
+  parent_hdr->recompute_nbytes_packet();
+}
+
+void
+Field::reset_VL() {
+  assert(VL);
+  nbits = 0;
+  nbytes = 0;
+  mask = 1;
+  if (is_signed) {
+    max = 1;
+    min = 1;
+  }
+}
+
+void
+Field::copy_value(const Field &src) {
+  // it's important to have a way of copying a field value without the
+  // packet_id pointer. This is used by PHV::copy_headers().
+  value = src.value;
+  bytes = src.bytes;
+  if (VL) {
+    nbits = src.nbits;
+    nbytes = src.nbytes;
+    mask = src.mask;
+    if (is_signed) {
+      min = src.min;
+      max = src.max;
+    }
+  }
 }
 
 }  // namespace bm

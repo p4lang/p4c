@@ -23,7 +23,6 @@
 #ifndef BM_BM_SIM_HEADERS_H_
 #define BM_BM_SIM_HEADERS_H_
 
-#include <algorithm>  // for std::swap
 #include <vector>
 #include <string>
 #include <set>
@@ -51,6 +50,7 @@ class HeaderType : public NamedP4Object {
     std::string name;
     int bitwidth;
     bool is_signed;
+    bool is_VL;
     bool is_hidden;
   };
 
@@ -62,10 +62,13 @@ class HeaderType : public NamedP4Object {
 
   // returns field offset
   int push_back_field(const std::string &field_name, int field_bit_width,
-                      bool is_signed = false);
+                      bool is_signed = false, bool is_VL = false);
 
+  // if field_length_expr is nullptr it means that the length will have to be
+  // provided to extract
   int push_back_VL_field(
       const std::string &field_name,
+      int max_header_bytes,
       std::unique_ptr<VLHeaderExpression> field_length_expr,
       bool is_signed = false);
 
@@ -108,8 +111,10 @@ class HeaderType : public NamedP4Object {
   }
 
   bool is_VL_header() const {
-    return (VL_expr_raw != nullptr);
+    return (VL_offset >= 0);
   }
+
+  bool has_VL_expr() const;
 
   std::unique_ptr<ArithExpression> resolve_VL_expr(header_id_t header_id) const;
 
@@ -119,11 +124,14 @@ class HeaderType : public NamedP4Object {
     return VL_offset;
   }
 
+  int get_VL_max_header_bytes() const;
+
  private:
   std::vector<FInfo> fields_info;
   // used for VL headers only
-  std::unique_ptr<VLHeaderExpression> VL_expr_raw{nullptr};
+  std::unique_ptr<VLHeaderExpression> VL_expr_raw;
   int VL_offset{-1};
+  int VL_max_header_bytes{0};
 };
 
 //! Used to represent P4 header instances. It includes a vector of Field
@@ -149,6 +157,8 @@ class Header : public NamedP4Object {
     return nbytes_packet;
   }
 
+  int recompute_nbytes_packet();
+
   //! Returns true if this header is marked valid
   bool is_valid() const {
     return (metadata || valid);
@@ -167,6 +177,8 @@ class Header : public NamedP4Object {
 
   //! Sets all the fields in the header to value `0`.
   void reset();
+
+  void reset_VL_header();
 
   //! Set the written_to flag maintained by each field. This flag can be queried
   //! at any time by the target, using the Field interface, and can be used to
@@ -198,10 +210,13 @@ class Header : public NamedP4Object {
   //! Returns true if this header is an instance of a Variable-Length header
   //! type, i.e. contains a field whose length is determined when the header is
   //! extracted from the packet data.
-  bool is_VL_header() const { return VL_expr != nullptr; }
+  bool is_VL_header() const { return header_type.is_VL_header(); }
 
   // phv needed for variable length extraction
   void extract(const char *data, const PHV &phv);
+
+  // extract a VL header for which the bitwidth of the VL field is already known
+  void extract_VL(const char *data, int VL_nbits);
 
   void deparse(char *data) const;
 
@@ -236,19 +251,9 @@ class Header : public NamedP4Object {
   }
 
   // useful for header stacks
-  void swap_values(Header *other) {
-    std::swap(valid, other->valid);
-    // cannot do that, would invalidate references
-    // std::swap(fields, other.fields);
-    for (size_t i = 0; i < fields.size(); i++) {
-      fields[i].swap_values(&other->fields[i]);
-    }
-  }
+  void swap_values(Header *other);
 
-  void copy_fields(const Header &src) {
-    for (size_t f = 0; f < fields.size(); f++)
-      fields[f].copy_value(src.fields[f]);
-  }
+  void copy_fields(const Header &src);
 
   // compare to another header instance; returns true iff headers have the same
   // type, are both valid (irrelevant for metadata) and all the fields have the
@@ -273,6 +278,8 @@ class Header : public NamedP4Object {
 
  private:
   void extract_VL(const char *data, const PHV &phv);
+  template <typename Fn>
+  void extract_VL_common(const char *data, const Fn &VL_fn);
 
  private:
   const HeaderType &header_type;
@@ -282,7 +289,7 @@ class Header : public NamedP4Object {
   Field *valid_field{nullptr};
   bool metadata{false};
   int nbytes_packet{0};
-  std::unique_ptr<ArithExpression> VL_expr{nullptr};
+  std::unique_ptr<ArithExpression> VL_expr;
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 };
 

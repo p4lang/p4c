@@ -27,10 +27,19 @@
 
 namespace bm {
 
+PHV::PHV(size_t num_headers, size_t num_header_stacks)
+    : capacity(num_headers), capacity_stacks(num_header_stacks) {
+  // this is needed, otherwise our references will not be valid anymore
+  headers.reserve(num_headers);
+  header_stacks.reserve(num_header_stacks);
+}
+
 void
 PHV::reset() {
-  for (auto &h : headers)
+  for (auto &h : headers) {
     h.mark_invalid();
+    if (h.is_VL_header()) h.reset_VL_header();
+  }
 }
 
 void
@@ -69,8 +78,11 @@ PHV::push_back_header(const std::string &header_name,
                       const bool metadata) {
   assert(header_index < static_cast<int>(capacity));
   assert(header_index == static_cast<int>(headers.size()));
-  headers.push_back(
-    Header(header_name, header_index, header_type, arith_offsets, metadata));
+  // cannot call push_back here, as the Header constructor passes "this" to the
+  // Field constructor (i.e. Header cannot be moved or the pointer would be
+  // invalid); this is not a very robust design
+  headers.emplace_back(
+      header_name, header_index, header_type, arith_offsets, metadata);
   headers.back().set_packet_id(&packet_id);
 
   headers_map.emplace(header_name, get_header(header_index));
@@ -84,8 +96,10 @@ PHV::push_back_header(const std::string &header_name,
   if (header_type.is_VL_header()) {
     headers.back().VL_expr = header_type.resolve_VL_expr(header_index);
 
-    for (const int offset : header_type.get_VL_input_offsets())
-      headers.back()[offset].set_arith(true);
+    if (headers.back().VL_expr != nullptr) {
+      for (const int offset : header_type.get_VL_input_offsets())
+        headers.back()[offset].set_arith(true);
+    }
   }
 }
 

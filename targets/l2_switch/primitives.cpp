@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/core/primitives.h>
 
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;
@@ -29,7 +30,7 @@ using bm::Header;
 
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
-    f.set(d);
+    bm::core::assign()(f, d);
   }
 };
 

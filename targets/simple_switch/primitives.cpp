@@ -20,6 +20,7 @@
 
 #include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/calculations.h>
+#include <bm/bm_sim/core/primitives.h>
 #include <bm/bm_sim/counters.h>
 #include <bm/bm_sim/meters.h>
 #include <bm/bm_sim/packet.h>
@@ -42,7 +43,7 @@ using bm::HeaderStack;
 
 class modify_field : public ActionPrimitive<Data &, const Data &> {
   void operator ()(Data &dst, const Data &src) {
-    dst.set(src);
+    bm::core::assign()(dst, src);
   }
 };
 
@@ -205,15 +206,7 @@ REGISTER_PRIMITIVE(remove_header);
 
 class copy_header : public ActionPrimitive<Header &, const Header &> {
   void operator ()(Header &dst, const Header &src) {
-    if (!src.is_valid()) {
-      dst.mark_invalid();
-      return;
-    }
-    dst.mark_valid();
-    assert(dst.get_header_type_id() == src.get_header_type_id());
-    for (unsigned int i = 0; i < dst.size(); i++) {
-      dst[i].set(src[i]);
-    }
+    bm::core::assign_header()(dst, src);
   }
 };
 

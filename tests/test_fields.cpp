@@ -107,7 +107,7 @@ TEST_P(FieldSerializeTest, Extract) {
 
     ASSERT_EQ(bitwidth + hdr_offset, static_cast<int>(input.nbits()));
 
-    Field f(bitwidth);
+    Field f(bitwidth, nullptr  /* parent hdr */);
     f.extract(input.bytes().data(), hdr_offset);
 
     ASSERT_EQ(v, f.get_int());
@@ -135,7 +135,7 @@ FieldSerializeTest::run_deparse_test(int sent_bit) {
       output.append_one(0);
     }
 
-    Field f(bitwidth);
+    Field f(bitwidth, nullptr  /* parent hdr */);
     f.set(v);
 
     ByteContainer output_bytes = output.bytes();
@@ -206,7 +206,8 @@ class SignedFieldTest : public TestWithParam<int> {
   Field signed_f;
 
   SignedFieldTest()
-      : bitwidth(GetParam()), signed_f(bitwidth, true, true) { }
+      : bitwidth(GetParam()),
+        signed_f(bitwidth, nullptr  /* parent hdr */, true, true) { }
 };
 
 TEST_P(SignedFieldTest, SyncValue) {

@@ -89,12 +89,7 @@ class PHV {
  public:
   PHV() {}
 
-  PHV(size_t num_headers, size_t num_header_stacks)
-    : capacity(num_headers), capacity_stacks(num_header_stacks) {
-    // this is needed, otherwise our references will not be valid anymore
-    headers.reserve(num_headers);
-    header_stacks.reserve(num_header_stacks);
-  }
+  PHV(size_t num_headers, size_t num_header_stacks);
 
   //! Access the Header with id \p header_index, with no bound checking.
   Header &get_header(header_id_t header_index) {

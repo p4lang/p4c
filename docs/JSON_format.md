@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.8*.
+The version described in this document is *2.9*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -140,6 +140,9 @@ have the `length_exp` attribute.
 variable-length field, in which case this attribute must be an expression
 resolving to an integral value, corresponding to the variable-length field's
 bitwidth.
+- `max_length`: this attribute needs only be present when the header type
+includes a variable-length field, in which case this attribute is the maximum
+width in bytes for the header.
 
 ### `headers`
 
@@ -212,23 +215,13 @@ parser. The attributes for these objects are:
   - `parser_ops`: a JSON array of the operations (set or extract) performed in
   this parse state, in the correct order. Each parser operation is represented
   by a JSON object, whose attributes are:
-    - `op`: the type of operation, either `extract`, `set`, `verify` or `shift`
+    - `op`: the type of operation, either `extract`, `extract_VL`, `set`,
+    `verify` or `shift`
     - `parameters`: a JSON array of objects encoding the parameters to the
     parser operation. Each parameter object has 2 string attributes: `type` for
     the parameter type and `value` for its value. Depending on the type of
-    operation, the constraints are different. An extract operation only takes
-    one parameter, of type `regular` (extraction to a regular header instance)
-    or `stack` (extraction to the end of a header stack). `value` is then the
-    name of the header instance or stack. On the other hand, a set operation
-    takes exactly 2 parameters. The first one needs to be of type `field` with
-    the appropriate value. The second one can be of type `field`, `hexstr`,
-    `lookahead` or `expression`, with the appropriate value (see [here]
-    (#the-type-value-object)). For a verify operation, we expect an array with
-    exactly 2 elements: the first should be a boolean expression while the
-    second should be an expression resolving to a valid integral value for an
-    error constant (see [here] (#errors)). Finally for a shift operation, we
-    expect a single parameter: the number of bytes to shift (shifted packet data
-    will be discarded).
+    operation, the constraints are different. A description of these constraints
+    is included [later in this section] (#parser-operations).
   - `transition_key`: a JSON array (in the correct order) of objects which
   describe the different fields of the parse state transition key. Each object
   has 2 attributes, `type` and `value`, where `type` can be either
@@ -257,6 +250,29 @@ the concatenation (in the right order) of all byte padded fields (padded with
 2-bit field, each value will need to have 3 bytes (2 for the first field, 1 for
 the second one). If the transition value is `0xaba`, `0x3`, the `value`
 attribute will be set to `0x0aba03`.
+
+#### parser operations
+
+In the `parser_ops` array, the format of the `parameters` array depends on the
+`op` value:
+  - `extract`: only takes one parameter, of type `regular` (extraction to a
+  regular header instance) or `stack` (extraction to the end of a header
+  stack). `value` is then the name of the header instance or stack.
+  - `extract_VL`: introduced for P4_16, where the expression to dynamically
+  compute the length of a variable-length field is an argument to the extract
+  built-in rather than a property of the header. For this operation, we require
+  2 parameters, the first one of type `regular` and the second one of type
+  `expression` (to compute the length in bits of the variable-length field in
+  the header).
+  - `set`: takes exactly 2 parameters; the first one needs to be of type `field`
+  with the appropriate value. The second one can be of type `field`, `hexstr`,
+  `lookahead` or `expression`, with the appropriate value (see [here]
+  (#the-type-value-object)).
+  - `verify`: we expect an array with exactly 2 elements; the first should be a
+  boolean expression while the second should be an expression resolving to a
+  valid integral value for an error constant (see [here] (#errors)).
+  - `shift`: we expect a single parameter, the number of bytes to shift (shifted
+  packet data will be discarded).
 
 ### `parse_vsets`
 
@@ -348,6 +364,10 @@ which the first parameter is the extern instance. For example, if the P4 call is
 primitive `_my_extern_type_methodA`, with the first parameter being `{"type":
 "extern", "value": "extern1"}` and the second parameter being the appropriate
 representation for `x` and `y`.
+
+bmv2 supports three core primitives: `assign`, `assign_VL` (for variable-length
+fields) and `assign_header`. Support for additional primitives depends on the
+architecture being used.
 
 ### `pipelines`
 

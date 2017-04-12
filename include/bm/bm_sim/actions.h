@@ -106,6 +106,8 @@ class ActionOpcodesMap {
 
   std::unique_ptr<ActionPrimitive_> get_primitive(const std::string &name);
  private:
+  ActionOpcodesMap();
+
   // Maps primitive names to their implementation.
   // The same pointer is used system-wide, even if a primitive is called from
   // different actions. As such, one has to be careful if some state is

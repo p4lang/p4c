@@ -284,9 +284,9 @@ def make_extract_function(P, fmt):
             offset += width
             setattr(self, name, v)
             if type(uf) is int:
-                if width == 0:
-                    v_str = None
-                    v_int = None
+                if width == 0:  # supports VL fields with width 0
+                    v_str = 'Empty'
+                    v_int = 0
                 else:
                     v_str = ':'.join(x.encode('hex') for x in v)
                     v_int = int(v.encode('hex'), 16)

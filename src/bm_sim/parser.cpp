@@ -26,6 +26,7 @@
 #include <bm/bm_sim/expressions.h>
 #include <bm/bm_sim/phv.h>
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/core/primitives.h>
 
 #include <string>
 #include <vector>
@@ -58,7 +59,12 @@ ParserOpSet<field_t>::operator()(Packet *pkt, const char *data,
   auto phv = pkt->get_phv();
   auto &f_dst = phv->get_field(dst.header, dst.offset);
   auto &f_src = phv->get_field(src.header, src.offset);
-  f_dst.set(f_src);
+  if (f_dst.is_VL()) {
+    assert(f_src.is_VL());
+    core::assign_VL()(f_dst, f_src);
+  } else {
+    core::assign()(f_dst, f_src);
+  }
   BMLOG_DEBUG_PKT(
     *pkt,
     "Parser set: setting field '{}' from field '{}' ({})",
@@ -74,7 +80,7 @@ ParserOpSet<Data>::operator()(Packet *pkt, const char *data,
   (void) bytes_parsed; (void) data;
   auto phv = pkt->get_phv();
   auto &f_dst = phv->get_field(dst.header, dst.offset);
-  f_dst.set(src);
+  core::assign()(f_dst, src);
   BMLOG_DEBUG_PKT(*pkt, "Parser set: setting field '{}' to {}",
                   phv->get_field_name(dst.header, dst.offset), f_dst);
 }
@@ -223,6 +229,49 @@ struct ParserOpExtract : ParserOp {
     BMLOG_DEBUG_PKT(*pkt, "Extracting header '{}'", hdr.get_name());
     check_enough_data_for_extract(*pkt, *bytes_parsed, hdr);
     hdr.extract(data, *phv);
+    *bytes_parsed += hdr.get_nbytes_packet();
+  }
+};
+
+struct ParserOpExtractVL : ParserOp {
+  header_id_t header;
+  ArithExpression field_length_expr;
+  size_t max_header_bytes;
+
+  explicit ParserOpExtractVL(header_id_t header,
+                             const ArithExpression &field_length_expr,
+                             size_t max_header_bytes)
+      : header(header), field_length_expr(field_length_expr),
+        max_header_bytes(max_header_bytes) { }
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    auto phv = pkt->get_phv();
+    auto &hdr = phv->get_header(header);
+    assert(hdr.is_VL_header());
+    if (hdr.is_valid())
+      throw parser_exception_core(ErrorCodeMap::Core::OverwritingHeader);
+
+    static thread_local Data computed_nbits;
+    field_length_expr.eval(*phv, &computed_nbits);
+
+    BMELOG(parser_extract, *pkt, header);
+    BMLOG_DEBUG_PKT(*pkt, "Extracting variable-sized header '{}'",
+                    hdr.get_name());
+    auto nbits = computed_nbits.get<int>();
+    // TODO(antonin): temporary limitation?
+    assert(nbits % 8 == 0 && "VL field bitwidth needs to be a multiple of 8");
+    // get_nbytes_packet counts the VL field in the header as 0 bits
+    auto bytes_to_extract = static_cast<size_t>(
+        hdr.get_nbytes_packet() + nbits / 8);
+    if (pkt->get_ingress_length() - *bytes_parsed < bytes_to_extract)
+      throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
+
+    if (max_header_bytes != 0 && max_header_bytes < bytes_to_extract)
+      throw parser_exception_core(ErrorCodeMap::Core::HeaderTooShort);
+
+    hdr.extract_VL(data, nbits);
+    // get_nbytes_packet now returns a value that includes the VL field bitwidth
     *bytes_parsed += hdr.get_nbytes_packet();
   }
 };
@@ -639,6 +688,14 @@ ParseState::ParseState(const std::string &name, p4object_id_t id)
 void
 ParseState::add_extract(header_id_t header) {
   parser_ops.emplace_back(new ParserOpExtract(header));
+}
+
+void
+ParseState::add_extract_VL(header_id_t header,
+                           const ArithExpression &field_length_expr,
+                           size_t max_header_bytes) {
+  parser_ops.emplace_back(
+      new ParserOpExtractVL(header, field_length_expr, max_header_bytes));
 }
 
 void

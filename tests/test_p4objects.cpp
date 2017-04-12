@@ -864,3 +864,20 @@ TEST(P4Objects, ParserShift) {
   LookupStructureFactory factory;
   ASSERT_EQ(0, objects.init_objects(&is, &factory));
 }
+
+TEST(P4Objects, ParserExtractVL) {
+  std::stringstream is;
+  is << "{\"header_types\":[{\"name\":\"h_t\",\"id\":0,\"fields\":"
+     << "[[\"f\",\"*\"]],\"max_length\":4}],"
+     << "\"headers\":[{\"name\":\"h\",\"id\":0,\"header_type\":\"h_t\","
+     << "\"metadata\":false}],"
+     << "\"parsers\":[{\"name\":\"parser\",\"id\":0,\"init_state\":"
+     << "\"start\",\"parse_states\":[{\"name\":\"start\",\"id\":0,"
+     << "\"parser_ops\":[{\"op\":\"extract_VL\",\"parameters\":"
+     << "[{\"type\":\"regular\",\"value\":\"h\"},{\"type\":\"expression\","
+     << "\"value\":{\"type\":\"hexstr\",\"value\":\"0x10\"}}]}],"
+     << "\"transition_key\":[],\"transitions\":[]}]}]}";
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+}

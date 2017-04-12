@@ -23,7 +23,7 @@
 #ifndef BM_BM_SIM_FIELDS_H_
 #define BM_BM_SIM_FIELDS_H_
 
-#include <algorithm>
+#include <algorithm>  // for std::copy
 
 #include <cassert>
 
@@ -33,6 +33,8 @@
 #include "debugger.h"
 
 namespace bm {
+
+class Header;
 
 //! Field objects are used to represent P4 fields. Each Field instance belongs
 //! to a Header instance. When defining your own target, you will have to
@@ -46,20 +48,12 @@ class Field : public Data {
   // Field. Unfortunately that would require adding an extra level of
   // indirection in Header (for the field vector), so I am sticking to this for
   // now.
-  explicit Field(int nbits, bool arith_flag = true, bool is_signed = false,
-                 bool hidden = false)
-      : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes),
-        is_signed(is_signed), hidden(hidden) {
-    arith = arith_flag;
-    // TODO(antonin) ?
-    // should I only do that for arith fields ?
-    mask <<= nbits; mask -= 1;
-    if (is_signed) {
-      assert(nbits > 1);
-      max <<= (nbits - 1); max -= 1;
-      min <<= (nbits - 1); min *= -1;
-    }
-  }
+  explicit Field(int nbits, Header *parent_hdr, bool arith_flag = true,
+                 bool is_signed = false, bool hidden = false, bool VL = false);
+
+  // to avoid dynamic resizing of the Bytecontainer, which would invalide field
+  // references
+  void reserve_VL(size_t max_bytes);
 
   // Overload set? Make it more generic (arbitary length) ?
   // It is probably only going to be used by the checksum engine anyway...
@@ -129,32 +123,33 @@ class Field : public Data {
   }
 
   // useful for header stacks
-  void swap_values(Field *other) {
-    // just the values, nothing else (especially not .arith)
-    std::swap(value, other->value);
-    std::swap(bytes, other->bytes);
-  }
+  void swap_values(Field *other);
 
-  /* returns the number of bits extracted */
+  // returns the number of bits extracted
   int extract(const char *data, int hdr_offset);
 
   int extract_VL(const char *data, int hdr_offset, int computed_nbits);
 
-  /* returns the number of bits deparsed */
+  // returns the number of bits deparsed
   int deparse(char *data, int hdr_offset) const;
+
+  void assign_VL(const Field &src);
+
+  void reset_VL();
 
   void set_id(uint64_t id) { my_id = id; }
   void set_packet_id(const Debugger::PacketId *id) { packet_id = id; }
 
-  void copy_value(const Field &src) {
-    // it's important to have a way of copying a field value without the
-    // packet_id pointer. This is used by PHV::copy_headers().
-    value = src.value;
-    bytes = src.bytes;
-  }
+  // it's important to have a way of copying a field value without the packet_id
+  // pointer. This is used by PHV::copy_headers().
+  void copy_value(const Field &src);
 
   bool is_hidden() const {
     return hidden;
+  }
+
+  bool is_VL() const {
+    return VL;
   }
 
   //! Set the value of the written_to flag for the field. This flag can be
@@ -174,8 +169,10 @@ class Field : public Data {
   int nbits;
   int nbytes;
   ByteContainer bytes;
+  Header *parent_hdr;
   bool is_signed{false};
   bool hidden{false};
+  bool VL{false};
   bool written_to{false};  // used to keep track of whether a field was modified
   Bignum mask{1};
   Bignum max{1};
