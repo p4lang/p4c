@@ -45,10 +45,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    action act() {
+    @hidden action act() {
         key_0 = hdr.data.f1 & 32w0xff00ff;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

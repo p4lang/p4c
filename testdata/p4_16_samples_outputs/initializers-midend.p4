@@ -17,10 +17,10 @@ parser P() {
 
 control C() {
     @name("fake") Fake() fake_2;
-    action act() {
+    @hidden action act() {
         fake_2.call(32w1);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

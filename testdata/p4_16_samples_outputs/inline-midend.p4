@@ -3,16 +3,16 @@ control p(out bit<1> y) {
     @name("b") action b_0() {
         y = x_3 & x_3 & (x_3 & x_3) & (x_3 & x_3 & (x_3 & x_3));
     }
-    action act() {
+    @hidden action act() {
         x_3 = 1w1;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_b {
+    @hidden table tbl_b {
         actions = {
             b_0();
         }

@@ -24,10 +24,10 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
 }
 
 control cBar(inout mystruct1 meta) {
-    action act() {
+    @hidden action act() {
         meta.a = meta.a + 4w15;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

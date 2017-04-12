@@ -63,13 +63,13 @@ control VerifyChecksumI(in H hdr, inout M meta) {
     }
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
-    table tbl_drop {
+    @hidden table tbl_drop {
         actions = {
             drop_0();
         }
         const default_action = drop_0();
     }
-    table tbl_drop_0 {
+    @hidden table tbl_drop_0 {
         actions = {
             drop_3();
         }

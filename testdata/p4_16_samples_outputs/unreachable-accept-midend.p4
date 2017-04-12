@@ -18,10 +18,10 @@ parser Parser(packet_in pkt_in, out headers_t hdr) {
 }
 
 control Deparser(in headers_t hdr, packet_out pkt_out) {
-    action act() {
+    @hidden action act() {
         pkt_out.emit<ethernet_h>(hdr.ethernet);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

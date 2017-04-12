@@ -19,17 +19,17 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         input.hdr.setInvalid();
         tmp3 = tmp2;
     }
-    action act() {
+    @hidden action act() {
         out1 = tmp1;
         out2 = tmp3;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }

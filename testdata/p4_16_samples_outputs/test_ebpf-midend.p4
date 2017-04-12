@@ -62,21 +62,21 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_0();
     }
-    action act() {
+    @hidden action act() {
         pass = false;
         hasReturned_0 = true;
     }
-    action act_0() {
+    @hidden action act_0() {
         hasReturned_0 = false;
         pass = true;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
@@ -87,7 +87,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned_0)
+        if (!hasReturned_0) 
             Check_src_ip.apply();
     }
 }

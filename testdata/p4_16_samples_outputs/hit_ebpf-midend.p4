@@ -63,48 +63,48 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_0();
     }
-    action act() {
+    @hidden action act() {
         pass = false;
         hasReturned_0 = true;
     }
-    action act_0() {
+    @hidden action act_0() {
         hasReturned_0 = false;
         pass = true;
     }
-    action act_1() {
+    @hidden action act_1() {
         tmp_0 = true;
     }
-    action act_2() {
+    @hidden action act_2() {
         tmp_0 = false;
     }
-    action act_3() {
+    @hidden action act_3() {
         pass = pass;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1 {
+    @hidden table tbl_act_1 {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_2 {
+    @hidden table tbl_act_2 {
         actions = {
             act_2();
         }
         const default_action = act_2();
     }
-    table tbl_act_3 {
+    @hidden table tbl_act_3 {
         actions = {
             act_3();
         }

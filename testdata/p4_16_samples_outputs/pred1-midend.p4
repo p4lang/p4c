@@ -6,7 +6,7 @@ package top(empty e);
 control Ing() {
     @name("cond") action cond_0() {
     }
-    table tbl_cond {
+    @hidden table tbl_cond {
         actions = {
             cond_0();
         }
