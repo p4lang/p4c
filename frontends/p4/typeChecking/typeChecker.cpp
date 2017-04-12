@@ -2302,7 +2302,7 @@ TypeInference::actionCall(bool inActionList,
                     // table (as default_action or entries), then the
                     // arguments do have to be compile-time constants.
                     if (!isCompileTimeConstant(arg))
-                        typeError("%1%: argument must be a compile-time constant", arg);
+                        typeError("%1%: action argument must be a compile-time constant", arg);
                 }
             } else if (p->direction == IR::Direction::Out ||
                        p->direction == IR::Direction::InOut) {
