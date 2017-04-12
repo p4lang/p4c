@@ -2,7 +2,7 @@
 top(g()) main;
          ^^^^
 ../testdata/p4_16_errors/module_e.p4(20)
-parser g(in bit x)
+parser g(in bit x) // mismatch in direction
                 ^
 ../testdata/p4_16_errors/module_e.p4(16)
 parser Filter(out bool filter);

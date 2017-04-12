@@ -1,5 +1,5 @@
 ../testdata/p4_16_errors/stack2.p4(24): error: AssignmentStatement: cannot unify stacks with different sized header h[] and header h[]
-        stack1 = stack2;
+        stack1 = stack2; // assignment between different stacks
                ^
 ../testdata/p4_16_errors/stack2.p4(21)
         h[5] stack1;
@@ -8,8 +8,8 @@
         h[3] stack2;
         ^^^^
 ../testdata/p4_16_errors/stack2.p4(25): error: Expression stack1.lastIndex cannot be the target of an assignment
-        stack1.lastIndex = 3;
+        stack1.lastIndex = 3; // not an l-value
         ^^^^^^^^^^^^^^^^
 ../testdata/p4_16_errors/stack2.p4(26): error: Expression stack2.size cannot be the target of an assignment
-        stack2.size = 4;
+        stack2.size = 4; // not an l-value
         ^^^^^^^^^^^

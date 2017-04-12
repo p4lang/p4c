@@ -31,7 +31,7 @@ p4_frontend_UNIFIED = \
 	frontends/p4/evaluator/substituteParameters.cpp \
 	frontends/p4/parserControlFlow.cpp \
 	frontends/p4/reservedWords.cpp \
-	frontends/p4/coreLibrary.cpp \
+	frontends/p4/modelInstances.cpp \
 	frontends/p4/externInstance.cpp \
 	frontends/p4/methodInstance.cpp \
 	frontends/p4/parserCallGraph.cpp \
@@ -40,7 +40,6 @@ p4_frontend_UNIFIED = \
 	frontends/p4/substitution.cpp \
 	frontends/p4/substitutionVisitor.cpp \
 	frontends/p4/fromv1.0/programStructure.cpp \
-	frontends/p4/fromv1.0/v1model.cpp \
 	frontends/p4/fromv1.0/converters.cpp \
 	frontends/p4/typeMap.cpp \
 	frontends/p4/simplifyDefUse.cpp \
