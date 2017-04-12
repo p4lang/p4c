@@ -24,7 +24,7 @@ void DoExpandLookahead::expandSetValid(const IR::Expression* base, const IR::Typ
                                        IR::IndexedVector<IR::StatOrDecl>* output) {
     if (type->is<IR::Type_Struct>()) {
         auto st = type->to<IR::Type_Struct>();
-        for (auto f : *st->fields) {
+        for (auto f : st->fields) {
             auto t = typeMap->getTypeType(f->type, true);
             if (t == nullptr)
                 return;
@@ -41,16 +41,16 @@ void DoExpandLookahead::expandSetValid(const IR::Expression* base, const IR::Typ
 const IR::Expression* DoExpandLookahead::expand(
     const IR::PathExpression* base, const IR::Type* type, unsigned* offset) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Header>()) {
-        auto vec = new IR::Vector<IR::Expression>();
+        auto vec = new IR::ListExpression({});
         auto st = type->to<IR::Type_StructLike>();
-        for (auto f : *st->fields) {
+        for (auto f : st->fields) {
             auto t = typeMap->getTypeType(f->type, true);
             if (t == nullptr)
                 continue;
             auto e = expand(base, t, offset);
             vec->push_back(e);
         }
-        return new IR::ListExpression(vec);
+        return vec;
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
@@ -96,23 +96,22 @@ const IR::Node* DoExpandLookahead::postorder(IR::AssignmentStatement* statement)
     auto decl = new IR::Declaration_Variable(IR::ID(name), bittype, nullptr);
     newDecls.push_back(decl);
 
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+    auto result = new IR::BlockStatement;
     auto ta = new IR::Vector<IR::Type>();
     ta->push_back(bittype);
     auto mc = new IR::MethodCallExpression(mce->srcInfo, mce->method->clone(), ta, mce->arguments);
     auto pathe = new IR::PathExpression(name);
     auto lookupCall = new IR::AssignmentStatement(statement->srcInfo, pathe, mc);
-    vec->push_back(lookupCall);
+    result->push_back(lookupCall);
 
     unsigned offset = 0;
-    expandSetValid(statement->left->clone(), typearg, vec);
+    expandSetValid(statement->left->clone(), typearg, &result->components);
     auto init = expand(pathe->clone(), typearg, &offset);
     if (init == nullptr)
         return statement;
     auto assignment = new IR::AssignmentStatement(statement->srcInfo, statement->left, init);
-    vec->push_back(assignment);
+    result->push_back(assignment);
 
-    auto result = new IR::BlockStatement(vec);
     return result;
 }
 

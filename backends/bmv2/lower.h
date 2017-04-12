@@ -94,31 +94,19 @@ class RemoveComplexExpressions : public Transform {
     const IR::Node* preorder(IR::ParserState* state) override
     { assignments.clear(); return state; }
     const IR::Node* postorder(IR::ParserState* state) override {
-        if (!assignments.empty()) {
-            auto comp = new IR::IndexedVector<IR::StatOrDecl>(*state->components);
-            comp->append(assignments);
-            state->components = comp;
-        }
+        state->components.append(assignments);
         return state;
     }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* preorder(IR::P4Parser* parser) override
     { newDecls.clear(); return parser; }
     const IR::Node* postorder(IR::P4Parser* parser) override {
-        if (!newDecls.empty()) {
-            auto locals = new IR::IndexedVector<IR::Declaration>(*parser->parserLocals);
-            locals->append(newDecls);
-            parser->parserLocals = locals;
-        }
+        parser->parserLocals.append(newDecls);
         return parser;
     }
     const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Control* control) override {
-        if (!newDecls.empty()) {
-            auto locals = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
-            locals->append(newDecls);
-            control->controlLocals = locals;
-        }
+        control->controlLocals.append(newDecls);
         return control;
     }
     const IR::Node* postorder(IR::Statement* statement) override;

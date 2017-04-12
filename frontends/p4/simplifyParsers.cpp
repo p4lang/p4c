@@ -112,7 +112,7 @@ class CollapseChains : public Transform {
         }
 
         auto states = new IR::IndexedVector<IR::ParserState>();
-        for (auto s : *parser->states) {
+        for (auto s : parser->states) {
             if (pred.find(s) != pred.end())
                 continue;
             if (chainStart.find(s) != chainStart.end()) {
@@ -122,7 +122,7 @@ class CollapseChains : public Transform {
                 LOG1("Chaining states into " << dbp(crt));
                 const IR::Expression *select = nullptr;
                 while (true) {
-                    components->append(*crt->components);
+                    components->append(crt->components);
                     select = crt->selectExpression;
                     crt = ::get(chain, crt);
                     if (crt == nullptr)
@@ -130,12 +130,12 @@ class CollapseChains : public Transform {
                     LOG1("Adding " << dbp(crt) << " to chain");
                 }
                 s = new IR::ParserState(s->srcInfo, s->name, s->annotations,
-                                        components, select);
+                                        *components, select);
             }
             states->push_back(s);
         }
 
-        parser->states = states;
+        parser->states = *states;
         prune();
         return parser;
     }

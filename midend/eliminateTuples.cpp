@@ -9,14 +9,14 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
     if (type->is<IR::Type_Struct>()) {
         auto st = type->to<IR::Type_Struct>();
         bool changes = false;
-        auto fields = new IR::IndexedVector<IR::StructField>();
-        for (auto f : *st->fields) {
+        IR::IndexedVector<IR::StructField> fields;
+        for (auto f : st->fields) {
             auto ftype = typeMap->getType(f);
             auto cftype = convertType(ftype);
             if (cftype != ftype)
                 changes = true;
             auto field = new IR::StructField(f->name, f->annotations, cftype->getP4Type());
-            fields->push_back(field);
+            fields.push_back(field);
         }
         if (changes) {
             auto result = new IR::Type_Struct(st->srcInfo, st->name, st->annotations, fields);
@@ -28,12 +28,12 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
         }
     } else if (type->is<IR::Type_Tuple>()) {
         cstring name = ng->newName("tuple");
-        auto fields = new IR::IndexedVector<IR::StructField>();
-        for (auto t : *type->to<IR::Type_Tuple>()->components) {
+        IR::IndexedVector<IR::StructField> fields;
+        for (auto t : type->to<IR::Type_Tuple>()->components) {
             auto ftype = convertType(t);
             auto fname = ng->newName("field");
             auto field = new IR::StructField(IR::ID(fname), ftype->getP4Type());
-            fields->push_back(field);
+            fields.push_back(field);
         }
         auto result = new IR::Type_Struct(name, fields);
         LOG3("Converted " << dbp(type) << " to " << dbp(result));
@@ -72,8 +72,7 @@ const IR::Node* DoReplaceTuples::postorder(IR::Type_Tuple*) {
 
 const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
     // Check that we are in the top-level P4Program list of declarations.
-    BUG_CHECK(getContext()->parent != nullptr, "Unexpected context %1%", before);
-    if (!getContext()->parent->node->is<IR::P4Program>())
+    if (!getParent<IR::P4Program>())
         return before;
 
     auto result = repl->getNewReplacements();

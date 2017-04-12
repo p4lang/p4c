@@ -89,14 +89,14 @@ const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
     auto actions = ::get(repl->repl, getOriginal<IR::P4Control>());
     if (actions == nullptr)
         return control;
-    auto newDecls = new IR::IndexedVector<IR::Declaration>();
+    IR::IndexedVector<IR::Declaration> newDecls;
     for (auto pair : *actions) {
         auto toInsert = pair.second;
         LOG1("Adding " << dbp(toInsert));
-        newDecls->push_back(toInsert);
+        newDecls.push_back(toInsert);
     }
 
-    newDecls->append(*control->controlLocals);
+    newDecls.append(control->controlLocals);
     control->controlLocals = newDecls;
     return control;
 }
@@ -176,9 +176,9 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
 
 const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
     bool changes = false;
-    auto newDecls = new IR::IndexedVector<IR::Declaration>();
-    for (auto d : *control->controlLocals) {
-        newDecls->push_back(d);
+    IR::IndexedVector<IR::Declaration> newDecls;
+    for (auto d : control->controlLocals) {
+        newDecls.push_back(d);
         if (d->is<IR::P4Action>()) {
             // The replacement are inserted in the same place
             // as the original.
@@ -186,7 +186,7 @@ const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
             if (replacements != nullptr) {
                 for (auto action : Values(*replacements)) {
                     LOG1("Adding " << dbp(action));
-                    newDecls->push_back(action);
+                    newDecls.push_back(action);
                     changes = true;
                 }
             }

@@ -70,7 +70,7 @@ bool Evaluator::preorder(const IR::P4Program* program) {
     toplevelBlock = new IR::ToplevelBlock(program->srcInfo, program);
 
     pushBlock(toplevelBlock);
-    for (auto d : *program->declarations) {
+    for (auto d : program->declarations) {
         if (d->is<IR::Type_Declaration>())
             // we will visit various containers and externs only when we instantiated them
             continue;
@@ -161,7 +161,7 @@ Evaluator::processConstructor(
         auto values = evaluateArguments(arguments, current);
         if (values != nullptr) {
             block->instantiate(values);
-            for (auto a : *cont->controlLocals)
+            for (auto a : cont->controlLocals)
                 visit(a);
         }
         popBlock(block);
@@ -173,9 +173,9 @@ Evaluator::processConstructor(
         auto values = evaluateArguments(arguments, current);
         if (values != nullptr) {
             block->instantiate(values);
-            for (auto a : *cont->parserLocals)
+            for (auto a : cont->parserLocals)
                 visit(a);
-            for (auto a : *cont->states)
+            for (auto a : cont->states)
                 visit(a);
         }
         popBlock(block);

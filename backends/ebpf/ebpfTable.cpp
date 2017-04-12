@@ -85,7 +85,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     // Use this to order elements by size
     std::map<size_t, const IR::KeyElement*> ordered;
     unsigned fieldNumber = 0;
-    for (auto c : *keyGenerator->keyElements) {
+    for (auto c : keyGenerator->keyElements) {
         auto type = program->typeMap->getType(c->expression);
         auto ebpfType = EBPFTypeFactory::instance->create(type);
         cstring fieldName = cstring("field") + Util::toString(fieldNumber);
@@ -150,7 +150,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->spc();
     builder->blockStart();
 
-    for (auto a : *actionList->actionList) {
+    for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = action->externalName();
@@ -176,7 +176,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->append("union ");
     builder->blockStart();
 
-    for (auto a : *actionList->actionList) {
+    for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = action->externalName();
@@ -260,7 +260,7 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
 }
 
 void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
-    for (auto c : *keyGenerator->keyElements) {
+    for (auto c : keyGenerator->keyElements) {
         auto ebpfType = ::get(keyTypes, c);
         cstring fieldName = ::get(keyFieldNames, c);
         CHECK_NULL(fieldName);
@@ -291,7 +291,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     builder->appendFormat("switch (%s->action) ", valueName);
     builder->blockStart();
 
-    for (auto a : *actionList->actionList) {
+    for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();

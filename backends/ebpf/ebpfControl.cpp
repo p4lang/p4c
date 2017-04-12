@@ -217,7 +217,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Expression>* args) 
     builder->blockEnd(true);
 
     unsigned alignment = 0;
-    for (auto f : *ht->fields) {
+    for (auto f : ht->fields) {
         auto ftype = typeMap->getType(f);
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<IHasWidth*>(etype);
@@ -487,7 +487,7 @@ bool EBPFControl::build() {
         return false;
     }
 
-    auto it = pl->parameters->begin();
+    auto it = pl->parameters.begin();
     headers = *it;
     ++it;
     accept = *it;
@@ -522,7 +522,7 @@ void EBPFControl::emit(CodeBuilder* builder) {
     builder->emitIndent();
     hitType->declare(builder, hitVariable, false);
     builder->endOfStatement(true);
-    for (auto a : *controlBlock->container->controlLocals)
+    for (auto a : controlBlock->container->controlLocals)
         emitDeclaration(builder, a);
     builder->emitIndent();
     codeGen->setBuilder(builder);

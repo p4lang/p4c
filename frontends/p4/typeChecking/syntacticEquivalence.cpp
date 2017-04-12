@@ -78,7 +78,7 @@ bool SameExpression::sameExpression(const IR::Expression* left, const IR::Expres
     } else if (left->is<IR::ListExpression>()) {
         auto ll = left->to<IR::ListExpression>();
         auto rl = right->to<IR::ListExpression>();
-        return sameExpressions(ll->components, rl->components);
+        return sameExpressions(&ll->components, &rl->components);
     } else if (left->is<IR::MethodCallExpression>()) {
         auto lm = left->to<IR::MethodCallExpression>();
         auto rm = right->to<IR::MethodCallExpression>();

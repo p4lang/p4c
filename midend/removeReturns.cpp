@@ -59,13 +59,11 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
     visit(action->body);
-    auto body = new IR::IndexedVector<IR::StatOrDecl>();
+    auto body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations);
     body->push_back(decl);
-    body->append(*action->body->components);
+    body->components.append(action->body->components);
     auto result = new IR::P4Action(action->srcInfo, action->name, action->annotations,
-                                   action->parameters,
-                                   new IR::BlockStatement(
-                                       action->body->srcInfo, action->body->annotations, body));
+                                   action->parameters, body);
     pop();
     BUG_CHECK(stack.empty(), "Non-empty stack");
     prune();
@@ -73,7 +71,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
-    visit(control->controlLocals);
+    control->controlLocals.visit_children(*this);
 
     HasExits he;
     (void)control->body->apply(he);
@@ -90,11 +88,9 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
     visit(control->body);
-    auto bodyContents = new IR::IndexedVector<IR::StatOrDecl>();
-    bodyContents->push_back(decl);
-    bodyContents->append(*control->body->components);
-    auto body = new IR::BlockStatement(
-        control->body->srcInfo, control->body->annotations, bodyContents);
+    auto body = new IR::BlockStatement(control->body->srcInfo, control->body->annotations);
+    body->push_back(decl);
+    body->components.append(control->body->components);
     auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
                                     control->constructorParams, control->controlLocals, body);
     pop();
@@ -117,33 +113,32 @@ const IR::Node* DoRemoveReturns::preorder(IR::ExitStatement* statement) {
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
-    auto body = new IR::IndexedVector<IR::StatOrDecl>();
-    auto currentBody = body;
+    auto block = new IR::BlockStatement;
+    auto currentBlock = block;
     Returns ret = Returns::No;
-    for (auto s : *statement->components) {
+    for (auto s : statement->components) {
         push();
         visit(s);
-        currentBody->push_back(s);
+        currentBlock->push_back(s);
         Returns r = hasReturned();
         pop();
         if (r == Returns::Yes) {
             ret = r;
             break;
         } else if (r == Returns::Maybe) {
-            auto newBody = new IR::IndexedVector<IR::StatOrDecl>();
+            auto newBlock = new IR::BlockStatement;
             auto path = new IR::PathExpression(returnVar);
             auto condition = new IR::LNot(path);
-            auto newBlock = new IR::BlockStatement(newBody);
             auto ifstat = new IR::IfStatement(condition, newBlock, nullptr);
-            body->push_back(ifstat);
-            currentBody = newBody;
+            block->push_back(ifstat);
+            currentBlock = newBlock;
             ret = r;
         }
     }
     if (!stack.empty())
         set(ret);
     prune();
-    return new IR::BlockStatement(statement->srcInfo, statement->annotations, body);
+    return block;
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
@@ -229,7 +224,7 @@ const IR::Node* DoRemoveExits::preorder(IR::ExitStatement* statement) {
 }
 
 const IR::Node* DoRemoveExits::preorder(IR::P4Table* table) {
-    for (auto a : *table->getActionList()->actionList) {
+    for (auto a : table->getActionList()->actionList) {
         auto path = a->getPath();
         auto decl = refMap->getDeclaration(path, true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1% is not an action", decl);
@@ -267,22 +262,22 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
 
     cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var, nullptr);
-    visit(control->controlLocals);
+    control->controlLocals.visit_children(*this);
 
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
     visit(control->body);
-    auto stateful = new IR::IndexedVector<IR::Declaration>();
+    IR::IndexedVector<IR::Declaration> stateful;
     auto decl = new IR::Declaration_Variable(returnVar, IR::Type_Boolean::get(), nullptr);
-    stateful->push_back(decl);
-    stateful->append(*control->controlLocals);
+    stateful.push_back(decl);
+    stateful.append(control->controlLocals);
     control->controlLocals = stateful;
 
-    auto newbody = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> newbody;
     auto left = new IR::PathExpression(returnVar);
     auto init = new IR::AssignmentStatement(left, new IR::BoolLiteral(false));
-    newbody->push_back(init);
-    newbody->append(*control->body->components);
+    newbody.push_back(init);
+    newbody.append(control->body->components);
     control->body = new IR::BlockStatement(
         control->body->srcInfo, control->body->annotations, newbody);
 
@@ -293,33 +288,32 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoRemoveExits::preorder(IR::BlockStatement* statement) {
-    auto body = new IR::IndexedVector<IR::StatOrDecl>();
-    auto currentBody = body;
+    auto block = new IR::BlockStatement;
+    auto currentBlock = block;
     Returns ret = Returns::No;
-    for (auto s : *statement->components) {
+    for (auto s : statement->components) {
         push();
         visit(s);
-        currentBody->push_back(s);
+        currentBlock->push_back(s);
         Returns r = hasReturned();
         pop();
         if (r == Returns::Yes) {
             ret = r;
             break;
         } else if (r == Returns::Maybe) {
-            auto newBody = new IR::IndexedVector<IR::StatOrDecl>();
+            auto newBlock = new IR::BlockStatement;
             auto path = new IR::PathExpression(returnVar);
             auto condition = new IR::LNot(path);
-            auto newBlock = new IR::BlockStatement(newBody);
             auto ifstat = new IR::IfStatement(condition, newBlock, nullptr);
-            body->push_back(ifstat);
-            currentBody = newBody;
+            block->push_back(ifstat);
+            currentBlock = newBlock;
             ret = r;
         }
     }
     if (!stack.empty())
         set(ret);
     prune();
-    return new IR::BlockStatement(statement->srcInfo, statement->annotations, body);
+    return block;
 }
 
 // if (t.apply.hit()) stat1;
@@ -389,9 +383,7 @@ const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
                 auto path = new IR::PathExpression(returnVar);
                 auto condition = new IR::LNot(path);
                 auto newif = new IR::IfStatement(condition, c->statement, nullptr);
-                auto vec = new IR::IndexedVector<IR::StatOrDecl>();
-                vec->push_back(newif);
-                stat = new IR::BlockStatement(newif->srcInfo, vec);
+                stat = new IR::BlockStatement(newif->srcInfo, {newif});
             }
             auto swcase = new IR::SwitchCase(c->srcInfo, c->label, stat);
             cases->push_back(swcase);

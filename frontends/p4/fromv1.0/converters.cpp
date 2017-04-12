@@ -61,7 +61,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
 
 const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
     // Field lists may contain other field lists
-    return new IR::ListExpression(fl->srcInfo, &fl->fields);
+    return new IR::ListExpression(fl->srcInfo, fl->fields);
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::Member* field) {
@@ -286,7 +286,7 @@ const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression
         auto s = convert(e);
         stats->push_back(s);
     }
-    auto result = new IR::BlockStatement(toConvert->srcInfo, stats);
+    auto result = new IR::BlockStatement(toConvert->srcInfo, *stats);
     return result;
 }
 

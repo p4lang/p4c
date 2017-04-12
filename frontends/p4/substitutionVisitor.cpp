@@ -32,19 +32,19 @@ bool TypeOccursVisitor::preorder(const IR::Type_InfInt* typeVariable) {
 
 const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tps) {
     // remove all variables that were substituted
-    auto result = new IR::IndexedVector<IR::Type_Var>();
-    for (auto param : *tps->parameters) {
-        const IR::Type* type = bindings->lookup(param);
+    for (auto it = tps->parameters.begin(); it != tps->parameters.end();) {
+        const IR::Type* type = bindings->lookup(*it);
         if (type != nullptr && !replace) {
-            LOG1("Removing from generic parameters " << param);
+            LOG1("Removing from generic parameters " << *it);
+            it = tps->parameters.erase(it);
         } else {
             if (type != nullptr)
                 BUG_CHECK(type->is<IR::Type_Var>(),
-                          "cannot replace a type parameter %1% with %2%:", param, type);
-            result->push_back(param);
+                          "cannot replace a type parameter %1% with %2%:", *it, type);
+            ++it;
         }
     }
-    return new IR::TypeParameters(tps->srcInfo, result);
+    return tps;
 }
 
 const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_Var* typeVariable) {

@@ -170,7 +170,7 @@ class ProgramStructure {
     convertExtern(const IR::Declaration_Instance* ext, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
-                 IR::IndexedVector<IR::Declaration>* stateful, std::map<cstring, cstring> &);
+                 IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
     const IR::P4Action* convertAction(const IR::ActionFunction* action, cstring newName,
                                       const IR::Meter* meterToAccess, cstring counterToAccess);
     const IR::Type_Control* controlType(IR::ID name);

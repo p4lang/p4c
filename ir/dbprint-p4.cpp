@@ -89,7 +89,7 @@ void IR::V1Parser::dbprint(std::ostream &out) const {
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
 void IR::ParserState::dbprint(std::ostream &out) const {
     out << "state " << name << " " << annotations << "{" << indent;
-    for (auto *s : *components)
+    for (auto s : components)
         out << endl << s;
     if (selectExpression)
         out << endl << selectExpression;
@@ -102,9 +102,9 @@ void IR::P4Parser::dbprint(std::ostream &out) const {
     if (constructorParams)
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;
-    for (auto d : *parserLocals)
+    for (auto d : parserLocals)
         out << endl << d;
-    for (auto s : *states)
+    for (auto s : states)
         out << endl << s;
     out << " }" << unindent;
 }
@@ -130,26 +130,25 @@ void IR::ActionFunction::dbprint(std::ostream &out) const {
 void IR::P4Action::dbprint(std::ostream &out) const {
     out << "action " << name << "(";
     const char *sep = "";
-    for (auto &arg : *parameters->parameters) {
+    for (auto arg : parameters->parameters) {
         out << sep << arg->direction << ' ' << arg->type << ' ' << arg->name;
         sep = ", "; }
     out << ") {" << indent;
     if (body)
-        for (auto &p : *body->components)
+        for (auto p : body->components)
             out << endl << p;
     out << unindent << " }";
 }
 
 void IR::BlockStatement::dbprint(std::ostream &out) const {
     out << "{" << indent;
-    if (components) {
-        bool first = true;
-        for (auto &p : *components) {
-            if (first) {
-                out << ' ' << p;
-                first = false;
-            } else {
-                out << endl << p; } } }
+    bool first = true;
+    for (auto p : components) {
+        if (first) {
+            out << ' ' << p;
+            first = false;
+        } else {
+            out << endl << p; } }
     out << unindent << " }";
 }
 
@@ -160,7 +159,7 @@ void IR::V1Table::dbprint(std::ostream &out) const { out << "IR::V1Table " << na
 void IR::ActionList::dbprint(std::ostream &out) const {
     out << "{" << indent;
     bool first = true;
-    for (auto *el : *actionList) {
+    for (auto el : actionList) {
         if (first)
             out << ' ' << el;
         else
@@ -176,7 +175,7 @@ void IR::KeyElement::dbprint(std::ostream &out) const {
 void IR::Key::dbprint(std::ostream &out) const {
     out << "{" << indent;
     bool first = true;
-    for (auto *el : *keyElements) {
+    for (auto el : keyElements) {
         if (first)
             out << ' ' << el;
         else
@@ -187,7 +186,7 @@ void IR::Key::dbprint(std::ostream &out) const {
 void IR::P4Table::dbprint(std::ostream &out) const {
     out << "table " << name;
     out << " " << annotations << "{" << indent;
-    for (auto p : *properties->properties)
+    for (auto p : properties->properties)
         out << endl << p;
     out << " }" << unindent;
 }
@@ -202,11 +201,10 @@ void IR::P4Control::dbprint(std::ostream &out) const {
     if (constructorParams)
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;
-    for (auto d : *controlLocals)
+    for (auto d : controlLocals)
         out << endl << d;
-    if (body->components)
-        for (auto s : *body->components)
-            out << endl << s;
+    for (auto s : body->components)
+        out << endl << s;
     out << " }" << unindent;
 }
 
@@ -216,14 +214,14 @@ void IR::V1Program::dbprint(std::ostream &out) const {
 }
 
 void IR::P4Program::dbprint(std::ostream &out) const {
-    for (auto &obj : *declarations)
+    for (auto obj : declarations)
         out << obj << endl;
 }
 
 void IR::Type_Error::dbprint(std::ostream &out) const {
     out << "error {";
     const char *sep = " ";
-    for (auto &id : *members) {
+    for (auto id : members) {
         out << sep << id->name;
         sep = ", "; }
     out << (sep+1) << "}";
@@ -232,7 +230,7 @@ void IR::Type_Error::dbprint(std::ostream &out) const {
 void IR::Declaration_MatchKind::dbprint(std::ostream &out) const {
     out << "match_kind {";
     const char *sep = " ";
-    for (auto &id : *members) {
+    for (auto id : members) {
         out << sep << id->name;
         sep = ", "; }
     out << (sep+1) << "}";

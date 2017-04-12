@@ -22,7 +22,7 @@ void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type
                                   const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
         auto sl = type->to<IR::Type_StructLike>();
-        for (auto f : *sl->fields) {
+        for (auto f : sl->fields) {
             auto ftype = typeMap->getType(f, true);
             auto member = new IR::Member(expr, f->name);
             generateResets(typeMap, ftype, member, resets);
@@ -54,7 +54,9 @@ const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
         return decl;
     auto resets = new IR::Vector<IR::StatOrDecl>();
     resets->push_back(decl);
-    BUG_CHECK(getContext()->node->is<IR::Vector<IR::StatOrDecl>>(),
+    BUG_CHECK(getContext()->node->is<IR::Vector<IR::StatOrDecl>>() ||
+              getContext()->node->is<IR::ParserState>() ||
+              getContext()->node->is<IR::BlockStatement>(),
               "%1%: parent is not Vector<StatOrDecl>, but %2%",
               decl, getContext()->node);
     auto type = typeMap->getType(getOriginal(), true);

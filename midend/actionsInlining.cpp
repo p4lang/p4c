@@ -144,7 +144,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         return statement;
 
     LOG1("Inlining: " << toInline);
-    auto body = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> body;
     ParameterSubstitution subst;
     TypeVariableSubstitution tvs;  // empty
 
@@ -152,14 +152,14 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
 
     // evaluate in and inout parameters in order
     auto it = statement->methodCall->arguments->begin();
-    for (auto param : *callee->parameters->parameters) {
+    for (auto param : callee->parameters->parameters) {
         auto initializer = *it;
         cstring newName = refMap->newName(param->name);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations,
                                                         param->type, initializer);
-            body->push_back(vardecl);
+            body.push_back(vardecl);
             subst.add(param, new IR::PathExpression(newName));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
@@ -170,7 +170,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
             auto vardecl = new IR::Declaration_Variable(newName,
                                                         param->annotations, param->type);
             subst.add(param, new IR::PathExpression(newName));
-            body->push_back(vardecl);
+            body.push_back(vardecl);
         }
         ++it;
     }
@@ -182,17 +182,17 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
     auto actclone = clone->to<IR::P4Action>();
-    body->append(*actclone->body->components);
+    body.append(actclone->body->components);
 
     // copy out and inout parameters
     it = statement->methodCall->arguments->begin();
-    for (auto param : *callee->parameters->parameters) {
+    for (auto param : callee->parameters->parameters) {
         auto left = *it;
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
             auto copyout = new IR::AssignmentStatement(left, right);
-            body->push_back(copyout);
+            body.push_back(copyout);
         }
         ++it;
     }

@@ -176,7 +176,7 @@ class SharedActionSelectorCheck : public Inspector {
 
         auto key = table->getKey();
         Input input;
-        for (auto ke : *key->keyElements) {
+        for (auto ke : key->keyElements) {
             auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
             BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
             if (mt->name.name != v1model.selectorMatchType.name) continue;
@@ -631,7 +631,7 @@ class ExpressionConverter : public Inspector {
             return;
         }
 
-        for (auto e : *expression->components) {
+        for (auto e : expression->components) {
             auto t = get(e);
             result->append(t);
         }
@@ -813,16 +813,16 @@ cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fie
     calc->emplace("algo", algo);
     if (!fields->is<IR::ListExpression>()) {
         // expand it into a list
-        auto vec = new IR::Vector<IR::Expression>();
+        auto list = new IR::ListExpression({});
         auto type = typeMap->getType(fields, true);
         BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: expected a struct", fields);
-        for (auto f : *type->to<IR::Type_StructLike>()->fields) {
+        for (auto f : type->to<IR::Type_StructLike>()->fields) {
             auto e = new IR::Member(fields, f->name);
             auto ftype = typeMap->getType(f);
             typeMap->setType(e, ftype);
-            vec->push_back(e);
+            list->push_back(e);
         }
-        fields = new IR::ListExpression(vec);
+        fields = list;
         typeMap->setType(fields, type);
     }
     auto jright = conv->convert(fields);
@@ -838,8 +838,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
     for (auto s : *body) {
         if (!s->is<IR::Statement>()) {
             continue;
-        } else if (s->is<IR::BlockStatement>()) {
-            convertActionBody(s->to<IR::BlockStatement>()->components, result, fieldLists,
+        } else if (auto block = s->to<IR::BlockStatement>()) {
+            convertActionBody(&block->components, result, fieldLists,
                               calculations, learn_lists);
             continue;
         } else if (s->is<IR::ReturnStatement>()) {
@@ -982,7 +982,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     if (ef->method->name == v1model.clone.name) {
                         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                         cstring name = refMap->newName("fl");
-                        auto emptylist = new IR::ListExpression(new IR::Vector<IR::Expression>());
+                        auto emptylist = new IR::ListExpression({});
                         id = createFieldList(emptylist, "field_lists", name, fieldLists);
                     } else {
                         BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
@@ -1117,7 +1117,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
 void JsonConverter::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
     if (expr->is<IR::ListExpression>()) {
         auto le = expr->to<IR::ListExpression>();
-        for (auto e : *le->components) {
+        for (auto e : le->components) {
             addToFieldList(e, fl);
         }
         return;
@@ -1127,7 +1127,7 @@ void JsonConverter::addToFieldList(const IR::Expression* expr, Util::JsonArray* 
     if (type->is<IR::Type_StructLike>()) {
         // recursively add all fields
         auto st = type->to<IR::Type_StructLike>();
-        for (auto f : *st->fields) {
+        for (auto f : st->fields) {
             auto member = new IR::Member(expr, f->name);
             typeMap->setType(member, typeMap->getType(f, true));
             addToFieldList(member, fl);
@@ -1197,7 +1197,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
             params->append(param);
         }
         auto body = mkArrayField(jact, "primitives");
-        convertActionBody(action->body->components, body, fieldLists, calculations, learn_lists);
+        convertActionBody(&action->body->components, body, fieldLists, calculations, learn_lists);
         result->append(jact);
     }
     return result;
@@ -1246,15 +1246,15 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
 
     auto entries = mkArrayField(jsonTable, "entries");
     int entryPriority = 1;  // default priority is defined by index position
-    for (auto e : *entriesList->entries) {
+    for (auto e : entriesList->entries) {
         auto entry = new Util::JsonObject();
 
         auto keyset = e->getKeys();
         auto matchKeys = mkArrayField(entry, "match_key");
         int keyIndex = 0;
-        for (auto k : *keyset->components) {
+        for (auto k : keyset->components) {
             auto key = new Util::JsonObject();
-            auto tableKey = table->getKey()->keyElements->at(keyIndex);
+            auto tableKey = table->getKey()->keyElements.at(keyIndex);
             auto keyWidth = tableKey->expression->type->width_bits();
             auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
@@ -1418,7 +1418,7 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
                 selector->emplace("algo", algo);
             }
             auto input = mkArrayField(selector, "input");
-            for (auto ke : *key->keyElements) {
+            for (auto ke : key->keyElements) {
                 auto mt = refMap->getDeclaration(ke->matchType->path, true)
                         ->to<IR::Declaration_ID>();
                 BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
@@ -1532,7 +1532,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     conv->simpleExpressionsOnly = true;
 
     if (key != nullptr) {
-        for (auto ke : *key->keyElements) {
+        for (auto ke : key->keyElements) {
             auto match_type = getKeyMatchType(ke);
             if (match_type == v1model.selectorMatchType.name)
                     continue;
@@ -1740,7 +1740,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     auto al = table->getActionList();
 
     std::map<cstring, cstring> useActionName;
-    for (auto a : *al->actionList) {
+    for (auto a : al->actionList) {
         if (a->expression->is<IR::MethodCallExpression>()) {
             auto mce = a->expression->to<IR::MethodCallExpression>();
             if (mce->arguments->size() > 0)
@@ -1804,7 +1804,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     // Generate labels which don't show up and send them to
     // the nextLabel.
     if (!hitMiss) {
-        for (auto a : *al->actionList) {
+        for (auto a : al->actionList) {
             cstring name = a->getName().name;
             cstring label = ::get(useActionName, name);
             if (labelsDone.find(label) == labelsDone.end())
@@ -1914,7 +1914,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         }
     }
 
-    for (auto c : *cont->controlLocals) {
+    for (auto c : cont->controlLocals) {
         if (c->is<IR::Declaration_Constant>() ||
             c->is<IR::Declaration_Variable>() ||
             c->is<IR::P4Action>() ||
@@ -2077,7 +2077,7 @@ unsigned JsonConverter::nextId(cstring group) {
 }
 
 void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
-    for (auto f : *headersStruct->fields) {
+    for (auto f : headersStruct->fields) {
         auto ft = typeMap->getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
         if (stack == nullptr)
@@ -2381,7 +2381,7 @@ void JsonConverter::createForceArith(const IR::Type* meta, cstring name,
     if (!meta->is<IR::Type_Struct>())
         return;
     auto st = meta->to<IR::Type_StructLike>();
-    for (auto f : *st->fields) {
+    for (auto f : st->fields) {
         auto field = pushNewArray(force);
         field->append(name);
         field->append(f->name.name);
@@ -2392,7 +2392,7 @@ void JsonConverter::generateUpdate(const IR::BlockStatement *block,
                                    Util::JsonArray* checksums, Util::JsonArray* calculations) {
     // Currently this is very hacky to target the very limited support for checksums in BMv2
     // This will work much better when BMv2 offers a checksum extern.
-    for (auto stat : *block->components) {
+    for (auto stat : block->components) {
         if (stat->is<IR::IfStatement>()) {
             // The way checksums work in Json, they always ignore the condition!
             stat = stat->to<IR::IfStatement>()->ifTrue;
@@ -2438,7 +2438,7 @@ void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
 }
 
 void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
-    for (auto f : *type->fields) {
+    for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
@@ -2451,7 +2451,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
         }
     }
 
-    for (auto f : *type->fields) {
+    for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto json = new Util::JsonObject();
@@ -2492,7 +2492,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
 
 void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
                                Util::JsonArray *fields) {
-    for (auto f : *st->fields) {
+    for (auto f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
@@ -2545,8 +2545,8 @@ void JsonConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
                                         Util::JsonArray* result) {
     conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
-        if (s->is<IR::BlockStatement>()) {
-            convertDeparserBody(s->to<IR::BlockStatement>()->components, result);
+        if (auto block = s->to<IR::BlockStatement>()) {
+            convertDeparserBody(&block->components, result);
             continue;
         } else if (s->is<IR::ReturnStatement>() || s->is<IR::ExitStatement>()) {
             break;
@@ -2596,7 +2596,7 @@ Util::IJson* JsonConverter::convertDeparser(const IR::P4Control* ctrl) {
     result->emplace("name", "deparser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("deparser"));
     auto order = mkArrayField(result, "order");
-    convertDeparserBody(ctrl->body->components, order);
+    convertDeparserBody(&ctrl->body->components, order);
     return result;
 }
 
@@ -2607,7 +2607,7 @@ Util::IJson* JsonConverter::toJson(const IR::P4Parser* parser) {
     result->emplace("init_state", IR::ParserState::start);
     auto states = mkArrayField(result, "parse_states");
 
-    for (auto state : *parser->states) {
+    for (auto state : parser->states) {
         auto json = toJson(state);
         if (json != nullptr)
             states->append(json);
@@ -2758,15 +2758,15 @@ unsigned JsonConverter::combine(const IR::Expression* keySet,
         return totalWidth;
     } else if (keySet->is<IR::ListExpression>()) {
         auto le = keySet->to<IR::ListExpression>();
-        BUG_CHECK(le->components->size() == select->components->size(),
+        BUG_CHECK(le->components.size() == select->components.size(),
                   "%1%: mismatched select", select);
         unsigned index = 0;
 
         bool noMask = true;
-        for (auto it = select->components->begin();
-             it != select->components->end(); ++it) {
+        for (auto it = select->components.begin();
+             it != select->components.end(); ++it) {
             auto e = *it;
-            auto keyElement = le->components->at(index);
+            auto keyElement = le->components.at(index);
 
             auto type = typeMap->getType(e, true);
             int width = type->width_bits();
@@ -2790,9 +2790,9 @@ unsigned JsonConverter::combine(const IR::Expression* keySet,
             mask = -1;
         return totalWidth;
     } else {
-        BUG_CHECK(select->components->size() == 1, "%1%: mismatched select/label", select);
+        BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
         convertSimpleKey(keySet, value, mask);
-        auto type = typeMap->getType(select->components->at(0), true);
+        auto type = typeMap->getType(select->components.at(0), true);
         return type->width_bits() / 8;
     }
 }
@@ -2816,7 +2816,7 @@ Util::IJson* JsonConverter::toJson(const IR::ParserState* state) {
     result->emplace("name", extVisibleName(state));
     result->emplace("id", nextId("parse_states"));
     auto operations = mkArrayField(result, "parser_ops");
-    for (auto s : *state->components) {
+    for (auto s : state->components) {
         auto j = convertParserStatement(s);
         operations->append(j);
     }

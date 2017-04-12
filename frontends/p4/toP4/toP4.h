@@ -168,17 +168,21 @@ class ToP4 : public Inspector {
     bool preorder(const IR::This* e) override;
 
     // vectors
-    bool preorder(const IR::Vector<IR::Type>* v) override;
+    bool preorder(const IR::Vector<IR::ActionListElement>* v) override;
+    bool preorder(const IR::Vector<IR::Annotation>* v) override;
+    bool preorder(const IR::Vector<IR::Entry>* v) override;
     bool preorder(const IR::Vector<IR::Expression>* v) override;
+    bool preorder(const IR::Vector<IR::KeyElement>* v) override;
+    bool preorder(const IR::Vector<IR::Method>* v) override;
+    bool preorder(const IR::Vector<IR::Node>* v) override;
     bool preorder(const IR::Vector<IR::SelectCase>* v) override;
     bool preorder(const IR::Vector<IR::SwitchCase>* v) override;
-    bool preorder(const IR::Vector<IR::Node>* v) override;
-    bool preorder(const IR::Vector<IR::ActionListElement>* v) override;
-    bool preorder(const IR::Vector<IR::Method>* v) override;
-    bool preorder(const IR::IndexedVector<IR::Node>* v) override;
-    bool preorder(const IR::IndexedVector<IR::StatOrDecl>* v) override;
-    bool preorder(const IR::IndexedVector<IR::ParserState>* v) override;
+    bool preorder(const IR::Vector<IR::Type>* v) override;
+    bool preorder(const IR::IndexedVector<IR::Declaration_ID>* v) override;
     bool preorder(const IR::IndexedVector<IR::Declaration>* v) override;
+    bool preorder(const IR::IndexedVector<IR::Node>* v) override;
+    bool preorder(const IR::IndexedVector<IR::ParserState>* v) override;
+    bool preorder(const IR::IndexedVector<IR::StatOrDecl>* v) override;
 
     // statements
     bool preorder(const IR::AssignmentStatement* s) override;

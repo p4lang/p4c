@@ -416,11 +416,7 @@ class V1Table {
     inline TableProperties      properties = {};  // non-standard properties
     optional Annotations        annotations = Annotations::empty;
 
-    // inefficient add
-    void addProperty(Property prop) {
-        auto props = new IndexedVector<Property>(*properties.properties);
-        props->push_back(prop);
-        properties = TableProperties(properties.srcInfo, props); }
+    void addProperty(Property prop) { properties.push_back(prop); }
     toString { return node_type_name() + " " + name; }
 }
 

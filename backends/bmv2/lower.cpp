@@ -421,10 +421,10 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
     for (auto e : *vec) {
         if (e->is<IR::ListExpression>()) {
             auto list = e->to<IR::ListExpression>();
-            auto simpl = simplifyExpressions(list->components);
-            if (simpl != list->components) {
+            auto simpl = simplifyExpressions(&list->components);
+            if (simpl != &list->components) {
                 changes = true;
-                auto l = new IR::ListExpression(e->srcInfo, simpl);
+                auto l = new IR::ListExpression(e->srcInfo, *simpl);
                 result->push_back(l);
             } else {
                 result->push_back(e);
@@ -449,9 +449,9 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
 
 const IR::Node*
 RemoveComplexExpressions::postorder(IR::SelectExpression* expression) {
-    auto vec = simplifyExpressions(expression->select->components);
-    if (vec != expression->select->components)
-        expression->select = new IR::ListExpression(expression->select->srcInfo, vec);
+    auto vec = simplifyExpressions(&expression->select->components);
+    if (vec != &expression->select->components)
+        expression->select = new IR::ListExpression(expression->select->srcInfo, *vec);
     return expression;
 }
 
@@ -484,9 +484,8 @@ const IR::Node*
 RemoveComplexExpressions::postorder(IR::Statement* statement) {
     if (assignments.empty())
         return statement;
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>(assignments);
-    vec->push_back(statement);
-    auto block = new IR::BlockStatement(vec);
+    auto block = new IR::BlockStatement(assignments);
+    block->push_back(statement);
     assignments.clear();
     return block;
 }

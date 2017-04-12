@@ -22,17 +22,17 @@ namespace P4 {
 const IR::Expression*
 DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression* expression) {
     if (expression->is<IR::ListExpression>()) {
-        auto vec = new IR::Vector<IR::Expression>();
+        IR::Vector<IR::Expression> vec;
         bool changes = false;
         auto list = expression->to<IR::ListExpression>();
-        for (auto e : *list->components) {
+        for (auto e : list->components) {
             auto type = typeMap->getType(e, true);
             if (type->is<IR::Type_Boolean>()) {
                 changes = true;
                 auto cast = new IR::Cast(IR::Type_Bits::get(1), e);
-                vec->push_back(cast);
+                vec.push_back(cast);
             } else {
-                vec->push_back(e);
+                vec.push_back(e);
             }
         }
         if (changes)

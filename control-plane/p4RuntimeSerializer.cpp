@@ -152,7 +152,7 @@ struct HeaderFieldPath {
                       "Member is not contained in a structlike type?");
 
             boost::optional<cstring> name;
-            for (auto field : *parentType->to<IR::Type_StructLike>()->fields) {
+            for (auto field : parentType->to<IR::Type_StructLike>()->fields) {
                 if (field->name == memberExpression->member) {
                     name = controlPlaneName(field);
                     break;
@@ -1105,7 +1105,7 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
     CHECK_NULL(control);
 
     // Collect action symbols.
-    forAllMatching<IR::P4Action>(control->controlLocals,
+    forAllMatching<IR::P4Action>(&control->controlLocals,
                                  [&](const IR::P4Action* action) {
         symbols.add(P4RuntimeSymbolType::ACTION, action);
     });
@@ -1123,7 +1123,7 @@ static void serializeControl(P4RuntimeSerializer& serializer,
     CHECK_NULL(control);
 
     // Serialize actions and, implicitly, their parameters.
-    forAllMatching<IR::P4Action>(control->controlLocals,
+    forAllMatching<IR::P4Action>(&control->controlLocals,
                                  [&](const IR::P4Action* action) {
         serializer.addAction(action);
     });
@@ -1248,7 +1248,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     auto key = table->getKey();
     if (!key) return matchFields;
 
-    for (auto keyElement : *key->keyElements) {
+    for (auto keyElement : key->keyElements) {
         auto matchTypeDecl = refMap->getDeclaration(keyElement->matchType->path, true)
                                    ->to<IR::Declaration_ID>();
         BUG_CHECK(matchTypeDecl != nullptr, "No declaration for match type '%1%'",
@@ -1410,7 +1410,7 @@ static void serializeTable(P4RuntimeSerializer& serializer,
     auto matchFields = getMatchFields(table, refMap, typeMap);
 
     std::vector<cstring> actions;
-    for (auto action : *table->getActionList()->actionList) {
+    for (auto action : table->getActionList()->actionList) {
         auto decl = refMap->getDeclaration(action->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "Not an action: '%1%'", decl);
         actions.push_back(controlPlaneName(decl->to<IR::P4Action>()));

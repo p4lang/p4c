@@ -6,7 +6,7 @@ bool ComplexValues::isNestedStruct(const IR::Type* type) {
     if (!type->is<IR::Type_Struct>())
         return false;
     auto st = type->to<IR::Type_Struct>();
-    for (auto f : *st->fields) {
+    for (auto f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->is<IR::Type_StructLike>() ||
             ftype->is<IR::Type_Tuple>() ||
@@ -21,7 +21,7 @@ bool ComplexValues::isNestedStruct(const IR::Type* type) {
 void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type,
                             FieldsMap* map, IR::Vector<IR::Declaration>* result) {
     CHECK_NULL(type);
-    for (auto f : *type->fields) {
+    for (auto f : type->fields) {
         cstring fname = prefix + "_" + f->name;
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {
