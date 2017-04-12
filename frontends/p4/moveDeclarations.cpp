@@ -24,9 +24,9 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Action* action)  {
         auto body = new IR::IndexedVector<IR::StatOrDecl>();
         auto m = getMoves();
         body->insert(body->end(), m->begin(), m->end());
-        body->append(*action->body->components);
+        body->append(action->body->components);
         action->body = new IR::BlockStatement(
-            action->body->srcInfo, action->body->annotations, body);
+            action->body->srcInfo, action->body->annotations, *body);
         pop();
     }
     return action;
@@ -39,8 +39,8 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {
         LOG1("Moved " << decl);
         decls->push_back(decl);
     }
-    decls->append(*control->controlLocals);
-    control->controlLocals = decls;
+    decls->append(control->controlLocals);
+    control->controlLocals = *decls;
     pop();
     return control;
 }
@@ -48,8 +48,8 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {
 const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
     auto newStateful = new IR::IndexedVector<IR::Declaration>();
     newStateful->append(*getMoves());
-    newStateful->append(*parser->parserLocals);
-    parser->parserLocals = newStateful;
+    newStateful->append(parser->parserLocals);
+    parser->parserLocals = *newStateful;
     pop();
     return parser;
 }
@@ -58,9 +58,9 @@ const IR::Node* MoveDeclarations::postorder(IR::Function* function)  {
     auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto m = getMoves();
     body->insert(body->end(), m->begin(), m->end());
-    body->append(*function->body->components);
+    body->append(function->body->components);
     function->body = new IR::BlockStatement(
-        function->body->srcInfo, function->body->annotations, body);
+        function->body->srcInfo, function->body->annotations, *body);
     pop();
     return function;
 }
@@ -69,7 +69,8 @@ const IR::Node* MoveDeclarations::postorder(IR::Declaration_Variable* decl) {
     auto parent = getContext()->node;
     // We must keep the initializer here
     if (decl->initializer != nullptr &&
-        !parent->is<IR::IndexedVector<IR::Declaration>>()) {
+        !parent->is<IR::IndexedVector<IR::Declaration>>() &&
+        !parent->is<IR::P4Parser>() && !parent->is<IR::P4Control>()) {
         // Don't split initializers from declarations that are at the "toplevel".
         // We cannot have assignment statements there.
         LOG1("Moving and splitting " << decl);
@@ -97,9 +98,9 @@ const IR::Node* MoveDeclarations::postorder(IR::Declaration_Constant* decl) {
 }
 
 const IR::Node* MoveInitializers::postorder(IR::Declaration_Variable* decl) {
-    if (getContext()->parent == nullptr)
+    if (getContext() == nullptr)
         return decl;
-    auto parent = getContext()->parent->node;
+    auto parent = getContext()->node;
     if (!parent->is<IR::P4Control>() &&
         !parent->is<IR::P4Parser>())
         // We are not in the local toplevel declarations
@@ -118,8 +119,8 @@ const IR::Node* MoveInitializers::postorder(IR::ParserState* state) {
     if (state->name != IR::ParserState::start ||
         toMove->empty())
         return state;
-    toMove->append(*state->components);
-    state->components = toMove;
+    toMove->append(state->components);
+    state->components = *toMove;
     toMove = new IR::IndexedVector<IR::StatOrDecl>();
     return state;
 }
@@ -127,8 +128,8 @@ const IR::Node* MoveInitializers::postorder(IR::ParserState* state) {
 const IR::Node* MoveInitializers::postorder(IR::P4Control* control) {
     if (toMove->empty())
         return control;
-    toMove->append(*control->body->components);
-    auto newBody = new IR::BlockStatement(control->body->annotations, toMove);
+    toMove->append(control->body->components);
+    auto newBody = new IR::BlockStatement(control->body->annotations, *toMove);
     control->body = newBody;
     toMove = new IR::IndexedVector<IR::StatOrDecl>();
     return control;

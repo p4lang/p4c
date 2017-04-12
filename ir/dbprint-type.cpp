@@ -25,7 +25,7 @@ void IR::ParameterList::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     const char *sep = "";
     out << Brief;
-    for (auto param : *parameters) {
+    for (auto param : parameters) {
         out << sep << param;
         sep = ", "; }
     dbsetflags(out, flags);
@@ -98,7 +98,7 @@ void IR::Type_Tuple::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << "tuple<";
     const char *sep = "";
-    for (auto t : *components) {
+    for (auto t : components) {
         out << sep << t;
         sep = ", "; }
     out << ">";
@@ -113,7 +113,7 @@ void IR::Type_Extern::dbprint(std::ostream& out) const {
     if (typeParameters != nullptr)
         out << typeParameters;
     out << " {" << indent << clrflag(Brief);
-    for (auto &method : *methods)
+    for (auto &method : methods)
         out << endl << method << ';';
     out << " }" << unindent;
 }
@@ -122,7 +122,7 @@ void IR::TypeParameters::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << "<";
     const char *sep = "";
-    for (auto p : *parameters) {
+    for (auto p : parameters) {
         out << sep << p;
         sep = ", "; }
     out << ">";
@@ -140,7 +140,7 @@ void IR::Type_StructLike::dbprint(std::ostream &out) const {
         out << name;
         return; }
     out << toString() << " " << annotations << "{" << indent;
-    for (auto &field : *fields)
+    for (auto &field : fields)
         out << endl << field << ';';
     out << " }" << unindent;
 }

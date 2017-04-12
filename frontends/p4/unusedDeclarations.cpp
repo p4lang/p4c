@@ -49,7 +49,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
         return nullptr;
     }
 
-    visit(cont->controlLocals);
+    cont->controlLocals.visit_children(*this);
     visit(cont->body);
     prune();
     return cont;
@@ -62,8 +62,8 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
         return nullptr;
     }
 
-    visit(cont->parserLocals);
-    visit(cont->states);
+    cont->parserLocals.visit_children(*this);
+    cont->states.visit_children(*this);
     prune();
     return cont;
 }
@@ -90,9 +90,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* dec
 
 const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) {
     LOG3("Visiting " << decl);
-    auto ctx = getContext();
-    if (decl->getName().name == IR::ParserState::verify &&
-        ctx->parent->node->is<IR::P4Program>())
+    if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
     if (refMap->isUsed(getOriginal<IR::IDeclaration>()))
         return decl->getNode();
@@ -103,9 +101,7 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* decl) {
     // Don't delete instances; they may have consequences on the control-plane API
-    auto ctx = getContext();
-    if (decl->getName().name == IR::P4Program::main &&
-        ctx->parent->node->is<IR::P4Program>())
+    if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>())
         return decl;
     if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
         if (giveWarning(getOriginal()))

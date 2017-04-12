@@ -26,8 +26,8 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
         if (statement->right->is<IR::ListExpression>()) {
             auto list = statement->right->to<IR::ListExpression>();
             unsigned index = 0;
-            for (auto f : *strct->fields) {
-                auto right = list->components->at(index);
+            for (auto f : strct->fields) {
+                auto right = list->components.at(index);
                 auto left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
                 index++;
@@ -37,7 +37,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 // Leave headers as they are -- copy_header will also copy the valid bit
                 return statement;
 
-            for (auto f : *strct->fields) {
+            for (auto f : strct->fields) {
                 BUG_CHECK(statement->right->is<IR::PathExpression>() ||
                           statement->right->is<IR::Member>() ||
                           statement->right->is<IR::ArrayIndex>(),

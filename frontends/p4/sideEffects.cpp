@@ -233,7 +233,7 @@ class DismantleExpression : public Transform {
                 cond = new IR::LNot(cond);
                 typeMap->setType(cond, type);
             }
-            auto block = new IR::BlockStatement(ifFalse);
+            auto block = new IR::BlockStatement(*ifFalse);
             auto ifStatement = new IR::IfStatement(cond, ifTrue, block);
             result->statements->push_back(ifStatement);
             result->final = path->clone();
@@ -265,7 +265,7 @@ class DismantleExpression : public Transform {
         result->statements = save;
 
         auto ifStatement = new IR::IfStatement(
-            e0, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+            e0, new IR::BlockStatement(*ifTrue), new IR::BlockStatement(*ifFalse));
         result->statements->push_back(ifStatement);
         result->final = path->clone();
         typeMap->setType(result->final, type);
@@ -431,9 +431,7 @@ class DismantleExpression : public Transform {
         // we cannot write down the type of tmp.  So we don't
         // dismantle these expressions.
         bool tbl_apply = false;
-        auto ctx = getContext();
-        if (ctx != nullptr && ctx->node->is<IR::Member>()) {
-            auto mmbr = ctx->node->to<IR::Member>();
+        if (auto mmbr = getParent<IR::Member>()) {
             auto tbl = TableApplySolver::isActionRun(mmbr, refMap, typeMap);
             auto tbl1 = TableApplySolver::isHit(mmbr, refMap, typeMap);
             tbl_apply = tbl != nullptr || tbl1 != nullptr;
@@ -492,12 +490,12 @@ class DismantleExpression : public Transform {
 const IR::Node* DoSimplifyExpressions::postorder(IR::Function* function) {
     if (toInsert.empty())
         return function;
-    auto locals = new IR::IndexedVector<IR::StatOrDecl>();
+    auto body = new IR::BlockStatement(function->body->srcInfo);
     for (auto a : toInsert)
-        locals->push_back(a);
-    for (auto s : *function->body->components)
-        locals->push_back(s);
-    function->body = new IR::BlockStatement(function->body->srcInfo, locals);
+        body->push_back(a);
+    for (auto s : function->body->components)
+        body->push_back(s);
+    function->body = body;
     toInsert.clear();
     return function;
 }
@@ -505,9 +503,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::Function* function) {
 const IR::Node* DoSimplifyExpressions::postorder(IR::P4Parser* parser) {
     if (toInsert.empty())
         return parser;
-    auto locals = new IR::IndexedVector<IR::Declaration>(*parser->parserLocals);
-    locals->append(toInsert);
-    parser->parserLocals = locals;
+    parser->parserLocals.append(toInsert);
     toInsert.clear();
     return parser;
 }
@@ -515,9 +511,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::P4Parser* parser) {
 const IR::Node* DoSimplifyExpressions::postorder(IR::P4Control* control) {
     if (toInsert.empty())
         return control;
-    auto locals = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
-    locals->append(toInsert);
-    control->controlLocals = locals;
+    control->controlLocals.append(toInsert);
     toInsert.clear();
     return control;
 }
@@ -525,12 +519,12 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::P4Control* control) {
 const IR::Node* DoSimplifyExpressions::postorder(IR::P4Action* action) {
     if (toInsert.empty())
         return action;
-    auto locals = new IR::IndexedVector<IR::StatOrDecl>();
+    auto body = new IR::BlockStatement(action->body->srcInfo);
     for (auto a : toInsert)
-        locals->push_back(a);
-    for (auto s : *action->body->components)
-        locals->push_back(s);
-    action->body = new IR::BlockStatement(action->body->srcInfo, locals);
+        body->push_back(a);
+    for (auto s : action->body->components)
+        body->push_back(s);
+    action->body = body;
     toInsert.clear();
     return action;
 }
@@ -544,9 +538,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::ParserState* state) {
     if (parts->simple())
         return state;
     toInsert.append(*parts->temporaries);
-    auto comp = new IR::IndexedVector<IR::StatOrDecl>(*state->components);
-    comp->append(*parts->statements);
-    state->components = comp;
+    state->components.append(*parts->statements);
     state->selectExpression = parts->final;
     return state;
 }
@@ -561,7 +553,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::AssignmentStatement* statem
     auto right = parts->final;
     CHECK_NULL(right);
     parts->statements->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
-    auto block = new IR::BlockStatement(parts->statements);
+    auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
 
@@ -572,7 +564,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::MethodCallStatement* statem
     if (parts->simple())
         return statement;
     toInsert.append(*parts->temporaries);
-    auto block = new IR::BlockStatement(parts->statements);
+    auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
 
@@ -587,7 +579,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::ReturnStatement* statement)
     toInsert.append(*parts->temporaries);
     auto expr = parts->final;
     parts->statements->push_back(new IR::ReturnStatement(statement->srcInfo, expr));
-    auto block = new IR::BlockStatement(parts->statements);
+    auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
 
@@ -601,7 +593,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::IfStatement* statement) {
     auto expr = parts->final;
     parts->statements->push_back(new IR::IfStatement(statement->srcInfo, expr,
                                                      statement->ifTrue, statement->ifFalse));
-    auto block = new IR::BlockStatement(parts->statements);
+    auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
 
@@ -615,7 +607,7 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::SwitchStatement* statement)
     auto expr = parts->final;
     parts->statements->push_back(
         new IR::SwitchStatement(statement->srcInfo, expr, std::move(statement->cases)));
-    auto block = new IR::BlockStatement(parts->statements);
+    auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
 

@@ -32,7 +32,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
         return expr;
     if (expr->is<IR::ListExpression>()) {
         auto list = expr->to<IR::ListExpression>();
-        for (auto e : *list->components)
+        for (auto e : list->components)
             if (getConstant(e) == nullptr)
                 return nullptr;
         return list;
@@ -482,7 +482,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
 
         bool found = false;
         int index = 0;
-        for (auto f : *structType->fields) {
+        for (auto f : structType->fields) {
             if (f->name.name == e->member.name) {
                 found = true;
                 break;
@@ -492,7 +492,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
 
         if (!found)
             BUG("Could not find field %1% in type %2%", e->member, type);
-        result = list->components->at(index)->clone();
+        result = list->components.at(index)->clone();
     }
     typeMap->setType(result, origtype);
     typeMap->setCompileTimeConstant(result);
@@ -686,17 +686,17 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
         auto list = select->to<IR::ListExpression>();
         if (keySet->is<IR::ListExpression>()) {
             auto klist = keySet->to<IR::ListExpression>();
-            BUG_CHECK(list->components->size() == klist->components->size(),
+            BUG_CHECK(list->components.size() == klist->components.size(),
                       "%1% and %2% size mismatch", list, klist);
-            for (unsigned i=0; i < list->components->size(); i++) {
-                auto r = setContains(klist->components->at(i), list->components->at(i));
+            for (unsigned i=0; i < list->components.size(); i++) {
+                auto r = setContains(klist->components.at(i), list->components.at(i));
                 if (r == Result::DontKnow || r == Result::No)
                     return r;
             }
             return Result::Yes;
         } else {
-            BUG_CHECK(list->components->size() == 1, "%1%: mismatch in list size", list);
-            return setContains(keySet, list->components->at(0));
+            BUG_CHECK(list->components.size() == 1, "%1%: mismatch in list size", list);
+            return setContains(keySet, list->components.at(0));
         }
     }
 

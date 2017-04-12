@@ -156,7 +156,7 @@ bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
 
 bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
     bool first = true;
-    for (auto e : *expression->components) {
+    for (auto e : expression->components) {
         if (!first)
             builder->append(", ");
         first = false;
@@ -242,7 +242,7 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
 bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
     builder->blockStart();
     setVecSep("\n", "\n");
-    visit(s->components);
+    s->components.visit_children(*this);
     doneVec();
     builder->blockEnd(false);
     return false;

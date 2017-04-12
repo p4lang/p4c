@@ -41,17 +41,17 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
         auto newtype = new IR::Type_Parser(name, parser->type->annotations,
                                            new IR::TypeParameters(),
                                            parser->type->applyParams);
-        declarations->append(*parser->parserLocals);
+        declarations->append(parser->parserLocals);
         result = new IR::P4Parser(name, newtype, new IR::ParameterList(),
-                                  declarations, parser->states);
+                                  *declarations, parser->states);
     } else if (clone->is<IR::P4Control>()) {
         auto control = clone->to<IR::P4Control>();
         auto newtype = new IR::Type_Control(name, control->type->annotations,
                                             new IR::TypeParameters(),
                                             control->type->applyParams);
-        declarations->append(*control->controlLocals);
+        declarations->append(control->controlLocals);
         result = new IR::P4Control(name, newtype, new IR::ParameterList(),
-                                   declarations, control->body);
+                                   *declarations, control->body);
 
     } else {
         BUG("%1%: unexpected type", specialized);
@@ -165,7 +165,7 @@ bool FindSpecializations::isSimpleConstant(const IR::Expression* expr) const {
         return true;
     if (expr->is<IR::ListExpression>()) {
         auto list = expr->to<IR::ListExpression>();
-        for (auto e : *list->components)
+        for (auto e : list->components)
             if (!isSimpleConstant(e))
                 return false;
         return true;

@@ -138,9 +138,9 @@ class FindLocationSets : public Inspector {
     }
 
     bool preorder(const IR::ListExpression* expression) {
-        visit(expression->components);
+        expression->components.visit_children(*this);
         auto l = LocationSet::empty;
-        for (auto c : *expression->components) {
+        for (auto c : expression->components) {
             auto cl = get(c);
             l = l->join(cl);
         }
@@ -441,7 +441,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
         inlineList->addInstantiation(parent->container, callee, instance);
     }
     visit_all(block);
-    visit(block->container->states);
+    block->container->states.visit_children(*this);
     return false;
 }
 
@@ -465,13 +465,13 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
 
     workToDo = &toInline->callerToWork[orig];
     LOG1("Analyzing " << dbp(caller));
-    auto locals = new IR::IndexedVector<IR::Declaration>();
-    for (auto s : *caller->controlLocals) {
+    IR::IndexedVector<IR::Declaration> locals;
+    for (auto s : caller->controlLocals) {
         auto inst = s->to<IR::Declaration_Instance>();
         if (inst == nullptr ||
             workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
             // not a call
-            locals->push_back(s);
+            locals.push_back(s);
         } else {
             auto callee = workToDo->declToCallee[inst]->to<IR::P4Control>();
             CHECK_NULL(callee);
@@ -524,7 +524,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
 
             // Substitute applyParameters which are not directionless
             // with fresh variable names or with the call arguments.
-            for (auto param : *callee->type->applyParams->parameters) {
+            for (auto param : callee->type->applyParams->parameters) {
                 if (param->direction == IR::Direction::None)
                     continue;
                 if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
@@ -542,7 +542,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                     LOG1("Replacing " << param->name << " with " << newName);
                     auto vardecl = new IR::Declaration_Variable(newName,
                                                                 param->annotations, param->type);
-                    locals->push_back(vardecl);
+                    locals.push_back(vardecl);
                 }
             }
 
@@ -551,8 +551,8 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                and once again at the call site (where we do additional
                substitutions, including the callee parameters). */
             auto clone = substs->rename<IR::P4Control>(refMap, callee);
-            for (auto i : *clone->controlLocals)
-                locals->push_back(i);
+            for (auto i : clone->controlLocals)
+                locals.push_back(i);
         }
     }
 
@@ -580,7 +580,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
         return statement;
 
     auto callee = called->to<IR::P4Control>();
-    auto body = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> body;
     // clone the substitution: it may be reused for multiple invocations
     auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
 
@@ -592,17 +592,17 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
         if ((param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) &&
             initializer != arg) {
             auto stat = new IR::AssignmentStatement(initializer, arg);
-            body->push_back(stat);
+            body.push_back(stat);
         } else if (param->direction == IR::Direction::Out) {
             auto paramType = typeMap->getType(param, true);
             // This is important, since this variable may be used many times.
-            DoResetHeaders::generateResets(typeMap, paramType, initializer, body);
+            DoResetHeaders::generateResets(typeMap, paramType, initializer, &body);
         }
     }
 
     // inline actual body
     callee = substs->rename<IR::P4Control>(refMap, callee);
-    body->append(*callee->body->components);
+    body.append(callee->body->components);
 
     // Copy values of out and inout parameters
     for (auto param : *mcd.substitution.getParameters()) {
@@ -611,7 +611,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             auto initializer = substs->paramSubst.lookupByName(param->name);
             if (initializer != left) {
                 auto copyout = new IR::AssignmentStatement(left, initializer->clone());
-                body->push_back(copyout);
+                body.push_back(copyout);
             }
         }
     }
@@ -689,7 +689,7 @@ class RenameStates : public Transform {
         return state;
     }
     const IR::Node* preorder(IR::P4Parser* parser) override {
-        visit(parser->states);
+        parser->states.visit_children(*this);
         prune();
         return parser;
     }
@@ -699,20 +699,20 @@ class RenameStates : public Transform {
 const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
     LOG1("Visiting state " << dbp(state));
     auto states = new IR::IndexedVector<IR::ParserState>();
-    auto current = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> current;
 
     // Scan the statements to find a parser call instruction
     auto srcInfo = state->srcInfo;
     auto annotations = state->annotations;
     IR::ID name = state->name;
-    for (auto e : *state->components) {
+    for (auto e : state->components) {
         if (!e->is<IR::MethodCallStatement>()) {
-            current->push_back(e);
+            current.push_back(e);
             continue;
         }
         auto call = e->to<IR::MethodCallStatement>();
         if (workToDo->callToInstance.find(call) == workToDo->callToInstance.end()) {
-            current->push_back(e);
+            current.push_back(e);
             continue;
         }
 
@@ -727,18 +727,18 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
 
         // Evaluate in and inout parameters in order.
         auto it = call->methodCall->arguments->begin();
-        for (auto param : *callee->type->applyParams->parameters) {
+        for (auto param : callee->type->applyParams->parameters) {
             auto initializer = *it;
             LOG1("Looking for " << param->name);
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
                 auto expr = substs->paramSubst.lookupByName(param->name);
                 auto stat = new IR::AssignmentStatement(expr, initializer);
-                current->push_back(stat);
+                current.push_back(stat);
             } else if (param->direction == IR::Direction::Out) {
                 auto expr = substs->paramSubst.lookupByName(param->name);
                 auto paramType = typeMap->getType(param, true);
                 // This is important, since this variable may be used many times.
-                DoResetHeaders::generateResets(typeMap, paramType, expr, current);
+                DoResetHeaders::generateResets(typeMap, paramType, expr, &current);
             } else if (param->direction == IR::Direction::None) {
                 substs->paramSubst.add(param, initializer);
             }
@@ -757,7 +757,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         auto transition = new IR::PathExpression(IR::ID(newStartName, nullptr));
         auto newState = new IR::ParserState(srcInfo, name, annotations, current, transition);
         states->push_back(newState);
-        for (auto s : *renamed->to<IR::P4Parser>()->states) {
+        for (auto s : renamed->to<IR::P4Parser>()->states) {
             if (s->name == IR::ParserState::accept ||
                 s->name == IR::ParserState::reject)
                 continue;
@@ -767,17 +767,17 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         // Prepare next state
         annotations = IR::Annotations::empty;
         name = IR::ID(nextState, nullptr);
-        current = new IR::IndexedVector<IR::StatOrDecl>();
+        current.clear();
 
         // Copy back out and inout parameters
         it = call->methodCall->arguments->begin();
-        for (auto param : *callee->type->applyParams->parameters) {
+        for (auto param : callee->type->applyParams->parameters) {
             auto left = *it;
             if (param->direction == IR::Direction::InOut ||
                 param->direction == IR::Direction::Out) {
                 auto expr = substs->paramSubst.lookupByName(param->name);
                 auto copyout = new IR::AssignmentStatement(left, expr->clone());
-                current->push_back(copyout);
+                current.push_back(copyout);
             }
             ++it;
         }
@@ -806,13 +806,13 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
 
     workToDo = &toInline->callerToWork[orig];
     LOG1("Analyzing " << dbp(caller));
-    auto locals = new IR::IndexedVector<IR::Declaration>();
-    for (auto s : *caller->parserLocals) {
+    IR::IndexedVector<IR::Declaration> locals;
+    for (auto s : caller->parserLocals) {
         auto inst = s->to<IR::Declaration_Instance>();
         if (inst == nullptr ||
             workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
             // not a call
-            locals->push_back(s);
+            locals.push_back(s);
         } else {
             auto callee = workToDo->declToCallee[inst]->to<IR::P4Parser>();
             CHECK_NULL(callee);
@@ -834,7 +834,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
 
             // Substitute applyParameters which are not directionless
             // with fresh variable names.
-            for (auto param : *callee->type->applyParams->parameters) {
+            for (auto param : callee->type->applyParams->parameters) {
                 if (param->direction == IR::Direction::None)
                     continue;
                 cstring newName = refMap->newName(param->name);
@@ -843,7 +843,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
                 LOG1("Replacing " << param->name << " with " << newName);
                 auto vardecl = new IR::Declaration_Variable(newName,
                                                             param->annotations, param->type);
-                locals->push_back(vardecl);
+                locals.push_back(vardecl);
             }
 
             /* We will perform these substitutions twice: once here, to
@@ -851,12 +851,12 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
                and once again at the call site (where we do additional
                substitutions, including the callee parameters). */
             auto clone = substs->rename<IR::P4Parser>(refMap, callee);
-            for (auto i : *clone->parserLocals)
-                locals->push_back(i);
+            for (auto i : clone->parserLocals)
+                locals.push_back(i);
         }
     }
 
-    visit(caller->states);
+    caller->states.visit_children(*this);
     caller->parserLocals = locals;
     list->replace(orig, caller);
     workToDo = nullptr;

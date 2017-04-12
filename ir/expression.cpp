@@ -26,11 +26,11 @@ int IR::Member::offset_bits() const {
 int IR::Member::lsb() const {
   int rv = 0;
   auto header_type = dynamic_cast<const IR::Type_StructLike *>(expr->type);
-  auto field_iter = header_type->fields->rbegin();
+  auto field_iter = header_type->fields.rbegin();
   // This assumes little-endian number for bits.
   while ((*field_iter)->name != member) {
       rv += (*field_iter)->type->width_bits();
-    if (++field_iter == header_type->fields->rend())
+    if (++field_iter == header_type->fields.rend())
         BUG("No field %s in %s", member, expr->type); }
   return rv;
 }

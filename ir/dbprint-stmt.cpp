@@ -55,9 +55,8 @@ void IR::Function::dbprint(std::ostream &out) const {
     if (type->typeParameters && !type->typeParameters->empty())
         out << type->typeParameters;
     out << "(" << type->parameters << ") {" << indent;
-    if (body->components)
-        for (auto s : *body->components)
-            out << endl << s;
+    for (auto s : body->components)
+        out << endl << s;
     out << unindent << " }";
 }
 

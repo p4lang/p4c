@@ -110,26 +110,26 @@ class Parameter : Declaration, IAnnotated {
 }
 
 class ParameterList : ISimpleNamespace {
-    IndexedVector<Parameter> parameters;
-    validate{ parameters->check_null(); }
-    ParameterList() { parameters = new IndexedVector<Parameter>(); }
+    optional inline IndexedVector<Parameter> parameters;
+    validate{ parameters.check_null(); }
     Util::Enumerator<Parameter>* getEnumerator() const {
-        return parameters->getEnumerator(); }
+        return parameters.getEnumerator(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return parameters->getDeclarations(); }
-    size_t size() const { return parameters->size(); }
+        return parameters.getDeclarations(); }
+    size_t size() const { return parameters.size(); }
     bool empty() const { return size() == 0; }
     IR::Parameter getParameter(cstring name) const {
-        return parameters->getDeclaration<Parameter>(name); }
+        return parameters.getDeclaration<Parameter>(name); }
     IR::Parameter getParameter(unsigned index) const {
-        for (auto &param : *parameters)
+        for (auto &param : parameters)
             if (0 == index--) return param;
         BUG("Only %1% parameters; index #%2% requested", size(), size()+index); }
     IR::IDeclaration getDeclByName(cstring name) const override { return getParameter(name); }
+    void push_back(const Parameter *p) { parameters.push_back(p); }
     toString {
         cstring result = "";
         bool first = true;
-        for (auto p : *parameters) {
+        for (auto p : parameters) {
             if (!first)
                 result += ", ";
             first = false;
@@ -138,8 +138,8 @@ class ParameterList : ISimpleNamespace {
         return result;
     }
 #emit
-    decltype(parameters->begin()) begin() const { return parameters->begin(); }
-    decltype(parameters->end()) end() const { return parameters->end(); }
+    auto begin() const -> decltype(parameters.begin()) { return parameters.begin(); }
+    auto end() const -> decltype(parameters.end()) { return parameters.end(); }
 #end
 }
 
@@ -186,21 +186,21 @@ class Type_MatchKind : Type_Base {
 }
 
 class TypeParameters : ISimpleNamespace {
-    IndexedVector<Type_Var> parameters;
-    TypeParameters() : parameters(new IndexedVector<Type_Var>()) {}
+    optional inline IndexedVector<Type_Var> parameters;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return parameters->getDeclarations(); }
-    bool empty() const { return parameters->empty(); }
-    size_t size() const { return parameters->size(); }
+        return parameters.getDeclarations(); }
+    bool empty() const { return parameters.empty(); }
+    size_t size() const { return parameters.size(); }
     IR::IDeclaration getDeclByName(cstring name) const override {
-        return parameters->getDeclaration(name); }
-    validate{ parameters->check_null(); }
+        return parameters.getDeclaration(name); }
+    void push_back(Type_Var tv) { parameters.push_back(tv); }
+    validate{ parameters.check_null(); }
     toString {
-        if (parameters->size() == 0)
+        if (parameters.size() == 0)
             return "";
         cstring result = "<";
         bool first = true;
-        for (auto p : *parameters) {
+        for (auto p : parameters) {
             if (!first)
                 result += ", ";
             first = false;
@@ -218,21 +218,21 @@ class StructField : Declaration, IAnnotated {
 }
 
 abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
-    optional Annotations       annotations = Annotations::empty;
-    IndexedVector<StructField> fields;
+    optional Annotations                        annotations = Annotations::empty;
+    optional inline IndexedVector<StructField>  fields;
     Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return fields->getDeclarations(); }
+        return fields.getDeclarations(); }
     StructField getField(cstring name) const {
-        return fields->getDeclaration<StructField>(name); }
+        return fields.getDeclaration<StructField>(name); }
     int width_bits() const override {
         int rv = 0;
-        for (auto f : *fields)
+        for (auto f : fields)
             rv += f->type->width_bits();
         return rv; }
     IR::IDeclaration getDeclByName(cstring name) const override {
-        return fields->getDeclaration(name); }
-    validate{ fields->check_null(); }
+        return fields.getDeclaration(name); }
+    validate{ fields.check_null(); }
     dbprint;
 #apply
 }
@@ -248,7 +248,7 @@ class Type_Union : Type_StructLike {
     /// this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
-        for (auto f : *fields)
+        for (auto f : fields)
             rv = std::max(rv, f->type->width_bits());
         return rv; }
 }
@@ -274,9 +274,9 @@ class Type_Set : Type {
 
 /// The type of an expressionList
 class Type_Tuple : Type {
-    Vector<Type> components;
-    toString{ return "Tuple(" + Util::toString(components->size()) + ")"; }
-    validate{ components->check_null(); }
+    optional inline Vector<Type> components;
+    toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
+    validate{ components.check_null(); }
     const Type* getP4Type() const override { return this; }
 }
 
@@ -377,13 +377,13 @@ class Type_String : Type_Base {
 }
 
 class Type_Enum : Type_Declaration, ISimpleNamespace {
-    IndexedVector<Declaration_ID> members;
+    inline IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return members->getDeclarations(); }
+        return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
-        return members->getDeclaration(name); }
+        return members.getDeclaration(name); }
 #nodbprint
-    validate{ members->check_null(); }
+    validate{ members.check_null(); }
  }
 
 class Type_Table : Type, IApply {
@@ -481,16 +481,16 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 /// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     optional TypeParameters typeParameters = new TypeParameters;
-    Vector<Method> methods;  // methods can be overloaded, so this is not IndexedVector
+    optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
     optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
     optional Annotations annotations = Annotations::empty;
 
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return methods->getEnumerator()->as<const IDeclaration*>()
+        return methods.getEnumerator()->as<const IDeclaration*>()
             ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     Method lookupMethod(cstring name, int argCount) const;
-    validate{ methods->check_null(); }
+    validate{ methods.check_null(); }
 }
 
 /** @} *//* end group irdefs */

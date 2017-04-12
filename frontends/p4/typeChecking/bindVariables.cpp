@@ -34,7 +34,7 @@ const IR::Node* BindTypeVariables::postorder(IR::Declaration_Instance* decl) {
     if (mt->getTypeParameters()->empty())
         return decl;
     auto typeArgs = new IR::Vector<IR::Type>();
-    for (auto p : *mt->getTypeParameters()->parameters) {
+    for (auto p : mt->getTypeParameters()->parameters) {
         auto type = getVarValue(p);
         if (type == nullptr) {
             ::error("%1%: cannot infer type for type parameter %2%", decl, p);
@@ -57,7 +57,7 @@ const IR::Node* BindTypeVariables::postorder(IR::MethodCallExpression* expressio
     if (mt->getTypeParameters()->empty())
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
-    for (auto p : *mt->getTypeParameters()->parameters) {
+    for (auto p : mt->getTypeParameters()->parameters) {
         auto type = getVarValue(p);
         if (type == nullptr) {
             ::error("%1%: cannot infer type for type parameter %2%", expression, p);
@@ -79,7 +79,7 @@ const IR::Node* BindTypeVariables::postorder(IR::ConstructorCallExpression* expr
     if (mt->getTypeParameters()->empty())
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
-    for (auto p : *mt->getTypeParameters()->parameters) {
+    for (auto p : mt->getTypeParameters()->parameters) {
         auto type = getVarValue(p);
         if (type == nullptr) {
             ::error("%1%: cannot infer type for type parameter %2%", expression, p);

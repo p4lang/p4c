@@ -84,7 +84,6 @@ static const IR::Annotations *getPragmas() {
     IR::Meter                   *Meter;
     IR::Parameter               *Parameter;
     IR::ParameterList           *ParameterList;
-    IR::IndexedVector<IR::Parameter> *ParameterVector;
     IR::V1Parser                *Parser;
     IR::Register                *Register;
     IR::V1Table                 *Table;
@@ -162,8 +161,7 @@ static const IR::Annotations *getPragmas() {
 %type<NameList>         action_list name_list opt_name_list field_list_list
 %type<Meter>            meter_spec_list
 %type<Parameter>        argument
-%type<ParameterList>    opt_argument_list
-%type<ParameterVector>  argument_list
+%type<ParameterList>    opt_argument_list argument_list
 %type<Parser>           parser_statement_list
 %type<Register>         register_spec_list
 %type<Table>            table_body
@@ -209,9 +207,9 @@ header_type_declaration: HEADER_TYPE name '{' header_dec_body '}'
         current_pragmas.clear();
         global->add($2, new IR::v1HeaderType(@1+@5, $2,
             new IR::Type_Struct(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations(*$4.annotations), $4.fields),
+                                new IR::Annotations(*$4.annotations), *$4.fields),
             new IR::Type_Header(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations(*$4.annotations), $4.fields))); }
+                                new IR::Annotations(*$4.annotations), *$4.fields))); }
 ;
 
 header_dec_body: FIELDS '{' field_declarations '}' opt_length opt_max_length
@@ -714,7 +712,7 @@ apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
 /************/
 
 blackbox_type_declaration: BLACKBOX_TYPE name '{' blackbox_body '}'
-      { global->add($2, new IR::Type_Extern(@1+@5, IR::ID(@2, $2), $4.methods,
+      { global->add($2, new IR::Type_Extern(@1+@5, IR::ID(@2, $2), *$4.methods,
                                             *$4.attribs, getPragmas())); }
 ;
 
@@ -750,12 +748,12 @@ blackbox_method: { $$ = new IR::Annotations; }
 ;
 
 opt_argument_list:
-      /* epsilon */ { $$ = new IR::ParameterList(new IR::IndexedVector<IR::Parameter>); }
-    | argument_list { $$ = new IR::ParameterList($1); }
+      /* epsilon */ { $$ = new IR::ParameterList; }
+    | argument_list { $$ = $1; }
 ;
 
 argument_list:
-      argument                          { $$ = new IR::IndexedVector<IR::Parameter>($1); }
+      argument                          { $$ = new IR::ParameterList({$1}); }
     | argument_list ',' argument        { ($$=$1)->push_back($3); }
 ;
 

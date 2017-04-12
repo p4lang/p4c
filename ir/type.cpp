@@ -121,7 +121,7 @@ const Type_MatchKind *Type_MatchKind::get() {
 }
 
 bool Type_ActionEnum::contains(cstring name) const {
-    for (auto a : *actionList->actionList) {
+    for (auto a : actionList->actionList) {
         if (a->getName() == name)
             return true;
     }

@@ -46,7 +46,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type = typeMap->getTypeType(type, true);  // get the canonical version
         auto st = type->to<IR::Type_StructLike>();
         auto result = new StructLocation(type, name);
-        for (auto f : *st->fields) {
+        for (auto f : st->fields) {
             auto sl = create(f->type, name + "." + f->name);
             result->addField(f->name, sl);
         }
@@ -358,7 +358,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
 
     if (parameters != nullptr) {
-        for (auto p : *parameters->parameters) {
+        for (auto p : parameters->parameters) {
             StorageLocation* loc = definitions->storageMap->getOrAdd(p);
             if (loc == nullptr)
                 continue;
@@ -397,7 +397,7 @@ void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
                                 const IR::IndexedVector<IR::Declaration>* locals) {
     currentDefinitions = currentDefinitions->clone();
     if (parameters != nullptr) {
-        for (auto p : *parameters->parameters) {
+        for (auto p : parameters->parameters) {
             StorageLocation* loc = definitions->storageMap->getStorage(p);
             if (loc == nullptr)
                 continue;
@@ -417,10 +417,10 @@ void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
 
 Definitions* ComputeWriteSet::getDefinitionsAfter(const IR::ParserState* state) {
     ProgramPoint last;
-    if (state->components->size() == 0)
+    if (state->components.size() == 0)
         last = ProgramPoint(state);
     else
-        last = ProgramPoint(ProgramPoint(state), state->components->back());
+        last = ProgramPoint(ProgramPoint(state), state->components.back());
     return definitions->get(last);
 }
 
@@ -583,9 +583,9 @@ bool ComputeWriteSet::preorder(const IR::SelectExpression* expression) {
 }
 
 bool ComputeWriteSet::preorder(const IR::ListExpression* expression) {
-    visit(expression->components);
+    expression->components.visit_children(*this);
     auto l = LocationSet::empty;
-    for (auto c : *expression->components) {
+    for (auto c : expression->components) {
         auto cl = get(c);
         l = l->join(cl);
     }
@@ -677,21 +677,13 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 //////////////////////////
 /// Statements and other control structures
 
-bool ComputeWriteSet::preorder(const IR::ParserState* state) {
-    for (auto stat : *state->components)
-        visit(stat);
-    if (state->selectExpression != nullptr)
-        visit(state->selectExpression);
-    return false;
-}
-
 // Symbolic execution of the parser
 bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     LOG3("CWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
-    enterScope(parser->type->applyParams, parser->parserLocals, startPoint);
-    for (auto l : *parser->parserLocals) {
+    enterScope(parser->type->applyParams, &parser->parserLocals, startPoint);
+    for (auto l : parser->parserLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
     }
@@ -735,10 +727,10 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     LOG3("CWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
-    enterScope(control->type->applyParams, control->controlLocals, startPoint);
+    enterScope(control->type->applyParams, &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
-    for (auto l : *control->controlLocals) {
+    for (auto l : control->controlLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
     }
@@ -764,7 +756,7 @@ bool ComputeWriteSet::preorder(const IR::IfStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::BlockStatement* statement) {
-    visit(statement->components);
+    statement->components.visit_children(*this);
     return setDefinitions(currentDefinitions);
 }
 
@@ -835,7 +827,7 @@ bool ComputeWriteSet::preorder(const IR::P4Action* action) {
     auto decls = new IR::IndexedVector<IR::Declaration>();
     // We assume that there are no declarations in inner scopes
     // inside the action body.
-    for (auto s : *action->body->components) {
+    for (auto s : action->body->components) {
         if (s->is<IR::Declaration>())
             decls->push_back(s->to<IR::Declaration>());
     }
@@ -891,7 +883,7 @@ bool ComputeWriteSet::preorder(const IR::P4Table* table) {
     auto after = new Definitions();
     auto beforeTable = currentDefinitions;
     auto actions = table->getActionList();
-    for (auto ale : *actions->actionList) {
+    for (auto ale : actions->actionList) {
         BUG_CHECK(ale->expression->is<IR::MethodCallExpression>(),
                   "%1%: unexpected entry in action list", ale);
         currentDefinitions = beforeTable;

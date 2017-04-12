@@ -56,7 +56,7 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     builder->blockStart();
 
     setVecSep("\n", "\n");
-    visit(parserState->components);
+    parserState->components.visit_children(*this);
     doneVec();
 
     if (parserState->selectExpression == nullptr) {
@@ -82,7 +82,7 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     hasDefault = false;
-    if (expression->select->components->size() != 1) {
+    if (expression->select->components.size() != 1) {
         // TODO: this does not handle correctly tuples
         ::error("%1%: only supporting a single argument for select", expression->select);
         return false;
@@ -248,7 +248,7 @@ StateTranslationVisitor::compileExtract(const IR::Vector<IR::Expression>* args) 
     builder->blockEnd(true);
 
     unsigned alignment = 0;
-    for (auto f : *ht->fields) {
+    for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<IHasWidth*>(etype);
@@ -353,10 +353,10 @@ bool EBPFParser::build() {
         return false;
     }
 
-    auto it = pl->parameters->begin();
+    auto it = pl->parameters.begin();
     packet = *it; ++it;
     headers = *it;
-    for (auto state : *parserBlock->container->states) {
+    for (auto state : parserBlock->container->states) {
         auto ps = new EBPFParserState(state, this);
         states.push_back(ps);
     }

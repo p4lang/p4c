@@ -146,11 +146,11 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     if (left->is<IR::Type_StructLike>()) {
         auto sl = left->to<IR::Type_StructLike>();
         auto sr = right->to<IR::Type_StructLike>();
-        if (sl->fields->size() != sr->fields->size())
+        if (sl->fields.size() != sr->fields.size())
             return false;
-        for (size_t i = 0; i < sl->fields->size(); i++) {
-            auto fl = sl->fields->at(i);
-            auto fr = sr->fields->at(i);
+        for (size_t i = 0; i < sl->fields.size(); i++) {
+            auto fl = sl->fields.at(i);
+            auto fr = sr->fields.at(i);
             if (fl->name != fr->name)
                 return false;
             if (!equivalent(fl->type, fr->type))
@@ -161,11 +161,11 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     if (left->is<IR::Type_Tuple>()) {
         auto lt = left->to<IR::Type_Tuple>();
         auto rt = right->to<IR::Type_Tuple>();
-        if (lt->components->size() != rt->components->size())
+        if (lt->components.size() != rt->components.size())
             return false;
-        for (size_t i = 0; i < lt->components->size(); i++) {
-            auto l = lt->components->at(i);
-            auto r = rt->components->at(i);
+        for (size_t i = 0; i < lt->components.size(); i++) {
+            auto l = lt->components.at(i);
+            auto r = rt->components.at(i);
             if (!equivalent(l, r))
                 return false;
         }
@@ -188,8 +188,8 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         if (lm->typeParameters->size() != rm->typeParameters->size())
             return false;
         for (size_t i = 0; i < lm->typeParameters->size(); i++) {
-            auto lp = lm->typeParameters->parameters->at(i);
-            auto rp = rm->typeParameters->parameters->at(i);
+            auto lp = lm->typeParameters->parameters.at(i);
+            auto rp = rm->typeParameters->parameters.at(i);
             if (!equivalent(lp, rp))
                 return false;
         }
@@ -197,8 +197,8 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         if (lm->parameters->size() != rm->parameters->size())
             return false;
         for (size_t i = 0; i < lm->parameters->size(); i++) {
-            auto lp = lm->parameters->parameters->at(i);
-            auto rp = rm->parameters->parameters->at(i);
+            auto lp = lm->parameters->parameters.at(i);
+            auto rp = rm->parameters->parameters.at(i);
             if (lp->direction != rp->direction)
                 return false;
             if (!equivalent(lp->type, rp->type))
@@ -226,8 +226,8 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         if (lm->typeParameters->size() != rm->typeParameters->size())
             return false;
         for (size_t i = 0; i < lm->typeParameters->size(); i++) {
-            auto lp = lm->typeParameters->parameters->at(i);
-            auto rp = rm->typeParameters->parameters->at(i);
+            auto lp = lm->typeParameters->parameters.at(i);
+            auto rp = rm->typeParameters->parameters.at(i);
             if (!equivalent(lp, rp))
                 return false;
         }
@@ -236,8 +236,8 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         if (lm->parameters->size() != rm->parameters->size())
             return false;
         for (size_t i = 0; i < lm->parameters->size(); i++) {
-            auto lp = lm->parameters->parameters->at(i);
-            auto rp = rm->parameters->parameters->at(i);
+            auto lp = lm->parameters->parameters.at(i);
+            auto rp = rm->parameters->parameters.at(i);
             if (lp->direction != rp->direction)
                 return false;
             if (!equivalent(lp->type, rp->type))

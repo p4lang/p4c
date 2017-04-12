@@ -141,7 +141,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
 
     bool first = true;
     dump(2);
-    for (auto a : *program->declarations) {
+    for (auto a : program->declarations) {
         // Check where this declaration originates
         cstring sourceFile = ifSystemFile(a);
         if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
@@ -175,7 +175,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
         first = false;
         visit(a);
     }
-    if (!program->declarations->empty())
+    if (!program->declarations.empty())
         builder.newline();
     return false;
 }
@@ -250,7 +250,7 @@ bool ToP4::preorder(const IR::Type_Tuple* t) {
     dump(1);
     builder.append("tuple<");
     bool first = true;
-    for (auto a : *t->components) {
+    for (auto a : t->components) {
         if (!first)
             builder.append(", ");
         first = false;
@@ -286,7 +286,7 @@ bool ToP4::preorder(const IR::TypeParameters* t) {
     if (!t->empty()) {
         builder.append("<");
         bool first = true;
-        for (auto a : *t->parameters) {
+        for (auto a : t->parameters) {
             if (!first)
                 builder.append(", ");
             first = false;
@@ -300,8 +300,7 @@ bool ToP4::preorder(const IR::TypeParameters* t) {
 bool ToP4::preorder(const IR::Method* m) {
     dump(1);
     const Context* ctx = getContext();
-    bool standaloneFunction = ctx && (!ctx->parent ||
-                                      !ctx->parent->node->is<IR::Type_Extern>());
+    bool standaloneFunction = !ctx || !ctx->node->is<IR::Type_Extern>();
     // standalone function declaration: not in a Vector of methods
     if (standaloneFunction)
         builder.append("extern ");
@@ -349,7 +348,7 @@ bool ToP4::preorder(const IR::Type_Extern* t) {
     setVecSep(";\n", ";\n");
     bool decl = isDeclaration;
     isDeclaration = true;
-    visit(t->methods);
+    preorder(&t->methods);
     isDeclaration = decl;
     doneVec();
     builder.blockEnd(true);
@@ -389,7 +388,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
 
     std::map<const IR::StructField*, cstring> type;
     size_t len = 0;
-    for (auto f : *t->fields) {
+    for (auto f : t->fields) {
         Util::SourceCodeBuilder builder;
         ToP4 rec(builder, showIR);
 
@@ -400,7 +399,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
         type.emplace(f, t);
     }
 
-    for (auto f : *t->fields) {
+    for (auto f : t->fields) {
         dump(2, f, 1);
         if (f->annotations->size() > 0) {
             builder.emitIndent();
@@ -607,17 +606,22 @@ bool ToP4::preorder(const IR::Declaration_MatchKind* d) {
         builder.append(sep.terminator); }                 \
 return false; }
 
-VECTOR_VISIT(Vector, Type)
+VECTOR_VISIT(Vector, ActionListElement)
+VECTOR_VISIT(Vector, Annotation)
+VECTOR_VISIT(Vector, Entry)
 VECTOR_VISIT(Vector, Expression)
+VECTOR_VISIT(Vector, KeyElement)
 VECTOR_VISIT(Vector, Method)
+VECTOR_VISIT(Vector, Node)
 VECTOR_VISIT(Vector, SelectCase)
 VECTOR_VISIT(Vector, SwitchCase)
-VECTOR_VISIT(Vector, Node)
-VECTOR_VISIT(Vector, ActionListElement)
+VECTOR_VISIT(Vector, Type)
+VECTOR_VISIT(IndexedVector, Declaration)
+VECTOR_VISIT(IndexedVector, Declaration_ID)
+VECTOR_VISIT(IndexedVector, Node)
 VECTOR_VISIT(IndexedVector, ParserState)
 VECTOR_VISIT(IndexedVector, StatOrDecl)
-VECTOR_VISIT(IndexedVector, Declaration)
-VECTOR_VISIT(IndexedVector, Node)
+
 #undef VECTOR_VISIT
 
 ///////////////////////////////////////////
@@ -732,7 +736,7 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
     setListTerm("{ ", " }");
-    visit(e->components);
+    preorder(&e->components);
     doneList();
     expressionPrecedence = prec;
     doneVec();
@@ -743,8 +747,7 @@ bool ToP4::preorder(const IR::ListExpression* e) {
 bool ToP4::preorder(const IR::MethodCallExpression* e) {
     int prec = expressionPrecedence;
     bool useParens = (prec > DBPrint::Prec_Postfix) ||
-            (!e->typeArguments->empty() &&
-             getContext()->node->is<IR::Expression>());
+            (!e->typeArguments->empty() && prec >= DBPrint::Prec_Cond);
     // FIXME: we use parenthesis more often than necessary
     // because the bison parser has a bug which parses
     // these expressions incorrectly.
@@ -871,7 +874,7 @@ bool ToP4::preorder(const IR::BlockStatement* s) {
     visit(s->annotations);
     builder.blockStart();
     setVecSep("\n", "\n");
-    visit(s->components);
+    preorder(&s->components);
     doneVec();
     builder.blockEnd(false);
     return false;
@@ -1007,7 +1010,7 @@ bool ToP4::preorder(const IR::P4Control * c) {
         visit(c->constructorParams);
     builder.spc();
     builder.blockStart();
-    for (auto s : *c->controlLocals) {
+    for (auto s : c->controlLocals) {
         builder.emitIndent();
         visit(s);
         builder.newline();
@@ -1055,7 +1058,7 @@ bool ToP4::preorder(const IR::ParserState* s) {
     builder.spc();
     builder.blockStart();
     setVecSep("\n", "\n");
-    visit(s->components);
+    preorder(&s->components);
     doneVec();
 
     if (s->selectExpression != nullptr) {
@@ -1083,10 +1086,10 @@ bool ToP4::preorder(const IR::P4Parser * c) {
     builder.spc();
     builder.blockStart();
     setVecSep("\n", "\n");
-    visit(c->parserLocals);
+    preorder(&c->parserLocals);
     doneVec();
     // explicit visit of parser states
-    for (auto s : *c->states) {
+    for (auto s : c->states) {
         if (s->isBuiltin()) continue;
         builder.emitIndent();
         visit(s);
@@ -1114,7 +1117,7 @@ bool ToP4::preorder(const IR::ActionList* v) {
     dump(2);
     builder.blockStart();
     setVecSep(";\n", ";\n");
-    visit(v->actionList);
+    preorder(&v->actionList);
     doneVec();
     builder.blockEnd(false);
     return false;
@@ -1126,7 +1129,7 @@ bool ToP4::preorder(const IR::Key* v) {
 
     std::map<const IR::KeyElement*, cstring> kf;
     size_t len = 0;
-    for (auto f : *v->keyElements) {
+    for (auto f : v->keyElements) {
         Util::SourceCodeBuilder builder;
         ToP4 rec(builder, showIR);
 
@@ -1137,7 +1140,7 @@ bool ToP4::preorder(const IR::Key* v) {
         kf.emplace(f, s);
     }
 
-    for (auto f : *v->keyElements) {
+    for (auto f : v->keyElements) {
         dump(2, f, 2);
         builder.emitIndent();
         cstring s = get(kf, f);
@@ -1168,7 +1171,7 @@ bool ToP4::preorder(const IR::Property* p) {
 }
 
 bool ToP4::preorder(const IR::TableProperties* t) {
-    for (auto p : *t->properties) {
+    for (auto p : t->properties) {
         builder.emitIndent();
         visit(p);
         builder.newline();
@@ -1181,7 +1184,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
     builder.append("{");
     builder.newline();
     builder.increaseIndent();
-    visit(l->entries);
+    preorder(&l->entries);
     builder.decreaseIndent();
     builder.emitIndent();
     builder.append("}");
@@ -1191,7 +1194,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
 
 bool ToP4::preorder(const IR::Entry *e) {
     builder.emitIndent();
-    if (e->keys->components->size() == 1)
+    if (e->keys->components.size() == 1)
         setListTerm("", "");
     else
         setListTerm("(", ")");

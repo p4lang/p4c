@@ -115,7 +115,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
     width = 0;
     implWidth = 0;
 
-    for (auto f : *strct->fields) {
+    for (auto f : strct->fields) {
         auto type = EBPFTypeFactory::instance->create(f->type);
         auto wt = dynamic_cast<IHasWidth*>(type);
         if (wt == nullptr) {
@@ -239,7 +239,7 @@ void EBPFEnumType::emit(EBPF::CodeBuilder* builder) {
     auto et = getType();
     builder->append(et->name);
     builder->blockStart();
-    for (auto m : *et->members) {
+    for (auto m : et->members) {
         builder->append(m->name);
         builder->appendLine(",");
     }

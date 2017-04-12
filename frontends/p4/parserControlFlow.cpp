@@ -72,7 +72,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
     auto origSelect = state->selectExpression;
 
     cstring joinName;  // non-empty if we split the state
-    for (auto c : *origComponents) {
+    for (auto c : origComponents) {
         if (c->is<IR::IfStatement>()) {
             LOG1("Converting " << c << " into states");
 
@@ -84,7 +84,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
             cstring trueName = refMap->newName(state->name.name + "_true");
             auto trueComponents = new IR::IndexedVector<IR::StatOrDecl>();
             trueComponents->push_back(ifstat->ifTrue);
-            auto trueState = new IR::ParserState(trueName, trueComponents,
+            auto trueState = new IR::ParserState(trueName, *trueComponents,
                 new IR::PathExpression(IR::ID(joinName, nullptr)));
             states->push_back(trueState);
 
@@ -94,7 +94,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
                 falseName = refMap->newName(state->name.name + "_false");
                 auto falseComponents = new IR::IndexedVector<IR::StatOrDecl>();
                 falseComponents->push_back(ifstat->ifFalse);
-                auto falseState = new IR::ParserState(falseName, falseComponents,
+                auto falseState = new IR::ParserState(falseName, *falseComponents,
                     new IR::PathExpression(IR::ID(joinName, nullptr)));
                 states->push_back(falseState);
             }
@@ -111,16 +111,16 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
             cases->push_back(trueCase);
             cases->push_back(falseCase);
             currentState->selectExpression = new IR::SelectExpression(
-                new IR::ListExpression(vec), std::move(*cases));
+                new IR::ListExpression(*vec), std::move(*cases));
 
-            currentState->components = currentComponents;
+            currentState->components = *currentComponents;
             currentComponents = new IR::IndexedVector<IR::StatOrDecl>();
-            currentState = new IR::ParserState(joinName,
-                currentComponents, origSelect);  // may be overriten
+            currentState = new IR::ParserState(joinName, origSelect);  // may be overriten
         } else {
             currentComponents->push_back(c);
         }
     }
+    currentState->components = *currentComponents;
 
     if (states->empty())
         return state;

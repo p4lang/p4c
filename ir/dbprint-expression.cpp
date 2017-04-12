@@ -217,7 +217,7 @@ void IR::ListExpression::dbprint(std::ostream &out) const {
     if (prec > Prec_Postfix) out << '(';
     out << setprec(Prec_Postfix) << "{" << setprec(Prec_Low);
     bool first = true;
-    for (auto a : *components) {
+    for (auto a : components) {
         if (!first) out << ", ";
         out << setprec(Prec_Low) << a;
         first = false;

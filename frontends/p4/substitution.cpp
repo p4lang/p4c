@@ -89,14 +89,14 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
     if (params == nullptr || args == nullptr)
         BUG("Nullptr argument to setBindings");
 
-    if (params->parameters->size() != args->size()) {
+    if (params->parameters.size() != args->size()) {
         ::error("%1% has %2% type parameters, invoked with %3% %4%",
-                errorLocation, params->parameters->size(), args->size(), args);
+                errorLocation, params->parameters.size(), args->size(), args);
         return false;
     }
 
     auto it = args->begin();
-    for (auto tp : *params->parameters) {
+    for (auto tp : params->parameters) {
         auto t = *it;
         ++it;
 

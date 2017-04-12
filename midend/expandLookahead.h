@@ -49,11 +49,8 @@ class DoExpandLookahead : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override
     { newDecls.clear(); return parser; }
     const IR::Node* postorder(IR::P4Parser* parser) override {
-        if (!newDecls.empty()) {
-            auto locals = new IR::IndexedVector<IR::Declaration>(*parser->parserLocals);
-            locals->append(newDecls);
-            parser->parserLocals = locals;
-        }
+        if (!newDecls.empty())
+            parser->parserLocals.append(newDecls);
         return parser;
     }
 };

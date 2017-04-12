@@ -45,12 +45,12 @@ class ComplexValues final {
         ordered_map<cstring, Component*> members;
         FieldsMap() = default;
         const IR::Expression* convertToExpression() override {
-            auto vec = new IR::Vector<IR::Expression>();
+            auto vec = new IR::ListExpression({});
             for (auto m : members) {
                 auto e = m.second->convertToExpression();
                 vec->push_back(e);
             }
-            return new IR::ListExpression(vec);
+            return vec;
         }
         Component* get(cstring name) override
         { return ::get(members, name); }
