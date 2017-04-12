@@ -14,12 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <stdexcept>
 #include "helpers.h"
 
 namespace detail {
 
-std::string makeP4Source(const char* file, unsigned line, const char* rawSource) {
+std::string makeP4Source(const char* file, unsigned line,
+                         P4Headers headers, const char* rawSource) {
     std::stringstream source;
+
+    // Prepend any requested headers.
+    switch (headers) {
+        case P4Headers::NONE: break;
+        case P4Headers::CORE:
+            source << P4CTestEnvironment::get()->coreP4();
+            break;
+        case P4Headers::V1MODEL:
+            source << P4CTestEnvironment::get()->coreP4();
+            source << P4CTestEnvironment::get()->v1Model();
+            break;
+    }
 
     unsigned lineCount = 0;
     for (auto iter = rawSource; *iter; ++iter) {
@@ -40,18 +54,37 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
     return source.str();
 }
 
-}  // namespace detail
-
-// A macro which should be used by unit tests to define P4 source code. It adds
-// additional information to the source code to aid in debugging; see
-// makeP4Source for more information.
-#define P4_SOURCE(SRC) detail::makeP4Source(__FILE__, __LINE__, SRC)
-
-/* preprocessing by prepending the content of core.p4 to test program */
-std::string with_core_p4(const std::string& pgm) {
-    std::ifstream input("p4include/core.p4");
-    std::stringstream sstr;
-    while (input >> sstr.rdbuf()) continue;
-    return sstr.str() + pgm;
+std::string makeP4Source(const char* file, unsigned line, const char* rawSource) {
+    return makeP4Source(file, line, P4Headers::NONE, rawSource);
 }
 
+}  // namespace detail
+
+/* static */ P4CTestEnvironment* P4CTestEnvironment::get() {
+    static P4CTestEnvironment* instance = new P4CTestEnvironment;
+    return instance;
+}
+
+P4CTestEnvironment::P4CTestEnvironment() {
+    auto readHeader = [](const char* filename) {
+        std::ifstream input(filename);
+        if (!input.good()) {
+          throw std::runtime_error(std::string("Couldn't read standard header ")
+                                     + filename);
+        }
+
+        // Initialize a buffer with a #line preprocessor directive. This ensures
+        // that any errors we encounter in this header will reference the
+        // correct file and line.
+        std::stringstream buffer;
+        buffer << "#line 1 \"" << filename << "\"" << std::endl;
+
+        // Read the header into the buffer and return it.
+        while (input >> buffer.rdbuf()) continue;
+        return buffer.str();
+    };
+
+    // XXX(seth): We should find a more robust way to locate these headers.
+    _coreP4 = readHeader("p4include/core.p4");
+    _v1Model = readHeader("p4include/v1model.p4");
+}
