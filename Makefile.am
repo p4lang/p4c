@@ -172,6 +172,40 @@ etags:
 	cd $(srcdir)/tools/ir-generator; ctags -e -R --langmap=Flex:+.l,YACC:+.ypp \
 	    . ../../lib
 
+# XXX(seth): automake as of version 1.15 has a bug that makes "recheck" interact
+# very badly with parallel make.
+#
+# Here's the background: there are two "top-level" targets in an automake-based
+# makefile: "all", and "all-am". A very important difference between them is
+# that "all" *spawns a second copy of make*, while "all-am" does not. This means
+# that depending on "all" is dangerous: if a rule depends on "all", but
+# also depends on other targets directly, the two copies of make can end up
+# racing to build those targets, resulting in corrupted artifacts and build
+# failures.
+#
+# So how does this tie into the "recheck" target? The rule that automake
+# generates depends on "all", *not* on "all-am". This is unlike other
+# automake-generated targets (e.g. "check" or "install"), which correctly depend
+# on "all-am", so I'm not sure how things went wrong for "recheck". This bad
+# rule was causing "recheck" builds to fail frequently if they were built in
+# parallel.
+#
+# Unfortunately, there's no easy way to override "recheck" and just change which
+# targets it depends on, so to resolve this I've been forced to copy the entire
+# automake-generated rule. The only difference is that "all" has been replaced
+# with "all-am".
+recheck: all-am $(check_LTLIBRARIES) $(check_PROGRAMS)
+	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
+	@set +e; $(am__set_TESTS_bases); \
+	bases=`for i in $$bases; do echo $$i; done \
+	         | $(am__list_recheck_tests)` || exit 1; \
+	log_list=`for i in $$bases; do echo $$i.log; done`; \
+	log_list=`echo $$log_list`; \
+	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG) \
+	        am__force_recheck=am--force-recheck \
+	        TEST_LOGS="$$log_list"; \
+	exit $$?
+
 check-%:
 	@$(MAKE) check TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
 
