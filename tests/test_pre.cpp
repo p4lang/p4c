@@ -138,6 +138,31 @@ TEST(McSimplePre, Replicate) {
   ASSERT_EQ(rc, McSimplePre::SUCCESS);
 }
 
+TEST(McSimplePre, DestroyWithoutDissociate) {
+  McSimplePre pre;
+  McSimplePre::mgrp_t mgid = 0x400;
+  McSimplePre::mgrp_hdl_t mgrp_hdl;
+  McSimplePre::l1_hdl_t l1_hdl;
+  McSimplePre::rid_t rid = 0x200;
+  McSimplePre::egress_port_t port = 9;
+  McSimplePre::PortMap port_map;
+  port_map[port] = 1;
+  McSimplePre::McIn ingress_info = {mgid};
+
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_mgrp_create(mgid, &mgrp_hdl));
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_create(rid, port_map, &l1_hdl));
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_associate(mgid, l1_hdl));
+
+  const auto egress_info_1 = pre.replicate(ingress_info);
+  EXPECT_EQ(1u, egress_info_1.size());
+  EXPECT_EQ(rid, egress_info_1.at(0).rid);
+  EXPECT_EQ(port, egress_info_1.at(0).egress_port);
+
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_destroy(l1_hdl));
+  const auto egress_info_2 = pre.replicate(ingress_info);
+  EXPECT_TRUE(egress_info_2.empty());
+}
+
 
 TEST(McSimplePreLAG, Replicate) {
   McSimplePreLAG pre;

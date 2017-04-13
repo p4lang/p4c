@@ -78,7 +78,7 @@ McSimplePre::mc_node_create(const rid_t rid,
     return ERROR;
   }
   l1_entries.insert(std::make_pair(*l1_hdl, L1Entry(rid)));
-  L1Entry &l1_entry = l1_entries[*l1_hdl];
+  auto &l1_entry = l1_entries.at(*l1_hdl);
   l1_entry.l2_hdl = l2_hdl;
   l2_entries.insert(std::make_pair(l2_hdl, L2Entry(*l1_hdl, portmap)));
   Logger::get()->debug("node created for rid {}", rid);
@@ -93,10 +93,20 @@ McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl,
     Logger::get()->error("node associate failed, invalid l1 handle");
     return INVALID_L1_HANDLE;
   }
-  MgidEntry &mgid_entry = mgid_entries[mgrp_hdl];
-  L1Entry &l1_entry = l1_entries[l1_hdl];
+  auto mgid_entry_it = mgid_entries.find(mgrp_hdl);
+  if (mgid_entry_it == mgid_entries.end()) {
+    Logger::get()->error("node associate failed, invalid mgrp handle");
+    return INVALID_MGID;
+  }
+  auto &mgid_entry = mgid_entry_it->second;
+  auto &l1_entry = l1_entries.at(l1_hdl);
+  if (l1_entry.is_associated) {
+    Logger::get()->error("node associate failed, node is already associated");
+    return ERROR;
+  }
   mgid_entry.l1_list.push_back(l1_hdl);
   l1_entry.mgrp_hdl = mgrp_hdl;
+  l1_entry.is_associated = true;
   Logger::get()->debug("node associated with mgid {}", mgrp_hdl);
   return SUCCESS;
 }
@@ -109,13 +119,20 @@ McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl,
     Logger::get()->error("node dissociate failed, invalid l1 handle");
     return INVALID_L1_HANDLE;
   }
-  MgidEntry &mgid_entry = mgid_entries[mgrp_hdl];
-  L1Entry &l1_entry = l1_entries[l1_hdl];
-  mgid_entry.l1_list.erase(std::remove(mgid_entry.l1_list.begin(),
-                                       mgid_entry.l1_list.end(),
-                                       l1_hdl),
-                           mgid_entry.l1_list.end());
-  l1_entry.mgrp_hdl = 0;
+  auto mgid_entry_it = mgid_entries.find(mgrp_hdl);
+  if (mgid_entry_it == mgid_entries.end()) {
+    Logger::get()->error("node dissociate failed, invalid mgrp handle");
+    return INVALID_MGID;
+  }
+  auto &mgid_entry = mgid_entry_it->second;
+  auto &l1_entry = l1_entries.at(l1_hdl);
+  if (!l1_entry.is_associated || (l1_entry.mgrp_hdl != mgrp_hdl)) {
+    Logger::get()->error(
+        "node dissociate failed, node is not associated to mgrp");
+    return ERROR;
+  }
+  node_dissociate(&mgid_entry, l1_hdl);
+  l1_entry.is_associated = false;
   Logger::get()->debug("node dissociated with mgid {}", mgrp_hdl);
   return SUCCESS;
 }
@@ -128,13 +145,15 @@ McSimplePre::mc_node_destroy(const l1_hdl_t l1_hdl) {
     Logger::get()->error("node destroy failed, invalid l1 handle");
     return INVALID_L1_HANDLE;
   }
-  L1Entry &l1_entry = l1_entries[l1_hdl];
+  auto &l1_entry = l1_entries.at(l1_hdl);
+  if (l1_entry.is_associated) {
+    // we let users destroy a node without dissociating it first
+    auto &mgid_entry = mgid_entries.at(l1_entry.mgrp_hdl);
+    node_dissociate(&mgid_entry, l1_hdl);
+  }
   rid = l1_entry.rid;
   l2_entries.erase(l1_entry.l2_hdl);
-  if (l2_handles.release_handle(l1_entry.l2_hdl)) {
-    Logger::get()->error("node destroy failed, invalid l2 handle");
-    return INVALID_L2_HANDLE;
-  }
+  assert(!l2_handles.release_handle(l1_entry.l2_hdl));
   l1_entries.erase(l1_hdl);
   assert(!l1_handles.release_handle(l1_hdl));
   Logger::get()->debug("node destroyed for rid {}", rid);
@@ -149,9 +168,9 @@ McSimplePre::mc_node_update(const l1_hdl_t l1_hdl,
     Logger::get()->error("node update failed, invalid l1 handle");
     return INVALID_L1_HANDLE;
   }
-  L1Entry &l1_entry = l1_entries[l1_hdl];
-  l2_hdl_t l2_hdl = l1_entry.l2_hdl;
-  L2Entry &l2_entry = l2_entries[l2_hdl];
+  const auto &l1_entry = l1_entries.at(l1_hdl);
+  auto l2_hdl = l1_entry.l2_hdl;
+  auto &l2_entry = l2_entries.at(l2_hdl);
   l2_entry.port_map = port_map;
   Logger::get()->debug("node updated for rid {}", l1_entry.rid);
   return SUCCESS;
@@ -253,11 +272,11 @@ McSimplePre::replicate(const McSimplePre::McIn ingress_info) const {
                         "to the PRE", ingress_info.mgid);
     return {};
   }
-  const MgidEntry &mgid_entry = mgid_it->second;
+  const auto &mgid_entry = mgid_it->second;
   for (const l1_hdl_t l1_hdl : mgid_entry.l1_list) {
-    const L1Entry &l1_entry = l1_entries.at(l1_hdl);
+    const auto &l1_entry = l1_entries.at(l1_hdl);
     egress_info.rid = l1_entry.rid;
-    const L2Entry &l2_entry = l2_entries.at(l1_entry.l2_hdl);
+    const auto &l2_entry = l2_entries.at(l1_entry.l2_hdl);
     // Port replication
     for (port_id = 0; port_id < l2_entry.port_map.size(); port_id++) {
       if (l2_entry.port_map[port_id]) {
@@ -268,6 +287,13 @@ McSimplePre::replicate(const McSimplePre::McIn ingress_info) const {
   }
   BMLOG_DEBUG("number of packets replicated : {}", egress_info_list.size());
   return egress_info_list;
+}
+
+void
+McSimplePre::node_dissociate(MgidEntry *mgid_entry, l1_hdl_t l1_hdl) {
+  auto &l1_list = mgid_entry->l1_list;
+  l1_list.erase(std::remove(l1_list.begin(), l1_list.end(), l1_hdl),
+                l1_list.end());
 }
 
 }  // namespace bm

@@ -53,7 +53,6 @@ class McSimplePreLAG : public McSimplePre {
 
   void reset_state();
 
-  //! TODO(unknown)
   std::vector<McOut> replicate(const McIn) const;
 
  private:
@@ -62,10 +61,8 @@ class McSimplePreLAG : public McSimplePre {
     PortMap port_map{};
 
     LagEntry() {}
-    LagEntry(uint16_t member_count,
-            const PortMap &port_map) :
-            member_count(member_count),
-            port_map(port_map) {}
+    LagEntry(uint16_t member_count, const PortMap &port_map)
+        : member_count(member_count), port_map(port_map) {}
   };
 
   std::unordered_map<lag_id_t, LagEntry> lag_entries{};

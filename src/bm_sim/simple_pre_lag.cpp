@@ -55,7 +55,7 @@ McSimplePreLAG::mc_node_create(const rid_t rid,
     return ERROR;
   }
   l1_entries.insert(std::make_pair(*l1_hdl, L1Entry(rid)));
-  L1Entry &l1_entry = l1_entries[*l1_hdl];
+  auto &l1_entry = l1_entries.at(*l1_hdl);
   l1_entry.l2_hdl = l2_hdl;
   l2_entries.insert(
     std::make_pair(l2_hdl, L2Entry(*l1_hdl, port_map, lag_map)));
@@ -72,9 +72,9 @@ McSimplePreLAG::mc_node_update(const l1_hdl_t l1_hdl,
     Logger::get()->error("node update failed, invalid l1 handle");
     return INVALID_L1_HANDLE;
   }
-  L1Entry &l1_entry = l1_entries[l1_hdl];
-  l2_hdl_t l2_hdl = l1_entry.l2_hdl;
-  L2Entry &l2_entry = l2_entries[l2_hdl];
+  auto &l1_entry = l1_entries.at(l1_hdl);
+  auto l2_hdl = l1_entry.l2_hdl;
+  auto &l2_entry = l2_entries.at(l2_hdl);
   l2_entry.port_map = port_map;
   l2_entry.lag_map = lag_map;
   Logger::get()->debug("node updated for rid {}", l1_entry.rid);
@@ -95,7 +95,7 @@ McSimplePreLAG::mc_set_lag_membership(const lag_id_t lag_index,
       member_count++;
     }
   }
-  LagEntry &lag_entry = lag_entries[lag_index];
+  auto &lag_entry = lag_entries[lag_index];
   lag_entry.member_count = member_count;
   lag_entry.port_map = port_map;
   Logger::get()->debug("lag membership set for lag index {}", lag_index);
@@ -158,12 +158,12 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
                         "to the PRE", ingress_info.mgid);
     return {};
   }
-  const MgidEntry &mgid_entry = mgid_it->second;
+  const auto &mgid_entry = mgid_it->second;
   for (const l1_hdl_t l1_hdl : mgid_entry.l1_list) {
-    const L1Entry &l1_entry = l1_entries.at(l1_hdl);
+    const auto &l1_entry = l1_entries.at(l1_hdl);
     egress_info.rid = l1_entry.rid;
     // Port replication
-    const L2Entry &l2_entry = l2_entries.at(l1_entry.l2_hdl);
+    const auto &l2_entry = l2_entries.at(l1_entry.l2_hdl);
     for (port_id = 0; port_id < l2_entry.port_map.size(); port_id++) {
       if (l2_entry.port_map[port_id]) {
         egress_info.egress_port = port_id;
