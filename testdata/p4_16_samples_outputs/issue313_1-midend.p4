@@ -14,16 +14,16 @@ control ctrl(inout struct_t input, out header_h output) {
         input.stack.pop_front(1);
         tmp1 = tmp0;
     }
-    action act() {
+    @hidden action act() {
         output = tmp1;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }

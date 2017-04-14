@@ -67,25 +67,25 @@ control c(out bit<32> v) {
         }
         default_action = a1_0();
     }
-    action act() {
+    @hidden action act() {
         e = 32w1;
     }
-    action act_0() {
+    @hidden action act_0() {
         e = e + 32w1;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_a1 {
+    @hidden table tbl_a1 {
         actions = {
             a1_2();
         }

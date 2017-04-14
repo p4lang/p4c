@@ -58,19 +58,19 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_0();
     }
-    action act() {
+    @hidden action act() {
         key_0 = h.h.a + 32w1;
     }
-    action act_0() {
+    @hidden action act_0() {
         sm.egress_spec = 9w0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }

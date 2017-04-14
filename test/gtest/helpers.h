@@ -18,25 +18,64 @@ limitations under the License.
 #define TEST_GTEST_HELPERS_H_
 
 #include <string>
+#include "gtest/gtest.h"
+
+/// Specifies which standard headers should be included by a GTest.
+enum class P4Headers {
+    NONE,    // No headers.
+    CORE,    // Just core.p4.
+    V1MODEL  // Both core.p4 and v1model.p4.
+};
 
 namespace detail {
 
 /**
- * Creates a "nice" version of the P4 program in @rawSource which contains
- * additional information for the preprocessor to aid in debugging. @file and
- * @line should be the __FILE__ and __LINE__, respectively, at which @rawSource
- * is defined.
+ * Transforms the P4 program (or program fragment) in @rawSource to turn it into
+ * a complete program and make it more suitable for debugging.
+ *
+ * @param file  The __FILE__ at which @rawSource is defined; used along with
+ *              @line to improve compiler error messages.
+ * @param line  The __LINE__ at which @rawSource is defined.
+ * @param headers  Specifies any standard headers that should be prepended to
+ *                 @rawSource to make a complete P4 program.
+ * @param rawSource  A P4 program or program fragment. Callers will normally
+ *                   find it convenient to specify this as a raw string.
+ * @return the transformed P4 program.
  */
+std::string makeP4Source(const char* file, unsigned line,
+                         P4Headers headers, const char* rawSource);
+
+/// An overload of makeP4Source which doesn't prepend any headers; equivalent to
+/// `makeP4Source(file, line, P4Headers::NONE, rawSource);`.
 std::string makeP4Source(const char* file, unsigned line, const char* rawSource);
 
 }  // namespace detail
 
 // A macro which should be used by unit tests to define P4 source code. It adds
 // additional information to the source code to aid in debugging; see
-// makeP4Source for more information.
-#define P4_SOURCE(SRC) detail::makeP4Source(__FILE__, __LINE__, SRC)
+// makeP4Source for more information and parameter details.
+#define P4_SOURCE(...) detail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
 
-/* preprocessing by prepending the content of core.p4 to test program */
-std::string with_core_p4(const std::string& pgm);
+class P4CTestEnvironment {
+    // XXX(seth): Ideally this would be a ::testing::Environment subclass, but
+    // if you register a global test environment with GTest it tries to tear it
+    // down in an atexit() handler, and in some configurations libgc does the
+    // same, resulting in a double delete that's not easy to resolve cleanly.
+ public:
+    /// @return the global instance of P4CTestEnvironment.
+    static P4CTestEnvironment* get();
+
+    /// @return a string containing the "core.p4" P4 standard header.
+    const std::string& coreP4() const { return _coreP4; }
+
+    /// @return a string containing the "v1model.p4" P4 standard header.
+    const std::string& v1Model() const { return _v1Model; }
+
+ private:
+    P4CTestEnvironment();
+
+    std::string _coreP4;
+    std::string _v1Model;
+};
 
 #endif /* TEST_GTEST_HELPERS_H_ */

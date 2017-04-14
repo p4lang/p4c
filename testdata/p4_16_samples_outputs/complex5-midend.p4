@@ -1,28 +1,28 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     bit<32> tmp_1;
-    action act() {
+    @hidden action act() {
         r = 32w1;
     }
-    action act_0() {
+    @hidden action act_0() {
         r = 32w2;
     }
-    action act_1() {
+    @hidden action act_1() {
         tmp_1 = f(32w2);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1 {
+    @hidden table tbl_act_1 {
         actions = {
             act_0();
         }
@@ -30,9 +30,9 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_1 > 32w0)
+        if (tmp_1 > 32w0) 
             tbl_act_0.apply();
-        else
+        else 
             tbl_act_1.apply();
     }
 }

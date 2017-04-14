@@ -1,10 +1,10 @@
 control c(out bit<32> x);
 package top(c _c);
 control my(out bit<32> x) {
-    action act() {
+    @hidden action act() {
         x = 32w2;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

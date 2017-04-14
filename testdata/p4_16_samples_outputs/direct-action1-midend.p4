@@ -3,16 +3,16 @@ control c(inout bit<16> y) {
     @name("a") action a_0() {
         y = (bit<16>)x;
     }
-    action act() {
+    @hidden action act() {
         x = 32w10;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_a {
+    @hidden table tbl_a {
         actions = {
             a_0();
         }

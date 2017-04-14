@@ -1,8 +1,8 @@
 ../testdata/p4_16_errors/div1.p4(18): error: /: not defined on negative numbers
-    a = a / -1;
+    a = a / -1; // not defined for negative numbers
         ^^^^^^
 ../testdata/p4_16_errors/div1.p4(18): error: Could not find type of /
-    a = a / -1;
+    a = a / -1; // not defined for negative numbers
         ^^^^^^
 ../testdata/p4_16_errors/div1.p4(19): error: /: not defined on negative numbers
     a = -5 / a;

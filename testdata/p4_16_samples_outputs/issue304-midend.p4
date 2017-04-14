@@ -1,9 +1,9 @@
 control t(inout bit<32> b) {
-    action act() {
+    @hidden action act() {
         b = b + 32w1;
         b = b + 32w1;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

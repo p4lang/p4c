@@ -23,7 +23,7 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     @name("input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes;
     @name("sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr;
     @name("num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt;
-    action act() {
+    @hidden action act() {
         sum_rtt_Tr.read(32w0, sum_rtt_Tr_tmp);
         sum_rtt_Tr_tmp = sum_rtt_Tr_tmp + pkt_hdr.rtt;
         sum_rtt_Tr.write(sum_rtt_Tr_tmp, 32w0);
@@ -31,18 +31,18 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
         num_pkts_with_rtt_tmp = num_pkts_with_rtt_tmp + 32w1;
         num_pkts_with_rtt.write(num_pkts_with_rtt_tmp, 32w0);
     }
-    action act_0() {
+    @hidden action act_0() {
         input_traffic_bytes.read(32w0, input_traffic_bytes_tmp);
         input_traffic_bytes_tmp = input_traffic_bytes_tmp + metadata.pkt_len;
         input_traffic_bytes.write(input_traffic_bytes_tmp, 32w0);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }

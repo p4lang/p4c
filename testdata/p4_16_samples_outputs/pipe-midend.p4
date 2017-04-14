@@ -70,35 +70,35 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         }
         const default_action = NoAction_0();
     }
-    action act() {
+    @hidden action act() {
         p1_tArg1_0.field1 = qArg1.field1;
         p1_tArg1_0.drop = qArg1.drop;
         p1_aArg2_0.field2 = qArg2.field2;
     }
-    action act_0() {
+    @hidden action act_0() {
         qArg1.field1 = p1_tArg1_0.field1;
         qArg1.drop = p1_tArg1_0.drop;
         p1_tArg1_0.field1 = qArg1.field1;
         p1_tArg1_0.drop = qArg1.drop;
         p1_aArg2_0.field2 = qArg2.field2;
     }
-    action act_1() {
+    @hidden action act_1() {
         qArg1.field1 = p1_tArg1_0.field1;
         qArg1.drop = p1_tArg1_0.drop;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_1 {
+    @hidden table tbl_act_1 {
         actions = {
             act_1();
         }

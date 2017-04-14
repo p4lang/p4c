@@ -11,7 +11,7 @@ control c(inout bit<32> b) {
         s2.x = s1.x;
         b = s2.x;
     }
-    table tbl_a {
+    @hidden table tbl_a {
         actions = {
             a_0();
         }

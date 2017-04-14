@@ -4,14 +4,14 @@ control c(inout bit<32> r) {
     bit<32> tmp_8;
     bit<32> tmp_10;
     bit<32> tmp_12;
-    action act() {
+    @hidden action act() {
         tmp_6 = f(32w5, 32w2);
         tmp_8 = f(32w2, 32w3);
         tmp_10 = f(32w6, tmp_8);
         tmp_12 = f(tmp_6, tmp_10);
         r = tmp_12;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

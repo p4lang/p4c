@@ -1,23 +1,23 @@
 ../testdata/p4_16_samples/uninit.p4(35): warning: h may not be completely initialized
-        func(h);
+        func(h); // uninitialized
              ^
 ../testdata/p4_16_samples/uninit.p4(36): warning: h.data2 may be uninitialized
-        g(h.data2, g(h.data2, h.data2));
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
           ^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(36): warning: h.data2 may be uninitialized
-        g(h.data2, g(h.data2, h.data2));
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
                      ^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(36): warning: h.data2 may be uninitialized
-        g(h.data2, g(h.data2, h.data2));
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
                               ^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(41): warning: h.data3 may be uninitialized
-        h.data2 = h.data3 + 1;
+        h.data2 = h.data3 + 1; // uninitialized
                   ^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(42): warning: [] may not be completely initialized
-        stack[0] = stack[1];
+        stack[0] = stack[1]; // uninitialized
                    ^^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(62): warning: c may be uninitialized
-        c = !c;
+        c = !c; // uninitialized;
              ^
 ../testdata/p4_16_samples/uninit.p4(82): warning: b may be uninitialized
         b = b + 1;

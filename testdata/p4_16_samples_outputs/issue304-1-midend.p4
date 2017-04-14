@@ -17,11 +17,11 @@ control t(inout bit<32> b) {
             c2_tmp_1 = this.b();
         }
     };
-    action act() {
+    @hidden action act() {
         c1_x_0.a(b);
         c2_x_0.a(b);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

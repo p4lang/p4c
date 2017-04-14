@@ -220,7 +220,7 @@ FILE* CompilerOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
-        cmd += cstring(" -undef -nostdinc") + " " + preprocessor_options
+        cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options
             + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;

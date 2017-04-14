@@ -71,6 +71,14 @@ static bool isMetadataType(const IR::Type* type) {
     return metadataAnnotation != nullptr;
 }
 
+/// @return true if @node has an @hidden annotation.
+static bool isHidden(const IR::Node* node) {
+    if (!node->is<IR::IAnnotated>()) return false;
+    auto annotations = node->to<IR::IAnnotated>()->getAnnotations();
+    auto hiddenAnnotation = annotations->getSingle("hidden");
+    return hiddenAnnotation != nullptr;
+}
+
 /// @return a version of @name which has been sanitized for exposure to the
 /// control plane.
 static cstring controlPlaneName(const cstring& name) {
@@ -891,6 +899,8 @@ public:
     }
 
     void addAction(const IR::P4Action* actionDeclaration) {
+        if (isHidden(actionDeclaration)) return;
+
         auto name = controlPlaneName(actionDeclaration);
         auto id = symbols.getId(P4RuntimeSymbolType::ACTION, name);
         auto annotations = actionDeclaration->to<IR::IAnnotated>();
@@ -954,6 +964,8 @@ public:
                   const std::vector<cstring>& actions,
                   const std::vector<MatchField>& matchFields,
                   bool supportsTimeout) {
+        if (isHidden(tableDeclaration)) return;
+
         auto name = controlPlaneName(tableDeclaration);
         auto annotations = tableDeclaration->to<IR::IAnnotated>();
 

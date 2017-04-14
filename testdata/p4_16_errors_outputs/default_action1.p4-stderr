@@ -5,7 +5,7 @@
 action b() {}
        ^
 ../testdata/p4_16_errors/default_action1.p4(23): error: .b and b refer to different actions
-        default_action = .b();
+        default_action = .b(); // not the same b
                           ^
 ../testdata/p4_16_errors/default_action1.p4(22)
         actions = { a; b; }
