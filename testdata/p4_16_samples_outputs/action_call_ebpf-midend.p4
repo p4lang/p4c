@@ -15,16 +15,16 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("Reject") action Reject_0() {
         pass = x;
     }
-    action act() {
+    @hidden action act() {
         x = true;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_Reject {
+    @hidden table tbl_Reject {
         actions = {
             Reject_0();
         }

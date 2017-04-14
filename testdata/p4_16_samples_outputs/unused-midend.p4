@@ -18,27 +18,27 @@ extern E {
 control c(inout S s) {
     bit<32> tmp_0;
     @name("e") E() e;
-    action act() {
+    @hidden action act() {
         s.h.data3 = 32w0;
     }
-    action act_0() {
+    @hidden action act_0() {
         tmp_0 = e.get<bit<32>>(s.h.data2);
         s.h.data1 = tmp_0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
     apply {
-        if (s.h.isValid())
+        if (s.h.isValid()) 
             tbl_act.apply();
         if (s.h.data2 == 32w0) {
             tbl_act_0.apply();

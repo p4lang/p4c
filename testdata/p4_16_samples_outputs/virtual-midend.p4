@@ -10,11 +10,11 @@ control c(inout bit<16> p) {
             return ix + 16w1;
         }
     };
-    action act() {
+    @hidden action act() {
         tmp_0 = cntr.f(16w6);
         p = tmp_0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

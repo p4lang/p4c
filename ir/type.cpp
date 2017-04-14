@@ -32,6 +32,10 @@ const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::action_run = ID("action_run");
 
 const cstring IR::Annotation::nameAnnotation = "name";
+const cstring IR::Annotation::tableOnlyAnnotation = "tableonly";
+const cstring IR::Annotation::defaultOnlyAnnotation = "defaultonly";
+const cstring IR::Annotation::atomicAnnotation = "atomic";
+const cstring IR::Annotation::hiddenAnnotation = "hidden";
 
 std::map<int, const IR::Type_Bits*> *Type_Bits::signedTypes = nullptr;
 std::map<int, const IR::Type_Bits*> *Type_Bits::unsignedTypes = nullptr;

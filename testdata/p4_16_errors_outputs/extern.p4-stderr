@@ -1,5 +1,5 @@
 ../testdata/p4_16_errors/extern.p4(19): error: x: a parameter with an extern type cannot have a direction
-control c(in X x) {
+control c(in X x) { // Cannot have externs with direction
                ^
 ../testdata/p4_16_errors/extern.p4(19): error: Could not find type of control c
 control c(in X x) {
@@ -20,7 +20,7 @@ package top(proto _c);
 package top(proto _c);
         ^^^
 ../testdata/p4_16_errors/extern.p4(19): error: Could not find type of control c
-control c(in X x) {
+control c(in X x) { // Cannot have externs with direction
         ^
 ../testdata/p4_16_errors/extern.p4(27): error: Could not find type of c
 top(c()) main;

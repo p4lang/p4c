@@ -31,10 +31,10 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    action act() {
+    @hidden action act() {
         meta.flag = true;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

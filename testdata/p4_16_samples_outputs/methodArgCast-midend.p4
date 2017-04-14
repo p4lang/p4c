@@ -5,10 +5,10 @@ extern E {
 
 control c() {
     @name("e") E() e;
-    action act() {
+    @hidden action act() {
         e.setValue(32w10);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
