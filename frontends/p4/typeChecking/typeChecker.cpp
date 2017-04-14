@@ -18,6 +18,7 @@ limitations under the License.
 #include "typeUnification.h"
 #include "frontends/p4/substitution.h"
 #include "typeConstraints.h"
+#include "frontends/p4/coreLibrary.h"
 #include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
@@ -1143,6 +1144,22 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto validator = [] (const IR::Type* t)
             { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
     validateFields(canon, validator);
+
+    const IR::StructField* varbit = nullptr;
+    for (auto field : *type->fields) {
+        auto ftype = getType(field);
+        if (ftype == nullptr)
+            return type;
+        if (ftype->is<IR::Type_Varbits>()) {
+            if (varbit == nullptr) {
+                varbit = field;
+            } else {
+                typeError("%1% and %2%: multiple varbit fields in a header",
+                          varbit, field);
+                return type;
+            }
+        }
+    }
     return type;
 }
 
@@ -2328,6 +2345,88 @@ TypeInference::actionCall(bool inActionList,
     return actionCall;
 }
 
+bool TypeInference::hasVarbits(const IR::Type_Header* type) const {
+    for (auto f : *type->fields) {
+        auto ftype = typeMap->getType(f);
+        if (ftype == nullptr)
+            continue;
+        if (ftype->is<IR::Type_Varbits>())
+            return true;
+    }
+    return false;
+}
+
+void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() || type->is<IR::Type_Union>())
+        return;
+
+    if (type->is<IR::Type_Struct>()) {
+        for (auto f : *type->to<IR::Type_Struct>()->fields) {
+            auto ftype = typeMap->getType(f);
+            if (ftype == nullptr)
+                continue;
+            checkEmitType(emit, ftype);
+        }
+        return;
+    }
+
+    ::error("%1%: argument must be a header, stack or union, or a struct of such types",
+            emit);
+}
+
+void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
+    P4CoreLibrary &corelib = P4CoreLibrary::instance;
+    auto et = em->actualExternType;
+    unsigned argCount = em->expr->arguments->size();
+
+    if (et->name == corelib.packetIn.name) {
+        if (em->method->name == corelib.packetIn.extract.name) {
+            if (argCount == 0) {
+                // core.p4 is corrupted.
+                ::error("%1%: Expected exactly 1 argument for %2% method",
+                        em->expr, corelib.packetIn.extract.name);
+                return;
+            }
+
+            auto arg0 = em->expr->arguments->at(0);
+            auto argType = typeMap->getType(arg0, true);
+            if (!argType->is<IR::Type_Header>()) {
+                ::error("%1%: argument must be a header", em->expr->arguments->at(0));
+                return;
+            }
+
+            if (argCount == 1) {
+                if (hasVarbits(argType->to<IR::Type_Header>()))
+                    ::error("%1%: argument cannot contain varbit fields", arg0);
+            } else if (argCount == 2) {
+                if (!hasVarbits(argType->to<IR::Type_Header>()))
+                    ::error("%1%: argument should contain a varbit field", arg0);
+            } else {
+                // core.p4 is corrupted.
+                ::error("%1%: Expected 1 or 2 arguments for '%2%' method",
+                        em->expr, corelib.packetIn.extract.name);
+            }
+        }
+    } else if (et->name == corelib.packetOut.name) {
+        if (em->method->name == corelib.packetOut.emit.name) {
+            const IR::Expression* arg = nullptr;
+            if (argCount == 1) {
+                arg = em->expr->arguments->at(0);
+            } else if (argCount == 2) {
+                arg = em->expr->arguments->at(1);
+            } else {
+                // core.p4 is corrupted.
+                ::error("%1%: Expected 1 or 2 arguments for '%2%' method",
+                        em->expr, corelib.packetOut.emit.name);
+                return;
+            }
+
+            auto argType = typeMap->getType(arg, true);
+            checkEmitType(em->expr, argType);
+        }
+    }
+}
+
 const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done()) return expression;
     methodArguments.pop_back();
@@ -2419,6 +2518,9 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             if (a->isTableApply() && findContext<IR::P4Action>())
                 ::error("%1%: tables cannot be invoked from actions", expression);
         }
+
+        if (mi->is<ExternMethod>())
+            checkCorelibMethods(mi->to<ExternMethod>());
 
         return result;
     }

@@ -1,0 +1,6 @@
+../testdata/p4_16_errors/twovarbit.p4(2): error: x and u: multiple varbit fields in a header
+    varbit<120> x;
+                ^
+../testdata/p4_16_errors/twovarbit.p4(3)
+    varbit<120> u;
+                ^

@@ -36,7 +36,7 @@ header IPv4_options_h {
    varbit<160> options;
 }
 
-struct Tcp {
+header Tcp {
     bit<16> port;
 }
 

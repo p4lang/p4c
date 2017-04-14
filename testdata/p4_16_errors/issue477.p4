@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,16 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "core.p4"
+#include <core.p4>
 
-parser P(packet_in p, out bit<32> h) {
+header h_t {
+    bit<8> f;
+}
+
+struct my_packet {
+    h_t[10] h;
+}
+
+parser MyParser(packet_in b, out my_packet p) {
     state start {
-        p.extract(h);  // error: not a header
+        b.extract(p.h);
         transition accept;
     }
 }
-
-parser Simple(packet_in p, out bit<32> h);
-
-package top(Simple prs);
-top(P()) main;

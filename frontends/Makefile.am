@@ -108,7 +108,6 @@ cpplint_FILES += frontends/p4/p4-lex.l \
 		 $(p4_frontend_UNIFIED) \
 		 $(p4_frontend_NONUNIFIED)
 
-
 common_frontend_UNIFIED = \
 	frontends/common/options.cpp \
 	frontends/common/constantFolding.cpp \
