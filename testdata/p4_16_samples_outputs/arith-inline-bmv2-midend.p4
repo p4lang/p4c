@@ -52,10 +52,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = c_add();
     }
-    action act() {
+    @hidden action act() {
         sm.egress_spec = 9w0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

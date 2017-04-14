@@ -55,10 +55,10 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 }
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    action act() {
+    @hidden action act() {
         standard_meta.drop = 1w0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
@@ -89,7 +89,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         debug.write(32w2, inc);
         reg.write(32w0, val.field1);
     }
-    table tbl_test {
+    @hidden table tbl_test {
         actions = {
             test_0();
         }

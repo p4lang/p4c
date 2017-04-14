@@ -2,7 +2,7 @@ control c(inout bit<32> x) {
     @name("a") action a_0() {
         x = 32w15;
     }
-    table tbl_a {
+    @hidden table tbl_a {
         actions = {
             a_0();
         }

@@ -12,10 +12,10 @@ control ctrl() {
         }
         default_action = e_0();
     }
-    action act() {
+    @hidden action act() {
         hasExited = false;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
@@ -25,11 +25,11 @@ control ctrl() {
         tbl_act.apply();
         switch (t.apply().action_run) {
             e_0: {
-                if (!hasExited)
+                if (!hasExited) 
                     t.apply();
             }
             f_0: {
-                if (!hasExited)
+                if (!hasExited) 
                     t.apply();
             }
         }

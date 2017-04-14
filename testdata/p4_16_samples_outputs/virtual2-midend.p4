@@ -18,10 +18,10 @@ control c(inout bit<16> p) {
             return tmp_0;
         }
     };
-    action act() {
+    @hidden action act() {
         cntr.run(16w6);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

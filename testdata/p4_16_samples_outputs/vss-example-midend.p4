@@ -157,52 +157,52 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 16;
         default_action = Drop_action_5();
     }
-    action act() {
+    @hidden action act() {
         hasReturned_0 = true;
     }
-    action act_0() {
+    @hidden action act_0() {
         hasReturned_0 = false;
     }
-    action act_1() {
+    @hidden action act_1() {
         hasReturned_0 = true;
     }
-    action act_2() {
+    @hidden action act_2() {
         hasReturned_0 = true;
     }
-    action act_3() {
+    @hidden action act_3() {
         hasReturned_0 = true;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_Drop_action {
+    @hidden table tbl_Drop_action {
         actions = {
             Drop_action_6();
         }
         const default_action = Drop_action_6();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1 {
+    @hidden table tbl_act_1 {
         actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_2 {
+    @hidden table tbl_act_2 {
         actions = {
             act_2();
         }
         const default_action = act_2();
     }
-    table tbl_act_3 {
+    @hidden table tbl_act_3 {
         actions = {
             act_3();
         }
@@ -237,32 +237,32 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     bit<16> tmp_6;
     @name("ck") Ck16() ck_2;
-    action act_4() {
+    @hidden action act_4() {
         ck_2.clear();
         p.ip.hdrChecksum = 16w0;
         ck_2.update<Ipv4_h>(p.ip);
         tmp_6 = ck_2.get();
         p.ip.hdrChecksum = tmp_6;
     }
-    action act_5() {
+    @hidden action act_5() {
         b.emit<Ethernet_h>(p.ethernet);
     }
-    action act_6() {
+    @hidden action act_6() {
         b.emit<Ipv4_h>(p.ip);
     }
-    table tbl_act_4 {
+    @hidden table tbl_act_4 {
         actions = {
             act_5();
         }
         const default_action = act_5();
     }
-    table tbl_act_5 {
+    @hidden table tbl_act_5 {
         actions = {
             act_4();
         }
         const default_action = act_4();
     }
-    table tbl_act_6 {
+    @hidden table tbl_act_6 {
         actions = {
             act_6();
         }

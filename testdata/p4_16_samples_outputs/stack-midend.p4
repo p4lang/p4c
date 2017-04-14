@@ -20,13 +20,13 @@ parser p() {
 
 control c() {
     h[4] stack_2;
-    action act() {
+    @hidden action act() {
         stack_2[3].setValid();
         stack_2[2] = stack_2[3];
         stack_2.push_front(2);
         stack_2.pop_front(2);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

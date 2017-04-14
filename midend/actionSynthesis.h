@@ -22,31 +22,41 @@ limitations under the License.
 
 namespace P4 {
 
-// Policy which selects the control blocks where action
-// synthesis is applied.
+/**
+Policy which selects the control blocks where action
+synthesis is applied.
+*/
 class ActionSynthesisPolicy {
  public:
     virtual ~ActionSynthesisPolicy() {}
-    // If the policy returns true the control block is processed,
-    // otherwise it is left unchanged.
+    /**
+       If the policy returns true the control block is processed,
+       otherwise it is left unchanged.
+    */
     virtual bool convert(const IR::P4Control* control) const = 0;
 };
 
-// Convert direct action calls to table invocations.
-// control c() {
-//   action x(in bit b) { ... }
-//   apply { x(e); }
-// }
-// turns into
-// control c() {
-//   action x(in bit b) { ... }
-//   table _tmp() {
-//     actions = { x(e); }
-//     const default_action = x();
-//   }
-//   apply { _tmp.apply(); }
-// }
-// For this to work all variable declarations must have been moved to the beginning.
+/**
+Convert direct action calls to table invocations.
+
+control c() {
+  action x(in bit b) { ... }
+  apply { x(e); }
+}
+
+turns into
+
+control c() {
+  action x(in bit b) { ... }
+  table _tmp() {
+    actions = { x(e); }
+    const default_action = x();
+  }
+  apply { _tmp.apply(); }
+}
+
+For this to work all variable declarations must have been moved to the beginning.
+*/
 class DoMoveActionsToTables : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
@@ -66,17 +76,23 @@ class DoMoveActionsToTables : public Transform {
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
 };
 
-// Convert some statements into action invocations by synthesizing new actions.
-// E.g.
-// control c(inout bit x) {
-//    apply { x = 1; }
-// }
-// is converted to:
-// control c(inout bit x) {
-//    action act() { x = 1; }
-//    apply { act(); }
-// }
-// For this to work all variable declarations must have been moved to the beginning.
+/**
+Convert some statements into action invocations by synthesizing new actions.
+E.g.
+
+control c(inout bit x) {
+   apply { x = 1; }
+}
+
+is converted to:
+
+control c(inout bit x) {
+   action act() { x = 1; }
+   apply { act(); }
+}
+
+For this to work all variable declarations must have been moved to the beginning.
+*/
 class DoSynthesizeActions : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;

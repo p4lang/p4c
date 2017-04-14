@@ -29,16 +29,16 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         val[31:0] = tmp_0;
         res = val;
     }
-    action act() {
+    @hidden action act() {
         res = 64w0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_update {
+    @hidden table tbl_update {
         actions = {
             update_0();
         }

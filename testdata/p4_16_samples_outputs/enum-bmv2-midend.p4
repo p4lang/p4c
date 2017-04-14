@@ -48,28 +48,28 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    action act() {
+    @hidden action act() {
         h.h.c = h.h.a;
     }
-    action act_0() {
+    @hidden action act_0() {
         h.h.c = h.h.b;
     }
-    action act_1() {
+    @hidden action act_1() {
         sm.egress_spec = 9w0;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_0 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_1 {
+    @hidden table tbl_act_1 {
         actions = {
             act_1();
         }

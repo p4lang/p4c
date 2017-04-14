@@ -19,48 +19,26 @@ struct mystruct1 {
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<Ethernet_h>(hdr.ethernet);
+        packet.emit(hdr.ethernet);
     }
 }
 
-control cBar(inout mystruct1 meta) {
-    @hidden action act() {
-        meta.a = meta.a + 4w15;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    apply {
-        tbl_act.apply();
-    }
+action foo2(in bit<16> bar, out bit<8> bar2) {
+    bar2 = (bit<8>)(bar >> 4);
 }
-
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
+    const bit<32> c1d = 32w0xcafebabe;
+    bit<8> b1a;
     state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
+        bit<8> b1b;
+        foo2((bit<16>)c1d, b1a);
+        pkt.extract(hdr.ethernet);
         transition accept;
     }
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @name("cbar_inst2") cBar() cbar_inst2;
-    @name("foo") action foo_0() {
-        meta.b = meta.b + 4w5;
-    }
-    @name("guh") table guh {
-        key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-        }
-        actions = {
-            foo_0();
-        }
-        default_action = foo_0();
-    }
     apply {
-        guh.apply();
     }
 }
 

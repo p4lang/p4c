@@ -7,12 +7,12 @@ control c(out H[2] h);
 package top(c _c);
 control my(out H[2] s) {
     bit<1> tmp_1;
-    action act() {
+    @hidden action act() {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;
         tmp_1 = f(s[32w0].z, 1w0);
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }

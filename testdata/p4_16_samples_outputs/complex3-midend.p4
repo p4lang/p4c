@@ -2,12 +2,12 @@ extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     bit<32> tmp_2;
     bit<32> tmp_3;
-    action act() {
+    @hidden action act() {
         tmp_2 = f(32w4);
         tmp_3 = f(32w5);
         r = tmp_2 + tmp_3;
     }
-    table tbl_act {
+    @hidden table tbl_act {
         actions = {
             act();
         }
