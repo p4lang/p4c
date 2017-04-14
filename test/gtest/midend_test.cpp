@@ -45,7 +45,7 @@ TEST(midend, convertEnums_pass) {
         control m() { C(E.A) ctr; apply{} }
     )");
     const IR::P4Program* pgm = parse_string(program);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 
     // Example to enable logging in source
     // Log::addDebugSpec("convertEnums:0");
@@ -56,7 +56,7 @@ TEST(midend, convertEnums_pass) {
         convertEnums
     };
     pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 TEST(midend, convertEnums_used_before_declare) {
@@ -65,7 +65,7 @@ TEST(midend, convertEnums_used_before_declare) {
         enum E { A, B, C, D };
     )");
     const IR::P4Program* pgm = parse_string(program);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap  refMap;
     TypeMap       typeMap;
@@ -75,7 +75,7 @@ TEST(midend, convertEnums_used_before_declare) {
     };
     auto result = pgm->apply(passes);
     // use enum before declaration should fail
-    ASSERT_EQ(nullptr, result);
+    ASSERT_TRUE(result == nullptr);
 }
 
 // use enumMap in convertEnums directly
@@ -85,7 +85,7 @@ TEST(midend, getEnumMapping) {
         const bool a = E.A == E.B;
     )");
     const IR::P4Program* pgm = parse_string(program);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap  refMap;
     TypeMap       typeMap;
@@ -95,7 +95,7 @@ TEST(midend, getEnumMapping) {
         convertEnums
     };
     auto result = pgm->apply(passes_);
-    ASSERT_NE(nullptr, result);
+    ASSERT_TRUE(result != nullptr);
 
     enumMap = convertEnums->getEnumMapping();
     ASSERT_EQ(enumMap.size(), (unsigned long)1);
