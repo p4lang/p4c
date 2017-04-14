@@ -1,0 +1,21 @@
+../testdata/p4_16_errors/header2_e.p4(20): error: Field field of header h cannot have type struct s
+    s field; // no struct fields allowed in headers
+      ^^^^^
+../testdata/p4_16_errors/header2_e.p4(16)
+struct s {}
+       ^
+../testdata/p4_16_errors/header2_e.p4(27): error: Field field of struct s1 cannot have type parser p
+    p field; // no functor-typed fields allowed
+      ^^^^^
+../testdata/p4_16_errors/header2_e.p4(23)
+parser p();
+       ^
+../testdata/p4_16_errors/header2_e.p4(32): error: Field field of header_union u cannot have type struct s
+   s field; // no struct field allowed in header_union
+     ^^^^^
+../testdata/p4_16_errors/header2_e.p4(16)
+struct s {}
+       ^
+../testdata/p4_16_errors/header2_e.p4(33): error: Field field1 of header_union u cannot have type bit<1>
+   bit field1; // no non-header field allowed in header_union
+       ^^^^^^

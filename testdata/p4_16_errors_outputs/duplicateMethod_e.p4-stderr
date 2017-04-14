@@ -1,0 +1,7 @@
+error: Ambiguous method append with 1 parameters
+../testdata/p4_16_errors/duplicateMethod_e.p4(21): error: Candidate is append
+    void append<D>(in D d);
+         ^^^^^^
+../testdata/p4_16_errors/duplicateMethod_e.p4(23): error: Candidate is append
+    void append(in packet_in b); // duplicate method
+         ^^^^^^

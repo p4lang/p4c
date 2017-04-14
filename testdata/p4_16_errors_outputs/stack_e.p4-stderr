@@ -1,0 +1,27 @@
+../testdata/p4_16_errors/stack_e.p4(23): error: Header stack struct s[] used with non-header type struct s
+        s[5] stack1; // non-header illegal in header stack
+        ^^^^
+../testdata/p4_16_errors/stack_e.p4(23): error: Could not find type of s[]
+        s[5] stack1; // non-header illegal in header stack
+        ^^^^
+../testdata/p4_16_errors/stack_e.p4(26): error: Index too large: 1231092310293
+        h b = stack[1231092310293];
+                    ^^^^^^^^^^^^^
+../testdata/p4_16_errors/stack_e.p4(26): error: Could not find type of []
+        h b = stack[1231092310293];
+              ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/stack_e.p4(27): error: Negative array index -2
+        h c = stack[-2];
+                     ^
+../testdata/p4_16_errors/stack_e.p4(27): error: Could not find type of []
+        h c = stack[-2];
+              ^^^^^^^^^
+../testdata/p4_16_errors/stack_e.p4(28): error: Array index 6 larger or equal to array size 5
+        h d = stack[6];
+                    ^
+../testdata/p4_16_errors/stack_e.p4(22)
+        h[5] stack;
+          ^
+../testdata/p4_16_errors/stack_e.p4(28): error: Could not find type of []
+        h d = stack[6];
+              ^^^^^^^^

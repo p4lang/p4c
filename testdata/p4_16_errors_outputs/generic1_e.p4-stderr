@@ -1,0 +1,33 @@
+../testdata/p4_16_errors/generic1_e.p4(21): error: Type parameters needed for x
+control p1(If x) // missing type parameter
+              ^
+../testdata/p4_16_errors/generic1_e.p4(21): error: Could not find type of x
+control p1(If x) // missing type parameter
+              ^
+../testdata/p4_16_errors/generic1_e.p4(21): error: Could not find type of control p1
+control p1(If x) // missing type parameter
+        ^^
+../testdata/p4_16_errors/generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
+control p2(If<int<32>, int<32>> x) // too many type parameters
+           ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/generic1_e.p4(16)
+extern If<T>
+       ^^
+../testdata/p4_16_errors/generic1_e.p4(26): error: Could not find type of If<...>
+control p2(If<int<32>, int<32>> x) // too many type parameters
+           ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/generic1_e.p4(26): error: Could not find type of x
+control p2(If<int<32>, int<32>> x) // too many type parameters
+                                ^
+../testdata/p4_16_errors/generic1_e.p4(26): error: Could not find type of control p2
+control p2(If<int<32>, int<32>> x) // too many type parameters
+        ^^
+../testdata/p4_16_errors/generic1_e.p4(36): error: h<...>: Type header h is not generic and thus it cannot be specialized using type arguments
+        h<bit> x; // no type parameter
+        ^^^^^^
+../testdata/p4_16_errors/generic1_e.p4(31)
+header h {}
+       ^
+../testdata/p4_16_errors/generic1_e.p4(36): error: Could not find type of h<...>
+        h<bit> x; // no type parameter
+        ^^^^^^
