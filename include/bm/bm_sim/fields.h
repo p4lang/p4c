@@ -137,8 +137,13 @@ class Field : public Data {
 
   void reset_VL();
 
+#ifdef BMDEBUG_ON
   void set_id(uint64_t id) { my_id = id; }
   void set_packet_id(const Debugger::PacketId *id) { packet_id = id; }
+#else
+  void set_id(uint64_t) { }
+  void set_packet_id(const Debugger::PacketId *) { }
+#endif
 
   // it's important to have a way of copying a field value without the packet_id
   // pointer. This is used by PHV::copy_headers().
@@ -177,8 +182,10 @@ class Field : public Data {
   Bignum mask{1};
   Bignum max{1};
   Bignum min{1};
+#ifdef BMDEBUG_ON
   uint64_t my_id{};
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
+#endif
 };
 
 }  // namespace bm

@@ -260,7 +260,11 @@ class Header : public NamedP4Object {
   // same value.
   bool cmp(const Header &other) const;
 
+#ifdef BMDEBUG_ON
   void set_packet_id(const Debugger::PacketId *id);
+#else
+  void set_packet_id(const Debugger::PacketId *) { }
+#endif
 
   //! Returns a reference to the name of the field at the given offset.
   const std::string &get_field_name(int field_offset) const;
@@ -290,7 +294,9 @@ class Header : public NamedP4Object {
   bool metadata{false};
   int nbytes_packet{0};
   std::unique_ptr<ArithExpression> VL_expr;
+#ifdef BMDEBUG_ON
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
+#endif
 };
 
 }  // namespace bm

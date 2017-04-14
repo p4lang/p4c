@@ -274,10 +274,12 @@ Header::deparse(char *data) const {
   }
 }
 
+#ifdef BMDEBUG_ON
 void
 Header::set_packet_id(const Debugger::PacketId *id) {
   for (Field &f : fields) f.set_packet_id(id);
 }
+#endif
 
 const std::string &
 Header::get_field_name(int field_offset) const {
