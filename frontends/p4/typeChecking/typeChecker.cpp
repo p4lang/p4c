@@ -121,7 +121,7 @@ void TypeInference::end_apply(const IR::Node* node) {
         BUG("%1%: typechecker mutated node %2%", dbp(node), dbp(initialNode));
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
-        LOG2("Typemap: " << std::endl << typeMap);
+        LOG4("Typemap: " << std::endl << typeMap);
 }
 
 bool TypeInference::done() const {
@@ -141,7 +141,7 @@ const IR::Type* TypeInference::getType(const IR::Node* element, bool verbose) co
 const IR::Type* TypeInference::getTypeType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
     if (result == nullptr) {
-        typeError("Could not find type of %1%", dbp(element));
+        typeError("Could not find type of %1%", element);
         return nullptr;
     }
     BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", dbp(result));
@@ -933,7 +933,10 @@ const IR::Type* TypeInference::setTypeType(const IR::Type* type, bool learn) {
         // Learn the new type
         if (canon != orig && learn) {
             TypeInference tc(refMap, typeMap, readOnly);
+            unsigned e = ::errorCount();
             (void)canon->apply(tc);
+            if (::errorCount() > e)
+                return nullptr;
         }
         auto tt = new IR::Type_Type(canon);
         setType(getOriginal(), tt);
@@ -1114,17 +1117,17 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
 
 void TypeInference::validateFields(const IR::Type* type,
                                    std::function<bool(const IR::Type*)> checker) const {
+    if (type == nullptr)
+        return;
     BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%; expected a Struct-like", type);
     auto strct = type->to<IR::Type_StructLike>();
     for (auto field : *strct->fields) {
         auto ftype = getType(field);
         if (ftype == nullptr)
             return;
-        if (!checker(ftype)) {
+        if (!checker(ftype))
             typeError("Field %1% of %2% cannot have type %3%",
                       field, type->toString(), field->type);
-            return;
-        }
     }
 }
 
@@ -1170,6 +1173,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Header>() || t->is<IR::Type_Union>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
+        t->is<IR::Type_Varbits>() ||
         t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>(); };
     validateFields(canon, validator);
     return type;
@@ -2296,6 +2300,8 @@ TypeInference::actionCall(bool inActionList,
         typeError("%1%: Cannot supply type parameters for an action invocation",
                   baseType->typeParameters);
 
+    bool inTable = findContext<IR::P4Table>() != nullptr;
+
     TypeConstraints constraints;
     auto params = new IR::IndexedVector<IR::Parameter>();
     auto it = arguments->begin();
@@ -2311,11 +2317,19 @@ TypeInference::actionCall(bool inActionList,
             auto argType = getType(arg);
             constraints.addEqualityConstraint(paramType, argType);
             if (p->direction == IR::Direction::None) {
-                if (inActionList)
+                if (inActionList) {
                     typeError("%1%: parameter %2% cannot be bound: it is set by the control plane",
                               arg, p);
-                // For actions None parameters are treated as IN parameters.
-                // We don't require them to be bound to a compile-time constant.
+                } else if (inTable) {
+                    // For actions None parameters are treated as IN
+                    // parameters when the action is called directly.  We
+                    // don't require them to be bound to a compile-time
+                    // constant.  But if the action is instantiated in a
+                    // table (as default_action or entries), then the
+                    // arguments do have to be compile-time constants.
+                    if (!isCompileTimeConstant(arg))
+                        typeError("%1%: action argument must be a compile-time constant", arg);
+                }
             } else if (p->direction == IR::Direction::Out ||
                        p->direction == IR::Direction::InOut) {
                 if (!isLeftValue(arg))

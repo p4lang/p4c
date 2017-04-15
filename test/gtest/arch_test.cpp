@@ -57,7 +57,7 @@ TEST(arch, packet_out) {
     });
 
     pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 // Potential bug
@@ -91,7 +91,7 @@ TEST(arch, duplicatedDeclarationBug) {
     });
 
     pgm = pgm->apply(passes);
-    ASSERT_EQ(nullptr, pgm);
+    ASSERT_TRUE(pgm == nullptr);
 }
 
 TEST(arch, instantiation) {
@@ -141,7 +141,7 @@ TEST(arch, instantiation) {
     });
 
     pgm = pgm->apply(passes);
-    ASSERT_NE(pgm, nullptr);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 TEST(arch, psa_package_with_body) {
@@ -172,7 +172,7 @@ TEST(arch, psa_package_with_body) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_EQ(pgm, nullptr);
+    ASSERT_TRUE(pgm == nullptr);
 }
 
 TEST(arch, psa_control_in_control) {
@@ -208,7 +208,7 @@ TEST(arch, psa_control_in_control) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_NE(pgm, nullptr);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 TEST(arch, psa_clone_as_param_to_package) {
@@ -233,7 +233,7 @@ TEST(arch, psa_clone_as_param_to_package) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 TEST(arch, psa_clone_as_param_to_control) {
@@ -268,7 +268,7 @@ TEST(arch, psa_clone_as_param_to_control) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 TEST(arch, psa_clone_as_param_to_extern) {
@@ -311,7 +311,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 }
 
 TEST(arch, clone_as_extern_method) {
@@ -343,5 +343,5 @@ TEST(arch, clone_as_extern_method) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_NE(nullptr, pgm);
+    ASSERT_TRUE(pgm != nullptr);
 }
