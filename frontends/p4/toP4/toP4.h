@@ -22,8 +22,11 @@ limitations under the License.
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4 {
-    // conversion from P4 v1.2 IR back to P4 source
 
+/**
+This pass converts a P4-16 IR into a P4 source (text) program.
+It can optionally emit as comments a representation of the program IR.
+*/
 class ToP4 : public Inspector {
     int expressionPrecedence;  // precedence of current IR::Operation
     bool isDeclaration;  // current type is a declaration
@@ -82,9 +85,9 @@ class ToP4 : public Inspector {
      * useful functionality the ostream does not already provide; it just serves to
      * obfuscate the code */
     std::ostream* outStream;
-    // If this is set to non-nullptr, some declarations
-    // that come from libraries and models are not
-    // emitted.  Currently unused.
+    /** If this is set to non-nullptr, some declarations
+        that come from libraries and models are not
+        emitted. */
     cstring mainFile;
 
     ToP4(Util::SourceCodeBuilder& builder, bool showIR, cstring mainFile = nullptr) :

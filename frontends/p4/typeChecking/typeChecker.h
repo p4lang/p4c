@@ -26,6 +26,7 @@ limitations under the License.
 #include "frontends/p4/substitutionVisitor.h"
 #include "typeConstraints.h"
 #include "typeUnification.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -109,9 +110,10 @@ class TypeInference : public Transform {
         const IR::Node* errorPosition, const IR::Type* destType,
         const IR::Type* srcType, bool reportErrors);
 
-    // Tries to assign sourceExpression to a destination with type destType.
-    // This may rewrite the sourceExpression, in particular converting InfInt values
-    // to values with concrete types.  Returns new sourceExpression.
+    /** Tries to assign sourceExpression to a destination with type destType.
+        This may rewrite the sourceExpression, in particular converting InfInt values
+        to values with concrete types.
+        @returns new sourceExpression. */
     const IR::Expression* assignment(const IR::Node* errorPosition, const IR::Type* destType,
                                      const IR::Expression* sourceExpression);
     const IR::SelectCase* matchCase(const IR::SelectExpression* select,
@@ -121,12 +123,15 @@ class TypeInference : public Transform {
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
 
-    // Converts each type to a canonical representation.
+    /** Converts each type to a canonical representation. */
     const IR::Type* canonicalize(const IR::Type* type);
     const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
     const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
+    bool hasVarbits(const IR::Type_Header* type) const;
+    void checkCorelibMethods(const ExternMethod* em) const;
+    void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
     void validateFields(const IR::Type* type,
                         std::function<bool(const IR::Type*)> checker) const;

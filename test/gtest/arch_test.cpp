@@ -38,12 +38,12 @@ TEST(arch, packet_out) {
         control Deparser<H> (packet_out b, in H hdr);
         package PSA<H> (Deparser<H> p);
         // user program
-        struct ParsedHeaders {
+        header ParsedHeaders {
             bit<32> hdr;
         }
         control MyDeparser(packet_out b, in ParsedHeaders h){
             apply {
-                b.emit(h.hdr);
+                b.emit(h);
             }
         }
         PSA(MyDeparser()) main;
@@ -109,7 +109,7 @@ TEST(arch, instantiation) {
         control Deparser<H> (packet_out b, in H hdr);
         package PSA<H, M> (Parser<M> p, Ingress<H, M> ig, Deparser<H> dp);
         // user program
-        struct ParsedHeaders {
+        header ParsedHeaders {
             bit<32> hdr;
         }
         struct Metadata {
@@ -122,9 +122,9 @@ TEST(arch, instantiation) {
             apply {
             }
         }
-        control MyDeparser(packet_out b, in ParsedHeaders h){
+        control MyDeparser(packet_out b, in ParsedHeaders h) {
             apply {
-                b.emit(h.hdr);
+                b.emit(h);
             }
         }
         MyParser() p;
@@ -345,4 +345,3 @@ TEST(arch, clone_as_extern_method) {
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr);
 }
-

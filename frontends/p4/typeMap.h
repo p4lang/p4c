@@ -22,21 +22,21 @@ limitations under the License.
 #include "frontends/p4/substitution.h"
 
 namespace P4 {
-/*
- * Maps nodes to their canonical types.
- * Not all Node objects have types.
- * The type of each node is maintained in the typeMap.
- * Objects that have a type in the map:
- * - all Expression objects (includes Literals)
- * - function parameters
- * - variables and constant declarations
- * - functors (control, parser, etc.)
- * - functions
- * - interfaces
- * - enum fields (pointing to the enclosing enum)
- * - error (pointing to the error type)
- * - prototypes (function and functor prototypes); map name to the actual type
- */
+/**
+Maps nodes to their canonical types.
+Not all Node objects have types.
+The type of each node is maintained in the typeMap.
+Objects that have a type in the map:
+- all Expression objects (includes Literals)
+- function parameters
+- variables and constant declarations
+- functors (control, parser, etc.)
+- functions
+- interfaces
+- enum fields (pointing to the enclosing enum)
+- error (pointing to the error type)
+- type declarations - map name to the actual type
+*/
 class TypeMap final : public ProgramMap {
  protected:
     // We want to have the same canonical type for two
@@ -81,7 +81,7 @@ class TypeMap final : public ProgramMap {
     const IR::Type* getSubstitution(const IR::Type_Var* var)
     { return allTypeVariables.lookup(var); }
 
-    // deep structural equivalence between canonical types only.
+    /// Check deep structural equivalence; defined between canonical types only.
     static bool equivalent(const IR::Type* left, const IR::Type* right);
 
     // Used for tuples and stacks only

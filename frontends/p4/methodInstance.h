@@ -25,7 +25,21 @@ limitations under the License.
 
 namespace P4 {
 
-// Represents compile-time information about a MethodCallExpression
+/**
+This class is very useful for extracting information out of
+MethodCallExpressions.  Since there are no function pointers in P4,
+methods can completely be resolved at compilation time.  The static
+method 'resolve' will categorize each method call into one of several
+kinds:
+- apply method, could be of a table, control or parser
+- extern function
+- extern method (method of an extern object)
+- action call
+- built-in method (there are five of these: setValid, setInvalid, isValid, push, pop
+
+See also the ConstructorCall class and the MethodCallDescription class
+below.
+*/
 class MethodInstance {
  protected:
     MethodInstance(const IR::MethodCallExpression* mce,
@@ -38,16 +52,22 @@ class MethodInstance {
 
  public:
     const IR::MethodCallExpression* expr;
-    const IR::IDeclaration* object;  // Declaration of object that method is applied to.
-                                     // May be null for plain functions.
-    const IR::Type_MethodBase* originalMethodType;  // the type of the *original* called method,
-                                                    // without instantiated type parameters.
-    const IR::Type_MethodBase* actualMethodType;  // type of called method,
-                                                  // with instantiated type parameters.
+    /** Declaration of object that method is applied to.
+        May be null for plain functions. */
+    const IR::IDeclaration* object;
+    /** The type of the *original* called method,
+        without instantiated type parameters. */
+    const IR::Type_MethodBase* originalMethodType;
+    /** Type of called method,
+        with instantiated type parameters. */
+    const IR::Type_MethodBase* actualMethodType;
 
     virtual bool isApply() const { return false; }
     virtual ~MethodInstance() {}
 
+    /** @param useExpressionType If true, the typeMap can be nullptr,
+        and then mce->type is used.  For some technical reasons
+        neither the refMap or the typeMap are const here.  */
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
                                    ReferenceMap* refMap, TypeMap* typeMap,
                                    bool useExpressionType = false);
@@ -62,7 +82,8 @@ class MethodInstance {
     template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
 };
 
-// The call of an Apply method on an object that implements IApply
+/** Represents the call of an Apply method on an object that implements IApply:
+    a table, control or parser */
 class ApplyMethod final : public MethodInstance {
     ApplyMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
                 const IR::IApply* applyObject) :
@@ -78,7 +99,7 @@ class ApplyMethod final : public MethodInstance {
     bool isTableApply() const { return object->is<IR::P4Table>(); }
 };
 
-// A method call on an extern object
+/** Represents a method call on an extern object */
 class ExternMethod final : public MethodInstance {
     ExternMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
                  const IR::Method* method,
@@ -96,7 +117,7 @@ class ExternMethod final : public MethodInstance {
     const IR::Type_Extern* actualExternType;      // with type variables substituted
 };
 
-// An extern function
+/** Represents the call of an extern function */
 class ExternFunction final : public MethodInstance {
     ExternFunction(const IR::MethodCallExpression* expr,
                    const IR::Method* method,
@@ -109,7 +130,10 @@ class ExternFunction final : public MethodInstance {
     const IR::Method* method;
 };
 
-// Calling an action directly
+/** Represents the direct call of an action; This also works for
+    correctly for actions declared in a table 'actions' list, and for
+    action instantiations such as the default_action or the list of
+    table entries */
 class ActionCall final : public MethodInstance {
     ActionCall(const IR::MethodCallExpression* expr,
                const IR::P4Action* action,
@@ -122,9 +146,14 @@ class ActionCall final : public MethodInstance {
     const IR::P4Action* action;
 };
 
-// A built-in method.
-// These methods are:
-// header.setValid(), header.setInvalid(), header.isValid(), stack.push(int), stack.pop(int)
+/** This class represents the call of a built-in method:
+These methods are:
+- header.setValid(),
+- header.setInvalid(),
+- header.isValid(),
+- stack.push(int),
+- stack.pop(int)
+*/
 class BuiltInMethod final : public MethodInstance {
     friend class MethodInstance;
     BuiltInMethod(const IR::MethodCallExpression* expr, IR::ID name,
@@ -136,7 +165,12 @@ class BuiltInMethod final : public MethodInstance {
     const IR::Expression* appliedTo;  // object is an expression
 };
 
-// Similar to a MethodInstance, but for a constructor call expression
+/** This class is used to disambiguate constructor calls.
+    The core method is the static method 'resolve', which will categorize a
+    constructor as one of
+    - Extern constructor
+    - Container constructor (parser, control or package)
+*/
 class ConstructorCall {
  protected:
     virtual ~ConstructorCall() {}
@@ -150,6 +184,7 @@ class ConstructorCall {
     template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
 };
 
+/** Represents a constructor call that allocates an Extern object */
 class ExternConstructorCall : public ConstructorCall {
     explicit ExternConstructorCall(const IR::Type_Extern* type) :
             type(type) { CHECK_NULL(type); }
@@ -158,6 +193,8 @@ class ExternConstructorCall : public ConstructorCall {
     const IR::Type_Extern* type;  // actual extern declaration in program IR
 };
 
+/** Represents a constructor call that allocates an object that implements IContainer.
+    These can be package, control or parser */
 class ContainerConstructorCall : public ConstructorCall {
     explicit ContainerConstructorCall(const IR::IContainer* cont) :
             container(cont) { CHECK_NULL(cont); }
@@ -166,14 +203,21 @@ class ContainerConstructorCall : public ConstructorCall {
     const IR::IContainer* container;  // actual container in program IR
 };
 
-// Abstraction for a method call: maintains mapping between arguments
-// and parameters.  This will make it easier to introduce different
-// calling conventions in the future.
-// TODO: convert all code to use this class.
+/**
+   Abstraction for a method call: in addition to information about the
+   MethodInstance, this class also maintains a mapping between
+   arguments and the corresponding parameters.  This will make it
+   easier to introduce different calling conventions in the future,
+   e.g. calls by specifying the name of the parameter.
+
+   TODO: Today not all code paths use this class for matching
+   arguments to parameters; we should convert all code to use this
+   class.
+*/
 class MethodCallDescription {
  public:
     MethodInstance       *instance;
-    // For each callee parameter the corresponding argument
+    /// For each callee parameter the corresponding argument
     ParameterSubstitution substitution;
 
     MethodCallDescription(const IR::MethodCallExpression* mce,

@@ -50,8 +50,13 @@ limitations under the License.
 namespace P4 {
 
 namespace {
+/**
+This pass outputs the program as a P4 source file.
+*/
 class PrettyPrint : public Inspector {
+    /// output file
     cstring ppfile;
+    /// The file that is being compiled.  This used
     cstring inputfile;
  public:
     explicit PrettyPrint(const CompilerOptions& options) {
@@ -71,7 +76,9 @@ class PrettyPrint : public Inspector {
 };
 }  // namespace
 
-// This pass does nothing, it's just here to mark the end of the front-end
+/**
+This pass does nothing, it's just here to mark the end of the front-end
+*/
 class FrontEndLast : public PassManager {
  public:
     FrontEndLast() { setName("FrontEndLast"); }
