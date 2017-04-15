@@ -20,7 +20,7 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
         }
         if (changes) {
             auto result = new IR::Type_Struct(st->srcInfo, st->name, st->annotations, fields);
-            LOG1("Converted " << dbp(type) << " to " << dbp(result));
+            LOG3("Converted " << dbp(type) << " to " << dbp(result));
             replacement.emplace(type, result);
             return result;
         } else {
@@ -36,7 +36,7 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
             fields->push_back(field);
         }
         auto result = new IR::Type_Struct(name, fields);
-        LOG1("Converted " << dbp(type) << " to " << dbp(result));
+        LOG3("Converted " << dbp(type) << " to " << dbp(result));
         replacement.emplace(type, result);
         return result;
     }
@@ -79,7 +79,7 @@ const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
     auto result = repl->getNewReplacements();
     if (result == nullptr)
         return before;
-    LOG1("Inserting replacements before " << dbp(before));
+    LOG3("Inserting replacements before " << dbp(before));
     result->push_back(before);
     return result;
 }

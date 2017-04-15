@@ -20,22 +20,6 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-// Removes nested structs.  This converts only local variables, but
-// does not change the arguments of controls, parsers, packages, and methods.
-// Should be run after CopyStructures, EliminateTuples, and
-// MoveInitializers.
-
-// struct T { bit b; }
-// struct S { T t1; T t2; }
-// S v;
-// f(v.t1, v);
-// is replaced by
-// T v_t1;
-// T v_t2;
-// f(v_t1, { v_t1, v_t2 });
-// This does not work if the second argument of f is out or inout,
-// since the list expression is not a l-value.  This pass cannot be
-// used in this case.
 namespace P4 {
 
 class ComplexValues final {
@@ -102,6 +86,26 @@ class ComplexValues final {
         LOG2("Translated " << dbp(expression) << " to " << comp); }
 };
 
+/**
+Removes nested structs.  This converts only local variables, but
+does not change the arguments of controls, parsers, packages, and methods.
+Should be run after CopyStructures, EliminateTuples, and
+MoveInitializers.
+
+struct T { bit b; }
+struct S { T t1; T t2; }
+S v;
+f(v.t1, v);
+is replaced by
+T v_t1;
+T v_t2;
+f(v_t1, { v_t1, v_t2 });
+
+This does not work if the second argument of f is out or inout,
+since the list expression is not a l-value.  This pass cannot be
+used in this case.  This can arise only if there are extern functions
+that can return nested structs.
+*/
 class RemoveNestedStructs final : public Transform {
     ComplexValues* values;
  public:
