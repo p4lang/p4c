@@ -78,9 +78,6 @@ class CompilerOptions : public Util::Options {
 
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
-    // TODO: Deprecated, remove and use p4RuntimeFormat instead
-    // If true, write out the P4Runtime API description as human-readable JSON.
-    bool p4RuntimeAsJson = false;
 
     // Compiler target architecture
     cstring target = nullptr;
