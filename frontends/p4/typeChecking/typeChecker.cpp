@@ -2283,6 +2283,8 @@ TypeInference::actionCall(bool inActionList,
         typeError("%1%: Cannot supply type parameters for an action invocation",
                   baseType->typeParameters);
 
+    bool inTable = findContext<IR::P4Table>() != nullptr;
+
     TypeConstraints constraints;
     auto params = new IR::IndexedVector<IR::Parameter>();
     auto it = arguments->begin();
@@ -2298,11 +2300,19 @@ TypeInference::actionCall(bool inActionList,
             auto argType = getType(arg);
             constraints.addEqualityConstraint(paramType, argType);
             if (p->direction == IR::Direction::None) {
-                if (inActionList)
+                if (inActionList) {
                     typeError("%1%: parameter %2% cannot be bound: it is set by the control plane",
                               arg, p);
-                // For actions None parameters are treated as IN parameters.
-                // We don't require them to be bound to a compile-time constant.
+                } else if (inTable) {
+                    // For actions None parameters are treated as IN
+                    // parameters when the action is called directly.  We
+                    // don't require them to be bound to a compile-time
+                    // constant.  But if the action is instantiated in a
+                    // table (as default_action or entries), then the
+                    // arguments do have to be compile-time constants.
+                    if (!isCompileTimeConstant(arg))
+                        typeError("%1%: action argument must be a compile-time constant", arg);
+                }
             } else if (p->direction == IR::Direction::Out ||
                        p->direction == IR::Direction::InOut) {
                 if (!isLeftValue(arg))
