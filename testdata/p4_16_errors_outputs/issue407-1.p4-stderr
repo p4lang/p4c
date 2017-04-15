@@ -1,0 +1,45 @@
+../testdata/p4_16_errors/issue407-1.p4(47): error: Field x7 of header H cannot have type error
+    error x7;
+          ^^
+/p4c/build/p4include/core.p4(22)
+error {
+^
+../testdata/p4_16_errors/issue407-1.p4(48): error: Field x8 of header H cannot have type bool
+    bool x8;
+         ^^
+../testdata/p4_16_errors/issue407-1.p4(49): error: Field x9 of header H cannot have type myenum1
+    myenum1 x9;
+            ^^
+../testdata/p4_16_errors/issue407-1.p4(32)
+enum myenum1 {
+^^^^
+../testdata/p4_16_errors/issue407-1.p4(50): error: Field x10 of header H cannot have type header Ethernet_h
+    Ethernet_h x10;
+               ^^^
+../testdata/p4_16_errors/issue407-1.p4(38)
+header Ethernet_h {
+       ^^^^^^^^^^
+../testdata/p4_16_errors/issue407-1.p4(51): error: Field x11 of header H cannot have type header Ethernet_h[]
+    Ethernet_h[4] x11;
+                  ^^^
+../testdata/p4_16_errors/issue407-1.p4(51)
+    Ethernet_h[4] x11;
+    ^^^^^^^^^^^^^
+../testdata/p4_16_errors/issue407-1.p4(52): error: Field x12 of header H cannot have type struct mystruct1
+    mystruct1 x12;
+              ^^^
+../testdata/p4_16_errors/issue407-1.p4(21)
+struct mystruct1 {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue407-1.p4(53): error: Field x13 of header H cannot have type struct mystruct2
+    mystruct2 x13;
+              ^^^
+../testdata/p4_16_errors/issue407-1.p4(26)
+struct mystruct2 {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue407-1.p4(54): error: Field x14 of header H cannot have type Tuple(2)
+    myTuple0 x14;
+             ^^^
+../testdata/p4_16_errors/issue407-1.p4(44)
+typedef tuple<bit<8>, bit<16>> myTuple0;
+        ^^^^^^^^^^^^^^^^^^^^^^

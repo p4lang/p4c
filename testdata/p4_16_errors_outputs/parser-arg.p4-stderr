@@ -7,11 +7,15 @@ parser Parser();
 ../testdata/p4_16_errors/parser-arg.p4(18): error: Could not find type of parser MyParser
 parser MyParser(Parser p);
        ^^^^^^^^
-error: Could not find type of <Type_Name>(23) MyParser
+../testdata/p4_16_errors/parser-arg.p4(19): error: Could not find type of MyParser
+package Package(MyParser p1, MyParser p2);
+                ^^^^^^^^
 ../testdata/p4_16_errors/parser-arg.p4(18): error: Could not find type of parser MyParser
 parser MyParser(Parser p);
        ^^^^^^^^
-error: Could not find type of <Type_Name>(27) MyParser
+../testdata/p4_16_errors/parser-arg.p4(19): error: Could not find type of MyParser
+package Package(MyParser p1, MyParser p2);
+                             ^^^^^^^^
 ../testdata/p4_16_errors/parser-arg.p4(19): error: Could not find type of p1
 package Package(MyParser p1, MyParser p2);
                          ^^
@@ -21,22 +25,30 @@ parser Parser1(Parser p) {
 ../testdata/p4_16_errors/parser-arg.p4(17)
 parser Parser();
        ^^^^^^
-error: Could not find type of <Type_Parser>(38) Parser1
+../testdata/p4_16_errors/parser-arg.p4(21): error: Could not find type of parser Parser1
+parser Parser1(Parser p) {
+       ^^^^^^^
 ../testdata/p4_16_errors/parser-arg.p4(28): error: p: parameter cannot have type parser Parser
 parser Parser2(Parser p) {
                       ^
 ../testdata/p4_16_errors/parser-arg.p4(17)
 parser Parser();
        ^^^^^^
-error: Could not find type of <Type_Parser>(63) Parser2
-../testdata/p4_16_errors/parser-arg.p4(21): error: Could not find type of parser Parser1
-parser Parser1(Parser p) {
-       ^^^^^^^
-error: Could not find type of <Type_Name>(81) Parser1
 ../testdata/p4_16_errors/parser-arg.p4(28): error: Could not find type of parser Parser2
 parser Parser2(Parser p) {
        ^^^^^^^
-error: Could not find type of <Type_Name>(86) Parser2
+../testdata/p4_16_errors/parser-arg.p4(21): error: Could not find type of parser Parser1
+parser Parser1(Parser p) {
+       ^^^^^^^
+../testdata/p4_16_errors/parser-arg.p4(35): error: Could not find type of Parser1
+Parser1() p1;
+^^^^^^^
+../testdata/p4_16_errors/parser-arg.p4(28): error: Could not find type of parser Parser2
+parser Parser2(Parser p) {
+       ^^^^^^^
+../testdata/p4_16_errors/parser-arg.p4(36): error: Could not find type of Parser2
+Parser2() p2;
+^^^^^^^
 ../testdata/p4_16_errors/parser-arg.p4(19): error: Could not find type of package Package
 package Package(MyParser p1, MyParser p2);
         ^^^^^^^
@@ -46,4 +58,6 @@ Parser1() p1;
 ../testdata/p4_16_errors/parser-arg.p4(36): error: Could not find type of p2
 Parser2() p2;
           ^^
-error: Could not find type of <Type_Name>(91) Package
+../testdata/p4_16_errors/parser-arg.p4(38): error: Could not find type of Package
+Package(p1,p2) main;
+^^^^^^^

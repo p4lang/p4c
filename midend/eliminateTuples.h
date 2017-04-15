@@ -22,6 +22,10 @@ limitations under the License.
 
 namespace P4 {
 
+/**
+Maintains for each type that may contain a tuple (or be a tuple) the
+corresponding struct replacement.
+*/
 class ReplacementMap {
     ordered_map<const IR::Type*, const IR::Type_Struct*> replacement;
     std::set<const IR::Type_Struct*> inserted;
@@ -36,7 +40,12 @@ class ReplacementMap {
     IR::IndexedVector<IR::Node>* getNewReplacements();
 };
 
-// Convert each Tuple type into a Struct.
+/**
+Convert each Tuple type into a Struct and insert the struct in the
+program replacing the tuple.  We make up field names for the struct
+fields.  Note that the replacement has to be recursive, since the
+tuple could contain types that contain other tuples.
+*/
 class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;
  public:
@@ -45,6 +54,8 @@ class DoReplaceTuples final : public Transform {
     const IR::Node* postorder(IR::Type_Tuple* type) override;
     const IR::Node* insertReplacements(const IR::Node* before);
     const IR::Node* postorder(IR::Type_Struct* type) override
+    { return insertReplacements(type); }
+    const IR::Node* postorder(IR::Type_Typedef* type) override
     { return insertReplacements(type); }
     const IR::Node* postorder(IR::P4Parser* parser) override
     { return insertReplacements(parser); }
