@@ -121,8 +121,11 @@ MidEnd::MidEnd(CompilerOptions& options) {
                 // nothing further to do
                 return nullptr;
             // We save the names of some control blocks for special processing later
-            if (main->getConstructorParameters()->size() != 6)
-                ::error("%1%: Expected 6 arguments for main package", main);
+            if (main->getConstructorParameters()->size() != 6) {
+                ::error("%1%: Expected 6 arguments for main package; are you using %2%?",
+                        main, P4V1::V1Model::instance.file.toString());
+                return nullptr;
+            }
             auto ingress = main->getParameterValue(P4V1::V1Model::instance.sw.ingress.name);
             auto egress = main->getParameterValue(P4V1::V1Model::instance.sw.egress.name);
             auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
