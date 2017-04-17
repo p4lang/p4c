@@ -37,7 +37,7 @@ RUN apt-get update && \
     ./autogen.sh && \
     ./configure --enable-debugger --with-pdfixed --with-stress-tests && \
     make && \
-    make install && \
+    make install-strip && \
     ldconfig && \
     (test "$IMAGE_TYPE" = "build" && \
       apt-get purge -y $BM_DEPS && \
