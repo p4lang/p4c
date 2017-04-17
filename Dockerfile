@@ -1,6 +1,11 @@
 FROM p4lang/third-party:stable
 MAINTAINER Seth Fowler <seth.fowler@barefootnetworks.com>
 
+# Default to using 2 make jobs, which is a good default for CI. If you're
+# building locally or you know there are more cores available, you may want to
+# override this.
+ARG MAKEFLAGS=-j2
+
 # Select the type of image we're building. Use `build` for a normal build, which
 # is optimized for image size. Use `test` if this image will be used for
 # testing; in this case, the source code and build-only dependencies will not be
