@@ -233,6 +233,8 @@ struct MatchField {
     const cstring name;       // The fully qualified external name of this field.
     const MatchType type;     // The match algorithm - exact, ternary, range, etc.
     const uint32_t bitwidth;  // How wide this field is.
+    const IR::IAnnotated* annotations;  // If non-null, any annotations applied
+                                        // to this field.
 };
 
 /// The types of action profiles available in the V1 model.
@@ -1017,6 +1019,7 @@ public:
             auto match_field = table->add_match_fields();
             match_field->set_id(index++);
             match_field->set_name(field.name);
+            addAnnotations(match_field, field.annotations);
             match_field->set_bitwidth(field.bitwidth);
             match_field->set_match_type(field.type);
         }
@@ -1333,7 +1336,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         }
 
         matchFields.push_back(MatchField{path->serialize(), matchType,
-                                         uint32_t(path->type->width_bits())});
+                                         uint32_t(path->type->width_bits()),
+                                         keyElement->to<IR::IAnnotated>()});
     }
 
     return matchFields;
