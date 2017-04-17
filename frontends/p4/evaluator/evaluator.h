@@ -45,10 +45,10 @@ class Evaluator final : public Inspector, public IHasBlock {
     IR::ToplevelBlock* getToplevelBlock() override { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
-    void setValue(const IR::Node* node, const IR::CompileTimeValue* constant);
-    const IR::CompileTimeValue* getValue(const IR::Node* node) const;
+    void setValue(const IR::Node* node, const IR::ICompileTimeValue* constant);
+    const IR::ICompileTimeValue* getValue(const IR::Node* node) const;
 
-    std::vector<const IR::CompileTimeValue*>*
+    std::vector<const IR::ICompileTimeValue*>*
             evaluateArguments(const IR::Vector<IR::Expression>* arguments,
                               IR::Block* context);
 

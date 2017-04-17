@@ -12,6 +12,7 @@ abstract Operation_Unary : Operation {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
+    bool isCompileTimeConstant() const override { return expr->isCompileTimeConstant(); }
 }
 
 class Neg : Operation_Unary {
@@ -33,6 +34,8 @@ abstract Operation_Binary : Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
+    bool isCompileTimeConstant() const override {
+        return left->isCompileTimeConstant() && right->isCompileTimeConstant(); }
 }
 
 abstract Operation_Ternary : Operation {
@@ -122,8 +125,9 @@ class LOr : Operation_Binary {
     precedence = DBPrint::Prec_LOr;
 }
 
-abstract Literal : Expression, CompileTimeValue {
+abstract Literal : Expression, ICompileTimeValue {
 #nodbprint
+    bool isCompileTimeConstant() const override { return true; }
 }
 
 /// This is an integer literal on arbitrary-precision.
@@ -169,6 +173,7 @@ class Constant : Literal {
 #end
     toString { return Util::toString(&value); }
     visit_children { v.visit(type, "type"); }
+    bool isCompileTimeConstant() const override { return true; }
 }
 
 class BoolLiteral : Literal {
@@ -191,6 +196,7 @@ class PathExpression : Expression {
     PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
     PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->toString(); }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 // enum X { a }
@@ -203,6 +209,7 @@ class TypeNameExpression : Expression {
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ Node::dbprint(out); out << typeName; }
     toString { return typeName->toString(); }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class Slice : Operation_Ternary {
@@ -219,6 +226,7 @@ class Slice : Operation_Ternary {
     Slice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class Member : Operation_Unary {
@@ -273,9 +281,13 @@ class Mux : Operation_Ternary {
         clone.visit(e2, "e2");
         v.flow_merge(clone); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
+    bool isCompileTimeConstant() const override {
+        return e1->isCompileTimeConstant() && e2->isCompileTimeConstant(); }
 }
 
-class DefaultExpression : Expression {}
+class DefaultExpression : Expression {
+    bool isCompileTimeConstant() const override { return false; }
+}
 
 // Two different This should not be equal.
 // That's why we use a hidden id field to distinguish them.
@@ -283,6 +295,9 @@ class This : Expression {
     int id = nextId++;
  private:
     static int nextId;
+ public:
+    bool isCompileTimeConstant() const override { return false; }
+
 }  // experimental
 
 class Cast : Operation_Unary {
@@ -308,6 +323,7 @@ class SelectExpression : Expression {
     visit_children {
         v.visit(select, "select");
         selectCases.parallel_visit_children(v); }
+    bool isCompileTimeConstant() const override { return select->isCompileTimeConstant(); }
 }
 
 class MethodCallExpression : Expression {
@@ -316,6 +332,7 @@ class MethodCallExpression : Expression {
     optional Vector<Expression> arguments = new Vector<Expression>;
     toString{ return method->toString(); }
     validate{ typeArguments->check_null(); arguments->check_null(); }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class ConstructorCallExpression : Expression {
@@ -326,6 +343,7 @@ class ConstructorCallExpression : Expression {
                         constructedType->is<Type_Specialized>(),
                         "%1%: unexpected type", constructedType);
         arguments->check_null(); }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 /// Represents a list of expressions separated by commas
@@ -335,6 +353,12 @@ class ListExpression : Expression {
         components.check_null();
     }
     void push_back(Expression e) { components.push_back(e); }
+    bool isCompileTimeConstant() const override {
+      bool result = true;
+      for (auto e : components)
+        result = result && e->isCompileTimeConstant();
+      return result;
+    }
 }
 
 /** @} *//* end group irdefs */

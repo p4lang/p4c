@@ -13,7 +13,14 @@
 */
 
 /// a value that can be evaluated at compile-time
-interface CompileTimeValue {}
+interface ICompileTimeValue {
+    /// Return whether the compile time value is a constant
+    /// It is needed because some expressions will evaluate to constants,
+    /// but need to traverse the tree to determine whether the value is constant
+    ///
+    /// @return True if the IR node is a compile time constant
+    virtual bool isCompileTimeConstant() const = 0;
+}
 
 /// Base class for P4 types
 abstract Type {
@@ -119,7 +126,7 @@ abstract Type_Declaration : Type, IDeclaration {
     const Type* getP4Type() const override { return new Type_Name(name); }
 }
 
-abstract Expression {
+abstract Expression : ICompileTimeValue {
     /// Note that the type field is not visited.
     /// Most P4_16 passes don't use this field.
     /// It is a used to hold the result of TypeInferencing for the expression.

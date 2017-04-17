@@ -107,6 +107,7 @@ class Metadata : HeaderOrMetadata {
 
 abstract HeaderRef : Expression {
     virtual HeaderOrMetadata baseRef() const = 0;
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class ConcreteHeaderRef : HeaderRef {
@@ -143,6 +144,7 @@ class If :  Expression {
         v.flow_merge(clone);
         Expression::visit_children(v);
     }
+    bool isCompileTimeConstant() const override { return pred->isCompileTimeConstant(); }
 }
 
 // an if condition tagged with a name so we can refer to it
@@ -175,6 +177,7 @@ class Apply : Expression {
             v.flow_merge(clone2); }
         Expression::visit_children(v);
     }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class Primitive : Operation {
@@ -213,6 +216,10 @@ class Primitive : Operation {
 #apply
     stringOp = name;
     precedence = DBPrint::Prec_Postfix;
+    // \TODO(calin): is there a case where a Primtive can be a compile time constant?
+    // E.g. all the operands are constant and the compiler replaces the primitive
+    // with an assignment?
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class FieldList {
@@ -359,6 +366,7 @@ class ActionArg : Expression {
     ActionArg { if (!srcInfo) srcInfo = name.srcInfo; }
     dbprint{ out << action_name << ':' << name; }
     toString{ return name.name; }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 // Represents a P4 v1.0 action
@@ -435,6 +443,7 @@ class AttribLocal : Expression, IDeclaration {
     ID  name;
 #nodbprint
     ID getName() const override { return name; }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class AttribLocals : ISimpleNamespace {
@@ -459,6 +468,7 @@ class GlobalRef : Expression {
     validate { obj->is<IInstance>(); }
     toString { return obj->to<IInstance>()->Name(); }
     dbprint { out << obj->to<IInstance>()->Name(); }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class AttributeRef : Expression {
@@ -468,6 +478,7 @@ class AttributeRef : Expression {
     AttributeRef { type = attrib->type; }
     toString { return attrib->name; }
     dbprint { out << attrib->name; }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 #emit

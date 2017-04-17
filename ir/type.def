@@ -365,8 +365,9 @@ class Type_SpecializedCanonical : Type {
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member
-class Declaration_ID : Declaration, CompileTimeValue {
+class Declaration_ID : Declaration, ICompileTimeValue {
 #nodbprint
+    bool isCompileTimeConstant() const override { return true; }
 }
 
 /// The type of a string literal

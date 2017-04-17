@@ -153,7 +153,7 @@ P4Table::getApplyMethodType() const {
 const Type_Method* Type_Table::getApplyMethodType() const
 { return table->getApplyMethodType(); }
 
-void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) {
+void InstantiatedBlock::instantiate(std::vector<const ICompileTimeValue*> *args) {
     CHECK_NULL(args);
     auto it = args->begin();
     for (auto p : *getConstructorParameters()->getEnumerator()) {
@@ -163,7 +163,7 @@ void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) 
     }
 }
 
-const IR::CompileTimeValue* InstantiatedBlock::getParameterValue(cstring paramName) const {
+const IR::ICompileTimeValue* InstantiatedBlock::getParameterValue(cstring paramName) const {
     auto param = getConstructorParameters()->getDeclByName(paramName);
     BUG_CHECK(param != nullptr, "No parameter named %1%", paramName);
     BUG_CHECK(param->is<IR::Parameter>(), "No parameter named %1%", paramName);

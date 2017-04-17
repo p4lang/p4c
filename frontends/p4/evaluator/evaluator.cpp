@@ -47,7 +47,7 @@ void Evaluator::popBlock(IR::Block* block) {
     blockStack.pop_back();
 }
 
-void Evaluator::setValue(const IR::Node* node, const IR::CompileTimeValue* constant) {
+void Evaluator::setValue(const IR::Node* node, const IR::ICompileTimeValue* constant) {
     CHECK_NULL(node);
     CHECK_NULL(constant);
     auto block = currentBlock();
@@ -55,7 +55,7 @@ void Evaluator::setValue(const IR::Node* node, const IR::CompileTimeValue* const
     block->setValue(node, constant);
 }
 
-const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
+const IR::ICompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
     CHECK_NULL(node);
     auto block = currentBlock();
     auto result = block->getValue(node);
@@ -92,10 +92,10 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
     return false;
 }
 
-std::vector<const IR::CompileTimeValue*>*
+std::vector<const IR::ICompileTimeValue*>*
 Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments, IR::Block* context) {
     P4::DoConstantFolding cf(refMap, nullptr);
-    auto values = new std::vector<const IR::CompileTimeValue*>();
+    auto values = new std::vector<const IR::ICompileTimeValue*>();
     pushBlock(context);
     for (auto e : *arguments) {
         auto folded = e->apply(cf);  // constant fold argument

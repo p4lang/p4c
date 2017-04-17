@@ -472,28 +472,29 @@ class Function : Declaration {
 // Blocks are not visited using visitors, so the visit_children()
 // method is empty.  Users have to write custom visitors to
 // traverse the constantValue map.
-abstract Block : CompileTimeValue {
+abstract Block : ICompileTimeValue {
     Node node;  // Node that evaluates to this block.
     // It's either a Declaration_Instance or a ConstructorCallExpression.
 
     // One value for each Node inside that evaluates to a compile-time constant.
     // This includes all constructor parameters, and all inner nested blocks.
-    ordered_map<Node, CompileTimeValue> constantValue = {};
+    ordered_map<Node, ICompileTimeValue> constantValue = {};
 
     virtual void dbprint(std::ostream& out) const override;
     virtual void dbprint_recursive(std::ostream& out) const;
-    void setValue(Node node, CompileTimeValue value) {
+    void setValue(Node node, ICompileTimeValue value) {
         CHECK_NULL(node); CHECK_NULL(value);
         auto it = constantValue.find(node);
         BUG_CHECK(it == constantValue.end(), "%1% already set", node);
         constantValue[node] = value; }
-    CompileTimeValue getValue(Node node) const {
+    ICompileTimeValue getValue(Node node) const {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
         if (it == constantValue.end())
             return nullptr;
         return it->second; }
     visit_children { (void)v; }
+    bool isCompileTimeConstant() const override { return false; }
 }
 
 class TableBlock : Block {
@@ -507,8 +508,8 @@ abstract InstantiatedBlock : Block {
     Type instanceType;  // May be a SpecializedType
 
     virtual ParameterList getConstructorParameters() const = 0;
-    void instantiate(std::vector<CompileTimeValue> *args);
-    CompileTimeValue getParameterValue(cstring paramName) const;
+    void instantiate(std::vector<ICompileTimeValue> *args);
+    ICompileTimeValue getParameterValue(cstring paramName) const;
     virtual void dbprint(std::ostream& out) const override;
 }
 
