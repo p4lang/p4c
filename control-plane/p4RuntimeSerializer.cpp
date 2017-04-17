@@ -938,6 +938,7 @@ public:
             auto paramName = controlPlaneName(actionParam);
             param->set_id(index++);
             param->set_name(paramName);
+            addAnnotations(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
             if (!paramType->is<IR::Type_Bits>()) {
@@ -1044,17 +1045,18 @@ public:
 
 private:
     /// Serialize @annotated's P4 annotations and attach them to a P4Info message
-    /// with a @preamble. '@name' and '@id' are ignored.
-    static void addAnnotations(Preamble* preamble, const IR::IAnnotated* annotated)
+    /// with an 'annotations' field. '@name' and '@id' are ignored.
+    template <typename Message>
+    static void addAnnotations(Message* message, const IR::IAnnotated* annotated)
     {
-        CHECK_NULL(preamble);
+        CHECK_NULL(message);
 
         // Synthesized resources may have no annotations.
         if (annotated == nullptr) return;
 
         for (const IR::Annotation* annotation : annotated->getAnnotations()->annotations) {
-            // Don't output the @name or @id annotations; they're already captured by
-            // the corresponding fields of the P4Info preamble.
+            // Don't output the @name or @id annotations; they're represented
+            // elsewhere in P4Info messages.
             if (annotation->name == IR::Annotation::nameAnnotation) continue;
             if (annotation->name == "id") continue;
 
@@ -1062,13 +1064,13 @@ private:
             // XXX(seth): Might be nice to do something better than rely on toString().
             std::string serializedAnnotation = "@" + annotation->name + "(";
             auto expressions = annotation->expr;
-            for (unsigned i = 0; i < expressions.size() ; ++i) {
+            for (unsigned i = 0; i < expressions.size(); ++i) {
                 serializedAnnotation.append(expressions[i]->toString());
                 if (i + 1 < expressions.size()) serializedAnnotation.append(", ");
             }
             serializedAnnotation.append(")");
 
-            preamble->add_annotations(serializedAnnotation);
+            message->add_annotations(serializedAnnotation);
         }
     }
 
