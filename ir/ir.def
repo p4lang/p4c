@@ -179,11 +179,12 @@ class ActionList : PropertyValue {
     size_t size() const { return actionList->size(); }
 }
 
-class KeyElement {
+class KeyElement : IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Expression           expression;
     PathExpression       matchType;
 
+    Annotations     getAnnotations() const override { return annotations; }
     const IR::Node *transform_visit(Transform &v) {
         // call this from Transform::preorder(KeyElement) if the transform might split
         // the expression into a Vector<Expression>
