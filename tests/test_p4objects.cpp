@@ -881,3 +881,44 @@ TEST(P4Objects, ParserExtractVL) {
   LookupStructureFactory factory;
   ASSERT_EQ(0, objects.init_objects(&is, &factory));
 }
+
+namespace {
+
+void create_2_header_types_json(std::ostream *ss,
+                                const std::string &name_1, int id_1,
+                                const std::string &name_2, int id_2) {
+  *ss << "{\"header_types\":[";
+  auto add_one = [ss] (const std::string &name, int id) {
+    *ss << "{\"name\":\"" << name << "\",\"id\":" << id << ",\"fields\":[]}";
+  };
+  add_one(name_1, id_1);
+  *ss << ",";
+  add_one(name_2, id_2);
+  *ss << "]}";
+}
+
+}  // namespace
+
+TEST(P4Objects, DupName) {
+  std::stringstream is;
+  create_2_header_types_json(&is, "ht0", 0, "ht0", 1);
+  std::stringstream os;
+  P4Objects objects(os);
+  LookupStructureFactory factory;
+  std::string expected_error_msg(
+      "Duplicate objects of type 'header type' with name 'ht0'\n");
+  ASSERT_NE(0, objects.init_objects(&is, &factory));
+  EXPECT_EQ(expected_error_msg, os.str());
+}
+
+TEST(P4Objects, DupId) {
+  std::stringstream is;
+  create_2_header_types_json(&is, "ht0", 0, "ht1", 0);
+  std::stringstream os;
+  P4Objects objects(os);
+  LookupStructureFactory factory;
+  std::string expected_error_msg(
+      "Several objects of type 'header type' have the same id 0\n");
+  ASSERT_NE(0, objects.init_objects(&is, &factory));
+  EXPECT_EQ(expected_error_msg, os.str());
+}

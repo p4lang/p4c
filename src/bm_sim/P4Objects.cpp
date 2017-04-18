@@ -27,6 +27,7 @@
 #include <tuple>
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <exception>
 
 #include "jsoncpp/json.h"
@@ -460,6 +461,38 @@ struct DirectMeterArray {
   int offset;
 };
 
+class DupIdChecker {
+ public:
+  explicit DupIdChecker(const std::string &type_name)
+      : type_name(type_name) { }
+
+  void add(p4object_id_t id) {
+    auto p = ids.insert(id);
+    if (!p.second) {  // insertion did not take place
+      throw json_exception(
+          EFormat() << "Several objects of type '" << type_name
+          << "' have the same id " << id);
+    }
+  }
+
+ private:
+  std::string type_name;
+  std::unordered_set<p4object_id_t> ids{};
+};
+
+template <typename T>
+void add_new_object(std::unordered_map<std::string, T> *map,
+                    const std::string &type_name,
+                    const std::string &name, T obj) {
+  auto it = map->find(name);
+  if (it != map->end()) {
+    throw json_exception(
+        EFormat() << "Duplicate objects of type '" << type_name
+                  << "' with name '" << name << "'");
+  }
+  map->emplace(name, std::move(obj));
+}
+
 }  // namespace
 
 struct P4Objects::InitState {
@@ -487,10 +520,12 @@ P4Objects::init_enums(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_header_types(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("header type");
   const Json::Value &cfg_header_types = cfg_root["header_types"];
   for (const auto &cfg_header_type : cfg_header_types) {
     const string header_type_name = cfg_header_type["name"].asString();
     header_type_id_t header_type_id = cfg_header_type["id"].asInt();
+    dup_id_checker.add(header_type_id);
     HeaderType *header_type = new HeaderType(header_type_name,
                                              header_type_id);
 
@@ -526,12 +561,14 @@ P4Objects::init_header_types(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_headers(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("header");
   const Json::Value &cfg_headers = cfg_root["headers"];
 
   for (const auto &cfg_header : cfg_headers) {
     const string header_name = cfg_header["name"].asString();
     const string header_type_name = cfg_header["header_type"].asString();
     header_id_t header_id = cfg_header["id"].asInt();
+    dup_id_checker.add(header_id);
     bool metadata = cfg_header["metadata"].asBool();
 
     HeaderType *header_type = get_header_type(header_type_name);
@@ -546,12 +583,14 @@ P4Objects::init_headers(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_header_stacks(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("header stack");
   const Json::Value &cfg_header_stacks = cfg_root["header_stacks"];
 
   for (const auto &cfg_header_stack : cfg_header_stacks) {
     const string header_stack_name = cfg_header_stack["name"].asString();
     const string header_type_name = cfg_header_stack["header_type"].asString();
     header_stack_id_t header_stack_id = cfg_header_stack["id"].asInt();
+    dup_id_checker.add(header_stack_id);
 
     HeaderType *header_stack_type = get_header_type(header_type_name);
     header_stack_to_type_map[header_stack_name] = header_stack_type;
@@ -570,10 +609,12 @@ P4Objects::init_header_stacks(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_extern_instances(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("extern");
   const Json::Value &cfg_extern_instances = cfg_root["extern_instances"];
   for (const auto &cfg_extern_instance : cfg_extern_instances) {
     const string extern_instance_name = cfg_extern_instance["name"].asString();
     const p4object_id_t extern_instance_id = cfg_extern_instance["id"].asInt();
+    dup_id_checker.add(extern_instance_id);
 
     const string extern_type_name = cfg_extern_instance["type"].asString();
     auto instance = ExternFactoryMap::get_instance()->get_extern_instance(
@@ -634,10 +675,12 @@ P4Objects::init_extern_instances(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_parse_vsets(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("parser vset");
   const Json::Value &cfg_parse_vsets = cfg_root["parse_vsets"];
   for (const auto &cfg_parse_vset : cfg_parse_vsets) {
     const string parse_vset_name = cfg_parse_vset["name"].asString();
     const p4object_id_t parse_vset_id = cfg_parse_vset["id"].asInt();
+    dup_id_checker.add(parse_vset_id);
     const size_t parse_vset_cbitwidth =
         cfg_parse_vset["compressed_bitwidth"].asUInt();
 
@@ -662,15 +705,18 @@ P4Objects::init_errors(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_parsers(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("parser");
   const Json::Value &cfg_parsers = cfg_root["parsers"];
   for (const auto &cfg_parser : cfg_parsers) {
     const string parser_name = cfg_parser["name"].asString();
     p4object_id_t parser_id = cfg_parser["id"].asInt();
+    dup_id_checker.add(parser_id);
 
     std::unique_ptr<Parser> parser(
         new Parser(parser_name, parser_id, &error_codes));
 
     std::unordered_map<string, ParseState *> current_parse_states;
+    DupIdChecker dup_id_checker_states("parse state");
 
     // parse states
 
@@ -678,6 +724,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
     for (const auto &cfg_parse_state : cfg_parse_states) {
       const string parse_state_name = cfg_parse_state["name"].asString();
       const p4object_id_t id = cfg_parse_state["id"].asInt();
+      dup_id_checker_states.add(id);
       // p4object_id_t parse_state_id = cfg_parse_state["id"].asInt();
       std::unique_ptr<ParseState> parse_state(
           new ParseState(parse_state_name, id));
@@ -835,7 +882,8 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
       if (cfg_transition_key.size() > 0u)
         parse_state->set_key_builder(key_builder);
 
-      current_parse_states[parse_state_name] = parse_state.get();
+      add_new_object(&current_parse_states, "parse state", parse_state_name,
+                     parse_state.get());
       parse_states.push_back(std::move(parse_state));
     }
 
@@ -895,10 +943,12 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_deparsers(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("deparser");
   const Json::Value &cfg_deparsers = cfg_root["deparsers"];
   for (const auto &cfg_deparser : cfg_deparsers) {
     const string deparser_name = cfg_deparser["name"].asString();
     p4object_id_t deparser_id = cfg_deparser["id"].asInt();
+    dup_id_checker.add(deparser_id);
     Deparser *deparser = new Deparser(deparser_name, deparser_id);
 
     const Json::Value &cfg_ordered_headers = cfg_deparser["order"];
@@ -913,10 +963,12 @@ P4Objects::init_deparsers(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_calculations(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("calculation");
   const Json::Value &cfg_calculations = cfg_root["calculations"];
   for (const auto &cfg_calculation : cfg_calculations) {
     const string name = cfg_calculation["name"].asString();
     const p4object_id_t id = cfg_calculation["id"].asInt();
+    dup_id_checker.add(id);
     const string algo = cfg_calculation["algo"].asString();
 
     BufBuilder builder;
@@ -952,10 +1004,12 @@ P4Objects::init_calculations(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_counter_arrays(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("counter");
   const Json::Value &cfg_counter_arrays = cfg_root["counter_arrays"];
   for (const auto &cfg_counter_array : cfg_counter_arrays) {
     const string name = cfg_counter_array["name"].asString();
     const p4object_id_t id = cfg_counter_array["id"].asInt();
+    dup_id_checker.add(id);
     const size_t size = cfg_counter_array["size"].asUInt();
     const Json::Value false_value(false);
     const bool is_direct =
@@ -972,10 +1026,12 @@ P4Objects::init_meter_arrays(const Json::Value &cfg_root,
                              InitState *init_state) {
   auto &direct_meters = init_state->direct_meters;
 
+  DupIdChecker dup_id_checker("meter");
   const Json::Value &cfg_meter_arrays = cfg_root["meter_arrays"];
   for (const auto &cfg_meter_array : cfg_meter_arrays) {
     const string name = cfg_meter_array["name"].asString();
     const p4object_id_t id = cfg_meter_array["id"].asInt();
+    dup_id_checker.add(id);
     const string type = cfg_meter_array["type"].asString();
     Meter::MeterType meter_type;
     if (type == "packets") {
@@ -1010,10 +1066,12 @@ P4Objects::init_meter_arrays(const Json::Value &cfg_root,
 
 void
 P4Objects::init_register_arrays(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("register");
   const Json::Value &cfg_register_arrays = cfg_root["register_arrays"];
   for (const auto &cfg_register_array : cfg_register_arrays) {
     const string name = cfg_register_array["name"].asString();
     const p4object_id_t id = cfg_register_array["id"].asInt();
+    dup_id_checker.add(id);
     const size_t size = cfg_register_array["size"].asUInt();
     const int bitwidth = cfg_register_array["bitwidth"].asInt();
 
@@ -1024,10 +1082,12 @@ P4Objects::init_register_arrays(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_actions(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("action");
   const Json::Value &cfg_actions = cfg_root["actions"];
   for (const auto &cfg_action : cfg_actions) {
     const string action_name = cfg_action["name"].asString();
     p4object_id_t action_id = cfg_action["id"].asInt();
+    dup_id_checker.add(action_id);
     std::unique_ptr<ActionFn> action_fn(new ActionFn(
         action_name, action_id, cfg_action["runtime_data"].size()));
 
@@ -1167,17 +1227,21 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
                           InitState *init_state) {
   auto &direct_meters = init_state->direct_meters;
 
+  DupIdChecker dup_id_checker("pipeline");
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
     const string pipeline_name = cfg_pipeline["name"].asString();
     p4object_id_t pipeline_id = cfg_pipeline["id"].asInt();
+    dup_id_checker.add(pipeline_id);
 
     // pipelines -> action profiles
 
+    DupIdChecker dup_id_checker_act_prof("action profile");
     const auto &cfg_act_profs = cfg_pipeline["action_profiles"];
     for (const auto &cfg_act_prof : cfg_act_profs) {
       const auto act_prof_name = cfg_act_prof["name"].asString();
       const auto act_prof_id = cfg_act_prof["id"].asInt();
+      dup_id_checker_act_prof.add(act_prof_id);
       const auto act_prof_size = cfg_act_prof["max_size"].asInt();
       // we ignore size for action profiles, at least for now
       (void) act_prof_size;
@@ -1194,10 +1258,12 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
 
     // pipelines -> tables
 
+    DupIdChecker dup_id_checker_table("table");
     const Json::Value &cfg_tables = cfg_pipeline["tables"];
     for (const auto &cfg_table : cfg_tables) {
       const string table_name = cfg_table["name"].asString();
       p4object_id_t table_id = cfg_table["id"].asInt();
+      dup_id_checker_table.add(table_id);
 
       MatchKeyBuilder key_builder;
       const Json::Value &cfg_match_key = cfg_table["key"];
@@ -1327,10 +1393,12 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
 
     // pipelines -> conditionals
 
+    DupIdChecker dup_id_checker_condition("condition");
     const Json::Value &cfg_conditionals = cfg_pipeline["conditionals"];
     for (const auto &cfg_conditional : cfg_conditionals) {
       const string conditional_name = cfg_conditional["name"].asString();
       p4object_id_t conditional_id = cfg_conditional["id"].asInt();
+      dup_id_checker_condition.add(conditional_id);
       Conditional *conditional = new Conditional(conditional_name,
                                                  conditional_id);
 
@@ -1526,10 +1594,12 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
 
 void
 P4Objects::init_checksums(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("checksum");
   const Json::Value &cfg_checksums = cfg_root["checksums"];
   for (const auto &cfg_checksum : cfg_checksums) {
     const string checksum_name = cfg_checksum["name"].asString();
     p4object_id_t checksum_id = cfg_checksum["id"].asInt();
+    dup_id_checker.add(checksum_id);
     const string checksum_type = cfg_checksum["type"].asString();
 
     const Json::Value &cfg_cksum_field = cfg_checksum["target"];
@@ -1567,6 +1637,7 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_learn_lists(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("learn list");
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
   if (cfg_learn_lists.size() > 0) {
@@ -1575,6 +1646,7 @@ P4Objects::init_learn_lists(const Json::Value &cfg_root) {
 
   for (const auto &cfg_learn_list : cfg_learn_lists) {
     LearnEngineIface::list_id_t list_id = cfg_learn_list["id"].asInt();
+    dup_id_checker.add(list_id);
     learn_engine->list_create(list_id, 16);  // 16 is max nb of samples
     learn_engine->list_set_learn_writer(list_id, notifications_transport);
 
@@ -1597,6 +1669,7 @@ P4Objects::init_learn_lists(const Json::Value &cfg_root) {
 
 void
 P4Objects::init_field_lists(const Json::Value &cfg_root) {
+  DupIdChecker dup_id_checker("field list");
   const Json::Value &cfg_field_lists = cfg_root["field_lists"];
   // used only for cloning
 
@@ -1604,6 +1677,7 @@ P4Objects::init_field_lists(const Json::Value &cfg_root) {
   // lists
   for (const auto &cfg_field_list : cfg_field_lists) {
     p4object_id_t list_id = cfg_field_list["id"].asInt();
+    dup_id_checker.add(list_id);
     std::unique_ptr<FieldList> field_list(new FieldList());
     const Json::Value &cfg_elements = cfg_field_list["elements"];
 
@@ -2020,7 +2094,8 @@ P4Objects::get_enum_name(const std::string &enum_name,
 void
 P4Objects::add_header_type(const std::string &name,
                            std::unique_ptr<HeaderType> header_type) {
-  header_types_map[name] = std::move(header_type);
+  add_new_object(&header_types_map, "header type", name,
+                 std::move(header_type));
 }
 
 HeaderType *
@@ -2030,13 +2105,13 @@ P4Objects::get_header_type(const std::string &name) {
 
 void
 P4Objects::add_header_id(const std::string &name, header_id_t header_id) {
-  header_ids_map[name] = header_id;
+  add_new_object(&header_ids_map, "header", name, header_id);
 }
 
 void
 P4Objects::add_header_stack_id(const std::string &name,
                                header_stack_id_t header_stack_id) {
-  header_stack_ids_map[name] = header_stack_id;
+  add_new_object(&header_stack_ids_map, "header stack", name, header_stack_id);
 }
 
 header_id_t
@@ -2058,86 +2133,104 @@ void
 P4Objects::add_action_to_table(
     const std::string &table_name,
     const std::string &action_name, ActionFn *action) {
-  t_actions_map[std::make_pair(table_name, action_name)] = action;
+  auto pair = std::make_pair(table_name, action_name);
+  auto it = t_actions_map.find(pair);
+  if (it != t_actions_map.end()) {
+    throw json_exception(
+        EFormat() << "Duplicate actions with name '" << action_name
+                  << "' in table '" << table_name << "'");
+  }
+  t_actions_map.emplace(pair, action);
 }
 
 void
 P4Objects::add_action_to_act_prof(const std::string &act_prof_name,
                                   const std::string &action_name,
                                   ActionFn *action) {
-  aprof_actions_map[std::make_pair(act_prof_name, action_name)] = action;
+  auto pair = std::make_pair(act_prof_name, action_name);
+  auto it = aprof_actions_map.find(pair);
+  if (it != aprof_actions_map.end()) {
+    throw json_exception(
+        EFormat() << "Duplicate actions with name '" << action_name
+                  << "' in action profile '" << act_prof_name << "'");
+  }
+  aprof_actions_map.emplace(pair, action);
 }
 
 void
 P4Objects::add_parser(const std::string &name, std::unique_ptr<Parser> parser) {
-  parsers[name] = std::move(parser);
+  add_new_object(&parsers, "parser", name, std::move(parser));
 }
 
 void
 P4Objects::add_parse_vset(const std::string &name,
                           std::unique_ptr<ParseVSet> parse_vset) {
-  parse_vsets[name] = std::move(parse_vset);
+  add_new_object(&parse_vsets, "parser vset", name, std::move(parse_vset));
 }
 
 void
 P4Objects::add_deparser(const std::string &name,
                         std::unique_ptr<Deparser> deparser) {
-  deparsers[name] = std::move(deparser);
+  add_new_object(&deparsers, "deparser", name, std::move(deparser));
 }
 
 void
 P4Objects::add_match_action_table(const std::string &name,
                                   std::unique_ptr<MatchActionTable> table) {
   add_control_node(name, table.get());
-  match_action_tables_map[name] = std::move(table);
+  // not really needed as add_control_node enforces a stricter check
+  add_new_object(&match_action_tables_map, "match-action table", name,
+                 std::move(table));
 }
 
 void
 P4Objects::add_action_profile(const std::string &name,
                               std::unique_ptr<ActionProfile> action_profile) {
-  action_profiles_map[name] = std::move(action_profile);
+  add_new_object(&action_profiles_map, "action profile", name,
+                 std::move(action_profile));
 }
 
 void
 P4Objects::add_conditional(const std::string &name,
                            std::unique_ptr<Conditional> conditional) {
   add_control_node(name, conditional.get());
-  conditionals_map[name] = std::move(conditional);
+  // not really needed as add_control_node enforces a stricter check
+  add_new_object(&conditionals_map, "condition", name, std::move(conditional));
 }
 
 void
 P4Objects::add_control_node(const std::string &name, ControlFlowNode *node) {
-  control_nodes_map[name] = node;
+  add_new_object(&control_nodes_map, "control node", name, node);
 }
 
 void
 P4Objects::add_pipeline(const std::string &name,
                         std::unique_ptr<Pipeline> pipeline) {
-  pipelines_map[name] = std::move(pipeline);
+  add_new_object(&pipelines_map, "pipeline", name, std::move(pipeline));
 }
 
 void
 P4Objects::add_meter_array(const std::string &name,
                            std::unique_ptr<MeterArray> meter_array) {
-  meter_arrays[name] = std::move(meter_array);
+  add_new_object(&meter_arrays, "meter", name, std::move(meter_array));
 }
 
 void
 P4Objects::add_counter_array(const std::string &name,
                              std::unique_ptr<CounterArray> counter_array) {
-  counter_arrays[name] = std::move(counter_array);
+  add_new_object(&counter_arrays, "counter", name, std::move(counter_array));
 }
 
 void
 P4Objects::add_register_array(const std::string &name,
                               std::unique_ptr<RegisterArray> register_array) {
-  register_arrays[name] = std::move(register_array);
+  add_new_object(&register_arrays, "register", name, std::move(register_array));
 }
 
 void
 P4Objects::add_named_calculation(
     const std::string &name, std::unique_ptr<NamedCalculation> calculation) {
-  calculations[name] = std::move(calculation);
+  add_new_object(&calculations, "calculation", name, std::move(calculation));
 }
 
 void
@@ -2149,7 +2242,7 @@ P4Objects::add_field_list(const p4object_id_t field_list_id,
 void
 P4Objects::add_extern_instance(const std::string &name,
                                std::unique_ptr<ExternType> extern_instance) {
-  extern_instances[name] = std::move(extern_instance);
+  add_new_object(&extern_instances, "extern", name, std::move(extern_instance));
 }
 
 }  // namespace bm
