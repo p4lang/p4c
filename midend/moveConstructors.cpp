@@ -68,9 +68,9 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override {
         cmap.clear();
         convert = Region::InParserStateful;
-        visit(parser->parserLocals);
+        parser->parserLocals.visit_children(*this);
         convert = Region::InBody;
-        visit(parser->states);
+        parser->states.visit_children(*this);
         convert = Region::Outside;
         prune();
         return parser;
@@ -103,34 +103,29 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* postorder(IR::P4Parser* parser) override {
         if (cmap.empty())
             return parser;
-        auto newDecls = new IR::IndexedVector<IR::Declaration>();
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
                 cce->srcInfo, e.second, cce->constructedType, cce->arguments);
-            newDecls->push_back(decl);
-        }
-        newDecls->append(*parser->parserLocals);
-        auto result = new IR::P4Parser(parser->srcInfo, parser->name, parser->type,
-                                       parser->constructorParams, newDecls, parser->states);
-        return result;
+            parser->parserLocals.insert(parser->parserLocals.begin(), decl); }
+        return parser;
     }
 
     const IR::Node* preorder(IR::P4Control* control) override {
         cmap.clear();
         convert = Region::InControlStateful;
-        auto newDecls = new IR::IndexedVector<IR::Declaration>();
+        IR::IndexedVector<IR::Declaration> newDecls;
         bool changes = false;
-        for (auto decl : *control->controlLocals) {
+        for (auto decl : control->controlLocals) {
             visit(decl);
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto inst = new IR::Declaration_Instance(
                     cce->srcInfo, e.second, cce->constructedType, cce->arguments);
-                newDecls->push_back(inst);
+                newDecls.push_back(inst);
                 changes = true;
             }
-            newDecls->push_back(decl);
+            newDecls.push_back(decl);
             cmap.clear();
         }
         convert = Region::InBody;
@@ -138,10 +133,7 @@ class MoveConstructorsImpl : public Transform {
         convert = Region::Outside;
         prune();
         if (changes) {
-            auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                            control->constructorParams, newDecls,
-                                            control->body);
-            return result;
+            control->controlLocals = newDecls;
         }
         return control;
     }
@@ -149,18 +141,16 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* postorder(IR::P4Control* control) override {
         if (cmap.empty())
             return control;
-        auto newDecls = new IR::IndexedVector<IR::Declaration>();
+        IR::IndexedVector<IR::Declaration> newDecls;
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
                 cce->srcInfo, e.second, cce->constructedType, cce->arguments);
-            newDecls->push_back(decl);
+            newDecls.push_back(decl);
         }
-        newDecls->append(*control->controlLocals);
-        auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                        control->constructorParams, newDecls,
-                                        control->body);
-        return result;
+        newDecls.append(control->controlLocals);
+        control->controlLocals = newDecls;
+        return control;
     }
 
     const IR::Node* preorder(IR::P4Table* table) override

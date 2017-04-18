@@ -56,7 +56,7 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
 
 /// Unions must have at least one field
 void ValidateParsedProgram::postorder(const IR::Type_Union* type) {
-    if (type->fields->size() == 0)
+    if (type->fields.size() == 0)
         ::error("%1%: empty union", type);
 }
 
@@ -79,7 +79,7 @@ void ValidateParsedProgram::postorder(const IR::ParserState* s) {
 /// All parameters of a constructor must be directionless.
 /// This only checks controls, parsers and packages
 void ValidateParsedProgram::container(const IR::IContainer* type) {
-    for (auto p : *type->getConstructorParameters()->parameters)
+    for (auto p : type->getConstructorParameters()->parameters)
         if (p->direction != IR::Direction::None)
             ::error("%1%: constructor parameters cannot have a direction", p);
 }
@@ -105,9 +105,9 @@ void ValidateParsedProgram::distinctParameters(
     const IR::ParameterList* constr) {
     std::map<cstring, const IR::Node*> found;
 
-    for (auto p : *typeParams->parameters)
+    for (auto p : typeParams->parameters)
         found.emplace(p->getName(), p);
-    for (auto p : *apply->parameters) {
+    for (auto p : apply->parameters) {
         auto it = found.find(p->getName());
         if (it != found.end())
             ::error("Duplicated parameter name: %1% and %2%",
@@ -115,7 +115,7 @@ void ValidateParsedProgram::distinctParameters(
         else
             found.emplace(p->getName(), p);
     }
-    for (auto p : *constr->parameters) {
+    for (auto p : constr->parameters) {
         auto it = found.find(p->getName());
         if (it != found.end())
             ::error("Duplicated parameter name: %1% and %2%",

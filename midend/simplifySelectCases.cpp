@@ -35,7 +35,7 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) cons
     }
     if (expr->is<IR::ListExpression>()) {
         auto list = expr->to<IR::ListExpression>();
-        for (auto e : *list->components)
+        for (auto e : list->components)
             checkSimpleConstant(e);
         return;
     }

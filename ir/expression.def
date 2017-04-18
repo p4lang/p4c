@@ -330,10 +330,11 @@ class ConstructorCallExpression : Expression {
 
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
-    Vector<Expression> components;
+    inline Vector<Expression> components;
     validate {
-        components->check_null();
+        components.check_null();
     }
+    void push_back(Expression e) { components.push_back(e); }
 }
 
 /** @} *//* end group irdefs */

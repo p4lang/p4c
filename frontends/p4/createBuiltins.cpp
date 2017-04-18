@@ -19,16 +19,8 @@ limitations under the License.
 
 namespace P4 {
 void CreateBuiltins::postorder(IR::P4Parser* parser) {
-    auto newStates = new IR::IndexedVector<IR::ParserState>(*parser->states);
-    IR::ParserState* ac = new IR::ParserState(IR::ParserState::accept,
-                                              new IR::IndexedVector<IR::StatOrDecl>(),
-                                              nullptr);
-    IR::ParserState* rj = new IR::ParserState(IR::ParserState::reject,
-                                              new IR::IndexedVector<IR::StatOrDecl>(),
-                                              nullptr);
-    newStates->push_back(ac);
-    newStates->push_back(rj);
-    parser->states = newStates;
+    parser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
+    parser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
 }
 
 void CreateBuiltins::postorder(IR::ActionListElement* element) {

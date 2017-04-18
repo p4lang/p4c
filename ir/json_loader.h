@@ -85,6 +85,8 @@ class JSONLoader {
         v = *IR::Vector<T>::fromJSON(*this); }
     template<typename T> void unpack_json(const IR::Vector<T> *&v) {
         v = IR::Vector<T>::fromJSON(*this); }
+    template<typename T> void unpack_json(IR::IndexedVector<T> &v) {
+        v = *IR::IndexedVector<T>::fromJSON(*this); }
     template<typename T> void unpack_json(const IR::IndexedVector<T> *&v) {
         v = IR::IndexedVector<T>::fromJSON(*this); }
     template<class T, template<class K, class V, class COMP, class ALLOC> class MAP,
@@ -93,7 +95,7 @@ class JSONLoader {
         m = *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(*this); }
     template<class T, template<class K, class V, class COMP, class ALLOC> class MAP,
              class COMP, class ALLOC>
-    void unpack_json(IR::NameMap<T, MAP, COMP, ALLOC> *&m) {
+    void unpack_json(const IR::NameMap<T, MAP, COMP, ALLOC> *&m) {
         m = IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(*this); }
 
     template<typename K, typename V>

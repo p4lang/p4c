@@ -33,19 +33,39 @@
   Some assignments are turned into methods returning constant values:
   stringOp     -> cstring getStringOp() const
   precedence   -> int getPrecedence() const
+
+  When defining fields and methods in an IR class, all fields and arguments of any IR
+  class type are automatically converted into const IR::class * fields or arguments, unless
+  they are identified as 'inline'.  It is not possible to create a non-const pointer to
+  an IR class in any other IR class.
+
+  There are some special keywords that can be applied (as decl modifiers) to fields that
+  affect how they are created, checked, and initialized.
+
+  inline      The field (of IR class type) should be defined directly in the object
+              rather than being converted to a const T * as described above.
+  NullOK      The field is a ppointer and may be null (verify will check that it is not otherwise)
+  optional    The field may be proveded as an argument to the constructor but need not be.
+              (overloaded constructors will be created as needed)
+
+  Unless there is a '#noconstructor' tag in the class, a constructor
+  will automatically be generated that takes as arguments values to
+  initialize all fields of the IR class and its bases that do not have
+  explicit initializers.  Fields marked 'optional' will create multiple
+  constructors both with and without an argument for that field.
  */
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
-    optional Annotations        annotations = Annotations::empty;
-    IndexedVector<StatOrDecl>   components;
+    optional Annotations                        annotations = Annotations::empty;
+    optional inline IndexedVector<StatOrDecl>   components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
-    NullOK Expression         selectExpression;
+    NullOK Expression                   selectExpression;
 
     Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return components->getDeclarations(); }
+        return components.getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const override {
-        return components->getDeclaration(name); }
+        return components.getDeclaration(name); }
 
     static const cstring accept;
     static const cstring reject;
@@ -62,19 +82,19 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
 class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
-    Type_Parser                 type;
-    optional ParameterList      constructorParams = new ParameterList;
-    IndexedVector<Declaration>  parserLocals;
-    IndexedVector<ParserState>  states;
+    Type_Parser                                 type;
+    optional ParameterList                      constructorParams = new ParameterList;
+    optional inline IndexedVector<Declaration>  parserLocals;
+    optional inline IndexedVector<ParserState>  states;
 
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return parserLocals->getDeclarations()->concat(states->getDeclarations()); }
+        return parserLocals.getDeclarations()->concat(states.getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
-        auto decl = parserLocals->getDeclaration(name);
+        auto decl = parserLocals.getDeclaration(name);
         if (decl != nullptr)
             return decl;
-        return states->getDeclaration(name); }
+        return states.getDeclaration(name); }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
@@ -83,32 +103,32 @@ class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     validate {
         if (!(name == type->name))
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
-        parserLocals->check_null();
-        states->check_null();
+        parserLocals.check_null();
+        states.check_null();
         checkDuplicates();
     }
     toString { return cstring("parser ") + externalName(); }
 }
 
 class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
-    Type_Control                type;
-    optional ParameterList      constructorParams = new ParameterList;
-    IndexedVector<Declaration>  controlLocals;
-    BlockStatement       body;
+    Type_Control                                type;
+    optional ParameterList                      constructorParams = new ParameterList;
+    optional inline IndexedVector<Declaration>  controlLocals;
+    BlockStatement                              body;
 
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return controlLocals->getDeclarations(); }
+        return controlLocals.getDeclarations(); }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     Type_Method getConstructorMethodType() const override;
     IDeclaration getDeclByName(cstring name) const override {
-        return controlLocals->getDeclaration(name); }
+        return controlLocals.getDeclaration(name); }
     ParameterList getConstructorParameters() const override { return constructorParams; }
 #apply
     validate {
         if (!(name == type->name))
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
-        controlLocals->check_null();
+        controlLocals.check_null();
     }
     toString { return cstring("control ") + externalName(); }
 }
@@ -124,22 +144,22 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
 
 class Type_Error : ISimpleNamespace, Type_Declaration {
     static const cstring error;
-    IndexedVector<Declaration_ID> members;
+    optional inline IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return members->getDeclarations(); }
+        return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
-        return members->getDeclaration(name); }
-    validate{ members->check_null(); }
+        return members.getDeclaration(name); }
+    validate{ members.check_null(); }
 }
 
 // Not a subclass of IDeclaration
 class Declaration_MatchKind : ISimpleNamespace {
-    IndexedVector<Declaration_ID> members;
+    optional inline IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return members->getDeclarations(); }
+        return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
-        return members->getDeclaration(name); }
-    validate{ members->check_null(); }
+        return members.getDeclaration(name); }
+    validate{ members.check_null(); }
 }
 
 // Table property value abstract base class
@@ -174,16 +194,20 @@ class ActionListElement : IAnnotated, IDeclaration {
 
 // A list of actions (in a table)
 class ActionList : PropertyValue {
-    IndexedVector<ActionListElement> actionList;
-    validate{ actionList->check_null(); }
-    size_t size() const { return actionList->size(); }
+    inline IndexedVector<ActionListElement> actionList;
+    validate{ actionList.check_null(); }
+    size_t size() const { return actionList.size(); }
+    void push_back(ActionListElement e) { actionList.push_back(e); }
+    ActionListElement getDeclaration(cstring n) const {
+        return actionList.getDeclaration<ActionListElement>(n); }
 }
 
-class KeyElement {
+class KeyElement : IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Expression           expression;
     PathExpression       matchType;
 
+    Annotations     getAnnotations() const override { return annotations; }
     const IR::Node *transform_visit(Transform &v) {
         // call this from Transform::preorder(KeyElement) if the transform might split
         // the expression into a Vector<Expression>
@@ -206,8 +230,9 @@ class KeyElement {
 
 // Value of a table key property
 class Key : PropertyValue {
-    Vector<KeyElement> keyElements;
-    validate { keyElements->check_null(); }
+    inline Vector<KeyElement> keyElements;
+    validate { keyElements.check_null(); }
+    void push_back(KeyElement ke) { keyElements.push_back(ke); }
 }
 
 /// Pre-defined entry in a table
@@ -226,8 +251,8 @@ class Entry : IAnnotated {
 
 /// List of predefined entries. Part of table properties
 class EntriesList : PropertyValue {
-    Vector<Entry> entries;
-    size_t size() const { return entries->size(); }
+    inline Vector<Entry> entries;
+    size_t size() const { return entries.size(); }
     dbprint { out << "{ " << entries << "}"; }
 }
 
@@ -240,22 +265,22 @@ class Property : Declaration, IAnnotated {
 }
 
 class TableProperties : ISimpleNamespace {
-    IndexedVector<Property> properties;
-    toString{ return "TableProperties(" + Util::toString(properties->size()) + ")"; }
-    TableProperties() { properties = new IndexedVector<Property>(); }
+    optional inline IndexedVector<Property> properties;
+    toString{ return "TableProperties(" + Util::toString(properties.size()) + ")"; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return properties->getDeclarations(); }
+        return properties.getDeclarations(); }
     Property getProperty(cstring name) const {
-        return properties->getDeclaration<Property>(name); }
+        return properties.getDeclaration<Property>(name); }
     IDeclaration getDeclByName(cstring name) const override {
-        return properties->getDeclaration(name); }
+        return properties.getDeclaration(name); }
+    void push_back(Property prop) { properties.push_back(prop); }
 
     static const cstring actionsPropertyName;
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
     static const cstring entriesPropertyName;
 #nodbprint
-    validate{ properties->check_null(); }
+    validate{ properties.check_null(); properties.check_valid(); }
 }
 
 class P4Table : Declaration, IAnnotated, IApply {
@@ -350,11 +375,11 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
 
 // Toplevel program representation
 class P4Program : ISimpleNamespace {
-    IndexedVector<Node> declarations;
+    optional inline IndexedVector<Node> declarations;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return declarations->getDeclarations(); }
+        return declarations.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
-        return declarations->getDeclaration(name); }
+        return declarations.getDeclaration(name); }
     static const cstring main;
 #apply
 }
@@ -397,12 +422,13 @@ class IfStatement : Statement {
 }
 
 class BlockStatement : Statement, ISimpleNamespace {
-    optional Annotations        annotations = Annotations::empty;
-    IndexedVector<StatOrDecl>   components;
+    optional Annotations                        annotations = Annotations::empty;
+    optional inline IndexedVector<StatOrDecl>   components;
     IDeclaration getDeclByName(cstring name) const override {
-        return components->getDeclaration(name); }
+        return components.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return components->getDeclarations(); }
+        return components.getDeclarations(); }
+    void push_back(StatOrDecl st) { components.push_back(st); }
 }
 
 class MethodCallStatement : Statement {

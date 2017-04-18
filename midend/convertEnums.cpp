@@ -7,7 +7,7 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
     bool convert = policy->convert(type);
     if (!convert)
         return type;
-    unsigned count = type->members->size();
+    unsigned count = type->members.size();
     unsigned width = policy->enumSize(count);
     LOG1("Converting enum " << type->name << " to " << "bit<" << width << ">");
     BUG_CHECK(count >= (1U << width),
@@ -17,7 +17,7 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
     BUG_CHECK(canontype->is<IR::Type_Enum>(),
               "canon type of enum %s is non enum %s?", type, canontype);
     repr.emplace(canontype->to<IR::Type_Enum>(), r);
-    for (auto d : *type->members)
+    for (auto d : type->members)
         r->add(d->name.name);
     return nullptr;  // delete the declaration
 }

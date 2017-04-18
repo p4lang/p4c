@@ -119,7 +119,7 @@ class FindParameters : public Inspector {
     // If all is true then rename all parameters, else rename only
     // directional parameters
     void doParameters(const IR::ParameterList* pl, bool all) {
-        for (auto p : *pl->parameters) {
+        for (auto p : pl->parameters) {
             if (!all && p->direction == IR::Direction::None)
                 continue;
             cstring newName = refMap->newName(p->name);

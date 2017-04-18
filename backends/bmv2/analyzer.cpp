@@ -199,7 +199,7 @@ class CFGBuilder : public Inspector {
         return false;
     }
     bool preorder(const IR::BlockStatement* statement) override {
-        for (auto s : *statement->components) {
+        for (auto s : statement->components) {
             auto stat = s->to<IR::Statement>();
             if (stat == nullptr) continue;
             visit(stat);

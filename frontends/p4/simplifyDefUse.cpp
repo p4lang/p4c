@@ -115,7 +115,7 @@ class FindUninitialized : public Inspector {
         LOG1("FU Visiting " << dbp(state));
         context = ProgramPoint(state);
         currentPoint = ProgramPoint(state);  // point before the first statement
-        visit(state->components);
+        state->components.visit_children(*this);
         if (state->selectExpression != nullptr)
             visit(state->selectExpression);
         context = ProgramPoint();
@@ -130,7 +130,7 @@ class FindUninitialized : public Inspector {
 
     void checkOutParameters(const IR::IDeclaration* block,
                             const IR::ParameterList* parameters, Definitions* defs) {
-        for (auto p : *parameters->parameters) {
+        for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
                 if (storage == nullptr)
@@ -152,7 +152,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::P4Control* control) override {
         currentPoint = ProgramPoint(control);
-        for (auto d : *control->controlLocals)
+        for (auto d : control->controlLocals)
             if (d->is<IR::Declaration_Instance>())
                 // visit virtual Function implementation if any
                 visit(d);
@@ -164,7 +164,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::P4Parser* parser) override {
         LOG1("FU Visiting " << dbp(parser));
-        visit(parser->states);
+        parser->states.visit_children(*this);
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->get(accept, true);
         if (!acceptdefs->empty())
@@ -198,7 +198,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::BlockStatement* statement) override {
         LOG1("FU Visiting " << dbp(statement));
-        visit(statement->components);
+        statement->components.visit_children(*this);
         return setCurrent(statement);
     }
 
@@ -317,7 +317,7 @@ class FindUninitialized : public Inspector {
         auto key = table->getKey();
         visit(key);
         auto actions = table->getActionList();
-        for (auto ale : *actions->actionList) {
+        for (auto ale : actions->actionList) {
             BUG_CHECK(ale->expression->is<IR::MethodCallExpression>(),
                       "%1%: unexpected entry in action list", ale);
             visit(ale->expression);

@@ -70,6 +70,8 @@ class IndexedVector : public Vector<T> {
     IndexedVector() = default;
     IndexedVector(const IndexedVector &) = default;
     IndexedVector(IndexedVector &&) = default;
+    IndexedVector(const std::initializer_list<const T *> &a) : Vector<T>(a) {
+        for (auto el : *this) insertInMap(el); }
     IndexedVector &operator=(const IndexedVector &) = default;
     IndexedVector &operator=(IndexedVector &&) = default;
     explicit IndexedVector(const T *a) {
@@ -117,7 +119,7 @@ class IndexedVector : public Vector<T> {
         return insert(Vector<T>::end(), toAppend.begin(), toAppend.end()); }
     iterator insert(iterator i, const T* v) {
         insertInMap(v);
-        return typename Vector<T>::insert(i, v); }
+        return Vector<T>::insert(i, v); }
     template <class... Args> void emplace_back(Args&&... args) {
         auto el = new T(std::forward<Args>(args)...);
         insert(el); }
@@ -146,6 +148,10 @@ class IndexedVector : public Vector<T> {
 
     void toJSON(JSONGenerator &json) const override;
     static IndexedVector<T>* fromJSON(JSONLoader &json);
+    void check_valid() const {
+        for (auto el : *this) {
+            auto it = declarations.find(el->getName());
+            assert(it != declarations.end() && it->second == el); } }
 };
 
 }  // namespace IR

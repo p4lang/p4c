@@ -36,7 +36,6 @@ const IR::Node* DoHandleNoMatch::preorder(IR::P4Parser* parser) {
 
     cstring name = nameGen->newName("noMatch");
     LOG2("Inserting " << name << " state");
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
     auto args = new IR::Vector<IR::Expression>();
     args->push_back(new IR::BoolLiteral(false));
     args->push_back(new IR::Member(
@@ -44,12 +43,9 @@ const IR::Node* DoHandleNoMatch::preorder(IR::P4Parser* parser) {
         lib.noMatch.Id()));
     auto verify = new IR::MethodCallExpression(
         new IR::PathExpression(IR::ID(IR::ParserState::verify)), args);
-    vec->push_back(new IR::MethodCallStatement(verify));
-    noMatch = new IR::ParserState(IR::ID(name), vec,
+    noMatch = new IR::ParserState(IR::ID(name), { new IR::MethodCallStatement(verify) },
                                   new IR::PathExpression(IR::ID(IR::ParserState::reject)));
-    auto comp = new IR::IndexedVector<IR::ParserState>(*parser->states);
-    comp->push_back(noMatch);
-    parser->states = comp;
+    parser->states.push_back(noMatch);
     return parser;
 }
 

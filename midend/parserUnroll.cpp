@@ -55,14 +55,14 @@ class ParserSymbolicInterpreter {
         ValueMap* result = new ValueMap();
         ExpressionEvaluator ev(refMap, typeMap, result);
 
-        for (auto p : *parser->type->applyParams->parameters) {
+        for (auto p : parser->type->applyParams->parameters) {
             auto type = typeMap->getType(p);
             bool initialized = p->direction == IR::Direction::In ||
                     p->direction == IR::Direction::InOut;
             auto value = factory->create(type, !initialized);
             result->set(p, value);
         }
-        for (auto d : *parser->parserLocals) {
+        for (auto d : parser->parserLocals) {
             auto type = typeMap->getType(d);
             SymbolicValue* value = nullptr;
             if (d->is<IR::Declaration_Constant>()) {
@@ -295,7 +295,7 @@ class ParserSymbolicInterpreter {
     std::vector<ParserStateInfo*>* evaluateState(ParserStateInfo* state) {
         LOG1("Analyzing " << state->state);
         auto valueMap = state->before->clone();
-        for (auto s : *state->state->components) {
+        for (auto s : state->state->components) {
             bool success = executeStatement(state, s, valueMap);
             if (!success)
                 return nullptr;

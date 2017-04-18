@@ -152,7 +152,7 @@ struct HeaderFieldPath {
                       "Member is not contained in a structlike type?");
 
             boost::optional<cstring> name;
-            for (auto field : *parentType->to<IR::Type_StructLike>()->fields) {
+            for (auto field : parentType->to<IR::Type_StructLike>()->fields) {
                 if (field->name == memberExpression->member) {
                     name = controlPlaneName(field);
                     break;
@@ -233,6 +233,8 @@ struct MatchField {
     const cstring name;       // The fully qualified external name of this field.
     const MatchType type;     // The match algorithm - exact, ternary, range, etc.
     const uint32_t bitwidth;  // How wide this field is.
+    const IR::IAnnotated* annotations;  // If non-null, any annotations applied
+                                        // to this field.
 };
 
 /// The types of action profiles available in the V1 model.
@@ -938,6 +940,7 @@ public:
             auto paramName = controlPlaneName(actionParam);
             param->set_id(index++);
             param->set_name(paramName);
+            addAnnotations(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
             if (!paramType->is<IR::Type_Bits>()) {
@@ -1016,6 +1019,7 @@ public:
             auto match_field = table->add_match_fields();
             match_field->set_id(index++);
             match_field->set_name(field.name);
+            addAnnotations(match_field, field.annotations);
             match_field->set_bitwidth(field.bitwidth);
             match_field->set_match_type(field.type);
         }
@@ -1044,17 +1048,18 @@ public:
 
 private:
     /// Serialize @annotated's P4 annotations and attach them to a P4Info message
-    /// with a @preamble. '@name' and '@id' are ignored.
-    static void addAnnotations(Preamble* preamble, const IR::IAnnotated* annotated)
+    /// with an 'annotations' field. '@name' and '@id' are ignored.
+    template <typename Message>
+    static void addAnnotations(Message* message, const IR::IAnnotated* annotated)
     {
-        CHECK_NULL(preamble);
+        CHECK_NULL(message);
 
         // Synthesized resources may have no annotations.
         if (annotated == nullptr) return;
 
         for (const IR::Annotation* annotation : annotated->getAnnotations()->annotations) {
-            // Don't output the @name or @id annotations; they're already captured by
-            // the corresponding fields of the P4Info preamble.
+            // Don't output the @name or @id annotations; they're represented
+            // elsewhere in P4Info messages.
             if (annotation->name == IR::Annotation::nameAnnotation) continue;
             if (annotation->name == "id") continue;
 
@@ -1062,13 +1067,13 @@ private:
             // XXX(seth): Might be nice to do something better than rely on toString().
             std::string serializedAnnotation = "@" + annotation->name + "(";
             auto expressions = annotation->expr;
-            for (unsigned i = 0; i < expressions.size() ; ++i) {
+            for (unsigned i = 0; i < expressions.size(); ++i) {
                 serializedAnnotation.append(expressions[i]->toString());
                 if (i + 1 < expressions.size()) serializedAnnotation.append(", ");
             }
             serializedAnnotation.append(")");
 
-            preamble->add_annotations(serializedAnnotation);
+            message->add_annotations(serializedAnnotation);
         }
     }
 
@@ -1100,7 +1105,7 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
     CHECK_NULL(control);
 
     // Collect action symbols.
-    forAllMatching<IR::P4Action>(control->controlLocals,
+    forAllMatching<IR::P4Action>(&control->controlLocals,
                                  [&](const IR::P4Action* action) {
         symbols.add(P4RuntimeSymbolType::ACTION, action);
     });
@@ -1118,7 +1123,7 @@ static void serializeControl(P4RuntimeSerializer& serializer,
     CHECK_NULL(control);
 
     // Serialize actions and, implicitly, their parameters.
-    forAllMatching<IR::P4Action>(control->controlLocals,
+    forAllMatching<IR::P4Action>(&control->controlLocals,
                                  [&](const IR::P4Action* action) {
         serializer.addAction(action);
     });
@@ -1243,7 +1248,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     auto key = table->getKey();
     if (!key) return matchFields;
 
-    for (auto keyElement : *key->keyElements) {
+    for (auto keyElement : key->keyElements) {
         auto matchTypeDecl = refMap->getDeclaration(keyElement->matchType->path, true)
                                    ->to<IR::Declaration_ID>();
         BUG_CHECK(matchTypeDecl != nullptr, "No declaration for match type '%1%'",
@@ -1331,7 +1336,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         }
 
         matchFields.push_back(MatchField{path->serialize(), matchType,
-                                         uint32_t(path->type->width_bits())});
+                                         uint32_t(path->type->width_bits()),
+                                         keyElement->to<IR::IAnnotated>()});
     }
 
     return matchFields;
@@ -1404,7 +1410,7 @@ static void serializeTable(P4RuntimeSerializer& serializer,
     auto matchFields = getMatchFields(table, refMap, typeMap);
 
     std::vector<cstring> actions;
-    for (auto action : *table->getActionList()->actionList) {
+    for (auto action : table->getActionList()->actionList) {
         auto decl = refMap->getDeclaration(action->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "Not an action: '%1%'", decl);
         actions.push_back(controlPlaneName(decl->to<IR::P4Action>()));

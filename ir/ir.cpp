@@ -54,8 +54,7 @@ Util::Enumerator<const IR::IDeclaration*>* IGeneralNamespace::getDeclsByName(cst
 
 void IGeneralNamespace::checkDuplicateDeclarations() const {
     std::unordered_map<cstring, ID> seen;
-    auto decls = getDeclarations();
-    for (auto decl : *decls) {
+    for (auto decl : *getDeclarations()) {
         IR::ID name = decl->getName();
         auto f = seen.find(name.name);
         if (f != seen.end()) {
@@ -67,8 +66,8 @@ void IGeneralNamespace::checkDuplicateDeclarations() const {
 }
 
 void P4Parser::checkDuplicates() const {
-    for (auto decl : *states) {
-        auto prev = parserLocals->getDeclaration(decl->getName().name);
+    for (auto decl : states) {
+        auto prev = parserLocals.getDeclaration(decl->getName().name);
         if (prev != nullptr)
             ::error("State %1% has same name as %2%", decl, prev);
     }
@@ -95,7 +94,7 @@ const Method* Type_Extern::lookupMethod(cstring name, int paramCount) const {
     size_t upc = paramCount;
 
     bool reported = false;
-    for (auto m : *methods) {
+    for (auto m : methods) {
         if (m->name == name && m->minParameterCount() <= upc && m->maxParameterCount() >= upc) {
             if (result == nullptr) {
                 result = m;
@@ -144,12 +143,9 @@ P4Table::getApplyMethodType() const {
         BUG("Action property is not an IR::ActionList, but %1%",
             actions);
     auto alv = actions->value->to<IR::ActionList>();
-    auto fields = new IR::IndexedVector<IR::StructField>();
     auto hit = new IR::StructField(IR::Type_Table::hit, IR::Type_Boolean::get());
-    fields->push_back(hit);
     auto label = new IR::StructField(IR::Type_Table::action_run, new IR::Type_ActionEnum(alv));
-    fields->push_back(label);
-    auto rettype = new IR::Type_Struct(ID(name), fields);
+    auto rettype = new IR::Type_Struct(ID(name), { hit, label });
     auto applyMethod = new IR::Type_Method(rettype, new IR::ParameterList());
     return applyMethod;
 }
@@ -178,7 +174,7 @@ Util::Enumerator<const IDeclaration*>* P4Action::getDeclarations() const
 { return body->getDeclarations(); }
 
 const IDeclaration* P4Action::getDeclByName(cstring name) const
-{ return body->components->getDeclaration(name); }
+{ return body->components.getDeclaration(name); }
 
 const IR::PackageBlock* ToplevelBlock::getMain() const {
     auto program = getProgram();

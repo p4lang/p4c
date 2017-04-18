@@ -428,7 +428,6 @@ class ComputeWriteSet : public Inspector {
     bool preorder(const IR::DefaultExpression* expression) override;
     bool preorder(const IR::Expression* expression) override;
     // statements
-    bool preorder(const IR::ParserState* state) override;
     bool preorder(const IR::P4Parser* parser) override;
     bool preorder(const IR::P4Control* control) override;
     bool preorder(const IR::P4Action* action) override;

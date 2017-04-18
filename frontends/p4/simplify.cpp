@@ -33,24 +33,23 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
         return statement;
     }
     bool withinBlock = statancestor != nullptr && statancestor->is<IR::BlockStatement>();
-    auto grandParent = getContext()->parent ? getContext()->parent->node : nullptr;
-    bool withinAction = grandParent != nullptr && grandParent->is<IR::P4Action>();
-    bool withinParserState = grandParent != nullptr && grandParent->is<IR::ParserState>();
+    bool withinAction = parent != nullptr && parent->is<IR::P4Action>();
+    bool withinParserState = parent != nullptr && parent->is<IR::ParserState>();
     if (withinParserState || withinBlock || withinAction) {
         // if there are no local declarations we can remove this block
         bool hasDeclarations = false;
-        for (auto c : *statement->components)
+        for (auto c : statement->components)
             if (!c->is<IR::Statement>()) {
                 hasDeclarations = true;
                 break;
             }
         if (!hasDeclarations)
-            return statement->components;
+            return &statement->components;
     }
-    if (statement->components->empty())
+    if (statement->components.empty())
         return new IR::EmptyStatement(statement->srcInfo);
-    if (statement->components->size() == 1) {
-        auto first = statement->components->at(0);
+    if (statement->components.size() == 1) {
+        auto first = statement->components.at(0);
         if (first->is<IR::Statement>())
             return first;
     }

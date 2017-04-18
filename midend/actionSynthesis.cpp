@@ -31,9 +31,9 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto directionArgs = new IR::Vector<IR::Expression>();
     auto mc = statement->methodCall;
 
-    auto it = action->parameters->parameters->begin();
+    auto it = action->parameters->parameters.begin();
     auto arg = mc->arguments->begin();
-    for (; it != action->parameters->parameters->end(); ++it) {
+    for (; it != action->parameters->parameters.end(); ++it) {
         auto p = *it;
         if (p->direction == IR::Direction::None)
             break;
@@ -48,16 +48,14 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto call = new IR::MethodCallExpression(mc->srcInfo, actionPath,
                                              new IR::Vector<IR::Type>(), directionArgs);
     auto actinst = new IR::ActionListElement(statement->srcInfo, call);
-    auto actions = new IR::IndexedVector<IR::ActionListElement>();
-    actions->push_back(actinst);
     // Action list property
-    auto actlist = new IR::ActionList(actions);
+    auto actlist = new IR::ActionList({actinst});
     auto prop = new IR::Property(
         IR::ID(IR::TableProperties::actionsPropertyName, nullptr),
         actlist, false);
     // default action property
     auto otherArgs = new IR::Vector<IR::Expression>();
-    for (; it != action->parameters->parameters->end(); ++it) {
+    for (; it != action->parameters->parameters.end(); ++it) {
         otherArgs->push_back(*arg);
         ++arg;
     }
@@ -69,10 +67,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
         defactval, true);
 
     // List of table properties
-    auto nm = new IR::IndexedVector<IR::Property>();
-    nm->push_back(prop);
-    nm->push_back(defprop);
-    auto props = new IR::TableProperties(nm);
+    auto props = new IR::TableProperties({ prop, defprop });
     // Synthesize a new table
     cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
 
@@ -93,15 +88,9 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
 }
 
 const IR::Node* DoMoveActionsToTables::postorder(IR::P4Control* control) {
-    if (tables.empty())
-        return control;
-    auto nm = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
     for (auto t : tables)
-        nm->push_back(t);
-    auto result = new IR::P4Control(control->srcInfo, control->name,
-                                    control->type, control->constructorParams,
-                                    nm, control->body);
-    return result;
+        control->controlLocals.push_back(t);
+    return control;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -135,23 +124,17 @@ const IR::Node* DoSynthesizeActions::preorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {
-    if (actions.empty())
-        return control;
-    auto nm = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
     for (auto a : actions)
-        nm->push_back(a);
-    auto result = new IR::P4Control(control->srcInfo, control->name,
-                                    control->type, control->constructorParams,
-                                    nm, control->body);
-    return result;
+        control->controlLocals.push_back(a);
+    return control;
 }
 
 const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
     // Find a chain of statements to convert
-    auto actbody = new IR::IndexedVector<IR::StatOrDecl>();  // build here new action
-    auto left = new IR::IndexedVector<IR::StatOrDecl>();  // leftover statements
+    auto actbody = new IR::BlockStatement;  // build here new action
+    auto left = new IR::BlockStatement(statement->annotations);  // leftover statements
 
-    for (auto c : *statement->components) {
+    for (auto c : statement->components) {
         if (c->is<IR::AssignmentStatement>()) {
             if (mustMove(c->to<IR::AssignmentStatement>())) {
                 actbody->push_back(c);
@@ -166,17 +149,15 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
             visit(c);
         }
 
-        if (!actbody->empty()) {
-            auto block = new IR::BlockStatement(actbody);
-            auto action = createAction(block);
+        if (!actbody->components.empty()) {
+            auto action = createAction(actbody);
             left->push_back(action);
-            actbody = new IR::IndexedVector<IR::StatOrDecl>();
+            actbody = new IR::BlockStatement;
         }
         left->push_back(c);
     }
-    if (!actbody->empty()) {
-        auto block = new IR::BlockStatement(actbody);
-        auto action = createAction(block);
+    if (!actbody->components.empty()) {
+        auto action = createAction(actbody);
         left->push_back(action);
     }
     prune();
@@ -184,8 +165,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         // Since we have only one 'changes' per P4Control, this may
         // be conservatively creating a new block when it hasn't changed.
         // But the result should be correct.
-        auto result = new IR::BlockStatement(statement->annotations, left);
-        return result;
+        return left;
     }
     return statement;
 }
@@ -197,9 +177,7 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>();
     } else {
-        auto b = new IR::IndexedVector<IR::StatOrDecl>();
-        b->push_back(toAdd);
-        body = new IR::BlockStatement(toAdd->srcInfo, b);
+        body = new IR::BlockStatement(toAdd->srcInfo, { toAdd });
     }
 
     auto annos = new IR::Annotations();

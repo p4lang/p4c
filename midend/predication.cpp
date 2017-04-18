@@ -31,26 +31,26 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         return statement;
 
     ++ifNestingLevel;
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+    auto rv = new IR::BlockStatement;
     cstring conditionName = generator->newName("cond");
     auto condDecl = new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get());
-    vec->push_back(condDecl);
+    rv->push_back(condDecl);
     auto condition = new IR::PathExpression(IR::ID(conditionName));
 
     // A vector for a new BlockStatement.
-    auto blockVec = new IR::IndexedVector<IR::StatOrDecl>();
+    auto block = new IR::BlockStatement;
 
     const IR::Expression* previousPredicate = predicate();  // This may be nullptr
     // a new name for the new predicate
     cstring newPredName = generator->newName("pred");
     predicateName.push_back(newPredName);
     auto decl = new IR::Declaration_Variable(newPredName, IR::Type::Boolean::get());
-    blockVec->push_back(decl);
+    block->push_back(decl);
     // This evaluates the if condition.
     // We are careful not to evaluate any conditional more times
     // than in the original program, since the evaluation may have side-effects.
     auto trueCond = new IR::AssignmentStatement(condition->clone(), statement->condition);
-    blockVec->push_back(trueCond);
+    block->push_back(trueCond);
 
     const IR::Expression* pred;
     if (previousPredicate == nullptr) {
@@ -59,33 +59,32 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         pred = new IR::LAnd(previousPredicate, condition->clone());
     }
     auto truePred = new IR::AssignmentStatement(predicate(), pred);
-    blockVec->push_back(truePred);
+    block->push_back(truePred);
 
     visit(statement->ifTrue);
-    blockVec->push_back(statement->ifTrue);
+    block->push_back(statement->ifTrue);
 
     if (statement->ifFalse != nullptr) {
         auto neg = new IR::LNot(condition->clone());
         auto falseCond = new IR::AssignmentStatement(condition->clone(), neg);
-        blockVec->push_back(falseCond);
+        block->push_back(falseCond);
         if (previousPredicate == nullptr) {
             pred = condition->clone();
         } else {
             pred = new IR::LAnd(previousPredicate->clone(), condition->clone());
         }
         auto falsePred = new IR::AssignmentStatement(predicate(), pred);
-        blockVec->push_back(falsePred);
+        block->push_back(falsePred);
 
         visit(statement->ifFalse);
-        blockVec->push_back(statement->ifFalse);
+        block->push_back(statement->ifFalse);
     }
 
-    auto block = new IR::BlockStatement(blockVec);
-    vec->push_back(block);
+    rv->push_back(block);
     predicateName.pop_back();
     --ifNestingLevel;
     prune();
-    return new IR::BlockStatement(vec);
+    return rv;
 }
 
 const IR::Node* Predication::preorder(IR::P4Action* action) {

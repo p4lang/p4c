@@ -62,14 +62,14 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
         return isFixedWidth(type->to<IR::Type_Stack>()->elementType);
     if (type->is<IR::Type_StructLike>()) {
         auto st = type->to<IR::Type_StructLike>();
-        for (auto f : *st->fields)
+        for (auto f : st->fields)
             if (!isFixedWidth(f->type))
                 return false;
         return true;
     }
     if (type->is<IR::Type_Tuple>()) {
         auto tt = type->to<IR::Type_Tuple>();
-        for (auto f : *tt->components) {
+        for (auto f : tt->components) {
             if (!isFixedWidth(f))
                 return false;
         }
@@ -86,14 +86,14 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
         return 1;
     if (type->is<IR::Type_Union>()) {
         unsigned width = 0;
-        for (auto f : *type->to<IR::Type_Union>()->fields)
+        for (auto f : type->to<IR::Type_Union>()->fields)
             width = std::max(width, getWidth(f->type));
         return width;
     }
     if (type->is<IR::Type_StructLike>()) {
         unsigned width = 0;
         auto st = type->to<IR::Type_StructLike>();
-        for (auto f : *st->fields)
+        for (auto f : st->fields)
             width += getWidth(f->type);
         return width;
     }
@@ -105,7 +105,7 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
     if (type->is<IR::Type_Tuple>()) {
         auto tt = type->to<IR::Type_Tuple>();
         unsigned width = 0;
-        for (auto f : *tt->components)
+        for (auto f : tt->components)
             width += getWidth(f);
         return width;
     }
@@ -238,7 +238,7 @@ bool SymbolicEnum::equals(const SymbolicValue* other) const {
 SymbolicStruct::SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
                                const SymbolicValueFactory* factory) : SymbolicValue(type) {
     CHECK_NULL(type); CHECK_NULL(factory);
-    for (auto f : *type->fields) {
+    for (auto f : type->fields) {
         auto value = factory->create(f->type, uninitialized);
         fieldValue[f->name.name] = value;
     }
@@ -269,7 +269,7 @@ bool SymbolicStruct::merge(const SymbolicValue* other) {
 }
 
 void SymbolicStruct::setAllUnknown() {
-    for (auto f : *type->to<IR::Type_StructLike>()->fields)
+    for (auto f : type->to<IR::Type_StructLike>()->fields)
         fieldValue[f->name.name]->setAllUnknown();
 }
 
@@ -509,7 +509,7 @@ SymbolicValue* AnyElement::collapse() const {
 SymbolicTuple::SymbolicTuple(const IR::Type_Tuple* type, bool uninitialized,
                              const SymbolicValueFactory* factory) :
         SymbolicValue(type) {
-    for (auto t : *type->components) {
+    for (auto t : type->components) {
         auto v = factory->create(t, uninitialized);
         values.push_back(v);
     }
@@ -669,7 +669,7 @@ void ExpressionEvaluator::postorder(const IR::Constant* expression) {
 void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
     auto type = typeMap->getType(expression, true);
     auto result = new SymbolicTuple(type->to<IR::Type_Tuple>());
-    for (auto e : *expression->components) {
+    for (auto e : expression->components) {
         auto v = get(e);
         result->add(v);
     }

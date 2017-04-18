@@ -312,21 +312,21 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
     BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
     visit(ctrl->type, "type");
     visit(ctrl->constructorParams, "constructorParams");
-    visit(ctrl->controlLocals, "controlLocals");
+    ctrl->controlLocals.visit_children(*this);
     if (working || !available.empty()) BUG("corrupt internal data struct");
     working = true;
     LOG2("DoLocalCopyPropagation working on control " << ctrl->name);
     LOG4(ctrl);
     need_key_rewrite = false;
-    for (auto local : *ctrl->controlLocals)
+    for (auto local : ctrl->controlLocals)
         if (auto var = local->to<IR::Declaration_Variable>())
             visit_local_decl(var);
     visit(ctrl->body, "body");
     if (need_key_rewrite)
-        ctrl->controlLocals = ctrl->controlLocals->apply(RewriteTableKeys(*this));
+        ctrl->controlLocals = *ctrl->controlLocals.apply(RewriteTableKeys(*this));
     LOG5("DoLocalCopyPropagation before ElimDead " << ctrl->name);
     LOG5(ctrl);
-    ctrl->controlLocals = ctrl->controlLocals->apply(ElimDead(*this));
+    ctrl->controlLocals = *ctrl->controlLocals.apply(ElimDead(*this));
     ctrl->body = ctrl->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
     working = false;
     available.clear();
@@ -372,7 +372,7 @@ IR::P4Table *DoLocalCopyPropagation::preorder(IR::P4Table *tbl) {
     BUG_CHECK(!inferForTable, "corrupt internal data struct");
     inferForTable = &tables[tbl->name];
     inferForTable->keyreads.clear();
-    for (auto ale : *tbl->getActionList()->actionList)
+    for (auto ale : tbl->getActionList()->actionList)
         inferForTable->actions.insert(ale->getPath()->name);
     return tbl;
 }

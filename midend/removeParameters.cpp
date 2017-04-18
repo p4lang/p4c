@@ -78,7 +78,7 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
 
 const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     LOG1("Visiting " << dbp(action));
-    BUG_CHECK(getContext()->node->is<IR::IndexedVector<IR::Declaration>>(),
+    BUG_CHECK(getParent<IR::P4Control>() || getParent<IR::P4Program>(),
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
     auto result = new IR::IndexedVector<IR::Declaration>();
     auto leftParams = new IR::IndexedVector<IR::Parameter>();
@@ -91,7 +91,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
 
     auto argit = args->begin();
     bool removeAll = invocations->removeAllParameters(getOriginal<IR::P4Action>());
-    for (auto p : *action->parameters->parameters) {
+    for (auto p : action->parameters->parameters) {
         if (p->direction == IR::Direction::None && !removeAll) {
             leftParams->push_back(p);
         } else {
@@ -120,11 +120,11 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     if (result->empty())
         return action;
 
-    initializers->append(*action->body->components);
+    initializers->append(action->body->components);
     initializers->append(*postamble);
 
-    action->parameters = new IR::ParameterList(action->parameters->srcInfo, leftParams);
-    action->body = new IR::BlockStatement(action->body->srcInfo, initializers);
+    action->parameters = new IR::ParameterList(action->parameters->srcInfo, *leftParams);
+    action->body = new IR::BlockStatement(action->body->srcInfo, *initializers);
     LOG1("To replace " << dbp(action));
     result->push_back(action);
     return result;
