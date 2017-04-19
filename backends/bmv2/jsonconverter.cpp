@@ -470,6 +470,12 @@ class ExpressionConverter : public Inspector {
                 e->append(converter->jsonMetadataParameterName);
                 e->append(fieldName);
             } else {
+                if (param != converter->userMetadataParameter)
+                    // I.e., this is the headers parameter.
+                    // Since the metadata and the headers parameters
+                    // are flattened in the same JSON namespace, we
+                    // use this trick to prevent name clashes.
+                    fieldName += "@";
                 if (type->is<IR::Type_Stack>()) {
                     result->emplace("type", "header_stack");
                     result->emplace("value", fieldName);
@@ -800,7 +806,7 @@ JsonConverter::JsonConverter(const CompilerOptions& options) :
         corelib(P4::P4CoreLibrary::instance),
         refMap(nullptr), typeMap(nullptr), toplevelBlock(nullptr),
         conv(new ExpressionConverter(this)),
-        headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
+        userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
 {}
 
 // return calculation name
@@ -2081,7 +2087,11 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
 
         LOG3("Creating " << stack);
         auto json = new Util::JsonObject();
-        json->emplace("name", extVisibleName(f));
+        cstring fname = extVisibleName(f) + "@";
+        // since the metadata and the headers parameters
+        // are flattened in the same JSON namespace, we
+        // use this trick to prevent name clashes
+        json->emplace("name", fname);
         json->emplace("id", nextId("stack"));
         json->emplace("size", stack->getSize());
         auto type = typeMap->getTypeType(stack->elementType, true);
@@ -2096,7 +2106,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
             unsigned id = nextId("headers");
             stackMembers->append(id);
             auto header = new Util::JsonObject();
-            cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
+            cstring name = fname + "[" + Util::toString(i) + "]";
             header->emplace("name", name);
             header->emplace("id", id);
             header->emplace("header_type", header_type);
@@ -2451,7 +2461,13 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto json = new Util::JsonObject();
-            json->emplace("name", extVisibleName(f));
+            cstring name = extVisibleName(f);
+            if (!meta)
+                // since the metadata and the headers parameters
+                // are flattened in the same JSON namespace, we
+                // use this trick to prevent name clashes
+                name += "@";
+            json->emplace("name", name);
             json->emplace("id", nextId("headers"));
             json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
             json->emplace("metadata", meta);
@@ -2490,6 +2506,7 @@ void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
                                Util::JsonArray *fields) {
     for (auto f : st->fields) {
         auto ftype = typeMap->getType(f, true);
+
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
         } else if (ftype->is<IR::Type_Boolean>()) {
