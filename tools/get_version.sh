@@ -29,11 +29,15 @@ bversion_str=""
 if [ -f $bf_path ]; then
     bversion_str="$(cat $bf_path | tr -d '\n')"
 else
-    git_sha_str="$(git rev-parse @)"
-    if [ $? -ne 0 ]; then
+    if [ ! -d "$THIS_DIR/../.git" ]; then
         bversion_str="unknown"
     else
-        bversion_str=${git_sha_str:0:8}
+        git_sha_str="$(git rev-parse @)"
+        if [ $? -ne 0 ]; then
+            bversion_str="unknown"
+        else
+            bversion_str=${git_sha_str:0:8}
+        fi
     fi
 fi
 
