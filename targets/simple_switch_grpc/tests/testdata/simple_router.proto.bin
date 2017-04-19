@@ -1,13 +1,0 @@
-
-E
-ÊÁ€
-send_frame#standard_metadata.egress_port 	(Ø—‚¸¶€@€
-2
-¡×ipv4_lpmipv4.dstAddr  (¬‘‚¸¶€@€
-?
-„‚forward routing_metadata.nhop_ipv4  (˜€¸¶€@€
-˜€set_dmacdmac 0
-¸¶€_drop,
-¬‘‚set_nhop	nhop_ipv4  
-port 	
-Ø—‚rewrite_macsmac 0

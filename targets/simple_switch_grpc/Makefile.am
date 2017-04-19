@@ -14,3 +14,8 @@ simple_switch_grpc_LDADD = \
 $(builddir)/../simple_switch/libsimpleswitch.la \
 $(builddir)/../../PI/libbmpi.la \
 -lpifeproto -lpigrpcserver -lpi
+
+# We follow this tutorial to link with grpc++_reflection:
+# https://github.com/grpc/grpc/blob/master/doc/server_reflection_tutorial.md
+simple_switch_grpc_LDFLAGS = \
+-Wl,--no-as-needed,-lgrpc++_reflection,--as-needed

@@ -22,6 +22,8 @@
 
 #include <p4/p4runtime.grpc.pb.h>
 
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/text_format.h>
 #include <google/protobuf/util/message_differencer.h>
 
 #include <memory>
@@ -35,7 +37,7 @@ using google::protobuf::util::MessageDifferencer;
 
 namespace {
 
-const char *test_proto_bin = TESTDATADIR "/simple_router.proto.bin";
+const char *test_proto_txt = TESTDATADIR "/simple_router.proto.txt";
 
 int get_table_id(const p4::config::P4Info &p4info,
                  const std::string &t_name) {
@@ -89,8 +91,10 @@ main() {
       p4::P4Runtime::NewStub(channel));
 
   p4::config::P4Info p4info;
-  std::ifstream istream(test_proto_bin);
-  p4info.ParseFromIstream(&istream);
+  std::ifstream istream(test_proto_txt);
+  // p4info.ParseFromIstream(&istream);
+  google::protobuf::io::IstreamInputStream istream_(&istream);
+  google::protobuf::TextFormat::Parse(&istream_, &p4info);
 
   {
     p4::SetForwardingPipelineConfigRequest request;

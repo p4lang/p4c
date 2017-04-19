@@ -17,7 +17,7 @@ ENV PROTOCOL_BUFFERS_DEPS autoconf \
                           unzip
 RUN git clone https://github.com/google/protobuf.git
 WORKDIR /protobuf/
-RUN git checkout tags/v3.0.2
+RUN git checkout tags/v3.2.0
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $PROTOCOL_BUFFERS_DEPS && \
     export CFLAGS="-Os" && \
@@ -42,15 +42,17 @@ ENV GRPC_DEPS build-essential \
               libtool
 RUN git clone https://github.com/google/grpc.git
 WORKDIR /grpc/
-RUN git checkout tags/v1.0.1 && \
+RUN git checkout tags/v1.2.3 && \
     git submodule update --init --recursive
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends $GRPC_DEPS && \
+    apt-get install -y --no-install-recommends $GRPC_DEPS libgflags-dev && \
     export LDFLAGS="-Wl,-s" && \
     make && \
+    make grpc_cli && \
     make install && \
     ldconfig && \
+    cp /grpc/bins/opt/grpc_cli /usr/bin/ && \
     apt-get purge -y $GRPC_DEPS && apt-get autoremove --purge -y && \
     rm -rf /grpc /var/cache/apt/* /var/lib/apt/lists/* /var/cache/debconf/* /var/lib/dpkg/*-old /var/log/*
 

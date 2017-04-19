@@ -1,0 +1,106 @@
+tables {
+  preamble {
+    id: 33589124
+    name: "forward"
+    alias: "forward"
+  }
+  match_fields {
+    id: 1
+    name: "routing_metadata.nhop_ipv4"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_ids: 16780303
+  action_ids: 16784184
+  action_ids: 16800567
+  size: 512
+}
+tables {
+  preamble {
+    id: 33581985
+    name: "ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_ids: 16812204
+  action_ids: 16784184
+  action_ids: 16800567
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33562826
+    name: "send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.egress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_ids: 16813016
+  action_ids: 16784184
+  action_ids: 16800567
+  size: 256
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16780303
+    name: "set_dmac"
+    alias: "set_dmac"
+  }
+  params {
+    id: 1
+    name: "dmac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16784184
+    name: "_drop"
+    alias: "_drop"
+  }
+}
+actions {
+  preamble {
+    id: 16812204
+    name: "set_nhop"
+    alias: "set_nhop"
+  }
+  params {
+    id: 1
+    name: "nhop_ipv4"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16813016
+    name: "rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
