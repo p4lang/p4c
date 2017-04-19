@@ -66,7 +66,6 @@ class JsonConverter final {
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
     std::map<cstring, const IR::P4Table*> directCountersMap;  // map counter name to table
-    const IR::Parameter*   headerParameter;
     const IR::Parameter*   userMetadataParameter;
     const IR::Parameter*   stdMetadataParameter;
     cstring                jsonMetadataParameterName = "standard_metadata";
