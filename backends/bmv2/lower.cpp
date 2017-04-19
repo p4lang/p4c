@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "lower.h"
+#include "frontends/p4/methodInstance.h"
 #include "lib/gmputil.h"
 
 namespace BMV2 {
