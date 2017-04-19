@@ -41,6 +41,7 @@ namespace P4 {
    - switch statements do not occur in actions
    - instantiations do not occur in actions
    - constructors are not invoked in actions
+   - returns and exits do not appear in parsers
    - extern constructors have the same name as the enclosing extern
  */
 class ValidateParsedProgram final : public Inspector {
