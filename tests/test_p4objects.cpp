@@ -881,3 +881,19 @@ TEST(P4Objects, ParserExtractVL) {
   LookupStructureFactory factory;
   ASSERT_EQ(0, objects.init_objects(&is, &factory));
 }
+
+TEST(P4Objects, BadRuntimeDataOffset) {
+  std::stringstream is(
+      "{\"actions\":[{\"name\":\"a0\",\"id\":0,\"runtime_data\":[],"
+      "\"primitives\":[{\"op\":\"ignore_string\","
+      "\"parameters\":[{\"type\":\"runtime_data\",\"value\":0}]}]}]}");
+  std::stringstream os;
+  P4Objects objects(os);
+  LookupStructureFactory factory;
+  ASSERT_NE(0, objects.init_objects(&is, &factory));
+  std::string expected_error_msg(
+      "Invalid 'runtime_data' parameter reference in action 'a0' when calling "
+      "primitive 'ignore_string': trying to use parameter at offset 0 but "
+      "action only has 0 parameter(s)\n");
+  EXPECT_EQ(expected_error_msg, os.str());
+}

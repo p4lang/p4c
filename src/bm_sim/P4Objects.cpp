@@ -349,7 +349,18 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
       const auto value_hexstr = cfg_parameter["value"].asString();
       action_fn->parameter_push_back_const(Data(value_hexstr));
     } else if (type == "runtime_data") {
-      auto action_data_offset = cfg_parameter["value"].asInt();
+      auto action_data_offset = cfg_parameter["value"].asUInt();
+      auto runtime_data_size = action_fn->get_num_params();
+      if (action_data_offset >= runtime_data_size) {
+        throw json_exception(
+            EFormat() << "Invalid 'runtime_data' parameter reference in "
+                      << "action '" << action_fn->get_name() << "' when "
+                      << "calling primitive '" << primitive_name << "': trying "
+                      << "to use parameter at offset " << action_data_offset
+                      << " but action only has " << runtime_data_size
+                      << " parameter(s)",
+            cfg_parameter);
+      }
       action_fn->parameter_push_back_action_data(action_data_offset);
     } else if (type == "header") {
       const auto header_name = cfg_parameter["value"].asString();
