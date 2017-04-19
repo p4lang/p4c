@@ -19,22 +19,4 @@ switch1(f()) main2;
 ../testdata/p4_16_samples/module.p4(44): warning: main7: unused instance
 switch4(f2()) main7;
               ^^^^^
-../testdata/p4_16_samples/module.p4(23): warning: out parameter x may be uninitialized when f terminates
-parser f(out bool x)
-                  ^
-../testdata/p4_16_samples/module.p4(23)
-parser f(out bool x)
-       ^
-../testdata/p4_16_samples/module.p4(26): warning: out parameter x may be uninitialized when f2 terminates
-parser f2(out bool x, out bool y)
-                   ^
-../testdata/p4_16_samples/module.p4(26)
-parser f2(out bool x, out bool y)
-       ^^
-../testdata/p4_16_samples/module.p4(26): warning: out parameter y may be uninitialized when f2 terminates
-parser f2(out bool x, out bool y)
-                               ^
-../testdata/p4_16_samples/module.p4(26)
-parser f2(out bool x, out bool y)
-       ^^
 warning: Program does not contain a `main' module

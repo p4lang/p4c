@@ -23,12 +23,6 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
     }
 }
 
-control cBar(inout mystruct1 meta) {
-    apply {
-        meta.a = meta.a + 4w15;
-    }
-}
-
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
     state start {
         pkt.extract<Ethernet_h>(hdr.ethernet);
@@ -37,7 +31,6 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @name("cbar_inst2") cBar() cbar_inst2_0;
     @name("foo") action foo_0() {
         meta.b = meta.b + 4w5;
     }

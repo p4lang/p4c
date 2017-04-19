@@ -106,6 +106,16 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* dec
     if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
         if (giveWarning(getOriginal()))
             ::warning("%1%: unused instance", decl);
+        // We won't delete extern instances; these may be useful even if not references.
+        auto type = decl->type;
+        if (type->is<IR::Type_Specialized>())
+            type = type->to<IR::Type_Specialized>()->baseType;
+        if (type->is<IR::Type_Name>())
+            type = refMap->getDeclaration(type->to<IR::Type_Name>()->path, true)->to<IR::Type>();
+        if (!type->is<IR::Type_Extern>())
+            return process(decl);
+        prune();
+        return decl;
     }
     // don't scan the initializer: we don't want to delete virtual methods
     prune();
