@@ -58,6 +58,9 @@ The code contains three sample backends:
     p4c -b bmv2-v1model-p4org program.p4 -o program.bmv2.json
     ```
 
+If you plan to contribute to p4c, you'll find more useful information
+[here](#Development tools).
+
 # Dependencies
 
 Ubuntu 16.04 is the officially supported platform for p4c. There's also
@@ -160,32 +163,25 @@ Installing on macOS:
 
 # Development tools
 
-- We recommend installing a new version of gdb, because older gdb versions
-  do not always handle C++11 correctly.  See `http://ftp.gnu.org/gnu/gdb`.
+There is a variety of design and development documentation [here](docs/README.md).
 
-- We recommend exuberant ctags for navigating source code in Emacs and
-  vi.  `sudo apt-get install exuberant-ctags.` The Makefile targets
-  `make ctags` and `make etags` generate tags for vi and Emacs
-  respectively.  (Make sure that you are using the correct version of
-  ctags; there are several competing programs with the same name in
-  existence.)
+We recommend using `clang++` with no optimizations for speeding up
+compilation and simplifying debugging.
 
-- Steps for setting up Eclipse under Ubuntu Linux 14.04 can be found in
-  [Eclipse-readme](docs/Eclipse-readme.md).
+We recommend installing a new version of gdb, because older gdb versions do not
+always handle C++11 correctly.  See `http://ftp.gnu.org/gnu/gdb`.
 
-# Building
-
-By default the build is performed in a separate folder `build`.
-
+We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
+apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make
+etags` generate tags for vi and Emacs respectively.  (Make sure that you are
+using the correct version of ctags; there are several competing programs with
+the same name in existence.)
 
 To enable building code documentation, please run `bootstrap.sh
 --enable-doxygen-doc`. This enables the `make docs` rule to generate
 documentation. HTML and PDF (if enabled) are available in
 build/doxygen-out/html/index.html and build/doxygen-out/p4c.pdf,
 respectively.
-
-We recommend using `clang++` with no optimizations for speeding up
-compilation and simplifying debugging.
 
 # Docker
 
@@ -201,7 +197,3 @@ containers used during the `docker build` process. On macOS in particular the
 default is 2GB, which is not enough to build p4c. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
-
-## Additional documentation
-
-More documentation is in [docs/README.md](docs/README.md)
