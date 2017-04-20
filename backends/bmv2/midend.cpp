@@ -110,6 +110,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
+#if 0
+        TODO(hanw): removed as it only works for v1model
         new VisitFunctor([this, skipv1controls, evaluator](const IR::Node *root) ->
                          const IR::Node* {
             auto toplevel = evaluator->getToplevelBlock();
@@ -144,6 +146,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
             skipv1controls->emplace(updateControlBlockName);
             skipv1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
             return root; }),
+#endif
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
@@ -175,6 +178,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
+        // TODO(hanw): skip synthesizing actions in verify, update and deparser.
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         // Proper back-end
@@ -185,9 +189,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
-        new RemoveComplexExpressions(&refMap, &typeMap,
-                                     &ingressControlBlockName, &egressControlBlockName),
-        new FixupChecksum(&updateControlBlockName),
+        // TODO(hanw): fixing
+//        new RemoveComplexExpressions(&refMap, &typeMap,
+//                                     &ingressControlBlockName, &egressControlBlockName),
+//        new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,

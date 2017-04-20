@@ -493,4 +493,16 @@ inline void clearErrorReporter() {
   ErrorReporter::instance.clear();
 }
 
+#define ERROR_IF_NULL(a, format, ...) do { \
+    if ((a) == nullptr) { \
+        ::error(format, ##__VA_ARGS__); \
+        return; \
+    } \
+} while (0)
+
+#define CHECK_ERROR() do { \
+    if (::errorCount() > 0) \
+        return; \
+} while (0)
+
 #endif /* P4C_LIB_ERROR_H_ */

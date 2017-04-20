@@ -28,7 +28,7 @@ limitations under the License.
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "midend.h"
-#include "jsonconverter.h"
+#include "backend.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -74,9 +74,11 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
-    BMV2::JsonConverter converter(options);
+    BMV2::Backend backend(&midend.enumMap);
     try {
-        converter.convert(&midEnd.refMap, &midEnd.typeMap, toplevel, &midEnd.enumMap);
+        backend.addDebugHook(hook);
+        backend.process(toplevel);
+        backend.convert(toplevel, options);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -87,7 +89,7 @@ int main(int argc, char *const argv[]) {
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.outputFile, false);
         if (out != nullptr) {
-            converter.serialize(*out);
+            backend.serialize(*out);
             out->flush();
         }
     }

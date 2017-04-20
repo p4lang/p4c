@@ -189,6 +189,16 @@ class ProgramParts {
     void analyze(const IR::ToplevelBlock* toplevel);
 };
 
+class DiscoverStructure : public Inspector {
+    ProgramParts*           structure;
+ public:
+    explicit DiscoverStructure(ProgramParts* structure) : structure(structure)
+    { setName("DiscoverStructure"); }
+    void postorder(const IR::ParameterList* paramList) override;
+    void postorder(const IR::P4Action* action) override;
+    void postorder(const IR::Declaration_Variable* decl) override;
+};
+
 }  // namespace BMV2
 
 #endif /* _BACKENDS_BMV2_ANALYZER_H_ */
