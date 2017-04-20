@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/p4lang/p4c.svg?branch=master)](https://travis-ci.org/p4lang/p4c)
 
-This folder contains the C++ source code for the P4-16 compiler.  This
-is a reference implementation of a compiler for the 2016 version of
-the P4 programming language, also called P4-16.  The P4-16 draft spec
-is available at
-http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html.
-For the P4 programming language see http://p4.org.
+# p4c
+
+p4c is a new, alpha-quality reference compiler for the P4 programming language.
+It supports both P4-14 and P4-16; you can find more information about P4
+[here](http://p4.org) and the specifications for both versions of the language
+[here](http://p4lang.github.io/p4-spec/).
 
 This repository depends on several submodules.
 * You can clone `p4c` and these submodules in one step using the following command:
@@ -21,17 +21,6 @@ The code contains three sample compiler back-ends:
   in the Linux kernel for packet filtering
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging.
-
-Some of these compilers can accept both
-[P4-14](http://p4.org/wp-content/uploads/2016/11/p4-spec-latest.pdf)
-(i.e., P4 v1.0, v1.1) and
-[P4-16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html)
-programs.
-
-The code and documentation are hosted in the following git repository:
-https://github.com/p4lang/p4c
-
-The code is currently alpha quality.
 
 # Dependences
 
