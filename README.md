@@ -7,7 +7,11 @@ It supports both P4-14 and P4-16; you can find more information about P4
 [here](http://p4.org) and the specifications for both versions of the language
 [here](http://p4lang.github.io/p4-spec/).
 
-The code contains three sample compiler back-ends:
+p4c is modular; it provides a standard frontend and midend which can be combined
+with a target-specific backend to create a complete P4 compiler. The goal is to
+make adding new backends easy.
+
+The code contains three sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model
 * p4c-ebpf: can be used to generate C code which can be compiled to EBPF
@@ -28,8 +32,9 @@ The code contains three sample compiler back-ends:
     git submodule update --init --recursive
     ```
 
-2.  Install dependencies. You can find instructions for Ubuntu 16.04
-    [here](#Ubuntu dependencies) and for macOS 10.12 [here](#macOS dependencies).
+2.  Install [dependencies](#Dependencies). You can find specific instructions
+    for Ubuntu 16.04 [here](#Ubuntu dependencies) and for macOS 10.12
+    [here](#macOS dependencies).
 
 3.  Build. By default, building takes place in a subdirectory named `build`.
     ```
@@ -82,9 +87,8 @@ use them, but YMMV.
   (2.38.0 or higher) and if desired to generate PDF documentation,
   LaTeX.
 
-The compiler is modular, and it contains multiple back-ends.  New ones can be added easily.
-Each back-end may have additional dependencies.  This repository contains the following two
-back-ends; please read the following documents for installing more dependencies:
+Backends may have additional dependencies. The dependencies for the backends
+included with `p4c` are documented here:
   * [BMv2](backends/bmv2/README.md)
   * [eBPF](backends/ebpf/README.md)
 
