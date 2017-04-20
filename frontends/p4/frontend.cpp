@@ -46,6 +46,7 @@ limitations under the License.
 #include "tableKeyNames.h"
 #include "parserControlFlow.h"
 #include "uselessCasts.h"
+#include "inferArchitecture.h"
 
 namespace P4 {
 
@@ -131,6 +132,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap),
         new RemoveParserControlFlow(&refMap, &typeMap),
+        new InferArchitecture(&typeMap),
         new FrontEndLast(),
     };
 

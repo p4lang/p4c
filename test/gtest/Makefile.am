@@ -18,7 +18,8 @@ gtest_unittest_UNIFIED = \
 	test/gtest/arch_test.cpp \
 	test/gtest/helpers.cpp \
 	test/gtest/midend_test.cpp \
-	test/gtest/opeq_test.cpp
+	test/gtest/opeq_test.cpp \
+	test/gtest/psa_test.cpp
 
 noinst_HEADERS += \
 	test/gtest/helpers.h

@@ -14,22 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "coreLibrary.h"
-#include "fromv1.0/v1model.h"
-#include "common/model.h"
+#include "frontends/common/model.h"
 
-namespace P4 {
+/// take v2model and turn it into v1model
 
-P4CoreLibrary P4CoreLibrary::instance;
-V2Model V2Model::instance;
+namespace BMV2 {
 
-}  // namespace P4
+void toV1Model(const P4::V2Model& v2model, P4::V1Model& v1model) {
 
-/* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance
- * is initialized before V1Model::instance */
-namespace P4V1 {
 
-V1Model V1Model::instance;
 
-}  // namespace P4V1
+}
 
+
+} // namespace BMV2
