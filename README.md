@@ -86,9 +86,8 @@ use them, but YMMV.
 - Python 2.7 for scripting and running tests
 
 - Optional: Documentation generation (enabled when configuring with
-  --enable-doxygen-doc) requires Doxygen (1.8.10 or higher), Graphviz
-  (2.38.0 or higher) and if desired to generate PDF documentation,
-  LaTeX.
+  --enable-doxygen-doc) requires Doxygen (1.8.10 or higher) and Graphviz
+  (2.38.0 or higher).
 
 Backends may have additional dependencies. The dependencies for the backends
 included with `p4c` are documented here:
@@ -152,8 +151,6 @@ Installing on macOS:
   ```
   brew install doxygen graphviz
   ```
-  For Latex we recommend [MacTeX](http://www.tug.org/mactex/).
-
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
   work for p4c itself but may cause problems with some extensions. It's
   preferable to install Protocol Buffers 3.0 from source using the instructions
@@ -177,11 +174,10 @@ etags` generate tags for vi and Emacs respectively.  (Make sure that you are
 using the correct version of ctags; there are several competing programs with
 the same name in existence.)
 
-To enable building code documentation, please run `bootstrap.sh --enable-doxygen-doc`.
-This enables the `make docs` rule to generate
-documentation. HTML and PDF (if enabled) are available in
-`build/doxygen-out/html/index.html` and `build/doxygen-out/p4c.pdf`,
-respectively.
+To enable building code documentation, please run
+`bootstrap.sh --enable-doxygen-doc`. This enables the `make docs` rule to
+generate documentation. The HTML output is available in
+`build/doxygen-out/html/index.html`.
 
 # Docker
 
