@@ -777,6 +777,8 @@ private:
 class P4RuntimeSerializer {
     using Counter = ::p4::config::Counter;
     using Meter = ::p4::config::Meter;
+    using CounterSpec = ::p4::config::CounterSpec;
+    using MeterSpec = ::p4::config::MeterSpec;
     using Preamble = ::p4::config::Preamble;
     using P4Info = ::p4::config::P4Info;
 
@@ -849,54 +851,70 @@ public:
         destination->flush();
     }
 
-    void addCounter(const Counterlike<IR::Counter>& counterInstance) {
-        auto counter = p4Info->add_counters();
+    /// Set common fields between p4::config::Counter and p4::config::DirectCounter.
+    template <typename Kind>
+    void setCounterCommon(Kind *counter, const Counterlike<IR::Counter>& counterInstance) {
         auto id = symbols.getId(P4RuntimeSymbolType::COUNTER, counterInstance.name);
         counter->mutable_preamble()->set_id(id);
         counter->mutable_preamble()->set_name(counterInstance.name);
         counter->mutable_preamble()->set_alias(symbols.getAlias(counterInstance.name));
         addAnnotations(counter->mutable_preamble(), counterInstance.annotations);
-        counter->set_size(counterInstance.size);
+        auto counter_spec = counter->mutable_spec();
 
         if (counterInstance.unit == "packets") {
-            counter->set_unit(Counter::PACKETS);
+            counter_spec->set_unit(CounterSpec::PACKETS);
         } else if (counterInstance.unit == "bytes") {
-            counter->set_unit(Counter::BYTES);
+            counter_spec->set_unit(CounterSpec::BYTES);
         } else if (counterInstance.unit == "packets_and_bytes") {
-            counter->set_unit(Counter::BOTH);
+            counter_spec->set_unit(CounterSpec::BOTH);
         } else {
-            counter->set_unit(Counter::UNSPECIFIED);
-        }
-
-        if (counterInstance.table) {
-            auto id = symbols.getId(P4RuntimeSymbolType::TABLE,
-                                    *counterInstance.table);
-            counter->set_direct_table_id(id);
+            counter_spec->set_unit(CounterSpec::UNSPECIFIED);
         }
     }
 
-    void addMeter(const Counterlike<IR::Meter>& meterInstance) {
-        auto meter = p4Info->add_meters();
+    void addCounter(const Counterlike<IR::Counter>& counterInstance) {
+        if (counterInstance.table) {
+            auto counter = p4Info->add_direct_counters();
+            setCounterCommon(counter, counterInstance);
+            auto id = symbols.getId(P4RuntimeSymbolType::TABLE, *counterInstance.table);
+            counter->set_direct_table_id(id);
+        } else {
+            auto counter = p4Info->add_counters();
+            setCounterCommon(counter, counterInstance);
+            counter->set_size(counterInstance.size);
+        }
+    }
+
+    /// Set common fields between p4::config::Meter and p4::config::DirectMeter.
+    template <typename Kind>
+    void setMeterCommon(Kind *meter, const Counterlike<IR::Meter>& meterInstance) {
         auto id = symbols.getId(P4RuntimeSymbolType::METER, meterInstance.name);
         meter->mutable_preamble()->set_id(id);
         meter->mutable_preamble()->set_name(meterInstance.name);
         meter->mutable_preamble()->set_alias(symbols.getAlias(meterInstance.name));
         addAnnotations(meter->mutable_preamble(), meterInstance.annotations);
-        meter->set_size(meterInstance.size);
-        meter->set_type(Meter::COLOR_UNAWARE);  // A default; this isn't exposed.
+        auto meter_spec = meter->mutable_spec();
+        meter_spec->set_type(MeterSpec::COLOR_UNAWARE);  // A default; this isn't exposed.
 
         if (meterInstance.unit == "packets") {
-            meter->set_unit(Meter::PACKETS);
+            meter_spec->set_unit(MeterSpec::PACKETS);
         } else if (meterInstance.unit == "bytes") {
-            meter->set_unit(Meter::BYTES);
+            meter_spec->set_unit(MeterSpec::BYTES);
         } else {
-            meter->set_unit(Meter::UNSPECIFIED);
+            meter_spec->set_unit(MeterSpec::UNSPECIFIED);
         }
+    }
 
+    void addMeter(const Counterlike<IR::Meter>& meterInstance) {
         if (meterInstance.table) {
-            auto id = symbols.getId(P4RuntimeSymbolType::TABLE,
-                                    *meterInstance.table);
+            auto meter = p4Info->add_direct_meters();
+            setMeterCommon(meter, meterInstance);
+            auto id = symbols.getId(P4RuntimeSymbolType::TABLE, *meterInstance.table);
             meter->set_direct_table_id(id);
+        } else {
+            auto meter = p4Info->add_meters();
+            setMeterCommon(meter, meterInstance);
+            meter->set_size(meterInstance.size);
         }
     }
 
