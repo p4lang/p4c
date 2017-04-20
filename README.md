@@ -35,11 +35,11 @@ The code is currently alpha quality.
 
 # Dependences
 
-We have tested the compiler on U*X systems (MacOS and Ubuntu).  The
-following tools are required to build and run the compiler and tests:
+Ubuntu 16.04 is the officially supported platform for p4c. There's also
+unofficial support for macOS 10.12. Other platforms are untested; you can try to
+use them, but YMMV.
 
-- A C++11 compiler
-  E.g., gcc 4.8 or later, or clang++
+- A C++11 compiler. GCC 4.9 or later or Clang 3.3 or later is required.
 
 - `git` for version control
 
