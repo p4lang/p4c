@@ -1182,7 +1182,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
         auto params = mkArrayField(jact, "runtime_data");
         for (auto p : *action->parameters->getEnumerator()) {
             if (!refMap->isUsed(p))
-                ::warning("Removing unused action parameter %1% for compatibility reasons", p);
+                ::warning("Unused action parameter %1%", p);
 
             auto param = new Util::JsonObject();
             param->emplace("name", p->name);
