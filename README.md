@@ -29,7 +29,7 @@ The code contains three sample compiler back-ends:
     ```
 
 2.  Install dependencies. You can find instructions for Ubuntu 16.04
-    [here](#Ubuntu dependences) and for macOS 10.12 [here](#macOS dependences).
+    [here](#Ubuntu dependencies) and for macOS 10.12 [here](#macOS dependencies).
 
 3.  Build. By default, building takes place in a subdirectory named `build`.
     ```
@@ -53,7 +53,7 @@ The code contains three sample compiler back-ends:
     p4c -b bmv2-v1model-p4org program.p4 -o program.bmv2.json
     ```
 
-# Dependences
+# Dependencies
 
 Ubuntu 16.04 is the officially supported platform for p4c. There's also
 unofficial support for macOS 10.12. Other platforms are untested; you can try to
@@ -83,14 +83,14 @@ use them, but YMMV.
   LaTeX.
 
 The compiler is modular, and it contains multiple back-ends.  New ones can be added easily.
-Each back-end may have additional dependences.  This repository contains the following two
-back-ends; please read the following documents for installing more dependences:
+Each back-end may have additional dependencies.  This repository contains the following two
+back-ends; please read the following documents for installing more dependencies:
   * [BMv2](backends/bmv2/README.md)
   * [eBPF](backends/ebpf/README.md)
 
-## Ubuntu dependences
+## Ubuntu dependencies
 
-Most dependences can be installed using `apt-get install`:
+Most dependencies can be installed using `apt-get install`:
 
 `sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev pkg-config python python-scapy python-ipaddr tcpdump`
 
@@ -105,7 +105,7 @@ Please note that while newer versions should work for `p4c` itself, you may run
 into trouble with some extensions unless you install version 3.0, so you may
 want to install from source even on newer releases of Ubuntu.
 
-## macOS dependences
+## macOS dependencies
 
 Installing on macOS:
 
