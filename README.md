@@ -7,12 +7,6 @@ It supports both P4-14 and P4-16; you can find more information about P4
 [here](http://p4.org) and the specifications for both versions of the language
 [here](http://p4lang.github.io/p4-spec/).
 
-This repository depends on several submodules.
-* You can clone `p4c` and these submodules in one step using the following command:
-```git clone --recursive```
-* Alternatively, if you've already cloned `p4c`, you can clone the submodules using the command:
-```git submodule update --init --recursive```
-
 The code contains three sample compiler back-ends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model
@@ -21,6 +15,43 @@ The code contains three sample compiler back-ends:
   in the Linux kernel for packet filtering
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging.
+
+# Getting started
+
+1.  Clone the repository. It includes submodules, so be sure to use
+    `--recursive` to pull them in:
+    ```
+    git clone --recursive https://github.com/p4lang/p4c.git
+    ```
+    If you forgot `--recursive`, you can update the submodules at any time using:
+    ```
+    git submodule update --init --recursive
+    ```
+
+2.  Install dependencies. You can find instructions for Ubuntu 16.04
+    [here](#Ubuntu dependences) and for macOS 10.12 [here](#macOS dependences).
+
+3.  Build. By default, building takes place in a subdirectory named `build`.
+    ```
+    ./bootstrap.sh
+    cd build
+    make -j4
+    make check -j4
+    ```
+
+4.  (Optional) Install the compiler and the P4 shared headers globally.
+    ```
+    sudo make install
+    ```
+    The compiler driver `p4c` and binaries for each of the backends are
+    installed in `/usr/local/bin` by default; the P4 headers are placed in
+    `/usr/local/share/p4c`.
+
+5.  You're ready to go! You should be able to compile a P4-16 program for BMV2
+    using:
+    ```
+    p4c -b bmv2-v1model-p4org program.p4 -o program.bmv2.json
+    ```
 
 # Dependences
 
@@ -142,12 +173,6 @@ Installing on macOS:
 
 By default the build is performed in a separate folder `build`.
 
-```
-./bootstrap.sh
-cd build
-make -j4
-make check -j4
-```
 
 To enable building code documentation, please run `bootstrap.sh
 --enable-doxygen-doc`. This enables the `make docs` rule to generate
