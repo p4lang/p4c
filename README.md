@@ -33,8 +33,8 @@ The code contains three sample backends:
     ```
 
 2.  Install [dependencies](#Dependencies). You can find specific instructions
-    for Ubuntu 16.04 [here](#Ubuntu dependencies) and for macOS 10.12
-    [here](#macOS dependencies).
+    for Ubuntu 16.04 [here](#Ubuntu-dependencies) and for macOS 10.12
+    [here](#macOS-dependencies).
 
 3.  Build. By default, building takes place in a subdirectory named `build`.
     ```
@@ -59,7 +59,7 @@ The code contains three sample backends:
     ```
 
 If you plan to contribute to p4c, you'll find more useful information
-[here](#Development tools).
+[here](#Development-tools).
 
 # Dependencies
 
