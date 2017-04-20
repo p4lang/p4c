@@ -152,7 +152,7 @@ Installing on macOS:
   ```
   brew install doxygen graphviz
   ```
-  For Latex we recommend MacTeX (http://www.tug.org/mactex/).
+  For Latex we recommend [MacTeX](http://www.tug.org/mactex/).
 
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
   work for p4c itself but may cause problems with some extensions. It's
@@ -168,8 +168,8 @@ There is a variety of design and development documentation [here](docs/README.md
 We recommend using `clang++` with no optimizations for speeding up
 compilation and simplifying debugging.
 
-We recommend installing a new version of gdb, because older gdb versions do not
-always handle C++11 correctly.  See `http://ftp.gnu.org/gnu/gdb`.
+We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb).,
+because older gdb versions do not always handle C++11 correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
 apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make
@@ -177,10 +177,10 @@ etags` generate tags for vi and Emacs respectively.  (Make sure that you are
 using the correct version of ctags; there are several competing programs with
 the same name in existence.)
 
-To enable building code documentation, please run `bootstrap.sh
---enable-doxygen-doc`. This enables the `make docs` rule to generate
+To enable building code documentation, please run `bootstrap.sh --enable-doxygen-doc`.
+This enables the `make docs` rule to generate
 documentation. HTML and PDF (if enabled) are available in
-build/doxygen-out/html/index.html and build/doxygen-out/p4c.pdf,
+`build/doxygen-out/html/index.html` and `build/doxygen-out/p4c.pdf`,
 respectively.
 
 # Docker
