@@ -1181,12 +1181,8 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
         jact->emplace("id", id);
         auto params = mkArrayField(jact, "runtime_data");
         for (auto p : *action->parameters->getEnumerator()) {
-            // The P4 v1.0 compiler removes unused action parameters!
-            // We have to do the same, although this seems wrong.
-            if (!refMap->isUsed(p)) {
-                ::warning("Removing unused action parameter %1% for compatibility reasons", p);
-                continue;
-            }
+            if (!refMap->isUsed(p))
+                ::warning("Unused action parameter %1%", p);
 
             auto param = new Util::JsonObject();
             param->emplace("name", p->name);
