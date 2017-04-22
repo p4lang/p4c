@@ -293,7 +293,7 @@ const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression
 const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
-            if (auto max = type->annotations->getSingle("max_length")) {
+            if (auto max = type->getAnnotation("max_length")) {
                 if (max->expr.size() != 1 || !max->expr[0]->is<IR::Constant>())
                     error("%s: max_length must be a constant", max);
                 else
@@ -307,7 +307,7 @@ const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
 const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     if (!field->type->is<IR::Type_Varbits>()) return field;
     if (auto type = findContext<IR::Type_StructLike>())
-        if (auto len = type->annotations->getSingle("length"))
+        if (auto len = type->getAnnotation("length"))
             field->annotations = field->annotations->add(len);
     return field;
 }

@@ -22,7 +22,7 @@ cstring IDeclaration::externalName(cstring replace) const {
     if (!is<IAnnotated>())
         return getName().toString();
 
-    auto anno = to<IAnnotated>()->getAnnotations()->getSingle(IR::Annotation::nameAnnotation);
+    auto anno = getAnnotation(IR::Annotation::nameAnnotation);
     if (anno != nullptr) {
         if (anno->expr.size() != 1) {
             ::error("%1% should contain a string", anno);

@@ -131,7 +131,7 @@ bool Type_ActionEnum::contains(cstring name) const {
 size_t Type_MethodBase::minParameterCount() const {
     size_t rv = 0;
     for (auto p : *parameters)
-        if (!p->annotations->getSingle("optional"))
+        if (!p->getAnnotation("optional"))
             ++rv;
     return rv;
 }

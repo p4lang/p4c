@@ -100,7 +100,7 @@ class KeyNameGenerator : public Inspector {
 
 const IR::Node* DoTableKeyNames::postorder(IR::KeyElement* keyElement) {
     LOG3("Visiting " << getOriginal());
-    if (keyElement->annotations->getSingle(IR::Annotation::nameAnnotation) != nullptr)
+    if (keyElement->getAnnotation(IR::Annotation::nameAnnotation) != nullptr)
         // already present: no changes
         return keyElement;
     KeyNameGenerator kng(typeMap);;
