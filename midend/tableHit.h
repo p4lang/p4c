@@ -22,14 +22,16 @@ limitations under the License.
 
 namespace P4 {
 
-// Convert
-// tmp = t.apply().hit
-//    into
-// if (t.apply().hit)
-//    tmp = true;
-// else
-//    tmp = false;
-// This may be needed by some back-ends which only support hit test in conditionals
+/**
+Convert
+tmp = t.apply().hit
+   into
+if (t.apply().hit)
+   tmp = true;
+else
+   tmp = false;
+This may be needed by some back-ends which only support hit test in conditionals
+*/
 class DoTableHit : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
