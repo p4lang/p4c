@@ -232,6 +232,8 @@ class Annotations {
 /// Implemented by all objects that can have annotations
 interface IAnnotated {
     virtual Annotations getAnnotations() const = 0;
+    Annotation getAnnotation(cstring name) const override {
+        return getAnnotations()->getSingle(name); }
 }
 
 interface IInstance {

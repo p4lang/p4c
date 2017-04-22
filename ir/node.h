@@ -36,6 +36,7 @@ class JSONLoader;
 namespace IR {
 
 class Node;
+class Annotation;
 
 template<class T> class Vector;
 template<class T> class IndexedVector;
@@ -50,6 +51,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     virtual void toJSON(JSONGenerator &) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
+    virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
     template<typename T> bool is() const;
     template<typename T> const T *to() const;
     template<typename T> const T &as() const;

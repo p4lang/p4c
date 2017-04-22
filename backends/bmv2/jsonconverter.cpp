@@ -1334,7 +1334,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
         }
         entry->emplace("action_entry", action);
 
-        auto priorityAnnotation = e->getAnnotations()->getSingle("priority");
+        auto priorityAnnotation = e->getAnnotation("priority");
         if (priorityAnnotation != nullptr) {
             if (priorityAnnotation->expr.size() > 1)
                 ::error("invalid priority value %1%", priorityAnnotation->expr);

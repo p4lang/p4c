@@ -65,18 +65,12 @@ namespace ControlPlaneAPI {
 
 /// @return true if @type has an @metadata annotation.
 static bool isMetadataType(const IR::Type* type) {
-    if (!type->is<IR::IAnnotated>()) return false;
-    auto annotations = type->to<IR::IAnnotated>()->getAnnotations();
-    auto metadataAnnotation = annotations->getSingle("metadata");
-    return metadataAnnotation != nullptr;
+    return type->getAnnotation("metadata") != nullptr;
 }
 
 /// @return true if @node has an @hidden annotation.
-static bool isHidden(const IR::Node* node) {
-    if (!node->is<IR::IAnnotated>()) return false;
-    auto annotations = node->to<IR::IAnnotated>()->getAnnotations();
-    auto hiddenAnnotation = annotations->getSingle("hidden");
-    return hiddenAnnotation != nullptr;
+static bool isHidden(const IR::Node *node) {
+    return node->getAnnotation("hidden") != nullptr;
 }
 
 /// @return a version of @name which has been sanitized for exposure to the
@@ -404,9 +398,7 @@ externalId(const IR::IDeclaration* declaration) {
     }
 
     // If the user specified an @id annotation, use that.
-    auto annotations = declaration->to<IR::IAnnotated>()->getAnnotations();
-    auto idAnnotation = annotations->getSingle("id");
-    if (idAnnotation != nullptr) {
+    if (auto idAnnotation = declaration->getAnnotation("id")) {
         if (idAnnotation->expr.size() != 1) {
             ::error("@id should be an integer for declaration %1%", declaration);
             return boost::none;

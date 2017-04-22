@@ -62,7 +62,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
 
     auto sit = src->arguments->begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
-        bool optarg = dit->annotations->getSingle("optional") != nullptr;
+        bool optarg = dit->getAnnotation("optional") != nullptr;
         if (sit == src->arguments->end()) {
             if (optarg) continue;
             if (reportErrors)
