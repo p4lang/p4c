@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "ir.h"
 #include "dbprint.h"
+#include "lib/enumerator.h"
 #include "lib/gmputil.h"
 #include "lib/bitops.h"
 
@@ -145,4 +146,30 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
         return IR::Type::Bits::get(32);
     }
     return IR::Type::Unknown::get();
+}
+
+Util::Enumerator<const IR::IDeclaration*>* IR::V1Program::getDeclarations() const {
+    using ScopeVal = decltype(scope)::value_type;
+
+    std::function<const IR::Node*(const ScopeVal&)> toNode =
+      [](const ScopeVal& value) -> const IR::Node* { return value.second; };
+    std::function<const IR::IDeclaration*(const IR::Node* const&)> toIDeclaration =
+      [](const IR::Node* const& node) { return node->to<IR::IDeclaration>(); };
+
+    // Return an enumerator over all Nodes in the scope which are IDeclarations.
+    return Util::Enumerator<ScopeVal>::createEnumerator(scope.begin(), scope.end())
+              ->map(toNode)
+              ->where([](const IR::Node* node) { return node->is<IR::IDeclaration>(); })
+              ->map(toIDeclaration);
+}
+
+const IR::IDeclaration* IR::V1Program::getDeclByName(cstring name) const {
+    auto nodeIter = scope.find(name);
+
+    // Search the scope and return the first IDeclaration we find.
+    while (nodeIter != scope.end() && nodeIter->first == name)
+        if (nodeIter->second->is<IR::IDeclaration>())
+            return nodeIter->second->to<IR::IDeclaration>();
+
+    return nullptr;  // No matching declaration.
 }
