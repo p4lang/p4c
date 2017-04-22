@@ -31,7 +31,7 @@ limitations under the License.
 
 namespace P4 {
 
-// Describes information about a caller-callee pair
+/// Describes information about a caller-callee pair
 struct CallInfo {
     const IR::IContainer* caller;
     const IR::IContainer* callee;
@@ -94,18 +94,18 @@ struct PerInstanceSubstitutions {
     const T* rename(ReferenceMap* refMap, const IR::Node* node);
 };
 
-// Summarizes all inline operations to be performed.
+/// Summarizes all inline operations to be performed.
 struct InlineSummary {
-    // Various substitutions that must be applied for each instance
+    /// Various substitutions that must be applied for each instance
     struct PerCaller {  // information for each caller
-        // For each instance (key) the container that is intantiated.
+        /// For each instance (key) the container that is intantiated.
         std::map<const IR::Declaration_Instance*, const IR::IContainer*> declToCallee;
-        // For each instance (key) we must apply a bunch of substitutions
+        /// For each instance (key) we must apply a bunch of substitutions
         std::map<const IR::Declaration_Instance*, PerInstanceSubstitutions*> substitutions;
-        // For each invocation (key) call the instance that is invoked.
+        /// For each invocation (key) call the instance that is invoked.
         std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToInstance;
-        // nullptr if there isn't exactly one caller,
-        // otherwise the single caller of this instance.
+        /// @returns nullptr if there isn't exactly one caller,
+        /// otherwise the single caller of this instance.
         const IR::MethodCallStatement* uniqueCaller(
             const IR::Declaration_Instance* instance) const {
             const IR::MethodCallStatement* call = nullptr;
@@ -170,13 +170,13 @@ class InlineWorkList {
     InlineSummary* next();
 };
 
-// Base class for an inliner:
-// Information to inline is in list
-// Future inlining information is in toInline; must be updated
-// as inlining is performed (since callers change into new nodes).
+/// Base class for an inliner.
 class AbstractInliner : public Transform {
  protected:
+    /// Information to inline
     InlineWorkList* list;
+    /// Future inlining information; must be updated as inlining is
+    /// performed (since callers change into new nodes).
     InlineSummary*  toInline;
     AbstractInliner() : list(nullptr), toInline(nullptr) {}
  public:
@@ -193,7 +193,7 @@ class AbstractInliner : public Transform {
     virtual ~AbstractInliner() {}
 };
 
-// Repeatedly invokes an abstract inliner with work from the worklist
+/// Repeatedly invokes an abstract inliner with work from the worklist
 class InlineDriver : public Transform {
     InlineWorkList*  toInline;
     AbstractInliner* inliner;
@@ -201,12 +201,12 @@ class InlineDriver : public Transform {
     InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner) :
             toInline(toInline), inliner(inliner)
     { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineDriver"); }
-    // Not really a visitor, but we want to embed it into a PassManager,
+    // This is not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
     const IR::Node* preorder(IR::P4Program* program) override;
 };
 
-// Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
+/// Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
     InlineWorkList*     inlineList;  // output: result is here
     ReferenceMap*       refMap;      // input
@@ -240,7 +240,7 @@ class DiscoverInlining : public Inspector {
     { visit_all(toplevel); return false; }
 };
 
-// Performs actual inlining work
+/// Performs actual inlining work
 class GeneralInliner : public AbstractInliner {
     ReferenceMap* refMap;
     TypeMap* typeMap;
@@ -259,14 +259,31 @@ class GeneralInliner : public AbstractInliner {
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };
 
-class Inline : public PassManager {
+/// Performs one round of inlining bottoms-up
+class InlinePass : public PassManager {
     InlineWorkList toInline;
  public:
-    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
+    InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
         passes.push_back(new InlineDriver(&toInline, new P4::GeneralInliner(refMap->isV1())));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap));
+        setName("InlinePass");
+    }
+};
+
+/**
+Performs inlining as many times as necessary.  Most frequently once
+will be enough.  Multiple iterations are necessary only when instances are
+passed as arguments using constructor arguments.
+*/
+class Inline : public PassRepeated {
+ public:
+    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
+        passes.push_back(new InlinePass(refMap, typeMap, evaluator));
+        // After inlining the output of the evaluator changes, so
+        // we have to run it again
+        passes.push_back(evaluator);
         setName("Inline");
     }
 };

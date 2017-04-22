@@ -24,7 +24,7 @@ namespace P4 {
 
 class RemoveUnusedDeclarations : public Transform {
     const ReferenceMap* refMap;
-    // If non-null give warnings about unused declarations
+    /// If non-null give warnings about unused declarations
     std::set<const IR::Node*>* warned;
     const IR::Node* process(const IR::IDeclaration* decl);
 
@@ -38,8 +38,8 @@ class RemoveUnusedDeclarations : public Transform {
     using Transform::preorder;
     using Transform::init_apply;
 
-    // True if we should report a warning; the node is
-    // added to warned in this case
+    /// True if we should report a warning; the node is
+    /// added to warned in this case
     bool giveWarning(const IR::Node* node);
 
     Visitor::profile_t init_apply(const IR::Node *root) override;
@@ -52,7 +52,7 @@ class RemoveUnusedDeclarations : public Transform {
 
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
 
-    // Do not delete the following even if unused
+    // The following kinds of nodes are not deleted even if they are unreferenced
     const IR::Node* preorder(IR::Type_Error* type) override
     { prune(); return type; }
     const IR::Node* preorder(IR::Declaration_MatchKind* decl) override
@@ -63,14 +63,14 @@ class RemoveUnusedDeclarations : public Transform {
     { prune(); return type; }
     const IR::Node* preorder(IR::Type_Method* type) override
     { prune(); return type; }
+    const IR::Node* preorder(IR::Parameter* param) override { return param; }  // never dead
 
     const IR::Node* preorder(IR::Declaration_Variable* decl)  override;
-    const IR::Node* preorder(IR::Parameter* param) override { return param; }  // never dead
     const IR::Node* preorder(IR::Declaration* decl) override { return process(decl); }
     const IR::Node* preorder(IR::Type_Declaration* decl) override { return process(decl); }
 };
 
-// Iterates RemoveUnusedDeclarations until convergence.
+/// Iterates RemoveUnusedDeclarations until convergence.
 class RemoveAllUnusedDeclarations : public PassManager {
  public:
     explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool warn = false) {

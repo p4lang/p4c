@@ -82,7 +82,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-            new VisitFunctor([v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
+        new VisitFunctor([v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
             if (main == nullptr)
