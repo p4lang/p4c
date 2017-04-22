@@ -23,7 +23,7 @@ p4c
 │   └── p4                    -- P4_16 front-end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
-├── m4                        -- gnu m4 macro
+├── m4                        -- m4 macros used by autotools
 ├── midend                    -- code that may be useful for writing mid-ends
 ├── p4include                 -- standard P4 files needed by the compiler (e.g., core.p4)
 ├── test                      -- test code
@@ -258,7 +258,7 @@ output:
 ## Compiler Driver
 
 **p4c** is a compiler driver. The goal is to provide a consistent user interface
-across different p4 backends and work flows. The compiler driver is written in 
+across different p4 backends and work flows. The compiler driver is written in
 Python. It can be extended for custom backends.
 
 The usage of the driver is as follows:
@@ -300,11 +300,11 @@ makefile variable.
 p4c_PYTHON += p4c.custom.cfg
 ```
 
-There is an global variable `config` in p4c compiler driver that stores the build steps 
+There is an global variable `config` in p4c compiler driver that stores the build steps
 for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
-is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is 
+is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is
 identified as `bmv2-*-p4org`. The * is a wildcard to represent any architecture. User may choose
-to specify the architecture string to use different compilation flow for different backend 
+to specify the architecture string to use different compilation flow for different backend
 architecture.
 
 A sample configuration file looks as follows:
@@ -321,6 +321,5 @@ config.target.append("bmv2-psa-p4org")
 
 After adding the new configuration file, rerun `bootstrap.sh`
 
-For testing purpose, p4c will be installed in the build/ directory when executing `make`. 
+For testing purpose, p4c will be installed in the build/ directory when executing `make`.
 User can install `p4c` to other system path by running `make install`
-

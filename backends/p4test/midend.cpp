@@ -73,7 +73,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto v1controls = new std::set<cstring>();
 
     // TODO: parser loop unrolling
-    // TODO: improve copy propagation
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     // TODO: handle bit-slices as out arguments
