@@ -96,7 +96,8 @@ class Vector : public VectorBase {
         int index = i - vec.begin();
         vec.insert(i, b, e);
         return vec.begin() + index; }
-    iterator append(const Vector<T>& toAppend)
+    template<typename Container>
+    iterator append(const Container &toAppend)
     { return insert(end(), toAppend.begin(), toAppend.end()); }
     iterator insert(iterator i, const T* v) {
         /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void

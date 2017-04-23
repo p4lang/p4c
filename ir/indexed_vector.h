@@ -115,7 +115,8 @@ class IndexedVector : public Vector<T> {
         *i = v;
         insertInMap(v);
         return ++i; }
-    iterator append(const Vector<T>& toAppend) {
+    template<typename Container>
+    iterator append(const Container &toAppend) {
         return insert(Vector<T>::end(), toAppend.begin(), toAppend.end()); }
     iterator insert(iterator i, const T* v) {
         insertInMap(v);
