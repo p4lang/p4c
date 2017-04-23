@@ -226,6 +226,36 @@ cstring InputSources::getSourceFragment(const SourceInfo &position) const {
     return result + toadd + marker + cstring::newline;
 }
 
+cstring InputSources::getSourceFragment2(const SourceInfo &position) const {
+    if (!position.isValid())
+        return "";
+
+    cstring result = this->getLine(position.getStart().getLineNumber());
+    unsigned int result_len = strlen(result);
+    unsigned int start = position.getStart().getColumnNumber();
+    unsigned int end, len;
+    cstring toadd = "";
+
+    // If the position spans multiple lines, truncate to just the first line
+    if (position.getEnd().getLineNumber() > position.getStart().getLineNumber()) {
+        // go to the end of the first line
+        end = strlen(result);
+        if (result.find('\n') != nullptr) {
+            --end;
+        }
+        toadd = " ...";
+    } else {
+        end = position.getEnd().getColumnNumber();
+    }
+    len = end - start;
+
+    char substr[result_len+1];
+    memcpy(substr, &result[start], len);
+    substr[len] = '\0';
+
+    return substr + toadd;
+}
+
 cstring InputSources::toDebugString() const {
     std::stringstream builder;
     for (auto line : contents)
@@ -242,11 +272,27 @@ cstring SourceInfo::toSourceFragment() const {
     return InputSources::instance->getSourceFragment(*this);
 }
 
+cstring SourceInfo::toSourceFragment2() const {
+    return InputSources::instance->getSourceFragment2(*this);
+}
+
 cstring SourceInfo::toPositionString() const {
     if (!isValid())
         return "";
     SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
     return position.toString();
+}
+
+cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
+                                         unsigned *outColumnNumber) const {
+    SourceFileLine position = InputSources::instance->getSourceLine(this->start.getLineNumber());
+    if (outLineNumber != NULL) {
+        *outLineNumber = position.sourceLine;
+    }
+    if (outColumnNumber != NULL) {
+        *outColumnNumber = this->start.getColumnNumber();
+    }
+    return position.fileName.c_str();
 }
 
 SourceFileLine SourceInfo::toPosition() const {
