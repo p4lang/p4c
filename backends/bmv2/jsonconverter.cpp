@@ -824,6 +824,32 @@ void addSrcInfoData(Util::JsonObject* result,
     }
 }
 
+void addSrcInfoDataAssignment(Util::JsonObject* result,
+                              const IR::Node* node,
+                              const IR::Node* lhsNode,
+                              const IR::Node* rhsNode) {
+    unsigned lineNumber, columnNumber;
+    cstring fName = node->srcInfo.toSourcePositionData(NULL, NULL);
+    cstring lhsStr = lhsNode->srcInfo.toSourcePositionData(&lineNumber,
+                                                        &columnNumber);
+    cstring rhsStr = rhsNode->srcInfo.toSourcePositionData(NULL, NULL);
+    if (fName == NULL || lhsStr == NULL || rhsStr == NULL) {
+        // Do not add anything to the JSON file for this, as this is
+        // likely a statement synthesized by the compiler, and either
+        // not easy, or it is impossible, to correlate it directly
+        // with anything in the user's P4 source code.
+    } else {
+        cstring sourceFrag = node->srcInfo.toSourceFragment2();
+        cstring lhsFrag = lhsNode->srcInfo.toSourceFragment2();
+        cstring rhsFrag = rhsNode->srcInfo.toSourceFragment2();
+        result->emplace("filename", fName);
+        result->emplace("line", lineNumber);
+        result->emplace("column", columnNumber);
+        result->emplace("expression_string",
+                        lhsFrag + " " + sourceFrag + " " + rhsFrag);
+    }
+}
+
 // return calculation name
 cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fields,
                                          Util::JsonArray* calculations,
@@ -889,11 +915,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 operation = "modify_field";
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
-            // TBD jafinger - assignment statement location with this
-            // code only includes the '=' 'operator'.  It would be
-            // nice if it included the entire assignment statement.
-            // Easy to do?
-            addSrcInfoData(primitive, s);
+            addSrcInfoDataAssignment(primitive, assign, l, r);
             auto left = conv->convertLeftValue(l);
             parameters->append(left);
             bool convertBool = type->is<IR::Type_Boolean>();
