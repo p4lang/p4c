@@ -2146,7 +2146,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto json = new Util::JsonObject();
         json->emplace("name", extVisibleName(f));
         json->emplace("id", nextId("stack"));
-        // TBD jafinger - add line/col here?
+        addSrcInfoData(json, f);
         json->emplace("size", stack->getSize());
         auto type = typeMap->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
@@ -2295,7 +2295,6 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     CHECK_NULL(refMap);
     CHECK_NULL(enumMap);
 
-    ::warning("%1%: JsonConverter::convert ", toplevelBlock);
     auto package = toplevelBlock->getMain();
     if (package == nullptr) {
         ::error("No output to generate");
