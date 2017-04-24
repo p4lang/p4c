@@ -231,9 +231,8 @@ cstring InputSources::getSourceFragment2(const SourceInfo &position) const {
         return "";
 
     cstring result = this->getLine(position.getStart().getLineNumber());
-    unsigned int result_len = strlen(result);
     unsigned int start = position.getStart().getColumnNumber();
-    unsigned int end, len;
+    unsigned int end;
     cstring toadd = "";
 
     // If the position spans multiple lines, truncate to just the first line
@@ -247,13 +246,7 @@ cstring InputSources::getSourceFragment2(const SourceInfo &position) const {
     } else {
         end = position.getEnd().getColumnNumber();
     }
-    len = end - start;
-
-    char substr[result_len+1];
-    memcpy(substr, &result[start], len);
-    substr[len] = '\0';
-
-    return substr + toadd;
+    return result.substr(start, end - start) + toadd;
 }
 
 cstring InputSources::toDebugString() const {
