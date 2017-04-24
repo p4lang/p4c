@@ -16,9 +16,6 @@ limitations under the License.
 
 #include "midend.h"
 #include "lower.h"
-#if 0
-#include "inlining.h"
-#endif
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
