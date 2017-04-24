@@ -23,36 +23,97 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
-// Can also be run before type checking, so it only uses types if
-// they are available.
+
+/** Implements a pass that statically evaluates many constant
+ * expressions.
+ *
+ * Currently the following expressions are treated as constants:
+ *  - `IR::Constant`
+ *  - `IR::BoolLiteral`
+ *  - `IR::ListExpression` where each element is also a constant
+ *  - `IR::TypeNameExpression`
+ *
+ * The pass can be invoked either with or without the reference and
+ * type maps. When this information is not available, then several
+ * cases revert to the identify function.
+ *
+ * The pass also eliminates arbitrary-precision integer literals,
+ * replacing them with literals that have explicit widths.
+ *
+ * @pre: None
+ *
+ * @post: Ensures that
+ *    - some constant expressions are eliminated (TODO: specify)
+ *    - arbitrary-precision integers replaced with fixed-width integers (TODO: confirm)
+ */
 class DoConstantFolding : public Transform {
  protected:
-    const ReferenceMap* refMap;  // if null no 'const' values can be resolved
-    TypeMap* typeMap;  // if null we have no types; updated for new constants
+    /// Used to resolve IR nodes to declarations.
+    /// If `null`, then `const` values cannot be resolved.
+    const ReferenceMap* refMap;
+
+    /// Used to resolve nodes to their types.
+    /// If `null`, then type information is not available.
+    TypeMap* typeMap;
+
+    /// Set to `true` iff type information is available.
     bool typesKnown;
-    bool warnings;  // if true emit warnings
-    // maps expressions and declarations to their constant values
+
+    /// If `true` then emit warnings
+    bool warnings;
+
+    /// Maps IR nodes to constants
     std::map<const IR::Node*, const IR::Expression*> constants;
 
  protected:
-    // returns nullptr if the expression is not a constant
+    /** Check whether @p expr is a constant. @returns @p expr if a
+     *  constant and `nullptr` if not.  The result is guaranteed to have one
+     *  of the following types:
+     *  - `IR::Constant`
+     *  - `IR::BoolLiteral`
+     *  - `IR::ListExpression`, where each element is also a constant
+     *  - `IR::TypeNameExpression`
+     * 
+     * @todo should we change the return type to a variant?
+     */
     const IR::Expression* getConstant(const IR::Expression* expr) const;
+
+    /// Add a mapping from @p node to @p result in `constants`. Note that
+    /// this method must be called by a visitor as it invokes
+    /// @ref Visitor#getOriginal.
     void setConstant(const IR::Node* expr, const IR::Expression* result);
 
+    /// Cast constant @p node to @p type at @p base.
     const IR::Constant* cast(
         const IR::Constant* node, unsigned base, const IR::Type_Bits* type) const;
+
+    /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node* binary(const IR::Operation_Binary* op,
                            std::function<mpz_class(mpz_class, mpz_class)> func);
-    // for == and != only
-    const IR::Node* compare(const IR::Operation_Binary* op);
-    const IR::Node* shift(const IR::Operation_Binary* op);
 
+    /// Statically evaluate comparison operation @p e.
+    /// Note that this only handles the case where @p e represents `==` or `!=`.
+    const IR::Node* compare(const IR::Operation_Binary* e);
+
+    /// Statically evaluate shift operation @p e.
+    const IR::Node* shift(const IR::Operation_Binary* e);
+
+    /// Result type for @ref setContains.
     enum class Result {
         Yes,
         No,
         DontKnow
     };
 
+    /** Statically evaluate case in select expression. 
+     * 
+     * @returns 
+     *    - Result::Yes
+     *    - Result::No
+     *    - Result::DontKnow
+     * 
+     *  depending on whether @p constant is contained in @p keyset.
+     */
     Result setContains(const IR::Expression* keySet, const IR::Expression* constant) const;
 
  public:
@@ -92,6 +153,9 @@ class DoConstantFolding : public Transform {
     const IR::Node* postorder(IR::SelectExpression* e) override;
 };
 
+/** This pass optionally runs @ref TypeChecking if @p typeMap is not
+ *  `nullptr`, and then runs @ref DoConstantFolding.
+ */
 class ConstantFolding : public PassManager {
  public:
     ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true) {
