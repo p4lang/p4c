@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-///@section Helper methods
+/// @section Helper methods
 
 bool StrengthReduction::isOne(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
@@ -110,7 +110,7 @@ const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
     // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
     return expr;
 }
-  
+
 const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
     if (isZero(expr->right))
         return expr->left;
