@@ -77,8 +77,10 @@ class PrettyPrint : public Inspector {
 }  // namespace
 
 /**
-This pass does nothing, it's just here to mark the end of the front-end
-*/
+ * This pass is a no-op. It's purpose is to mark the end of the
+ * front-end, which is useful for debugging.
+ */
+// TODO: explain why this is a PassManager?
 class FrontEndLast : public PassManager {
  public:
     FrontEndLast() { setName("FrontEndLast"); }
