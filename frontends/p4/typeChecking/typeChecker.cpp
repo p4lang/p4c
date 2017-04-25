@@ -89,7 +89,7 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     }
 
     TypeVariableSubstitutionVisitor sv(&tvs, true);
-    auto clone = type->toType()->apply(sv);
+    auto clone = type->to<IR::Type>()->apply(sv);
     CHECK_NULL(clone);
     // Learn this new type
     TypeInference tc(refMap, typeMap, true);
