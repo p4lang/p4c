@@ -29,7 +29,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action set_nhop(bit<8> port) {
+    action set_nhop(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     apply {

@@ -2,5 +2,5 @@
         set_nhop(); // parameter not bound
         ^^^^^^^^^^
 ../testdata/p4_16_errors/not_bound.p4(32)
-    action set_nhop(bit<8> port) {
+    action set_nhop(bit<9> port) {
                            ^^^^

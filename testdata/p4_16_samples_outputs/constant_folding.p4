@@ -28,7 +28,7 @@ control c(out bit<32> x) {
         x = 32w5 >> 1;
         x = 5 << 0;
         x = 5 >> 0;
-        x = 4w1 ++ 4w1;
+        x = (bit<32>)(4w1 ++ 4w1);
         bool w;
         w = 5 == 3;
         w = 32w5 == 3;

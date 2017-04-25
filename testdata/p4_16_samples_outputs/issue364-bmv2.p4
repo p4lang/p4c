@@ -42,7 +42,7 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     direct_counter(CounterType.packets) c;
-    action my_action(bit<32> a) {
+    action my_action(bit<9> a) {
         sm.egress_spec = a;
     }
     table t {

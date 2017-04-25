@@ -46,16 +46,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
-        standard_metadata.egress_spec = egress_spec;
-        hdr.ethernet.src_addr = src_addr;
+        standard_metadata.egress_spec = (bit<9>)egress_spec;
+        hdr.ethernet.src_addr = (bit<48>)src_addr;
     }
     @name(".noop") action noop() {
     }
     @name(".setf2") action setf2(bit<32> val) {
-        hdr.data.f2 = val;
+        hdr.data.f2 = (bit<32>)val;
     }
     @name(".setf1") action setf1(bit<32> val) {
-        hdr.data.f1 = val;
+        hdr.data.f1 = (bit<32>)val;
     }
     @name("routing") table routing {
         actions = {

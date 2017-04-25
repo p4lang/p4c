@@ -65,22 +65,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".ing_drop") action ing_drop() {
-        meta.ing_metadata.drop = 1w1;
+        meta.ing_metadata.drop = (bit<1>)1w1;
     }
     @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta.ing_metadata.egress_port = egress_port;
+        meta.ing_metadata.egress_port = (bit<8>)egress_port;
     }
     @name(".set_f1") action set_f1(bit<8> f1) {
-        meta.ing_metadata.f1 = f1;
+        meta.ing_metadata.f1 = (bit<8>)f1;
     }
     @name(".set_f2") action set_f2(bit<16> f2) {
-        meta.ing_metadata.f2 = f2;
+        meta.ing_metadata.f2 = (bit<16>)f2;
     }
     @name(".set_f3") action set_f3(bit<32> f3) {
-        meta.ing_metadata.f3 = f3;
+        meta.ing_metadata.f3 = (bit<32>)f3;
     }
     @name(".set_f4") action set_f4(bit<64> f4) {
-        meta.ing_metadata.f4 = f4;
+        meta.ing_metadata.f4 = (bit<64>)f4;
     }
     @name("i_t1") table i_t1 {
         actions = {
