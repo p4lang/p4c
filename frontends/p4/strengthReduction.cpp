@@ -20,8 +20,6 @@ namespace P4 {
 
 ///@section Helper methods
 
-
-/** Helper that returns `true` if `expr` is the constant `1`. */
 bool StrengthReduction::isOne(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -29,7 +27,6 @@ bool StrengthReduction::isOne(const IR::Expression* expr) const {
     return cst->value == 1;
 }
 
-/** Helper that returns `true` if `expr` is the constant `0`. */  
 bool StrengthReduction::isZero(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -37,7 +34,6 @@ bool StrengthReduction::isZero(const IR::Expression* expr) const {
     return cst->value == 0;
 }
 
-/** Helper that returns `true` if `expr` is the constant `true`. */
 bool StrengthReduction::isTrue(const IR::Expression* expr) const {
     auto cst = expr->to<IR::BoolLiteral>();
     if (cst == nullptr)
@@ -45,16 +41,12 @@ bool StrengthReduction::isTrue(const IR::Expression* expr) const {
     return cst->value;
 }
 
-/** Helper that returns `true` if `expr` is the constant `false`. */
 bool StrengthReduction::isFalse(const IR::Expression* expr) const {
     auto cst = expr->to<IR::BoolLiteral>();
     if (cst == nullptr)
         return false;
     return !cst->value;
 }
-/** Helper that returns the logarithm (base 2) of `expr` if it is
-  * positive and a power of `2`, or `-1` otherwise. 
-  */
 int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -66,13 +58,12 @@ int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     if (bitcnt != 1)
         return -1;
     auto log = mpz_scan1(value.get_mpz_t(), 0);
-    // Hopefully we don't have to worry if the number has more than 2 billion bits
+    // Assumes value does not have more than 2 billion bits
     return log;
 }
 
 /// @section Visitor Methods
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     if (isZero(expr->left))
         return expr->left;
@@ -81,7 +72,6 @@ const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
     if (isZero(expr->left))
         return expr->right;
@@ -90,7 +80,6 @@ const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
     if (isZero(expr->left))
         return expr->right;
@@ -99,7 +88,6 @@ const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
     if (isFalse(expr->left))
         return expr->left;
@@ -112,7 +100,6 @@ const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
     if (isFalse(expr->left))
         return expr->right;
@@ -124,13 +111,12 @@ const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
     return expr;
 }
   
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
     if (isZero(expr->right))
         return expr->left;
     if (isZero(expr->left))
         return new IR::Neg(expr->srcInfo, expr->right);
-    // a - constant => a + (-constant)
+    // Replace `a - constant` with `a + (-constant)`
     if (expr->right->is<IR::Constant>()) {
         auto cst = expr->right->to<IR::Constant>();
         auto neg = new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true);
@@ -140,7 +126,6 @@ const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Add* expr) {
     if (isZero(expr->right))
         return expr->left;
@@ -149,21 +134,18 @@ const IR::Node* StrengthReduction::postorder(IR::Add* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Shl* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Shr* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
     if (isZero(expr->left))
         return expr->left;
@@ -188,8 +170,8 @@ const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
+    // TODO: can this happen? Constant folding also checks for the same condition.
     if (isZero(expr->right)) {
         ::error("%1%: Division by zero", expr);
         return expr;
@@ -207,7 +189,6 @@ const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
     return expr;
 }
 
-/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Mod* expr) {
     if (isZero(expr->right)) {
         ::error("%1%: Modulo by zero", expr);

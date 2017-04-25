@@ -41,17 +41,22 @@ namespace P4 {
   * @post: 
   *   - all arithmetic and boolean expressions are simplified
   *   - check for div / mod by `0`
-  *       
-  * 
   */ 
 // TODO:
 //   - overlap with constant folding?
 //   - store constant values in IR?
 class StrengthReduction final : public Transform {
+    /// Helper that returns `true` if `expr` is the constant `1`.
     bool isOne(const IR::Expression* expr) const;
+    /// Helper that returns `true` if `expr` is the constant `0.
     bool isZero(const IR::Expression* expr) const;
-    bool isFalse(const IR::Expression* expr) const;
+    /// Helper that returns `true` if `expr` is the constant `true`.
     bool isTrue(const IR::Expression* expr) const;
+    /// Helper that returns `true` if `expr` is the constant `false`.
+    bool isFalse(const IR::Expression* expr) const;
+    /** Helper that returns the logarithm (base 2) of `expr` if it is
+     * positive and a power of `2`, or `-1` otherwise. 
+     */    
     int isPowerOf2(const IR::Expression* expr) const;
 
  public:
