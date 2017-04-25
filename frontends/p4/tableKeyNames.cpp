@@ -18,6 +18,12 @@ limitations under the License.
 
 namespace P4 {
 
+/** Generate control plane names for simple expressions that appear in
+ * table keys without `@name` annotations.
+ *
+ * Reject the program if it contains complex expressions without `@name`
+ * annotations.
+ */
 class KeyNameGenerator : public Inspector {
     std::map<const IR::Expression*, cstring> name;
     const TypeMap* typeMap;
@@ -32,10 +38,16 @@ class KeyNameGenerator : public Inspector {
 
     void postorder(const IR::Expression* expression) override { error(expression); }
 
+    /** Compute a name annotation for @expression.  Eg. `@name("foo.bar")` for
+     * `foo.bar`.
+     */
     void postorder(const IR::PathExpression* expression) override {
         name.emplace(expression, expression->path->toString());
     }
 
+    /** Compute a name annotation for @expression.  Eg. `@name("foo.bar")` for
+     * `foo.bar`.
+     */
     void postorder(const IR::Member* expression) override {
         auto type = typeMap->getType(expression->expr, true);
         cstring fname = expression->member.name;
@@ -49,6 +61,9 @@ class KeyNameGenerator : public Inspector {
             name.emplace(expression, n + "." + fname);
     }
 
+    /** Compute a name annotation for @expression.  Eg. `@name("arr[5]")` for
+     * `arr[5]`.
+     */
     void postorder(const IR::ArrayIndex* expression) override {
         cstring l = getName(expression->left);
         cstring r = getName(expression->right);
@@ -57,6 +72,9 @@ class KeyNameGenerator : public Inspector {
         name.emplace(expression, l + "[" + r + "]");
     }
 
+    /** Compute a name annotation for @expression.  Eg. `@name("bits")` for
+     * `bits & 0x3` or `0x3 & bits`.
+     */
     void postorder(const IR::BAnd *expression) override {
         if (expression->right->is<IR::Constant>()) {
             if (cstring l = getName(expression->left))
@@ -68,10 +86,17 @@ class KeyNameGenerator : public Inspector {
             error(expression); }
     }
 
+    /** Compute a name annotation for @expression.  Eg. `@name("16w4")` for
+     * `16w4`.
+     */
     void postorder(const IR::Constant* expression) override {
         name.emplace(expression, expression->toString());
     }
 
+
+    /** Compute a name annotation for @expression.  Eg. `@name("foo[0:3]")` for
+     * `foo[0:3]`.
+     */
     void postorder(const IR::Slice* expression) override {
         cstring e0 = getName(expression->e0);
         cstring e1 = getName(expression->e1);
@@ -81,6 +106,12 @@ class KeyNameGenerator : public Inspector {
         name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
     }
 
+    /** Compute a name annotation if @expression is a method call for
+     * `isValid()`.
+     *
+     * @warning All other method calls in keys will cause the compiler to
+     * reject the program.
+     */
     void postorder(const IR::MethodCallExpression* expression) override {
         cstring m = getName(expression->method);
         if (!m)

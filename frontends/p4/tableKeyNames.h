@@ -23,13 +23,6 @@ limitations under the License.
 
 namespace P4 {
 
-/**
-Adds a "@name" annotation to each table key that does not have a name.
-The string used for the name is derived from the expression itself -
-if the expression is "simple" enough.  If the expression is not
-simple the compiler will give an error.  Simple expressions are
-PathExpression, ArrayIndex, Member, .isValid(), Constant, Slice
-*/
 class DoTableKeyNames : public Transform {
     const TypeMap* typeMap;
  public:
@@ -38,6 +31,24 @@ class DoTableKeyNames : public Transform {
     const IR::Node* postorder(IR::KeyElement* keyElement) override;
 };
 
+/** Adds a "@name" annotation to each table key that does not have a name.
+ * The string used for the name is derived from the expression itself - if
+ * the expression is "simple" enough.  If the expression is not simple the
+ * compiler will give an error.  Simple expressions are:
+ * - .isValid(),
+ * - ArrayIndex,
+ * - BAnd (where at least one operand is constant),
+ * - Constant,
+ * - Member,
+ * - PathExpression,
+ * - Slice.
+ *
+ * @pre None.
+ * @post All keys have `@name` annotations.
+ *
+ * @error Reject the program if it contains complex expressions without
+ * `@name` annotations.
+ */
 class TableKeyNames : public PassManager {
  public:
     TableKeyNames(ReferenceMap* refMap, TypeMap* typeMap) {
