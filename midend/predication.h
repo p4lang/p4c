@@ -24,7 +24,7 @@ namespace P4 {
 
 /**
 
-This pass operates on action bodyes.  It converts 'if' statements to
+This pass operates on action bodies.  It converts 'if' statements to
 '?:' expressions, if possible.  Otherwise this pass will signal an
 error.  This pass should be used only on architectures that do not
 support conditionals in actions.
