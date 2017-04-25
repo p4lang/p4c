@@ -70,7 +70,9 @@ class ComplexValues final {
 
     ComplexValues(ReferenceMap* refMap, TypeMap* typeMap)  : refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    /// Helper function that test if a struct is nested
     bool isNestedStruct(const IR::Type* type);
+    /// Flatten a nested struct to only contain field declaration or non-nested struct
     void explode(cstring prefix, const IR::Type_Struct* type,
                  FieldsMap* map, IR::Vector<IR::Declaration>* result);
     Component* getTranslation(const IR::IDeclaration* decl) {
@@ -87,33 +89,45 @@ class ComplexValues final {
 };
 
 /**
-Removes nested structs.  This converts only local variables, but
-does not change the arguments of controls, parsers, packages, and methods.
-Should be run after CopyStructures, EliminateTuples, and
-MoveInitializers.
-
-struct T { bit b; }
-struct S { T t1; T t2; }
-S v;
-f(v.t1, v);
-is replaced by
-T v_t1;
-T v_t2;
-f(v_t1, { v_t1, v_t2 });
-
-This does not work if the second argument of f is out or inout,
-since the list expression is not a l-value.  This pass cannot be
-used in this case.  This can arise only if there are extern functions
-that can return nested structs.
-*/
+ * Implements a pass that removes nested structs.
+ *
+ * Specifically, it converts only local variables, but does not change
+ * the arguments of controls, parsers, packages, and methods.
+ *
+ * Example:
+ *  struct T { bit b; }
+ *  struct S { T t1; T t2; }
+ *  S v;
+ *  f(v.t1, v);
+ *
+ *  is replaced by
+ *
+ *  T v_t1;
+ *  T v_t2;
+ *  f(v_t1, { v_t1, v_t2 });
+ *
+ *  This does not work if the second argument of f is out or inout,
+ *  since the list expression is not a l-value.  This pass cannot be
+ *  used in this case.  This can arise only if there are extern functions
+ *  that can return nested structs.
+ *
+ *  @pre: This pass should be run after CopyStructures, EliminateTuples, and
+ *        MoveInitializers.
+ *
+ *  @post: Ensure that
+ *    - all nested structs are replaced with flattened structs.
+ */
 class RemoveNestedStructs final : public Transform {
     ComplexValues* values;
  public:
     explicit RemoveNestedStructs(ComplexValues* values) : values(values)
     { CHECK_NULL(values); setName("RemoveNestedStructs"); }
 
+    /// rewrite nested structs to non-nested structs
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
+    /// replace reference to nested structs with the corresponding non-nested version
     const IR::Node* postorder(IR::Member* expression) override;
+    /// replace reference to nested structs with the corresponding non-nested version
     const IR::Node* postorder(IR::PathExpression* expression) override;
 };
 
