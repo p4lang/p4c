@@ -38,25 +38,25 @@ namespace P4 {
   * 
   * @pre: None
   * 
-  * @post: 
-  *   - all arithmetic and boolean expressions are simplified
-  *   - check for div / mod by `0`
+  * @post: Ensure that
+  *   - most arithmetic and boolean expressions are simplified
+  *   - division and modulus by `0`
+  * 
+  * @todo: Several open issues:
+  *    - What is the overlap with constant folding?
+  *    - Should we store constant values in the IR instead of computing them explicitly?
   */ 
-// TODO:
-//   - overlap with constant folding?
-//   - store constant values in IR?
 class StrengthReduction final : public Transform {
-    /// Helper that returns `true` if `expr` is the constant `1`.
+    /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression* expr) const;
-    /// Helper that returns `true` if `expr` is the constant `0.
+    /// @returns `true` if @p expr is the constant `0`.
     bool isZero(const IR::Expression* expr) const;
-    /// Helper that returns `true` if `expr` is the constant `true`.
+    /// @returns `true` if @p expr is the constant `true`.
     bool isTrue(const IR::Expression* expr) const;
-    /// Helper that returns `true` if `expr` is the constant `false`.
+    /// @returns `true` if @p expr is the constant `false`.
     bool isFalse(const IR::Expression* expr) const;
-    /** Helper that returns the logarithm (base 2) of `expr` if it is
-     * positive and a power of `2`, or `-1` otherwise. 
-     */    
+    /// returns the logarithm (base 2) of @p expr if it is positive
+    /// and a power of `2` and `-1` otherwise.
     int isPowerOf2(const IR::Expression* expr) const;
 
  public:
