@@ -95,8 +95,7 @@ const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
         return expr->right;
     if (isTrue(expr->right))
         return expr->left;
-    // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
-    // TODO: why? if isFalse(expr->right), we can safely replace with expr->left...
+    // Note that remaining case is not simplified, due to possible side effects in expr->left
     return expr;
 }
 
