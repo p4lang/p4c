@@ -20,11 +20,16 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-// Converts if statements to ?: in actions, if possible
-// For this to work all statements must be assignments or other ifs.
 namespace P4 {
 
-/*
+/**
+
+This pass operates on action bodyes.  It converts 'if' statements to
+'?:' expressions, if possible.  Otherwise this pass will signal an
+error.  This pass should be used only on architectures that do not
+support conditionals in actions.
+
+For this to work all statements must be assignments or other ifs.
 
 if (e)
    a = f(b);
@@ -65,7 +70,8 @@ class Predication final : public Transform {
         return new IR::PathExpression(IR::ID(predicateName.back())); }
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
-            ::error("%1%: Predication cannot be applied", statement);
+            ::error("%1%: Conditional execution in actions is not supported on this target",
+                    statement);
         return statement;
     }
 
