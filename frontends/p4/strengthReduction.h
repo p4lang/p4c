@@ -26,13 +26,32 @@ limitations under the License.
 
 namespace P4 {
 
+/** Implements a pass that replaces expensive arithmetic and boolean
+  * operations with cheaper ones -- i.e., strength reduction
+  * 
+  * Specifically, it provides:
+  * 
+  * 1. A collection of helper methods that determine whether a given
+  * expression is `0`, `1`, `true`, or `false`, or a power of `2`
+  * 
+  * 2. A visitor that transforms arithmetic and boolean exprssions
+  * 
+  * @pre: None
+  * 
+  * @post: 
+  *   - all arithmetic and boolean expressions are simplified
+  *   - check for div / mod by `0`
+  *       
+  * 
+  */ 
+// TODO:
+//   - overlap with constant folding?
+//   - store constant values in IR?
 class StrengthReduction final : public Transform {
     bool isOne(const IR::Expression* expr) const;
     bool isZero(const IR::Expression* expr) const;
     bool isFalse(const IR::Expression* expr) const;
     bool isTrue(const IR::Expression* expr) const;
-    // if expr is a constant value that is a power of 2 return the log2 of it,
-    // else return -1
     int isPowerOf2(const IR::Expression* expr) const;
 
  public:

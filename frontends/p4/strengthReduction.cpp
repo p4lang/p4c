@@ -18,6 +18,10 @@ limitations under the License.
 
 namespace P4 {
 
+///@section Helper methods
+
+
+/** Helper that returns `true` if `expr` is the constant `1`. */
 bool StrengthReduction::isOne(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -25,6 +29,7 @@ bool StrengthReduction::isOne(const IR::Expression* expr) const {
     return cst->value == 1;
 }
 
+/** Helper that returns `true` if `expr` is the constant `0`. */  
 bool StrengthReduction::isZero(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -32,6 +37,7 @@ bool StrengthReduction::isZero(const IR::Expression* expr) const {
     return cst->value == 0;
 }
 
+/** Helper that returns `true` if `expr` is the constant `true`. */
 bool StrengthReduction::isTrue(const IR::Expression* expr) const {
     auto cst = expr->to<IR::BoolLiteral>();
     if (cst == nullptr)
@@ -39,13 +45,16 @@ bool StrengthReduction::isTrue(const IR::Expression* expr) const {
     return cst->value;
 }
 
+/** Helper that returns `true` if `expr` is the constant `false`. */
 bool StrengthReduction::isFalse(const IR::Expression* expr) const {
     auto cst = expr->to<IR::BoolLiteral>();
     if (cst == nullptr)
         return false;
     return !cst->value;
 }
-
+/** Helper that returns the logarithm (base 2) of `expr` if it is
+  * positive and a power of `2`, or `-1` otherwise. 
+  */
 int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -61,8 +70,9 @@ int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     return log;
 }
 
-///////////////// visitor methods ////////////////////
+/// @section Visitor Methods
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     if (isZero(expr->left))
         return expr->left;
@@ -71,6 +81,7 @@ const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
     if (isZero(expr->left))
         return expr->right;
@@ -79,6 +90,7 @@ const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
     if (isZero(expr->left))
         return expr->right;
@@ -87,6 +99,7 @@ const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
     if (isFalse(expr->left))
         return expr->left;
@@ -94,10 +107,12 @@ const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
         return expr->right;
     if (isTrue(expr->right))
         return expr->left;
-    // Remaining one is not simplified, due to semantics of short-circuit evaluation
+    // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
+    // TODO: why? if isFalse(expr->right), we can safely replace with expr->left...
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
     if (isFalse(expr->left))
         return expr->right;
@@ -105,10 +120,11 @@ const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
         return expr->left;
     if (isFalse(expr->right))
         return expr->left;
-    // Remaining one is not simplified, due to semantics of short-circuit evaluation
+    // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
     return expr;
 }
-
+  
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
     if (isZero(expr->right))
         return expr->left;
@@ -124,6 +140,7 @@ const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Add* expr) {
     if (isZero(expr->right))
         return expr->left;
@@ -132,18 +149,21 @@ const IR::Node* StrengthReduction::postorder(IR::Add* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Shl* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Shr* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
     if (isZero(expr->left))
         return expr->left;
@@ -168,6 +188,7 @@ const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
     if (isZero(expr->right)) {
         ::error("%1%: Division by zero", expr);
@@ -186,6 +207,7 @@ const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
     return expr;
 }
 
+/** See class comment. */
 const IR::Node* StrengthReduction::postorder(IR::Mod* expr) {
     if (isZero(expr->right)) {
         ::error("%1%: Modulo by zero", expr);
