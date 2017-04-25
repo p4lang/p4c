@@ -231,6 +231,12 @@ struct MatchField {
                                         // to this field.
 };
 
+struct ActionRef {
+    const cstring name;  // The fully qualified external name of the action.
+    const IR::IAnnotated* annotations;  // If non-null, any annotations applied to this action
+                                        // reference in the table declaration.
+};
+
 /// The types of action profiles available in the V1 model.
 enum class ActionProfileType {
     INDIRECT,
@@ -974,7 +980,7 @@ public:
                   const boost::optional<Counterlike<IR::Counter>>& directCounter,
                   const boost::optional<Counterlike<IR::Meter>>& directMeter,
                   const boost::optional<DefaultAction>& defaultAction,
-                  const std::vector<cstring>& actions,
+                  const std::vector<ActionRef>& actions,
                   const std::vector<MatchField>& matchFields,
                   bool supportsTimeout) {
         if (isHidden(tableDeclaration)) return;
@@ -1020,7 +1026,12 @@ public:
         }
 
         for (const auto& action : actions) {
-            auto id = symbols.getId(P4RuntimeSymbolType::ACTION, action);
+            auto id = symbols.getId(P4RuntimeSymbolType::ACTION, action.name);
+            auto action_ref = table->add_action_refs();
+            action_ref->set_id(id);
+            addAnnotations(action_ref, action.annotations);
+            // XXX(antonin): This is temporary for backward-compatibility; can be removed when all
+            // consumers have moved from action_ids to action_refs.
             table->add_action_ids(id);
         }
 
@@ -1408,6 +1419,20 @@ static bool getSupportsTimeout(const IR::P4Table* table) {
     return expr->to<IR::BoolLiteral>()->value;
 }
 
+static std::vector<ActionRef> getActionRefs(const IR::P4Table* table, ReferenceMap* refMap,
+                                            TypeMap* typeMap) {
+    std::vector<ActionRef> actions;
+    for (auto action : table->getActionList()->actionList) {
+        auto decl = refMap->getDeclaration(action->getPath(), true);
+        BUG_CHECK(decl->is<IR::P4Action>(), "Not an action: '%1%'", decl);
+        auto name = controlPlaneName(decl->to<IR::P4Action>());
+        // get annotations on the reference in the action list, not on the action declaration
+        auto annotations = action->to<IR::IAnnotated>();
+        actions.push_back(ActionRef{name, annotations});
+    }
+    return actions;
+}
+
 static void serializeTable(P4RuntimeSerializer& serializer,
                            const IR::TableBlock* tableBlock,
                            ReferenceMap* refMap,
@@ -1418,13 +1443,7 @@ static void serializeTable(P4RuntimeSerializer& serializer,
     auto tableSize = getTableSize(table);
     auto defaultAction = getDefaultAction(table, refMap, typeMap);
     auto matchFields = getMatchFields(table, refMap, typeMap);
-
-    std::vector<cstring> actions;
-    for (auto action : table->getActionList()->actionList) {
-        auto decl = refMap->getDeclaration(action->getPath(), true);
-        BUG_CHECK(decl->is<IR::P4Action>(), "Not an action: '%1%'", decl);
-        actions.push_back(controlPlaneName(decl->to<IR::P4Action>()));
-    }
+    auto actions = getActionRefs(table, refMap, typeMap);
 
     auto impl = table->properties->getProperty(P4V1::V1Model::instance
                                                 .tableAttributes
