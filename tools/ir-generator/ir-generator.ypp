@@ -143,7 +143,7 @@ element
     | COMMENTBLOCK      { global.push_back(new CommentBlock(@1, $1)); }
     | COMMENTBLOCK irclass {
             /* find all the comments that have been pushed on the global stack */
-            while(global.size() > 0) {
+            while (global.size() > 0) {
                 auto c = dynamic_cast<CommentBlock *>(global.back());
                 if (c != nullptr) {
                     $2->comments.push_back(c);
