@@ -29,7 +29,7 @@ This pass is designed to be run after all declarations have received unique
 internal names.  This is important because the locals map uses only the
 declaration name, and not the full path.
 
-@preconditions
+@pre
 Requires expression types be stored inline in the expression
 (obtained by running Typechecking(updateProgram = true)).
 
