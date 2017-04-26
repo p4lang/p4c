@@ -2,11 +2,11 @@ header H {
     bit<1> z;
 }
 
-extern bit<1> f(inout bit<1> x, in bit<1> b);
+extern bit<32> f(inout bit<1> x, in bit<1> b);
 control c(out H[2] h);
 package top(c _c);
 control my(out H[2] s) {
-    bit<1> tmp_1;
+    bit<32> tmp_1;
     @hidden action act() {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;

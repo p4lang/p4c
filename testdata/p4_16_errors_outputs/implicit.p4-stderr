@@ -1,0 +1,3 @@
+../testdata/p4_16_errors/implicit.p4(19): error: b: Cannot unify int<32> to bit<32>
+    bit<32> b = 32s1;
+    ^^^^^^^^^^^^^^^^^

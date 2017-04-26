@@ -35,9 +35,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
-        meta.counter_metadata.counter_index = index;
-        standard_metadata.egress_spec = port;
-        meta.counter_metadata.counter_run = 4w1;
+        meta.counter_metadata.counter_index = (bit<16>)index;
+        standard_metadata.egress_spec = (bit<9>)port;
+        meta.counter_metadata.counter_run = (bit<4>)4w1;
     }
     @name(".count_entries") action count_entries() {
         count1.count((bit<32>)meta.counter_metadata.counter_index);

@@ -643,16 +643,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (initType == destType)
         return sourceExpression;
 
-    if (canCastBetween(destType, initType)) {
-        LOG2("Inserting cast in " << sourceExpression);
-        bool isConst = isCompileTimeConstant(sourceExpression);
-        sourceExpression = new IR::Cast(sourceExpression->srcInfo, destType, sourceExpression);
-        setType(sourceExpression, destType);
-        if (isConst)
-            setCompileTimeConstant(sourceExpression);
-        return sourceExpression;
-    }
-
     auto tvs = unify(errorPosition, destType, initType, true);
     if (tvs == nullptr)
         // error already signalled

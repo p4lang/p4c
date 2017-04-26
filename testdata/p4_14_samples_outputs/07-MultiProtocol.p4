@@ -151,30 +151,30 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".l2_packet") action l2_packet() {
-        meta.ing_metadata.packet_type = 4w0;
+        meta.ing_metadata.packet_type = (bit<4>)4w0;
     }
     @name(".ipv4_packet") action ipv4_packet() {
-        meta.ing_metadata.packet_type = 4w1;
+        meta.ing_metadata.packet_type = (bit<4>)4w1;
     }
     @name(".ipv6_packet") action ipv6_packet() {
-        meta.ing_metadata.packet_type = 4w2;
+        meta.ing_metadata.packet_type = (bit<4>)4w2;
     }
     @name(".mpls_packet") action mpls_packet() {
-        meta.ing_metadata.packet_type = 4w3;
+        meta.ing_metadata.packet_type = (bit<4>)4w3;
     }
     @name(".mim_packet") action mim_packet() {
-        meta.ing_metadata.packet_type = 4w4;
+        meta.ing_metadata.packet_type = (bit<4>)4w4;
     }
     @name(".nop") action nop() {
     }
     @name(".drop") action drop() {
-        meta.ing_metadata.drop = 1w1;
+        meta.ing_metadata.drop = (bit<1>)1w1;
     }
     @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
-        meta.ing_metadata.egress_port = egress_port;
+        meta.ing_metadata.egress_port = (bit<9>)egress_port;
     }
     @name(".send_packet") action send_packet() {
-        standard_metadata.egress_spec = meta.ing_metadata.egress_port;
+        standard_metadata.egress_spec = (bit<9>)meta.ing_metadata.egress_port;
     }
     @name("ethertype_match") table ethertype_match {
         actions = {

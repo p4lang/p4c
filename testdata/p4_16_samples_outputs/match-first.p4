@@ -1,8 +1,7 @@
-#include <core.p4>
-
 error {
     InvalidOptions
 }
+#include <core.p4>
 
 header Ipv4_no_options_h {
     bit<4>  version;
@@ -23,7 +22,7 @@ header Ipv4_options_h {
     varbit<160> options;
 }
 
-struct Tcp {
+header Tcp {
     bit<16> port;
 }
 

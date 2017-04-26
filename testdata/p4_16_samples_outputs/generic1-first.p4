@@ -9,8 +9,8 @@ control c<T>()(T size) {
     Generic<T>(size) x;
     apply {
         bit<32> a = x.get<bit<32>>();
-        bit<32> b = (bit<32>)(x.get1<bit<5>, bit<10>>(10w0, 5w0));
-        f<bit<32>>(b);
+        bit<5> b = x.get1<bit<5>, bit<10>>(10w0, 5w0);
+        f<bit<5>>(b);
     }
 }
 

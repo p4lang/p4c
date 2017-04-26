@@ -50,10 +50,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop() {
     }
     @name(".set_port") action set_port(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = (bit<9>)port;
     }
     @name("._resubmit") action _resubmit() {
-        meta.mymeta.f1 = 8w1;
+        meta.mymeta.f1 = (bit<8>)8w1;
         resubmit({ standard_metadata, meta.mymeta });
     }
     @name("t_ingress_1") table t_ingress_1 {

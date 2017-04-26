@@ -50,7 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     direct_counter(CounterType.packets) c;
     direct_counter(CounterType.packets) c1;
 
-    action my_action(bit<32> a) { sm.egress_spec = a; }
+    action my_action(bit<9> a) { sm.egress_spec = a; }
     table t {
         actions = { my_action; }
         const default_action = my_action(0);
