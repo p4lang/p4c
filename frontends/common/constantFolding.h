@@ -28,19 +28,16 @@ namespace P4 {
  * expressions.
  *
  * The pass can be invoked either with or without the reference and
- * type maps. When this information is not available, then several
- * cases revert to the identify function.
- *
- * The pass also eliminates arbitrary-precision integer literals,
- * replacing them with literals that have explicit widths.
+ * type maps. When type information is not available, constant folding
+ * is not done for some IR nodes.
  *
  * @pre: None
  *
  * @post: Ensures that
- *    - some constant expressions are eliminated (TODO: specify)
+ *    - some constant expressions are eliminated (TODO: specify?)
+ * 
  *    - no operations that involve only int-typed values; at least one
-        operand will have a known width, which is used to cast the
-        other operand.
+ *      operand will have a known width. 
  */
 class DoConstantFolding : public Transform {
  protected:
