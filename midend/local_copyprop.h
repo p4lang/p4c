@@ -23,15 +23,21 @@ limitations under the License.
 
 namespace P4 {
 
-/* Local copy propagation and dead code elimination within a single action function.
-   This pass is designed to be run after all declarations have received unique
-   internal names.  This is important because the locals map uses only the
-   declaration name, and not the full path.
+/**
+Local copy propagation and dead code elimination within a single pass.
+This pass is designed to be run after all declarations have received unique
+internal names.  This is important because the locals map uses only the
+declaration name, and not the full path.
 
-   Requires expression types be stored inline in the expression
-   (obtained by running Typechecking(updateProgram = true)).
-   Requires that all declaration names be globally unique
-   (obtained by running UniqueNames)
+@preconditions
+Requires expression types be stored inline in the expression
+(obtained by running Typechecking(updateProgram = true)).
+
+Requires that all declaration names be globally unique
+(obtained by running UniqueNames).
+
+Requires that all variable declarations are at the top-level control scope
+(obtained using MoveDeclarations).
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
     bool                        working = false;
