@@ -170,7 +170,6 @@ const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
 }
 
 const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
-    // TODO: can this happen? Constant folding also checks for the same condition.
     if (isZero(expr->right)) {
         ::error("%1%: Division by zero", expr);
         return expr;

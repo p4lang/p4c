@@ -34,7 +34,7 @@ namespace P4 {
   * 1. A collection of helper methods that determine whether a given
   * expression is `0`, `1`, `true`, or `false`, or a power of `2`
   * 
-  * 2. A visitor that transforms arithmetic and boolean exprssions
+  * 2. A visitor that transforms arithmetic and boolean expressions
   * 
   * @pre: None
   * 
@@ -42,8 +42,8 @@ namespace P4 {
   *   - most arithmetic and boolean expressions are simplified
   *   - division and modulus by `0`
   * 
-  * @todo: Several open issues:
-  *    - What is the overlap with constant folding?
+  * @todo: Some open issues:
+  *    - Should this pass be merged with constant folding?
   *    - Should we store constant values in the IR instead of computing them explicitly?
   */ 
 class StrengthReduction final : public Transform {
@@ -55,7 +55,7 @@ class StrengthReduction final : public Transform {
     bool isTrue(const IR::Expression* expr) const;
     /// @returns `true` if @p expr is the constant `false`.
     bool isFalse(const IR::Expression* expr) const;
-    /// returns the logarithm (base 2) of @p expr if it is positive
+    /// @returns the logarithm (base 2) of @p expr if it is positive
     /// and a power of `2` and `-1` otherwise.
     int isPowerOf2(const IR::Expression* expr) const;
 
