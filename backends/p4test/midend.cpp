@@ -129,6 +129,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::RemoveSelectBooleans(&refMap, &typeMap),
         new P4::Predication(&refMap),
+        new P4::MoveDeclarations(),  // more may have been introduced
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
