@@ -18,6 +18,8 @@ limitations under the License.
 
 namespace P4 {
 
+/// @section Helper methods
+
 bool StrengthReduction::isOne(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -45,7 +47,6 @@ bool StrengthReduction::isFalse(const IR::Expression* expr) const {
         return false;
     return !cst->value;
 }
-
 int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -57,11 +58,11 @@ int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     if (bitcnt != 1)
         return -1;
     auto log = mpz_scan1(value.get_mpz_t(), 0);
-    // Hopefully we don't have to worry if the number has more than 2 billion bits
+    // Assumes value does not have more than 2 billion bits
     return log;
 }
 
-///////////////// visitor methods ////////////////////
+/// @section Visitor Methods
 
 const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     if (isZero(expr->left))
@@ -94,7 +95,7 @@ const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
         return expr->right;
     if (isTrue(expr->right))
         return expr->left;
-    // Remaining one is not simplified, due to semantics of short-circuit evaluation
+    // Note that remaining case is not simplified, due to possible side effects in expr->left
     return expr;
 }
 
@@ -105,7 +106,7 @@ const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
         return expr->left;
     if (isFalse(expr->right))
         return expr->left;
-    // Remaining one is not simplified, due to semantics of short-circuit evaluation
+    // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
     return expr;
 }
 
@@ -114,7 +115,7 @@ const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
         return expr->left;
     if (isZero(expr->left))
         return new IR::Neg(expr->srcInfo, expr->right);
-    // a - constant => a + (-constant)
+    // Replace `a - constant` with `a + (-constant)`
     if (expr->right->is<IR::Constant>()) {
         auto cst = expr->right->to<IR::Constant>();
         auto neg = new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true);
