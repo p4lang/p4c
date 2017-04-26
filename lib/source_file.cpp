@@ -226,7 +226,7 @@ cstring InputSources::getSourceFragment(const SourceInfo &position) const {
     return result + toadd + marker + cstring::newline;
 }
 
-cstring InputSources::getSourceFragment2(const SourceInfo &position) const {
+cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
     if (!position.isValid())
         return "";
 
@@ -238,7 +238,7 @@ cstring InputSources::getSourceFragment2(const SourceInfo &position) const {
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber()) {
         // go to the end of the first line
-        end = strlen(result);
+        end = result.size();
         if (result.find('\n') != nullptr) {
             --end;
         }
@@ -265,8 +265,8 @@ cstring SourceInfo::toSourceFragment() const {
     return InputSources::instance->getSourceFragment(*this);
 }
 
-cstring SourceInfo::toSourceFragment2() const {
-    return InputSources::instance->getSourceFragment2(*this);
+cstring SourceInfo::toBriefSourceFragment() const {
+    return InputSources::instance->getBriefSourceFragment(*this);
 }
 
 cstring SourceInfo::toPositionString() const {

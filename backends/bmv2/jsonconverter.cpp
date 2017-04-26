@@ -355,7 +355,7 @@ class ExpressionConverter : public Inspector {
                 v->append(0);
                 v->append(width);
                 map.emplace(expression, j);
-                // TBD jafinger - add line/col here?
+                // TODO(jafingerhut) - add line/col here?
                 return;
             }
         } else if (instance->is<P4::BuiltInMethod>()) {
@@ -370,7 +370,7 @@ class ExpressionConverter : public Inspector {
                 auto l = get(bim->appliedTo);
                 e->emplace("right", l);
                 map.emplace(expression, result);
-                // TBD jafinger - add line/col here?
+                // TODO(jafingerhut) - add line/col here?
                 return;
             }
         }
@@ -810,13 +810,13 @@ void addSrcInfoData(Util::JsonObject* result,
     unsigned lineNumber, columnNumber;
     cstring fName = node->srcInfo.toSourcePositionData(&lineNumber,
                                                        &columnNumber);
-    if (fName == NULL) {
+    if (fName == nullptr) {
         // Do not add anything to the JSON file for this, as this is
         // likely a statement synthesized by the compiler, and either
         // not easy, or it is impossible, to correlate it directly
         // with anything in the user's P4 source code.
     } else {
-        cstring sourceFrag = node->srcInfo.toSourceFragment2();
+        cstring sourceFrag = node->srcInfo.toBriefSourceFragment();
         result->emplace("filename", fName);
         result->emplace("line", lineNumber);
         result->emplace("column", columnNumber);
@@ -829,19 +829,19 @@ void addSrcInfoDataAssignment(Util::JsonObject* result,
                               const IR::Node* lhsNode,
                               const IR::Node* rhsNode) {
     unsigned lineNumber, columnNumber;
-    cstring fName = node->srcInfo.toSourcePositionData(NULL, NULL);
+    cstring fName = node->srcInfo.toSourcePositionData(nullptr, nullptr);
     cstring lhsStr = lhsNode->srcInfo.toSourcePositionData(&lineNumber,
                                                         &columnNumber);
-    cstring rhsStr = rhsNode->srcInfo.toSourcePositionData(NULL, NULL);
-    if (fName == NULL || lhsStr == NULL || rhsStr == NULL) {
+    cstring rhsStr = rhsNode->srcInfo.toSourcePositionData(nullptr, nullptr);
+    if (fName == nullptr || lhsStr == nullptr || rhsStr == nullptr) {
         // Do not add anything to the JSON file for this, as this is
         // likely a statement synthesized by the compiler, and either
         // not easy, or it is impossible, to correlate it directly
         // with anything in the user's P4 source code.
     } else {
-        cstring sourceFrag = node->srcInfo.toSourceFragment2();
-        cstring lhsFrag = lhsNode->srcInfo.toSourceFragment2();
-        cstring rhsFrag = rhsNode->srcInfo.toSourceFragment2();
+        cstring sourceFrag = node->srcInfo.toBriefSourceFragment();
+        cstring lhsFrag = lhsNode->srcInfo.toBriefSourceFragment();
+        cstring rhsFrag = rhsNode->srcInfo.toBriefSourceFragment();
         result->emplace("filename", fName);
         result->emplace("line", lineNumber);
         result->emplace("column", columnNumber);
@@ -885,7 +885,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                                  Util::JsonArray* result, Util::JsonArray* fieldLists,
                                  Util::JsonArray* calculations, Util::JsonArray* learn_lists) {
     for (auto s : *body) {
-        // TBD jafinger - add line/col at all individual cases below,
+        // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
         // for all of them?
         if (!s->is<IR::Statement>()) {
@@ -1058,6 +1058,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto session = conv->convert(mc->arguments->at(1));
                         auto primitive = mkPrimitive(prim, result);
                         auto parameters = mkParameters(primitive);
+                        // TODO(jafingerhut): addSrcInfoData(primitive, s);
                         parameters->append(session);
 
                         if (id >= 0) {
@@ -1092,7 +1093,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                     auto primitive = mkPrimitive("generate_digest", result);
                     auto parameters = mkParameters(primitive);
-                    // TBD jafinger: addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
                     auto dest = conv->convert(mc->arguments->at(0));
                     parameters->append(dest);
                     cstring listName = "digest";
@@ -1123,7 +1124,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                             "resubmit" : "recirculate";
                     auto primitive = mkPrimitive(prim, result);
                     auto parameters = mkParameters(primitive);
-                    // TBD jafinger: addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
                     cstring listName = prim;
                     // If we are supplied a type argument that is a named type use
                     // that for the list name.
@@ -1156,7 +1157,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     auto primitive =
                             mkPrimitive(v1model.random.modify_field_rng_uniform.name, result);
                     auto params = mkParameters(primitive);
-                    // TBD jafinger: addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
                     auto dest = conv->convert(mc->arguments->at(0));
                     auto lo = conv->convert(mc->arguments->at(1));
                     auto hi = conv->convert(mc->arguments->at(2));
@@ -1168,7 +1169,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 arguments for %1%", mc);
                     auto primitive = mkPrimitive(v1model.truncate.name, result);
                     auto params = mkParameters(primitive);
-                    // TBD jafinger: addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
                     auto len = conv->convert(mc->arguments->at(0));
                     params->append(len);
                     continue;
@@ -1212,7 +1213,7 @@ int JsonConverter::createFieldList(const IR::Expression* expr, cstring group, cs
     int id = nextId(group);
     fl->emplace("id", id);
     fl->emplace("name", listName);
-    // TBD jafinger - add line/col here?
+    // TODO(jafingerhut) - add line/col here?
     auto elements = mkArrayField(fl, "elements");
     addToFieldList(expr, elements);
     return id;
@@ -1311,7 +1312,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
     auto entries = mkArrayField(jsonTable, "entries");
     int entryPriority = 1;  // default priority is defined by index position
     for (auto e : entriesList->entries) {
-        // TBD jafinger - add line/col here?
+        // TODO(jafingerhut) - add line/col here?
         auto entry = new Util::JsonObject();
 
         auto keyset = e->getKeys();
@@ -1454,7 +1455,7 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
         action_profiles->append(action_profile);
         action_profile->emplace("name", apname);
         action_profile->emplace("id", nextId("action_profiles"));
-        // TBD jafinger - add line/col here?
+        // TODO(jafingerhut) - add line/col here?
         // TBD what about the else if cases below?
 
         auto add_size = [&action_profile, &arguments](size_t arg_index) {
@@ -1718,9 +1719,9 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                 cstring ctrname = ctrs->externalName("counter");
                 jctr->emplace("name", ctrname);
                 jctr->emplace("id", nextId("counter_arrays"));
-                // TBD jafinger - what kind of P4_16 code causes this
+                // TODO(jafingerhut) - what kind of P4_16 code causes this
                 // code to run, if any?
-                // TBD jafinger: addSrcInfoData(jctr, ctrs);
+                // TODO(jafingerhut): addSrcInfoData(jctr, ctrs);
                 bool direct = te->name == v1model.directCounter.name;
                 jctr->emplace("is_direct", direct);
                 jctr->emplace("binding", name);
@@ -2001,7 +2002,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                 // So we don't do anything.
                 continue;
 
-            // TBD jafinger - add line/col here? for a thing declared
+            // TODO(jafingerhut) - add line/col here? for a thing declared
             // within a control
 
             if (bl->is<IR::ExternBlock>()) {
@@ -2071,7 +2072,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                         LOG3("Created direct counter " << name);
                         jctr->emplace("name", name);
                         jctr->emplace("id", nextId("counter_arrays"));
-                        // TBD jafinger - add line/col here?
+                        // TODO(jafingerhut) - add line/col here?
                         jctr->emplace("is_direct", true);
                         jctr->emplace("binding", it->second->externalName());
                         counters->append(jctr);
@@ -2113,7 +2114,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto action_profile = new Util::JsonObject();
                     action_profile->emplace("name", name);
                     action_profile->emplace("id", nextId("action_profiles"));
-                    // TBD jafinger - add line/col here?
+                    // TODO(jafingerhut) - add line/col here?
 
                     auto add_size = [&action_profile, &eb](const cstring &pname) {
                       auto sz = eb->getParameterValue(pname);
@@ -2185,7 +2186,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
             cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
             header->emplace("name", name);
             header->emplace("id", id);
-            // TBD jafinger - add line/col here?
+            // TODO(jafingerhut) - add line/col here?
             header->emplace("header_type", header_type);
             header->emplace("metadata", false);
             headerInstances->append(header);
@@ -2208,7 +2209,7 @@ void JsonConverter::addLocals() {
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("headers"));
-            // TBD jafinger - add line/col here?
+            // TODO(jafingerhut) - add line/col here?
             json->emplace("header_type", name);
             json->emplace("metadata", true);
             json->emplace("pi_omit", true);  // Don't expose in PI.
@@ -2217,7 +2218,7 @@ void JsonConverter::addLocals() {
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("stack"));
-            // TBD jafinger - add line/col here?
+            // TODO(jafingerhut) - add line/col here?
             json->emplace("size", stack->getSize());
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
@@ -2234,7 +2235,7 @@ void JsonConverter::addLocals() {
                 cstring name = v->name + "[" + Util::toString(i) + "]";
                 header->emplace("name", name);
                 header->emplace("id", id);
-                // TBD jafinger - add line/col here?
+                // TODO(jafingerhut) - add line/col here?
                 header->emplace("header_type", header_type);
                 header->emplace("metadata", false);
                 header->emplace("pi_omit", true);  // Don't expose in PI.
@@ -2273,7 +2274,7 @@ void JsonConverter::addLocals() {
     auto json = new Util::JsonObject();
     json->emplace("name", scalarsName);
     json->emplace("id", nextId("headers"));
-    // TBD jafinger - add line/col here?
+    // TODO(jafingerhut) - add line/col here?
     json->emplace("header_type", scalarsName);
     json->emplace("metadata", true);
     json->emplace("pi_omit", true);  // Don't expose in PI.
@@ -2357,8 +2358,8 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     scalarsName = refMap->newName("scalars");
     scalarsStruct->emplace("name", scalarsName);
     scalarsStruct->emplace("id", nextId("header_types"));
-    // TBD jafinger - add line/col here?
-    // TBD jafinger: addSrcInfoData(scalarsStruct, refMap);
+    // TODO(jafingerhut) - add line/col here?
+    // TODO(jafingerhut): addSrcInfoData(scalarsStruct, refMap);
     scalars_width = 0;
     mkArrayField(scalarsStruct, "fields");
 
@@ -2403,7 +2404,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
         return;
     dprs->append(deparserJson);
 
-    // TBD jafinger - add line/col for meters, counters, registers,
+    // TODO(jafingerhut) - add line/col for meters, counters, registers,
     // calculations, learn_lists?  Where best to do that?  Perhaps
     // inside convertControl()
     auto meters = mkArrayField(&toplevel, "meter_arrays");
@@ -2442,7 +2443,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
         auto json = new Util::JsonObject();
         json->emplace("name", v1model.ingress.standardMetadataParam.name);
         json->emplace("id", nextId("headers"));
-        // TBD jafinger - add line/col here?
+        // TODO(jafingerhut) - add line/col here?
         json->emplace("header_type", stdMetaName);
         json->emplace("metadata", true);
         headerInstances->append(json);
@@ -2506,7 +2507,7 @@ void JsonConverter::generateUpdate(const IR::BlockStatement *block,
                                                              calculations, mc);
                         cksum->emplace("name", refMap->newName("cksum_"));
                         cksum->emplace("id", nextId("checksums"));
-                        // TBD jafinger - add line/col here?
+                        // TODO(jafingerhut) - add line/col here?
                         auto jleft = conv->convert(assign->left);
                         cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
                         cksum->emplace("type", "generic");
