@@ -51,9 +51,10 @@ struct EvaluationOrder {
     }
 
     const IR::Expression* addAssignment(
+        Util::SourceInfo srcInfo,
         cstring varName, const IR::Expression* expression) {
         auto left = new IR::PathExpression(IR::ID(varName, nullptr));
-        auto stat = new IR::AssignmentStatement(left, expression);
+        auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
         statements->push_back(stat);
         auto result = left->clone();
         return result;
@@ -106,7 +107,7 @@ class DismantleExpression : public Transform {
             if (!right->is<IR::Constant>()) {
                 auto indexType = typeMap->getType(expression->right, true);
                 auto tmp = result->createTemporary(indexType);
-                right = result->addAssignment(tmp, right);
+                right = result->addAssignment(expression->srcInfo, tmp, right);
                 typeMap->setType(right, indexType);
             }
 
@@ -192,7 +193,7 @@ class DismantleExpression : public Transform {
             clone->right = right;
             typeMap->setType(clone, type);
             auto tmp = result->createTemporary(type);
-            auto path = result->addAssignment(tmp, clone);
+            auto path = result->addAssignment(expression->srcInfo, tmp, clone);
             result->final = path;
         }
         typeMap->setType(result->final, type);
@@ -220,21 +221,21 @@ class DismantleExpression : public Transform {
             bool land = expression->is<IR::LAnd>();
             auto constant = new IR::BoolLiteral(!land);
             auto tmp = result->createTemporary(type);
-            auto ifTrue = new IR::AssignmentStatement(
+            auto ifTrue = new IR::AssignmentStatement(expression->srcInfo,
                 new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
             auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
 
             auto save = result->statements;
             result->statements = ifFalse;
             visit(expression->right);
-            auto path = result->addAssignment(tmp, result->final);
+            auto path = result->addAssignment(expression->srcInfo, tmp, result->final);
             result->statements = save;
             if (land) {
                 cond = new IR::LNot(cond);
                 typeMap->setType(cond, type);
             }
             auto block = new IR::BlockStatement(*ifFalse);
-            auto ifStatement = new IR::IfStatement(cond, ifTrue, block);
+            auto ifStatement = new IR::IfStatement(expression->srcInfo, cond, ifTrue, block);
             result->statements->push_back(ifStatement);
             result->final = path->clone();
         }
@@ -256,12 +257,12 @@ class DismantleExpression : public Transform {
         auto ifTrue = new IR::IndexedVector<IR::StatOrDecl>();
         result->statements = ifTrue;
         visit(expression->e1);
-        (void)result->addAssignment(tmp, result->final);
+        (void)result->addAssignment(expression->srcInfo, tmp, result->final);
 
         auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
         result->statements = ifFalse;
         visit(expression->e2);
-        auto path = result->addAssignment(tmp, result->final);
+        auto path = result->addAssignment(expression->srcInfo, tmp, result->final);
         result->statements = save;
 
         auto ifStatement = new IR::IfStatement(
