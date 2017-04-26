@@ -2089,7 +2089,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto ht = type->to<IR::Type_Header>();
         createJsonType(ht);
 
-        cstring header_type = stack->elementType->to<IR::Type_Header>()->name;
+        cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
         json->emplace("header_type", header_type);
         auto stackMembers = mkArrayField(json, "header_ids");
         for (unsigned i=0; i < stack->getSize(); i++) {

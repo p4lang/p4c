@@ -328,12 +328,12 @@ class DiscoverStructure : public Inspector {
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
-    void postorder(const IR::Metadata* md) override {
-        structure->metadata.emplace(md);
-        structure->types.emplace(md->type); }
-    void postorder(const IR::Header* hd) override {
-        structure->headers.emplace(hd);
-        structure->types.emplace(hd->type); }
+    void postorder(const IR::Metadata* md) override
+    { structure->metadata.emplace(md); }
+    void postorder(const IR::Header* hd) override
+    { structure->headers.emplace(hd); }
+    void postorder(const IR::Type_StructLike *t) override
+    { structure->types.emplace(t); }
     void postorder(const IR::V1Control* control) override
     { structure->controls.emplace(control); }
     void postorder(const IR::V1Parser* parser) override
@@ -342,9 +342,8 @@ class DiscoverStructure : public Inspector {
     { structure->tables.emplace(table); }
     void postorder(const IR::ActionFunction* action) override
     { structure->actions.emplace(action); }
-    void postorder(const IR::HeaderStack* stack) override {
-        structure->stacks.emplace(stack);
-        structure->types.emplace(stack->type); }
+    void postorder(const IR::HeaderStack* stack) override
+    { structure->stacks.emplace(stack); }
     void postorder(const IR::Counter* count) override
     { structure->counters.emplace(count); }
     void postorder(const IR::Register* reg) override
