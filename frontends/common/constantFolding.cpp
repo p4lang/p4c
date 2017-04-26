@@ -495,7 +495,6 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
         result = list->components.at(index)->clone();
     }
     typeMap->setType(result, origtype);
-    typeMap->setCompileTimeConstant(result);
     setConstant(e, result);
     return result;
 }
@@ -670,7 +669,6 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         auto result = expr->clone();
         auto origtype = typeMap->getType(getOriginal());
         typeMap->setType(result, origtype);
-        typeMap->setCompileTimeConstant(result);
         setConstant(e, result);
         return result;
     }

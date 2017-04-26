@@ -76,8 +76,6 @@ class DismantleExpression : public Transform {
         typeMap->setType(expression, type);
         if (typeMap->isLeftValue(orig))
             typeMap->setLeftValue(expression);
-        if (typeMap->isCompileTimeConstant(orig))
-            typeMap->setCompileTimeConstant(expression);
         result->final = expression;
         return result->final;
     }

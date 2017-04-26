@@ -39,8 +39,6 @@ class ConstantTypeSubstitution : public Transform {
     // their children have changed.
     const IR::Node* postorder(IR::Expression* expression) override {
         auto type = typeMap->getType(getOriginal(), true);
-        if (typeMap->isCompileTimeConstant(getOriginal<IR::Expression>()))
-            typeMap->setCompileTimeConstant(expression);
         typeMap->setType(expression, type);
         return expression;
     }
@@ -54,7 +52,6 @@ class ConstantTypeSubstitution : public Transform {
             LOG2("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
             typeMap->setType(cst, repl);
-            typeMap->setCompileTimeConstant(cst);
         }
         return cst;
     }
@@ -645,11 +642,10 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
 
     if (canCastBetween(destType, initType)) {
         LOG2("Inserting cast in " << sourceExpression);
-        bool isConst = isCompileTimeConstant(sourceExpression);
+        // std::cout << __FILE__ << ":" << __LINE__ << " src:" << sourceExpression->isCompileTimeConstant();
         sourceExpression = new IR::Cast(sourceExpression->srcInfo, destType, sourceExpression);
+        // std::cout << ", new:" << sourceExpression->isCompileTimeConstant() << std::endl;
         setType(sourceExpression, destType);
-        if (isConst)
-            setCompileTimeConstant(sourceExpression);
         return sourceExpression;
     }
 
@@ -676,7 +672,7 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
         return decl;
     }
 
-    if (!isCompileTimeConstant(decl->initializer))
+    if (!decl->initializer->isCompileTimeConstant())
         typeError("%1%: Cannot evaluate initializer to a compile-time constant", decl->initializer);
     auto orig = getOriginal<IR::Declaration_Constant>();
     auto newInit = assignment(decl, type, decl->initializer);
@@ -717,7 +713,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         auto arg = arguments->at(i++);
-        if (!isCompileTimeConstant(arg))
+        if (!arg->isCompileTimeConstant())
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         auto paramType = getType(pi);
@@ -874,7 +870,7 @@ TypeInference::containerInstantiation(
     // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
     auto args = new IR::Vector<IR::ArgumentInfo>();
     for (auto arg : *constructorArguments) {
-        if (!isCompileTimeConstant(arg))
+        if (!arg->isCompileTimeConstant())
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         if (argType == nullptr)
@@ -1216,8 +1212,6 @@ const IR::Node* TypeInference::postorder(IR::Constant* expression) {
         return expression;
     setType(getOriginal(), type);
     setType(expression, type);
-    setCompileTimeConstant(getOriginal<IR::Expression>());
-    setCompileTimeConstant(expression);
     return expression;
 }
 
@@ -1232,8 +1226,6 @@ const IR::Node* TypeInference::postorder(IR::BoolLiteral* expression) {
     if (done()) return expression;
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
-    setCompileTimeConstant(getOriginal<IR::Expression>());
-    setCompileTimeConstant(expression);
     return expression;
 }
 
@@ -1287,10 +1279,6 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     }
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1323,10 +1311,6 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     if (resultType != nullptr) {
         setType(getOriginal(), resultType);
         setType(expression, resultType);
-        if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-            setCompileTimeConstant(expression);
-            setCompileTimeConstant(getOriginal<IR::Expression>());
-        }
     }
     return expression;
 }
@@ -1421,7 +1405,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
 
     bool nonConstantKeys = false;
     for (auto ke : keyset->components)
-        if (!isCompileTimeConstant(ke)) {
+        if (!ke->isCompileTimeConstant()) {
             ::error("Key entry must be a compile time constant: %1%", ke);
             nonConstantKeys = true;
         }
@@ -1464,11 +1448,8 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
 
 const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     if (done()) return expression;
-    bool constant = true;
     auto components = new IR::Vector<IR::Type>();
     for (auto c : expression->components) {
-        if (!isCompileTimeConstant(c))
-            constant = false;
         auto type = getType(c);
         if (type == nullptr)
             return expression;
@@ -1481,10 +1462,6 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
         return expression;
     setType(getOriginal(), type);
     setType(expression, type);
-    if (constant) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1553,10 +1530,6 @@ const IR::Node* TypeInference::binaryBool(const IR::Operation_Binary* expression
     }
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1613,10 +1586,6 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
     }
     setType(getOriginal(), resultType);
     setType(expression, resultType);
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1653,10 +1622,6 @@ const IR::Node* TypeInference::unsBinaryArith(const IR::Operation_Binary* expres
         }
     }
 
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return binaryArith(expression);
 }
 
@@ -1698,10 +1663,6 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
 
     setType(expression, ltype);
     setType(getOriginal(), ltype);
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1737,7 +1698,6 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         CHECK_NULL(cst);
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
         setType(e->left, rtype);
-        setCompileTimeConstant(e->left);
         expression = e;
         resultType = rtype;
     } else if (bl != nullptr && br == nullptr) {
@@ -1746,16 +1706,11 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         CHECK_NULL(cst);
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
         setType(e->right, ltype);
-        setCompileTimeConstant(e->right);
         expression = e;
         resultType = ltype;
     }
     setType(expression, resultType);
     setType(getOriginal(), resultType);
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1792,7 +1747,6 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         auto e = expression->clone();
         auto cst = expression->left->to<IR::Constant>();
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
-        setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
         setType(e->left, sameType);
@@ -1800,7 +1754,6 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         auto e = expression->clone();
         auto cst = expression->right->to<IR::Constant>();
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
-        setCompileTimeConstant(e->right);
         expression = e;
         sameType = ltype;
         setType(e->right, sameType);
@@ -1809,8 +1762,6 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         // set after unification
         auto r = expression->right->clone();
         auto e = expression->clone();
-        if (isCompileTimeConstant(expression->right))
-            setCompileTimeConstant(r);
         e->right = r;
         expression = e;
         setType(r, sameType);
@@ -1819,11 +1770,6 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     auto resultType = new IR::Type_Set(sameType->srcInfo, sameType);
     typeMap->setType(expression, resultType);
     typeMap->setType(getOriginal(), resultType);
-
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
 
     return expression;
 }
@@ -1839,10 +1785,6 @@ const IR::Node* TypeInference::postorder(IR::LNot* expression) {
     } else {
         setType(expression, IR::Type_Boolean::get());
         setType(getOriginal(), IR::Type_Boolean::get());
-    }
-    if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
     }
     return expression;
 }
@@ -1863,10 +1805,6 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
         typeError("Cannot apply %1% to value %2% of type %3%",
                   expression->getStringOp(), expression->expr, type->toString());
     }
-    if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1884,10 +1822,6 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     } else {
         typeError("Cannot apply %1% to value %2% of type %3%",
                   expression->getStringOp(), expression->expr, type->toString());
-    }
-    if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
     }
     return expression;
 }
@@ -1916,10 +1850,6 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     }
     setType(expression, castType);
     setType(getOriginal(), castType);
-    if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -1940,13 +1870,11 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
             setLeftValue(expression);
             setLeftValue(getOriginal<IR::Expression>());
         } else if (paramDecl->direction == IR::Direction::None) {
-            setCompileTimeConstant(expression);
-            setCompileTimeConstant(getOriginal<IR::Expression>());
+            expression->setCompileTimeConstant();
         }
     } else if (decl->is<IR::Declaration_Constant>() ||
                decl->is<IR::Declaration_Instance>()) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
+        expression->setCompileTimeConstant();
     } else if (decl->is<IR::Method>()) {
         type = getType(decl);
         // Each method invocation uses fresh type variables
@@ -2024,10 +1952,6 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     }
-    if (isCompileTimeConstant(expression->e0)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-    }
     return expression;
 }
 
@@ -2062,12 +1986,6 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
         }
         setType(expression, secondType);
         setType(getOriginal(), secondType);
-        if (isCompileTimeConstant(expression->e0) &&
-            isCompileTimeConstant(expression->e1) &&
-            isCompileTimeConstant(expression->e2)) {
-            setCompileTimeConstant(expression);
-            setCompileTimeConstant(getOriginal<IR::Expression>());
-        }
     }
     return expression;
 }
@@ -2079,8 +1997,6 @@ const IR::Node* TypeInference::postorder(IR::TypeNameExpression* expression) {
         return expression;
     setType(getOriginal(), type);
     setType(expression, type);
-    setCompileTimeConstant(expression);
-    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 
@@ -2120,8 +2036,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
         setType(getOriginal(), methodType);
         setType(expression, methodType);
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
+        expression->setCompileTimeConstant();
         return expression;
     }
 
@@ -2169,10 +2084,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             setLeftValue(getOriginal<IR::Expression>());
         } else {
             LOG2("No left value " << expression->expr);
-        }
-        if (isCompileTimeConstant(expression->expr)) {
-            setCompileTimeConstant(expression);
-            setCompileTimeConstant(getOriginal<IR::Expression>());
         }
         return expression;
     }
@@ -2242,9 +2153,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     if (type->is<IR::Type_Type>()) {
         auto base = type->to<IR::Type_Type>()->type;
         if (base->is<IR::Type_Error>() || base->is<IR::Type_Enum>()) {
-            if (isCompileTimeConstant(expression->expr)) {
-                setCompileTimeConstant(expression);
-                setCompileTimeConstant(getOriginal<IR::Expression>()); }
             auto fbase = base->to<IR::ISimpleNamespace>();
             if (auto decl = fbase->getDeclByName(member)) {
                 if (auto ftype = getType(decl->getNode())) {
@@ -2324,7 +2232,7 @@ TypeInference::actionCall(bool inActionList,
                     // constant.  But if the action is instantiated in a
                     // table (as default_action or entries), then the
                     // arguments do have to be compile-time constants.
-                    if (!isCompileTimeConstant(arg))
+                    if (!arg->isCompileTimeConstant())
                         typeError("%1%: action argument must be a compile-time constant", arg);
                 }
             } else if (p->direction == IR::Direction::Out ||
@@ -2469,7 +2377,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             if (argType == nullptr)
                 return expression;
             auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
-                                                isCompileTimeConstant(arg), argType);
+                                                arg->isCompileTimeConstant(), argType);
             args->push_back(argInfo);
         }
         auto typeArgs = new IR::Vector<IR::Type>();
@@ -2575,8 +2483,6 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
                   expression, type->toString());
     }
 
-    setCompileTimeConstant(expression);
-    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 
@@ -2626,8 +2532,6 @@ const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
         setType(expression, IR::Type_Dontcare::get());
         setType(getOriginal(), IR::Type_Dontcare::get());
     }
-    setCompileTimeConstant(expression);
-    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 

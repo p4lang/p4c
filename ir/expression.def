@@ -193,10 +193,14 @@ class StringLiteral : Literal {
 
 class PathExpression : Expression {
     Path path;
+    bool isConstant = false;
     PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
     PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->toString(); }
-    bool isCompileTimeConstant() const override { return false; }
+    bool isCompileTimeConstant() const override { return isConstant; }
+    /// PathExpressions may be constants if they refer to directionless
+    /// parameters or constant declarations
+    void setCompileTimeConstant() { isConstant = true; }
 }
 
 // enum X { a }
@@ -209,7 +213,7 @@ class TypeNameExpression : Expression {
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ Node::dbprint(out); out << typeName; }
     toString { return typeName->toString(); }
-    bool isCompileTimeConstant() const override { return false; }
+    bool isCompileTimeConstant() const override { return true; }
 }
 
 class Slice : Operation_Ternary {
@@ -226,16 +230,24 @@ class Slice : Operation_Ternary {
     Slice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
-    bool isCompileTimeConstant() const override { return false; }
+    bool isCompileTimeConstant() const override { return e0->isCompileTimeConstant(); }
 }
 
 class Member : Operation_Unary {
     ID member;
+    bool isConstant = false;
     virtual int offset_bits() const;
     int lsb() const;
     int msb() const;
     stringOp = ".";
     toString{ return expr->toString() + "." + member; }
+    /// Like any other Unary expression, we look at the type of the expr member
+    /// except for extern methods
+    bool isCompileTimeConstant() const override {
+        return isConstant ? isConstant : expr->isCompileTimeConstant(); }
+    /// a method of an extern type is considered compile time constant
+    /// and since we don't know the type we allow it to be set.
+    void setCompileTimeConstant() { isConstant = true; }
 }
 
 class Concat : Operation_Binary {
@@ -282,11 +294,13 @@ class Mux : Operation_Ternary {
         v.flow_merge(clone); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
     bool isCompileTimeConstant() const override {
-        return e1->isCompileTimeConstant() && e2->isCompileTimeConstant(); }
+        return e0->isCompileTimeConstant() &&
+               e1->isCompileTimeConstant() &&
+               e2->isCompileTimeConstant(); }
 }
 
 class DefaultExpression : Expression {
-    bool isCompileTimeConstant() const override { return false; }
+    bool isCompileTimeConstant() const override { return true; }
 }
 
 // Two different This should not be equal.
@@ -343,7 +357,7 @@ class ConstructorCallExpression : Expression {
                         constructedType->is<Type_Specialized>(),
                         "%1%: unexpected type", constructedType);
         arguments->check_null(); }
-    bool isCompileTimeConstant() const override { return false; }
+    bool isCompileTimeConstant() const override { return true; }
 }
 
 /// Represents a list of expressions separated by commas

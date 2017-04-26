@@ -89,10 +89,6 @@ class TypeInference : public Transform {
     { typeMap->setLeftValue(expression); }
     bool isLeftValue(const IR::Expression* expression) const
     { return typeMap->isLeftValue(expression); }
-    void setCompileTimeConstant(const IR::Expression* expression)
-    { typeMap->setCompileTimeConstant(expression); }
-    bool isCompileTimeConstant(const IR::Expression* expression) const
-    { return typeMap->isCompileTimeConstant(expression); }
 
     template<typename... T>
     void typeError(const char* format, T... args) const {
@@ -283,8 +279,8 @@ class ApplyTypesToExpressions : public Transform {
                 typeMap->setType(e, type);
                 if (typeMap->isLeftValue(orig))
                     typeMap->setLeftValue(e);
-                if (typeMap->isCompileTimeConstant(orig))
-                    typeMap->setCompileTimeConstant(e);
+                if(orig->isCompileTimeConstant() != e->isCompileTimeConstant())
+                    ::error("******* Messed up compile time const for %1%", e);
             }
         }
         return e; }
