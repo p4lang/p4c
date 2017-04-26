@@ -1082,7 +1082,9 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     auto ei = P4::EnumInstance::resolve(mc->arguments->at(1), typeMap);
                     CHECK_NULL(ei);
                     cstring algo = convertHashAlgorithm(ei->name);
-                    cstring calcName = createCalculation(algo, mc->arguments->at(3), calculations, mc);
+                    cstring calcName = createCalculation(algo,
+                                                         mc->arguments->at(3),
+                                                         calculations, mc);
                     calc->emplace("type", "calculation");
                     calc->emplace("value", calcName);
                     parameters->append(calc);
