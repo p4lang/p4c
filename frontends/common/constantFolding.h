@@ -27,12 +27,6 @@ namespace P4 {
 /** Implements a pass that statically evaluates many constant
  * expressions.
  *
- * Currently the following expressions are treated as constants:
- *  - `IR::Constant`
- *  - `IR::BoolLiteral`
- *  - `IR::ListExpression` where each element is also a constant
- *  - `IR::TypeNameExpression`
- *
  * The pass can be invoked either with or without the reference and
  * type maps. When this information is not available, then several
  * cases revert to the identify function.
@@ -44,7 +38,9 @@ namespace P4 {
  *
  * @post: Ensures that
  *    - some constant expressions are eliminated (TODO: specify)
- *    - arbitrary-precision integers replaced with fixed-width integers (TODO: confirm)
+ *    - no operations that involve only int-typed values; at least one
+        operand will have a known width, which is used to cast the
+        other operand.
  */
 class DoConstantFolding : public Transform {
  protected:
@@ -62,20 +58,11 @@ class DoConstantFolding : public Transform {
     /// If `true` then emit warnings
     bool warnings;
 
-    /// Maps IR nodes to constants
+    /// Maps IR nodes to constant expressions
     std::map<const IR::Node*, const IR::Expression*> constants;
 
  protected:
-    /** Check whether @p expr is a constant. @returns @p expr if a
-     *  constant and `nullptr` if not.  The result is guaranteed to have one
-     *  of the following types:
-     *  - `IR::Constant`
-     *  - `IR::BoolLiteral`
-     *  - `IR::ListExpression`, where each element is also a constant
-     *  - `IR::TypeNameExpression`
-     * 
-     * @todo should we change the return type to a variant?
-     */
+    /// @returns a constant equivalent to @p expr or `nullptr`
     const IR::Expression* getConstant(const IR::Expression* expr) const;
 
     /// Add a mapping from @p node to @p result in `constants`. Note that
