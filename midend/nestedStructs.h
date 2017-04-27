@@ -115,7 +115,7 @@ class ComplexValues final {
  *        MoveInitializers.
  *
  *  @post: Ensure that
- *    - all nested structs are replaced with flattened structs.
+ *    - all variables whose types are nested structs are flattened.
  */
 class RemoveNestedStructs final : public Transform {
     ComplexValues* values;
