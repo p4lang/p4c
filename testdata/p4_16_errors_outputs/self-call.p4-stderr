@@ -1,0 +1,15 @@
+../testdata/p4_16_errors/self-call.p4(16): error: Could not find type of control c
+control c() {
+        ^
+../testdata/p4_16_errors/self-call.p4(17): error: Could not find type of c
+    c() c_inst;
+    ^
+../testdata/p4_16_errors/self-call.p4(17): error: Could not find type of c_inst
+    c() c_inst;
+        ^^^^^^
+../testdata/p4_16_errors/self-call.p4(19): error: Could not find type of c_inst
+        c_inst.apply();
+        ^^^^^^
+../testdata/p4_16_errors/self-call.p4(19): error: Could not find type of c_inst.apply
+        c_inst.apply();
+        ^^^^^^^^^^^^
