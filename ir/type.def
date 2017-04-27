@@ -458,10 +458,7 @@ class Type_MethodCall : Type {
 
 /// Actions look a lot like methods in many respects.
 /// However, invoking an action returns another action
-/// \TODO(mbudiu): where is the constraint of returning an action captured?
-/// It seems that both Type_Method and Type_Action are simply inheriting
-/// from Type_MethodBase and do not redefine any method.
-/// Is then the distinction limited to pretty printing?
+/// Having different IR nodes allows performing different transforms in visitors
 class Type_Action : Type_MethodBase {
 #nodbprint
 }
