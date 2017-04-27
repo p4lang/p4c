@@ -412,6 +412,7 @@ parserStatements
 
 parserStatement
     : assignmentOrMethodCallStatement { $$ = $1; }
+    | directApplication               { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
     | constantDeclaration             { $$ = $1; }
     | parserBlockStatement            { $$ = $1; }
