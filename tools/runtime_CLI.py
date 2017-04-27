@@ -1616,9 +1616,12 @@ class RuntimeAPI(cmd.Cmd):
 
         print "=========="
         print "LAGS"
-        for lag in mc_json["lags"]:
-            print "lag({})".format(lag["id"]),
-            print "-> ports=[{}]".format(", ".join([str(p) for p in ports]))
+        if "lags" in mc_json:
+            for lag in mc_json["lags"]:
+                print "lag({})".format(lag["id"]),
+                print "-> ports=[{}]".format(", ".join([str(p) for p in ports]))
+        else:
+            print "None for this PRE type"
         print "=========="
 
     @handle_bad_input
