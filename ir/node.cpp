@@ -98,7 +98,7 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
     } else {
         fullSourceFrag = sourceFrag;
     }
-    json->emplace("expression_string", fullSourceFrag);
+    json->emplace("source_fragment", fullSourceFrag);
     return json;
 }
 
