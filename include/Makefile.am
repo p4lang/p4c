@@ -43,7 +43,6 @@ bm/bm_sim/fields.h \
 bm/bm_sim/field_lists.h \
 bm/bm_sim/handle_mgr.h \
 bm/bm_sim/headers.h \
-bm/bm_sim/header_stacks.h \
 bm/bm_sim/learning.h \
 bm/bm_sim/logger.h \
 bm/bm_sim/lookup_structures.h \
@@ -77,9 +76,11 @@ bm/bm_sim/stateful.h \
 bm/bm_sim/switch.h \
 bm/bm_sim/simple_pre.h \
 bm/bm_sim/simple_pre_lag.h \
+bm/bm_sim/stacks.h \
 bm/bm_sim/tables.h \
 bm/bm_sim/target_parser.h \
-bm/bm_sim/transport.h
+bm/bm_sim/transport.h \
+bm/bm_sim/header_unions.h
 
 nobase_include_HEADERS += \
 bm/bm_sim/core/primitives.h

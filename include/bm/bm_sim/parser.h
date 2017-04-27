@@ -94,6 +94,10 @@ class ParseSwitchKeyBuilder {
   void push_back_stack_field(header_stack_id_t header_stack, int field_offset,
                              int bitwidth);
 
+  void push_back_union_stack_field(header_union_stack_id_t header_union_stack,
+                                   size_t header_offset, int field_offset,
+                                   int bitwidth);
+
   void push_back_lookahead(int offset, int bitwidth);
 
   std::vector<int> get_bitwidths() const;
@@ -102,17 +106,26 @@ class ParseSwitchKeyBuilder {
 
  private:
   struct Entry {
-    enum {FIELD, LOOKAHEAD, STACK_FIELD} tag{};
+    enum {FIELD, LOOKAHEAD, STACK_FIELD, UNION_STACK_FIELD} tag{};
     // I made sure ParserLookAhead was POD data so that it is easy to use in the
     // union
     union {
       field_t field;
+      struct {
+        header_union_stack_id_t header_union_stack;
+        size_t header_offset;
+        int offset;
+      } union_stack_field;
       ParserLookAhead lookahead;
     };
 
     static Entry make_field(header_id_t header, int offset);
 
     static Entry make_stack_field(header_stack_id_t header_stack, int offset);
+
+    static Entry make_union_stack_field(
+        header_union_stack_id_t header_union_stack, size_t header_offset,
+        int offset);
 
     static Entry make_lookahead(int offset, int bitwidth);
   };
@@ -215,6 +228,8 @@ class ParseState : public NamedP4Object {
                       const ArithExpression &field_length_expr,
                       size_t max_header_bytes);
   void add_extract_to_stack(header_stack_id_t header_stack);
+  void add_extract_to_union_stack(header_union_stack_id_t header_union_stack,
+                                  size_t header_offset);
 
   void add_set_from_field(header_id_t dst_header, int dst_offset,
                           header_id_t src_header, int src_offset);

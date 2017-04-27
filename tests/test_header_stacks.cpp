@@ -41,7 +41,7 @@ class HeaderStackTest : public ::testing::Test {
   size_t stack_depth{3};
 
   HeaderStackTest()
-    : testHeaderType("test_t", 0) {
+      : testHeaderType("test_t", 0) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test_0", testHeader_0, testHeaderType);

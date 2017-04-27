@@ -314,22 +314,6 @@ class register_write
 
 REGISTER_PRIMITIVE(register_write);
 
-class push : public ActionPrimitive<HeaderStack &, const Data &> {
-  void operator ()(HeaderStack &stack, const Data &num) {
-    stack.push_front(num.get_uint());
-  }
-};
-
-REGISTER_PRIMITIVE(push);
-
-class pop : public ActionPrimitive<HeaderStack &, const Data &> {
-  void operator ()(HeaderStack &stack, const Data &num) {
-    stack.pop_front(num.get_uint());
-  }
-};
-
-REGISTER_PRIMITIVE(pop);
-
 // I cannot name this "truncate" and register it with the usual
 // REGISTER_PRIMITIVE macro, because of a name conflict:
 //

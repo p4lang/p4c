@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/headers.h>
+#include <bm/bm_sim/header_unions.h>
 #include <bm/bm_sim/phv.h>
 #include <bm/bm_sim/expressions.h>
 
@@ -133,7 +134,7 @@ Header::Header(const std::string &name, p4object_id_t id,
                const HeaderType &header_type,
                const std::set<int> &arith_offsets,
                const bool metadata)
-  : NamedP4Object(name, id), header_type(header_type), metadata(metadata) {
+    : NamedP4Object(name, id), header_type(header_type), metadata(metadata) {
   // header_type_id = header_type.get_type_id();
   for (int i = 0; i < header_type.get_num_fields(); i++) {
     const auto &finfo = header_type.get_finfo(i);
@@ -180,12 +181,14 @@ void
 Header::mark_valid() {
   valid = true;
   valid_field->set(1);
+  if (union_membership) union_membership->make_valid();
 }
 
 void
 Header::mark_invalid() {
   valid = false;
   valid_field->set(0);
+  if (union_membership) union_membership->make_invalid();
 }
 
 void
@@ -315,6 +318,24 @@ Header::cmp(const Header &other) const {
   return (header_type.get_type_id() == other.header_type.get_type_id()) &&
       is_valid() && other.is_valid() &&
       (fields == other.fields);
+}
+
+Header::UnionMembership::UnionMembership(HeaderUnion *header_union, size_t idx)
+    : header_union(header_union), idx(idx) { }
+
+void
+Header::UnionMembership::make_valid() {
+  header_union->make_header_valid(idx);
+}
+
+void
+Header::UnionMembership::make_invalid() {
+  header_union->make_header_invalid(idx);
+}
+
+void
+Header::set_union_membership(HeaderUnion *header_union, size_t idx) {
+  union_membership.reset(new UnionMembership(header_union, idx));
 }
 
 }  // namespace bm

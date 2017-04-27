@@ -173,6 +173,19 @@ class SaveCString
 
 REGISTER_PRIMITIVE(SaveCString);
 
+class HeaderUnionAsParameter : public ActionPrimitive<const HeaderUnion &> {
+  void operator ()(const HeaderUnion &hu) override {
+    union_name = hu.get_name();
+  }
+
+  std::string union_name;
+
+ public:
+  std::string get_union_name() const { return union_name; }
+};
+
+REGISTER_PRIMITIVE(HeaderUnionAsParameter);
+
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
  protected:
@@ -182,8 +195,11 @@ class ActionsTest : public ::testing::Test {
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
   header_id_t testHeaderS0{2}, testHeaderS1{3};
+  header_id_t testHeaderU0{4}, testHeaderU1{5};
 
   header_stack_id_t testHeaderStack{0};
+
+  header_union_id_t testHeaderUnion{0};
 
   ActionFn testActionFn;
   ActionFnEntry testActionFnEntry;
@@ -213,6 +229,11 @@ class ActionsTest : public ::testing::Test {
     phv_factory.push_back_header_stack("test_stack", testHeaderStack,
                                        testHeaderType,
                                        {testHeaderS0, testHeaderS1});
+
+    phv_factory.push_back_header("testU0", testHeaderU0, testHeaderType);
+    phv_factory.push_back_header("testU1", testHeaderU1, testHeaderType);
+    phv_factory.push_back_header_union("test_union", testHeaderUnion,
+                                       {testHeaderU0, testHeaderU1});
   }
 
   virtual void SetUp() {
@@ -599,6 +620,16 @@ TEST_F(ActionsTest, WritePacketRegister) {
   testActionFnEntry(pkt.get());
 
   ASSERT_EQ(v, pkt->get_register(idx));
+}
+
+TEST_F(ActionsTest, HeaderUnion) {
+  HeaderUnionAsParameter primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_header_union(testHeaderUnion);
+
+  testActionFnEntry(pkt.get());
+
+  EXPECT_EQ("test_union", primitive.get_union_name());
 }
 
 template <typename Primitive>

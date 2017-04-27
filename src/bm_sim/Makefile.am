@@ -36,6 +36,7 @@ extern.cpp \
 extract.h \
 fields.cpp \
 headers.cpp \
+header_unions.cpp \
 learning.cpp \
 lookup_structures.cpp \
 logger.cpp \
@@ -59,6 +60,7 @@ stateful.cpp \
 switch.cpp \
 simple_pre.cpp \
 simple_pre_lag.cpp \
+stacks.cpp \
 tables.cpp \
 target_parser.cpp \
 transport.cpp \

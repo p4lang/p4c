@@ -43,6 +43,19 @@ struct assign_header : public ActionPrimitive<Header &, const Header &> {
   void operator ()(Header &dst, const Header &src);
 };
 
+struct assign_union
+    : public ActionPrimitive<HeaderUnion &, const HeaderUnion &> {
+  void operator ()(HeaderUnion &dst, const HeaderUnion &src);
+};
+
+struct push : public ActionPrimitive<StackIface &, const Data &> {
+  void operator ()(StackIface &stack, const Data &num);
+};
+
+struct pop : public ActionPrimitive<StackIface &, const Data &> {
+  void operator ()(StackIface &stack, const Data &num);
+};
+
 }  // namespace core
 
 }  // namespace bm

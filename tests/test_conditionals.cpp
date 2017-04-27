@@ -24,6 +24,7 @@
 #include <bm/bm_sim/stateful.h>
 
 #include <string>
+#include <vector>
 
 // This is where expressions are tested (essentially the same thing as
 // conditionals)
@@ -644,7 +645,7 @@ TEST_F(ConditionalsTest, Stacks) {
                                                    size_t index) {
       auto c = base_condition(name);
       c.push_back_load_const(Data(index));
-      c.push_back_op(ExprOpcode::DEREFERENCE_STACK);
+      c.push_back_op(ExprOpcode::DEREFERENCE_HEADER_STACK);
       c.push_back_op(ExprOpcode::VALID_HEADER);
       c.build();
       return c;
@@ -749,4 +750,145 @@ TEST_F(ConditionalsTest, Stress) {
       ASSERT_FALSE(c.eval(*phv));
     }
   }
+}
+
+
+class ConditionalsUnionTest : public ConditionalsTest {
+ protected:
+  header_id_t testHeader3{2}, testHeader4{3};
+
+  header_union_id_t testHeaderUnion0{0};
+  header_union_id_t testHeaderUnion1{1};
+
+  header_union_stack_id_t testHeaderUnionStack{0};
+  size_t union_stack_depth{2};
+
+  ConditionalsUnionTest() {
+    phv_factory.push_back_header("test3", testHeader3, testHeaderType);
+    phv_factory.push_back_header("test4", testHeader4, testHeaderType);
+
+    const std::vector<header_id_t> headers0({testHeader1, testHeader2});
+    phv_factory.push_back_header_union(
+        "test_union0", testHeaderUnion0, headers0);
+    const std::vector<header_id_t> headers1({testHeader3, testHeader4});
+    phv_factory.push_back_header_union(
+        "test_union1", testHeaderUnion1, headers1);
+
+    const std::vector<header_union_id_t> unions(
+        {testHeaderUnion0, testHeaderUnion1});
+    phv_factory.push_back_header_union_stack(
+        "test_union_stack", testHeaderUnionStack, unions);
+  }
+};
+
+TEST_F(ConditionalsUnionTest, EqUnion) {
+  Conditional c("ctest", 0);
+  c.push_back_load_header_union(testHeaderUnion0);
+  c.push_back_load_header_union(testHeaderUnion1);
+  c.push_back_op(ExprOpcode::EQ_UNION);
+  c.build();
+
+  auto &hdr1 = phv->get_header(testHeader1);
+  auto &hdr2 = phv->get_header(testHeader2);
+  auto &hdr3 = phv->get_header(testHeader3);
+  hdr1.mark_valid();
+  hdr3.mark_valid();
+
+  ASSERT_TRUE(c.eval(*phv));
+
+  hdr2.mark_valid();
+
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsUnionTest, NeqUnion) {
+  Conditional c("ctest", 0);
+  c.push_back_load_header_union(testHeaderUnion0);
+  c.push_back_load_header_union(testHeaderUnion1);
+  c.push_back_op(ExprOpcode::NEQ_UNION);
+  c.build();
+
+  auto &hdr1 = phv->get_header(testHeader1);
+  auto &hdr2 = phv->get_header(testHeader2);
+  auto &hdr3 = phv->get_header(testHeader3);
+  hdr2.mark_valid();
+  hdr3.mark_valid();
+
+  ASSERT_TRUE(c.eval(*phv));
+
+  hdr1.mark_valid();
+
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsUnionTest, AccessUnionHeader) {
+  // valid(test_union0.test2) ?
+  Conditional c("ctest", 0);
+  c.push_back_load_header_union(testHeaderUnion0);
+  c.push_back_access_union_header(1);  // access header at offset 1 in union
+  c.push_back_op(ExprOpcode::VALID_HEADER);
+  c.build();
+
+  auto &hdr1 = phv->get_header(testHeader1);
+  auto &hdr2 = phv->get_header(testHeader2);
+  hdr2.mark_valid();
+
+  ASSERT_TRUE(c.eval(*phv));
+
+  hdr1.mark_valid();
+
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsUnionTest, ValidUnion) {
+  // valid(test_union0) ?
+  Conditional c("ctest", 0);
+  c.push_back_load_header_union(testHeaderUnion0);
+  c.push_back_op(ExprOpcode::VALID_UNION);
+  c.build();
+
+  auto &hdr1 = phv->get_header(testHeader1);
+
+  ASSERT_FALSE(c.eval(*phv));
+
+  hdr1.mark_valid();
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsUnionTest, DereferenceUnionStack) {
+  Conditional c("ctest", 0);
+  c.push_back_load_header_union_stack(testHeaderUnionStack);
+  c.push_back_load_const(Data(0));
+  c.push_back_op(ExprOpcode::DEREFERENCE_UNION_STACK);
+  c.push_back_op(ExprOpcode::VALID_UNION);
+  c.build();
+
+  auto &union_stack = phv->get_header_union_stack(testHeaderUnionStack);
+  union_stack.push_front();
+  auto &hdr1 = phv->get_header(testHeader1);
+
+  ASSERT_FALSE(c.eval(*phv));
+
+  hdr1.mark_valid();
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsUnionTest, UnionStackSize) {
+  // size(test_union) == 1 ?
+  Conditional c("ctest", 0);
+  c.push_back_load_header_union_stack(testHeaderUnionStack);
+  c.push_back_op(ExprOpcode::SIZE_STACK);
+  c.push_back_load_const(Data(1));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  auto &union_stack = phv->get_header_union_stack(testHeaderUnionStack);
+
+  ASSERT_FALSE(c.eval(*phv));
+
+  union_stack.push_front();
+
+  ASSERT_TRUE(c.eval(*phv));
 }

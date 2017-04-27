@@ -125,3 +125,5 @@ TEST_F(AssignPrimitivesTest, AssignHeader) {
     EXPECT_TRUE(hdr21.cmp(hdr20));
   }
 }
+
+// assign_union is tested in test_header_unions

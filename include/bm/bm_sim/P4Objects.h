@@ -246,9 +246,20 @@ class P4Objects {
   void add_header_stack_id(const std::string &name,
                            header_stack_id_t header_stack_id);
 
+  void add_header_union_id(const std::string &name,
+                           header_union_id_t header_union_id);
+
+  void add_header_union_stack_id(const std::string &name,
+                                 header_union_stack_id_t header_union_stack_id);
+
   header_id_t get_header_id(const std::string &name) const;
 
   header_stack_id_t get_header_stack_id(const std::string &name) const;
+
+  header_union_id_t get_header_union_id(const std::string &name) const;
+
+  header_union_stack_id_t get_header_union_stack_id(
+      const std::string &name) const;
 
   void add_action(p4object_id_t id, std::unique_ptr<ActionFn> action);
 
@@ -304,10 +315,12 @@ class P4Objects {
   void init_header_types(const Json::Value &root);
   void init_headers(const Json::Value &root);
   void init_header_stacks(const Json::Value &root);
+  void init_header_unions(const Json::Value &root, InitState *);
+  void init_header_union_stacks(const Json::Value &root, InitState *);
   void init_extern_instances(const Json::Value &root);
   void init_parse_vsets(const Json::Value &root);
   void init_errors(const Json::Value &root);
-  void init_parsers(const Json::Value &root);
+  void init_parsers(const Json::Value &root, InitState *);
   void init_deparsers(const Json::Value &root);
   void init_calculations(const Json::Value &root);
   void init_counter_arrays(const Json::Value &root);
@@ -334,6 +347,9 @@ class P4Objects {
 
   std::unordered_map<std::string, header_id_t> header_ids_map{};
   std::unordered_map<std::string, header_stack_id_t> header_stack_ids_map{};
+  std::unordered_map<std::string, header_union_id_t> header_union_ids_map{};
+  std::unordered_map<std::string, header_union_stack_id_t>
+  header_union_stack_ids_map{};
   std::unordered_map<std::string, HeaderType *> header_to_type_map{};
   std::unordered_map<std::string, HeaderType *> header_stack_to_type_map{};
 
@@ -425,6 +441,13 @@ class P4Objects {
 
   // used for initialization only
   std::unordered_map<p4object_id_t, p4object_id_t> header_id_to_stack_id{};
+  struct HeaderUnionPos {
+    header_union_id_t union_id;
+    size_t offset;  // the offset of the header in the union
+  };
+  std::unordered_map<p4object_id_t, HeaderUnionPos> header_id_to_union_pos{};
+  std::unordered_map<p4object_id_t, header_union_stack_id_t>
+  union_id_to_union_stack_id{};
 
   ConfigOptionMap config_options{};
 

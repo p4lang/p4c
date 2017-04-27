@@ -20,14 +20,18 @@
 
 #include <gtest/gtest.h>
 
+#include <boost/filesystem.hpp>
+
 #include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/deparser.h>
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/parser.h>
 #include <bm/bm_sim/phv_source.h>
 #include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/P4Objects.h>
 
 #include <chrono>
+#include <fstream>
 #include <thread>
 #include <mutex>
 #include <vector>
@@ -1920,4 +1924,211 @@ TEST_F(ParserExtractVLTest, HeaderTooShort) {
   std::string packet_data(packet_bytes, '\xaa');
   auto packet = get_pkt(packet_data);
   parse_and_check_error(&packet, ErrorCodeMap::Core::HeaderTooShort);
+}
+
+
+// Google Test fixture for header union stacks
+class HeaderUnionStackParserTest : public ParserTestGeneric {
+ protected:
+  HeaderType optionAHeaderType, optionBHeaderType;
+  ParseState optionsParseState, optionAParseState, optionBParseState;
+  header_id_t optionA_0{0}, optionB_0{1}, optionA_1{2}, optionB_1{3};
+  header_union_id_t union_0{0}, union_1{1};
+  header_union_stack_id_t options{0};
+
+  Deparser deparser;
+
+  HeaderUnionStackParserTest()
+      : optionAHeaderType("optionA_t", 0), optionBHeaderType("optionB_t", 1),
+        optionsParseState("options_parse", 0),
+        optionAParseState("optionA_parse", 0),
+        optionBParseState("optionB_parse", 0),
+        deparser("test_deparser", 0) {
+    optionAHeaderType.push_back_field("type", 8);
+    optionAHeaderType.push_back_field("bos", 8);
+    optionBHeaderType.push_back_field("type", 8);
+    optionBHeaderType.push_back_field("bos", 8);
+    optionBHeaderType.push_back_field("f8", 8);
+
+    phv_factory.push_back_header("optionA_0", optionA_0, optionAHeaderType);
+    phv_factory.push_back_header("optionA_1", optionA_1, optionAHeaderType);
+    phv_factory.push_back_header("optionB_0", optionB_0, optionBHeaderType);
+    phv_factory.push_back_header("optionB_1", optionB_1, optionBHeaderType);
+
+    const std::vector<header_id_t> headers_0({optionA_0, optionB_0});
+    phv_factory.push_back_header_union("option_0", union_0, headers_0);
+    const std::vector<header_id_t> headers_1({optionA_1, optionB_1});
+    phv_factory.push_back_header_union("option_1", union_1, headers_1);
+
+    const std::vector<header_union_id_t> unions({union_0, union_1});
+    phv_factory.push_back_header_union_stack("options", options, unions);
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+
+    // we assume at least one option for the parse graph definition
+
+    {
+      ParseSwitchKeyBuilder optionsKeyBuilder;
+      optionsKeyBuilder.push_back_lookahead(0, 8);  // type
+      optionsParseState.set_key_builder(optionsKeyBuilder);
+      char keyA[] = {'\x0a'};
+      optionsParseState.add_switch_case(sizeof(keyA), keyA, &optionAParseState);
+      char keyB[] = {'\x0b'};
+      optionsParseState.add_switch_case(sizeof(keyB), keyB, &optionBParseState);
+    }
+    {
+      ParseSwitchKeyBuilder optionAKeyBuilder;
+      // options[last].optionA.bos
+      optionAKeyBuilder.push_back_union_stack_field(options, 0, 1, 8);
+      optionAParseState.set_key_builder(optionAKeyBuilder);
+      char key[] = {'\x00'};
+      optionAParseState.add_switch_case(sizeof(key), key, &optionsParseState);
+    }
+    {
+      ParseSwitchKeyBuilder optionBKeyBuilder;
+      // options[last].optionA.bos
+      optionBKeyBuilder.push_back_union_stack_field(options, 1, 1, 8);
+      optionBParseState.set_key_builder(optionBKeyBuilder);
+      char key[] = {'\x00'};
+      optionBParseState.add_switch_case(sizeof(key), key, &optionsParseState);
+    }
+
+    // optionA has offset 0 in union, optionB has offset 1 in union
+    optionAParseState.add_extract_to_union_stack(options, 0);
+    optionBParseState.add_extract_to_union_stack(options, 1);
+
+    parser.set_init_state(&optionsParseState);
+
+    // TODO(antonin): ideally we would like a push_back_header_union method here
+    deparser.push_back_header(optionA_0);
+    deparser.push_back_header(optionB_0);
+    deparser.push_back_header(optionA_1);
+    deparser.push_back_header(optionB_1);
+  }
+
+  Packet get_pkt(const std::string &data) {
+    assert(data.size() <= 128);
+    return Packet::make_new(data.size(),
+                            PacketBuffer(128, data.data(), data.size()),
+                            phv_source.get());
+  }
+
+  // virtual void TearDown() { }
+};
+
+TEST_F(HeaderUnionStackParserTest, ParseAndDeparse2Options) {
+  // optionB followed by optionA
+  const std::string data("\x0b\x00\xab\x0a\x01", 5);
+  auto packet = get_pkt(data);
+  auto phv = packet.get_phv();
+  parse_and_check_no_error(&packet);
+
+  const auto &optionA_0_hdr = phv->get_header(optionA_0);
+  const auto &optionA_1_hdr = phv->get_header(optionA_1);
+  const auto &optionB_0_hdr = phv->get_header(optionB_0);
+  const auto &optionB_1_hdr = phv->get_header(optionB_1);
+  const auto &options_union_0 = phv->get_header_union(union_0);
+  const auto &options_union_1 = phv->get_header_union(union_1);
+  const auto &options_union_stack = phv->get_header_union_stack(options);
+
+  EXPECT_FALSE(optionA_0_hdr.is_valid());
+  EXPECT_TRUE(optionA_1_hdr.is_valid());
+  EXPECT_TRUE(optionB_0_hdr.is_valid());
+  EXPECT_FALSE(optionB_1_hdr.is_valid());
+  EXPECT_EQ(&optionB_0_hdr, options_union_0.get_valid_header());
+  EXPECT_EQ(&optionA_1_hdr, options_union_1.get_valid_header());
+  EXPECT_EQ(2u, options_union_stack.get_count());
+  EXPECT_EQ(0xab, optionB_0_hdr.get_field(2).get<int>());
+
+  deparser.deparse(&packet);
+
+  ASSERT_EQ(data.size(), packet.get_data_size());
+  ASSERT_EQ(0, memcmp(data.data(), packet.data(), data.size()));
+}
+
+
+namespace fs = boost::filesystem;
+
+// unsure whether these tests really belong here, or in test_p4objects...
+
+class HeaderUnionStackE2ETest : public ::testing::Test {
+ protected:
+  P4Objects objects;
+  LookupStructureFactory factory;
+  Parser *parser;
+  Deparser *deparser;
+
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  static constexpr size_t num_packets = 10u;
+
+  HeaderUnionStackE2ETest()
+      : phv_source(PHVSourceIface::make_phv_source()) { }
+
+  void init_objects(const fs::path &json_path) {
+    std::ifstream is(json_path.string());
+    EXPECT_EQ(0, objects.init_objects(&is, &factory));
+    parser = get_parser();
+    ASSERT_TRUE(parser != nullptr);
+    deparser = get_deparser();
+    ASSERT_TRUE(deparser != nullptr);
+  }
+
+  void parse_and_deparse(const std::string &data) {
+    for (size_t i = 0; i < num_packets; i++) {
+      auto packet = get_pkt(data);
+      parse_and_check_no_error(&packet);
+      deparser->deparse(&packet);
+      ASSERT_EQ(data.size(), packet.get_data_size());
+      ASSERT_EQ(0, memcmp(data.data(), packet.data(), data.size()));
+    }
+  }
+
+ private:
+  Parser *get_parser() const {
+    return objects.get_parser_rt("parser");
+  }
+
+  Deparser *get_deparser() const {
+    return objects.get_deparser_rt("deparser");
+  }
+
+  void parse_and_check_no_error(Packet *packet) {
+    auto error_codes = objects.get_error_codes();
+    ErrorCode no_error(error_codes.from_core(ErrorCodeMap::Core::NoError));
+    parser->parse(packet);
+    ASSERT_EQ(no_error, packet->get_error_code());
+  }
+
+  Packet get_pkt(const std::string &data) {
+    phv_source->set_phv_factory(0, &objects.get_phv_factory());
+    assert(data.size() <= 128);
+    return Packet::make_new(data.size(),
+                            PacketBuffer(128, data.data(), data.size()),
+                            phv_source.get());
+  }
+};
+
+constexpr size_t HeaderUnionStackE2ETest::num_packets;
+
+TEST_F(HeaderUnionStackE2ETest, OptionsE2eCount) {
+  fs::path json_path =
+      fs::path(TESTDATADIR) / fs::path("unions_e2e_options_count.json");
+  init_objects(json_path);
+
+  // the last byte is a payload byte, to avoid an invalid memory read because of
+  // the parser lookahead
+  std::string data("\x02\x0a\x0b\x66\xab", 5);
+  parse_and_deparse(data);
+}
+
+TEST_F(HeaderUnionStackE2ETest, OptionsE2eBos) {
+  fs::path json_path =
+      fs::path(TESTDATADIR) / fs::path("unions_e2e_options_bos.json");
+  init_objects(json_path);
+
+  std::string data("\x0b\x00\x77\x0a\x01", 5);
+  parse_and_deparse(data);
 }

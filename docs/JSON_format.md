@@ -2,16 +2,15 @@
 
 All bmv2 target switches take as input a JSON file, whose format is essentially
 target independent. The format is very simple and several examples can be found
-in this repository, including [here]
-(../targets/simple_router/simple_router.json).
+in this repository, including
+[here](../targets/simple_router/simple_router.json).
 
 This documents attempt to describe the expected JSON schema and the constraints
-on each attribute. There is some ongoing work to write a formal JSON schema as
-per [this specification] (http://json-schema.org/).
+on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.9*.
+The version described in this document is *2.10*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -28,7 +27,7 @@ though it is recommended for all consummers of the JSON.
 
 Tentative support for signed fields (with a 2 complement representation) has
 been added to bmv2, although they are not supported in P4 1.0 or by the [p4c-bm
-compiler] (https://github.com/p4lang/p4c-bm). However, signed constants (in
+compiler](https://github.com/p4lang/p4c-bm). However, signed constants (in
 expressions, or as primitive arguments) are always supported.
 Arithmetic is done with infinite precision, but when a value is copied into a
 field, it is truncated based on the field's bitwidth.
@@ -46,8 +45,9 @@ header instance name and the second is the field member name.
 endian order); it can be prefixed with a negative sign, for negative values.
 - if `type` is `bool`, `value` is either `true` or `false`.
 - if `type` is a named P4 type (`header`, `header_stack`, `calculation`,
-`register_array`, `meter_array`, `counter_array`), `value` is a string
-corresponding to the name of the designated object.
+`register_array`, `meter_array`, `counter_array`, `header_union`,
+`header_union_stack`), `value` is a string corresponding to the name of the
+designated object.
 - if `type` is `string`, `value` is a sequence of characters.
 - if `type` is `lookahead` (parser only), `value` is a JSON 2-tuple, where the
 first item is the bit offset for the lookahead and the second item is the
@@ -58,9 +58,14 @@ index.
 - if `type` is `stack_field`, `value` is a JSON 2-tuple, where the first item is
 the header stack name and the second is the field member name. This is used to
 access a field in the last valid header instance in the stack.
+- if `type` is `union_stack_field`, `value` is a JSON 3-tuple, where the first item is
+the header union stack name, the second is the union member name and the third
+is the field member name. This can be used exclusively in the `transition_key`
+of a parser to access a field in the last valid union instance in the stack.
 - if `type` is `expression`, `value` is a JSON object with 3 attributes:
   - `op`: the operation performed (`+`, `-`, `*`, `<<`, `>>`, `==`, `!=`, `>`,
-  `>=`, `<`, `<=`, `and`, `or`, `not`, `&`, `|`, `^`, `~`, `valid`)
+  `>=`, `<`, `<=`, `and`, `or`, `not`, `&`, `|`, `^`, `~`, `valid`,
+  `valid_union`)
   - `left`: the left side of the operation, or `null` if unary operation
   - `right`: the right side of the operation
 
@@ -86,7 +91,7 @@ object has a fourth attribute, `cond` (condition), which is itself an
 expression. For example, in `(hA.f1 == 9) ? 3 : 4`, `cond` would be the JSON
 representation of `(hA.f1 == 9)`, `left` would be the JSON representation of `3`
 and `right` would be the JSON representation of `4`.
-  - stack header access (`op` is `dereference_stack`): `left` is a
+  - stack header access (`op` is `dereference_header_stack`): `left` is a
 `header_stack` and `right` needs to evaluate to a valid index inside the stack;
 the expression produces a `header`.
   - last valid index in a stack (`op` is `last_stack_index`): unary operation
@@ -101,6 +106,15 @@ representing a valid field offset for that header; the expression returns the
 header field at the given offset. The interest of this operation is that the
 `header` needs not be known at compile time, it can be a stack member resolved
 at runtime.
+  - stack union access (`op` is `dereference_union_stack`): `left` is a
+`header_union_stack` and `right` needs to evaluate to a valid index inside the
+stack; the expression produces a `header`.
+  - access to the header union member at a given offset (`op` is
+`access_union_header`): `left` needs to evaluate to a `header_union` and `right`
+is a JSON integer representing a valid member offset for that union; the
+expression returns the header at the given offset. The interest of this
+operation is that the `header_union` needs not be known at compile time, it can
+be a union stack entry resolved at runtime.
 
 For field references, some special values are allowed. They are called "hidden
 fields". For now, we only support one kind of hidden fields: `<header instance
@@ -164,6 +178,40 @@ array item has the following attributes:
 a header instance included in the stack. These ids have to be in the correct
 order: stack[0], stack[1], ...
 
+### `header_unions_types`
+
+It is a JSON array of all the header union types declared in the P4
+program. Each array item has the following attributes:
+- `name`
+- `id`: a unique integer (unique with respect to other header union types)
+- `headers`: a JSON array of 2-tuples, where the first element is the P4 name of
+the corresponding union member, and the second element is the name of the header
+type for this element.
+
+### `header_unions`
+
+It is a JSON array of all the header unions declared in the P4 program. Each
+array item has the following attributes:
+- `name`
+- `id`: a unique integer (unique with respect to other header unions)
+- `union_type`: the name of the corresponding header union type for this union
+instance
+- `header_ids`: a JSON array of integers, each integer being the unique `id` of
+a header instance included in the union. We recommend using the same order as in
+the corresponding P4 declaration.
+
+### `header_union_stacks`
+
+It is a JSON array of all the header union stacks declared in the P4
+program. Each array item has the following attributes:
+- `name`
+- `id`: a unique integer (unique with respect to other header union stacks)
+- `union_type`: the name of the corresponding header union type for the elements
+of this stack.
+- `header_union_ids`: a JSON array of integers, each integer being the unique
+`id` of a header union instance included in the stack. These ids have to be in
+the correct order: union_stack[0], union_stack[1], ...
+
 ### `errors`
 
 It is a JSON array of all the errors declared in the P4 program (error
@@ -195,8 +243,8 @@ constant as it appears in the P4 program and an integer value in the range `[0,
 with respect to the other constants in the enum) to each enum constant; if the
 enum constant is used in an expression in the P4 program, it is up to the
 compiler to consistently replace each reference with its assigned value when
-producing the bmv2 JSON. This is very similar to how we handle [errors]
-(#errors).
+producing the bmv2 JSON. This is very similar to how we handle
+[errors](#errors).
 
 ### `parsers`
 
@@ -221,12 +269,13 @@ parser. The attributes for these objects are:
     parser operation. Each parameter object has 2 string attributes: `type` for
     the parameter type and `value` for its value. Depending on the type of
     operation, the constraints are different. A description of these constraints
-    is included [later in this section] (#parser-operations).
+    is included [later in this section](#parser-operations).
   - `transition_key`: a JSON array (in the correct order) of objects which
   describe the different fields of the parse state transition key. Each object
   has 2 attributes, `type` and `value`, where `type` can be either
   `field`, `stack_field` (for a field of the last extracted instance in a
-  stack) or `lookahead` (see [here] (#the-type-value-object)).
+  stack), `union_stack_field` (for a field of the last extracted instance in a
+  union stack) or `lookahead` (see [here](#the-type-value-object)).
   - `transitions`: a JSON array of objects encoding each parse state
   transition. The different attributes for these objects are:
     - `type`: either `default` (for the default transition), `hexstr` (for a
@@ -256,8 +305,13 @@ attribute will be set to `0x0aba03`.
 In the `parser_ops` array, the format of the `parameters` array depends on the
 `op` value:
   - `extract`: only takes one parameter, of type `regular` (extraction to a
-  regular header instance) or `stack` (extraction to the end of a header
-  stack). `value` is then the name of the header instance or stack.
+  regular header instance), `stack` (extraction to the end of a header stack) or
+  `union_stack` (extraction to the end of a header union stack). If `type` is
+  `regular`, `value` is the name of the header instance to extract. If `type` is
+  `stack`, `value` is the name of the header stack. Finally if `type` is
+  `union_stack`, then `value` is a 2-tuple with the name of the header union
+  stack as the first element and the name of the appropriate union member as the
+  second element.
   - `extract_VL`: introduced for P4_16, where the expression to dynamically
   compute the length of a variable-length field is an argument to the extract
   built-in rather than a property of the header. For this operation, we require
@@ -266,11 +320,11 @@ In the `parser_ops` array, the format of the `parameters` array depends on the
   the header).
   - `set`: takes exactly 2 parameters; the first one needs to be of type `field`
   with the appropriate value. The second one can be of type `field`, `hexstr`,
-  `lookahead` or `expression`, with the appropriate value (see [here]
-  (#the-type-value-object)).
+  `lookahead` or `expression`, with the appropriate value (see
+  [here](#the-type-value-object)).
   - `verify`: we expect an array with exactly 2 elements; the first should be a
   boolean expression while the second should be an expression resolving to a
-  valid integral value for an error constant (see [here] (#errors)).
+  valid integral value for an error constant (see [here](#errors)).
   - `shift`: we expect a single parameter, the number of bytes to shift (shifted
   packet data will be discarded).
 
@@ -292,6 +346,9 @@ from P4 parsers). Each array item has the following attributes:
 - `order`: a JSON array of sorted header instance names. When the target switch
 invokes a deparser, the headers will be serialized in this order, and non-valid
 headers will be skipped.
+
+For stacks and unions, all the header instances need to be listed in the
+appropriate order.
 
 ### `meter_arrays`
 
@@ -354,7 +411,7 @@ call, with the following attributes:
     - `value`: the appropriate parameter value. If `type` is `runtime_data`,
     this is an integer representing an index into the `runtime_data` (attribute
     of action) array. If `type` is `extern`, this is the name of the extern
-    instance. See [here] (#the-type-value-object) for other types.
+    instance. See [here](#the-type-value-object) for other types.
 
 *Important note about extern instance methods*: even though in P4 these are
 invoked using object-oriented style, bmv2 treats them as regular primitives for
@@ -365,9 +422,11 @@ primitive `_my_extern_type_methodA`, with the first parameter being `{"type":
 "extern", "value": "extern1"}` and the second parameter being the appropriate
 representation for `x` and `y`.
 
-bmv2 supports three core primitives: `assign`, `assign_VL` (for variable-length
-fields) and `assign_header`. Support for additional primitives depends on the
-architecture being used.
+bmv2 supports the following core primitives:
+- `assign`, `assign_VL` (for variable-length fields), `assign_header` and
+`assign_union`.
+- `push` and `pop` for stack (header stack or header union stack) manipulation.
+Support for additional primitives depends on the architecture being used.
 
 ### `pipelines`
 
@@ -442,7 +501,7 @@ attributes for these objects are:
   the added entries cannot be modified / deleted and that new entries cannot be
   added. This doesn't impact the default entry though (see the `default_entry`
   attribute). `entries` is a JSON array where each element follows the
-  [match-action entry format] (#match-action-entry-format) described below.
+  [match-action entry format](#match-action-entry-format) described below.
 - `conditionals`: a JSON array of JSON objects. Each of these objects stores the
 information for a given P4 condition, which is used by the current pipeline. The
 attributes for these objects are:
@@ -450,8 +509,8 @@ attributes for these objects are:
   - `id`: a unique integer; note that it has to be unique with respect to *all*
   conditions in the JSON file, not just the conditions included in this parser
   object
-  - `expression`: the expression for the condition. See [here]
-    (#the-type-value-object) for more information on expressions format.
+  - `expression`: the expression for the condition. See
+    [here](#the-type-value-object) for more information on expressions format.
 
 The `match_type` for the table needs to follow the following rules:
 - If one match field is `range`, the table `match_type` has to be `range`
@@ -505,8 +564,8 @@ attributes:
 - `algo`: the hash algorithm used (has to be supported by target switch)
 - `input`: a JSON array of objects with the following attributes:
   - `type`: one of `field`, `hexstr`, `header`, `payload`
-  - `value`: the appropriate value or reference (see [here]
-    (#the-type-value-object))
+  - `value`: the appropriate value or reference (see
+    [here](#the-type-value-object))
 
 If `type` is `payload`, all the headers present after the last included header
 (or after the enclosing header of the last included field) will be included in
@@ -526,8 +585,8 @@ the following attributes:
 - `calculation`: the name of the calculation to use to compute the checksum
 - `if_cond`: null if the checksum needs to be updated unconditionally, otherwise
 a boolean expression, which will determine whether or not the checksum gets
-updated. See [here]
-    (#the-type-value-object) for more information on expressions format.
+updated. See [here](#the-type-value-object) for more information on expressions
+format.
 
 ### `learn_lists`
 

@@ -18,21 +18,16 @@
  *
  */
 
-#ifndef BM_BM_SIM_PHV_FORWARD_H_
-#define BM_BM_SIM_PHV_FORWARD_H_
+#include <bm/bm_sim/headers.h>
+#include <bm/bm_sim/header_unions.h>
 
 namespace bm {
 
-using header_id_t = int;
-using header_stack_id_t = int;
-using header_union_id_t = int;
-using header_union_stack_id_t = int;
-
-class PHV;
-class PHVFactory;
-class Header;
-class Field;
+bool
+HeaderUnion::cmp(const HeaderUnion &other) const {
+  return valid && other.valid &&
+      (valid_header_idx == other.valid_header_idx) &&
+      headers[valid_header_idx].get().cmp(other.headers[valid_header_idx]);
+}
 
 }  // namespace bm
-
-#endif  // BM_BM_SIM_PHV_FORWARD_H_

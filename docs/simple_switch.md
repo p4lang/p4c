@@ -91,5 +91,5 @@ queue.
 We mostly support the standard P4_14 primitive actions. One difference is that
 optional parameters are not supported in bmv2, so all parameters are always
 required (see `resubmit` for example).
-The full list of primitives can be seen in this [C++ source file]
-(../targets/simple_switch/primitives.cpp).
+The full list of primitives can be seen in this [C++ source
+file](../targets/simple_switch/primitives.cpp).

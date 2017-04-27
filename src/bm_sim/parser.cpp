@@ -151,6 +151,18 @@ ParseSwitchKeyBuilder::Entry::make_stack_field(header_stack_id_t header_stack,
 }
 
 ParseSwitchKeyBuilder::Entry
+ParseSwitchKeyBuilder::Entry::make_union_stack_field(
+    header_union_stack_id_t header_union_stack, size_t header_offset,
+    int offset) {
+  Entry e;
+  e.tag = UNION_STACK_FIELD;
+  e.union_stack_field.header_union_stack = header_union_stack;
+  e.union_stack_field.header_offset = header_offset;
+  e.union_stack_field.offset = offset;
+  return e;
+}
+
+ParseSwitchKeyBuilder::Entry
 ParseSwitchKeyBuilder::Entry::make_lookahead(int offset, int bitwidth) {
   Entry e;
   e.tag = LOOKAHEAD;
@@ -169,6 +181,15 @@ void
 ParseSwitchKeyBuilder::push_back_stack_field(header_stack_id_t header_stack,
                                              int field_offset, int bitwidth) {
   entries.push_back(Entry::make_stack_field(header_stack, field_offset));
+  bitwidths.push_back(bitwidth);
+}
+
+void
+ParseSwitchKeyBuilder::push_back_union_stack_field(
+    header_union_stack_id_t header_union_stack, size_t header_offset,
+    int field_offset, int bitwidth) {
+  entries.push_back(Entry::make_union_stack_field(
+      header_union_stack, header_offset, field_offset));
   bitwidths.push_back(bitwidth);
 }
 
@@ -197,6 +218,13 @@ ParseSwitchKeyBuilder::operator()(const PHV &phv, const char *data,
         break;
       case Entry::LOOKAHEAD:
         e.lookahead.peek(data, key);
+        break;
+      case Entry::UNION_STACK_FIELD:
+        key->append(
+            phv.get_header_union_stack(
+                e.union_stack_field.header_union_stack).get_last()
+            .at(e.union_stack_field.header_offset)
+            .get_field(e.union_stack_field.offset).get_bytes());
         break;
     }
   }
@@ -282,7 +310,7 @@ struct ParserOpExtractStack : ParserOp {
   header_stack_id_t header_stack;
 
   explicit ParserOpExtractStack(header_stack_id_t header_stack)
-    : header_stack(header_stack) {}
+      : header_stack(header_stack) { }
 
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
@@ -299,6 +327,33 @@ struct ParserOpExtractStack : ParserOp {
     *bytes_parsed += next_hdr.get_nbytes_packet();
     // should I have a HeaderStack::extract() method instead?
     stack.push_back();
+  }
+};
+
+struct ParserOpExtractUnionStack : ParserOp {
+  header_union_stack_id_t header_union_stack;
+  size_t header_offset;
+
+  explicit ParserOpExtractUnionStack(header_union_stack_id_t header_union_stack,
+                                     size_t header_offset)
+      : header_union_stack(header_union_stack), header_offset(header_offset) { }
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    auto phv = pkt->get_phv();
+    auto &union_stack = phv->get_header_union_stack(header_union_stack);
+    if (union_stack.is_full())
+      throw parser_exception_core(ErrorCodeMap::Core::StackOutOfBounds);
+    auto &next_union = union_stack.get_next();
+    auto &next_hdr = next_union.at(header_offset);
+    BMELOG(parser_extract, *pkt, next_hdr.get_id());
+    BMLOG_DEBUG_PKT(*pkt,
+                    "Extracting to header union stack {}, next header is {}",
+                    header_union_stack, next_hdr.get_id());
+    check_enough_data_for_extract(*pkt, *bytes_parsed, next_hdr);
+    next_hdr.extract(data, *phv);
+    *bytes_parsed += next_hdr.get_nbytes_packet();
+    union_stack.push_back();
   }
 };
 
@@ -701,6 +756,13 @@ ParseState::add_extract_VL(header_id_t header,
 void
 ParseState::add_extract_to_stack(header_stack_id_t header_stack) {
   parser_ops.emplace_back(new ParserOpExtractStack(header_stack));
+}
+
+void
+ParseState::add_extract_to_union_stack(
+    header_union_stack_id_t header_union_stack, size_t header_offset) {
+  parser_ops.emplace_back(new ParserOpExtractUnionStack(
+      header_union_stack, header_offset));
 }
 
 void

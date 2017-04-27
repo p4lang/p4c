@@ -12,7 +12,7 @@ libtestutils_la_LIBADD = $(top_builddir)/src/bm_sim/libbmsim.la
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -isystem $(top_srcdir)/third_party/jsoncpp/include \
--DTESTDATADIR=\"$(srcdir)/testdata\"
+-DTESTDATADIR=\"$(abs_srcdir)/testdata\"
 
 if SKIP_UNDETERMINISTIC_TESTS
     AM_CPPFLAGS += -DSKIP_UNDETERMINISTIC_TESTS
@@ -49,6 +49,7 @@ test_pre \
 test_calculations \
 test_headers \
 test_header_stacks \
+test_header_unions \
 test_meters \
 test_ageing \
 test_counters \
@@ -85,6 +86,7 @@ test_pre_SOURCES             = $(common_source) test_pre.cpp
 test_calculations_SOURCES    = $(common_source) test_calculations.cpp
 test_headers_SOURCES         = $(common_source) test_headers.cpp
 test_header_stacks_SOURCES   = $(common_source) test_header_stacks.cpp
+test_header_unions_SOURCES   = $(common_source) test_header_unions.cpp
 test_meters_SOURCES          = $(common_source) test_meters.cpp
 test_ageing_SOURCES          = $(common_source) test_ageing.cpp
 test_counters_SOURCES        = $(common_source) test_counters.cpp
@@ -119,6 +121,7 @@ test_pre.cpp \
 test_calculations.cpp \
 test_headers.cpp \
 test_header_stacks.cpp \
+test_header_unions.cpp \
 test_meters.cpp \
 test_ageing.cpp \
 test_counters.cpp \

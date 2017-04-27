@@ -76,6 +76,23 @@ ActionFn::parameter_push_back_last_header_stack_field(
 }
 
 void
+ActionFn::parameter_push_back_header_union(header_union_id_t header_union) {
+  ActionParam param;
+  param.tag = ActionParam::HEADER_UNION;
+  param.header_union = header_union;
+  params.push_back(param);
+}
+
+void
+ActionFn::parameter_push_back_header_union_stack(
+    header_union_stack_id_t header_union_stack) {
+  ActionParam param;
+  param.tag = ActionParam::HEADER_UNION_STACK;
+  param.header_union_stack = header_union_stack;
+  params.push_back(param);
+}
+
+void
 ActionFn::parameter_push_back_const(const Data &data) {
   const_values.push_back(data);
   ActionParam param;

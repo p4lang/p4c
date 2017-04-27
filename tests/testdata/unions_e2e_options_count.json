@@ -1,0 +1,447 @@
+{
+    "__meta__": {
+        "version": [
+            2,
+            5
+        ],
+        "compiler": "HAND_WRITTEN"
+    },
+    "header_types": [
+        {
+            "name": "standard_metadata_t",
+            "id": 0,
+            "fields": [
+                [
+                    "ingress_port",
+                    9
+                ],
+                [
+                    "packet_length",
+                    32
+                ],
+                [
+                    "egress_spec",
+                    9
+                ],
+                [
+                    "egress_port",
+                    9
+                ],
+                [
+                    "egress_instance",
+                    32
+                ],
+                [
+                    "instance_type",
+                    32
+                ],
+                [
+                    "clone_spec",
+                    32
+                ],
+                [
+                    "_padding",
+                    5
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "h_t",
+            "id": 1,
+            "fields": [
+                [
+                    "num_options",
+                    8
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "optionA_t",
+            "id": 2,
+            "fields": [
+                [
+                    "type",
+                    8
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "optionB_t",
+            "id": 3,
+            "fields": [
+                [
+                    "type",
+                    8
+                ],
+                [
+                    "f8",
+                    8
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "my_metadata_t",
+            "id": 8,
+            "fields": [
+                [
+                    "option_counter",
+                    8
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        }
+    ],
+    "headers": [
+        {
+            "name": "standard_metadata",
+            "id": 0,
+            "header_type": "standard_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "h",
+            "id": 1,
+            "header_type": "h_t",
+            "metadata": false
+        },
+        {
+            "name": "optionA_0",
+            "id": 2,
+            "header_type": "optionA_t",
+            "metadata": false
+        },
+        {
+            "name": "optionA_1",
+            "id": 3,
+            "header_type": "optionA_t",
+            "metadata": false
+        },
+        {
+            "name": "optionB_0",
+            "id": 4,
+            "header_type": "optionB_t",
+            "metadata": false
+        },
+        {
+            "name": "optionB_1",
+            "id": 5,
+            "header_type": "optionB_t",
+            "metadata": false
+        },
+        {
+            "name": "my_metadata",
+            "id": 6,
+            "header_type": "my_metadata_t",
+            "metadata": true
+        }
+    ],
+    "header_stacks": [],
+    "header_union_types": [
+        {
+            "name": "options",
+            "id": 0,
+            "headers": [
+                [
+                    "optionA",
+                    "optionA_t"
+                ],
+                [
+                    "optionB",
+                    "optionB_t"
+                ]
+            ]
+        }
+    ],
+    "header_unions": [
+        {
+            "name": "options_0",
+            "id": 0,
+            "union_type": "options",
+            "header_ids": [
+                2,
+                4
+            ]
+        },
+        {
+            "name": "options_1",
+            "id": 1,
+            "union_type": "options",
+            "header_ids": [
+                3,
+                5
+            ]
+        }
+    ],
+    "header_union_stacks": [
+        {
+            "name": "options",
+            "id": 0,
+            "union_type": "options",
+            "header_union_ids": [
+                0,
+                1
+            ]
+        }
+    ],
+    "parsers": [
+        {
+            "name": "parser",
+            "id": 0,
+            "init_state": "start",
+            "parse_states": [
+                {
+                    "name": "start",
+                    "id": 0,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "h"
+                                }
+                            ]
+                        },
+                        {
+                            "op": "set",
+                            "parameters": [
+                                {
+                                    "type": "field",
+                                    "value": [
+                                        "my_metadata",
+                                        "option_counter"
+                                    ]
+                                },
+                                {
+                                    "type": "field",
+                                    "value": [
+                                        "h",
+                                        "num_options"
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "type": "default",
+                            "value": null,
+                            "mask": null,
+                            "next_state": "parse_options"
+                        }
+                    ]
+                },
+                {
+                    "name": "parse_options",
+                    "id": 1,
+                    "parser_ops": [],
+                    "transition_key": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "my_metadata",
+                                "option_counter"
+                            ]
+                        },
+                        {
+                            "type": "lookahead",
+                            "value": [
+                                0,
+                                8
+                            ]
+                        }
+                    ],
+                    "transitions": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x0000",
+                            "mask": "0xff00",
+                            "next_state": null
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x000a",
+                            "mask": "0x00ff",
+                            "next_state": "parse_optionA"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x000b",
+                            "mask": "0x00ff",
+                            "next_state": "parse_optionB"
+                        }
+                    ]
+                },
+                {
+                    "name": "parse_optionA",
+                    "id": 2,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "union_stack",
+                                    "value": [
+                                        "options",
+                                        "optionA"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "op": "set",
+                            "parameters": [
+                                {
+                                    "type": "field",
+                                    "value": [
+                                        "my_metadata",
+                                        "option_counter"
+                                    ]
+                                },
+                                {
+                                    "type": "expression",
+                                    "value": {
+                                        "type": "expression",
+                                        "value": {
+                                            "op": "-",
+                                            "left": {
+                                                "type": "field",
+                                                "value": [
+                                                    "my_metadata",
+                                                    "option_counter"
+                                                ]
+                                            },
+                                            "right": {
+                                                "type": "hexstr",
+                                                "value": "0x1"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "type": "default",
+                            "value": null,
+                            "mask": null,
+                            "next_state": "parse_options"
+                        }
+                    ]
+                },
+                {
+                    "name": "parse_optionB",
+                    "id": 3,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "union_stack",
+                                    "value": [
+                                        "options",
+                                        "optionB"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "op": "set",
+                            "parameters": [
+                                {
+                                    "type": "field",
+                                    "value": [
+                                        "my_metadata",
+                                        "option_counter"
+                                    ]
+                                },
+                                {
+                                    "type": "expression",
+                                    "value": {
+                                        "type": "expression",
+                                        "value": {
+                                            "op": "-",
+                                            "left": {
+                                                "type": "field",
+                                                "value": [
+                                                    "my_metadata",
+                                                    "option_counter"
+                                                ]
+                                            },
+                                            "right": {
+                                                "type": "hexstr",
+                                                "value": "0x1"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "type": "default",
+                            "value": null,
+                            "mask": null,
+                            "next_state": "parse_options"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "parse_vsets": [],
+    "deparsers": [
+        {
+            "name": "deparser",
+            "id": 0,
+            "order": [
+                "h",
+                "optionA_0",
+                "optionB_0",
+                "optionA_1",
+                "optionB_1"
+            ]
+        }
+    ],
+    "meter_arrays": [],
+    "actions": [],
+    "pipelines": [
+        {
+            "name": "ingress",
+            "id": 0,
+            "init_table": null,
+            "tables": [],
+            "action_profiles": [],
+            "conditionals": []
+        },
+        {
+            "name": "egress",
+            "id": 1,
+            "init_table": null,
+            "tables": [],
+            "action_profiles": [],
+            "conditionals": []
+        }
+    ],
+    "calculations": [],
+    "checksums": [],
+    "learn_lists": [],
+    "field_lists": [],
+    "counter_arrays": [],
+    "register_arrays": [],
+    "force_arith": []
+}

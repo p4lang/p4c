@@ -36,7 +36,9 @@
 
 #include "fields.h"
 #include "headers.h"
-#include "header_stacks.h"
+#include "header_unions.h"
+// #include "header_stacks.h"
+#include "stacks.h"
 #include "named_p4object.h"
 #include "expressions.h"
 
@@ -89,7 +91,8 @@ class PHV {
  public:
   PHV() {}
 
-  PHV(size_t num_headers, size_t num_header_stacks);
+  PHV(size_t num_headers, size_t num_header_stacks,
+      size_t num_header_unions, size_t num_header_union_stacks);
 
   //! Access the Header with id \p header_index, with no bound checking.
   Header &get_header(header_id_t header_index) {
@@ -161,6 +164,32 @@ class PHV {
   const HeaderStack &get_header_stack(
       header_stack_id_t header_stack_index) const {
     return header_stacks[header_stack_index];
+  }
+
+  //! Access the HeaderUnion with id \p header_union_index, with no bound
+  //! checking.
+  HeaderUnion &get_header_union(header_union_id_t header_union_index) {
+    return header_unions[header_union_index];
+  }
+
+  //! @copydoc get_header_union(header_union_id_t header_union_index)
+  const HeaderUnion &get_header_union(
+      header_union_id_t header_union_index) const {
+    return header_unions[header_union_index];
+  }
+
+  //! Access the HeaderUnionStack with id \p header_union_stack_index, with no
+  //! bound checking.
+  HeaderUnionStack &get_header_union_stack(
+      header_union_stack_id_t header_union_stack_index) {
+    return header_union_stacks[header_union_stack_index];
+  }
+
+  //! @copydoc get_header_union_stack(header_union_stack_id_t
+  //! header_union_stack_index)
+  const HeaderUnionStack &get_header_union_stack(
+      header_union_stack_id_t header_union_stack_index) const {
+    return header_union_stacks[header_union_stack_index];
   }
 
   //! Mark all Header instances in the PHV as invalid.
@@ -282,6 +311,15 @@ class PHV {
                               const HeaderType &header_type,
                               const std::vector<header_id_t> &header_ids);
 
+  void push_back_header_union(const std::string &header_union_name,
+                              header_union_id_t header_union_index,
+                              const std::vector<header_id_t> &header_ids);
+
+  void push_back_header_union_stack(
+      const std::string &header_union_stack_name,
+      header_union_stack_id_t header_union_stack_index,
+      const std::vector<header_union_id_t> &header_union_ids);
+
   // get_field(from) will be equivalent to get_field(to)
   // 'to' needs to be a valid field name (or a previously inserted alias)
   // 'from' (the alias) does not need to adhere to the "hdr.f" naming convention
@@ -290,10 +328,14 @@ class PHV {
  private:
   std::vector<Header> headers{};
   std::vector<HeaderStack> header_stacks{};
+  std::vector<HeaderUnion> header_unions{};
+  std::vector<HeaderUnionStack> header_union_stacks{};
   HeaderNamesMap headers_map{};
   FieldNamesMap fields_map{};
   size_t capacity{0};
   size_t capacity_stacks{0};
+  size_t capacity_unions{0};
+  size_t capacity_union_stacks{0};
   Debugger::PacketId packet_id;
 };
 
@@ -308,7 +350,8 @@ class PHVFactory {
 
     HeaderDesc(const std::string &name, const header_id_t index,
                const HeaderType &header_type, const bool metadata)
-      : name(name), index(index), header_type(header_type), metadata(metadata) {
+        : name(name), index(index), header_type(header_type),
+          metadata(metadata) {
       for (int offset = 0; offset < header_type.get_num_fields(); offset++) {
         arith_offsets.insert(offset);
       }
@@ -324,7 +367,29 @@ class PHVFactory {
     HeaderStackDesc(const std::string &name, const header_stack_id_t index,
                     const HeaderType &header_type,
                     const std::vector<header_id_t> &headers)
-      : name(name), index(index), header_type(header_type), headers(headers) { }
+        : name(name), index(index), header_type(header_type),
+          headers(headers) { }
+  };
+
+  struct HeaderUnionDesc {
+    const std::string name;
+    header_union_id_t index;
+    std::vector<header_id_t> headers;
+
+    HeaderUnionDesc(const std::string &name, const header_union_id_t index,
+                    const std::vector<header_id_t> &headers)
+        : name(name), index(index), headers(headers) { }
+  };
+
+  struct HeaderUnionStackDesc {
+    const std::string name;
+    header_union_stack_id_t index;
+    std::vector<header_union_id_t> header_unions;
+
+    HeaderUnionStackDesc(const std::string &name,
+                         const header_union_stack_id_t index,
+                         const std::vector<header_union_id_t> &header_unions)
+        : name(name), index(index), header_unions(header_unions) { }
   };
 
  public:
@@ -337,6 +402,15 @@ class PHVFactory {
                               const header_stack_id_t header_stack_index,
                               const HeaderType &header_type,
                               const std::vector<header_id_t> &headers);
+
+  void push_back_header_union(const std::string &header_union_name,
+                              const header_stack_id_t header_union_index,
+                              const std::vector<header_id_t> &headers);
+
+  void push_back_header_union_stack(
+      const std::string &header_union_stack_name,
+      const header_union_stack_id_t header_union_stack_index,
+      const std::vector<header_union_id_t> &header_unions);
 
   void add_field_alias(const std::string &from, const std::string &to);
 
@@ -362,6 +436,16 @@ class PHVFactory {
 
   void enable_all_stack_field_arith(header_stack_id_t header_stack_id);
 
+  void enable_union_stack_field_arith(
+      header_union_stack_id_t header_union_stack_id, size_t header_offset,
+      int field_offset);
+
+  void enable_all_union_stack_field_arith(
+      header_union_stack_id_t header_union_stack_id, size_t header_offset);
+
+  void enable_all_union_stack_field_arith(
+      header_union_stack_id_t header_union_stack_id);
+
   void enable_all_arith();
 
   std::unique_ptr<PHV> create() const;
@@ -369,6 +453,9 @@ class PHVFactory {
  private:
   std::map<header_id_t, HeaderDesc> header_descs{};  // sorted by header id
   std::map<header_stack_id_t, HeaderStackDesc> header_stack_descs{};
+  std::map<header_union_id_t, HeaderUnionDesc> header_union_descs{};
+  std::map<header_union_stack_id_t, HeaderUnionStackDesc>
+  header_union_stack_descs{};
   std::map<std::string, std::string> field_aliases{};  // order does not matter
   std::unordered_set<std::string> field_names{};  // just for debugging
 };

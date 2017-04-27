@@ -38,6 +38,8 @@ using header_type_id_t = p4object_id_t;
 class VLHeaderExpression;
 class ArithExpression;
 
+class HeaderUnion;
+
 class HeaderType : public NamedP4Object {
  public:
   // do not specify custome values for enum entries, the value is used directly
@@ -285,7 +287,20 @@ class Header : public NamedP4Object {
   template <typename Fn>
   void extract_VL_common(const char *data, const Fn &VL_fn);
 
+  // called by the PHV class
+  void set_union_membership(HeaderUnion *header_union, size_t idx);
+
  private:
+  struct UnionMembership {
+    UnionMembership(HeaderUnion *header_union, size_t idx);
+
+    void make_valid();
+    void make_invalid();
+
+    HeaderUnion *header_union;
+    size_t idx;
+  };
+
   const HeaderType &header_type;
   std::vector<Field> fields{};
   bool valid{false};
@@ -294,6 +309,7 @@ class Header : public NamedP4Object {
   bool metadata{false};
   int nbytes_packet{0};
   std::unique_ptr<ArithExpression> VL_expr;
+  std::unique_ptr<UnionMembership> union_membership{nullptr};
 #ifdef BMDEBUG_ON
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 #endif

@@ -104,7 +104,9 @@ using EFormat = ExceptionFormatter;
 }  // namespace
 
 
-enum class P4Objects::ExprType { UNKNOWN, DATA, HEADER, HEADER_STACK, BOOL };
+enum class P4Objects::ExprType {
+  UNKNOWN, DATA, HEADER, HEADER_STACK, BOOL, UNION, UNION_STACK
+};
 
 void
 P4Objects::build_expression(const Json::Value &json_expression,
@@ -125,6 +127,8 @@ ExprOpcode get_eq_opcode(ExprType expr_type) {
       return ExprOpcode::EQ_HEADER;
     case ExprType::BOOL:
       return ExprOpcode::EQ_BOOL;
+    case ExprType::UNION:
+      return ExprOpcode::EQ_UNION;
     default:
       break;
   }
@@ -140,6 +144,8 @@ ExprOpcode get_neq_opcode(ExprType expr_type) {
       return ExprOpcode::NEQ_HEADER;
     case ExprType::BOOL:
       return ExprOpcode::NEQ_BOOL;
+    case ExprType::UNION:
+      return ExprOpcode::NEQ_UNION;
     default:
       break;
   }
@@ -182,19 +188,28 @@ ExprType get_opcode_type(ExprOpcode opcode) {
     case ExprOpcode::LET_DATA:
     case ExprOpcode::EQ_HEADER:
     case ExprOpcode::NEQ_HEADER:
+    case ExprOpcode::EQ_UNION:
+    case ExprOpcode::NEQ_UNION:
     case ExprOpcode::EQ_BOOL:
     case ExprOpcode::NEQ_BOOL:
     case ExprOpcode::AND:
     case ExprOpcode::OR:
     case ExprOpcode::NOT:
     case ExprOpcode::VALID_HEADER:
+    case ExprOpcode::VALID_UNION:
     case ExprOpcode::DATA_TO_BOOL:
       return ExprType::BOOL;
     case ExprOpcode::LOAD_HEADER:
-    case ExprOpcode::DEREFERENCE_STACK:
+    case ExprOpcode::DEREFERENCE_HEADER_STACK:
+    case ExprOpcode::ACCESS_UNION_HEADER:
       return ExprType::HEADER;
     case ExprOpcode::LOAD_HEADER_STACK:
       return ExprType::HEADER_STACK;
+    case ExprOpcode::LOAD_UNION:
+    case ExprOpcode::DEREFERENCE_UNION_STACK:
+      return ExprType::UNION;
+    case ExprOpcode::LOAD_UNION_STACK:
+      return ExprType::UNION_STACK;
     case ExprOpcode::TERNARY_OP:
       return ExprType::UNKNOWN;
     case ExprOpcode::SKIP:
@@ -309,6 +324,17 @@ P4Objects::build_expression(const Json::Value &json_expression,
     *expr_type = ExprType::DATA;
 
     phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
+  } else if (type == "header_union") {
+    auto header_union_id = get_header_union_id(json_value.asString());
+    expr->push_back_load_header_union(header_union_id);
+    *expr_type = ExprType::UNION;
+  } else if (type == "header_union_stack") {
+    auto header_union_stack_id = get_header_union_stack_id(
+        json_value.asString());
+    expr->push_back_load_header_union_stack(header_union_stack_id);
+    *expr_type = ExprType::UNION_STACK;
+
+    phv_factory.enable_all_union_stack_field_arith(header_union_stack_id);
   } else {
     throw json_exception(
         EFormat() << "Invalid 'type' in expression: '" << type << "'",
@@ -471,10 +497,45 @@ struct DirectMeterArray {
   int offset;
 };
 
+class HeaderUnionType : public NamedP4Object {
+ public:
+  HeaderUnionType(const std::string &name, p4object_id_t id)
+      : NamedP4Object(name, id) { }
+
+  struct EntryInfo {
+    std::string name;
+    HeaderType *header_type;
+  };
+
+  size_t get_header_offset(const std::string &name) {
+    for (size_t i = 0; i < entries.size(); i++) {
+      if (name == entries.at(i).name) return i;
+    }
+    throw json_exception(EFormat() << "Unknown field name '" << name
+                                   << "' in union type '" << get_name() << "'");
+  }
+
+  HeaderType *get_header_type(const std::string &header_name) {
+    auto header_offset = get_header_offset(header_name);
+    return entries.at(header_offset).header_type;
+  }
+
+  void push_back(const std::string &name, HeaderType *header_type) {
+    entries.push_back({name, header_type});
+  }
+
+ private:
+  std::vector<EntryInfo> entries{};
+};
+
 }  // namespace
 
 struct P4Objects::InitState {
   std::unordered_map<std::string, DirectMeterArray> direct_meters{};
+  std::unordered_map<std::string, HeaderUnionType> header_union_types_map{};
+  std::unordered_map<std::string, HeaderUnionType *> header_union_to_type_map{};
+  std::unordered_map<std::string, HeaderUnionType *>
+  header_union_stack_to_type_map{};
 };
 
 void
@@ -580,6 +641,84 @@ P4Objects::init_header_stacks(const Json::Value &cfg_root) {
 }
 
 void
+P4Objects::init_header_unions(const Json::Value &cfg_root,
+                              InitState *init_state) {
+  auto &header_union_types_map = init_state->header_union_types_map;
+  auto &header_union_to_type_map = init_state->header_union_to_type_map;
+
+  const auto &cfg_header_union_types = cfg_root["header_union_types"];
+
+  for (const auto &cfg_header_union_type : cfg_header_union_types) {
+    auto header_union_type_name = cfg_header_union_type["name"].asString();
+    p4object_id_t header_union_type_id = cfg_header_union_type["id"].asInt();
+    HeaderUnionType header_union_type(header_union_type_name,
+                                      header_union_type_id);
+
+    for (const auto &cfg_header : cfg_header_union_type["headers"]) {
+      auto name = cfg_header[0].asString();
+      auto type_name = cfg_header[1].asString();
+      header_union_type.push_back(name, get_header_type(type_name));
+    }
+    header_union_types_map.emplace(header_union_type_name, header_union_type);
+  }
+
+  const auto &cfg_header_unions = cfg_root["header_unions"];
+
+  for (const auto &cfg_header_union : cfg_header_unions) {
+    auto header_union_name = cfg_header_union["name"].asString();
+    header_union_id_t header_union_id = cfg_header_union["id"].asInt();
+    auto header_union_type_name = cfg_header_union["union_type"].asString();
+    auto &header_union_type = header_union_types_map.at(header_union_type_name);
+
+    std::vector<header_id_t> header_ids;
+    for (const auto &cfg_header_id : cfg_header_union["header_ids"]) {
+      header_id_to_union_pos.emplace(
+          cfg_header_id.asInt(),
+          HeaderUnionPos({header_union_id, header_ids.size()}));
+      header_ids.push_back(cfg_header_id.asInt());
+    }
+
+    phv_factory.push_back_header_union(header_union_name, header_union_id,
+                                       header_ids);
+    add_header_union_id(header_union_name, header_union_id);
+    header_union_to_type_map.emplace(header_union_name, &header_union_type);
+  }
+}
+
+void
+P4Objects::init_header_union_stacks(const Json::Value &cfg_root,
+                                    InitState *init_state) {
+  auto &header_union_types_map = init_state->header_union_types_map;
+  auto &header_union_stack_to_type_map =
+      init_state->header_union_stack_to_type_map;
+
+  const auto &cfg_header_union_stacks = cfg_root["header_union_stacks"];
+
+  for (const auto &cfg_header_union_stack : cfg_header_union_stacks) {
+    auto header_union_stack_name = cfg_header_union_stack["name"].asString();
+    header_union_stack_id_t header_union_stack_id =
+        cfg_header_union_stack["id"].asInt();
+    auto header_union_type_name =
+        cfg_header_union_stack["union_type"].asString();
+    auto &header_union_type = header_union_types_map.at(header_union_type_name);
+
+    std::vector<header_union_id_t> header_union_ids;
+    auto &cfg_header_unions = cfg_header_union_stack["header_union_ids"];
+    for (const auto &cfg_header_union_id : cfg_header_unions) {
+      header_union_ids.push_back(cfg_header_union_id.asInt());
+      union_id_to_union_stack_id[cfg_header_union_id.asInt()] =
+          header_union_stack_id;
+    }
+
+    phv_factory.push_back_header_union_stack(
+        header_union_stack_name, header_union_stack_id, header_union_ids);
+    add_header_union_stack_id(header_union_stack_name, header_union_stack_id);
+    header_union_stack_to_type_map.emplace(header_union_stack_name,
+                                           &header_union_type);
+  }
+}
+
+void
 P4Objects::init_extern_instances(const Json::Value &cfg_root) {
   const Json::Value &cfg_extern_instances = cfg_root["extern_instances"];
   for (const auto &cfg_extern_instance : cfg_extern_instances) {
@@ -672,8 +811,11 @@ P4Objects::init_errors(const Json::Value &cfg_root) {
 }
 
 void
-P4Objects::init_parsers(const Json::Value &cfg_root) {
-  const Json::Value &cfg_parsers = cfg_root["parsers"];
+P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
+  auto &header_union_stack_to_type_map =
+      init_state->header_union_stack_to_type_map;
+
+  const auto &cfg_parsers = cfg_root["parsers"];
   for (const auto &cfg_parser : cfg_parsers) {
     const string parser_name = cfg_parser["name"].asString();
     p4object_id_t parser_id = cfg_parser["id"].asInt();
@@ -701,8 +843,8 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
           assert(cfg_parameters.size() == 1);
           const Json::Value &cfg_extract = cfg_parameters[0];
           const string extract_type = cfg_extract["type"].asString();
-          const string extract_header = cfg_extract["value"].asString();
           if (extract_type == "regular") {
+            const string extract_header = cfg_extract["value"].asString();
             header_id_t header_id = get_header_id(extract_header);
             const auto &header_type = phv_factory.get_header_type(header_id);
             if (header_type.is_VL_header() && !header_type.has_VL_expr()) {
@@ -714,9 +856,22 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
             }
             parse_state->add_extract(header_id);
           } else if (extract_type == "stack") {
+            const string extract_header = cfg_extract["value"].asString();
             header_stack_id_t header_stack_id =
               get_header_stack_id(extract_header);
             parse_state->add_extract_to_stack(header_stack_id);
+          } else if (extract_type == "union_stack") {
+            const auto &cfg_union_stack = cfg_extract["value"];
+            assert(cfg_union_stack.size() == 2);
+            auto extract_union_stack = cfg_union_stack[0].asString();
+            auto header_union_stack_id = get_header_union_stack_id(
+                extract_union_stack);
+            auto *union_type = header_union_stack_to_type_map.at(
+                extract_union_stack);
+            auto header_offset = union_type->get_header_offset(
+                cfg_union_stack[1].asString());
+            parse_state->add_extract_to_union_stack(
+                header_union_stack_id, header_offset);
           } else {
             throw json_exception(
                 EFormat() << "Extract type '" << extract_type
@@ -834,12 +989,28 @@ P4Objects::init_parsers(const Json::Value &cfg_root) {
           int bitwidth = header_type->get_bit_width(field_offset);
           key_builder.push_back_stack_field(header_stack_id, field_offset,
                                             bitwidth);
+        } else if (type == "union_stack_field") {
+          auto union_stack_name = cfg_value[0].asString();
+          auto header_union_stack_id = get_header_union_stack_id(
+              union_stack_name);
+          auto *union_type = header_union_stack_to_type_map.at(
+              union_stack_name);
+          auto header_offset = union_type->get_header_offset(
+              cfg_value[1].asString());
+          auto header_type = union_type->get_header_type(
+              cfg_value[1].asString());
+          auto field_offset = header_type->get_field_offset(
+              cfg_value[2].asString());
+          auto bitwidth = header_type->get_bit_width(field_offset);
+          key_builder.push_back_union_stack_field(
+              header_union_stack_id, header_offset, field_offset, bitwidth);
         } else if (type == "lookahead") {
           int offset = cfg_value[0].asInt();
           int bitwidth = cfg_value[1].asInt();
           key_builder.push_back_lookahead(offset, bitwidth);
         } else {
-          assert(0 && "invalid entry in parse state key");
+          throw json_exception("Invalid entry in parse state key",
+                               cfg_key_elem);
         }
       }
 
@@ -1669,6 +1840,10 @@ P4Objects::init_objects(std::istream *is,
 
     init_header_stacks(cfg_root);
 
+    init_header_unions(cfg_root, &init_state);
+
+    init_header_union_stacks(cfg_root, &init_state);
+
     if (cfg_root.isMember("field_aliases")) {
       const auto &cfg_field_aliases = cfg_root["field_aliases"];
 
@@ -1691,7 +1866,7 @@ P4Objects::init_objects(std::istream *is,
 
     init_errors(cfg_root);  // parser errors
 
-    init_parsers(cfg_root);
+    init_parsers(cfg_root, &init_state);
 
     init_deparsers(cfg_root);
 
@@ -1929,22 +2104,50 @@ P4Objects::get_primitive(const std::string &name) {
 
 void
 P4Objects::enable_arith(header_id_t header_id, int field_offset) {
-  auto it = header_id_to_stack_id.find(header_id);
-  if (it == header_id_to_stack_id.end()) {
-    phv_factory.enable_field_arith(header_id, field_offset);
-  } else {
-    phv_factory.enable_stack_field_arith(it->second, field_offset);
+  {
+    auto it = header_id_to_union_pos.find(header_id);
+    if (it != header_id_to_union_pos.end()) {
+      const auto &union_pos = it->second;
+      auto it2 = union_id_to_union_stack_id.find(union_pos.union_id);
+      if (it2 != union_id_to_union_stack_id.end()) {
+        phv_factory.enable_union_stack_field_arith(
+            it2->second, union_pos.offset, field_offset);
+      }
+      return;
+    }
   }
+  {
+    auto it = header_id_to_stack_id.find(header_id);
+    if (it != header_id_to_stack_id.end()) {
+      phv_factory.enable_stack_field_arith(it->second, field_offset);
+      return;
+    }
+  }
+  phv_factory.enable_field_arith(header_id, field_offset);
 }
 
 void
 P4Objects::enable_arith(header_id_t header_id) {
-  auto it = header_id_to_stack_id.find(header_id);
-  if (it == header_id_to_stack_id.end()) {
-    phv_factory.enable_all_field_arith(header_id);
-  } else {
-    phv_factory.enable_all_stack_field_arith(it->second);
+  {
+    auto it = header_id_to_union_pos.find(header_id);
+    if (it != header_id_to_union_pos.end()) {
+      const auto &union_pos = it->second;
+      auto it2 = union_id_to_union_stack_id.find(union_pos.union_id);
+      if (it2 != union_id_to_union_stack_id.end()) {
+        phv_factory.enable_all_union_stack_field_arith(
+            it2->second, union_pos.offset);
+      }
+      return;
+    }
   }
+  {
+    auto it = header_id_to_stack_id.find(header_id);
+    if (it != header_id_to_stack_id.end()) {
+      phv_factory.enable_all_stack_field_arith(it->second);
+      return;
+    }
+  }
+  phv_factory.enable_all_field_arith(header_id);
 }
 
 ActionFn *
@@ -2050,6 +2253,18 @@ P4Objects::add_header_stack_id(const std::string &name,
   header_stack_ids_map[name] = header_stack_id;
 }
 
+void
+P4Objects::add_header_union_id(const std::string &name,
+                               header_union_id_t header_union_id) {
+  header_union_ids_map[name] = header_union_id;
+}
+
+void
+P4Objects::add_header_union_stack_id(
+    const std::string &name, header_union_stack_id_t header_union_stack_id) {
+  header_union_stack_ids_map[name] = header_union_stack_id;
+}
+
 header_id_t
 P4Objects::get_header_id(const std::string &name) const {
   return header_ids_map.at(name);
@@ -2058,6 +2273,16 @@ P4Objects::get_header_id(const std::string &name) const {
 header_stack_id_t
 P4Objects::get_header_stack_id(const std::string &name) const {
   return header_stack_ids_map.at(name);
+}
+
+header_union_id_t
+P4Objects::get_header_union_id(const std::string &name) const {
+  return header_union_ids_map.at(name);
+}
+
+header_union_stack_id_t
+P4Objects::get_header_union_stack_id(const std::string &name) const {
+  return header_union_stack_ids_map.at(name);
 }
 
 void

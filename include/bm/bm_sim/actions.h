@@ -56,6 +56,10 @@
 //!   - `[const] MeterArray &`
 //!   - `[const] CounterArray &`
 //!   - `[const] RegisterArray &`
+//!   - `[const] HeaderUnion &`
+//!   - `[const] StackIface &` for arbitrary P4 stacks
+//!   - `[const] HeaderStack &` for P4 header stacks
+//!   - `[const] HeaderUnionStack &` for P4 header union stacks
 //!   - `const std::string &` or `const char *` for strings
 //!
 //! You can declare and register primitives anywhere in your switch target C++
@@ -180,7 +184,8 @@ struct ActionParam {
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
         EXPRESSION,
         EXTERN_INSTANCE,
-        STRING} tag;
+        STRING,
+        HEADER_UNION, HEADER_UNION_STACK} tag;
 
   union {
     unsigned int const_offset;
@@ -241,6 +246,10 @@ struct ActionParam {
     // I use a pointer here to avoid complications with the union; the string
     // memory is owned by ActionFn (just like for ArithExpression above)
     const std::string *str;
+
+    header_union_stack_id_t header_union_stack;
+
+    header_union_id_t header_union;
   };
 
   // convert to the correct type when calling a primitive
@@ -344,6 +353,49 @@ template <> inline
 const HeaderStack &ActionParam::to<const HeaderStack &>(
     ActionEngineState *state) const {
   return ActionParam::to<HeaderStack &>(state);
+}
+
+template <> inline
+StackIface &ActionParam::to<StackIface &>(ActionEngineState *state) const {
+  switch (tag) {
+    case HEADER_STACK:
+      return state->phv.get_header_stack(header_stack);
+    case HEADER_UNION_STACK:
+      return state->phv.get_header_union_stack(header_union_stack);
+    default:
+      assert(0);
+  }
+}
+
+template <> inline
+const StackIface &ActionParam::to<const StackIface &>(
+    ActionEngineState *state) const {
+  return ActionParam::to<StackIface &>(state);
+}
+
+template <> inline
+HeaderUnion &ActionParam::to<HeaderUnion &>(ActionEngineState *state) const {
+  assert(tag == ActionParam::HEADER_UNION);
+  return state->phv.get_header_union(header_union);
+}
+
+template <> inline
+const HeaderUnion &ActionParam::to<const HeaderUnion &>(
+    ActionEngineState *state) const {
+  return ActionParam::to<HeaderUnion &>(state);
+}
+
+template <> inline
+HeaderUnionStack &ActionParam::to<HeaderUnionStack &>(
+    ActionEngineState *state) const {
+  assert(tag == ActionParam::HEADER_UNION_STACK);
+  return state->phv.get_header_union_stack(header_union_stack);
+}
+
+template <> inline
+const HeaderUnionStack &ActionParam::to<const HeaderUnionStack &>(
+    ActionEngineState *state) const {
+  return ActionParam::to<HeaderUnionStack &>(state);
 }
 
 template <> inline
@@ -562,6 +614,9 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_header_stack(header_stack_id_t header_stack);
   void parameter_push_back_last_header_stack_field(
       header_stack_id_t header_stack, int field_offset);
+  void parameter_push_back_header_union(header_union_id_t header_union);
+  void parameter_push_back_header_union_stack(
+      header_union_stack_id_t header_union_stack);
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
   void parameter_push_back_register_ref(RegisterArray *register_array,
