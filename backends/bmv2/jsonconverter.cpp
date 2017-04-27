@@ -1257,7 +1257,7 @@ void JsonConverter::convertTableEntries(const IR::P4Table *table,
             key->emplace("match_type", matchType);
             if (matchType == "valid") {
                 if (k->is<IR::BoolLiteral>())
-                    key->emplace("key", k->to<IR::BoolLiteral>()->toString());
+                    key->emplace("key", k->to<IR::BoolLiteral>()->value);
                 else
                     ::error("%1% invalid 'valid' key expression", k);
             } else if (matchType == corelib.exactMatch.name) {
