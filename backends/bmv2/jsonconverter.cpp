@@ -805,51 +805,6 @@ JsonConverter::JsonConverter(const CompilerOptions& options) :
         headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
 {}
 
-void addSrcInfoData(Util::JsonObject* result,
-                    const IR::Node* node) {
-    unsigned lineNumber, columnNumber;
-    cstring fName = node->srcInfo.toSourcePositionData(&lineNumber,
-                                                       &columnNumber);
-    if (fName == nullptr) {
-        // Do not add anything to the JSON file for this, as this is
-        // likely a statement synthesized by the compiler, and either
-        // not easy, or it is impossible, to correlate it directly
-        // with anything in the user's P4 source code.
-    } else {
-        cstring sourceFrag = node->srcInfo.toBriefSourceFragment();
-        result->emplace("filename", fName);
-        result->emplace("line", lineNumber);
-        result->emplace("column", columnNumber);
-        result->emplace("expression_string", sourceFrag);
-    }
-}
-
-void addSrcInfoDataAssignment(Util::JsonObject* result,
-                              const IR::Node* node,
-                              const IR::Node* lhsNode,
-                              const IR::Node* rhsNode) {
-    unsigned lineNumber, columnNumber;
-    cstring fName = node->srcInfo.toSourcePositionData(nullptr, nullptr);
-    cstring lhsStr = lhsNode->srcInfo.toSourcePositionData(&lineNumber,
-                                                        &columnNumber);
-    cstring rhsStr = rhsNode->srcInfo.toSourcePositionData(nullptr, nullptr);
-    if (fName == nullptr || lhsStr == nullptr || rhsStr == nullptr) {
-        // Do not add anything to the JSON file for this, as this is
-        // likely a statement synthesized by the compiler, and either
-        // not easy, or it is impossible, to correlate it directly
-        // with anything in the user's P4 source code.
-    } else {
-        cstring sourceFrag = node->srcInfo.toBriefSourceFragment();
-        cstring lhsFrag = lhsNode->srcInfo.toBriefSourceFragment();
-        cstring rhsFrag = rhsNode->srcInfo.toBriefSourceFragment();
-        result->emplace("filename", fName);
-        result->emplace("line", lineNumber);
-        result->emplace("column", columnNumber);
-        result->emplace("expression_string",
-                        lhsFrag + " " + sourceFrag + " " + rhsFrag);
-    }
-}
-
 // return calculation name
 cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fields,
                                          Util::JsonArray* calculations,
@@ -858,7 +813,7 @@ cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fie
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
     calc->emplace("id", nextId("calculations"));
-    addSrcInfoData(calc, node);
+    calc->emplace_non_null("source_info", node->sourceInfoJsonObj());
     calc->emplace("algo", algo);
     if (!fields->is<IR::ListExpression>()) {
         // expand it into a list
@@ -899,7 +854,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
         } else if (s->is<IR::ExitStatement>()) {
             auto primitive = mkPrimitive("exit", result);
             (void)mkParameters(primitive);
-            addSrcInfoData(primitive, s);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             break;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression* l, *r;
@@ -915,7 +870,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 operation = "modify_field";
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
-            addSrcInfoDataAssignment(primitive, assign, l, r);
+            primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
             auto left = conv->convertLeftValue(l);
             parameters->append(left);
             bool convertBool = type->is<IR::Type_Boolean>();
@@ -957,7 +912,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 }
                 auto primitive = mkPrimitive(prim, result);
                 primitive->emplace("parameters", parameters);
-                addSrcInfoData(primitive, s);
+                primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
@@ -966,7 +921,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                         auto primitive = mkPrimitive("count", result);
                         auto parameters = mkParameters(primitive);
-                        addSrcInfoData(primitive, s);
+                        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                         auto ctr = new Util::JsonObject();
                         ctr->emplace("type", "counter_array");
                         ctr->emplace("value", extVisibleName(em->object));
@@ -980,7 +935,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                         auto primitive = mkPrimitive("execute_meter", result);
                         auto parameters = mkParameters(primitive);
-                        addSrcInfoData(primitive, s);
+                        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                         auto mtr = new Util::JsonObject();
                         mtr->emplace("type", "meter_array");
                         mtr->emplace("value", extVisibleName(em->object));
@@ -1000,7 +955,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     if (em->method->name == v1model.registers.read.name) {
                         auto primitive = mkPrimitive("register_read", result);
                         auto parameters = mkParameters(primitive);
-                        addSrcInfoData(primitive, s);
+                        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                         auto dest = conv->convert(mc->arguments->at(0));
                         parameters->append(dest);
                         parameters->append(reg);
@@ -1010,7 +965,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     } else if (em->method->name == v1model.registers.write.name) {
                         auto primitive = mkPrimitive("register_write", result);
                         auto parameters = mkParameters(primitive);
-                        addSrcInfoData(primitive, s);
+                        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                         parameters->append(reg);
                         auto index = conv->convert(mc->arguments->at(0));
                         parameters->append(index);
@@ -1058,7 +1013,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto session = conv->convert(mc->arguments->at(1));
                         auto primitive = mkPrimitive(prim, result);
                         auto parameters = mkParameters(primitive);
-                        // TODO(jafingerhut): addSrcInfoData(primitive, s);
+                        // TODO(jafingerhut):
+                        // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                         parameters->append(session);
 
                         if (id >= 0) {
@@ -1073,7 +1029,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 5, "Expected 5 arguments for %1%", mc);
                     auto primitive = mkPrimitive("modify_field_with_hash_based_offset", result);
                     auto parameters = mkParameters(primitive);
-                    addSrcInfoData(primitive, s);
+                    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                     auto dest = conv->convert(mc->arguments->at(0));
                     parameters->append(dest);
                     auto base = conv->convert(mc->arguments->at(2));
@@ -1095,7 +1051,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                     auto primitive = mkPrimitive("generate_digest", result);
                     auto parameters = mkParameters(primitive);
-                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut):
+                    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                     auto dest = conv->convert(mc->arguments->at(0));
                     parameters->append(dest);
                     cstring listName = "digest";
@@ -1126,7 +1083,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                             "resubmit" : "recirculate";
                     auto primitive = mkPrimitive(prim, result);
                     auto parameters = mkParameters(primitive);
-                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut):
+                    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                     cstring listName = prim;
                     // If we are supplied a type argument that is a named type use
                     // that for the list name.
@@ -1152,14 +1110,15 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 0, "Expected 0 arguments for %1%", mc);
                     auto primitive = mkPrimitive("drop", result);
                     (void)mkParameters(primitive);
-                    addSrcInfoData(primitive, s);
+                    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                     continue;
                 } else if (ef->method->name == v1model.random.name) {
                     BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
                     auto primitive =
                             mkPrimitive(v1model.random.modify_field_rng_uniform.name, result);
                     auto params = mkParameters(primitive);
-                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut):
+                    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                     auto dest = conv->convert(mc->arguments->at(0));
                     auto lo = conv->convert(mc->arguments->at(1));
                     auto hi = conv->convert(mc->arguments->at(2));
@@ -1171,7 +1130,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 arguments for %1%", mc);
                     auto primitive = mkPrimitive(v1model.truncate.name, result);
                     auto params = mkParameters(primitive);
-                    // TODO(jafingerhut): addSrcInfoData(primitive, s);
+                    // TODO(jafingerhut):
+                    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                     auto len = conv->convert(mc->arguments->at(0));
                     params->append(len);
                     continue;
@@ -1248,7 +1208,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
         unsigned id = nextId("actions");
         structure.ids.emplace(action, id);
         jact->emplace("id", id);
-        addSrcInfoData(jact, action);
+        jact->emplace_non_null("source_info", action->sourceInfoJsonObj());
         auto params = mkArrayField(jact, "runtime_data");
         for (auto p : *action->parameters->getEnumerator()) {
             if (!refMap->isUsed(p))
@@ -1280,7 +1240,8 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     auto result = new Util::JsonObject();
     result->emplace("name", node->name);
     result->emplace("id", nextId("conditionals"));
-    addSrcInfoData(result, node->statement->condition);
+    result->emplace_non_null("source_info",
+                             node->statement->condition->sourceInfoJsonObj());
     auto j = conv->convert(node->statement->condition, true, false);
     CHECK_NULL(j);
     result->emplace("expression", j);
@@ -1596,7 +1557,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     cstring name = extVisibleName(table);
     result->emplace("name", name);
     result->emplace("id", nextId("tables"));
-    addSrcInfoData(result, table);
+    result->emplace_non_null("source_info", table->sourceInfoJsonObj());
     cstring table_match_type = corelib.exactMatch.name;
     auto key = table->getKey();
     auto tkey = mkArrayField(result, "key");
@@ -1723,7 +1684,8 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                 jctr->emplace("id", nextId("counter_arrays"));
                 // TODO(jafingerhut) - what kind of P4_16 code causes this
                 // code to run, if any?
-                // TODO(jafingerhut): addSrcInfoData(jctr, ctrs);
+                // TODO(jafingerhut):
+                // jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
                 bool direct = te->name == v1model.directCounter.name;
                 jctr->emplace("is_direct", direct);
                 jctr->emplace("binding", name);
@@ -1954,7 +1916,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     auto result = new Util::JsonObject();
     result->emplace("name", name);
     result->emplace("id", nextId("control"));
-    addSrcInfoData(result, cont);
+    result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 
     auto cfg = new CFG();
     cfg->build(cont, refMap, typeMap);
@@ -2013,7 +1975,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto jctr = new Util::JsonObject();
                     jctr->emplace("name", name);
                     jctr->emplace("id", nextId("counter_arrays"));
-                    addSrcInfoData(jctr, eb);
+                    jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
                     auto sz = eb->getParameterValue(v1model.counter.sizeParam.name);
                     CHECK_NULL(sz);
                     BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
@@ -2025,7 +1987,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto jmtr = new Util::JsonObject();
                     jmtr->emplace("name", name);
                     jmtr->emplace("id", nextId("meter_arrays"));
-                    addSrcInfoData(jmtr, eb);
+                    jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
                     jmtr->emplace("is_direct", false);
                     auto sz = eb->getParameterValue(v1model.meter.sizeParam.name);
                     CHECK_NULL(sz);
@@ -2050,7 +2012,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto jreg = new Util::JsonObject();
                     jreg->emplace("name", name);
                     jreg->emplace("id", nextId("register_arrays"));
-                    addSrcInfoData(jreg, eb);
+                    jreg->emplace_non_null("source_info", eb->sourceInfoJsonObj());
                     auto sz = eb->getParameterValue(v1model.registers.sizeParam.name);
                     CHECK_NULL(sz);
                     BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
@@ -2089,7 +2051,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto jmtr = new Util::JsonObject();
                     jmtr->emplace("name", name);
                     jmtr->emplace("id", nextId("meter_arrays"));
-                    addSrcInfoData(jmtr, eb);
+                    jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
                     jmtr->emplace("is_direct", true);
                     jmtr->emplace("rate_count", 2);
                     auto mkind = eb->getParameterValue(v1model.directMeter.typeParam.name);
@@ -2171,7 +2133,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto json = new Util::JsonObject();
         json->emplace("name", extVisibleName(f));
         json->emplace("id", nextId("stack"));
-        addSrcInfoData(json, f);
+        json->emplace_non_null("source_info", f->sourceInfoJsonObj());
         json->emplace("size", stack->getSize());
         auto type = typeMap->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
@@ -2361,7 +2323,8 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     scalarsStruct->emplace("name", scalarsName);
     scalarsStruct->emplace("id", nextId("header_types"));
     // TODO(jafingerhut) - add line/col here?
-    // TODO(jafingerhut): addSrcInfoData(scalarsStruct, refMap);
+    // TODO(jafingerhut):
+    // scalarsStruct->emplace_non_null("source_info", refMap->sourceInfoJsonObj());
     scalars_width = 0;
     mkArrayField(scalarsStruct, "fields");
 
@@ -2554,7 +2517,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             auto json = new Util::JsonObject();
             json->emplace("name", extVisibleName(f));
             json->emplace("id", nextId("headers"));
-            addSrcInfoData(json, f);
+            json->emplace_non_null("source_info", f->sourceInfoJsonObj());
             json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
             json->emplace("metadata", meta);
             headerInstances->append(json);
@@ -2633,7 +2596,7 @@ cstring JsonConverter::createJsonType(const IR::Type_StructLike *st) {
     headerTypesCreated[st->name] = name;
     typeJson->emplace("name", name);
     typeJson->emplace("id", nextId("header_types"));
-    addSrcInfoData(typeJson, st);
+    typeJson->emplace_non_null("source_info", st->sourceInfoJsonObj());
     headerTypes->append(typeJson);
     auto fields = mkArrayField(typeJson, "fields");
     pushFields("", st, fields);
@@ -2694,7 +2657,7 @@ Util::IJson* JsonConverter::convertDeparser(const IR::P4Control* ctrl) {
     auto result = new Util::JsonObject();
     result->emplace("name", "deparser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("deparser"));
-    addSrcInfoData(result, ctrl);
+    result->emplace_non_null("source_info", ctrl->sourceInfoJsonObj());
     auto order = mkArrayField(result, "order");
     convertDeparserBody(&ctrl->body->components, order);
     return result;
@@ -2704,7 +2667,7 @@ Util::IJson* JsonConverter::toJson(const IR::P4Parser* parser) {
     auto result = new Util::JsonObject();
     result->emplace("name", "parser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("parser"));
-    addSrcInfoData(result, parser);
+    result->emplace_non_null("source_info", parser->sourceInfoJsonObj());
     result->emplace("init_state", IR::ParserState::start);
     auto states = mkArrayField(result, "parse_states");
 
@@ -2916,7 +2879,7 @@ Util::IJson* JsonConverter::toJson(const IR::ParserState* state) {
     auto result = new Util::JsonObject();
     result->emplace("name", extVisibleName(state));
     result->emplace("id", nextId("parse_states"));
-    addSrcInfoData(result, state);
+    result->emplace_non_null("source_info", state->sourceInfoJsonObj());
     auto operations = mkArrayField(result, "parser_ops");
     for (auto s : state->components) {
         auto j = convertParserStatement(s);
@@ -2994,7 +2957,7 @@ void JsonConverter::addEnums() {
         auto enumName = pEnum.first->getName().name.c_str();
         auto enumObj = new Util::JsonObject();
         enumObj->emplace("name", enumName);
-        addSrcInfoData(enumObj, pEnum.first);
+        enumObj->emplace_non_null("source_info", pEnum.first->sourceInfoJsonObj());
         auto entries = mkArrayField(enumObj, "entries");
         for (const auto &pEntry : *pEnum.second) {
             auto entry = pushNewArray(entries);

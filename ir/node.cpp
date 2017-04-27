@@ -66,4 +66,40 @@ cstring IR::dbp(const IR::INode* node) {
     return str.str();
 }
 
+Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
+    unsigned lineNumber, columnNumber;
+    const IR::Expression *lhs, *rhs;
+    cstring fName = srcInfo.toSourcePositionData(&lineNumber,
+                                                 &columnNumber);
+    if (fName == nullptr) {
+        // Do not add anything to the bmv2 JSON file for this, as this
+        // is likely a statement synthesized by the compiler, and
+        // either not easy, or it is impossible, to correlate it
+        // directly with anything in the user's P4 source code.
+        return nullptr;
+    }
+    bool isAssignment = this->is<IR::AssignmentStatement>();
+    if (isAssignment) {
+        auto assign = this->to<IR::AssignmentStatement>();
+        lhs = assign->left;
+        rhs = assign->right;
+        lhs->srcInfo.toSourcePositionData(&lineNumber, &columnNumber);
+    }
+    auto json = new Util::JsonObject();
+    cstring sourceFrag = srcInfo.toBriefSourceFragment();
+    json->emplace("filename", fName);
+    json->emplace("line", lineNumber);
+    json->emplace("column", columnNumber);
+    cstring fullSourceFrag;
+    if (isAssignment) {
+        cstring lhsFrag = lhs->srcInfo.toBriefSourceFragment();
+        cstring rhsFrag = rhs->srcInfo.toBriefSourceFragment();
+        fullSourceFrag = lhsFrag + " " + sourceFrag + " " + rhsFrag;
+    } else {
+        fullSourceFrag = sourceFrag;
+    }
+    json->emplace("expression_string", fullSourceFrag);
+    return json;
+}
+
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )
