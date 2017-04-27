@@ -78,12 +78,12 @@ action ac() {
     a = fct(a + b, a + c);
     a = fct(a, fct(b, a) + c);
     a = fct(a + b * c, a * (b + c));
-    a = (Bit)b;
-    a = (Bit)b + c;
-    a = (Bit)(b + c);
-    a = (Bit)f.z + b;
-    a = (Bit)fct((Bit)f.z + b, b + c);
+    a = b;
+    a = b + c;
+    a = b + c;
+    a = f.z + b;
+    a = fct(f.z + b, b + c);
     f = { a + b, c };
     g = { { a + b, c }, { a + b, c } };
-    g = { { (Bit)(a + b) + b, c }, { a + (b + c), c } };
+    g = { { a + b + b, c }, { a + (b + c), c } };
 }

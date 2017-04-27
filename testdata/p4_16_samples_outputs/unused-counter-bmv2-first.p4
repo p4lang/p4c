@@ -43,14 +43,14 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     direct_counter(CounterType.packets) c;
     direct_counter(CounterType.packets) c1;
-    action my_action(bit<32> a) {
-        sm.egress_spec = (bit<9>)a;
+    action my_action(bit<9> a) {
+        sm.egress_spec = a;
     }
     table t {
         actions = {
             my_action();
         }
-        const default_action = my_action(32w0);
+        const default_action = my_action(9w0);
         counters = c;
     }
     apply {

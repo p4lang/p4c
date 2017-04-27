@@ -34,8 +34,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
     }
     @name(".act") action act_0(bit<9> port) {
-        standard_metadata.egress_spec = port;
         cnt.count();
+        standard_metadata.egress_spec = port;
     }
     @name("tab1") table tab1 {
         actions = {

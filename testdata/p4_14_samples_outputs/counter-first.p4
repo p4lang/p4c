@@ -55,9 +55,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop() {
     }
     @name(".m_action") action m_action_0(bit<14> idx) {
+        my_direct_counter.count();
         my_indirect_counter.count((bit<32>)idx);
         mark_to_drop();
-        my_direct_counter.count();
     }
     @name("._nop") action _nop_0() {
         my_direct_counter.count();

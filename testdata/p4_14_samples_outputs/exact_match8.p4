@@ -31,40 +31,40 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop() {
     }
     @name(".setb1") action setb1(bit<8> val) {
-        hdr.data.b1 = val;
+        hdr.data.b1 = (bit<8>)val;
     }
     @name(".setb2") action setb2(bit<8> val) {
-        hdr.data.b2 = val;
+        hdr.data.b2 = (bit<8>)val;
     }
     @name(".setb3") action setb3(bit<8> val) {
-        hdr.data.b3 = val;
+        hdr.data.b3 = (bit<8>)val;
     }
     @name(".setb4") action setb4(bit<8> val) {
-        hdr.data.b4 = val;
+        hdr.data.b4 = (bit<8>)val;
     }
     @name(".setb12") action setb12(bit<8> v1, bit<8> v2) {
-        hdr.data.b1 = v1;
-        hdr.data.b2 = v2;
+        hdr.data.b1 = (bit<8>)v1;
+        hdr.data.b2 = (bit<8>)v2;
     }
     @name(".setb13") action setb13(bit<8> v1, bit<8> v2) {
-        hdr.data.b1 = v1;
-        hdr.data.b3 = v2;
+        hdr.data.b1 = (bit<8>)v1;
+        hdr.data.b3 = (bit<8>)v2;
     }
     @name(".setb14") action setb14(bit<8> v1, bit<8> v2) {
-        hdr.data.b1 = v1;
-        hdr.data.b4 = v2;
+        hdr.data.b1 = (bit<8>)v1;
+        hdr.data.b4 = (bit<8>)v2;
     }
     @name(".setb23") action setb23(bit<8> v1, bit<8> v2) {
-        hdr.data.b2 = v1;
-        hdr.data.b3 = v2;
+        hdr.data.b2 = (bit<8>)v1;
+        hdr.data.b3 = (bit<8>)v2;
     }
     @name(".setb24") action setb24(bit<8> v1, bit<8> v2) {
-        hdr.data.b2 = v1;
-        hdr.data.b4 = v2;
+        hdr.data.b2 = (bit<8>)v1;
+        hdr.data.b4 = (bit<8>)v2;
     }
     @name(".setb34") action setb34(bit<8> v1, bit<8> v2) {
-        hdr.data.b3 = v1;
-        hdr.data.b4 = v2;
+        hdr.data.b3 = (bit<8>)v1;
+        hdr.data.b4 = (bit<8>)v2;
     }
     @name("test1") table test1 {
         actions = {

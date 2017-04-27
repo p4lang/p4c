@@ -4,6 +4,9 @@
 ../testdata/p4_16_errors/signs.p4(16)
 action a() {
        ^
+../testdata/p4_16_errors/signs.p4(18): error: b: Cannot unify bit<8> to int<8>
+    int<8> b = 8w0;
+    ^^^^^^^^^^^^^^^
 ../testdata/p4_16_errors/signs.p4(19): error: -: Cannot operate on values with different signs
     a = a - b;
         ^^^^^
