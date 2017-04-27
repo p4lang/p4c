@@ -37,13 +37,9 @@ abstract Type {
 interface IMayBeGenericType {
     /// Allows the retrieval of type parameters
     virtual const TypeParameters* getTypeParameters() const = 0;
-    // cast to a Type object.
-    // There is a single invocation of this method (typeChecker.cpp:92) so removed
-    // const Type* toType() const { return to<Type>(); }
 }
 
 /// Implemented by objects with an 'apply' method: Parser, Control, Table
-/// \TODO: Unclear why the corresponding Type objects of these objects also implement IApply
 interface IApply {
     static const cstring applyMethodName;
     /// @returns the type signature of the apply method
@@ -150,8 +146,8 @@ abstract Operation : Expression {
     toString{ return getStringOp(); }
 }
 
-/// A Path represents a fully qualified name for a P4 object
-/// global (absolute) names are prefixed by a '.'
+/// A Path is a vestige of a previous design.
+/// Today paths can only consist of a '.'
 class Path {
     ID   name;
     optional bool absolute = false;
