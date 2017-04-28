@@ -78,9 +78,9 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
         // directly with anything in the user's P4 source code.
         return nullptr;
     }
-    bool isAssignment = this->is<IR::AssignmentStatement>();
+    bool isAssignment = is<IR::AssignmentStatement>();
     if (isAssignment) {
-        auto assign = this->to<IR::AssignmentStatement>();
+        auto assign = to<IR::AssignmentStatement>();
         lhs = assign->left;
         rhs = assign->right;
         lhs->srcInfo.toSourcePositionData(&lineNumber, &columnNumber);

@@ -74,7 +74,7 @@ void InputSources::seal() {
 }
 
 unsigned InputSources::lineCount() const {
-    int size = this->contents.size();
+    int size = contents.size();
     if (contents.back().isNullOrEmpty()) {
         // do not count the last line if it is empty.
         size -= 1;
@@ -156,8 +156,8 @@ void InputSources::mapLine(cstring file, unsigned originalSourceLineNo) {
 }
 
 SourceFileLine InputSources::getSourceLine(unsigned line) const {
-    auto it = this->line_file_map.upper_bound(line);
-    if (it == this->line_file_map.begin())
+    auto it = line_file_map.upper_bound(line);
+    if (it == line_file_map.begin())
         // There must be always something mapped to line 0
         BUG("No source information for line %1%", line);
     --it;
@@ -230,7 +230,7 @@ cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
     if (!position.isValid())
         return "";
 
-    cstring result = this->getLine(position.getStart().getLineNumber());
+    cstring result = getLine(position.getStart().getLineNumber());
     unsigned int start = position.getStart().getColumnNumber();
     unsigned int end;
     cstring toadd = "";
@@ -278,12 +278,12 @@ cstring SourceInfo::toPositionString() const {
 
 cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
                                          unsigned *outColumnNumber) const {
-    SourceFileLine position = InputSources::instance->getSourceLine(this->start.getLineNumber());
-    if (outLineNumber != NULL) {
+    SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
+    if (outLineNumber != nullptr) {
         *outLineNumber = position.sourceLine;
     }
-    if (outColumnNumber != NULL) {
-        *outColumnNumber = this->start.getColumnNumber();
+    if (outColumnNumber != nullptr) {
+        *outColumnNumber = start.getColumnNumber();
     }
     return position.fileName.c_str();
 }
