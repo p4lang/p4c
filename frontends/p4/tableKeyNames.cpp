@@ -33,21 +33,19 @@ class KeyNameGenerator : public Inspector {
     { setName("KeyNameGenerator"); }
 
     void error(const IR::Expression* expression) {
-        ::error("%1%: Complex key expression requires a @name annotation", expression);
+        ::error(
+            "%1%: Complex key expression requires a @name annotation",
+            expression);
     }
 
-    void postorder(const IR::Expression* expression) override { error(expression); }
+    void postorder(const IR::Expression* expression) override {
+        error(expression);
+    }
 
-    /** Compute a control plane name for @expression.  Eg. `".foo"` for
-     * `.foo`.
-     */
     void postorder(const IR::PathExpression* expression) override {
         name.emplace(expression, expression->path->toString());
     }
 
-    /** Compute a control plane name for @expression.  Eg. `"foo.bar"` for
-     * `foo.bar`.
-     */
     void postorder(const IR::Member* expression) override {
         auto type = typeMap->getType(expression->expr, true);
         cstring fname = expression->member.name;
@@ -61,9 +59,6 @@ class KeyNameGenerator : public Inspector {
             name.emplace(expression, n + "." + fname);
     }
 
-    /** Compute a control plane name for @expression.  Eg. `"arr[5]"` for
-     * `arr[5]`.
-     */
     void postorder(const IR::ArrayIndex* expression) override {
         cstring l = getName(expression->left);
         cstring r = getName(expression->right);
@@ -72,9 +67,6 @@ class KeyNameGenerator : public Inspector {
         name.emplace(expression, l + "[" + r + "]");
     }
 
-    /** Compute a control plane name for @expression.  Eg. `"bits"` for
-     * `bits & 0x3` or `0x3 & bits`.
-     */
     void postorder(const IR::BAnd *expression) override {
         // TODO: this exists for P4_14 to P4_16 conversion and should live in
         // the converter, not here.
@@ -88,17 +80,11 @@ class KeyNameGenerator : public Inspector {
             error(expression); }
     }
 
-    /** Compute a control plane name for @expression.  Eg. `"4"` for
-     * `16w4`.
-     */
     void postorder(const IR::Constant* expression) override {
         name.emplace(expression, expression->toString());
     }
 
 
-    /** Compute a control plane name for @expression.  Eg. `"foo[3:0]"` for
-     * `foo[3:0]`.
-     */
     void postorder(const IR::Slice* expression) override {
         cstring e0 = getName(expression->e0);
         cstring e1 = getName(expression->e1);
@@ -108,11 +94,6 @@ class KeyNameGenerator : public Inspector {
         name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
     }
 
-    /** Compute a name annotation if @expression is a method call for
-     * `isValid()`.  Eg. `"f1.isValid()"` for `f1.isValid()`.
-     *
-     * Emit a compilation error for other method calls.
-     */
     void postorder(const IR::MethodCallExpression* expression) override {
         cstring m = getName(expression->method);
         if (!m)

@@ -35,6 +35,14 @@ namespace P4 {
  * - PathExpression,
  * - Slice.
  *
+ * Examples of control plane names generated from expressions:
+ * - `arr[16w5].f` : `@name("arr[5].f")`
+ * - `f & 0x3` : `@name("f")`
+ * - `.foo` : `@name(".foo")`
+ * - `foo.bar` : `@name("foo.bar")`
+ * - `f.isValid()` : `@name("f.isValid()")`
+ * - `f[3:0]` : `@name("f[3:0]")`
+ *
  * @pre This must run before passes that change key expressions, eg. constant
  * folding.  Otherwise the generated control plane names may not match the
  * syntax of the original P4 program.
