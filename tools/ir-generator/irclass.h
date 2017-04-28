@@ -195,6 +195,7 @@ class CommentBlock : public IrElement {
             return body;
         return "";
     }
+    void append(cstring comment) { body += "\n" + comment; }
     void generate_hdr(std::ostream &out) const override { out << toString() << std::endl; };
     void generate_impl(std::ostream &out) const override { out << toString() << std::endl; };
 };

@@ -240,6 +240,7 @@ mostlyclean-local:
 # also depends on the ir-generated.h (part of BUILT_SOURCES)
 # and force rebuilding documentation when sources change
 docs: $(BUILT_SOURCES) $(DOXY_SOURCES)
+	$(RM) $(DX_DOCDIR)/$(PACKAGE).tag
 	@$(MAKE) doxygen-doc
 else
 docs:

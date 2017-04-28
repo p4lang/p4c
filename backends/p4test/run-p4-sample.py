@@ -174,7 +174,7 @@ def process_file(options, argv):
         os.makedirs(expected_dirname)
 
     # We rely on the fact that these keys are in alphabetical order.
-    rename = { "FrontEnd_12_SimplifyControlFlow": "first",
+    rename = { "FrontEnd_13_SimplifyControlFlow": "first",
                "FrontEndLast": "frontend",
                "MidEndLast": "midend" }
 

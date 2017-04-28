@@ -26,7 +26,7 @@ control c<T>()(T size) {
     Generic<T>(size) x;
     apply {
         bit<32> a = x.get<bit<32>>();
-        bit<32> b = x.get1(10w0, 5w0);
+        bit<5> b = x.get1(10w0, 5w0);
         f(b);
     }
 }

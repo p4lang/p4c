@@ -28,7 +28,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copy2") action copy2(inout bit<8> dest, bit<8> val) {
-        dest = val;
+        dest = (bit<8>)val;
     }
     @name(".copy") action copy(inout bit<8> dest, bit<8> val) {
         copy2(dest, val);
@@ -38,7 +38,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".setb1") action setb1(bit<9> port) {
         setbyte(hdr.data.b1, hdr.data.b2);
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = (bit<9>)port;
     }
     @name(".noop") action noop() {
     }

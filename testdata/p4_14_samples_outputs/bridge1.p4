@@ -32,7 +32,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copyb1") action copyb1() {
-        hdr.data.b1 = meta.meta.val;
+        hdr.data.b1 = (bit<8>)meta.meta.val;
     }
     @name("output") table output {
         actions = {
@@ -47,8 +47,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".setb1") action setb1(bit<8> val, bit<9> port) {
-        meta.meta.val = val;
-        standard_metadata.egress_spec = port;
+        meta.meta.val = (bit<8>)val;
+        standard_metadata.egress_spec = (bit<9>)port;
     }
     @name(".noop") action noop() {
     }

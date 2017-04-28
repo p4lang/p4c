@@ -37,7 +37,7 @@ struct Packet_data {
 
 control T_host(inout TArg1 tArg1, in TArg2 aArg2)(bit<32> t2Size) {
     action B_action(out bit<9> barg, BParamType bData) {
-        barg = (bit<9>)bData;
+        barg = bData;
     }
     action C_action(bit<9> cData) {
         tArg1.field1 = cData;
