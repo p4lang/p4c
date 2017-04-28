@@ -23,14 +23,6 @@ limitations under the License.
 
 namespace P4 {
 
-class DoTableKeyNames : public Transform {
-    const TypeMap* typeMap;
- public:
-    explicit DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("DoTableKeyNames"); }
-    const IR::Node* postorder(IR::KeyElement* keyElement) override;
-};
-
 /** Adds a "@name" annotation to each table key that does not have a name.
  * The string used for the name is derived from the expression itself - if
  * the expression is "simple" enough.  If the expression is not simple the
@@ -43,12 +35,23 @@ class DoTableKeyNames : public Transform {
  * - PathExpression,
  * - Slice.
  *
- * @pre None.
- * @post All keys have `@name` annotations.
+ * @pre This must run before passes that change key expressions, eg. constant
+ * folding.  Otherwise the generated control plane names may not match the
+ * syntax of the original P4 program.
+ * 
+ * @post All key fields have `@name` annotations.
  *
- * @error Reject the program if it contains complex expressions without
- * `@name` annotations.
+ * Emit a compilation error if the program contains complex key expressions
+ * without `@name` annotations.
  */
+class DoTableKeyNames : public Transform {
+    const TypeMap* typeMap;
+ public:
+    explicit DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
+    { CHECK_NULL(typeMap); setName("DoTableKeyNames"); }
+    const IR::Node* postorder(IR::KeyElement* keyElement) override;
+};
+
 class TableKeyNames : public PassManager {
  public:
     TableKeyNames(ReferenceMap* refMap, TypeMap* typeMap) {
