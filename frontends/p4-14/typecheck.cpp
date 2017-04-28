@@ -46,7 +46,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
             if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
                 if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {
                     auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
-                    if (attr->locals && attr->locals->locals.count(ref->path->name)) {
+                    if (attr && attr->locals && attr->locals->locals.count(ref->path->name)) {
                         return attr->locals->locals.at(ref->path->name); } } } }
         if (auto bbox = findContext<IR::Declaration_Instance>()) {
             if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {

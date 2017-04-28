@@ -90,6 +90,7 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
 }
 
 void ProgramStructure::createTypes() {
+    // FIXME -- refactor this to reduce the excessive duplication
     std::unordered_set<const IR::Type *> converted;
     for (auto it : metadata) {
         auto type = it.first->type;
@@ -107,6 +108,23 @@ void ProgramStructure::createTypes() {
         checkHeaderType(type, true);
         declarations->push_back(type);
         converted.emplace(type);
+    }
+    for (auto it : registers) {
+        if (it.first->layout) {
+            auto type = types.get(it.first->layout);
+            if (converted.count(type))
+                continue;
+            converted.emplace(type);
+            auto type_name = types.get(type);
+            type = type->apply(TypeConverter(this));
+            if (type->name.name != type_name) {
+                auto annos = addNameAnnotation(type->name.name, type->annotations);
+                type = new IR::Type_Struct(type->srcInfo, type_name, annos, type->fields);
+            }
+            checkHeaderType(type, true);
+            declarations->push_back(type);
+            converted.emplace(type);
+        }
     }
 
     converted.clear();
@@ -1426,13 +1444,16 @@ const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm
 const IR::Declaration_Instance*
 ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     LOG1("Synthesizing " << reg);
-    int width = reg->width;
-    if (width <= 0) {
+    const IR::Type *regElementType = nullptr;
+    if (reg->width > 0) {
+        regElementType = IR::Type_Bits::get(reg->width);
+    } else if (reg->layout) {
+        regElementType = types.get(reg->layout);
+    } else {
         ::warning("%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
-        width = defaultRegisterWidth;
+        regElementType = IR::Type_Bits::get(defaultRegisterWidth);
     }
 
-    auto regElementType = IR::Type_Bits::get(width);
     IR::ID ext = v1model.registers.Id();
     auto typepath = new IR::Path(ext);
     auto type = new IR::Type_Name(typepath);
@@ -1440,7 +1461,12 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     typeargs->push_back(regElementType);
     auto spectype = new IR::Type_Specialized(type, typeargs);
     auto args = new IR::Vector<IR::Expression>();
-    args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count));
+    if (reg->direct) {
+        // FIXME -- do we need a direct_register extern in v1model?  For now
+        // using size of 0 to specify a direct register
+        args->push_back(new IR::Constant(v1model.registers.size_type, 0));
+    } else {
+        args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count)); }
     auto annos = addNameAnnotation(reg->name, reg->annotations);
     auto decl = new IR::Declaration_Instance(newName, annos, spectype, args, nullptr);
     return decl;

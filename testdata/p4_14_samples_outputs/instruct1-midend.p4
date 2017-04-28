@@ -12,7 +12,7 @@ header data_t {
     bit<8>  b4;
 }
 
-header data2_t {
+@name("data2_t") header data2_t_0 {
     bit<16> x1;
     bit<16> x2;
 }
@@ -22,23 +22,23 @@ struct metadata {
 
 struct headers {
     @name("data") 
-    data_t  data;
+    data_t    data;
     @name("hdr1") 
-    data2_t hdr1;
+    data2_t_0 hdr1;
     @name("hdr2") 
-    data2_t hdr2;
+    data2_t_0 hdr2;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_data2") state parse_data2 {
-        packet.extract<data2_t>(hdr.hdr1);
+        packet.extract<data2_t_0>(hdr.hdr1);
         transition select(hdr.hdr1.x1) {
             16w1 &&& 16w1: parse_hdr2;
             default: accept;
         }
     }
     @name("parse_hdr2") state parse_hdr2 {
-        packet.extract<data2_t>(hdr.hdr2);
+        packet.extract<data2_t_0>(hdr.hdr2);
         transition accept;
     }
     @name("start") state start {
@@ -83,8 +83,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<data_t>(hdr.data);
-        packet.emit<data2_t>(hdr.hdr1);
-        packet.emit<data2_t>(hdr.hdr2);
+        packet.emit<data2_t_0>(hdr.hdr1);
+        packet.emit<data2_t_0>(hdr.hdr2);
     }
 }
 

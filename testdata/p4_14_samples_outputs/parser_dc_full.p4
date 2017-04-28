@@ -40,7 +40,7 @@ header eompls_t {
     bit<16> seqNo;
 }
 
-header erspan_header_v1_t {
+@name("erspan_header_v1_t") header erspan_header_v1_t_0 {
     bit<4>  version;
     bit<12> vlan;
     bit<6>  priority;
@@ -49,7 +49,7 @@ header erspan_header_v1_t {
     bit<8>  truncated;
 }
 
-header erspan_header_v2_t {
+@name("erspan_header_v2_t") header erspan_header_v2_t_0 {
     bit<4>  version;
     bit<12> vlan;
     bit<6>  priority;
@@ -270,95 +270,95 @@ struct metadata {
 
 struct headers {
     @name("arp_rarp") 
-    arp_rarp_t         arp_rarp;
+    arp_rarp_t           arp_rarp;
     @name("arp_rarp_ipv4") 
-    arp_rarp_ipv4_t    arp_rarp_ipv4;
+    arp_rarp_ipv4_t      arp_rarp_ipv4;
     @name("cpu_header") 
-    cpu_header_t       cpu_header;
+    cpu_header_t         cpu_header;
     @name("data") 
-    payload_t          data;
+    payload_t            data;
     @name("eompls") 
-    eompls_t           eompls;
+    eompls_t             eompls;
     @name("erspan_v1_header") 
-    erspan_header_v1_t erspan_v1_header;
+    erspan_header_v1_t_0 erspan_v1_header;
     @name("erspan_v2_header") 
-    erspan_header_v2_t erspan_v2_header;
+    erspan_header_v2_t_0 erspan_v2_header;
     @name("ethernet") 
-    ethernet_t         ethernet;
+    ethernet_t           ethernet;
     @name("fcoe") 
-    fcoe_header_t      fcoe;
+    fcoe_header_t        fcoe;
     @name("genv") 
-    genv_t             genv;
+    genv_t               genv;
     @name("genv_opt_A") 
-    genv_opt_A_t       genv_opt_A;
+    genv_opt_A_t         genv_opt_A;
     @name("genv_opt_B") 
-    genv_opt_B_t       genv_opt_B;
+    genv_opt_B_t         genv_opt_B;
     @name("genv_opt_C") 
-    genv_opt_C_t       genv_opt_C;
+    genv_opt_C_t         genv_opt_C;
     @name("gre") 
-    gre_t              gre;
+    gre_t                gre;
     @name("icmp") 
-    icmp_t             icmp;
+    icmp_t               icmp;
     @name("icmpv6") 
-    icmpv6_t           icmpv6;
+    icmpv6_t             icmpv6;
     @name("inner_ethernet") 
-    ethernet_t         inner_ethernet;
+    ethernet_t           inner_ethernet;
     @name("inner_icmp") 
-    icmp_t             inner_icmp;
+    icmp_t               inner_icmp;
     @name("inner_icmpv6") 
-    icmpv6_t           inner_icmpv6;
+    icmpv6_t             inner_icmpv6;
     @name("inner_ipv4") 
-    ipv4_t             inner_ipv4;
+    ipv4_t               inner_ipv4;
     @name("inner_ipv6") 
-    ipv6_t             inner_ipv6;
+    ipv6_t               inner_ipv6;
     @name("inner_sctp") 
-    sctp_t             inner_sctp;
+    sctp_t               inner_sctp;
     @name("inner_tcp") 
-    tcp_t              inner_tcp;
+    tcp_t                inner_tcp;
     @name("inner_udp") 
-    udp_t              inner_udp;
+    udp_t                inner_udp;
     @name("input_port_hdr") 
-    input_port_hdr_t   input_port_hdr;
+    input_port_hdr_t     input_port_hdr;
     @name("ipv4") 
-    ipv4_t             ipv4;
+    ipv4_t               ipv4;
     @name("ipv6") 
-    ipv6_t             ipv6;
+    ipv6_t               ipv6;
     @name("mpls_bos") 
-    mpls_t             mpls_bos;
+    mpls_t               mpls_bos;
     @name("nsh") 
-    nsh_t              nsh;
+    nsh_t                nsh;
     @name("nsh_context") 
-    nsh_context_t      nsh_context;
+    nsh_context_t        nsh_context;
     @name("nvgre") 
-    nvgre_t            nvgre;
+    nvgre_t              nvgre;
     @name("outer_ipv4") 
-    ipv4_t             outer_ipv4;
+    ipv4_t               outer_ipv4;
     @name("outer_ipv6") 
-    ipv6_t             outer_ipv6;
+    ipv6_t               outer_ipv6;
     @name("outer_udp") 
-    udp_t              outer_udp;
+    udp_t                outer_udp;
     @name("roce") 
-    roce_header_t      roce;
+    roce_header_t        roce;
     @name("roce_v2") 
-    roce_v2_header_t   roce_v2;
+    roce_v2_header_t     roce_v2;
     @name("sctp") 
-    sctp_t             sctp;
+    sctp_t               sctp;
     @name("snap_header") 
-    snap_header_t      snap_header;
+    snap_header_t        snap_header;
     @name("tcp") 
-    tcp_t              tcp;
+    tcp_t                tcp;
     @name("udp") 
-    udp_t              udp;
+    udp_t                udp;
     @name("vxlan") 
-    vxlan_t            vxlan;
+    vxlan_t              vxlan;
     @name("mpls") 
-    mpls_t[3]          mpls;
+    mpls_t[3]            mpls;
     @name("vlan_tag_") 
-    vlan_tag_t[2]      vlan_tag_;
+    vlan_tag_t[2]        vlan_tag_;
     @name("vlan_tag_3b") 
-    vlan_tag_3b_t[2]   vlan_tag_3b;
+    vlan_tag_3b_t[2]     vlan_tag_3b;
     @name("vlan_tag_5b") 
-    vlan_tag_5b_t[2]   vlan_tag_5b;
+    vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
