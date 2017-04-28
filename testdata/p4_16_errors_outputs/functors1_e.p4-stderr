@@ -1,4 +1,0 @@
-../testdata/p4_16_errors/functors1_e.p4(24):syntax error, unexpected '.'
-        p.
-         ^
-error: 1 errors encountered, aborting compilation
