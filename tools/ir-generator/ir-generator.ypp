@@ -63,6 +63,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     IrNamespace                 *irNamespace;
     ConstFieldInitializer       *constFieldInit;
     LookupScope                 *lookup;
+    CommentBlock                *comment_block;
     std::vector<const Type *>   *types;
     Type                        *type;
     NodeKind                    kind;
@@ -89,6 +90,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %type<types>                    parentList nonEmptyParentList type_args
 %type<str>                      name expression optInitializer fieldName methodName body
 %type<lookup>                   lookup_scope
+%type<comment_block>             comment_block
 
 %error-verbose
 %locations
@@ -140,15 +142,22 @@ input
 
 element
     : irclass           { global.push_back($1); }
-    | COMMENTBLOCK      { global.push_back(new CommentBlock(@1, $1)); }
-    | COMMENTBLOCK irclass {
-            $2->comments.push_back(new CommentBlock(@1, $1));
+    | comment_block     { global.push_back($1); }
+    | comment_block irclass {
+            $2->comments.push_back($1);
             global.push_back($2); }
     | EMITBLOCK         { global.push_back(new EmitBlock(@1, $1.impl, $1.block)); }
     | NAMESPACE { BEGIN(PARSE_BRACKET); }
       IDENTIFIER { current_namespace = IrNamespace::get(current_namespace, $3); }
       '{' input '}' { current_namespace = current_namespace->parent; }
     | ';' /* ignore */
+    ;
+
+comment_block : COMMENTBLOCK { $$ = new CommentBlock(@1, $1); }
+    | comment_block COMMENTBLOCK {
+        $$ = $1;
+        $$->srcInfo += @2;
+        $$->append($2); }
     ;
 
 scope

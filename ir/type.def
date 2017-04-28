@@ -458,6 +458,7 @@ class Type_MethodCall : Type {
 
 /// Actions look a lot like methods in many respects.
 /// However, invoking an action returns another action
+/// Having different IR nodes allows performing different transforms in visitors
 class Type_Action : Type_MethodBase {
 #nodbprint
 }
