@@ -1,4 +1,15 @@
-../testdata/p4_16_errors/functors2_e.p4(20):syntax error, unexpected '.'
-        p.
-         ^
-error: 1 errors encountered, aborting compilation
+../testdata/p4_16_errors/functors2_e.p4(20): error: Could not find type of p
+        p.apply();
+        ^^^^^^^^^
+../testdata/p4_16_errors/functors2_e.p4(20): error: Could not find type of p_inst
+        p.apply();
+        ^^^^^^^^^
+../testdata/p4_16_errors/functors2_e.p4(20): error: Could not find type of p_inst.apply
+        p.apply();
+        ^^^^^^^^^
+../testdata/p4_16_errors/functors2_e.p4(16): error: Could not find type of control p
+control p()
+        ^
+../testdata/p4_16_errors/functors2_e.p4(20): error: Could not find type of p
+        p.apply();
+        ^

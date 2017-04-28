@@ -46,6 +46,7 @@ limitations under the License.
 #include "tableKeyNames.h"
 #include "parserControlFlow.h"
 #include "uselessCasts.h"
+#include "directCalls.h"
 
 namespace P4 {
 
@@ -78,12 +79,21 @@ class PrettyPrint : public Inspector {
 
 /**
  * This pass is a no-op whose purpose is to mark the end of the
- * front-end, which is useful for debugging. It is implemented as an
+ * front-end, used for testing.  It is implemented as an
  * empty @ref PassManager (instead of a @ref Visitor) for efficiency.
  */
 class FrontEndLast : public PassManager {
  public:
     FrontEndLast() { setName("FrontEndLast"); }
+};
+
+/**
+ * This pass is a no-op whose purpose is to mark a point in the
+ * front-end, used for testing.
+ */
+class FrontEndDump : public PassManager {
+ public:
+    FrontEndDump() { setName("FrontEndDump"); }
 };
 
 // TODO: remove skipSideEffectOrdering flag
@@ -107,10 +117,13 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(&refMap, nullptr),
+        // Desugars direct parser and control applications
+        // into instantiations followed by application
+        new InstantiateDirectCalls(&refMap),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new ResolveReferences(&refMap),
-        new TypeInference(&refMap, &typeMap),
+        new ResolveReferences(&refMap),  // check shadowing
+        new TypeInference(&refMap, &typeMap, false),  // insert casts
         new BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.
         new ClearTypeMap(&typeMap),
@@ -119,6 +132,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StrengthReduction(),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
+        new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(&refMap, true),
         new SimplifyParsers(&refMap),
         new ResetHeaders(&refMap, &typeMap),
