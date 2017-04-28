@@ -39,7 +39,8 @@ void DoSetHeaders::generateSetValid(
     } else if (destType->is<IR::Type_Header>()) {
         LOG3("Inserting setValid for " << dest);
         auto method = new IR::Member(dest->srcInfo, dest, IR::Type_Header::setValid);
-        auto mc = new IR::MethodCallExpression(dest->srcInfo, method, new IR::Vector<IR::Expression>());
+        auto mc = new IR::MethodCallExpression(
+            dest->srcInfo, method, new IR::Vector<IR::Expression>());
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
         insert->push_back(stat);
     }
