@@ -25,6 +25,7 @@ limitations under the License.
 #include "lib/source_file.h"
 #include "ir-tree-macros.h"
 #include "lib/log.h"
+#include "lib/json.h"
 
 class Visitor;
 class Inspector;
@@ -104,6 +105,7 @@ class Node : public virtual INode {
     explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
+    Util::JsonObject* sourceInfoJsonObj() const;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }

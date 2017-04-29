@@ -173,4 +173,11 @@ JsonObject* JsonObject::emplace(cstring label, IJson* value) {
     return this;
 }
 
+JsonObject* JsonObject::emplace_non_null(cstring label, IJson* value) {
+    if (value != nullptr) {
+        return emplace(label, value);
+    }
+    return this;
+}
+
 }  // namespace Util

@@ -179,7 +179,10 @@ class SourceInfo final {
     { out << this->toDebugString(); }
 
     cstring toSourceFragment() const;
+    cstring toBriefSourceFragment() const;
     cstring toPositionString() const;
+    cstring toSourcePositionData(unsigned *outLineNumber,
+                                 unsigned *outColumnNumber) const;
     SourceFileLine toPosition() const;
 
     bool isValid() const
@@ -274,6 +277,7 @@ class InputSources final {
                ^^^^^^^^ */
     cstring getSourceFragment(const SourcePosition &position) const;
     cstring getSourceFragment(const SourceInfo &position) const;
+    cstring getBriefSourceFragment(const SourceInfo &position) const;
 
     cstring toDebugString() const;
 

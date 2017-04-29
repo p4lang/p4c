@@ -74,7 +74,7 @@ void InputSources::seal() {
 }
 
 unsigned InputSources::lineCount() const {
-    int size = this->contents.size();
+    int size = contents.size();
     if (contents.back().isNullOrEmpty()) {
         // do not count the last line if it is empty.
         size -= 1;
@@ -156,8 +156,8 @@ void InputSources::mapLine(cstring file, unsigned originalSourceLineNo) {
 }
 
 SourceFileLine InputSources::getSourceLine(unsigned line) const {
-    auto it = this->line_file_map.upper_bound(line);
-    if (it == this->line_file_map.begin())
+    auto it = line_file_map.upper_bound(line);
+    if (it == line_file_map.begin())
         // There must be always something mapped to line 0
         BUG("No source information for line %1%", line);
     --it;
@@ -226,6 +226,29 @@ cstring InputSources::getSourceFragment(const SourceInfo &position) const {
     return result + toadd + marker + cstring::newline;
 }
 
+cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
+    if (!position.isValid())
+        return "";
+
+    cstring result = getLine(position.getStart().getLineNumber());
+    unsigned int start = position.getStart().getColumnNumber();
+    unsigned int end;
+    cstring toadd = "";
+
+    // If the position spans multiple lines, truncate to just the first line
+    if (position.getEnd().getLineNumber() > position.getStart().getLineNumber()) {
+        // go to the end of the first line
+        end = result.size();
+        if (result.find('\n') != nullptr) {
+            --end;
+        }
+        toadd = " ...";
+    } else {
+        end = position.getEnd().getColumnNumber();
+    }
+    return result.substr(start, end - start) + toadd;
+}
+
 cstring InputSources::toDebugString() const {
     std::stringstream builder;
     for (auto line : contents)
@@ -242,11 +265,27 @@ cstring SourceInfo::toSourceFragment() const {
     return InputSources::instance->getSourceFragment(*this);
 }
 
+cstring SourceInfo::toBriefSourceFragment() const {
+    return InputSources::instance->getBriefSourceFragment(*this);
+}
+
 cstring SourceInfo::toPositionString() const {
     if (!isValid())
         return "";
     SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
     return position.toString();
+}
+
+cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
+                                         unsigned *outColumnNumber) const {
+    SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
+    if (outLineNumber != nullptr) {
+        *outLineNumber = position.sourceLine;
+    }
+    if (outColumnNumber != nullptr) {
+        *outColumnNumber = start.getColumnNumber();
+    }
+    return position.fileName.c_str();
 }
 
 SourceFileLine SourceInfo::toPosition() const {
