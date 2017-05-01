@@ -22,9 +22,13 @@ limitations under the License.
 
 namespace P4 {
 
-// Check that operations which are only defined at compile-time
-// do not exist in the program.  This should be run after inlining,
-// constant folding and strength reduction.
+/**
+ * Check that operations which are only defined at compile-time
+ * do not exist in the program.
+ *
+ * @pre This should be run after inlining, constant folding and strength reduction.
+ * @post Raise error for IR::Mod and IR::Div.
+ */
 class CompileTimeOperations : public Inspector {
  public:
     CompileTimeOperations() { setName("CompileTimeOperations"); }
