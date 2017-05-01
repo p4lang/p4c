@@ -643,6 +643,14 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (initType == destType)
         return sourceExpression;
 
+    // Unification allows tuples to be assigned to headers and structs.
+    // We should only allow this if the source expression is a ListExpression.
+    if (destType->is<IR::Type_StructLike>() && initType->is<IR::Type_Tuple>() &&
+        !sourceExpression->is<IR::ListExpression>()) {
+        typeError("%1%: Cannot assign a %2% to a %3%", errorPosition, initType, destType);
+        return sourceExpression;
+    }
+
     auto tvs = unify(errorPosition, destType, initType, true);
     if (tvs == nullptr)
         // error already signalled

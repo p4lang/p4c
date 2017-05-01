@@ -18,33 +18,42 @@ limitations under the License.
 
 namespace P4 {
 
-void DoSetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type,
-                                  const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets) {
-    if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
-        auto sl = type->to<IR::Type_StructLike>();
+void DoSetHeaders::generateSetValid(
+    const IR::Type* destType, const IR::Type* srcType,
+    const IR::Expression* dest, IR::Vector<IR::StatOrDecl>* insert) {
+    auto tt = srcType->to<IR::Type_Tuple>();
+    if (tt == nullptr)
+        return;
+
+    // The source is either a tuple, or a list expression
+    if (destType->is<IR::Type_Struct>()) {
+        auto it = tt->components.begin();
+        auto sl = destType->to<IR::Type_Struct>();
         for (auto f : sl->fields) {
             auto ftype = typeMap->getType(f, true);
-            auto member = new IR::Member(expr, f->name);
-            generateResets(typeMap, ftype, member, resets);
+            auto stype = *it;
+            auto member = new IR::Member(dest, f->name);
+            generateSetValid(ftype, stype, member, insert);
+            ++it;
         }
-    } else if (type->is<IR::Type_Header>()) {
-        auto method = new IR::Member(expr->srcInfo, expr, IR::Type_Header::setInvalid);
-        auto args = new IR::Vector<IR::Expression>();
-        auto mc = new IR::MethodCallExpression(expr->srcInfo, method, args);
+    } else if (destType->is<IR::Type_Header>()) {
+        LOG3("Inserting setValid for " << dest);
+        auto method = new IR::Member(dest->srcInfo, dest, IR::Type_Header::setValid);
+        auto mc = new IR::MethodCallExpression(dest->srcInfo, method, new IR::Vector<IR::Expression>());
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
-        resets->push_back(stat);
-    } else if (type->is<IR::Type_Stack>()) {
-        auto tstack = type->to<IR::Type_Stack>();
-        if (!tstack->sizeKnown()) {
-            ::error("%1%: stack size is not a compile-time constant", tstack);
-            return;
-        }
-        for (unsigned i = 0; i < tstack->getSize(); i++) {
-            auto index = new IR::Constant(i);
-            auto elem = new IR::ArrayIndex(expr, index);
-            generateResets(typeMap, tstack->elementType, elem, resets);
-        }
+        insert->push_back(stat);
     }
+}
+
+const IR::Node* DoSetHeaders::postorder(IR::AssignmentStatement* statement) {
+    auto vec = new IR::Vector<IR::StatOrDecl>();
+    auto ltype = typeMap->getType(statement->left, true);
+    auto rtype = typeMap->getType(statement->right, true);
+    generateSetValid(ltype, rtype, statement->left, vec);
+    if (vec->empty())
+        return statement;
+    vec->push_back(statement);
+    return vec;
 }
 
 }  // namespace P4

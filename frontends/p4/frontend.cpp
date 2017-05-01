@@ -47,6 +47,7 @@ limitations under the License.
 #include "parserControlFlow.h"
 #include "uselessCasts.h"
 #include "directCalls.h"
+#include "setHeaders.h"
 
 namespace P4 {
 
@@ -139,8 +140,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
-        new SetHeaders(&refMap, &typeMap),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
+        new SetHeaders(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),

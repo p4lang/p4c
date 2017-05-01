@@ -52,7 +52,6 @@ class SideEffects : public Inspector {
             nodeWithSideEffect = mce;
             return;
         }
-        // TODO: add an annotation to indicate lack of side-effects
         auto mi = MethodInstance::resolve(mce, refMap, typeMap);
         if (!mi->is<BuiltInMethod>()) {
             sideEffectCount++;
@@ -76,8 +75,7 @@ class SideEffects : public Inspector {
     SideEffects(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap) { setName("SideEffects"); }
 
-    /// Returns true if the expression may contain constructor or method
-    /// invocations.
+    /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression* expression,
                       ReferenceMap* refMap,
                       TypeMap* typeMap) {
@@ -128,8 +126,6 @@ class DoSimplifyExpressions : public Transform {
     IR::IndexedVector<IR::Declaration> toInsert;
 
  public:
-    // Currently this only works correctly only if initializers
-    // cannot appear in local declarations.
     DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap)
             : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);

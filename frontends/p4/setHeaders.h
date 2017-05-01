@@ -24,25 +24,47 @@ limitations under the License.
 namespace P4 {
 /**
 Assigning a list expression to a header should also
-set the header validity bit.  This pass should be run after
-RemoveInitializers - it only looks at assignment statements.
+set the header validity bit.  For example, given:
+
+header H { ... };
+struct S { H h; }
+S s;
+
+The following fragment:
+
+s = { { 1, 2 } };
+
+is converted to:
+
+s.h.setValid();
+s = { { 1, 2 } };
+
+@pre This pass should be run after RemoveInitializers - it only looks
+at assignment statements.  It should also run after
+SideEffectOrdering, because that pass inserts temporaries for the case
+of tuples passed as arguments to functions expecting headers, reducing
+them to assignments.
 */
-class DoSetHeaders : public Transform {
-    const TypeMap* typeMap;
+class DoSetHeaders final : public Transform {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+
+    bool containsHeaderType(const IR::Type* type);
+    void generateSetValid(
+        const IR::Type* destType, const IR::Type* srcType,
+        const IR::Expression* dest, IR::Vector<IR::StatOrDecl>* insert);
 
  public:
-    static void generateSets(
-        const TypeMap* typeMap, const IR::Type* type,
-        const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
-    explicit DoSetHeaders(const TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("DoSetHeaders"); }
+    DoSetHeaders(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSetHeaders"); }
+    const IR::Node* postorder(IR::AssignmentStatement* assign) override;
 };
 
-class SetHeaders : public PassManager {
+class SetHeaders final : public PassManager {
  public:
     SetHeaders(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new P4::DoSetHeaders(typeMap));
+        passes.push_back(new P4::DoSetHeaders(refMap, typeMap));
         setName("SetHeaders");
     }
 };

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,16 +23,16 @@ namespace P4 {
 
 class TypeConstraints;
 
-/*
- * Hindley-Milner type unification algorithm
- * (See for example, http://cs.brown.edu/~sk/Publications/Books/ProgLangs/2007-04-26/plai-2007-04-26.pdf, page 280.)
- * Attempts to unify two types.  As a consequence it generates constraints on other sub-types.
- * Constraints are solved at the end.
- * Solving a constraint generates type-variable substitutions
- * (where a type variable is replaced with another type - which could still contain type variables inside).
- * All substitutions are composed together.
- * Constraint solving can fail, which means that the program does not type-check.
- */
+/**
+Hindley-Milner type unification algorithm
+(See for example, http://cs.brown.edu/~sk/Publications/Books/ProgLangs/2007-04-26/plai-2007-04-26.pdf, page 280.)
+Attempts to unify two types.  As a consequence it generates constraints on other sub-types.
+Constraints are solved at the end.
+Solving a constraint generates type-variable substitutions
+(where a type variable is replaced with another type - which could still contain type variables inside).
+All substitutions are composed together.
+Constraint solving can fail, which means that the program does not type-check.
+*/
 class TypeUnification final {
     TypeConstraints*  constraints;
 

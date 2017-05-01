@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,22 +13,42 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-typedef tuple<bit<32>, bool> pair;
+header H {
+    bit<32> x;
+}
 struct S {
-    bit<32> f;
-    bool    s;
+    H h;
 }
 
-control proto();
-package top(proto _p);
+control c(out bool b);
+package top(c _c);
 
-control c() {
-    pair x = { 10, false };
-    tuple<bit<32>, bool> y;
+control e(in H h, out bool valid) {
     apply {
-        y = x;
+        valid = h.isValid();
     }
 }
 
-top(c()) main;
+control d(out bool b) {
+    e() einst;
+
+    apply {
+        H h;
+        H h1;
+        H[2] h3;
+        h = { 0 };
+
+        S s;
+        S s1;
+        s = { { 0 } };
+
+        s1.h = { 0 };
+        h3[0] = { 0 };
+        h3[1] = { 1 };
+
+        bool eout;
+        einst.apply({ 0 }, eout);
+        b = h.isValid() && eout;
+    }
+}
+top(d()) main;
