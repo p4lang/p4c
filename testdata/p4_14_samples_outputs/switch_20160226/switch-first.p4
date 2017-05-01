@@ -245,7 +245,7 @@ header eompls_t {
     bit<16> seqNo;
 }
 
-header erspan_header_t3_t {
+@name("erspan_header_t3_t") header erspan_header_t3_t_0 {
     bit<4>  version;
     bit<12> vlan;
     bit<6>  priority;
@@ -655,7 +655,7 @@ struct headers {
     @name("eompls") 
     eompls_t                                eompls;
     @name("erspan_t3_header") 
-    erspan_header_t3_t                      erspan_t3_header;
+    erspan_header_t3_t_0                    erspan_t3_header;
     @name("ethernet") 
     ethernet_t                              ethernet;
     @name("fabric_header") 
@@ -800,7 +800,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_inner_ethernet;
     }
     @name("parse_erspan_t3") state parse_erspan_t3 {
-        packet.extract<erspan_header_t3_t>(hdr.erspan_t3_header);
+        packet.extract<erspan_header_t3_t_0>(hdr.erspan_t3_header);
         transition parse_inner_ethernet;
     }
     @name("parse_ethernet") state parse_ethernet {
@@ -2750,7 +2750,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".egress_mirror") action egress_mirror(bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
     @name(".egress_mirror_drop") action egress_mirror_drop(bit<32> session_id) {
         egress_mirror(session_id);
@@ -3754,7 +3754,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
     @name("mac_acl") table mac_acl {
@@ -3801,7 +3801,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
     @name(".acl_dod_en") action acl_dod_en() {
@@ -4756,7 +4756,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         mark_to_drop();
     }
     @name(".negative_mirror") action negative_mirror(bit<32> session_id) {
-        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
+        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop();
     }
     @name(".deflect_on_drop") action deflect_on_drop() {
@@ -4948,7 +4948,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<ipv6_t>(hdr.ipv6);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<gre_t>(hdr.gre);
-        packet.emit<erspan_header_t3_t>(hdr.erspan_t3_header);
+        packet.emit<erspan_header_t3_t_0>(hdr.erspan_t3_header);
         packet.emit<nvgre_t>(hdr.nvgre);
         packet.emit<udp_t>(hdr.udp);
         packet.emit<vxlan_gpe_t>(hdr.vxlan_gpe);

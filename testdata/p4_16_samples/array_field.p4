@@ -16,7 +16,7 @@ limitations under the License.
 
 header H { bit z; }
 
-extern bit f(inout bit x, in bit b);
+extern bit<32> f(inout bit x, in bit b);
 
 control c(out H[2] h);
 package top(c _c);

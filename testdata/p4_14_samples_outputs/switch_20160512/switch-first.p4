@@ -276,7 +276,7 @@ header eompls_t {
     bit<16> seqNo;
 }
 
-header erspan_header_t3_t {
+@name("erspan_header_t3_t") header erspan_header_t3_t_0 {
     bit<4>  version;
     bit<12> vlan;
     bit<6>  priority;
@@ -697,7 +697,7 @@ struct headers {
     @name("eompls") 
     eompls_t                                eompls;
     @name("erspan_t3_header") 
-    erspan_header_t3_t                      erspan_t3_header;
+    erspan_header_t3_t_0                    erspan_t3_header;
     @name("ethernet") 
     ethernet_t                              ethernet;
     @name("fabric_header") 
@@ -838,7 +838,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_inner_ethernet;
     }
     @name("parse_erspan_t3") state parse_erspan_t3 {
-        packet.extract<erspan_header_t3_t>(hdr.erspan_t3_header);
+        packet.extract<erspan_header_t3_t_0>(hdr.erspan_t3_header);
         transition parse_inner_ethernet;
     }
     @name("parse_ethernet") state parse_ethernet {
@@ -2937,7 +2937,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".egress_mirror") action egress_mirror(bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
     @name(".egress_mirror_drop") action egress_mirror_drop(bit<32> session_id) {
         egress_mirror(session_id);
@@ -3465,7 +3465,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
     @name(".int_sink") action int_sink(bit<32> mirror_id) {
         meta.int_metadata_i2e.sink = 1w1;
         meta.i2e_metadata.mirror_session_id = (bit<16>)mirror_id;
-        clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, (bit<32>)mirror_id, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, mirror_id, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
         hdr.int_header.setInvalid();
         hdr.int_val[0].setInvalid();
         hdr.int_val[1].setInvalid();
@@ -4249,7 +4249,7 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
     @name(".sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
         meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
-        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, (bit<32>)sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
     }
     @name(".sflow_ing_session_enable") action sflow_ing_session_enable(bit<32> rate_thr, bit<16> session_id) {
         meta.ingress_metadata.sflow_take_sample = rate_thr + meta.ingress_metadata.sflow_take_sample;
@@ -4259,10 +4259,10 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
         sflow_ingress_session_pkt_counter.count();
     }
     @name(".sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu_0(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
+        sflow_ingress_session_pkt_counter.count();
         meta.fabric_metadata.reason_code = reason_code;
         meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
-        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, (bit<32>)sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
-        sflow_ingress_session_pkt_counter.count();
+        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
     }
     @name("sflow_ing_take_sample") table sflow_ing_take_sample {
         actions = {
@@ -4475,7 +4475,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -4542,7 +4542,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -5059,11 +5059,11 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         ipv4_multicast_route_s_g_stats.count();
     }
     @name(".multicast_route_s_g_hit") action multicast_route_s_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv4_multicast_route_s_g_stats.count();
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.mcast_route_hit = 1w1;
         meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-        ipv4_multicast_route_s_g_stats.count();
     }
     @name("ipv4_multicast_route") table ipv4_multicast_route {
         actions = {
@@ -5081,22 +5081,22 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         @name("ipv4_multicast_route_s_g_stats") counters = direct_counter(CounterType.packets);
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_0() {
-        meta.l3_metadata.l3_copy = 1w1;
         ipv4_multicast_route_star_g_stats.count();
+        meta.l3_metadata.l3_copy = 1w1;
     }
     @name(".multicast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv4_multicast_route_star_g_stats.count();
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
         meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-        ipv4_multicast_route_star_g_stats.count();
     }
     @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv4_multicast_route_star_g_stats.count();
         meta.multicast_metadata.mcast_mode = 2w2;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
         meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
-        ipv4_multicast_route_star_g_stats.count();
     }
     @name("ipv4_multicast_route_star_g") table ipv4_multicast_route_star_g {
         actions = {
@@ -5198,11 +5198,11 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         ipv6_multicast_route_s_g_stats.count();
     }
     @name(".multicast_route_s_g_hit") action multicast_route_s_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv6_multicast_route_s_g_stats.count();
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.mcast_route_hit = 1w1;
         meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-        ipv6_multicast_route_s_g_stats.count();
     }
     @name("ipv6_multicast_route") table ipv6_multicast_route {
         actions = {
@@ -5220,22 +5220,22 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         @name("ipv6_multicast_route_s_g_stats") counters = direct_counter(CounterType.packets);
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_1() {
-        meta.l3_metadata.l3_copy = 1w1;
         ipv6_multicast_route_star_g_stats.count();
+        meta.l3_metadata.l3_copy = 1w1;
     }
     @name(".multicast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv6_multicast_route_star_g_stats.count();
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
         meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
-        ipv6_multicast_route_star_g_stats.count();
     }
     @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
+        ipv6_multicast_route_star_g_stats.count();
         meta.multicast_metadata.mcast_mode = 2w2;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
         meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
-        ipv6_multicast_route_star_g_stats.count();
     }
     @name("ipv6_multicast_route_star_g") table ipv6_multicast_route_star_g {
         actions = {
@@ -5399,8 +5399,8 @@ control process_meter_action(inout headers hdr, inout metadata meta, inout stand
         meter_stats.count();
     }
     @name(".meter_deny") action meter_deny_0() {
-        mark_to_drop();
         meter_stats.count();
+        mark_to_drop();
     }
     @name("meter_action") table meter_action {
         actions = {
@@ -5788,7 +5788,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         mark_to_drop();
     }
     @name(".negative_mirror") action negative_mirror(bit<32> session_id) {
-        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
+        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop();
     }
     @name("drop_stats") table drop_stats_0 {
@@ -5990,7 +5990,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<ipv6_t>(hdr.ipv6);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<gre_t>(hdr.gre);
-        packet.emit<erspan_header_t3_t>(hdr.erspan_t3_header);
+        packet.emit<erspan_header_t3_t_0>(hdr.erspan_t3_header);
         packet.emit<nvgre_t>(hdr.nvgre);
         packet.emit<udp_t>(hdr.udp);
         packet.emit<sflow_hdr_t>(hdr.sflow);

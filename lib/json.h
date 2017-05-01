@@ -126,6 +126,7 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson*> {
     JsonObject() = default;
     void serialize(std::ostream& out) const;
     JsonObject* emplace(cstring label, IJson* value);
+    JsonObject* emplace_non_null(cstring label, IJson* value);
     JsonObject* emplace(cstring label, bool b)
     { emplace(label, new JsonValue(b)); return this; }
     JsonObject* emplace(cstring label, mpz_class v)

@@ -64,16 +64,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".set_f1") action set_f1(bit<1024> f1) {
-        meta.ing_metadata.f1 = f1;
+        meta.ing_metadata.f1 = (bit<1024>)f1;
     }
     @name(".set_f2") action set_f2(bit<512> f2) {
-        meta.ing_metadata.f2 = f2;
+        meta.ing_metadata.f2 = (bit<512>)f2;
     }
     @name(".set_f3") action set_f3(bit<256> f3) {
-        meta.ing_metadata.f3 = f3;
+        meta.ing_metadata.f3 = (bit<256>)f3;
     }
     @name(".set_f4") action set_f4(bit<128> f4) {
-        meta.ing_metadata.f4 = f4;
+        meta.ing_metadata.f4 = (bit<128>)f4;
     }
     @name("i_t1") table i_t1 {
         actions = {

@@ -116,7 +116,8 @@ class JsonConverter final {
                                 Util::JsonArray* counters, Util::JsonArray* meters,
                                 Util::JsonArray* registers);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
-                              Util::JsonArray* calculations);
+                              Util::JsonArray* calculations,
+                              const IR::Node* node);
     Util::IJson* nodeName(const CFG::Node* node) const;
     void createForceArith(const IR::Type* stdMetaType, cstring name,
                           Util::JsonArray* force_list) const;

@@ -195,6 +195,8 @@ class ProgramStructure {
     void createMain();
 
  public:
+    const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
+                                          const IR::Expression* right, const IR::Type* type);
     const IR::Expression* paramReference(const IR::Parameter* param);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;

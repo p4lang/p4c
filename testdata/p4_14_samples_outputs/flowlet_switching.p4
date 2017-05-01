@@ -94,7 +94,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".rewrite_mac") action rewrite_mac(bit<48> smac) {
-        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.srcAddr = (bit<48>)smac;
     }
     @name("._drop") action _drop() {
         mark_to_drop();
@@ -126,23 +126,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hash(meta.ingress_metadata.ecmp_offset, HashAlgorithm.crc16, (bit<10>)ecmp_base, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id }, (bit<20>)ecmp_count);
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta.ingress_metadata.nhop_ipv4 = nhop_ipv4;
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        meta.ingress_metadata.nhop_ipv4 = (bit<32>)nhop_ipv4;
+        standard_metadata.egress_spec = (bit<9>)port;
+        hdr.ipv4.ttl = (bit<8>)(hdr.ipv4.ttl + 8w255);
     }
     @name(".lookup_flowlet_map") action lookup_flowlet_map() {
         hash(meta.ingress_metadata.flowlet_map_index, HashAlgorithm.crc16, (bit<13>)0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, (bit<26>)13);
         flowlet_id.read(meta.ingress_metadata.flowlet_id, (bit<32>)meta.ingress_metadata.flowlet_map_index);
-        meta.ingress_metadata.flow_ipg = meta.intrinsic_metadata.ingress_global_timestamp;
+        meta.ingress_metadata.flow_ipg = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
         flowlet_lasttime.read(meta.ingress_metadata.flowlet_lasttime, (bit<32>)meta.ingress_metadata.flowlet_map_index);
-        meta.ingress_metadata.flow_ipg = meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime;
+        meta.ingress_metadata.flow_ipg = (bit<32>)(meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime);
         flowlet_lasttime.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp);
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
-        hdr.ethernet.dstAddr = dmac;
+        hdr.ethernet.dstAddr = (bit<48>)dmac;
     }
     @name(".update_flowlet_id") action update_flowlet_id() {
-        meta.ingress_metadata.flowlet_id = meta.ingress_metadata.flowlet_id + 16w1;
+        meta.ingress_metadata.flowlet_id = (bit<16>)(meta.ingress_metadata.flowlet_id + 16w1);
         flowlet_id.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
     }
     @name("ecmp_group") table ecmp_group {

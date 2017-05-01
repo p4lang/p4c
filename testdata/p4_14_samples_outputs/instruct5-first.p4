@@ -10,7 +10,7 @@ header data_t {
     bit<8>  more;
 }
 
-header data2_t {
+@name("data2_t") header data2_t_0 {
     bit<24> x1;
     bit<8>  more;
 }
@@ -20,14 +20,14 @@ struct metadata {
 
 struct headers {
     @name("data") 
-    data_t     data;
+    data_t       data;
     @name("extra") 
-    data2_t[4] extra;
+    data2_t_0[4] extra;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_extra") state parse_extra {
-        packet.extract<data2_t>(hdr.extra.next);
+        packet.extract<data2_t_0>(hdr.extra.next);
         transition select(hdr.extra.last.more) {
             8w0: accept;
             default: parse_extra;
@@ -99,7 +99,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<data_t>(hdr.data);
-        packet.emit<data2_t[4]>(hdr.extra);
+        packet.emit<data2_t_0[4]>(hdr.extra);
     }
 }
 

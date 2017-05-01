@@ -12,7 +12,7 @@ header data_t {
     bit<8>  b4;
 }
 
-header data2_t {
+@name("data2_t") header data2_t_0 {
     bit<16> x1;
     bit<16> x2;
 }
@@ -22,11 +22,11 @@ struct metadata {
 
 struct headers {
     @name("data") 
-    data_t  data;
+    data_t    data;
     @name("hdr1") 
-    data2_t hdr1;
+    data2_t_0 hdr1;
     @name("hdr2") 
-    data2_t hdr2;
+    data2_t_0 hdr2;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {

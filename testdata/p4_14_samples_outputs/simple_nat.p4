@@ -84,7 +84,7 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_cpu_header") state parse_cpu_header {
         packet.extract(hdr.cpu_header);
-        meta.meta.if_index = hdr.cpu_header.if_index;
+        meta.meta.if_index = (bit<8>)hdr.cpu_header.if_index;
         transition parse_ethernet;
     }
     @name("parse_ethernet") state parse_ethernet {
@@ -96,9 +96,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        meta.meta.ipv4_sa = hdr.ipv4.srcAddr;
-        meta.meta.ipv4_da = hdr.ipv4.dstAddr;
-        meta.meta.tcpLength = hdr.ipv4.totalLen - 16w20;
+        meta.meta.ipv4_sa = (bit<32>)hdr.ipv4.srcAddr;
+        meta.meta.ipv4_da = (bit<32>)hdr.ipv4.dstAddr;
+        meta.meta.tcpLength = (bit<16>)(hdr.ipv4.totalLen - 16w20);
         transition select(hdr.ipv4.protocol) {
             8w0x6: parse_tcp;
             default: accept;
@@ -106,12 +106,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_tcp") state parse_tcp {
         packet.extract(hdr.tcp);
-        meta.meta.tcp_sp = hdr.tcp.srcPort;
-        meta.meta.tcp_dp = hdr.tcp.dstPort;
+        meta.meta.tcp_sp = (bit<16>)hdr.tcp.srcPort;
+        meta.meta.tcp_dp = (bit<16>)hdr.tcp.dstPort;
         transition accept;
     }
     @name("start") state start {
-        meta.meta.if_index = standard_metadata.ingress_port;
+        meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
         transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
@@ -122,21 +122,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_rewrites") action do_rewrites(bit<48> smac) {
         hdr.cpu_header.setInvalid();
-        hdr.ethernet.srcAddr = smac;
-        hdr.ipv4.srcAddr = meta.meta.ipv4_sa;
-        hdr.ipv4.dstAddr = meta.meta.ipv4_da;
-        hdr.tcp.srcPort = meta.meta.tcp_sp;
-        hdr.tcp.dstPort = meta.meta.tcp_dp;
+        hdr.ethernet.srcAddr = (bit<48>)smac;
+        hdr.ipv4.srcAddr = (bit<32>)meta.meta.ipv4_sa;
+        hdr.ipv4.dstAddr = (bit<32>)meta.meta.ipv4_da;
+        hdr.tcp.srcPort = (bit<16>)meta.meta.tcp_sp;
+        hdr.tcp.dstPort = (bit<16>)meta.meta.tcp_dp;
     }
     @name("._drop") action _drop() {
         mark_to_drop();
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
-        hdr.cpu_header.preamble = 64w0;
-        hdr.cpu_header.device = 8w0;
-        hdr.cpu_header.reason = 8w0xab;
-        hdr.cpu_header.if_index = meta.meta.if_index;
+        hdr.cpu_header.preamble = (bit<64>)64w0;
+        hdr.cpu_header.device = (bit<8>)8w0;
+        hdr.cpu_header.reason = (bit<8>)8w0xab;
+        hdr.cpu_header.if_index = (bit<8>)meta.meta.if_index;
     }
     @name("send_frame") table send_frame {
         actions = {
@@ -169,40 +169,40 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
-        hdr.ethernet.dstAddr = dmac;
+        hdr.ethernet.dstAddr = (bit<48>)dmac;
     }
     @name("._drop") action _drop() {
         mark_to_drop();
     }
     @name(".set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
-        meta.meta.if_ipv4_addr = ipv4_addr;
-        meta.meta.if_mac_addr = mac_addr;
-        meta.meta.is_ext_if = is_ext;
+        meta.meta.if_ipv4_addr = (bit<32>)ipv4_addr;
+        meta.meta.if_mac_addr = (bit<48>)mac_addr;
+        meta.meta.is_ext_if = (bit<1>)is_ext;
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta.meta.nhop_ipv4 = nhop_ipv4;
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        meta.meta.nhop_ipv4 = (bit<32>)nhop_ipv4;
+        standard_metadata.egress_spec = (bit<9>)port;
+        hdr.ipv4.ttl = (bit<8>)(hdr.ipv4.ttl + 8w255);
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext() {
         clone3(CloneType.I2E, (bit<32>)32w250, { standard_metadata });
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
-        meta.meta.do_forward = 1w0;
+        meta.meta.do_forward = (bit<1>)1w0;
         mark_to_drop();
     }
     @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
-        meta.meta.do_forward = 1w1;
-        meta.meta.ipv4_sa = srcAddr;
-        meta.meta.tcp_sp = srcPort;
+        meta.meta.do_forward = (bit<1>)1w1;
+        meta.meta.ipv4_sa = (bit<32>)srcAddr;
+        meta.meta.tcp_sp = (bit<16>)srcPort;
     }
     @name(".nat_hit_ext_to_int") action nat_hit_ext_to_int(bit<32> dstAddr, bit<16> dstPort) {
-        meta.meta.do_forward = 1w1;
-        meta.meta.ipv4_da = dstAddr;
-        meta.meta.tcp_dp = dstPort;
+        meta.meta.do_forward = (bit<1>)1w1;
+        meta.meta.ipv4_da = (bit<32>)dstAddr;
+        meta.meta.tcp_dp = (bit<16>)dstPort;
     }
     @name(".nat_no_nat") action nat_no_nat() {
-        meta.meta.do_forward = 1w1;
+        meta.meta.do_forward = (bit<1>)1w1;
     }
     @name("forward") table forward {
         actions = {

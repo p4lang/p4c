@@ -10,7 +10,7 @@ header data_t {
     bit<8>  more;
 }
 
-header data2_t {
+@name("data2_t") header data2_t_0 {
     bit<24> x1;
     bit<8>  more;
 }
@@ -20,9 +20,9 @@ struct metadata {
 
 struct headers {
     @name("data") 
-    data_t     data;
+    data_t       data;
     @name("extra") 
-    data2_t[4] extra;
+    data2_t_0[4] extra;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -44,26 +44,26 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".output") action output(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = (bit<9>)port;
     }
     @name(".noop") action noop() {
     }
     @name(".push1") action push1(bit<24> x1) {
         hdr.extra.push_front(1);
-        hdr.extra[0].x1 = x1;
-        hdr.extra[0].more = hdr.data.more;
-        hdr.data.more = 8w1;
+        hdr.extra[0].x1 = (bit<24>)x1;
+        hdr.extra[0].more = (bit<8>)hdr.data.more;
+        hdr.data.more = (bit<8>)8w1;
     }
     @name(".push2") action push2(bit<24> x1, bit<24> x2) {
         hdr.extra.push_front(2);
-        hdr.extra[0].x1 = x1;
-        hdr.extra[0].more = 8w1;
-        hdr.extra[1].x1 = x2;
-        hdr.extra[1].more = hdr.data.more;
-        hdr.data.more = 8w1;
+        hdr.extra[0].x1 = (bit<24>)x1;
+        hdr.extra[0].more = (bit<8>)8w1;
+        hdr.extra[1].x1 = (bit<24>)x2;
+        hdr.extra[1].more = (bit<8>)hdr.data.more;
+        hdr.data.more = (bit<8>)8w1;
     }
     @name(".pop1") action pop1() {
-        hdr.data.more = hdr.extra[0].more;
+        hdr.data.more = (bit<8>)hdr.extra[0].more;
         hdr.extra.pop_front(1);
     }
     @name("output") table output_0 {

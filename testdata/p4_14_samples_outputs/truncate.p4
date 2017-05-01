@@ -30,7 +30,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop() {
     }
     @name("._truncate") action _truncate(bit<32> new_length, bit<9> port) {
-        standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = (bit<9>)port;
         truncate((bit<32>)new_length);
     }
     @name("t_ingress") table t_ingress {

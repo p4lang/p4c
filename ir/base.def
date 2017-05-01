@@ -32,18 +32,21 @@ abstract Type {
     virtual const Type* getP4Type() const = 0;
 }
 
-/// Implemented by all types that may be generic
+/// Implemented by all types that may be generic:
+/// Control, Extern, Method, Package, and Parser
 interface IMayBeGenericType {
+    /// Allows the retrieval of type parameters
     virtual const TypeParameters* getTypeParameters() const = 0;
-    const Type* toType() const { return to<Type>(); }
 }
 
-/// Implemented by objects with an 'apply' method
+/// Implemented by objects with an 'apply' method: Parser, Control, Table
 interface IApply {
     static const cstring applyMethodName;
+    /// @returns the type signature of the apply method
     virtual const Type_Method* getApplyMethodType() const = 0;
 }
 
+/// base class for namespaces
 interface INamespace {
     virtual Util::Enumerator<IDeclaration> *getDeclarations() const = 0;
 }
@@ -57,6 +60,7 @@ interface ISimpleNamespace : INamespace {
 /// E.g., an extern can have multiple methods with the same name.
 interface IGeneralNamespace : INamespace {
     virtual Util::Enumerator<IDeclaration>* getDeclsByName(cstring name) const;
+    /// prints an error if it finds duplicate names
     void checkDuplicateDeclarations() const;
     validate{ checkDuplicateDeclarations(); }
 }
@@ -119,6 +123,7 @@ abstract Type_Declaration : Type, IDeclaration {
     const Type* getP4Type() const override { return new Type_Name(name); }
 }
 
+/// base class for expressions
 abstract Expression {
     /// Note that the type field is not visited.
     /// Most P4_16 passes don't use this field.
@@ -141,6 +146,8 @@ abstract Operation : Expression {
     toString{ return getStringOp(); }
 }
 
+/// A Path is a vestige of a previous design.
+/// Today paths can only consist of a '.'
 class Path {
     ID   name;
     optional bool absolute = false;

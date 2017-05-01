@@ -50,7 +50,8 @@ p4_frontend_UNIFIED = \
 	frontends/p4/moveDeclarations.cpp \
 	frontends/p4/tableKeyNames.cpp \
 	frontends/p4/specialize.cpp \
-	frontends/p4/uselessCasts.cpp
+	frontends/p4/uselessCasts.cpp \
+	frontends/p4/directCalls.cpp
 
 p4_frontend_NONUNIFIED = \
 	frontends/p4/p4-parse.ypp
@@ -102,7 +103,8 @@ noinst_HEADERS += \
 	frontends/p4/unusedDeclarations.h \
 	frontends/p4/tableKeyNames.h \
 	frontends/p4/validateParsedProgram.h \
-	frontends/p4/uselessCasts.h
+	frontends/p4/uselessCasts.h \
+	frontends/p4/directCalls.h
 
 cpplint_FILES += frontends/p4/p4-lex.l \
 		 $(p4_frontend_UNIFIED) \

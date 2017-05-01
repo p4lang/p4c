@@ -90,6 +90,7 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
 }
 
 void ProgramStructure::createTypes() {
+    // FIXME -- refactor this to reduce the excessive duplication
     std::unordered_set<const IR::Type *> converted;
     for (auto it : metadata) {
         auto type = it.first->type;
@@ -107,6 +108,23 @@ void ProgramStructure::createTypes() {
         checkHeaderType(type, true);
         declarations->push_back(type);
         converted.emplace(type);
+    }
+    for (auto it : registers) {
+        if (it.first->layout) {
+            auto type = types.get(it.first->layout);
+            if (converted.count(type))
+                continue;
+            converted.emplace(type);
+            auto type_name = types.get(type);
+            type = type->apply(TypeConverter(this));
+            if (type->name.name != type_name) {
+                auto annos = addNameAnnotation(type->name.name, type->annotations);
+                type = new IR::Type_Struct(type->srcInfo, type_name, annos, type->fields);
+            }
+            checkHeaderType(type, true);
+            declarations->push_back(type);
+            converted.emplace(type);
+        }
     }
 
     converted.clear();
@@ -277,6 +295,18 @@ const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* para
     return result;
 }
 
+const IR::AssignmentStatement* ProgramStructure::assign(
+    Util::SourceInfo srcInfo, const IR::Expression* left,
+    const IR::Expression* right, const IR::Type* type) {
+    const IR::Expression* cast;
+    if (type != nullptr)
+        cast = new IR::Cast(type, right);
+    else
+        cast = right;
+    auto result = new IR::AssignmentStatement(srcInfo, left, cast);
+    return result;
+}
+
 const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expression* expr) {
     ExpressionConverter conv(this);
 
@@ -304,8 +334,7 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
 
             auto dest = conv.convert(primitive->operands.at(0));
             auto src = conv.convert(primitive->operands.at(1));
-            auto result = new IR::AssignmentStatement(primitive->srcInfo, dest, src);
-            return result;
+            return assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
         }
     }
     BUG("Unhandled expression %1%", expr);
@@ -831,7 +860,7 @@ const IR::Statement* ProgramStructure::sliceAssign(
             auto l = new IR::Constant(range.lowIndex);
             left = new IR::Slice(left->srcInfo, left, h, l);
             right = new IR::Slice(right->srcInfo, right, h, l);
-            return new IR::AssignmentStatement(srcInfo, left, right);
+            return assign(srcInfo, left, right, nullptr);
         }
         // else value is too complex for a slice
     }
@@ -844,7 +873,7 @@ const IR::Statement* ProgramStructure::sliceAssign(
     auto op1 = new IR::BAnd(left->srcInfo, left, new IR::Cmpl(mask));
     auto op2 = new IR::BAnd(right->srcInfo, right, mask);
     auto result = new IR::BOr(mask->srcInfo, op1, op2);
-    return new IR::AssignmentStatement(srcInfo, left, result);
+    return assign(srcInfo, left, result, type);
 }
 
 #define OPS_CK(primitive, n) BUG_CHECK((primitive)->operands.size() == n, \
@@ -884,7 +913,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         if (primitive->operands.size() == 2) {
             auto left = conv.convert(primitive->operands.at(0));
             auto right = conv.convert(primitive->operands.at(1));
-            return new IR::AssignmentStatement(primitive->srcInfo, left, right);
+            return assign(primitive->srcInfo, left, right, primitive->operands.at(0)->type);
         } else if (primitive->operands.size() == 3) {
             auto left = conv.convert(primitive->operands.at(0));
             auto right = conv.convert(primitive->operands.at(1));
@@ -946,8 +975,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
             op = new IR::Shl(dest->srcInfo, left, right);
         else if (primitive->name == "shift_right")
             op = new IR::Shr(dest->srcInfo, left, right);
-        auto result = new IR::AssignmentStatement(primitive->srcInfo, dest, op);
-        return result;
+        return assign(primitive->srcInfo, dest, op, primitive->operands.at(0)->type);
     } else if (primitive->name == "bit_not") {
         OPS_CK(primitive, 2);
         auto dest = conv.convert(primitive->operands.at(0));
@@ -955,8 +983,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         IR::Expression* op = nullptr;
         if (primitive->name == "bit_not")
             op = new IR::Cmpl(right);
-        auto result = new IR::AssignmentStatement(primitive->srcInfo, dest, op);
-        return result;
+        return assign(primitive->srcInfo, dest, op, primitive->operands.at(0)->type);
     } else if (primitive->name == "no_op") {
         return new IR::EmptyStatement();
     } else if (primitive->name == "add_to_field" || primitive->name == "subtract_from_field") {
@@ -970,7 +997,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
             op = new IR::Add(primitive->srcInfo, left, right);
         else
             op = new IR::Sub(primitive->srcInfo, left, right);
-        return new IR::AssignmentStatement(primitive->srcInfo, left2, op);
+        return assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
     } else if (primitive->name == "remove_header") {
         OPS_CK(primitive, 1);
         auto hdr = conv.convert(primitive->operands.at(0));
@@ -1048,16 +1075,15 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
         auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
         auto block = new IR::BlockStatement;
-        const IR::Statement* assign;
-        if (mask != nullptr) {
-            assign = sliceAssign(primitive->srcInfo, field,
+        const IR::Statement* assgn;
+        if (mask != nullptr)
+            assgn = sliceAssign(primitive->srcInfo, field,
                                  new IR::PathExpression(IR::ID(tmpvar)), mask);
-        } else {
-            assign = new IR::AssignmentStatement(field, new IR::PathExpression(tmpvar));
-        }
+        else
+            assgn = new IR::AssignmentStatement(field, new IR::PathExpression(tmpvar));
         block->push_back(decl);
         block->push_back(call);
-        block->push_back(assign);
+        block->push_back(assgn);
         return block;
     } else if (primitive->name == "modify_field_rng_uniform") {
         BUG_CHECK(primitive->operands.size() == 3, "Expected 3 operands for %1%", primitive);
@@ -1182,7 +1208,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         if (!cond->type->is<IR::Type::Boolean>())
             cond = new IR::Neq(cond, new IR::Constant(0));
         src = new IR::Mux(primitive->srcInfo, cond, src, dest);
-        return new IR::AssignmentStatement(primitive->srcInfo, dest, src);
+        return assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
     } else if (primitive->name == "generate_digest") {
         OPS_CK(primitive, 2);
         auto args = new IR::Vector<IR::Expression>();
@@ -1273,7 +1299,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto lo = conv.convert(primitive->operands.at(2));
         auto shift = conv.convert(primitive->operands.at(3));
         auto src = new IR::Shr(new IR::Concat(hi, lo), shift);
-        return new IR::AssignmentStatement(primitive->srcInfo, dest, src);
+        return assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
     }
 
     // If everything else failed maybe we are invoking an action
@@ -1418,13 +1444,16 @@ const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm
 const IR::Declaration_Instance*
 ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     LOG1("Synthesizing " << reg);
-    int width = reg->width;
-    if (width <= 0) {
+    const IR::Type *regElementType = nullptr;
+    if (reg->width > 0) {
+        regElementType = IR::Type_Bits::get(reg->width);
+    } else if (reg->layout) {
+        regElementType = types.get(reg->layout);
+    } else {
         ::warning("%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
-        width = defaultRegisterWidth;
+        regElementType = IR::Type_Bits::get(defaultRegisterWidth);
     }
 
-    auto regElementType = IR::Type_Bits::get(width);
     IR::ID ext = v1model.registers.Id();
     auto typepath = new IR::Path(ext);
     auto type = new IR::Type_Name(typepath);
@@ -1432,7 +1461,12 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     typeargs->push_back(regElementType);
     auto spectype = new IR::Type_Specialized(type, typeargs);
     auto args = new IR::Vector<IR::Expression>();
-    args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count));
+    if (reg->direct) {
+        // FIXME -- do we need a direct_register extern in v1model?  For now
+        // using size of 0 to specify a direct register
+        args->push_back(new IR::Constant(v1model.registers.size_type, 0));
+    } else {
+        args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count)); }
     auto annos = addNameAnnotation(reg->name, reg->annotations);
     auto decl = new IR::Declaration_Instance(newName, annos, spectype, args, nullptr);
     return decl;

@@ -1,10 +1,10 @@
 #include <core.p4>
 
-struct EthernetHeader {
+header EthernetHeader {
     bit<16> etherType;
 }
 
-struct IPv4 {
+header IPv4 {
     bit<16> protocol;
 }
 
