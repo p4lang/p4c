@@ -1,0 +1,29 @@
+# This file maps p4d2 metadata to the bmv2 simple switch standard and intrinsic metadata
+
+# parser
+parser_input_t.ingress_port       -> standard_metadata.ingress_port
+parser_input_t.resubmit_flag      -> standard_metadata.resubmit_flag
+# ingress input
+ingress_input_t.ingress_port      -> standard_metadata.ingress_port
+ingress_input_t.resubmit_flag     -> standard_metadata.resubmit_flag
+ingress_input_t.ingress_timestamp -> intrinsic_metadata.ingress_global_timestamp
+# ingress output
+ingress_output_t.egress_port      -> standard_metadata.egress_port
+ingress_output_t.mcast_group      -> intrinsic_metadata.mcast_grp
+ingress_output_t.clone_id         -> standard_metadata.clone_spec
+ingress_output_t.resubmit_flag    -> standard_metadata.resubmit_flag
+ingress_output_t.drop_flag        -> standard_metadata.drop
+ingress_output_t.egress_queue     -> standard_metadata.egress_spec
+# egress input
+egress_input_t.egress_port        -> standard_metadata.egress_port
+egress_input_t.egress_rid         -> intrinsic_metadata.egress_rid
+egress_input_t.clone_id           -> standard_metadata.clone_spec
+egress_input_t.packet_length      -> standard_metadata.packet_length
+egress_input_t.egress_queue       -> standard_metadata.egress_spec
+egress_input_t.enq_timestamp      -> queueing_metadata.enq_timestamp
+egress_input_t.deq_timedelta      -> queueing_metadata.deq_timedelta
+egress_input_t.enq_qdepth         -> queueing_metadata.enq_qdepth
+egress_input_t.deq_qdepth         -> queueing_metadata.deq_qdepth
+# egress output
+egress_output_t.clone_id          -> standard_metadata.clone_spec
+egress_output_t.drop_flag         -> standard_metadata.drop
