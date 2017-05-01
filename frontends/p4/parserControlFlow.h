@@ -23,9 +23,57 @@ limitations under the License.
 
 namespace P4 {
 
-// Converts if statements in parsers into transitions.
-// This should be run after variables have been moved to the "top" of
-// the parser.
+/** @brief Converts if statements in parsers into transitions.
+ *
+ * For example, this code snippet:
+ * 
+```
+state s {
+   statement1;
+   statement2;
+   if (exp)
+      statement3;
+   else
+      statement4;
+   statement5;
+   transition selectExpression;
+}
+```
+ * 
+ * would be converted into the following four states:
+ *
+```
+state s {
+   statement1;
+   statement2;
+   transition select(exp) {
+      true: s_true;
+      false: s_false;
+   }
+}
+
+state s_true {
+   statement3;
+   transition s_join;
+}
+
+state s_false {
+   statement4;
+   transition s_join;
+}
+
+state s_join {
+   statement5;
+   transition selectExpression;
+}
+```
+ *
+ * @pre Must be run after MoveDeclarations.  Requires an up-to-date
+ * ReferenceMap.
+ * 
+ * @post No if statements remain in parsers.
+ */
+
 class DoRemoveParserControlFlow : public Transform {
     ReferenceMap* refMap;
  public:
@@ -35,6 +83,9 @@ class DoRemoveParserControlFlow : public Transform {
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };
 
+
+/// Iterates DoRemoveParserControlFlow and SimplifyControlFlow until
+/// convergence.
 class RemoveParserControlFlow : public PassRepeated {
  public:
     RemoveParserControlFlow(ReferenceMap* refMap, TypeMap* typeMap) : PassRepeated({}) {
