@@ -31,8 +31,8 @@ namespace P4 {
  * UniqueNames pass.
  */
 class MoveDeclarations : public Transform {
-    // List of lists of declarations to move, one list per
-    // control/parser/action.
+    /// List of lists of declarations to move, one list per
+    /// control/parser/action.
     std::vector<IR::Vector<IR::Declaration>*> toMove;
     void push() { toMove.push_back(new IR::Vector<IR::Declaration>()); }
     void pop() { BUG_CHECK(!toMove.empty(), "Empty move stack"); toMove.pop_back(); }
