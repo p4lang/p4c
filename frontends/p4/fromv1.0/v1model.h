@@ -21,6 +21,9 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
+#include "lib/json.h"
+
+class BMV2::Backend;
 
 namespace P4V1 {
 
@@ -297,6 +300,11 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       recirculate;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
+
+    static void convertExternObjects(Util::JsonObject *o, BMV2::Backend *bmv2,
+                                     P4::ExternMethod *em, IR::MethodCallStatement *mc);
+    static void convertExternFunctions(Util::JsonObject *o, BMV2::Backend *bmv2,
+                                       P4::ExternMethod *em, IR::MethodCallStatement *mc);
 
     static V1Model instance;
 };
