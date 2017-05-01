@@ -18,46 +18,6 @@ limitations under the License.
 
 namespace P4 {
 
-/* convert
-state s {
-   statement1;
-   statement2;
-   if (exp)
-      statement3;
-   else
-      statement4;
-   statement5;
-   transition selectExpression;
-}
-
-into 4 states:
-
-state s {
-   statement1;
-   statement2;
-   transition select(exp) {
-      true: s_true;
-      false: s_false;
-   }
-}
-
-state s_true {
-   statement3;
-   transition s_join;
-}
-
-state s_false {
-   statement4;
-   transition s_join;
-}
-
-state s_join {
-   statement5;
-   transition selectExpression;
-}
-
-*/
-
 const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
     LOG1("Visiting " << dbp(state));
     // TODO: we keep annotations on the first state,
