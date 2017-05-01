@@ -23,8 +23,8 @@ limitations under the License.
 namespace P4 {
 
 /**
-Maintains for each type that may contain a tuple (or be a tuple) the
-corresponding struct replacement.
+ * Maintains for each type that may contain a tuple (or be a tuple) the
+ * corresponding struct replacement.
 */
 class ReplacementMap {
     ordered_map<const IR::Type*, const IR::Type_Struct*> replacement;
@@ -41,10 +41,26 @@ class ReplacementMap {
 };
 
 /**
-Convert each Tuple type into a Struct and insert the struct in the
-program replacing the tuple.  We make up field names for the struct
-fields.  Note that the replacement has to be recursive, since the
-tuple could contain types that contain other tuples.
+ * Implement a pass that convert each Tuple type into a Struct.
+ *
+ * The struct is inserted in the program replacing the tuple.
+ * We make up field names for the struct fields.
+ * Note that the replacement has to be recursive, since the tuple
+ * could contain types that contain other tuples.
+ *
+ * Example:
+ *   tuple<bit<32>, bit<32>> t;
+ *
+ * is replaced by
+ *
+ *   struct tuple_0 {
+ *     bit<32> field;
+ *     bit<32> field_0;
+ *   }
+ *   tuple_0 t;
+ *
+ *   @pre none
+ *   @post ensure all tuples are replaced with struct.
 */
 class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;
