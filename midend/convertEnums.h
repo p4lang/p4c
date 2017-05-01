@@ -22,8 +22,10 @@ limitations under the License.
 
 namespace P4 {
 
-// Policy function: given a number of enum values should return
-// the size of a Type_Bits type used to represent the values.
+/**
+ * Policy function: given a number of enum values should return
+ * the size of a Type_Bits type used to represent the values.
+ */
 class ChooseEnumRepresentation {
  public:
     virtual ~ChooseEnumRepresentation() {}
@@ -56,6 +58,37 @@ class EnumRepresentation {
     const_iterator end() const { return repr.end(); }
 };
 
+/** implement a pass to convert Type_Enum to Type_Bits
+ *
+ *  User must provide a class to extend ChooseEnumRepresentation
+ *  to specify the width of the generated Type_Bits. User must
+ *  also implement a policy to decide whether an Enum type
+ *  shall be converted.
+ *
+ *  Example:
+ *
+ *  enum e {
+ *    A,
+ *    B,
+ *  }
+ *
+ *  struct st {
+ *    // Type_Name
+ *    A a;
+ *  }
+ *
+ *
+ *  if the policy is to convert enum to bit<32>, then the above
+ *  is replaced by:
+ *
+ *  struct st {
+ *    // Type_Bits
+ *    bit<32> a;
+ *  }
+ *
+ *  @pre none
+ *  @post all Type_Enum types accepted by 'policy' are converted.
+ */
 class DoConvertEnums : public Transform {
     friend class ConvertEnums;
 
