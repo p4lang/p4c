@@ -15,13 +15,13 @@ limitations under the License.
 */
 
 #include "backend.h"
-#include "convertControl.h"
-#include "convertErrorCode.h"
-#include "convertExterns.h"
-#include "convertHeaders.h"
-#include "convertParser.h"
-#include "convertDeparser.h"
-#include "expressionConverter.h"
+#include "control.h"
+#include "extern.h"
+#include "header.h"
+#include "parser.h"
+#include "deparser.h"
+#include "error_code.h"
+#include "expression.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace BMV2 {
@@ -323,8 +323,8 @@ void Backend::run(const IR::ToplevelBlock* tb) {
         new ConvertDeparser(&refMap, &typeMap, conv, deparsers),
         new VisitFunctor([this, actions]() { createActions(actions); }),
     };
-    dump(tb->getProgram());
-    dump(tb->getMain());
+    //dump(tb->getProgram());
+    //dump(tb->getMain());
     tb->getMain()->apply(codegen_passes);
 }
 

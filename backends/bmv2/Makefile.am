@@ -20,33 +20,33 @@ bin_PROGRAMS += p4c-bm2-ss
 p4c_bm2_ss_LDADD = libfrontend.la libp4ctoolkit.a
 
 p4c_bm2_ss_UNIFIED = \
-	backends/bmv2/bmv2.cpp \
 	backends/bmv2/analyzer.cpp \
-	backends/bmv2/midend.cpp \
-	backends/bmv2/lower.cpp \
+	backends/bmv2/backend.cpp \
+	backends/bmv2/bmv2.cpp \
+	backends/bmv2/control.cpp \
+	backends/bmv2/deparser.cpp \
+	backends/bmv2/errorcode.cpp \
+	backends/bmv2/expression.cpp \
+	backends/bmv2/extern.cpp \
+	backends/bmv2/header.cpp \
 	backends/bmv2/helpers.cpp \
-	backends/bmv2/expressionConverter.cpp \
-	backends/bmv2/convertControl.cpp \
-	backends/bmv2/convertDeparser.cpp \
-	backends/bmv2/convertParser.cpp \
-	backends/bmv2/convertExterns.cpp \
-	backends/bmv2/convertHeaders.cpp \
-	backends/bmv2/convertErrorCode.cpp \
-	backends/bmv2/backend.cpp
+	backends/bmv2/lower.cpp \
+	backends/bmv2/midend.cpp \
+	backends/bmv2/parser.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
+	backends/bmv2/backend.h \
+	backends/bmv2/control.h \
+	backends/bmv2/deparser.h \
+	backends/bmv2/errorcode.h \
+	backends/bmv2/expression.h \
+	backends/bmv2/extern.h \
+	backends/bmv2/header.h \
+	backends/bmv2/helpers.h \
 	backends/bmv2/lower.h \
 	backends/bmv2/midend.h \
-	backends/bmv2/helpers.h \
-	backends/bmv2/expressionConverter.h \
-	backends/bmv2/convertControl.h \
-	backends/bmv2/convertDeparser.h \
-	backends/bmv2/convertParser.h \
-	backends/bmv2/convertExterns.h \
-	backends/bmv2/convertHeaders.h \
-	backends/bmv2/convertErrorCode.h \
-	backends/bmv2/backend.h
+	backends/bmv2/parser.h
 
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
 

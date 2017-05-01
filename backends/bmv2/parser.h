@@ -21,11 +21,11 @@ limitations under the License.
 #include "lib/json.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "expressionConverter.h"
+#include "expression.h"
 
 namespace BMV2 {
 
-class DoParserBlockConversion : public Inspector {
+class Parser : public Inspector {
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
     ExpressionConverter* conv;
@@ -46,7 +46,7 @@ class DoParserBlockConversion : public Inspector {
  public:
     bool preorder(const IR::P4Parser* p) override;
     bool preorder(const IR::PackageBlock* b) override;
-    explicit DoParserBlockConversion(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+    explicit Parser(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                                      ExpressionConverter* conv, Util::JsonArray* parsers) :
     refMap(refMap), typeMap(typeMap), conv(conv), parsers(parsers),
     corelib(P4::P4CoreLibrary::instance) {}
@@ -57,7 +57,7 @@ class ConvertParser final : public PassManager {
     ConvertParser(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                   ExpressionConverter* conv,
                   Util::JsonArray* parsers) {
-        passes.push_back(new DoParserBlockConversion(refMap, typeMap, conv, parsers));
+        passes.push_back(new Parser(refMap, typeMap, conv, parsers));
         setName("ConvertParser");
     }
 };

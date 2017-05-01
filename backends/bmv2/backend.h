@@ -26,7 +26,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "analyzer.h"
 #include "helpers.h"
-#include "expressionConverter.h"
+#include "expression.h"
 #include "frontends/p4/coreLibrary.h"
 #include "midend/convertEnums.h"
 #include "frontends/common/model.h"

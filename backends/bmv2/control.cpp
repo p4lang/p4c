@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "convertControl.h"
+#include "control.h"
 
 namespace BMV2 {
 
@@ -30,7 +30,7 @@ namespace BMV2 {
     @param table A P4 table IR node
     @param jsonTable the JSON table object to add predefined entries
 */
-void DoControlBlockConversion::convertTableEntries(const IR::P4Table *table,
+void Control::convertTableEntries(const IR::P4Table *table,
                                                    Util::JsonObject *jsonTable) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
@@ -154,7 +154,7 @@ void DoControlBlockConversion::convertTableEntries(const IR::P4Table *table,
     @param ke A table match key element
     @return the key type
 */
-cstring DoControlBlockConversion::getKeyMatchType(const IR::KeyElement *ke) {
+cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
     auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
     auto expr = ke->expression;
@@ -180,7 +180,7 @@ cstring DoControlBlockConversion::getKeyMatchType(const IR::KeyElement *ke) {
 }
 
 bool
-DoControlBlockConversion::handleTableImplementation(const IR::Property* implementation,
+Control::handleTableImplementation(const IR::Property* implementation,
                                                     const IR::Key* key,
                                                     Util::JsonObject* table,
                                                     Util::JsonArray* action_profiles) {
@@ -292,7 +292,7 @@ DoControlBlockConversion::handleTableImplementation(const IR::Property* implemen
 }
 
 Util::IJson*
-DoControlBlockConversion::convertTable(const CFG::TableNode* node,
+Control::convertTable(const CFG::TableNode* node,
                                        Util::JsonArray* counters,
                                        Util::JsonArray* action_profiles) {
     auto table = node->table;
@@ -644,7 +644,7 @@ DoControlBlockConversion::convertTable(const CFG::TableNode* node,
     return result;
 }
 
-Util::IJson* DoControlBlockConversion::convertIf(const CFG::IfNode* node, cstring prefix) {
+Util::IJson* Control::convertIf(const CFG::IfNode* node, cstring prefix) {
     auto result = new Util::JsonObject();
     result->emplace("name", node->name);
     result->emplace("id", nextId("conditionals"));
@@ -663,7 +663,7 @@ Util::IJson* DoControlBlockConversion::convertIf(const CFG::IfNode* node, cstrin
 /**
     Custom visitor to enable traversal on other blocks
 */
-bool DoControlBlockConversion::preorder(const IR::PackageBlock *block) {
+bool Control::preorder(const IR::PackageBlock *block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ControlBlock>()) {
             visit(it.second->getNode());
@@ -672,7 +672,7 @@ bool DoControlBlockConversion::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-bool DoControlBlockConversion::preorder(const IR::ControlBlock* block) {
+bool Control::preorder(const IR::ControlBlock* block) {
     // skip control block marked as deparser
     if(block->getAnnotation("deparser"))
         return false;
@@ -727,7 +727,7 @@ bool DoControlBlockConversion::preorder(const IR::ControlBlock* block) {
         Register<bit<32>, bit<32>> reg;  <- visit this line
     }
 */
-bool DoControlBlockConversion::preorder(const IR::Declaration_Instance* instance) {
+bool Control::preorder(const IR::Declaration_Instance* instance) {
     LOG3("Visiting " << dbp(instance));
     auto parent = getContext()->node;
     auto bl = parent->to<IR::ControlBlock>()->getValue(instance);
@@ -740,7 +740,7 @@ bool DoControlBlockConversion::preorder(const IR::Declaration_Instance* instance
     return false;
 }
 
-Util::IJson* DoControlBlockConversion::createExternInstance(cstring name, cstring type) {
+Util::IJson* Control::createExternInstance(cstring name, cstring type) {
     auto j = new Util::JsonObject();
     j->emplace("name", name);
     j->emplace("id", nextId("extern_instances"));

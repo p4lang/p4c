@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "convertParser.h"
+#include "parser.h"
 
 namespace BMV2 {
 
-Util::IJson* DoParserBlockConversion::toJson(const IR::P4Parser* parser) {
+Util::IJson* Parser::toJson(const IR::P4Parser* parser) {
     auto result = new Util::JsonObject();
     result->emplace("name", "parser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("parser"));
@@ -33,7 +33,7 @@ Util::IJson* DoParserBlockConversion::toJson(const IR::P4Parser* parser) {
     return result;
 }
 
-Util::IJson* DoParserBlockConversion::convertParserStatement(const IR::StatOrDecl* stat) {
+Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
     if (stat->is<IR::AssignmentStatement>()) {
@@ -130,7 +130,7 @@ Util::IJson* DoParserBlockConversion::convertParserStatement(const IR::StatOrDec
 }
 
 // Operates on a select keyset
-void DoParserBlockConversion::convertSimpleKey(const IR::Expression* keySet,
+void Parser::convertSimpleKey(const IR::Expression* keySet,
                                      mpz_class& value, mpz_class& mask) const {
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
@@ -157,7 +157,7 @@ void DoParserBlockConversion::convertSimpleKey(const IR::Expression* keySet,
     }
 }
 
-unsigned DoParserBlockConversion::combine(const IR::Expression* keySet,
+unsigned Parser::combine(const IR::Expression* keySet,
                                 const IR::ListExpression* select,
                                 mpz_class& value, mpz_class& mask) const {
     // From the BMv2 spec: For values and masks, make sure that you
@@ -215,7 +215,7 @@ unsigned DoParserBlockConversion::combine(const IR::Expression* keySet,
     }
 }
 
-Util::IJson* DoParserBlockConversion::stateName(IR::ID state) {
+Util::IJson* Parser::stateName(IR::ID state) {
     if (state.name == IR::ParserState::accept) {
         return Util::JsonValue::null;
     } else if (state.name == IR::ParserState::reject) {
@@ -226,7 +226,7 @@ Util::IJson* DoParserBlockConversion::stateName(IR::ID state) {
     }
 }
 
-Util::IJson* DoParserBlockConversion::toJson(const IR::ParserState* state) {
+Util::IJson* Parser::toJson(const IR::ParserState* state) {
     if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
         return nullptr;
 
@@ -286,7 +286,7 @@ Util::IJson* DoParserBlockConversion::toJson(const IR::ParserState* state) {
     return result;
 }
 
-bool DoParserBlockConversion::preorder(const IR::PackageBlock* block) {
+bool Parser::preorder(const IR::PackageBlock* block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ParserBlock>()) {
             visit(it.second->getNode());
@@ -295,7 +295,7 @@ bool DoParserBlockConversion::preorder(const IR::PackageBlock* block) {
     return false;
 }
 
-bool DoParserBlockConversion::preorder(const IR::P4Parser* parser) {
+bool Parser::preorder(const IR::P4Parser* parser) {
     auto parserJson = toJson(parser);
     parsers->append(parserJson);
     return false;

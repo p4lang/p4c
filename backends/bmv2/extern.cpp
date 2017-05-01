@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "convertExterns.h"
+#include "extern.h"
 
 namespace BMV2 {
 
 /**
     Custom visitor to enable traversal on other blocks
 */
-bool DoExternBlockConversion::preorder(const IR::PackageBlock *block) {
+bool Extern::preorder(const IR::PackageBlock *block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>()) {
             visit(it.second->getNode());
@@ -30,7 +30,7 @@ bool DoExternBlockConversion::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-void DoExternBlockConversion::addExternAttributes(const IR::Declaration_Instance* di,
+void Extern::addExternAttributes(const IR::Declaration_Instance* di,
                                                   const IR::ExternBlock* block,
                                                   Util::JsonArray* attributes) {
     auto paramIt = block->getConstructorParameters()->parameters.begin();
@@ -61,7 +61,7 @@ void DoExternBlockConversion::addExternAttributes(const IR::Declaration_Instance
 }
 
 /// generate extern_instances from instance declarations.
-bool DoExternBlockConversion::preorder(const IR::Declaration_Instance* decl) {
+bool Extern::preorder(const IR::Declaration_Instance* decl) {
     LOG1("ExternConv Visiting ..." << dbp(decl));
     // Declaration_Instance -> P4Control -> ControlBlock
     auto grandparent = getContext()->parent->node;

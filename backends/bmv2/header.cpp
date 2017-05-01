@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "backend.h"
-#include "convertHeaders.h"
+#include "header.h"
 
 namespace BMV2 {
 

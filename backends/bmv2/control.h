@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "midend/convertEnums.h"
-#include "expressionConverter.h"
+#include "expression.h"
 #include "helpers.h"
 
 namespace BMV2 {
@@ -126,7 +126,7 @@ class SharedActionSelectorCheck : public Inspector {
     }
 };
 
-class DoControlBlockConversion : public Inspector {
+class Control : public Inspector {
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
     ExpressionConverter* conv;
@@ -156,7 +156,7 @@ class DoControlBlockConversion : public Inspector {
     bool preorder(const IR::ControlBlock* b) override;
     bool preorder(const IR::Declaration_Instance* d) override;
 
-    explicit DoControlBlockConversion(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+    explicit Control(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                                       ExpressionConverter* conv,
                                       ProgramParts* structure, Util::JsonArray* pipelines,
                                       Util::JsonArray* counters) :
@@ -174,7 +174,7 @@ class ConvertControl final : public PassManager {
                    ExpressionConverter* conv,
                    ProgramParts* structure, Util::JsonArray* pipelines,
                    Util::JsonArray* counters) {
-        passes.push_back(new DoControlBlockConversion(refMap, typeMap, conv, structure, pipelines, counters));
+        passes.push_back(new Control(refMap, typeMap, conv, structure, pipelines, counters));
         setName("ConvertControl");
     }
 };
