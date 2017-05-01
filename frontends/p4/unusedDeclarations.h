@@ -22,10 +22,38 @@ limitations under the License.
 
 namespace P4 {
 
+/** @brief Removes unused declarations.
+ *
+ * The following kinds of nodes are not removed even if they are unreferenced:
+ *  - IR::Declaration_MatchKind
+ *  - IR::Parameter
+ *  - IR::Type_Error
+ *  - IR::Type_Extern
+ *  - IR::Type_Method
+ *  - IR::Type_StructLike
+ *
+ * If @warned is non-null, unused IR::P4Table and IR::Declaration_Instance
+ * nodes are stored in @warned if they are unused and removed by this pass.
+ *
+ * @pre Requires an up-to-date ReferenceMap.
+ */
 class RemoveUnusedDeclarations : public Transform {
     const ReferenceMap* refMap;
-    /// If non-null give warnings about unused declarations
+
+    /** If not null, logs the following unused elements in @warn:
+     *  - unused IR::P4Table nodes
+     *  - unused IR::Declaration_Instance nodes
+     */
     std::set<const IR::Node*>* warned;
+
+    /** Stores @node in @warned if: 
+     *   - @warned is non-null,
+     *   - @node is an unused declaration, 
+     *   - @node is not already present in @warned.
+     * 
+     * @return true if @node is added to @warned.
+     */
+    bool giveWarning(const IR::Node* node);
     const IR::Node* process(const IR::IDeclaration* decl);
 
  public:
@@ -37,10 +65,6 @@ class RemoveUnusedDeclarations : public Transform {
     using Transform::postorder;
     using Transform::preorder;
     using Transform::init_apply;
-
-    /// True if we should report a warning; the node is
-    /// added to warned in this case
-    bool giveWarning(const IR::Node* node);
 
     Visitor::profile_t init_apply(const IR::Node *root) override;
 
@@ -70,14 +94,22 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Type_Declaration* decl) override { return process(decl); }
 };
 
-/// Iterates RemoveUnusedDeclarations until convergence.
+/** @brief Iterates RemoveUnusedDeclarations until convergence.
+ *
+ * If @warn is true, emit compiler warnings if an unused instance of an
+ * IR::P4Table or IR::Declaration_Instance is removed.
+ */
 class RemoveAllUnusedDeclarations : public PassManager {
  public:
     explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool warn = false) {
         CHECK_NULL(refMap);
         std::set<const IR::Node*> *warned = nullptr;
+
+        // TODO: The @warned set is discarded.  Is it necessary, or can it be replaced
+        // with a bool?
         if (warn)
             warned = new std::set<const IR::Node*>();
+
         passes.emplace_back(
             new PassRepeated {
                 new ResolveReferences(refMap),
