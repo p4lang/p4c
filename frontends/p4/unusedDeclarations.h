@@ -32,8 +32,13 @@ namespace P4 {
  *  - IR::Type_Method
  *  - IR::Type_StructLike
  *
+ * Additionally, IR::Declaration_Instance nodes for extern instances are not
+ * removed but still trigger warnings.
+ *
  * If @warned is non-null, unused IR::P4Table and IR::Declaration_Instance
- * nodes are stored in @warned if they are unused and removed by this pass.
+ * nodes are stored in @warned if they are unused and removed by this pass.  A
+ * compilation warning is emitted when a new node is added to @warned,
+ * preventing duplicate warnings per node.
  *
  * @pre Requires an up-to-date ReferenceMap.
  */
@@ -103,10 +108,11 @@ class RemoveAllUnusedDeclarations : public PassManager {
  public:
     explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool warn = false) {
         CHECK_NULL(refMap);
-        std::set<const IR::Node*> *warned = nullptr;
 
-        // TODO: The @warned set is discarded.  Is it necessary, or can it be replaced
-        // with a bool?
+        // Unused extern instances are not removed but may still trigger
+        // warnings.  The @warned set keeps track of warnings emitted in
+        // previous iterations to avoid emitting duplicate warnings.
+        std::set<const IR::Node*> *warned = nullptr;
         if (warn)
             warned = new std::set<const IR::Node*>();
 
