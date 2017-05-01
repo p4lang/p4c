@@ -22,7 +22,36 @@ limitations under the License.
 
 namespace P4 {
 
-// Convert assignments between structures to assignments between fields
+/**
+ * Convert assignments between structures to assignments between fields
+ *
+ * Examples:
+ *   struct src {
+ *     bit<32> hdr;
+ *   }
+ *   struct dst {
+ *     bit<32> hdr;
+ *   }
+ *   action test() {
+ *     dst = src;
+ *   }
+ *
+ *   is replaced by
+ *
+ *   action test() {
+ *     dst.hdr = src.hdr;
+ *   }
+ *
+ *   Further, struct initialization is converted to assignment on struct fields
+ *
+ *   Note, header assignments are not converted in this pass.
+ *
+ * @pre none
+ * @post
+ *  - struct to struct copy is replaced by field assignment
+ *  - struct initialization is replaced by field assignment
+ *
+ */
 class DoCopyStructures : public Transform {
     TypeMap* typeMap;
  public:
