@@ -20,14 +20,13 @@ limitations under the License.
 #include "lib/log.h"
 
 #include "frontends/p4/typeMap.h"
+#include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/inferArchitecture.h"
 #include "frontends/p4/createBuiltins.h"
-#include "backends/bmv2/jsonconverter.h"
 #include "backends/bmv2/backend.h"
-
 #include "p4/createBuiltins.h"
 #include "p4/typeChecking/typeChecker.h"
 
@@ -37,7 +36,6 @@ using namespace P4;
 
 TEST(arch, psa_infer) {
     Log::addDebugSpec("inferArchitecture:1");
-    Log::addDebugSpec("jsonconverter:1");
     Log::addDebugSpec("psa_test:1");
     std::string program = P4_SOURCE(R"(
         typedef bit<9> PortId_t;
@@ -119,7 +117,6 @@ TEST(arch, psa_infer) {
     pgm = pgm->apply(passes);
     // midend pass
     CompilerOptions options;
-    BMV2::JsonConverter converter(options);
     const IR::ToplevelBlock *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -132,12 +129,12 @@ TEST(arch, psa_infer) {
     });
     pgm = pgm->apply(midpass);
     //dump(pgm);
-    converter.convert(&refMap, &typeMap, toplevel, &enumMap);
-    converter.serialize(std::cout);
+    BMV2::Backend backend(&enumMap);
+    backend.run(toplevel);
+    backend.serialize(std::cout);
 }
 
 TEST(arch, block_visitor) {
-    Log::addDebugSpec("jsonconverter:1");
     Log::addDebugSpec("backend:1");
     Log::addDebugSpec("convertControl:1");
     std::string program = P4_SOURCE(R"(
@@ -193,15 +190,19 @@ TEST(arch, block_visitor) {
     });
     pgm = pgm->apply(passes);
     const IR::ToplevelBlock *toplevel = nullptr;
+    P4::ConvertEnums::EnumMapping enumMap;
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     PassManager midpass({
+        convertEnums,
+        new VisitFunctor([this, convertEnums, &enumMap]() { enumMap = convertEnums->getEnumMapping(); }),
         evaluator,
         new VisitFunctor([this, evaluator, &toplevel]() { toplevel = evaluator->getToplevelBlock(); })
     });
     pgm = pgm->apply(midpass);
 
     // backend passes
-    BMV2::Backend backend;
+    BMV2::Backend backend(&enumMap);
     backend.run(toplevel);
     backend.serialize(std::cout);
 }
