@@ -51,21 +51,36 @@ main(int argc, char* argv[]) {
   simple_switch_parser = new bm::TargetParserBasic();
   simple_switch_parser->add_flag_option("enable-swap",
                                         "enable JSON swapping at runtime");
+  simple_switch_parser->add_string_option(
+      "grpc-server-addr",
+      "bind gRPC server to given address [default is 0.0.0.0:50051]");
   int status = simple_switch->init_from_command_line_options(
       argc, argv, simple_switch_parser);
   if (status != 0) std::exit(status);
 
   bool enable_swap_flag = false;
-  if (simple_switch_parser->get_flag_option("enable-swap", &enable_swap_flag)
-      != bm::TargetParserBasic::ReturnCode::SUCCESS)
-    std::exit(1);
+  {
+    auto rc = simple_switch_parser->get_flag_option(
+        "enable-swap", &enable_swap_flag);
+    if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS) std::exit(1);
+  }
   if (enable_swap_flag) simple_switch->enable_config_swap();
+
+  std::string grpc_server_addr;
+  {
+    auto rc = simple_switch_parser->get_string_option(
+        "grpc-server-addr", &grpc_server_addr);
+    if (rc == bm::TargetParserBasic::ReturnCode::OPTION_NOT_PROVIDED)
+      grpc_server_addr = "0.0.0.0:50051";
+    else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS)
+      std::exit(1);
+  }
 
   bm::pi::register_switch(simple_switch);
 
   using pi::fe::proto::DeviceMgr;
   DeviceMgr::init(256);
-  PIGrpcServerRun();
+  PIGrpcServerRunAddr(grpc_server_addr.c_str());
 
   simple_switch->start_and_return();
 
