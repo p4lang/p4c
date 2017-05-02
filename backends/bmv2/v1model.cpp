@@ -18,14 +18,63 @@ limitations under the License.
  * This file implements the simple switch model
  */
 
+#include <algorithm>
+#include <cstring>
+#include <set>
 #include <frontends/p4/fromv1.0/v1model.h>
 #include <backends/bmv2/backend.h>
 
-using BMV2::mkPrimitive;
-using BMV2::mkParameters;
 using BMV2::extVisibleName;
+using BMV2::mkArrayField;
+using BMV2::mkParameters;
+using BMV2::mkPrimitive;
+using BMV2::nextId;
 
 namespace P4V1 {
+
+
+static void addToFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
+                           Util::JsonArray* fl)
+{
+    if (expr->is<IR::ListExpression>()) {
+        auto le = expr->to<IR::ListExpression>();
+        for (auto e : le->components) {
+            addToFieldList(bmv2, e, fl);
+        }
+        return;
+    }
+
+    auto type = bmv2->getTypeMap().getType(expr, true);
+    if (type->is<IR::Type_StructLike>()) {
+        // recursively add all fields
+        auto st = type->to<IR::Type_StructLike>();
+        for (auto f : st->fields) {
+            auto member = new IR::Member(expr, f->name);
+            bmv2->getTypeMap().setType(member, bmv2->getTypeMap().getType(f, true));
+            addToFieldList(bmv2, member, fl);
+        }
+        return;
+    }
+
+    auto j = bmv2->getExpressionConverter()->convert(expr);
+    fl->append(j);
+}
+
+// returns id of created field list
+static int createFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
+                           cstring group, cstring listName,
+                           Util::JsonArray* fieldLists)
+{
+    auto fl = new Util::JsonObject();
+    fieldLists->append(fl);
+    int id = nextId(group);
+    fl->emplace("id", id);
+    fl->emplace("name", listName);
+    auto elements = mkArrayField(fl, "elements");
+    addToFieldList(bmv2, expr, elements);
+    return id;
+}
+
 
 void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
                                   const P4::ExternMethod *em,
@@ -97,8 +146,164 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
 }
 
 void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv2,
-                                     const P4::ExternMethod *em,
-                                     const IR::MethodCallExpression *mc){
+                                     const P4::ExternFunction *ef,
+                                     const IR::MethodCallExpression *mc)
+{
+    if (ef->method->name == instance.clone.name ||
+        ef->method->name == instance.clone.clone3.name) {
+        int id = -1;
+        if (ef->method->name == instance.clone.name) {
+            BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
+            cstring name = bmv2->getRefMap().newName("fl");
+            auto emptylist = new IR::ListExpression({});
+            id = createFieldList(bmv2, emptylist, "field_lists", name, bmv2->fieldLists);
+        } else {
+            BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
+            cstring name = bmv2->getRefMap().newName("fl");
+            id = createFieldList(bmv2, mc->arguments->at(2), "field_lists", name, bmv2->fieldLists);
+        }
+        auto cloneType = mc->arguments->at(0);
+        auto ei = P4::EnumInstance::resolve(cloneType, &bmv2->getTypeMap());
+        if (ei == nullptr) {
+            ::error("%1%: must be a constant on this target", cloneType);
+        } else {
+            cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
+                    "clone_egress_pkt_to_egress";
+            auto session = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
+            auto primitive = mkPrimitive(prim, result);
+            auto parameters = mkParameters(primitive);
+            parameters->append(session);
+
+            if (id >= 0) {
+                auto cst = new IR::Constant(id);
+                bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
+                auto jcst = bmv2->getExpressionConverter()->convert(cst);
+                parameters->append(jcst);
+            }
+        }
+    } else if (ef->method->name == instance.hash.name) {
+
+        static std::set<cstring> supportedHashAlgorithms = {
+            instance.algorithm.crc32.name, instance.algorithm.crc32_custom.name,
+            instance.algorithm.crc16.name, instance.algorithm.crc16_custom.name,
+            instance.algorithm.random.name, instance.algorithm.identity.name };
+
+        BUG_CHECK(mc->arguments->size() == 5, "Expected 5 arguments for %1%", mc);
+        auto primitive = mkPrimitive("modify_field_with_hash_based_offset", result);
+        auto parameters = mkParameters(primitive);
+        auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
+        parameters->append(dest);
+        auto base = bmv2->getExpressionConverter()->convert(mc->arguments->at(2));
+        parameters->append(base);
+        auto calculation = new Util::JsonObject();
+        auto ei = P4::EnumInstance::resolve(mc->arguments->at(1), &bmv2->getTypeMap());
+        CHECK_NULL(ei);
+        if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end())
+            ::error("%1%: unexpected algorithm", ei->name);
+        // inlined cstring calcName = createCalculation(ei->name, mc->arguments->at(3), calculations);
+        auto fields = mc->arguments->at(3);
+        cstring calcName = bmv2->getRefMap().newName("calc_");
+        auto calc = new Util::JsonObject();
+        calc->emplace("name", calcName);
+        calc->emplace("id", nextId("calculations"));
+        calc->emplace("algo", ei->name);
+        if (!fields->is<IR::ListExpression>()) {
+            // expand it into a list
+            auto list = new IR::ListExpression({});
+            auto type = bmv2->getTypeMap().getType(fields, true);
+            BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: expected a struct", fields);
+            for (auto f : type->to<IR::Type_StructLike>()->fields) {
+                auto e = new IR::Member(fields, f->name);
+                auto ftype = bmv2->getTypeMap().getType(f);
+                bmv2->getTypeMap().setType(e, ftype);
+                list->push_back(e);
+            }
+            fields = list;
+            bmv2->getTypeMap().setType(fields, type);
+        }
+        auto jright = bmv2->getExpressionConverter()->convert(fields);
+        calc->emplace("input", jright);
+        bmv2->calculations->append(calc);
+        calculation->emplace("type", "calculation");
+        calculation->emplace("value", calcName);
+        parameters->append(calculation);
+        auto max = bmv2->getExpressionConverter()->convert(mc->arguments->at(4));
+        parameters->append(max);
+    } else if (ef->method->name == instance.digest_receiver.name) {
+        BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
+        auto primitive = mkPrimitive("generate_digest", result);
+        auto parameters = mkParameters(primitive);
+        auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
+        parameters->append(dest);
+        cstring listName = "digest";
+        // If we are supplied a type argument that is a named type use
+        // that for the list name.
+        if (mc->typeArguments->size() == 1) {
+            auto typeArg = mc->typeArguments->at(0);
+            if (typeArg->is<IR::Type_Name>()) {
+                auto origType = bmv2->getRefMap().getDeclaration(
+                    typeArg->to<IR::Type_Name>()->path, true);
+                BUG_CHECK(origType->is<IR::Type_Struct>(),
+                          "%1%: expected a struct type", origType);
+                auto st = origType->to<IR::Type_Struct>();
+                listName = extVisibleName(st);
+            }
+        }
+        int id = createFieldList(bmv2, mc->arguments->at(1), "learn_lists",
+                                 listName, bmv2->learn_lists);
+        auto cst = new IR::Constant(id);
+        bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
+        auto jcst = bmv2->getExpressionConverter()->convert(cst);
+        parameters->append(jcst);
+    } else if (ef->method->name == instance.resubmit.name ||
+               ef->method->name == instance.recirculate.name) {
+        BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
+        cstring prim = (ef->method->name == instance.resubmit.name) ?
+                "resubmit" : "recirculate";
+        auto primitive = mkPrimitive(prim, result);
+        auto parameters = mkParameters(primitive);
+        cstring listName = prim;
+        // If we are supplied a type argument that is a named type use
+        // that for the list name.
+        if (mc->typeArguments->size() == 1) {
+            auto typeArg = mc->typeArguments->at(0);
+            if (typeArg->is<IR::Type_Name>()) {
+                auto origType = bmv2->getRefMap().getDeclaration(
+                    typeArg->to<IR::Type_Name>()->path, true);
+                BUG_CHECK(origType->is<IR::Type_Struct>(),
+                          "%1%: expected a struct type", origType);
+                auto st = origType->to<IR::Type_Struct>();
+                listName = extVisibleName(st);
+            }
+        }
+        int id = createFieldList(bmv2, mc->arguments->at(0), "field_lists",
+                                 listName, bmv2->fieldLists);
+        auto cst = new IR::Constant(id);
+        bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
+        auto jcst = bmv2->getExpressionConverter()->convert(cst);
+        parameters->append(jcst);
+    } else if (ef->method->name == instance.drop.name) {
+        BUG_CHECK(mc->arguments->size() == 0, "Expected 0 arguments for %1%", mc);
+        auto primitive = mkPrimitive("drop", result);
+        (void)mkParameters(primitive);
+    } else if (ef->method->name == instance.random.name) {
+        BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
+        auto primitive =
+                mkPrimitive(instance.random.modify_field_rng_uniform.name, result);
+        auto params = mkParameters(primitive);
+        auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
+        auto lo = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
+        auto hi = bmv2->getExpressionConverter()->convert(mc->arguments->at(2));
+        params->append(dest);
+        params->append(lo);
+        params->append(hi);
+    } else if (ef->method->name == instance.truncate.name) {
+        BUG_CHECK(mc->arguments->size() == 1, "Expected 1 arguments for %1%", mc);
+        auto primitive = mkPrimitive(instance.truncate.name, result);
+        auto params = mkParameters(primitive);
+        auto len = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
+        params->append(len);
+    }
 
 }
 

@@ -88,7 +88,9 @@ class Backend {
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
     ExpressionConverter* getExpressionConverter() { return conv; };
-    DirectMeterMap& getMeterMap() { return meterMap; }
+    DirectMeterMap&      getMeterMap() { return meterMap; }
+    P4::ReferenceMap&    getRefMap()   { return refMap; }
+    P4::TypeMap&         getTypeMap()  { return typeMap; }
 };
 
 }  // namespace BMV2

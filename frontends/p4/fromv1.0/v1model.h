@@ -309,7 +309,7 @@ class V1Model : public ::Model::Model {
                                      const P4::ExternMethod *em,
                                      const IR::MethodCallExpression *mc);
     static void convertExternFunctions(Util::JsonArray *o, BMV2::Backend *bmv2,
-                                       const P4::ExternMethod *em,
+                                       const P4::ExternFunction *ef,
                                        const IR::MethodCallExpression *mc);
 
     static V1Model instance;
