@@ -27,7 +27,7 @@ namespace P4 {
  * do not exist in the program.
  *
  * @pre This should be run after inlining, constant folding and strength reduction.
- * @post Raise error for IR::Mod and IR::Div.
+ * @post There are no IR::Mod and IR::Div operations in the program.
  */
 class CompileTimeOperations : public Inspector {
  public:
