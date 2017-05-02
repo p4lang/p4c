@@ -38,10 +38,16 @@ void IR::FieldList::dbprint(std::ostream &out) const {
     out << unindent << " }";
 }
 void IR::FieldListCalculation::dbprint(std::ostream &out) const {
-    out << "field_list_calcualtion " << name << '(' << algorithm << ", " << output_width << ')';
+    out << "field_list_calculation" << name << '(' << algorithm << ", " << output_width << ')';
 }
 void IR::CalculatedField::dbprint(std::ostream &out) const {
-    out << "calcualted_field " << *field << indent;
+    out << "calculated_field ";
+    if (field) {
+        out << *field;
+    } else {
+        out << "(null)";
+    }
+    out << indent;
     for (auto &spec : specs) {
         out << endl << (spec.update ? "update " : "verify ") << spec.name;
         if (spec.cond) out << " if " << spec.cond; }
