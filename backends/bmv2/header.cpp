@@ -35,11 +35,11 @@ bool ConvertHeaders::hasStructLikeMember(const IR::Type_StructLike *st, bool met
     return false;
 }
 
-
 void ConvertHeaders::pushFields(const IR::Type_StructLike *st,
                                Util::JsonArray *fields) {
+    LOG4("Visit " << __FUNCTION__);
     for (auto f : st->fields) {
-        auto ftype = typeMap->getType(f, true);
+        auto ftype = backend->getTypeMap()->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
         } else if (ftype->is<IR::Type_Boolean>()) {
@@ -66,7 +66,7 @@ void ConvertHeaders::pushFields(const IR::Type_StructLike *st,
     unsigned width = st->width_bits();
     unsigned padding = width % 8;
     if (padding != 0) {
-        cstring name = refMap->newName("_padding");
+        cstring name = backend->getRefMap()->newName("_padding");
         auto field = pushNewArray(fields);
         field->append(name);
         field->append(8 - padding);
@@ -75,7 +75,7 @@ void ConvertHeaders::pushFields(const IR::Type_StructLike *st,
 }
 
 void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, bool meta) {
-    // must not have nested struct
+    LOG4("Visit " << __FUNCTION__);
     BUG_CHECK(!hasStructLikeMember(st, meta),
               "%1%: Header has nested structure.", st);
 
@@ -89,7 +89,7 @@ void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, 
         result->emplace("id", nextId("header_types"));
         auto fields = mkArrayField(result, "fields");
         pushFields(st, fields);
-        headerTypes->append(result);
+        backend->headerTypes->append(result);
         headerTypesCreated.insert(st);
     }
 
@@ -110,12 +110,12 @@ void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, 
 }
 
 void ConvertHeaders::createStack(const IR::Type_Stack *stack, bool meta) {
-    LOG1("Visiting createStack");
+    LOG4("Visit " << __FUNCTION__);
     auto json = new Util::JsonObject();
     json->emplace("name", "name");
     json->emplace("id", nextId("stack"));
     json->emplace("size", stack->getSize());
-    auto type = typeMap->getTypeType(stack->elementType, true);
+    auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
     auto ht = type->to<IR::Type_Header>();
 
     auto ht_name = stack->elementType->to<IR::Type_Header>()->name;
@@ -124,130 +124,21 @@ void ConvertHeaders::createStack(const IR::Type_Stack *stack, bool meta) {
     for (unsigned i = 0; i < stack->getSize(); i++) {
         createHeaderTypeAndInstance(ht, meta);
     }
-    headerStacks->append(json);
+    backend->headerStacks->append(json);
 }
 
 void ConvertHeaders::createNestedStruct(const IR::Type_StructLike *st, bool meta) {
-    LOG1("Visiting createNestedStruct");
+    LOG4("Visit " << __FUNCTION__);
     if (!hasStructLikeMember(st, meta)) {
-        LOG1("createHeaderTypeAndInstance");
         createHeaderTypeAndInstance(st, meta);
     } else {
-        LOG1("create struct fields");
         for (auto f : st->fields) {
             if (f->type->is<IR::Type_StructLike>()) {
-                LOG1("create field");
                 createNestedStruct(f->type->to<IR::Type_StructLike>(), meta);
             } else if (f->type->is<IR::Type_Stack>()) {
-                LOG1("create stack");
                 createStack(f->type->to<IR::Type_Stack>(), meta);
             }
         }
-    }
-}
-
-void ConvertHeaders::addLocals() {
-    // We synthesize a "header_type" for each local which has a struct type
-    // and we pack all the scalar-typed locals into a scalarsStruct
-    auto scalarFields = scalarsStruct->get("fields")->to<Util::JsonArray>();
-    CHECK_NULL(scalarFields);
-
-    LOG1("... structure " << structure->variables);
-    for (auto v : structure->variables) {
-        LOG1("Creating local " << v);
-        auto type = typeMap->getType(v, true);
-        if (auto st = type->to<IR::Type_StructLike>()) {
-            createJsonType(st);
-            auto name = st->name;
-            // create header instance?
-            auto json = new Util::JsonObject();
-            json->emplace("name", v->name);
-            json->emplace("id", nextId("headers"));
-            json->emplace("header_type", name);
-            json->emplace("metadata", true);
-            json->emplace("pi_omit", true);  // Don't expose in PI.
-            headerInstances->append(json);
-        } else if (auto stack = type->to<IR::Type_Stack>()) {
-            auto json = new Util::JsonObject();
-            json->emplace("name", v->name);
-            json->emplace("id", nextId("stack"));
-            json->emplace("size", stack->getSize());
-            auto type = typeMap->getTypeType(stack->elementType, true);
-            BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
-            auto ht = type->to<IR::Type_Header>();
-            createJsonType(ht);
-
-            cstring header_type = stack->elementType->to<IR::Type_Header>()->name;
-            json->emplace("header_type", header_type);
-            auto stackMembers = mkArrayField(json, "header_ids");
-            for (unsigned i=0; i < stack->getSize(); i++) {
-                unsigned id = nextId("headers");
-                stackMembers->append(id);
-                auto header = new Util::JsonObject();
-                cstring name = v->name + "[" + Util::toString(i) + "]";
-                header->emplace("name", name);
-                header->emplace("id", id);
-                header->emplace("header_type", header_type);
-                header->emplace("metadata", false);
-                header->emplace("pi_omit", true);  // Don't expose in PI.
-                headerInstances->append(header);
-            }
-            headerStacks->append(json);
-        } else if (type->is<IR::Type_Bits>()) {
-            auto tb = type->to<IR::Type_Bits>();
-            auto field = pushNewArray(scalarFields);
-            field->append(v->name.name);
-            field->append(tb->size);
-            field->append(tb->isSigned);
-            scalars_width += tb->size;
-        } else if (type->is<IR::Type_Boolean>()) {
-            auto field = pushNewArray(scalarFields);
-            field->append(v->name.name);
-            field->append(boolWidth);
-            field->append(0);
-            scalars_width += boolWidth;
-        } else if (type->is<IR::Type_Error>()) {
-            auto field = pushNewArray(scalarFields);
-            field->append(v->name.name);
-            field->append(32);  // using 32-bit fields for errors
-            field->append(0);
-            scalars_width += 32;
-        } else {
-            BUG("%1%: type not yet handled on this target", type);
-        }
-    }
-
-    //FIXME: do we need to put scalarsStruct in set?
-    //headerTypesCreated.insert(scalarsName);
-    headerTypes->append(scalarsStruct);
-
-    // insert the scalars instance
-    auto json = new Util::JsonObject();
-    json->emplace("name", scalarsName);
-    json->emplace("id", nextId("headers"));
-    json->emplace("header_type", scalarsName);
-    json->emplace("metadata", true);
-    json->emplace("pi_omit", true);  // Don't expose in PI.
-    headerInstances->append(json);
-}
-
-void ConvertHeaders::createScalars() {
-    scalarsName = refMap->newName("scalars");
-    scalarsStruct = new Util::JsonObject();
-    scalarsStruct->emplace("name", scalarsName);
-    scalarsStruct->emplace("id", nextId("header_types"));
-    scalarFields = mkArrayField(scalarsStruct, "fields");
-}
-
-void ConvertHeaders::padScalars() {
-    unsigned padding = scalars_width % 8;
-    auto scalarFields = (*scalarsStruct)["fields"]->to<Util::JsonArray>();
-    if (padding != 0) {
-        cstring name = refMap->newName("_padding");
-        auto field = pushNewArray(scalarFields);
-        field->append(name);
-        field->append(8 - padding);
-        field->append(false);
     }
 }
 
@@ -258,7 +149,7 @@ void ConvertHeaders::createJsonType(const IR::Type_StructLike *st) {
         cstring name = extVisibleName(st);
         typeJson->emplace("name", name);
         typeJson->emplace("id", nextId("header_types"));
-        headerTypes->append(typeJson);
+        backend->headerTypes->append(typeJson);
         auto fields = mkArrayField(typeJson, "fields");
         pushFields(st, fields);
         headerTypesCreated.insert(st);
@@ -278,7 +169,7 @@ bool ConvertHeaders::preorder(const IR::PackageBlock *block) {
 }
 
 bool ConvertHeaders::preorder(const IR::Type_Control* ctrl) {
-    LOG1("Visiting " << dbp(ctrl));
+    LOG3("Visiting " << dbp(ctrl));
     auto parent = getContext()->node;
     if (parent->is<IR::P4Control>()) {
         return true;
@@ -301,13 +192,36 @@ bool ConvertHeaders::preorder(const IR::Type_Extern* ext) {
 }
 
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
-    auto type = typeMap->getType(param->getNode(), true);
+    auto type = backend->getTypeMap()->getType(param->getNode(), true);
     LOG3("Visiting " << dbp(type));
     if (type->is<IR::Type_StructLike>()) {
         auto st = type->to<IR::Type_StructLike>();
         auto isCreated = headerTypesCreated.find(st) != headerTypesCreated.end();
         if (!isCreated) {
             createNestedStruct(st, false);
+        }
+    } else if (type->is<IR::Type_Bits>()){
+        LOG3("... create scalars " << type);
+        auto scalarFields = backend->scalarsStruct->get("fields")->to<Util::JsonArray>();
+        CHECK_NULL(scalarFields);
+        cstring newName = backend->getRefMap()->newName(type->getName() + "." + f->name);
+        if (ft->is<IR::Type_Bits>()) {
+            auto tb = ft->to<IR::Type_Bits>();
+            auto field = pushNewArray(scalarFields);
+            field->append(newName);
+            field->append(tb->size);
+            field->append(tb->isSigned);
+            scalars_width += tb->size;
+            backend->scalarMetadataFields.emplace(f, newName);
+        } else if (ft->is<IR::Type_Boolean>()) {
+            auto field = pushNewArray(scalarFields);
+            field->append(newName);
+            field->append(boolWidth);
+            field->append(0);
+            scalars_width += boolWidth;
+            backend->scalarMetadataFields.emplace(f, newName);
+        } else {
+            BUG("%1%: Unhandled type for %2%", ft, f);
         }
     }
     return false;

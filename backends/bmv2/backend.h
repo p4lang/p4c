@@ -66,14 +66,46 @@ class Backend {
     P4::V2Model&                     model;
     P4V1::V1Model&                   v1model;
     DirectMeterMap                   meterMap;
-
     using ErrorValue = unsigned int;
     using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
     ErrorCodesMap                    errorCodesMap;
+    unsigned                         scalars_width = 0;
+    const unsigned                   boolWidth = 1;
+    cstring                          scalarsName;
+
+ public:
+    Util::JsonArray*                 calculations;
+    Util::JsonArray*                 checksums;
+    Util::JsonArray*                 counters;
+    Util::JsonArray*                 field_lists;
+    Util::JsonArray*                 learn_lists;
+    Util::JsonArray*                 meter_arrays;
+    Util::JsonArray*                 register_arrays;
+    Util::JsonArray*                 headerTypes;
+    Util::JsonArray*                 headerInstances;
+    Util::JsonArray*                 headerStacks;
+    Util::JsonArray*                 parsers;
+    Util::JsonArray*                 pipelines;
+    Util::JsonArray*                 deparsers;
+    Util::JsonArray*                 actions;
+    Util::JsonArray*                 externs;
+    Util::JsonArray*                 errors;
+    Util::JsonArray*                 enums;
+
+    Util::JsonObject*                scalarsStruct;
+    Util::JsonArray*                 scalarFields;
+
+    // We place scalar user metadata fields (i.e., bit<>, bool)
+    // in the "scalars" metadata object, so we may need to rename
+    // these fields.  This map holds the new names.
+    std::map<const IR::StructField*, cstring> scalarMetadataFields;
 
  protected:
     void addMetaInformation();
     void addEnums(Util::JsonArray* enums);
+    void addLocals();
+    void createScalars();
+    void padScalars();
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
     Backend::ErrorValue retrieveErrorValue(const IR::Member* mem) const;
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
