@@ -22,14 +22,19 @@ namespace P4 {
 
 namespace {
 
-// Data structure used for making explicit the order of evaluation of
-// sub-expressions in an expression.
-// An expression e will be represented as a sequence of temporary declarations,
-// followed by a sequence of statements 'statements' (mostly assignments to the temporaries,
-// but which could also include conditionals for short-circuit evaluation).
+/** Data structure used for making the order of evaluation explicit for
+ * sub-expressions in an expression.  An expression ```e``` will be represented
+ * as a sequence of temporary declarations, followed by a sequence of
+ * statements (mostly assignments to the temporaries, but which could also
+ * include conditionals for short-circuit evaluation).
+ */
 struct EvaluationOrder {
     ReferenceMap* refMap;
+
+    /// Output: The original expression with side-effecting sub-expressions
+    /// replaced by temporaries.
     const IR::Expression* final;  // output
+
     // Declaration instead of Declaration_Variable so it can be more easily inserted
     // in the program IR.
     IR::IndexedVector<IR::Declaration> *temporaries;
@@ -40,6 +45,7 @@ struct EvaluationOrder {
             temporaries(new IR::IndexedVector<IR::Declaration>()),
             statements(new IR::IndexedVector<IR::StatOrDecl>())
     { CHECK_NULL(refMap); }
+
     bool simple() const
     { return temporaries->empty() && statements->empty(); }
 
@@ -50,9 +56,14 @@ struct EvaluationOrder {
         return tmp;
     }
 
+    /** Add ```@varName = @expression``` to the vector of statements.
+      *
+      * @return A copy of the l-value expression created for varName.
+      */
     const IR::Expression* addAssignment(
         Util::SourceInfo srcInfo,
-        cstring varName, const IR::Expression* expression) {
+        cstring varName,
+        const IR::Expression* expression) {
         auto left = new IR::PathExpression(IR::ID(varName, nullptr));
         auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
         statements->push_back(stat);
@@ -61,13 +72,36 @@ struct EvaluationOrder {
     }
 };
 
+/** @brief Replace expressions containing constructor or method invocations
+ * with temporaries.
+ * 
+ * The EvaluationOrder field accumulates lists of the temporaries introduced in
+ * this way, as well as assignment statements that assign the original
+ * expressions to the appropriate temporaries.
+ *
+ * The DoSimplifyExpressions pass will later insert the declarations and
+ * assignments above the expression.
+ *
+ * @pre An up-to-date ReferenceMap and TypeMap.
+ *
+ * @post The RefenceMap and TypeMap are updated to reflect changes to the IR.
+ * This includes extra information stored in the TypeMap, specifically
+ * left-value-ness and compile-time-contant-ness.
+ */
 class DismantleExpression : public Transform {
+    // TODO: It may be worth refactoring DismantleExpression to purely use
+    // pre-/postorder methods, rather than invoking visit() in preorder
+    // methods, to reflect the design pattern used elsewhere.
     ReferenceMap* refMap;
     TypeMap* typeMap;
     EvaluationOrder *result;
-    bool leftValue;  // true when we are dismantling a left-value.
-    bool resultNotUsed;  // true when the caller does not want the result (i.e.,
-                         // we are invoked from a MethodCallStatement).
+
+    /// true when we are dismantling a left-value.
+    bool leftValue;
+
+    /// true when the caller does not want the result (i.e.,
+    /// we are invoked from a MethodCallStatement).
+    bool resultNotUsed;
 
     // catch-all case
     const IR::Node* postorder(IR::Expression* expression) override {
@@ -169,6 +203,7 @@ class DismantleExpression : public Transform {
         visit(expression->expr);
         auto left = result->final;
         CHECK_NULL(left);
+        // TODO: why clone here?
         auto clone = expression->clone();
         clone->expr = left;
         typeMap->setType(clone, type);
@@ -188,6 +223,7 @@ class DismantleExpression : public Transform {
             CHECK_NULL(left);
             visit(expression->right);
             auto right = result->final;
+            // TODO: why clone here?
             auto clone = expression->clone();
             clone->left = left;
             clone->right = right;
@@ -237,6 +273,7 @@ class DismantleExpression : public Transform {
             auto block = new IR::BlockStatement(*ifFalse);
             auto ifStatement = new IR::IfStatement(expression->srcInfo, cond, ifTrue, block);
             result->statements->push_back(ifStatement);
+            // TODO: result->addAssignment() returns a clone; why clone again?
             result->final = path->clone();
         }
         typeMap->setType(result->final, type);
@@ -268,6 +305,7 @@ class DismantleExpression : public Transform {
         auto ifStatement = new IR::IfStatement(
             e0, new IR::BlockStatement(*ifTrue), new IR::BlockStatement(*ifFalse));
         result->statements->push_back(ifStatement);
+        // TODO: result->addAssignment() returns a clone; why clone again?
         result->final = path->clone();
         typeMap->setType(result->final, type);
         prune();
@@ -279,8 +317,11 @@ class DismantleExpression : public Transform {
 
     // We don't want to compute the full read/write set here so we
     // overapproximate it as follows: all declarations that occur in
-    // an expression.  TODO: this could be made more precise, perhaps
-    // using LocationSets.
+    // an expression.
+
+    // TODO: this could be made more precise, perhaps using LocationSets.
+    // TODO: surely there are other passes that compute reads/writes?  Perhaps
+    // we can reuse one here.
     class ReadsWrites : public Inspector {
      public:
         std::set<const IR::IDeclaration*> decls;
@@ -295,6 +336,8 @@ class DismantleExpression : public Transform {
         }
     };
 
+    // TODO: alias analysis would be generally useful... refactor this into
+    // a stand-alone (perhaps more precise) utility?
     bool mayAlias(const IR::Expression* left, const IR::Expression* right) const {
         ReadsWrites rwleft(refMap);
         (void)left->apply(rwleft);
