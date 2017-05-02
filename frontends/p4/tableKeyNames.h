@@ -23,13 +23,35 @@ limitations under the License.
 
 namespace P4 {
 
-/**
-Adds a "@name" annotation to each table key that does not have a name.
-The string used for the name is derived from the expression itself -
-if the expression is "simple" enough.  If the expression is not
-simple the compiler will give an error.  Simple expressions are
-PathExpression, ArrayIndex, Member, .isValid(), Constant, Slice
-*/
+/** Adds a "@name" annotation to each table key that does not have a name.
+ * The string used for the name is derived from the expression itself - if
+ * the expression is "simple" enough.  If the expression is not simple the
+ * compiler will give an error.  Simple expressions are:
+ * - .isValid(),
+ * - ArrayIndex,
+ * - BAnd (where at least one operand is constant),
+ * - Constant,
+ * - Member,
+ * - PathExpression,
+ * - Slice.
+ *
+ * Examples of control plane names generated from expressions:
+ * - `arr[16w5].f` : `@name("arr[5].f")`
+ * - `f & 0x3` : `@name("f")`
+ * - `.foo` : `@name(".foo")`
+ * - `foo.bar` : `@name("foo.bar")`
+ * - `f.isValid()` : `@name("f.isValid()")`
+ * - `f[3:0]` : `@name("f[3:0]")`
+ *
+ * @pre This must run before passes that change key expressions, eg. constant
+ * folding.  Otherwise the generated control plane names may not match the
+ * syntax of the original P4 program.
+ * 
+ * @post All key fields have `@name` annotations.
+ *
+ * Emit a compilation error if the program contains complex key expressions
+ * without `@name` annotations.
+ */
 class DoTableKeyNames : public Transform {
     const TypeMap* typeMap;
  public:

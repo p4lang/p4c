@@ -1154,10 +1154,16 @@ static void collectExternSymbols(P4RuntimeSymbolTable& symbols,
                                  const IR::ExternBlock* externBlock) {
     CHECK_NULL(externBlock);
 
+    auto decl = externBlock->node->to<IR::IDeclaration>();
+    if (decl == nullptr) return;
+
     if (externBlock->type->name == "counter") {
-        symbols.add(P4RuntimeSymbolType::COUNTER, externBlock->node->to<IR::IDeclaration>());
+        symbols.add(P4RuntimeSymbolType::COUNTER, decl);
     } else if (externBlock->type->name == "meter") {
-        symbols.add(P4RuntimeSymbolType::METER, externBlock->node->to<IR::IDeclaration>());
+        symbols.add(P4RuntimeSymbolType::METER, decl);
+    } else if (externBlock->type->name == P4V1::V1Model::instance.action_profile.name ||
+               externBlock->type->name == P4V1::V1Model::instance.action_selector.name) {
+        symbols.add(P4RuntimeSymbolType::ACTION_PROFILE, decl);
     }
 }
 
@@ -1232,7 +1238,17 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
                                                 .tableAttributes
                                                 .tableImplementation.name);
     if (impl) {
-        symbols.add(P4RuntimeSymbolType::ACTION_PROFILE, controlPlaneName(impl));
+        // we only collect the implementation symbol if the action profile is instantiated within
+        // the table declaration, otherwise the symbol is collected by collectExternSymbols.
+        if (!impl->value->is<IR::ExpressionValue>()) {
+            ::error("Expected implementation property value for table %1% to be an expression: %2%",
+                    controlPlaneName(table), impl);
+            return;
+        }
+        auto expr = impl->value->to<IR::ExpressionValue>()->expression;
+        if (expr->is<IR::ConstructorCallExpression>()) {
+            symbols.add(P4RuntimeSymbolType::ACTION_PROFILE, controlPlaneName(impl));
+        }
     }
 
     auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
@@ -1433,6 +1449,27 @@ static std::vector<ActionRef> getActionRefs(const IR::P4Table* table, ReferenceM
     return actions;
 }
 
+static boost::optional<cstring> getTableImplementationName(const IR::P4Table* table,
+                                                           ReferenceMap* refMap,
+                                                           TypeMap* typeMap) {
+    auto impl = table->properties->getProperty(P4V1::V1Model::instance
+                                                .tableAttributes
+                                                .tableImplementation.name);
+    if (impl == nullptr) return boost::none;
+    if (!impl->value->is<IR::ExpressionValue>()) {
+        ::error("Expected implementation property value for table %1% to be an expression: %2%",
+                controlPlaneName(table), impl);
+        return boost::none;
+    }
+    auto expr = impl->value->to<IR::ExpressionValue>()->expression;
+    if (expr->is<IR::ConstructorCallExpression>()) return controlPlaneName(impl);
+    if (expr->is<IR::PathExpression>()) {
+        auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+        return controlPlaneName(decl);
+    }
+    return boost::none;
+}
+
 static void serializeTable(P4RuntimeSerializer& serializer,
                            const IR::TableBlock* tableBlock,
                            ReferenceMap* refMap,
@@ -1445,11 +1482,7 @@ static void serializeTable(P4RuntimeSerializer& serializer,
     auto matchFields = getMatchFields(table, refMap, typeMap);
     auto actions = getActionRefs(table, refMap, typeMap);
 
-    auto impl = table->properties->getProperty(P4V1::V1Model::instance
-                                                .tableAttributes
-                                                .tableImplementation.name);
-    boost::optional<cstring> implementation;
-    if (impl) implementation = controlPlaneName(impl);
+    auto implementation = getTableImplementationName(table, refMap, typeMap);
 
     auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
     auto directMeter = getDirectCounterlike<IR::Meter>(table, refMap, typeMap);
