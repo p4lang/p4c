@@ -22,14 +22,17 @@ limitations under the License.
 
 namespace P4 {
 
-// Moves all local declarations to the "top".
-// This can only be done safely if all declarations have different names,
-// so it has to be done after the UniqueNames pass.
-// We move all declarations in a control or parser to the "top", including
-// the ones in the Control body and Parser states.
-// Also, if the control has nested actions, we move the declarations from
-// the actions to the enclosing control.
+/** Moves all local declarations in a control or parser to the "top", including
+ * the ones in the control body and parser states.  Also, if the control has
+ * nested actions, move the declarations from the actions to the enclosing
+ * control.
+ *
+ * @pre All declarations must have different names---eg. must be done after the
+ * UniqueNames pass.
+ */
 class MoveDeclarations : public Transform {
+    /// List of lists of declarations to move, one list per
+    /// control/parser/action.
     std::vector<IR::Vector<IR::Declaration>*> toMove;
     void push() { toMove.push_back(new IR::Vector<IR::Declaration>()); }
     void pop() { BUG_CHECK(!toMove.empty(), "Empty move stack"); toMove.pop_back(); }
@@ -62,10 +65,12 @@ class MoveDeclarations : public Transform {
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
 };
 
-// Run after MoveDeclarations.
-// Some variable declarations in the "local" section of a parser and control
-// may still have initializers; these are moved into the start state,
-// and to the beginning of the apply body repectively.
+/** After MoveDeclarations, some variable declarations in the "local"
+ * section of a parser and control may still have initializers; these are moved
+ * into the start state, and to the beginning of the apply body repectively.
+ *
+ * @pre Must be run after MoveDeclarations.
+ */
 class MoveInitializers : public Transform {
     IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
 

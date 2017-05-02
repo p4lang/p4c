@@ -18,6 +18,12 @@ limitations under the License.
 
 namespace P4 {
 
+/** Generate control plane names for simple expressions that appear in table
+ * keys without `@name` annotations.
+ *
+ * Emit a compilation error if the IR contains complex expressions without
+ * `@name` annotations.
+ */
 class KeyNameGenerator : public Inspector {
     std::map<const IR::Expression*, cstring> name;
     const TypeMap* typeMap;
@@ -27,10 +33,14 @@ class KeyNameGenerator : public Inspector {
     { setName("KeyNameGenerator"); }
 
     void error(const IR::Expression* expression) {
-        ::error("%1%: Complex key expression requires a @name annotation", expression);
+        ::error(
+            "%1%: Complex key expression requires a @name annotation",
+            expression);
     }
 
-    void postorder(const IR::Expression* expression) override { error(expression); }
+    void postorder(const IR::Expression* expression) override {
+        error(expression);
+    }
 
     void postorder(const IR::PathExpression* expression) override {
         name.emplace(expression, expression->path->toString());
@@ -58,6 +68,8 @@ class KeyNameGenerator : public Inspector {
     }
 
     void postorder(const IR::BAnd *expression) override {
+        // TODO: this exists for P4_14 to P4_16 conversion and should live in
+        // the converter, not here.
         if (expression->right->is<IR::Constant>()) {
             if (cstring l = getName(expression->left))
                 name.emplace(expression, l);
@@ -71,6 +83,7 @@ class KeyNameGenerator : public Inspector {
     void postorder(const IR::Constant* expression) override {
         name.emplace(expression, expression->toString());
     }
+
 
     void postorder(const IR::Slice* expression) override {
         cstring e0 = getName(expression->e0);
