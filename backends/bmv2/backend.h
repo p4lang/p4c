@@ -65,6 +65,7 @@ class Backend {
     Util::JsonObject                 toplevel;
     P4::V2Model&                     model;
     P4V1::V1Model&                   v1model;
+    DirectMeterMap                   meterMap;
 
     using ErrorValue = unsigned int;
     using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
@@ -73,6 +74,7 @@ class Backend {
  protected:
     void addMetaInformation();
     void addEnums(Util::JsonArray* enums);
+    void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
     Backend::ErrorValue retrieveErrorValue(const IR::Member* mem) const;
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
@@ -85,6 +87,8 @@ class Backend {
     void run(const IR::ToplevelBlock* block);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
+    ExpressionConverter* getExpressionConverter() { return conv; };
+    DirectMeterMap& getMeterMap() { return meterMap; }
 };
 
 }  // namespace BMV2

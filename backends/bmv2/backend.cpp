@@ -20,7 +20,7 @@ limitations under the License.
 #include "header.h"
 #include "parser.h"
 #include "deparser.h"
-#include "error_code.h"
+#include "errorcode.h"
 #include "expression.h"
 #include "frontends/p4/methodInstance.h"
 
@@ -131,6 +131,37 @@ void Backend::addEnums(Util::JsonArray* enums) {
     }
 }
 
+#ifdef PSA
+void Backend::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
+    auto name = "_" + em->actualExternType->name + "_" + em->method->name.name;
+    // if (em->originalExternType->name.name == corelib.packetOut.name &&
+    //         em->method->name.name == corelib.packetOut.emit.name) {
+    //     LOG1("print emit method");
+    // }
+    auto primitive = mkPrimitive(name, result);
+    auto parameters = mkParameters(primitive);
+
+    auto ext = new Util::JsonObject();
+    ext->emplace("type", "extern");
+
+    //FIXME: have extern pass building a map and lookup here.
+    if (em->object->is<IR::Parameter>()) {
+        auto param = em->object->to<IR::Parameter>();
+        //auto packageObject = resolveParameter(param);
+        //ext->emplace("value", packageObject->getName());
+        ext->emplace("value", "FIXME");
+    } else {
+        ext->emplace("value", em->object->getName());
+    }
+    parameters->append(ext);
+
+    for (auto a : *mc->arguments) {
+        auto arg = conv->convert(a);
+        parameters->append(arg);
+    }
+}
+#endif
+
 void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
     //FIXME: conv->createFieldList = true??
     for (auto s : *body) {
@@ -204,32 +235,12 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
-                auto name = "_" + em->actualExternType->name + "_" + em->method->name.name;
-                // if (em->originalExternType->name.name == corelib.packetOut.name &&
-                //         em->method->name.name == corelib.packetOut.emit.name) {
-                //     LOG1("print emit method");
-                // }
-                auto primitive = mkPrimitive(name, result);
-                auto parameters = mkParameters(primitive);
-
-                auto ext = new Util::JsonObject();
-                ext->emplace("type", "extern");
-
-                //FIXME: have extern pass building a map and lookup here.
-                if (em->object->is<IR::Parameter>()) {
-                    auto param = em->object->to<IR::Parameter>();
-                    //auto packageObject = resolveParameter(param);
-                    //ext->emplace("value", packageObject->getName());
-                    ext->emplace("value", "FIXME");
-                } else {
-                    ext->emplace("value", em->object->getName());
-                }
-                parameters->append(ext);
-
-                for (auto a : *mc->arguments) {
-                    auto arg = conv->convert(a);
-                    parameters->append(arg);
-                }
+#ifdef PSA
+                    genExternMethod(result, em);
+#else
+                    LOG1("P4V1:: convert " << s);
+                    P4V1::V1Model::convertExternObjects(result, this, em, mc);
+#endif
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();

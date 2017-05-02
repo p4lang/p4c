@@ -24,8 +24,11 @@ limitations under the License.
 
 namespace BMV2 {
 
+
 class ErrorCodesVisitor : public Inspector {
     Util::JsonArray* errors;
+    using ErrorValue = unsigned int;
+    using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
     ErrorCodesMap*    errorCodesMap;
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);

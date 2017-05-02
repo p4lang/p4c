@@ -18,16 +18,21 @@ limitations under the License.
  * This file implements the simple switch model
  */
 
-#include <p4includes/v1model.h>
+#include <frontends/p4/fromv1.0/v1model.h>
 #include <backends/bmv2/backend.h>
+
+using BMV2::mkPrimitive;
+using BMV2::mkParameters;
+using BMV2::extVisibleName;
 
 namespace P4V1 {
 
-void V1Model::convertExternObject(Util::JsonObject *o, BMV2::Backend *bmv2,
-                                  P4::ExternMethod *em, IR::MethodCallStatement *mc)
+void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
+                                  const P4::ExternMethod *em,
+                                  const IR::MethodCallExpression *mc)
 {
-    if (em->originalExternType->name == v1model.counter.name) {
-        if (em->method->name == v1model.counter.increment.name) {
+    if (em->originalExternType->name == instance.counter.name) {
+        if (em->method->name == instance.counter.increment.name) {
             BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
             auto primitive = mkPrimitive("count", result);
             auto parameters = mkParameters(primitive);
@@ -38,8 +43,8 @@ void V1Model::convertExternObject(Util::JsonObject *o, BMV2::Backend *bmv2,
             auto index = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
             parameters->append(index);
         }
-    } else if (em->originalExternType->name == v1model.meter.name) {
-        if (em->method->name == v1model.meter.executeMeter.name) {
+    } else if (em->originalExternType->name == instance.meter.name) {
+        if (em->method->name == instance.meter.executeMeter.name) {
             BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
             auto primitive = mkPrimitive("execute_meter", result);
             auto parameters = mkParameters(primitive);
@@ -52,13 +57,13 @@ void V1Model::convertExternObject(Util::JsonObject *o, BMV2::Backend *bmv2,
             auto result = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
             parameters->append(result);
         }
-    } else if (em->originalExternType->name == v1model.registers.name) {
+    } else if (em->originalExternType->name == instance.registers.name) {
         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
         auto reg = new Util::JsonObject();
         reg->emplace("type", "register_array");
         cstring name = extVisibleName(em->object);
         reg->emplace("value", name);
-        if (em->method->name == v1model.registers.read.name) {
+        if (em->method->name == instance.registers.read.name) {
             auto primitive = mkPrimitive("register_read", result);
             auto parameters = mkParameters(primitive);
             auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
@@ -66,7 +71,7 @@ void V1Model::convertExternObject(Util::JsonObject *o, BMV2::Backend *bmv2,
             parameters->append(reg);
             auto index = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
             parameters->append(index);
-        } else if (em->method->name == v1model.registers.write.name) {
+        } else if (em->method->name == instance.registers.write.name) {
             auto primitive = mkPrimitive("register_write", result);
             auto parameters = mkParameters(primitive);
             parameters->append(reg);
@@ -75,15 +80,15 @@ void V1Model::convertExternObject(Util::JsonObject *o, BMV2::Backend *bmv2,
             auto value = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
             parameters->append(value);
         }
-    } else if (em->originalExternType->name == v1model.directMeter.name) {
-        if (em->method->name == v1model.directMeter.read.name) {
+    } else if (em->originalExternType->name == instance.directMeter.name) {
+        if (em->method->name == instance.directMeter.read.name) {
             BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
             auto dest = mc->arguments->at(0);
             bmv2->getMeterMap().setDestination(em->object, dest);
             // Do not generate any code for this operation
         }
-    } else if (em->originalExternType->name == v1model.directCounter.name) {
-        if (em->method->name == v1model.directCounter.count.name) {
+    } else if (em->originalExternType->name == instance.directCounter.name) {
+        if (em->method->name == instance.directCounter.count.name) {
             BUG_CHECK(mc->arguments->size() == 0, "Expected 0 argument for %1%", mc);
             // Do not generate any code for this operation
         }
@@ -91,8 +96,9 @@ void V1Model::convertExternObject(Util::JsonObject *o, BMV2::Backend *bmv2,
 
 }
 
-void V1Model::convertExternFunctions(Util::JsonObject *o, BMV2::Backend *bmv2,
-                                     P4::ExternMethod *em, IR::MethodCallStatement *mc){
+void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv2,
+                                     const P4::ExternMethod *em,
+                                     const IR::MethodCallExpression *mc){
 
 }
 

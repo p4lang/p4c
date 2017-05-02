@@ -20,10 +20,13 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "lib/json.h"
 
-class BMV2::Backend;
+namespace BMV2 {
+class Backend;
+}
 
 namespace P4V1 {
 
@@ -246,6 +249,7 @@ struct TableAttributes_Model {
     const unsigned defaultTableSize = 1024;
 };
 
+
 class V1Model : public ::Model::Model {
  protected:
     V1Model() :
@@ -301,10 +305,12 @@ class V1Model : public ::Model::Model {
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 
-    static void convertExternObjects(Util::JsonObject *o, BMV2::Backend *bmv2,
-                                     P4::ExternMethod *em, IR::MethodCallStatement *mc);
-    static void convertExternFunctions(Util::JsonObject *o, BMV2::Backend *bmv2,
-                                       P4::ExternMethod *em, IR::MethodCallStatement *mc);
+    static void convertExternObjects(Util::JsonArray *o, BMV2::Backend *bmv2,
+                                     const P4::ExternMethod *em,
+                                     const IR::MethodCallExpression *mc);
+    static void convertExternFunctions(Util::JsonArray *o, BMV2::Backend *bmv2,
+                                       const P4::ExternMethod *em,
+                                       const IR::MethodCallExpression *mc);
 
     static V1Model instance;
 };

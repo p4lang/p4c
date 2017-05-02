@@ -32,7 +32,8 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/helpers.cpp \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/midend.cpp \
-	backends/bmv2/parser.cpp
+	backends/bmv2/parser.cpp \
+	backends/bmv2/v1model.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
