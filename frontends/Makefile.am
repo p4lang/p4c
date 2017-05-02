@@ -133,7 +133,6 @@ cpplint_FILES += $(common_frontend_UNIFIED) $(common_frontend_NONUNIFIED)
 
 
 v1_frontend_UNIFIED = \
-	frontends/p4-14/intrinsic.cpp \
 	frontends/p4-14/typecheck.cpp \
 	frontends/p4-14/header_type.cpp
 
