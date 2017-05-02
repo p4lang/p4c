@@ -521,7 +521,7 @@ class Rewriter : public Transform {
 This pass uses the @length annotation set by the v1 front-end on
 varbit fields and converts extracts for headers with varbit fields.
 (The @length annotation is inserted as a conversion from the length
-header fproperty.)  For example:
+header property.)  For example:
 
 header H {
    bit<8> len;
@@ -536,8 +536,7 @@ is converted to:
 
 header H {
    bit<8> len;
-   @length(len)
-   varbit<64> data;
+   varbit<64> data;  // annotation removed
 }
 ...
 H h;
@@ -560,10 +559,13 @@ h.data = h_1.data;
 class FixExtracts final : public Transform {
     ProgramStructure* structure;
 
+    /// Newly-introduced types for each extract.
     std::vector<const IR::Type_Header*> typeDecls;
+    /// All newly-introduced types.
     // The following contains IR::Type_Header, but it is easier
     // to append if the elements are Node.
     IR::IndexedVector<IR::Node>        allTypeDecls;
+    /// All newly-introduced variables, for each parser.
     IR::IndexedVector<IR::Declaration> varDecls;
     /// Map each newly created header with a varbit field
     /// to an expression that denotes its length.
@@ -601,11 +603,12 @@ class FixExtracts final : public Transform {
     }
 
     /**
-       This pass rewrites expressions from a @length expression:
+       This pass rewrites expressions from a @length annotation expression:
        PathExpressions that refer to enclosing fields are rewritten to
-       refer to the proper fields in a different structure.
+       refer to the proper fields in a different structure.  In the example above, `len`
+       is translated to `h_0.len`.
      */
-    class RewriteLength : public Transform {
+    class RewriteLength final : public Transform {
         const std::vector<const IR::Type_Header*> &typeDecls;
         const IR::IndexedVector<IR::Declaration>  &vars;
      public:
@@ -634,6 +637,8 @@ class FixExtracts final : public Transform {
     { CHECK_NULL(structure); setName("FixExtracts"); }
 
     const IR::Node* postorder(IR::P4Program* program) override {
+        // P4-14 headers cannot refer to other types, so it is safe
+        // to prepend them to the list of declarations.
         allTypeDecls.append(program->declarations);
         program->declarations = allTypeDecls;
         return program;
