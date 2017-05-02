@@ -48,12 +48,30 @@ class CompilerBug final : public P4CExceptionBase {
     template <typename... T>
     CompilerBug(const char* format, T... args)
             : P4CExceptionBase(format, args...)
-    { message = "COMPILER BUG:\n" + message; }
+    // \e[31m prints the text in red
+    { message = "\e[31mCOMPILER BUG\e[0m:\n" + message; }
     template <typename... T>
     CompilerBug(const char* file, int line, const char* format, T... args)
             : P4CExceptionBase(format, args...)
-    { message = cstring("COMPILER BUG: ") + file + ":" + Util::toString(line) + "\n" + message; }
+    { message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
+                cstring("\e[31mCOMPILER BUG\e[0m: ") + message; }
 };
+
+// This class indicates an unimplemented feature in the compiler
+class CompilerUnimplemented final : public P4CExceptionBase {
+ public:
+    template <typename... T>
+    CompilerUnimplemented(const char* format, T... args)
+            : P4CExceptionBase(format, args...)
+    // \e[34m prints the text in blue
+    { message = "\e[34mUnimplemented compiler support\e[0m:\n" + message; }
+    template <typename... T>
+    CompilerUnimplemented(const char* file, int line, const char* format, T... args)
+            : P4CExceptionBase(format, args...)
+    { message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
+                cstring("\e[34mUnimplemented compiler support\e[0m: ") + message; }
+};
+
 
 // This class indicates a compilation error that we do not want to recover from.
 // This may be due to a malformed input program.
@@ -67,6 +85,9 @@ class CompilationError : public P4CExceptionBase {
 
 #define BUG(...) do { throw Util::CompilerBug(__FILE__, __LINE__, __VA_ARGS__); } while (0)
 #define BUG_CHECK(e, ...) do { if (!(e)) BUG(__VA_ARGS__); } while (0)
+#define P4C_UNIMPLEMENTED(...) do { \
+        throw Util::CompilerUnimplemented(__FILE__, __LINE__, __VA_ARGS__); \
+    } while (0)
 
 }  // namespace Util
 #endif /* P4C_LIB_EXCEPTIONS_H_ */
