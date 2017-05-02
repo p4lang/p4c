@@ -34,8 +34,8 @@ namespace {
 
 struct hash_ex {
   uint32_t operator()(const char *buf, size_t s) const {
-    const int p = 16777619;
-    int hash = 2166136261;
+    const uint32_t p = 16777619;
+    uint32_t hash = 2166136261;
 
     for (size_t i = 0; i < s; i++)
       hash = (hash ^ buf[i]) * p;
