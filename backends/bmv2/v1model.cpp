@@ -63,10 +63,10 @@ static void addToFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
 // returns id of created field list
 static int createFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
                            cstring group, cstring listName,
-                           Util::JsonArray* fieldLists)
+                           Util::JsonArray* field_lists)
 {
     auto fl = new Util::JsonObject();
-    fieldLists->append(fl);
+    field_lists->append(fl);
     int id = nextId(group);
     fl->emplace("id", id);
     fl->emplace("name", listName);
@@ -156,11 +156,11 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
             BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
             cstring name = bmv2->getRefMap().newName("fl");
             auto emptylist = new IR::ListExpression({});
-            id = createFieldList(bmv2, emptylist, "field_lists", name, bmv2->fieldLists);
+            id = createFieldList(bmv2, emptylist, "field_lists", name, bmv2->field_lists);
         } else {
             BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
             cstring name = bmv2->getRefMap().newName("fl");
-            id = createFieldList(bmv2, mc->arguments->at(2), "field_lists", name, bmv2->fieldLists);
+            id = createFieldList(bmv2, mc->arguments->at(2), "field_lists", name, bmv2->field_lists);
         }
         auto cloneType = mc->arguments->at(0);
         auto ei = P4::EnumInstance::resolve(cloneType, &bmv2->getTypeMap());
@@ -277,7 +277,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
             }
         }
         int id = createFieldList(bmv2, mc->arguments->at(0), "field_lists",
-                                 listName, bmv2->fieldLists);
+                                 listName, bmv2->field_lists);
         auto cst = new IR::Constant(id);
         bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
         auto jcst = bmv2->getExpressionConverter()->convert(cst);

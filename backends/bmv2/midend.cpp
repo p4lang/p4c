@@ -33,6 +33,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
+#include "midend/isolateMethodCalls.h"
 #include "midend/local_copyprop.h"
 #include "midend/localizeActions.h"
 #include "midend/moveConstructors.h"
@@ -105,13 +106,14 @@ MidEnd::MidEnd(CompilerOptions& options) {
     addPasses({
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
+        new P4::IsolateMethodCalls(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
 #if 0
-        TODO(hanw): removed as it only works for v1model
+        // TODO(hanw): removed as it only works for v1model
         new VisitFunctor([this, skipv1controls, evaluator](const IR::Node *root) ->
                          const IR::Node* {
             auto toplevel = evaluator->getToplevelBlock();
@@ -181,7 +183,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
         // TODO(hanw): skip synthesizing actions in verify, update and deparser.
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-        // Proper back-end
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
@@ -189,10 +190,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
-        // TODO(hanw): fixing
-//        new RemoveComplexExpressions(&refMap, &typeMap,
-//                                     &ingressControlBlockName, &egressControlBlockName),
-//        new FixupChecksum(&updateControlBlockName),
+        // TODO(hanw): re-enable these two passes
+        //new RemoveComplexExpressions(&refMap, &typeMap,
+        //                             &ingressControlBlockName, &egressControlBlockName),
+        //new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,

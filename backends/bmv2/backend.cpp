@@ -26,80 +26,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-/**
-    Return direct meter information from the direct meter map
-*/
-DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
-    auto prev = ::get(directMeter, meter);
-    BUG_CHECK(prev == nullptr, "Already created");
-    auto result = new DirectMeterMap::DirectMeterInfo();
-    directMeter.emplace(meter, result);
-    return result;
-}
-
-DirectMeterMap::DirectMeterInfo* DirectMeterMap::getInfo(const IR::IDeclaration* meter) {
-    return ::get(directMeter, meter);
-}
-
-/**
-    Set the table that a direct meter is attached to.
-*/
-void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* table) {
-    auto info = getInfo(meter);
-    CHECK_NULL(info);
-    if (info->table != nullptr)
-        ::error("%1%: Direct meters cannot be attached to multiple tables %2% and %3%",
-                meter, table, info->table);
-    info->table = table;
-}
-
-/**
-    Helper function to check if two expressions are the same
-*/
-static bool checkSame(const IR::Expression* expr0, const IR::Expression* expr1) {
-    if (expr0->node_type_name() != expr1->node_type_name())
-        return false;
-    if (auto pe0 = expr0->to<IR::PathExpression>()) {
-        auto pe1 = expr1->to<IR::PathExpression>();
-        return pe0->path->name == pe1->path->name &&
-               pe0->path->absolute == pe1->path->absolute;
-    } else if (auto mem0 = expr0->to<IR::Member>()) {
-        auto mem1 = expr1->to<IR::Member>();
-        return checkSame(mem0->expr, mem1->expr) && mem0->member == mem1->member;
-    }
-    BUG("%1%: unexpected expression for meter destination", expr0);
-}
-
-/**
-    Set the destination that a meter is attached to??
-*/
-void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
-                                    const IR::Expression* destination) {
-    auto info = getInfo(meter);
-    if (info == nullptr)
-        info = createInfo(meter);
-    if (info->destinationField == nullptr) {
-        info->destinationField = destination;
-    } else {
-        bool same = checkSame(destination, info->destinationField);
-        if (!same)
-            ::error("On this target all meter operations must write to the same destination "
-                    "but %1% and %2% are different", destination, info->destinationField);
-    }
-}
-
-/**
-    Set the size of the table that a meter is attached to.
-
-    @param meter
-    @param size
-*/
-void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
-    auto info = getInfo(meter);
-    CHECK_NULL(info);
-    info->tableSize = size;
-}
-
 void Backend::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
@@ -139,6 +65,58 @@ void Backend::createScalars() {
     scalarFields = mkArrayField(scalarsStruct, "fields");
 }
 
+void Backend::createJsonType(const IR::Type_StructLike *st) {
+    auto isCreated = headerTypesCreated.find(st) != headerTypesCreated.end();
+    if (!isCreated) {
+        auto typeJson = new Util::JsonObject();
+        cstring name = extVisibleName(st);
+        typeJson->emplace("name", name);
+        typeJson->emplace("id", nextId("header_types"));
+        headerTypes->append(typeJson);
+        auto fields = mkArrayField(typeJson, "fields");
+        pushFields(st, fields);
+        headerTypesCreated.insert(st);
+    }
+}
+
+void Backend::pushFields(const IR::Type_StructLike *st,
+                         Util::JsonArray *fields) {
+    for (auto f : st->fields) {
+        auto ftype = typeMap.getType(f, true);
+        if (ftype->to<IR::Type_StructLike>()) {
+            BUG("%1%: nested structure", st);
+        } else if (ftype->is<IR::Type_Boolean>()) {
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(1); // boolWidth
+            field->append(0);
+        } else if (auto type = ftype->to<IR::Type_Bits>()) {
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(type->size);
+            field->append(type->isSigned);
+        } else if (auto type = ftype->to<IR::Type_Varbits>()) {
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(type->size); // FIXME -- where does length go?
+        } else if (ftype->to<IR::Type_Stack>()) {
+            BUG("%1%: nested stack", st);
+        } else {
+            BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
+        }
+    }
+    // must add padding
+    unsigned width = st->width_bits();
+    unsigned padding = width % 8;
+    if (padding != 0) {
+        cstring name = refMap.newName("_padding");
+        auto field = pushNewArray(fields);
+        field->append(name);
+        field->append(8 - padding);
+        field->append(false);
+    }
+}
+
 void Backend::addLocals() {
     // We synthesize a "header_type" for each local which has a struct type
     // and we pack all the scalar-typed locals into a scalarsStruct
@@ -148,7 +126,7 @@ void Backend::addLocals() {
     LOG3("... structure " << structure.variables);
     for (auto v : structure.variables) {
         LOG3("Creating local " << v);
-        auto type = backend->getTypeMap()->getType(v, true);
+        auto type = typeMap.getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             createJsonType(st);
             auto name = st->name;
@@ -165,7 +143,7 @@ void Backend::addLocals() {
             json->emplace("name", v->name);
             json->emplace("id", nextId("stack"));
             json->emplace("size", stack->getSize());
-            auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
+            auto type = typeMap.getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             createJsonType(ht);
@@ -389,8 +367,17 @@ void Backend::createActions(Util::JsonArray* actions) {
     }
 }
 
+void Backend::process(const IR::ToplevelBlock* tb) {
+    setName("BackEnd");
+    addPasses({
+        new P4::TypeChecking(&refMap, &typeMap),
+        new DiscoverStructure(&structure),
+    });
+    tb->getProgram()->apply(*this);
+}
+
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject.
-void Backend::run(const IR::ToplevelBlock* tb) {
+void Backend::convert(const IR::ToplevelBlock* tb) {
     headerTypes = mkArrayField(&toplevel, "header_types");
     headerInstances = mkArrayField(&toplevel, "headers");
     headerStacks = mkArrayField(&toplevel, "header_stacks");
@@ -411,19 +398,13 @@ void Backend::run(const IR::ToplevelBlock* tb) {
     meter_arrays = mkArrayField(&toplevel, "meter_arrays");
     register_arrays = mkArrayField(&toplevel, "register_arrays");
 
-    PassManager processing_passes = {
-        new P4::TypeChecking(&refMap, &typeMap),
-        new DiscoverStructure(&structure),
-        new ErrorCodesVisitor(errors, &errorCodesMap),
-    };
-    tb->getProgram()->apply(processing_passes);
-
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(&refMap, &typeMap, &structure, &errorCodesMap);
 
     PassManager codegen_passes = {
-        new VisitFunctor([this]() { addMetaInformation(); }),
-        new VisitFunctor([this]() { addEnums(enums); }),
+        new ErrorCodesVisitor(errors, &errorCodesMap),
+        new VisitFunctor([this](){ addMetaInformation(); }),
+        new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
         new ConvertHeaders(this),
         new VisitFunctor([this](){ addLocals(); }),
@@ -432,7 +413,7 @@ void Backend::run(const IR::ToplevelBlock* tb) {
         new ConvertParser(&refMap, &typeMap, conv, parsers),
         new ConvertControl(&refMap, &typeMap, conv, &structure, pipelines, counters),
         new ConvertDeparser(&refMap, &typeMap, conv, deparsers),
-        new VisitFunctor([this]() { createActions(actions); }),
+        new VisitFunctor([this](){ createActions(actions); }),
     };
     //dump(tb->getProgram());
     //dump(tb->getMain());

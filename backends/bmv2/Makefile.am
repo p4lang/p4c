@@ -32,6 +32,7 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/helpers.cpp \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/midend.cpp \
+	backends/bmv2/metermap.cpp \
 	backends/bmv2/parser.cpp \
 	backends/bmv2/v1model.cpp
 
@@ -47,6 +48,7 @@ noinst_HEADERS += \
 	backends/bmv2/helpers.h \
 	backends/bmv2/lower.h \
 	backends/bmv2/midend.h \
+	backends/bmv2/metermap.h \
 	backends/bmv2/parser.h
 
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)

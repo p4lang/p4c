@@ -24,6 +24,38 @@ limitations under the License.
 
 namespace BMV2 {
 
+/// constant used in bmv2 backend code generation
+class TableImplementation {
+public:
+    static const cstring actionProfileName;
+    static const cstring actionSelectorName;
+    static const cstring directCounterName;
+    static const cstring directMeterName;
+    static const cstring counterName;
+};
+
+class MatchImplementation {
+public:
+    static const cstring selectorMatchTypeName;
+    static const cstring rangeMatchTypeName;
+};
+
+class TableAttributes {
+public:
+    static const cstring implementationName;
+    static const cstring sizeName;
+    static const cstring supportTimeoutName;
+    static const unsigned defaultTableSize;
+};
+
+class V1ModelProperties {
+public:
+    static const cstring jsonMetadataParameterName;
+};
+
+using ErrorValue = unsigned int;
+using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
+
 Util::IJson* nodeName(const CFG::Node* node);
 Util::JsonArray* mkArrayField(Util::JsonObject* parent, cstring name);
 Util::JsonArray* mkParameters(Util::JsonObject* object);

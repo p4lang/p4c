@@ -18,7 +18,6 @@ limitations under the License.
 #define _BACKENDS_BMV2_EXPRESSIONCONVERTER_H_
 
 #include "ir/ir.h"
-#include "helpers.h"
 #include "lower.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
@@ -27,11 +26,9 @@ limitations under the License.
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
+#include "helpers.h"
 
 namespace BMV2 {
-
-using ErrorValue = unsigned int;
-using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
 
 class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
@@ -52,8 +49,9 @@ class ExpressionConverter : public Inspector {
     P4::P4CoreLibrary& corelib;
     ProgramParts*      structure;
     ErrorCodesMap*     errorCodesMap;
-    cstring            scalarsName;
+    cstring            scalarsName = "scalars";
 
+    /// after translating an Expression to JSON, save the result to 'map'.
     std::map<const IR::Expression*, Util::IJson*> map;
     bool leftValue;  // true if converting a left value
  public:
@@ -69,7 +67,6 @@ class ExpressionConverter : public Inspector {
     void binary(const IR::Operation_Binary* expression);
     Util::IJson* get(const IR::Expression* expression) const;
     Util::IJson* fixLocal(Util::IJson* json);
-    void setScalarsName(cstring name) { scalarsName = name; };
 
     // doFixup = true -> insert masking operations for proper arithmetic implementation
     // see below for wrap

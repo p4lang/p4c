@@ -43,7 +43,6 @@ class ConvertHeaders : public Inspector {
     bool hasStructLikeMember(const IR::Type_StructLike *st, bool meta);
 
     bool preorder(const IR::PackageBlock* b) override;
-    bool preorder(const IR::Type_Extern* e) override;
     bool preorder(const IR::Type_Parser* e) override;
     bool preorder(const IR::Type_Control* ctrl) override;
     bool preorder(const IR::Parameter* param) override;

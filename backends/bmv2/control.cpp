@@ -226,7 +226,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
             }
             action_profile->emplace("max_size", size);
         };
-        if (implementationType->name == v2model.action_selector.name) {
+        if (implementationType->name == BMV2::TableImplementation::actionSelectorName) {
             BUG_CHECK(arguments->size() == 3, "%1%: expected 3 arguments", arguments);
             isSimpleTable = false;
             auto selector = new Util::JsonObject();
@@ -246,14 +246,14 @@ Control::handleTableImplementation(const IR::Property* implementation,
                 auto mt = refMap->getDeclaration(ke->matchType->path, true)
                         ->to<IR::Declaration_ID>();
                 BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
-                if (mt->name.name != v2model.selectorMatchType.name)
+                if (mt->name.name != BMV2::MatchImplementation::selectorMatchTypeName)
                     continue;
 
                 auto expr = ke->expression;
                 auto jk = conv->convert(expr);
                 input->append(jk);
             }
-        } else if (implementationType->name == v2model.action_profile.name) {
+        } else if (implementationType->name == BMV2::TableImplementation::actionProfileName) {
             isSimpleTable = false;
             table->emplace("type", "indirect");
             add_size(0);
@@ -274,9 +274,9 @@ Control::handleTableImplementation(const IR::Property* implementation,
             return false;
         }
         auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
-        if (type_extern_name == v2model.action_profile.name) {
+        if (type_extern_name == BMV2::TableImplementation::actionProfileName) {
             table->emplace("type", "indirect");
-        } else if (type_extern_name == v2model.action_selector.name) {
+        } else if (type_extern_name == BMV2::TableImplementation::actionSelectorName) {
             table->emplace("type", "indirect_ws");
         } else {
             ::error("%1%: unexpected type for implementation", dcltype);
@@ -309,7 +309,7 @@ Control::convertTable(const CFG::TableNode* node,
     if (key != nullptr) {
         for (auto ke : key->keyElements) {
             auto match_type = getKeyMatchType(ke);
-            if (match_type == v2model.selectorMatchType.name)
+            if (match_type == BMV2::MatchImplementation::selectorMatchTypeName)
                     continue;
             // Decreasing order of precedence (bmv2 specification):
             // 0) more than one LPM field is an error
@@ -318,10 +318,10 @@ Control::convertTable(const CFG::TableNode* node,
             // 3) if there is a LPM field, then the table is LPM
             // 4) otherwise the table is EXACT
             if (match_type != table_match_type) {
-                if (match_type == v2model.rangeMatchType.name)
-                    table_match_type = v2model.rangeMatchType.name;
+                if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
+                    table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
                 if (match_type == corelib.ternaryMatch.name &&
-                    table_match_type != v2model.rangeMatchType.name)
+                    table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = corelib.ternaryMatch.name;
                 if (match_type == corelib.lpmMatch.name &&
                     table_match_type == corelib.exactMatch.name)
@@ -361,7 +361,7 @@ Control::convertTable(const CFG::TableNode* node,
                                 typeMap->setType(expr, expr->type);
                                 match_type = corelib.ternaryMatch.name;
                                 if (match_type != table_match_type &&
-                                    table_match_type != v2model.rangeMatchType.name)
+                                    table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
                                     table_match_type = corelib.ternaryMatch.name;
                             } else {
                                 expr = bim->appliedTo; }}}}
@@ -381,11 +381,11 @@ Control::convertTable(const CFG::TableNode* node,
     result->emplace("match_type", table_match_type);
     conv->simpleExpressionsOnly = false;
 
-    auto impl = table->properties->getProperty(v2model.tableAttributes.tableImplementation.name);
+    auto impl = table->properties->getProperty(BMV2::TableAttributes::implementationName);
     bool simple = handleTableImplementation(impl, key, result, action_profiles);
 
     unsigned size = 0;
-    auto sz = table->properties->getProperty(v2model.tableAttributes.size.name);
+    auto sz = table->properties->getProperty(BMV2::TableAttributes::sizeName);
     if (sz != nullptr) {
         if (sz->value->is<IR::ExpressionValue>()) {
             auto expr = sz->value->to<IR::ExpressionValue>()->expression;
@@ -400,10 +400,10 @@ Control::convertTable(const CFG::TableNode* node,
         }
     }
     if (size == 0)
-        size = v2model.tableAttributes.defaultTableSize;
+        size = BMV2::TableAttributes::defaultTableSize;
 
     result->emplace("max_size", size);
-    auto ctrs = table->properties->getProperty(v2model.tableAttributes.directCounter.name);
+    auto ctrs = table->properties->getProperty(BMV2::TableImplementation::directCounterName);
     if (ctrs != nullptr) {
         if (ctrs->value->is<IR::ExpressionValue>()) {
             auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
@@ -416,17 +416,17 @@ Control::convertTable(const CFG::TableNode* node,
                     return result;
                 }
                 auto te = type->to<IR::Type_Extern>();
-                // FIXME
-                //if (te->name != v2model.directCounter.name && te->name != v2model.counter.name) {
-                //    ::error("%1%: Unexpected type %2% for property", ctrs, type);
-                //    return result;
-                //}
+                if (te->name != BMV2::TableImplementation::directCounterName &&
+                    te->name != BMV2::TableImplementation::counterName) {
+                    ::error("%1%: Unexpected type %2% for property", ctrs, type);
+                    return result;
+                }
                 result->emplace("with_counters", true);
                 auto jctr = new Util::JsonObject();
                 cstring ctrname = ctrs->externalName("counter");
                 jctr->emplace("name", ctrname);
                 jctr->emplace("id", nextId("counter_arrays"));
-                bool direct = te->name == "directCounter"; //v2model.directCounter.name;
+                bool direct = te->name == BMV2::TableImplementation::directCounterName;
                 jctr->emplace("is_direct", direct);
                 jctr->emplace("binding", name);
                 counters->append(jctr);
@@ -456,7 +456,7 @@ Control::convertTable(const CFG::TableNode* node,
     }
 
     bool sup_to = false;
-    auto timeout = table->properties->getProperty(v2model.tableAttributes.supportTimeout.name);
+    auto timeout = table->properties->getProperty(BMV2::TableAttributes::supportTimeoutName);
     if (timeout != nullptr) {
         if (timeout->value->is<IR::ExpressionValue>()) {
             auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
@@ -471,7 +471,7 @@ Control::convertTable(const CFG::TableNode* node,
     }
     result->emplace("support_timeout", sup_to);
 
-    auto dm = table->properties->getProperty(v2model.tableAttributes.directMeter.name);
+    auto dm = table->properties->getProperty(BMV2::TableImplementation::directMeterName);
     if (dm != nullptr) {
         if (dm->value->is<IR::ExpressionValue>()) {
             auto expr = dm->value->to<IR::ExpressionValue>()->expression;
@@ -490,7 +490,7 @@ Control::convertTable(const CFG::TableNode* node,
                     return result;
                 }
                 auto te = type->to<IR::Type_Extern>();
-                if (te->name != "direct_meter") { //FIXME v2model.directMeter.name
+                if (te->name != BMV2::TableImplementation::directMeterName) {
                     ::error("%1%: Unexpected type %2% for property", dm, type);
                     return result;
                 }

@@ -17,6 +17,12 @@ limitations under the License.
 #ifndef _BACKENDS_BMV2_BACKEND_H_
 #define _BACKENDS_BMV2_BACKEND_H_
 
+#include "analyzer.h"
+#include "expression.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/fromv1.0/v1model.h"
+#include "helpers.h"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -24,38 +30,12 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "analyzer.h"
-#include "helpers.h"
-#include "expression.h"
-#include "frontends/p4/coreLibrary.h"
+#include "metermap.h"
 #include "midend/convertEnums.h"
-#include "frontends/common/model.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace BMV2 {
 
-class DirectMeterMap final {
- public:
-    struct DirectMeterInfo {
-        const IR::Expression* destinationField;
-        const IR::P4Table* table;
-        unsigned tableSize;
-
-        DirectMeterInfo() : destinationField(nullptr), table(nullptr), tableSize(0) {}
-    };
-
- private:
-    // key is declaration of direct meter
-    std::map<const IR::IDeclaration*, DirectMeterInfo*> directMeter;
-    DirectMeterInfo* createInfo(const IR::IDeclaration* meter);
- public:
-    DirectMeterInfo* getInfo(const IR::IDeclaration* meter);
-    void setDestination(const IR::IDeclaration* meter, const IR::Expression* destination);
-    void setTable(const IR::IDeclaration* meter, const IR::P4Table* table);
-    void setSize(const IR::IDeclaration* meter, unsigned size);
-};
-
-class Backend {
+class Backend : public PassManager {
     ExpressionConverter*             conv;
     P4::ConvertEnums::EnumMapping*   enumMap;
     P4::P4CoreLibrary&               corelib;
@@ -66,12 +46,7 @@ class Backend {
     P4::V2Model&                     model;
     P4V1::V1Model&                   v1model;
     DirectMeterMap                   meterMap;
-    using ErrorValue = unsigned int;
-    using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
     ErrorCodesMap                    errorCodesMap;
-    unsigned                         scalars_width = 0;
-    const unsigned                   boolWidth = 1;
-    cstring                          scalarsName;
 
  public:
     Util::JsonArray*                 calculations;
@@ -94,11 +69,17 @@ class Backend {
 
     Util::JsonObject*                scalarsStruct;
     Util::JsonArray*                 scalarFields;
+    const unsigned                   boolWidth = 1;
+    unsigned                         scalars_width = 0;
+    cstring                          scalarsName;
 
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
+    std::set<const IR::Type_StructLike*> headerTypesCreated;
+    std::set<const IR::Type*> headerInstancesCreated;
+    void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
 
  protected:
     void addMetaInformation();
@@ -106,8 +87,9 @@ class Backend {
     void addLocals();
     void createScalars();
     void padScalars();
+    void createJsonType(const IR::Type_StructLike* st);
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
-    Backend::ErrorValue retrieveErrorValue(const IR::Member* mem) const;
+    ErrorValue retrieveErrorValue(const IR::Member* mem) const;
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
 
@@ -116,7 +98,8 @@ class Backend {
         enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
     {}
-    void run(const IR::ToplevelBlock* block);
+    void process(const IR::ToplevelBlock* block);
+    void convert(const IR::ToplevelBlock* block);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
     ExpressionConverter* getExpressionConverter() { return conv; };

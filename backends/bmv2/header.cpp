@@ -35,51 +35,13 @@ bool ConvertHeaders::hasStructLikeMember(const IR::Type_StructLike *st, bool met
     return false;
 }
 
-void ConvertHeaders::pushFields(const IR::Type_StructLike *st,
-                               Util::JsonArray *fields) {
-    LOG4("Visit " << __FUNCTION__);
-    for (auto f : st->fields) {
-        auto ftype = backend->getTypeMap()->getType(f, true);
-        if (ftype->to<IR::Type_StructLike>()) {
-            BUG("%1%: nested structure", st);
-        } else if (ftype->is<IR::Type_Boolean>()) {
-            auto field = pushNewArray(fields);
-            field->append(f->name.name);
-            field->append(1); // boolWidth
-            field->append(0);
-        } else if (auto type = ftype->to<IR::Type_Bits>()) {
-            auto field = pushNewArray(fields);
-            field->append(f->name.name);
-            field->append(type->size);
-            field->append(type->isSigned);
-        } else if (auto type = ftype->to<IR::Type_Varbits>()) {
-            auto field = pushNewArray(fields);
-            field->append(f->name.name);
-            field->append(type->size); // FIXME -- where does length go?
-        } else if (ftype->to<IR::Type_Stack>()) {
-            BUG("%1%: nested stack", st);
-        } else {
-            BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
-        }
-    }
-    // must add padding
-    unsigned width = st->width_bits();
-    unsigned padding = width % 8;
-    if (padding != 0) {
-        cstring name = backend->getRefMap()->newName("_padding");
-        auto field = pushNewArray(fields);
-        field->append(name);
-        field->append(8 - padding);
-        field->append(false);
-    }
-}
-
 void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, bool meta) {
     LOG4("Visit " << __FUNCTION__);
     BUG_CHECK(!hasStructLikeMember(st, meta),
               "%1%: Header has nested structure.", st);
 
-    auto isTypeCreated = headerTypesCreated.find(st) != headerTypesCreated.end();
+    auto isTypeCreated =
+        backend->headerTypesCreated.find(st) != backend->headerTypesCreated.end();
     if (!isTypeCreated) {
         cstring extName = st->name;
         LOG1("create header " << extName);
@@ -88,24 +50,24 @@ void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, 
         result->emplace("name", name);
         result->emplace("id", nextId("header_types"));
         auto fields = mkArrayField(result, "fields");
-        pushFields(st, fields);
+        backend->pushFields(st, fields);
         backend->headerTypes->append(result);
-        headerTypesCreated.insert(st);
+        backend->headerTypesCreated.insert(st);
     }
 
-    auto isInstanceCreated = headerInstancesCreated.find(st) != headerInstancesCreated.end();
+    auto isInstanceCreated =
+        backend->headerInstancesCreated.find(st) != backend->headerInstancesCreated.end();
     if (!isInstanceCreated) {
         unsigned id = nextId("headers");
         LOG1("create header instance " << id);
         auto json = new Util::JsonObject();
-        //FIXME: fix name
-        json->emplace("name", st->name);
+        json->emplace("name", st->name); //FIXME: fix name
         json->emplace("id", id);
         json->emplace("header_type", st->name);
         json->emplace("metadata", meta);
         json->emplace("pi_omit", true);
-        headerInstances->append(json);
-        headerInstancesCreated.insert(st);
+        backend->headerInstances->append(json);
+        backend->headerInstancesCreated.insert(st);
     }
 }
 
@@ -115,7 +77,7 @@ void ConvertHeaders::createStack(const IR::Type_Stack *stack, bool meta) {
     json->emplace("name", "name");
     json->emplace("id", nextId("stack"));
     json->emplace("size", stack->getSize());
-    auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
+    auto type = backend->getTypeMap().getTypeType(stack->elementType, true);
     auto ht = type->to<IR::Type_Header>();
 
     auto ht_name = stack->elementType->to<IR::Type_Header>()->name;
@@ -139,20 +101,6 @@ void ConvertHeaders::createNestedStruct(const IR::Type_StructLike *st, bool meta
                 createStack(f->type->to<IR::Type_Stack>(), meta);
             }
         }
-    }
-}
-
-void ConvertHeaders::createJsonType(const IR::Type_StructLike *st) {
-    auto isCreated = headerTypesCreated.find(st) != headerTypesCreated.end();
-    if (!isCreated) {
-        auto typeJson = new Util::JsonObject();
-        cstring name = extVisibleName(st);
-        typeJson->emplace("name", name);
-        typeJson->emplace("id", nextId("header_types"));
-        backend->headerTypes->append(typeJson);
-        auto fields = mkArrayField(typeJson, "fields");
-        pushFields(st, fields);
-        headerTypesCreated.insert(st);
     }
 }
 
@@ -186,42 +134,20 @@ bool ConvertHeaders::preorder(const IR::Type_Parser* prsr) {
     return false;
 }
 
-bool ConvertHeaders::preorder(const IR::Type_Extern* ext) {
-    LOG3("Visiting " << dbp(ext));
-    return false;
-}
-
+// TODO(hanw): handle more than one layer of nesting.
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
-    auto type = backend->getTypeMap()->getType(param->getNode(), true);
-    LOG3("Visiting " << dbp(type));
-    if (type->is<IR::Type_StructLike>()) {
-        auto st = type->to<IR::Type_StructLike>();
-        auto isCreated = headerTypesCreated.find(st) != headerTypesCreated.end();
-        if (!isCreated) {
-            createNestedStruct(st, false);
-        }
-    } else if (type->is<IR::Type_Bits>()){
-        LOG3("... create scalars " << type);
-        auto scalarFields = backend->scalarsStruct->get("fields")->to<Util::JsonArray>();
-        CHECK_NULL(scalarFields);
-        cstring newName = backend->getRefMap()->newName(type->getName() + "." + f->name);
-        if (ft->is<IR::Type_Bits>()) {
-            auto tb = ft->to<IR::Type_Bits>();
-            auto field = pushNewArray(scalarFields);
-            field->append(newName);
-            field->append(tb->size);
-            field->append(tb->isSigned);
-            scalars_width += tb->size;
-            backend->scalarMetadataFields.emplace(f, newName);
-        } else if (ft->is<IR::Type_Boolean>()) {
-            auto field = pushNewArray(scalarFields);
-            field->append(newName);
-            field->append(boolWidth);
-            field->append(0);
-            scalars_width += boolWidth;
-            backend->scalarMetadataFields.emplace(f, newName);
-        } else {
-            BUG("%1%: Unhandled type for %2%", ft, f);
+    /// only handle control block parameters
+    auto parent = getContext()->node;
+    if (parent->is<IR::ParserBlock>() || parent->is<IR::ControlBlock>()) {
+        auto type = backend->getTypeMap().getType(param->getNode(), true);
+        LOG3("Visiting param " << dbp(type));
+        if (type->is<IR::Type_StructLike>()) {
+            auto st = type->to<IR::Type_StructLike>();
+            auto isCreated =
+                backend->headerTypesCreated.find(st) != backend->headerTypesCreated.end();
+            if (!isCreated) {
+                createNestedStruct(st, false);
+            }
         }
     }
     return false;

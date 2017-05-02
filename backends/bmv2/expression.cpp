@@ -69,6 +69,12 @@ const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
 
 Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
     auto result = ::get(map, expression);
+    if (result == nullptr) {
+        LOG3("Looking up " << expression);
+        for (auto it : map) {
+            LOG3(" " << it.first << " " << it.second);
+        }
+    }
     BUG_CHECK(result, "%1%: could not convert to Json", expression);
     return result;
 }
@@ -208,7 +214,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     if (param != nullptr) {
         auto type = typeMap->getType(expression, true);
         LOG1("Parameter: " << param);
-        //FIXME: special standard metadata
+        //FIXME:
+#if 0
         if (type->is<IR::Type_StructLike>()) {
             LOG1("  Struct" << type);
             result->emplace("type", "field");
@@ -216,6 +223,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->append(type->to<IR::Type_StructLike>()->name);
             e->append(fieldName);
         } else {
+#endif
             if (type->is<IR::Type_Stack>()) {
                 result->emplace("type", "header_stack");
                 result->emplace("value", fieldName);
@@ -240,7 +248,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 result->emplace("type", "header");
                 result->emplace("value", fieldName);
             }
+#if 0
         }
+#endif
     } else {
         bool done = false;
         if (expression->expr->is<IR::Member>()) {
@@ -411,7 +421,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     // This is useful for action bodies mostly
     auto decl = refMap->getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
-        LOG1("Expression: " << param);
+        LOG1("Expression: " << param << " " << expression);
 #if 0
         if (param == converter->stdMetadataParameter) {
             // This is a flat struct

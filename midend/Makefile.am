@@ -23,6 +23,7 @@ midend_UNIFIED = \
 	midend/nestedStructs.cpp \
 	midend/inlining.cpp \
 	midend/interpreter.cpp \
+	midend/isolateMethodCalls.cpp \
 	midend/local_copyprop.cpp \
 	midend/localizeActions.cpp \
 	midend/moveConstructors.cpp \
@@ -34,7 +35,7 @@ midend_UNIFIED = \
 	midend/simplifyKey.cpp \
 	midend/simplifySelectCases.cpp \
 	midend/simplifySelectList.cpp \
-        midend/removeSelectBooleans.cpp \
+	midend/removeSelectBooleans.cpp \
 	midend/validateProperties.cpp \
 	midend/expandLookahead.cpp \
 	midend/noMatch.cpp \
@@ -51,6 +52,7 @@ noinst_HEADERS += \
 	midend/has_side_effects.h \
 	midend/inlining.h \
 	midend/interpreter.h \
+	midend/isolateMethodCalls.h \
 	midend/local_copyprop.h \
 	midend/localizeActions.h \
 	midend/moveConstructors.h \
@@ -63,7 +65,7 @@ noinst_HEADERS += \
 	midend/simplifyKey.h \
 	midend/simplifySelectCases.h \
 	midend/simplifySelectList.h \
-        midend/removeSelectBooleans.h \
+	midend/removeSelectBooleans.h \
 	midend/validateProperties.h \
 	midend/expandLookahead.h \
 	midend/noMatch.h \

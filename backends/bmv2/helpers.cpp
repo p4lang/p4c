@@ -16,6 +16,20 @@ limitations under the License.
 
 namespace BMV2 {
 
+/// constant definition for bmv2
+const cstring TableImplementation::actionProfileName = "action_profile";
+const cstring TableImplementation::actionSelectorName = "action_selector";
+const cstring TableImplementation::directCounterName = "directCounter";
+const cstring TableImplementation::counterName = "counter";
+const cstring TableImplementation::directMeterName = "directMeter";
+const cstring MatchImplementation::selectorMatchTypeName = "selector";
+const cstring MatchImplementation::rangeMatchTypeName = "range";
+const cstring TableAttributes::implementationName = "implementation";
+const cstring TableAttributes::sizeName = "size";
+const cstring TableAttributes::supportTimeoutName = "supportTimeout";
+const unsigned TableAttributes::defaultTableSize = 1024;
+const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata";
+
 Util::IJson* nodeName(const CFG::Node* node) {
     if (node->name.isNullOrEmpty())
         return Util::JsonValue::null;

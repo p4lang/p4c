@@ -21,14 +21,12 @@ limitations under the License.
 #include "lib/json.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "helpers.h"
 
 namespace BMV2 {
 
-
 class ErrorCodesVisitor : public Inspector {
     Util::JsonArray* errors;
-    using ErrorValue = unsigned int;
-    using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
     ErrorCodesMap*    errorCodesMap;
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);

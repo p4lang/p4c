@@ -114,22 +114,6 @@ struct Extern_Model : public Block_Model<Method_Model> {
         Block_Model<Method_Model>(name), type("Extern") {}
 };
 
-struct TableAttributes_Model : public ::Model::Type_Model {
-    ::Model::Elem tableImplementation;
-    ::Model::Elem directCounter;
-    ::Model::Elem directMeter;
-    ::Model::Elem size;
-    ::Model::Elem supportTimeout;
-    const unsigned defaultTableSize = 1024;
-    explicit TableAttributes_Model(cstring name) :
-        Type_Model(name),
-        tableImplementation("implementation"),
-        directCounter("directCounter"),
-        directMeter("directMeter"),
-        size("size"),
-        supportTimeout("supportTimeout") {}
-};
-
 /// V2Model : Model::Model
 class V2Model : public ::Model::Model {
  public:
@@ -137,21 +121,10 @@ class V2Model : public ::Model::Model {
     std::vector<Control_Model*> controls;
     std::vector<Extern_Model*>  externs;
     std::vector<Type_Model*>    match_kinds;
-    ::Model::Elem                        action_profile;
-    ::Model::Elem                        action_selector;
-    ::Model::Elem                        selectorMatchType;
-    ::Model::Elem                        rangeMatchType;
-    TableAttributes_Model                tableAttributes;
     bool find_match_kind(cstring kind_name);
     bool find_extern(cstring extern_name);
     static V2Model              instance;
-    explicit V2Model() : ::Model::Model("0.2"),
-        action_profile("action_profile"),
-        action_selector("action_selector"),
-        selectorMatchType("selector"),
-        rangeMatchType("range"),
-        tableAttributes("tableAttributes") {}
-
+    explicit V2Model() : ::Model::Model("0.2") {}
 };
 
 } // namespace P4
