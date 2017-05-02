@@ -2745,8 +2745,6 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                     }
                     return result;
                 }
-            } else if (mce->arguments->size() == 2) {
-
             }
         } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();

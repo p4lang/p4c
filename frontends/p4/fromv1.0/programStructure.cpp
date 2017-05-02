@@ -84,81 +84,59 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
             if (metadata)
                 ::error("%1%: varbit types illegal in metadata", f);
         } else if (!f->type->is<IR::Type_Bits>()) {
-            // These come from P4 v1.0, so they cannot be anything else
+            // These come from P4-14, so they cannot be anything else
             BUG("%1%: unexpected type", f); }
     }
 }
 
+void ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
+                                   std::unordered_set<const IR::Type*> *converted) {
+    if (converted->count(type))
+        return;
+    converted->emplace(type);
+    auto type_name = types.get(type);
+    auto newType = type->apply(TypeConverter(this));
+    if (newType->name.name != type_name) {
+        auto annos = addNameAnnotation(type->name.name, type->annotations);
+        if (header) {
+            newType = new IR::Type_Header(newType->srcInfo, type_name, annos, newType->fields);
+        } else {
+            newType = new IR::Type_Struct(newType->srcInfo, type_name, annos, newType->fields);
+        }
+    }
+    if (header)
+        finalHeaderType.emplace(type->externalName(), newType);
+    checkHeaderType(newType, !header);
+    LOG3("Added type " << dbp(newType) << " named " << type_name << " from " << dbp(type));
+    declarations->push_back(newType);
+    converted->emplace(newType);
+}
+
 void ProgramStructure::createTypes() {
-    // FIXME -- refactor this to reduce the excessive duplication
     std::unordered_set<const IR::Type *> converted;
+    // Metadata first
     for (auto it : metadata) {
         auto type = it.first->type;
         if (type->name.name == v1model.standardMetadataType.name)
             continue;
-        if (converted.count(type))
-            continue;
-        converted.emplace(type);
-        auto type_name = types.get(type);
-        type = type->apply(TypeConverter(this));
-        if (type->name.name != type_name) {
-            auto annos = addNameAnnotation(type->name.name, type->annotations);
-            type = new IR::Type_Struct(type->srcInfo, type_name, annos, type->fields);
-        }
-        checkHeaderType(type, true);
-        LOG3("Added type " << type << " named " << type_name);
-        declarations->push_back(type);
-        converted.emplace(type);
+        createType(type, false, &converted);
     }
     for (auto it : registers) {
         if (it.first->layout) {
             auto type = types.get(it.first->layout);
-            if (converted.count(type))
-                continue;
-            converted.emplace(type);
-            auto type_name = types.get(type);
-            type = type->apply(TypeConverter(this));
-            if (type->name.name != type_name) {
-                auto annos = addNameAnnotation(type->name.name, type->annotations);
-                type = new IR::Type_Struct(type->srcInfo, type_name, annos, type->fields);
-            }
-            checkHeaderType(type, true);
-            declarations->push_back(type);
-            converted.emplace(type);
+            createType(type, false, &converted);
         }
     }
 
+    // Headers next
     converted.clear();
     for (auto it : headers) {
         auto type = it.first->type;
-        if (converted.count(type))
-            continue;
-        converted.emplace(type);
-        auto type_name = types.get(type);
-        type = type->apply(TypeConverter(this));
-        if (type->name.name != type_name) {
-            auto annos = addNameAnnotation(type->name.name, type->annotations);
-            type = new IR::Type_Header(type->srcInfo, type_name, annos, type->fields);
-        }
-        checkHeaderType(type, false);
-        LOG3("Added type " << type << " named " << type_name);
-        declarations->push_back(type);
-        converted.emplace(type);
+        createType(type, true, &converted);
     }
     for (auto it : stacks) {
         auto type = it.first->type;
-        if (converted.count(type))
-            continue;
-        converted.emplace(type);
-        auto type_name = types.get(type);
-        type = type->apply(TypeConverter(this));
-        if (type->name.name != type_name) {
-            auto annos = addNameAnnotation(type->name.name, type->annotations);
-            type = new IR::Type_Header(type->srcInfo, type_name, annos, type->fields);
-        }
-        checkHeaderType(type, false);
-        declarations->push_back(type);
-        converted.emplace(type);
+        createType(type, true, &converted);
     }
 }
 
@@ -317,8 +295,15 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
         if (primitive->name == "extract") {
             BUG_CHECK(primitive->operands.size() == 1, "Expected 1 operand for %1%", primitive);
             auto dest = primitive->operands.at(0);
-            auto destType = dest->type->to<IR::Type_Header>();
+            auto destType = dest->type;
             CHECK_NULL(destType);
+            BUG_CHECK(destType->is<IR::Type_Header>(), "%1%: expected a header", destType);
+            auto finalDestType = ::get(
+                finalHeaderType, destType->to<IR::Type_Header>()->externalName());
+            BUG_CHECK(finalDestType != nullptr, "%1%: could not find final type",
+                      destType->to<IR::Type_Header>()->externalName());
+            destType = finalDestType;
+            BUG_CHECK(destType->is<IR::Type_Header>(), "%1%: expected a header", destType);
 
             auto current = conv.convert(dest);
             auto args = new IR::Vector<IR::Expression>();
@@ -333,14 +318,9 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
                 paramReference(parserPacketIn),
                 p4lib.packetIn.extract.Id());
             auto mce = new IR::MethodCallExpression(expr->srcInfo, method, args);
-            // The type may have a new name in P4-16; destType was inserted early
-            // in the compilation by the P4-14 type checker.
-            auto origType = types.get(destType->name);
-            CHECK_NULL(origType);
-            cstring typeName = types.get(origType);
-            BUG_CHECK(!typeName.isNullOrEmpty(), "%1%: empty name", destType);
-            LOG3("Inserted extract " << dbp(mce) << typeName);
-            extractsSynthesized.emplace(mce, typeName);
+
+            LOG3("Inserted extract " << dbp(mce) << " " << dbp(destType));
+            extractsSynthesized.emplace(mce, destType->to<IR::Type_Header>());
             auto result = new IR::MethodCallStatement(expr->srcInfo, mce);
             return result;
         } else if (primitive->name == "set_metadata") {

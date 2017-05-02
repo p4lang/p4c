@@ -575,7 +575,7 @@ class FixExtracts final : public Transform {
     void splitHeaderType(const IR::Type_Header* type) {
         IR::IndexedVector<IR::StructField> fields;
         const IR::Expression* length = nullptr;
-        for (auto f: type->fields) {
+        for (auto f : type->fields) {
             if (f->type->is<IR::Type_Varbits>()) {
                 cstring hname = structure->makeUniqueName(type->name);
                 auto htype = new IR::Type_Header(IR::ID(hname), fields);
@@ -651,18 +651,14 @@ class FixExtracts final : public Transform {
         typeDecls.clear();
         auto mce = getOriginal<IR::MethodCallStatement>()->methodCall;
         LOG3("Looking up in extracts " << dbp(mce));
-        cstring htname = ::get(structure->extractsSynthesized, mce);
-        if (htname.isNullOrEmpty())
+        auto ht = ::get(structure->extractsSynthesized, mce);
+        if (ht == nullptr)
+            // not an extract
             return statement;
 
         // This is an extract method invocation
         BUG_CHECK(mce->arguments->size() == 1, "%1%: expected 1 argument", mce);
         auto arg = mce->arguments->at(0);
-        auto program = findContext<IR::P4Program>();
-        BUG_CHECK(program != nullptr, "could not find program");
-        auto t = program->declarations.getDeclaration(htname);
-        BUG_CHECK(t != nullptr && t->is<IR::Type_Header>(), "%1%: could not find type by name", htname);
-        auto ht = t->to<IR::Type_Header>();
 
         splitHeaderType(ht);
         if (typeDecls.empty())

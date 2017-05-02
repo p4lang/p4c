@@ -130,11 +130,16 @@ class ProgramStructure {
 
     std::map<const IR::V1Table*, const IR::V1Control*> tableMapping;
     std::map<const IR::V1Table*, const IR::Apply*> tableInvocation;
+    /// Some types are transformed during conversion; this maps the
+    /// original P4-14 header type name to the final P4-16
+    /// Type_Header.  We can't use the P4-14 type object itself as a
+    /// key, because it keeps changing.
+    std::map<cstring, const IR::Type*> finalHeaderType;
 
-    /// Maps each inserted extract statement to the name of the header
+    /// Maps each inserted extract statement to the type of the header
     /// type that is being extracted.  The extracts will need another
     /// pass to cope with varbit fields.
-    std::map<const IR::MethodCallExpression*, cstring> extractsSynthesized;
+    std::map<const IR::MethodCallExpression*, const IR::Type_Header*> extractsSynthesized;
 
     struct ConversionContext {
         const IR::Expression* header;
@@ -189,6 +194,8 @@ class ProgramStructure {
     void createChecksumUpdates();
     void createStructures();
     void createExterns();
+    void createType(const IR::Type_StructLike* type, bool header,
+                    std::unordered_set<const IR::Type*> *converted);
     void createTypes();
     void createParser();
     void createControls();
