@@ -18,6 +18,7 @@ ENV P4C_DEPS automake \
              flex \
              g++ \
              libboost-dev \
+             libboost-iostreams1.58-dev \
              libgc-dev \
              libgmp-dev \
              libtool \
@@ -26,6 +27,7 @@ ENV P4C_DEPS automake \
              python-scapy \
              tcpdump
 ENV P4C_RUNTIME_DEPS cpp \
+                     libboost-iostreams1.58.0 \
                      libgc1c2 \
                      libgmp10 \
                      libgmpxx4ldbl \
