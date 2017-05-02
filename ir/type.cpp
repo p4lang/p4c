@@ -36,6 +36,7 @@ const cstring IR::Annotation::tableOnlyAnnotation = "tableonly";
 const cstring IR::Annotation::defaultOnlyAnnotation = "defaultonly";
 const cstring IR::Annotation::atomicAnnotation = "atomic";
 const cstring IR::Annotation::hiddenAnnotation = "hidden";
+const cstring IR::Annotation::lengthAnnotation = "length";
 
 std::map<int, const IR::Type_Bits*> *Type_Bits::signedTypes = nullptr;
 std::map<int, const IR::Type_Bits*> *Type_Bits::unsignedTypes = nullptr;

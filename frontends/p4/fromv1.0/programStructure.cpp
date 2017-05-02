@@ -106,6 +106,7 @@ void ProgramStructure::createTypes() {
             type = new IR::Type_Struct(type->srcInfo, type_name, annos, type->fields);
         }
         checkHeaderType(type, true);
+        LOG3("Added type " << type << " named " << type_name);
         declarations->push_back(type);
         converted.emplace(type);
     }
@@ -140,6 +141,7 @@ void ProgramStructure::createTypes() {
             type = new IR::Type_Header(type->srcInfo, type_name, annos, type->fields);
         }
         checkHeaderType(type, false);
+        LOG3("Added type " << type << " named " << type_name);
         declarations->push_back(type);
         converted.emplace(type);
     }
@@ -315,11 +317,15 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
         if (primitive->name == "extract") {
             BUG_CHECK(primitive->operands.size() == 1, "Expected 1 operand for %1%", primitive);
             auto dest = primitive->operands.at(0);
+            auto destType = dest->type->to<IR::Type_Header>();
+            CHECK_NULL(destType);
 
             auto current = conv.convert(dest);
             auto args = new IR::Vector<IR::Expression>();
             args->push_back(current);
 
+            // A second conversion of dest is used to compute the
+            // 'latest' (P4-14 keyword) value if referenced later.
             conv.replaceNextWithLast = true;
             this->latest = conv.convert(dest);
             conv.replaceNextWithLast = false;
@@ -327,6 +333,14 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
                 paramReference(parserPacketIn),
                 p4lib.packetIn.extract.Id());
             auto mce = new IR::MethodCallExpression(expr->srcInfo, method, args);
+            // The type may have a new name in P4-16; destType was inserted early
+            // in the compilation by the P4-14 type checker.
+            auto origType = types.get(destType->name);
+            CHECK_NULL(origType);
+            cstring typeName = types.get(origType);
+            BUG_CHECK(!typeName.isNullOrEmpty(), "%1%: empty name", destType);
+            LOG3("Inserted extract " << dbp(mce) << typeName);
+            extractsSynthesized.emplace(mce, typeName);
             auto result = new IR::MethodCallStatement(expr->srcInfo, mce);
             return result;
         } else if (primitive->name == "set_metadata") {
