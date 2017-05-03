@@ -606,3 +606,23 @@ this extern instance. Each array item has the following attributes:
   - `type`: the type of the attribute, only `hexstr` (integral values), `string`
   (for character sequences) and `expression` are supported for now
   - `value`: the initial value for the attribute
+
+### `field_aliases`
+
+bmv2 target architectures usually require a set of metadata fields to be defined
+in the JSON input. For example, simple_switch requires the following fields:
+`standard_metadata.ingress_port`, `standard_metadata.packet_length`,
+`standard_metadata.instance_type`, `standard_metadata.egress_spec`,
+`standard_metadata.egress_port` and `standard_metadata.clone_spec`. These fields
+happen to be the standard metadata fields described in the P4_14
+specification. In some cases you may want to use different names for these
+fields in a P4 program, which you can accomplish by using field aliases. A field
+alias maps the name expected by bmv2 to the name used in the P4 / JSON.
+
+The `field_aliases` attribute is a JSON array of 2-tuples, with the following
+elements:
+- a string corresponding to the name expected by the bmv2 target
+(e.g. `"standard_metadata.egress_port"`)
+- a 2-tuple where the first item is the actual header instance name and the
+second is the actual field member name, as they appear in the P4 / JSON input
+(e.g. `["my_metadata", "my_egress_port"]`)
