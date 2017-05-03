@@ -219,12 +219,14 @@ parser Parser<H, M>(packet_in b,
 control VerifyChecksum<H,M>(in    H hdr,
                             inout M meta);
 
+@pipeline
 control Ingress<H, M>(inout H                hdr,
                       inout M                meta,
                       in    error            parser_error,
                       in    ingress_input_t  input_meta,
                       inout ingress_output_t output_meta);
 
+@pipeline
 control Egress<H, M>(inout H               hdr,
                      inout M               meta,
                      in    egress_input_t  input_meta,

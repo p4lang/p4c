@@ -24,6 +24,7 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/backend.cpp \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/control.cpp \
+	backends/bmv2/copyAnnotations.cpp \
 	backends/bmv2/deparser.cpp \
 	backends/bmv2/errorcode.cpp \
 	backends/bmv2/expression.cpp \
@@ -40,6 +41,7 @@ noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
 	backends/bmv2/backend.h \
 	backends/bmv2/control.h \
+	backends/bmv2/copyAnnotations.h \
 	backends/bmv2/deparser.h \
 	backends/bmv2/errorcode.h \
 	backends/bmv2/expression.h \

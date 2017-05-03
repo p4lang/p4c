@@ -22,11 +22,13 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "expression.h"
+#include "backend.h"
 
 namespace BMV2 {
 
 class DoDeparserBlockConversion : public Inspector {
-    Backend*             backend;
+    Backend*    backend;
+
  protected:
     Util::IJson* convertDeparser(const IR::P4Control* ctrl);
     void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);

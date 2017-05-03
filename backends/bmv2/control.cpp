@@ -673,9 +673,14 @@ bool Control::preorder(const IR::PackageBlock *block) {
 }
 
 bool Control::preorder(const IR::ControlBlock* block) {
-    // skip control block marked as deparser
-    if(block->getAnnotation("deparser"))
-        return false;
+    auto bt = backend->blockTypeMap.find(block);
+    if (bt != backend->blockTypeMap.end()) {
+        LOG3(bt->second->getAnnotation("pipeline"));
+        // only generate control block marked with @pipeline
+        if(!bt->second->getAnnotation("pipeline")) {
+            return false;
+        }
+    }
 
     const IR::P4Control* cont = block->container;
     auto result = new Util::JsonObject();

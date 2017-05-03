@@ -133,14 +133,17 @@ parser Parser<H, M>(packet_in b,
                     inout standard_metadata_t standard_metadata);
 control VerifyChecksum<H, M>(in H hdr,
                              inout M meta);
+@pipeline
 control Ingress<H, M>(inout H hdr,
                       inout M meta,
                       inout standard_metadata_t standard_metadata);
+@pipeline
 control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
+@deparser
 control Deparser<H>(packet_out b, in H hdr);
 
 package V1Switch<H, M>(Parser<H, M> p,

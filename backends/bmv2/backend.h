@@ -35,10 +35,10 @@ limitations under the License.
 
 namespace BMV2 {
 
-
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
+    const IR::ToplevelBlock*         tlb;
     ExpressionConverter*             conv;
     P4::ConvertEnums::EnumMapping*   enumMap;
     P4::P4CoreLibrary&               corelib;
@@ -84,6 +84,9 @@ class Backend : public PassManager {
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
     std::set<const IR::Type_StructLike*> headerTypesCreated;
     std::set<const IR::Type*> headerInstancesCreated;
+
+    /// map from block to its type as defined in architecture file
+    std::map<const IR::Block*, const IR::Type*> blockTypeMap;
     void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
     void createJsonType(const IR::Type_StructLike* st);
 
@@ -116,6 +119,7 @@ class Backend : public PassManager {
     P4::ReferenceMap &    getRefMap()    { return refMap; }
     ProgramParts &        getStructure() { return structure; }
     P4::TypeMap &         getTypeMap()   { return typeMap; }
+    const IR::ToplevelBlock* getToplevelBlock() { return tlb; }
 };
 
 }  // namespace BMV2

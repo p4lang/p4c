@@ -23,6 +23,7 @@ limitations under the License.
 #include "errorcode.h"
 #include "expression.h"
 #include "frontends/p4/methodInstance.h"
+#include "copyAnnotations.h"
 
 namespace BMV2 {
 
@@ -411,6 +412,7 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
     conv = new ExpressionConverter(&refMap, &typeMap, &structure, &errorCodesMap);
 
     PassManager codegen_passes = {
+        new CopyAnnotations(this),
         new VisitFunctor([this](){ addMetaInformation(); }),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
