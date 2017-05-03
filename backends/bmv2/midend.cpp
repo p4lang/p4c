@@ -105,7 +105,6 @@ class GenerateSkipControls : public Inspector {
         auto bt = map->find(block);
         if (bt != map->end()) {
             if (!bt->second->getAnnotation("pipeline")) {
-                LOG1("found pipeline");
                 skip->insert(block->container->name);
             }
         }
@@ -140,11 +139,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
+        // (hanw) following three visit functors require apply() on PackageBlock
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        // build the map from user block to architecture type
         new VisitFunctor([this, mapBlockType]() { toplevel->getMain()->apply(*mapBlockType); }),
         new VisitFunctor([this, generateSkipControls]() { toplevel->getMain()->apply(*generateSkipControls); }),
-        new VisitFunctor([this]() { for(auto a : blockTypeMap) LOG1("skip" << a.first << " " << a.second); }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
