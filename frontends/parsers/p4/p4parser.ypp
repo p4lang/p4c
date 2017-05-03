@@ -219,13 +219,12 @@ typedef const IR::Type ConstType;
 %%
 
 /*
-   This grammar may look weird in some places, but a lot of effort was
-   put into eliminating conflics.  This sometimes required having the
-   grammar be more lenient than necessary.  Moreover, the grammar is
-   context-sensitive, and it needs some rudiments of type information
-   to properly perform parsing.  This is done with the help of the
-   "structure" object, which keeps track which identifiers represent
-   types, and which represent namespaces.
+   This grammar may look weird in some places, but a lot of effort was put into
+   eliminating conflicts.  This sometimes required having the grammar be more
+   lenient than necessary.  Moreover, the grammar is context-sensitive, and it
+   needs some rudiments of type information to properly perform parsing.  This
+   is done with the help of P4ParserDriver's "structure" object, which keeps
+   track of which identifiers represent types, and which represent namespaces.
 */
 
 program : input END { YYACCEPT; };

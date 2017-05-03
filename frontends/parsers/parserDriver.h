@@ -31,10 +31,13 @@ namespace P4 {
 class P4Lexer;
 class P4Parser;
 
+/// The base class of ParserDrivers, which provide a high level interface to
+/// parsers and lexers and manage their state.
 class AbstractParserDriver {
  public:
     virtual ~AbstractParserDriver() = 0;
 
+ protected:
     ////////////////////////////////////////////////////////////////////////////
     // Callbacks.
     ////////////////////////////////////////////////////////////////////////////
@@ -75,6 +78,7 @@ class AbstractParserDriver {
     cstring lastIdentifier;
 };
 
+/// A ParserDriver that can parse P4-16 programs.
 class P4ParserDriver final : public AbstractParserDriver {
  public:
     /**
@@ -140,6 +144,7 @@ namespace V1 {
 class V1Lexer;
 class V1Parser;
 
+/// A ParserDriver that can parse P4-14 programs.
 class V1ParserDriver final : public P4::AbstractParserDriver {
  public:
     /**

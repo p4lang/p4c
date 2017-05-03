@@ -52,10 +52,9 @@ parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
     return result;
 }
 
-IR::Constant*
-parseConstant(const Util::SourceInfo& srcInfo,
-              const UnparsedConstant& constant,
-              boost::optional<long> defaultValue /* = boost::none */) {
+IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
+                            const UnparsedConstant& constant,
+                            long defaultValue) {
     if (!constant.hasWidth) {
         auto value = Util::cvtInt(constant.text.c_str() + constant.skip, constant.base);
         return new IR::Constant(srcInfo, value, constant.base);
@@ -64,6 +63,6 @@ parseConstant(const Util::SourceInfo& srcInfo,
     auto result = parseConstantWithWidth(srcInfo, constant.text.c_str(),
                                          constant.skip, constant.base);
     if (result == nullptr && defaultValue)
-      return new IR::Constant(srcInfo, *defaultValue);
+        return new IR::Constant(srcInfo, defaultValue);
     return result;
 }

@@ -52,8 +52,7 @@ struct AutoStdioInputStream {
 struct AutoStdioInputStream {
     explicit AutoStdioInputStream(FILE* in) {
         char buffer[512];
-        while (fgets(buffer, sizeof(buffer), in))
-            stream << buffer;
+        while (fgets(buffer, sizeof(buffer), in)) stream << buffer;
     }
 
     std::istream& get() { return stream; }

@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef _FRONTENDS_COMMON_CONSTANTPARSING_H_
 #define _FRONTENDS_COMMON_CONSTANTPARSING_H_
 
-#include <boost/optional.hpp>
 #include "lib/cstring.h"
 
 namespace IR {
@@ -72,16 +71,14 @@ std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant);
 
 /**
  * Parses an UnparsedConstant @constant into an IR::Constant object, with
- * location information taken from @srcInfo. If parsing fails, by default null
- * is returned, but callers can optionally specify a @defaultValue to return
- * instead. Regardless of whether @defaultValue is present or not, parse
- * failures will result in an error being reported.
+ * location information taken from @srcInfo. If parsing fails, an IR::Constant
+ * containing the value @defaultValue is returned, and an error is reported.
  *
  * @return an IR::Constant parsed from @constant. If parsing fails, returns
- * either null or a default value.
+ * either a default value.
  */
 IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
                             const UnparsedConstant& constant,
-                            boost::optional<long> defaultValue = boost::none);
+                            long defaultValue);
 
 #endif /* _FRONTENDS_COMMON_CONSTANTPARSING_H_ */
