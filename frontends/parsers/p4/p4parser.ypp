@@ -121,12 +121,15 @@ typedef const IR::Type ConstType;
 %token      ASSIGN "="
 %token      SEMICOLON ";"
 %token      AT "@"
+%token      PP "++"
+%token      DONTCARE "_"
+%token      MASK "&&&"
+%token      RANGE ".."
 %token      TRUE FALSE THIS
-%token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
-            DEFAULT DONTCARE ELSE ENTRIES ENUM ERROR
-            EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
-            PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
-            TUPLE TYPEDEF VARBIT VOID
+%token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA DEFAULT
+            ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
+            INT KEY SELECT MATCH_KIND OUT PACKAGE PARSER RETURN STATE STRUCT
+            SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VOID
 
 %token<cstring> IDENTIFIER TYPE STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -231,8 +234,8 @@ program : input END { YYACCEPT; };
 
 input
     : /* epsilon */
-    | input declaration       { if ($2) driver.declarations->push_back($2->getNode()); }
-    | input SEMICOLON         {}   // empty declaration
+    | input declaration  { if ($2) driver.declarations->push_back($2->getNode()); }
+    | input ";"          {}   // empty declaration
     ;
 
 declaration
@@ -277,8 +280,8 @@ annotations
     ;
 
 annotation
-    : AT name                                { $$ = new IR::Annotation(@1, *$2, {}); }
-    | AT name L_PAREN expressionList R_PAREN { $$ = new IR::Annotation(@1, *$2, *$4); }
+    : "@" name                        { $$ = new IR::Annotation(@1, *$2, {}); }
+    | "@" name "(" expressionList ")" { $$ = new IR::Annotation(@1, *$2, *$4); }
     ;
 
 parameterList
@@ -289,7 +292,7 @@ parameterList
 nonEmptyParameterList
     : parameter                           { $$ = new IR::IndexedVector<IR::Parameter>();
                                             $$->push_back($1); }
-    | nonEmptyParameterList COMMA parameter { $$ = $1; $$->push_back($3); }
+    | nonEmptyParameterList "," parameter { $$ = $1; $$->push_back($3); }
     ;
 
 parameter
@@ -306,32 +309,32 @@ direction
 packageTypeDeclaration
     : optAnnotations PACKAGE name { driver.structure->pushContainerType(*$3, false); }
       optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-      L_PAREN parameterList R_PAREN        { auto pl = new IR::ParameterList(@8, *$8);
-                                             $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
+      "(" parameterList ")"        { auto pl = new IR::ParameterList(@8, *$8);
+                                     $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
     ;
 
 instantiation
-      : annotations typeRef L_PAREN argumentList R_PAREN name SEMICOLON
+      : annotations typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
                                                          $2, $4);
                        driver.structure->declareObject(*$6); }
-      | typeRef L_PAREN argumentList R_PAREN name SEMICOLON
+      | typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
                        driver.structure->declareObject(*$5); }
       /* experimental */
-      | annotations typeRef L_PAREN argumentList R_PAREN name ASSIGN objInitializer SEMICOLON
+      | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
                                                          $2, $4, $8);
                        driver.structure->declareObject(*$6); }
       /* experimental */
-      | typeRef L_PAREN argumentList R_PAREN name ASSIGN objInitializer SEMICOLON
+      | typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3, $7);
                        driver.structure->declareObject(*$5); }
     ;
 
 /* experimental; includes the following 3 productions */
 objInitializer
-    : L_BRACE { driver.structure->pushNamespace(@1, false); } objDeclarations R_BRACE
+    : "{" { driver.structure->pushNamespace(@1, false); } objDeclarations "}"
                                { driver.structure->pop();
                                  $$ = new IR::BlockStatement(@1+@4, *$3); }
     ;
@@ -347,19 +350,19 @@ objDeclaration
     ;
 
 optConstructorParameters
-    : /* empty */                    { $$ = new IR::IndexedVector<IR::Parameter>(); }
-    | L_PAREN parameterList R_PAREN  { $$ = $2; }
+    : /* empty */            { $$ = new IR::IndexedVector<IR::Parameter>(); }
+    | "(" parameterList ")"  { $$ = $2; }
     ;
 
 dotPrefix
-    : DOT                      { driver.structure->startAbsolutePath(); }
+    : "."                      { driver.structure->startAbsolutePath(); }
     ;
 
 /**************************** PARSER ******************************/
 
 parserDeclaration
     : parserTypeDeclaration optConstructorParameters
-      L_BRACE parserLocalElements parserStates R_BRACE
+      "{" parserLocalElements parserStates "}"
                              { driver.structure->pop();
                                auto pl = new IR::ParameterList(@2, *$2);
                                $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
@@ -381,8 +384,8 @@ parserTypeDeclaration
     : optAnnotations
         PARSER name       { driver.structure->pushContainerType(*$3, false); }
         optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-        L_PAREN parameterList R_PAREN { auto pl = new IR::ParameterList(@8, *$8);
-                                        $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
+        "(" parameterList ")" { auto pl = new IR::ParameterList(@8, *$8);
+                                $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
     ;
 
 parserStates
@@ -392,7 +395,7 @@ parserStates
     ;
 
 parserState
-    : optAnnotations STATE name L_BRACE parserStatements transitionStatement R_BRACE
+    : optAnnotations STATE name "{" parserStatements transitionStatement "}"
                                       { $$ = new IR::ParserState(@3, *$3, $1, *$5, $6); }
     ;
 
@@ -410,7 +413,7 @@ parserStatement
     ;
 
 parserBlockStatement
-    : optAnnotations L_BRACE parserStatements R_BRACE
+    : optAnnotations "{" parserStatements "}"
       { $$ = new IR::BlockStatement(@1+@4, $1, *$3); }
     ;
 
@@ -420,12 +423,12 @@ transitionStatement
     ;
 
 stateExpression
-    : name SEMICOLON   { $$ = new IR::PathExpression(*$1); }
+    : name ";"         { $$ = new IR::PathExpression(*$1); }
     | selectExpression { $$ = $1; }
     ;
 
 selectExpression
-    : SELECT L_PAREN expressionList R_PAREN L_BRACE selectCaseList R_BRACE
+    : SELECT "(" expressionList ")" "{" selectCaseList "}"
                               { $$ = new IR::SelectExpression(@1 + @7,
                                      new IR::ListExpression(@3, *$3), std::move(*$6)); }
     ;
@@ -436,7 +439,7 @@ selectCaseList
     ;
 
 selectCase
-    : keysetExpression COLON name SEMICOLON
+    : keysetExpression ":" name ";"
       { auto expr = new IR::PathExpression(*$3);
         $$ = new IR::SelectCase(@1 + @3, $1, expr); }
     ;
@@ -448,28 +451,28 @@ keysetExpression
 
 tupleKeysetExpression
     /* at least two elements in the tuple */
-    : L_PAREN simpleKeysetExpression COMMA simpleExpressionList R_PAREN
+    : "(" simpleKeysetExpression "," simpleExpressionList ")"
                                 { $$ = $4; $4->insert($4->begin(), $2); }
     ;
 
 simpleExpressionList
     : simpleKeysetExpression { $$ = new IR::Vector<IR::Expression>(); $$->push_back($1); }
-    | simpleExpressionList COMMA simpleKeysetExpression { $$ = $1; $$->push_back($3); }
+    | simpleExpressionList "," simpleKeysetExpression { $$ = $1; $$->push_back($3); }
     ;
 
 simpleKeysetExpression
     : expression                  { $$ = $1; }
-    | expression MASK expression  { $$ = new IR::Mask(@1 + @3, $1, $3); }
-    | expression RANGE expression { $$ = new IR::Range(@1 + @3, $1, $3); }
+    | expression "&&&" expression { $$ = new IR::Mask(@1 + @3, $1, $3); }
+    | expression ".." expression  { $$ = new IR::Range(@1 + @3, $1, $3); }
     | DEFAULT                     { $$ = new IR::DefaultExpression(@1); }
-    | DONTCARE                    { $$ = new IR::DefaultExpression(@1); }
+    | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
 /*************************** CONTROL ************************/
 
 controlDeclaration
     : controlTypeDeclaration optConstructorParameters
-      L_BRACE controlLocalDeclarations APPLY controlBody R_BRACE
+      "{" controlLocalDeclarations APPLY controlBody "}"
         { driver.structure->pop();
           auto pl = new IR::ParameterList(@2, *$2);
           $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1, pl, *$4, $6); }
@@ -479,8 +482,8 @@ controlTypeDeclaration
     : optAnnotations
         CONTROL name { driver.structure->pushContainerType(*$3, false); }
         optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-        L_PAREN parameterList R_PAREN { auto pl = new IR::ParameterList(@8, *$8);
-                                        $$ = new IR::Type_Control(@3, *$3, $1, $5, pl); }
+        "(" parameterList ")" { auto pl = new IR::ParameterList(@8, *$8);
+                                $$ = new IR::Type_Control(@3, *$3, $1, $5, pl); }
     ;
 
 controlLocalDeclarations
@@ -506,9 +509,9 @@ externDeclaration
     : optAnnotations
         EXTERN nonTypeName { driver.structure->pushContainerType(*$3, true); }
         optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-        L_BRACE methodPrototypes R_BRACE { driver.structure->pop();
-                                           $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
-    | optAnnotations EXTERN functionPrototype SEMICOLON { $$ = $3; $3->annotations = $1; }
+        "{" methodPrototypes "}" { driver.structure->pop();
+                                   $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
+    | optAnnotations EXTERN functionPrototype ";" { $$ = $3; $3->annotations = $1; }
     ;
 
 methodPrototypes
@@ -520,16 +523,16 @@ functionPrototype
     : typeOrVoid
         name optTypeParameters { driver.structure->pushNamespace(@2, false);
                                  driver.structure->declareTypes(&$3->parameters); }
-        L_PAREN parameterList R_PAREN { driver.structure->pop(); }
+        "(" parameterList ")" { driver.structure->pop(); }
                            { auto params = new IR::ParameterList(@6, *$6);
                              auto mt = new IR::Type_Method(@2, $3, $1, params);
                              $$ = new IR::Method(@2, *$2, mt); }
     ;
 
 methodPrototype
-    : functionPrototype SEMICOLON { $$ = $1; }
-    | ABSTRACT functionPrototype SEMICOLON    { $$ = $2; $$->setAbstract(); }  // experimental
-    | TYPE L_PAREN parameterList R_PAREN SEMICOLON  // constructor
+    : functionPrototype ";" { $$ = $1; }
+    | ABSTRACT functionPrototype ";"    { $$ = $2; $$->setAbstract(); }  // experimental
+    | TYPE "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@3, *$3);
                                           auto mt = new IR::Type_Method(@1, par);
                                           $$ = new IR::Method(@1, IR::ID(@1, $1), mt); }
@@ -556,27 +559,26 @@ typeName
     ;
 
 tupleType
-    : TUPLE L_ANGLE typeArgumentList R_ANGLE   { $$ = new IR::Type_Tuple(@1+@4, *$3); }
+    : TUPLE "<" typeArgumentList ">"    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
     ;
 
 headerStackType
-    : typeName L_BRACKET expression R_BRACKET      { $$ = new IR::Type_Stack(@1+@4, $1, $3); }
+    : typeName "[" expression "]"       { $$ = new IR::Type_Stack(@1+@4, $1, $3); }
     ;
 
 specializedType
-    : typeName L_ANGLE typeArgumentList R_ANGLE
-                                       { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
+    : typeName "<" typeArgumentList ">" { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
     ;
 
 baseType
     : BOOL   { $$ = IR::Type_Boolean::get(); }
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
-    | BIT L_ANGLE INTEGER R_ANGLE
+    | BIT "<" INTEGER ">"
       { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), false); }
-    | INT L_ANGLE INTEGER R_ANGLE
+    | INT "<" INTEGER ">"
       { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
-    | VARBIT L_ANGLE INTEGER R_ANGLE
+    | VARBIT "<" INTEGER ">"
       { $$ = IR::Type::Varbits::get(@3, parseConstant(@3, $3, 0)->asInt()); }
     ;
 
@@ -588,32 +590,32 @@ typeOrVoid
     ;
 
 optTypeParameters
-    : /* empty */                       { $$ = new IR::TypeParameters(); }
-    | L_ANGLE typeParameterList R_ANGLE { $$ = new IR::TypeParameters(@1+@3, *$2); }
+    : /* empty */               { $$ = new IR::TypeParameters(); }
+    | "<" typeParameterList ">" { $$ = new IR::TypeParameters(@1+@3, *$2); }
     ;
 
 typeParameterList
-    : name                             { $$ = new IR::IndexedVector<IR::Type_Var>();
-                                         $$->push_back(new IR::Type_Var(@1, *$1)); }
-    | typeParameterList COMMA name     { ($$=$1)->push_back(new IR::Type_Var(@3, *$3)); }
+    : name                           { $$ = new IR::IndexedVector<IR::Type_Var>();
+                                       $$->push_back(new IR::Type_Var(@1, *$1)); }
+    | typeParameterList "," name     { ($$=$1)->push_back(new IR::Type_Var(@3, *$3)); }
     ;
 
 typeArg
-    : typeRef                          { $$ = $1; }
-    | DONTCARE                         { $$ = IR::Type_Dontcare::get(); }
+    : typeRef                     { $$ = $1; }
+    | "_"                         { $$ = IR::Type_Dontcare::get(); }
     ;
 
 typeArgumentList
-    : typeArg                          { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
-    | typeArgumentList COMMA typeArg   { $$ = $1; $$->push_back($3); }
+    : typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
+    | typeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
     ;
 
 typeDeclaration
-    : derivedTypeDeclaration           { $$ = $1; }
-    | typedefDeclaration SEMICOLON     { $$ = $1; }
-    | parserTypeDeclaration SEMICOLON  { driver.structure->pop(); $$ = $1; }
-    | controlTypeDeclaration SEMICOLON { driver.structure->pop(); $$ = $1; }
-    | packageTypeDeclaration SEMICOLON { driver.structure->pop(); $$ = $1; }
+    : derivedTypeDeclaration     { $$ = $1; }
+    | typedefDeclaration ";"     { $$ = $1; }
+    | parserTypeDeclaration ";"  { driver.structure->pop(); $$ = $1; }
+    | controlTypeDeclaration ";" { driver.structure->pop(); $$ = $1; }
+    | packageTypeDeclaration ";" { driver.structure->pop(); $$ = $1; }
     ;
 
 derivedTypeDeclaration
@@ -626,20 +628,20 @@ derivedTypeDeclaration
 headerTypeDeclaration
     : optAnnotations
         HEADER name { driver.structure->declareType(*$3); }
-        L_BRACE structFieldList R_BRACE { $$ = new IR::Type_Header(@3, *$3, $1, *$6); }
+        "{" structFieldList "}" { $$ = new IR::Type_Header(@3, *$3, $1, *$6); }
     ;
 
 structTypeDeclaration
     : optAnnotations
         STRUCT name { driver.structure->declareType(*$3); }
-        L_BRACE structFieldList R_BRACE { $$ = new IR::Type_Struct(@3, *$3, $1, *$6); }
+        "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, *$6); }
     ;
 
 // experimental
 headerUnionDeclaration
     : optAnnotations
         HEADER_UNION name { driver.structure->declareType(*$3); }
-        L_BRACE structFieldList R_BRACE { $$ = new IR::Type_Union(@3, *$3, $1, *$6); }
+        "{" structFieldList "}" { $$ = new IR::Type_Union(@3, *$3, $1, *$6); }
     ;
 
 structFieldList
@@ -648,29 +650,29 @@ structFieldList
     ;
 
 structField
-    : optAnnotations typeRef name SEMICOLON  { $$ = new IR::StructField(@3, *$3, $1, $2); }
+    : optAnnotations typeRef name ";"  { $$ = new IR::StructField(@3, *$3, $1, $2); }
     ;
 
 enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
-        L_BRACE identifierList R_BRACE { $$ = new IR::Type_Enum(@2, *$3, *$6); }
+        "{" identifierList "}" { $$ = new IR::Type_Enum(@2, *$3, *$6); }
     ;
 
 errorDeclaration
-    : ERROR L_BRACE identifierList R_BRACE
+    : ERROR "{" identifierList "}"
         { $$ = new IR::Type_Error(@1 + @4, IR::ID(@1, "error"), *$3); }
     ;
 
 matchKindDeclaration
-    : MATCH_KIND L_BRACE identifierList R_BRACE
+    : MATCH_KIND "{" identifierList "}"
         { $$ = new IR::Declaration_MatchKind(@1 + @4, *$3); }
     ;
 
 identifierList
-    : name                      { $$ = new IR::IndexedVector<IR::Declaration_ID>();
-                                  $$->push_back(new IR::Declaration_ID(@1, *$1));}
-    | identifierList COMMA name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3)); }
+    : name                    { $$ = new IR::IndexedVector<IR::Declaration_ID>();
+                                $$->push_back(new IR::Declaration_ID(@1, *$1));}
+    | identifierList "," name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3)); }
     ;
 
 typedefDeclaration
@@ -688,44 +690,44 @@ typedefDeclaration
 
 assignmentOrMethodCallStatement
     // These rules are overly permissive, but they avoid some conflicts
-    : lvalue L_PAREN argumentList R_PAREN SEMICOLON
+    : lvalue "(" argumentList ")" ";"
         { auto mc = new IR::MethodCallExpression(@1 + @4, $1,
                                                  new IR::Vector<IR::Type>(), $3);
           $$ = new IR::MethodCallStatement(@1 + @4, mc); }
 
-    | lvalue L_ANGLE typeArgumentList R_ANGLE L_PAREN argumentList R_PAREN SEMICOLON
+    | lvalue "<" typeArgumentList ">" "(" argumentList ")" ";"
         { auto mc = new IR::MethodCallExpression(@1 + @7,
                                                  $1, $3, $6);
           $$ = new IR::MethodCallStatement(@1 + @7, mc); }
 
-    | lvalue ASSIGN  expression SEMICOLON
+    | lvalue "=" expression ";"
         { $$ = new IR::AssignmentStatement(@2, $1, $3); }
 
     ;
 
 emptyStatement
-    : SEMICOLON      { $$ = new IR::EmptyStatement(@1); }
+    : ";"      { $$ = new IR::EmptyStatement(@1); }
     ;
 
 exitStatement
-    : EXIT SEMICOLON { $$ = new IR::ExitStatement(@1); }
+    : EXIT ";" { $$ = new IR::ExitStatement(@1); }
     ;
 
 returnStatement
-    : RETURN SEMICOLON            { $$ = new IR::ReturnStatement(@1, nullptr); }
-    | RETURN expression SEMICOLON { $$ = new IR::ReturnStatement(@1, $2); }
+    : RETURN ";"            { $$ = new IR::ReturnStatement(@1, nullptr); }
+    | RETURN expression ";" { $$ = new IR::ReturnStatement(@1, $2); }
     ;
 
 conditionalStatement
-    : IF L_PAREN expression R_PAREN statement                 %prec THEN
+    : IF "(" expression ")" statement                 %prec THEN
         { $$ = new IR::IfStatement(@1, $3, $5, nullptr); }
-    | IF L_PAREN expression R_PAREN statement ELSE statement  %prec THEN
+    | IF "(" expression ")" statement ELSE statement  %prec THEN
         { $$ = new IR::IfStatement(@1, $3, $5, $7); }
     ;
 
 // To support direct invocation of a control or parser without instantiation
 directApplication
-    : typeName DOT APPLY L_PAREN argumentList R_PAREN SEMICOLON {
+    : typeName "." APPLY "(" argumentList ")" ";" {
                                   auto method = new IR::Member(
                                       @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
                                   auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
@@ -744,9 +746,9 @@ statement
     ;
 
 blockStatement
-    : optAnnotations L_BRACE { driver.structure->pushNamespace(@2, false); }
-      statOrDeclList R_BRACE { driver.structure->pop();
-                               $$ = new IR::BlockStatement(@1 + @5, $1, *$4); }
+    : optAnnotations "{" { driver.structure->pushNamespace(@2, false); }
+      statOrDeclList "}" { driver.structure->pop();
+                           $$ = new IR::BlockStatement(@1 + @5, $1, *$4); }
     ;
 
 statOrDeclList
@@ -755,7 +757,7 @@ statOrDeclList
     ;
 
 switchStatement
-    : SWITCH L_PAREN expression R_PAREN L_BRACE switchCases R_BRACE {
+    : SWITCH "(" expression ")" "{" switchCases "}" {
             $$ = new IR::SwitchStatement(@1, $3, std::move(*$6)); }
     ;
 
@@ -765,8 +767,8 @@ switchCases
     ;
 
 switchCase
-    : switchLabel COLON blockStatement { $$ = new IR::SwitchCase(@1 + @3, $1, $3); }
-    | switchLabel COLON { $$ = new IR::SwitchCase(@1, $1, nullptr); }
+    : switchLabel ":" blockStatement { $$ = new IR::SwitchCase(@1 + @3, $1, $3); }
+    | switchLabel ":" { $$ = new IR::SwitchCase(@1, $1, nullptr); }
     ;
 
 switchLabel
@@ -785,7 +787,7 @@ statementOrDeclaration
 
 tableDeclaration
     : optAnnotations
-        TABLE name L_BRACE tablePropertyList R_BRACE
+        TABLE name "{" tablePropertyList "}"
           { $$ = new IR::P4Table(@3, *$3, $1, new IR::TableProperties(@5, *$5)); }
     ;
 
@@ -796,19 +798,19 @@ tablePropertyList
     ;
 
 tableProperty
-    : KEY ASSIGN L_BRACE keyElementList R_BRACE
+    : KEY "=" "{" keyElementList "}"
         { auto v = new IR::Key(@4, *$4);
           auto id = IR::ID(@1, "key");
           $$ = new IR::Property( @1 + @5, id, v, false); }
-    | ACTIONS ASSIGN L_BRACE actionList R_BRACE
+    | ACTIONS "=" "{" actionList "}"
         { auto v = new IR::ActionList(@4, *$4);
           auto id = IR::ID(@1, "actions");
           $$ = new IR::Property(@1 + @5, id, v, false); }
-    | optAnnotations optCONST ENTRIES ASSIGN L_BRACE entriesList R_BRACE
+    | optAnnotations optCONST ENTRIES "=" "{" entriesList "}"
         { auto l = new IR::EntriesList(@3, *$6);
           auto id = IR::ID(@3+@7, "entries");
           $$ = new IR::Property(@3, id, $1, l, $2); }
-    | optAnnotations optCONST IDENTIFIER ASSIGN initializer SEMICOLON
+    | optAnnotations optCONST IDENTIFIER "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
           auto id = IR::ID(@3, $3);
           $$ = new IR::Property(@3, id, $1, v, $2); }
@@ -820,21 +822,21 @@ keyElementList
     ;
 
 keyElement
-    : expression COLON name optAnnotations SEMICOLON
+    : expression ":" name optAnnotations ";"
                                          { auto expr = new IR::PathExpression(*$3);
                                            $$ = new IR::KeyElement(@3, $4, $1, expr); }
     ;
 
 actionList
-    : actionRef SEMICOLON                { $$ = new IR::IndexedVector<IR::ActionListElement>();
+    : actionRef ";"                      { $$ = new IR::IndexedVector<IR::ActionListElement>();
                                            $$->push_back($1); }
-    | actionList actionRef SEMICOLON     { $$ = $1; $$->push_back($2); }
+    | actionList actionRef ";"           { $$ = $1; $$->push_back($2); }
     ;
 
 actionRef
     : optAnnotations name                { auto expr = new IR::PathExpression(*$2);
                                            $$ = new IR::ActionListElement(@2, $1, expr);}
-    | optAnnotations name L_PAREN argumentList R_PAREN
+    | optAnnotations name "(" argumentList ")"
                                          { auto method = new IR::PathExpression(*$2);
                                            auto mce = new IR::MethodCallExpression(
                                                @2+@4, method, $4);
@@ -842,7 +844,7 @@ actionRef
     ;
 
 entry
-    : keysetExpression COLON actionBinding optAnnotations SEMICOLON
+    : keysetExpression ":" actionBinding optAnnotations ";"
                                          {
                                            assert($3->is<IR::MethodCallExpression>());
                                            if (auto l = $1->to<IR::ListExpression>())
@@ -857,10 +859,10 @@ entry
     ;
 
 actionBinding
-    : lvalue L_PAREN argumentList R_PAREN
+    : lvalue "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1,
                                             new IR::Vector<IR::Type>(), $3); }
-    | lvalue L_ANGLE typeArgumentList R_ANGLE L_PAREN argumentList R_PAREN
+    | lvalue "<" typeArgumentList ">" "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
 
 entriesList
@@ -871,7 +873,7 @@ entriesList
 /************************* ACTION ********************************/
 
 actionDeclaration
-    : optAnnotations ACTION name L_PAREN parameterList R_PAREN blockStatement
+    : optAnnotations ACTION name "(" parameterList ")" blockStatement
         { auto pl = new IR::ParameterList(@5, *$5);
           $$ = new IR::P4Action(@3, *$3, $1, pl, $7); }
     ;
@@ -879,24 +881,24 @@ actionDeclaration
 /************************* VARIABLES *****************************/
 
 variableDeclaration
-    : annotations typeRef name optInitializer SEMICOLON
+    : annotations typeRef name optInitializer ";"
                                      { auto ann = new IR::Annotations(@1, *$1);
                                        $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
                                        driver.structure->declareObject(*$3); }
-    | typeRef name optInitializer SEMICOLON
+    | typeRef name optInitializer ";"
                                      { $$ = new IR::Declaration_Variable(@1+@4, *$2, $1, $3);
                                        driver.structure->declareObject(*$2); }
     ;
 
 constantDeclaration
-    : optAnnotations CONST typeRef name ASSIGN initializer SEMICOLON
+    : optAnnotations CONST typeRef name "=" initializer ";"
                                      { $$ = new IR::Declaration_Constant(@1+@6, *$4, $1, $3, $6);
                                        driver.structure->declareObject(*$4); }
     ;
 
 optInitializer
-    : /* empty */                         { $$ = nullptr; }
-    | ASSIGN initializer                  { $$ = $2; }
+    : /* empty */                      { $$ = nullptr; }
+    | "=" initializer                  { $$ = $2; }
     ;
 
 initializer
@@ -918,7 +920,7 @@ argumentList
 nonEmptyArgList
     : argument                           { $$ = new IR::Vector<IR::Expression>();
                                            $$->push_back($1); }
-    | nonEmptyArgList COMMA argument     { $$ = $1; $$->push_back($3); }
+    | nonEmptyArgList "," argument       { $$ = $1; $$->push_back($3); }
     ;
 
 argument
@@ -928,7 +930,7 @@ argument
 expressionList
     : expression                         { $$ = new IR::Vector<IR::Expression>();
                                            $$->push_back($1); }
-    | expressionList COMMA expression    { $$ = $1; $$->push_back($3); }
+    | expressionList "," expression      { $$ = $1; $$->push_back($3); }
     ;
 
 prefixedNonTypeName
@@ -940,10 +942,9 @@ prefixedNonTypeName
 lvalue
     : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | THIS                               { $$ = new IR::This(@1); }  // experimental
-    | lvalue DOT name                    { $$ = new IR::Member(@1 + @3, $1, *$3); }
-    | lvalue L_BRACKET expression R_BRACKET { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
-    | lvalue L_BRACKET expression COLON expression R_BRACKET
-        { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    | lvalue "." name                    { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
+    | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     ;
 
 expression
@@ -953,52 +954,51 @@ expression
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
     | THIS                               { $$ = new IR::This(@1); }  // experimental
     | nonTypeName                        { $$ = new IR::PathExpression(*$1); }
-    | DOT nonTypeName                    { $$ = new IR::PathExpression(new IR::Path(*$2, true)); }
-    | expression L_BRACKET expression R_BRACKET { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
-    | expression L_BRACKET expression COLON expression R_BRACKET
-        { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
-    | L_BRACE expressionList R_BRACE     { $$ = new IR::ListExpression(@1 + @3, *$2); }
-    | L_PAREN expression R_PAREN         { $$ = $2; }
-    | NOT expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
-    | COMPLEMENT expression %prec PREFIX { $$ = new IR::Cmpl(@1 + @2, $2); }
-    | MINUS expression %prec PREFIX      { $$ = new IR::Neg(@1 + @2, $2); }
-    | PLUS expression %prec PREFIX       { $$ = $2; }
-    | typeName DOT name
+    | "." nonTypeName                    { $$ = new IR::PathExpression(new IR::Path(*$2, true)); }
+    | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
+    | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }
+    | "(" expression ")"                 { $$ = $2; }
+    | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
+    | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
+    | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
+    | "+" expression %prec PREFIX        { $$ = $2; }
+    | typeName "." name
         { $$ = new IR::Member(@1 + @3, new IR::TypeNameExpression(@1, $1), *$3); }
-    | ERROR DOT name
+    | ERROR "." name
         { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error")));
           $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
-    | expression DOT name                { $$ = new IR::Member(@1 + @3, $1, *$3); }
-    | expression MUL expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
-    | expression DIV expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
-    | expression MOD expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
-    | expression PLUS expression         { $$ = new IR::Add(@1 + @3, $1, $3); }
-    | expression MINUS expression        { $$ = new IR::Sub(@1 + @3, $1, $3); }
-    | expression SHL expression          { $$ = new IR::Shl(@1 + @3, $1, $3); }
-    | expression R_ANGLE R_ANGLE expression
+    | expression "." name                { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | expression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
+    | expression "/" expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
+    | expression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
+    | expression "+" expression          { $$ = new IR::Add(@1 + @3, $1, $3); }
+    | expression "-" expression          { $$ = new IR::Sub(@1 + @3, $1, $3); }
+    | expression "<<" expression         { $$ = new IR::Shl(@1 + @3, $1, $3); }
+    | expression ">" ">" expression
         { driver.checkShift(@2, @3); $$ = new IR::Shr(@1 + @4, $1, $4); }
-    | expression LE expression           { $$ = new IR::Leq(@1 + @3, $1, $3); }
-    | expression GE expression           { $$ = new IR::Geq(@1 + @3, $1, $3); }
-    | expression L_ANGLE expression      { $$ = new IR::Lss(@1 + @3, $1, $3); }
-    | expression R_ANGLE expression      { $$ = new IR::Grt(@1 + @3, $1, $3); }
-    | expression NE expression           { $$ = new IR::Neq(@1 + @3, $1, $3); }
-    | expression EQ expression           { $$ = new IR::Equ(@1 + @3, $1, $3); }
-    | expression BIT_AND expression      { $$ = new IR::BAnd(@1 + @3, $1, $3); }
-    | expression BIT_XOR expression      { $$ = new IR::BXor(@1 + @3, $1, $3); }
-    | expression BIT_OR expression       { $$ = new IR::BOr(@1 + @3, $1, $3); }
-    | expression PP expression           { $$ = new IR::Concat(@1 + @3, $1, $3); }
-    | expression AND expression          { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
-    | expression OR expression           { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
-    | expression QUESTION expression COLON expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
-    | expression L_ANGLE typeArgumentList R_ANGLE L_PAREN argumentList R_PAREN
+    | expression "<=" expression         { $$ = new IR::Leq(@1 + @3, $1, $3); }
+    | expression ">=" expression         { $$ = new IR::Geq(@1 + @3, $1, $3); }
+    | expression "<" expression          { $$ = new IR::Lss(@1 + @3, $1, $3); }
+    | expression ">" expression          { $$ = new IR::Grt(@1 + @3, $1, $3); }
+    | expression "!=" expression         { $$ = new IR::Neq(@1 + @3, $1, $3); }
+    | expression "==" expression         { $$ = new IR::Equ(@1 + @3, $1, $3); }
+    | expression "&" expression          { $$ = new IR::BAnd(@1 + @3, $1, $3); }
+    | expression "^" expression          { $$ = new IR::BXor(@1 + @3, $1, $3); }
+    | expression "|" expression          { $$ = new IR::BOr(@1 + @3, $1, $3); }
+    | expression "++" expression         { $$ = new IR::Concat(@1 + @3, $1, $3); }
+    | expression "&&" expression         { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
+    | expression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
+    | expression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
+    | expression "<" typeArgumentList ">" "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
     // FIXME: the previous rule has the wrong precedence, and parses with
     // precedence weaker than casts.  There is no easy way to fix this in bison.
-    | expression L_PAREN argumentList R_PAREN
+    | expression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
-    | typeRef L_PAREN argumentList R_PAREN
+    | typeRef "(" argumentList ")"
         { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
-    | L_PAREN typeRef R_PAREN expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
+    | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
     ;
 
 /*****************************************************************************/
