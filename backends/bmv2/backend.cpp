@@ -418,12 +418,13 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
     checksums = mkArrayField(&toplevel, "checksums");
     force_arith = mkArrayField(&toplevel, "force_arith");
     externs = mkArrayField(&toplevel, "extern_instances");
+    field_aliases = mkArrayField(&toplevel, "field_aliases");
 
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(this);
 
     PassManager codegen_passes = {
-        new CopyAnnotations(this),
+        new CopyAnnotations(&refMap, &blockTypeMap),
         new VisitFunctor([this](){ addMetaInformation(); }),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
@@ -436,7 +437,7 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
         // createAction must be called before convertControl
         new VisitFunctor([this](){ createActions(actions); }),
         new ConvertControl(this),
-        //new ConvertDeparser(this),
+        new ConvertDeparser(this),
     };
     //dump(tb->getProgram());
     //dump(tb->getMain());

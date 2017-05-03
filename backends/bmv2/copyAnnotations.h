@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "helpers.h"
 
 namespace BMV2 {
 
@@ -40,10 +41,14 @@ namespace BMV2 {
  * @pipeline
  * Control IngressImpl(in header h, inout metadata m);
  */
+
+/// TODO(hanw): implement transfrom pass to copy annotation to user block.
 class CopyAnnotations : public Inspector {
-    Backend* backend;
+    P4::ReferenceMap* refMap;
+    BlockTypeMap *map;
  public:
-    explicit CopyAnnotations(Backend* backend) : backend(backend)
+    explicit CopyAnnotations(P4::ReferenceMap* refMap, BlockTypeMap* map) :
+        refMap(refMap), map(map)
     { setName("CopyAnnotations"); }
     bool preorder(const IR::PackageBlock* block) override;
 };

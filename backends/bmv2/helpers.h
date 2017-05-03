@@ -55,6 +55,7 @@ public:
 
 using ErrorValue = unsigned int;
 using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
+using BlockTypeMap = std::map<const IR::Block*, const IR::Type*>;
 
 Util::IJson* nodeName(const CFG::Node* node);
 Util::JsonArray* mkArrayField(Util::JsonObject* parent, cstring name);

@@ -32,6 +32,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
+#include "copyAnnotations.h"
 
 namespace BMV2 {
 
@@ -71,6 +72,7 @@ class Backend : public PassManager {
     Util::JsonArray*                 parsers;
     Util::JsonArray*                 pipelines;
     Util::JsonArray*                 register_arrays;
+    Util::JsonArray*                 field_aliases;
 
     Util::JsonObject*                scalarsStruct;
     Util::JsonArray*                 scalarFields;
@@ -88,7 +90,7 @@ class Backend : public PassManager {
     std::set<const IR::Type*> headerInstancesCreated;
 
     /// map from block to its type as defined in architecture file
-    std::map<const IR::Block*, const IR::Type*> blockTypeMap;
+    BlockTypeMap                     blockTypeMap;
     void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
     void createJsonType(const IR::Type_StructLike* st);
 
