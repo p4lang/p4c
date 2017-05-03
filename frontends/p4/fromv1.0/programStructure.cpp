@@ -27,6 +27,7 @@ limitations under the License.
 #include "frontends/p4/p4-parse.h"
 #include "frontends/p4/reservedWords.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/tableKeyNames.h"
 
 namespace P4V1 {
 
@@ -685,15 +686,31 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
 
     if (table->reads != nullptr) {
         auto key = new IR::Key({});
-        for (size_t i=0; i < table->reads->size(); i++) {
+        for (size_t i = 0; i < table->reads->size(); i++) {
             auto e = table->reads->at(i);
             auto rt = table->reads_types.at(i);
             if (rt.name == "valid")
                 rt.name = p4lib.exactMatch.Id();
             auto ce = conv.convert(e);
-            // TODO: this should use a translation routine.  Now it relies on the fact that
-            // the spelling is the same
-            auto keyComp = new IR::KeyElement(ce, new IR::PathExpression(rt));
+
+            // If the key has a P4-14 mask, we add here a @name annotation.
+            // A mask generates a BAnd; a BAnd can only come from a mask.
+            const IR::Annotations* annos = IR::Annotations::empty;
+            if (ce->is<IR::BAnd>()) {
+                auto mask = ce->to<IR::BAnd>();
+                auto expr = mask->left;
+                if (mask->left->is<IR::Constant>())
+                    expr = mask->right;
+
+                P4::KeyNameGenerator kng(nullptr);
+                expr->apply(kng);
+                cstring anno = kng.getName(expr);
+                annos = annos->addAnnotation(IR::Annotation::nameAnnotation,
+                                             new IR::StringLiteral(key->srcInfo, anno));
+            }
+            // Here we rely on the fact that the spelling of 'rt' is
+            // the same in P4-14 and core.p4/v1model.p4.
+            auto keyComp = new IR::KeyElement(annos, ce, new IR::PathExpression(rt));
             key->push_back(keyComp);
         }
 

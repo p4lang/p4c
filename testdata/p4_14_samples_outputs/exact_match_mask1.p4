@@ -38,7 +38,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction;
         }
         key = {
-            hdr.data.f1 & 32w0xff00ff: exact;
+            hdr.data.f1 & 32w0xff00ff: exact @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }

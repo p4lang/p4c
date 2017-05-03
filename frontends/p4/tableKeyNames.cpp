@@ -18,98 +18,60 @@ limitations under the License.
 
 namespace P4 {
 
-/** Generate control plane names for simple expressions that appear in table
- * keys without `@name` annotations.
- *
- * Emit a compilation error if the IR contains complex expressions without
- * `@name` annotations.
- */
-class KeyNameGenerator : public Inspector {
-    std::map<const IR::Expression*, cstring> name;
-    const TypeMap* typeMap;
-
- public:
-    explicit KeyNameGenerator(const TypeMap* typeMap) : typeMap(typeMap)
-    { setName("KeyNameGenerator"); }
-
-    void error(const IR::Expression* expression) {
-        ::error(
-            "%1%: Complex key expression requires a @name annotation",
+void KeyNameGenerator::error(const IR::Expression* expression) {
+    ::error("%1%: Complex key expression requires a @name annotation",
             expression);
-    }
+}
 
-    void postorder(const IR::Expression* expression) override {
-        error(expression);
-    }
+void KeyNameGenerator::postorder(const IR::PathExpression* expression)
+{ name.emplace(expression, expression->path->toString()); }
 
-    void postorder(const IR::PathExpression* expression) override {
-        name.emplace(expression, expression->path->toString());
-    }
-
-    void postorder(const IR::Member* expression) override {
+void KeyNameGenerator::postorder(const IR::Member* expression) {
+    cstring fname = expression->member.name;
+    if (typeMap != nullptr) {
         auto type = typeMap->getType(expression->expr, true);
-        cstring fname = expression->member.name;
         if (type->is<IR::Type_StructLike>()) {
             auto st = type->to<IR::Type_StructLike>();
             auto field = st->getField(expression->member);
             if (field != nullptr)
                 fname = field->externalName();
         }
-        if (cstring n = getName(expression->expr))
-            name.emplace(expression, n + "." + fname);
     }
+    if (cstring n = getName(expression->expr))
+        name.emplace(expression, n + "." + fname);
+}
 
-    void postorder(const IR::ArrayIndex* expression) override {
-        cstring l = getName(expression->left);
-        cstring r = getName(expression->right);
-        if (!l || !r)
-            return;
-        name.emplace(expression, l + "[" + r + "]");
+void KeyNameGenerator::postorder(const IR::ArrayIndex* expression) {
+    cstring l = getName(expression->left);
+    cstring r = getName(expression->right);
+    if (!l || !r)
+        return;
+    name.emplace(expression, l + "[" + r + "]");
+}
+
+void KeyNameGenerator::postorder(const IR::Constant* expression)
+{ name.emplace(expression, expression->toString()); }
+
+void KeyNameGenerator::postorder(const IR::Slice* expression) {
+    cstring e0 = getName(expression->e0);
+    cstring e1 = getName(expression->e1);
+    cstring e2 = getName(expression->e2);
+    if (!e0 || !e1 || !e2)
+        return;
+    name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
+}
+
+void KeyNameGenerator::postorder(const IR::MethodCallExpression* expression) {
+    cstring m = getName(expression->method);
+    if (!m)
+        return;
+    if (!m.endsWith(IR::Type_Header::isValid) || expression->arguments->size() != 0) {
+        // This is a heuristic
+        error(expression);
+        return;
     }
-
-    void postorder(const IR::BAnd *expression) override {
-        // TODO: this exists for P4_14 to P4_16 conversion and should live in
-        // the converter, not here.
-        if (expression->right->is<IR::Constant>()) {
-            if (cstring l = getName(expression->left))
-                name.emplace(expression, l);
-        } else if (expression->left->is<IR::Constant>()) {
-            if (cstring r = getName(expression->right))
-                name.emplace(expression, r);
-        } else {
-            error(expression); }
-    }
-
-    void postorder(const IR::Constant* expression) override {
-        name.emplace(expression, expression->toString());
-    }
-
-
-    void postorder(const IR::Slice* expression) override {
-        cstring e0 = getName(expression->e0);
-        cstring e1 = getName(expression->e1);
-        cstring e2 = getName(expression->e2);
-        if (!e0 || !e1 || !e2)
-            return;
-        name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
-    }
-
-    void postorder(const IR::MethodCallExpression* expression) override {
-        cstring m = getName(expression->method);
-        if (!m)
-            return;
-        if (!m.endsWith(IR::Type_Header::isValid) || expression->arguments->size() != 0) {
-            // This is a heuristic
-            error(expression);
-            return;
-        }
-        name.emplace(expression, m + "()");
-    }
-
-    cstring getName(const IR::Expression* expression) {
-        return ::get(name, expression);
-    }
-};
+    name.emplace(expression, m + "()");
+}
 
 const IR::Node* DoTableKeyNames::postorder(IR::KeyElement* keyElement) {
     LOG3("Visiting " << getOriginal());
