@@ -196,7 +196,43 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
     }
 }
 
-// TODO(hanw): handle more than one layer of nesting.
+void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
+    for (auto f : headersStruct->fields) {
+        auto ft = backend->getTypeMap().getType(f, true);
+        auto stack = ft->to<IR::Type_Stack>();
+        if (stack == nullptr)
+            continue;
+
+        LOG3("Creating " << stack);
+        auto json = new Util::JsonObject();
+        json->emplace("name", extVisibleName(f));
+        json->emplace("id", nextId("stack"));
+        json->emplace("size", stack->getSize());
+        auto type = backend->getTypeMap().getTypeType(stack->elementType, true);
+        BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
+        auto ht = type->to<IR::Type_Header>();
+        backend->createJsonType(ht);
+
+        cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
+        json->emplace("header_type", header_type);
+        auto stackMembers = mkArrayField(json, "header_ids");
+        for (unsigned i=0; i < stack->getSize(); i++) {
+            unsigned id = nextId("headers");
+            stackMembers->append(id);
+            auto header = new Util::JsonObject();
+            cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
+            header->emplace("name", name);
+            header->emplace("id", id);
+            header->emplace("header_type", header_type);
+            header->emplace("metadata", false);
+            backend->headerInstances->append(header);
+        }
+        backend->headerStacks->append(json);
+    }
+}
+
+// TODO(hanw): complete the generic pass for nested struct and header
+// for now, use v1model header generation routine
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
 
 #ifdef NEW_HEADER_GENERATION
@@ -217,15 +253,12 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
     auto block = getContext()->parent->node;
     if (block->is<IR::Type_Control>() || block->is<IR::Type_Parser>()) {
         auto ft = backend->getTypeMap().getType(param->getNode(), true);
-        LOG1("ft type " << ft);
-        if (ft->is<IR::Type_StructLike>()) {
-            auto st = ft->to<IR::Type_StructLike>();
-            addTypesAndInstances(st, false);
-        }
         // find if struct is metadata or header
-        // addTypesAndInstances(st, bool);
-        // if is header
-        // addHeaderStack(st);
+        if (ft->is<IR::Type_Struct>()) {
+            auto st = ft->to<IR::Type_Struct>();
+            addTypesAndInstances(st, false);
+            addHeaderStacks(st);
+        }
     }
 #endif
     return false;

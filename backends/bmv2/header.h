@@ -40,6 +40,7 @@ class ConvertHeaders : public Inspector {
     void createNestedStruct(const IR::Type_StructLike *st, bool meta);
     bool hasStructLikeMember(const IR::Type_StructLike *st, bool meta);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
+    void addHeaderStacks(const IR::Type_Struct* type);
 
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Type_Parser* e) override;
