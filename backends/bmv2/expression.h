@@ -30,6 +30,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+class Backend;
+
 class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
  public:

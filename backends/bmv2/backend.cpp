@@ -347,6 +347,7 @@ void Backend::createActions(Util::JsonArray* actions) {
         auto jact = new Util::JsonObject();
         jact->emplace("name", name);
         unsigned id = nextId("actions");
+        LOG1("emplace " << action << " " << id);
         structure.ids.emplace(action, id);
         jact->emplace("id", id);
         auto params = mkArrayField(jact, "runtime_data");
@@ -443,9 +444,9 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
         new VisitFunctor([this](){ addErrors(errors); }),
         new ConvertExterns(this),
         new ConvertParser(&refMap, &typeMap, conv, parsers),
+        new VisitFunctor([this](){ createActions(actions); }),
         new ConvertControl(this),
         new ConvertDeparser(this),
-        new VisitFunctor([this](){ createActions(actions); }),
     };
     //dump(tb->getProgram());
     //dump(tb->getMain());

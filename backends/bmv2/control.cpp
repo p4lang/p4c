@@ -529,6 +529,7 @@ Control::convertTable(const CFG::TableNode* node,
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
         unsigned id = get(backend->getStructure().ids, action);
+        LOG1("look up id " << action << " " << id);
         action_ids->append(id);
         auto name = extVisibleName(action);
         actions->append(name);
