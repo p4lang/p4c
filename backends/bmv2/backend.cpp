@@ -368,6 +368,26 @@ void Backend::createActions(Util::JsonArray* actions) {
     }
 }
 
+// stdMeta and userMeta seem to change when moving from one declared control to another
+// and drive the expression converter to use the right parameter
+// still have not figured out where the metadata is actually generated!!
+void Backend::createMetadata() {
+    for ( auto parser : structure.parsers ) {
+        std::cerr << "Found " << parser << std::endl;
+        userMetadataParameter = parser->type->applyParams->getParameter(
+                                     v1model.parser.metadataParam.index);
+        stdMetadataParameter = parser->type->applyParams->getParameter(
+                                     v1model.parser.standardMetadataParam.index);
+        auto mdType = typeMap.getType(userMetadataParameter, true);
+        auto mt = mdType->to<IR::Type_Struct>();
+        if (mt == nullptr) {
+            ::error("Expected metadata %1% to be a struct", mdType);
+            return;
+        }
+        // break; // we need only one??
+    }
+}
+
 void Backend::addErrors(Util::JsonArray* errors) {
     for (const auto &p : errorCodesMap) {
         auto name = p.first->getName().name.c_str();
@@ -409,13 +429,14 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
     externs = mkArrayField(&toplevel, "extern_instances");
 
     // This visitor is used in multiple passes to convert expression to json
-    conv = new ExpressionConverter(&refMap, &typeMap, &structure, &errorCodesMap);
+    conv = new ExpressionConverter(this);
 
     PassManager codegen_passes = {
         new CopyAnnotations(this),
         new VisitFunctor([this](){ addMetaInformation(); }),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
+        new VisitFunctor([this](){ createMetadata(); }),
         new ConvertHeaders(this),
         new VisitFunctor([this](){ addLocals(); }),
         new VisitFunctor([this](){ padScalars(); }),

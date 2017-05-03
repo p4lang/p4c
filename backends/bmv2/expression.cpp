@@ -87,7 +87,8 @@ void ExpressionConverter::postorder(const IR::BoolLiteral* expression)  {
 }
 
 void ExpressionConverter::postorder(const IR::MethodCallExpression* expression)  {
-    auto instance = P4::MethodInstance::resolve(expression, refMap, typeMap);
+    auto instance = P4::MethodInstance::resolve(expression,
+                                                &backend->getRefMap(), &backend->getTypeMap());
     if (instance->is<P4::ExternMethod>()) {
         auto em = instance->to<P4::ExternMethod>();
         if (em->originalExternType->name == corelib.packetIn.name &&
@@ -95,7 +96,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             BUG_CHECK(expression->typeArguments->size() == 1,
                       "Expected 1 type parameter for %1%", em->method);
             auto targ = expression->typeArguments->at(0);
-            auto typearg = typeMap->getTypeType(targ, true);
+            auto typearg = backend->getTypeMap().getTypeType(targ, true);
             int width = typearg->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", targ);
             auto j = new Util::JsonObject();
@@ -175,11 +176,11 @@ const IR::Parameter* ExpressionConverter::enclosingParamReference(const IR::Expr
         return nullptr;
 
     auto pe = expression->to<IR::PathExpression>();
-    auto decl = refMap->getDeclaration(pe->path, true);
+    auto decl = backend->getRefMap().getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
     if (param == nullptr)
         return param;
-    if (structure->nonActionParameters.count(param) > 0)
+    if (backend->getStructure().nonActionParameters.count(param) > 0)
         return param;
     return nullptr;
 }
@@ -188,7 +189,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     // TODO: deal with references that return bool
     auto result = new Util::JsonObject();
 
-    auto parentType = typeMap->getType(expression->expr, true);
+    auto parentType = backend->getTypeMap().getType(expression->expr, true);
     cstring fieldName = expression->member.name;
     if (parentType->is<IR::Type_StructLike>()) {
         auto st = parentType->to<IR::Type_StructLike>();
@@ -199,11 +200,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     }
 
     {
-        auto type = typeMap->getType(expression, true);
+        auto type = backend->getTypeMap().getType(expression, true);
         if (type->is<IR::Type_Error>()) {
             result->emplace("type", "hexstr");
             auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
-            auto errorValue = errorCodesMap->at(decl);
+            auto errorValue = backend->getErrorCodesMap().at(decl);
             result->emplace("value", Util::toString(errorValue));
             map.emplace(expression, result);
             return;
@@ -212,7 +213,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
-        auto type = typeMap->getType(expression, true);
+        auto type = backend->getTypeMap().getType(expression, true);
         LOG1("Parameter: " << param);
         //FIXME:
 #if 0
@@ -256,7 +257,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         if (expression->expr->is<IR::Member>()) {
             // array.next.field => type: "stack_field", value: [ array, field ]
             auto mem = expression->expr->to<IR::Member>();
-            auto memtype = typeMap->getType(mem->expr, true);
+            auto memtype = backend->getTypeMap().getType(mem->expr, true);
             if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
                 auto l = get(mem->expr);
                 CHECK_NULL(l);
@@ -419,7 +420,7 @@ void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
 
 void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     // This is useful for action bodies mostly
-    auto decl = refMap->getDeclaration(expression->path, true);
+    auto decl = backend->getRefMap().getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
         LOG1("Expression: " << param << " " << expression);
 #if 0
@@ -432,20 +433,20 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
             return;
         }
 #endif
-        if (structure->nonActionParameters.find(param) !=
-            structure->nonActionParameters.end()) {
+        if (backend->getStructure().nonActionParameters.find(param) !=
+            backend->getStructure().nonActionParameters.end()) {
             map.emplace(expression, new Util::JsonValue(param->name.name));
             return;
         }
         auto result = new Util::JsonObject();
         result->emplace("type", "runtime_data");
-        unsigned paramIndex = ::get(structure->index, param);
+        unsigned paramIndex = ::get(&backend->getStructure().index, param);
         result->emplace("value", paramIndex);
         map.emplace(expression, result);
     } else if (auto var = decl->to<IR::Declaration_Variable>()) {
         LOG1("Variable to json " << var);
         auto result = new Util::JsonObject();
-        auto type = typeMap->getType(var, true);
+        auto type = backend->getTypeMap().getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
             result->emplace("type", "header");
             result->emplace("value", var->name);
@@ -498,7 +499,7 @@ void ExpressionConverter::postorder(const IR::Expression* expression)  {
 Util::IJson* ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, bool convertBool) {
     const IR::Expression *expr = e;
     if (doFixup) {
-        ArithmeticFixup af(typeMap);
+        ArithmeticFixup af(&backend->getTypeMap());
         auto r = e->apply(af);
         CHECK_NULL(r);
         expr = r->to<IR::Expression>();
@@ -543,7 +544,7 @@ Util::IJson* ExpressionConverter::convert(const IR::Expression* e, bool doFixup,
 Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
     leftValue = true;
     const IR::Expression *expr = e;
-    ArithmeticFixup af(typeMap);
+    ArithmeticFixup af(&backend->getTypeMap());
     auto r = e->apply(af);
     CHECK_NULL(r);
     expr = r->to<IR::Expression>();

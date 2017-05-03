@@ -108,7 +108,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
                     ::error("%1% invalid range key expression", k);
                 }
             } else {
-                ::error("unkown key type %1% for key %2%", matchType, k);
+                ::error("unkown key type '%1%' for key %2%", matchType, k);
             }
             matchKeys->append(key);
             keyIndex++;
@@ -163,6 +163,7 @@ cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
     cstring match_type = "invalid";
     if (mt->name.name == backend->getCoreLibrary().exactMatch.name ||
         mt->name.name == backend->getCoreLibrary().ternaryMatch.name) {
+        match_type = mt->name.name;
         if (expr->is<IR::MethodCallExpression>()) {
             auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
                                                   &backend->getRefMap(), &backend->getTypeMap());

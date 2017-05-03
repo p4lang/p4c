@@ -184,6 +184,8 @@ class ProgramParts {
     std::map<const IR::P4Action*, unsigned> ids;
     // All local variables
     std::vector<const IR::Declaration_Variable*> variables;
+    // All the parsers
+    std::vector<const IR::P4Parser *> parsers;
 
     ProgramParts() {}
     void analyze(const IR::ToplevelBlock* toplevel);
@@ -197,6 +199,7 @@ class DiscoverStructure : public Inspector {
     void postorder(const IR::ParameterList* paramList) override;
     void postorder(const IR::P4Action* action) override;
     void postorder(const IR::Declaration_Variable* decl) override;
+    void postorder(const IR::P4Parser *p) override { structure->parsers.push_back(p); }
 };
 
 }  // namespace BMV2

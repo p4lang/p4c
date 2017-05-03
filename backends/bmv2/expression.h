@@ -44,21 +44,16 @@ class ArithmeticFixup : public Transform {
 };
 
 class ExpressionConverter : public Inspector {
-    P4::ReferenceMap*  refMap;
-    P4::TypeMap*       typeMap;
+    Backend *backend;
     P4::P4CoreLibrary& corelib;
-    ProgramParts*      structure;
-    ErrorCodesMap*     errorCodesMap;
     cstring            scalarsName = "scalars";
 
     /// after translating an Expression to JSON, save the result to 'map'.
     std::map<const IR::Expression*, Util::IJson*> map;
     bool leftValue;  // true if converting a left value
  public:
-    explicit ExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                 ProgramParts* structure, ErrorCodesMap* errorCodesMap):
-            refMap(refMap), typeMap(typeMap), corelib(P4::P4CoreLibrary::instance),
-            structure(structure), errorCodesMap(errorCodesMap),
+    explicit ExpressionConverter(Backend *b) :
+            backend(b), corelib(P4::P4CoreLibrary::instance),
             leftValue(false), simpleExpressionsOnly(false) {}
     bool simpleExpressionsOnly;  // if set we fail to convert complex expressions
 

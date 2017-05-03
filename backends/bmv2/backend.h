@@ -77,6 +77,8 @@ class Backend : public PassManager {
     const unsigned                   boolWidth = 1;
     unsigned                         scalars_width = 0;
     cstring                          scalarsName;
+    const IR::Parameter*             userMetadataParameter;
+    const IR::Parameter*             stdMetadataParameter;
 
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the "scalars" metadata object, so we may need to rename
@@ -99,6 +101,7 @@ class Backend : public PassManager {
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
     void createScalars();
+    void createMetadata();
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
     void padScalars();
 
@@ -112,6 +115,7 @@ class Backend : public PassManager {
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
+    ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
     ExpressionConverter * getExpressionConverter() { return conv; };
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
