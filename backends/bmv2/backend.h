@@ -81,6 +81,7 @@ class Backend : public PassManager {
     std::set<const IR::Type_StructLike*> headerTypesCreated;
     std::set<const IR::Type*> headerInstancesCreated;
     void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
+    void createJsonType(const IR::Type_StructLike* st);
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
@@ -90,7 +91,6 @@ class Backend : public PassManager {
     void addMetaInformation();
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
-    void createJsonType(const IR::Type_StructLike* st);
     void createScalars();
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
     void padScalars();

@@ -134,9 +134,72 @@ bool ConvertHeaders::preorder(const IR::Type_Parser* prsr) {
     return false;
 }
 
+/**
+ * header generation for V1model that only handle one layer of nested struct.
+ */
+void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
+    LOG1("Adding " << type);
+    for (auto f : type->fields) {
+        auto ft = backend->getTypeMap().getType(f, true);
+        if (ft->is<IR::Type_StructLike>()) {
+            // The headers struct can not contain nested structures.
+            if (!meta && !ft->is<IR::Type_Header>()) {
+                ::error("Type %1% should only contain headers or header stacks", type);
+                return;
+            }
+            auto st = ft->to<IR::Type_StructLike>();
+            backend->createJsonType(st);
+        }
+    }
+
+    for (auto f : type->fields) {
+        auto ft = backend->getTypeMap().getType(f, true);
+        if (ft->is<IR::Type_StructLike>()) {
+            auto isCreated =
+                backend->headerInstancesCreated.find(ft) != backend->headerInstancesCreated.end();
+            if (!isCreated) {
+                auto json = new Util::JsonObject();
+                json->emplace("name", extVisibleName(f));
+                json->emplace("id", nextId("headers"));
+                json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
+                json->emplace("metadata", meta);
+                backend->headerInstances->append(json);
+                backend->headerInstancesCreated.insert(ft);
+            }
+        } else if (ft->is<IR::Type_Stack>()) {
+            // Done elsewhere
+            continue;
+        } else {
+            // Treat this field like a scalar local variable
+            auto scalarFields = backend->scalarsStruct->get("fields")->to<Util::JsonArray>();
+            CHECK_NULL(scalarFields);
+            cstring newName = backend->getRefMap().newName(type->getName() + "." + f->name);
+            if (ft->is<IR::Type_Bits>()) {
+                auto tb = ft->to<IR::Type_Bits>();
+                auto field = pushNewArray(scalarFields);
+                field->append(newName);
+                field->append(tb->size);
+                field->append(tb->isSigned);
+                backend->scalars_width += tb->size;
+                backend->scalarMetadataFields.emplace(f, newName);
+            } else if (ft->is<IR::Type_Boolean>()) {
+                auto field = pushNewArray(scalarFields);
+                field->append(newName);
+                field->append(backend->boolWidth);
+                field->append(0);
+                backend->scalars_width += backend->boolWidth;
+                backend->scalarMetadataFields.emplace(f, newName);
+            } else {
+                BUG("%1%: Unhandled type for %2%", ft, f);
+            }
+        }
+    }
+}
+
 // TODO(hanw): handle more than one layer of nesting.
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
-    /// only handle control block parameters
+
+#ifdef NEW_HEADER_GENERATION
     auto parent = getContext()->node;
     if (parent->is<IR::ParserBlock>() || parent->is<IR::ControlBlock>()) {
         auto type = backend->getTypeMap().getType(param->getNode(), true);
@@ -150,6 +213,21 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
             }
         }
     }
+#else
+    auto block = getContext()->parent->node;
+    if (block->is<IR::Type_Control>() || block->is<IR::Type_Parser>()) {
+        auto ft = backend->getTypeMap().getType(param->getNode(), true);
+        LOG1("ft type " << ft);
+        if (ft->is<IR::Type_StructLike>()) {
+            auto st = ft->to<IR::Type_StructLike>();
+            addTypesAndInstances(st, false);
+        }
+        // find if struct is metadata or header
+        // addTypesAndInstances(st, bool);
+        // if is header
+        // addHeaderStack(st);
+    }
+#endif
     return false;
 }
 

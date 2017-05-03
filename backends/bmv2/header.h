@@ -28,8 +28,6 @@ namespace BMV2 {
 
 class ConvertHeaders : public Inspector {
     BMV2::Backend*    backend;
-    std::set<const IR::Type_StructLike*> headerTypesCreated;
-    std::set<const IR::Type*> headerInstancesCreated;
 
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);
@@ -41,6 +39,7 @@ class ConvertHeaders : public Inspector {
     void createStack(const IR::Type_Stack *stack, bool meta);
     void createNestedStruct(const IR::Type_StructLike *st, bool meta);
     bool hasStructLikeMember(const IR::Type_StructLike *st, bool meta);
+    void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
 
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Type_Parser* e) override;
