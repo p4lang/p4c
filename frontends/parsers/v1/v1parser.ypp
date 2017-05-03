@@ -258,7 +258,7 @@ input: /* epsilon */
 /* 5.1 Header Type Declarations */
 /********************************/
 
-header_type_declaration: HEADER_TYPE name L_BRACE header_dec_body R_BRACE
+header_type_declaration: HEADER_TYPE name "{" header_dec_body "}"
       { $4.annotations->append(driver.takePragmasAsVector());
         driver.global->add($2, new IR::v1HeaderType(@1+@5, $2,
             new IR::Type_Struct(@1+@5, IR::ID(@2, $2),
@@ -267,16 +267,16 @@ header_type_declaration: HEADER_TYPE name L_BRACE header_dec_body R_BRACE
                                 new IR::Annotations(*$4.annotations), *$4.fields))); }
 ;
 
-header_dec_body: FIELDS L_BRACE field_declarations R_BRACE opt_length opt_max_length
+header_dec_body: FIELDS "{" field_declarations "}" opt_length opt_max_length
       { $$ = $3; }
 ;
 
 field_declarations: /* epsilon */
       { $$.annotations = new IR::Vector<IR::Annotation>;
         $$.fields = new IR::IndexedVector<IR::StructField>; }
-    | field_declarations name COLON bit_width SEMICOLON
+    | field_declarations name ":" bit_width ";"
       { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2), $4)); }
-    | field_declarations type name SEMICOLON
+    | field_declarations type name ";"
       { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
 ;
 
@@ -286,17 +286,17 @@ bit_width:
             $$ = IR::Type::Bits::get(@1, $1->asInt(), $2 & 1);
         else
             $$ = IR::Type::Unknown::get(); }
-    | MUL opt_field_modifiers
+    | "*" opt_field_modifiers
       { $$ = IR::Type::Varbits::get(); }
 ;
 
 opt_field_modifiers: /* epsilon */ { $$ = 0;}
-    | L_PAREN attributes R_PAREN { $$ = $2; }
+    | "(" attributes ")" { $$ = $2; }
 ;
 
 attributes:
       attrib { $$ = $1; }
-    | attributes COMMA attrib { $$ = $1 | $3; }
+    | attributes "," attrib { $$ = $1 | $3; }
 ;
 
 attrib:
@@ -306,19 +306,19 @@ attrib:
 ;
 
 opt_length: /* epsilon */
-    | LENGTH COLON expression SEMICOLON  /* const_expression or name */
+    | LENGTH ":" expression ";"  /* const_expression or name */
       { $<HeaderType>-1.annotations->emplace_back(@1+@4, "length",
               IR::Vector<IR::Expression>($3)); }
     ;
 
 opt_max_length: /* epsilon */
-    | MAX_LENGTH COLON const_expression SEMICOLON
+    | MAX_LENGTH ":" const_expression ";"
       { $<HeaderType>-2.annotations->emplace_back(@1+@4, "max_length",
               IR::Vector<IR::Expression>($3)); }
     ;
 
 type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
-    | BIT L_ANGLE INTEGER R_ANGLE
+    | BIT "<" INTEGER ">"
       { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt()); }
     | BLOCK { $$ = IR::Type_Block::get(); }
     | BOOL { $$ = IR::Type_Boolean::get(); }
@@ -326,7 +326,7 @@ type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
     | EXPRESSION { $$ = IR::Type_Expression::get(); }
     | FIELD_LIST_CALCULATION { $$ = IR::Type_FieldListCalculation::get(); }
     | INT { $$ = new IR::Type_InfInt; }
-    | INT L_ANGLE INTEGER R_ANGLE
+    | INT "<" INTEGER ">"
       { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
     | METER { $$ = IR::Type_Meter::get(); }
     | STRING { $$ = IR::Type_String::get(); }
@@ -339,10 +339,10 @@ type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
 /************************************/
 
 header_instance:
-      HEADER name name SEMICOLON
+      HEADER name name ";"
       { driver.global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3),
                                               driver.takePragmasAsAnnotations())); }
-    | HEADER name name L_BRACKET const_expression R_BRACKET SEMICOLON
+    | HEADER name name "[" const_expression "]" ";"
       { driver.global->add($3, new IR::HeaderStack(@1+@7, IR::ID(@2, $2), IR::ID(@3, $3),
                                                    driver.takePragmasAsAnnotations(),
                                                    $5 ? $5->asLong() : 0));
@@ -350,17 +350,17 @@ header_instance:
     ;
 
 metadata_instance:
-      METADATA name name opt_metadata_initializer SEMICOLON
+      METADATA name name opt_metadata_initializer ";"
       { driver.global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3),
                                                 driver.takePragmasAsAnnotations())); }
     ;
 
 opt_metadata_initializer: /* epsilon */
-    | L_BRACE metadata_field_init_list R_BRACE
+    | "{" metadata_field_init_list "}"
     ;
 
 metadata_field_init_list: /* empty */
-    | metadata_field_init_list name COLON const_expression SEMICOLON
+    | metadata_field_init_list name ":" const_expression ";"
       { $4 = nullptr; }
     ;
 
@@ -369,17 +369,17 @@ metadata_field_init_list: /* empty */
 /*******************/
 
 field_list_declaration:
-      FIELD_LIST name L_BRACE field_list_entries R_BRACE
+      FIELD_LIST name "{" field_list_entries "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
-    | FIELD_LIST name SEMICOLON
+    | FIELD_LIST name ";"
       /* FIXME -- empty field list? or (unneeded) forward declaration? */
 ;
 
 field_list_entries:
       /* epsilon */ { $$ = new IR::FieldList(driver.takePragmasAsAnnotations()); }
-    | field_list_entries expression SEMICOLON /* const_expression or field_ref or name */
+    | field_list_entries expression ";" /* const_expression or field_ref or name */
       { ($$=$1)->fields.push_back($2); }
-    | field_list_entries PAYLOAD SEMICOLON
+    | field_list_entries PAYLOAD ";"
       { ($$=$1)->payload = true; }
     ;
 
@@ -388,51 +388,51 @@ field_list_entries:
 /***************************************************/
 
 field_list_calculation_declaration:
-      FIELD_LIST_CALCULATION name L_BRACE field_list_calculation_body R_BRACE
+      FIELD_LIST_CALCULATION name "{" field_list_calculation_body "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
 ;
 
 field_list_calculation_body: /* epsilon */
       { $$ = new IR::FieldListCalculation(driver.takePragmasAsAnnotations()); }
-    | field_list_calculation_body INPUT L_BRACE field_list_list R_BRACE
+    | field_list_calculation_body INPUT "{" field_list_list "}"
       { if ($1->input)
             ::error("%s: multiple 'input' in field_list_calculation", @2);
         ($$=$1)->input = $4; }
-    | field_list_calculation_body ALGORITHM COLON name SEMICOLON
+    | field_list_calculation_body ALGORITHM ":" name ";"
       { if ($1->algorithm)
             ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
         ($$=$1)->algorithm = IR::ID(@4, $4); }
-    | field_list_calculation_body OUTPUT_WIDTH COLON const_expression SEMICOLON
+    | field_list_calculation_body OUTPUT_WIDTH ":" const_expression ";"
       { if ($1->output_width)
             ::error("%s: multiple 'output_width' in field_list_calculation", @2);
         ($$=$1)->output_width = $4 ? $4->asInt() : 0; }
-    | field_list_calculation_body error SEMICOLON { $$ = $1; }
+    | field_list_calculation_body error ";" { $$ = $1; }
     | field_list_calculation_body error { $$ = $1; }
 ;
 
 field_list_list: /* epsilon */
       { $$ = new IR::NameList; }
-    | field_list_list name SEMICOLON
+    | field_list_list name ";"
       { ($$=$1)->names.emplace_back(@2, $2); }
 ;
 
 calculated_field_declaration:
-      CALCULATED_FIELD field_ref L_BRACE update_verify_spec_list R_BRACE
+      CALCULATED_FIELD field_ref "{" update_verify_spec_list "}"
       { $4->field = $2; $4->srcInfo = @1 + @5; driver.global->add($2->toString(), $4); }
 ;
 
 update_verify_spec_list: /* epsilon */
       { $$ = new IR::CalculatedField(driver.takePragmasAsAnnotations()); }
-    | update_verify_spec_list UPDATE name opt_condition SEMICOLON
+    | update_verify_spec_list UPDATE name opt_condition ";"
       { ($$=$1)->specs.emplace_back(@1+@3, true, IR::ID(@3, $3), $4); }
-    | update_verify_spec_list VERIFY name opt_condition SEMICOLON
+    | update_verify_spec_list VERIFY name opt_condition ";"
       { ($$=$1)->specs.emplace_back(@1+@3, false, IR::ID(@3, $3), $4); }
-    | update_verify_spec_list error SEMICOLON { $$ = $1; }
+    | update_verify_spec_list error ";" { $$ = $1; }
     | update_verify_spec_list error { $$ = $1; }
 ;
 
 opt_condition: /* epsilon */ { $$ = nullptr; }
-    | IF L_PAREN expression R_PAREN { $$ = $3; }
+    | IF "(" expression ")" { $$ = $3; }
 ;
 
 /************************/
@@ -440,43 +440,42 @@ opt_condition: /* epsilon */ { $$ = nullptr; }
 /************************/
 
 parser_function_declaration:
-      PARSER name L_BRACE parser_statement_list R_BRACE
+      PARSER name "{" parser_statement_list "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
 ;
 
 parser_statement_list: /* epsilon */
       { $$ = new IR::V1Parser(driver.takePragmasAsAnnotations()); }
-    | parser_statement_list EXTRACT L_PAREN header_ref R_PAREN SEMICOLON
+    | parser_statement_list EXTRACT "(" header_ref ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
-    | parser_statement_list SET_METADATA L_PAREN field_ref COMMA expression R_PAREN SEMICOLON
+    | parser_statement_list SET_METADATA "(" field_ref "," expression ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@7, $2, $4, $6)); }
-    | parser_statement_list field_ref ASSIGN expression SEMICOLON
+    | parser_statement_list field_ref "=" expression ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@3, "set_metadata", $2, $4)); }
-    | parser_statement_list RETURN name SEMICOLON
+    | parser_statement_list RETURN name ";"
       { ($$=$1)->default_return = IR::ID(@3, $3); }
-    | parser_statement_list RETURN SELECT L_PAREN expression_list R_PAREN
-      L_BRACE case_entry_list R_BRACE
-        { ($$=$1)->select = $5; $$->cases = $8; }
-    | parser_statement_list PARSE_ERROR name SEMICOLON
+    | parser_statement_list RETURN SELECT "(" expression_list ")" "{" case_entry_list "}"
+      { ($$=$1)->select = $5; $$->cases = $8; }
+    | parser_statement_list PARSE_ERROR name ";"
       { ($$=$1)->parse_error = IR::ID(@3, $3); }
-    | parser_statement_list DROP SEMICOLON
+    | parser_statement_list DROP ";"
       { ($$=$1)->drop = true; }
-    | parser_statement_list error SEMICOLON { $$ = $1; }
+    | parser_statement_list error ";" { $$ = $1; }
     | parser_statement_list error { $$ = $1; }
 ;
 
 case_entry_list: /* epsilon */ { $$ = new IR::Vector<IR::CaseEntry>; }
-    | case_entry_list case_value_list COLON name SEMICOLON
+    | case_entry_list case_value_list ":" name ";"
       { $2->action = IR::ID(@4, $4); $1->srcInfo += @2 + @4; ($$=$1)->push_back($2); }
-    | case_entry_list case_value_list COLON PARSE_ERROR SEMICOLON
+    | case_entry_list case_value_list ":" PARSE_ERROR ";"
       { $2->action = IR::ID(@4, $4); $1->srcInfo += @2 + @4; ($$=$1)->push_back($2); }
 ;
 
 case_value_list:
       case_value { $$ = new IR::CaseEntry(@1);
                    $$->values.emplace_back($1); }
-    | case_value_list COMMA case_value { ($$=$1)->values.emplace_back($3);
-                                         $$->srcInfo += @3; }
+    | case_value_list "," case_value { ($$=$1)->values.emplace_back($3);
+                                       $$->srcInfo += @3; }
     ;
 
 case_value:
@@ -493,7 +492,7 @@ case_value:
 /*************************/
 
 parser_exception_declaration:
-      PARSER_EXCEPTION name L_BRACE parser_statement_list R_BRACE
+      PARSER_EXCEPTION name "{" parser_statement_list "}"
         { driver.clearPragmas(); }
 ;
 
@@ -501,32 +500,32 @@ parser_exception_declaration:
 /* 10.1 Counters */
 /*****************/
 
-counter_declaration: COUNTER name L_BRACE counter_spec_list R_BRACE
+counter_declaration: COUNTER name "{" counter_spec_list "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
 ;
 
 counter_spec_list:
-      TYPE COLON name SEMICOLON
+      TYPE ":" name ";"
       { ($$ = new IR::Counter(driver.takePragmasAsAnnotations()))->settype($3); }
-    | counter_spec_list DIRECT COLON name SEMICOLON
+    | counter_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
             ::error("%s: Can't attach counter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = true; }
-    | counter_spec_list STATIC COLON name SEMICOLON
+    | counter_spec_list STATIC ":" name ";"
       { if (($$=$1)->table)
             ::error("%s: Can't attach counter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = false; }
-    | counter_spec_list INSTANCE_COUNT COLON const_expression SEMICOLON
+    | counter_spec_list INSTANCE_COUNT ":" const_expression ";"
       { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | counter_spec_list MAX_WIDTH COLON const_expression SEMICOLON
+    | counter_spec_list MAX_WIDTH ":" const_expression ";"
       { ($$=$1)->max_width = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | counter_spec_list MIN_WIDTH COLON const_expression SEMICOLON
+    | counter_spec_list MIN_WIDTH ":" const_expression ";"
       { ($$=$1)->min_width = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | counter_spec_list SATURATING SEMICOLON
+    | counter_spec_list SATURATING ";"
       { ($$=$1)->saturating = true; }
-    | counter_spec_list error SEMICOLON { $$ = $1; }
+    | counter_spec_list error ";" { $$ = $1; }
     | counter_spec_list error { $$ = $1; }
 ;
 
@@ -534,33 +533,33 @@ counter_spec_list:
 /* 10.2 Meters */
 /***************/
 
-meter_declaration : METER name L_BRACE meter_spec_list R_BRACE
+meter_declaration : METER name "{" meter_spec_list "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5;
         driver.global->add($2, $4); }
 ;
 
 meter_spec_list:
-      TYPE COLON name SEMICOLON
+      TYPE ":" name ";"
       { ($$ = new IR::Meter(driver.takePragmasAsAnnotations()))->settype($3); }
-    | meter_spec_list RESULT COLON field_ref SEMICOLON
+    | meter_spec_list RESULT ":" field_ref ";"
       { ($$=$1)->result = $4; }
-    | meter_spec_list PRE_COLOR COLON field_ref SEMICOLON
+    | meter_spec_list PRE_COLOR ":" field_ref ";"
       { ($$=$1)->pre_color = $4; }
-    | meter_spec_list DIRECT COLON name SEMICOLON
+    | meter_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
             ::error("%s: Can't attach meter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = true; }
-    | meter_spec_list STATIC COLON name SEMICOLON
+    | meter_spec_list STATIC ":" name ";"
       { if (($$=$1)->table)
             ::error("%s: Can't attach meter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = false; }
-    | meter_spec_list INSTANCE_COUNT COLON const_expression SEMICOLON
+    | meter_spec_list INSTANCE_COUNT ":" const_expression ";"
       { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | meter_spec_list IMPLEMENTATION COLON name SEMICOLON
+    | meter_spec_list IMPLEMENTATION ":" name ";"
       { ($$=$1)->implementation = IR::ID(@4, $4); }
-    | meter_spec_list error SEMICOLON { $$ = $1; }
+    | meter_spec_list error ";" { $$ = $1; }
     | meter_spec_list error { $$ = $1; }
 ;
 
@@ -568,36 +567,36 @@ meter_spec_list:
 /* 10.2 Registers */
 /******************/
 
-register_declaration: REGISTER name L_BRACE register_spec_list R_BRACE
+register_declaration: REGISTER name "{" register_spec_list "}"
       { $4->name = IR::ID(@2, $2);
         $4->srcInfo = @1 + @5;
         driver.global->add($2, $4); }
 ;
 
 register_spec_list:
-      WIDTH COLON const_expression SEMICOLON
+      WIDTH ":" const_expression ";"
       { $$ = new IR::Register(driver.takePragmasAsAnnotations());
         $$->width = $3 ? $3->asLong() : 0;
         $3 = nullptr; }
-    | LAYOUT COLON name SEMICOLON
+    | LAYOUT ":" name ";"
       { $$ = new IR::Register(driver.takePragmasAsAnnotations());
         $$->layout = IR::ID(@3, $3); }
-    | register_spec_list DIRECT COLON name SEMICOLON
+    | register_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
             ::error("%s: Can't attach register to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = true; }
-    | register_spec_list STATIC COLON name SEMICOLON
+    | register_spec_list STATIC ":" name ";"
       { if (($$=$1)->table)
             ::error("%s: Can't attach register to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = false; }
-    | register_spec_list INSTANCE_COUNT COLON const_expression SEMICOLON
+    | register_spec_list INSTANCE_COUNT ":" const_expression ";"
       { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | register_spec_list ATTRIBUTES COLON attributes SEMICOLON
+    | register_spec_list ATTRIBUTES ":" attributes ";"
       { ($$=$1)->signed_ = ($4 & 1) ? true : false;
         $1->saturating = ($4 & 2) ? true : false; }
-    | register_spec_list error SEMICOLON { $$ = $1; }
+    | register_spec_list error ";" { $$ = $1; }
     | register_spec_list error { $$ = $1; }
 ;
 
@@ -606,13 +605,13 @@ register_spec_list:
 /**************************/
 
 primitive_action_declaration:
-    PRIMITIVE_ACTION name L_PAREN name_list R_PAREN SEMICOLON
+    PRIMITIVE_ACTION name "(" name_list ")" ";"
       { driver.clearPragmas(); $4 = nullptr; }
 ;
 
 name_list: name { $$ = new IR::NameList(@1, $1); }
-    | name_list COMMA name { ($$=$1)->names.emplace_back(@3, $3);
-                             $$->srcInfo = @1 + @3; }
+    | name_list "," name { ($$=$1)->names.emplace_back(@3, $3);
+                           $$->srcInfo = @1 + @3; }
     ;
 
 opt_name_list: /* epsilon */ { $$ = nullptr; }
@@ -624,7 +623,7 @@ opt_name_list: /* epsilon */ { $$ = nullptr; }
 /***************************/
 
 action_function_declaration:
-      ACTION name L_PAREN opt_name_list R_PAREN action_function_body
+      ACTION name "(" opt_name_list ")" action_function_body
       { $6->name = IR::ID(@2, $2);
         if ($4) for (auto &arg : $4->names)
             $6->args.push_back(new IR::ActionArg($2, arg));
@@ -634,19 +633,19 @@ action_function_declaration:
 ;
 
 action_function_body:
-      L_BRACE action_statement_list R_BRACE  { $$ = $2; }
-    | L_BRACE action_statement_list error R_BRACE  { $$ = $2; }
+      "{" action_statement_list "}"        { $$ = $2; }
+    | "{" action_statement_list error "}"  { $$ = $2; }
 ;
 
 action_statement_list: /* epsilon */
       { $$ = new IR::ActionFunction(driver.takePragmasAsAnnotations()); }
-    | action_statement_list name L_PAREN opt_expression_list R_PAREN SEMICOLON
+    | action_statement_list name "(" opt_expression_list ")" ";"
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2, $4)); }
-    | action_statement_list field_ref ASSIGN expression SEMICOLON
+    | action_statement_list field_ref "=" expression ";"
       { ($$ = $1)->action.push_back(new IR::Primitive(@3, "modify_field", $2, $4)); }
-    | action_statement_list field_ref L_PAREN opt_expression_list R_PAREN SEMICOLON
+    | action_statement_list field_ref "(" opt_expression_list ")" ";"
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2->member, $2->expr, $4)); }
-    | action_statement_list error SEMICOLON
+    | action_statement_list error ";"
       { $$ = $1; }
 ;
 
@@ -654,39 +653,36 @@ action_statement_list: /* epsilon */
 /* Action Profile Definitions */
 /***************************/
 
-action_profile_declaration: ACTION_PROFILE name L_BRACE action_profile_body R_BRACE
+action_profile_declaration: ACTION_PROFILE name "{" action_profile_body "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
     ;
 
 action_profile_body: /* epsilon */
       { $$ = new IR::ActionProfile(driver.takePragmasAsAnnotations()); }
-    | action_profile_body ACTIONS L_BRACE action_list R_BRACE
+    | action_profile_body ACTIONS "{" action_list "}"
       { ($$=$1)->actions = $4->names; $4 = nullptr; }
-    | action_profile_body SIZE COLON const_expression SEMICOLON
+    | action_profile_body SIZE ":" const_expression ";"
       { ($$=$1)->size = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | action_profile_body DYNAMIC_ACTION_SELECTION COLON name SEMICOLON
+    | action_profile_body DYNAMIC_ACTION_SELECTION ":" name ";"
       { ($$=$1)->selector = IR::ID(@4, $4); }
     ;
 
-action_selector_declaration: ACTION_SELECTOR name L_BRACE action_selector_body R_BRACE
+action_selector_declaration: ACTION_SELECTOR name "{" action_selector_body "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
     ;
 
 action_selector_body: /* epsilon */
       { $$ = new IR::ActionSelector(driver.takePragmasAsAnnotations()); }
-    | action_selector_body SELECTION_KEY COLON name SEMICOLON
-      { ($$=$1)->key = IR::ID(@4, $4); }
-    | action_selector_body SELECTION_MODE COLON name SEMICOLON
-      { ($$=$1)->mode = IR::ID(@4, $4); }
-    | action_selector_body SELECTION_TYPE COLON name SEMICOLON
-      { ($$=$1)->type = IR::ID(@4, $4); }
+    | action_selector_body SELECTION_KEY ":" name ";" { ($$=$1)->key = IR::ID(@4, $4); }
+    | action_selector_body SELECTION_MODE ":" name ";" { ($$=$1)->mode = IR::ID(@4, $4); }
+    | action_selector_body SELECTION_TYPE ":" name ";" { ($$=$1)->type = IR::ID(@4, $4); }
     ;
 
 /*************************/
 /* 13 Table Declarations */
 /*************************/
 
-table_declaration: TABLE name L_BRACE table_body R_BRACE
+table_declaration: TABLE name "{" table_body "}"
       { $4->name = IR::ID(@2, $2);
         $4->srcInfo = @1 + @5;
         driver.global->add($2, $4); }
@@ -694,43 +690,42 @@ table_declaration: TABLE name L_BRACE table_body R_BRACE
 
 table_body: /* epsilon */
       { $$ = new IR::V1Table(driver.takePragmasAsAnnotations()); }
-    | table_body READS L_BRACE field_match_list R_BRACE
+    | table_body READS "{" field_match_list "}"
       { ($$=$1)->reads = $4; }
-    | table_body ACTIONS L_BRACE action_list R_BRACE
+    | table_body ACTIONS "{" action_list "}"
       { ($$=$1)->actions = $4->names; $4 = nullptr; }
-    | table_body ACTION_PROFILE COLON name SEMICOLON
+    | table_body ACTION_PROFILE ":" name ";"
       { ($$=$1)->action_profile = IR::ID(@4, $4); }
-    | table_body MIN_SIZE COLON const_expression SEMICOLON
+    | table_body MIN_SIZE ":" const_expression ";"
       { ($$=$1)->min_size = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | table_body MAX_SIZE COLON const_expression SEMICOLON
+    | table_body MAX_SIZE ":" const_expression ";"
       { ($$=$1)->max_size = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | table_body SIZE COLON const_expression SEMICOLON
+    | table_body SIZE ":" const_expression ";"
       { ($$=$1)->size = $4 ? $4->asLong() : 0; $4 = nullptr; }
-    | table_body DEFAULT_ACTION COLON name SEMICOLON
+    | table_body DEFAULT_ACTION ":" name ";"
       { ($$=$1)->default_action = IR::ID(@4, $4); }
-    | table_body DEFAULT_ACTION COLON name
-      L_PAREN opt_expression_list R_PAREN SEMICOLON
+    | table_body DEFAULT_ACTION ":" name "(" opt_expression_list ")" ";"
         { ($$=$1)->default_action = IR::ID(@4, $4);
           $$->default_action_args = $6; }
-    | table_body IDENTIFIER COLON expression SEMICOLON
+    | table_body IDENTIFIER ":" expression ";"
       { auto exp = new IR::ExpressionValue(@4, $4);
         auto prop = new IR::Property(@2, IR::ID(@2, $2), exp, false);
         $1->addProperty(prop);
         $$ = $1; }
-    | table_body error SEMICOLON { $$=$1; }
+    | table_body error ";" { $$=$1; }
     | table_body error { $$=$1; }
 ;
 
 field_match_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>(); }
-    | field_match_list field_or_masked_ref COLON name SEMICOLON
+    | field_match_list field_or_masked_ref ":" name ";"
       { ($$=$1)->push_back($2);
         $$->srcInfo += @2 + @4;
         $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
-    | field_match_list header_ref COLON VALID SEMICOLON
+    | field_match_list header_ref ":" VALID ";"
       { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
         $$->srcInfo += @2 + @4;
         $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
-    | field_match_list error SEMICOLON { $$ = $1; }
+    | field_match_list error ";" { $$ = $1; }
     | field_match_list error { $$ = $1; }
 ;
 
@@ -738,52 +733,51 @@ field_or_masked_ref:
       field_ref { $$ = $1; }
     | field_ref MASK const_expression
       { $$ = new IR::Mask(@2, $1, $3); }
-    | header_ref DOT VALID
+    | header_ref "." VALID
       { $$ = new IR::Primitive(@1+@3, $3, $1); }
-    | header_ref DOT VALID MASK const_expression
+    | header_ref "." VALID MASK const_expression
       { $$ = new IR::Mask(@4, new IR::Primitive(@1+@3, $3, $1), $5); }
 ;
 
 action_list: /* epsilon */ { $$ = new IR::NameList(); }
-    | action_list name SEMICOLON { ($$=$1)->names.emplace_back(@2, $2); }
+    | action_list name ";" { ($$=$1)->names.emplace_back(@2, $2); }
 ;
 
 /*****************************************/
 /* 14 Packet Processing and Control Flow */
 /*****************************************/
 
-control_function_declaration: CONTROL name L_BRACE control_statement_list R_BRACE
+control_function_declaration: CONTROL name "{" control_statement_list "}"
       { driver.global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4,
                                                  driver.takePragmasAsAnnotations())); }
 ;
 
 control_statement_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>; }
-    | control_statement_list APPLY L_PAREN name R_PAREN SEMICOLON
+    | control_statement_list APPLY "(" name ")" ";"
       { ($$=$1)->push_back(new IR::Apply(@2+@5, IR::ID(@4, $4))); }
-    | control_statement_list APPLY L_PAREN name R_PAREN L_BRACE apply_case_list R_BRACE
+    | control_statement_list APPLY "(" name ")" "{" apply_case_list "}"
       { $7->name = IR::ID(@4, $4); $7->srcInfo = @2+@5; ($$=$1)->push_back($7); }
-    | control_statement_list IF L_PAREN expression R_PAREN
-      L_BRACE control_statement_list R_BRACE opt_else
+    | control_statement_list IF "(" expression ")" "{" control_statement_list "}" opt_else
         { ($$=$1)->push_back(new IR::If(@2+@4, $4, $7, $9)); }
-    | control_statement_list name L_PAREN R_PAREN SEMICOLON
+    | control_statement_list name "(" ")" ";"
       { ($$=$1)->push_back(new IR::Primitive(@2+@4, $2)); }
-    | control_statement_list error SEMICOLON { $$ = $1; }
+    | control_statement_list error ";" { $$ = $1; }
     | control_statement_list error { $$ = $1; }
 ;
 
 opt_else: /* epsilon */ { $$ = nullptr; }
-    | ELSE L_BRACE control_statement_list R_BRACE
+    | ELSE "{" control_statement_list "}"
       { $$ = $3; }
-    | ELSE IF L_PAREN expression R_PAREN L_BRACE control_statement_list R_BRACE opt_else
+    | ELSE IF "(" expression ")" "{" control_statement_list "}" opt_else
       { $$ = new IR::Vector<IR::Expression>(new IR::If(@2+@5, $4, $7, $9)); }
 ;
 
 apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
-    | apply_case_list name_list L_BRACE control_statement_list R_BRACE
+    | apply_case_list name_list "{" control_statement_list "}"
         { for (auto name : $2->names)
               $1->actions[name] = $4;
           $$ = $1; }
-    | apply_case_list DEFAULT L_BRACE control_statement_list R_BRACE
+    | apply_case_list DEFAULT "{" control_statement_list "}"
         { ($$=$1)->actions["default"] = $4; }
 ;
 
@@ -791,7 +785,7 @@ apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
 /* blackbox */
 /************/
 
-blackbox_type_declaration: BLACKBOX_TYPE name L_BRACE blackbox_body R_BRACE
+blackbox_type_declaration: BLACKBOX_TYPE name "{" blackbox_body "}"
       { driver.global->add($2,
           new IR::Type_Extern(@1+@5, IR::ID(@2, $2), *$4.methods,
                               *$4.attribs, driver.takePragmasAsAnnotations())); }
@@ -800,32 +794,31 @@ blackbox_type_declaration: BLACKBOX_TYPE name L_BRACE blackbox_body R_BRACE
 blackbox_body: /* epsilon */ {
             $$.methods = new IR::Vector<IR::Method>;
             $$.attribs = new IR::NameMap<IR::Attribute, ordered_map>; }
-    | blackbox_body ATTRIBUTE name L_BRACE blackbox_attribute R_BRACE
+    | blackbox_body ATTRIBUTE name "{" blackbox_attribute "}"
           { ($$=$1).attribs->addUnique($3, $5); }
-    | blackbox_body METHOD name L_PAREN opt_argument_list R_PAREN SEMICOLON
+    | blackbox_body METHOD name "(" opt_argument_list ")" ";"
           { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
                 new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5))); }
-    | blackbox_body METHOD name L_PAREN opt_argument_list R_PAREN
-      L_BRACE blackbox_method R_BRACE
+    | blackbox_body METHOD name "(" opt_argument_list ")" "{" blackbox_method "}"
           { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
                 new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5), $8)); }
     | blackbox_body error { $$ = $1; }
 ;
 
 blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute(@-1, $<cstring>-1); }
-    | blackbox_attribute TYPE COLON type SEMICOLON { ($$=$1)->type = $4; }
-    | blackbox_attribute EXPRESSION_LOCAL_VARIABLES L_BRACE opt_locals_list R_BRACE
+    | blackbox_attribute TYPE ":" type ";" { ($$=$1)->type = $4; }
+    | blackbox_attribute EXPRESSION_LOCAL_VARIABLES "{" opt_locals_list "}"
         { ($$=$1)->locals = $4; }
-    | blackbox_attribute OPTIONAL SEMICOLON
+    | blackbox_attribute OPTIONAL ";"
         { ($$=$1)->optional = true; }
-    | blackbox_attribute error SEMICOLON { $$ = $1; }
+    | blackbox_attribute error ";" { $$ = $1; }
     | blackbox_attribute error { $$ = $1; }
 ;
 
 blackbox_method: { $$ = new IR::Annotations; }
-    | blackbox_method READS L_BRACE opt_name_list R_BRACE
+    | blackbox_method READS "{" opt_name_list "}"
         { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
-    | blackbox_method WRITES L_BRACE opt_name_list R_BRACE
+    | blackbox_method WRITES "{" opt_name_list "}"
         { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
 ;
 
@@ -835,8 +828,8 @@ opt_argument_list:
 ;
 
 argument_list:
-      argument                          { $$ = new IR::ParameterList({$1}); }
-    | argument_list COMMA argument      { ($$=$1)->push_back($3); }
+      argument                        { $$ = new IR::ParameterList({$1}); }
+    | argument_list "," argument      { ($$=$1)->push_back($3); }
 ;
 
 argument:
@@ -850,8 +843,8 @@ inout: IN { $$ = IR::Direction::In; } | OUT { $$ = IR::Direction::Out; } ;
 
 opt_locals_list: { $$ = nullptr; } | locals_list ;
 locals_list:
-      local_var  { ($$ = new IR::AttribLocals())->locals[$1->name] = $1; }
-    | locals_list COMMA local_var  { ($$ = $1)->locals[$3->name] = $3; }
+      local_var                  { ($$ = new IR::AttribLocals())->locals[$1->name] = $1; }
+    | locals_list "," local_var  { ($$ = $1)->locals[$3->name] = $3; }
 ;
 local_var:
       name              { $$ = new IR::AttribLocal(@1, $1); }
@@ -859,29 +852,29 @@ local_var:
 ;
 
 blackbox_instantiation:
-      BLACKBOX name name SEMICOLON
+      BLACKBOX name name ";"
         { driver.global->add($3,
             new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
                                          new IR::Type_Name($2),
                                          new IR::Vector<IR::Expression>)); }
-    | BLACKBOX name name L_BRACE
+    | BLACKBOX name name "{"
         { $<IR::Declaration_Instance*>$ =
             new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
                                          new IR::Type_Name($2),
                                          new IR::Vector<IR::Expression>); }
-      blackbox_config R_BRACE
+      blackbox_config "}"
         { driver.global->add($3, $6); }
 ;
 
 blackbox_config: /* epsilon */ { $$ = $<IR::Declaration_Instance*>0; }
-    | blackbox_config name COLON expressions SEMICOLON
+    | blackbox_config name ":" expressions ";"
           { const IR::PropertyValue *pv;
             if ($4->size() == 1)
                 pv = new IR::ExpressionValue($4->front());
             else
                 pv = new IR::ExpressionListValue(std::move(*$4));
             ($$=$1)->properties.add($2, new IR::Property(@2+@4, $2, pv, false)); }
-    | blackbox_config name L_BRACE expressions R_BRACE
+    | blackbox_config name "{" expressions "}"
           { auto *pv = new IR::ExpressionListValue(std::move(*$4));
             ($$=$1)->properties.add($2, new IR::Property(@2+@4, $2, pv, false)); }
     ;
@@ -890,7 +883,7 @@ expressions: /* epsilon */
       { $$ = new IR::Vector<IR::Expression>; }
     | expressions expression %prec EXPRLIST
       { ($$=$1)->push_back($2); $$->srcInfo += @2; }
-    | expressions COMMA expression %prec EXPRLIST
+    | expressions "," expression %prec EXPRLIST
       { ($$=$1)->push_back($3); $$->srcInfo += @3; }
 ;
 
@@ -898,7 +891,7 @@ pragma_operands: /* epsilon */
       { $$ = new IR::Vector<IR::Expression>; }
     | pragma_operands pragma_operand
       { ($$=$1)->push_back($2); $$->srcInfo += @2; }
-    | pragma_operands COMMA pragma_operand
+    | pragma_operands "," pragma_operand
       { ($$=$1)->push_back($3); $$->srcInfo += @3; }
 ;
 
@@ -906,7 +899,7 @@ pragma_operand:
       INTEGER { $$ = parseConstant(@1, $1, 0); }
     | STRING_LITERAL { $$ = new IR::StringLiteral(@1, $1); }
     | name { $$ = new IR::StringLiteral(@1, $1); }
-    | name DOT name { $$ = new IR::StringLiteral(@1+@3, $1 + '.' + $3); }
+    | name "." name { $$ = new IR::StringLiteral(@1+@3, $1 + '.' + $3); }
 ;
 
 /***************/
@@ -914,39 +907,39 @@ pragma_operand:
 /***************/
 
 expression:
-      VALID L_PAREN header_or_field_ref R_PAREN { $$ = new IR::Primitive(@1+@4, $1, $3); }
-    | CURRENT L_PAREN const_expression COMMA const_expression R_PAREN
+      VALID "(" header_or_field_ref ")" { $$ = new IR::Primitive(@1+@4, $1, $3); }
+    | CURRENT "(" const_expression "," const_expression ")"
         { $$ = new IR::Primitive(@1+@6, $1, $3, $5); }
     | field_ref { $$ = $1; }
     | header_ref { $$ = $1; }
-    | header_ref DOT VALID { $$ = new IR::Primitive(@1+@3, $3, $1); }
-    | LATEST DOT name { $$ = new IR::Member(@1+@3,
+    | header_ref "." VALID { $$ = new IR::Primitive(@1+@3, $3, $1); }
+    | LATEST "." name { $$ = new IR::Member(@1+@3,
                                             new IR::PathExpression(IR::ID(@1, $1)),
                                             IR::ID(@3, $3)); }
     | INTEGER                            { $$ = parseConstant(@1, $1, 0); }
-    | L_PAREN expression R_PAREN         { $$ = $2; }
-    | NOT expression %prec PREFIX        { $$ = new IR::LNot(@1, $2); }
-    | COMPLEMENT expression %prec PREFIX { $$ = new IR::Cmpl(@1, $2); }
-    | MINUS expression %prec PREFIX      { $$ = new IR::Neg(@1, $2); }
-    | PLUS expression %prec PREFIX       { $$ = $2; }
-    | expression MUL expression          { $$ = new IR::Mul(@2, $1, $3); }
-    | expression DIV expression          { $$ = new IR::Div(@2, $1, $3); }
-    | expression MOD expression          { $$ = new IR::Mod(@2, $1, $3); }
-    | expression PLUS expression         { $$ = new IR::Add(@2, $1, $3); }
-    | expression MINUS expression        { $$ = new IR::Sub(@2, $1, $3); }
-    | expression SHL expression          { $$ = new IR::Shl(@2, $1, $3); }
-    | expression SHR expression          { $$ = new IR::Shr(@2, $1, $3); }
-    | expression LE expression           { $$ = new IR::Leq(@2, $1, $3); }
-    | expression GE expression           { $$ = new IR::Geq(@2, $1, $3); }
-    | expression L_ANGLE expression      { $$ = new IR::Lss(@2, $1, $3); }
-    | expression R_ANGLE expression      { $$ = new IR::Grt(@2, $1, $3); }
-    | expression NE expression           { $$ = new IR::Neq(@2, $1, $3); }
-    | expression EQ expression           { $$ = new IR::Equ(@2, $1, $3); }
-    | expression BIT_AND expression      { $$ = new IR::BAnd(@2, $1, $3); }
-    | expression BIT_XOR expression      { $$ = new IR::BXor(@2, $1, $3); }
-    | expression BIT_OR expression       { $$ = new IR::BOr(@2, $1, $3); }
-    | expression AND expression          { $$ = new IR::LAnd(@2, $1, $3); }
-    | expression OR expression           { $$ = new IR::LOr(@2, $1, $3); }
+    | "(" expression ")"                 { $$ = $2; }
+    | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1, $2); }
+    | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1, $2); }
+    | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1, $2); }
+    | "+" expression %prec PREFIX        { $$ = $2; }
+    | expression "*" expression          { $$ = new IR::Mul(@2, $1, $3); }
+    | expression "/" expression          { $$ = new IR::Div(@2, $1, $3); }
+    | expression "%" expression          { $$ = new IR::Mod(@2, $1, $3); }
+    | expression "+" expression          { $$ = new IR::Add(@2, $1, $3); }
+    | expression "-" expression          { $$ = new IR::Sub(@2, $1, $3); }
+    | expression "<<" expression         { $$ = new IR::Shl(@2, $1, $3); }
+    | expression ">>" expression         { $$ = new IR::Shr(@2, $1, $3); }
+    | expression "<=" expression         { $$ = new IR::Leq(@2, $1, $3); }
+    | expression ">=" expression         { $$ = new IR::Geq(@2, $1, $3); }
+    | expression "<" expression          { $$ = new IR::Lss(@2, $1, $3); }
+    | expression ">" expression          { $$ = new IR::Grt(@2, $1, $3); }
+    | expression "!=" expression         { $$ = new IR::Neq(@2, $1, $3); }
+    | expression "==" expression         { $$ = new IR::Equ(@2, $1, $3); }
+    | expression "&" expression          { $$ = new IR::BAnd(@2, $1, $3); }
+    | expression "^" expression          { $$ = new IR::BXor(@2, $1, $3); }
+    | expression "|" expression          { $$ = new IR::BOr(@2, $1, $3); }
+    | expression "&&" expression         { $$ = new IR::LAnd(@2, $1, $3); }
+    | expression "||" expression         { $$ = new IR::LOr(@2, $1, $3); }
     | TRUE                               { $$ = new IR::BoolLiteral(@1, true); }
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
 ;
@@ -957,12 +950,11 @@ header_or_field_ref:
 ;
 
 header_ref:
-      name      { $$ = new IR::PathExpression(IR::ID(@1, $1)); }
-    | header_ref L_BRACKET expression R_BRACKET
-        { $$ = new IR::HeaderStackItemRef(@1+@4, $1, $3); }
+      name                          { $$ = new IR::PathExpression(IR::ID(@1, $1)); }
+    | header_ref "[" expression "]" { $$ = new IR::HeaderStackItemRef(@1+@4, $1, $3); }
 ;
 
-field_ref: header_ref DOT name
+field_ref: header_ref "." name
          { $$ = new IR::Member(@1+@3, $1, IR::ID(@3, $3)); }
 ;
 
@@ -974,7 +966,7 @@ const_expression: expression
 
 expression_list:
       expression { $$ = new IR::Vector<IR::Expression>($1); $$->srcInfo = @1; }
-    | expression_list COMMA expression { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+    | expression_list "," expression { ($$=$1)->push_back($3); $$->srcInfo += @3; }
     ;
 
 opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list { $$ = $1; }

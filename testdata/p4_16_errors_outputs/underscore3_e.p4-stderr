@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/underscore3_e.p4(16):syntax error, unexpected DONTCARE
+../testdata/p4_16_errors/underscore3_e.p4(16):syntax error, unexpected _
 const bit _
           ^
 error: 1 errors encountered, aborting compilation

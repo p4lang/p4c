@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/underscore2_e.p4(19):syntax error, unexpected DONTCARE
+../testdata/p4_16_errors/underscore2_e.p4(19):syntax error, unexpected _
         bit _
             ^
 error: 1 errors encountered, aborting compilation
