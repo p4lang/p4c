@@ -231,11 +231,11 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     }
 }
 
+/// TODO(hanw): only check immediate struct fields.
 bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
     bool result = false;
-    dump(st);
     for (auto f : st->fields) {
-        if (f->is<IR::Type_Header>()) {
+        if (f->type->is<IR::Type_Header>()) {
             result = true;
         }
     }
@@ -264,13 +264,21 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
     auto block = getContext()->parent->node;
     if (block->is<IR::Type_Control>() || block->is<IR::Type_Parser>()) {
         auto ft = backend->getTypeMap().getType(param->getNode(), true);
-        // find if struct is metadata or header
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
-            LOG1(st);
-            LOG1("check header " << isHeaders(st));
-            addTypesAndInstances(st, false);
-            addHeaderStacks(st);
+            LOG1("name " << st->getName());
+            LOG1("anno " << st->getAnnotations());
+            if (st->getAnnotation("metadata")) {
+                backend->createJsonType(st);
+            } else {
+                auto isHeader = isHeaders(st);
+                if (isHeader) {
+                    addTypesAndInstances(st, false);
+                    addHeaderStacks(st);
+                } else {
+                    addTypesAndInstances(st, true);
+                }
+            }
         }
     }
 #endif

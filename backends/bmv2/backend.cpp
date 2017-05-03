@@ -369,24 +369,14 @@ void Backend::createActions(Util::JsonArray* actions) {
     }
 }
 
-// stdMeta and userMeta seem to change when moving from one declared control to another
-// and drive the expression converter to use the right parameter
-// still have not figured out where the metadata is actually generated!!
 void Backend::createMetadata() {
-    for ( auto parser : structure.parsers ) {
-        std::cerr << "Found " << parser << std::endl;
-        userMetadataParameter = parser->type->applyParams->getParameter(
-                                     v1model.parser.metadataParam.index);
-        stdMetadataParameter = parser->type->applyParams->getParameter(
-                                     v1model.parser.standardMetadataParam.index);
-        auto mdType = typeMap.getType(userMetadataParameter, true);
-        auto mt = mdType->to<IR::Type_Struct>();
-        if (mt == nullptr) {
-            ::error("Expected metadata %1% to be a struct", mdType);
-            return;
-        }
-        // break; // we need only one??
-    }
+    auto json = new Util::JsonObject();
+    json->emplace("name", "standard_metadata"); //FIXME: from arch
+    json->emplace("id", nextId("headers"));
+    json->emplace("header_type", "standard_metadata");
+    json->emplace("metadata", true);
+    headerInstances->append(json);
+    //headerInstancesCreated.insert();
 }
 
 void Backend::addErrors(Util::JsonArray* errors) {
@@ -437,16 +427,16 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
         new VisitFunctor([this](){ addMetaInformation(); }),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
-        new VisitFunctor([this](){ createMetadata(); }),
-        new ConvertHeaders(this),
         new VisitFunctor([this](){ addLocals(); }),
+        new ConvertHeaders(this),
         new VisitFunctor([this](){ padScalars(); }),
         new VisitFunctor([this](){ addErrors(errors); }),
         new ConvertExterns(this),
         new ConvertParser(&refMap, &typeMap, conv, parsers),
+        // createAction must be called before convertControl
         new VisitFunctor([this](){ createActions(actions); }),
         new ConvertControl(this),
-        new ConvertDeparser(this),
+        //new ConvertDeparser(this),
     };
     //dump(tb->getProgram());
     //dump(tb->getMain());

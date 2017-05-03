@@ -34,13 +34,13 @@ bool CopyAnnotations::preorder(const IR::PackageBlock* block) {
             //dump(block);
             //dump(decl->to<IR::Type>());
         }
+
+        // for each block
+
     }
     return false;
 }
 
-bool CopyAnnotations::preorder(const IR::P4Program* block) {
-    //LOG1(getContext()->node);
-    return false;
-}
+
 
 } // namespace BMV2

@@ -46,7 +46,6 @@ class CopyAnnotations : public Inspector {
     explicit CopyAnnotations(Backend* backend) : backend(backend)
     { setName("CopyAnnotations"); }
     bool preorder(const IR::PackageBlock* block) override;
-    bool preorder(const IR::P4Program* prog) override;
 };
 
 } // namespace BMV2

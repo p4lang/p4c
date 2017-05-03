@@ -23,6 +23,7 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
                                                     Util::JsonArray* result) {
     backend->getExpressionConverter()->simpleExpressionsOnly = true;
     for (auto s : *body) {
+        LOG1("deparser body " << s);
         if (auto block = s->to<IR::BlockStatement>()) {
             convertDeparserBody(&block->components, result);
             continue;
@@ -79,7 +80,6 @@ Util::IJson* DoDeparserBlockConversion::convertDeparser(const IR::P4Control* ctr
 }
 
 bool DoDeparserBlockConversion::preorder(const IR::PackageBlock* block) {
-    // FIXME: make a pointer to current arch block ?
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ControlBlock>()) {
             visit(it.second->getNode());
@@ -89,8 +89,14 @@ bool DoDeparserBlockConversion::preorder(const IR::PackageBlock* block) {
 }
 
 bool DoDeparserBlockConversion::preorder(const IR::ControlBlock* block) {
-    if(!block->getAnnotation("deparser"))
-        return false;
+    auto bt = backend->blockTypeMap.find(block);
+    if (bt != backend->blockTypeMap.end()) {
+        // only generate control block marked with @deparser
+        LOG3("bt " << bt->second);
+        if(!bt->second->getAnnotation("deparser")) {
+            return false;
+        }
+    }
     const IR::P4Control* cont = block->container;
     auto deparserJson = convertDeparser(cont);
     backend->deparsers->append(deparserJson);
