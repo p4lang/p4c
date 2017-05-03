@@ -532,7 +532,8 @@ class HeaderUnionType : public NamedP4Object {
 
 struct P4Objects::InitState {
   std::unordered_map<std::string, DirectMeterArray> direct_meters{};
-  std::unordered_map<std::string, HeaderUnionType> header_union_types_map{};
+  std::unordered_map<std::string, std::unique_ptr<HeaderUnionType> >
+  header_union_types_map{};
   std::unordered_map<std::string, HeaderUnionType *> header_union_to_type_map{};
   std::unordered_map<std::string, HeaderUnionType *>
   header_union_stack_to_type_map{};
@@ -651,15 +652,16 @@ P4Objects::init_header_unions(const Json::Value &cfg_root,
   for (const auto &cfg_header_union_type : cfg_header_union_types) {
     auto header_union_type_name = cfg_header_union_type["name"].asString();
     p4object_id_t header_union_type_id = cfg_header_union_type["id"].asInt();
-    HeaderUnionType header_union_type(header_union_type_name,
-                                      header_union_type_id);
+    std::unique_ptr<HeaderUnionType> header_union_type(new HeaderUnionType(
+        header_union_type_name, header_union_type_id));
 
     for (const auto &cfg_header : cfg_header_union_type["headers"]) {
       auto name = cfg_header[0].asString();
       auto type_name = cfg_header[1].asString();
-      header_union_type.push_back(name, get_header_type(type_name));
+      header_union_type->push_back(name, get_header_type(type_name));
     }
-    header_union_types_map.emplace(header_union_type_name, header_union_type);
+    header_union_types_map.emplace(header_union_type_name,
+                                   std::move(header_union_type));
   }
 
   const auto &cfg_header_unions = cfg_root["header_unions"];
@@ -681,7 +683,8 @@ P4Objects::init_header_unions(const Json::Value &cfg_root,
     phv_factory.push_back_header_union(header_union_name, header_union_id,
                                        header_ids);
     add_header_union_id(header_union_name, header_union_id);
-    header_union_to_type_map.emplace(header_union_name, &header_union_type);
+    header_union_to_type_map.emplace(header_union_name,
+                                     header_union_type.get());
   }
 }
 
@@ -714,7 +717,7 @@ P4Objects::init_header_union_stacks(const Json::Value &cfg_root,
         header_union_stack_name, header_union_stack_id, header_union_ids);
     add_header_union_stack_id(header_union_stack_name, header_union_stack_id);
     header_union_stack_to_type_map.emplace(header_union_stack_name,
-                                           &header_union_type);
+                                           header_union_type.get());
   }
 }
 

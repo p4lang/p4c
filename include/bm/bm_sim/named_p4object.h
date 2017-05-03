@@ -46,6 +46,16 @@ class NamedP4Object {
   //! Get the compiler-provided id
   p4object_id_t get_id() const { return id; }
 
+  //! Deleted copy constructor
+  NamedP4Object(const NamedP4Object &other) = delete;
+  //! Deleted copy assignment operator
+  NamedP4Object &operator=(const NamedP4Object &other) = delete;
+
+  //! Default move constructor
+  NamedP4Object(NamedP4Object &&other) = default;
+  //! Default assignment operator
+  NamedP4Object &operator=(NamedP4Object &&other) = default;
+
  protected:
   const std::string name;
   p4object_id_t id;
