@@ -47,7 +47,7 @@ class Parser : public Inspector {
     bool preorder(const IR::P4Parser* p) override;
     bool preorder(const IR::PackageBlock* b) override;
     explicit Parser(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                     ExpressionConverter* conv, Util::JsonArray* parsers) :
+                    ExpressionConverter* conv, Util::JsonArray* parsers) :
     refMap(refMap), typeMap(typeMap), conv(conv), parsers(parsers),
     corelib(P4::P4CoreLibrary::instance) {}
 };

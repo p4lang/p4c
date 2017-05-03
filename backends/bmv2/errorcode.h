@@ -26,17 +26,13 @@ limitations under the License.
 namespace BMV2 {
 
 class ErrorCodesVisitor : public Inspector {
-    Util::JsonArray* errors;
     ErrorCodesMap*    errorCodesMap;
- protected:
-    Util::JsonArray* pushNewArray(Util::JsonArray* parent);
  public:
     // we map error codes to numerical values for bmv2
     bool preorder(const IR::Type_Error* errors) override;
-    void postorder(const IR::P4Program* program) override;
-    explicit ErrorCodesVisitor(Util::JsonArray* errors, ErrorCodesMap* errorCodesMap) :
-        errors(errors), errorCodesMap(errorCodesMap)
-    { CHECK_NULL(errors); CHECK_NULL(errorCodesMap); }
+    explicit ErrorCodesVisitor(ErrorCodesMap* errorCodesMap) :
+        errorCodesMap(errorCodesMap)
+    { CHECK_NULL(errorCodesMap); }
 };
 
 } // namespace BMV2

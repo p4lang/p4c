@@ -18,28 +18,14 @@ limitations under the License.
 
 namespace BMV2 {
 
-Util::JsonArray* ErrorCodesVisitor::pushNewArray(Util::JsonArray* parent) {
-    auto result = new Util::JsonArray();
-    parent->append(result);
-    return result;
-}
-
 bool ErrorCodesVisitor::preorder(const IR::Type_Error* errors) {
+    LOG1("Visit " << errors);
+    auto &map = *errorCodesMap;
     for (auto m : *errors->getDeclarations()) {
-        BUG_CHECK(errorCodesMap->find(m) == errorCodesMap->end(), "Duplicate error");
-        errorCodesMap->emplace(m, errorCodesMap->size());
+        BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
+        map[m] = map.size();
     }
     return false;
-}
-
-void ErrorCodesVisitor::postorder(const IR::P4Program* program) {
-    for (const auto &p : *errorCodesMap) {
-        auto entry = new Util::JsonArray();
-        auto name = p.first->getName().name.c_str();
-        entry->append(name);
-        entry->append(p.second);
-        errors->append(entry);
-    }
 }
 
 } // namespace BMV2

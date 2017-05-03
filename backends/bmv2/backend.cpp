@@ -367,11 +367,21 @@ void Backend::createActions(Util::JsonArray* actions) {
     }
 }
 
+void Backend::addErrors(Util::JsonArray* errors) {
+    for (const auto &p : errorCodesMap) {
+        auto name = p.first->getName().name.c_str();
+        auto entry = pushNewArray(errors);
+        entry->append(name);
+        entry->append(p.second);
+    }
+}
+
 void Backend::process(const IR::ToplevelBlock* tb) {
     setName("BackEnd");
     addPasses({
         new P4::TypeChecking(&refMap, &typeMap),
         new DiscoverStructure(&structure),
+        new ErrorCodesVisitor(&errorCodesMap),
     });
     tb->getProgram()->apply(*this);
 }
@@ -381,34 +391,33 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
     headerTypes = mkArrayField(&toplevel, "header_types");
     headerInstances = mkArrayField(&toplevel, "headers");
     headerStacks = mkArrayField(&toplevel, "header_stacks");
-    parsers = mkArrayField(&toplevel, "parsers");
-    pipelines = mkArrayField(&toplevel, "pipelines");
-    deparsers = mkArrayField(&toplevel, "deparsers");
-    actions = mkArrayField(&toplevel, "actions");
-    externs = mkArrayField(&toplevel, "extern_instances");
+    field_lists = mkArrayField(&toplevel, "field_lists");
     errors = mkArrayField(&toplevel, "errors");
     enums = mkArrayField(&toplevel, "enums");
-
-    /// backward compatible with bm2-ss
-    calculations = mkArrayField(&toplevel, "calculations");
-    checksums = mkArrayField(&toplevel, "checksums");
-    counters = mkArrayField(&toplevel, "counter_arrays");
-    field_lists = mkArrayField(&toplevel, "field_lists");
-    learn_lists = mkArrayField(&toplevel, "learn_lists");
+    parsers = mkArrayField(&toplevel, "parsers");
+    deparsers = mkArrayField(&toplevel, "deparsers");
     meter_arrays = mkArrayField(&toplevel, "meter_arrays");
+    counters = mkArrayField(&toplevel, "counter_arrays");
     register_arrays = mkArrayField(&toplevel, "register_arrays");
+    calculations = mkArrayField(&toplevel, "calculations");
+    learn_lists = mkArrayField(&toplevel, "learn_lists");
+    actions = mkArrayField(&toplevel, "actions");
+    pipelines = mkArrayField(&toplevel, "pipelines");
+    checksums = mkArrayField(&toplevel, "checksums");
+    force_arith = mkArrayField(&toplevel, "force_arith");
+    externs = mkArrayField(&toplevel, "extern_instances");
 
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(&refMap, &typeMap, &structure, &errorCodesMap);
 
     PassManager codegen_passes = {
-        new ErrorCodesVisitor(errors, &errorCodesMap),
         new VisitFunctor([this](){ addMetaInformation(); }),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
         new ConvertHeaders(this),
         new VisitFunctor([this](){ addLocals(); }),
         new VisitFunctor([this](){ padScalars(); }),
+        new VisitFunctor([this](){ addErrors(errors); }),
         new ConvertExterns(&refMap, &typeMap, conv, externs),
         new ConvertParser(&refMap, &typeMap, conv, parsers),
         new ConvertControl(&refMap, &typeMap, conv, &structure, pipelines, counters),

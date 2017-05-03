@@ -49,23 +49,24 @@ class Backend : public PassManager {
     ErrorCodesMap                    errorCodesMap;
 
  public:
+    Util::JsonArray*                 actions;
     Util::JsonArray*                 calculations;
     Util::JsonArray*                 checksums;
     Util::JsonArray*                 counters;
+    Util::JsonArray*                 deparsers;
+    Util::JsonArray*                 enums;
+    Util::JsonArray*                 errors;
+    Util::JsonArray*                 externs;
     Util::JsonArray*                 field_lists;
-    Util::JsonArray*                 learn_lists;
-    Util::JsonArray*                 meter_arrays;
-    Util::JsonArray*                 register_arrays;
-    Util::JsonArray*                 headerTypes;
+    Util::JsonArray*                 force_arith;
     Util::JsonArray*                 headerInstances;
     Util::JsonArray*                 headerStacks;
+    Util::JsonArray*                 headerTypes;
+    Util::JsonArray*                 learn_lists;
+    Util::JsonArray*                 meter_arrays;
     Util::JsonArray*                 parsers;
     Util::JsonArray*                 pipelines;
-    Util::JsonArray*                 deparsers;
-    Util::JsonArray*                 actions;
-    Util::JsonArray*                 externs;
-    Util::JsonArray*                 errors;
-    Util::JsonArray*                 enums;
+    Util::JsonArray*                 register_arrays;
 
     Util::JsonObject*                scalarsStruct;
     Util::JsonArray*                 scalarFields;
@@ -82,16 +83,17 @@ class Backend : public PassManager {
     void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
 
  protected:
-    void addMetaInformation();
-    void addEnums(Util::JsonArray* enums);
-    void addLocals();
-    void createScalars();
-    void padScalars();
-    void createJsonType(const IR::Type_StructLike* st);
-    void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
+    void addEnums(Util::JsonArray* enums);
+    void addErrors(Util::JsonArray* errors);
+    void addLocals();
+    void addMetaInformation();
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
+    void createJsonType(const IR::Type_StructLike* st);
+    void createScalars();
+    void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
+    void padScalars();
 
  public:
     explicit Backend(P4::ConvertEnums::EnumMapping* enumMap) :
