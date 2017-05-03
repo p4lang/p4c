@@ -76,7 +76,7 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
             result->emplace("type", decl->type->to<IR::Type_Specialized>()->baseType->toString());
             auto attributes = mkArrayField(result, "attribute_values");
             addExternAttributes(decl, externBlock, attributes);
-            externs->append(result);
+            backend->externs->append(result);
         }
     }
     return false;

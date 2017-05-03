@@ -418,9 +418,9 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
         new VisitFunctor([this](){ addLocals(); }),
         new VisitFunctor([this](){ padScalars(); }),
         new VisitFunctor([this](){ addErrors(errors); }),
-        new ConvertExterns(&refMap, &typeMap, conv, externs),
+        new ConvertExterns(this),
         new ConvertParser(&refMap, &typeMap, conv, parsers),
-        new ConvertControl(&refMap, &typeMap, conv, &structure, pipelines, counters),
+        new ConvertControl(this),
         new ConvertDeparser(&refMap, &typeMap, conv, deparsers),
         new VisitFunctor([this](){ createActions(actions); }),
     };

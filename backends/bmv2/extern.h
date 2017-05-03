@@ -26,10 +26,8 @@ limitations under the License.
 namespace BMV2 {
 
 class Extern : public Inspector {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    ExpressionConverter* conv;
-    Util::JsonArray*     externs;
+    Backend *backend;
+
  protected:
     void addExternAttributes(const IR::Declaration_Instance* di, const IR::ExternBlock* block,
                              Util::JsonArray* attributes);
@@ -38,16 +36,13 @@ class Extern : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Declaration_Instance* decl) override;
 
-    explicit Extern(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                     ExpressionConverter* conv, Util::JsonArray* externs) :
-        refMap(refMap), typeMap(typeMap), conv(conv), externs(externs) {}
+    explicit Extern(Backend *b) : backend(b) {}
 };
 
 class ConvertExterns final : public PassManager {
  public:
-    ConvertExterns(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                   ExpressionConverter* conv, Util::JsonArray* externs) {
-       passes.push_back(new Extern(refMap, typeMap, conv, externs));
+    ConvertExterns(Backend *b) {
+       passes.push_back(new Extern(b));
        setName("ConvertExterns");
     }
 };

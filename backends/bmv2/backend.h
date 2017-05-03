@@ -35,7 +35,10 @@ limitations under the License.
 
 namespace BMV2 {
 
+
 class Backend : public PassManager {
+    using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
+
     ExpressionConverter*             conv;
     P4::ConvertEnums::EnumMapping*   enumMap;
     P4::P4CoreLibrary&               corelib;
@@ -45,6 +48,7 @@ class Backend : public PassManager {
     Util::JsonObject                 toplevel;
     P4::V2Model&                     model;
     P4V1::V1Model&                   v1model;
+    DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
 
@@ -104,10 +108,14 @@ class Backend : public PassManager {
     void convert(const IR::ToplevelBlock* block);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
-    ExpressionConverter* getExpressionConverter() { return conv; };
-    DirectMeterMap&      getMeterMap() { return meterMap; }
-    P4::ReferenceMap&    getRefMap()   { return refMap; }
-    P4::TypeMap&         getTypeMap()  { return typeMap; }
+    P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
+    ExpressionConverter * getExpressionConverter() { return conv; };
+    DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
+    DirectMeterMap &      getMeterMap()  { return meterMap; }
+    P4::V2Model &         getModel()     { return model; }
+    P4::ReferenceMap &    getRefMap()    { return refMap; }
+    ProgramParts &        getStructure() { return structure; }
+    P4::TypeMap &         getTypeMap()   { return typeMap; }
 };
 
 }  // namespace BMV2

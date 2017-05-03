@@ -127,14 +127,9 @@ class SharedActionSelectorCheck : public Inspector {
 };
 
 class Control : public Inspector {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    ExpressionConverter* conv;
-    ProgramParts*        structure;
-    Util::JsonArray*     counters;
-    Util::JsonArray*     pipelines;
-    P4::P4CoreLibrary&   corelib;
-    P4::V2Model&         v2model;
+    Backend*    backend;
+
+    // P4::V2Model&         v2model;
 
  protected:
     // helper function that create a JSON object for extern block
@@ -156,25 +151,13 @@ class Control : public Inspector {
     bool preorder(const IR::ControlBlock* b) override;
     bool preorder(const IR::Declaration_Instance* d) override;
 
-    explicit Control(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                      ExpressionConverter* conv,
-                                      ProgramParts* structure, Util::JsonArray* pipelines,
-                                      Util::JsonArray* counters) :
-        refMap(refMap), typeMap(typeMap), conv(conv),
-        structure(structure), counters(counters), pipelines(pipelines),
-        corelib(P4::P4CoreLibrary::instance),
-        v2model(P4::V2Model::instance)
-        { CHECK_NULL(conv); }
-
+    explicit Control(Backend *backend) : backend(backend) {}
 };
 
 class ConvertControl final : public PassManager {
  public:
-    ConvertControl(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                   ExpressionConverter* conv,
-                   ProgramParts* structure, Util::JsonArray* pipelines,
-                   Util::JsonArray* counters) {
-        passes.push_back(new Control(refMap, typeMap, conv, structure, pipelines, counters));
+    ConvertControl(Backend *backend) {
+        passes.push_back(new Control(backend));
         setName("ConvertControl");
     }
 };
