@@ -575,7 +575,7 @@ P4Objects::init_header_types(const Json::Value &cfg_root) {
         is_signed = cfg_field[2].asBool();
       if (cfg_field[1].asString() == "*") {  // VL field
         std::unique_ptr<VLHeaderExpression> VL_expr(nullptr);
-        if (!cfg_header_type.isMember("length_exp")) {
+        if (cfg_header_type.isMember("length_exp")) {
           const Json::Value &cfg_length_exp = cfg_header_type["length_exp"];
           ArithExpression raw_expr;
           build_expression(cfg_length_exp, &raw_expr);
@@ -583,7 +583,7 @@ P4Objects::init_header_types(const Json::Value &cfg_root) {
           VL_expr.reset(new VLHeaderExpression(raw_expr));
         }
         int max_header_bytes = 0;
-        if (!cfg_header_type.isMember("max_length"))
+        if (cfg_header_type.isMember("max_length"))
           max_header_bytes = cfg_header_type["max_length"].asInt();
         header_type->push_back_VL_field(
             field_name, max_header_bytes, std::move(VL_expr), is_signed);
