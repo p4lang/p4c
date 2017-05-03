@@ -56,9 +56,14 @@ int main(int argc, char *const argv[]) {
     auto hook = options.getDebugHook();
 
     if (program != nullptr && ::errorCount() == 0) {
-        P4::FrontEnd fe;
-        fe.addDebugHook(hook);
-        program = fe.run(options, program);
+        try {
+            P4::FrontEnd fe;
+            fe.addDebugHook(hook);
+            program = fe.run(options, program);
+        } catch (const Util::P4CExceptionBase &bug) {
+            std::cerr << bug.what() << std::endl;
+            return 1;
+        }
         log_dump(program, "Initial program");
         if (program != nullptr && ::errorCount() == 0) {
             P4Test::MidEnd midEnd(options);
@@ -73,7 +78,13 @@ int main(int argc, char *const argv[]) {
                 loader >> program;
             }
 #endif
-            auto top = midEnd.process(program);
+            const IR::ToplevelBlock *top = nullptr;
+            try {
+                top = midEnd.process(program);
+            } catch (const Util::P4CExceptionBase &bug) {
+                std::cerr << bug.what() << std::endl;
+                return 1;
+            }
             log_dump(program, "After midend");
             log_dump(top, "Top level block");
             if (options.dumpJsonFile)

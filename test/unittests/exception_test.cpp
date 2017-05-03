@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ class TestException : public TestBase {
         }
         catch (std::exception &ex) {
             cstring err(ex.what());
-            ASSERT_EQ(err, "COMPILER BUG:\ntest\n");
+            cstring expected = cstring(ANSI_RED) + "Compiler Bug" + ANSI_CLR +":\ntest\n";
+            ASSERT_EQ(err, expected);
         }
 
         try {

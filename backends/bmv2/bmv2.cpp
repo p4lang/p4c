@@ -49,22 +49,38 @@ int main(int argc, char *const argv[]) {
     auto program = parseP4File(options);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
-    P4::FrontEnd frontend;
-    frontend.addDebugHook(hook);
-    program = frontend.run(options, program);
+    try {
+        P4::FrontEnd frontend;
+        frontend.addDebugHook(hook);
+        program = frontend.run(options, program);
+    } catch (const Util::P4CExceptionBase &bug) {
+        std::cerr << bug.what() << std::endl;
+        return 1;
+    }
     if (program == nullptr || ::errorCount() > 0)
         return 1;
 
+    const IR::ToplevelBlock* toplevel = nullptr;
     BMV2::MidEnd midEnd(options);
     midEnd.addDebugHook(hook);
-    auto toplevel = midEnd.process(program);
-    if (options.dumpJsonFile)
-        JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+    try {
+        toplevel = midEnd.process(program);
+        if (options.dumpJsonFile)
+            JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+    } catch (const Util::P4CExceptionBase &bug) {
+        std::cerr << bug.what() << std::endl;
+        return 1;
+    }
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
     BMV2::JsonConverter converter(options);
-    converter.convert(&midEnd.refMap, &midEnd.typeMap, toplevel, &midEnd.enumMap);
+    try {
+        converter.convert(&midEnd.refMap, &midEnd.typeMap, toplevel, &midEnd.enumMap);
+    } catch (const Util::P4CExceptionBase &bug) {
+        std::cerr << bug.what() << std::endl;
+        return 1;
+    }
     if (::errorCount() > 0)
         return 1;
 
