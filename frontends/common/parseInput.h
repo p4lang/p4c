@@ -30,11 +30,13 @@ namespace P4 {
  * by @options. If the language version is not P4-16, then the program is
  * converted to P4-16 before being returned.
  *
- * The program state is cleared before parsing begins. Callers with more
- * complicated needs should use a ParserDriver directly.
+ * The program state is cleared before parsing begins. This is normally what you
+ * want. If you need more control (for example, if you need to compose a larger
+ * program out of fragments that come from different input sources) you can use
+ * a ParserDriver directly.
  *
  * @return a P4-16 IR tree representing the contents of the given file, or null
- * on failure.
+ * on failure. If failure occurs, an error will also be reported.
  */
 const IR::P4Program* parseP4File(CompilerOptions& options);
 
@@ -44,11 +46,13 @@ const IR::P4Program* parseP4File(CompilerOptions& options);
  * language version is not P4-16, then the program is converted to P4-16 before
  * being returned.
  *
- * The program state is cleared before parsing begins. Callers with more
- * complicated needs should use a ParserDriver directly.
+ * The program state is cleared before parsing begins. This is normally what you
+ * want. If you need more control (for example, if you need to compose a larger
+ * program out of fragments that come from different input sources) you can use
+ * a ParserDriver directly.
  *
  * @return a P4-16 IR tree representing the contents of the given string, or
- * null on failure.
+ * null on failure. If failure occurs, an error will also be reported.
  */
 const IR::P4Program* parseP4String(const std::string& input,
                                    CompilerOptions::FrontendVersion version);

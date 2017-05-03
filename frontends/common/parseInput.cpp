@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "parseInput.h"
 
+#include <boost/optional.hpp>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -28,8 +29,36 @@ limitations under the License.
 
 namespace P4 {
 
+template <typename Input>
+static const IR::P4Program*
+parseV1Program(const char* name, Input& stream,
+               boost::optional<DebugHook> debugHook = boost::none) {
+    // We load the model before parsing the input file, so that the SourceInfo
+    // in the model comes first.
+    P4V1::Converter converter;
+    if (debugHook) converter.addDebugHook(*debugHook);
+    converter.loadModel();
+
+    // Parse.
+    const IR::Node* v1 = V1::V1ParserDriver::parse(name, stream);
+    if (::errorCount() > 0 || v1 == nullptr)
+        return nullptr;
+
+    // Convert to P4-16.
+    if (Log::verbose())
+        std::cerr << "Converting to P4-16" << std::endl;
+    v1 = v1->apply(converter);
+    if (v1 != nullptr) {
+        BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
+        return v1->to<IR::P4Program>();
+    }
+
+    return nullptr;  // Conversion failed.
+}
+
 const IR::P4Program* parseP4File(CompilerOptions& options) {
     clearProgramState();
+
     FILE* in = nullptr;
     if (options.doNotPreprocess) {
         in = fopen(options.file, "r");
@@ -42,36 +71,17 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
         if (::errorCount() > 0 || in == nullptr)
             return nullptr;
     }
-    const IR::P4Program* result = nullptr;
-    bool compiling10 = options.isv1();
-    if (compiling10) {
-        // We load the model before parsing the input file, so that the
-        // SourceInfo in the model comes first.
-        P4V1::Converter converter;
-        converter.addDebugHook(options.getDebugHook());
-        converter.loadModel();
 
-        // Parse.
-        const IR::Node* v1 = V1::V1ParserDriver::parse(options.file, in);
-        if (::errorCount() > 0 || v1 == nullptr)
-            return nullptr;
-
-        // Convert to P4-16.
-        if (Log::verbose())
-            std::cerr << "Converting to P4-16" << std::endl;
-        v1 = v1->apply(converter);
-        if (v1 != nullptr) {
-            BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
-            result = v1->to<IR::P4Program>();
-        }
-    } else {
-        result = P4::P4ParserDriver::parse(options.file, in);
-    }
+    auto result = options.isv1()
+                ? parseV1Program(options.file, in, options.getDebugHook())
+                : P4ParserDriver::parse(options.file, in);
     options.closeInput(in);
+
     if (::errorCount() > 0) {
         ::error("%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;
     }
+    BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
     return result;
 }
 
@@ -80,41 +90,15 @@ const IR::P4Program* parseP4String(const std::string& input,
     clearProgramState();
 
     std::istringstream stream(input);
-    const IR::P4Program* result = nullptr;
-
-    switch (version) {
-      case CompilerOptions::FrontendVersion::P4_14: {
-        // We load the model before parsing the input file, so that the
-        // SourceInfo in the model comes first.
-        P4V1::Converter converter;
-        converter.loadModel();
-
-        // Parse.
-        const IR::Node* v1 = V1::V1ParserDriver::parse("(string)", stream);
-        if (::errorCount() > 0 || v1 == nullptr)
-            return nullptr;
-
-        // Convert to P4-16.
-        if (Log::verbose())
-            std::cerr << "Converting to P4-16" << std::endl;
-        v1 = v1->apply(converter);
-        if (v1 != nullptr) {
-            BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
-            result = v1->to<IR::P4Program>();
-        }
-        break;
-      }
-
-      case CompilerOptions::FrontendVersion::P4_16:
-        result = P4::P4ParserDriver::parse("(string)", stream);
-        break;
-    }
+    auto result = version == CompilerOptions::FrontendVersion::P4_14
+                ? parseV1Program("(string)", stream)
+                : P4ParserDriver::parse("(string)", stream);
 
     if (::errorCount() > 0) {
         ::error("%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;
     }
-
+    BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
     return result;
 }
 
