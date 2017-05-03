@@ -293,32 +293,32 @@ using Parser = V1::V1Parser;
 ">="            { BEGIN(NORMAL); return Parser::make_GE(driver.yylloc); }
 "<="            { BEGIN(NORMAL); return Parser::make_LE(driver.yylloc); }
 
-"+"            { BEGIN(NORMAL); return Parser::make_PLUS(driver.yylloc); }
-"-"            { BEGIN(NORMAL); return Parser::make_MINUS(driver.yylloc); }
-"*"            { BEGIN(NORMAL); return Parser::make_MUL(driver.yylloc); }
-"/"            { BEGIN(NORMAL); return Parser::make_DIV(driver.yylloc); }
-"%"            { BEGIN(NORMAL); return Parser::make_MOD(driver.yylloc); }
+"+"            { BEGIN(driver.saveState); return Parser::make_PLUS(driver.yylloc); }
+"-"            { BEGIN(driver.saveState); return Parser::make_MINUS(driver.yylloc); }
+"*"            { BEGIN(driver.saveState); return Parser::make_MUL(driver.yylloc); }
+"/"            { BEGIN(driver.saveState); return Parser::make_DIV(driver.yylloc); }
+"%"            { BEGIN(driver.saveState); return Parser::make_MOD(driver.yylloc); }
 
-"|"            { BEGIN(NORMAL); return Parser::make_BIT_OR(driver.yylloc); }
-"&"            { BEGIN(NORMAL); return Parser::make_BIT_AND(driver.yylloc); }
-"^"            { BEGIN(NORMAL); return Parser::make_BIT_XOR(driver.yylloc); }
-"~"            { BEGIN(NORMAL); return Parser::make_COMPLEMENT(driver.yylloc); }
+"|"            { BEGIN(driver.saveState); return Parser::make_BIT_OR(driver.yylloc); }
+"&"            { BEGIN(driver.saveState); return Parser::make_BIT_AND(driver.yylloc); }
+"^"            { BEGIN(driver.saveState); return Parser::make_BIT_XOR(driver.yylloc); }
+"~"            { BEGIN(driver.saveState); return Parser::make_COMPLEMENT(driver.yylloc); }
 
-"("            { BEGIN(NORMAL); return Parser::make_L_PAREN(driver.yylloc); }
-")"            { BEGIN(NORMAL); return Parser::make_R_PAREN(driver.yylloc); }
-"["            { BEGIN(NORMAL); return Parser::make_L_BRACKET(driver.yylloc); }
-"]"            { BEGIN(NORMAL); return Parser::make_R_BRACKET(driver.yylloc); }
-"{"            { BEGIN(NORMAL); return Parser::make_L_BRACE(driver.yylloc); }
-"}"            { BEGIN(NORMAL); return Parser::make_R_BRACE(driver.yylloc); }
-"<"            { BEGIN(NORMAL); return Parser::make_L_ANGLE(driver.yylloc); }
-">"            { BEGIN(NORMAL); return Parser::make_R_ANGLE(driver.yylloc); }
+"("            { BEGIN(driver.saveState); return Parser::make_L_PAREN(driver.yylloc); }
+")"            { BEGIN(driver.saveState); return Parser::make_R_PAREN(driver.yylloc); }
+"["            { BEGIN(driver.saveState); return Parser::make_L_BRACKET(driver.yylloc); }
+"]"            { BEGIN(driver.saveState); return Parser::make_R_BRACKET(driver.yylloc); }
+"{"            { BEGIN(driver.saveState); return Parser::make_L_BRACE(driver.yylloc); }
+"}"            { BEGIN(driver.saveState); return Parser::make_R_BRACE(driver.yylloc); }
+"<"            { BEGIN(driver.saveState); return Parser::make_L_ANGLE(driver.yylloc); }
+">"            { BEGIN(driver.saveState); return Parser::make_R_ANGLE(driver.yylloc); }
 
-"!"            { BEGIN(NORMAL); return Parser::make_NOT(driver.yylloc); }
-":"            { BEGIN(NORMAL); return Parser::make_COLON(driver.yylloc); }
-","            { BEGIN(NORMAL); return Parser::make_COMMA(driver.yylloc); }
-"."            { BEGIN(NORMAL); return Parser::make_DOT(driver.yylloc); }
-"="            { BEGIN(NORMAL); return Parser::make_ASSIGN(driver.yylloc); }
-";"            { BEGIN(NORMAL); return Parser::make_SEMICOLON(driver.yylloc); }
+"!"            { BEGIN(driver.saveState); return Parser::make_NOT(driver.yylloc); }
+":"            { BEGIN(driver.saveState); return Parser::make_COLON(driver.yylloc); }
+","            { BEGIN(driver.saveState); return Parser::make_COMMA(driver.yylloc); }
+"."            { BEGIN(driver.saveState); return Parser::make_DOT(driver.yylloc); }
+"="            { BEGIN(driver.saveState); return Parser::make_ASSIGN(driver.yylloc); }
+";"            { BEGIN(driver.saveState); return Parser::make_SEMICOLON(driver.yylloc); }
 
 .              { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
 
