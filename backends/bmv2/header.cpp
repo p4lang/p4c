@@ -231,6 +231,17 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     }
 }
 
+bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
+    bool result = false;
+    dump(st);
+    for (auto f : st->fields) {
+        if (f->is<IR::Type_Header>()) {
+            result = true;
+        }
+    }
+    return result;
+}
+
 // TODO(hanw): complete the generic pass for nested struct and header
 // for now, use v1model header generation routine
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
@@ -256,6 +267,8 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
         // find if struct is metadata or header
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
+            LOG1(st);
+            LOG1("check header " << isHeaders(st));
             addTypesAndInstances(st, false);
             addHeaderStacks(st);
         }

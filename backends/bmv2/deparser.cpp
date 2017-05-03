@@ -20,7 +20,7 @@ namespace BMV2 {
 
 void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
                                                     Util::JsonArray* result) {
-    conv->simpleExpressionsOnly = true;
+    backend->getExpressionConverter()->simpleExpressionsOnly = true;
     for (auto s : *body) {
         if (auto block = s->to<IR::BlockStatement>()) {
             convertDeparserBody(&block->components, result);
@@ -31,19 +31,19 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
             continue;
         } else if (s->is<IR::MethodCallStatement>()) {
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
-            auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
+            auto mi = P4::MethodInstance::resolve(mc, &backend->getRefMap(), &backend->getTypeMap());
             if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
-                if (em->originalExternType->name.name == corelib.packetOut.name) {
-                    if (em->method->name.name == corelib.packetOut.emit.name) {
+                if (em->originalExternType->name.name == backend->getCoreLibrary().packetOut.name) {
+                    if (em->method->name.name == backend->getCoreLibrary().packetOut.emit.name) {
                         BUG_CHECK(mc->arguments->size() == 1,
                                   "Expected exactly 1 argument for %1%", mc);
                         auto arg = mc->arguments->at(0);
-                        auto type = typeMap->getType(arg, true);
+                        auto type = backend->getTypeMap().getType(arg, true);
                         if (type->is<IR::Type_Stack>()) {
                             int size = type->to<IR::Type_Stack>()->getSize();
                             for (int i=0; i < size; i++) {
-                                auto j = conv->convert(arg);
+                                auto j = backend->getExpressionConverter()->convert(arg);
                                 auto e = j->to<Util::JsonObject>()->get("value");
                                 BUG_CHECK(e->is<Util::JsonValue>(),
                                           "%1%: Expected a Json value", e->toString());
@@ -52,7 +52,7 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
                                 result->append(ref);
                             }
                         } else if (type->is<IR::Type_Header>()) {
-                            auto j = conv->convert(arg);
+                            auto j = backend->getExpressionConverter()->convert(arg);
                             result->append(j->to<Util::JsonObject>()->get("value"));
                         } else {
                             ::error("%1%: emit only supports header and stack arguments, not %2%",
@@ -65,7 +65,7 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
         }
         ::error("%1%: not supported with a deparser on this target", s);
     }
-    conv->simpleExpressionsOnly = false;
+    backend->getExpressionConverter()->simpleExpressionsOnly = false;
 }
 
 Util::IJson* DoDeparserBlockConversion::convertDeparser(const IR::P4Control* ctrl) {
@@ -92,7 +92,7 @@ bool DoDeparserBlockConversion::preorder(const IR::ControlBlock* block) {
         return false;
     const IR::P4Control* cont = block->container;
     auto deparserJson = convertDeparser(cont);
-    deparsers->append(deparserJson);
+    backend->deparsers->append(deparserJson);
     return false;
 }
 

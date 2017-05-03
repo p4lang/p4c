@@ -295,7 +295,6 @@ Control::handleTableImplementation(const IR::Property* implementation,
 
 Util::IJson*
 Control::convertTable(const CFG::TableNode* node,
-                      Util::JsonArray* counters,
                       Util::JsonArray* action_profiles) {
     auto table = node->table;
     LOG3("Processing " << dbp(table));
@@ -702,7 +701,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
     // Tables are created prior to the other local declarations
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
-            auto j = convertTable(node->to<CFG::TableNode>(), backend->counters, action_profiles);
+            auto j = convertTable(node->to<CFG::TableNode>(), action_profiles);
             if (::errorCount() > 0)
                 return false;
             tables->append(j);

@@ -26,11 +26,7 @@ limitations under the License.
 namespace BMV2 {
 
 class DoDeparserBlockConversion : public Inspector {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    ExpressionConverter* conv;
-    Util::JsonArray*     deparsers;
-    P4::P4CoreLibrary&   corelib;
+    Backend*             backend;
  protected:
     Util::IJson* convertDeparser(const IR::P4Control* ctrl);
     void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
@@ -38,18 +34,14 @@ class DoDeparserBlockConversion : public Inspector {
     bool preorder(const IR::PackageBlock* block);
     bool preorder(const IR::ControlBlock* ctrl);
 
-    explicit DoDeparserBlockConversion(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                       ExpressionConverter* conv, Util::JsonArray* deparsers) :
-    refMap(refMap), typeMap(typeMap), conv(conv), deparsers(deparsers),
-    corelib(P4::P4CoreLibrary::instance) {}
+    explicit DoDeparserBlockConversion(Backend* backend) :
+        backend(backend) {}
 };
 
 class ConvertDeparser final : public PassManager {
  public:
-    ConvertDeparser(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                    ExpressionConverter* conv,
-                    Util::JsonArray* deparsers) {
-        passes.push_back(new DoDeparserBlockConversion(refMap, typeMap, conv, deparsers));
+    ConvertDeparser(Backend* backend) {
+        passes.push_back(new DoDeparserBlockConversion(backend));
         setName("ConvertDeparser");
     }
 };

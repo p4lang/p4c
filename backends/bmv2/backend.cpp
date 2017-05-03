@@ -421,7 +421,7 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
         new ConvertExterns(this),
         new ConvertParser(&refMap, &typeMap, conv, parsers),
         new ConvertControl(this),
-        new ConvertDeparser(&refMap, &typeMap, conv, deparsers),
+        new ConvertDeparser(this),
         new VisitFunctor([this](){ createActions(actions); }),
     };
     //dump(tb->getProgram());

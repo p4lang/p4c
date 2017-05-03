@@ -135,7 +135,6 @@ class Control : public Inspector {
     // helper function that create a JSON object for extern block
     Util::IJson* createExternInstance(cstring name, cstring type);
     Util::IJson* convertTable(const CFG::TableNode* node,
-                              Util::JsonArray* counters,
                               Util::JsonArray* action_profiles);
     void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
     cstring getKeyMatchType(const IR::KeyElement *ke);
