@@ -116,8 +116,8 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
  * - function is called with temporaries for all arguments
  * - out and inout temporaries are copied to the saved left-values in order
  *
- * An assignment statement ```e = e1;``` is treated as if it is a call to a
- * function ```set(out T v, in T v)```.
+ * For assignment statements ```e = e1;``` the left hand side is evaluated
+ * first.
  */
 class DoSimplifyExpressions : public Transform {
     // FIXME: does not handle select labels

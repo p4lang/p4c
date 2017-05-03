@@ -31,9 +31,10 @@ namespace {
 struct EvaluationOrder {
     ReferenceMap* refMap;
 
-    /// Output: The original expression with side-effecting sub-expressions
-    /// replaced by temporaries.
-    const IR::Expression* final;  // output
+    /// Output: An expression whose evaluation will produce the same result as
+    /// the original one, but where side-effects have been factored out such
+    /// that each statement produces at most one side-effect.
+    const IR::Expression* final;
 
     // Declaration instead of Declaration_Variable so it can be more easily inserted
     // in the program IR.
@@ -72,8 +73,8 @@ struct EvaluationOrder {
     }
 };
 
-/** @brief Replace expressions containing constructor or method invocations
- * with temporaries.
+/** @brief Replaces expressions containing constructor or method invocations
+ * with temporaries.  Also unrolls short-circuit evaluation.
  * 
  * The EvaluationOrder field accumulates lists of the temporaries introduced in
  * this way, as well as assignment statements that assign the original
@@ -89,9 +90,6 @@ struct EvaluationOrder {
  * left-value-ness and compile-time-contant-ness.
  */
 class DismantleExpression : public Transform {
-    // TODO: It may be worth refactoring DismantleExpression to purely use
-    // pre-/postorder methods, rather than invoking visit() in preorder
-    // methods, to reflect the design pattern used elsewhere.
     ReferenceMap* refMap;
     TypeMap* typeMap;
     EvaluationOrder *result;
@@ -203,7 +201,6 @@ class DismantleExpression : public Transform {
         visit(expression->expr);
         auto left = result->final;
         CHECK_NULL(left);
-        // TODO: why clone here?
         auto clone = expression->clone();
         clone->expr = left;
         typeMap->setType(clone, type);
@@ -223,7 +220,6 @@ class DismantleExpression : public Transform {
             CHECK_NULL(left);
             visit(expression->right);
             auto right = result->final;
-            // TODO: why clone here?
             auto clone = expression->clone();
             clone->left = left;
             clone->right = right;
@@ -273,7 +269,6 @@ class DismantleExpression : public Transform {
             auto block = new IR::BlockStatement(*ifFalse);
             auto ifStatement = new IR::IfStatement(expression->srcInfo, cond, ifTrue, block);
             result->statements->push_back(ifStatement);
-            // TODO: result->addAssignment() returns a clone; why clone again?
             result->final = path->clone();
         }
         typeMap->setType(result->final, type);
@@ -305,7 +300,6 @@ class DismantleExpression : public Transform {
         auto ifStatement = new IR::IfStatement(
             e0, new IR::BlockStatement(*ifTrue), new IR::BlockStatement(*ifFalse));
         result->statements->push_back(ifStatement);
-        // TODO: result->addAssignment() returns a clone; why clone again?
         result->final = path->clone();
         typeMap->setType(result->final, type);
         prune();
@@ -318,10 +312,7 @@ class DismantleExpression : public Transform {
     // We don't want to compute the full read/write set here so we
     // overapproximate it as follows: all declarations that occur in
     // an expression.
-
     // TODO: this could be made more precise, perhaps using LocationSets.
-    // TODO: surely there are other passes that compute reads/writes?  Perhaps
-    // we can reuse one here.
     class ReadsWrites : public Inspector {
      public:
         std::set<const IR::IDeclaration*> decls;
@@ -336,8 +327,9 @@ class DismantleExpression : public Transform {
         }
     };
 
-    // TODO: alias analysis would be generally useful... refactor this into
-    // a stand-alone (perhaps more precise) utility?
+    // Conservative alias analysis.  We implement this here because this pass
+    // runs early in the front end, before enough information is present (eg.
+    // def-use information) to do a precise alias analysis.
     bool mayAlias(const IR::Expression* left, const IR::Expression* right) const {
         ReadsWrites rwleft(refMap);
         (void)left->apply(rwleft);
