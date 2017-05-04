@@ -99,7 +99,7 @@ static const IR::Annotations *getPragmas() {
 }
 
 %token<str> ACTION ACTIONS ACTION_PROFILE ACTION_SELECTOR ALGORITHM APPLY
-            ATTRIBUTE ATTRIBUTES BIT BLACKBOX BLACKBOX_TYPE BLOCK
+            ATTRIBUTE ATTRIBUTES BIT BLACKBOX BLACKBOX_TYPE BLOCK BOOL
             CALCULATED_FIELD CONTROL COUNTER CURRENT DEFAULT DEFAULT_ACTION
             DIRECT DROP DYNAMIC_ACTION_SELECTION ELSE EXTRACT EXPRESSION
             EXPRESSION_LOCAL_VARIABLES FALSE
@@ -268,6 +268,7 @@ type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
             BUG("%1$: Value too large", @3);
         $$ = IR::Type::Bits::get(@3, $3->asInt()); }
     | BLOCK { $$ = IR::Type_Block::get(); }
+    | BOOL { $$ = IR::Type_Boolean::get(); }
     | COUNTER { $$ = IR::Type_Counter::get(); }
     | EXPRESSION { $$ = IR::Type_Expression::get(); }
     | FIELD_LIST_CALCULATION { $$ = IR::Type_FieldListCalculation::get(); }
@@ -894,7 +895,7 @@ opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list
 
 name: IDENTIFIER
     | ACTION | ACTIONS | ACTION_PROFILE | ACTION_SELECTOR | ALGORITHM
-    | ATTRIBUTE | ATTRIBUTES | BIT | BLACKBOX | BLACKBOX_TYPE | BLOCK
+    | ATTRIBUTE | ATTRIBUTES | BIT | BLACKBOX | BLACKBOX_TYPE | BLOCK | BOOL
     | CALCULATED_FIELD | CONTROL | COUNTER | DEFAULT_ACTION
     | DIRECT | DROP | DYNAMIC_ACTION_SELECTION | EXPRESSION | EXPRESSION_LOCAL_VARIABLES
     | EXTRACT | FIELD_LIST

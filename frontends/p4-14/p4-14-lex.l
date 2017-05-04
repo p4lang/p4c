@@ -67,6 +67,7 @@ static int saveState = -1;
 "attribute"     { yylval.str = yytext; BEGIN(saveState); return ATTRIBUTE; }
 "attributes"    { yylval.str = yytext; BEGIN(saveState); return ATTRIBUTES; }
 "bit"           { yylval.str = yytext; BEGIN(saveState); return BIT; }
+"bool"          { yylval.str = yytext; BEGIN(saveState); return BOOL; }
 "blackbox"      { yylval.str = yytext; BEGIN(saveState); return BLACKBOX; }
 "blackbox_type" { yylval.str = yytext; BEGIN(saveState); return BLACKBOX_TYPE; }
 "block"         { yylval.str = yytext; BEGIN(saveState); return BLOCK; }
