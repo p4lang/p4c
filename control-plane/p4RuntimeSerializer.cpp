@@ -116,17 +116,21 @@ struct HeaderFieldPath {
                                  const TypeMap* typeMap) {
         auto type = typeMap->getType(expression->getNode(), true);
         if (expression->is<IR::PathExpression>()) {
-            // Unlike other top-level structs, top-level metadata structs are
-            // fully exposed to P4Runtime and show up in P4Runtime field names.
-            if (isMetadataType(type) && type->is<IR::Type_Declaration>()) {
-                auto name = controlPlaneName(type->to<IR::Type_Declaration>());
-                return HeaderFieldPath::root(name, type);
-            }
+            // for consistency with old P4_14 tools (e.g. the bmv2 JSON to p4runtime conversion
+            // tool), we generate names differently in P4_14 mode
+            if (refMap->isV1()) {
+                // Unlike other top-level structs, top-level metadata structs are fully exposed to
+                // P4Runtime and show up in P4Runtime field names.
+                if (isMetadataType(type) && type->is<IR::Type_Declaration>()) {
+                    auto name = controlPlaneName(type->to<IR::Type_Declaration>());
+                    return HeaderFieldPath::root(name, type);
+                }
 
-            // Top-level structs and unions don't show up in P4Runtime field
-            // names, so we use a blank path component name.
-            if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
-                return HeaderFieldPath::root("", type);
+                // Top-level structs and unions don't show up in P4Runtime field names, so we use a
+                // blank path component name.
+                if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
+                    return HeaderFieldPath::root("", type);
+                }
             }
 
             // This is a top-level header or a non-structlike value.
@@ -1347,7 +1351,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             break;
         }
 
-        HeaderFieldPath* path = HeaderFieldPath::from(expr, refMap, typeMap);
+        auto path = HeaderFieldPath::from(expr, refMap, typeMap);
         if (!path) {
             ::error("Table '%1%': Match field '%2%' is too complicated "
                     "to represent in P4Runtime", controlPlaneName(table), expr);
