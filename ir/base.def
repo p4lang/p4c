@@ -181,11 +181,12 @@ class Annotation {
     Annotation(ID n, intmax_t v) : name(n) {
         expr.push_back(new IR::Constant(v)); }
     /// Predefined annotations used by the compiler
-    static const cstring nameAnnotation;  /// indicates the control-plane name
-    static const cstring tableOnlyAnnotation;  /// action cannot be a default_action
-    static const cstring defaultOnlyAnnotation;  /// action can only be a default_action
-    static const cstring atomicAnnotation;  /// code should be executed atomically
-    static const cstring hiddenAnnotation;  /// object should not be exposed to the control-plane
+    static const cstring nameAnnotation;  /// Indicates the control-plane name.
+    static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
+    static const cstring defaultOnlyAnnotation;  /// action can only be a default_action.
+    static const cstring atomicAnnotation;  /// Code should be executed atomically.
+    static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
+    static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 }

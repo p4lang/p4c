@@ -29,7 +29,7 @@ limitations under the License.
 
 namespace P4V1 {
 
-// Information about the structure of a P4-14 program
+/// Information about the structure of a P4-14 program, used to convert it to a P4-16 program.
 class ProgramStructure {
     // In P4-14 one can have multiple objects with different types with the same name
     // In P4-16 this is not possible, so we may need to rename some objects.
@@ -65,7 +65,6 @@ class ProgramStructure {
                 // Already done
                 return;
 
-            LOG1("Discovered " << obj);
             nameToObject.emplace(obj->name, obj);
             cstring newName;
 
@@ -74,16 +73,15 @@ class ProgramStructure {
                 newName = obj->name;
             } else {
                 newName = cstring::make_unique(*allNames, obj->name, '_');
-                // ::warning("Renaming %1% to %2%", obj, newName);
-                // The old name will be stored in an annotation.
             }
             if (allNames != nullptr)
                 allNames->emplace(newName);
+            LOG3("Discovered " << obj << " named " << newName);
             objectToNewName.emplace(obj, newName);
         }
-        // Lookup using the original name
+        /// Lookup using the original name
         T get(cstring name) const { return ::get(nameToObject, name); }
-        // Get the new name
+        /// Get the new name
         cstring get(T object) const { return ::get(objectToNewName, object); }
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
@@ -124,14 +122,24 @@ class ProgramStructure {
     P4::CallGraph<cstring> calledExterns;
     P4::CallGraph<cstring> parsers;
     std::map<cstring, IR::Vector<IR::Expression>> extracts;  // for each parser
-    std::map<cstring, cstring> directCounters;  // map table to direct counter
-    // map table name to direct meter
+    std::map<cstring, cstring> directCounters;  /// Maps table to direct counter.
+    /// Maps table name to direct meter.
     std::map<cstring, const IR::Meter*> directMeters;
     std::map<const IR::Meter*, const IR::Declaration_Instance*> meterMap;
     std::map<cstring, const IR::Declaration_Instance*> counterMap;
 
     std::map<const IR::V1Table*, const IR::V1Control*> tableMapping;
     std::map<const IR::V1Table*, const IR::Apply*> tableInvocation;
+    /// Some types are transformed during conversion; this maps the
+    /// original P4-14 header type name to the final P4-16
+    /// Type_Header.  We can't use the P4-14 type object itself as a
+    /// key, because it keeps changing.
+    std::map<cstring, const IR::Type*> finalHeaderType;
+
+    /// Maps each inserted extract statement to the type of the header
+    /// type that is being extracted.  The extracts will need another
+    /// pass to cope with varbit fields.
+    std::map<const IR::MethodCallExpression*, const IR::Type_Header*> extractsSynthesized;
 
     struct ConversionContext {
         const IR::Expression* header;
@@ -153,8 +161,6 @@ class ProgramStructure {
     IR::IndexedVector<IR::Node>* declarations;
 
  protected:
-    cstring makeUniqueName(cstring base);
-
     void include(cstring filename);
     const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
     void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
@@ -188,6 +194,8 @@ class ProgramStructure {
     void createChecksumUpdates();
     void createStructures();
     void createExterns();
+    void createType(const IR::Type_StructLike* type, bool header,
+                    std::unordered_set<const IR::Type*> *converted);
     void createTypes();
     void createParser();
     void createControls();
@@ -200,6 +208,7 @@ class ProgramStructure {
     const IR::Expression* paramReference(const IR::Parameter* param);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
+    cstring makeUniqueName(cstring base);
 
     const IR::V1Control* ingress;
     IR::ID ingressReference;
@@ -207,7 +216,7 @@ class ProgramStructure {
     const IR::P4Control* verifyChecksums;
     const IR::P4Control* updateChecksums;
     const IR::P4Control* deparser;
-    // Latest extraction
+    /// Represents 'latest' P4-14 construct.
     const IR::Expression* latest;
     const int defaultRegisterWidth = 32;
 
