@@ -46,7 +46,7 @@ int main(int argc, char *const argv[]) {
 
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
-    auto program = parseP4File(options);
+    auto program = P4::parseP4File(options);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
     try {

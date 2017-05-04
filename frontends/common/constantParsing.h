@@ -17,11 +17,68 @@ limitations under the License.
 #ifndef _FRONTENDS_COMMON_CONSTANTPARSING_H_
 #define _FRONTENDS_COMMON_CONSTANTPARSING_H_
 
-#include <gmpxx.h>
-#include "ir/ir.h"
-#include "lib/source_file.h"
+#include "lib/cstring.h"
 
-// helper for parsing constants
-IR::Constant* cvtCst(Util::SourceInfo srcInfo, const char* s, unsigned skip, unsigned base);
+namespace IR {
+class Constant;
+}  // namespace IR
+
+namespace Util {
+class SourceInfo;
+}  // namespace Util
+
+/**
+ * An unparsed numeric constant. We produce these as token values during
+ * lexing. The parser is responsible for actually interpreting the raw text as a
+ * numeric value and transforming it into an IR::Constant using parseConstant().
+ *
+ * To illustrate how a numeric constant is represented using this struct,
+ * here is a breakdown of '16w0x12':
+ *
+ *          ___
+ *         /                                    ___
+ *         |                                   /
+ *         |   bitwidth (if @hasWidth)        |       16
+ *         |                                   \___
+ *         |
+ *         |                                    ___
+ *         |                                   /
+ *         |   separator (if @hasWidth)       |       w
+ *         |                                   \___
+ *  @text  |
+ *         |                                    ___
+ *         |                                   /
+ *         |   ignored prefix of length @skip |       0x
+ *         |                                   \___
+ *         |
+ *         |                                    ___
+ *         |                                   /
+ *         |   numeric value in base @base    |       w
+ *         |                                   \___
+ *         \___
+ *   
+ * Simple numeric constants like '5' are specified by setting @hasWidth to
+ * false and providing a @skip length of 0.
+ */
+struct UnparsedConstant {
+    cstring text;   /// Raw P4 text which was recognized as a numeric constant.
+    unsigned skip;  /// An ignored prefix of the numeric constant (e.g. '0x').
+    unsigned base;  /// The base in which the constant is expressed.
+    bool hasWidth;  /// If true, a bitwidth and separator are present.
+};
+
+std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant);
+
+/**
+ * Parses an UnparsedConstant @constant into an IR::Constant object, with
+ * location information taken from @srcInfo. If parsing fails, an IR::Constant
+ * containing the value @defaultValue is returned, and an error is reported.
+ *
+ * @return an IR::Constant parsed from @constant. If parsing fails, returns
+ * either a default value.
+ */
+IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
+                            const UnparsedConstant& constant,
+                            long defaultValue);
 
 #endif /* _FRONTENDS_COMMON_CONSTANTPARSING_H_ */

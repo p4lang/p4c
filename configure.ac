@@ -110,6 +110,7 @@ AC_CHECK_LIB([gc], [GC_malloc], [], [AC_MSG_ERROR([Missing GC library])])
 AC_CHECK_LIB([rt], [clock_gettime], [], [])
 AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 AC_CHECK_LIB([gmpxx], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
+AX_CXX_CHECK_LIB([boost_iostreams], [boost::iostreams::file_descriptor], [], [])
 
 AC_CONFIG_FILES([Makefile])
 AX_PYTHON_MODULE([difflib], [fatal], [python])

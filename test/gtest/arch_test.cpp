@@ -19,9 +19,10 @@ limitations under the License.
 #include "helpers.h"
 #include "lib/log.h"
 
-#include "frontends/p4/typeMap.h"
+#include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeMap.h"
 
 #include "p4/createBuiltins.h"
 #include "p4/typeChecking/typeChecker.h"
@@ -48,7 +49,7 @@ TEST(arch, packet_out) {
         }
         PSA(MyDeparser()) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -82,7 +83,7 @@ TEST(arch, duplicatedDeclarationBug) {
         }
         PSA(Deparser()) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -132,7 +133,7 @@ TEST(arch, instantiation) {
         MyDeparser() dp;
         PSA(p, ig, dp) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -164,7 +165,7 @@ TEST(arch, psa_package_with_body) {
         MyIngress(2) ig;
         PSA(ig) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -200,7 +201,7 @@ TEST(arch, psa_control_in_control) {
         MyEgress(ig) eg;
         PSA(ig) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -225,7 +226,7 @@ TEST(arch, psa_clone_as_param_to_package) {
         clone() c;
         PSA(c) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -260,7 +261,7 @@ TEST(arch, psa_clone_as_param_to_control) {
         MyIngress(clone<bit<32>>()) ig;
         PSA(ig) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -303,7 +304,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
         MyIngress(pre) ig;
         PSA(ig) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -335,7 +336,7 @@ TEST(arch, clone_as_extern_method) {
         MyIngress() ig;
         PSA(ig) main;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
     ReferenceMap refMap;
     TypeMap      typeMap;

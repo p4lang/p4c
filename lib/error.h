@@ -442,6 +442,20 @@ class ErrorReporter final {
     void setOutputStream(std::ostream* stream)
     { outputstream = stream; }
 
+    /// Reports an error @message at @location. This allows us to use the
+    /// position information provided by Bison.
+    template <typename T>
+    void parser_error(const Util::SourceInfo& location, const T& message) {
+        errorCount++;
+        *outputstream << location.toPositionString() << ":" << message << std::endl;
+        emit_message(location.toSourceFragment());  // This flushes the stream.
+    }
+
+    /**
+     * Reports an error specified by @fmt and @args at the current position in
+     * the input file. This is necessary for the IR generator's C-based Bison
+     * parser, which doesn't have location information available.
+     */
     void parser_error(const char* fmt, va_list args) {
         errorCount++;
 

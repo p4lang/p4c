@@ -26,6 +26,13 @@ noinst_HEADERS += \
 	tools/ir-generator/irclass.h \
 	tools/ir-generator/type.h
 
+# Automake's default lex rule assumes that the generated lexer can be compiled
+# on its own. However, the IR generator's lexer is designed to be #include'd by
+# the generated parser. We use a custom rule to generate the lexer without
+# actually compiling it.
+tools/ir-generator/ir-generator-lex.c: tools/ir-generator/ir-generator-lex.l
+	$(LEX.l) $< > $@
+
 BUILT_SOURCES += \
 	tools/ir-generator/ir-generator-lex.c
 
