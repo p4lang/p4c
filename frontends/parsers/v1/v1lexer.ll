@@ -284,14 +284,14 @@ using Parser = V1::V1Parser;
 
 <PRAGMA_LINE>[^ \t\r\n,][^ \t\r\n,]* { return Parser::make_STRING_LITERAL(yytext, driver.yylloc); }
 
-"<<"            { BEGIN(NORMAL); return Parser::make_SHL(driver.yylloc); }
-">>"            { BEGIN(NORMAL); return Parser::make_SHR(driver.yylloc); }
-"&&"            { BEGIN(NORMAL); return Parser::make_AND(driver.yylloc); }
-"||"            { BEGIN(NORMAL); return Parser::make_OR(driver.yylloc); }
-"=="            { BEGIN(NORMAL); return Parser::make_EQ(driver.yylloc); }
-"!="            { BEGIN(NORMAL); return Parser::make_NE(driver.yylloc); }
-">="            { BEGIN(NORMAL); return Parser::make_GE(driver.yylloc); }
-"<="            { BEGIN(NORMAL); return Parser::make_LE(driver.yylloc); }
+"<<"            { BEGIN(driver.saveState); return Parser::make_SHL(driver.yylloc); }
+">>"            { BEGIN(driver.saveState); return Parser::make_SHR(driver.yylloc); }
+"&&"            { BEGIN(driver.saveState); return Parser::make_AND(driver.yylloc); }
+"||"            { BEGIN(driver.saveState); return Parser::make_OR(driver.yylloc); }
+"=="            { BEGIN(driver.saveState); return Parser::make_EQ(driver.yylloc); }
+"!="            { BEGIN(driver.saveState); return Parser::make_NE(driver.yylloc); }
+">="            { BEGIN(driver.saveState); return Parser::make_GE(driver.yylloc); }
+"<="            { BEGIN(driver.saveState); return Parser::make_LE(driver.yylloc); }
 
 "+"            { BEGIN(driver.saveState); return Parser::make_PLUS(driver.yylloc); }
 "-"            { BEGIN(driver.saveState); return Parser::make_MINUS(driver.yylloc); }
