@@ -132,8 +132,6 @@ class Control : public Inspector {
     // P4::V2Model&         v2model;
 
  protected:
-    // helper function that create a JSON object for extern block
-    Util::IJson* createExternInstance(cstring name, cstring type);
     Util::IJson* convertTable(const CFG::TableNode* node,
                               Util::JsonArray* action_profiles);
     void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
@@ -148,7 +146,7 @@ class Control : public Inspector {
  public:
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::ControlBlock* b) override;
-    bool preorder(const IR::Declaration_Instance* d) override;
+    //bool preorder(const IR::Declaration_Instance* d) override;
 
     explicit Control(Backend *backend) : backend(backend) {}
 };

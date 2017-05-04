@@ -204,7 +204,6 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         if (stack == nullptr)
             continue;
 
-        LOG3("Creating " << stack);
         auto json = new Util::JsonObject();
         json->emplace("name", extVisibleName(f));
         json->emplace("id", nextId("stack"));

@@ -19,9 +19,9 @@ namespace BMV2 {
 /// constant definition for bmv2
 const cstring TableImplementation::actionProfileName = "action_profile";
 const cstring TableImplementation::actionSelectorName = "action_selector";
-const cstring TableImplementation::directCounterName = "directCounter";
+const cstring TableImplementation::directCounterName = "direct_counter";
 const cstring TableImplementation::counterName = "counter";
-const cstring TableImplementation::directMeterName = "directMeter";
+const cstring TableImplementation::directMeterName = "direct_meter";
 const cstring MatchImplementation::selectorMatchTypeName = "selector";
 const cstring MatchImplementation::rangeMatchTypeName = "range";
 const cstring TableAttributes::implementationName = "implementation";

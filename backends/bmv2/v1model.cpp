@@ -79,6 +79,25 @@ static int createFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
     return id;
 }
 
+static cstring convertHashAlgorithm(cstring algorithm) {
+    cstring result;
+    if (algorithm == V1Model::instance.algorithm.crc32.name)
+        result = "crc32";
+    else if (algorithm == V1Model::instance.algorithm.crc32_custom.name)
+        result = "crc32_custom";
+    else if (algorithm == V1Model::instance.algorithm.crc16.name)
+        result = "crc16";
+    else if (algorithm == V1Model::instance.algorithm.crc16_custom.name)
+        result = "crc16_custom";
+    else if (algorithm == V1Model::instance.algorithm.random.name)
+        result = "random";
+    else if (algorithm == V1Model::instance.algorithm.identity.name)
+        result = "identity";
+    else
+        ::error("%1%: unexpected algorithm", algorithm);
+    return result;
+
+}
 
 void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
                                   const P4::ExternMethod *em,
@@ -88,7 +107,6 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
     LOG1("...convert extern object " << mc);
     if (em->originalExternType->name == instance.counter.name) {
         if (em->method->name == instance.counter.increment.name) {
-            LOG1("create counter ");
             BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
             auto primitive = mkPrimitive("count", result);
             auto parameters = mkParameters(primitive);
@@ -331,4 +349,142 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
     }
 }
 
+void V1Model::convertExternInstances(BMV2::Backend *backend,
+                                     const IR::Declaration_Instance *inst,
+                                     const IR::ExternBlock* eb,
+                                     Util::JsonArray* action_profiles) {
+    cstring name = extVisibleName(inst);
+    if (eb->type->name == instance.counter.name) {
+        auto jctr = new Util::JsonObject();
+        jctr->emplace("name", name);
+        jctr->emplace("id", nextId("counter_arrays"));
+        jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        auto sz = eb->getParameterValue(instance.counter.sizeParam.name);
+        CHECK_NULL(sz);
+        BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+        jctr->emplace("size", sz->to<IR::Constant>()->value);
+        jctr->emplace("is_direct", false);
+        backend->counters->append(jctr);
+    } else if (eb->type->name == instance.meter.name) {
+        auto jmtr = new Util::JsonObject();
+        jmtr->emplace("name", name);
+        jmtr->emplace("id", nextId("meter_arrays"));
+        jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        jmtr->emplace("is_direct", false);
+        auto sz = eb->getParameterValue(instance.meter.sizeParam.name);
+        CHECK_NULL(sz);
+        BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+        jmtr->emplace("size", sz->to<IR::Constant>()->value);
+        jmtr->emplace("rate_count", 2);
+        auto mkind = eb->getParameterValue(instance.meter.typeParam.name);
+        CHECK_NULL(mkind);
+        BUG_CHECK(mkind->is<IR::Declaration_ID>(), "%1%: expected a member", mkind);
+        cstring name = mkind->to<IR::Declaration_ID>()->name;
+        cstring type = "?";
+        if (name == instance.meter.meterType.packets.name)
+            type = "packets";
+        else if (name == instance.meter.meterType.bytes.name)
+            type = "bytes";
+        else
+            ::error("Unexpected meter type %1%", mkind);
+        jmtr->emplace("type", type);
+        backend->meter_arrays->append(jmtr);
+    } else if (eb->type->name == instance.registers.name) {
+        auto jreg = new Util::JsonObject();
+        jreg->emplace("name", name);
+        jreg->emplace("id", nextId("register_arrays"));
+        jreg->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        auto sz = eb->getParameterValue(instance.registers.sizeParam.name);
+        CHECK_NULL(sz);
+        BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+        jreg->emplace("size", sz->to<IR::Constant>()->value);
+        BUG_CHECK(eb->instanceType->is<IR::Type_SpecializedCanonical>(),
+                "%1%: Expected a generic specialized type", eb->instanceType);
+        auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
+        BUG_CHECK(st->arguments->size() == 1, "%1%: expected 1 type argument");
+        unsigned width = st->arguments->at(0)->width_bits();
+        if (width == 0)
+            ::error("%1%: unknown width", st->arguments->at(0));
+        jreg->emplace("bitwidth", width);
+        backend->register_arrays->append(jreg);
+    } else if (eb->type->name == instance.directCounter.name) {
+        auto it = backend->getDirectCounterMap().find(name);
+        if (it == backend->getDirectCounterMap().end()) {
+            ::warning("%1%: Direct counter not used; ignoring", inst);
+        } else {
+            auto jctr = new Util::JsonObject();
+            jctr->emplace("name", name);
+            jctr->emplace("id", nextId("counter_arrays"));
+            // TODO(jafingerhut) - add line/col here?
+            jctr->emplace("is_direct", true);
+            jctr->emplace("binding", it->second->externalName());
+            backend->counters->append(jctr);
+        }
+    } else if (eb->type->name == instance.directMeter.name) {
+        auto info = backend->getMeterMap().getInfo(inst);
+        CHECK_NULL(info);
+        CHECK_NULL(info->table);
+        CHECK_NULL(info->destinationField);
+
+        auto jmtr = new Util::JsonObject();
+        jmtr->emplace("name", name);
+        jmtr->emplace("id", nextId("meter_arrays"));
+        jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        jmtr->emplace("is_direct", true);
+        jmtr->emplace("rate_count", 2);
+        auto mkind = eb->getParameterValue(instance.directMeter.typeParam.name);
+        CHECK_NULL(mkind);
+        BUG_CHECK(mkind->is<IR::Declaration_ID>(), "%1%: expected a member", mkind);
+        cstring name = mkind->to<IR::Declaration_ID>()->name;
+        cstring type = "?";
+        if (name == instance.meter.meterType.packets.name)
+            type = "packets";
+        else if (name == instance.meter.meterType.bytes.name)
+            type = "bytes";
+        else
+            ::error("%1%: unexpected meter type", mkind);
+        jmtr->emplace("type", type);
+        jmtr->emplace("size", info->tableSize);
+        cstring tblname = extVisibleName(info->table);
+        jmtr->emplace("binding", tblname);
+        auto result = backend->getExpressionConverter()->convert(info->destinationField);
+        jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
+        backend->meter_arrays->append(jmtr);
+    } else if (eb->type->name == instance.action_profile.name ||
+            eb->type->name == instance.action_selector.name) {
+        auto action_profile = new Util::JsonObject();
+        action_profile->emplace("name", name);
+        action_profile->emplace("id", nextId("action_profiles"));
+        // TODO(jafingerhut) - add line/col here?
+
+        auto add_size = [&action_profile, &eb](const cstring &pname) {
+            auto sz = eb->getParameterValue(pname);
+            BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+            action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+        };
+
+        if (eb->type->name == instance.action_profile.name) {
+            add_size(instance.action_profile.sizeParam.name);
+        } else {
+            add_size(instance.action_selector.sizeParam.name);
+            auto selector = new Util::JsonObject();
+            auto hash = eb->getParameterValue(
+                    instance.action_selector.algorithmParam.name);
+            BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
+            auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+            selector->emplace("algo", algo);
+            //FIXME
+            //const auto &input = selector_check.get_selector_input(inst);
+            //auto j_input = mkArrayField(selector, "input");
+            //for (auto expr : input) {
+            //    auto jk = backend->getExpressionConverter()->convert(expr);
+            //    j_input->append(jk);
+            //}
+            action_profile->emplace("selector", selector);
+        }
+
+        action_profiles->append(action_profile);
+    }
 }
+
+} // namespace P4V1

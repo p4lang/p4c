@@ -507,9 +507,8 @@ Control::convertTable(const CFG::TableNode* node,
                     ::error("%1%: expected an instance", decl->getNode());
                     return result;
                 }
-                //FIXME
-                //meterMap.setTable(decl, table);
-                //meterMap.setSize(decl, size);
+                backend->getMeterMap().setTable(decl, table);
+                backend->getMeterMap().setSize(decl, size);
                 BUG_CHECK(decl->is<IR::Declaration_Instance>(),
                           "%1%: expected an instance", decl->getNode());
                 cstring name = extVisibleName(decl);
@@ -730,9 +729,30 @@ bool Control::preorder(const IR::ControlBlock* block) {
         }
     }
 
+#ifndef PSA
     for (auto c : cont->controlLocals) {
-        visit(c);
+        if (c->is<IR::Declaration_Constant>() ||
+            c->is<IR::Declaration_Variable>() ||
+            c->is<IR::P4Action>() ||
+            c->is<IR::P4Table>())
+            continue;
+        if (c->is<IR::Declaration_Instance>()) {
+            auto inst = c->to<IR::Declaration_Instance>();
+            auto bl = block->getValue(c);
+            CHECK_NULL(bl);
+            if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
+                // Since this block has not been inlined, it is probably unused
+                // So we don't do anything.
+                continue;
+            if (bl->is<IR::ExternBlock>()) {
+                auto eb = bl->to<IR::ExternBlock>();
+                P4V1::V1Model::convertExternInstances(backend, inst, eb, action_profiles);
+            }
+        }
+        BUG("%1%: not yet handled", c);
     }
+#endif
+
     backend->pipelines->append(result);
     return false;
 }
@@ -744,25 +764,17 @@ bool Control::preorder(const IR::ControlBlock* block) {
         Register<bit<32>, bit<32>> reg;  <- visit this line
     }
 */
-bool Control::preorder(const IR::Declaration_Instance* instance) {
-    LOG3("Visiting " << dbp(instance));
-    auto parent = getContext()->node;
-    auto bl = parent->to<IR::ControlBlock>()->getValue(instance);
-    CHECK_NULL(bl);
-    cstring name = instance->externalName();
-    LOG1("Declaration_Instance name = " << name.c_str());
-    if (bl->is<IR::ExternBlock>()) {
-        visit(bl->to<IR::ExternBlock>());
-    }
-    return false;
-}
-
-Util::IJson* Control::createExternInstance(cstring name, cstring type) {
-    auto j = new Util::JsonObject();
-    j->emplace("name", name);
-    j->emplace("id", nextId("extern_instances"));
-    j->emplace("type", type);
-    return j;
-}
+//bool Control::preorder(const IR::Declaration_Instance* instance) {
+//    LOG3("Visiting " << dbp(instance));
+//    auto parent = getContext()->node;
+//    auto bl = parent->to<IR::ControlBlock>()->getValue(instance);
+//    CHECK_NULL(bl);
+//    cstring name = instance->externalName();
+//    LOG1("Declaration_Instance name = " << name.c_str());
+//    if (bl->is<IR::ExternBlock>()) {
+//        visit(bl->to<IR::ExternBlock>());
+//    }
+//    return false;
+//}
 
 }  // namespace BMV2

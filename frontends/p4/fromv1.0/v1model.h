@@ -313,6 +313,10 @@ class V1Model : public ::Model::Model {
                                        const P4::ExternFunction *ef,
                                        const IR::MethodCallExpression *mc,
                                        const IR::StatOrDecl* s);
+    static void convertExternInstances(BMV2::Backend *bmv2,
+                                       const IR::Declaration_Instance *inst,
+                                       const IR::ExternBlock* eb,
+                                       Util::JsonArray* action_profiles);
 
     static V1Model instance;
 };

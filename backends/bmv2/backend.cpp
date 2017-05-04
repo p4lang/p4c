@@ -454,7 +454,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     actions = mkArrayField(&toplevel, "actions");
     pipelines = mkArrayField(&toplevel, "pipelines");
     checksums = mkArrayField(&toplevel, "checksums");
-    // force_arith = mkArrayField(&toplevel, "force_arith");
+    force_arith = mkArrayField(&toplevel, "force_arith");
     externs = mkArrayField(&toplevel, "extern_instances");
     constexpr char metadata_remap_file[] = "p4include/p4d2model_bmss_meta.map";
     field_aliases = mkArrayField(&toplevel, "field_aliases");

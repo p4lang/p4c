@@ -72,6 +72,7 @@ class Backend : public PassManager {
     Util::JsonArray*                 parsers;
     Util::JsonArray*                 pipelines;
     Util::JsonArray*                 register_arrays;
+    Util::JsonArray*                 force_arith;
     Util::JsonArray*                 field_aliases;
 
     Util::JsonObject*                scalarsStruct;

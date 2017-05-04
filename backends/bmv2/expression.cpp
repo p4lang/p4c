@@ -17,6 +17,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+class ArithmeticFixup;
+
 const IR::Expression* ArithmeticFixup::fix(const IR::Expression* expr, const IR::Type_Bits* type) {
     unsigned width = type->size;
     if (!type->isSigned) {
