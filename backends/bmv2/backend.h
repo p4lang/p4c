@@ -54,6 +54,7 @@ class Backend : public PassManager {
     ErrorCodesMap                    errorCodesMap;
 
  public:
+    Util::JsonArray*                 meta;
     Util::JsonArray*                 actions;
     Util::JsonArray*                 calculations;
     Util::JsonArray*                 checksums;
@@ -113,7 +114,7 @@ class Backend : public PassManager {
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
     {}
     void process(const IR::ToplevelBlock* block);
-    void convert(const IR::ToplevelBlock* block);
+    void convert(const IR::ToplevelBlock* block, CompilerOptions& options);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }

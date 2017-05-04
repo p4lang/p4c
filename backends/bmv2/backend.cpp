@@ -28,17 +28,16 @@ limitations under the License.
 namespace BMV2 {
 
 void Backend::addMetaInformation() {
-  auto meta = new Util::JsonObject();
+  auto info = new Util::JsonObject();
 
   static constexpr int version_major = 2;
   static constexpr int version_minor = 7;
-  auto version = mkArrayField(meta, "version");
+  auto version = mkArrayField(info, "version");
   version->append(version_major);
   version->append(version_minor);
 
-  meta->emplace("compiler", "https://github.com/p4lang/p4c");
-
-  toplevel.emplace("__meta__", meta);
+  info->emplace("compiler", "https://github.com/p4lang/p4c");
+  toplevel.emplace("__meta__", info);
 }
 
 void Backend::addEnums(Util::JsonArray* enums) {
@@ -399,7 +398,9 @@ void Backend::process(const IR::ToplevelBlock* tb) {
 }
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject.
-void Backend::convert(const IR::ToplevelBlock* tb) {
+void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
+    toplevel.emplace("program", options.file);
+    addMetaInformation();
     headerTypes = mkArrayField(&toplevel, "header_types");
     headerInstances = mkArrayField(&toplevel, "headers");
     headerStacks = mkArrayField(&toplevel, "header_stacks");
@@ -425,7 +426,6 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
 
     PassManager codegen_passes = {
         new CopyAnnotations(&refMap, &blockTypeMap),
-        new VisitFunctor([this](){ addMetaInformation(); }),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
         new VisitFunctor([this](){ addLocals(); }),
@@ -439,8 +439,6 @@ void Backend::convert(const IR::ToplevelBlock* tb) {
         new ConvertControl(this),
         new ConvertDeparser(this),
     };
-    //dump(tb->getProgram());
-    //dump(tb->getMain());
     tb->getMain()->apply(codegen_passes);
 }
 
