@@ -38,7 +38,7 @@ void compile(EbpfOptions& options) {
         ::error("This compiler only handles P4-16");
         return;
     }
-    auto program = parseP4File(options);
+    auto program = P4::parseP4File(options);
     if (::errorCount() > 0)
         return;
     P4::FrontEnd frontend;

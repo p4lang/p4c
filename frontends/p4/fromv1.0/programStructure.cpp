@@ -14,17 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "programStructure.h"
+
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+
 #include <set>
 #include <algorithm>
 
-#include "programStructure.h"
 #include "setup.h"
 #include "lib/path.h"
 #include "lib/gmputil.h"
 #include "converters.h"
 
 #include "frontends/common/options.h"
-#include "frontends/p4/p4-parse.h"
+#include "frontends/parsers/parserDriver.h"
 #include "frontends/p4/reservedWords.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/tableKeyNames.h"
@@ -482,10 +486,10 @@ void ProgramStructure::include(cstring filename) {
     options.file = path.toString();
     if (FILE* file = options.preprocess()) {
         if (!::errorCount()) {
-            if (auto code = parse_P4_16_file(options.file, file)) {
-                if (!::errorCount()) {
-                    for (auto decl : code->declarations) {
-                        declarations->push_back(decl); } } } }
+            auto code = P4::P4ParserDriver::parse(options.file, file);
+            if (code && !::errorCount())
+                for (auto decl : code->declarations)
+                    declarations->push_back(decl); }
         options.closeInput(file); }
 }
 

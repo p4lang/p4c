@@ -216,7 +216,7 @@ FILE* CompilerOptions::preprocess() {
         /* FIXME -- while clang has a 'cpp' executable, its broken and doesn't work right, so
          * we need to run clang -E instead.  This should be managed by autoconf (figure out how
          * to portably run the c preprocessor) */
-        std::string cmd("cc -E -x c");
+        std::string cmd("cc -E -x c -Wno-comment");
 #else
         std::string cmd("cpp");
 #endif

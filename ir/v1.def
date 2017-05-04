@@ -478,7 +478,7 @@ class V1Program {
     inline NameMap<Node, std::multimap>         scope;
 
 #noconstructor
-    V1Program(const CompilerOptions &options);
+    explicit V1Program();
 #emit
     template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
 #end

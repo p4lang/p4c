@@ -52,7 +52,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto program = parseP4File(options);
+    auto program = P4::parseP4File(options);
     auto hook = options.getDebugHook();
 
     if (program != nullptr && ::errorCount() == 0) {
