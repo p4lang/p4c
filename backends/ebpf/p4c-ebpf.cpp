@@ -70,7 +70,12 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         exit(1);
 
-    compile(options);
+    try {
+        compile(options);
+    } catch (const Util::P4CExceptionBase &bug) {
+        std::cerr << bug.what() << std::endl;
+        return 1;
+    }
 
     if (Log::verbose())
         std::cerr << "Done." << std::endl;

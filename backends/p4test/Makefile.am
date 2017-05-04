@@ -49,11 +49,6 @@ p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 	@$(GENTESTS) $(srcdir) p14_to_16 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 
 
-# First is issue #13
-# Second one is issue #447
-# Next ones are all issue #481
+# issue #13
 XFAIL_TESTS += \
-    p4/testdata/p4_16_samples/cast-call.p4.test \
-    p4/testdata/p4_16_samples/spec-ex32.p4.test \
-    p14_to_16/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
-    p14_to_16/testdata/p4_14_samples/TLV_parsing.p4.test
+    p4/testdata/p4_16_samples/cast-call.p4.test

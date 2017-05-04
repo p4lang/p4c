@@ -74,6 +74,7 @@ class PacketIn : public Model::Extern_Model {
     Model::Elem lookahead;
     Model::Elem advance;
     Model::Elem length;
+    int extractSecondArgSize = 32;
 };
 
 class PacketOut : public Model::Extern_Model {
