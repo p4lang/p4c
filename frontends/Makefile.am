@@ -53,13 +53,6 @@ p4_frontend_UNIFIED = \
 	frontends/p4/uselessCasts.cpp \
 	frontends/p4/directCalls.cpp
 
-p4_frontend_NONUNIFIED = \
-	frontends/p4/p4-parse.ypp
-
-BUILT_SOURCES += \
-        frontends/p4/p4-lex.c \
-	frontends/p4/p4-parse.cpp
-
 noinst_HEADERS += \
 	frontends/p4/callGraph.h \
 	frontends/p4/cloner.h \
@@ -76,7 +69,6 @@ noinst_HEADERS += \
 	frontends/p4/frontend.h \
 	frontends/p4/methodInstance.h \
 	frontends/p4/moveDeclarations.h \
-	frontends/p4/p4-parse.h \
 	frontends/p4/parameterSubstitution.h \
 	frontends/p4/parserCallGraph.h \
 	frontends/p4/parserControlFlow.h \
@@ -106,8 +98,7 @@ noinst_HEADERS += \
 	frontends/p4/uselessCasts.h \
 	frontends/p4/directCalls.h
 
-cpplint_FILES += frontends/p4/p4-lex.l \
-		 $(p4_frontend_UNIFIED) \
+cpplint_FILES += $(p4_frontend_UNIFIED) \
 		 $(p4_frontend_NONUNIFIED)
 
 common_frontend_UNIFIED = \
@@ -136,26 +127,41 @@ v1_frontend_UNIFIED = \
 	frontends/p4-14/typecheck.cpp \
 	frontends/p4-14/header_type.cpp
 
-v1_frontend_NONUNIFIED = \
-	frontends/p4-14/p4-14-parse.ypp
-
 ir_DEF_FILES += $(srcdir)/frontends/p4-14/ir-v1.def
-
-BUILT_SOURCES += \
-        frontends/p4-14/p4-14-lex.c \
-	frontends/p4-14/p4-14-parse.cpp
 
 noinst_HEADERS += \
 	frontends/p4-14/header_type.h \
 	frontends/p4-14/inline_control_flow.h \
-	frontends/p4-14/p4-14-parse.h \
 	frontends/p4-14/typecheck.h
 
-cpplint_FILES += frontends/p4-14/p4-14-lex.l \
-		 $(v1_frontend_UNIFIED) \
+cpplint_FILES += $(v1_frontend_UNIFIED) \
 		 $(v1_frontend_NONUNIFIED)
 
+parsers_UNIFIED = \
+	frontends/parsers/parserDriver.cpp
+
+parsers_NONUNIFIED = \
+        frontends/parsers/p4/p4lexer.ll \
+	frontends/parsers/p4/p4parser.ypp \
+        frontends/parsers/v1/v1lexer.ll \
+	frontends/parsers/v1/v1parser.ypp
+
+BUILT_SOURCES += \
+	frontends/parsers/p4/p4parser.hpp \
+	frontends/parsers/v1/v1parser.hpp
+
+noinst_HEADERS += \
+	frontends/parsers/p4/p4lexer.hpp \
+	frontends/parsers/v1/v1lexer.hpp
+
+noinst_HEADERS += \
+	frontends/parsers/parserDriver.h
+
+cpplint_FILES += $(parsers_UNIFIED) \
+		 $(parsers_NONUNIFIED)
+
 frontend_SOURCES = \
-	$(p4_frontend_SOURCES) \
 	$(common_frontend_SOURCES) \
+	$(parsers_SOURCES) \
+	$(p4_frontend_SOURCES) \
 	$(v1_frontend_SOURCES)
