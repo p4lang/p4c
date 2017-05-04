@@ -6,7 +6,7 @@ https://github.com/p4lang/behavioral-model.git
 It can accept either P4_14 programs, or P4_16 programs written for the
 `v1model.p4` switch model.
 
-# Dependences
+# Dependencies
 
 To run and test this back-end you need some additional tools:
 
@@ -17,3 +17,48 @@ To run and test this back-end you need some additional tools:
 - the Python scapy library for manipulating network packets `sudo pip install scapy`
 
 - the Python ipaddr library `sudo pip install ipaddr`
+
+# Unsupported P4_16 language features
+
+Here are some unsupported features we are aware of. We will update this list as
+more features get supported in the bmv2 compiler backend and as we discover more
+issues.
+
+- nested structs in structs used as block constructor parameters
+```
+struct s0_t {
+  bit<8> f1;
+  bit<8> f2;
+};
+
+struct s1_t {
+  s1_t s01;
+  s1_t s02;
+};
+
+parser parse(packet_in pkt, out parsed_packet_t hdr,
+             inout s1_t my_metadata,
+             inout standard_metadata_t standard_metadata) {
+  // ...
+}
+```
+
+- explicit transition to reject in parse state
+
+- compound action parameters (can only be `bit<>` or `int<>`)
+
+- functions or methods with a compound return type
+```
+struct s_t {
+    bit<8> f0;
+    bit<8> f1;
+};
+
+extern s_t my_extern_function();
+
+controlc c() {
+    apply { s_t s1 = my_extern_function(); }
+}
+```
+
+- user-defined extern types / methods which are not defined in `v1model.p4`
