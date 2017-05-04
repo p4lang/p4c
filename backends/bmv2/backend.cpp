@@ -394,7 +394,6 @@ void Backend::createMetadata() {
     json->emplace("header_type", "standard_metadata");
     json->emplace("metadata", true);
     headerInstances->append(json);
-    //headerInstancesCreated.insert();
 }
 
 void Backend::createFieldAliases(const char *remapFile) {
@@ -461,7 +460,6 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
 
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(this);
-
 
     PassManager codegen_passes = {
         new CopyAnnotations(&refMap, &blockTypeMap),

@@ -747,6 +747,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 P4V1::V1Model::convertExternInstances(backend, inst, eb, action_profiles);
+                continue;
             }
         }
         BUG("%1%: not yet handled", c);
