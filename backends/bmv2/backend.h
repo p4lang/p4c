@@ -64,8 +64,6 @@ class Backend : public PassManager {
     Util::JsonArray*                 errors;
     Util::JsonArray*                 externs;
     Util::JsonArray*                 field_lists;
-    // Util::JsonArray*                 force_arith;
-    Util::JsonArray*                 field_aliases;
     Util::JsonArray*                 headerInstances;
     Util::JsonArray*                 headerStacks;
     Util::JsonArray*                 headerTypes;

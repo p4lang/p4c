@@ -83,8 +83,10 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
                                   const P4::ExternMethod *em,
                                   const IR::MethodCallExpression *mc)
 {
+    LOG1("...convert extern object " << mc);
     if (em->originalExternType->name == instance.counter.name) {
         if (em->method->name == instance.counter.increment.name) {
+            LOG1("create counter ");
             BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
             auto primitive = mkPrimitive("count", result);
             auto parameters = mkParameters(primitive);
@@ -140,6 +142,7 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
             // Do not generate any code for this operation
         }
     } else if (em->originalExternType->name == instance.directCounter.name) {
+        LOG1("create direct counter ");
         if (em->method->name == instance.directCounter.count.name) {
             BUG_CHECK(mc->arguments->size() == 0, "Expected 0 argument for %1%", mc);
             // Do not generate any code for this operation

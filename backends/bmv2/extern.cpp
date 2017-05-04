@@ -35,6 +35,7 @@ void Extern::addExternAttributes(const IR::Declaration_Instance* di,
                                                   Util::JsonArray* attributes) {
     auto paramIt = block->getConstructorParameters()->parameters.begin();
     for (auto arg : *di->arguments) {
+        LOG1("add extern attr" << arg);
         auto j = new Util::JsonObject();
         j->emplace("name", arg->toString());
         if (arg->is<IR::Constant>()) {
@@ -49,7 +50,7 @@ void Extern::addExternAttributes(const IR::Declaration_Instance* di,
             auto declID = arg->to<IR::Declaration_ID>();
             j->emplace("type", "string");
             j->emplace("value", declID->toString());
-        } else if (arg->is<IR::Type_Enum>()) {
+        } else if (arg->type->is<IR::Type_Enum>()) {
             j->emplace("type", "string");
             j->emplace("value", arg->toString());
         } else {

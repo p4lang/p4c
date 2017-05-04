@@ -450,6 +450,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
         new VisitFunctor([this](){ addLocals(); }),
+        new VisitFunctor([this](){ createMetadata(); }),
         new ConvertHeaders(this),
         new VisitFunctor([this](){ padScalars(); }),
         new VisitFunctor([this](){ addErrors(errors); }),
