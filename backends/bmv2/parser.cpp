@@ -22,6 +22,7 @@ Util::IJson* Parser::toJson(const IR::P4Parser* parser) {
     auto result = new Util::JsonObject();
     result->emplace("name", "parser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("parser"));
+    result->emplace_non_null("source_info", parser->sourceInfoJsonObj());
     result->emplace("init_state", IR::ParserState::start);
     auto states = mkArrayField(result, "parse_states");
 
@@ -233,6 +234,7 @@ Util::IJson* Parser::toJson(const IR::ParserState* state) {
     auto result = new Util::JsonObject();
     result->emplace("name", extVisibleName(state));
     result->emplace("id", nextId("parse_states"));
+    result->emplace_non_null("source_info", state->sourceInfoJsonObj());
     auto operations = mkArrayField(result, "parser_ops");
     for (auto s : state->components) {
         auto j = convertParserStatement(s);

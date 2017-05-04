@@ -74,6 +74,7 @@ Util::IJson* DoDeparserBlockConversion::convertDeparser(const IR::P4Control* ctr
     auto result = new Util::JsonObject();
     result->emplace("name", "deparser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("deparser"));
+    result->emplace_non_null("source_info", ctrl->sourceInfoJsonObj());
     auto order = mkArrayField(result, "order");
     convertDeparserBody(&ctrl->body->components, order);
     return result;

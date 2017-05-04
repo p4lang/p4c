@@ -73,6 +73,7 @@ static int createFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
     int id = nextId(group);
     fl->emplace("id", id);
     fl->emplace("name", listName);
+    // TODO(jafingerhut) - add line/col here?
     auto elements = mkArrayField(fl, "elements");
     addToFieldList(bmv2, expr, elements);
     return id;
@@ -81,7 +82,8 @@ static int createFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
 
 void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
                                   const P4::ExternMethod *em,
-                                  const IR::MethodCallExpression *mc)
+                                  const IR::MethodCallExpression *mc,
+                                  const IR::StatOrDecl *s)
 {
     LOG1("...convert extern object " << mc);
     if (em->originalExternType->name == instance.counter.name) {
@@ -90,6 +92,7 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
             BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
             auto primitive = mkPrimitive("count", result);
             auto parameters = mkParameters(primitive);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             auto ctr = new Util::JsonObject();
             ctr->emplace("type", "counter_array");
             ctr->emplace("value", extVisibleName(em->object));
@@ -102,6 +105,7 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
             BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
             auto primitive = mkPrimitive("execute_meter", result);
             auto parameters = mkParameters(primitive);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             auto mtr = new Util::JsonObject();
             mtr->emplace("type", "meter_array");
             mtr->emplace("value", extVisibleName(em->object));
@@ -120,6 +124,7 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
         if (em->method->name == instance.registers.read.name) {
             auto primitive = mkPrimitive("register_read", result);
             auto parameters = mkParameters(primitive);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
             parameters->append(dest);
             parameters->append(reg);
@@ -128,6 +133,7 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
         } else if (em->method->name == instance.registers.write.name) {
             auto primitive = mkPrimitive("register_write", result);
             auto parameters = mkParameters(primitive);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             parameters->append(reg);
             auto index = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
             parameters->append(index);
@@ -153,7 +159,8 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
 
 void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv2,
                                      const P4::ExternFunction *ef,
-                                     const IR::MethodCallExpression *mc)
+                                     const IR::MethodCallExpression *mc,
+                                     const IR::StatOrDecl* s)
 {
     if (ef->method->name == instance.clone.name ||
         ef->method->name == instance.clone.clone3.name) {
@@ -178,6 +185,8 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
             auto session = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
             auto primitive = mkPrimitive(prim, result);
             auto parameters = mkParameters(primitive);
+            // TODO(jafingerhut):
+            // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             parameters->append(session);
 
             if (id >= 0) {
@@ -197,6 +206,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         BUG_CHECK(mc->arguments->size() == 5, "Expected 5 arguments for %1%", mc);
         auto primitive = mkPrimitive("modify_field_with_hash_based_offset", result);
         auto parameters = mkParameters(primitive);
+        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
         auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
         parameters->append(dest);
         auto base = bmv2->getExpressionConverter()->convert(mc->arguments->at(2));
@@ -239,6 +249,8 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
         auto primitive = mkPrimitive("generate_digest", result);
         auto parameters = mkParameters(primitive);
+        // TODO(jafingerhut):
+        // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
         auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
         parameters->append(dest);
         cstring listName = "digest";
@@ -268,6 +280,8 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
                 "resubmit" : "recirculate";
         auto primitive = mkPrimitive(prim, result);
         auto parameters = mkParameters(primitive);
+        // TODO(jafingerhut):
+        // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
         cstring listName = prim;
         // If we are supplied a type argument that is a named type use
         // that for the list name.
@@ -292,11 +306,14 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         BUG_CHECK(mc->arguments->size() == 0, "Expected 0 arguments for %1%", mc);
         auto primitive = mkPrimitive("drop", result);
         (void)mkParameters(primitive);
+        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     } else if (ef->method->name == instance.random.name) {
         BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
         auto primitive =
                 mkPrimitive(instance.random.modify_field_rng_uniform.name, result);
         auto params = mkParameters(primitive);
+        // TODO(jafingerhut):
+        // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
         auto dest = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
         auto lo = bmv2->getExpressionConverter()->convert(mc->arguments->at(1));
         auto hi = bmv2->getExpressionConverter()->convert(mc->arguments->at(2));
@@ -307,10 +324,11 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         BUG_CHECK(mc->arguments->size() == 1, "Expected 1 arguments for %1%", mc);
         auto primitive = mkPrimitive(instance.truncate.name, result);
         auto params = mkParameters(primitive);
+        // TODO(jafingerhut):
+        // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
         auto len = bmv2->getExpressionConverter()->convert(mc->arguments->at(0));
         params->append(len);
     }
-
 }
 
 }

@@ -47,6 +47,7 @@ void Backend::addEnums(Util::JsonArray* enums) {
         auto enumName = pEnum.first->getName().name.c_str();
         auto enumObj = new Util::JsonObject();
         enumObj->emplace("name", enumName);
+        enumObj->emplace_non_null("source_info", pEnum.first->sourceInfoJsonObj());
         auto entries = mkArrayField(enumObj, "entries");
         for (const auto &pEntry : *pEnum.second) {
             auto entry = new Util::JsonArray();
@@ -73,6 +74,7 @@ void Backend::createJsonType(const IR::Type_StructLike *st) {
         cstring name = extVisibleName(st);
         typeJson->emplace("name", name);
         typeJson->emplace("id", nextId("header_types"));
+        typeJson->emplace_non_null("source_info", st->sourceInfoJsonObj());
         headerTypes->append(typeJson);
         auto fields = mkArrayField(typeJson, "fields");
         pushFields(st, fields);
@@ -135,6 +137,7 @@ void Backend::addLocals() {
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("headers"));
+            // TODO(jafingerhut) - add line/col here?
             json->emplace("header_type", name);
             json->emplace("metadata", true);
             json->emplace("pi_omit", true);  // Don't expose in PI.
@@ -143,13 +146,14 @@ void Backend::addLocals() {
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("stack"));
+            // TODO(jafingerhut) - add line/col here?
             json->emplace("size", stack->getSize());
             auto type = typeMap.getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             createJsonType(ht);
 
-            cstring header_type = stack->elementType->to<IR::Type_Header>()->name;
+            cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
             json->emplace("header_type", header_type);
             auto stackMembers = mkArrayField(json, "header_ids");
             for (unsigned i=0; i < stack->getSize(); i++) {
@@ -159,6 +163,7 @@ void Backend::addLocals() {
                 cstring name = v->name + "[" + Util::toString(i) + "]";
                 header->emplace("name", name);
                 header->emplace("id", id);
+                // TODO(jafingerhut) - add line/col here?
                 header->emplace("header_type", header_type);
                 header->emplace("metadata", false);
                 header->emplace("pi_omit", true);  // Don't expose in PI.
@@ -197,6 +202,7 @@ void Backend::addLocals() {
     auto json = new Util::JsonObject();
     json->emplace("name", scalarsName);
     json->emplace("id", nextId("headers"));
+    // TODO(jafingerhut) - add line/col here?
     json->emplace("header_type", scalarsName);
     json->emplace("metadata", true);
     json->emplace("pi_omit", true);  // Don't expose in PI.
@@ -249,6 +255,9 @@ void Backend::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
 void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
     //FIXME: conv->createFieldList = true??
     for (auto s : *body) {
+        // TODO(jafingerhut) - add line/col at all individual cases below,
+        // or perhaps it can be done as a common case above or below
+        // for all of them?
         if (!s->is<IR::Statement>()) {
             continue;
         } else if (auto block = s->to<IR::BlockStatement>()) {
@@ -259,6 +268,7 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
         } else if (s->is<IR::ExitStatement>()) {
             auto primitive = mkPrimitive("exit", result);
             (void)mkParameters(primitive);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             break;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression* l, *r;
@@ -274,6 +284,7 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
                 operation = "modify_field";
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
+            primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
             auto left = conv->convertLeftValue(l);
             parameters->append(left);
             bool convertBool = type->is<IR::Type_Boolean>();
@@ -316,6 +327,7 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
                 }
                 auto primitive = mkPrimitive(prim, result);
                 primitive->emplace("parameters", parameters);
+                primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
@@ -323,16 +335,21 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
                     genExternMethod(result, em);
 #else
                     LOG1("P4V1:: convert " << s);
-                    P4V1::V1Model::convertExternObjects(result, this, em, mc);
+                    P4V1::V1Model::convertExternObjects(result, this, em, mc, s);
 #endif
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
+#ifdef PSA
                 auto primitive = mkPrimitive(ef->method->name.name, result);
                 auto parameters = mkParameters(primitive);
+                primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
                 for (auto a : *mc->arguments) {
                     parameters->append(conv->convert(a));
                 }
+#else
+                P4V1::V1Model::convertExternFunctions(result, this, ef, mc, s);
+#endif
                 continue;
             }
         }
@@ -350,6 +367,7 @@ void Backend::createActions(Util::JsonArray* actions) {
         LOG1("emplace " << action << " " << id);
         structure.ids.emplace(action, id);
         jact->emplace("id", id);
+        jact->emplace_non_null("source_info", action->sourceInfoJsonObj());
         auto params = mkArrayField(jact, "runtime_data");
         for (auto p : *action->parameters->getEnumerator()) {
             if (!refMap.isUsed(p))

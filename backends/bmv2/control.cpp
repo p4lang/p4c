@@ -39,6 +39,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
     auto entries = mkArrayField(jsonTable, "entries");
     int entryPriority = 1;  // default priority is defined by index position
     for (auto e : entriesList->entries) {
+        // TODO(jafingerhut) - add line/col here?
         auto entry = new Util::JsonObject();
 
         auto keyset = e->getKeys();
@@ -53,7 +54,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
             key->emplace("match_type", matchType);
             if (matchType == "valid") {
                 if (k->is<IR::BoolLiteral>())
-                    key->emplace("key", k->to<IR::BoolLiteral>()->toString());
+                    key->emplace("key", k->to<IR::BoolLiteral>()->value);
                 else
                     ::error("%1% invalid 'valid' key expression", k);
             } else if (matchType == backend->getCoreLibrary().exactMatch.name) {
@@ -217,6 +218,8 @@ Control::handleTableImplementation(const IR::Property* implementation,
         action_profiles->append(action_profile);
         action_profile->emplace("name", apname);
         action_profile->emplace("id", nextId("action_profiles"));
+        // TODO(jafingerhut) - add line/col here?
+        // TBD what about the else if cases below?
 
         auto add_size = [&action_profile, &arguments](size_t arg_index) {
             auto size_expr = arguments->at(arg_index);
@@ -303,6 +306,7 @@ Control::convertTable(const CFG::TableNode* node,
     cstring name = extVisibleName(table);
     result->emplace("name", name);
     result->emplace("id", nextId("tables"));
+    result->emplace_non_null("source_info", table->sourceInfoJsonObj());
     cstring table_match_type = backend->getCoreLibrary().exactMatch.name;
     auto key = table->getKey();
     auto tkey = mkArrayField(result, "key");
@@ -428,6 +432,10 @@ Control::convertTable(const CFG::TableNode* node,
                 cstring ctrname = ctrs->externalName("counter");
                 jctr->emplace("name", ctrname);
                 jctr->emplace("id", nextId("counter_arrays"));
+                // TODO(jafingerhut) - what kind of P4_16 code causes this
+                // code to run, if any?
+                // TODO(jafingerhut):
+                // jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
                 bool direct = te->name == BMV2::TableImplementation::directCounterName;
                 jctr->emplace("is_direct", direct);
                 jctr->emplace("binding", name);
@@ -650,6 +658,7 @@ Util::IJson* Control::convertIf(const CFG::IfNode* node, cstring prefix) {
     auto result = new Util::JsonObject();
     result->emplace("name", node->name);
     result->emplace("id", nextId("conditionals"));
+    result->emplace_non_null("source_info", node->statement->condition->sourceInfoJsonObj());
     auto j = backend->getExpressionConverter()->convert(node->statement->condition, true, false);
     CHECK_NULL(j);
     result->emplace("expression", j);
@@ -688,6 +697,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
     auto result = new Util::JsonObject();
     result->emplace("name", cont->name); //FIXME: check name is correct, externalName()?
     result->emplace("id", nextId("control"));
+    result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 
     auto cfg = new CFG();
     cfg->build(cont, &backend->getRefMap(), &backend->getTypeMap());

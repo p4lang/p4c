@@ -161,6 +161,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 auto json = new Util::JsonObject();
                 json->emplace("name", extVisibleName(f));
                 json->emplace("id", nextId("headers"));
+                json->emplace_non_null("source_info", f->sourceInfoJsonObj());
                 json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
                 json->emplace("metadata", meta);
                 backend->headerInstances->append(json);
@@ -207,6 +208,7 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto json = new Util::JsonObject();
         json->emplace("name", extVisibleName(f));
         json->emplace("id", nextId("stack"));
+        json->emplace_non_null("source_info", f->sourceInfoJsonObj());
         json->emplace("size", stack->getSize());
         auto type = backend->getTypeMap().getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
@@ -223,6 +225,7 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
             cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
             header->emplace("name", name);
             header->emplace("id", id);
+            // TODO(jafingerhut) - add line/col here?
             header->emplace("header_type", header_type);
             header->emplace("metadata", false);
             backend->headerInstances->append(header);

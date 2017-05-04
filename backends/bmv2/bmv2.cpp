@@ -74,7 +74,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
-    BMV2::Backend backend(&midend.enumMap);
+    BMV2::Backend backend(&midEnd.enumMap);
     try {
         backend.addDebugHook(hook);
         backend.process(toplevel);
