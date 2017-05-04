@@ -26,15 +26,23 @@ limitations under the License.
 
 namespace P4 {
 
-// Determines whether an expression may have side-effects
-// (but not any sub-expression)
+/** @brief Determines whether an expression may have method or constructor
+ * invocations.
+ *
+ * The TypeMap and ReferenceMap arguments may be null, in which case every
+ * method call expression is counted.  With type information, invocations
+ * of ```isValid()``` are ignored.
+ */
 class SideEffects : public Inspector {
  private:
     ReferenceMap* refMap;
     TypeMap*      typeMap;
 
  public:
+    /// Last visited side-effecting node.  Null if no node has side effects.
     const IR::Node* nodeWithSideEffect = nullptr;
+
+    /// Number of side effects in this expression.
     unsigned sideEffectCount = 0;
 
     void postorder(const IR::MethodCallExpression* mce) override {
@@ -57,15 +65,19 @@ class SideEffects : public Inspector {
             nodeWithSideEffect = mce;
         }
     }
+
     void postorder(const IR::ConstructorCallExpression* cce) override {
         sideEffectCount++;
         nodeWithSideEffect = cce;
     }
-    // If you pass nullptr for these arguments the check will be more conservative
+
+    /// The @refMap and @typeMap arguments can be null, in which case the check
+    /// will be more conservative.
     SideEffects(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap) { setName("SideEffects"); }
 
-    // Returns true if the expression may have side-effects.
+    /// Returns true if the expression may contain constructor or method
+    /// invocations.
     static bool check(const IR::Expression* expression,
                       ReferenceMap* refMap,
                       TypeMap* typeMap) {
@@ -75,39 +87,41 @@ class SideEffects : public Inspector {
     }
 };
 
-// convert expresions so that each expression contains at most one side-effect
-// left-values are converted to contain no side-effects.  An important consequence
-// of this pass is that it converts function calls so that no two parameters
-// (one of which is output) can alias.  This makes the job of the inliner simpler.
-//
-// a[f(x)] = b
-// is converted to
-// tmp = f(x); a[tmp] = b
-//
-// m(n()) is converted to
-// tmp = n()
-// m(tmp)
-//
-// This is especially tricky for handling out and inout arguments.
-// Consider bit f(inout T a, in T b); T g(inout T c);
-// The expression a[g(w)].x = f(a[1].x, g(a[1].x)); is translated as
-// T tmp1 = g(w);           // modifies w
-// T tmp2 = a[1].x;         // save a[1].x
-// T tmp3 = g(a[1].x);      // modifies a[1].x
-// T tmp4 = f(tmp2, tmp3);  // modifies tmp2
-// a[1].x = tmp2;           // copy tmp2 to a[1].x - out argument
-// a[tmp1].x = tmp4;        // assign result of call of f to actual left value
-// Function call proceeds as follows:
-// - arguments are evaluated in order
-// - inout and out arguments produce left-values - these are "saved"
-// - function is called with temporaries for all arguments
-// - out and inout temporaries are copied to the saved left-values in order
-// An assignment statement
-// e = e1;
-// is treated as if it is a call to a function "set(out T v, in T v)"
-// This pass should be run after removing table parameters.
-// FIXME: does not handle select labels
+/** @brief Convert expressions so that each expression contains at most one
+ * side effect.
+ *
+ * Left-values are converted to contain no side-effects.  An important consequence
+ * of this pass is that it converts function calls so that no two parameters
+ * (one of which is output) can alias.  This makes the job of the inliner simpler.
+ * For example:
+ * - The expression ```a[f(x)] = b;``` is converted to ```tmp = f(x); a[tmp] = b;```
+ * - And ```m(n())``` is converted to ```tmp = n(); m(tmp)```
+ *
+ * This is especially tricky for handling out and inout arguments.  Consider
+ * two function prototypes, ```bit f(inout T a, in T b); T g(inout T c);```.
+ * The expression ```a[g(w)].x = f(a[1].x, g(a[1].x));``` is translated as
+ *
+```
+T tmp1 = g(w);           // modifies w
+T tmp2 = a[1].x;         // save a[1].x
+T tmp3 = g(a[1].x);      // modifies a[1].x
+T tmp4 = f(tmp2, tmp3);  // modifies tmp2
+a[1].x = tmp2;           // copy tmp2 to a[1].x - out argument
+a[tmp1].x = tmp4;        // assign result of call of f to actual left value
+```
+ *
+ * Translating function calls proceeds as follows:
+ * - arguments are evaluated in order
+ * - inout and out arguments produce left-values---these are "saved"
+ * - function is called with temporaries for all arguments
+ * - out and inout temporaries are copied to the saved left-values in order
+ *
+ * For assignment statements ```e = e1;``` the left hand side is evaluated
+ * first.
+ */
 class DoSimplifyExpressions : public Transform {
+    // FIXME: does not handle select labels
+
     ReferenceMap*        refMap;
     TypeMap*             typeMap;
 

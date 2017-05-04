@@ -22,14 +22,20 @@ namespace P4 {
 
 namespace {
 
-// Data structure used for making explicit the order of evaluation of
-// sub-expressions in an expression.
-// An expression e will be represented as a sequence of temporary declarations,
-// followed by a sequence of statements 'statements' (mostly assignments to the temporaries,
-// but which could also include conditionals for short-circuit evaluation).
+/** Data structure used for making the order of evaluation explicit for
+ * sub-expressions in an expression.  An expression ```e``` will be represented
+ * as a sequence of temporary declarations, followed by a sequence of
+ * statements (mostly assignments to the temporaries, but which could also
+ * include conditionals for short-circuit evaluation).
+ */
 struct EvaluationOrder {
     ReferenceMap* refMap;
-    const IR::Expression* final;  // output
+
+    /// Output: An expression whose evaluation will produce the same result as
+    /// the original one, but where side-effects have been factored out such
+    /// that each statement produces at most one side-effect.
+    const IR::Expression* final;
+
     // Declaration instead of Declaration_Variable so it can be more easily inserted
     // in the program IR.
     IR::IndexedVector<IR::Declaration> *temporaries;
@@ -40,6 +46,7 @@ struct EvaluationOrder {
             temporaries(new IR::IndexedVector<IR::Declaration>()),
             statements(new IR::IndexedVector<IR::StatOrDecl>())
     { CHECK_NULL(refMap); }
+
     bool simple() const
     { return temporaries->empty() && statements->empty(); }
 
@@ -50,9 +57,14 @@ struct EvaluationOrder {
         return tmp;
     }
 
+    /** Add ```@varName = @expression``` to the vector of statements.
+      *
+      * @return A copy of the l-value expression created for varName.
+      */
     const IR::Expression* addAssignment(
         Util::SourceInfo srcInfo,
-        cstring varName, const IR::Expression* expression) {
+        cstring varName,
+        const IR::Expression* expression) {
         auto left = new IR::PathExpression(IR::ID(varName, nullptr));
         auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
         statements->push_back(stat);
@@ -61,13 +73,33 @@ struct EvaluationOrder {
     }
 };
 
+/** @brief Replaces expressions containing constructor or method invocations
+ * with temporaries.  Also unrolls short-circuit evaluation.
+ * 
+ * The EvaluationOrder field accumulates lists of the temporaries introduced in
+ * this way, as well as assignment statements that assign the original
+ * expressions to the appropriate temporaries.
+ *
+ * The DoSimplifyExpressions pass will later insert the declarations and
+ * assignments above the expression.
+ *
+ * @pre An up-to-date ReferenceMap and TypeMap.
+ *
+ * @post The RefenceMap and TypeMap are updated to reflect changes to the IR.
+ * This includes extra information stored in the TypeMap, specifically
+ * left-value-ness and compile-time-contant-ness.
+ */
 class DismantleExpression : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     EvaluationOrder *result;
-    bool leftValue;  // true when we are dismantling a left-value.
-    bool resultNotUsed;  // true when the caller does not want the result (i.e.,
-                         // we are invoked from a MethodCallStatement).
+
+    /// true when we are dismantling a left-value.
+    bool leftValue;
+
+    /// true when the caller does not want the result (i.e.,
+    /// we are invoked from a MethodCallStatement).
+    bool resultNotUsed;
 
     // catch-all case
     const IR::Node* postorder(IR::Expression* expression) override {
@@ -279,8 +311,8 @@ class DismantleExpression : public Transform {
 
     // We don't want to compute the full read/write set here so we
     // overapproximate it as follows: all declarations that occur in
-    // an expression.  TODO: this could be made more precise, perhaps
-    // using LocationSets.
+    // an expression.
+    // TODO: this could be made more precise, perhaps using LocationSets.
     class ReadsWrites : public Inspector {
      public:
         std::set<const IR::IDeclaration*> decls;
@@ -295,6 +327,9 @@ class DismantleExpression : public Transform {
         }
     };
 
+    // Conservative alias analysis.  We implement this here because this pass
+    // runs early in the front end, before enough information is present (eg.
+    // def-use information) to do a precise alias analysis.
     bool mayAlias(const IR::Expression* left, const IR::Expression* right) const {
         ReadsWrites rwleft(refMap);
         (void)left->apply(rwleft);
