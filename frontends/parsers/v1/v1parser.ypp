@@ -197,7 +197,7 @@ typedef const IR::Type ConstType;
 %type<IR::Attribute*>               blackbox_attribute
 %type<IR::AttribLocal*>             local_var
 %type<IR::AttribLocals*>            locals_list opt_locals_list
-%type<IR::Declaration_Instance*>    blackbox_config
+%type<IR::NameMap<IR::Property>*>   blackbox_config
 %type<BBoxType>                     blackbox_body
 %type<IR::CalculatedField*>         update_verify_spec_list
 %type<CaseValue>                    case_value
@@ -857,26 +857,26 @@ blackbox_instantiation:
             new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
                                          new IR::Type_Name($2),
                                          new IR::Vector<IR::Expression>)); }
-    | BLACKBOX name name "{"
-        { $<IR::Declaration_Instance*>$ =
+    | BLACKBOX name name "{" blackbox_config "}"
+        { auto instance =
             new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
                                          new IR::Type_Name($2),
-                                         new IR::Vector<IR::Expression>); }
-      blackbox_config "}"
-        { driver.global->add($3, $6); }
+                                         new IR::Vector<IR::Expression>);
+          instance->properties = std::move(*$5);
+          driver.global->add($3, instance); }
 ;
 
-blackbox_config: /* epsilon */ { $$ = $<IR::Declaration_Instance*>0; }
+blackbox_config: /* epsilon */ { $$ = new IR::NameMap<IR::Property>; }
     | blackbox_config name ":" expressions ";"
           { const IR::PropertyValue *pv;
             if ($4->size() == 1)
                 pv = new IR::ExpressionValue($4->front());
             else
                 pv = new IR::ExpressionListValue(std::move(*$4));
-            ($$=$1)->properties.add($2, new IR::Property(@2+@4, $2, pv, false)); }
+            ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
     | blackbox_config name "{" expressions "}"
           { auto *pv = new IR::ExpressionListValue(std::move(*$4));
-            ($$=$1)->properties.add($2, new IR::Property(@2+@4, $2, pv, false)); }
+            ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
     ;
 
 expressions: /* epsilon */
