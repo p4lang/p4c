@@ -141,8 +141,8 @@ const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
             return structure->conversionContext.standardMetadata->clone();
         else
             ref = structure->conversionContext.userMetadata->clone();
-        }
-    auto result = new IR::Member(ref, nhr->ref->name);
+    }
+    auto result = new IR::Member(nhr->srcInfo, ref, nhr->ref->name);
     result->type = nhr->type;
     return result;
 }
@@ -175,7 +175,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
     auto tbl = new IR::PathExpression(newname);
-    auto method = new IR::Member(tbl, IR::ID(IR::IApply::applyMethodName));
+    auto method = new IR::Member(apply->srcInfo, tbl, IR::ID(IR::IApply::applyMethodName));
     auto call = new IR::MethodCallExpression(apply->srcInfo, method);
     if (apply->actions.size() == 0) {
         auto stat = new IR::MethodCallStatement(apply->srcInfo, call);
@@ -516,12 +516,208 @@ class Rewriter : public Transform {
         return rv;
     }
 };
+
+/**
+This pass uses the @length annotation set by the v1 front-end on
+varbit fields and converts extracts for headers with varbit fields.
+(The @length annotation is inserted as a conversion from the length
+header property.)  For example:
+
+header H {
+   bit<8> len;
+   @length(len)
+   varbit<64> data;
+}
+...
+H h;
+pkt.extract(h);
+
+is converted to:
+
+header H {
+   bit<8> len;
+   varbit<64> data;  // annotation removed
+}
+...
+H h;
+header H_0 {
+   bit<8> len;
+}
+header H_1 {
+   varbit<64> data;
+}
+
+H_0 h_0;
+H_1 h_1;
+pkt.extract(h_0);
+pkt.extract(h_1, h_0.len);
+h.setValid();
+h.len = h_0.len;
+h.data = h_1.data;
+
+*/
+class FixExtracts final : public Transform {
+    ProgramStructure* structure;
+
+    /// Newly-introduced types for each extract.
+    std::vector<const IR::Type_Header*> typeDecls;
+    /// All newly-introduced types.
+    // The following contains IR::Type_Header, but it is easier
+    // to append if the elements are Node.
+    IR::IndexedVector<IR::Node>        allTypeDecls;
+    /// All newly-introduced variables, for each parser.
+    IR::IndexedVector<IR::Declaration> varDecls;
+    /// Map each newly created header with a varbit field
+    /// to an expression that denotes its length.
+    std::map<const IR::Type_Header*, const IR::Expression*> lengths;
+
+    /// If a header type contains varbit fields split it into several
+    /// header types, each of which starts with a varbit field.  The
+    /// types are inserted in the typeDecls list.
+    void splitHeaderType(const IR::Type_Header* type) {
+        IR::IndexedVector<IR::StructField> fields;
+        const IR::Expression* length = nullptr;
+        for (auto f : type->fields) {
+            if (f->type->is<IR::Type_Varbits>()) {
+                cstring hname = structure->makeUniqueName(type->name);
+                auto htype = new IR::Type_Header(IR::ID(hname), fields);
+                if (length != nullptr)
+                    lengths.emplace(htype, length);
+                typeDecls.push_back(htype);
+                fields.clear();
+                auto anno = f->getAnnotation(IR::Annotation::lengthAnnotation);
+                BUG_CHECK(anno != nullptr, "No length annotation on varbit field", f);
+                BUG_CHECK(anno->expr.size() == 1, "Expected exactly 1 argument", anno->expr);
+                length = anno->expr.at(0);
+                f = new IR::StructField(f->srcInfo, f->name, f->type);  // lose the annotation
+            }
+            fields.push_back(f);
+        }
+        if (!typeDecls.empty() && !fields.empty()) {
+            cstring hname = structure->makeUniqueName(type->name);
+            auto htype = new IR::Type_Header(IR::ID(hname), fields);
+            typeDecls.push_back(htype);
+            lengths.emplace(htype, length);
+            LOG3("Split header type " << type << " into " << typeDecls.size() << " parts");
+        }
+    }
+
+    /**
+       This pass rewrites expressions from a @length annotation expression:
+       PathExpressions that refer to enclosing fields are rewritten to
+       refer to the proper fields in a different structure.  In the example above, `len`
+       is translated to `h_0.len`.
+     */
+    class RewriteLength final : public Transform {
+        const std::vector<const IR::Type_Header*> &typeDecls;
+        const IR::IndexedVector<IR::Declaration>  &vars;
+     public:
+        explicit RewriteLength(const std::vector<const IR::Type_Header*> &typeDecls,
+                               const IR::IndexedVector<IR::Declaration>  &vars) :
+                typeDecls(typeDecls), vars(vars) { setName("RewriteLength"); }
+        const IR::Node* postorder(IR::PathExpression* expression) override {
+            if (expression->path->absolute)
+                return expression;
+            unsigned index = 0;
+            for (auto t : typeDecls) {
+                for (auto f : t->fields) {
+                    if (f->name == expression->path->name)
+                        return new IR::Member(
+                            expression->srcInfo,
+                            new IR::PathExpression(vars.at(index)->name), f->name);
+                }
+                index++;
+            }
+            return expression;
+        }
+    };
+
+ public:
+    explicit FixExtracts(ProgramStructure* structure) : structure(structure)
+    { CHECK_NULL(structure); setName("FixExtracts"); }
+
+    const IR::Node* postorder(IR::P4Program* program) override {
+        // P4-14 headers cannot refer to other types, so it is safe
+        // to prepend them to the list of declarations.
+        allTypeDecls.append(program->declarations);
+        program->declarations = allTypeDecls;
+        return program;
+    }
+
+    const IR::Node* postorder(IR::P4Parser* parser) override {
+        if (!varDecls.empty()) {
+            parser->parserLocals.append(varDecls);
+            varDecls.clear();
+        }
+        return parser;
+    }
+
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override {
+        typeDecls.clear();
+        auto mce = getOriginal<IR::MethodCallStatement>()->methodCall;
+        LOG3("Looking up in extracts " << dbp(mce));
+        auto ht = ::get(structure->extractsSynthesized, mce);
+        if (ht == nullptr)
+            // not an extract
+            return statement;
+
+        // This is an extract method invocation
+        BUG_CHECK(mce->arguments->size() == 1, "%1%: expected 1 argument", mce);
+        auto arg = mce->arguments->at(0);
+
+        splitHeaderType(ht);
+        if (typeDecls.empty())
+            return statement;
+
+        auto result = new IR::IndexedVector<IR::StatOrDecl>();
+        RewriteLength rewrite(typeDecls, varDecls);
+        for (auto t : typeDecls) {
+            allTypeDecls.push_back(t);
+            cstring varName = structure->makeUniqueName("tmp_hdr");
+            auto var = new IR::Declaration_Variable(IR::ID(varName), t->to<IR::Type>());
+            auto length = ::get(lengths, t);
+            varDecls.push_back(var);
+            auto args = new IR::Vector<IR::Expression>();
+            args->push_back(new IR::PathExpression(IR::ID(varName)));
+            if (length != nullptr) {
+                length = length->apply(rewrite);
+                auto type = IR::Type_Bits::get(
+                    P4::P4CoreLibrary::instance.packetIn.extractSecondArgSize);
+                auto cast = new IR::Cast(Util::SourceInfo(), type, length);
+                args->push_back(cast);
+            }
+            auto expression = new IR::MethodCallExpression(
+                mce->srcInfo, mce->method->clone(), args);
+            result->push_back(new IR::MethodCallStatement(expression));
+        }
+
+        auto setValid = new IR::Member(
+            mce->srcInfo, arg, IR::Type_Header::setValid);
+        result->push_back(new IR::MethodCallStatement(
+            new IR::MethodCallExpression(
+                mce->srcInfo, setValid, new IR::Vector<IR::Expression>())));
+        unsigned index = 0;
+        for (auto t : typeDecls) {
+            auto var = varDecls.at(index);
+            for (auto f : t->fields) {
+                auto left = new IR::Member(mce->srcInfo, arg, f->name);
+                auto right = new IR::Member(mce->srcInfo,
+                                            new IR::PathExpression(var->name), f->name);
+                auto assign = new IR::AssignmentStatement(mce->srcInfo, left, right);
+                result->push_back(assign);
+            }
+            index++;
+        }
+        return result;
+    }
+};
+
 }  // namespace
 
 ///////////////////////////////////////////////////////////////
 
 Converter::Converter() {
-    setStopOnError(true);
+    setStopOnError(true); setName("Converter");
 
     // Discover types using P4 v1.1 type-checker
     passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
@@ -531,6 +727,7 @@ Converter::Converter() {
     passes.emplace_back(new DiscoverStructure(&structure));
     passes.emplace_back(new ComputeCallGraph(&structure));
     passes.emplace_back(new Rewriter(&structure));
+    passes.emplace_back(new FixExtracts(&structure));
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {
