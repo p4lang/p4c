@@ -710,7 +710,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
         }
         if (tmp_11) 
             mark_to_drop();
-        if (!(hdr.ipv4.ihl == 4w5)) 
+        if (hdr.ipv4.ihl != 4w5) 
             tmp_14 = false;
         else {
             tmp_15 = ipv4_checksum.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
