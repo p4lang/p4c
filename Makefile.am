@@ -23,15 +23,11 @@ AM_CXXFLAGS = $(WARNING_FLAGS)
 AM_CPPFLAGS = -I$(srcdir)/frontends \
 	      -I$(srcdir)/backends \
 	      -I$(srcdir)/extensions
-AM_YFLAGS = -v
 
 TOOLSDIR=$(srcdir)/tools
 GENTESTS=$(TOOLSDIR)/gen-tests.py
 GEN_UNIFIED_MAKEFILE=$(TOOLSDIR)/gen-unified-makefile.py
 GEN_UNIFIED_CPP=$(TOOLSDIR)/gen-unified-sources.py
-
-.l.c:
-	$(LEX.l) $< > $@
 
 ################ Variables populated in subproject Makefiles
 # Please use += to append values to these variables.
@@ -246,3 +242,23 @@ else
 docs:
 	@echo "Please enable docs building (configure with --enable-doxygen-doc)"
 endif
+
+################ Flex and Bison
+
+# Bison generates multiple files at the same time, and it doesn't provide much
+# control over where those files are placed, so automake uses a special rule and
+# a wrapper script called ylwrap to move them all into place together and to
+# rewrite lines in the files that reference paths. Unfortunately, the rule
+# automake generates misses the 'stack.hh' file that Bison generates in C++
+# mode. This rule is identical to the original automake rule except that it
+# also handles 'stack.hh'.
+.ypp.cpp:
+	$(AM_V_YACC)$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $@ y.tab.h `echo $@ | $(am__yacc_c2h)` y.output $*.output stack.hh $(dir $@)stack.hh -- $(YACCCOMPILE)
+
+# The `-d` flag causes Bison to create header files for the parsers it generates.
+AM_YFLAGS = -v -d
+
+# This hack works around the fact that Flex, by default, adds a `.cc` extension
+# to lexers it generates in C++ mode. That extension confuses the `ylwrap`
+# script included with automake.
+AM_LFLAGS = -o$(LEX_OUTPUT_ROOT).c

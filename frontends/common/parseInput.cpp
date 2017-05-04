@@ -15,13 +15,21 @@ limitations under the License.
 */
 
 #include "parseInput.h"
-#include "lib/error.h"
-#include "frontends/p4-14/p4-14-parse.h"
+
+#include <cstdio>
+#include <iostream>
+#include <sstream>
+
+#include "frontends/parsers/parserDriver.h"
 #include "frontends/p4/fromv1.0/converters.h"
 #include "frontends/p4/frontend.h"
-#include "frontends/p4/p4-parse.h"
+#include "lib/error.h"
+#include "lib/source_file.h"
+
+namespace P4 {
 
 const IR::P4Program* parseP4File(CompilerOptions& options) {
+    clearProgramState();
     FILE* in = nullptr;
     if (options.doNotPreprocess) {
         in = fopen(options.file, "r");
@@ -37,26 +45,27 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     const IR::P4Program* result = nullptr;
     bool compiling10 = options.isv1();
     if (compiling10) {
+        // We load the model before parsing the input file, so that the
+        // SourceInfo in the model comes first.
         P4V1::Converter converter;
         converter.addDebugHook(options.getDebugHook());
         converter.loadModel();
-        // Model is loaded before parsing the input file.
-        // In this way the SourceInfo in the model comes first.
-        const IR::Node* v1 = parse_P4_14_file(options, in);
+
+        // Parse.
+        const IR::Node* v1 = V1::V1ParserDriver::parse(options.file, in);
         if (::errorCount() > 0 || v1 == nullptr)
             return nullptr;
+
+        // Convert to P4-16.
         if (Log::verbose())
             std::cerr << "Converting to P4-16" << std::endl;
         v1 = v1->apply(converter);
         if (v1 != nullptr) {
+            BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
             result = v1->to<IR::P4Program>();
-            if (result == nullptr) {
-                BUG("Conversion returned %1%", v1);
-                return result;
-            }
         }
     } else {
-        result = parse_P4_16_file(options.file, in);
+        result = P4::P4ParserDriver::parse(options.file, in);
     }
     options.closeInput(in);
     if (::errorCount() > 0) {
@@ -65,3 +74,53 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     }
     return result;
 }
+
+const IR::P4Program* parseP4String(const std::string& input,
+                                   CompilerOptions::FrontendVersion version) {
+    clearProgramState();
+
+    std::istringstream stream(input);
+    const IR::P4Program* result = nullptr;
+
+    switch (version) {
+      case CompilerOptions::FrontendVersion::P4_14: {
+        // We load the model before parsing the input file, so that the
+        // SourceInfo in the model comes first.
+        P4V1::Converter converter;
+        converter.loadModel();
+
+        // Parse.
+        const IR::Node* v1 = V1::V1ParserDriver::parse("(string)", stream);
+        if (::errorCount() > 0 || v1 == nullptr)
+            return nullptr;
+
+        // Convert to P4-16.
+        if (Log::verbose())
+            std::cerr << "Converting to P4-16" << std::endl;
+        v1 = v1->apply(converter);
+        if (v1 != nullptr) {
+            BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
+            result = v1->to<IR::P4Program>();
+        }
+        break;
+      }
+
+      case CompilerOptions::FrontendVersion::P4_16:
+        result = P4::P4ParserDriver::parse("(string)", stream);
+        break;
+    }
+
+    if (::errorCount() > 0) {
+        ::error("%1% errors encountered, aborting compilation", ::errorCount());
+        return nullptr;
+    }
+
+    return result;
+}
+
+void clearProgramState() {
+    Util::InputSources::reset();
+    clearErrorReporter();
+}
+
+}  // namespace P4

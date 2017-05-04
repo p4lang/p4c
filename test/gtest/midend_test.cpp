@@ -19,11 +19,10 @@ limitations under the License.
 #include "helpers.h"
 #include "lib/log.h"
 
-#include "frontends/p4/typeMap.h"
+#include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "midend/convertEnums.h"
-
-#include "p4/p4-parse.h"
 
 using namespace P4;
 
@@ -44,7 +43,7 @@ TEST(midend, convertEnums_pass) {
         extern C { C(E e); }
         control m() { C(E.A) ctr; apply{} }
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(pgm != nullptr);
 
     // Example to enable logging in source
@@ -64,7 +63,7 @@ TEST(midend, convertEnums_used_before_declare) {
         const bool a = E.A == E.B;
         enum E { A, B, C, D };
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap  refMap;
@@ -84,7 +83,7 @@ TEST(midend, getEnumMapping) {
         enum E { A, B, C, D };
         const bool a = E.A == E.B;
     )");
-    const IR::P4Program* pgm = parse_string(program);
+    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap  refMap;
