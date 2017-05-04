@@ -64,11 +64,13 @@ class StrengthReduction final : public Transform {
 
     using Transform::postorder;
 
+    const IR::Node* postorder(IR::Cmpl* expr) override;
     const IR::Node* postorder(IR::BAnd* expr) override;
     const IR::Node* postorder(IR::BOr* expr) override;
     const IR::Node* postorder(IR::BXor* expr) override;
     const IR::Node* postorder(IR::LAnd* expr) override;
     const IR::Node* postorder(IR::LOr* expr) override;
+    const IR::Node* postorder(IR::LNot* expr) override;
     const IR::Node* postorder(IR::Sub* expr) override;
     const IR::Node* postorder(IR::Add* expr) override;
     const IR::Node* postorder(IR::Shl* expr) override;
