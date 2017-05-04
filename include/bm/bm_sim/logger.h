@@ -134,6 +134,14 @@ class Logger {
 #define BMLOG_TRACE_PKT(pkt, s, ...)                     \
   BMLOG_TRACE("[{}] [cxt {}] " s, (pkt).get_unique_id(), \
               (pkt).get_context(), ##__VA_ARGS__)
+//! Same as BMLOG_TRACE_PKT except it takes a pointer to a SourceInfo
+//! object, and if non-NULL, include its data in the output.
+#define BMLOG_TRACE_SI_PKT(pkt, source_info, s, ...)       \
+  BMLOG_TRACE("[{}] [cxt {}] {}" s, (pkt).get_unique_id(), \
+              (pkt).get_context(),                         \
+              (source_info == nullptr) ? ""                \
+                : (source_info->to_string() + " "),        \
+              ##__VA_ARGS__)
 
 #define BMLOG_ERROR(...) bm::Logger::get()->error(__VA_ARGS__)
 

@@ -23,6 +23,7 @@
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/P4Objects.h>
 #include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/logger.h>
 
 #include <iostream>
 #include <string>
@@ -289,6 +290,8 @@ ActionFnEntry::execute(Packet *pkt) const {
   auto &primitives = action_fn->primitives;
   size_t param_offset = 0;
   // primitives is a vector of pointers
+  BMLOG_TRACE_SI_PKT(*pkt, action_fn->get_source_info(),
+                     "Executing action {}", action_fn->get_name());
   for (auto primitive : primitives) {
     primitive->execute(&state, &(action_fn->params[param_offset]));
     param_offset += primitive->get_num_params();

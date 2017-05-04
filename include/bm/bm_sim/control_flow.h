@@ -33,6 +33,9 @@ class ControlFlowNode : public NamedP4Object {
  public:
   ControlFlowNode(const std::string &name, p4object_id_t id)
       : NamedP4Object(name, id) { }
+  ControlFlowNode(const std::string &name, p4object_id_t id,
+                  std::unique_ptr<SourceInfo> source_info)
+      : NamedP4Object(name, id, std::move(source_info)) {}
   virtual ~ControlFlowNode() { }
   virtual const ControlFlowNode *operator()(Packet *pkt) const = 0;
 };

@@ -23,7 +23,9 @@
 #ifndef BM_BM_SIM_NAMED_P4OBJECT_H_
 #define BM_BM_SIM_NAMED_P4OBJECT_H_
 
+#include <bm/bm_sim/source_info.h>
 #include <string>
+#include <memory>
 
 namespace bm {
 
@@ -37,6 +39,9 @@ class NamedP4Object {
  public:
   NamedP4Object(const std::string &name, p4object_id_t id)
     : name(name), id(id) {}
+  NamedP4Object(const std::string &name, p4object_id_t id,
+                std::unique_ptr<SourceInfo> source_info)
+    : name(name), id(id), source_info(std::move(source_info)) {}
 
   virtual ~NamedP4Object() { }
 
@@ -56,9 +61,12 @@ class NamedP4Object {
   //! Default assignment operator
   NamedP4Object &operator=(NamedP4Object &&other) = default;
 
+  const SourceInfo *get_source_info() const { return source_info.get(); }
+
  protected:
   const std::string name;
   p4object_id_t id;
+  std::unique_ptr<SourceInfo> source_info;
 };
 
 }  // namespace bm

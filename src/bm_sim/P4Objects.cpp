@@ -219,6 +219,34 @@ ExprType get_opcode_type(ExprOpcode opcode) {
   return ExprType::UNKNOWN;
 }
 
+std::unique_ptr<SourceInfo> object_source_info(const Json::Value &cfg_object) {
+  std::string filename = "";
+  unsigned int line = 0;
+  unsigned int column = 0;
+  std::string source_fragment = "";
+  auto cfg_source_info = cfg_object["source_info"];
+
+  if (cfg_source_info.isNull()) {
+    return nullptr;
+  }
+  if (!cfg_source_info["filename"].isNull()) {
+    filename = cfg_source_info["filename"].asString();
+  }
+  if (!cfg_source_info["line"].isNull()) {
+    line = cfg_source_info["line"].asInt();
+  }
+  if (!cfg_source_info["column"].isNull()) {
+    column = cfg_source_info["column"].asInt();
+  }
+  if (!cfg_source_info["source_fragment"].isNull()) {
+    source_fragment = cfg_source_info["source_fragment"].asString();
+  }
+  auto source_info =
+      std::unique_ptr<SourceInfo>{new SourceInfo(filename, line, column,
+                                                 source_fragment)};
+  return source_info;
+}
+
 }  // namespace
 
 void
@@ -1214,7 +1242,8 @@ P4Objects::init_actions(const Json::Value &cfg_root) {
     const string action_name = cfg_action["name"].asString();
     p4object_id_t action_id = cfg_action["id"].asInt();
     std::unique_ptr<ActionFn> action_fn(new ActionFn(
-        action_name, action_id, cfg_action["runtime_data"].size()));
+        action_name, action_id, cfg_action["runtime_data"].size(),
+        object_source_info(cfg_action)));
 
     const auto &cfg_primitive_calls = cfg_action["primitives"];
     for (const auto &cfg_primitive_call : cfg_primitive_calls)
@@ -1516,9 +1545,8 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
     for (const auto &cfg_conditional : cfg_conditionals) {
       const string conditional_name = cfg_conditional["name"].asString();
       p4object_id_t conditional_id = cfg_conditional["id"].asInt();
-      Conditional *conditional = new Conditional(conditional_name,
-                                                 conditional_id);
-
+      auto conditional = new Conditional(
+        conditional_name, conditional_id, object_source_info(cfg_conditional));
       const Json::Value &cfg_expression = cfg_conditional["expression"];
       build_expression(cfg_expression, conditional);
       conditional->build();

@@ -517,6 +517,12 @@ class JsonBuilder {
     Json::Value cond(Json::objectValue);
     cond["name"] = name;
     cond["id"] = 0;
+    Json::Value source_info(Json::objectValue);
+    source_info["filename"] = "foo.p4";
+    source_info["line"] = 42;
+    source_info["column"] = 18;
+    source_info["source_fragment"] = "hdr.ethernet.dstAddr == 0";
+    cond["source_info"] = source_info;
     Json::Value expression(Json::objectValue);
     expression["type"] = "expression";
     expression["value"] = expr.get_json();

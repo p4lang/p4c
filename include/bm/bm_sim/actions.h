@@ -605,6 +605,10 @@ class ActionFn :  public NamedP4Object {
  public:
   ActionFn(const std::string &name, p4object_id_t id, size_t num_params)
       : NamedP4Object(name, id), num_params(num_params) { }
+    ActionFn(const std::string &name, p4object_id_t id, size_t num_params,
+             std::unique_ptr<SourceInfo> source_info)
+      : NamedP4Object(name, id, std::move(source_info)),
+        num_params(num_params) { }
 
   // these parameter_push_back_* methods are not very well named. They are used
   // to push arguments to the primitives; and are independent of the actual
