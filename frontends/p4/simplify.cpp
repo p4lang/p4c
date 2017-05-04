@@ -25,6 +25,10 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
         return statement;
     auto parent = getContext()->node;
     auto statancestor = findContext<IR::Statement>();
+
+    // TODO: either the `parent != nullptr` checks below are redundant or this
+    // if predicate is unsafe.
+
     if (parent->is<IR::SwitchCase>() ||
         parent->is<IR::P4Control>() ||
         parent->is<IR::Function>() ||
@@ -33,7 +37,11 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
         return statement;
     }
     bool withinBlock = statancestor != nullptr && statancestor->is<IR::BlockStatement>();
+
+    // TODO: withinAction will always be false: If parent is a P4Action, the if
+    // statement above would return.
     bool withinAction = parent != nullptr && parent->is<IR::P4Action>();
+
     bool withinParserState = parent != nullptr && parent->is<IR::ParserState>();
     if (withinParserState || withinBlock || withinAction) {
         // if there are no local declarations we can remove this block
@@ -79,6 +87,9 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement) 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
     LOG1("Visiting " << dbp(getOriginal()));
     if (statement->cases.empty()) {
+        // The P4_16 spec prohibits expressions other than table application as
+        // switch conditions.  The parser should have rejected programs for
+        // which this is not the case.
         BUG_CHECK(statement->expression->is<IR::Member>(),
                   "%1%: expected a Member", statement->expression);
         auto expr = statement->expression->to<IR::Member>();
