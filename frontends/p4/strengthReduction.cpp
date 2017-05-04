@@ -64,11 +64,21 @@ int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
 
 /// @section Visitor Methods
 
+const IR::Node* StrengthReduction::postorder(IR::Cmpl* expr) {
+    if (auto a = expr->expr->to<IR::Cmpl>())
+        return a->expr;
+    return expr;
+}
+
 const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     if (isZero(expr->left))
         return expr->left;
     if (isZero(expr->right))
         return expr->right;
+    auto l = expr->left->to<IR::Cmpl>();
+    auto r = expr->right->to<IR::Cmpl>();
+    if (l && r)
+        return new IR::Cmpl(new IR::BOr(expr->srcInfo, l->expr, r->expr));
     return expr;
 }
 
@@ -77,6 +87,10 @@ const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
         return expr->right;
     if (isZero(expr->right))
         return expr->left;
+    auto l = expr->left->to<IR::Cmpl>();
+    auto r = expr->right->to<IR::Cmpl>();
+    if (l && r)
+        return new IR::Cmpl(new IR::BAnd(expr->srcInfo, l->expr, r->expr));
     return expr;
 }
 
@@ -85,6 +99,15 @@ const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
         return expr->right;
     if (isZero(expr->right))
         return expr->left;
+    bool cmpl = false;
+    if (auto l = expr->left->to<IR::Cmpl>()) {
+        expr->left = l->expr;
+        cmpl = !cmpl; }
+    if (auto r = expr->right->to<IR::Cmpl>()) {
+        expr->right = r->expr;
+        cmpl = !cmpl; }
+    if (cmpl)
+        return new IR::Cmpl(expr);
     return expr;
 }
 
@@ -107,6 +130,22 @@ const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
     if (isFalse(expr->right))
         return expr->left;
     // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
+    return expr;
+}
+
+const IR::Node* StrengthReduction::postorder(IR::LNot* expr) {
+    if (auto e = expr->expr->to<IR::Equ>())
+        return new IR::Neq(e->left, e->right);
+    if (auto e = expr->expr->to<IR::Neq>())
+        return new IR::Equ(e->left, e->right);
+    if (auto e = expr->expr->to<IR::Leq>())
+        return new IR::Grt(e->left, e->right);
+    if (auto e = expr->expr->to<IR::Geq>())
+        return new IR::Lss(e->left, e->right);
+    if (auto e = expr->expr->to<IR::Lss>())
+        return new IR::Geq(e->left, e->right);
+    if (auto e = expr->expr->to<IR::Grt>())
+        return new IR::Leq(e->left, e->right);
     return expr;
 }
 

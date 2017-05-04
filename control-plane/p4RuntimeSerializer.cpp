@@ -1034,9 +1034,6 @@ public:
             auto action_ref = table->add_action_refs();
             action_ref->set_id(id);
             addAnnotations(action_ref, action.annotations);
-            // XXX(antonin): This is temporary for backward-compatibility; can be removed when all
-            // consumers have moved from action_ids to action_refs.
-            table->add_action_ids(id);
         }
 
         size_t index = 1;
