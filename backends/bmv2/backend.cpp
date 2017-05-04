@@ -471,7 +471,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         new VisitFunctor([this](){ padScalars(); }),
         new VisitFunctor([this](){ addErrors(errors); }),
         new ConvertExterns(this),
-        new ConvertParser(&refMap, &typeMap, conv, parsers),
+        new ConvertParser(this),
         // createAction must be called before convertControl
         new VisitFunctor([this](){ createActions(actions); }),
         new ConvertControl(this),

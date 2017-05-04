@@ -40,23 +40,23 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         result->emplace("op", "set");
-        auto l = conv->convertLeftValue(assign->left);
-        auto type = typeMap->getType(assign->left, true);
+        auto l = backend->getExpressionConverter()->convertLeftValue(assign->left);
+        auto type = backend->getTypeMap().getType(assign->left, true);
         bool convertBool = type->is<IR::Type_Boolean>();
-        auto r = conv->convert(assign->right, true, true, convertBool);
+        auto r = backend->getExpressionConverter()->convert(assign->right, true, true, convertBool);
         params->append(l);
         params->append(r);
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
-        auto minst = P4::MethodInstance::resolve(mce, refMap, typeMap);
+        auto minst = P4::MethodInstance::resolve(mce, &backend->getRefMap(), &backend->getTypeMap());
         if (minst->is<P4::ExternMethod>()) {
             auto extmeth = minst->to<P4::ExternMethod>();
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
                 result->emplace("op", "extract");
                 if (mce->arguments->size() == 1) {
                     auto arg = mce->arguments->at(0);
-                    auto argtype = typeMap->getType(arg, true);
+                    auto argtype = backend->getTypeMap().getType(arg, true);
                     if (!argtype->is<IR::Type_Header>()) {
                         ::error("%1%: extract only accepts arguments with header types, not %2%",
                                 arg, argtype);
@@ -69,11 +69,11 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
 
                     if (arg->is<IR::Member>()) {
                         auto mem = arg->to<IR::Member>();
-                        auto baseType = typeMap->getType(mem->expr, true);
+                        auto baseType = backend->getTypeMap().getType(mem->expr, true);
                         if (baseType->is<IR::Type_Stack>()) {
                             if (mem->member == IR::Type_Stack::next) {
                                 type = "stack";
-                                j = conv->convert(mem->expr);
+                                j = backend->getExpressionConverter()->convert(mem->expr);
                             } else {
                                 BUG("%1%: unsupported", mem);
                             }
@@ -81,7 +81,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                     }
                     if (j == nullptr) {
                         type = "regular";
-                        j = conv->convert(arg);
+                        j = backend->getExpressionConverter()->convert(arg);
                     }
                     auto value = j->to<Util::JsonObject>()->get("value");
                     param->emplace("type", type);
@@ -98,14 +98,14 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                     auto cond = mce->arguments->at(0);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = conv->convert(cond, true, false);
+                    auto jexpr = backend->getExpressionConverter()->convert(cond, true, false);
                     params->append(jexpr);
                 }
                 {
                     auto error = mce->arguments->at(1);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = conv->convert(error, true, false);
+                    auto jexpr = backend->getExpressionConverter()->convert(error, true, false);
                     params->append(jexpr);
                 }
                 return result;
@@ -114,13 +114,13 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
             auto bi = minst->to<P4::BuiltInMethod>();
             if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
                 auto mem = new IR::Member(bi->appliedTo, "$valid$");
-                typeMap->setType(mem, IR::Type_Void::get());
-                auto jexpr = conv->convert(mem, true, false);
+                backend->getTypeMap().setType(mem, IR::Type_Void::get());
+                auto jexpr = backend->getExpressionConverter()->convert(mem, true, false);
                 result->emplace("op", "set");
                 params->append(jexpr);
 
                 auto bl = new IR::BoolLiteral(bi->name == IR::Type_Header::setValid);
-                auto r = conv->convert(bl, true, true, true);
+                auto r = backend->getExpressionConverter()->convert(bl, true, true, true);
                 params->append(r);
                 return result;
             }
@@ -187,7 +187,7 @@ unsigned Parser::combine(const IR::Expression* keySet,
             auto e = *it;
             auto keyElement = le->components.at(index);
 
-            auto type = typeMap->getType(e, true);
+            auto type = backend->getTypeMap().getType(e, true);
             int width = type->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", e);
 
@@ -211,7 +211,7 @@ unsigned Parser::combine(const IR::Expression* keySet,
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
         convertSimpleKey(keySet, value, mask);
-        auto type = typeMap->getType(select->components.at(0), true);
+        auto type = backend->getTypeMap().getType(select->components.at(0), true);
         return type->width_bits() / 8;
     }
 }
@@ -246,7 +246,7 @@ Util::IJson* Parser::toJson(const IR::ParserState* state) {
     if (state->selectExpression != nullptr) {
         if (state->selectExpression->is<IR::SelectExpression>()) {
             auto se = state->selectExpression->to<IR::SelectExpression>();
-            key = conv->convert(se->select, false);
+            key = backend->getExpressionConverter()->convert(se->select, false);
             for (auto sc : se->selectCases) {
                 auto trans = new Util::JsonObject();
                 mpz_class value, mask;
@@ -299,7 +299,7 @@ bool Parser::preorder(const IR::PackageBlock* block) {
 
 bool Parser::preorder(const IR::P4Parser* parser) {
     auto parserJson = toJson(parser);
-    parsers->append(parserJson);
+    backend->parsers->append(parserJson);
     return false;
 }
 
