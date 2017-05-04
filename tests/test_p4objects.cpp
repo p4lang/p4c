@@ -506,7 +506,8 @@ class JsonBuilder {
   }
 
   // only supports one condition for now
-  void add_condition(const std::string &name, const JsonExpr &expr) {
+  void add_condition(const std::string &name, const JsonExpr &expr,
+                     SourceInfo *source_info = nullptr) {
     auto &pipelines = json["pipelines"];
     Json::Value pipeline(Json::objectValue);
     pipeline["name"] = "pipe";
@@ -517,12 +518,14 @@ class JsonBuilder {
     Json::Value cond(Json::objectValue);
     cond["name"] = name;
     cond["id"] = 0;
-    Json::Value source_info(Json::objectValue);
-    source_info["filename"] = "foo.p4";
-    source_info["line"] = 42;
-    source_info["column"] = 18;
-    source_info["source_fragment"] = "hdr.ethernet.dstAddr == 0";
-    cond["source_info"] = source_info;
+    if (source_info) {
+      Json::Value si(Json::objectValue);
+      si["filename"] = source_info->get_filename();
+      si["line"] = source_info->get_line();
+      si["column"] = source_info->get_column();
+      si["source_fragment"] = source_info->get_source_fragment();
+      cond["source_info"] = si;
+    }
     Json::Value expression(Json::objectValue);
     expression["type"] = "expression";
     expression["value"] = expr.get_json();
@@ -902,4 +905,27 @@ TEST(P4Objects, BadRuntimeDataOffset) {
       "primitive 'ignore_string': trying to use parameter at offset 0 but "
       "action only has 0 parameter(s)\n");
   EXPECT_EQ(expected_error_msg, os.str());
+}
+
+TEST(P4Objects, ConditionSourceInfo) {
+  JsonBuilder builder;
+  auto expr = JsonExpr::load_bool(true);
+  SourceInfo expected_source_info(
+      "foo.p4", 42, 18, "hdr.ethernet.dstAddr == 0");
+  builder.add_condition("c0", expr, &expected_source_info);
+  std::stringstream is(builder.to_string());
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  const auto cond = objects.get_conditional("c0");
+  auto source_info = cond->get_source_info();
+  EXPECT_EQ(expected_source_info.get_filename(),
+            source_info->get_filename());
+  EXPECT_EQ(expected_source_info.get_line(),
+            source_info->get_line());
+  EXPECT_EQ(expected_source_info.get_column(),
+            source_info->get_column());
+  EXPECT_EQ(expected_source_info.get_source_fragment(),
+            source_info->get_source_fragment());
+  EXPECT_EQ(std::string("foo.p4(42)"), source_info->to_string());
 }
