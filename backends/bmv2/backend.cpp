@@ -16,14 +16,15 @@ limitations under the License.
 
 #include "backend.h"
 #include "control.h"
-#include "extern.h"
-#include "header.h"
-#include "parser.h"
+#include "copyAnnotations.h"
 #include "deparser.h"
 #include "errorcode.h"
 #include "expression.h"
+#include "extern.h"
 #include "frontends/p4/methodInstance.h"
-#include "copyAnnotations.h"
+#include "header.h"
+#include "metadata.h"
+#include "parser.h"
 
 namespace BMV2 {
 
@@ -378,6 +379,22 @@ void Backend::createMetadata() {
     //headerInstancesCreated.insert();
 }
 
+void Backend::createFieldAliases(const char *remapFile) {
+    Arch::MetadataRemapT *remap = Arch::readMap(remapFile);
+    LOG1("Metadata alias map of size = " << remap->size());
+    for ( auto r : *remap) {
+        auto container = new Util::JsonArray();
+        auto alias = new Util::JsonArray();
+        container->append(r.second);
+        // break down the alias into meta . field
+        auto meta = r.first.before(r.first.find('.'));
+        alias->append(meta);
+        alias->append(r.first.substr(meta.size()+1));
+        container->append(alias);
+        field_aliases->append(container);
+    }
+}
+
 void Backend::addErrors(Util::JsonArray* errors) {
     for (const auto &p : errorCodesMap) {
         auto name = p.first->getName().name.c_str();
@@ -389,10 +406,12 @@ void Backend::addErrors(Util::JsonArray* errors) {
 
 void Backend::process(const IR::ToplevelBlock* tb) {
     setName("BackEnd");
+    // constexpr char mapfile[] = "p4include/p4d2model_bmss_meta.map";
     addPasses({
         new P4::TypeChecking(&refMap, &typeMap),
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
+        // new MetadataRemap(this, Arch::readMap(mapfile)),
     });
     tb->getProgram()->apply(*this);
 }
@@ -417,12 +436,14 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     actions = mkArrayField(&toplevel, "actions");
     pipelines = mkArrayField(&toplevel, "pipelines");
     checksums = mkArrayField(&toplevel, "checksums");
-    force_arith = mkArrayField(&toplevel, "force_arith");
+    // force_arith = mkArrayField(&toplevel, "force_arith");
     externs = mkArrayField(&toplevel, "extern_instances");
+    constexpr char metadata_remap_file[] = "p4include/p4d2model_bmss_meta.map";
     field_aliases = mkArrayField(&toplevel, "field_aliases");
 
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(this);
+
 
     PassManager codegen_passes = {
         new CopyAnnotations(&refMap, &blockTypeMap),
@@ -438,6 +459,8 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         new VisitFunctor([this](){ createActions(actions); }),
         new ConvertControl(this),
         new ConvertDeparser(this),
+        new VisitFunctor([this, metadata_remap_file](){
+            createFieldAliases(metadata_remap_file); }),
     };
     tb->getMain()->apply(codegen_passes);
 }
