@@ -478,8 +478,8 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         new VisitFunctor([this](){ createActions(actions); }),
         new ConvertControl(this),
         new ConvertDeparser(this),
-        new VisitFunctor([this, metadata_remap_file](){
-            createFieldAliases(metadata_remap_file); }),
+        // new VisitFunctor([this, metadata_remap_file](){
+        //     createFieldAliases(metadata_remap_file); }),
     };
     tb->getMain()->apply(codegen_passes);
 }

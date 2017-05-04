@@ -265,10 +265,15 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
     }
 #else
     auto block = getContext()->parent->node;
+    // keep track of which headers we've already generated the json for
     if (block->is<IR::Type_Control>() || block->is<IR::Type_Parser>()) {
         auto ft = backend->getTypeMap().getType(param->getNode(), true);
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
+            if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
+                return false; // already seen
+            else
+                visitedHeaders.emplace(st->getName());
             LOG1("name " << st->getName());
             LOG1("anno " << st->getAnnotations());
             if (st->getAnnotation("metadata")) {

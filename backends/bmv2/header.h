@@ -28,6 +28,7 @@ namespace BMV2 {
 
 class ConvertHeaders : public Inspector {
     BMV2::Backend*    backend;
+    std::set<cstring> visitedHeaders;
 
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);
