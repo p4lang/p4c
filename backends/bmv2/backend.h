@@ -93,7 +93,8 @@ class Backend : public PassManager {
     /// map from block to its type as defined in architecture file
     BlockTypeMap                     blockTypeMap;
     void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
-    void createJsonType(const IR::Type_StructLike* st);
+    // TODO(hanw) addLocal rely on this function to return cstring
+    cstring createJsonType(const IR::Type_StructLike* st);
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;

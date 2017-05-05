@@ -152,20 +152,19 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
     }
 
     for (auto f : type->fields) {
+        LOG1("fields " << f);
         auto ft = backend->getTypeMap().getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
-            auto isCreated =
-                backend->headerInstancesCreated.find(ft) != backend->headerInstancesCreated.end();
-            if (!isCreated) {
-                auto json = new Util::JsonObject();
-                json->emplace("name", extVisibleName(f));
-                json->emplace("id", nextId("headers"));
-                json->emplace_non_null("source_info", f->sourceInfoJsonObj());
-                json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
-                json->emplace("metadata", meta);
-                backend->headerInstances->append(json);
-                backend->headerInstancesCreated.insert(ft);
-            }
+            LOG1("add to header " << ft);
+            LOG1("create header");
+            auto json = new Util::JsonObject();
+            json->emplace("name", extVisibleName(f));
+            json->emplace("id", nextId("headers"));
+            json->emplace_non_null("source_info", f->sourceInfoJsonObj());
+            json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
+            json->emplace("metadata", meta);
+            backend->headerInstances->append(json);
+            backend->headerInstancesCreated.insert(ft);
         } else if (ft->is<IR::Type_Stack>()) {
             // Done elsewhere
             continue;
@@ -269,6 +268,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
         auto ft = backend->getTypeMap().getType(param->getNode(), true);
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
+            LOG1("sees header " << st);
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
                 return false;  // already seen
             else
@@ -278,6 +278,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
             if (st->getAnnotation("metadata")) {
                 backend->createJsonType(st);
             } else {
+                LOG1("header " << st->getName());
                 auto isHeader = isHeaders(st);
                 if (isHeader) {
                     addTypesAndInstances(st, false);

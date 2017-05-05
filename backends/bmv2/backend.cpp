@@ -67,9 +67,12 @@ void Backend::createScalars() {
     scalarFields = mkArrayField(scalarsStruct, "fields");
 }
 
-void Backend::createJsonType(const IR::Type_StructLike *st) {
-    auto isCreated = headerTypesCreated.find(st) != headerTypesCreated.end();
-    if (!isCreated) {
+// TODO(hanw) clean up, especially the return type
+cstring Backend::createJsonType(const IR::Type_StructLike *st) {
+    auto header = headerTypesCreated.find(st);
+    if (header != headerTypesCreated.end()) {
+        return extVisibleName(*header);
+    } else {
         auto typeJson = new Util::JsonObject();
         cstring name = extVisibleName(st);
         typeJson->emplace("name", name);
@@ -79,6 +82,7 @@ void Backend::createJsonType(const IR::Type_StructLike *st) {
         auto fields = mkArrayField(typeJson, "fields");
         pushFields(st, fields);
         headerTypesCreated.insert(st);
+        return name;
     }
 }
 
@@ -126,13 +130,12 @@ void Backend::addLocals() {
     auto scalarFields = scalarsStruct->get("fields")->to<Util::JsonArray>();
     CHECK_NULL(scalarFields);
 
-    LOG3("... structure " << structure.variables);
+    LOG1("... structure " << structure.variables);
     for (auto v : structure.variables) {
-        LOG3("Creating local " << v);
+        LOG1("Creating local " << v);
         auto type = typeMap.getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
-            createJsonType(st);
-            auto name = st->name;
+            auto name = createJsonType(st);
             // create header instance?
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
@@ -154,6 +157,7 @@ void Backend::addLocals() {
             createJsonType(ht);
 
             cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
+            LOG1("header xx" << header_type);
             json->emplace("header_type", header_type);
             auto stackMembers = mkArrayField(json, "header_ids");
             for (unsigned i=0; i < stack->getSize(); i++) {
@@ -164,6 +168,7 @@ void Backend::addLocals() {
                 header->emplace("name", name);
                 header->emplace("id", id);
                 // TODO(jafingerhut) - add line/col here?
+                LOG1("header xx" << header_type);
                 header->emplace("header_type", header_type);
                 header->emplace("metadata", false);
                 header->emplace("pi_omit", true);  // Don't expose in PI.
