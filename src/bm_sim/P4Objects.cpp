@@ -2023,8 +2023,14 @@ P4Objects::deserialize(std::istream *in) {
 int
 P4Objects::get_field_offset(header_id_t header_id,
                             const string &field_name) const {
-  const HeaderType &header_type = phv_factory.get_header_type(header_id);
-  return header_type.get_field_offset(field_name);
+  const auto &header_type = phv_factory.get_header_type(header_id);
+  auto offset = header_type.get_field_offset(field_name);
+  if (offset < 0) {
+    throw json_exception(
+        EFormat() << "No field '" << field_name << "' can be found in "
+                  << "header type '" << header_type.get_name() << "'");
+  }
+  return offset;
 }
 
 size_t
@@ -2298,7 +2304,12 @@ P4Objects::add_header_union_stack_id(
 
 header_id_t
 P4Objects::get_header_id(const std::string &name) const {
-  return header_ids_map.at(name);
+  auto it = header_ids_map.find(name);
+  if (it == header_ids_map.end()) {
+    throw json_exception(
+        EFormat() << "No header instance '" << name << "' was defined");
+  }
+  return it->second;
 }
 
 header_stack_id_t
