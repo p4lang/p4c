@@ -25,6 +25,7 @@ limitations under the License.
 #include "header.h"
 #include "metadata.h"
 #include "parser.h"
+#include "JsonObjects.h"
 
 namespace BMV2 {
 
@@ -60,7 +61,7 @@ void Backend::addEnums(Util::JsonArray* enums) {
 }
 
 void Backend::createScalars() {
-    scalarsName = refMap->newName("scalars");
+    scalarsName = refMap->newName("scalars");  // TODO(hanw): why add scalars to refMap
     scalarsStruct = new Util::JsonObject();
     scalarsStruct->emplace("name", scalarsName);
     scalarsStruct->emplace("id", nextId("header_types"));
@@ -413,12 +414,15 @@ void Backend::createFieldAliases(const char *remapFile) {
     }
 }
 
+// TODO(hanw): remove
 void Backend::addErrors(Util::JsonArray* errors) {
     for (const auto &p : errorCodesMap) {
-        auto name = p.first->getName().name.c_str();
+        auto name = p.first->toString();
         auto entry = pushNewArray(errors);
         entry->append(name);
         entry->append(p.second);
+        // auto type = p.second;
+        // bm->json->add_error(name, type);
     }
 }
 
@@ -462,7 +466,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
 
     PassManager codegen_passes = {
         new CopyAnnotations(refMap, &blockTypeMap),
-        new VisitFunctor([this](){ addEnums(enums); }),
+        new VisitFunctor([this](){ addEnums(enums); }),  // TODO(hanw): remove
         new VisitFunctor([this](){ createScalars(); }),
         new VisitFunctor([this](){ addLocals(); }),
         new VisitFunctor([this](){ createMetadata(); }),

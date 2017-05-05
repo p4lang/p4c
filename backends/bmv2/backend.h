@@ -33,6 +33,7 @@ limitations under the License.
 #include "metermap.h"
 #include "midend/convertEnums.h"
 #include "copyAnnotations.h"
+#include "JsonObjects.h"
 
 namespace BMV2 {
 
@@ -55,6 +56,8 @@ class Backend : public PassManager {
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
+
+    bm::JsonObjects*                 json;
 
  public:
     Util::JsonArray*                 meta;

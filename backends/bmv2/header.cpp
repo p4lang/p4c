@@ -225,14 +225,32 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
             stackMembers->append(id);
             auto header = new Util::JsonObject();
             cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
+            // replace
             header->emplace("name", name);
             header->emplace("id", id);
-            // TODO(jafingerhut) - add line/col here?
             header->emplace("header_type", header_type);
             header->emplace("metadata", false);
             backend->headerInstances->append(header);
+            //bm->json->add_header(header_type, name, false);
         }
         backend->headerStacks->append(json);
+
+/*
+        auto name = extVisibleName(f);
+        auto size = stack->getSize();
+        auto elem = stack->elementType;
+        auto elemType = typeMap.getTypeType(elem, true);
+        bm->add_header_type(elemType);
+        cstring hdrType = extVisibleName(elemType->to<IR::TypeHeader>());
+        std::vector<unsigned> ids;
+        for (unsigned i = 0; i < size; i++) {
+            cstring hdrName = extVisibleName(f) + "[" + Util::toString(i) + "]";
+            auto id = bm->json->add_header(hdrName, hdrType, false);
+            ids.append(id);
+        }
+        bm->json->add_header_stack(name, headerType, size, ids);
+*/
+
     }
 }
 

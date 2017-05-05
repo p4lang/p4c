@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 #include "midend.h"
 #include "backend.h"
+#include "JsonObjects.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -74,6 +75,19 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
+    bm::JsonObjects jsonObjects;
+    jsonObjects.add_program_info(options.file);
+    jsonObjects.add_meta_info();
+
+    // convert all enums to json
+    for (const auto &pEnum : midEnd.enumMap) {
+        auto name = pEnum.first->getName();
+        for (const auto &pEntry : *pEnum.second) {
+            jsonObjects.add_enum(name, pEntry.first, pEntry.second);
+        }
+    }
+
+    // TODO(hanw): backend depends on the modified refMap and typeMap from midEnd.
     BMV2::Backend backend(options.isv1(), &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
     try {
         backend.addDebugHook(hook);
