@@ -111,11 +111,11 @@ class Backend : public PassManager {
     void padScalars();
 
  public:
-    explicit Backend(P4::ReferenceMap &refMap, P4::TypeMap &typeMap,
-                     P4::ConvertEnums::EnumMapping* enumMap) :
-        refMap(refMap), typeMap(typeMap), enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
+  explicit Backend(bool isV1,
+                   P4::ConvertEnums::EnumMapping* enumMap) :
+        enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
-    {}
+    { refMap.setIsV1(isV1); }
     void process(const IR::ToplevelBlock* block);
     void convert(const IR::ToplevelBlock* block, CompilerOptions& options);
     void serialize(std::ostream& out) const

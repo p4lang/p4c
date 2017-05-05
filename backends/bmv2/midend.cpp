@@ -177,7 +177,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
-        // TODO(hanw): skip synthesizing actions in verify, update and deparser.
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
@@ -187,9 +186,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
-        // TODO(hanw): re-enable these two passes
-        // new RemoveComplexExpressions(&refMap, &typeMap,
-        //                             &ingressControlBlockName, &egressControlBlockName),
+        new RemoveComplexExpressions(&refMap, &typeMap,
+                                     &P4V1::V1Model::instance.ingress.name,
+                                     &P4V1::V1Model::instance.egress.name),
+        // TODO(hanw): re-enable this pass
         // new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),

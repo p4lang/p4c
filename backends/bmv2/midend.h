@@ -31,8 +31,6 @@ class MidEnd : public PassManager {
     P4::InlineWorkList controlsToInline;
     P4::ActionsInlineList actionsToInline;
     cstring updateControlBlockName;
-    cstring ingressControlBlockName;
-    cstring egressControlBlockName;
 
  public:
     // These will be accurate when the mid-end completes evaluation
