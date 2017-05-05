@@ -167,6 +167,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             backend->headerInstancesCreated.insert(ft);
         } else if (ft->is<IR::Type_Stack>()) {
             // Done elsewhere
+            LOG1("stack generation done elsewhere");
             continue;
         } else {
             // Treat this field like a scalar local variable
@@ -198,9 +199,11 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
 }
 
 void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
+    LOG1("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
         auto ft = backend->getTypeMap().getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
+        LOG1("Creating " << stack);
         if (stack == nullptr)
             continue;
 
@@ -237,7 +240,7 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
 bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
     bool result = false;
     for (auto f : st->fields) {
-        if (f->type->is<IR::Type_Header>()) {
+        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
             result = true;
         }
     }
@@ -268,7 +271,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
         auto ft = backend->getTypeMap().getType(param->getNode(), true);
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
-            LOG1("sees header " << st);
+            LOG1("sees header ");
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
                 return false;  // already seen
             else
@@ -282,8 +285,10 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
                 auto isHeader = isHeaders(st);
                 if (isHeader) {
                     addTypesAndInstances(st, false);
+                    LOG1("add stack" << st);
                     addHeaderStacks(st);
                 } else {
+                    LOG1("add metadata" << st);
                     addTypesAndInstances(st, true);
                 }
             }
