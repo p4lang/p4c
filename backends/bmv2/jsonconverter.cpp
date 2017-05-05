@@ -142,8 +142,10 @@ class SharedActionSelectorCheck : public Inspector {
     explicit SharedActionSelectorCheck(JsonConverter* converter) : converter(converter)
     { CHECK_NULL(converter); }
 
-    const Input &get_selector_input(const IR::Declaration_Instance* selector) const {
-        return selector_input_map.at(selector);
+    const Input *get_selector_input(const IR::Declaration_Instance* selector) const {
+        auto it = selector_input_map.find(selector);
+        if (it == selector_input_map.end()) return nullptr;  // selector never used
+        return &it->second;
     }
 
     bool preorder(const IR::P4Table* table) override {
@@ -2096,10 +2098,17 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                         BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
                         auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
                         selector->emplace("algo", algo);
-                        const auto &input = selector_check.get_selector_input(
+                        auto input = selector_check.get_selector_input(
                             c->to<IR::Declaration_Instance>());
+                        if (input == nullptr) {
+                            // the selector is never used by any table, we cannot figure out its
+                            // input and therefore cannot include it in the JSON
+                            ::warning("Action selector '%1%' is never referenced by a table "
+                                      "and cannot be included in bmv2 JSON", c);
+                            continue;
+                        }
                         auto j_input = mkArrayField(selector, "input");
-                        for (auto expr : input) {
+                        for (auto expr : *input) {
                             auto jk = conv->convert(expr);
                             j_input->append(jk);
                         }
