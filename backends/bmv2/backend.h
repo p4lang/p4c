@@ -39,12 +39,12 @@ namespace BMV2 {
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
-    const IR::ToplevelBlock*         tlb;
-    ExpressionConverter*             conv;
-    P4::ConvertEnums::EnumMapping*   enumMap;
-    P4::P4CoreLibrary&               corelib;
     P4::ReferenceMap                 refMap;
     P4::TypeMap                      typeMap;
+    P4::ConvertEnums::EnumMapping*   enumMap;
+    const IR::ToplevelBlock*         tlb;
+    ExpressionConverter*             conv;
+    P4::P4CoreLibrary&               corelib;
     ProgramParts                     structure;
     Util::JsonObject                 toplevel;
     P4::V2Model&                     model;
@@ -110,8 +110,9 @@ class Backend : public PassManager {
     void padScalars();
 
  public:
-    explicit Backend(P4::ConvertEnums::EnumMapping* enumMap) :
-        enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
+    explicit Backend(P4::ReferenceMap &refMap, P4::TypeMap &typeMap,
+                     P4::ConvertEnums::EnumMapping* enumMap) :
+        refMap(refMap), typeMap(typeMap), enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
     {}
     void process(const IR::ToplevelBlock* block);
