@@ -345,9 +345,10 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
 }
 
 void V1Model::convertExternInstances(BMV2::Backend *backend,
-                                     const IR::Declaration_Instance *inst,
+                                     const IR::Declaration *c,
                                      const IR::ExternBlock* eb,
                                      Util::JsonArray* action_profiles) {
+    auto inst = c->to<IR::Declaration_Instance>();
     cstring name = extVisibleName(inst);
     if (eb->type->name == instance.counter.name) {
         auto jctr = new Util::JsonObject();
@@ -416,7 +417,7 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
             backend->counters->append(jctr);
         }
     } else if (eb->type->name == instance.directMeter.name) {
-        auto info = backend->getMeterMap().getInfo(inst);
+        auto info = backend->getMeterMap().getInfo(c);
         CHECK_NULL(info);
         CHECK_NULL(info->table);
         CHECK_NULL(info->destinationField);

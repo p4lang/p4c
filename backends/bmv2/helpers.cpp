@@ -27,6 +27,7 @@ const cstring MatchImplementation::rangeMatchTypeName = "range";
 const cstring TableAttributes::implementationName = "implementation";
 const cstring TableAttributes::sizeName = "size";
 const cstring TableAttributes::supportTimeoutName = "supportTimeout";
+const cstring TableAttributes::directMeterName = "meters";
 const unsigned TableAttributes::defaultTableSize = 1024;
 const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata";
 

@@ -483,7 +483,7 @@ Control::convertTable(const CFG::TableNode* node,
     }
     result->emplace("support_timeout", sup_to);
 
-    auto dm = table->properties->getProperty(BMV2::TableImplementation::directMeterName);
+    auto dm = table->properties->getProperty(BMV2::TableAttributes::directMeterName);
     if (dm != nullptr) {
         if (dm->value->is<IR::ExpressionValue>()) {
             auto expr = dm->value->to<IR::ExpressionValue>()->expression;
@@ -751,7 +751,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
                 continue;
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
-                P4V1::V1Model::convertExternInstances(backend, inst, eb, action_profiles);
+                P4V1::V1Model::convertExternInstances(backend, c, eb, action_profiles);
                 continue;
             }
         }

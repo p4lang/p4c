@@ -46,6 +46,7 @@ class TableAttributes {
     static const cstring sizeName;
     static const cstring supportTimeoutName;
     static const unsigned defaultTableSize;
+    static const cstring directMeterName;
 };
 
 class V1ModelProperties {
