@@ -181,6 +181,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 field->append(tb->size);
                 field->append(tb->isSigned);
                 backend->scalars_width += tb->size;
+                LOG1("insert field " << f);
                 backend->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Boolean>()) {
                 auto field = pushNewArray(scalarFields);
@@ -188,6 +189,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 field->append(backend->boolWidth);
                 field->append(0);
                 backend->scalars_width += backend->boolWidth;
+                LOG1("insert field " << f);
                 backend->scalarMetadataFields.emplace(f, newName);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);

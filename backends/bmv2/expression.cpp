@@ -217,16 +217,13 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
         auto type = backend->getTypeMap().getType(expression, true);
-        LOG1("Parameter: " << param);
-// FIXME: handle expression generation for std meta
-#if 0
-        if (param == /* stdmetadata */ ) {
+        // TODO(hanw): need a function isStandardMetadata();
+        if (param->type->toString() == "standard_metadata_t") {
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");
-            e->append(type->to<IR::Type_StructLike>()->name);
+            e->append(BMV2::V1ModelProperties::jsonMetadataParameterName);
             e->append(fieldName);
         } else {
-#endif
             if (type->is<IR::Type_Stack>()) {
                 result->emplace("type", "header_stack");
                 result->emplace("value", fieldName);
@@ -235,6 +232,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 auto field = parentType->to<IR::Type_StructLike>()->getField(
                     expression->member);
                 CHECK_NULL(field);
+                LOG1("looking up field " << field);
                 auto name = ::get(backend->scalarMetadataFields, field);
                 CHECK_NULL(name);
                 result->emplace("type", "field");
@@ -247,9 +245,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 result->emplace("type", "header");
                 result->emplace("value", fieldName);
             }
-#if 0
         }
-#endif
     } else {
         bool done = false;
         if (expression->expr->is<IR::Member>()) {
