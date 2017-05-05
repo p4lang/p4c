@@ -1,0 +1,9 @@
+../testdata/p4_16_errors/tuple-to-header.p4(23): error: AssignmentStatement: Cannot assign a Tuple(1) to a header H
+        h = t; // illegal assignment between tuple and header
+          ^
+../testdata/p4_16_errors/tuple-to-header.p4(20)
+    tuple<bit<32>> t = { 0 };
+    ^^^^^^^^^^^^^^
+../testdata/p4_16_errors/tuple-to-header.p4(17)
+header H { bit<32> x; }
+       ^

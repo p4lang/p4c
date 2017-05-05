@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,21 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-typedef tuple<bit<32>, bool> pair;
-struct S {
-    bit<32> f;
-    bool    s;
-}
-
-control proto();
-package top(proto _p);
+header H { bit<32> x; }
 
 control c() {
-    pair x = { 10, false };
-    tuple<bit<32>, bool> y;
+    tuple<bit<32>> t = { 0 };
+    H h;
     apply {
-        y = x;
+        h = t; // illegal assignment between tuple and header
     }
 }
-
-top(c()) main;

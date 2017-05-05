@@ -9,10 +9,8 @@ package top(proto _p);
 control c() {
     tuple<bit<32>, bool> x = { 32w10, false };
     tuple<bit<32>, bool> y;
-    S z;
     apply {
         y = x;
-        z = y;
     }
 }
 

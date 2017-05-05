@@ -75,7 +75,7 @@ struct EvaluationOrder {
 
 /** @brief Replaces expressions containing constructor or method invocations
  * with temporaries.  Also unrolls short-circuit evaluation.
- * 
+ *
  * The EvaluationOrder field accumulates lists of the temporaries introduced in
  * this way, as well as assignment statements that assign the original
  * expressions to the appropriate temporaries.
@@ -345,6 +345,22 @@ class DismantleExpression : public Transform {
         return false;
     }
 
+    /// Returns true if type is a header or a struct containing a header.
+    /// (We don't care about stacks or unions.)
+    bool containsHeaderType(const IR::Type* type) {
+        if (type->is<IR::Type_Header>())
+            return true;
+        auto st = type->to<IR::Type_Struct>();
+        if (st == nullptr)
+            return false;
+        for (auto f : st->fields) {
+            auto ftype = typeMap->getType(f, true);
+            if (containsHeaderType(ftype))
+                return true;
+        }
+        return false;
+    }
+
     const IR::Node* preorder(IR::MethodCallExpression* mce) override {
         BUG_CHECK(!leftValue, "%1%: method on left hand side?", mce);
         LOG3("Visiting " << dbp(mce));
@@ -383,6 +399,23 @@ class DismantleExpression : public Transform {
                 LOG3("Using temporary for " << dbp(mce) <<
                      " param " << dbp(p) << " arg side effect");
                 useTemporary.emplace(p);
+                continue;
+            }
+            // If the parameter contains header values and the
+            // argument is a list expression then we also use a
+            // temporary.  This makes the job of the SetHeaders pass
+            // later simpler (otherwise we have to handle this case
+            // there).
+            auto ptype = typeMap->getType(p, true);
+            if (!containsHeaderType(ptype))
+                continue;
+
+            auto argType = typeMap->getType(arg, true);
+            if (argType->is<IR::Type_Tuple>()) {
+                LOG3("Using temporary for " << dbp(mce) <<
+                     " param " << dbp(p) << " assigning tuple to header");
+                useTemporary.emplace(p);
+                continue;
             }
         }
 
