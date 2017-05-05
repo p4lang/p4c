@@ -253,6 +253,8 @@ struct ActionProfile {
     const cstring name;  // The fully qualified external name of this action profile.
     const ActionProfileType type;
     const int64_t size;
+    const IR::IAnnotated* annotations;  // If non-null, any annotations applied to this action
+                                        // profile declaration.
 
     bool operator<(const ActionProfile& other) const {
         if (name != other.name) return name < other.name;
@@ -1069,6 +1071,8 @@ public:
         for (const auto& table : tables) {
             profile->add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE, table));
         }
+
+        addAnnotations(profile->mutable_preamble(), actionProfile.annotations);
     }
 
 private:
@@ -1214,6 +1218,14 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     return externInstance;
 }
 
+/// @return the table implementation property, or nullptr if the table has no
+/// such property.
+static const IR::Property *
+getTableImplementationProperty(const IR::P4Table* table) {
+    return table->properties->getProperty(
+        P4V1::V1Model::instance.tableAttributes.tableImplementation.name);
+}
+
 /// @return the direct counter associated with @table, if it has one, or
 /// boost::none otherwise.
 template <typename Kind>
@@ -1238,9 +1250,7 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
     // We collect that symbol here as well, because in P4-16 action profiles are
     // just extern instantiations and aren't defined separately from the tables
     // that use them.
-    auto impl = table->properties->getProperty(P4V1::V1Model::instance
-                                                .tableAttributes
-                                                .tableImplementation.name);
+    auto impl = getTableImplementationProperty(table);
     if (impl) {
         // we only collect the implementation symbol if the action profile is instantiated within
         // the table declaration, otherwise the symbol is collected by collectExternSymbols.
@@ -1338,9 +1348,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             // key, but it's worth doing a sanity check that this table has an
             // implementation property - if it doesn't, serializeActionProfiles()
             // will ignore it.
-            auto impl = table->properties->getProperty(P4V1::V1Model::instance
-                                                        .tableAttributes
-                                                        .tableImplementation.name);
+            auto impl = getTableImplementationProperty(table);
             BUG_CHECK(impl != nullptr, "Table '%1%' has match type 'selector' "
                                        "but no implementation property",
                       controlPlaneName(table));
@@ -1456,9 +1464,7 @@ static std::vector<ActionRef> getActionRefs(const IR::P4Table* table, ReferenceM
 static boost::optional<cstring> getTableImplementationName(const IR::P4Table* table,
                                                            ReferenceMap* refMap,
                                                            TypeMap* typeMap) {
-    auto impl = table->properties->getProperty(P4V1::V1Model::instance
-                                                .tableAttributes
-                                                .tableImplementation.name);
+    auto impl = getTableImplementationProperty(table);
     if (impl == nullptr) return boost::none;
     if (!impl->value->is<IR::ExpressionValue>()) {
         ::error("Expected implementation property value for table %1% to be an expression: %2%",
@@ -1524,6 +1530,20 @@ static void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock,
     }
 }
 
+static const IR::IAnnotated*
+getActionProfileAnnotations(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+    auto impl = getTableImplementationProperty(table);
+    if (impl == nullptr) return nullptr;
+    if (!impl->value->is<IR::ExpressionValue>()) return nullptr;
+    auto expr = impl->value->to<IR::ExpressionValue>()->expression;
+    if (expr->is<IR::ConstructorCallExpression>()) return impl->to<IR::IAnnotated>();
+    if (expr->is<IR::PathExpression>()) {
+        auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+        return decl->to<IR::IAnnotated>();
+    }
+    return nullptr;
+}
+
 /// @return the action profile referenced in @table's implementation property,
 /// if it has one, or boost::none otherwise.
 static boost::optional<ActionProfile>
@@ -1555,7 +1575,8 @@ getActionProfile(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
     }
 
     const int64_t size = sizeExpression->to<IR::Constant>()->asInt();
-    return ActionProfile{*instance->name, actionProfileType, size};
+    return ActionProfile{*instance->name, actionProfileType, size,
+          getActionProfileAnnotations(table, refMap, typeMap)};
 }
 
 static void serializeActionProfiles(P4RuntimeSerializer& serializer,
