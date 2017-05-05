@@ -466,7 +466,9 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         new ConvertHeaders(this),
         new VisitFunctor([this](){ padScalars(); }),
         new VisitFunctor([this](){ addErrors(errors); }),
+#ifdef PSA
         new ConvertExterns(this),
+#endif
         new ConvertParser(this),
         // createAction must be called before convertControl
         new VisitFunctor([this](){ createActions(actions); }),
