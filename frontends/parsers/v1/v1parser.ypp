@@ -16,7 +16,7 @@ limitations under the License.
 
 // Use Bison's C++ mode.
 %skeleton "lalr1.cc" /* -*-C++-*- */
-%require "3.0.4"
+%require "3.0.0"
 
 // Set up names.
 %defines
