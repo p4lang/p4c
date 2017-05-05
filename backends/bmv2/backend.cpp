@@ -230,7 +230,7 @@ void Backend::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
     auto ext = new Util::JsonObject();
     ext->emplace("type", "extern");
 
-    // FIXME: have extern pass building a map and lookup here.
+    // FIXME: PSA have extern pass building a map and lookup here.
     if (em->object->is<IR::Parameter>()) {
         auto param = em->object->to<IR::Parameter>();
         // auto packageObject = resolveParameter(param);

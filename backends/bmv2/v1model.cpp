@@ -468,7 +468,7 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
             BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
             auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
             selector->emplace("algo", algo);
-            // FIXME
+            // FIXME selector_check pass
             // const auto &input = selector_check.get_selector_input(inst);
             // auto j_input = mkArrayField(selector, "input");
             // for (auto expr : input) {

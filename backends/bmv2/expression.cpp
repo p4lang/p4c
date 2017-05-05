@@ -218,10 +218,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     if (param != nullptr) {
         auto type = backend->getTypeMap().getType(expression, true);
         LOG1("Parameter: " << param);
-        // FIXME translate scalar:
+// FIXME: handle expression generation for std meta
 #if 0
-        if (type->is<IR::Type_StructLike>()) {
-            LOG1("  Struct" << type);
+        if (param == /* stdmetadata */ ) {
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");
             e->append(type->to<IR::Type_StructLike>()->name);
@@ -236,15 +235,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 auto field = parentType->to<IR::Type_StructLike>()->getField(
                     expression->member);
                 CHECK_NULL(field);
-#if 0
-                auto name = ::get(converter->scalarMetadataFields, field);
-#else
-                auto name = "FIXME";
-#endif
+                auto name = ::get(backend->scalarMetadataFields, field);
                 CHECK_NULL(name);
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
-                e->append(scalarsName);
+                e->append(backend->scalarsName);
                 e->append(name);
             } else {
                 // This may be wrong, but the caller will handle it properly
