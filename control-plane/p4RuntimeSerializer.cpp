@@ -255,7 +255,9 @@ struct ActionProfile {
     const int64_t size;
 
     bool operator<(const ActionProfile& other) const {
-        return name < other.name && type < other.type && size < other.size;
+        if (name != other.name) return name < other.name;
+        if (type != other.type) return type < other.type;
+        return size < other.size;
     }
 };
 
@@ -1569,7 +1571,7 @@ static void serializeActionProfiles(P4RuntimeSerializer& serializer,
         auto table = block->to<IR::TableBlock>()->container;
         auto actionProfile = getActionProfile(table, refMap, typeMap);
         if (actionProfile) {
-          actionProfiles[*actionProfile].insert(controlPlaneName(table));
+            actionProfiles[*actionProfile].insert(controlPlaneName(table));
         }
     });
 
