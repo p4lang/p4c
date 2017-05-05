@@ -93,4 +93,4 @@ unsigned nextId(cstring group) {
     return counters[group]++;
 }
 
-} // namespace BMV2
+}  // namespace BMV2

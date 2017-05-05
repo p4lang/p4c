@@ -21,8 +21,8 @@ limitations under the License.
 #include <algorithm>
 #include <cstring>
 #include <set>
-#include <frontends/p4/fromv1.0/v1model.h>
-#include <backends/bmv2/backend.h>
+#include "frontends/p4/fromv1.0/v1model.h"
+#include "backends/bmv2/backend.h"
 
 using BMV2::extVisibleName;
 using BMV2::mkArrayField;
@@ -37,8 +37,7 @@ cstring                jsonMetadataParameterName = "standard_metadata";
 
 
 static void addToFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
-                           Util::JsonArray* fl)
-{
+                           Util::JsonArray* fl) {
     if (expr->is<IR::ListExpression>()) {
         auto le = expr->to<IR::ListExpression>();
         for (auto e : le->components) {
@@ -66,8 +65,7 @@ static void addToFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
 // returns id of created field list
 static int createFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
                            cstring group, cstring listName,
-                           Util::JsonArray* field_lists)
-{
+                           Util::JsonArray* field_lists) {
     auto fl = new Util::JsonObject();
     field_lists->append(fl);
     int id = nextId(group);
@@ -96,14 +94,12 @@ static cstring convertHashAlgorithm(cstring algorithm) {
     else
         ::error("%1%: unexpected algorithm", algorithm);
     return result;
-
 }
 
 void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
                                   const P4::ExternMethod *em,
                                   const IR::MethodCallExpression *mc,
-                                  const IR::StatOrDecl *s)
-{
+                                  const IR::StatOrDecl *s) {
     LOG1("...convert extern object " << mc);
     if (em->originalExternType->name == instance.counter.name) {
         if (em->method->name == instance.counter.increment.name) {
@@ -172,14 +168,12 @@ void V1Model::convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
             // Do not generate any code for this operation
         }
     }
-
 }
 
 void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv2,
                                      const P4::ExternFunction *ef,
                                      const IR::MethodCallExpression *mc,
-                                     const IR::StatOrDecl* s)
-{
+                                     const IR::StatOrDecl* s) {
     if (ef->method->name == instance.clone.name ||
         ef->method->name == instance.clone.clone3.name) {
         int id = -1;
@@ -191,7 +185,8 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         } else {
             BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
             cstring name = bmv2->getRefMap().newName("fl");
-            id = createFieldList(bmv2, mc->arguments->at(2), "field_lists", name, bmv2->field_lists);
+            id = createFieldList(bmv2, mc->arguments->at(2),
+                    "field_lists", name, bmv2->field_lists);
         }
         auto cloneType = mc->arguments->at(0);
         auto ei = P4::EnumInstance::resolve(cloneType, &bmv2->getTypeMap());
@@ -215,7 +210,6 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
             }
         }
     } else if (ef->method->name == instance.hash.name) {
-
         static std::set<cstring> supportedHashAlgorithms = {
             instance.algorithm.crc32.name, instance.algorithm.crc32_custom.name,
             instance.algorithm.crc16.name, instance.algorithm.crc16_custom.name,
@@ -234,7 +228,8 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         CHECK_NULL(ei);
         if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end())
             ::error("%1%: unexpected algorithm", ei->name);
-        // inlined cstring calcName = createCalculation(ei->name, mc->arguments->at(3), calculations);
+        // inlined cstring calcName = createCalculation(ei->name,
+        //                  mc->arguments->at(3), calculations);
         auto fields = mc->arguments->at(3);
         cstring calcName = bmv2->getRefMap().newName("calc_");
         auto calc = new Util::JsonObject();
@@ -473,13 +468,13 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
             BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
             auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
             selector->emplace("algo", algo);
-            //FIXME
-            //const auto &input = selector_check.get_selector_input(inst);
-            //auto j_input = mkArrayField(selector, "input");
-            //for (auto expr : input) {
-            //    auto jk = backend->getExpressionConverter()->convert(expr);
-            //    j_input->append(jk);
-            //}
+            // FIXME
+            // const auto &input = selector_check.get_selector_input(inst);
+            // auto j_input = mkArrayField(selector, "input");
+            // for (auto expr : input) {
+            //     auto jk = backend->getExpressionConverter()->convert(expr);
+            //     j_input->append(jk);
+            // }
             action_profile->emplace("selector", selector);
         }
 
@@ -487,4 +482,4 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
     }
 }
 
-} // namespace P4V1
+}  // namespace P4V1

@@ -140,9 +140,12 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::ClearTypeMap(&typeMap),
         evaluator,
         // (hanw) following three visit functors require apply() on PackageBlock
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        new VisitFunctor([this, mapBlockType]() { toplevel->getMain()->apply(*mapBlockType); }),
-        new VisitFunctor([this, generateSkipControls]() { toplevel->getMain()->apply(*generateSkipControls); }),
+        new VisitFunctor([this, evaluator]()
+                { toplevel = evaluator->getToplevelBlock(); }),
+        new VisitFunctor([this, mapBlockType]()
+                { toplevel->getMain()->apply(*mapBlockType); }),
+        new VisitFunctor([this, generateSkipControls]()
+                { toplevel->getMain()->apply(*generateSkipControls); }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
@@ -185,9 +188,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
         // TODO(hanw): re-enable these two passes
-        //new RemoveComplexExpressions(&refMap, &typeMap,
+        // new RemoveComplexExpressions(&refMap, &typeMap,
         //                             &ingressControlBlockName, &egressControlBlockName),
-        //new FixupChecksum(&updateControlBlockName),
+        // new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,

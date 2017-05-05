@@ -92,5 +92,5 @@ void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
     info->tableSize = size;
 }
 
-} // namespace BMV2
+}  // namespace BMV2
 

@@ -53,5 +53,6 @@ class CopyAnnotations : public Inspector {
     bool preorder(const IR::PackageBlock* block) override;
 };
 
-} // namespace BMV2
-#endif
+}  // namespace BMV2
+
+#endif  /* _BACKENDS_BMV2_COPYANNOTATIONS_H_ */

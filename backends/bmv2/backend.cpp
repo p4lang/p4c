@@ -91,7 +91,7 @@ void Backend::pushFields(const IR::Type_StructLike *st,
         } else if (ftype->is<IR::Type_Boolean>()) {
             auto field = pushNewArray(fields);
             field->append(f->name.name);
-            field->append(1); // boolWidth
+            field->append(boolWidth);
             field->append(0);
         } else if (auto type = ftype->to<IR::Type_Bits>()) {
             auto field = pushNewArray(fields);
@@ -101,7 +101,7 @@ void Backend::pushFields(const IR::Type_StructLike *st,
         } else if (auto type = ftype->to<IR::Type_Varbits>()) {
             auto field = pushNewArray(fields);
             field->append(f->name.name);
-            field->append(type->size); // FIXME -- where does length go?
+            field->append(type->size);  // FIXME -- where does length go?
         } else if (ftype->to<IR::Type_Stack>()) {
             BUG("%1%: nested stack", st);
         } else {
@@ -194,8 +194,8 @@ void Backend::addLocals() {
         }
     }
 
-    //FIXME: do we need to put scalarsStruct in set?
-    //headerTypesCreated.insert(scalarsName);
+    // FIXME: do we need to put scalarsStruct in set?
+    // headerTypesCreated.insert(scalarsName);
     headerTypes->append(scalarsStruct);
 
     // insert the scalars instance
@@ -224,21 +224,17 @@ void Backend::padScalars() {
 #ifdef PSA
 void Backend::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
     auto name = "_" + em->actualExternType->name + "_" + em->method->name.name;
-    // if (em->originalExternType->name.name == corelib.packetOut.name &&
-    //         em->method->name.name == corelib.packetOut.emit.name) {
-    //     LOG1("print emit method");
-    // }
     auto primitive = mkPrimitive(name, result);
     auto parameters = mkParameters(primitive);
 
     auto ext = new Util::JsonObject();
     ext->emplace("type", "extern");
 
-    //FIXME: have extern pass building a map and lookup here.
+    // FIXME: have extern pass building a map and lookup here.
     if (em->object->is<IR::Parameter>()) {
         auto param = em->object->to<IR::Parameter>();
-        //auto packageObject = resolveParameter(param);
-        //ext->emplace("value", packageObject->getName());
+        // auto packageObject = resolveParameter(param);
+        // ext->emplace("value", packageObject->getName());
         ext->emplace("value", "FIXME");
     } else {
         ext->emplace("value", em->object->getName());
@@ -253,7 +249,7 @@ void Backend::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
 #endif
 
 void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
-    //FIXME: conv->createFieldList = true??
+    // FIXME: conv->createFieldList = true??
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
@@ -389,7 +385,7 @@ void Backend::createActions(Util::JsonArray* actions) {
 
 void Backend::createMetadata() {
     auto json = new Util::JsonObject();
-    json->emplace("name", "standard_metadata"); //FIXME: from arch
+    json->emplace("name", "standard_metadata");
     json->emplace("id", nextId("headers"));
     json->emplace("header_type", "standard_metadata");
     json->emplace("metadata", true);
@@ -399,7 +395,7 @@ void Backend::createMetadata() {
 void Backend::createFieldAliases(const char *remapFile) {
     Arch::MetadataRemapT *remap = Arch::readMap(remapFile);
     LOG1("Metadata alias map of size = " << remap->size());
-    for ( auto r : *remap) {
+    for (auto r : *remap) {
         auto container = new Util::JsonArray();
         auto alias = new Util::JsonArray();
         container->append(r.second);
@@ -482,4 +478,4 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     tb->getMain()->apply(codegen_passes);
 }
 
-} // namespace BMV2
+}  // namespace BMV2

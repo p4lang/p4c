@@ -120,7 +120,7 @@ class Backend : public PassManager {
     { toplevel.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
-    ExpressionConverter * getExpressionConverter() { return conv; };
+    ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
     P4::V2Model &         getModel()     { return model; }

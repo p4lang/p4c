@@ -33,7 +33,8 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
             continue;
         } else if (s->is<IR::MethodCallStatement>()) {
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
-            auto mi = P4::MethodInstance::resolve(mc, &backend->getRefMap(), &backend->getTypeMap());
+            auto mi = P4::MethodInstance::resolve(mc,
+                    &backend->getRefMap(), &backend->getTypeMap());
             if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 if (em->originalExternType->name.name == backend->getCoreLibrary().packetOut.name) {
@@ -93,8 +94,7 @@ bool DoDeparserBlockConversion::preorder(const IR::ControlBlock* block) {
     auto bt = backend->blockTypeMap.find(block);
     if (bt != backend->blockTypeMap.end()) {
         // only generate control block marked with @deparser
-        LOG3("bt " << bt->second);
-        if(!bt->second->getAnnotation("deparser")) {
+        if (!bt->second->getAnnotation("deparser")) {
             return false;
         }
     }
@@ -104,4 +104,4 @@ bool DoDeparserBlockConversion::preorder(const IR::ControlBlock* block) {
     return false;
 }
 
-} // namespace BMV2
+}  // namespace BMV2

@@ -26,7 +26,7 @@ namespace BMV2 {
 
 /// constant used in bmv2 backend code generation
 class TableImplementation {
-public:
+ public:
     static const cstring actionProfileName;
     static const cstring actionSelectorName;
     static const cstring directCounterName;
@@ -35,13 +35,13 @@ public:
 };
 
 class MatchImplementation {
-public:
+ public:
     static const cstring selectorMatchTypeName;
     static const cstring rangeMatchTypeName;
 };
 
 class TableAttributes {
-public:
+ public:
     static const cstring implementationName;
     static const cstring sizeName;
     static const cstring supportTimeoutName;
@@ -49,7 +49,7 @@ public:
 };
 
 class V1ModelProperties {
-public:
+ public:
     static const cstring jsonMetadataParameterName;
 };
 

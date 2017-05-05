@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_CONVERTEXTERNS_H_
-#define _BACKENDS_BMV2_CONVERTEXTERNS_H_
+#ifndef _BACKENDS_BMV2_EXTERN_H_
+#define _BACKENDS_BMV2_EXTERN_H_
 
 #include "ir/ir.h"
 #include "lib/json.h"
@@ -41,7 +41,7 @@ class Extern : public Inspector {
 
 class ConvertExterns final : public PassManager {
  public:
-    ConvertExterns(Backend *b) {
+    explicit ConvertExterns(Backend *b) {
        passes.push_back(new Extern(b));
        setName("ConvertExterns");
     }
@@ -49,4 +49,4 @@ class ConvertExterns final : public PassManager {
 
 }  // namespace BMV2
 
-#endif
+#endif  /* _BACKENDS_BMV2_EXTERN_H_ */

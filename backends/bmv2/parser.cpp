@@ -49,7 +49,8 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
-        auto minst = P4::MethodInstance::resolve(mce, &backend->getRefMap(), &backend->getTypeMap());
+        auto minst = P4::MethodInstance::resolve(mce,
+                &backend->getRefMap(), &backend->getTypeMap());
         if (minst->is<P4::ExternMethod>()) {
             auto extmeth = minst->to<P4::ExternMethod>();
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
@@ -303,4 +304,4 @@ bool Parser::preorder(const IR::P4Parser* parser) {
     return false;
 }
 
-} // namespace BMV2
+}  // namespace BMV2

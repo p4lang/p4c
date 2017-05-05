@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_CONVERTCONTROL_H_
-#define _BACKENDS_BMV2_CONVERTCONTROL_H_
+#ifndef _BACKENDS_BMV2_CONTROL_H_
+#define _BACKENDS_BMV2_CONTROL_H_
 
 #include "ir/ir.h"
 #include "lib/json.h"
@@ -69,7 +69,6 @@ class SharedActionSelectorCheck : public Inspector {
 
     bool preorder(const IR::P4Table* table) override {
         auto implementation = table->properties->getProperty("implementation");
-                //v2model.tableAttributes.tableImplementation.name);
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {
           ::error("%1%: expected expression for property", implementation);
@@ -89,14 +88,14 @@ class SharedActionSelectorCheck : public Inspector {
             return false;
         }
         auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
-        //if (type_extern_name != v2model.action_selector.name) return false;
+        if (type_extern_name != BMV2::TableImplementation::actionSelectorName) return false;
 
         auto key = table->getKey();
         Input input;
         for (auto ke : key->keyElements) {
             auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
             BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
-            //if (mt->name.name != v2model.selectorMatchType.name) continue;
+            if (mt->name.name != BMV2::MatchImplementation::selectorMatchTypeName) continue;
             input.push_back(ke->expression);
         }
         auto decl_instance = decl->to<IR::Declaration_Instance>();
@@ -128,9 +127,6 @@ class SharedActionSelectorCheck : public Inspector {
 
 class Control : public Inspector {
     Backend*    backend;
-
-    // P4::V2Model&         v2model;
-
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
                               Util::JsonArray* action_profiles);
@@ -146,14 +142,13 @@ class Control : public Inspector {
  public:
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::ControlBlock* b) override;
-    //bool preorder(const IR::Declaration_Instance* d) override;
 
     explicit Control(Backend *backend) : backend(backend) {}
 };
 
 class ConvertControl final : public PassManager {
  public:
-    ConvertControl(Backend *backend) {
+    explicit ConvertControl(Backend *backend) {
         passes.push_back(new Control(backend));
         setName("ConvertControl");
     }
@@ -161,4 +156,4 @@ class ConvertControl final : public PassManager {
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_CONVERTCONTROL_H_ */
+#endif  /* _BACKENDS_BMV2_CONTROL_H_ */

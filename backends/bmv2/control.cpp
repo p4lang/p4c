@@ -157,7 +157,8 @@ void Control::convertTableEntries(const IR::P4Table *table,
     @return the key type
 */
 cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
-    auto mt = backend->getRefMap().getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
+    auto path = ke->matchType->path;
+    auto mt = backend->getRefMap().getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
     auto expr = ke->expression;
 
@@ -244,7 +245,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
             if (ei == nullptr) {
                 ::error("%1%: must be a constant on this target", hash);
             } else {
-                cstring algo = ei->name; //FIXME: translate algorithm name?
+                cstring algo = ei->name;
                 selector->emplace("algo", algo);
             }
             auto input = mkArrayField(selector, "input");
@@ -357,7 +358,7 @@ Control::convertTable(const CFG::TableNode* node,
                           ->to<IR::Declaration_ID>();
                 if (expr->is<IR::MethodCallExpression>()) {
                     auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                                                          &backend->getRefMap(), &backend->getTypeMap());
+                                            &backend->getRefMap(), &backend->getTypeMap());
                     if (mi->is<P4::BuiltInMethod>()) {
                         auto bim = mi->to<P4::BuiltInMethod>();
                         if (bim->name == IR::Type_Header::isValid) {
@@ -367,8 +368,10 @@ Control::convertTable(const CFG::TableNode* node,
                                 backend->getTypeMap().setType(expr, expr->type);
                                 match_type = backend->getCoreLibrary().ternaryMatch.name;
                                 if (match_type != table_match_type &&
-                                    table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
-                                    table_match_type = backend->getCoreLibrary().ternaryMatch.name;
+                                    table_match_type !=
+                                        BMV2::MatchImplementation::rangeMatchTypeName)
+                                    table_match_type =
+                                        backend->getCoreLibrary().ternaryMatch.name;
                             } else {
                                 expr = bim->appliedTo; }}}}
             }
@@ -617,12 +620,14 @@ Control::convertTable(const CFG::TableNode* node,
         const IR::Vector<IR::Expression>* args = nullptr;
 
         if (expr->is<IR::PathExpression>()) {
-            auto decl = backend->getRefMap().getDeclaration(expr->to<IR::PathExpression>()->path, true);
+            auto path = expr->to<IR::PathExpression>()->path;
+            auto decl = backend->getRefMap().getDeclaration(path, true);
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
             action = decl->to<IR::P4Action>();
         } else if (expr->is<IR::MethodCallExpression>()) {
             auto mce = expr->to<IR::MethodCallExpression>();
-            auto mi = P4::MethodInstance::resolve(mce, &backend->getRefMap(), &backend->getTypeMap());
+            auto mi = P4::MethodInstance::resolve(mce,
+                    &backend->getRefMap(), &backend->getTypeMap());
             BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
             action = mi->to<P4::ActionCall>()->action;
             args = mce->arguments;
@@ -687,14 +692,14 @@ bool Control::preorder(const IR::ControlBlock* block) {
     if (bt != backend->blockTypeMap.end()) {
         LOG3(bt->second->getAnnotation("pipeline"));
         // only generate control block marked with @pipeline
-        if(!bt->second->getAnnotation("pipeline")) {
+        if (!bt->second->getAnnotation("pipeline")) {
             return false;
         }
     }
 
     const IR::P4Control* cont = block->container;
     auto result = new Util::JsonObject();
-    result->emplace("name", cont->name); //FIXME: check name is correct, externalName()?
+    result->emplace("name", cont->name);
     result->emplace("id", nextId("control"));
     result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 
@@ -757,25 +762,5 @@ bool Control::preorder(const IR::ControlBlock* block) {
     backend->pipelines->append(result);
     return false;
 }
-
-/**
-    Process extern instance inside a control block
-
-    Control C ( ... ) {
-        Register<bit<32>, bit<32>> reg;  <- visit this line
-    }
-*/
-//bool Control::preorder(const IR::Declaration_Instance* instance) {
-//    LOG3("Visiting " << dbp(instance));
-//    auto parent = getContext()->node;
-//    auto bl = parent->to<IR::ControlBlock>()->getValue(instance);
-//    CHECK_NULL(bl);
-//    cstring name = instance->externalName();
-//    LOG1("Declaration_Instance name = " << name.c_str());
-//    if (bl->is<IR::ExternBlock>()) {
-//        visit(bl->to<IR::ExternBlock>());
-//    }
-//    return false;
-//}
 
 }  // namespace BMV2

@@ -172,7 +172,8 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
 }
 
 /// Non-null if the expression refers to a parameter from the enclosing control
-const IR::Parameter* ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
+const IR::Parameter*
+ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
     CHECK_NULL(expression);
     if (!expression->is<IR::PathExpression>())
         return nullptr;
@@ -217,7 +218,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     if (param != nullptr) {
         auto type = backend->getTypeMap().getType(expression, true);
         LOG1("Parameter: " << param);
-        //FIXME:
+        // FIXME translate scalar:
 #if 0
         if (type->is<IR::Type_StructLike>()) {
             LOG1("  Struct" << type);
@@ -498,7 +499,8 @@ void ExpressionConverter::postorder(const IR::Expression* expression)  {
 
 // doFixup = true -> insert masking operations for proper arithmetic implementation
 // see below for wrap
-Util::IJson* ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, bool convertBool) {
+Util::IJson*
+ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, bool convertBool) {
     const IR::Expression *expr = e;
     if (doFixup) {
         ArithmeticFixup af(&backend->getTypeMap());
@@ -559,4 +561,4 @@ Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
     return result;
 }
 
-} // namespace BMV2
+}  // namespace BMV2

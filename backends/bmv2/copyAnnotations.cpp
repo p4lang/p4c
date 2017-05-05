@@ -26,16 +26,12 @@ bool CopyAnnotations::preorder(const IR::PackageBlock* block) {
         auto param = *arch_iter;
         if (param->type->is<IR::Type_Specialized>()) {
             auto tp = param->type->to<IR::Type_Specialized>();
-            //LOG1("path " << tp->baseType->path);
             auto decl = refMap->getDeclaration(tp->baseType->path, true);
-            //LOG1("anno " << decl->getAnnotation("pipeline"));
             auto block = iter->second->to<IR::Block>();
             map->emplace(block, decl->to<IR::Type>());
-            //dump(block);
-            //dump(decl->to<IR::Type>());
         }
     }
     return false;
 }
 
-} // namespace BMV2
+}  // namespace BMV2

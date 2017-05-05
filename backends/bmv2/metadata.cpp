@@ -50,7 +50,7 @@ MetadataRemapT *readMap(const char *filename) {
     input.open(filename);
 
     MetadataRemapT *remap = new MetadataRemapT;
-    while(input.good()) {
+    while (input.good()) {
         std::string a, sep, b;
         int c = input.peek();
         if (c == EOF) return remap;
@@ -61,14 +61,16 @@ MetadataRemapT *readMap(const char *filename) {
         }
         input >> a >> sep >> b;
         if (a.length() > 0) {
-            remap->emplace(cstring(a),cstring(b));
+            remap->emplace(cstring(a), cstring(b));
         }
     }
     input.close();
     return remap;
 }
-} // end namespace Arch
+
+}  // end namespace Arch
 
 namespace BMV2 {
 
-} // end namespace BMV2
+}  // end namespace BMV2
+

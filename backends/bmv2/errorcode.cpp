@@ -28,4 +28,4 @@ bool ErrorCodesVisitor::preorder(const IR::Type_Error* errors) {
     return false;
 }
 
-} // namespace BMV2
+}  // namespace BMV2

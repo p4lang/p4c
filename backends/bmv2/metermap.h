@@ -42,6 +42,6 @@ class DirectMeterMap final {
     void setSize(const IR::IDeclaration* meter, unsigned size);
 };
 
-} // namespace BMV2
+}  // namespace BMV2
 
-#endif
+#endif  /* _BACKENDS_BMV2_METERMAP_H_ */

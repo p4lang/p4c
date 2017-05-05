@@ -59,9 +59,8 @@ void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, 
         backend->headerInstancesCreated.find(st) != backend->headerInstancesCreated.end();
     if (!isInstanceCreated) {
         unsigned id = nextId("headers");
-        LOG1("create header instance " << id);
         auto json = new Util::JsonObject();
-        json->emplace("name", st->name); //FIXME: fix name
+        json->emplace("name", st->name);  // FIXME: fix name
         json->emplace("id", id);
         json->emplace("header_type", st->name);
         json->emplace("metadata", meta);
@@ -247,7 +246,6 @@ bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
 // TODO(hanw): complete the generic pass for nested struct and header
 // for now, use v1model header generation routine
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
-
 #ifdef NEW_HEADER_GENERATION
     auto parent = getContext()->node;
     if (parent->is<IR::ParserBlock>() || parent->is<IR::ControlBlock>()) {
@@ -270,7 +268,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
-                return false; // already seen
+                return false;  // already seen
             else
                 visitedHeaders.emplace(st->getName());
             LOG1("name " << st->getName());
@@ -292,5 +290,5 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
     return false;
 }
 
-} // namespace BMV2
+}  // namespace BMV2
 

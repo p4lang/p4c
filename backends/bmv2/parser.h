@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_CONVERTPARSER_H_
-#define _BACKENDS_BMV2_CONVERTPARSER_H_
+#ifndef _BACKENDS_BMV2_PARSER_H_
+#define _BACKENDS_BMV2_PARSER_H_
 
 #include "ir/ir.h"
 #include "lib/json.h"
@@ -49,7 +49,7 @@ class Parser : public Inspector {
 
 class ConvertParser final : public PassManager {
  public:
-    ConvertParser(Backend* backend) {
+    explicit ConvertParser(Backend* backend) {
         passes.push_back(new Parser(backend));
         setName("ConvertParser");
     }
@@ -57,4 +57,4 @@ class ConvertParser final : public PassManager {
 
 }  // namespace BMV2
 
-#endif
+#endif  /* _BACKENDS_BMV2_PARSER_H_ */

@@ -20,15 +20,15 @@ limitations under the License.
 #include <cstring>
 #include <map>
 #include <string>
-#include <ir/ir.h>
-#include <ir/visitor.h>
+#include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace Arch {
 
 using MetadataRemapT = std::map<cstring, cstring>;
 MetadataRemapT *readMap(const char *filename);
 
-} // namespace Arch
+}  // namespace Arch
 
 #if 0
 // we may need this later, but for now it's handled through aliases
@@ -43,20 +43,25 @@ class MetadataRemap : public Transform {
     Backend *backend;
     const Arch::MetadataRemapT *remap;
 
-public:
-
+ public:
     explicit MetadataRemap(Backend *b, const Arch::MetadataRemapT *remap) :
         backend(b), remap(remap) { setName("MetadataRemap"); }
 
-    const IR::Node * postorder(const IR::PackageBlock* b) override { std::cerr << b << std::endl; };
-    const IR::Node * postorder(const IR::Declaration_Instance* decl) override { std::cerr << decl << std::endl; };
-    const IR::Node * postorder(const IR::ParameterList* paramList) override { std::cerr << paramList << std::endl; };
-    const IR::Node * postorder(const IR::P4Action* action) override { std::cerr << action << std::endl; };
-    const IR::Node * postorder(const IR::Declaration_Variable* decl) override { std::cerr << decl << std::endl; };
+    const IR::Node * postorder(const IR::PackageBlock* b) override
+    { std::cerr << b << std::endl; };
+    const IR::Node * postorder(const IR::Declaration_Instance* decl) override
+    { std::cerr << decl << std::endl; };
+    const IR::Node * postorder(const IR::ParameterList* paramList) override
+    { std::cerr << paramList << std::endl; };
+    const IR::Node * postorder(const IR::P4Action* action) override
+    { std::cerr << action << std::endl; };
+    const IR::Node * postorder(const IR::Declaration_Variable* decl) override
+    { std::cerr << decl << std::endl; };
 };
 
 }  // namespace BMV2
 
 #endif
 
-#endif // _BACKENDS_BMV2_METADATA_H_
+#endif  // _BACKENDS_BMV2_METADATA_H_
+

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_EXPRESSIONCONVERTER_H_
-#define _BACKENDS_BMV2_EXPRESSIONCONVERTER_H_
+#ifndef _BACKENDS_BMV2_EXPRESSION_H_
+#define _BACKENDS_BMV2_EXPRESSION_H_
 
 #include "ir/ir.h"
 #include "lower.h"
@@ -53,6 +53,7 @@ class ExpressionConverter : public Inspector {
     /// after translating an Expression to JSON, save the result to 'map'.
     std::map<const IR::Expression*, Util::IJson*> map;
     bool leftValue;  // true if converting a left value
+
  public:
     explicit ExpressionConverter(Backend *b) :
             backend(b), corelib(P4::P4CoreLibrary::instance),
@@ -87,6 +88,6 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::Expression* expression) override;
 };
 
-} // namespace BMV2
+}  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_EXPRESSIONCONVERTER_H_ */
+#endif /* _BACKENDS_BMV2_EXPRESSION_H_ */

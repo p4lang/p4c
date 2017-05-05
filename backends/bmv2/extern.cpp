@@ -75,9 +75,11 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
             result->emplace("name", decl->name);
             result->emplace("id", nextId("extern_instances"));
             if (decl->type->is<IR::Type_Specialized>())
-                result->emplace("type", decl->type->to<IR::Type_Specialized>()->baseType->toString());
+                result->emplace("type",
+                        decl->type->to<IR::Type_Specialized>()->baseType->toString());
             else if (decl->type->is<IR::Type_Name>())
-                result->emplace("type", decl->type->to<IR::Type_Name>()->path->name.toString());
+                result->emplace("type",
+                        decl->type->to<IR::Type_Name>()->path->name.toString());
             else
                 P4C_UNIMPLEMENTED("extern support for %1%", decl);
             auto attributes = mkArrayField(result, "attribute_values");
@@ -88,4 +90,4 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
     return false;
 }
 
-} // namespace BMV2
+}  // namespace BMV2
