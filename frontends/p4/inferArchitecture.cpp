@@ -24,12 +24,13 @@ using ::Model::Param_Model;
 
 bool InferArchitecture::preorder(const IR::P4Program* program) {
     for (auto decl : program->declarations) {
-        if (decl->is<IR::Type_Package>() || decl->is<IR::Type_Extern>()) {
+        if (decl->is<IR::Type_Package>() || decl->is<IR::Type_Extern>() ||
+            decl->is<IR::Declaration_MatchKind>()) {
             LOG3("[ " << decl << " ]");
             visit(decl);
         }
     }
-    return false;
+    return true;
 }
 
 bool InferArchitecture::preorder(const IR::Type_Control *node) {
@@ -102,9 +103,11 @@ bool InferArchitecture::preorder(const IR::Type_Extern *node) {
 /// infer match type?
 bool InferArchitecture::preorder(const IR::Declaration_MatchKind* kind) {
     /// add to match_kind model
-    Type_Model *match_kind = new Type_Model(kind->toString());
-    v2model.match_kinds.push_back(match_kind);
-    LOG3("... match kind " << match_kind);
+    for (auto member : kind->members) {
+        Type_Model *match_kind = new Type_Model(member->toString());
+        v2model.match_kinds.push_back(match_kind);
+        LOG1("... match kind " << match_kind);
+    }
     return false;
 }
 
