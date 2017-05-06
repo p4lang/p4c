@@ -32,7 +32,7 @@ class ErrorCodesVisitor : public Inspector {
     bool preorder(const IR::Type_Error* errors) override;
     explicit ErrorCodesVisitor(ErrorCodesMap* errorCodesMap) :
         errorCodesMap(errorCodesMap)
-    { CHECK_NULL(errorCodesMap); }
+    { CHECK_NULL(errorCodesMap); setName("ErrorCodeVisitor"); }
 };
 
 }  // namespace BMV2

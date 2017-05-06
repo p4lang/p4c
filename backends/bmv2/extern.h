@@ -36,7 +36,7 @@ class Extern : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Declaration_Instance* decl) override;
 
-    explicit Extern(Backend *b) : backend(b) {}
+    explicit Extern(Backend *b) : backend(b) { setName("Extern"); }
 };
 
 class ConvertExterns final : public PassManager {

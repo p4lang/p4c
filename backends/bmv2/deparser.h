@@ -37,7 +37,7 @@ class DoDeparserBlockConversion : public Inspector {
     bool preorder(const IR::ControlBlock* ctrl);
 
     explicit DoDeparserBlockConversion(Backend* backend) :
-        backend(backend) {}
+        backend(backend) { setName("DoDeparserBlockConversion"); }
 };
 
 class ConvertDeparser final : public PassManager {

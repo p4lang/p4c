@@ -49,13 +49,14 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
-        auto minst = P4::MethodInstance::resolve(mce,
-                backend->getRefMap(), backend->getTypeMap());
+        auto minst = P4::MethodInstance::resolve(mce, backend->getRefMap(), backend->getTypeMap());
         if (minst->is<P4::ExternMethod>()) {
             auto extmeth = minst->to<P4::ExternMethod>();
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
-                result->emplace("op", "extract");
-                if (mce->arguments->size() == 1) {
+                int argCount = mce->arguments->size();
+                if (argCount == 1 || argCount == 2) {
+                    cstring ename = argCount == 1 ? "extract" : "extract_VL";
+                    result->emplace("op", ename);
                     auto arg = mce->arguments->at(0);
                     auto argtype = backend->getTypeMap()->getType(arg, true);
                     if (!argtype->is<IR::Type_Header>()) {
@@ -87,6 +88,16 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                     auto value = j->to<Util::JsonObject>()->get("value");
                     param->emplace("type", type);
                     param->emplace("value", value);
+
+                    if (argCount == 2) {
+                        auto arg2 = mce->arguments->at(1);
+                        auto jexpr = backend->getExpressionConverter()->convert(arg2, true, false);
+                        auto rwrap = new Util::JsonObject();
+                        // The spec says that this must always be wrapped in an expression
+                        rwrap->emplace("type", "expression");
+                        rwrap->emplace("value", jexpr);
+                        params->append(rwrap);
+                    }
                     return result;
                 }
             }

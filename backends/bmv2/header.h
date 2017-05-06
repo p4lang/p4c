@@ -50,7 +50,7 @@ class ConvertHeaders : public Inspector {
     bool preorder(const IR::Parameter* param) override;
 
     explicit ConvertHeaders(Backend* backend): backend(backend)
-    {}
+    { setName("ConvertHeaders"); }
 };
 
 }  // namespace BMV2

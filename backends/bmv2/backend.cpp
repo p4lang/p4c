@@ -480,6 +480,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         // new VisitFunctor([this, metadata_remap_file](){
         //     createFieldAliases(metadata_remap_file); }),
     };
+    codegen_passes.setName("CodeGen");
     tb->getMain()->apply(codegen_passes);
 }
 

@@ -44,7 +44,7 @@ class Parser : public Inspector {
     bool preorder(const IR::P4Parser* p) override;
     bool preorder(const IR::PackageBlock* b) override;
     explicit Parser(Backend* backend) : backend(backend),
-    corelib(P4::P4CoreLibrary::instance) {}
+    corelib(P4::P4CoreLibrary::instance) { setName("Parser"); }
 };
 
 class ConvertParser final : public PassManager {
