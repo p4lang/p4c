@@ -76,7 +76,7 @@ void ConvertHeaders::createStack(const IR::Type_Stack *stack, bool meta) {
     json->emplace("name", "name");
     json->emplace("id", nextId("stack"));
     json->emplace("size", stack->getSize());
-    auto type = backend->getTypeMap().getTypeType(stack->elementType, true);
+    auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
     auto ht = type->to<IR::Type_Header>();
 
     auto ht_name = stack->elementType->to<IR::Type_Header>()->name;
@@ -139,7 +139,7 @@ bool ConvertHeaders::preorder(const IR::Type_Parser* prsr) {
 void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
     LOG1("Adding " << type);
     for (auto f : type->fields) {
-        auto ft = backend->getTypeMap().getType(f, true);
+        auto ft = backend->getTypeMap()->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (!meta && !ft->is<IR::Type_Header>()) {
@@ -153,7 +153,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
 
     for (auto f : type->fields) {
         LOG1("fields " << f);
-        auto ft = backend->getTypeMap().getType(f, true);
+        auto ft = backend->getTypeMap()->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             LOG1("add to header " << ft);
             LOG1("create header");
@@ -173,7 +173,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             // Treat this field like a scalar local variable
             auto scalarFields = backend->scalarsStruct->get("fields")->to<Util::JsonArray>();
             CHECK_NULL(scalarFields);
-            cstring newName = backend->getRefMap().newName(type->getName() + "." + f->name);
+            cstring newName = backend->getRefMap()->newName(type->getName() + "." + f->name);
             if (ft->is<IR::Type_Bits>()) {
                 auto tb = ft->to<IR::Type_Bits>();
                 auto field = pushNewArray(scalarFields);
@@ -201,7 +201,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
 void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     LOG1("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
-        auto ft = backend->getTypeMap().getType(f, true);
+        auto ft = backend->getTypeMap()->getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
         LOG1("Creating " << stack);
         if (stack == nullptr)
@@ -212,7 +212,7 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         json->emplace("id", nextId("stack"));
         json->emplace_non_null("source_info", f->sourceInfoJsonObj());
         json->emplace("size", stack->getSize());
-        auto type = backend->getTypeMap().getTypeType(stack->elementType, true);
+        auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
         backend->createJsonType(ht);
@@ -253,7 +253,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
 #ifdef NEW_HEADER_GENERATION
     auto parent = getContext()->node;
     if (parent->is<IR::ParserBlock>() || parent->is<IR::ControlBlock>()) {
-        auto type = backend->getTypeMap().getType(param->getNode(), true);
+        auto type = backend->getTypeMap()->getType(param->getNode(), true);
         LOG3("Visiting param " << dbp(type));
         if (type->is<IR::Type_StructLike>()) {
             auto st = type->to<IR::Type_StructLike>();
@@ -268,7 +268,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
     auto block = getContext()->parent->node;
     // keep track of which headers we've already generated the json for
     if (block->is<IR::Type_Control>() || block->is<IR::Type_Parser>()) {
-        auto ft = backend->getTypeMap().getType(param->getNode(), true);
+        auto ft = backend->getTypeMap()->getType(param->getNode(), true);
         if (ft->is<IR::Type_Struct>()) {
             auto st = ft->to<IR::Type_Struct>();
             LOG1("sees header ");

@@ -121,7 +121,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
             ::error("%1%: invalid action in entries list", actionRef);
         auto actionCall = actionRef->to<IR::MethodCallExpression>();
         auto method = actionCall->method->to<IR::PathExpression>()->path;
-        auto decl = backend->getRefMap().getDeclaration(method, true);
+        auto decl = backend->getRefMap()->getDeclaration(method, true);
         auto actionDecl = decl->to<IR::P4Action>();
         unsigned id = get(backend->getStructure().ids, actionDecl);
         action->emplace("action_id", id);
@@ -158,7 +158,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
 */
 cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
     auto path = ke->matchType->path;
-    auto mt = backend->getRefMap().getDeclaration(path, true)->to<IR::Declaration_ID>();
+    auto mt = backend->getRefMap()->getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
     auto expr = ke->expression;
 
@@ -168,7 +168,7 @@ cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
         match_type = mt->name.name;
         if (expr->is<IR::MethodCallExpression>()) {
             auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                                                  &backend->getRefMap(), &backend->getTypeMap());
+                                                  backend->getRefMap(), backend->getTypeMap());
             if (mi->is<P4::BuiltInMethod>())
                 if (mi->to<P4::BuiltInMethod>()->name == IR::Type_Header::isValid)
                     match_type = "valid";
@@ -206,7 +206,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
     if (propv->expression->is<IR::ConstructorCallExpression>()) {
         auto cc = P4::ConstructorCall::resolve(
             propv->expression->to<IR::ConstructorCallExpression>(),
-            &backend->getRefMap(), &backend->getTypeMap());
+            backend->getRefMap(), backend->getTypeMap());
         if (!cc->is<P4::ExternConstructorCall>()) {
             ::error("%1%: expected extern object for property", implementation);
             return false;
@@ -214,7 +214,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
         auto ecc = cc->to<P4::ExternConstructorCall>();
         auto implementationType = ecc->type;
         auto arguments = ecc->cce->arguments;
-        apname = implementation->externalName(backend->getRefMap().newName("action_profile"));
+        apname = implementation->externalName(backend->getRefMap()->newName("action_profile"));
         action_profile = new Util::JsonObject();
         action_profiles->append(action_profile);
         action_profile->emplace("name", apname);
@@ -241,7 +241,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
             action_profile->emplace("selector", selector);
             add_size(1);
             auto hash = arguments->at(0);
-            auto ei = P4::EnumInstance::resolve(hash, &backend->getTypeMap());
+            auto ei = P4::EnumInstance::resolve(hash, backend->getTypeMap());
             if (ei == nullptr) {
                 ::error("%1%: must be a constant on this target", hash);
             } else {
@@ -250,7 +250,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
             }
             auto input = mkArrayField(selector, "input");
             for (auto ke : key->keyElements) {
-                auto mt = backend->getRefMap().getDeclaration(ke->matchType->path, true)
+                auto mt = backend->getRefMap()->getDeclaration(ke->matchType->path, true)
                         ->to<IR::Declaration_ID>();
                 BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
                 if (mt->name.name != BMV2::MatchImplementation::selectorMatchTypeName)
@@ -269,13 +269,13 @@ Control::handleTableImplementation(const IR::Property* implementation,
         }
     } else if (propv->expression->is<IR::PathExpression>()) {
         auto pathe = propv->expression->to<IR::PathExpression>();
-        auto decl = backend->getRefMap().getDeclaration(pathe->path, true);
+        auto decl = backend->getRefMap()->getDeclaration(pathe->path, true);
         if (!decl->is<IR::Declaration_Instance>()) {
             ::error("%1%: expected a reference to an instance", pathe);
             return false;
         }
         apname = extVisibleName(decl);
-        auto dcltype = backend->getTypeMap().getType(pathe, true);
+        auto dcltype = backend->getTypeMap()->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
             ::error("%1%: unexpected type for implementation", dcltype);
             return false;
@@ -354,18 +354,18 @@ Control::convertTable(const CFG::TableNode* node,
                 mask = Util::maskFromSlice(h, l);
             }
             if (match_type == "valid") {
-                auto mt = backend->getRefMap().getDeclaration(ke->matchType->path, true)
+                auto mt = backend->getRefMap()->getDeclaration(ke->matchType->path, true)
                           ->to<IR::Declaration_ID>();
                 if (expr->is<IR::MethodCallExpression>()) {
                     auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                                            &backend->getRefMap(), &backend->getTypeMap());
+                                            backend->getRefMap(), backend->getTypeMap());
                     if (mi->is<P4::BuiltInMethod>()) {
                         auto bim = mi->to<P4::BuiltInMethod>();
                         if (bim->name == IR::Type_Header::isValid) {
                             if (mt->name.name == backend->getCoreLibrary().ternaryMatch.name) {
                                 expr = new IR::Member(IR::Type::Boolean::get(), bim->appliedTo,
                                                       "$valid$");
-                                backend->getTypeMap().setType(expr, expr->type);
+                                backend->getTypeMap()->setType(expr, expr->type);
                                 match_type = backend->getCoreLibrary().ternaryMatch.name;
                                 if (match_type != table_match_type &&
                                     table_match_type !=
@@ -417,7 +417,7 @@ Control::convertTable(const CFG::TableNode* node,
         if (ctrs->value->is<IR::ExpressionValue>()) {
             auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
             if (expr->is<IR::ConstructorCallExpression>()) {
-                auto type = backend->getTypeMap().getType(expr, true);
+                auto type = backend->getTypeMap()->getType(expr, true);
                 if (type == nullptr)
                     return result;
                 if (!type->is<IR::Type_Extern>()) {
@@ -445,7 +445,7 @@ Control::convertTable(const CFG::TableNode* node,
                 backend->counters->append(jctr);
             } else if (expr->is<IR::PathExpression>()) {
                 auto pe = expr->to<IR::PathExpression>();
-                auto decl = backend->getRefMap().getDeclaration(pe->path, true);
+                auto decl = backend->getRefMap()->getDeclaration(pe->path, true);
                 if (!decl->is<IR::Declaration_Instance>()) {
                     ::error("%1%: expected an instance", decl->getNode());
                     return result;
@@ -491,8 +491,8 @@ Control::convertTable(const CFG::TableNode* node,
                 ::error("%1%: expected a reference to a meter declaration", expr);
             } else {
                 auto pe = expr->to<IR::PathExpression>();
-                auto decl = backend->getRefMap().getDeclaration(pe->path, true);
-                auto type = backend->getTypeMap().getType(expr, true);
+                auto decl = backend->getRefMap()->getDeclaration(pe->path, true);
+                auto type = backend->getTypeMap()->getType(expr, true);
                 if (type == nullptr)
                     return result;
                 if (type->is<IR::Type_SpecializedCanonical>())
@@ -535,7 +535,7 @@ Control::convertTable(const CFG::TableNode* node,
             if (mce->arguments->size() > 0)
                 ::error("%1%: Actions in action list with arguments not supported", a);
         }
-        auto decl = backend->getRefMap().getDeclaration(a->getPath(), true);
+        auto decl = backend->getRefMap()->getDeclaration(a->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
         unsigned id = get(backend->getStructure().ids, action);
@@ -621,13 +621,13 @@ Control::convertTable(const CFG::TableNode* node,
 
         if (expr->is<IR::PathExpression>()) {
             auto path = expr->to<IR::PathExpression>()->path;
-            auto decl = backend->getRefMap().getDeclaration(path, true);
+            auto decl = backend->getRefMap()->getDeclaration(path, true);
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
             action = decl->to<IR::P4Action>();
         } else if (expr->is<IR::MethodCallExpression>()) {
             auto mce = expr->to<IR::MethodCallExpression>();
             auto mi = P4::MethodInstance::resolve(mce,
-                    &backend->getRefMap(), &backend->getTypeMap());
+                    backend->getRefMap(), backend->getTypeMap());
             BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
             action = mi->to<P4::ActionCall>()->action;
             args = mce->arguments;
@@ -704,7 +704,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
     result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 
     auto cfg = new CFG();
-    cfg->build(cont, &backend->getRefMap(), &backend->getTypeMap());
+    cfg->build(cont, backend->getRefMap(), backend->getTypeMap());
     cfg->checkForCycles();
 
     if (cfg->entryPoint->successors.size() == 0) {

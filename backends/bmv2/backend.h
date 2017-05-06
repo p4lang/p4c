@@ -39,8 +39,11 @@ namespace BMV2 {
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
-    P4::ReferenceMap                 refMap;
-    P4::TypeMap                      typeMap;
+    // TODO(hanw): current implementation uses refMap and typeMap from midend.
+    // Once all midend passes are refactored to avoid patching refMap, typeMap,
+    // We can regenerated the refMap and typeMap in backend.
+    P4::ReferenceMap*                refMap;
+    P4::TypeMap*                     typeMap;
     P4::ConvertEnums::EnumMapping*   enumMap;
     const IR::ToplevelBlock*         tlb;
     ExpressionConverter*             conv;
@@ -112,10 +115,12 @@ class Backend : public PassManager {
 
  public:
   explicit Backend(bool isV1,
+                   P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                    P4::ConvertEnums::EnumMapping* enumMap) :
+        refMap(refMap), typeMap(typeMap),
         enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
-    { refMap.setIsV1(isV1); }
+    { refMap->setIsV1(isV1); }
     void process(const IR::ToplevelBlock* block);
     void convert(const IR::ToplevelBlock* block, CompilerOptions& options);
     void serialize(std::ostream& out) const
@@ -126,9 +131,9 @@ class Backend : public PassManager {
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
     P4::V2Model &         getModel()     { return model; }
-    P4::ReferenceMap &    getRefMap()    { return refMap; }
     ProgramParts &        getStructure() { return structure; }
-    P4::TypeMap &         getTypeMap()   { return typeMap; }
+    P4::ReferenceMap*     getRefMap()    { return refMap; }
+    P4::TypeMap*          getTypeMap()   { return typeMap; }
     const IR::ToplevelBlock* getToplevelBlock() { return tlb; }
 };
 

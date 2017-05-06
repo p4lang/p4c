@@ -46,13 +46,13 @@ static void addToFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
         return;
     }
 
-    auto type = bmv2->getTypeMap().getType(expr, true);
+    auto type = bmv2->getTypeMap()->getType(expr, true);
     if (type->is<IR::Type_StructLike>()) {
         // recursively add all fields
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : st->fields) {
             auto member = new IR::Member(expr, f->name);
-            bmv2->getTypeMap().setType(member, bmv2->getTypeMap().getType(f, true));
+            bmv2->getTypeMap()->setType(member, bmv2->getTypeMap()->getType(f, true));
             addToFieldList(bmv2, member, fl);
         }
         return;
@@ -179,17 +179,17 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         int id = -1;
         if (ef->method->name == instance.clone.name) {
             BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
-            cstring name = bmv2->getRefMap().newName("fl");
+            cstring name = bmv2->getRefMap()->newName("fl");
             auto emptylist = new IR::ListExpression({});
             id = createFieldList(bmv2, emptylist, "field_lists", name, bmv2->field_lists);
         } else {
             BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
-            cstring name = bmv2->getRefMap().newName("fl");
+            cstring name = bmv2->getRefMap()->newName("fl");
             id = createFieldList(bmv2, mc->arguments->at(2),
                     "field_lists", name, bmv2->field_lists);
         }
         auto cloneType = mc->arguments->at(0);
-        auto ei = P4::EnumInstance::resolve(cloneType, &bmv2->getTypeMap());
+        auto ei = P4::EnumInstance::resolve(cloneType, bmv2->getTypeMap());
         if (ei == nullptr) {
             ::error("%1%: must be a constant on this target", cloneType);
         } else {
@@ -204,7 +204,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
 
             if (id >= 0) {
                 auto cst = new IR::Constant(id);
-                bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
+                bmv2->getTypeMap()->setType(cst, IR::Type_Bits::get(32));
                 auto jcst = bmv2->getExpressionConverter()->convert(cst);
                 parameters->append(jcst);
             }
@@ -224,14 +224,14 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         auto base = bmv2->getExpressionConverter()->convert(mc->arguments->at(2));
         parameters->append(base);
         auto calculation = new Util::JsonObject();
-        auto ei = P4::EnumInstance::resolve(mc->arguments->at(1), &bmv2->getTypeMap());
+        auto ei = P4::EnumInstance::resolve(mc->arguments->at(1), bmv2->getTypeMap());
         CHECK_NULL(ei);
         if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end())
             ::error("%1%: unexpected algorithm", ei->name);
         // inlined cstring calcName = createCalculation(ei->name,
         //                  mc->arguments->at(3), calculations);
         auto fields = mc->arguments->at(3);
-        cstring calcName = bmv2->getRefMap().newName("calc_");
+        cstring calcName = bmv2->getRefMap()->newName("calc_");
         auto calc = new Util::JsonObject();
         calc->emplace("name", calcName);
         calc->emplace("id", nextId("calculations"));
@@ -239,16 +239,16 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         if (!fields->is<IR::ListExpression>()) {
             // expand it into a list
             auto list = new IR::ListExpression({});
-            auto type = bmv2->getTypeMap().getType(fields, true);
+            auto type = bmv2->getTypeMap()->getType(fields, true);
             BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: expected a struct", fields);
             for (auto f : type->to<IR::Type_StructLike>()->fields) {
                 auto e = new IR::Member(fields, f->name);
-                auto ftype = bmv2->getTypeMap().getType(f);
-                bmv2->getTypeMap().setType(e, ftype);
+                auto ftype = bmv2->getTypeMap()->getType(f);
+                bmv2->getTypeMap()->setType(e, ftype);
                 list->push_back(e);
             }
             fields = list;
-            bmv2->getTypeMap().setType(fields, type);
+            bmv2->getTypeMap()->setType(fields, type);
         }
         auto jright = bmv2->getExpressionConverter()->convert(fields);
         calc->emplace("input", jright);
@@ -272,7 +272,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         if (mc->typeArguments->size() == 1) {
             auto typeArg = mc->typeArguments->at(0);
             if (typeArg->is<IR::Type_Name>()) {
-                auto origType = bmv2->getRefMap().getDeclaration(
+                auto origType = bmv2->getRefMap()->getDeclaration(
                     typeArg->to<IR::Type_Name>()->path, true);
                 BUG_CHECK(origType->is<IR::Type_Struct>(),
                           "%1%: expected a struct type", origType);
@@ -283,7 +283,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         int id = createFieldList(bmv2, mc->arguments->at(1), "learn_lists",
                                  listName, bmv2->learn_lists);
         auto cst = new IR::Constant(id);
-        bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
+        bmv2->getTypeMap()->setType(cst, IR::Type_Bits::get(32));
         auto jcst = bmv2->getExpressionConverter()->convert(cst);
         parameters->append(jcst);
     } else if (ef->method->name == instance.resubmit.name ||
@@ -301,7 +301,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         if (mc->typeArguments->size() == 1) {
             auto typeArg = mc->typeArguments->at(0);
             if (typeArg->is<IR::Type_Name>()) {
-                auto origType = bmv2->getRefMap().getDeclaration(
+                auto origType = bmv2->getRefMap()->getDeclaration(
                     typeArg->to<IR::Type_Name>()->path, true);
                 BUG_CHECK(origType->is<IR::Type_Struct>(),
                           "%1%: expected a struct type", origType);
@@ -312,7 +312,7 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
         int id = createFieldList(bmv2, mc->arguments->at(0), "field_lists",
                                  listName, bmv2->field_lists);
         auto cst = new IR::Constant(id);
-        bmv2->getTypeMap().setType(cst, IR::Type_Bits::get(32));
+        bmv2->getTypeMap()->setType(cst, IR::Type_Bits::get(32));
         auto jcst = bmv2->getExpressionConverter()->convert(cst);
         parameters->append(jcst);
     } else if (ef->method->name == instance.drop.name) {

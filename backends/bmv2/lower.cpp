@@ -401,12 +401,14 @@ class ComplexExpression : public Inspector {
 const IR::PathExpression*
 RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
-    auto name = refMap->newName("tmp");
+    LOG1("expression " << expression << " " << type);
+    auto name = refMap->newName("removeComplexExpression_tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);
     auto assign = new IR::AssignmentStatement(new IR::PathExpression(name), expression);
     assignments.push_back(assign);
+    typeMap->dbprint(std::cout);
     return new IR::PathExpression(name);
 }
 
@@ -458,8 +460,7 @@ RemoveComplexExpressions::postorder(IR::SelectExpression* expression) {
 
 const IR::Node*
 RemoveComplexExpressions::preorder(IR::P4Control* control) {
-    // we only do this for the ingress or egress
-    if (control->name != *ingressName && control->name != *egressName) {
+    if (policy != nullptr && !policy->convert(control)) {
         prune();
         return control;
     }

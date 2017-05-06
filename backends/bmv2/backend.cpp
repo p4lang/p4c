@@ -60,7 +60,7 @@ void Backend::addEnums(Util::JsonArray* enums) {
 }
 
 void Backend::createScalars() {
-    scalarsName = refMap.newName("scalars");
+    scalarsName = refMap->newName("scalars");
     scalarsStruct = new Util::JsonObject();
     scalarsStruct->emplace("name", scalarsName);
     scalarsStruct->emplace("id", nextId("header_types"));
@@ -89,7 +89,7 @@ cstring Backend::createJsonType(const IR::Type_StructLike *st) {
 void Backend::pushFields(const IR::Type_StructLike *st,
                          Util::JsonArray *fields) {
     for (auto f : st->fields) {
-        auto ftype = typeMap.getType(f, true);
+        auto ftype = typeMap->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
         } else if (ftype->is<IR::Type_Boolean>()) {
@@ -116,7 +116,7 @@ void Backend::pushFields(const IR::Type_StructLike *st,
     unsigned width = st->width_bits();
     unsigned padding = width % 8;
     if (padding != 0) {
-        cstring name = refMap.newName("_padding");
+        cstring name = refMap->newName("_padding");
         auto field = pushNewArray(fields);
         field->append(name);
         field->append(8 - padding);
@@ -133,7 +133,7 @@ void Backend::addLocals() {
     LOG1("... structure " << structure.variables);
     for (auto v : structure.variables) {
         LOG1("Creating local " << v);
-        auto type = typeMap.getType(v, true);
+        auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto name = createJsonType(st);
             // create header instance?
@@ -151,7 +151,7 @@ void Backend::addLocals() {
             json->emplace("id", nextId("stack"));
             // TODO(jafingerhut) - add line/col here?
             json->emplace("size", stack->getSize());
-            auto type = typeMap.getTypeType(stack->elementType, true);
+            auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             createJsonType(ht);
@@ -218,7 +218,7 @@ void Backend::padScalars() {
     unsigned padding = scalars_width % 8;
     auto scalarFields = (*scalarsStruct)["fields"]->to<Util::JsonArray>();
     if (padding != 0) {
-        cstring name = refMap.newName("_padding");
+        cstring name = refMap->newName("_padding");
         auto field = pushNewArray(scalarFields);
         field->append(name);
         field->append(8 - padding);
@@ -278,7 +278,7 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
             r = assign->right;
 
             cstring operation;
-            auto type = typeMap.getType(l, true);
+            auto type = typeMap->getType(l, true);
             if (type->is<IR::Type_StructLike>())
                 operation = "copy_header";
             else
@@ -297,7 +297,7 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
         } else if (s->is<IR::MethodCallStatement>()) {
             LOG1("Visit " << dbp(s));
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
-            auto mi = P4::MethodInstance::resolve(mc, &refMap, &typeMap);
+            auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
             if (mi->is<P4::ActionCall>()) {
                 BUG("%1%: action call should have been inlined", mc);
                 continue;
@@ -371,12 +371,12 @@ void Backend::createActions(Util::JsonArray* actions) {
         jact->emplace_non_null("source_info", action->sourceInfoJsonObj());
         auto params = mkArrayField(jact, "runtime_data");
         for (auto p : *action->parameters->getEnumerator()) {
-            if (!refMap.isUsed(p))
+            if (!refMap->isUsed(p))
                 ::warning("Unused action parameter %1%", p);
 
             auto param = new Util::JsonObject();
             param->emplace("name", p->name);
-            auto type = typeMap.getType(p, true);
+            auto type = typeMap->getType(p, true);
             if (!type->is<IR::Type_Bits>())
                 ::error("%1%: Action parameters can only be bit<> or int<> on this target", p);
             param->emplace("bitwidth", type->width_bits());
@@ -424,9 +424,7 @@ void Backend::addErrors(Util::JsonArray* errors) {
 
 void Backend::process(const IR::ToplevelBlock* tb) {
     setName("BackEnd");
-    // constexpr char mapfile[] = "p4include/p4d2model_bmss_meta.map";
     addPasses({
-        new P4::TypeChecking(&refMap, &typeMap),
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
         // new MetadataRemap(this, Arch::readMap(mapfile)),
@@ -463,7 +461,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     conv = new ExpressionConverter(this);
 
     PassManager codegen_passes = {
-        new CopyAnnotations(&refMap, &blockTypeMap),
+        new CopyAnnotations(refMap, &blockTypeMap),
         new VisitFunctor([this](){ addEnums(enums); }),
         new VisitFunctor([this](){ createScalars(); }),
         new VisitFunctor([this](){ addLocals(); }),

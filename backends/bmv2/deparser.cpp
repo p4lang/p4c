@@ -34,7 +34,7 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
         } else if (s->is<IR::MethodCallStatement>()) {
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
             auto mi = P4::MethodInstance::resolve(mc,
-                    &backend->getRefMap(), &backend->getTypeMap());
+                    backend->getRefMap(), backend->getTypeMap());
             if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 if (em->originalExternType->name.name == backend->getCoreLibrary().packetOut.name) {
@@ -42,7 +42,7 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
                         BUG_CHECK(mc->arguments->size() == 1,
                                   "Expected exactly 1 argument for %1%", mc);
                         auto arg = mc->arguments->at(0);
-                        auto type = backend->getTypeMap().getType(arg, true);
+                        auto type = backend->getTypeMap()->getType(arg, true);
                         if (type->is<IR::Type_Stack>()) {
                             int size = type->to<IR::Type_Stack>()->getSize();
                             for (int i=0; i < size; i++) {

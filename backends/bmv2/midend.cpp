@@ -95,17 +95,35 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
+class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
+    const std::set<cstring> *process;
+
+ public:
+    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
+        CHECK_NULL(process);
+    }
+    bool convert(const IR::P4Control* control) const {
+        if (process->find(control->name) != process->end())
+            return true;
+        return false;
+    }
+};
+
 class GenerateSkipControls : public Inspector {
     std::set<cstring>* skip;
+    std::set<cstring>* process;
     BlockTypeMap*      map;
  public:
-    explicit GenerateSkipControls(BlockTypeMap* map, std::set<cstring>* skip) :
-        skip(skip), map(map) { CHECK_NULL(skip); }
+    explicit GenerateSkipControls(BlockTypeMap* map, std::set<cstring>* skip,
+                                  std::set<cstring>* process) :
+        skip(skip), map(map), process(process) { CHECK_NULL(skip);  CHECK_NULL(process); }
     bool preorder(const IR::ControlBlock* block) {
         auto bt = map->find(block);
         if (bt != map->end()) {
             if (!bt->second->getAnnotation("pipeline")) {
                 skip->insert(block->container->name);
+            } else {
+                process->insert(block->container->name);
             }
         }
         return false;
@@ -127,13 +145,16 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto skipv1controls = new std::set<cstring>();  // in these controls we don't synthesize actions
+    auto procControls = new std::set<cstring>();  // in these controls we remove complex expressions
     auto mapBlockType = new CopyAnnotations(&refMap, &blockTypeMap);
-    auto generateSkipControls = new GenerateSkipControls(&blockTypeMap, skipv1controls);
+    auto generateSkipControls = new GenerateSkipControls(&blockTypeMap, skipv1controls, procControls);
 
     addPasses({
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
+#ifdef PSA
         new P4::IsolateMethodCalls(&refMap, &typeMap),
+#endif
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
@@ -186,9 +207,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap, false),
         new P4::TypeChecking(&refMap, &typeMap),
-        new RemoveComplexExpressions(&refMap, &typeMap,
-                                     &P4V1::V1Model::instance.ingress.name,
-                                     &P4V1::V1Model::instance.egress.name),
+        new RemoveComplexExpressions(&refMap, &typeMap, new ProcessControls(procControls)),
         // TODO(hanw): re-enable this pass
         // new FixupChecksum(&updateControlBlockName),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
