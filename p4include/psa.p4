@@ -62,10 +62,6 @@ struct psa_ingress_input_metadata_t {
   ParserErrorLocation_t    parser_error_location;
 }
 
-struct psa_ingress_output_metadata_t {
-  PortId_t                 egress_port;
-}
-
 struct psa_egress_input_metadata_t {
   PortId_t                 egress_port;
   InstanceType_t           instance_type;  /// Clone or Normal
@@ -155,7 +151,7 @@ enum CloneMethod_t {
  *   From this, it follows that if there is a call that sets the
  *   multicast_group, the packet will be multicast to the group that
  *   last set the multicast group. Otherwise, the packet will be sent
- *   to the port set by either send_to_port.
+ *   to the port set by send_to_port.
  *
  * - multiple clone invocations will cause the packet to be cloned to
  *   the corresponding port. Any drop call in the pipeline will cause
@@ -346,7 +342,7 @@ enum HashAlgorithm {
   crc32_custom,
   crc16,
   crc16_custom,
-  random,
+  random,           /// are random hash algorithms useful?
   identity
 }
 
@@ -471,7 +467,7 @@ extern Meter<S> {
   @ControlPlaneAPI
   {
     reset(in MeterColor_t color);
-    setParams(in S committedRate, out S committedBurstSize
+    setParams(in S committedRate, in S committedBurstSize
               in S peakRate, in S peakBurstSize);
     getParams(out S committedRate, out S committedBurstSize
               out S peakRate, out S peakBurstSize);
@@ -488,7 +484,7 @@ extern DirectMeter {
   @ControlPlaneAPI
   {
     reset(in MeterColor_t color);
-    void setParams<S>(in S committedRate, out S committedBurstSize
+    void setParams<S>(in S committedRate, in S committedBurstSize
                       in S peakRate, in S peakBurstSize);
     void getParams<S>(out S committedRate, out S committedBurstSize
                       out S peakRate, out S peakBurstSize);
@@ -504,10 +500,10 @@ extern DirectMeter {
  * written in actions. Registers are similar to counters, but can be
  * used in a more general way to keep state.
  *
- * Although registers cannot be used directly in matching, they may be
- * used as the RHS of an assignment operation, allowing the current
- * value of the register to be copied into metadata and be available
- * for matching in subsquent tables.
+ * Although registers cannot be used directly in matching,
+ * register.read may be used as the RHS of an assignment operation,
+ * allowing the current value of the register to be copied into
+ * metadata and be available for matching in subsequent tables.
  */
 extern Register<T, S> {
   Register(S size);
@@ -533,6 +529,8 @@ extern Register<T, S> {
  */
 
 /// The set of distributions supported by the Random extern.
+/// \TODO: should this be removed in favor of letting the extern
+/// return whatever distribution is supported by the target?
 enum RandomDistribution {
   PRNG,
   Binomial,
@@ -654,11 +652,10 @@ control VerifyChecksum<H, M>(in H hdr, inout M user_meta);
 
 control Ingress<H, M>(inout H hdr, inout M user_meta,
                       PacketReplicationEngine pre,
-                      in  psa_ingress_input_metadata_t  istd,
-                      out psa_ingress_output_metadata_t ostd);
+                      in  psa_ingress_input_metadata_t  istd);
 
 control Egress<H, M>(inout H hdr, inout M user_meta,
-                     PacketReplicationEngine pre,
+                     BufferingQueueingEngine bqe,
                      in  psa_egress_input_metadata_t  istd);
 
 control ComputeChecksum<H, M>(inout H hdr, inout M user_meta);
