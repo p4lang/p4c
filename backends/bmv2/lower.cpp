@@ -408,7 +408,6 @@ RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
     typeMap->setType(decl, type);
     auto assign = new IR::AssignmentStatement(new IR::PathExpression(name), expression);
     assignments.push_back(assign);
-    typeMap->dbprint(std::cout);
     return new IR::PathExpression(name);
 }
 
