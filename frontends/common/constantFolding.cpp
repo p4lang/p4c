@@ -41,7 +41,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
     }
     return nullptr;
 }
-    
+
 const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
     if (refMap == nullptr)
         return e;
@@ -78,11 +78,11 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
             if (d->type->is<IR::Type_Bits>()) {
                 if (cst->type->is<IR::Type_InfInt>() ||
                     (cst->type->is<IR::Type_Bits>() &&
-                     !(*d->type->to<IR::Type_Bits>() == *cst->type->to<IR::Type_Bits>()))) 
+                     !(*d->type->to<IR::Type_Bits>() == *cst->type->to<IR::Type_Bits>())))
                     init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
             }
         }
-        if (init != d->initializer) 
+        if (init != d->initializer)
             d = new IR::Declaration_Constant(d->srcInfo, d->name, d->annotations, d->type, init);
     }
     constants.emplace(getOriginal<IR::Declaration_Constant>(), init);

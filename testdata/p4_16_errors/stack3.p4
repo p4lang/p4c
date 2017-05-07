@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/* This test illustrates several limitations and incorrect uses of
+ * header stacks, which must be declared with compile-time constant
+ * sizes. */
+
 #include <core.p4>
 
 header h {}
