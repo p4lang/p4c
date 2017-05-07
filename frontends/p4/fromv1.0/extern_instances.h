@@ -39,6 +39,9 @@ struct External_Instances_Model {
 	const std::vector<External_Instance_Model> External_Inst =
 	{
 		{
+			"ext_type", {"ext_attr_a", "ext_attr_b"}, {"ext_method"},
+		},
+		{
 			"ExternRohcCompressor", {"verbose"}, {"rohc_comp_header"},
 		},
 		{

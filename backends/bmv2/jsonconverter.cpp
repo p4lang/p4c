@@ -988,29 +988,20 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         continue;
                     }
                 } else {
-					bool found = false;
-					for (auto idx : v1model.External_Instances.External_Inst) {
-						if (em->originalExternType->name == idx.name) {
-							LOG3("Found extern method " <<em->method->name << ". Make sure that the BMv2 target supports it");
-							//::warning("Found extern method %1%. Make sure that the BMv2 target supports it", em->method->name);
-							for (auto method : idx.Methods) {
-								if (em->method->name == method.name) {
-									BUG_CHECK(mc->arguments->size() == 0, "Expected 0 argument for %1%", mc);
-									auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name, result);
-									auto parameters = mkParameters(primitive);
-									primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-									auto etr = new Util::JsonObject();
-									etr->emplace("type", "extern");
-									etr->emplace("value", extVisibleName(em->object));
-									parameters->append(etr);
-									found = true;
-									continue;
-								}
-							}
-						}
-						if (found) continue;
+					LOG3("Found extern method " << em->method->name << ". Make sure that the BMv2 target supports it");
+					//::warning("Found extern method %1%. Make sure that the BMv2 target supports it", em->method->name);
+					auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name, result);
+					auto parameters = mkParameters(primitive);
+					primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+					auto etr = new Util::JsonObject();
+					etr->emplace("type", "extern");
+					etr->emplace("value", extVisibleName(em->object));
+					parameters->append(etr);
+					for (auto arg : *mc->arguments) {
+						auto args = conv->convert(arg);
+						parameters->append(args);
 					}
-					if (found) continue;
+					continue;
 				}
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
@@ -2134,33 +2125,26 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     action_profiles->append(action_profile);
                     continue;
 				} else {
-					bool found = false;
-					for (auto idx : v1model.External_Instances.External_Inst) {
-						if (eb->type->name == idx.name) {
-							//::warning("Found extern instance %1%. Make sure that the BMv2 target supports it", eb->type->name);
-							LOG3("Found extern instance " << eb->type->name << ". Make sure that the BMv2 target supports it");
-							auto ectr = new Util::JsonObject();
-							ectr->emplace("name", name);
-							ectr->emplace("id", nextId("extern_instances"));
-							ectr->emplace("type", eb->type->name);
-							ectr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
-							auto params = mkArrayField(ectr, "attribute_values");
-							for (auto p : idx.Parameters) {
-								auto parameter = eb->getParameterValue(p.name);
-								CHECK_NULL(parameter);
-								BUG_CHECK(parameter->is<IR::Constant>(), "%1%: expected a constant", parameter);
-								auto param = new Util::JsonObject();
-								param->emplace("name", p.name);
-								param->emplace("type", "hexstr");
-								param->emplace("value", parameter->to<IR::Constant>()->value);
-								params->append(param);
-							}
-							extern_instances->append(ectr);
-							found = true;
-							continue;
-						}
+					//::warning("Found extern instance %1%. Make sure that the BMv2 target supports it", eb->type->name);
+					LOG3("Found extern instance " << eb->type->name << ". Make sure that the BMv2 target supports it");
+					auto ectr = new Util::JsonObject();
+					ectr->emplace("name", name);
+					ectr->emplace("id", nextId("extern_instances"));
+					ectr->emplace("type", eb->type->name);
+					ectr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+					auto params = mkArrayField(ectr, "attribute_values");
+					for (auto p : *eb->getConstructorParameters()) {
+						auto parameter = eb->getParameterValue(p->toString());
+						CHECK_NULL(parameter);
+						BUG_CHECK(parameter->is<IR::Constant>(), "%1%: expected a constant", parameter);
+						auto param = new Util::JsonObject();
+						param->emplace("name", p->toString());
+						param->emplace("type", "hexstr");
+						param->emplace("value", parameter->to<IR::Constant>()->value);
+						params->append(param);
 					}
-					if (found) continue;
+					extern_instances->append(ectr);
+					continue;
 				}
 			}
         }
