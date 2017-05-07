@@ -29,45 +29,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-void Backend::addMetaInformation() {
-  auto info = new Util::JsonObject();
-
-  static constexpr int version_major = 2;
-  static constexpr int version_minor = 7;
-  auto version = mkArrayField(info, "version");
-  version->append(version_major);
-  version->append(version_minor);
-
-  info->emplace("compiler", "https://github.com/p4lang/p4c");
-  toplevel.emplace("__meta__", info);
-}
-
-void Backend::addEnums(Util::JsonArray* enums) {
-    CHECK_NULL(enumMap);
-    for (const auto &pEnum : *enumMap) {
-        auto enumName = pEnum.first->getName().name.c_str();
-        auto enumObj = new Util::JsonObject();
-        enumObj->emplace("name", enumName);
-        enumObj->emplace_non_null("source_info", pEnum.first->sourceInfoJsonObj());
-        auto entries = mkArrayField(enumObj, "entries");
-        for (const auto &pEntry : *pEnum.second) {
-            auto entry = new Util::JsonArray();
-            entry->append(pEntry.first);
-            entry->append(pEntry.second);
-            entries->append(entry);
-        }
-        enums->append(enumObj);
-    }
-}
-
-void Backend::createScalars() {
-    scalarsName = refMap->newName("scalars");  // TODO(hanw): why add scalars to refMap
-    scalarsStruct = new Util::JsonObject();
-    scalarsStruct->emplace("name", scalarsName);
-    scalarsStruct->emplace("id", nextId("header_types"));
-    scalarFields = mkArrayField(scalarsStruct, "fields");
-}
-
 // TODO(hanw) clean up, especially the return type
 cstring Backend::createJsonType(const IR::Type_StructLike *st) {
     auto header = headerTypesCreated.find(st);
@@ -83,10 +44,17 @@ cstring Backend::createJsonType(const IR::Type_StructLike *st) {
         auto fields = mkArrayField(typeJson, "fields");
         pushFields(st, fields);
         headerTypesCreated.insert(st);
+        // auto fields = new Util::JsonArray();
+        // pushFields(st, fields);
+        //
+        // auto fields = create_json_fields(st);
+        // auto id = bm->add_header_type(type, name, fields);
         return name;
     }
 }
 
+// TODO(hanw): fix for nested structure
+// TODO(hanw): return Util::JsonArray* create_json_fields(st);
 void Backend::pushFields(const IR::Type_StructLike *st,
                          Util::JsonArray *fields) {
     for (auto f : st->fields) {
@@ -125,11 +93,17 @@ void Backend::pushFields(const IR::Type_StructLike *st,
     }
 }
 
+/**
+ * We synthesize a "header_type" for each local which has a struct type
+ * and we pack all the scalar-typed locals into a scalarsStruct
+ */
 void Backend::addLocals() {
-    // We synthesize a "header_type" for each local which has a struct type
-    // and we pack all the scalar-typed locals into a scalarsStruct
-    auto scalarFields = scalarsStruct->get("fields")->to<Util::JsonArray>();
-    CHECK_NULL(scalarFields);
+    // TODO(hanw): avoid modifying refMap
+    scalarsName = refMap->newName("scalars");
+    scalarsStruct = new Util::JsonObject();
+    scalarsStruct->emplace("name", scalarsName);
+    scalarsStruct->emplace("id", nextId("header_types"));
+    scalarFields = mkArrayField(scalarsStruct, "fields");
 
     LOG1("... structure " << structure.variables);
     for (auto v : structure.variables) {
@@ -137,7 +111,7 @@ void Backend::addLocals() {
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto name = createJsonType(st);
-            // create header instance?
+            // TODO(hanw): remove
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("headers"));
@@ -146,7 +120,9 @@ void Backend::addLocals() {
             json->emplace("metadata", true);
             json->emplace("pi_omit", true);  // Don't expose in PI.
             headerInstances->append(json);
+            // bm->json->add_metadata(v->name, name);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
+            // TODO(hanw): remove
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("stack"));
@@ -176,6 +152,14 @@ void Backend::addLocals() {
                 headerInstances->append(header);
             }
             headerStacks->append(json);
+            // TODO(hanw): keep
+            std::vector<unsigned> header_ids;
+            for (unsigned i=0; i < stack->getSize(); i++) {
+                cstring name = v->name + "[" + Util::toString(i) + "]";
+                auto header_id = bm->add_header(header_type, name);
+                header_ids.push_back(header_id);
+            }
+            bm->add_header_stack(v->name, header_type, stack->getSize(), header_ids);
         } else if (type->is<IR::Type_Bits>()) {
             auto tb = type->to<IR::Type_Bits>();
             auto field = pushNewArray(scalarFields);
@@ -183,18 +167,21 @@ void Backend::addLocals() {
             field->append(tb->size);
             field->append(tb->isSigned);
             scalars_width += tb->size;
+            // bm->add_header_field(header_type, header_name, fields);
         } else if (type->is<IR::Type_Boolean>()) {
             auto field = pushNewArray(scalarFields);
             field->append(v->name.name);
             field->append(boolWidth);
             field->append(0);
             scalars_width += boolWidth;
+            // bm->add_header_field(header_type, header_name, fields);
         } else if (type->is<IR::Type_Error>()) {
             auto field = pushNewArray(scalarFields);
             field->append(v->name.name);
             field->append(32);  // using 32-bit fields for errors
             field->append(0);
             scalars_width += 32;
+            // bm->add_header_field(header_type, header_name, fields);
         } else {
             BUG("%1%: type not yet handled on this target", type);
         }
@@ -203,7 +190,9 @@ void Backend::addLocals() {
     // FIXME: do we need to put scalarsStruct in set?
     // headerTypesCreated.insert(scalarsName);
     headerTypes->append(scalarsStruct);
+    // bm->add_header_type(scalarsStruct);
 
+    // TODO(hanw): remove
     // insert the scalars instance
     auto json = new Util::JsonObject();
     json->emplace("name", scalarsName);
@@ -213,8 +202,10 @@ void Backend::addLocals() {
     json->emplace("metadata", true);
     json->emplace("pi_omit", true);  // Don't expose in PI.
     headerInstances->append(json);
+    // bm->json->add_metadata(scalarsName, scalarsName);
 }
 
+// TODO(hanw): merge with add_locals
 void Backend::padScalars() {
     unsigned padding = scalars_width % 8;
     auto scalarFields = (*scalarsStruct)["fields"]->to<Util::JsonArray>();
@@ -254,6 +245,7 @@ void Backend::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
 }
 #endif
 
+// TODO(hanw): return JsonArray*
 void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
     // FIXME: conv->createFieldList = true??
     for (auto s : *body) {
@@ -359,6 +351,7 @@ void Backend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::Js
     }
 }
 
+// TODO(hanw): return JsonArray*
 void Backend::createActions(Util::JsonArray* actions) {
     for (auto it : structure.actions) {
         auto action = it.first;
@@ -386,9 +379,22 @@ void Backend::createActions(Util::JsonArray* actions) {
         auto body = mkArrayField(jact, "primitives");
         convertActionBody(&action->body->components, body);
         actions->append(jact);
+
+        // auto params = new Util::JsonArray();
+        // for (auto p : *action->parameters->getEnumerator()) {
+        //   auto param = new Util::JsonObject();
+        //   param->emplace("name", p->name);
+        //   params->append(param);
+        // }
+        //
+        // TODO(hanw): function to convertActionParams
+        // auto params = convertActionParams(&action->parameters);
+        // auto body = convertActionBody(&action->body->components);
+        // bm->add_action(name, params, body);
     }
 }
 
+// TODO(hanw): remove
 void Backend::createMetadata() {
     auto json = new Util::JsonObject();
     json->emplace("name", "standard_metadata");
@@ -396,8 +402,11 @@ void Backend::createMetadata() {
     json->emplace("header_type", "standard_metadata");
     json->emplace("metadata", true);
     headerInstances->append(json);
+
+    // bm->json->add_metadata("standard_metadata", "standard_metadata");
 }
 
+// TODO(hanw): clean up
 void Backend::createFieldAliases(const char *remapFile) {
     Arch::MetadataRemapT *remap = Arch::readMap(remapFile);
     LOG1("Metadata alias map of size = " << remap->size());
@@ -438,15 +447,16 @@ void Backend::process(const IR::ToplevelBlock* tb) {
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject.
 void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
+    // TODO(hanw): remove
     toplevel.emplace("program", options.file);
-    addMetaInformation();
+    toplevel.emplace("__meta__", bm->meta);
     headerTypes = mkArrayField(&toplevel, "header_types");
     headerInstances = mkArrayField(&toplevel, "headers");
     headerStacks = mkArrayField(&toplevel, "header_stacks");
     field_lists = mkArrayField(&toplevel, "field_lists");
     errors = mkArrayField(&toplevel, "errors");
-    enums = mkArrayField(&toplevel, "enums");
-    parsers = mkArrayField(&toplevel, "parsers");
+    toplevel.emplace("enums", bm->enums);
+    toplevel.emplace("parsers", bm->parsers);
     deparsers = mkArrayField(&toplevel, "deparsers");
     meter_arrays = mkArrayField(&toplevel, "meter_arrays");
     counters = mkArrayField(&toplevel, "counter_arrays");
@@ -466,8 +476,6 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
 
     PassManager codegen_passes = {
         new CopyAnnotations(refMap, &blockTypeMap),
-        new VisitFunctor([this](){ addEnums(enums); }),  // TODO(hanw): remove
-        new VisitFunctor([this](){ createScalars(); }),
         new VisitFunctor([this](){ addLocals(); }),
         new VisitFunctor([this](){ createMetadata(); }),
         new ConvertHeaders(this),

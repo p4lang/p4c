@@ -88,21 +88,42 @@ JsonObjects::add_meta_info() {
     version->append(version_minor);
     info->emplace("compiler", "https://github.com/p4lang/p4c");
     toplevel->emplace("__meta__", info);
-}
-
-void
-JsonObjects::add_header_type(const cstring& name) {
-    auto header_type = new Util::JsonObject();
-    unsigned id = BMV2::nextId("header_types");
-    auto fields = insert_array_field(header_type, "fields");
-    header_type->emplace("name", name);
-    header_type->emplace("id", id);
-    // add fields
+    meta = info; // TODO(hanw): remove
 }
 
 /**
- * create a header instance in json
+ * create a header type in json
+ * @param name header name
+ * @param type header type
+ * @param fields a JsonArray for the fields in the header
  */
+unsigned
+JsonObjects::add_header_type(const cstring& name, Util::JsonArray* fields) {
+    CHECK_NULL(fields);
+    auto header_type = new Util::JsonObject();
+    unsigned id = BMV2::nextId("header_types");
+    header_type->emplace("name", name);
+    header_type->emplace("id", id);
+    header_type->emplace("fields", fields);
+    header_types->append(header_type);
+    return id;
+}
+
+/// insert additional field to an existing header type, such as 'scalars'.
+unsigned
+JsonObjects::add_header_field(const cstring& name, Util::JsonArray* field) {
+    CHECK_NULL(field);
+    for (auto h : *header_types) {
+        auto hdr = h->to<Util::JsonObject>();
+        if (hdr->toString() == name) {
+            auto fields = hdr->get("fields")->to<Util::JsonArray>();
+            fields->append(field);
+            break;
+        }
+    }
+}
+
+/// create a header instance in json
 unsigned
 JsonObjects::add_header(const cstring& type, const cstring& name) {
     auto header = new Util::JsonObject();
@@ -130,7 +151,8 @@ JsonObjects::add_metadata(const cstring& type, const cstring& name) {
 }
 
 void
-JsonObjects::add_header_stack(const cstring& type, const cstring& name, const unsigned size) {
+JsonObjects::add_header_stack(const cstring& type, const cstring& name,
+                              const unsigned size, const std::vector<unsigned>& ids) {
     auto stack = new Util::JsonObject();
     unsigned id = BMV2::nextId("stack");
     stack->emplace("name", name);
@@ -195,9 +217,79 @@ JsonObjects::add_enum(const cstring& enum_name, const cstring& entry_name,
 }
 
 ///
-void
-JsonObjects::add_parser() {
+unsigned
+JsonObjects::add_parser(const cstring& name) {
+    auto parser = new Util::JsonObject();
+    unsigned id = BMV2::nextId("parser");
+    parser->emplace("name", name);
+    parser->emplace("id", id);
+    parser->emplace("init_state", IR::ParserState::start);
+    auto parse_states = new Util::JsonArray();
+    parser->emplace("parse_states", parse_states);
+    parsers->append(parser);
 
+    map_parser.emplace(id, parser);
+    return id;
+}
+
+unsigned
+JsonObjects::add_parser_state(const unsigned id, const cstring& state_name) {
+    if (map_parser.find(id) != map_parser.end()) {
+        auto parser = map_parser[id];
+        auto states = parser->get("parse_states")->to<Util::JsonArray>();
+
+        auto state = new Util::JsonObject();
+        unsigned id = BMV2::nextId("parse_states");
+        state->emplace("name", state_name);
+        state->emplace("id", id);
+        auto operations = new Util::JsonArray();
+        state->emplace("parser_ops", operations);
+        auto transitions = new Util::JsonArray();
+        state->emplace("transitions", transitions);
+        states->append(state);
+        auto key = new Util::JsonArray();
+        state->emplace("transition_key", key);
+
+        map_parser_state.emplace(id, state);
+        return id;
+    } else {
+        BUG("%1% parser state not valid.", state_name);
+    }
+}
+
+void
+JsonObjects::add_parser_transition(const unsigned id, Util::IJson* transition) {
+    if (map_parser_state.find(id) != map_parser_state.end()) {
+       auto state = map_parser_state[id];
+       auto transitions = state->get("transitions")->to<Util::JsonArray>();
+       CHECK_NULL(transitions);
+       auto trans = transition->to<Util::JsonObject>();
+       CHECK_NULL(trans);
+       transitions->append(trans);
+    }
+}
+
+void
+JsonObjects::add_parser_op(const unsigned id, Util::IJson* op) {
+    if (map_parser_state.find(id) != map_parser_state.end()) {
+        auto state = map_parser_state[id];
+        auto statements = state->get("parser_ops")->to<Util::JsonArray>();
+        CHECK_NULL(statements);
+        statements->append(op);
+    }
+}
+
+void
+JsonObjects::add_parser_transition_key(const unsigned id, Util::IJson* newKey) {
+    if (map_parser_state.find(id) != map_parser_state.end()) {
+       auto state = map_parser_state[id];
+       auto keys = state->get("transition_key")->to<Util::JsonArray>();
+       CHECK_NULL(keys);
+       auto new_keys = newKey->to<Util::JsonArray>();
+       for (auto k : *new_keys) {
+           keys->append(k);
+       }
+    }
 }
 
 void
@@ -231,8 +323,17 @@ JsonObjects::add_learn_list() {
 }
 
 void
-JsonObjects::add_action() {
-
+JsonObjects::add_action(const cstring& name, const Util::JsonArray* params,
+                        const Util::JsonArray* body) {
+    CHECK_NULL(params);
+    CHECK_NULL(body);
+    auto action = new Util::JsonObject();
+    action->emplace("name", name);
+    unsigned id = BMV2::nextId("actions");
+    action->emplace("id", id);
+    action->emplace("runtime_data", params);
+    action->emplace("primitives", body);
+    actions->append(action);
 }
 
 void

@@ -36,17 +36,14 @@ class ConvertHeaders : public Inspector {
     void createJsonType(const IR::Type_StructLike* st);
 
  public:
-    void createHeaderTypeAndInstance(const IR::Type_StructLike* st, bool meta);
-    void createStack(const IR::Type_Stack *stack, bool meta);
-    void createNestedStruct(const IR::Type_StructLike *st, bool meta);
-    bool hasStructLikeMember(const IR::Type_StructLike *st, bool meta);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderStacks(const IR::Type_Struct* type);
     bool isHeaders(const IR::Type_StructLike* st);
+    bool checkNestedStruct(const IR::Type_Struct* st);
 
     bool preorder(const IR::PackageBlock* b) override;
-    bool preorder(const IR::Type_Parser* e) override;
-    bool preorder(const IR::Type_Control* ctrl) override;
+//    bool preorder(const IR::Type_Parser* e) override;
+//    bool preorder(const IR::Type_Control* ctrl) override;
     bool preorder(const IR::Parameter* param) override;
 
     explicit ConvertHeaders(Backend* backend): backend(backend)

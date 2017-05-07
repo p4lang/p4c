@@ -39,6 +39,10 @@ class Parser : public Inspector {
     Util::IJson* toJson(const IR::P4Parser* cont);
     Util::IJson* toJson(const IR::ParserState* state);
     Util::IJson* convertParserStatement(const IR::StatOrDecl* stat);
+    Util::IJson* convertSelectKey(const IR::SelectExpression* expr);
+    Util::IJson* convertPathExpression(const IR::PathExpression* expr);
+    Util::IJson* createDefaultTransition();
+    std::vector<Util::IJson*> convertSelectExpression(const IR::SelectExpression* expr);
 
  public:
     bool preorder(const IR::P4Parser* p) override;

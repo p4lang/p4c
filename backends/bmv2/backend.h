@@ -57,9 +57,9 @@ class Backend : public PassManager {
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
 
-    bm::JsonObjects*                 json;
 
  public:
+    bm::JsonObjects*                 bm;
     Util::JsonArray*                 meta;
     Util::JsonArray*                 actions;
     Util::JsonArray*                 calculations;
@@ -110,7 +110,6 @@ class Backend : public PassManager {
     void addMetaInformation();
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
-    void createScalars();
     void createMetadata();
     void createFieldAliases(const char *remapFile);
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
@@ -119,9 +118,9 @@ class Backend : public PassManager {
  public:
   explicit Backend(bool isV1,
                    P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                   P4::ConvertEnums::EnumMapping* enumMap) :
+                   P4::ConvertEnums::EnumMapping* enumMap, bm::JsonObjects* bm) :
         refMap(refMap), typeMap(typeMap),
-        enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
+        enumMap(enumMap), bm(bm), corelib(P4::P4CoreLibrary::instance),
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
     { refMap->setIsV1(isV1); }
     void process(const IR::ToplevelBlock* block);

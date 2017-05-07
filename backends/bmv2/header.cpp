@@ -26,83 +26,6 @@ Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
     return result;
 }
 
-bool ConvertHeaders::hasStructLikeMember(const IR::Type_StructLike *st, bool meta) {
-    for (auto f : st->fields) {
-        if (f->type->is<IR::Type_StructLike>() || f->type->is<IR::Type_Stack>()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void ConvertHeaders::createHeaderTypeAndInstance(const IR::Type_StructLike* st, bool meta) {
-    LOG4("Visit " << __FUNCTION__);
-    BUG_CHECK(!hasStructLikeMember(st, meta),
-              "%1%: Header has nested structure.", st);
-
-    auto isTypeCreated =
-        backend->headerTypesCreated.find(st) != backend->headerTypesCreated.end();
-    if (!isTypeCreated) {
-        cstring extName = st->name;
-        LOG1("create header " << extName);
-        auto result = new Util::JsonObject();
-        cstring name = extVisibleName(st);
-        result->emplace("name", name);
-        result->emplace("id", nextId("header_types"));
-        auto fields = mkArrayField(result, "fields");
-        backend->pushFields(st, fields);
-        backend->headerTypes->append(result);
-        backend->headerTypesCreated.insert(st);
-    }
-
-    auto isInstanceCreated =
-        backend->headerInstancesCreated.find(st) != backend->headerInstancesCreated.end();
-    if (!isInstanceCreated) {
-        unsigned id = nextId("headers");
-        auto json = new Util::JsonObject();
-        json->emplace("name", st->name);  // FIXME: fix name
-        json->emplace("id", id);
-        json->emplace("header_type", st->name);
-        json->emplace("metadata", meta);
-        json->emplace("pi_omit", true);
-        backend->headerInstances->append(json);
-        backend->headerInstancesCreated.insert(st);
-    }
-}
-
-void ConvertHeaders::createStack(const IR::Type_Stack *stack, bool meta) {
-    LOG4("Visit " << __FUNCTION__);
-    auto json = new Util::JsonObject();
-    json->emplace("name", "name");
-    json->emplace("id", nextId("stack"));
-    json->emplace("size", stack->getSize());
-    auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
-    auto ht = type->to<IR::Type_Header>();
-
-    auto ht_name = stack->elementType->to<IR::Type_Header>()->name;
-    json->emplace("header_type", ht_name);
-    auto stackMembers = mkArrayField(json, "header_ids");
-    for (unsigned i = 0; i < stack->getSize(); i++) {
-        createHeaderTypeAndInstance(ht, meta);
-    }
-    backend->headerStacks->append(json);
-}
-
-void ConvertHeaders::createNestedStruct(const IR::Type_StructLike *st, bool meta) {
-    LOG4("Visit " << __FUNCTION__);
-    if (!hasStructLikeMember(st, meta)) {
-        createHeaderTypeAndInstance(st, meta);
-    } else {
-        for (auto f : st->fields) {
-            if (f->type->is<IR::Type_StructLike>()) {
-                createNestedStruct(f->type->to<IR::Type_StructLike>(), meta);
-            } else if (f->type->is<IR::Type_Stack>()) {
-                createStack(f->type->to<IR::Type_Stack>(), meta);
-            }
-        }
-    }
-}
-
 /**
     Blocks are not in IR tree, use a custom visitor to traverse
 */
@@ -115,26 +38,8 @@ bool ConvertHeaders::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-bool ConvertHeaders::preorder(const IR::Type_Control* ctrl) {
-    LOG3("Visiting " << dbp(ctrl));
-    auto parent = getContext()->node;
-    if (parent->is<IR::P4Control>()) {
-        return true;
-    }
-    return false;
-}
-
-bool ConvertHeaders::preorder(const IR::Type_Parser* prsr) {
-    LOG3("Visiting " << dbp(prsr));
-    auto parent = getContext()->node;
-    if (parent->is<IR::P4Parser>()) {
-        return true;
-    }
-    return false;
-}
-
 /**
- * header generation for V1model that only handle one layer of nested struct.
+ * This function handles one layer of nested struct.
  */
 void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
     LOG1("Adding " << type);
@@ -148,6 +53,9 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             }
             auto st = ft->to<IR::Type_StructLike>();
             backend->createJsonType(st);
+
+            // auto fields = create_header_fields(st);
+            // bm->add_header_type(type, name, fields);
         }
     }
 
@@ -165,6 +73,9 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             json->emplace("metadata", meta);
             backend->headerInstances->append(json);
             backend->headerInstancesCreated.insert(ft);
+            // auto name = extVisibleName(f);
+            // auto type = extVisibleName(ft->to<IR::Type_StructLike>());
+            // bm->add_header(type, name);
         } else if (ft->is<IR::Type_Stack>()) {
             // Done elsewhere
             LOG1("stack generation done elsewhere");
@@ -173,6 +84,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             // Treat this field like a scalar local variable
             auto scalarFields = backend->scalarsStruct->get("fields")->to<Util::JsonArray>();
             CHECK_NULL(scalarFields);
+            // TODO(hanw): avoid modifying refMap
             cstring newName = backend->getRefMap()->newName(type->getName() + "." + f->name);
             if (ft->is<IR::Type_Bits>()) {
                 auto tb = ft->to<IR::Type_Bits>();
@@ -183,6 +95,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 backend->scalars_width += tb->size;
                 LOG1("insert field " << f);
                 backend->scalarMetadataFields.emplace(f, newName);
+                // scalars->add_field();
             } else if (ft->is<IR::Type_Boolean>()) {
                 auto field = pushNewArray(scalarFields);
                 field->append(newName);
@@ -191,6 +104,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 backend->scalars_width += backend->boolWidth;
                 LOG1("insert field " << f);
                 backend->scalarMetadataFields.emplace(f, newName);
+                // scalars->add_field();
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
@@ -265,54 +179,62 @@ bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
     return result;
 }
 
-// TODO(hanw): complete the generic pass for nested struct and header
-// for now, use v1model header generation routine
+bool ConvertHeaders::checkNestedStruct(const IR::Type_Struct* st) {
+    bool result = false;
+    for (auto f : st->fields) {
+        if (f->type->is<IR::Type_Struct>()) {
+            result = true;
+        }
+    }
+    return result;
+}
+
+/**
+ * Generate json for header from IR::Block's constructor parameters
+ *
+ * The only allowed fields in a struct are: Type_Bits, Type_Bool and Type_Header
+ *
+ * header H {
+ *   bit<32> x;
+ * }
+ *
+ * struct {
+ *   bit<32> x;
+ *   bool    y;
+ *   H       h;
+ * }
+ *
+ * Type_Struct within a Type_Struct, i.e. nested struct, should be flattened apriori.
+ *
+ * @pre assumes no nested struct in parameters.
+ * @post none
+ */
 bool ConvertHeaders::preorder(const IR::Parameter* param) {
-#ifdef NEW_HEADER_GENERATION
-    auto parent = getContext()->node;
-    if (parent->is<IR::ParserBlock>() || parent->is<IR::ControlBlock>()) {
-        auto type = backend->getTypeMap()->getType(param->getNode(), true);
-        LOG3("Visiting param " << dbp(type));
-        if (type->is<IR::Type_StructLike>()) {
-            auto st = type->to<IR::Type_StructLike>();
-            auto isCreated =
-                backend->headerTypesCreated.find(st) != backend->headerTypesCreated.end();
-            if (!isCreated) {
-                createNestedStruct(st, false);
-            }
-        }
-    }
-#else
-    auto block = getContext()->parent->node;
-    // keep track of which headers we've already generated the json for
-    if (block->is<IR::Type_Control>() || block->is<IR::Type_Parser>()) {
-        auto ft = backend->getTypeMap()->getType(param->getNode(), true);
-        if (ft->is<IR::Type_Struct>()) {
-            auto st = ft->to<IR::Type_Struct>();
-            LOG1("sees header ");
-            if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
-                return false;  // already seen
-            else
-                visitedHeaders.emplace(st->getName());
-            LOG1("name " << st->getName());
-            LOG1("anno " << st->getAnnotations());
-            if (st->getAnnotation("metadata")) {
-                backend->createJsonType(st);
+    //// keep track of which headers we've already generated the json for
+    auto ft = backend->getTypeMap()->getType(param->getNode(), true);
+    if (ft->is<IR::Type_Struct>()) {
+        auto st = ft->to<IR::Type_Struct>();
+        if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
+            return false;  // already seen
+        else
+            visitedHeaders.emplace(st->getName());
+
+        // BUG_CHECK(!checkNestedStruct(st), "%1% nested struct not implemented", st->getName());
+
+        if (st->getAnnotation("metadata")) {
+            backend->createJsonType(st);
+        } else {
+            auto isHeader = isHeaders(st);
+            if (isHeader) {
+                addTypesAndInstances(st, false);
+                LOG1("add stack" << st);
+                addHeaderStacks(st);
             } else {
-                LOG1("header " << st->getName());
-                auto isHeader = isHeaders(st);
-                if (isHeader) {
-                    addTypesAndInstances(st, false);
-                    LOG1("add stack" << st);
-                    addHeaderStacks(st);
-                } else {
-                    LOG1("add metadata" << st);
-                    addTypesAndInstances(st, true);
-                }
+                LOG1("add metadata" << st);
+                addTypesAndInstances(st, true);
             }
         }
     }
-#endif
     return false;
 }
 

@@ -18,22 +18,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-Util::IJson* Parser::toJson(const IR::P4Parser* parser) {
-    auto result = new Util::JsonObject();
-    result->emplace("name", "parser");  // at least in simple_router this name is hardwired
-    result->emplace("id", nextId("parser"));
-    result->emplace_non_null("source_info", parser->sourceInfoJsonObj());
-    result->emplace("init_state", IR::ParserState::start);
-    auto states = mkArrayField(result, "parse_states");
-
-    for (auto state : parser->states) {
-        auto json = toJson(state);
-        if (json != nullptr)
-            states->append(json);
-    }
-    return result;
-}
-
+// TODO(hanw) refactor this function
 Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
@@ -239,79 +224,100 @@ Util::IJson* Parser::stateName(IR::ID state) {
     }
 }
 
-Util::IJson* Parser::toJson(const IR::ParserState* state) {
-    if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
-        return nullptr;
-
-    auto result = new Util::JsonObject();
-    result->emplace("name", extVisibleName(state));
-    result->emplace("id", nextId("parse_states"));
-    result->emplace_non_null("source_info", state->sourceInfoJsonObj());
-    auto operations = mkArrayField(result, "parser_ops");
-    for (auto s : state->components) {
-        auto j = convertParserStatement(s);
-        operations->append(j);
-    }
-
-    Util::IJson* key;
-    auto transitions = mkArrayField(result, "transitions");
-    if (state->selectExpression != nullptr) {
-        if (state->selectExpression->is<IR::SelectExpression>()) {
-            auto se = state->selectExpression->to<IR::SelectExpression>();
-            key = backend->getExpressionConverter()->convert(se->select, false);
-            for (auto sc : se->selectCases) {
-                auto trans = new Util::JsonObject();
-                mpz_class value, mask;
-                unsigned bytes = combine(sc->keyset, se->select, value, mask);
-                if (mask == 0) {
-                    trans->emplace("value", "default");
-                    trans->emplace("mask", Util::JsonValue::null);
-                    trans->emplace("next_state", stateName(sc->state->path->name));
-                } else {
-                    trans->emplace("value", stringRepr(value, bytes));
-                    if (mask == -1)
-                        trans->emplace("mask", Util::JsonValue::null);
-                    else
-                        trans->emplace("mask", stringRepr(mask, bytes));
-                    trans->emplace("next_state", stateName(sc->state->path->name));
-                }
-                transitions->append(trans);
-            }
-        } else if (state->selectExpression->is<IR::PathExpression>()) {
-            auto pe = state->selectExpression->to<IR::PathExpression>();
-            key = new Util::JsonArray();
-            auto trans = new Util::JsonObject();
+std::vector<Util::IJson*>
+Parser::convertSelectExpression(const IR::SelectExpression* expr) {
+    std::vector<Util::IJson*> result;
+    auto se = expr->to<IR::SelectExpression>();
+    for (auto sc : se->selectCases) {
+        auto trans = new Util::JsonObject();
+        mpz_class value, mask;
+        unsigned bytes = combine(sc->keyset, se->select, value, mask);
+        if (mask == 0) {
             trans->emplace("value", "default");
             trans->emplace("mask", Util::JsonValue::null);
-            trans->emplace("next_state", stateName(pe->path->name));
-            transitions->append(trans);
+            trans->emplace("next_state", stateName(sc->state->path->name));
         } else {
-            BUG("%1%: unexpected selectExpression", state->selectExpression);
+            trans->emplace("value", stringRepr(value, bytes));
+            if (mask == -1)
+                trans->emplace("mask", Util::JsonValue::null);
+            else
+                trans->emplace("mask", stringRepr(mask, bytes));
+            trans->emplace("next_state", stateName(sc->state->path->name));
         }
-    } else {
-        key = new Util::JsonArray();
-        auto trans = new Util::JsonObject();
-        trans->emplace("value", "default");
-        trans->emplace("mask", Util::JsonValue::null);
-        trans->emplace("next_state", Util::JsonValue::null);
-        transitions->append(trans);
+        result.push_back(trans);
     }
-    result->emplace("transition_key", key);
     return result;
 }
 
+Util::IJson*
+Parser::convertSelectKey(const IR::SelectExpression* expr) {
+    auto se = expr->to<IR::SelectExpression>();
+    CHECK_NULL(se);
+    auto key = backend->getExpressionConverter()->convert(se->select, false);
+    return key;
+}
+
+Util::IJson*
+Parser::convertPathExpression(const IR::PathExpression* pe) {
+    auto trans = new Util::JsonObject();
+    trans->emplace("value", "default");
+    trans->emplace("mask", Util::JsonValue::null);
+    trans->emplace("next_state", stateName(pe->path->name));
+    return trans;
+}
+
+Util::IJson*
+Parser::createDefaultTransition() {
+    auto trans = new Util::JsonObject();
+    trans->emplace("value", "default");
+    trans->emplace("mask", Util::JsonValue::null);
+    trans->emplace("next_state", Util::JsonValue::null);
+    return trans;
+}
+
+bool Parser::preorder(const IR::P4Parser* parser) {
+    // TODO(hanw): hard-coded parser name
+    auto parser_id = backend->bm->add_parser("parser");
+    // convert parse state
+    for (auto state : parser->states) {
+        auto state_id = backend->bm->add_parser_state(parser_id, extVisibleName(state));
+        // convert statements
+        for (auto s : state->components) {
+            auto op = convertParserStatement(s);
+            backend->bm->add_parser_op(state_id, op);
+        }
+        // convert transitions
+        if (state->selectExpression != nullptr) {
+            if (state->selectExpression->is<IR::SelectExpression>()) {
+                auto expr = state->selectExpression->to<IR::SelectExpression>();
+                auto transitions = convertSelectExpression(expr);
+                for (auto transition : transitions) {
+                    backend->bm->add_parser_transition(state_id, transition);
+                }
+                auto key = convertSelectKey(expr);
+                backend->bm->add_parser_transition_key(state_id, key);
+            } else if (state->selectExpression->is<IR::PathExpression>()) {
+                auto expr = state->selectExpression->to<IR::PathExpression>();
+                auto transition = convertPathExpression(expr);
+                backend->bm->add_parser_transition(state_id, transition);
+            } else {
+                BUG("%1%: unexpected selectExpression", state->selectExpression);
+            }
+        } else {
+            auto transition = createDefaultTransition();
+            backend->bm->add_parser_transition(state_id, transition);
+        }
+    }
+    return false;
+}
+
+/// visit ParserBlock only
 bool Parser::preorder(const IR::PackageBlock* block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ParserBlock>()) {
             visit(it.second->getNode());
         }
     }
-    return false;
-}
-
-bool Parser::preorder(const IR::P4Parser* parser) {
-    auto parserJson = toJson(parser);
-    backend->parsers->append(parserJson);
     return false;
 }
 
