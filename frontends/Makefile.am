@@ -66,6 +66,7 @@ noinst_HEADERS += \
 	frontends/p4/externInstance.h \
 	frontends/p4/fromv1.0/converters.h \
 	frontends/p4/fromv1.0/programStructure.h \
+	frontends/p4/fromv1.0/extern_instances.h \
 	frontends/p4/fromv1.0/v1model.h \
 	frontends/p4/frontend.h \
 	frontends/p4/methodInstance.h \

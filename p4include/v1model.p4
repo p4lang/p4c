@@ -20,6 +20,7 @@ limitations under the License.
 #define _V1_MODEL_P4_
 
 #include "core.p4"
+#include "extern_instances.p4"
 
 match_kind {
     range,
@@ -116,6 +117,7 @@ enum CloneType {
 
 extern void resubmit<T>(in T data);
 extern void recirculate<T>(in T data);
+extern void modify_and_resubmit<T>(in T data);
 extern void clone(in CloneType type, in bit<32> session);
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 

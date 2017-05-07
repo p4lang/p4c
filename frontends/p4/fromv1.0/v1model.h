@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
+#include "extern_instances.h"
 
 namespace P4V1 {
 
@@ -260,7 +261,8 @@ class V1Model : public ::Model::Model {
             verify("verifyChecksum", headersType), update("computeChecksum", headersType),
             ck16(), digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
-            recirculate("recirculate"), directMeter(), directCounter()
+            recirculate("recirculate"), directMeter(), directCounter(),
+		    External_Instances()
     {}
 
  public:
@@ -297,7 +299,7 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       recirculate;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
-
+	External_Instances_Model External_Instances;
     static V1Model instance;
 };
 
