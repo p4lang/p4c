@@ -168,7 +168,12 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // ----------
     // The first line indicates that line 2 is the first line in x.p4
     // line=2, it->first=1, it->second.sourceLine=1
-    // So we have to subtract one to get the real line number
+    // So we have to subtract one to get the real line number,
+    // except in the special case of all 0s, where 0 is preferable to
+    // (-1 mod 2^32)
+    if (line == 0 && it->first == 0 && it->second.sourceLine == 0) {
+        return SourceFileLine(it->second.fileName, 0);
+    }
     return SourceFileLine(it->second.fileName, line - it->first + it->second.sourceLine - 1);
 }
 
