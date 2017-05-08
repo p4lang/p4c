@@ -156,4 +156,6 @@ testdata/parse_vset.json \
 testdata/header_stack.p4 \
 testdata/header_stack.json \
 testdata/config_options.json \
-testdata/one_extern.json
+testdata/one_extern.json \
+testdata/unions_e2e_options_bos.json \
+testdata/unions_e2e_options_count.json
