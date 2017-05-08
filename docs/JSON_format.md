@@ -511,6 +511,11 @@ attributes for these objects are:
   object
   - `expression`: the expression for the condition. See
     [here](#the-type-value-object) for more information on expressions format.
+  - `true_next`: the name of the next control flow to execute if the condition
+  evaluates to true (can be a table, another conditional or an action call), or
+  null if this is the end of the pipeline
+  - `false_next`: the name of the next control flow to execute if the condition
+  evaluates to false, or null if this is the end of the pipeline
 - `action_calls`: a JSON array of JSON objects. It is used for direct action
 calls from a control flow which are not wrapped into a table. The attributes for
 these objects are:
@@ -521,7 +526,8 @@ these objects are:
   - `action_id`: the id of the action to call; note that the corresponding
   action must not expect any parameter
   - `next_node`: the name of the next control flow node to execute (can be a
-  table, a conditional or another action call like this one)
+  table, a conditional or another action call like this one), or null if this is
+  the last node in the pipeline
 
 The `match_type` for the table needs to follow the following rules:
 - If one match field is `range`, the table `match_type` has to be `range`
