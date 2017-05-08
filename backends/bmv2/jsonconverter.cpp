@@ -988,8 +988,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         continue;
                     }
                 } else {
-					LOG3("Found extern method " << em->method->name << ". Make sure that the BMv2 target supports it");
-					//::warning("Found extern method %1%. Make sure that the BMv2 target supports it", em->method->name);
+					::warning("Found extern method %1%. Make sure that the BMv2 target supports it", em->method->name);
 					auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name, result);
 					auto parameters = mkParameters(primitive);
 					primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
@@ -2125,8 +2124,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     action_profiles->append(action_profile);
                     continue;
 				} else {
-					//::warning("Found extern instance %1%. Make sure that the BMv2 target supports it", eb->type->name);
-					LOG3("Found extern instance " << eb->type->name << ". Make sure that the BMv2 target supports it");
+					::warning("Found extern instance %1%. Make sure that the BMv2 target supports it", eb->type->name);
 					auto ectr = new Util::JsonObject();
 					ectr->emplace("name", name);
 					ectr->emplace("id", nextId("extern_instances"));
