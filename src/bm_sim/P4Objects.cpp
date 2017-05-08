@@ -1570,17 +1570,41 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
 
     // pipelines -> conditionals
 
-    const Json::Value &cfg_conditionals = cfg_pipeline["conditionals"];
+    const auto &cfg_conditionals = cfg_pipeline["conditionals"];
     for (const auto &cfg_conditional : cfg_conditionals) {
       const string conditional_name = cfg_conditional["name"].asString();
       p4object_id_t conditional_id = cfg_conditional["id"].asInt();
       auto conditional = new Conditional(
         conditional_name, conditional_id, object_source_info(cfg_conditional));
-      const Json::Value &cfg_expression = cfg_conditional["expression"];
+      const auto &cfg_expression = cfg_conditional["expression"];
       build_expression(cfg_expression, conditional);
       conditional->build();
 
       add_conditional(conditional_name, unique_ptr<Conditional>(conditional));
+    }
+
+    // pipelines -> control action calls
+
+    const auto &cfg_control_actions = cfg_pipeline["action_calls"];
+    for (const auto &cfg_control_action : cfg_control_actions) {
+      auto control_action_name = cfg_control_action["name"].asString();
+      auto control_action_id = static_cast<p4object_id_t>(
+          cfg_control_action["id"].asInt());
+      auto control_action = std::unique_ptr<ControlAction>(
+          new ControlAction(control_action_name, control_action_id));
+      auto action_id = static_cast<p4object_id_t>(
+          cfg_control_action["action_id"].asInt());
+      auto action_fn = get_action_by_id(action_id);
+      auto num_params = action_fn->get_num_params();
+      if (num_params > 0) {
+        throw json_exception(
+            EFormat() << "Cannot call action '" << action_fn->get_name()
+                      << "' directly from control as it expects parameters",
+            cfg_control_action);
+      }
+      control_action->set_action(action_fn);
+
+      add_control_action(control_action_name, std::move(control_action));
     }
 
     // next node resolution for tables
@@ -1738,20 +1762,32 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
     // next node resolution for conditionals
 
     for (const auto &cfg_conditional : cfg_conditionals) {
-      const string conditional_name = cfg_conditional["name"].asString();
-      Conditional *conditional = get_conditional(conditional_name);
+      auto conditional_name = cfg_conditional["name"].asString();
+      auto conditional = get_conditional(conditional_name);
 
-      const Json::Value &cfg_true_next = cfg_conditional["true_next"];
-      const Json::Value &cfg_false_next = cfg_conditional["false_next"];
+      const auto &cfg_true_next = cfg_conditional["true_next"];
+      const auto &cfg_false_next = cfg_conditional["false_next"];
 
       if (!cfg_true_next.isNull()) {
-        ControlFlowNode *next_node = get_control_node(cfg_true_next.asString());
+        auto next_node = get_control_node(cfg_true_next.asString());
         conditional->set_next_node_if_true(next_node);
       }
       if (!cfg_false_next.isNull()) {
-        ControlFlowNode *next_node = get_control_node(
-          cfg_false_next.asString());
+        auto next_node = get_control_node(cfg_false_next.asString());
         conditional->set_next_node_if_false(next_node);
+      }
+    }
+
+    // next node resolution for control actions
+
+    for (const auto &cfg_control_action : cfg_control_actions) {
+      auto control_action_name = cfg_control_action["name"].asString();
+      auto control_action = control_actions_map.at(control_action_name).get();
+      const auto &cfg_next_node = cfg_control_action["next_node"];
+      if (!cfg_next_node.isNull()) {
+        auto next_node_name = cfg_next_node.asString();
+        auto next_node = get_control_node(next_node_name);
+        control_action->set_next_node(next_node);
       }
     }
 
@@ -2412,6 +2448,13 @@ P4Objects::add_conditional(const std::string &name,
                            std::unique_ptr<Conditional> conditional) {
   add_control_node(name, conditional.get());
   conditionals_map[name] = std::move(conditional);
+}
+
+void
+P4Objects::add_control_action(const std::string &name,
+                              std::unique_ptr<ControlAction> control_action) {
+  add_control_node(name, control_action.get());
+  control_actions_map[name] = std::move(control_action);
 }
 
 void

@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.10*.
+The version described in this document is *2.11*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -507,10 +507,21 @@ information for a given P4 condition, which is used by the current pipeline. The
 attributes for these objects are:
   - `name`
   - `id`: a unique integer; note that it has to be unique with respect to *all*
-  conditions in the JSON file, not just the conditions included in this parser
+  conditions in the JSON file, not just the conditions included in this pipeline
   object
   - `expression`: the expression for the condition. See
     [here](#the-type-value-object) for more information on expressions format.
+- `action_calls`: a JSON array of JSON objects. It is used for direct action
+calls from a control flow which are not wrapped into a table. The attributes for
+these objects are:
+  - `name`
+  - `id`: a unique integer; note that it has to be unique with respect to *all*
+  action calls in the JSON file, not just the ones included in this pipeline
+  object
+  - `action_id`: the id of the action to call; note that the corresponding
+  action must not expect any parameter
+  - `next_node`: the name of the next control flow node to execute (can be a
+  table, a conditional or another action call like this one)
 
 The `match_type` for the table needs to follow the following rules:
 - If one match field is `range`, the table `match_type` has to be `range`

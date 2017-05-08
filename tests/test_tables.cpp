@@ -54,10 +54,7 @@ struct DummyNode: public ControlFlowNode {
   DummyNode()
       : ControlFlowNode("", 0) { }
 
-  const ControlFlowNode *operator()(Packet * pkt) const {
-    (void)pkt;
-    return nullptr;
-  }
+  const ControlFlowNode *operator()(Packet *) const { return nullptr; }
 };
 
 template <typename MUType>

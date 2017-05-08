@@ -22,6 +22,7 @@ calculations.cpp \
 checksums.cpp \
 conditionals.cpp \
 context.cpp \
+control_action.cpp \
 counters.cpp \
 crc_tables.h \
 debugger.cpp \

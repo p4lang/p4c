@@ -47,6 +47,7 @@
 #include "field_lists.h"
 #include "extern.h"
 #include "enums.h"
+#include "control_action.h"
 
 // forward declaration of Json::Value
 namespace Json {
@@ -287,6 +288,9 @@ class P4Objects {
   void add_conditional(const std::string &name,
                        std::unique_ptr<Conditional> conditional);
 
+  void add_control_action(const std::string &name,
+                          std::unique_ptr<ControlAction> control_action);
+
   void add_control_node(const std::string &name, ControlFlowNode *node);
 
   void add_pipeline(const std::string &name,
@@ -365,6 +369,9 @@ class P4Objects {
 
   std::unordered_map<std::string, std::unique_ptr<Conditional> >
   conditionals_map{};
+
+  std::unordered_map<std::string, std::unique_ptr<ControlAction> >
+  control_actions_map{};
 
   std::unordered_map<std::string, ControlFlowNode *> control_nodes_map{};
 

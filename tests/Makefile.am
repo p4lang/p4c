@@ -64,7 +64,8 @@ test_runtime_iface \
 test_bm_apps \
 test_stateful \
 test_enums \
-test_core_primitives
+test_core_primitives \
+test_control_flow
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -102,6 +103,7 @@ test_bm_apps_SOURCES         = $(common_source) test_bm_apps.cpp
 test_stateful_SOURCES        = $(common_source) test_stateful.cpp
 test_enums_SOURCES           = $(common_source) test_enums.cpp
 test_core_primitives_SOURCES = $(common_source) test_core_primitives.cpp
+test_control_flow_SOURCES    = $(common_source) test_control_flow.cpp
 
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
@@ -136,7 +138,8 @@ test_runtime_iface.cpp \
 test_bm_apps.cpp \
 test_stateful.cpp \
 test_enums.cpp \
-test_core_primitives.cpp
+test_core_primitives.cpp \
+test_control_flow.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \

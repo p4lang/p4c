@@ -586,6 +586,22 @@ class JsonBuilder {
     pipelines.append(pipeline);
   }
 
+  void add_control_action(const std::string &name, int action_id) {
+    auto &pipelines = json["pipelines"];
+    Json::Value pipeline(Json::objectValue);
+    pipeline["name"] = "pipe";
+    pipeline["id"] = 0;
+    pipeline["init_table"] = name;
+    pipeline["action_calls"] = Json::Value(Json::arrayValue);
+    Json::Value action_call(Json::objectValue);
+    action_call["name"] = name;
+    action_call["id"] = 0;
+    action_call["action_id"] = action_id;
+    action_call["next_node"] = Json::Value();  // null
+    pipeline["action_calls"].append(action_call);
+    pipelines.append(pipeline);
+  }
+
   using MatchParam = std::map<std::string, std::string>;
   void add_entry_to_table(const std::string &table_name, int action_id,
                           const std::vector<MatchParam> &mk,
@@ -928,4 +944,15 @@ TEST(P4Objects, ConditionSourceInfo) {
   EXPECT_EQ(expected_source_info.get_source_fragment(),
             source_info->get_source_fragment());
   EXPECT_EQ(std::string("foo.p4(42)"), source_info->to_string());
+}
+
+TEST(P4Objects, ActionControl) {
+  JsonBuilder builder;
+  builder.add_action("a");
+  builder.add_control_action("ca", 0);
+  std::cout << builder.to_string() << "\n";
+  std::stringstream is(builder.to_string());
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
 }
