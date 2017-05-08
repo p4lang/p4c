@@ -128,11 +128,12 @@ unsigned
 JsonObjects::add_header(const cstring& type, const cstring& name) {
     auto header = new Util::JsonObject();
     unsigned id = BMV2::nextId("headers");
+    LOG1("add header id " << id);
     header->emplace("name", name);
     header->emplace("id", id);
     header->emplace("header_type", type);
     header->emplace("metadata", false);
-    // header->emplace("pi_omit", true);
+    header->emplace("pi_omit", true);
     headers->append(header);
     return id;
 }
@@ -141,26 +142,29 @@ unsigned
 JsonObjects::add_metadata(const cstring& type, const cstring& name) {
     auto header = new Util::JsonObject();
     unsigned id = BMV2::nextId("headers");
-    header->emplace("name", name);
+    LOG1("add metadata header id " << id); header->emplace("name", name);
     header->emplace("id", id);
     header->emplace("header_type", type);
     header->emplace("metadata", true);
-    // header->emplace("pi_omit", true);
+    header->emplace("pi_omit", true);  // Don't expose in PI.
     headers->append(header);
     return id;
 }
 
 void
 JsonObjects::add_header_stack(const cstring& type, const cstring& name,
-                              const unsigned size, const std::vector<unsigned>& ids) {
+                              const unsigned size, std::vector<unsigned>& ids) {
     auto stack = new Util::JsonObject();
     unsigned id = BMV2::nextId("stack");
     stack->emplace("name", name);
     stack->emplace("id", id);
     stack->emplace("header_type", type);
     stack->emplace("size", size);
-    auto members = insert_array_field(stack, "header_ids");
-    // id are generated automatically
+    auto members = new Util::JsonArray();
+    stack->emplace("header_ids", members);
+    for (auto id : ids) {
+        members->append(id);
+    }
     header_stacks->append(stack);
 }
 

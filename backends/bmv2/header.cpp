@@ -53,29 +53,20 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             }
             auto st = ft->to<IR::Type_StructLike>();
             backend->createJsonType(st);
-
-            // auto fields = create_header_fields(st);
-            // bm->add_header_type(type, name, fields);
         }
     }
 
     for (auto f : type->fields) {
-        LOG1("fields " << f);
         auto ft = backend->getTypeMap()->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
-            LOG1("add to header " << ft);
-            LOG1("create header");
-            auto json = new Util::JsonObject();
-            json->emplace("name", extVisibleName(f));
-            json->emplace("id", nextId("headers"));
-            json->emplace_non_null("source_info", f->sourceInfoJsonObj());
-            json->emplace("header_type", extVisibleName(ft->to<IR::Type_StructLike>()));
-            json->emplace("metadata", meta);
-            backend->headerInstances->append(json);
             backend->headerInstancesCreated.insert(ft);
-            // auto name = extVisibleName(f);
-            // auto type = extVisibleName(ft->to<IR::Type_StructLike>());
-            // bm->add_header(type, name);
+            auto header_name = extVisibleName(f);
+            auto header_type = extVisibleName(ft->to<IR::Type_StructLike>());
+            if (meta == true) {
+                backend->bm->add_metadata(header_type, header_name);
+            } else {
+                backend->bm->add_header(header_type, header_name);
+            }
         } else if (ft->is<IR::Type_Stack>()) {
             // Done elsewhere
             LOG1("stack generation done elsewhere");
@@ -117,54 +108,22 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     for (auto f : headersStruct->fields) {
         auto ft = backend->getTypeMap()->getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
-        LOG1("Creating " << stack);
         if (stack == nullptr)
             continue;
-
-        auto json = new Util::JsonObject();
-        json->emplace("name", extVisibleName(f));
-        json->emplace("id", nextId("stack"));
-        json->emplace_non_null("source_info", f->sourceInfoJsonObj());
-        json->emplace("size", stack->getSize());
+        auto stack_name = extVisibleName(f); // name
+        auto stack_size = stack->getSize();  // size
         auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
         backend->createJsonType(ht);
-
-        cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
-        json->emplace("header_type", header_type);
-        auto stackMembers = mkArrayField(json, "header_ids");
-        for (unsigned i=0; i < stack->getSize(); i++) {
-            unsigned id = nextId("headers");
-            stackMembers->append(id);
-            auto header = new Util::JsonObject();
-            cstring name = extVisibleName(f) + "[" + Util::toString(i) + "]";
-            // replace
-            header->emplace("name", name);
-            header->emplace("id", id);
-            header->emplace("header_type", header_type);
-            header->emplace("metadata", false);
-            backend->headerInstances->append(header);
-            //bm->json->add_header(header_type, name, false);
-        }
-        backend->headerStacks->append(json);
-
-/*
-        auto name = extVisibleName(f);
-        auto size = stack->getSize();
-        auto elem = stack->elementType;
-        auto elemType = typeMap.getTypeType(elem, true);
-        bm->add_header_type(elemType);
-        cstring hdrType = extVisibleName(elemType->to<IR::TypeHeader>());
+        cstring stack_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
         std::vector<unsigned> ids;
-        for (unsigned i = 0; i < size; i++) {
+        for (unsigned i = 0; i < stack_size; i++) {
             cstring hdrName = extVisibleName(f) + "[" + Util::toString(i) + "]";
-            auto id = bm->json->add_header(hdrName, hdrType, false);
-            ids.append(id);
+            auto id = backend->bm->add_header(stack_type, hdrName);
+            ids.push_back(id);
         }
-        bm->json->add_header_stack(name, headerType, size, ids);
-*/
-
+        backend->bm->add_header_stack(stack_type, stack_name, stack_size, ids);
     }
 }
 
@@ -227,10 +186,8 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
             auto isHeader = isHeaders(st);
             if (isHeader) {
                 addTypesAndInstances(st, false);
-                LOG1("add stack" << st);
                 addHeaderStacks(st);
             } else {
-                LOG1("add metadata" << st);
                 addTypesAndInstances(st, true);
             }
         }

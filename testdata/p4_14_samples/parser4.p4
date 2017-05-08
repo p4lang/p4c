@@ -173,7 +173,7 @@ header mpls_t mpls_bos;
 /* TODO: this will be optimized when pushed to the chip ? */
 
 parser parse_mpls {
-    return select(current(23, 1)) {
+    return select(current(0, 24)) {
         0 : parse_mpls_not_bos;
         1 : parse_mpls_bos;
         default: ingress;

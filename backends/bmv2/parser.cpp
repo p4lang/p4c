@@ -280,6 +280,8 @@ bool Parser::preorder(const IR::P4Parser* parser) {
     auto parser_id = backend->bm->add_parser("parser");
     // convert parse state
     for (auto state : parser->states) {
+        if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
+            continue;
         auto state_id = backend->bm->add_parser_state(parser_id, extVisibleName(state));
         // convert statements
         for (auto s : state->components) {

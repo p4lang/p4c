@@ -32,8 +32,8 @@ class ConvertHeaders : public Inspector {
 
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);
-    void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
-    void createJsonType(const IR::Type_StructLike* st);
+    //void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
+    //void createJsonType(const IR::Type_StructLike* st);
 
  public:
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
@@ -42,8 +42,6 @@ class ConvertHeaders : public Inspector {
     bool checkNestedStruct(const IR::Type_Struct* st);
 
     bool preorder(const IR::PackageBlock* b) override;
-//    bool preorder(const IR::Type_Parser* e) override;
-//    bool preorder(const IR::Type_Control* ctrl) override;
     bool preorder(const IR::Parameter* param) override;
 
     explicit ConvertHeaders(Backend* backend): backend(backend)

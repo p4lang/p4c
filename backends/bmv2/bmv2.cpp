@@ -108,6 +108,10 @@ int main(int argc, char *const argv[]) {
         }
     }
 
+    backend.bm->headers->serialize(std::cout);
+    backend.bm->header_types->serialize(std::cout);
+    backend.bm->header_stacks->serialize(std::cout);
+
     // Generate a PI control plane API for this program if requested.
     if (!options.p4RuntimeFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.p4RuntimeFile, false);

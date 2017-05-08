@@ -29,34 +29,17 @@ limitations under the License.
 
 namespace BMV2 {
 
-// TODO(hanw) clean up, especially the return type
-cstring Backend::createJsonType(const IR::Type_StructLike *st) {
-    auto header = headerTypesCreated.find(st);
-    if (header != headerTypesCreated.end()) {
-        return extVisibleName(*header);
-    } else {
-        auto typeJson = new Util::JsonObject();
-        cstring name = extVisibleName(st);
-        typeJson->emplace("name", name);
-        typeJson->emplace("id", nextId("header_types"));
-        typeJson->emplace_non_null("source_info", st->sourceInfoJsonObj());
-        headerTypes->append(typeJson);
-        auto fields = mkArrayField(typeJson, "fields");
-        pushFields(st, fields);
-        headerTypesCreated.insert(st);
-        // auto fields = new Util::JsonArray();
-        // pushFields(st, fields);
-        //
-        // auto fields = create_json_fields(st);
-        // auto id = bm->add_header_type(type, name, fields);
-        return name;
-    }
+// TODO(hanw): move to header.cpp
+void Backend::createJsonType(const IR::Type_StructLike *st) {
+    cstring name = extVisibleName(st);
+    auto fields = new Util::JsonArray();
+    pushFields(st, fields);
+    auto id = bm->add_header_type(name, fields);
 }
 
-// TODO(hanw): fix for nested structure
-// TODO(hanw): return Util::JsonArray* create_json_fields(st);
+// TODO(hanw): move to header.cpp
 void Backend::pushFields(const IR::Type_StructLike *st,
-                         Util::JsonArray *fields) {
+                                Util::JsonArray *fields) {
     for (auto f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
@@ -93,10 +76,12 @@ void Backend::pushFields(const IR::Type_StructLike *st,
     }
 }
 
+
 /**
  * We synthesize a "header_type" for each local which has a struct type
  * and we pack all the scalar-typed locals into a scalarsStruct
  */
+// TODO(hanw): move to header.cpp
 void Backend::addLocals() {
     // TODO(hanw): avoid modifying refMap
     scalarsName = refMap->newName("scalars");
@@ -110,56 +95,22 @@ void Backend::addLocals() {
         LOG1("Creating local " << v);
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
-            auto name = createJsonType(st);
-            // TODO(hanw): remove
-            auto json = new Util::JsonObject();
-            json->emplace("name", v->name);
-            json->emplace("id", nextId("headers"));
-            // TODO(jafingerhut) - add line/col here?
-            json->emplace("header_type", name);
-            json->emplace("metadata", true);
-            json->emplace("pi_omit", true);  // Don't expose in PI.
-            headerInstances->append(json);
-            // bm->json->add_metadata(v->name, name);
+            auto metadata_type = extVisibleName(st);
+            createJsonType(st);
+            bm->add_metadata(metadata_type, v->name);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
-            // TODO(hanw): remove
-            auto json = new Util::JsonObject();
-            json->emplace("name", v->name);
-            json->emplace("id", nextId("stack"));
-            // TODO(jafingerhut) - add line/col here?
-            json->emplace("size", stack->getSize());
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             createJsonType(ht);
-
             cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
-            LOG1("header xx" << header_type);
-            json->emplace("header_type", header_type);
-            auto stackMembers = mkArrayField(json, "header_ids");
-            for (unsigned i=0; i < stack->getSize(); i++) {
-                unsigned id = nextId("headers");
-                stackMembers->append(id);
-                auto header = new Util::JsonObject();
-                cstring name = v->name + "[" + Util::toString(i) + "]";
-                header->emplace("name", name);
-                header->emplace("id", id);
-                // TODO(jafingerhut) - add line/col here?
-                LOG1("header xx" << header_type);
-                header->emplace("header_type", header_type);
-                header->emplace("metadata", false);
-                header->emplace("pi_omit", true);  // Don't expose in PI.
-                headerInstances->append(header);
-            }
-            headerStacks->append(json);
-            // TODO(hanw): keep
             std::vector<unsigned> header_ids;
             for (unsigned i=0; i < stack->getSize(); i++) {
                 cstring name = v->name + "[" + Util::toString(i) + "]";
                 auto header_id = bm->add_header(header_type, name);
                 header_ids.push_back(header_id);
             }
-            bm->add_header_stack(v->name, header_type, stack->getSize(), header_ids);
+            bm->add_header_stack(header_type, v->name, stack->getSize(), header_ids);
         } else if (type->is<IR::Type_Bits>()) {
             auto tb = type->to<IR::Type_Bits>();
             auto field = pushNewArray(scalarFields);
@@ -188,21 +139,8 @@ void Backend::addLocals() {
     }
 
     // FIXME: do we need to put scalarsStruct in set?
-    // headerTypesCreated.insert(scalarsName);
-    headerTypes->append(scalarsStruct);
-    // bm->add_header_type(scalarsStruct);
-
-    // TODO(hanw): remove
-    // insert the scalars instance
-    auto json = new Util::JsonObject();
-    json->emplace("name", scalarsName);
-    json->emplace("id", nextId("headers"));
-    // TODO(jafingerhut) - add line/col here?
-    json->emplace("header_type", scalarsName);
-    json->emplace("metadata", true);
-    json->emplace("pi_omit", true);  // Don't expose in PI.
-    headerInstances->append(json);
-    // bm->json->add_metadata(scalarsName, scalarsName);
+    bm->header_types->append(scalarsStruct);
+    bm->add_metadata(scalarsName, scalarsName);
 }
 
 // TODO(hanw): merge with add_locals
@@ -396,14 +334,7 @@ void Backend::createActions(Util::JsonArray* actions) {
 
 // TODO(hanw): remove
 void Backend::createMetadata() {
-    auto json = new Util::JsonObject();
-    json->emplace("name", "standard_metadata");
-    json->emplace("id", nextId("headers"));
-    json->emplace("header_type", "standard_metadata");
-    json->emplace("metadata", true);
-    headerInstances->append(json);
-
-    // bm->json->add_metadata("standard_metadata", "standard_metadata");
+    bm->add_metadata("standard_metadata", "standard_metadata");
 }
 
 // TODO(hanw): clean up
@@ -447,12 +378,11 @@ void Backend::process(const IR::ToplevelBlock* tb) {
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject.
 void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
-    // TODO(hanw): remove
     toplevel.emplace("program", options.file);
     toplevel.emplace("__meta__", bm->meta);
-    headerTypes = mkArrayField(&toplevel, "header_types");
-    headerInstances = mkArrayField(&toplevel, "headers");
-    headerStacks = mkArrayField(&toplevel, "header_stacks");
+    toplevel.emplace("header_types", bm->header_types);
+    toplevel.emplace("headers", bm->headers);
+    toplevel.emplace("header_stacks", bm->header_stacks);
     field_lists = mkArrayField(&toplevel, "field_lists");
     errors = mkArrayField(&toplevel, "errors");
     toplevel.emplace("enums", bm->enums);

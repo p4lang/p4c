@@ -57,7 +57,6 @@ class Backend : public PassManager {
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
 
-
  public:
     bm::JsonObjects*                 bm;
     Util::JsonArray*                 meta;
@@ -70,9 +69,6 @@ class Backend : public PassManager {
     Util::JsonArray*                 errors;
     Util::JsonArray*                 externs;
     Util::JsonArray*                 field_lists;
-    Util::JsonArray*                 headerInstances;
-    Util::JsonArray*                 headerStacks;
-    Util::JsonArray*                 headerTypes;
     Util::JsonArray*                 learn_lists;
     Util::JsonArray*                 meter_arrays;
     Util::JsonArray*                 parsers;
@@ -93,14 +89,12 @@ class Backend : public PassManager {
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
-    std::set<const IR::Type_StructLike*> headerTypesCreated;
     std::set<const IR::Type*> headerInstancesCreated;
 
     /// map from block to its type as defined in architecture file
     BlockTypeMap                     blockTypeMap;
     void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
-    // TODO(hanw) addLocal rely on this function to return cstring
-    cstring createJsonType(const IR::Type_StructLike* st);
+    void createJsonType(const IR::Type_StructLike* st);
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
