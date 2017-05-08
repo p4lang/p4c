@@ -2569,7 +2569,7 @@ bool cmp_LPM(const std::string &k1, const std::string &k2, int pref) {
   if (k1.size() != k2.size()) return false;
   if (k1.compare(0, pref / 8, k2, 0, pref / 8) != 0) return false;
   if (pref % 8 != 0) {
-    char mask = static_cast<char>(0xff) << (8 - (pref % 8));
+    auto mask = static_cast<unsigned char>(0xff) << (8 - (pref % 8));
     if ((k1[pref / 8] & mask) != (k2[pref / 8] & mask)) return false;
   }
   return true;
