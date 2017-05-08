@@ -7,5 +7,5 @@ install:
   - docker build -t p4c --build-arg IMAGE_TYPE=test .
 
 script:
-  - docker run -w /p4c/build p4c make check VERBOSE=1
-  - docker run -w /p4c/build p4c make cpplint
+  - docker run -w /p4c/build -e 'MAKEFLAGS=-j2' p4c make check VERBOSE=1
+  - docker run -w /p4c/build -e 'MAKEFLAGS=-j2' p4c make cpplint
