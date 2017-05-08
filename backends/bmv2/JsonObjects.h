@@ -38,7 +38,6 @@ class JsonObjects {
     void add_parser_transition(const unsigned id, Util::IJson* transition);
     void add_parser_op(const unsigned id, Util::IJson* op);
     void add_parser_transition_key(const unsigned id, Util::IJson* key);
-    void add_deparser();
     void add_meter_array();
     void add_counter();
     void add_register();

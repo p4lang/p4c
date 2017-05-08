@@ -387,7 +387,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     errors = mkArrayField(&toplevel, "errors");
     toplevel.emplace("enums", bm->enums);
     toplevel.emplace("parsers", bm->parsers);
-    deparsers = mkArrayField(&toplevel, "deparsers");
+    toplevel.emplace("deparsers", bm->deparsers);
     meter_arrays = mkArrayField(&toplevel, "meter_arrays");
     counters = mkArrayField(&toplevel, "counter_arrays");
     register_arrays = mkArrayField(&toplevel, "register_arrays");

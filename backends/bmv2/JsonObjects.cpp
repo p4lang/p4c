@@ -192,11 +192,10 @@ JsonObjects::add_enum(const cstring& enum_name, const cstring& entry_name,
         auto obj = e->to<Util::JsonObject>();
         if (obj != nullptr) {
             auto jname = obj->get("name")->to<Util::JsonValue>();
+            LOG1("jname" << jname->getString() << " ");
             if (jname != nullptr && jname->isString() && jname->getString() == enum_name) {
                 enum_json = obj;
                 break;
-            } else {
-                BUG("Json %1% name field is not string.", enum_name);
             }
         }
     }
@@ -294,11 +293,6 @@ JsonObjects::add_parser_transition_key(const unsigned id, Util::IJson* newKey) {
            keys->append(k);
        }
     }
-}
-
-void
-JsonObjects::add_deparser() {
-
 }
 
 void

@@ -23,7 +23,6 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
                                                     Util::JsonArray* result) {
     backend->getExpressionConverter()->simpleExpressionsOnly = true;
     for (auto s : *body) {
-        LOG1("deparser body " << s);
         if (auto block = s->to<IR::BlockStatement>()) {
             convertDeparserBody(&block->components, result);
             continue;
@@ -100,7 +99,7 @@ bool DoDeparserBlockConversion::preorder(const IR::ControlBlock* block) {
     }
     const IR::P4Control* cont = block->container;
     auto deparserJson = convertDeparser(cont);
-    backend->deparsers->append(deparserJson);
+    backend->bm->deparsers->append(deparserJson);
     return false;
 }
 
