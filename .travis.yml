@@ -15,7 +15,7 @@ matrix:
 
     - os: linux
       compiler: gcc
-      env: COMPILER=g++-5 GCOV=gcov-5
+      env: COMPILER=g++-6 GCOV=gcov-6
 
     - os: linux
       env: COMPILER=clang++-3.6
@@ -47,7 +47,7 @@ addons:
       - bison
       - pkg-config
       - g++-4.8
-      - g++-5
+      - g++-6
       - clang-3.6
       - clang-3.8
       - libssl-dev
