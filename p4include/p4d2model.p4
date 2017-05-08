@@ -40,11 +40,16 @@ match_kind {
 }
 
 /****************************************************************************
- ************* P A R S E R  I N T R I N S I C   M E T A D A T A *************
+ ********** S T A N D A R D  I N T R I N S I C   M E T A D A T A ************
  ****************************************************************************/
-struct parser_input_t {
-    portid_t    ingress_port;      /* The packet the port ingressed in      */
-    bit<1>      resubmit_flag;     /* The resubmit() indicator              */
+struct standard_metadata_t {
+    portid_t    ingress_port;   /* The packet the port ingressed in         */
+    portid_t    egress_port;    /* Used of mcast_group != 0                 */
+    mgid_t      mcast_group;    /* Non-zero value specifies multicast group */
+    bit<1>      resubmit_flag;  /* The resubmit() indicator                 */
+    bit<1>      drop_flag;      /* Packet (but not clone) is dropped        */
+    cloneid_t   clone_id;       /* Non-zero value identifies clone_i2e dest */
+    qid_t       egress_queue;   /* Requested Queue to hold the packet in    */
 }
 
 /****************************************************************************
@@ -55,39 +60,20 @@ struct parser_input_t {
  ********** I N G R E S S   I N T R I N S I C   M E T A D A T A *************
  ****************************************************************************/
 struct ingress_input_t {
-    portid_t       ingress_port;      /* The packet the port ingressed in   */
-    bit<1>         resubmit_flag;     /* The resubmit() indicator           */
     timestamp_t    ingress_timestamp; /* Ingress timestamp                  */
-}
-
-struct ingress_output_t {
-    portid_t   egress_port;    /* Used of mcast_group != 0                  */
-    mgid_t     mcast_group;    /* Non-zero value specifies multicast group  */
-    cloneid_t  clone_id;       /* Non-zero value identifies clone_i2e dest  */
-    bit<1>     resubmit_flag;  /* Requests packet resubmit                  */
-    bit<1>     drop_flag;      /* Packet (but not clone) is dropped         */
-    qid_t      egress_queue;   /* Requested Queue to hold the packet in     */
 }
 
 /****************************************************************************
  **********  E G R E S S   I N T R I N S I C   M E T A D A T A  *************
  ****************************************************************************/
 struct egress_input_t {
-    portid_t          egress_port;    /* The egress port for the packet     */
     rid_t             egress_rid;     /* Multicast RID (0 for unicast)      */
-    cloneid_t         clone_id;       /* Clone ID (0 for the orig. packet)  */
     packet_length_t   packet_length;  /* Packet length in bytes             */
-    
-    queue_id_t        egress_queue;   /* The queue packet was dequeued from */
+
     timestamp_t       enq_timestamp;  /* The time the packet was enqueued   */
     timestamp_t       deq_timedelta;  /* The time spent in the queue        */
     queue_depth_t     enq_qdepth;     /* Q depth when packet was enqueued   */
     queue_depth_t     deq_qdepth;     /* Q depth when packet was dequeued   */
-}
-
-struct egress_output_t {
-    cloneid_t    clone_id;    /* Non-zero value identifies clone_e2e dest  */
-    bit<1>       drop_flag;   /* Packet (but not clone) is dropped         */
 }
 
 /****************************************************************************
@@ -157,7 +143,7 @@ extern register<T, I> {
 
 /********************** Random Number Generators ***************************/
 extern random<T> {
-    random(T lo, T hi); 
+    random(T lo, T hi);
     T get();
 }
 
@@ -167,7 +153,7 @@ enum hash_algorithm_t {
     crc16,
     crc32,
     random,
-    custom 
+    custom
 }
 
 extern hash<T, D> {
@@ -206,15 +192,15 @@ action resubmit() {
 action clone_to_egress(cloneid_t clone_id) {
     // output_meta.clone_id = clone_id;
 }
-    
+
 /***************************************************************************
  ***************** P A C K A G E   C O M P O N E N T S  ********************
  ***************************************************************************/
 
 parser Parser<H, M>(packet_in b,
-                    out   H              parsedHdr,
-                    inout M              meta,
-                    in    parser_input_t input_meta);
+                    out   H               parsedHdr,
+                    inout M               meta,
+                    inout standard_metadata_t standard_meta);
 
 control VerifyChecksum<H,M>(in    H hdr,
                             inout M meta);
@@ -224,13 +210,13 @@ control Ingress<H, M>(inout H                hdr,
                       inout M                meta,
                       in    error            parser_error,
                       in    ingress_input_t  input_meta,
-                      inout ingress_output_t output_meta);
+                      inout standard_metadata_t output_meta);
 
 @pipeline
 control Egress<H, M>(inout H               hdr,
                      inout M               meta,
                      in    egress_input_t  input_meta,
-                     inout egress_output_t output_meta);
+                     inout standard_metadata_t output_meta);
 
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
@@ -245,5 +231,3 @@ package P4D2Switch<H, M>(Parser<H, M>          user_parser,
                          ComputeChecksum<H, M> user_checksum_compute,
                          Deparser<H>           user_deparser
                         );
-
-
