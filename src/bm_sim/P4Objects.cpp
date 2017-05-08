@@ -556,6 +556,23 @@ class HeaderUnionType : public NamedP4Object {
   std::vector<EntryInfo> entries{};
 };
 
+void check_json_tuple_size(const Json::Value &cfg_parent,
+                           const std::string &key,
+                           size_t expected_size) {
+  const auto &cfg_v = cfg_parent[key];
+  if (!cfg_v.isArray()) {
+    throw json_exception(
+        EFormat() << "Expected '" << key << "' to be a JSON array",
+        cfg_parent);
+  }
+  if (cfg_v.size() != expected_size) {
+    throw json_exception(
+        EFormat() << "Expected '" << key << "' to be a JSON array of size "
+                  << expected_size << " but array has size " << cfg_v.size(),
+        cfg_parent);
+  }
+}
+
 }  // namespace
 
 struct P4Objects::InitState {
@@ -871,7 +888,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
         const string op_type = cfg_parser_op["op"].asString();
         const Json::Value &cfg_parameters = cfg_parser_op["parameters"];
         if (op_type == "extract") {
-          assert(cfg_parameters.size() == 1);
+          check_json_tuple_size(cfg_parser_op, "parameters", 1);
           const Json::Value &cfg_extract = cfg_parameters[0];
           const string extract_type = cfg_extract["type"].asString();
           if (extract_type == "regular") {
@@ -893,7 +910,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
             parse_state->add_extract_to_stack(header_stack_id);
           } else if (extract_type == "union_stack") {
             const auto &cfg_union_stack = cfg_extract["value"];
-            assert(cfg_union_stack.size() == 2);
+            check_json_tuple_size(cfg_extract, "value", 2);
             auto extract_union_stack = cfg_union_stack[0].asString();
             auto header_union_stack_id = get_header_union_stack_id(
                 extract_union_stack);
@@ -910,7 +927,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
                 cfg_parser_op);
           }
         } else if (op_type == "extract_VL") {
-          assert(cfg_parameters.size() == 2);
+          check_json_tuple_size(cfg_parser_op, "parameters", 2);
           const Json::Value &cfg_extract = cfg_parameters[0];
           const Json::Value &cfg_VL_expr = cfg_parameters[1];
           assert(cfg_extract["type"].asString() == "regular");
@@ -923,12 +940,17 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           parse_state->add_extract_VL(header_id, VL_expr,
                                       header_type.get_VL_max_header_bytes());
         } else if (op_type == "set") {
-          assert(cfg_parameters.size() == 2);
+          check_json_tuple_size(cfg_parser_op, "parameters", 2);
           const Json::Value &cfg_dest = cfg_parameters[0];
           const Json::Value &cfg_src = cfg_parameters[1];
 
           const string &dest_type = cfg_dest["type"].asString();
-          assert(dest_type == "field");
+          if (dest_type != "field") {
+            throw json_exception(
+                EFormat() << "Parser 'set' operation has invalid destination "
+                          << "type '" << dest_type << "', expected 'field'",
+                cfg_parser_op);
+          }
           const auto dest = field_info(cfg_dest["value"][0].asString(),
                                        cfg_dest["value"][1].asString());
           enable_arith(std::get<0>(dest), std::get<1>(dest));
@@ -957,10 +979,13 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
             parse_state->add_set_from_expression(
               std::get<0>(dest), std::get<1>(dest), expr);
           } else {
-            assert(0 && "parser set op not supported");
+            throw json_exception(
+                EFormat() << "Parser 'set' operation has unsupported source "
+                          << "type '" << src_type << "'",
+                cfg_parser_op);
           }
         } else if (op_type == "verify") {
-          assert(cfg_parameters.size() == 2);
+          check_json_tuple_size(cfg_parser_op, "parameters", 2);
           BoolExpression cond_expr;
           build_expression(cfg_parameters[0], &cond_expr);
           cond_expr.build();
@@ -980,7 +1005,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           error_expr.build();
           parse_state->add_verify(cond_expr, error_expr);
         } else if (op_type == "primitive") {
-          assert(cfg_parameters.size() == 1);
+          check_json_tuple_size(cfg_parser_op, "parameters", 1);
           const auto primitive_name = cfg_parameters[0]["op"].asString();
           std::unique_ptr<ActionFn> action_fn(new ActionFn(
               primitive_name, 0, 0));
@@ -1196,7 +1221,8 @@ P4Objects::init_meter_arrays(const Json::Value &cfg_root,
     } else if (type == "bytes") {
       meter_type = Meter::MeterType::BYTES;
     } else {
-      assert(0 && "invalid meter type");
+      throw json_exception(
+          EFormat() << "Invalid meter type '" << type << "'", cfg_meter_array);
     }
     const size_t rate_count = cfg_meter_array["rate_count"].asUInt();
     const size_t size = cfg_meter_array["size"].asUInt();
@@ -1483,8 +1509,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         table = MatchActionTable::create_match_action_table<MatchTable>(
           match_type, table_name, table_id, table_size, key_builder,
           with_counters, with_ageing, lookup_factory);
-      } else {
-        assert(table_type == "indirect" || table_type == "indirect_ws");
+      } else if (table_type == "indirect" || table_type == "indirect_ws") {
         bool with_selection = (table_type == "indirect_ws");
         if (table_type == "indirect") {
           table =
@@ -1523,6 +1548,10 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           auto calc = process_cfg_selector(cfg_table["selector"]);
           action_profile->set_hash(std::move(calc));
         }
+      } else {
+        throw json_exception(
+            EFormat() << "Invalid table type '" << table_type << "'",
+            cfg_table);
       }
 
       // maintains backwards compatibility
@@ -1835,7 +1864,9 @@ P4Objects::init_field_lists(const Json::Value &cfg_root) {
         field_list->push_back_constant(
             cfg_value_hexstr.asString(), cfg_value_bitwidth.asInt());
       } else {
-        assert(0);  // TODO(antonin): other types
+        throw json_exception(
+            EFormat() << "Invalid entry type '" << type << "' in field list",
+            cfg_element);
       }
     }
 
