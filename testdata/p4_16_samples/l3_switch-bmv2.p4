@@ -185,10 +185,6 @@ control MyIngress(
     in    ingress_input_t  input_meta,
     inout standard_metadata_t  standard_metadata)
 {
-    action drop() {
-        mark_to_drop();
-        exit;
-    }
 
     action set_dst_info(mac_addr_t mac_da,
                         mac_addr_t mac_sa,
@@ -210,7 +206,7 @@ control MyIngress(
         hdr.ethernet.srcAddr = meta.mac_sa;
         hdr.ipv4.ttl         = hdr.ipv4.ttl - 1;
 
-        standard_metadata.egress_spec = meta.egress_port;
+        standard_metadata.egress_port = meta.egress_port;
     }
 
     action send_arp_reply() {
@@ -286,7 +282,7 @@ control MyEgress(
     inout my_metadata_t       meta,
     in    egress_input_t      input_meta,
     inout standard_metadata_t standard_metadata) {
-    apply {    }
+    apply {  }
 }
 
 /*************************************************************************

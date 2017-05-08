@@ -176,22 +176,13 @@ extern digest<T> {
  * Note: These actions assume that the parameters in the user-instantiated
  *       controls are named the same way as in the architecture definition
  */
-action mark_for_drop() {
-    // output_meta.drop_flag = 1;
-}
+#define mark_for_drop() { standard_metadata.drop_bit = 1; }
 
-action drop() {
-    mark_for_drop();
-    exit;
-}
+#define drop() { mark_for_drop(standard_metadata); exit; }
 
-action resubmit() {
-    // output_meta.resubmit_flag = 1;
-}
+#define resubmit() { standard_metadata.resubmit_flag = 1; }
 
-action clone_to_egress(cloneid_t clone_id) {
-    // output_meta.clone_id = clone_id;
-}
+#define clone_to_egress(clone_id) { standard_metadata.clone_id = clone_id; }
 
 /***************************************************************************
  ***************** P A C K A G E   C O M P O N E N T S  ********************
