@@ -233,10 +233,10 @@ std::unique_ptr<SourceInfo> object_source_info(const Json::Value &cfg_object) {
     filename = cfg_source_info["filename"].asString();
   }
   if (!cfg_source_info["line"].isNull()) {
-    line = cfg_source_info["line"].asInt();
+    line = cfg_source_info["line"].asUInt();
   }
   if (!cfg_source_info["column"].isNull()) {
-    column = cfg_source_info["column"].asInt();
+    column = cfg_source_info["column"].asUInt();
   }
   if (!cfg_source_info["source_fragment"].isNull()) {
     source_fragment = cfg_source_info["source_fragment"].asString();
