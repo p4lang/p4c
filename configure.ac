@@ -105,6 +105,7 @@ AC_SUBST([PROTOBUF_LIBS])
 AC_PATH_PROG([PROTOC], [protoc], [])
 AS_IF([test "x$PROTOC" = x], [AC_MSG_ERROR([protoc not found; is protobuf installed?])])
 
+AC_CHECK_HEADER([FlexLexer.h], [], [AC_MSG_ERROR([Missing FlexLexer.h; is flex and libfl-dev installed?])])
 AC_CHECK_HEADERS([constraint_solver/constraint_solver.h])
 AC_CHECK_LIB([gc], [GC_malloc], [], [AC_MSG_ERROR([Missing GC library])])
 AC_CHECK_LIB([rt], [clock_gettime], [], [])
