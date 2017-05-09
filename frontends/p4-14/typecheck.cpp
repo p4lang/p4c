@@ -16,15 +16,18 @@ limitations under the License.
 
 #include "typecheck.h"
 
-// P4 v1.0 and v1.1 type checking algorithm
-// Initial type setting based on immediate context:
-// - replace named reference to ActionParams in the bodies of ActionFunctions with the
-//   actual ActionParam
-// - link header/metadata instances to the Type
-// - replace named references to global header or metadata instances with ConcreteHeaderRef
-//   expressions that link directly to them.
-// - set type for Member and HeaderStackItemRefs
+/// P4-14 (v1.0 and v1.1) type checking algorithm
+/// Initial type setting based on immediate context:
+/// - replace named reference to ActionParams in the bodies of ActionFunctions with the
+///   actual ActionParam
+/// - link header/metadata instances to the Type
+/// - replace named references to global header or metadata instances with ConcreteHeaderRef
+///   expressions that link directly to them.
+/// - set type for Member and HeaderStackItemRefs
 class TypeCheck::AssignInitialTypes : public Transform {
+ public:
+    AssignInitialTypes() { setName("AssignInitialTypes"); }
+ private:
     const IR::V1Program   *global = nullptr;
 
     template <typename NodeType, typename TypeType>
@@ -194,8 +197,11 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
     return a;
 }
 
-// bottom up type inferencing -- set the types of expression nodes based on operands
+/// Bottom up type inferencing -- set the types of expression nodes based on operands.
 class TypeCheck::InferExpressionsBottomUp : public Modifier {
+ public:
+    InferExpressionsBottomUp() { setName("InferExpressionsBottomUp"); }
+ private:
     void setType(IR::Expression* currentNode, const IR::Type* type) {
         BUG_CHECK(currentNode == getCurrentNode<IR::Expression>(),
                   "Expected to be called on the visitor's current node");
@@ -273,8 +279,11 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
     return rv;
 }
 
-// top down type inferencing -- set the type of expression nodes based on their uses.
+/// Top down type inferencing -- set the type of expression nodes based on their uses.
 class TypeCheck::InferExpressionsTopDown : public Modifier {
+ public:
+    InferExpressionsTopDown() { setName("InferExpressionsTopDown"); }
+ private:
     const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
@@ -319,7 +328,7 @@ class TypeCheck::InferActionArgsBottomUp : public Inspector {
             prim->typecheck(); } }
 
  public:
-    explicit InferActionArgsBottomUp(TypeCheck &s) : self(s) {}
+    explicit InferActionArgsBottomUp(TypeCheck &s) : self(s) { setName("InferActionArgsBottomUp"); }
 };
 
 class TypeCheck::InferActionArgsTopDown : public Inspector {
@@ -360,6 +369,7 @@ class TypeCheck::InferActionArgsTopDown : public Inspector {
         // action argument, we need to visit the action argument nodes every
         // time they appear in the IR tree.
         visitDagOnce = false;
+        setName("InferActionArgsTopDown");
     }
 };
 
@@ -396,7 +406,7 @@ class TypeCheck::AssignActionArgTypes : public Modifier {
     }
 
  public:
-    explicit AssignActionArgTypes(TypeCheck &s) : self(s) { }
+    explicit AssignActionArgTypes(TypeCheck &s) : self(s) { setName("AssignActionArgTypes"); }
 };
 
 TypeCheck::TypeCheck() : PassManager({
