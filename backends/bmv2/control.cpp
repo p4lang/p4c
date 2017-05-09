@@ -257,7 +257,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
                     continue;
 
                 auto expr = ke->expression;
-                auto jk = backend->getExpressionConverter()->convert(expr);
+                auto jk = conv->convert(expr);
                 input->append(jk);
             }
         } else if (implementationType->name == BMV2::TableImplementation::actionProfileName) {
@@ -311,7 +311,7 @@ Control::convertTable(const CFG::TableNode* node,
     cstring table_match_type = backend->getCoreLibrary().exactMatch.name;
     auto key = table->getKey();
     auto tkey = mkArrayField(result, "key");
-    backend->getExpressionConverter()->simpleExpressionsOnly = true;
+    conv->simpleExpressionsOnly = true;
 
     if (key != nullptr) {
         for (auto ke : key->keyElements) {
@@ -378,7 +378,7 @@ Control::convertTable(const CFG::TableNode* node,
 
             auto keyelement = new Util::JsonObject();
             keyelement->emplace("match_type", match_type);
-            auto jk = backend->getExpressionConverter()->convert(expr);
+            auto jk = conv->convert(expr);
             keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
             if (mask != 0)
                 keyelement->emplace("mask", stringRepr(mask, (expr->type->width_bits() + 7) / 8));
@@ -388,7 +388,7 @@ Control::convertTable(const CFG::TableNode* node,
         }
     }
     result->emplace("match_type", table_match_type);
-    backend->getExpressionConverter()->simpleExpressionsOnly = false;
+    conv->simpleExpressionsOnly = false;
 
     auto impl = table->properties->getProperty(BMV2::TableAttributes::implementationName);
     bool simple = handleTableImplementation(impl, key, result, action_profiles);
@@ -664,7 +664,7 @@ Util::IJson* Control::convertIf(const CFG::IfNode* node, cstring prefix) {
     result->emplace("name", node->name);
     result->emplace("id", nextId("conditionals"));
     result->emplace_non_null("source_info", node->statement->condition->sourceInfoJsonObj());
-    auto j = backend->getExpressionConverter()->convert(node->statement->condition, true, false);
+    auto j = conv->convert(node->statement->condition, true, false);
     CHECK_NULL(j);
     result->emplace("expression", j);
     for (auto e : node->successors.edges) {

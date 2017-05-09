@@ -25,10 +25,10 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         result->emplace("op", "set");
-        auto l = backend->getExpressionConverter()->convertLeftValue(assign->left);
+        auto l = conv->convertLeftValue(assign->left);
         auto type = typeMap->getType(assign->left, true);
         bool convertBool = type->is<IR::Type_Boolean>();
-        auto r = backend->getExpressionConverter()->convert(assign->right, true, true, convertBool);
+        auto r = conv->convert(assign->right, true, true, convertBool);
         params->append(l);
         params->append(r);
         return result;
@@ -60,7 +60,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                         if (baseType->is<IR::Type_Stack>()) {
                             if (mem->member == IR::Type_Stack::next) {
                                 type = "stack";
-                                j = backend->getExpressionConverter()->convert(mem->expr);
+                                j = conv->convert(mem->expr);
                             } else {
                                 BUG("%1%: unsupported", mem);
                             }
@@ -68,7 +68,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                     }
                     if (j == nullptr) {
                         type = "regular";
-                        j = backend->getExpressionConverter()->convert(arg);
+                        j = conv->convert(arg);
                     }
                     auto value = j->to<Util::JsonObject>()->get("value");
                     param->emplace("type", type);
@@ -76,7 +76,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
 
                     if (argCount == 2) {
                         auto arg2 = mce->arguments->at(1);
-                        auto jexpr = backend->getExpressionConverter()->convert(arg2, true, false);
+                        auto jexpr = conv->convert(arg2, true, false);
                         auto rwrap = new Util::JsonObject();
                         // The spec says that this must always be wrapped in an expression
                         rwrap->emplace("type", "expression");
@@ -95,14 +95,14 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                     auto cond = mce->arguments->at(0);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = backend->getExpressionConverter()->convert(cond, true, false);
+                    auto jexpr = conv->convert(cond, true, false);
                     params->append(jexpr);
                 }
                 {
                     auto error = mce->arguments->at(1);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = backend->getExpressionConverter()->convert(error, true, false);
+                    auto jexpr = conv->convert(error, true, false);
                     params->append(jexpr);
                 }
                 return result;
@@ -112,12 +112,12 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
             if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
                 auto mem = new IR::Member(bi->appliedTo, "$valid$");
                 typeMap->setType(mem, IR::Type_Void::get());
-                auto jexpr = backend->getExpressionConverter()->convert(mem, true, false);
+                auto jexpr = conv->convert(mem, true, false);
                 result->emplace("op", "set");
                 params->append(jexpr);
 
                 auto bl = new IR::BoolLiteral(bi->name == IR::Type_Header::setValid);
-                auto r = backend->getExpressionConverter()->convert(bl, true, true, true);
+                auto r = conv->convert(bl, true, true, true);
                 params->append(r);
                 return result;
             }
@@ -253,7 +253,7 @@ Util::IJson*
 Parser::convertSelectKey(const IR::SelectExpression* expr) {
     auto se = expr->to<IR::SelectExpression>();
     CHECK_NULL(se);
-    auto key = backend->getExpressionConverter()->convert(se->select, false);
+    auto key = conv->convert(se->select, false);
     return key;
 }
 

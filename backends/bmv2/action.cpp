@@ -49,7 +49,7 @@ ConvertActions::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
 
 void
 ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
-    // FIXME: backend->getExpressionConverter()->createFieldList = true??
+    // FIXME: conv->createFieldList = true??
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
@@ -81,10 +81,10 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
-            auto left = backend->getExpressionConverter()->convertLeftValue(l);
+            auto left = conv->convertLeftValue(l);
             parameters->append(left);
             bool convertBool = type->is<IR::Type_Boolean>();
-            auto right = backend->getExpressionConverter()->convert(r, true, true, convertBool);
+            auto right = conv->convert(r, true, true, convertBool);
             parameters->append(right);
             continue;
         } else if (s->is<IR::EmptyStatement>()) {
@@ -101,7 +101,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
 
                 cstring prim;
                 auto parameters = new Util::JsonArray();
-                auto obj = backend->getExpressionConverter()->convert(builtin->appliedTo);
+                auto obj = conv->convert(builtin->appliedTo);
                 parameters->append(obj);
 
                 if (builtin->name == IR::Type_Header::setValid) {
@@ -110,12 +110,12 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
                     prim = "remove_header";
                 } else if (builtin->name == IR::Type_Stack::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                    auto arg = backend->getExpressionConverter()->convert(mc->arguments->at(0));
+                    auto arg = conv->convert(mc->arguments->at(0));
                     prim = "push";
                     parameters->append(arg);
                 } else if (builtin->name == IR::Type_Stack::pop_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                    auto arg = backend->getExpressionConverter()->convert(mc->arguments->at(0));
+                    auto arg = conv->convert(mc->arguments->at(0));
                     prim = "pop";
                     parameters->append(arg);
                 } else {

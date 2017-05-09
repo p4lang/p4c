@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "lib/assert.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"

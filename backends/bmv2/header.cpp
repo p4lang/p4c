@@ -160,7 +160,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
         field->append(false);
     }
 
-    json->add_header_type(name, &fields);
+    UNUSED auto id = json->add_header_type(name, &fields);
 }
 
 /**
@@ -213,7 +213,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
     return Inspector::init_apply(node);
 }
 
-void ConvertHeaders::end_apply(const IR::Node* node) {
+void ConvertHeaders::end_apply(UNUSED const IR::Node* node) {
     // pad scalars to byte boundary
     unsigned padding = scalars_width % 8;
     if (padding != 0) {

@@ -23,10 +23,11 @@ limitations under the License.
 namespace BMV2 {
 
 class ConvertActions : public Inspector {
-    Backend*           backend;
-    P4::ReferenceMap*  refMap;
-    P4::TypeMap*       typeMap;
-    bm::JsonObjects*   json;
+    Backend*               backend;
+    P4::ReferenceMap*      refMap;
+    P4::TypeMap*           typeMap;
+    bm::JsonObjects*       json;
+    ExpressionConverter*   conv;
 
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result);
@@ -37,7 +38,7 @@ class ConvertActions : public Inspector {
     void end_apply(const IR::Node* node);
     explicit ConvertActions(Backend *backend) : backend(backend),
     refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-    json(backend->json) {}
+    json(backend->json), conv(backend->getExpressionConverter()) {}
 };
 
 } // namespace BMV2

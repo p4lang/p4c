@@ -126,9 +126,10 @@ class SharedActionSelectorCheck : public Inspector {
 };
 
 class Control : public Inspector {
-    Backend*           backend;
-    P4::ReferenceMap*  refMap;
-    P4::TypeMap*       typeMap;
+    Backend*               backend;
+    P4::ReferenceMap*      refMap;
+    P4::TypeMap*           typeMap;
+    ExpressionConverter*   conv;
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
@@ -147,7 +148,8 @@ class Control : public Inspector {
     bool preorder(const IR::ControlBlock* b) override;
 
     explicit Control(Backend *backend) : backend(backend),
-        refMap(backend->getRefMap()), typeMap(backend->getTypeMap()) {}
+        refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
+        conv(backend->getExpressionConverter()){}
 };
 
 class ConvertControl final : public PassManager {
