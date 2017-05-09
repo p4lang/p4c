@@ -39,6 +39,7 @@ JsonObjects::JsonObjects() {
     checksums = insert_array_field(toplevel, "checksums");
     force_arith = insert_array_field(toplevel, "force_arith");
     externs = insert_array_field(toplevel, "extern_instances");
+    field_aliases = insert_array_field(toplevel, "field_aliases");
 }
 
 /// insert a json array to a parent object under key 'name'

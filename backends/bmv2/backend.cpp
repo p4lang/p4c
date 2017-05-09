@@ -62,24 +62,22 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     toplevel.emplace("header_types", json->header_types);
     toplevel.emplace("headers", json->headers);
     toplevel.emplace("header_stacks", json->header_stacks);
+    field_lists = mkArrayField(&toplevel, "field_lists");
     toplevel.emplace("errors", json->errors);
     toplevel.emplace("enums", json->enums);
     toplevel.emplace("parsers", json->parsers);
     toplevel.emplace("deparsers", json->deparsers);
-    toplevel.emplace("actions", json->actions);
     toplevel.emplace("pipelines", json->pipelines);
-    toplevel.emplace("extern_instances", json->externs);
-
-    // v1model only
-    field_lists = mkArrayField(&toplevel, "field_lists");
     meter_arrays = mkArrayField(&toplevel, "meter_arrays");
     counters = mkArrayField(&toplevel, "counter_arrays");
     register_arrays = mkArrayField(&toplevel, "register_arrays");
     calculations = mkArrayField(&toplevel, "calculations");
     learn_lists = mkArrayField(&toplevel, "learn_lists");
+    toplevel.emplace("actions", json->actions);
     checksums = mkArrayField(&toplevel, "checksums");
     force_arith = mkArrayField(&toplevel, "force_arith");
-    field_aliases = mkArrayField(&toplevel, "field_aliases");
+    toplevel.emplace("extern_instances", json->externs);
+    toplevel.emplace("field_aliases", json->field_aliases);
 
     /// generate error types
     for (const auto &p : errorCodesMap) {

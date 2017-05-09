@@ -161,6 +161,22 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
     }
 
     UNUSED auto id = json->add_header_type(name, &fields);
+
+    LOG1("... creating aliases for metadata fields " << st);
+    for (auto f : st->fields) {
+        if (auto name_annotation = f->getAnnotation("name")) {
+            auto container = new Util::JsonArray();
+            auto alias = new Util::JsonArray();
+            auto target_name = name_annotation->expr.front()->to<IR::StringLiteral>()->value;
+            LOG2("field alias " << target_name);
+            container->append(target_name); // name on target
+            // break down the alias into meta . field
+            alias->append(name);      // metadata name
+            alias->append(f->name);   // field name
+            container->append(alias);
+            json->field_aliases->append(container);
+        }
+    }
 }
 
 /**

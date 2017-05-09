@@ -38,6 +38,18 @@ struct standard_metadata_t {
     bit<1>  drop;
     bit<16> recirculate_port;
     bit<32> packet_length;
+    // flattening fields that exist in bmv2-ss
+    // queueing metadata
+    @name("queueing_metadata.enq_timestamp") bit<32> enq_timestamp;
+    @name("queueing_metadata.enq_qdepth")    bit<19> enq_qdepth;
+    @name("queueing_metadata.deq_timedelta") bit<32> deq_timedelta;
+    @name("queueing_metadata.deq_qdepth")    bit<19> deq_qdepth;
+    // intrinsic metadata
+    @name("intrinsic_metadata.ingress_global_timestamp") bit<48> ingress_global_timestamp;
+    @name("intrinsic_metadata.lf_field_list") bit<32> lf_field_list;
+    @name("intrinsic_metadata.mcast_grp")     bit<16> mgast_grp;
+    @name("intrinsic_metadata.resubmit_flag") bit<1>  resubmit_flag;
+    @name("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
 }
 
 extern Checksum16 {
