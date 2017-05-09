@@ -227,9 +227,8 @@ directory. You can also browse this documentation [online]
 
 ### Are all features supported yet ?
 
-At this time, we believe that all P4 features have been implemented. The last
-feature to have been implemented is *parse value sets*, which was scarcely used
-in bmv1.
+At this time, we are aware of the following unsupported P4_14 features:
+- direct registers
 
 If you find more missing features or if you would like to request that a
 specific feature be added, please send us an email (p4-dev@p4.org) or submit an
