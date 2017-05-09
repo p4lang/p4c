@@ -27,6 +27,7 @@ limitations under the License.
 class TypeCheck::AssignInitialTypes : public Transform {
  public:
     AssignInitialTypes() { setName("AssignInitialTypes"); }
+
  private:
     const IR::V1Program   *global = nullptr;
 
@@ -201,6 +202,7 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
 class TypeCheck::InferExpressionsBottomUp : public Modifier {
  public:
     InferExpressionsBottomUp() { setName("InferExpressionsBottomUp"); }
+
  private:
     void setType(IR::Expression* currentNode, const IR::Type* type) {
         BUG_CHECK(currentNode == getCurrentNode<IR::Expression>(),
