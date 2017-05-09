@@ -1907,7 +1907,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
             expression = new IR::Cast(expression->srcInfo, expression->destType, rhs);
-            sourceType = expression->destType;
+            sourceType = getTypeType(expression->destType);
         }
         if (!canCastBetween(castType, sourceType))
             typeError("%1%: Illegal cast from %2% to %3%", expression, sourceType, castType);
