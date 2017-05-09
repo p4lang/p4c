@@ -84,3 +84,5 @@ bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 	      $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4 \
 	      $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_14_samples
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
+
+gtest_LDADD += libbackendbmv2.a
