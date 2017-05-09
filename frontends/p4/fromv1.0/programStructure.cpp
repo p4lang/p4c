@@ -95,7 +95,7 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
 }
 
 void ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
-                                   std::unordered_set<const IR::Type*> *converted) {
+                                  std::unordered_set<const IR::Type*> *converted) {
     if (converted->count(type))
         return;
     converted->emplace(type);
@@ -126,14 +126,16 @@ void ProgramStructure::createTypes() {
             continue;
         createType(type, false, &converted);
     }
+
     for (auto it : registers) {
         if (it.first->layout) {
             auto type = types.get(it.first->layout);
-            createType(type, false, &converted);
+            if (type->is<IR::Type_Struct>())
+                createType(type, false, &converted);
         }
     }
 
-    // Headers next
+    // Now headers
     converted.clear();
     for (auto it : headers) {
         auto type = it.first->type;
@@ -142,6 +144,13 @@ void ProgramStructure::createTypes() {
     for (auto it : stacks) {
         auto type = it.first->type;
         createType(type, true, &converted);
+    }
+    for (auto it : registers) {
+        if (it.first->layout) {
+            auto type = types.get(it.first->layout);
+            if (type->is<IR::Type_Header>())
+                createType(type, true, &converted);
+        }
     }
 }
 
