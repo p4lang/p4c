@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-struct P
-{
-    bit<32> f1;
-    bit<32> f2;
+header h_t {
+    bit<8> f;
 }
 
-struct T
-{
-    int<32> t1;
-    int<32> t2;
+struct my_packet {
+    h_t h;
 }
 
-struct S
-{
-    T s1;
-    T s2;
+control c() {
+    apply {
+        h_t h = { 0 };
+        h_t h1 = h;
+        h_t h3 = { h.f };
+    }
 }
-
-const T t = { 10, 20 };
-const S s = { { 15, 25 }, t };
-
-const int<32> x = t.t1;
-const int<32> y = s.s1.t2;
-
-const int<32> w = .t.t1;
-
-const T t1 = s.s1;
