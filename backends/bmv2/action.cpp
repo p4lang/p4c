@@ -73,7 +73,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             r = assign->right;
 
             cstring operation;
-            auto type = backend->getTypeMap()->getType(l, true);
+            auto type = typeMap->getType(l, true);
             if (type->is<IR::Type_StructLike>())
                 operation = "copy_header";
             else
@@ -92,7 +92,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
         } else if (s->is<IR::MethodCallStatement>()) {
             LOG1("Visit " << dbp(s));
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
-            auto mi = P4::MethodInstance::resolve(mc, backend->getRefMap(), backend->getTypeMap());
+            auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
             if (mi->is<P4::ActionCall>()) {
                 BUG("%1%: action call should have been inlined", mc);
                 continue;
@@ -156,12 +156,12 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
 void
 ConvertActions::convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params) {
     for (auto p : *parameters->getEnumerator()) {
-        if (!backend->getRefMap()->isUsed(p))
+        if (!refMap->isUsed(p))
             ::warning("Unused action parameter %1%", p);
 
         auto param = new Util::JsonObject();
         param->emplace("name", p->name);
-        auto type = backend->getTypeMap()->getType(p, true);
+        auto type = typeMap->getType(p, true);
         if (!type->is<IR::Type_Bits>())
             ::error("%1%: Action parameters can only be bit<> or int<> on this target", p);
         param->emplace("bitwidth", type->width_bits());
@@ -170,7 +170,7 @@ ConvertActions::convertActionParams(const IR::ParameterList *parameters, Util::J
 }
 
 void
-ConvertActions::createActions(Util::JsonArray* actions) {
+ConvertActions::createActions() {
     for (auto it : backend->getStructure().actions) {
         auto action = it.first;
         cstring name = extVisibleName(action);
@@ -178,14 +178,15 @@ ConvertActions::createActions(Util::JsonArray* actions) {
         convertActionParams(action->parameters, params);
         auto body = new Util::JsonArray();
         convertActionBody(&action->body->components, body);
-        auto id = backend->bm->add_action(name, &params, &body);
+        auto id = json->add_action(name, &params, &body);
         backend->getStructure().ids.emplace(action, id);
     }
 }
 
 void
 ConvertActions::end_apply(const IR::Node* node) {
-    createActions(backend->bm->actions);
+    (void) node;
+    createActions();
 }
 
 }

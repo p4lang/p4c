@@ -301,6 +301,31 @@ JsonObjects::add_parser_transition_key(const unsigned id, Util::IJson* newKey) {
     }
 }
 
+unsigned
+JsonObjects::add_action(const cstring& name, Util::JsonArray** params, Util::JsonArray** body) {
+    CHECK_NULL(params);
+    CHECK_NULL(body);
+    auto action = new Util::JsonObject();
+    action->emplace("name", name);
+    unsigned id = BMV2::nextId("actions");
+    action->emplace("id", id);
+    action->emplace("runtime_data", *params);
+    action->emplace("primitives", *body);
+    actions->append(action);
+    return id;
+}
+
+void
+JsonObjects::add_extern() {
+
+
+}
+
+void
+JsonObjects::add_pipeline() {
+
+}
+
 void
 JsonObjects::add_meter_array() {
 
@@ -326,24 +351,6 @@ JsonObjects::add_learn_list() {
 
 }
 
-unsigned
-JsonObjects::add_action(const cstring& name, Util::JsonArray** params, Util::JsonArray** body) {
-    CHECK_NULL(params);
-    CHECK_NULL(body);
-    auto action = new Util::JsonObject();
-    action->emplace("name", name);
-    unsigned id = BMV2::nextId("actions");
-    action->emplace("id", id);
-    action->emplace("runtime_data", *params);
-    action->emplace("primitives", *body);
-    actions->append(action);
-    return id;
-}
-
-void
-JsonObjects::add_pipeline() {
-
-}
 
 void
 JsonObjects::add_checksum() {
@@ -352,12 +359,6 @@ JsonObjects::add_checksum() {
 
 void
 JsonObjects::add_force_arith() {
-
-}
-
-void
-JsonObjects::add_extern() {
-
 
 }
 

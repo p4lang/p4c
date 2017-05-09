@@ -27,6 +27,9 @@ namespace BMV2 {
 
 class Parser : public Inspector {
     Backend* backend;
+    P4::ReferenceMap*    refMap;
+    P4::TypeMap*         typeMap;
+    bm::JsonObjects*     json;
     P4::P4CoreLibrary&   corelib;
     std::map<const IR::P4Parser*, Util::IJson*> parser_map;
     std::map<const IR::ParserState*, Util::IJson*> state_map;
@@ -47,7 +50,8 @@ class Parser : public Inspector {
  public:
     bool preorder(const IR::P4Parser* p) override;
     bool preorder(const IR::PackageBlock* b) override;
-    explicit Parser(Backend* backend) : backend(backend),
+    explicit Parser(Backend* backend) : backend(backend), refMap(backend->getRefMap()),
+    typeMap(backend->getTypeMap()), json(backend->json),
     corelib(P4::P4CoreLibrary::instance) { setName("Parser"); }
 };
 

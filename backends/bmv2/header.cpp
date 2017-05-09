@@ -160,7 +160,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
         field->append(false);
     }
 
-    auto id = json->add_header_type(name, &fields);
+    json->add_header_type(name, &fields);
 }
 
 /**
@@ -168,7 +168,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
  * and we pack all the scalar-typed locals into a 'scalar' type
  */
 Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
-    auto id = json->add_header_type("scalars");
+    json->add_header_type("scalars");
     refMap->newName("scalars");  // TODO(hanw): avoid modifying refMap?
 
     // bit<n>, bool, error are packed into 'scalars' type,

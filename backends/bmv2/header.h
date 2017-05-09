@@ -54,10 +54,10 @@ class ConvertHeaders : public Inspector {
 
     explicit ConvertHeaders(Backend* backend):
         backend(backend), refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-        json(backend->bm)
+        json(backend->json)
     {
         setName("ConvertHeaders");
-        CHECK_NULL(backend->bm);
+        CHECK_NULL(backend->json);
     }
 };
 

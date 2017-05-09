@@ -27,7 +27,10 @@ limitations under the License.
 namespace BMV2 {
 
 class DoDeparserBlockConversion : public Inspector {
-    Backend*    backend;
+    Backend*            backend;
+    P4::ReferenceMap*   refMap;
+    P4::TypeMap*        typeMap;
+    bm::JsonObjects*    json;
 
  protected:
     Util::IJson* convertDeparser(const IR::P4Control* ctrl);
@@ -37,7 +40,9 @@ class DoDeparserBlockConversion : public Inspector {
     bool preorder(const IR::ControlBlock* ctrl);
 
     explicit DoDeparserBlockConversion(Backend* backend) :
-        backend(backend) { setName("DoDeparserBlockConversion"); }
+        backend(backend), refMap(backend->getRefMap()),
+        typeMap(backend->getTypeMap()),
+        json(backend->json) { setName("DoDeparserBlockConversion"); }
 };
 
 class ConvertDeparser final : public PassManager {

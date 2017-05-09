@@ -26,7 +26,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
         auto assign = stat->to<IR::AssignmentStatement>();
         result->emplace("op", "set");
         auto l = backend->getExpressionConverter()->convertLeftValue(assign->left);
-        auto type = backend->getTypeMap()->getType(assign->left, true);
+        auto type = typeMap->getType(assign->left, true);
         bool convertBool = type->is<IR::Type_Boolean>();
         auto r = backend->getExpressionConverter()->convert(assign->right, true, true, convertBool);
         params->append(l);
@@ -34,7 +34,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
-        auto minst = P4::MethodInstance::resolve(mce, backend->getRefMap(), backend->getTypeMap());
+        auto minst = P4::MethodInstance::resolve(mce, refMap, typeMap);
         if (minst->is<P4::ExternMethod>()) {
             auto extmeth = minst->to<P4::ExternMethod>();
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
@@ -43,7 +43,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
                     cstring ename = argCount == 1 ? "extract" : "extract_VL";
                     result->emplace("op", ename);
                     auto arg = mce->arguments->at(0);
-                    auto argtype = backend->getTypeMap()->getType(arg, true);
+                    auto argtype = typeMap->getType(arg, true);
                     if (!argtype->is<IR::Type_Header>()) {
                         ::error("%1%: extract only accepts arguments with header types, not %2%",
                                 arg, argtype);
@@ -56,7 +56,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
 
                     if (arg->is<IR::Member>()) {
                         auto mem = arg->to<IR::Member>();
-                        auto baseType = backend->getTypeMap()->getType(mem->expr, true);
+                        auto baseType = typeMap->getType(mem->expr, true);
                         if (baseType->is<IR::Type_Stack>()) {
                             if (mem->member == IR::Type_Stack::next) {
                                 type = "stack";
@@ -111,7 +111,7 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
             auto bi = minst->to<P4::BuiltInMethod>();
             if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
                 auto mem = new IR::Member(bi->appliedTo, "$valid$");
-                backend->getTypeMap()->setType(mem, IR::Type_Void::get());
+                typeMap->setType(mem, IR::Type_Void::get());
                 auto jexpr = backend->getExpressionConverter()->convert(mem, true, false);
                 result->emplace("op", "set");
                 params->append(jexpr);
@@ -184,7 +184,7 @@ unsigned Parser::combine(const IR::Expression* keySet,
             auto e = *it;
             auto keyElement = le->components.at(index);
 
-            auto type = backend->getTypeMap()->getType(e, true);
+            auto type = typeMap->getType(e, true);
             int width = type->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", e);
 
@@ -208,7 +208,7 @@ unsigned Parser::combine(const IR::Expression* keySet,
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
         convertSimpleKey(keySet, value, mask);
-        auto type = backend->getTypeMap()->getType(select->components.at(0), true);
+        auto type = typeMap->getType(select->components.at(0), true);
         return type->width_bits() / 8;
     }
 }
@@ -277,16 +277,16 @@ Parser::createDefaultTransition() {
 
 bool Parser::preorder(const IR::P4Parser* parser) {
     // TODO(hanw): hard-coded parser name
-    auto parser_id = backend->bm->add_parser("parser");
+    auto parser_id = json->add_parser("parser");
     // convert parse state
     for (auto state : parser->states) {
         if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
             continue;
-        auto state_id = backend->bm->add_parser_state(parser_id, extVisibleName(state));
+        auto state_id = json->add_parser_state(parser_id, extVisibleName(state));
         // convert statements
         for (auto s : state->components) {
             auto op = convertParserStatement(s);
-            backend->bm->add_parser_op(state_id, op);
+            json->add_parser_op(state_id, op);
         }
         // convert transitions
         if (state->selectExpression != nullptr) {
@@ -294,20 +294,20 @@ bool Parser::preorder(const IR::P4Parser* parser) {
                 auto expr = state->selectExpression->to<IR::SelectExpression>();
                 auto transitions = convertSelectExpression(expr);
                 for (auto transition : transitions) {
-                    backend->bm->add_parser_transition(state_id, transition);
+                    json->add_parser_transition(state_id, transition);
                 }
                 auto key = convertSelectKey(expr);
-                backend->bm->add_parser_transition_key(state_id, key);
+                json->add_parser_transition_key(state_id, key);
             } else if (state->selectExpression->is<IR::PathExpression>()) {
                 auto expr = state->selectExpression->to<IR::PathExpression>();
                 auto transition = convertPathExpression(expr);
-                backend->bm->add_parser_transition(state_id, transition);
+                json->add_parser_transition(state_id, transition);
             } else {
                 BUG("%1%: unexpected selectExpression", state->selectExpression);
             }
         } else {
             auto transition = createDefaultTransition();
-            backend->bm->add_parser_transition(state_id, transition);
+            json->add_parser_transition(state_id, transition);
         }
     }
     return false;

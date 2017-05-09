@@ -46,7 +46,7 @@ class ArithmeticFixup : public Transform {
 };
 
 class ExpressionConverter : public Inspector {
-    Backend *backend;
+    Backend*           backend;
     P4::P4CoreLibrary& corelib;
     cstring            scalarsName = "scalars";
 
@@ -55,8 +55,8 @@ class ExpressionConverter : public Inspector {
     bool leftValue;  // true if converting a left value
 
  public:
-    explicit ExpressionConverter(Backend *b) :
-            backend(b), corelib(P4::P4CoreLibrary::instance),
+    explicit ExpressionConverter(Backend *backend) :
+            backend(backend), corelib(P4::P4CoreLibrary::instance),
             leftValue(false), simpleExpressionsOnly(false) {}
     bool simpleExpressionsOnly;  // if set we fail to convert complex expressions
 

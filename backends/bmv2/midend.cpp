@@ -116,7 +116,7 @@ class GenerateSkipControls : public Inspector {
  public:
     explicit GenerateSkipControls(BlockTypeMap* map, std::set<cstring>* skip,
                                   std::set<cstring>* process) :
-        skip(skip), map(map), process(process) { CHECK_NULL(skip);  CHECK_NULL(process); }
+        skip(skip), process(process), map(map) { CHECK_NULL(skip);  CHECK_NULL(process); }
     bool preorder(const IR::ControlBlock* block) {
         auto bt = map->find(block);
         if (bt != map->end()) {

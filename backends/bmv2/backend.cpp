@@ -58,14 +58,14 @@ void Backend::process(const IR::ToplevelBlock* tb) {
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject.
 void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     toplevel.emplace("program", options.file);
-    toplevel.emplace("__meta__", bm->meta);
-    toplevel.emplace("header_types", bm->header_types);
-    toplevel.emplace("headers", bm->headers);
-    toplevel.emplace("header_stacks", bm->header_stacks);
-    toplevel.emplace("errors", bm->errors);
-    toplevel.emplace("enums", bm->enums);
-    toplevel.emplace("parsers", bm->parsers);
-    toplevel.emplace("deparsers", bm->deparsers);
+    toplevel.emplace("__meta__", json->meta);
+    toplevel.emplace("header_types", json->header_types);
+    toplevel.emplace("headers", json->headers);
+    toplevel.emplace("header_stacks", json->header_stacks);
+    toplevel.emplace("errors", json->errors);
+    toplevel.emplace("enums", json->enums);
+    toplevel.emplace("parsers", json->parsers);
+    toplevel.emplace("deparsers", json->deparsers);
 
     // v1model only
     field_lists = mkArrayField(&toplevel, "field_lists");
@@ -74,7 +74,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     register_arrays = mkArrayField(&toplevel, "register_arrays");
     calculations = mkArrayField(&toplevel, "calculations");
     learn_lists = mkArrayField(&toplevel, "learn_lists");
-    toplevel.emplace("actions", bm->actions);
+    toplevel.emplace("actions", json->actions);
     pipelines = mkArrayField(&toplevel, "pipelines");
     checksums = mkArrayField(&toplevel, "checksums");
     force_arith = mkArrayField(&toplevel, "force_arith");
@@ -85,7 +85,7 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     for (const auto &p : errorCodesMap) {
         auto name = p.first->toString();
         auto type = p.second;
-        bm->add_error(name, type);
+        json->add_error(name, type);
     }
 
     // This visitor is used in multiple passes to convert expression to json
