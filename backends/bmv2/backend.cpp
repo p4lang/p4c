@@ -66,6 +66,9 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     toplevel.emplace("enums", json->enums);
     toplevel.emplace("parsers", json->parsers);
     toplevel.emplace("deparsers", json->deparsers);
+    toplevel.emplace("actions", json->actions);
+    toplevel.emplace("pipelines", json->pipelines);
+    toplevel.emplace("extern_instances", json->externs);
 
     // v1model only
     field_lists = mkArrayField(&toplevel, "field_lists");
@@ -74,11 +77,8 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     register_arrays = mkArrayField(&toplevel, "register_arrays");
     calculations = mkArrayField(&toplevel, "calculations");
     learn_lists = mkArrayField(&toplevel, "learn_lists");
-    toplevel.emplace("actions", json->actions);
-    pipelines = mkArrayField(&toplevel, "pipelines");
     checksums = mkArrayField(&toplevel, "checksums");
     force_arith = mkArrayField(&toplevel, "force_arith");
-    externs = mkArrayField(&toplevel, "extern_instances");
     field_aliases = mkArrayField(&toplevel, "field_aliases");
 
     /// generate error types

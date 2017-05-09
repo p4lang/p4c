@@ -759,7 +759,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
     }
 #endif
 
-    backend->pipelines->append(result);
+    json->pipelines->append(result);
     return false;
 }
 

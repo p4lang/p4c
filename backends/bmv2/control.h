@@ -130,6 +130,7 @@ class Control : public Inspector {
     P4::ReferenceMap*      refMap;
     P4::TypeMap*           typeMap;
     ExpressionConverter*   conv;
+    bm::JsonObjects*       json;
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
@@ -149,7 +150,8 @@ class Control : public Inspector {
 
     explicit Control(Backend *backend) : backend(backend),
         refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-        conv(backend->getExpressionConverter()){}
+        conv(backend->getExpressionConverter()),
+        json(backend->json) {}
 };
 
 class ConvertControl final : public PassManager {

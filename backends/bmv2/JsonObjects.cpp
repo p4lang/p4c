@@ -274,8 +274,7 @@ JsonObjects::add_parser_transition(const unsigned id, Util::IJson* transition) {
        CHECK_NULL(transitions);
        auto trans = transition->to<Util::JsonObject>();
        CHECK_NULL(trans);
-       transitions->append(trans);
-    }
+       transitions->append(trans); }
 }
 
 void
@@ -316,55 +315,25 @@ JsonObjects::add_action(const cstring& name, Util::JsonArray** params, Util::Jso
 }
 
 void
-JsonObjects::add_extern() {
-
-
+JsonObjects::add_extern_attribute(const cstring& name, const cstring& type,
+                                  const cstring& value, Util::JsonArray* attributes) {
+    auto attr = new Util::JsonObject();
+    attr->emplace("name", name);
+    attr->emplace("type", type);
+    attr->emplace("value", value);
+    attributes->append(attr);
 }
 
 void
-JsonObjects::add_pipeline() {
-
-}
-
-void
-JsonObjects::add_meter_array() {
-
-}
-
-void
-JsonObjects::add_counter() {
-
-}
-
-void
-JsonObjects::add_register() {
-
-}
-
-void
-JsonObjects::add_calculation() {
-
-}
-
-void
-JsonObjects::add_learn_list() {
-
-}
-
-
-void
-JsonObjects::add_checksum() {
-
-}
-
-void
-JsonObjects::add_force_arith() {
-
-}
-
-void
-JsonObjects::add_field_alias() {
-
+JsonObjects::add_extern(const cstring& name, const cstring& type,
+                        Util::JsonArray** attributes) {
+    auto extn = new Util::JsonObject();
+    unsigned id = BMV2::nextId("extern_instances");
+    extn->emplace("name", name);
+    extn->emplace("id", id);
+    extn->emplace("type", type);
+    extn->emplace("attribute_values", *attributes);
+    externs->append(extn);
 }
 
 }  // namespace bm

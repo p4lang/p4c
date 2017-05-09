@@ -19,24 +19,27 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "lib/json.h"
-#include "helpers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "helpers.h"
+#include "JsonObjects.h"
 
 namespace BMV2 {
 
 class Extern : public Inspector {
     Backend *backend;
+    bm::JsonObjects*     json;
 
  protected:
-    void addExternAttributes(const IR::Declaration_Instance* di, const IR::ExternBlock* block,
-                             Util::JsonArray* attributes);
+    Util::JsonArray*
+        addExternAttributes(const IR::Declaration_Instance* di, const IR::ExternBlock* block);
 
  public:
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Declaration_Instance* decl) override;
 
-    explicit Extern(Backend *b) : backend(b) { setName("Extern"); }
+    explicit Extern(Backend *backend) : backend(backend),
+        json(backend->json) { setName("Extern"); }
 };
 
 class ConvertExterns final : public PassManager {

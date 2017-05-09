@@ -32,9 +32,7 @@ using BMV2::nextId;
 
 namespace P4V1 {
 
-cstring                jsonMetadataParameterName = "standard_metadata";
-
-
+cstring jsonMetadataParameterName = "standard_metadata";
 
 static void addToFieldList(BMV2::Backend *bmv2, const IR::Expression* expr,
                            Util::JsonArray* fl) {

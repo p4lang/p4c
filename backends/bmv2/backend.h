@@ -62,31 +62,16 @@ class Backend : public PassManager {
 
  public:
     bm::JsonObjects*                 json;
-    Util::JsonArray*                 meta;
-    Util::JsonArray*                 actions;
     Util::JsonArray*                 calculations;
     Util::JsonArray*                 checksums;
     Util::JsonArray*                 counters;
-    Util::JsonArray*                 deparsers;
-    Util::JsonArray*                 enums;
-    Util::JsonArray*                 errors;
     Util::JsonArray*                 externs;
     Util::JsonArray*                 field_lists;
     Util::JsonArray*                 learn_lists;
     Util::JsonArray*                 meter_arrays;
-    Util::JsonArray*                 parsers;
-    Util::JsonArray*                 pipelines;
     Util::JsonArray*                 register_arrays;
     Util::JsonArray*                 force_arith;
     Util::JsonArray*                 field_aliases;
-
-    Util::JsonObject*                scalarsStruct;
-    Util::JsonArray*                 scalarFields;
-    const unsigned                   boolWidth = 1;
-    unsigned                         scalars_width = 0;
-    cstring                          scalarsName;
-    const IR::Parameter*             userMetadataParameter;
-    const IR::Parameter*             stdMetadataParameter;
 
     CompilerMode                     mode;
 
@@ -94,19 +79,12 @@ class Backend : public PassManager {
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
-    // std::set<const IR::Type*> headerInstancesCreated;
 
     /// map from block to its type as defined in architecture file
     BlockTypeMap                     blockTypeMap;
-    void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
-    void createJsonType(const IR::Type_StructLike* st);
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
-    void addErrors(Util::JsonArray* errors);
-    void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
-    void convertActionParams(const IR::ParameterList* parameters, Util::JsonArray* result);
-    void createActions(Util::JsonArray* actions);
     void createFieldAliases(const char *remapFile);
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
 

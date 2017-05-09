@@ -16,40 +16,34 @@ limitations under the License.
 
 #include "extern.h"
 
-
-// TODO(hanw): backend checks whether mode is psa or ss
-
 namespace BMV2 {
 
-void Extern::addExternAttributes(const IR::Declaration_Instance* di,
-                                                  const IR::ExternBlock* block,
-                                                  Util::JsonArray* attributes) {
+Util::JsonArray*
+Extern::addExternAttributes(const IR::Declaration_Instance* di,
+                            const IR::ExternBlock* block) {
+    auto attributes = new Util::JsonArray();
     auto paramIt = block->getConstructorParameters()->parameters.begin();
     for (auto arg : *di->arguments) {
-        LOG1("add extern attr" << arg);
-        auto j = new Util::JsonObject();
-        j->emplace("name", arg->toString());
+        auto name = arg->toString();
         if (arg->is<IR::Constant>()) {
             auto cVal = arg->to<IR::Constant>();
             if (arg->type->is<IR::Type_Bits>()) {
-                j->emplace("type", "hexstr");
-                j->emplace("value", stringRepr(cVal->value));
+                json->add_extern_attribute(name, "hexstr",
+                                           stringRepr(cVal->value), attributes);
             } else {
                 BUG("%1%: unhandled constant constructor param", cVal->toString());
             }
         } else if (arg->is<IR::Declaration_ID>()) {
-            auto declID = arg->to<IR::Declaration_ID>();
-            j->emplace("type", "string");
-            j->emplace("value", declID->toString());
+            auto declId = arg->to<IR::Declaration_ID>();
+            json->add_extern_attribute(name, "string", declId->toString(), attributes);
         } else if (arg->type->is<IR::Type_Enum>()) {
-            j->emplace("type", "string");
-            j->emplace("value", arg->toString());
+            json->add_extern_attribute(name, "string", arg->toString(), attributes);
         } else {
             BUG("%1%: unknown constructor param type", arg->type);
         }
-        attributes->append(j);
         ++paramIt;
     }
+    return attributes;
 }
 
 /// generate extern_instances from instance declarations.
@@ -62,20 +56,16 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
         CHECK_NULL(block);
         if (block->is<IR::ExternBlock>()) {
             auto externBlock = block->to<IR::ExternBlock>();
-            auto result = new Util::JsonObject();
-            result->emplace("name", decl->name);
-            result->emplace("id", nextId("extern_instances"));
+            auto name = decl->name;
+            auto type = "";
             if (decl->type->is<IR::Type_Specialized>())
-                result->emplace("type",
-                        decl->type->to<IR::Type_Specialized>()->baseType->toString());
+                type = decl->type->to<IR::Type_Specialized>()->baseType->toString();
             else if (decl->type->is<IR::Type_Name>())
-                result->emplace("type",
-                        decl->type->to<IR::Type_Name>()->path->name.toString());
+                type = decl->type->to<IR::Type_Name>()->path->name.toString();
             else
                 P4C_UNIMPLEMENTED("extern support for %1%", decl);
-            auto attributes = mkArrayField(result, "attribute_values");
-            addExternAttributes(decl, externBlock, attributes);
-            backend->externs->append(result);
+            auto attributes = addExternAttributes(decl, externBlock);
+            json->add_extern(name, type, &attributes);
         }
     }
     return false;
