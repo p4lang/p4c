@@ -18,4 +18,4 @@ const S s = { { 15, 25 }, t };
 const int<32> x = t.t1;
 const int<32> y = s.s1.t2;
 const int<32> w = .t.t1;
-const T t1 = (T)s.s1;
+const T t1 = s.s1;
