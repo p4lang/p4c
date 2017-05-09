@@ -297,7 +297,8 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       recirculate;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
-    static V1Model instance;
+
+	static V1Model instance;
 };
 
 }  // namespace P4V1
