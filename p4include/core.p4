@@ -30,7 +30,7 @@ error {
 }
 
 extern packet_in {
-    /// Read a header from the packet into a fixed-sized header @hrd and advance the cursor.
+    /// Read a header from the packet into a fixed-sized header @hdr and advance the cursor.
     /// May trigger error PacketTooShort or StackOutOfBounds.
     /// @T must be a fixed-size header type
     void extract<T>(out T hdr);
@@ -52,7 +52,7 @@ extern packet_in {
 }
 
 extern packet_out {
-    /// Write @hrd into the output packet, advancing cursor.
+    /// Write @hdr into the output packet, advancing cursor.
     /// @T can be a header type, a header stack, a header_union, or a struct
     /// containing fields with such types.
     void emit<T>(in T hdr);
