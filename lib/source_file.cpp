@@ -58,7 +58,7 @@ InputSources* InputSources::instance = new InputSources();
 
 InputSources::InputSources() :
         sealed(false) {
-    mapLine(nullptr, 0);
+    mapLine(nullptr, 1);  // the first line read will be line 1 of stdin
     contents.push_back("");
 }
 
@@ -169,6 +169,7 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // The first line indicates that line 2 is the first line in x.p4
     // line=2, it->first=1, it->second.sourceLine=1
     // So we have to subtract one to get the real line number
+    BUG_CHECK(line - it->first + it->second.sourceLine > 0, "invalid source line");
     return SourceFileLine(it->second.fileName, line - it->first + it->second.sourceLine - 1);
 }
 
