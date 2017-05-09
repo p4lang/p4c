@@ -161,7 +161,14 @@ const LocationSet* LocationSet::getField(cstring field) const {
     for (auto l : locations) {
         if (l->is<StructLocation>()) {
             auto strct = l->to<StructLocation>();
-            strct->addField(field, result);
+            if (field == StorageFactory::validFieldName && strct->isHeaderUnion()) {
+                // special handling for union.isValid()
+                for (auto f : strct->fields()) {
+                    f->to<StructLocation>()->addField(field, result);
+                }
+            } else {
+                strct->addField(field, result);
+            }
         } else {
             BUG_CHECK(l->is<ArrayLocation>(), "%1%: expected an ArrayLocation", l);
             auto array = l->to<ArrayLocation>();

@@ -25,7 +25,7 @@ namespace P4 {
 class StorageFactory;
 class LocationSet;
 
-// Abstraction for something that is has a left value (variable, parameter)
+/// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint {
  public:
     virtual ~StorageLocation() {}
@@ -49,32 +49,35 @@ class StorageLocation : public IHasDbPrint {
     }
     cstring toString() const { return name; }
 
-    // all locations inside that represent valid bits
+    /// @returns All locations inside that represent valid bits.
     const LocationSet* getValidBits() const;
     virtual void addValidBits(LocationSet* result) const = 0;
-    // set of locations if we exclude all headers
+    /// @returns All locations inside if we exclude all headers.
     const LocationSet* removeHeaders() const;
     virtual void removeHeaders(LocationSet* result) const = 0;
-    // all locations inside that represent the last index of an array
+    /// @returns All locations inside that represent the 'lastIndex' of an array.
     const LocationSet* getLastIndexField() const;
     virtual void addLastIndexField(LocationSet* result) const = 0;
 };
 
-/* Represents a storage location with a simple type.
-   It could be either a scalar variable, or a field of a struct, etc. */
+/** Represents a storage location with a simple type or a tuple type.
+    It could be either a scalar variable, or a field of a struct, etc. */
 class BaseLocation : public StorageLocation {
  public:
+    // We can use this for tuples because tuples have no field accessors,
+    // so we treat them as monolithic objects.
     BaseLocation(const IR::Type* type, cstring name) :
             StorageLocation(type, name)
-    { BUG_CHECK(type->is<IR::Type_Base>() || type->is<IR::Type_Enum>()
-                || type->is<IR::Type_Var>() || type->is<IR::Type_Tuple>()
-                || type-is<IR::Type_Error>() || type->is<IR::Type_Var>(),
+    { BUG_CHECK(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>() ||
+                type->is<IR::Type_Boolean>() || type->is<IR::Type_Var>() ||
+                type->is<IR::Type_Tuple>() || type-is<IR::Type_Error>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
     void addLastIndexField(LocationSet*) const override {}
     void removeHeaders(LocationSet* result) const override;
 };
 
+/** Represents the locations for element of a struct, header or union */
 class StructLocation : public StorageLocation {
     std::map<cstring, const StorageLocation*> fieldLocations;
     friend class StorageFactory;
@@ -97,6 +100,9 @@ class StructLocation : public StorageLocation {
     void addValidBits(LocationSet* result) const override;
     void removeHeaders(LocationSet* result) const override;
     void addLastIndexField(LocationSet* result) const override;
+    bool isHeader() const { return type->is<IR::Type_Header>(); }
+    bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
+    bool isStruct() const { return type->is<IR::Type_Struct>(); }
 };
 
 class ArrayLocation : public StorageLocation {
@@ -143,8 +149,8 @@ class StorageFactory {
     static const cstring indexFieldName;
 };
 
-// A set of locations that may be read or written by a computation.
-// In general this is a conservative approximation of the actual location set.
+/// A set of locations that may be read or written by a computation.
+/// In general this is a conservative approximation of the actual location set.
 class LocationSet : public IHasDbPrint {
     std::set<const StorageLocation*> locations;
 
@@ -163,8 +169,8 @@ class LocationSet : public IHasDbPrint {
     void add(const StorageLocation* location)
     { locations.emplace(location); }
     const LocationSet* join(const LocationSet* other) const;
-    // express this location set only in terms of BaseLocation;
-    // e.g., a StructLocation is expanded in all its fields.
+    /// @returns this location set expressed only in terms of BaseLocation;
+    /// e.g., a StructLocation is expanded in all its fields.
     const LocationSet* canonicalize() const;
     void addCanonical(const StorageLocation* location);
     std::set<const StorageLocation*>::const_iterator begin() const { return locations.cbegin(); }
@@ -182,7 +188,7 @@ class LocationSet : public IHasDbPrint {
     bool isEmpty() const { return locations.empty(); }
 };
 
-// For each declaration we keep the associated storage
+/// Maps a declaration to its associated storage.
 class StorageMap {
     std::map<const IR::IDeclaration*, StorageLocation*> storage;
     StorageFactory factory;
@@ -215,11 +221,11 @@ class StorageMap {
     }
 };
 
-// Indicates a statement in the program.
-// The stack is for representing calls: i.e.,
-// table.apply() -> table -> action
+/// Indicates a statement in the program.
 class ProgramPoint : public IHasDbPrint {
-    // empty stack represents "beforeStart" (see below)
+    /// The stack is for representing calls for context-sensitive analyses: i.e.,
+    /// table.apply() -> table -> action.
+    /// The empty stack represents "beforeStart" (see below).
     std::vector<const IR::Node*> stack;
 
  public:
@@ -227,7 +233,7 @@ class ProgramPoint : public IHasDbPrint {
     ProgramPoint(const ProgramPoint& other) : stack(other.stack) {}
     explicit ProgramPoint(const IR::Node* node) { stack.push_back(node); }
     ProgramPoint(const ProgramPoint& context, const IR::Node* node);
-    static ProgramPoint beforeStart;  // a point logically before the program start
+    static ProgramPoint beforeStart;  /// A point logically before the program start.
     bool operator==(const ProgramPoint& other) const;
     std::size_t hash() const;
     void dbprint(std::ostream& out) const {
@@ -291,17 +297,17 @@ class ProgramPoints : public IHasDbPrint {
     { return points.cend(); }
 };
 
-// List of definers for each base storage (at a specific program point)
+/// List of definers for each base storage (at a specific program point).
 class Definitions : public IHasDbPrint {
-    // which program points have written last to each location
-    // (conservative approximation)
+    /// Set of program points that have written last to each location
+    /// (conservative approximation).
     std::map<const BaseLocation*, const ProgramPoints*> definitions;
 
  public:
     Definitions() = default;
     Definitions(const Definitions& other) : definitions(other.definitions) {}
     Definitions* join(const Definitions* other) const;
-    // point writes the specified LocationSet
+    /// Point writes the specified LocationSet.
     Definitions* writes(ProgramPoint point, const LocationSet* locations) const;
     void set(const BaseLocation* loc, const ProgramPoints* point)
     { CHECK_NULL(loc); CHECK_NULL(point); definitions[loc] = point; }
@@ -330,9 +336,9 @@ class Definitions : public IHasDbPrint {
 };
 
 class AllDefinitions : public IHasDbPrint {
-    // These are the definitions available AFTER each ProgramPoint.
-    // However, for ProgramPoints representing P4Control, P4Action, and P4Table
-    // the definitions are BEFORE the ProgramPoint.
+    /// These are the definitions available AFTER each ProgramPoint.
+    /// However, for ProgramPoints representing P4Control, P4Action, and P4Table
+    /// the definitions are BEFORE the ProgramPoint.
     std::unordered_map<ProgramPoint, Definitions*> atPoint;
 
  public:
@@ -359,28 +365,31 @@ class AllDefinitions : public IHasDbPrint {
     }
 };
 
-// This does not scan variable initializers, so it must be executed
-// after these have been removed.
-// Run for each parser and control separately.
-// Computes the write set for each expression and statement.
-// We are controlling precisely the visit order - to simulate a
-// simbolic execution of the program.
+/**
+ * Computes the write set for each expression and statement.
+ *
+ * This pass is run for each parser and control separately.  It
+ * controls precisely the visit order --- to simulate a simbolic
+ * execution of the program.
+ *
+ * @pre Must be executed after variable initializers have been removed.
+ *
+ */
 class ComputeWriteSet : public Inspector {
  protected:
-    AllDefinitions*     definitions;  // result
-    Definitions*        currentDefinitions;  // before statement currently processed
-    Definitions*        returnedDefinitions;  // set by return statements
-    Definitions*        exitDefinitions;  // set by exit statements
+    AllDefinitions*     definitions;  /// Result computed by this pass.
+    Definitions*        currentDefinitions;  /// Before statement currently processed.
+    Definitions*        returnedDefinitions;  /// Definitions after return statements.
+    Definitions*        exitDefinitions;  /// Definitions after exit statements.
     ProgramPoint        callingContext;
     const StorageMap*   storageMap;
-    bool                lhs;    // if true we are processing an
-                                // expression on the lhs of an
-                                // assignment
-    // For each expression the location set it writes
+    /// if true we are processing an expression on the lhs of an assignment
+    bool                lhs;
+    /// For each expression the location set it writes
     std::map<const IR::Expression*, const LocationSet*> writes;
 
-    // Create new visitor, but with same underlying data structures.
-    // Needed to visit some program fragments repeatedly.
+    /// Creates new visitor, but with same underlying data structures.
+    /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
             definitions(source->definitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
