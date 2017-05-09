@@ -237,7 +237,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 CHECK_NULL(name);
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
-                e->append(backend->scalarsName);
+                e->append(scalarsName);
                 e->append(name);
             } else {
                 // This may be wrong, but the caller will handle it properly

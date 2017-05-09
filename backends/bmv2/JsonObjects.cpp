@@ -99,7 +99,6 @@ JsonObjects::add_meta_info() {
  */
 unsigned
 JsonObjects::add_header_type(const cstring& name, Util::JsonArray** fields) {
-    CHECK_NULL(fields);
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
     header_type->emplace("name", name);

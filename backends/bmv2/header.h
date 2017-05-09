@@ -27,12 +27,14 @@ limitations under the License.
 namespace BMV2 {
 
 class ConvertHeaders : public Inspector {
-    BMV2::Backend*    backend;
-    std::set<cstring> visitedHeaders;
+    BMV2::Backend*     backend;
+    P4::ReferenceMap*  refMap;
+    P4::TypeMap*       typeMap;
+    bm::JsonObjects*   json;
+    std::set<cstring>  visitedHeaders;
 
     const unsigned     boolWidth = 1;
     unsigned           scalars_width = 0;
-    cstring            scalarsName;
 
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);
@@ -43,7 +45,6 @@ class ConvertHeaders : public Inspector {
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderStacks(const IR::Type_Struct* type);
     bool isHeaders(const IR::Type_StructLike* st);
-    bool checkNestedStruct(const IR::Type_Struct* st);
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* node) override;
@@ -51,8 +52,13 @@ class ConvertHeaders : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Parameter* param) override;
 
-    explicit ConvertHeaders(Backend* backend): backend(backend)
-    { setName("ConvertHeaders"); }
+    explicit ConvertHeaders(Backend* backend):
+        backend(backend), refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
+        json(backend->bm)
+    {
+        setName("ConvertHeaders");
+        CHECK_NULL(backend->bm);
+    }
 };
 
 }  // namespace BMV2
