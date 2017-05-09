@@ -20,6 +20,7 @@ limitations under the License.
 
 namespace BMV2 {
 
+// TODO(hanw): remove
 Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
     auto result = new Util::JsonArray();
     parent->append(result);
@@ -52,14 +53,13 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
-            backend->createJsonType(st);
+            addHeaderType(st);
         }
     }
 
     for (auto f : type->fields) {
         auto ft = backend->getTypeMap()->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
-            backend->headerInstancesCreated.insert(ft);
             auto header_name = extVisibleName(f);
             auto header_type = extVisibleName(ft->to<IR::Type_StructLike>());
             if (meta == true) {
@@ -115,7 +115,7 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
-        backend->createJsonType(ht);
+        addHeaderType(ht);
         cstring stack_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
         std::vector<unsigned> ids;
         for (unsigned i = 0; i < stack_size; i++) {
@@ -147,6 +147,116 @@ bool ConvertHeaders::checkNestedStruct(const IR::Type_Struct* st) {
     }
     return result;
 }
+
+void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
+                                     int size, bool is_signed) {
+    auto field = new Util::JsonArray();
+    field->append(name);
+    field->append(size);
+    field->append(is_signed);
+    backend->bm->add_header_field(header, &field);
+}
+
+void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
+    cstring name = extVisibleName(st);
+    auto fields = new Util::JsonArray();
+    for (auto f : st->fields) {
+        auto ftype = backend->getTypeMap()->getType(f, true);
+        if (ftype->to<IR::Type_StructLike>()) {
+            BUG("%1%: nested structure", st);
+        } else if (ftype->is<IR::Type_Boolean>()) {
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(boolWidth);
+            field->append(0);
+        } else if (auto type = ftype->to<IR::Type_Bits>()) {
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(type->size);
+            field->append(type->isSigned);
+        } else if (auto type = ftype->to<IR::Type_Varbits>()) {
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(type->size);  // FIXME -- where does length go?
+        } else if (ftype->to<IR::Type_Stack>()) {
+            BUG("%1%: nested stack", st);
+        } else {
+            BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
+        }
+    }
+    // must add padding
+    unsigned width = st->width_bits();
+    unsigned padding = width % 8;
+    if (padding != 0) {
+        cstring name = backend->getRefMap()->newName("_padding");
+        auto field = pushNewArray(fields);
+        field->append(name);
+        field->append(8 - padding);
+        field->append(false);
+    }
+
+    auto id = backend->bm->add_header_type(name, &fields);
+}
+
+/**
+ * We synthesize a "header_type" for each local which has a struct type
+ * and we pack all the scalar-typed locals into a 'scalar' type
+ */
+Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
+    auto id = backend->bm->add_header_type("scalars");
+    backend->getRefMap()->newName("scalars");  // TODO(hanw): avoid modifying refMap?
+
+    // bit<n>, bool, error are packed into 'scalars' type,
+    // struct and stack introduces new header types
+    for (auto v : backend->getStructure().variables) {
+        auto type = backend->getTypeMap()->getType(v, true);
+        if (auto st = type->to<IR::Type_StructLike>()) {
+            auto metadata_type = extVisibleName(st);
+            addHeaderType(st);
+            backend->bm->add_metadata(metadata_type, v->name);
+        } else if (auto stack = type->to<IR::Type_Stack>()) {
+            auto type = backend->getTypeMap()->getTypeType(stack->elementType, true);
+            BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
+            auto ht = type->to<IR::Type_Header>();
+            addHeaderType(ht);
+            cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
+            std::vector<unsigned> header_ids;
+            for (unsigned i=0; i < stack->getSize(); i++) {
+                cstring name = v->name + "[" + Util::toString(i) + "]";
+                auto header_id = backend->bm->add_header(header_type, name);
+                header_ids.push_back(header_id);
+            }
+            backend->bm->add_header_stack(header_type, v->name, stack->getSize(), header_ids);
+        } else if (type->is<IR::Type_Bits>()) {
+            auto tb = type->to<IR::Type_Bits>();
+            addHeaderField("scalars", v->name.name, tb->size, tb->isSigned);
+            scalars_width += tb->size;
+        } else if (type->is<IR::Type_Boolean>()) {
+            addHeaderField("scalars", v->name.name, boolWidth, false);
+            scalars_width += boolWidth;
+        } else if (type->is<IR::Type_Error>()) {
+            addHeaderField("scalars", v->name.name, 32, 0);
+            scalars_width += 32;
+        } else {
+            BUG("%1%: type not yet handled on this target", type);
+        }
+    }
+
+    // always-have metadata instance
+    backend->bm->add_metadata("scalars", "scalars");
+    backend->bm->add_metadata("standard_metadata", "standard_metadata");
+    return Inspector::init_apply(node);
+}
+
+void ConvertHeaders::end_apply(const IR::Node* node) {
+    // pad scalars to byte boundary
+    unsigned padding = scalars_width % 8;
+    if (padding != 0) {
+        cstring name = backend->getRefMap()->newName("_padding");
+        addHeaderField("scalars", name, 8-padding, false);
+    }
+}
+
 
 /**
  * Generate json for header from IR::Block's constructor parameters
@@ -181,7 +291,7 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
         // BUG_CHECK(!checkNestedStruct(st), "%1% nested struct not implemented", st->getName());
 
         if (st->getAnnotation("metadata")) {
-            backend->createJsonType(st);
+            addHeaderType(st);
         } else {
             auto isHeader = isHeaders(st);
             if (isHeader) {

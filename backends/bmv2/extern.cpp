@@ -16,19 +16,10 @@ limitations under the License.
 
 #include "extern.h"
 
-namespace BMV2 {
 
-/**
-    Custom visitor to enable traversal on other blocks
-*/
-bool Extern::preorder(const IR::PackageBlock *block) {
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>()) {
-            visit(it.second->getNode());
-        }
-    }
-    return false;
-}
+// TODO(hanw): backend checks whether mode is psa or ss
+
+namespace BMV2 {
 
 void Extern::addExternAttributes(const IR::Declaration_Instance* di,
                                                   const IR::ExternBlock* block,
@@ -89,5 +80,19 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
     }
     return false;
 }
+
+/// Custom visitor to enable traversal on other blocks
+bool Extern::preorder(const IR::PackageBlock *block) {
+    if (backend->mode != CompilerMode::PSA)
+        return false;
+
+    for (auto it : block->constantValue) {
+        if (it.second->is<IR::Block>()) {
+            visit(it.second->getNode());
+        }
+    }
+    return false;
+}
+
 
 }  // namespace BMV2

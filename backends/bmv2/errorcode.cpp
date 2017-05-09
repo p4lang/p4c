@@ -18,8 +18,8 @@ limitations under the License.
 
 namespace BMV2 {
 
-bool ErrorCodesVisitor::preorder(const IR::Type_Error* errors) {
-    LOG1("Visit " << errors);
+bool
+ErrorCodesVisitor::preorder(const IR::Type_Error* errors) {
     auto &map = *errorCodesMap;
     for (auto m : *errors->getDeclarations()) {
         BUG_CHECK(map.find(m) == map.end(), "Duplicate error");

@@ -30,16 +30,23 @@ class ConvertHeaders : public Inspector {
     BMV2::Backend*    backend;
     std::set<cstring> visitedHeaders;
 
+    const unsigned     boolWidth = 1;
+    unsigned           scalars_width = 0;
+    cstring            scalarsName;
+
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);
-    //void pushFields(const IR::Type_StructLike *st, Util::JsonArray *fields);
-    //void createJsonType(const IR::Type_StructLike* st);
+    void addHeaderType(const IR::Type_StructLike* st);
+    void addHeaderField(const cstring& header, const cstring& name, int size, bool is_signed);
 
  public:
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderStacks(const IR::Type_Struct* type);
     bool isHeaders(const IR::Type_StructLike* st);
     bool checkNestedStruct(const IR::Type_Struct* st);
+
+    Visitor::profile_t init_apply(const IR::Node* node) override;
+    void end_apply(const IR::Node* node) override;
 
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Parameter* param) override;

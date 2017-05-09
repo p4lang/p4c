@@ -37,6 +37,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+enum class CompilerMode { PSA, SIMPLE };
+
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
@@ -85,11 +87,13 @@ class Backend : public PassManager {
     const IR::Parameter*             userMetadataParameter;
     const IR::Parameter*             stdMetadataParameter;
 
+    CompilerMode                     mode;
+
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
-    std::set<const IR::Type*> headerInstancesCreated;
+    // std::set<const IR::Type*> headerInstancesCreated;
 
     /// map from block to its type as defined in architecture file
     BlockTypeMap                     blockTypeMap;
@@ -98,16 +102,12 @@ class Backend : public PassManager {
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
-    void addEnums(Util::JsonArray* enums);
     void addErrors(Util::JsonArray* errors);
-    void addLocals();
-    void addMetaInformation();
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
+    void convertActionParams(const IR::ParameterList* parameters, Util::JsonArray* result);
     void createActions(Util::JsonArray* actions);
-    void createMetadata();
     void createFieldAliases(const char *remapFile);
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
-    void padScalars();
 
  public:
   explicit Backend(bool isV1,
@@ -115,7 +115,8 @@ class Backend : public PassManager {
                    P4::ConvertEnums::EnumMapping* enumMap, bm::JsonObjects* bm) :
         refMap(refMap), typeMap(typeMap),
         enumMap(enumMap), bm(bm), corelib(P4::P4CoreLibrary::instance),
-        model(P4::V2Model::instance), v1model(P4V1::V1Model::instance)
+        model(P4::V2Model::instance), v1model(P4V1::V1Model::instance),
+        mode(CompilerMode::SIMPLE)
     { refMap->setIsV1(isV1); }
     void process(const IR::ToplevelBlock* block);
     void convert(const IR::ToplevelBlock* block, CompilerOptions& options);

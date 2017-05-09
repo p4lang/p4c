@@ -98,29 +98,38 @@ JsonObjects::add_meta_info() {
  * @param fields a JsonArray for the fields in the header
  */
 unsigned
-JsonObjects::add_header_type(const cstring& name, Util::JsonArray* fields) {
+JsonObjects::add_header_type(const cstring& name, Util::JsonArray** fields) {
     CHECK_NULL(fields);
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
     header_type->emplace("name", name);
     header_type->emplace("id", id);
-    header_type->emplace("fields", fields);
+    if (fields != nullptr) {
+        header_type->emplace("fields", *fields);
+    } else {
+        auto temp = new Util::JsonArray();
+        header_type->emplace("fields", temp);
+    }
     header_types->append(header_type);
     return id;
 }
 
-/// insert additional field to an existing header type, such as 'scalars'.
-unsigned
-JsonObjects::add_header_field(const cstring& name, Util::JsonArray* field) {
+/// create a new field to an existing header type, returns a pointer to the field
+void
+JsonObjects::add_header_field(const cstring& name, Util::JsonArray** field) {
     CHECK_NULL(field);
+    Util::JsonArray* fields = nullptr;
     for (auto h : *header_types) {
         auto hdr = h->to<Util::JsonObject>();
-        if (hdr->toString() == name) {
-            auto fields = hdr->get("fields")->to<Util::JsonArray>();
-            fields->append(field);
+        auto hdrName = hdr->get("name")->to<Util::JsonValue>();
+        if (hdrName != nullptr && hdrName->isString() && hdrName->getString() == name) {
+            fields = hdr->get("fields")->to<Util::JsonArray>();
+            CHECK_NULL(fields);
             break;
         }
     }
+    BUG_CHECK(fields != nullptr, "header '%1%' not found", name);
+    fields->append(*field);
 }
 
 /// create a header instance in json
@@ -170,12 +179,11 @@ JsonObjects::add_header_stack(const cstring& type, const cstring& name,
 
 void
 JsonObjects::add_field_list() {
-
 }
 
 /// Add an error to json.
 void
-JsonObjects::add_error(const cstring& type, const cstring& name) {
+JsonObjects::add_error(const cstring& name, const unsigned type) {
     auto arr = append_array(errors);
     arr->append(name);
     arr->append(type);
@@ -192,7 +200,6 @@ JsonObjects::add_enum(const cstring& enum_name, const cstring& entry_name,
         auto obj = e->to<Util::JsonObject>();
         if (obj != nullptr) {
             auto jname = obj->get("name")->to<Util::JsonValue>();
-            LOG1("jname" << jname->getString() << " ");
             if (jname != nullptr && jname->isString() && jname->getString() == enum_name) {
                 enum_json = obj;
                 break;
@@ -320,18 +327,18 @@ JsonObjects::add_learn_list() {
 
 }
 
-void
-JsonObjects::add_action(const cstring& name, const Util::JsonArray* params,
-                        const Util::JsonArray* body) {
+unsigned
+JsonObjects::add_action(const cstring& name, Util::JsonArray** params, Util::JsonArray** body) {
     CHECK_NULL(params);
     CHECK_NULL(body);
     auto action = new Util::JsonObject();
     action->emplace("name", name);
     unsigned id = BMV2::nextId("actions");
     action->emplace("id", id);
-    action->emplace("runtime_data", params);
-    action->emplace("primitives", body);
+    action->emplace("runtime_data", *params);
+    action->emplace("primitives", *body);
     actions->append(action);
+    return id;
 }
 
 void

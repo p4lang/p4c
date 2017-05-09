@@ -21,6 +21,7 @@ p4c_bm2_ss_LDADD = libfrontend.la libp4ctoolkit.a
 
 p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/analyzer.cpp \
+	backends/bmv2/action.cpp \
 	backends/bmv2/backend.cpp \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/control.cpp \
@@ -41,6 +42,7 @@ p4c_bm2_ss_UNIFIED = \
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
+	backends/bmv2/action.h \
 	backends/bmv2/backend.h \
 	backends/bmv2/control.h \
 	backends/bmv2/copyAnnotations.h \
