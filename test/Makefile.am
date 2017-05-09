@@ -61,8 +61,11 @@ gtestp4c_SOURCES = \
 	test/gtest/gtestp4c.cpp \
 	$(gtest_SOURCES)
 
+# Makefiles can add libraries to $(gtest_LDADD) to include them in the test
+# executable.
+gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a $(gtest_LDADD)
+
 check_PROGRAMS += gtestp4c
-gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a libbackendbmv2.a
 gtestp4c_CPPFLAGS = $(GTEST_CPPFLAGS)
 cpplint_FILES += test/gtest/gtestp4c.cpp
 TESTS += gtestp4c

@@ -51,6 +51,7 @@ IFAIL_TESTS =                  # intermittent failures
 export XFAIL_TESTS
 export IFAIL_TESTS
 gtest_SOURCES =                # GTests
+gtest_LDADD =                  # Libraries needed by GTests
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
