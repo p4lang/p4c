@@ -176,10 +176,6 @@ JsonObjects::add_header_stack(const cstring& type, const cstring& name,
     header_stacks->append(stack);
 }
 
-void
-JsonObjects::add_field_list() {
-}
-
 /// Add an error to json.
 void
 JsonObjects::add_error(const cstring& name, const unsigned type) {
