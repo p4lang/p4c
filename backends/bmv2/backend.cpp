@@ -24,7 +24,6 @@ limitations under the License.
 #include "extern.h"
 #include "frontends/p4/methodInstance.h"
 #include "header.h"
-#include "metadata.h"
 #include "parser.h"
 #include "JsonObjects.h"
 
