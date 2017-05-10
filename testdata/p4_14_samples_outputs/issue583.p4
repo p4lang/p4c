@@ -1,6 +1,21 @@
 #include <core.p4>
 #include <v1model.p4>
 
+struct ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
 struct routing_metadata_t {
     bit<1> drop;
 }
@@ -23,7 +38,7 @@ header icmpv6_t {
     bit<16> hdrChecksum;
 }
 
-header ipv4_t {
+@name("ipv4_t") header ipv4_t_0 {
     bit<4>  version;
     bit<4>  ihl;
     bit<8>  diffserv;
@@ -78,6 +93,8 @@ header vlan_tag_t {
 }
 
 struct metadata {
+    @name("ipv4_meta") 
+    ipv4_t             ipv4_meta;
     @name("routing_metadata") 
     routing_metadata_t routing_metadata;
 }
@@ -90,7 +107,7 @@ struct headers {
     @name("icmpv6") 
     icmpv6_t      icmpv6;
     @name("ipv4") 
-    ipv4_t        ipv4;
+    ipv4_t_0      ipv4;
     @name("ipv6") 
     ipv6_t        ipv6;
     @name("tcp") 
@@ -169,8 +186,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("cnt1") counter(32w32, CounterType.packets) cnt1;
+    @name("reg2") register<ipv4_t>(32w100) reg2;
     @name(".drop_pkt") action drop_pkt() {
         mark_to_drop();
+        reg2.write((bit<32>)0, meta.ipv4_meta);
     }
     @name(".hop") action hop(inout bit<8> ttl, bit<9> egress_spec) {
         ttl = (bit<8>)(ttl + 8w255);
