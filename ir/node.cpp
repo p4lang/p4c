@@ -83,7 +83,8 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
         auto assign = to<IR::AssignmentStatement>();
         lhs = assign->left;
         rhs = assign->right;
-        lhs->srcInfo.toSourcePositionData(&lineNumber, &columnNumber);
+        if (lhs->srcInfo.isValid())
+            lhs->srcInfo.toSourcePositionData(&lineNumber, &columnNumber);
     }
     auto json = new Util::JsonObject();
     cstring sourceFrag = srcInfo.toBriefSourceFragment();
