@@ -30,11 +30,11 @@ struct SpecializationInfo {
     cstring name;
     /// Actual parser or control that is being specialized.
     const IR::IContainer*              specialized;
-    /// values to substitute for type arguments.
+    /// Values to substitute for type arguments.
     const IR::Vector<IR::Type>*        typeArguments;
-    /// values to substitute for constructor arguments.
+    /// Values to substitute for constructor arguments.
     IR::Vector<IR::Expression>*        constructorArguments;
-    /// declarations to insert in the list of locals.
+    /// Declarations to insert in the list of locals.
     IR::IndexedVector<IR::Declaration>* declarations;
     /// Invocation which causes this specialization.
     const IR::Node*                    invocation;
@@ -90,7 +90,9 @@ class SpecializationMap {
     void clear() { specializations.clear(); }
 };
 
-/// Builds a SpecializationMap.
+/** Builds a SpecializationMap of instantiations with constant values for
+ * type and constructor arguments.
+ */
 class FindSpecializations : public Inspector {
     SpecializationMap* specMap;
 
@@ -117,15 +119,18 @@ class FindSpecializations : public Inspector {
     void postorder(const IR::Declaration_Instance* decl) override;
 };
 
-/** @brief Specializes each Parser and Control by substituting type arguments
- * and constructor parameters.
+/** @brief Specializes each Parser and Control *with constant constructor
+ * arguments* by substituting type arguments and constructor parameters.
  *
  * Specifically, each instantiation of each Parser (or Control) with
  * constructor parameters will cause
- *  - the creation of a new Parser (Control) with the actual arguments
+ *  - the creation of a new Parser (or Control) with the actual arguments
  *    substituted for the constructor parameters, and
  *  - the replacement of the instantiation with a new instantiation using the
  *    newly-specialized Parser (or Control).
+ *
+ * Instantiations with constructor arguments that are not constant values are
+ * ignored---see SpecializeAll for details.
  *
  * Note that this pass handles type substition for instantiating generic Parser
  * or Control types, which is an experimental feature.
@@ -144,14 +149,10 @@ control cspec(in bit<32> data) { ... }
 cspec() c_inst;
 ```
  *
+ * with ```16``` substituted for ```size``` in the body of ```cspec```.
+ *
  * A different specialization is made for each constructor invocation
  * and Declaration_Instance.
- *
- * @pre Actual arguments are suitable for substitution, meaning that it must
- * run after ConstantFolding and SimplifyExpressions.
- *
- * @post No instantiations of Parsers or Controls with constructor parameters
- * remain.
  */
 class Specialize : public Transform {
     SpecializationMap* specMap;
@@ -167,20 +168,29 @@ class Specialize : public Transform {
     const IR::Node* postorder(IR::Declaration_Instance*) override;
 };
 
-/** @brief Repeats ConstantFolding, TypeChecking, FindSpecializations, and
- * Specialize followed by RemoveAllUnusedDeclarations until convergence.
+/** @brief Specializes each Parser and Control by substituting type arguments
+ * and constructor parameters.
  *
  * The primary goal of this pass is to specialize Control and Parser types with
  * instantiations that supply constructor parameters, which is accomplished via
  * Specialize.
  *
- * Specialization may also  enable new opportunities for ConstantFolding (after
- * actual arguments are substituted for constructor parameters) and
- * RemoveAllUnusedDeclarations (after all instantiations of Control and Parser
- * types with constructors are replaced).
+ * This is an iterative process, however: Specialize will only substitute
+ * constant values for constructor parameters, but constructor calls may have
+ * (a) expressions and (b) other constructor parameters as arguments.  Hence,
+ * each iteration applies constant folding and then specialization until
+ * reaching convergence.
  *
- * @pre See preconditions for the passes SpecializeAll invokes.
- * @post See postconditions for the passes SpecializeAll invokes.
+ * Eventually, all instantiations of Control or Parser type declarations with
+ * constructor parameters will be replaced by instantiations of specialized
+ * type declarations, at which point it is safe to remove the original (now
+ * unused) type declarations.
+ *
+ * @pre Actual arguments that are suitable for substitution, meaning that this
+ * pass must run after SimplifyExpressions.
+ *
+ * @post No declarations nor instantiations remain of Parser or Control types
+ * with constructor parameters.
  */
 class SpecializeAll : public PassRepeated {
     SpecializationMap specMap;
