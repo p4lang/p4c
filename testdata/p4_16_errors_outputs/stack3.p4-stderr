@@ -1,0 +1,36 @@
+../testdata/p4_16_errors/stack3.p4(34): error: header h[]: Size of header stack type should be a constant
+        h[s1.size + 1] s2;
+        ^^^^^^^^^^^^^^
+../testdata/p4_16_errors/stack3.p4(34): error: header h[]: Size of header stack type should be a constant
+        h[s1.size + 1] s2;
+        ^^^^^^^^^^^^^^
+../testdata/p4_16_errors/stack3.p4(34): error: header h[]: Size of header stack type should be a constant
+        h[s1.size + 1] s2;
+        ^^^^^^^^^^^^^^
+../testdata/p4_16_errors/stack3.p4(34): error: Could not find type of h[]
+        h[s1.size + 1] s2;
+        ^^^^^^^^^^^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: header h[]: Size of header stack type should be a constant
+        h[x] s3;
+        ^^^^
+../testdata/p4_16_errors/stack3.p4(35): error: Could not find type of h[]
+        h[x] s3;
+        ^^^^

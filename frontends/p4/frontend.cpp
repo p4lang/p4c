@@ -80,7 +80,7 @@ class PrettyPrint : public Inspector {
 
 /**
  * This pass is a no-op whose purpose is to mark the end of the
- * front-end, used for testing.  It is implemented as an
+ * front-end, which is useful for debugging. It is implemented as an
  * empty @ref PassManager (instead of a @ref Visitor) for efficiency.
  */
 class FrontEndLast : public PassManager {
