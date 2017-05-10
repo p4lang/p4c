@@ -2135,14 +2135,27 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     ectr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
                     auto params = mkArrayField(ectr, "attribute_values");
                     for (auto p : *eb->getConstructorParameters()) {
+                        auto bits_type = p->type->is<IR::Type_Bits>();
+                        auto bool_type = p->type->is<IR::Type_Boolean>();
+                        BUG_CHECK(bits_type || bool_type,
+                                  "%1%: expected a type bit<>, int<> or bool",
+                                  p->toString());
                         auto parameter = eb->getParameterValue(p->toString());
                         CHECK_NULL(parameter);
-                        BUG_CHECK(parameter->is<IR::Constant>(), "%1%: expected a constant",
+                        bits_type = parameter->is<IR::Constant>();
+                        bool_type = parameter->is<IR::BoolLiteral>();
+                        BUG_CHECK(bits_type || bool_type,
+                                  "%1%: expected a constant integer or boolean value",
                                   parameter);
+                        mpz_class param_val;
+                        if (bool_type)
+                            param_val = parameter->to<IR::BoolLiteral>()->value ? 1 : 0;
+                        else
+                            param_val = parameter->to<IR::Constant>()->value;
                         auto param = new Util::JsonObject();
                         param->emplace("name", p->toString());
                         param->emplace("type", "hexstr");
-                        param->emplace("value", parameter->to<IR::Constant>()->value);
+                        param->emplace("value", param_val);
                         params->append(param);
                     }
                     extern_instances->append(ectr);
