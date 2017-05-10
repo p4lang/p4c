@@ -989,6 +989,22 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         // Do not generate any code for this operation
                         continue;
                     }
+                } else {
+                    ::warning("Found extern method %1%. Make sure that the BMv2 supports it",
+                               em->method->name);
+                    auto primitive = mkPrimitive("_" + em->originalExternType->name +
+                                                 "_" + em->method->name, result);
+                    auto parameters = mkParameters(primitive);
+                    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+                    auto etr = new Util::JsonObject();
+                    etr->emplace("type", "extern");
+                    etr->emplace("value", extVisibleName(em->object));
+                    parameters->append(etr);
+                    for (auto arg : *mc->arguments) {
+                        auto args = conv->convert(arg);
+                        parameters->append(args);
+                    }
+                    continue;
                 }
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
@@ -1906,7 +1922,8 @@ JsonConverter::convertTable(const CFG::TableNode* node,
 
 Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstring name,
                                            Util::JsonArray *counters, Util::JsonArray* meters,
-                                           Util::JsonArray* registers) {
+                                           Util::JsonArray* registers,
+                                           Util::JsonArray* extern_instances) {
     const IR::P4Control* cont = block->container;
     // the index is the same for ingress and egress
     stdMetadataParameter = cont->type->applyParams->getParameter(
@@ -2116,6 +2133,41 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     }
 
                     action_profiles->append(action_profile);
+                    continue;
+                } else {
+                    ::warning("Found extern instance %1%. Make sure that the BMv2 supports it",
+                               eb->type->name);
+                    auto ectr = new Util::JsonObject();
+                    ectr->emplace("name", name);
+                    ectr->emplace("id", nextId("extern_instances"));
+                    ectr->emplace("type", eb->type->name);
+                    ectr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+                    auto params = mkArrayField(ectr, "attribute_values");
+                    for (auto p : *eb->getConstructorParameters()) {
+                        auto bits_type = p->type->is<IR::Type_Bits>();
+                        auto bool_type = p->type->is<IR::Type_Boolean>();
+                        BUG_CHECK(bits_type || bool_type,
+                                  "%1%: expected a type bit<>, int<> or bool",
+                                  p->toString());
+                        auto parameter = eb->getParameterValue(p->toString());
+                        CHECK_NULL(parameter);
+                        bits_type = parameter->is<IR::Constant>();
+                        bool_type = parameter->is<IR::BoolLiteral>();
+                        BUG_CHECK(bits_type || bool_type,
+                                  "%1%: expected a constant integer or boolean value",
+                                  parameter);
+                        mpz_class param_val;
+                        if (bool_type)
+                            param_val = parameter->to<IR::BoolLiteral>()->value ? 1 : 0;
+                        else
+                            param_val = parameter->to<IR::Constant>()->value;
+                        auto param = new Util::JsonObject();
+                        param->emplace("name", p->toString());
+                        param->emplace("type", "hexstr");
+                        param->emplace("value", param_val);
+                        params->append(param);
+                    }
+                    extern_instances->append(ectr);
                     continue;
                 }
             }
@@ -2386,6 +2438,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     auto registers = mkArrayField(&toplevel, "register_arrays");
     auto calculations = mkArrayField(&toplevel, "calculations");
     auto learn_lists = mkArrayField(&toplevel, "learn_lists");
+    auto extern_instances = mkArrayField(&toplevel, "extern_instances");
 
     auto acts = createActions(fieldLists, calculations, learn_lists);
     if (::errorCount() > 0)
@@ -2396,13 +2449,14 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     auto ingressBlock = package->getParameterValue(v1model.sw.ingress.name);
     auto ingressControl = ingressBlock->to<IR::ControlBlock>();
     auto ingress = convertControl(ingressControl, v1model.ingress.name,
-                                  counters, meters, registers);
+                                  counters, meters, registers, extern_instances);
     if (::errorCount() > 0)
         return;
     pipelines->append(ingress);
     auto egressBlock = package->getParameterValue(v1model.sw.egress.name);
     auto egress = convertControl(egressBlock->to<IR::ControlBlock>(),
-                                 v1model.egress.name, counters, meters, registers);
+                                 v1model.egress.name, counters, meters,
+                                 registers, extern_instances);
     if (::errorCount() > 0)
         return;
     pipelines->append(egress);

@@ -114,7 +114,8 @@ class JsonConverter final {
     Util::IJson* convertParserStatement(const IR::StatOrDecl* stat);
     Util::IJson* convertControl(const IR::ControlBlock* block, cstring name,
                                 Util::JsonArray* counters, Util::JsonArray* meters,
-                                Util::JsonArray* registers);
+                                Util::JsonArray* registers,
+                                Util::JsonArray* extern_instances);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations,
                               const IR::Node* node);
