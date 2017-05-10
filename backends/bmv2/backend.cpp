@@ -67,13 +67,13 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     toplevel.emplace("enums", json->enums);
     toplevel.emplace("parsers", json->parsers);
     toplevel.emplace("deparsers", json->deparsers);
-    toplevel.emplace("pipelines", json->pipelines);
     meter_arrays = mkArrayField(&toplevel, "meter_arrays");
     counters = mkArrayField(&toplevel, "counter_arrays");
     register_arrays = mkArrayField(&toplevel, "register_arrays");
     calculations = mkArrayField(&toplevel, "calculations");
     learn_lists = mkArrayField(&toplevel, "learn_lists");
     toplevel.emplace("actions", json->actions);
+    toplevel.emplace("pipelines", json->pipelines);
     checksums = mkArrayField(&toplevel, "checksums");
     force_arith = mkArrayField(&toplevel, "force_arith");
     toplevel.emplace("extern_instances", json->externs);

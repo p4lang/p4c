@@ -193,6 +193,10 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto metadata_type = extVisibleName(st);
+            if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
+                continue;  // already seen
+            else
+                visitedHeaders.emplace(st->getName());
             addHeaderType(st);
             json->add_metadata(metadata_type, v->name);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
@@ -219,7 +223,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
             addHeaderField("scalars", v->name.name, 32, 0);
             scalars_width += 32;
         } else {
-            BUG("%1%: type not yet handled on this target", type);
+            P4C_UNIMPLEMENTED("%1%: type not yet handled on this target", type);
         }
     }
 

@@ -62,7 +62,7 @@ gtestp4c_SOURCES = \
 	$(gtest_SOURCES)
 
 check_PROGRAMS += gtestp4c
-gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a libbackendbmv2.la
+gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a libbackendbmv2.a
 gtestp4c_CPPFLAGS = $(GTEST_CPPFLAGS)
 cpplint_FILES += test/gtest/gtestp4c.cpp
 TESTS += gtestp4c
