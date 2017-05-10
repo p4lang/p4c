@@ -17,7 +17,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "JsonObjects.h"
 
-namespace bm {
+namespace BMV2 {
 
 JsonObjects::JsonObjects() {
     toplevel = new Util::JsonObject();
@@ -65,7 +65,7 @@ JsonObjects::create_parameters(Util::JsonObject* object) {
 }
 
 /// append a json object r to a parent json array
-/// insert a field 'op' with 'name' to r
+/// insert a field 'op' with 'name' to parent
 Util::JsonObject*
 JsonObjects::create_primitive(Util::JsonArray* parent, cstring name) {
     auto result = new Util::JsonObject();
@@ -99,13 +99,13 @@ JsonObjects::add_meta_info() {
  * @param fields a JsonArray for the fields in the header
  */
 unsigned
-JsonObjects::add_header_type(const cstring& name, Util::JsonArray** fields) {
+JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields) {
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
     header_type->emplace("name", name);
     header_type->emplace("id", id);
     if (fields != nullptr) {
-        header_type->emplace("fields", *fields);
+        header_type->emplace("fields", fields);
     } else {
         auto temp = new Util::JsonArray();
         header_type->emplace("fields", temp);
@@ -114,9 +114,22 @@ JsonObjects::add_header_type(const cstring& name, Util::JsonArray** fields) {
     return id;
 }
 
-/// create a new field to an existing header type, returns a pointer to the field
+/// create a heder type with empty field list.
+unsigned
+JsonObjects::add_header_type(const cstring& name) {
+    auto header_type = new Util::JsonObject();
+    unsigned id = BMV2::nextId("header_types");
+    header_type->emplace("name", name);
+    header_type->emplace("id", id);
+    auto temp = new Util::JsonArray();
+    header_type->emplace("fields", temp);
+    header_types->append(header_type);
+    return id;
+}
+
+/// create a new field to an existing header type
 void
-JsonObjects::add_header_field(const cstring& name, Util::JsonArray** field) {
+JsonObjects::add_header_field(const cstring& name, Util::JsonArray*& field) {
     CHECK_NULL(field);
     Util::JsonArray* fields = nullptr;
     for (auto h : *header_types) {
@@ -129,7 +142,7 @@ JsonObjects::add_header_field(const cstring& name, Util::JsonArray** field) {
         }
     }
     BUG_CHECK(fields != nullptr, "header '%1%' not found", name);
-    fields->append(*field);
+    fields->append(field);
 }
 
 /// create a header instance in json
@@ -298,15 +311,15 @@ JsonObjects::add_parser_transition_key(const unsigned id, Util::IJson* newKey) {
 }
 
 unsigned
-JsonObjects::add_action(const cstring& name, Util::JsonArray** params, Util::JsonArray** body) {
+JsonObjects::add_action(const cstring& name, Util::JsonArray*& params, Util::JsonArray*& body) {
     CHECK_NULL(params);
     CHECK_NULL(body);
     auto action = new Util::JsonObject();
     action->emplace("name", name);
     unsigned id = BMV2::nextId("actions");
     action->emplace("id", id);
-    action->emplace("runtime_data", *params);
-    action->emplace("primitives", *body);
+    action->emplace("runtime_data", params);
+    action->emplace("primitives", body);
     actions->append(action);
     return id;
 }
@@ -323,13 +336,13 @@ JsonObjects::add_extern_attribute(const cstring& name, const cstring& type,
 
 void
 JsonObjects::add_extern(const cstring& name, const cstring& type,
-                        Util::JsonArray** attributes) {
+                        Util::JsonArray*& attributes) {
     auto extn = new Util::JsonObject();
     unsigned id = BMV2::nextId("extern_instances");
     extn->emplace("name", name);
     extn->emplace("id", id);
     extn->emplace("type", type);
-    extn->emplace("attribute_values", *attributes);
+    extn->emplace("attribute_values", attributes);
     externs->append(extn);
 }
 

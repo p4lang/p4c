@@ -65,7 +65,7 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
             else
                 P4C_UNIMPLEMENTED("extern support for %1%", decl);
             auto attributes = addExternAttributes(decl, externBlock);
-            json->add_extern(name, type, &attributes);
+            json->add_extern(name, type, attributes);
         }
     }
     return false;

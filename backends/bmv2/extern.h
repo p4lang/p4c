@@ -27,8 +27,8 @@ limitations under the License.
 namespace BMV2 {
 
 class Extern : public Inspector {
-    Backend *backend;
-    bm::JsonObjects*     json;
+    Backend*             backend;
+    BMV2::JsonObjects*   json;
 
  protected:
     Util::JsonArray*

@@ -401,8 +401,7 @@ class ComplexExpression : public Inspector {
 const IR::PathExpression*
 RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
-    LOG1("expression " << expression << " " << type);
-    auto name = refMap->newName("removeComplexExpression_tmp");
+    auto name = refMap->newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);

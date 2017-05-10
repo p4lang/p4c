@@ -1,8 +1,0 @@
-set_default ipv4_lpm drop
-set_default swid add_swid 7
-add ipv4_lpm 0 hdr.ipv4.dstAddr:0x0a00010a ipv4_forward(dstAddr:0x00aa00010001, port:1)
-add ipv4_lpm 1 hdr.ipv4.dstAddr:0x0a00020a ipv4_forward(dstAddr:0xf2ede6df4efa, port:2)
-add ipv4_lpm 2 hdr.ipv4.dstAddr:0x0a00030a ipv4_forward(dstAddr:0xf2ede6df4efb, port:3)
-
-packet 0 ffffffff ffff0000 00000000 0800 0a00010a 00000000 0000
-expect 1 00aa0001 00010000 00000000 0800 0a00010a ******** ****

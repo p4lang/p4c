@@ -17,14 +17,15 @@ limitations under the License.
 #ifndef _BACKENDS_BMV2_JSONOBJECTS_H_
 #define _BACKENDS_BMV2_JSONOBJECTS_H_
 
-namespace bm {
+namespace BMV2 {
 
 class JsonObjects {
  public:
     void add_program_info(const cstring& name);
     void add_meta_info();
-    unsigned add_header_type(const cstring& name, Util::JsonArray** fields = nullptr);
-    void add_header_field(const cstring& name, Util::JsonArray** field);
+    unsigned add_header_type(const cstring& name, Util::JsonArray*& fields);
+    unsigned add_header_type(const cstring& name);
+    void add_header_field(const cstring& name, Util::JsonArray*& field);
     unsigned add_header(const cstring& type, const cstring& name);
     unsigned add_metadata(const cstring& type, const cstring& name);
     void add_header_stack(const cstring& type, const cstring& name,
@@ -37,11 +38,11 @@ class JsonObjects {
     void add_parser_transition(const unsigned id, Util::IJson* transition);
     void add_parser_op(const unsigned id, Util::IJson* op);
     void add_parser_transition_key(const unsigned id, Util::IJson* key);
-    unsigned add_action(const cstring& name, Util::JsonArray** params, Util::JsonArray** body);
+    unsigned add_action(const cstring& name, Util::JsonArray*& params, Util::JsonArray*& body);
     void add_pipeline();
     void add_extern_attribute(const cstring& name, const cstring& type,
                               const cstring& value, Util::JsonArray* attributes);
-    void add_extern(const cstring& name, const cstring& type, Util::JsonArray** attributes);
+    void add_extern(const cstring& name, const cstring& type, Util::JsonArray*& attributes);
     JsonObjects();
     Util::JsonArray* insert_array_field(Util::JsonObject* parent, cstring name);
     Util::JsonArray* append_array(Util::JsonArray* parent);

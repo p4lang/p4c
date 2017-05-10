@@ -30,22 +30,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-void Backend::createFieldAliases(const char *remapFile) {
-    Arch::MetadataRemapT *remap = Arch::readMap(remapFile);
-    LOG1("Metadata alias map of size = " << remap->size());
-    for (auto r : *remap) {
-        auto container = new Util::JsonArray();
-        auto alias = new Util::JsonArray();
-        container->append(r.second);
-        // break down the alias into meta . field
-        auto meta = r.first.before(r.first.find('.'));
-        alias->append(meta);
-        alias->append(r.first.substr(meta.size()+1));
-        container->append(alias);
-        field_aliases->append(container);
-    }
-}
-
 void Backend::process(const IR::ToplevelBlock* tb) {
     setName("BackEnd");
     addPasses({

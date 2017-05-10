@@ -177,7 +177,7 @@ ConvertActions::createActions() {
         convertActionParams(action->parameters, params);
         auto body = new Util::JsonArray();
         convertActionBody(&action->body->components, body);
-        auto id = json->add_action(name, &params, &body);
+        auto id = json->add_action(name, params, body);
         backend->getStructure().ids.emplace(action, id);
     }
 }

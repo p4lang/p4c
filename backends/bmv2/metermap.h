@@ -21,6 +21,9 @@ limitations under the License.
 
 namespace BMV2 {
 
+/**
+ *
+ */
 class DirectMeterMap final {
  public:
     struct DirectMeterInfo {

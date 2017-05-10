@@ -130,7 +130,7 @@ class Control : public Inspector {
     P4::ReferenceMap*      refMap;
     P4::TypeMap*           typeMap;
     ExpressionConverter*   conv;
-    bm::JsonObjects*       json;
+    BMV2::JsonObjects*     json;
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,

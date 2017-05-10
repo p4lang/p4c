@@ -27,11 +27,11 @@ limitations under the License.
 namespace BMV2 {
 
 class ConvertHeaders : public Inspector {
-    BMV2::Backend*     backend;
-    P4::ReferenceMap*  refMap;
-    P4::TypeMap*       typeMap;
-    bm::JsonObjects*   json;
-    std::set<cstring>  visitedHeaders;
+    BMV2::Backend*       backend;
+    P4::ReferenceMap*    refMap;
+    P4::TypeMap*         typeMap;
+    BMV2::JsonObjects*   json;
+    std::set<cstring>    visitedHeaders;
 
     const unsigned     boolWidth = 1;
     unsigned           scalars_width = 0;

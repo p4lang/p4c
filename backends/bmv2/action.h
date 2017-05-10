@@ -26,7 +26,7 @@ class ConvertActions : public Inspector {
     Backend*               backend;
     P4::ReferenceMap*      refMap;
     P4::TypeMap*           typeMap;
-    bm::JsonObjects*       json;
+    BMV2::JsonObjects*     json;
     ExpressionConverter*   conv;
 
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,

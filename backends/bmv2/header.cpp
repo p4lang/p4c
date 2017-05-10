@@ -115,11 +115,11 @@ bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
 
 void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
                                      int size, bool is_signed) {
-    auto field = new Util::JsonArray();
+    Util::JsonArray* field = new Util::JsonArray();
     field->append(name);
     field->append(size);
     field->append(is_signed);
-    json->add_header_field(header, &field);
+    json->add_header_field(header, field);
 }
 
 void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
@@ -160,7 +160,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
         field->append(false);
     }
 
-    UNUSED auto id = json->add_header_type(name, &fields);
+    UNUSED auto id = json->add_header_type(name, fields);
 
     LOG1("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {

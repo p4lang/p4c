@@ -61,7 +61,7 @@ class Backend : public PassManager {
     ErrorCodesMap                    errorCodesMap;
 
  public:
-    bm::JsonObjects*                 json;
+    BMV2::JsonObjects*               json;
     Util::JsonArray*                 calculations;
     Util::JsonArray*                 checksums;
     Util::JsonArray*                 counters;
@@ -91,7 +91,7 @@ class Backend : public PassManager {
  public:
   explicit Backend(bool isV1,
                    P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                   P4::ConvertEnums::EnumMapping* enumMap, bm::JsonObjects* json) :
+                   P4::ConvertEnums::EnumMapping* enumMap, BMV2::JsonObjects* json) :
         refMap(refMap), typeMap(typeMap),
         enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
         model(P4::V2Model::instance), v1model(P4V1::V1Model::instance),

@@ -29,7 +29,7 @@ class Parser : public Inspector {
     Backend* backend;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
-    bm::JsonObjects*     json;
+    BMV2::JsonObjects*   json;
     ExpressionConverter* conv;
     P4::P4CoreLibrary&   corelib;
     std::map<const IR::P4Parser*, Util::IJson*> parser_map;

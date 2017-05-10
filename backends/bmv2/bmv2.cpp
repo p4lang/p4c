@@ -75,7 +75,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
-    bm::JsonObjects jsonObjects;
+    BMV2::JsonObjects jsonObjects;
     jsonObjects.add_program_info(options.file);
     jsonObjects.add_meta_info();
 

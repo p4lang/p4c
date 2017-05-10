@@ -82,9 +82,6 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
 
 /**
     Set the size of the table that a meter is attached to.
-
-    @param meter
-    @param size
 */
 void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
     auto info = getInfo(meter);

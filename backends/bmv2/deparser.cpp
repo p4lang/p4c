@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
+void ConvertDeparser::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
                                                     Util::JsonArray* result) {
     conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
@@ -70,7 +70,7 @@ void DoDeparserBlockConversion::convertDeparserBody(const IR::Vector<IR::StatOrD
     conv->simpleExpressionsOnly = false;
 }
 
-Util::IJson* DoDeparserBlockConversion::convertDeparser(const IR::P4Control* ctrl) {
+Util::IJson* ConvertDeparser::convertDeparser(const IR::P4Control* ctrl) {
     auto result = new Util::JsonObject();
     result->emplace("name", "deparser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("deparser"));
@@ -80,7 +80,7 @@ Util::IJson* DoDeparserBlockConversion::convertDeparser(const IR::P4Control* ctr
     return result;
 }
 
-bool DoDeparserBlockConversion::preorder(const IR::PackageBlock* block) {
+bool ConvertDeparser::preorder(const IR::PackageBlock* block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ControlBlock>()) {
             visit(it.second->getNode());
@@ -89,7 +89,7 @@ bool DoDeparserBlockConversion::preorder(const IR::PackageBlock* block) {
     return false;
 }
 
-bool DoDeparserBlockConversion::preorder(const IR::ControlBlock* block) {
+bool ConvertDeparser::preorder(const IR::ControlBlock* block) {
     auto bt = backend->blockTypeMap.find(block);
     if (bt != backend->blockTypeMap.end()) {
         // only generate control block marked with @deparser
