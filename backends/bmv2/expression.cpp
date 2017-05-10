@@ -192,6 +192,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     // TODO: deal with references that return bool
     auto result = new Util::JsonObject();
 
+    LOG1("member " << expression);
     auto parentType = backend->getTypeMap()->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
     if (parentType->is<IR::Type_StructLike>()) {
@@ -217,7 +218,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
         auto type = backend->getTypeMap()->getType(expression, true);
-        // TODO(hanw): need a function isStandardMetadata();
+        // hanw: need a function isStandardMetadata();
         if (param->type->toString() == "standard_metadata_t") {
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");
@@ -416,17 +417,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     // This is useful for action bodies mostly
     auto decl = backend->getRefMap()->getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
-        LOG1("Expression: " << param << " " << expression);
-#if 0
-        if (param == converter->stdMetadataParameter) {
-            // This is a flat struct
-            auto result = new Util::JsonObject();
-            result->emplace("type", "header");
-            result->emplace("value", converter->jsonMetadataParameterName);
-            map.emplace(expression, result);
-            return;
-        }
-#endif
+        // LOG1("Expression: " << param << " " << expression);
         if (backend->getStructure().nonActionParameters.find(param) !=
             backend->getStructure().nonActionParameters.end()) {
             map.emplace(expression, new Util::JsonValue(param->name.name));

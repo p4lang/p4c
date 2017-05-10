@@ -49,7 +49,6 @@ ConvertActions::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
 
 void
 ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
-    // FIXME: conv->createFieldList = true??
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below

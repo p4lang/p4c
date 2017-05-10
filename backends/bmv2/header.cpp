@@ -164,7 +164,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
 
     LOG1("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {
-        if (auto name_annotation = f->getAnnotation("name")) {
+        if (auto name_annotation = f->getAnnotation("alias")) {
             auto container = new Util::JsonArray();
             auto alias = new Util::JsonArray();
             auto target_name = name_annotation->expr.front()->to<IR::StringLiteral>()->value;
@@ -190,15 +190,17 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
     // bit<n>, bool, error are packed into 'scalars' type,
     // struct and stack introduces new header types
     for (auto v : backend->getStructure().variables) {
+        LOG1("variable " << v);
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto metadata_type = extVisibleName(st);
+            json->add_metadata(metadata_type, v->name);
+            // only create header type only
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
                 continue;  // already seen
             else
                 visitedHeaders.emplace(st->getName());
             addHeaderType(st);
-            json->add_metadata(metadata_type, v->name);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
