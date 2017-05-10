@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "lib/json.h"
+#include "backends/bmv2/sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 class Backend;
@@ -316,7 +317,8 @@ class V1Model : public ::Model::Model {
     static void convertExternInstances(BMV2::Backend *bmv2,
                                        const IR::Declaration *c,
                                        const IR::ExternBlock* eb,
-                                       Util::JsonArray* action_profiles);
+                                       Util::JsonArray* action_profiles,
+                                       BMV2::SharedActionSelectorCheck& selector_check);
 
     static V1Model instance;
 };

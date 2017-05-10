@@ -345,7 +345,8 @@ void V1Model::convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv
 void V1Model::convertExternInstances(BMV2::Backend *backend,
                                      const IR::Declaration *c,
                                      const IR::ExternBlock* eb,
-                                     Util::JsonArray* action_profiles) {
+                                     Util::JsonArray* action_profiles,
+                                     BMV2::SharedActionSelectorCheck& selector_check) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = extVisibleName(inst);
     if (eb->type->name == instance.counter.name) {
@@ -467,13 +468,12 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
             BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
             auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
             selector->emplace("algo", algo);
-            // FIXME selector_check pass
-            // const auto &input = selector_check.get_selector_input(inst);
-            // auto j_input = mkArrayField(selector, "input");
-            // for (auto expr : input) {
-            //     auto jk = backend->getExpressionConverter()->convert(expr);
-            //     j_input->append(jk);
-            // }
+            const auto &input = selector_check.get_selector_input(inst);
+            auto j_input = mkArrayField(selector, "input");
+            for (auto expr : input) {
+                auto jk = backend->getExpressionConverter()->convert(expr);
+                j_input->append(jk);
+            }
             action_profile->emplace("selector", selector);
         }
 

@@ -720,6 +720,9 @@ bool Control::preorder(const IR::ControlBlock* block) {
     auto action_profiles = mkArrayField(result, "action_profiles");
     auto conditionals = mkArrayField(result, "conditionals");
 
+    SharedActionSelectorCheck selector_check(refMap, typeMap);
+    block->apply(selector_check);
+
     // Tables are created prior to the other local declarations
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
@@ -751,11 +754,11 @@ bool Control::preorder(const IR::ControlBlock* block) {
                 continue;
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
-                P4V1::V1Model::convertExternInstances(backend, c, eb, action_profiles);
+                P4V1::V1Model::convertExternInstances(backend, c, eb, action_profiles, selector_check);
                 continue;
             }
         }
-        BUG("%1%: not yet handled", c);
+        P4C_UNIMPLEMENTED("%1%: not yet handled", c);
     }
 #endif
 
