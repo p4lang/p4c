@@ -94,10 +94,10 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
     }
 }
 
-void ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
+cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
                                   std::unordered_set<const IR::Type*> *converted) {
     if (converted->count(type))
-        return;
+        return type->name;
     converted->emplace(type);
     auto type_name = types.get(type);
     auto newType = type->apply(TypeConverter(this));
@@ -115,6 +115,7 @@ void ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
     LOG3("Added type " << dbp(newType) << " named " << type_name << " from " << dbp(type));
     declarations->push_back(newType);
     converted->emplace(newType);
+    return type_name;
 }
 
 void ProgramStructure::createTypes() {
@@ -129,9 +130,27 @@ void ProgramStructure::createTypes() {
 
     for (auto it : registers) {
         if (it.first->layout) {
-            auto type = types.get(it.first->layout);
-            if (type->is<IR::Type_Struct>())
-                createType(type, false, &converted);
+            cstring layoutTypeName = it.first->layout;
+            auto type = types.get(layoutTypeName);
+            if (converted.count(type) || !type->is<IR::Type_StructLike>())
+                continue;
+            auto st = type->to<IR::Type_StructLike>();
+            if (type->is<IR::Type_Struct>()) {
+                cstring newName = createType(type, false, &converted);
+                registerLayoutType.emplace(layoutTypeName, newName);
+                continue;
+            }
+
+            BUG_CHECK(type->is<IR::Type_Header>(), "%1%: unexpected type", type);
+            // Must convert to a struct type
+            cstring type_name = makeUniqueName(st->name);
+            // Registers always use struct types
+            auto annos = addNameAnnotation(layoutTypeName, type->annotations);
+            auto newType = new IR::Type_Struct(type->srcInfo, type_name, annos, st->fields);
+            checkHeaderType(newType, false);
+            LOG3("Added type " << dbp(newType) << " named " << type_name << " from " << dbp(type));
+            declarations->push_back(newType);
+            registerLayoutType.emplace(layoutTypeName, newType->name);
         }
     }
 
@@ -144,13 +163,6 @@ void ProgramStructure::createTypes() {
     for (auto it : stacks) {
         auto type = it.first->type;
         createType(type, true, &converted);
-    }
-    for (auto it : registers) {
-        if (it.first->layout) {
-            auto type = types.get(it.first->layout);
-            if (type->is<IR::Type_Header>())
-                createType(type, true, &converted);
-        }
     }
 }
 
@@ -273,6 +285,12 @@ class ProgramStructure::FixupExtern : public Modifier {
 };
 
 void ProgramStructure::createExterns() {
+    for (auto r : registers) {
+        auto reg = r.first;
+        if (reg->direct)
+            ::error("%1%: direct registers are not supported yet", reg);
+    }
+
     for (auto it : extern_types)
         declarations->push_back(it.first->apply(FixupExtern(*this, it.second)));
 }
@@ -1285,10 +1303,12 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         if (!reg) {
             ::error("Expected a register reference %1%", ref);
             return nullptr; }
+
+        const IR::Type* castType = nullptr;
         int width = reg->width;
-        if (width <= 0)
-            width = defaultRegisterWidth;
-        auto regElementType = IR::Type_Bits::get(width);
+        if (width > 0)
+            castType = IR::Type_Bits::get(width);
+        // Else this is a structured type, so no cast is inserted below.
 
         auto newname = registers.get(reg);
         auto registerref = new IR::PathExpression(newname);
@@ -1297,8 +1317,9 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto args = new IR::Vector<IR::Expression>();
         auto arg0 = new IR::Cast(primitive->operands.at(1)->srcInfo, v1model.registers.index_type,
                                  conv.convert(primitive->operands.at(1)));
-        auto arg1 = new IR::Cast(primitive->operands.at(2)->srcInfo, regElementType,
-                                 conv.convert(primitive->operands.at(2)));
+        const IR::Expression* arg1 = conv.convert(primitive->operands.at(2));
+        if (castType != nullptr)
+            arg1 = new IR::Cast(primitive->operands.at(2)->srcInfo, castType, arg1);
         args->push_back(arg0);
         args->push_back(arg1);
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
@@ -1472,7 +1493,10 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     if (reg->width > 0) {
         regElementType = IR::Type_Bits::get(reg->width);
     } else if (reg->layout) {
-        regElementType = types.get(reg->layout);
+        cstring newName = ::get(registerLayoutType, reg->layout);
+        if (newName.isNullOrEmpty())
+            newName = reg->layout;
+        regElementType = new IR::Type_Name(new IR::Path(newName));
     } else {
         ::warning("%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
         regElementType = IR::Type_Bits::get(defaultRegisterWidth);
