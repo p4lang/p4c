@@ -1,6 +1,21 @@
 #include <core.p4>
 #include <v1model.p4>
 
+struct ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
 struct routing_metadata_t {
     bit<1> drop;
 }
@@ -23,7 +38,7 @@ header icmpv6_t {
     bit<16> hdrChecksum;
 }
 
-header ipv4_t {
+@name("ipv4_t") header ipv4_t_0 {
     bit<4>  version;
     bit<4>  ihl;
     bit<8>  diffserv;
@@ -78,6 +93,8 @@ header vlan_tag_t {
 }
 
 struct metadata {
+    @name("ipv4_meta") 
+    ipv4_t             ipv4_meta;
     @name("routing_metadata") 
     routing_metadata_t routing_metadata;
 }
@@ -90,7 +107,7 @@ struct headers {
     @name("icmpv6") 
     icmpv6_t      icmpv6;
     @name("ipv4") 
-    ipv4_t        ipv4;
+    ipv4_t_0      ipv4;
     @name("ipv6") 
     ipv6_t        ipv6;
     @name("tcp") 
@@ -122,7 +139,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name("parse_ipv4") state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract<ipv4_t_0>(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.protocol) {
             (13w0, 8w1): parse_icmp;
             (13w0, 8w6): parse_tcp;
@@ -169,8 +186,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("cnt1") counter(32w32, CounterType.packets) cnt1_0;
+    @name("reg2") register<ipv4_t>(32w100) reg2_0;
     @name(".drop_pkt") action drop_pkt_0() {
         mark_to_drop();
+        reg2_0.write(32w0, meta.ipv4_meta);
     }
     @name(".hop") action hop_0(inout bit<8> ttl_0, bit<9> egress_spec_0) {
         ttl_0 = ttl_0 + 8w255;
@@ -215,7 +234,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<vlan_tag_t[4]>(hdr.vlan_tag_);
         packet.emit<ipv6_t>(hdr.ipv6);
         packet.emit<icmpv6_t>(hdr.icmpv6);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit<ipv4_t_0>(hdr.ipv4);
         packet.emit<udp_t>(hdr.udp);
         packet.emit<tcp_t>(hdr.tcp);
         packet.emit<icmp_t>(hdr.icmp);

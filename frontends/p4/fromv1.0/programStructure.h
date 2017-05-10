@@ -135,6 +135,9 @@ class ProgramStructure {
     /// Type_Header.  We can't use the P4-14 type object itself as a
     /// key, because it keeps changing.
     std::map<cstring, const IR::Type*> finalHeaderType;
+    /// For registers whose layout is a header, this map contains the mapping
+    /// from the original layout type name to the final layout type name.
+    std::map<cstring, cstring> registerLayoutType;
 
     /// Maps each inserted extract statement to the type of the header
     /// type that is being extracted.  The extracts will need another
@@ -194,8 +197,8 @@ class ProgramStructure {
     void createChecksumUpdates();
     void createStructures();
     void createExterns();
-    void createType(const IR::Type_StructLike* type, bool header,
-                    std::unordered_set<const IR::Type*> *converted);
+    cstring createType(const IR::Type_StructLike* type, bool header,
+                       std::unordered_set<const IR::Type*> *converted);
     void createTypes();
     void createParser();
     void createControls();
