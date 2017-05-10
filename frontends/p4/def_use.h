@@ -84,6 +84,8 @@ class StructLocation : public StorageLocation {
 
     void addField(cstring name, StorageLocation* field)
     { fieldLocations.emplace(name, field); CHECK_NULL(field); }
+    void replaceField(cstring field, StorageLocation* replacement)
+    { fieldLocations[field] = replacement; }
  public:
     StructLocation(const IR::Type* type, cstring name) :
             StorageLocation(type, name) {
