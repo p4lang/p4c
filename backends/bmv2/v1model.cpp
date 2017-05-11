@@ -468,9 +468,17 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
             BUG_CHECK(hash->is<IR::Declaration_ID>(), "%1%: expected a member", hash);
             auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
             selector->emplace("algo", algo);
-            const auto &input = selector_check.get_selector_input(inst);
+            auto input = selector_check.get_selector_input(
+                    c->to<IR::Declaration_Instance>());
+            if (input == nullptr) {
+                // the selector is never used by any table, we cannot figure out its
+                // input and therefore cannot include it in the JSON
+                ::warning("Action selector '%1%' is never referenced by a table "
+                        "and cannot be included in bmv2 JSON", c);
+                return;
+            }
             auto j_input = mkArrayField(selector, "input");
-            for (auto expr : input) {
+            for (auto expr : *input) {
                 auto jk = backend->getExpressionConverter()->convert(expr);
                 j_input->append(jk);
             }

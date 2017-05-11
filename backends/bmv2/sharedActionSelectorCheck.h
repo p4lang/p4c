@@ -62,7 +62,7 @@ class SharedActionSelectorCheck : public Inspector {
     explicit SharedActionSelectorCheck(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
         refMap(refMap), typeMap(typeMap) {}
 
-    const Input &get_selector_input(const IR::Declaration_Instance* selector);
+    const Input* get_selector_input(const IR::Declaration_Instance* selector);
     bool preorder(const IR::P4Table* table) override;
 };
 

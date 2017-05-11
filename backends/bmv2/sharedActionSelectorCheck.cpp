@@ -18,9 +18,11 @@ limitations under the License.
 
 namespace BMV2 {
 
-const Input&
+const Input*
 SharedActionSelectorCheck::get_selector_input(const IR::Declaration_Instance* selector) {
-    return selector_input_map.at(selector);
+    auto it = selector_input_map.find(selector);
+    if (it == selector_input_map.end()) return nullptr;  // selector never used
+    return &it->second;
 }
 
 bool

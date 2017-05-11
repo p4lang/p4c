@@ -17,6 +17,9 @@ limitations under the License.
 #ifndef _BACKENDS_BMV2_JSONOBJECTS_H_
 #define _BACKENDS_BMV2_JSONOBJECTS_H_
 
+
+#include <map>
+
 namespace BMV2 {
 
 class JsonObjects {

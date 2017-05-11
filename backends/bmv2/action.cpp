@@ -76,7 +76,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             if (type->is<IR::Type_StructLike>())
                 operation = "copy_header";
             else
-                operation = "modify_field";
+                operation = "assign";
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
