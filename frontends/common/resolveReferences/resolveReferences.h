@@ -31,16 +31,16 @@ enum class ResolutionType {
     TypeVariable
 };
 
-/**
- *  Data structure used while resolving references that comprises:
- *  - A stack of namespaces
- *  - The root namespace
- *  - A vector of globals
- */
+/// Data structure representing a stack of nested namespaces.
 class ResolutionContext : public IHasDbPrint {
+
+    /// Stack of nested namespaces
     std::vector<const IR::INamespace*> stack;
+    /// Root namespace for the program.
     const IR::INamespace* rootNamespace;
-    std::vector<const IR::INamespace*> globals;  // match_kind
+    /// Stack of namespaces for global declarations (e.g., match_kind)
+    /// @todo: what about errors?
+    std::vector<const IR::INamespace*> globals;
 
  public:
     explicit ResolutionContext(const IR::INamespace* rootNamespace) :
@@ -115,16 +115,17 @@ class ResolveReferences : public Inspector {
     bool checkShadow;
 
  private:
-    /// Add @p ns to `context`
+    /// Add namespace @p ns to `context`
     void addToContext(const IR::INamespace* ns);
 
-    /// Remove @p ns from `context`
+    /// Remove namespace @p ns from `context`
     void removeFromContext(const IR::INamespace* ns);
 
-    /// Add @p ns to `globals`
+    /// Add namespace @p ns to `globals`
     void addToGlobals(const IR::INamespace* ns);
 
-    /// Resolve @p path; @p isType indicates if a type is expected.
+    /// Resolve @p path; if @p isType is `true` then resolution will
+    /// only return type nodes.
     void resolvePath(const IR::Path* path, bool isType) const;
 
  public:

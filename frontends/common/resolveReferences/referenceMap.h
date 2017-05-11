@@ -32,20 +32,20 @@ class NameGenerator {
 
 /// Class used to encode maps from paths to declarations.
 class ReferenceMap final : public ProgramMap, public NameGenerator {
-    /// If `isv1` is true, then map is for a P4_14 program
+    /// If `isv1` is true, then the map is for a P4_14 program
+    /// (possibly translated into P4_16).
     bool isv1;
 
-    /// Maps paths in the program to declarations
+    /// Maps paths in the program to declarations.
     std::map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
 
-    /// Set containing all declarations in the program
+    /// Set containing all declarations in the program.
     std::set<const IR::IDeclaration*> used;
 
-    /// Map from `This` to declarations
-    /// @todo: briefly explain why different than `pathToDeclaration`
+    /// Map from `This` to declarations (an experimental feature).
     std::map<const IR::This*, const IR::IDeclaration*> thisToDeclaration;
 
-    /// Set containing all names used in the program
+    /// Set containing all names used in the program.
     std::set<cstring> usedNames;
 
  public:

@@ -445,8 +445,9 @@ bool ResolveReferences::preorder(const IR::Property *prop) {
         if (attr->locals)
             addToContext(attr->locals);
         if (attr->type->is<IR::Type::String>())
-            // Attribute is arbitray string -- need not match anything
-            return false; }
+            // Attribute is arbitrary string -- need not match anything
+            return false;
+    }
     return true;
 }
 void ResolveReferences::postorder(const IR::Property *prop) {
