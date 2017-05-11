@@ -21,6 +21,34 @@ limitations under the License.
 
 namespace P4 {
 
+/**
+ * This pass converts constructor call expressions that appear
+ * within the bodies of P4Parser and P4Control blocks
+ * into Declaration_Instance. This is needed for implementing
+ * copy-in/copy-out in inlining, since
+ * constructed objects do not have assignment operations.
+ *
+ * For example:
+ * extern T {}
+ * control c()(T t) {  apply { ... } }
+ * control d() {
+ *    c(T()) cinst;
+ *    apply { ... }
+ * }
+ * is converted to
+ * extern T {}
+ * control c()(T t) {  apply { ... } }
+ * control d() {
+ *    T() tmp;
+ *    c(tmp) cinst;
+ *    apply { ... }
+ * }
+ *
+ * @pre None
+ * @post No constructor call expression in P4Parser and P4Control
+ *       constructor parameters.
+ *
+ */
 class MoveConstructors : public PassManager {
  public:
     explicit MoveConstructors(ReferenceMap* refMap);
