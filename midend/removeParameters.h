@@ -48,10 +48,10 @@ class ActionInvocation {
     }
     void bindDefaultAction(const IR::P4Action* action,
                            const IR::MethodCallExpression* defaultInvocation) {
-        /// We must have a binding for this action already.
+        // We must have a binding for this action already.
         auto actionCallInvocation = ::get(invocations, action);
         CHECK_NULL(actionCallInvocation);
-        /// We must remove all arguments which are bound in the action list.
+        // We must remove all arguments which are bound in the action list.
         unsigned boundArgs = actionCallInvocation->arguments->size();
         defaultActions.emplace(defaultInvocation, boundArgs);
     }
@@ -87,29 +87,29 @@ class FindActionParameters : public Inspector {
 };
 
 /**
-Removes parameters of an action which are in/inout/out.
-
-\code{.cpp}
-control c(inout bit<32> x) {
-   action a(in bit<32> arg) { x = arg; }
-   table t() { actions = { a(10); } }
-   apply { ... } }
-\endcode
-
-is converted to
-
-\code{.cpp}
-control c(inout bit<32> x) {
-   bit<32> arg;
-   action a() { arg = 10; x = arg; }
-   table t() { actions = { a; } }
-   apply { ... } }
-\endcode
-
-@pre This pass requires each action to have a single caller.
-     It must run after the LocalizeActions pass.
-@post in/inout/out parameters of an action are removed.
-*/
+ * Removes parameters of an action which are in/inout/out.
+ *
+ * \code{.cpp}
+ * control c(inout bit<32> x) {
+ *    action a(in bit<32> arg) { x = arg; }
+ *    table t() { actions = { a(10); } }
+ *    apply { ... } }
+ * \endcode
+ *
+ * is converted to
+ *
+ * \code{.cpp}
+ * control c(inout bit<32> x) {
+ *    bit<32> arg;
+ *    action a() { arg = 10; x = arg; }
+ *    table t() { actions = { a; } }
+ *    apply { ... } }
+ * \endcode
+ *
+ * @pre This pass requires each action to have a single caller.
+ *      It must run after the LocalizeActions pass.
+ * @post in/inout/out parameters of an action are removed.
+ */
 class DoRemoveActionParameters : public Transform {
     ActionInvocation* invocations;
  public:
@@ -117,11 +117,8 @@ class DoRemoveActionParameters : public Transform {
             invocations(invocations)
     { CHECK_NULL(invocations); setName("DoRemoveActionParameters"); }
 
-    /// Remove arguments from action
     const IR::Node* postorder(IR::P4Action* table) override;
-    /// Remove arguments from table action list
     const IR::Node* postorder(IR::ActionListElement* element) override;
-    /// Remove arguments from method call
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
 };
 

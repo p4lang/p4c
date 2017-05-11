@@ -31,7 +31,7 @@ namespace P4 {
  * If requireConstants is true this pass requires that
  * all select labels evaluate to constants.
  *
- * @pre None
+ * @pre Assumes that there are no side-effects in the evaluation of select labels.
  * @post Unreachable case labels are removed. Case statement with
  *       a single label is replaced with a direct transition
  */
