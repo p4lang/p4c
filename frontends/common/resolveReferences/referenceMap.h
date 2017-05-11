@@ -50,13 +50,15 @@ class ReferenceMap final : public ProgramMap, public NameGenerator {
 
  public:
     ReferenceMap();
-    /// Looks up declaration for @p path. If @p notNull is false, then failure to find is an error.
+    /// Looks up declaration for @p path. If @p notNull is false, then
+    /// failure to find a declaration is an error.
     const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false) const;
 
     /// Sets declaration for @p path to @p decl.
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
 
-    /// Looks up declaration for @p pointer. If @p notNull is false, then failure to find is an error.
+    /// Looks up declaration for @p pointer. If @p notNull is false,
+    /// then failure to find a declaration is an error.
     const IR::IDeclaration* getDeclaration(const IR::This* pointer, bool notNull = false) const;
 
     /// Sets declaration for @p pointer to @p decl.
