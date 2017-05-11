@@ -47,7 +47,7 @@ class NonLeftValue : public KeyIsComplex {
 };
 
 /**
- * Policy that tracks whether a lvalue is masked lvalue, simple lvalue or isValid()
+ * Policy that tracks whether a expression is masked non-lvalue, simple non-lvalue or isValid()
  */
 class NonMaskLeftValue : public NonLeftValue {
  public:
@@ -94,6 +94,8 @@ class TableInsertions {
  *  }
  * \endcode
  *
+ * @pre none
+ * @post all complex non-lvalue table key expressions are replaced with a lvalue expression.
  */
 class DoSimplifyKey : public Transform {
     ReferenceMap*       refMap;

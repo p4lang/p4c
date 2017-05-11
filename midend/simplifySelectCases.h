@@ -31,6 +31,9 @@ namespace P4 {
  * If requireConstants is true this pass requires that
  * all select labels evaluate to constants.
  *
+ * @pre None
+ * @post Unreachable case labels are removed. Case statement with
+ *       a single label is replaced with a direct transition
  */
 class DoSimplifySelectCases : public Transform {
     const TypeMap* typeMap;

@@ -44,6 +44,10 @@ namespace P4 {
  *    apply { ... }
  * }
  *
+ * @pre None
+ * @post No constructor call expression in P4Parser and P4Control
+ *       constructor parameters.
+ *
  */
 class MoveConstructors : public PassManager {
  public:

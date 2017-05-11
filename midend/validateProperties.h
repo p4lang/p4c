@@ -24,6 +24,9 @@ namespace P4 {
 
 /**
  * Checks to see if there are any unknown properties.
+ *
+ * @pre none
+ * @post no invalid table properties in P4 program.
  */
 class ValidateTableProperties : public Inspector {
     std::set<cstring> legalProperties;
