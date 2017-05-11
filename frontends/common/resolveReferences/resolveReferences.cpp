@@ -251,7 +251,7 @@ void ResolveReferences::end_apply(const IR::Node* node) {
     refMap->updateMap(node);
 }
 
-/****** Visitor methods ******/
+// Visitor methods
 
 bool ResolveReferences::preorder(const IR::P4Program* program) {
     if (refMap->checkMap(program))
