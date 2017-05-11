@@ -29,6 +29,7 @@ p4_frontend_UNIFIED = \
 	frontends/p4/unusedDeclarations.cpp \
 	frontends/p4/evaluator/evaluator.cpp \
 	frontends/p4/evaluator/substituteParameters.cpp \
+	frontends/p4/inferArchitecture.cpp \
 	frontends/p4/parserControlFlow.cpp \
 	frontends/p4/reservedWords.cpp \
 	frontends/p4/modelInstances.cpp \
@@ -68,6 +69,7 @@ noinst_HEADERS += \
 	frontends/p4/fromv1.0/programStructure.h \
 	frontends/p4/fromv1.0/v1model.h \
 	frontends/p4/frontend.h \
+	frontends/p4/inferArchitecture.h \
 	frontends/p4/methodInstance.h \
 	frontends/p4/moveDeclarations.h \
 	frontends/p4/parameterSubstitution.h \
@@ -109,7 +111,8 @@ common_frontend_UNIFIED = \
 	frontends/common/resolveReferences/referenceMap.cpp \
 	frontends/common/resolveReferences/resolveReferences.cpp \
 	frontends/common/parseInput.cpp \
-	frontends/common/constantParsing.cpp
+	frontends/common/constantParsing.cpp \
+	frontends/common/model.cpp
 
 noinst_HEADERS += \
 	frontends/common/constantFolding.h \

@@ -2527,6 +2527,13 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
                 ::error("%1%: tables cannot be invoked from actions", expression);
         }
 
+        // Check that verify is only invoked from parsers.
+        if (auto ef = mi->to<ExternFunction>()) {
+            if (ef->method->name == IR::ParserState::verify)
+                if (!findContext<IR::P4Parser>())
+                    ::error("%1%: may only be invoked in parsers", ef->expr);
+        }
+
         if (mi->is<ExternMethod>())
             checkCorelibMethods(mi->to<ExternMethod>());
 
