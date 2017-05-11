@@ -12,8 +12,7 @@ const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
     if (type == nullptr)
         return type;
     auto rtype = type->getP4Type();
-    CHECK_NULL(rtype);
-    return rtype;
+    return rtype;  // This may be nullptr
 }
 
 const IR::Node* BindTypeVariables::postorder(IR::Expression* expression) {
