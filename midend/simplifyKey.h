@@ -121,7 +121,7 @@ class DoSimplifyKey : public Transform {
 };
 
 /**
- * This pass uses 'policy' to determine whether a key expression is too complex.
+ * This pass uses 'policy' to determine whether a key expression is too complex
  * and simplifies keys which are complex according to the policy.
  */
 class SimplifyKey : public PassManager {
