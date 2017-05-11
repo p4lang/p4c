@@ -121,10 +121,10 @@ class DoSimplifyKey : public Transform {
 };
 
 /**
- *  This pass considers any non-lvalues, except built-in method invocation (isValid),
- *  in table keys as complex expressions, and simplifies the keys.
- *
- * @param policy Use 'policy' to determine whether a key expression is too complex.
+ * This pass uses 'policy' to determine whether a key expression is too complex.
+ * Policies are defined in 'NonLeftValue' and 'NonMaskLeftValue', which consider
+ * any non-lvalue, except built-in method (isValid) in table key expressions
+ * as complex expressions.
  */
 class SimplifyKey : public PassManager {
  public:
