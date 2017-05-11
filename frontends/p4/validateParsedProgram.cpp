@@ -55,11 +55,11 @@ void ValidateParsedProgram::postorder(const IR::MethodCallExpression* e) {
         if (m->path->asString() == IR::ParserState::verify) {
             auto inParser = findContext<IR::P4Parser>();
             if (inParser == nullptr)
-                ::error("%1%: may only be invoked in parsers", m); 
+                ::error("%1%: may only be invoked in parsers", m);
         }
     }
 }
-    
+
 /// Struct field names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::StructField* f) {
     if (f->name.isDontCare())
