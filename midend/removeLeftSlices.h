@@ -22,7 +22,11 @@ limitations under the License.
 
 namespace P4 {
 
-// Remove Slices on the lhs of an assignment
+/**
+ * This pass removes Slices on the lhs of an assignment
+ *
+ * a[m:l] = e;  ->  a = (a & ~mask) | (((cast)e << l) & mask);
+ */
 class DoRemoveLeftSlices : public Transform {
     P4::TypeMap* typeMap;
  public:
