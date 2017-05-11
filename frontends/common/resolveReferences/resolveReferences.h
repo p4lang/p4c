@@ -111,7 +111,7 @@ class ResolveReferences : public Inspector {
     /// Indicates if _all_ forward references are allowed
     bool anyOrder;
 
-    /// Indicates if it should be an error for one declaration to shadow another.
+    /// If @true, then warn if one declaration shadows another.
     bool checkShadow;
 
  private:
