@@ -33,8 +33,8 @@ class KeyIsComplex {
 };
 
 /**
- * Policy which returns 'true' whenever a key is not a left value
- * or a call to the isValid().
+ * Policy that tracks whether a key is not a left value or a call to the isValid().
+ * It returns 'true' if any of the conditions is met.
  */
 class NonLeftValue : public KeyIsComplex {
     ReferenceMap* refMap;
@@ -47,7 +47,7 @@ class NonLeftValue : public KeyIsComplex {
 };
 
 /**
- * Policy that allows masked lvalues as well as simple lvalues or isValid()
+ * Policy that tracks whether a lvalue is masked lvalue, simple lvalue or isValid()
  */
 class NonMaskLeftValue : public NonLeftValue {
  public:
@@ -68,10 +68,9 @@ class TableInsertions {
 };
 
 /**
- * If some of the fields of a table key are "too complex",
- * turn them into simpler expressions.
+ * Transform complex table keys into simpler expressions.
  *
- * e.g.
+ * \code{.cpp}
  *  table t {
  *    key = { h.a + 1 : exact; }
  *    ...
@@ -79,9 +78,11 @@ class TableInsertions {
  *  apply {
  *    t.apply();
  *  }
+ * \endcode
  *
  * is transformed to
  *
+ * \code{.cpp}
  *  bit<32> key_0;
  *  table t {
  *    key = { key_0 : exact; }
@@ -91,6 +92,7 @@ class TableInsertions {
  *    key_0 = h.a + 1;
  *    t.apply();
  *  }
+ * \endcode
  *
  */
 class DoSimplifyKey : public Transform {
@@ -117,7 +119,11 @@ class DoSimplifyKey : public Transform {
 };
 
 /**
- * This pass uses a policy to decide when a key expression is too complex.
+ * Determines whether a key expression is too complex.
+ *
+ * Any non-lvalues, except built-in method invocation (isValid),
+ * are considered complex expressions.
+ *
  */
 class SimplifyKey : public PassManager {
  public:

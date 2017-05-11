@@ -25,7 +25,9 @@ namespace P4 {
 /**
  * This pass removes Slices on the lhs of an assignment
  *
+ * \code{.cpp}
  * a[m:l] = e;  ->  a = (a & ~mask) | (((cast)e << l) & mask);
+ * \endcode
  */
 class DoRemoveLeftSlices : public Transform {
     P4::TypeMap* typeMap;

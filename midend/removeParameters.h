@@ -89,16 +89,22 @@ class FindActionParameters : public Inspector {
 /**
 Removes parameters of an action which are in/inout/out.
 
+\code{.cpp}
 control c(inout bit<32> x) {
    action a(in bit<32> arg) { x = arg; }
    table t() { actions = { a(10); } }
    apply { ... } }
+\endcode
+
 is converted to
+
+\code{.cpp}
 control c(inout bit<32> x) {
    bit<32> arg;
    action a() { arg = 10; x = arg; }
    table t() { actions = { a; } }
    apply { ... } }
+\endcode
 
 @pre This pass requires each action to have a single caller.
      It must run after the LocalizeActions pass.

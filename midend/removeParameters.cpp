@@ -150,6 +150,8 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* ex
 
 /**
  * This is needed because of this case:
+ *
+ * \code{.cpp}
  * action a(inout x) { x = x + 1 }
  * bit<32> w;
  * table t() { actions = a(w); ... }
@@ -157,6 +159,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* ex
  * action a() { x = w; x = x + 1; w = x; } << w is not yet defined
  * bit<32> w;
  * table t() { actions = a(); ... }
+ * \endcode
  */
 RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap) {
     setName("RemoveActionParameters");
