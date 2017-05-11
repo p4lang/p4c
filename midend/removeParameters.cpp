@@ -148,18 +148,18 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* ex
     return expression;
 }
 
-//////////////////////////////////////////
-
+/**
+ * This is needed because of this case:
+ * action a(inout x) { x = x + 1 }
+ * bit<32> w;
+ * table t() { actions = a(w); ... }
+ * Without the MoveDeclarations the code would become
+ * action a() { x = w; x = x + 1; w = x; } << w is not yet defined
+ * bit<32> w;
+ * table t() { actions = a(); ... }
+ */
 RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap) {
     setName("RemoveActionParameters");
-    // This is needed because of this case:
-    // action a(inout x) { x = x + 1 }
-    // bit<32> w;
-    // table t() { actions = a(w); ... }
-    // Without the MoveDeclarations the code would become
-    // action a() { x = w; x = x + 1; w = x; } << w is not yet defined
-    // bit<32> w;
-    // table t() { actions = a(); ... }
     auto ai = new ActionInvocation();
     passes.emplace_back(new MoveDeclarations());
     passes.emplace_back(new TypeChecking(refMap, typeMap));
