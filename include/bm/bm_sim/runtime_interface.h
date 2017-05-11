@@ -55,6 +55,11 @@ class RuntimeInterface {
                      const std::string &table_name,
                      size_t *num_entries) const = 0;
 
+  virtual MatchErrorCode
+  mt_clear_entries(size_t cxt_id,
+                   const std::string &table_name,
+                   bool reset_default_entry) = 0;
+
   // direct tables
 
   virtual MatchErrorCode

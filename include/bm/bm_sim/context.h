@@ -168,6 +168,9 @@ class Context final {
   mt_get_num_entries(const std::string &table_name, size_t *num_entries) const;
 
   MatchErrorCode
+  mt_clear_entries(const std::string &table_name, bool reset_default_entry);
+
+  MatchErrorCode
   mt_add_entry(const std::string &table_name,
                const std::vector<MatchKeyParam> &match_key,
                const std::string &action_name,

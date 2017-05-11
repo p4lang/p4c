@@ -204,6 +204,17 @@ public:
     return static_cast<int64_t>(num_entries);
   }
 
+  void bm_mt_clear_entries(const int32_t cxt_id, const std::string& table_name, const bool reset_default_entry) {
+    Logger::get()->trace("bm_mt_clear_entries");
+    auto error_code = switch_->mt_clear_entries(
+        cxt_id, table_name, reset_default_entry);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
   BmEntryHandle bm_mt_add_entry(const int32_t cxt_id, const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
     Logger::get()->trace("bm_table_add_entry");
     entry_handle_t entry_handle;

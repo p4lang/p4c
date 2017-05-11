@@ -301,6 +301,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
+  mt_clear_entries(size_t cxt_id,
+                   const std::string &table_name,
+                   bool reset_default_entry) override {
+    return contexts.at(cxt_id).mt_clear_entries(table_name,
+                                                reset_default_entry);
+  }
+
+  MatchErrorCode
   mt_add_entry(size_t cxt_id,
                const std::string &table_name,
                const std::vector<MatchKeyParam> &match_key,

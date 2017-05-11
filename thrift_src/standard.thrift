@@ -287,6 +287,13 @@ service Standard {
     2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
+  // works for direct and indirect tables
+  void bm_mt_clear_entries(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:bool reset_default_entry  // TODO(antonin): not implemented yet
+  ) throws (1:InvalidTableOperation ouch),
+
   // direct tables
 
   BmEntryHandle bm_mt_add_entry(

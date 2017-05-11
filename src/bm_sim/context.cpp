@@ -45,6 +45,17 @@ Context::mt_get_num_entries(const std::string &table_name,
 }
 
 MatchErrorCode
+Context::mt_clear_entries(const std::string &table_name,
+                          bool reset_default_entry) {
+  auto abstract_table = p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  // TODO(antonin)
+  if (reset_default_entry) return MatchErrorCode::ERROR;
+  abstract_table->reset_state();
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
 Context::mt_add_entry(const std::string &table_name,
                       const std::vector<MatchKeyParam> &match_key,
                       const std::string &action_name,
