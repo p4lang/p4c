@@ -20,7 +20,7 @@ limitations under the License.
 namespace P4 {
 
 std::vector<const IR::IDeclaration*>*
-ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOnly) const {
+ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK) const {
     static std::vector<const IR::IDeclaration*> empty;
 
     std::vector<const IR::INamespace*> toTry(stack);
@@ -55,7 +55,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (previousOnly) {
+            if (!forwardOK) {
                 std::function<bool(const IR::IDeclaration*)> locationFilter =
                         [name](const IR::IDeclaration* d) {
                     Util::SourceInfo nsi = name.srcInfo;
@@ -96,7 +96,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (previousOnly) {
+            if (!forwardOK) {
                 Util::SourceInfo nsi = name.srcInfo;
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
@@ -123,8 +123,8 @@ void ResolutionContext::done() {
 const IR::IDeclaration*
 ResolutionContext::resolveUnique(IR::ID name,
                                  P4::ResolutionType type,
-                                 bool previousOnly) const {
-    auto decls = resolve(name, type, previousOnly);
+                                 bool forwardOK) const {
+    auto decls = resolve(name, type, forwardOK);
     if (decls->empty()) {
         ::error("Could not find declaration for %1%", name);
         return nullptr;
@@ -140,8 +140,9 @@ ResolutionContext::resolveUnique(IR::ID name,
 
 const IR::Type *
 ResolutionContext::resolveType(const IR::Type *type) const {
+    /// @todo: why is `true` supplied for `forwardOK` here?
     if (auto tname = type->to<IR::Type_Name>())
-        return resolveUnique(tname->path->name, ResolutionType::Type, false)->to<IR::Type>();
+        return resolveUnique(tname->path->name, ResolutionType::Type, true)->to<IR::Type>();
     return type;
 }
 
@@ -162,8 +163,6 @@ void ResolutionContext::dbprint(std::ostream& out) const {
     }
     out << "----------" << std::endl;
 }
-
-/////////////////////////////////////////////////////
 
 ResolveReferences::ResolveReferences(ReferenceMap* refMap,
                                      bool checkShadow) :
@@ -203,9 +202,9 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
 
     BUG_CHECK(!resolveForward.empty(), "Empty resolveForward");
-    bool allowForward = resolveForward.back();
+    bool forwardOK = resolveForward.back();
 
-    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, !allowForward);
+    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, forwardOK);
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
         return;
@@ -221,7 +220,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
         if (node->is<IR::StructField>())
             continue;
 
-        auto prev = context->resolve(decl->getName(), ResolutionType::Any, !anyOrder);
+        auto prev = context->resolve(decl->getName(), ResolutionType::Any, anyOrder);
         if (prev->empty()) continue;
 
         for (auto p : *prev) {
@@ -252,9 +251,8 @@ void ResolveReferences::end_apply(const IR::Node* node) {
     refMap->updateMap(node);
 }
 
-/////////////////// visitor methods ////////////////////////
+/****** Visitor methods ******/
 
-// visitor should be invoked here
 bool ResolveReferences::preorder(const IR::P4Program* program) {
     if (refMap->checkMap(program))
         return false;
@@ -440,8 +438,10 @@ void ResolveReferences::postorder(const IR::Declaration_Instance *decl) {
 }
 
 bool ResolveReferences::preorder(const IR::Property *prop) {
+    /// @todo: why is `dynamic_cast` used here instead of `to`?
+    /// @todo: why is `forwardOK` set to `true` here?
     if (auto attr = dynamic_cast<const IR::Attribute *>(context->
-                    resolveUnique(prop->name, ResolutionType::Any, false))) {
+                    resolveUnique(prop->name, ResolutionType::Any, true))) {
         if (attr->locals)
             addToContext(attr->locals);
         if (attr->type->is<IR::Type::String>())
@@ -451,7 +451,7 @@ bool ResolveReferences::preorder(const IR::Property *prop) {
 }
 void ResolveReferences::postorder(const IR::Property *prop) {
     if (auto attr = dynamic_cast<const IR::Attribute *>(context->
-                    resolveUnique(prop->name, ResolutionType::Any, false))) {
+                    resolveUnique(prop->name, ResolutionType::Any, true))) {
         if (attr->locals)
             removeFromContext(attr->locals);
     }

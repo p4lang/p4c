@@ -23,12 +23,20 @@ limitations under the License.
 #include "lib/cstring.h"
 
 namespace P4 {
+
+/// Helper class to indicate types of nodes that may be returned during resolution.
 enum class ResolutionType {
     Any,
     Type,
     TypeVariable
 };
 
+/**
+ *  Data structure used while resolving references that comprises:
+ *  - A stack of namespaces
+ *  - The root namespace
+ *  - A vector of globals
+ */
 class ResolutionContext : public IHasDbPrint {
     std::vector<const IR::INamespace*> stack;
     const IR::INamespace* rootNamespace;
@@ -40,13 +48,21 @@ class ResolutionContext : public IHasDbPrint {
     { push(rootNamespace); }
 
     void dbprint(std::ostream& out) const;
+
+    /// Add name space @p e to `globals`.
     void addGlobal(const IR::INamespace* e) {
         globals.push_back(e);
     }
+
+    /// Add name space @p element to `stack`.
     void push(const IR::INamespace* element) {
         CHECK_NULL(element);
         stack.push_back(element);
     }
+
+    /// Remove namespace @p element from `stack`
+    /// @pre: `stack` must not be empty and `element` must be back element
+    /// @post: first occurrence of `element` is removed from stack
     void pop(const IR::INamespace* element) {
         if (stack.empty())
             BUG("Empty stack in ResolutionContext::pop");
@@ -57,37 +73,58 @@ class ResolutionContext : public IHasDbPrint {
     }
     void done();
 
-    // Resolve a reference for the specified name.
-    // The reference is restricted to be to an object of the specified type
-    // If previousOnly is true, the reference must precede the point of the 'name' in the program
+    /// Resolve references for @p name, restricted to @p type declarations.
+    /// If @p forwardOK is `false`, the referenced location must precede the location of @p name.
     std::vector<const IR::IDeclaration*>*
-    resolve(IR::ID name, ResolutionType type, bool previousOnly) const;
+    resolve(IR::ID name, ResolutionType type, bool forwardOK) const;
 
-    // Resolve a reference for the specified name; expect a single result
+    /// Resolve reference for @p name, restricted to @p type declarations, and expect one result.
+    /// If @p forwardOK is `false`, the referenced location must precede the location of @p name.
     const IR::IDeclaration*
-    resolveUnique(IR::ID name, ResolutionType type, bool previousOnly) const;
+    resolveUnique(IR::ID name, ResolutionType type, bool forwardOK) const;
 
-    // Resolve a Type_Name to a concrete type
+    // Resolve a refrence to a type @p type.
     const IR::Type *resolveType(const IR::Type *type) const;
 };
 
-// No prerequisites, but it usually must be run over the whole program.
-// Builds output in refMap.
-// The ReferenceMap maps each Path to a declaration.
+/** Inspector that computes `refMap`: a map from paths to declarations.
+ *
+ * @pre: None
+ *
+ * @post: produces an up-to-date `refMap`
+ *
+ * @todo: is @p rootNamespace redundant, since @p context always has it?
+ */
 class ResolveReferences : public Inspector {
-    // Output: reference map
+    /// Reference map -- essentially from paths to declarations.
     ReferenceMap* refMap;
+
+    /// Helper data structure that maintains current context.
     ResolutionContext* context;
+
+    /// The program's root namespace.
     const IR::INamespace* rootNamespace;
-    // used as a stack
-    std::vector<bool> resolveForward;  // if true allow resolution with declarations that follow use
+
+    /// Tracks whether forward references are permitted in a context.
+    std::vector<bool> resolveForward;
+
+    /// Indicates if _all_ forward references are allowed
     bool anyOrder;
+
+    /// Indicates if it should be an error for one declaration to shadow another.
     bool checkShadow;
 
  private:
+    /// Add @p ns to `context`
     void addToContext(const IR::INamespace* ns);
+
+    /// Remove @p ns from `context`
     void removeFromContext(const IR::INamespace* ns);
+
+    /// Add @p ns to `globals`
     void addToGlobals(const IR::INamespace* ns);
+
+    /// Resolve @p path; @p isType indicates if a type is expected.
     void resolvePath(const IR::Path* path, bool isType) const;
 
  public:
