@@ -42,5 +42,5 @@ autoreconf -i
 mkdir -p build # recommended folder for build
 sourcedir=`pwd`
 cd build
-../configure CXXFLAGS="-g -O0" --enable-doxygen-doc $*
+../configure CXXFLAGS="-g -O0" --disable-doxygen-doc $*
 echo "### Configured for building in 'build' folder"
