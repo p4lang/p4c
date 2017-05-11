@@ -44,6 +44,8 @@ class BoolExpression;
 class ArithExpression;
 class ActionFn;
 
+class Checksum;
+
 struct field_t {
   header_id_t header;
   int offset;
@@ -306,6 +308,8 @@ class Parser : public NamedP4Object {
 
   void set_init_state(const ParseState *state);
 
+  void add_checksum(const Checksum *checksum);
+
   //! Extracts Packet headers as specified by the parse graph. When the parser
   //! extracts a header to the PHV, the header is marked as valid. After parsing
   //! a packet, you can send it to the appropriate match-action Pipeline for
@@ -324,9 +328,12 @@ class Parser : public NamedP4Object {
   Parser &operator=(Parser &&other) /*noexcept*/ = default;
 
  private:
+  void verify_checksums(const Packet &pkt) const;
+
   const ParseState *init_state;
   const ErrorCodeMap *error_codes;
   const ErrorCode no_error;
+  std::vector<const Checksum *> checksums{};
 };
 
 }  // namespace bm

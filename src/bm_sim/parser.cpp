@@ -26,6 +26,7 @@
 #include <bm/bm_sim/expressions.h>
 #include <bm/bm_sim/phv.h>
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/checksums.h>
 #include <bm/bm_sim/core/primitives.h>
 
 #include <string>
@@ -936,6 +937,22 @@ Parser::set_init_state(const ParseState *state) {
 }
 
 void
+Parser::add_checksum(const Checksum *checksum) {
+  checksums.push_back(checksum);
+}
+
+void
+Parser::verify_checksums(const Packet &pkt) const {
+  for (auto checksum : checksums) {
+    auto is_correct = checksum->verify(pkt);
+    if (!is_correct) {
+      BMLOG_ERROR_PKT(pkt, "Checksum '{}' is not correct",
+                      checksum->get_name());
+    }
+  }
+}
+
+void
 Parser::parse(Packet *pkt) const {
   BMELOG(parser_start, *pkt, *this);
   // TODO(antonin)
@@ -963,6 +980,7 @@ Parser::parse(Packet *pkt) const {
     BMLOG_TRACE_PKT(*pkt, "Bytes parsed: {}", bytes_parsed);
   }
   pkt->remove(bytes_parsed);
+  verify_checksums(*pkt);
   BMELOG(parser_done, *pkt, *this);
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),

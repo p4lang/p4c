@@ -1840,6 +1840,10 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
     for (auto it = deparsers.begin(); it != deparsers.end(); ++it) {
       it->second->add_checksum(checksum);
     }
+
+    for (auto it = parsers.begin(); it != parsers.end(); ++it) {
+      it->second->add_checksum(checksum);
+    }
   }
 }
 
