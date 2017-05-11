@@ -28,7 +28,8 @@ limitations under the License.
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "midend.h"
-#include "jsonconverter.h"
+#include "backend.h"
+#include "JsonObjects.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -74,9 +75,25 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
-    BMV2::JsonConverter converter(options);
+    BMV2::JsonObjects jsonObjects;
+    jsonObjects.add_program_info(options.file);
+    jsonObjects.add_meta_info();
+
+    // convert all enums to json
+    for (const auto &pEnum : midEnd.enumMap) {
+        auto name = pEnum.first->getName();
+        for (const auto &pEntry : *pEnum.second) {
+            jsonObjects.add_enum(name, pEntry.first, pEntry.second);
+        }
+    }
+
+    // backend depends on the modified refMap and typeMap from midEnd.
+    BMV2::Backend backend(options.isv1(), &midEnd.refMap,
+            &midEnd.typeMap, &midEnd.enumMap, &jsonObjects);
     try {
-        converter.convert(&midEnd.refMap, &midEnd.typeMap, toplevel, &midEnd.enumMap);
+        backend.addDebugHook(hook);
+        backend.process(toplevel);
+        backend.convert(toplevel, options);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -87,7 +104,7 @@ int main(int argc, char *const argv[]) {
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.outputFile, false);
         if (out != nullptr) {
-            converter.serialize(*out);
+            backend.serialize(*out);
             out->flush();
         }
     }

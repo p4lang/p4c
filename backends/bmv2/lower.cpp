@@ -458,8 +458,7 @@ RemoveComplexExpressions::postorder(IR::SelectExpression* expression) {
 
 const IR::Node*
 RemoveComplexExpressions::preorder(IR::P4Control* control) {
-    // we only do this for the ingress or egress
-    if (control->name != *ingressName && control->name != *egressName) {
+    if (policy != nullptr && !policy->convert(control)) {
         prune();
         return control;
     }
