@@ -14,22 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "coreLibrary.h"
-#include "fromv1.0/v1model.h"
-#include "common/model.h"
+#ifndef _P4C_LIB_ASSERT_H_
+#define _P4C_LIB_ASSERT_H_
 
-namespace P4 {
+/* Mark a function or variable possibly unused. */
+#ifndef UNUSED
+#define UNUSED __attribute__((__unused__))
+#endif
 
-P4CoreLibrary P4CoreLibrary::instance;
-V2Model V2Model::instance;
+/* Mark a function parameter as unused. */
+#ifndef UNUSED_PARAMETER
+#define UNUSED_PARAMETER(x) (void)(x)
+#endif
 
-}  // namespace P4
-
-/* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance
- * is initialized before V1Model::instance */
-namespace P4V1 {
-
-V1Model V1Model::instance;
-
-}  // namespace P4V1
-
+#endif

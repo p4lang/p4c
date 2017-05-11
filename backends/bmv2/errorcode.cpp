@@ -14,22 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "coreLibrary.h"
-#include "fromv1.0/v1model.h"
-#include "common/model.h"
+#include "errorcode.h"
 
-namespace P4 {
+namespace BMV2 {
 
-P4CoreLibrary P4CoreLibrary::instance;
-V2Model V2Model::instance;
+bool
+ErrorCodesVisitor::preorder(const IR::Type_Error* errors) {
+    auto &map = *errorCodesMap;
+    for (auto m : *errors->getDeclarations()) {
+        BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
+        map[m] = map.size();
+    }
+    return false;
+}
 
-}  // namespace P4
-
-/* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance
- * is initialized before V1Model::instance */
-namespace P4V1 {
-
-V1Model V1Model::instance;
-
-}  // namespace P4V1
-
+}  // namespace BMV2

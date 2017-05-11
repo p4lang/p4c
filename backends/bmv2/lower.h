@@ -67,6 +67,19 @@ class FixupChecksum : public Transform {
     const IR::Node* preorder(IR::P4Control* control) override;
 };
 
+/**
+Policy which selects the control blocks where remove
+complex expression is applied.
+*/
+class RemoveComplexExpressionsPolicy {
+ public:
+    virtual ~RemoveComplexExpressionsPolicy() {}
+    /**
+       If the policy returns true the control block is processed,
+       otherwise it is left unchanged.
+    */
+    virtual bool convert(const IR::P4Control* control) const = 0;
+};
 
 /**
 BMv2 does not support complex expressions for a select
@@ -76,8 +89,7 @@ Such expressions are lifted into a temporaries.
 class RemoveComplexExpressions : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    const cstring *ingressName;
-    const cstring *egressName;
+    RemoveComplexExpressionsPolicy* policy;
     IR::IndexedVector<IR::Declaration> newDecls;
     IR::IndexedVector<IR::StatOrDecl>  assignments;
 
@@ -86,9 +98,9 @@ class RemoveComplexExpressions : public Transform {
 
  public:
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             const cstring* ingressName, const cstring* egressName):
-            refMap(refMap), typeMap(typeMap), ingressName(ingressName), egressName(egressName) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(ingressName); CHECK_NULL(egressName);
+                             RemoveComplexExpressionsPolicy* policy = nullptr) :
+            refMap(refMap), typeMap(typeMap), policy(policy) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("RemoveComplexExpressions"); }
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* preorder(IR::ParserState* state) override

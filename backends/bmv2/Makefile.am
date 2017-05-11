@@ -20,21 +20,53 @@ bin_PROGRAMS += p4c-bm2-ss
 p4c_bm2_ss_LDADD = libfrontend.la libp4ctoolkit.a
 
 p4c_bm2_ss_UNIFIED = \
-	backends/bmv2/bmv2.cpp \
 	backends/bmv2/analyzer.cpp \
-	backends/bmv2/jsonconverter.cpp \
+	backends/bmv2/action.cpp \
+	backends/bmv2/backend.cpp \
+	backends/bmv2/bmv2.cpp \
+	backends/bmv2/control.cpp \
+	backends/bmv2/copyAnnotations.cpp \
+	backends/bmv2/deparser.cpp \
+	backends/bmv2/errorcode.cpp \
+	backends/bmv2/expression.cpp \
+	backends/bmv2/extern.cpp \
+	backends/bmv2/header.cpp \
+	backends/bmv2/helpers.cpp \
+	backends/bmv2/JsonObjects.cpp \
+	backends/bmv2/lower.cpp \
 	backends/bmv2/midend.cpp \
-	backends/bmv2/lower.cpp
+	backends/bmv2/metermap.cpp \
+	backends/bmv2/parser.cpp \
+	backends/bmv2/sharedActionSelectorCheck.cpp \
+	backends/bmv2/v1model.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
-	backends/bmv2/jsonconverter.h \
+	backends/bmv2/action.h \
+	backends/bmv2/backend.h \
+	backends/bmv2/control.h \
+	backends/bmv2/copyAnnotations.h \
+	backends/bmv2/deparser.h \
+	backends/bmv2/errorcode.h \
+	backends/bmv2/expression.h \
+	backends/bmv2/extern.h \
+	backends/bmv2/header.h \
+	backends/bmv2/helpers.h \
+	backends/bmv2/JsonObjects.h \
 	backends/bmv2/lower.h \
-	backends/bmv2/midend.h
+	backends/bmv2/midend.h \
+	backends/bmv2/metermap.h \
+	backends/bmv2/parser.h \
+	backends/bmv2/sharedActionSelectorCheck.h
 
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
 
 ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
+
+noinst_LIBRARIES += libbackendbmv2.a
+libbackendbmv2_a_LIBADD = libfrontend.la
+libbackendbmv2_a_SOURCES = \
+	$(p4c_bm2_ss_SOURCES)
 
 # Tests
 -include bmv2tests.mk
