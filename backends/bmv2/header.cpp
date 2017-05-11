@@ -71,6 +71,9 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 addHeaderField("scalars", newName, boolWidth, 0);
                 scalars_width += boolWidth;
                 backend->scalarMetadataFields.emplace(f, newName);
+            } else if (ft->is<IR::Type_Error>()) {
+                P4C_UNIMPLEMENTED("The %1% does not support declaring fields of type:\n %2%",
+                                  "BMV2 backend", ft);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
@@ -301,4 +304,3 @@ bool ConvertHeaders::preorder(const IR::PackageBlock *block) {
 }
 
 }  // namespace BMV2
-
