@@ -1,6 +1,7 @@
 error {
     Oops
 }
+#include <core.p4>
 
 control C() {
     apply {
