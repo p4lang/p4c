@@ -22,10 +22,16 @@ limitations under the License.
 
 namespace P4 {
 
-// Analyze reachability of select cases; handles corner cases
-// (e.g., no cases).
-// If requireConstants is true this pass requires that
-// all select labels evaluate to constants.
+/**
+ * This pass analyzes reachability of select cases.
+ * - If there is just one case label, the select statement is eliminated.
+ * - If a case label appears after the default label, the case is
+ *   unreachable and therefore eliminated.
+ *
+ * If requireConstants is true this pass requires that
+ * all select labels evaluate to constants.
+ *
+ */
 class DoSimplifySelectCases : public Transform {
     const TypeMap* typeMap;
     bool requireConstants;
