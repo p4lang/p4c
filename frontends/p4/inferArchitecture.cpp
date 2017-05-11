@@ -26,7 +26,7 @@ bool InferArchitecture::preorder(const IR::P4Program* program) {
     for (auto decl : program->declarations) {
         if (decl->is<IR::Type_Package>() || decl->is<IR::Type_Extern>() ||
             decl->is<IR::Declaration_MatchKind>()) {
-            LOG3("[ " << decl << " ]");
+            // LOG3("[ " << decl << " ]");
             visit(decl);
         }
     }
@@ -34,12 +34,14 @@ bool InferArchitecture::preorder(const IR::P4Program* program) {
 }
 
 bool InferArchitecture::preorder(const IR::Type_Control *node) {
-    Control_Model *control_m = v2model.controls.back();
-    uint32_t paramCounter = 0;
-    for (auto param : node->applyParams->parameters) {
-        Type_Model paramTypeModel(param->type->toString());
-        Param_Model newParam(param->toString(), paramTypeModel, paramCounter++);
-        control_m->elems.push_back(newParam);
+    if (v2model.controls.size() != 0) {
+        Control_Model *control_m = v2model.controls.back();
+        uint32_t paramCounter = 0;
+        for (auto param : node->applyParams->parameters) {
+            Type_Model paramTypeModel(param->type->toString());
+            Param_Model newParam(param->toString(), paramTypeModel, paramCounter++);
+            control_m->elems.push_back(newParam);
+        }
     }
     LOG3("...control [" << node << " ]");
     return false;
@@ -47,13 +49,15 @@ bool InferArchitecture::preorder(const IR::Type_Control *node) {
 
 /// new Parser_Model object
 bool InferArchitecture::preorder(const IR::Type_Parser *node) {
-    Parser_Model *parser_m = v2model.parsers.back();
-    uint32_t paramCounter = 0;
-    for (auto param : *node->applyParams->getEnumerator()) {
-        Type_Model paramTypeModel(param->type->toString());
-        Param_Model newParam(param->toString(), paramTypeModel, paramCounter++);
-        parser_m->elems.push_back(newParam);
-        LOG3("...... parser params [ " << param << " ]");
+    if (v2model.parsers.size() != 0) {
+        Parser_Model *parser_m = v2model.parsers.back();
+        uint32_t paramCounter = 0;
+        for (auto param : *node->applyParams->getEnumerator()) {
+            Type_Model paramTypeModel(param->type->toString());
+            Param_Model newParam(param->toString(), paramTypeModel, paramCounter++);
+            parser_m->elems.push_back(newParam);
+            LOG3("...... parser params [ " << param << " ]");
+        }
     }
     return false;
 }
@@ -63,17 +67,19 @@ bool InferArchitecture::preorder(const IR::Type_Parser *node) {
 /// if (p4type->is<IR::Type_Parser>) { visit(p4type); }
 /// else if (p4type->is<IR::Type_Control>) { visit(p4type); }
 bool InferArchitecture::preorder(const IR::Type_Package *node) {
-    for (auto param : node->constructorParams->parameters) {
-        BUG_CHECK(param->type->is<IR::Type_Specialized>(),
-                  "Unexpected Package param type");
-        auto baseType = param->type->to<IR::Type_Specialized>()->baseType;
-        auto typeObj = typeMap->getType(baseType)->getP4Type();
-        if (typeObj->is<IR::Type_Parser>()) {
-            v2model.parsers.push_back(new Parser_Model(param->toString()));
-            visit(typeObj->to<IR::Type_Parser>());
-        } else if (typeObj->is<IR::Type_Control>()) {
-            v2model.controls.push_back(new Control_Model(param->toString()));
-            visit(typeObj->to<IR::Type_Control>());
+    for (auto p : node->getConstructorParameters()->parameters) {
+        LOG1("package constructor param: " << p);
+        auto ptype = typeMap->getType(p);
+        if (ptype == nullptr)
+            continue;
+        if (ptype->is<IR::P4Parser>()) {
+            LOG3("new parser model: " << p->toString());
+            v2model.parsers.push_back(new Parser_Model(p->toString()));
+            visit(ptype->to<IR::P4Parser>()->type);
+        } else if (ptype->is<IR::P4Control>()) {
+            LOG3("new control model: " << p->toString());
+            v2model.controls.push_back(new Control_Model(p->toString()));
+            visit(ptype->to<IR::P4Control>()->type);
         }
     }
     LOG3("...package [ " << node << " ]");
