@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_INFER_ARCHITECTURE_H_
-#define _P4_INFER_ARCHITECTURE_H_
+#ifndef _FRONTENDS_P4_INFERARCHITECTURE_H_
+#define _FRONTENDS_P4_INFERARCHITECTURE_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -29,7 +29,7 @@ class InferArchitecture : public Inspector {
     TypeMap *typeMap;
     V2Model& v2model;
  public:
-    InferArchitecture(TypeMap *typeMap)
+    explicit InferArchitecture(TypeMap *typeMap)
         : typeMap(typeMap), v2model(P4::V2Model::instance) {
     }
  public:
@@ -41,6 +41,6 @@ class InferArchitecture : public Inspector {
     bool preorder(const IR::Declaration_MatchKind* kind) override;
 };
 
-} // namespace P4
+}  // namespace P4
 
-#endif
+#endif  /* _FRONTENDS_P4_INFERARCHITECTURE_H_ */

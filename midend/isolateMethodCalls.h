@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+#ifndef _MIDEND_ISOLATEMETHODCALLS_H_
+#define _MIDEND_ISOLATEMETHODCALLS_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -51,7 +54,7 @@ namespace P4 {
  * ck.get(some.field, other.field);
  */
 class ConvertToVoid : public Transform {
-  private:
+ private:
     ReferenceMap *refMap;
     TypeMap *typeMap;
     P4CoreLibrary &corelib;
@@ -59,7 +62,7 @@ class ConvertToVoid : public Transform {
     bool isBuiltInMethod(const IR::MethodCallExpression *mce);
     bool isInCoreLib(const IR::Type_Extern *ex);
 
-  public:
+ public:
     ConvertToVoid(ReferenceMap *refMap, TypeMap *typeMap) :
             refMap(refMap),
             typeMap(typeMap),
@@ -69,7 +72,7 @@ class ConvertToVoid : public Transform {
 };
 
 class IsolateMethodCalls : public PassManager {
-  public:
+ public:
     IsolateMethodCalls(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new ConvertToVoid(refMap, typeMap));
@@ -77,5 +80,6 @@ class IsolateMethodCalls : public PassManager {
     }
 };
 
-} // namespace P4
+}  // namespace P4
 
+#endif  /* _MIDEND_ISOLATEMETHODCALLS_H_ */

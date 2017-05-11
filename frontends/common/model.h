@@ -124,10 +124,10 @@ class V2Model : public ::Model::Model {
     bool find_match_kind(cstring kind_name);
     bool find_extern(cstring extern_name);
     static V2Model              instance;
-    explicit V2Model() : ::Model::Model("0.2") {}
+    V2Model() : ::Model::Model("0.2") {}
 };
 
-} // namespace P4
+}  // namespace P4
 
 std::ostream& operator<<(std::ostream &out, Model::Type_Model& m);
 std::ostream& operator<<(std::ostream &out, Model::Param_Model& p);

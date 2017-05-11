@@ -50,6 +50,7 @@ class Control : public Inspector {
     Util::IJson* convertControl(const IR::ControlBlock* block, cstring name,
                                 Util::JsonArray *counters, Util::JsonArray* meters,
                                 Util::JsonArray* registers);
+
  public:
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::ControlBlock* b) override;

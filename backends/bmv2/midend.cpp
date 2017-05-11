@@ -113,6 +113,7 @@ class GenerateSkipControls : public Inspector {
     std::set<cstring>* skip;
     std::set<cstring>* process;
     BlockTypeMap*      map;
+
  public:
     explicit GenerateSkipControls(BlockTypeMap* map, std::set<cstring>* skip,
                                   std::set<cstring>* process) :
@@ -144,10 +145,13 @@ MidEnd::MidEnd(CompilerOptions& options) {
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
-    auto skipv1controls = new std::set<cstring>();  // in these controls we don't synthesize actions
-    auto procControls = new std::set<cstring>();  // in these controls we remove complex expressions
+    // in these controls we don't synthesize actions
+    auto skipv1controls = new std::set<cstring>();
+    // in these controls we remove complex expressions
+    auto procControls = new std::set<cstring>();
     auto mapBlockType = new CopyAnnotations(&refMap, &blockTypeMap);
-    auto generateSkipControls = new GenerateSkipControls(&blockTypeMap, skipv1controls, procControls);
+    auto generateSkipControls = new GenerateSkipControls(&blockTypeMap,
+            skipv1controls, procControls);
 
     addPasses({
         convertEnums,

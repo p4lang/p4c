@@ -89,7 +89,7 @@ JsonObjects::add_meta_info() {
     version->append(version_minor);
     info->emplace("compiler", "https://github.com/p4lang/p4c");
     toplevel->emplace("__meta__", info);
-    meta = info; // TODO(hanw): remove
+    meta = info;  // TODO(hanw): remove
 }
 
 /**
@@ -346,4 +346,5 @@ JsonObjects::add_extern(const cstring& name, const cstring& type,
     externs->append(extn);
 }
 
-}  // namespace bm
+}  // namespace BMV2
+

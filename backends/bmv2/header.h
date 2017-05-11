@@ -53,9 +53,8 @@ class ConvertHeaders : public Inspector {
     bool preorder(const IR::Parameter* param) override;
 
     explicit ConvertHeaders(Backend* backend):
-        backend(backend), refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-        json(backend->json)
-    {
+        backend(backend), refMap(backend->getRefMap()),
+        typeMap(backend->getTypeMap()), json(backend->json) {
         setName("ConvertHeaders");
         CHECK_NULL(backend->json);
     }

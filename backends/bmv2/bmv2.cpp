@@ -88,7 +88,8 @@ int main(int argc, char *const argv[]) {
     }
 
     // backend depends on the modified refMap and typeMap from midEnd.
-    BMV2::Backend backend(options.isv1(), &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap, &jsonObjects);
+    BMV2::Backend backend(options.isv1(), &midEnd.refMap,
+            &midEnd.typeMap, &midEnd.enumMap, &jsonObjects);
     try {
         backend.addDebugHook(hook);
         backend.process(toplevel);

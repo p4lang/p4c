@@ -35,6 +35,7 @@ class Parser : public Inspector {
     std::map<const IR::P4Parser*, Util::IJson*> parser_map;
     std::map<const IR::ParserState*, Util::IJson*> state_map;
     std::vector<Util::IJson*> context;
+
  protected:
     void convertSimpleKey(const IR::Expression* keySet, mpz_class& value, mpz_class& mask) const;
     unsigned combine(const IR::Expression* keySet, const IR::ListExpression* select,

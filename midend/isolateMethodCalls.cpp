@@ -34,17 +34,13 @@ const IR::Node *ConvertToVoid::postorder(IR::AssignmentStatement *as) {
     auto mce = as->right->to<IR::MethodCallExpression>();
     if (!mce || isBuiltInMethod(mce)) return as;
 
-    // skipping the ones in core lib
-    //auto member = mce->method->to<IR::Member>();
-    //auto memberType = typeMap->getType(member->expr)->to<IR::Type_Extern>();
-    //if (isInCoreLib(memberType)) return as;
-
     auto newArgs = new IR::Vector<IR::Expression>();
     newArgs->push_back(as->left);
     for (auto a : *mce->arguments) {
         newArgs->push_back(a);
     }
-    auto new_mce = new IR::MethodCallExpression(mce->type, mce->method, mce->typeArguments, newArgs);
+    auto new_mce = new IR::MethodCallExpression(mce->type,
+            mce->method, mce->typeArguments, newArgs);
     auto mcs = new IR::MethodCallStatement(new_mce);
     return mcs;
 }
@@ -65,4 +61,4 @@ const IR::Node *ConvertToVoid::postorder(IR::Method *method) {
     return new IR::Method(method->name, newMT, method->isAbstract);
 }
 
-} // namespace P4
+}  // namespace P4

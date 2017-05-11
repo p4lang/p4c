@@ -81,6 +81,6 @@ class JsonObjects {
     Util::JsonArray* field_aliases;
 };
 
-}  // namespace bm
+}  // namespace BMV2
 
 #endif /* _BACKENDS_BMV2_JSONOBJECTS_H_ */

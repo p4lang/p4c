@@ -188,4 +188,4 @@ ConvertActions::end_apply(const IR::Node* node) {
     createActions();
 }
 
-}
+}  // namespace BMV2

@@ -41,6 +41,6 @@ class ConvertActions : public Inspector {
     json(backend->json), conv(backend->getExpressionConverter()) {}
 };
 
-} // namespace BMV2
+}  // namespace BMV2
 
-#endif
+#endif  /* _BACKENDS_BMV2_ACTION_H_ */
