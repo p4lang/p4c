@@ -1,3 +1,5 @@
+#include <core.p4>
+
 error { Oops }
 
 control C() {

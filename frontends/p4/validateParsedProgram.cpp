@@ -48,18 +48,6 @@ void ValidateParsedProgram::postorder(const IR::Method* m) {
     }
 }
 
-/// Check that verify is not used outside of parsers
-void ValidateParsedProgram::postorder(const IR::MethodCallExpression* e) {
-    if (e->method->is<IR::PathExpression>()) {
-        auto m = e->method->to<IR::PathExpression>();
-        if (m->path->asString() == IR::ParserState::verify) {
-            auto inParser = findContext<IR::P4Parser>();
-            if (inParser == nullptr)
-                ::error("%1%: may only be invoked in parsers", m);
-        }
-    }
-}
-
 /// Struct field names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::StructField* f) {
     if (f->name.isDontCare())
