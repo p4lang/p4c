@@ -33,7 +33,6 @@ enum class ResolutionType {
 
 /// Data structure representing a stack of nested namespaces.
 class ResolutionContext : public IHasDbPrint {
-
     /// Stack of nested namespaces
     std::vector<const IR::INamespace*> stack;
     /// Root namespace for the program.
