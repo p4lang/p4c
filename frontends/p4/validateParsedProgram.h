@@ -42,6 +42,7 @@ namespace P4 {
    - instantiations do not occur in actions
    - constructors are not invoked in actions
    - returns and exits do not appear in parsers
+   - verify only appears in parsers 
    - extern constructors have the same name as the enclosing extern
  */
 class ValidateParsedProgram final : public Inspector {
@@ -65,6 +66,7 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::Type_Union* type) override;
     void postorder(const IR::Type_Bits* type) override;
     void postorder(const IR::ConstructorCallExpression* expression) override;
+    void postorder(const IR::MethodCallExpression* expression) override;
     void postorder(const IR::Declaration_Variable* decl) override;
     void postorder(const IR::Declaration_Instance* inst) override;
     void postorder(const IR::Declaration_Constant* decl) override;
