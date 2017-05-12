@@ -23,7 +23,7 @@ limitations under the License.
 error {
     NoError,           /// No error.
     PacketTooShort,    /// Not enough bits in packet for 'extract'.
-    NoMatch,           /// Match expression has no matches.
+    NoMatch,           /// 'select' expression has no matches.
     StackOutOfBounds,  /// Reference to invalid element of a header stack.
     HeaderTooShort,    /// Extracting too many bits into a varbit field.
     ParserTimeout      /// Parser execution time limit exceeded.
