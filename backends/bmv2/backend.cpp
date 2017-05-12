@@ -26,7 +26,7 @@ limitations under the License.
 #include "header.h"
 #include "parser.h"
 #include "JsonObjects.h"
-#include "inferArchitecture.h"
+#include "extractArchInfo.h"
 
 namespace BMV2 {
 
@@ -35,7 +35,7 @@ void Backend::process(const IR::ToplevelBlock* tb) {
     addPasses({
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
-        new InferArchitecture(typeMap),
+        new ExtractArchInfo(typeMap),
     });
     tb->getProgram()->apply(*this);
 }

@@ -32,7 +32,7 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/extern.cpp \
 	backends/bmv2/header.cpp \
 	backends/bmv2/helpers.cpp \
-	backends/bmv2/inferArchitecture.cpp \
+	backends/bmv2/extractArchInfo.cpp \
 	backends/bmv2/JsonObjects.cpp \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/midend.cpp \
@@ -54,7 +54,7 @@ noinst_HEADERS += \
 	backends/bmv2/extern.h \
 	backends/bmv2/header.h \
 	backends/bmv2/helpers.h \
-	backends/bmv2/inferArchitecture.h \
+	backends/bmv2/extractArchInfo.h \
 	backends/bmv2/JsonObjects.h \
 	backends/bmv2/lower.h \
 	backends/bmv2/midend.h \

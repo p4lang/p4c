@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "inferArchitecture.h"
+#include "extractArchInfo.h"
 
 namespace BMV2 {
 
 using ::Model::Type_Model;
 using ::Model::Param_Model;
 
-bool InferArchitecture::preorder(const IR::P4Program* program) {
+bool ExtractArchInfo::preorder(const IR::P4Program* program) {
     for (auto decl : program->declarations) {
         if (decl->is<IR::Type_Package>() || decl->is<IR::Type_Extern>() ||
             decl->is<IR::Declaration_MatchKind>()) {
@@ -32,7 +32,7 @@ bool InferArchitecture::preorder(const IR::P4Program* program) {
     return true;
 }
 
-bool InferArchitecture::preorder(const IR::Type_Control *node) {
+bool ExtractArchInfo::preorder(const IR::Type_Control *node) {
     if (v2model.controls.size() != 0) {
         P4::Control_Model *control_m = v2model.controls.back();
         uint32_t paramCounter = 0;
@@ -47,7 +47,7 @@ bool InferArchitecture::preorder(const IR::Type_Control *node) {
 }
 
 /// new P4::Parser_Model object
-bool InferArchitecture::preorder(const IR::Type_Parser *node) {
+bool ExtractArchInfo::preorder(const IR::Type_Parser *node) {
     if (v2model.parsers.size() != 0) {
         P4::Parser_Model *parser_m = v2model.parsers.back();
         uint32_t paramCounter = 0;
@@ -65,7 +65,7 @@ bool InferArchitecture::preorder(const IR::Type_Parser *node) {
 /// p4type = p4Type(param);
 /// if (p4type->is<IR::Type_Parser>) { visit(p4type); }
 /// else if (p4type->is<IR::Type_Control>) { visit(p4type); }
-bool InferArchitecture::preorder(const IR::Type_Package *node) {
+bool ExtractArchInfo::preorder(const IR::Type_Package *node) {
     for (auto p : node->getConstructorParameters()->parameters) {
         LOG1("package constructor param: " << p);
         auto ptype = typeMap->getType(p);
@@ -87,7 +87,7 @@ bool InferArchitecture::preorder(const IR::Type_Package *node) {
 
 /// create new Extern_Model object
 /// add method and its parameters to extern.
-bool InferArchitecture::preorder(const IR::Type_Extern *node) {
+bool ExtractArchInfo::preorder(const IR::Type_Extern *node) {
     P4::Extern_Model *extern_m = new P4::Extern_Model(node->toString());
     for (auto method : node->methods) {
         uint32_t paramCounter = 0;
@@ -106,7 +106,7 @@ bool InferArchitecture::preorder(const IR::Type_Extern *node) {
 }
 
 /// infer match type?
-bool InferArchitecture::preorder(const IR::Declaration_MatchKind* kind) {
+bool ExtractArchInfo::preorder(const IR::Declaration_MatchKind* kind) {
     /// add to match_kind model
     for (auto member : kind->members) {
         Type_Model *match_kind = new Type_Model(member->toString());
