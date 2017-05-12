@@ -98,11 +98,11 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 LOG1("P4V1:: convert " << s);
-                P4V1::V1Model::convertExternObjects(result, backend, em, mc, s);
+                P4V1::convertExternObjects(result, backend, em, mc, s);
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
-                P4V1::V1Model::convertExternFunctions(result, backend, ef, mc, s);
+                P4V1::convertExternFunctions(result, backend, ef, mc, s);
                 continue;
             }
         }

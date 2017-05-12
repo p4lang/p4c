@@ -34,10 +34,13 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "mapAnnotations.h"
 #include "JsonObjects.h"
+#include "v2model.h"
 
 namespace BMV2 {
 
 enum class Target { PSA, SIMPLE };
+
+class ExpressionConverter;
 
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;

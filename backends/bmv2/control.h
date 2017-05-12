@@ -28,6 +28,7 @@ limitations under the License.
 #include "expression.h"
 #include "helpers.h"
 #include "sharedActionSelectorCheck.h"
+#include "simpleSwitch.h"
 
 namespace BMV2 {
 

@@ -32,13 +32,15 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/extern.cpp \
 	backends/bmv2/header.cpp \
 	backends/bmv2/helpers.cpp \
+	backends/bmv2/inferArchitecture.cpp \
 	backends/bmv2/JsonObjects.cpp \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/midend.cpp \
 	backends/bmv2/metermap.cpp \
 	backends/bmv2/parser.cpp \
 	backends/bmv2/sharedActionSelectorCheck.cpp \
-	backends/bmv2/simple_switch.cpp
+	backends/bmv2/simpleSwitch.cpp \
+	backends/bmv2/v2model.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
@@ -52,12 +54,15 @@ noinst_HEADERS += \
 	backends/bmv2/extern.h \
 	backends/bmv2/header.h \
 	backends/bmv2/helpers.h \
+	backends/bmv2/inferArchitecture.h \
 	backends/bmv2/JsonObjects.h \
 	backends/bmv2/lower.h \
 	backends/bmv2/midend.h \
 	backends/bmv2/metermap.h \
 	backends/bmv2/parser.h \
-	backends/bmv2/sharedActionSelectorCheck.h
+	backends/bmv2/sharedActionSelectorCheck.h \
+	backends/bmv2/simpleSwitch.h \
+	backends/bmv2/v2model.h
 
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
 

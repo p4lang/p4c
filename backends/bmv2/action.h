@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "backend.h"
+#include "simpleSwitch.h"
 
 namespace BMV2 {
 

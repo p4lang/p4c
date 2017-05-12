@@ -19,17 +19,18 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "typeMap.h"
-#include "common/model.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace BMV2 {
 
 class InferArchitecture : public Inspector {
  private:
-    TypeMap *typeMap;
-    V2Model& v2model;
+    P4::TypeMap *typeMap;
+    P4::V2Model& v2model;
  public:
-    explicit InferArchitecture(TypeMap *typeMap)
+    explicit InferArchitecture(P4::TypeMap *typeMap)
         : typeMap(typeMap), v2model(P4::V2Model::instance) {
     }
  public:

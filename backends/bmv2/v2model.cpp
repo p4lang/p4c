@@ -14,7 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "model.h"
+#include "frontends/common/model.h"
+#include "v2model.h"
+
+namespace P4 {
+
+V2Model V2Model::instance;
+
+}
 
 bool P4::V2Model::find_match_kind(cstring kind_name) {
     bool found = false;

@@ -15,9 +15,8 @@ limitations under the License.
 */
 
 #include "inferArchitecture.h"
-#include "methodInstance.h"
 
-namespace P4 {
+namespace BMV2 {
 
 using ::Model::Type_Model;
 using ::Model::Param_Model;
@@ -35,7 +34,7 @@ bool InferArchitecture::preorder(const IR::P4Program* program) {
 
 bool InferArchitecture::preorder(const IR::Type_Control *node) {
     if (v2model.controls.size() != 0) {
-        Control_Model *control_m = v2model.controls.back();
+        P4::Control_Model *control_m = v2model.controls.back();
         uint32_t paramCounter = 0;
         for (auto param : node->applyParams->parameters) {
             Type_Model paramTypeModel(param->type->toString());
@@ -47,10 +46,10 @@ bool InferArchitecture::preorder(const IR::Type_Control *node) {
     return false;
 }
 
-/// new Parser_Model object
+/// new P4::Parser_Model object
 bool InferArchitecture::preorder(const IR::Type_Parser *node) {
     if (v2model.parsers.size() != 0) {
-        Parser_Model *parser_m = v2model.parsers.back();
+        P4::Parser_Model *parser_m = v2model.parsers.back();
         uint32_t paramCounter = 0;
         for (auto param : *node->applyParams->getEnumerator()) {
             Type_Model paramTypeModel(param->type->toString());
@@ -74,11 +73,11 @@ bool InferArchitecture::preorder(const IR::Type_Package *node) {
             continue;
         if (ptype->is<IR::P4Parser>()) {
             LOG3("new parser model: " << p->toString());
-            v2model.parsers.push_back(new Parser_Model(p->toString()));
+            v2model.parsers.push_back(new P4::Parser_Model(p->toString()));
             visit(ptype->to<IR::P4Parser>()->type);
         } else if (ptype->is<IR::P4Control>()) {
             LOG3("new control model: " << p->toString());
-            v2model.controls.push_back(new Control_Model(p->toString()));
+            v2model.controls.push_back(new P4::Control_Model(p->toString()));
             visit(ptype->to<IR::P4Control>()->type);
         }
     }
@@ -89,10 +88,10 @@ bool InferArchitecture::preorder(const IR::Type_Package *node) {
 /// create new Extern_Model object
 /// add method and its parameters to extern.
 bool InferArchitecture::preorder(const IR::Type_Extern *node) {
-    Extern_Model *extern_m = new Extern_Model(node->toString());
+    P4::Extern_Model *extern_m = new P4::Extern_Model(node->toString());
     for (auto method : node->methods) {
         uint32_t paramCounter = 0;
-        Method_Model method_m(method->toString());
+        P4::Method_Model method_m(method->toString());
         for (auto param : *method->type->parameters->getEnumerator()) {
             Type_Model paramTypeModel(param->type->toString());
             Param_Model newParam(param->toString(), paramTypeModel,
