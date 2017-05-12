@@ -33,7 +33,6 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
-#include "midend/isolateMethodCalls.h"
 #include "midend/local_copyprop.h"
 #include "midend/localizeActions.h"
 #include "midend/moveConstructors.h"
@@ -150,22 +149,18 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto skipv1controls = new std::set<cstring>();
     // in these controls we remove complex expressions
     auto procControls = new std::set<cstring>();
-    auto mapBlockType = new CopyAnnotations(&refMap, &blockTypeMap);
+    auto mapBlockType = new MapAnnotations(&refMap, &blockTypeMap);
     auto generateSkipControls = new GenerateSkipControls(&blockTypeMap,
             skipv1controls, procControls);
 
     addPasses({
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
-#ifdef PSA
-        new P4::IsolateMethodCalls(&refMap, &typeMap),
-#endif
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-        // (hanw) following three visit functors require apply() on PackageBlock
         new VisitFunctor([this, evaluator]()
                 { toplevel = evaluator->getToplevelBlock(); }),
         new VisitFunctor([this, mapBlockType]()

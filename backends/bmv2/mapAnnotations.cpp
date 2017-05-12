@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "copyAnnotations.h"
+#include "mapAnnotations.h"
 
 namespace BMV2 {
 
-bool CopyAnnotations::preorder(const IR::PackageBlock* block) {
+bool MapAnnotations::preorder(const IR::PackageBlock* block) {
     auto iter = block->constantValue.begin();
     for (auto arch_iter = block->getConstructorParameters()->begin();
               arch_iter != block->getConstructorParameters()->end();

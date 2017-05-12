@@ -25,31 +25,18 @@ limitations under the License.
 namespace BMV2 {
 
 /**
- * Copy Annotations from architecture block to the corresponding
- * instance in user program.
+ * Build a map from architecture block to its declaration in uer program.
  *
- * @pipeline
- * Control Ingress(in H h, inout M m);
- *
- * Control IngressImpl(in header h, inout metadata m);
- *
- * is converted to
- *
- * @pipeline
- * Control Ingress(in H h, inout M m);
- *
- * @pipeline
- * Control IngressImpl(in header h, inout metadata m);
+ * This is useful for building copy annotation from architecture definition
+ * to user program, which remains to be done.
  */
-
-/// TODO(hanw): implement transfrom pass to copy annotation to user block.
-class CopyAnnotations : public Inspector {
+class MapAnnotations : public Inspector {
     P4::ReferenceMap* refMap;
     BlockTypeMap *map;
  public:
-    explicit CopyAnnotations(P4::ReferenceMap* refMap, BlockTypeMap* map) :
+    explicit MapAnnotations(P4::ReferenceMap* refMap, BlockTypeMap* map) :
         refMap(refMap), map(map)
-    { setName("CopyAnnotations"); }
+    { setName("MapAnnotations"); }
     bool preorder(const IR::PackageBlock* block) override;
 };
 

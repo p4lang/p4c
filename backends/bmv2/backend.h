@@ -24,7 +24,6 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "lib/assert.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
@@ -33,12 +32,12 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
-#include "copyAnnotations.h"
+#include "mapAnnotations.h"
 #include "JsonObjects.h"
 
 namespace BMV2 {
 
-enum class CompilerMode { PSA, SIMPLE };
+enum class Target { PSA, SIMPLE };
 
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
@@ -73,7 +72,7 @@ class Backend : public PassManager {
     Util::JsonArray*                 force_arith;
     Util::JsonArray*                 field_aliases;
 
-    CompilerMode                     mode;
+    Target                           target;
 
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the "scalars" metadata object, so we may need to rename
@@ -89,15 +88,12 @@ class Backend : public PassManager {
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
 
  public:
-  explicit Backend(bool isV1,
-                   P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                   P4::ConvertEnums::EnumMapping* enumMap, BMV2::JsonObjects* json) :
-        refMap(refMap), typeMap(typeMap),
-        enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
-        model(P4::V2Model::instance), v1model(P4V1::V1Model::instance),
-        json(json),
-        mode(CompilerMode::SIMPLE)
-    { refMap->setIsV1(isV1); }
+    Backend(bool isV1, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+            P4::ConvertEnums::EnumMapping* enumMap) :
+        refMap(refMap), typeMap(typeMap), enumMap(enumMap),
+        corelib(P4::P4CoreLibrary::instance), model(P4::V2Model::instance),
+        v1model(P4V1::V1Model::instance), json(new BMV2::JsonObjects()),
+        target(Target::SIMPLE) { refMap->setIsV1(isV1); }
     void process(const IR::ToplevelBlock* block);
     void convert(const IR::ToplevelBlock* block, CompilerOptions& options);
     void serialize(std::ostream& out) const

@@ -18,35 +18,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-#ifdef PSA
-void
-ConvertActions::genExternMethod(Util::JsonArray* result, P4::ExternMethod *em) {
-    auto name = "_" + em->actualExternType->name + "_" + em->method->name.name;
-    auto primitive = mkPrimitive(name, result);
-    auto parameters = mkParameters(primitive);
-
-    auto ext = new Util::JsonObject();
-    ext->emplace("type", "extern");
-
-    // FIXME: PSA have extern pass building a map and lookup here.
-    if (em->object->is<IR::Parameter>()) {
-        auto param = em->object->to<IR::Parameter>();
-        // auto packageObject = resolveParameter(param);
-        // ext->emplace("value", packageObject->getName());
-        ext->emplace("value", "FIXME");
-    } else {
-        ext->emplace("value", em->object->getName());
-    }
-    parameters->append(ext);
-
-    for (auto a : *mc->arguments) {
-        auto arg = conv->convert(a);
-        parameters->append(arg);
-    }
-}
-#endif
-
-
 void
 ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result) {
     for (auto s : *body) {
@@ -126,25 +97,12 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
-#ifdef PSA
-                    genExternMethod(result, em);
-#else
-                    LOG1("P4V1:: convert " << s);
-                    P4V1::V1Model::convertExternObjects(result, backend, em, mc, s);
-#endif
+                LOG1("P4V1:: convert " << s);
+                P4V1::V1Model::convertExternObjects(result, backend, em, mc, s);
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
-#ifdef PSA
-                auto primitive = mkPrimitive(ef->method->name.name, result);
-                auto parameters = mkParameters(primitive);
-                primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-                for (auto a : *mc->arguments) {
-                    parameters->append(conv->convert(a));
-                }
-#else
                 P4V1::V1Model::convertExternFunctions(result, backend, ef, mc, s);
-#endif
                 continue;
             }
         }
@@ -182,10 +140,10 @@ ConvertActions::createActions() {
     }
 }
 
-void
-ConvertActions::end_apply(const IR::Node* node) {
-    (void) node;
+bool
+ConvertActions::preorder(const IR::PackageBlock*) {
     createActions();
+    return false;
 }
 
 }  // namespace BMV2

@@ -19,19 +19,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-/**
-    Converts a list of P4 defined table entries to JSON.
-
-    Assumes that all the checking on the entries being valid has been
-    done in the validateParsedProgram pass, so this is simply the serialization.
-
-    This function still checks and reports errors in key entry expressions.
-    The JSON generated after a reported error will not be accepted in BMv2.
-
-    @param table A P4 table IR node
-    @param jsonTable the JSON table object to add predefined entries
-*/
-void Control::convertTableEntries(const IR::P4Table *table,
+void ControlConverter::convertTableEntries(const IR::P4Table *table,
                                   Util::JsonObject *jsonTable) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
@@ -136,7 +124,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
             if (priorityAnnotation->expr.size() > 1)
                 ::error("invalid priority value %1%", priorityAnnotation->expr);
             auto priValue = priorityAnnotation->expr.front();
-            if ( !priValue->is<IR::Constant>())
+            if (!priValue->is<IR::Constant>())
                 ::error("invalid priority value %1%. must be constant", priorityAnnotation->expr);
             entry->emplace("priority", priValue->to<IR::Constant>()->value);
         } else {
@@ -156,7 +144,7 @@ void Control::convertTableEntries(const IR::P4Table *table,
     @param ke A table match key element
     @return the key type
 */
-cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
+cstring ControlConverter::getKeyMatchType(const IR::KeyElement *ke) {
     auto path = ke->matchType->path;
     auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
@@ -184,10 +172,10 @@ cstring Control::getKeyMatchType(const IR::KeyElement *ke) {
 }
 
 bool
-Control::handleTableImplementation(const IR::Property* implementation,
-                                                    const IR::Key* key,
-                                                    Util::JsonObject* table,
-                                                    Util::JsonArray* action_profiles) {
+ControlConverter::handleTableImplementation(const IR::Property* implementation,
+                                   const IR::Key* key,
+                                   Util::JsonObject* table,
+                                   Util::JsonArray* action_profiles) {
     if (implementation == nullptr) {
         table->emplace("type", "simple");
         return true;
@@ -299,7 +287,7 @@ Control::handleTableImplementation(const IR::Property* implementation,
 }
 
 Util::IJson*
-Control::convertTable(const CFG::TableNode* node,
+ControlConverter::convertTable(const CFG::TableNode* node,
                       Util::JsonArray* action_profiles) {
     auto table = node->table;
     LOG3("Processing " << dbp(table));
@@ -658,7 +646,7 @@ Control::convertTable(const CFG::TableNode* node,
     return result;
 }
 
-Util::IJson* Control::convertIf(const CFG::IfNode* node, cstring prefix) {
+Util::IJson* ControlConverter::convertIf(const CFG::IfNode* node, cstring prefix) {
     (void) prefix;
     auto result = new Util::JsonObject();
     result->emplace("name", node->name);
@@ -679,7 +667,7 @@ Util::IJson* Control::convertIf(const CFG::IfNode* node, cstring prefix) {
 /**
     Custom visitor to enable traversal on other blocks
 */
-bool Control::preorder(const IR::PackageBlock *block) {
+bool ControlConverter::preorder(const IR::PackageBlock *block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ControlBlock>()) {
             visit(it.second->getNode());
@@ -688,7 +676,7 @@ bool Control::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-bool Control::preorder(const IR::ControlBlock* block) {
+bool ControlConverter::preorder(const IR::ControlBlock* block) {
     auto bt = backend->blockTypeMap.find(block);
     if (bt != backend->blockTypeMap.end()) {
         LOG3(bt->second->getAnnotation("pipeline"));
@@ -738,7 +726,7 @@ bool Control::preorder(const IR::ControlBlock* block) {
         }
     }
 
-#ifndef PSA
+    // hanw: skip for PSA
     for (auto c : cont->controlLocals) {
         if (c->is<IR::Declaration_Constant>() ||
             c->is<IR::Declaration_Variable>() ||
@@ -761,7 +749,6 @@ bool Control::preorder(const IR::ControlBlock* block) {
         }
         P4C_UNIMPLEMENTED("%1%: not yet handled", c);
     }
-#endif
 
     json->pipelines->append(result);
     return false;

@@ -25,7 +25,7 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/backend.cpp \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/control.cpp \
-	backends/bmv2/copyAnnotations.cpp \
+	backends/bmv2/mapAnnotations.cpp \
 	backends/bmv2/deparser.cpp \
 	backends/bmv2/errorcode.cpp \
 	backends/bmv2/expression.cpp \
@@ -38,14 +38,14 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/metermap.cpp \
 	backends/bmv2/parser.cpp \
 	backends/bmv2/sharedActionSelectorCheck.cpp \
-	backends/bmv2/v1model.cpp
+	backends/bmv2/simple_switch.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
 	backends/bmv2/action.h \
 	backends/bmv2/backend.h \
 	backends/bmv2/control.h \
-	backends/bmv2/copyAnnotations.h \
+	backends/bmv2/mapAnnotations.h \
 	backends/bmv2/deparser.h \
 	backends/bmv2/errorcode.h \
 	backends/bmv2/expression.h \

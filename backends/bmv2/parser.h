@@ -28,7 +28,7 @@ namespace BMV2 {
 
 class JsonObjects;
 
-class Parser : public Inspector {
+class ParserConverter : public Inspector {
     Backend* backend;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
@@ -55,16 +55,16 @@ class Parser : public Inspector {
  public:
     bool preorder(const IR::P4Parser* p) override;
     bool preorder(const IR::PackageBlock* b) override;
-    explicit Parser(Backend* backend) : backend(backend), refMap(backend->getRefMap()),
+    explicit ParserConverter(Backend* backend) : backend(backend), refMap(backend->getRefMap()),
     typeMap(backend->getTypeMap()), json(backend->json),
     conv(backend->getExpressionConverter()),
-    corelib(P4::P4CoreLibrary::instance) { setName("Parser"); }
+    corelib(P4::P4CoreLibrary::instance) { setName("ParserConverter"); }
 };
 
 class ConvertParser final : public PassManager {
  public:
     explicit ConvertParser(Backend* backend) {
-        passes.push_back(new Parser(backend));
+        passes.push_back(new ParserConverter(backend));
         setName("ConvertParser");
     }
 };

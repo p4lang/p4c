@@ -47,6 +47,7 @@ const IR::Node* ArithmeticFixup::updateType(const IR::Expression* expression) {
 const IR::Node* ArithmeticFixup::postorder(IR::Expression* expression) {
     return updateType(expression);
 }
+
 const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() ||

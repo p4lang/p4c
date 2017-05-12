@@ -102,8 +102,7 @@ BUILT_SOURCES += \
 # FIXME -- and check-install-headers: below need to be consistent
 p4includedir = $(pkgdatadir)/p4include
 p4_14includedir = $(pkgdatadir)/p4_14include
-p4include_HEADERS += $(wildcard $(srcdir)/p4include/*.p4) \
-		     $(wildcard $(srcdir)/p4include/*.map)
+p4include_HEADERS += $(wildcard $(srcdir)/p4include/*.p4)
 
 #### For testing, install headers in the build directory
 

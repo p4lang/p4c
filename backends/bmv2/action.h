@@ -34,8 +34,8 @@ class ConvertActions : public Inspector {
     void convertActionParams(const IR::ParameterList *parameters,
                              Util::JsonArray* params);
     void createActions();
+    bool preorder(const IR::PackageBlock* package);
  public:
-    void end_apply(const IR::Node* node);
     explicit ConvertActions(Backend *backend) : backend(backend),
     refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
     json(backend->json), conv(backend->getExpressionConverter())

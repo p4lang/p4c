@@ -17,7 +17,7 @@ limitations under the License.
 #include "action.h"
 #include "backend.h"
 #include "control.h"
-#include "copyAnnotations.h"
+#include "mapAnnotations.h"
 #include "deparser.h"
 #include "errorcode.h"
 #include "expression.h"
@@ -38,7 +38,8 @@ void Backend::process(const IR::ToplevelBlock* tb) {
     tb->getProgram()->apply(*this);
 }
 
-/// BMV2 Backend that takes the top level block and converts it to a JsonObject.
+/// BMV2 Backend that takes the top level block and converts it to a JsonObject
+/// that can be interpreted by the BMv2 simulator.
 void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     toplevel.emplace("program", options.file);
     toplevel.emplace("__meta__", json->meta);
@@ -62,6 +63,17 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     toplevel.emplace("extern_instances", json->externs);
     toplevel.emplace("field_aliases", json->field_aliases);
 
+    json->add_program_info(options.file);
+    json->add_meta_info();
+
+    // convert all enums to json
+    for (const auto &pEnum : *enumMap) {
+        auto name = pEnum.first->getName();
+        for (const auto &pEntry : *pEnum.second) {
+            json->add_enum(name, pEntry.first, pEntry.second);
+        }
+    }
+
     /// generate error types
     for (const auto &p : errorCodesMap) {
         auto name = p.first->toString();
@@ -75,9 +87,9 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
     // if (psa) tlb->apply(new ConvertExterns());
 
     PassManager codegen_passes = {
-        new CopyAnnotations(refMap, &blockTypeMap),
+        new MapAnnotations(refMap, &blockTypeMap),
         new ConvertHeaders(this),
-        new ConvertExterns(this),  // only run when mode == PSA
+        new ConvertExterns(this),  // only run when target == PSA
         new ConvertParser(this),
         new ConvertActions(this),
         new ConvertControl(this),

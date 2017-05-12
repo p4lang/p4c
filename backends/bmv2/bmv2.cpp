@@ -75,21 +75,9 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
-    BMV2::JsonObjects jsonObjects;
-    jsonObjects.add_program_info(options.file);
-    jsonObjects.add_meta_info();
-
-    // convert all enums to json
-    for (const auto &pEnum : midEnd.enumMap) {
-        auto name = pEnum.first->getName();
-        for (const auto &pEntry : *pEnum.second) {
-            jsonObjects.add_enum(name, pEntry.first, pEntry.second);
-        }
-    }
-
     // backend depends on the modified refMap and typeMap from midEnd.
     BMV2::Backend backend(options.isv1(), &midEnd.refMap,
-            &midEnd.typeMap, &midEnd.enumMap, &jsonObjects);
+            &midEnd.typeMap, &midEnd.enumMap);
     try {
         backend.addDebugHook(hook);
         backend.process(toplevel);

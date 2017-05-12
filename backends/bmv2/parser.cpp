@@ -20,7 +20,7 @@ limitations under the License.
 namespace BMV2 {
 
 // TODO(hanw) refactor this function
-Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
+Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
     if (stat->is<IR::AssignmentStatement>()) {
@@ -129,8 +129,8 @@ Util::IJson* Parser::convertParserStatement(const IR::StatOrDecl* stat) {
 }
 
 // Operates on a select keyset
-void Parser::convertSimpleKey(const IR::Expression* keySet,
-                                     mpz_class& value, mpz_class& mask) const {
+void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
+                                       mpz_class& value, mpz_class& mask) const {
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
@@ -156,7 +156,7 @@ void Parser::convertSimpleKey(const IR::Expression* keySet,
     }
 }
 
-unsigned Parser::combine(const IR::Expression* keySet,
+unsigned ParserConverter::combine(const IR::Expression* keySet,
                                 const IR::ListExpression* select,
                                 mpz_class& value, mpz_class& mask) const {
     // From the BMv2 spec: For values and masks, make sure that you
@@ -214,7 +214,7 @@ unsigned Parser::combine(const IR::Expression* keySet,
     }
 }
 
-Util::IJson* Parser::stateName(IR::ID state) {
+Util::IJson* ParserConverter::stateName(IR::ID state) {
     if (state.name == IR::ParserState::accept) {
         return Util::JsonValue::null;
     } else if (state.name == IR::ParserState::reject) {
@@ -226,7 +226,7 @@ Util::IJson* Parser::stateName(IR::ID state) {
 }
 
 std::vector<Util::IJson*>
-Parser::convertSelectExpression(const IR::SelectExpression* expr) {
+ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
     std::vector<Util::IJson*> result;
     auto se = expr->to<IR::SelectExpression>();
     for (auto sc : se->selectCases) {
@@ -251,7 +251,7 @@ Parser::convertSelectExpression(const IR::SelectExpression* expr) {
 }
 
 Util::IJson*
-Parser::convertSelectKey(const IR::SelectExpression* expr) {
+ParserConverter::convertSelectKey(const IR::SelectExpression* expr) {
     auto se = expr->to<IR::SelectExpression>();
     CHECK_NULL(se);
     auto key = conv->convert(se->select, false);
@@ -259,7 +259,7 @@ Parser::convertSelectKey(const IR::SelectExpression* expr) {
 }
 
 Util::IJson*
-Parser::convertPathExpression(const IR::PathExpression* pe) {
+ParserConverter::convertPathExpression(const IR::PathExpression* pe) {
     auto trans = new Util::JsonObject();
     trans->emplace("value", "default");
     trans->emplace("mask", Util::JsonValue::null);
@@ -268,7 +268,7 @@ Parser::convertPathExpression(const IR::PathExpression* pe) {
 }
 
 Util::IJson*
-Parser::createDefaultTransition() {
+ParserConverter::createDefaultTransition() {
     auto trans = new Util::JsonObject();
     trans->emplace("value", "default");
     trans->emplace("mask", Util::JsonValue::null);
@@ -276,8 +276,8 @@ Parser::createDefaultTransition() {
     return trans;
 }
 
-bool Parser::preorder(const IR::P4Parser* parser) {
-    // TODO(hanw): hard-coded parser name
+bool ParserConverter::preorder(const IR::P4Parser* parser) {
+    // hanw hard-coded parser name assumed by BMv2
     auto parser_id = json->add_parser("parser");
 
     for (auto s : parser->parserLocals) {
@@ -323,7 +323,7 @@ bool Parser::preorder(const IR::P4Parser* parser) {
 }
 
 /// visit ParserBlock only
-bool Parser::preorder(const IR::PackageBlock* block) {
+bool ParserConverter::preorder(const IR::PackageBlock* block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ParserBlock>()) {
             visit(it.second->getNode());
