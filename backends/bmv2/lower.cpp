@@ -412,7 +412,7 @@ RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
 }
 
 const IR::Vector<IR::Expression>*
-RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* vec) {
+RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* vec, bool force) {
     // This is more complicated than I'd like.  If an expression is
     // a list expression, then we actually simplify the elements
     // of the list.  Otherwise we simplify the argument itself.
@@ -434,7 +434,7 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
         } else {
             ComplexExpression ce;
             (void)e->apply(ce);
-            if (ce.isComplex) {
+            if (force || ce.isComplex) {
                 changes = true;
                 LOG3("Moved into temporary " << dbp(e));
                 auto tmp = createTemporary(e);
@@ -496,7 +496,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
             vec->push_back(expression->arguments->at(0));
             auto arg1 = expression->arguments->at(1);
             if (arg1->is<IR::ListExpression>()) {
-                auto list = simplifyExpressions(&arg1->to<IR::ListExpression>()->components);
+                auto list = simplifyExpressions(&arg1->to<IR::ListExpression>()->components, true);
                 arg1 = new IR::ListExpression(arg1->srcInfo, *list);
                 vec->push_back(arg1);
             } else {

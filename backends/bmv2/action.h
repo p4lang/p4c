@@ -38,7 +38,8 @@ class ConvertActions : public Inspector {
     void end_apply(const IR::Node* node);
     explicit ConvertActions(Backend *backend) : backend(backend),
     refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-    json(backend->json), conv(backend->getExpressionConverter()) {}
+    json(backend->json), conv(backend->getExpressionConverter())
+    { setName("ConvertActions"); }
 };
 
 }  // namespace BMV2
