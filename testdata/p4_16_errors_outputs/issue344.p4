@@ -3,4 +3,6 @@ control C<H>() {
     }
 }
 
-C() c;
+control cproto();
+package top(cproto _c);
+top(C()) c;
