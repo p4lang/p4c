@@ -22,6 +22,12 @@ limitations under the License.
 #include "target.h"
 #include "frontends/p4/typeMap.h"
 
+namespace P4 {
+
+class ReferenceMap;
+
+}
+
 namespace EBPF {
 
 class CodeBuilder : public Util::SourceCodeBuilder {

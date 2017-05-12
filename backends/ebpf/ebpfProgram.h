@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "target.h"
 #include "ebpfModel.h"
+#include "ebpfObject.h"
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
