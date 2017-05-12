@@ -23,9 +23,15 @@ control MyVerifyChecksum(in my_packet hdr, inout my_metadata meta) {
     }
 }
 
+control C() {
+    apply {
+    }
+}
+
+C() c;
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     apply {
-        bit<1> b = (bit<1>){ 0 };
+        c.apply();
     }
 }
 
