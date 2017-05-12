@@ -23,13 +23,16 @@ limitations under the License.
 
 namespace P4 {
 
-// For each action that is invoked keep the list of arguments that it's called with.
-// There must be only one call of each action; this is done by LocalizeActions.
+/**
+ * For each action that is invoked keep the list of arguments that
+ * it's called with. There must be only one call of each action;
+ * this is done by LocalizeActions.
+ */
 class ActionInvocation {
     std::map<const IR::P4Action*, const IR::MethodCallExpression*> invocations;
     std::set<const IR::P4Action*> all;  // for these actions remove all parameters
     std::set<const IR::MethodCallExpression*> calls;
-    // how many arguments to remove from each default action
+    /// how many arguments to remove from each default action
     std::map<const IR::MethodCallExpression*, unsigned> defaultActions;
 
  public:
@@ -83,19 +86,30 @@ class FindActionParameters : public Inspector {
     void postorder(const IR::MethodCallExpression* expression) override;
 };
 
-// Removes parameters of an action which are in/inout/out.
-// For this to work each action must have a single caller.
-// (This is done by the LocalizeActions pass).
-// control c(inout bit<32> x) {
-//    action a(in bit<32> arg) { x = arg; }
-//    table t() { actions = { a(10); } }
-//    apply { ... } }
-// is converted to
-// control c(inout bit<32> x) {
-//    bit<32> arg;
-//    action a() { arg = 10; x = arg; }
-//    table t() { actions = { a; } }
-//    apply { ... } }
+/**
+ * Removes parameters of an action which are in/inout/out.
+ *
+ * \code{.cpp}
+ * control c(inout bit<32> x) {
+ *    action a(in bit<32> arg) { x = arg; }
+ *    table t() { actions = { a(10); } }
+ *    apply { ... } }
+ * \endcode
+ *
+ * is converted to
+ *
+ * \code{.cpp}
+ * control c(inout bit<32> x) {
+ *    bit<32> arg;
+ *    action a() { arg = 10; x = arg; }
+ *    table t() { actions = { a; } }
+ *    apply { ... } }
+ * \endcode
+ *
+ * @pre This pass requires each action to have a single caller.
+ *      It must run after the LocalizeActions pass.
+ * @post in/inout/out parameters of an action are removed.
+ */
 class DoRemoveActionParameters : public Transform {
     ActionInvocation* invocations;
  public:

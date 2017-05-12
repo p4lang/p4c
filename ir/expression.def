@@ -134,7 +134,7 @@ class Constant : Literal {
     /// if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
     Constant(intmax_t v, unsigned base = 10) :
-            Literal(new Type_InfInt()), value(v), base(base) {}
+            Literal(new Type_InfInt()), value((long)v), base(base) {}
     Constant(mpz_class v, unsigned base = 10) :
             Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
