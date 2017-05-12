@@ -116,4 +116,4 @@ bool ExtractArchInfo::preorder(const IR::Declaration_MatchKind* kind) {
     return false;
 }
 
-}  // namespace P4
+}  // namespace BMV2

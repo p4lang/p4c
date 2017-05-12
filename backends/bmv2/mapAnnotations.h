@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_COPYANNOTATIONS_H_
-#define _BACKENDS_BMV2_COPYANNOTATIONS_H_
+#ifndef _BACKENDS_BMV2_MAPANNOTATIONS_H_
+#define _BACKENDS_BMV2_MAPANNOTATIONS_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
@@ -42,4 +42,4 @@ class MapAnnotations : public Inspector {
 
 }  // namespace BMV2
 
-#endif  /* _BACKENDS_BMV2_COPYANNOTATIONS_H_ */
+#endif  /* _BACKENDS_BMV2_MAPANNOTATIONS_H_ */

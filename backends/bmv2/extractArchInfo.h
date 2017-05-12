@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_EXTRACTARCHINFO_H_
-#define _FRONTENDS_P4_EXTRACTARCHINFO_H_
+#ifndef _BACKENDS_BMV2_EXTRACTARCHINFO_H_
+#define _BACKENDS_BMV2_EXTRACTARCHINFO_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -42,6 +42,6 @@ class ExtractArchInfo : public Inspector {
     bool preorder(const IR::Declaration_MatchKind* kind) override;
 };
 
-}  // namespace P4
+}  // namespace BMV2
 
-#endif  /* _FRONTENDS_P4_EXTRACTARCHINFO_H_ */
+#endif  /* _BACKENDS_BMV2_EXTRACTARCHINFO_H_ */
