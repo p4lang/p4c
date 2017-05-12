@@ -1897,6 +1897,11 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
+    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
+        ::error("%1%: casts are only supported to base types", expression->destType);
+        return expression;
+    }
+
     if (!canCastBetween(castType, sourceType)) {
         // This cast is not legal, but let's try to see whether
         // performing a substitution can help
@@ -1907,10 +1912,11 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
             expression = new IR::Cast(expression->srcInfo, expression->destType, rhs);
-            sourceType = expression->destType;
+            sourceType = getTypeType(expression->destType);
         }
         if (!canCastBetween(castType, sourceType))
-            typeError("%1%: Illegal cast from %2% to %3%", expression, sourceType, castType);
+            typeError("%1%: Illegal cast from %2% to %3%",
+                      expression, sourceType->toString(), castType->toString());
     }
     setType(expression, castType);
     setType(getOriginal(), castType);
@@ -2525,6 +2531,13 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             auto a = mi->to<ApplyMethod>();
             if (a->isTableApply() && findContext<IR::P4Action>())
                 ::error("%1%: tables cannot be invoked from actions", expression);
+        }
+
+        // Check that verify is only invoked from parsers.
+        if (auto ef = mi->to<ExternFunction>()) {
+            if (ef->method->name == IR::ParserState::verify)
+                if (!findContext<IR::P4Parser>())
+                    ::error("%1%: may only be invoked in parsers", ef->expr);
         }
 
         if (mi->is<ExternMethod>())
