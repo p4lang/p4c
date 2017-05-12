@@ -70,7 +70,8 @@ class BaseLocation : public StorageLocation {
             StorageLocation(type, name)
     { BUG_CHECK(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>() ||
                 type->is<IR::Type_Boolean>() || type->is<IR::Type_Var>() ||
-                type->is<IR::Type_Tuple>() || type-is<IR::Type_Error>(),
+                type->is<IR::Type_Tuple>() || type->is<IR::Type_Error>() ||
+                type->is<IR::Type_Varbits>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
     void addLastIndexField(LocationSet*) const override {}
