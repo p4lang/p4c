@@ -23,8 +23,15 @@ limitations under the License.
 
 namespace P4 {
 
-// - remove unreachable parser states
-// - collapse simple chains of states
+/** @brief Remove unreachable parser states, and collapse simple chains of
+ * states.
+ *
+ * Does not remove the "accept" state, even if it is not reachable.  A
+ * transition between states ```s1``` and ```s2``` is part of a "simple" chain if:
+ *  - there are no other outgoing edges from ```s1```,
+ *  - there are no other incoming edges to ```s2```,
+ *  - and ```s2``` does not have annotations.
+ */
 class DoSimplifyParsers : public Transform {
     ReferenceMap *refMap;
  public:

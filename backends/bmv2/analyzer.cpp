@@ -266,37 +266,24 @@ void CFG::build(const IR::P4Control* cc,
     }
 }
 
-namespace {
-class DiscoverStructure : public Inspector {
-    ProgramParts*           structure;
-
- public:
-    explicit DiscoverStructure(ProgramParts* structure) : structure(structure)
-    { setName("DiscoverStructure"); }
-
-    void postorder(const IR::ParameterList* paramList) override {
-        bool inAction = findContext<IR::P4Action>() != nullptr;
-        unsigned index = 0;
-        for (auto p : *paramList->getEnumerator()) {
-            structure->index.emplace(p, index);
-            if (!inAction)
-                structure->nonActionParameters.emplace(p);
-            index++;
-        }
+void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
+    bool inAction = findContext<IR::P4Action>() != nullptr;
+    unsigned index = 0;
+    for (auto p : *paramList->getEnumerator()) {
+        structure->index.emplace(p, index);
+        if (!inAction)
+            structure->nonActionParameters.emplace(p);
+        index++;
     }
-    void postorder(const IR::P4Action* action) override {
-        auto control = findContext<IR::P4Control>();
-        structure->actions.emplace(action, control);
-    }
-    void postorder(const IR::Declaration_Variable* decl) override {
-        structure->variables.push_back(decl);
-    }
-};
-}  // namespace
+}
+void DiscoverStructure::postorder(const IR::P4Action* action) {
+    LOG1("discovery action " << action);
+    auto control = findContext<IR::P4Control>();
+    structure->actions.emplace(action, control);
+}
 
-void ProgramParts::analyze(const IR::ToplevelBlock* toplevel) {
-    DiscoverStructure disc(this);
-    toplevel->getProgram()->apply(disc);
+void DiscoverStructure::postorder(const IR::Declaration_Variable* decl) {
+    structure->variables.push_back(decl);
 }
 
 }  // namespace BMV2
