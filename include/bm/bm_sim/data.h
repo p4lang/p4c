@@ -180,28 +180,25 @@ class Data {
            typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   T get() const {
     assert(arith);
-    return static_cast<T>(value);
+    return value.convert_to<typename std::remove_const<T>::type>();
   }
 
   //! Get the value of Data has an unsigned integer
   unsigned int get_uint() const {
     assert(arith);
-    // Bad ?
-    return static_cast<unsigned int>(value);
+    return value.convert_to<unsigned int>();
   }
 
   //! Get the value of Data has a `uint64_t`
   uint64_t get_uint64() const {
     assert(arith);
-    // Bad ?
-    return static_cast<uint64_t>(value);
+    return value.convert_to<uint64_t>();
   }
 
   //! get the value of Data has an integer
   int get_int() const {
     assert(arith);
-    // Bad ?
-    return static_cast<int>(value);
+    return value.convert_to<int>();
   }
 
   //! get the binary representation of Data has a string. There is no sign

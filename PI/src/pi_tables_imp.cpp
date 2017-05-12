@@ -485,6 +485,7 @@ void set_direct_resources(const pi_p4info_t *p4info, pi_dev_id_t dev_id,
         break;
       default:  // TODO(antonin): what to do?
         assert(0);
+        return;
     }
     if (error_code != bm::MatchErrorCode::SUCCESS)
       throw bm_exception(error_code);
