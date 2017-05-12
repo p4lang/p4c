@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_V2MODEL_H_
-#define _BACKENDS_BMV2_V2MODEL_H_
+#ifndef _BACKENDS_BMV2_PORTABLESWITCH_H_
+#define _BACKENDS_BMV2_PORTABLESWITCH_H_
 
 #include "ir/ir.h"
 #include "lower.h"
@@ -77,8 +77,8 @@ struct Extern_Model : public Block_Model<Method_Model> {
         Block_Model<Method_Model>(name), type("Extern") {}
 };
 
-/// V2Model : Model::Model
-class V2Model : public ::Model::Model {
+/// PortableModel : Model::Model
+class PortableModel : public ::Model::Model {
  public:
     std::vector<Parser_Model*>  parsers;
     std::vector<Control_Model*> controls;
@@ -86,18 +86,20 @@ class V2Model : public ::Model::Model {
     std::vector<Type_Model*>    match_kinds;
     bool find_match_kind(cstring kind_name);
     bool find_extern(cstring extern_name);
-    static V2Model              instance;
-    V2Model() : ::Model::Model("0.2") {}
+    static PortableModel instance;
+    PortableModel() : ::Model::Model("0.2") {}
 };
 
 }  // namespace P4
 
 std::ostream& operator<<(std::ostream &out, Model::Type_Model& m);
 std::ostream& operator<<(std::ostream &out, Model::Param_Model& p);
-std::ostream& operator<<(std::ostream &out, P4::V2Model& e);
+std::ostream& operator<<(std::ostream &out, P4::PortableModel& e);
 std::ostream& operator<<(std::ostream &out, P4::Method_Model& p);
 std::ostream& operator<<(std::ostream &out, P4::Parser_Model* p);
 std::ostream& operator<<(std::ostream &out, P4::Control_Model* p);
 std::ostream& operator<<(std::ostream &out, P4::Extern_Model* p);
 
-#endif  /* _BACKENDS_BMV2_V2MODEL_H_ */
+// portableSwitch
+
+#endif  /* _BACKENDS_BMV2_PORTABLESWITCH_H_ */

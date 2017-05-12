@@ -22,7 +22,15 @@ limitations under the License.
 #include "errorcode.h"
 #include "expression.h"
 #include "extern.h"
+#include "frontends/common/constantFolding.h"
+#include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
+#include "midend/actionSynthesis.h"
+#include "midend/removeLeftSlices.h"
+#include "lower.h"
 #include "header.h"
 #include "parser.h"
 #include "JsonObjects.h"
@@ -30,40 +38,116 @@ limitations under the License.
 
 namespace BMV2 {
 
-void Backend::process(const IR::ToplevelBlock* tb) {
+/**
+This class implements a policy suitable for the SynthesizeActions pass.
+The policy is: do not synthesize actions for the controls whose names
+are in the specified set.
+For example, we expect that the code in the deparser will not use any
+tables or actions.
+*/
+class SkipControls : public P4::ActionSynthesisPolicy {
+    // set of controls where actions are not synthesized
+    const std::set<cstring> *skip;
+
+ public:
+    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    bool convert(const IR::P4Control* control) const {
+        if (skip->find(control->name) != skip->end())
+            return false;
+        return true;
+    }
+};
+
+/**
+This class implements a policy suitable for the RemoveComplexExpression pass.
+The policy is: only remove complex expression for the controls whose names
+are in the specified set.
+For example, we expect that the code in ingress and egress will have complex
+expression removed.
+*/
+class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
+    const std::set<cstring> *process;
+
+ public:
+    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
+        CHECK_NULL(process);
+    }
+    bool convert(const IR::P4Control* control) const {
+        if (process->find(control->name) != process->end())
+            return true;
+        return false;
+    }
+};
+
+void
+Backend::process(const IR::ToplevelBlock* block, BMV2Options& options) {
+    CHECK_NULL(block);
     setName("BackEnd");
+    // in these controls we remove complex expressions
+    std::set<cstring>* pipelines;
+    // in these controls we don't synthesize actions
+    std::set<cstring>* skipControls;
+    cstring updateControlBlockName;
+    toplevel = block;
+
+    if (options.arch == Target::SIMPLE){
+        // TODO(hanw): implement psa
+        // pipelines = portableSwitch->getPipelineControls();
+        // skipControls = portableSwitch->getSkipControls();
+        // updateControlBlockName = portableSwitch->getUpdateChecksumControl();
+    } else {
+        // default architecture is simple-switch
+        pipelines = simpleSwitch->getPipelineControls();
+        skipControls = simpleSwitch->getSkipControls();
+        updateControlBlockName = simpleSwitch->getUpdateChecksumControl();
+    }
+
+    // These passes are logically bmv2-specific
     addPasses({
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(skipControls)),
+        new P4::MoveActionsToTables(refMap, typeMap),
+        new P4::TypeChecking(refMap, typeMap),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::RemoveLeftSlices(refMap, typeMap),
+        new P4::TypeChecking(refMap, typeMap),
+        new LowerExpressions(typeMap),
+        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::TypeChecking(refMap, typeMap),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(pipelines)),
+        new FixupChecksum(&updateControlBlockName),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
-        new ExtractArchInfo(typeMap),
+        //new ExtractArchInfo(typeMap),
     });
-    tb->getProgram()->apply(*this);
+    block->getProgram()->apply(*this);
 }
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject
 /// that can be interpreted by the BMv2 simulator.
-void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
-    toplevel.emplace("program", options.file);
-    toplevel.emplace("__meta__", json->meta);
-    toplevel.emplace("header_types", json->header_types);
-    toplevel.emplace("headers", json->headers);
-    toplevel.emplace("header_stacks", json->header_stacks);
-    field_lists = mkArrayField(&toplevel, "field_lists");
-    toplevel.emplace("errors", json->errors);
-    toplevel.emplace("enums", json->enums);
-    toplevel.emplace("parsers", json->parsers);
-    toplevel.emplace("deparsers", json->deparsers);
-    meter_arrays = mkArrayField(&toplevel, "meter_arrays");
-    counters = mkArrayField(&toplevel, "counter_arrays");
-    register_arrays = mkArrayField(&toplevel, "register_arrays");
-    calculations = mkArrayField(&toplevel, "calculations");
-    learn_lists = mkArrayField(&toplevel, "learn_lists");
-    toplevel.emplace("actions", json->actions);
-    toplevel.emplace("pipelines", json->pipelines);
-    checksums = mkArrayField(&toplevel, "checksums");
-    force_arith = mkArrayField(&toplevel, "force_arith");
-    toplevel.emplace("extern_instances", json->externs);
-    toplevel.emplace("field_aliases", json->field_aliases);
+void Backend::convert(BMV2Options& options) {
+    jsonTop.emplace("program", options.file);
+    jsonTop.emplace("__meta__", json->meta);
+    jsonTop.emplace("header_types", json->header_types);
+    jsonTop.emplace("headers", json->headers);
+    jsonTop.emplace("header_stacks", json->header_stacks);
+    field_lists = mkArrayField(&jsonTop, "field_lists");
+    jsonTop.emplace("errors", json->errors);
+    jsonTop.emplace("enums", json->enums);
+    jsonTop.emplace("parsers", json->parsers);
+    jsonTop.emplace("deparsers", json->deparsers);
+    meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
+    counters = mkArrayField(&jsonTop, "counter_arrays");
+    register_arrays = mkArrayField(&jsonTop, "register_arrays");
+    calculations = mkArrayField(&jsonTop, "calculations");
+    learn_lists = mkArrayField(&jsonTop, "learn_lists");
+    jsonTop.emplace("actions", json->actions);
+    jsonTop.emplace("pipelines", json->pipelines);
+    checksums = mkArrayField(&jsonTop, "checksums");
+    force_arith = mkArrayField(&jsonTop, "force_arith");
+    jsonTop.emplace("extern_instances", json->externs);
+    jsonTop.emplace("field_aliases", json->field_aliases);
 
     json->add_program_info(options.file);
     json->add_meta_info();
@@ -98,7 +182,8 @@ void Backend::convert(const IR::ToplevelBlock* tb, CompilerOptions& options) {
         new ConvertDeparser(this),
     };
     codegen_passes.setName("CodeGen");
-    tb->getMain()->apply(codegen_passes);
+    CHECK_NULL(toplevel);
+    toplevel->getMain()->apply(codegen_passes);
 }
 
 }  // namespace BMV2

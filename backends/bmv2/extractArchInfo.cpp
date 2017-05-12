@@ -25,7 +25,6 @@ bool ExtractArchInfo::preorder(const IR::P4Program* program) {
     for (auto decl : program->declarations) {
         if (decl->is<IR::Type_Package>() || decl->is<IR::Type_Extern>() ||
             decl->is<IR::Declaration_MatchKind>()) {
-            // LOG3("[ " << decl << " ]");
             visit(decl);
         }
     }
@@ -33,8 +32,8 @@ bool ExtractArchInfo::preorder(const IR::P4Program* program) {
 }
 
 bool ExtractArchInfo::preorder(const IR::Type_Control *node) {
-    if (v2model.controls.size() != 0) {
-        P4::Control_Model *control_m = v2model.controls.back();
+    if (portable_model.controls.size() != 0) {
+        P4::Control_Model *control_m = portable_model.controls.back();
         uint32_t paramCounter = 0;
         for (auto param : node->applyParams->parameters) {
             Type_Model paramTypeModel(param->type->toString());
@@ -46,10 +45,9 @@ bool ExtractArchInfo::preorder(const IR::Type_Control *node) {
     return false;
 }
 
-/// new P4::Parser_Model object
 bool ExtractArchInfo::preorder(const IR::Type_Parser *node) {
-    if (v2model.parsers.size() != 0) {
-        P4::Parser_Model *parser_m = v2model.parsers.back();
+    if (portable_model.parsers.size() != 0) {
+        P4::Parser_Model *parser_m = portable_model.parsers.back();
         uint32_t paramCounter = 0;
         for (auto param : *node->applyParams->getEnumerator()) {
             Type_Model paramTypeModel(param->type->toString());
@@ -61,10 +59,6 @@ bool ExtractArchInfo::preorder(const IR::Type_Parser *node) {
     return false;
 }
 
-/// FIXME: going from param to p4type takes a lot of work, should be as simple as
-/// p4type = p4Type(param);
-/// if (p4type->is<IR::Type_Parser>) { visit(p4type); }
-/// else if (p4type->is<IR::Type_Control>) { visit(p4type); }
 bool ExtractArchInfo::preorder(const IR::Type_Package *node) {
     for (auto p : node->getConstructorParameters()->parameters) {
         LOG1("package constructor param: " << p);
@@ -73,11 +67,11 @@ bool ExtractArchInfo::preorder(const IR::Type_Package *node) {
             continue;
         if (ptype->is<IR::P4Parser>()) {
             LOG3("new parser model: " << p->toString());
-            v2model.parsers.push_back(new P4::Parser_Model(p->toString()));
+            portable_model.parsers.push_back(new P4::Parser_Model(p->toString()));
             visit(ptype->to<IR::P4Parser>()->type);
         } else if (ptype->is<IR::P4Control>()) {
             LOG3("new control model: " << p->toString());
-            v2model.controls.push_back(new P4::Control_Model(p->toString()));
+            portable_model.controls.push_back(new P4::Control_Model(p->toString()));
             visit(ptype->to<IR::P4Control>()->type);
         }
     }
@@ -85,8 +79,6 @@ bool ExtractArchInfo::preorder(const IR::Type_Package *node) {
     return false;
 }
 
-/// create new Extern_Model object
-/// add method and its parameters to extern.
 bool ExtractArchInfo::preorder(const IR::Type_Extern *node) {
     P4::Extern_Model *extern_m = new P4::Extern_Model(node->toString());
     for (auto method : node->methods) {
@@ -100,18 +92,16 @@ bool ExtractArchInfo::preorder(const IR::Type_Extern *node) {
         }
         extern_m->elems.push_back(method_m);
     }
-    v2model.externs.push_back(extern_m);
+    portable_model.externs.push_back(extern_m);
     LOG3("...extern [ " << node << " ]");
     return false;
 }
 
-/// infer match type?
 bool ExtractArchInfo::preorder(const IR::Declaration_MatchKind* kind) {
-    /// add to match_kind model
     for (auto member : kind->members) {
         Type_Model *match_kind = new Type_Model(member->toString());
-        v2model.match_kinds.push_back(match_kind);
-        LOG1("... match kind " << match_kind);
+        portable_model.match_kinds.push_back(match_kind);
+        LOG3("... match kind " << match_kind);
     }
     return false;
 }

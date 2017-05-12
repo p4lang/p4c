@@ -75,83 +75,12 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     { return 32; }
 };
 
-/**
-This class implements a policy suitable for the SynthesizeActions pass.
-The policy is: do not synthesize actions for the controls whose names
-are in the specified set.
-For example, we expect that the code in the deparser will not use any
-tables or actions.
-*/
-class SkipControls : public P4::ActionSynthesisPolicy {
-    // set of controls where actions are not synthesized
-    const std::set<cstring> *skip;
-
- public:
-    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const IR::P4Control* control) const {
-        if (skip->find(control->name) != skip->end())
-            return false;
-        return true;
-    }
-};
-
-class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
-    const std::set<cstring> *process;
-
- public:
-    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
-        CHECK_NULL(process);
-    }
-    bool convert(const IR::P4Control* control) const {
-        if (process->find(control->name) != process->end())
-            return true;
-        return false;
-    }
-};
-
-class GenerateSkipControls : public Inspector {
-    std::set<cstring>* skip;
-    std::set<cstring>* process;
-    BlockTypeMap*      map;
-
- public:
-    explicit GenerateSkipControls(BlockTypeMap* map, std::set<cstring>* skip,
-                                  std::set<cstring>* process) :
-        skip(skip), process(process), map(map) { CHECK_NULL(skip);  CHECK_NULL(process); }
-    bool preorder(const IR::ControlBlock* block) {
-        auto bt = map->find(block);
-        if (bt != map->end()) {
-            if (!bt->second->getAnnotation("pipeline")) {
-                skip->insert(block->container->name);
-            } else {
-                process->insert(block->container->name);
-            }
-        }
-        return false;
-    }
-    bool preorder(const IR::PackageBlock* block) {
-        for (auto it : block->constantValue) {
-            if (it.second->is<IR::ControlBlock>()) {
-                visit(it.second->getNode());
-            }
-        }
-        return false;
-    }
-};
-
-MidEnd::MidEnd(CompilerOptions& options) {
+MidEnd::MidEnd(BMV2Options& options) {
     bool isv1 = options.isv1();
     setName("MidEnd");
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
-    // in these controls we don't synthesize actions
-    auto skipv1controls = new std::set<cstring>();
-    // in these controls we remove complex expressions
-    auto procControls = new std::set<cstring>();
-    auto mapBlockType = new MapAnnotations(&refMap, &blockTypeMap);
-    auto generateSkipControls = new GenerateSkipControls(&blockTypeMap,
-            skipv1controls, procControls);
 
     addPasses({
         convertEnums,
@@ -161,12 +90,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-        new VisitFunctor([this, evaluator]()
-                { toplevel = evaluator->getToplevelBlock(); }),
-        new VisitFunctor([this, mapBlockType]()
-                { toplevel->getMain()->apply(*mapBlockType); }),
-        new VisitFunctor([this, generateSkipControls]()
-                { toplevel->getMain()->apply(*generateSkipControls); }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
@@ -198,22 +121,21 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
-        new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
-        new P4::MoveActionsToTables(&refMap, &typeMap),
         new P4::MidEndLast(),
-        // Here is actually the start of the BMv2-specific back-end
-        new P4::TypeChecking(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveLeftSlices(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap),
-        new LowerExpressions(&typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap, false),
-        new P4::TypeChecking(&refMap, &typeMap),
-        new RemoveComplexExpressions(&refMap, &typeMap, new ProcessControls(procControls)),
-        // TODO(hanw): re-enable this pass
-        // new FixupChecksum(&updateControlBlockName),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
+        //new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
+        //new P4::MoveActionsToTables(&refMap, &typeMap),
+        //new P4::TypeChecking(&refMap, &typeMap),
+        //new P4::SimplifyControlFlow(&refMap, &typeMap),
+        //new P4::RemoveLeftSlices(&refMap, &typeMap),
+        //new P4::TypeChecking(&refMap, &typeMap),
+        //new LowerExpressions(&typeMap),
+        //new P4::ConstantFolding(&refMap, &typeMap, false),
+        //new P4::TypeChecking(&refMap, &typeMap),
+        //new RemoveComplexExpressions(&refMap, &typeMap, new ProcessControls(procControls)),
+        //// TODO(hanw): re-enable this pass
+        //// new FixupChecksum(&updateControlBlockName),
+        //new P4::SimplifyControlFlow(&refMap, &typeMap),
+        //new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });

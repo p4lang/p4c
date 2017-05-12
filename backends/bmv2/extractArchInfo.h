@@ -27,11 +27,11 @@ namespace BMV2 {
 
 class ExtractArchInfo : public Inspector {
  private:
-    P4::TypeMap *typeMap;
-    P4::V2Model& v2model;
+    P4::TypeMap*       typeMap;
+    P4::PortableModel& portable_model;
  public:
     explicit ExtractArchInfo(P4::TypeMap *typeMap)
-        : typeMap(typeMap), v2model(P4::V2Model::instance) {
+        : typeMap(typeMap), portable_model(P4::PortableModel::instance) {
     }
  public:
     bool preorder(const IR::Type_Control *node) override;

@@ -75,7 +75,7 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
 
 /// Custom visitor to enable traversal on other blocks
 bool Extern::preorder(const IR::PackageBlock *block) {
-    if (backend->target != Target::PSA)
+    if (backend->target != Target::PORTABLE)
         return false;
 
     for (auto it : block->constantValue) {

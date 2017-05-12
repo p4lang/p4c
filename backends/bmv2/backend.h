@@ -21,7 +21,6 @@ limitations under the License.
 #include "expression.h"
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "lib/error.h"
@@ -30,15 +29,15 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
+#include "JsonObjects.h"
+#include "mapAnnotations.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
-#include "mapAnnotations.h"
-#include "JsonObjects.h"
-#include "v2model.h"
+#include "options.h"
+#include "portableSwitch.h"
+#include "simpleSwitch.h"
 
 namespace BMV2 {
-
-enum class Target { PSA, SIMPLE };
 
 class ExpressionConverter;
 
@@ -51,16 +50,21 @@ class Backend : public PassManager {
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
     P4::ConvertEnums::EnumMapping*   enumMap;
-    const IR::ToplevelBlock*         tlb;
+    const IR::ToplevelBlock*         toplevel;
     ExpressionConverter*             conv;
     P4::P4CoreLibrary&               corelib;
     ProgramParts                     structure;
-    Util::JsonObject                 toplevel;
-    P4::V2Model&                     model;
-    P4V1::V1Model&                   v1model;
+    Util::JsonObject                 jsonTop;
+    P4::PortableModel&               model;  // remove
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
+
+    // bmv2 backend supports multiple target architectures, we create different
+    // json generators for each architecture to handle the differences in json
+    // format for each architecture.
+    P4V1::SimpleSwitch*              simpleSwitch;
+    // PortableSwitchJsonConverter*  portableSwitch;
 
  public:
     BMV2::JsonObjects*               json;
@@ -94,23 +98,26 @@ class Backend : public PassManager {
     Backend(bool isV1, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
             P4::ConvertEnums::EnumMapping* enumMap) :
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
-        corelib(P4::P4CoreLibrary::instance), model(P4::V2Model::instance),
-        v1model(P4V1::V1Model::instance), json(new BMV2::JsonObjects()),
+        corelib(P4::P4CoreLibrary::instance),
+        model(P4::PortableModel::instance),
+        simpleSwitch(new P4V1::SimpleSwitch(this)),
+        json(new BMV2::JsonObjects()),
         target(Target::SIMPLE) { refMap->setIsV1(isV1); }
-    void process(const IR::ToplevelBlock* block);
-    void convert(const IR::ToplevelBlock* block, CompilerOptions& options);
+    void process(const IR::ToplevelBlock* block, BMV2Options& options);
+    void convert(BMV2Options& options);
     void serialize(std::ostream& out) const
-    { toplevel.serialize(out); }
+    { jsonTop.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
     ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
-    P4::V2Model &         getModel()     { return model; }
+    P4::PortableModel &   getModel()     { return model; }
     ProgramParts &        getStructure() { return structure; }
     P4::ReferenceMap*     getRefMap()    { return refMap; }
     P4::TypeMap*          getTypeMap()   { return typeMap; }
-    const IR::ToplevelBlock* getToplevelBlock() { return tlb; }
+    P4V1::SimpleSwitch*   getSimpleSwitch()        { return simpleSwitch; }
+    const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
 };
 
 }  // namespace BMV2

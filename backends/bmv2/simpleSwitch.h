@@ -19,27 +19,48 @@ limitations under the License.
 
 #include <algorithm>
 #include <cstring>
-#include <set>
 #include "frontends/p4/fromv1.0/v1model.h"
-#include "backends/bmv2/backend.h"
+#include "backend.h"
+
+namespace BMV2 {
+class Backend;
+}
 
 namespace P4V1 {
 
-void convertExternObjects(Util::JsonArray *result, BMV2::Backend *bmv2,
-                          const P4::ExternMethod *em,
-                          const IR::MethodCallExpression *mc,
-                          const IR::StatOrDecl *s);
+class SimpleSwitch {
+    BMV2::Backend* backend;
+    V1Model&       v1model;
 
-void convertExternFunctions(Util::JsonArray *result, BMV2::Backend *bmv2,
-                            const P4::ExternFunction *ef,
-                            const IR::MethodCallExpression *mc,
-                            const IR::StatOrDecl* s);
+ protected:
+    void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
+    int createFieldList(const IR::Expression* expr, cstring group,
+                        cstring listName, Util::JsonArray* field_lists);
+    cstring convertHashAlgorithm(cstring algorithm);
+    cstring createCalculation(cstring algo, const IR::Expression* fields,
+                              Util::JsonArray* calculations, const IR::Node* node);
+    void generateUpdate(const IR::BlockStatement *block,
+                        Util::JsonArray* checksums, Util::JsonArray* calculations);
 
-void convertExternInstances(BMV2::Backend *backend,
-                            const IR::Declaration *c,
-                            const IR::ExternBlock* eb,
-                            Util::JsonArray* action_profiles,
-                            BMV2::SharedActionSelectorCheck& selector_check);
+ public:
+    void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
+                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s);
+    void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
+                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s);
+    void convertExternInstances(const IR::Declaration *c,
+                                const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
+                                BMV2::SharedActionSelectorCheck& selector_check);
+    void convertChecksumUpdate(const IR::P4Control* updateControl,
+                               Util::JsonArray* checksums, Util::JsonArray* calculations);
+
+    std::set<cstring>* getPipelineControls();
+    std::set<cstring>* getSkipControls();
+    cstring getUpdateChecksumControl();
+
+    explicit SimpleSwitch(BMV2::Backend* backend) :
+        backend(backend), v1model(V1Model::instance)
+    { CHECK_NULL(backend); }
+};
 
 }  // namespace P4V1
 
