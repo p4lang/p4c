@@ -395,3 +395,43 @@ TEST(McSimplePreLAG, ResetState) {
   auto mc_out_3 = pre.replicate({1});
   ASSERT_EQ(0u, mc_out_3.size());
 }
+
+TEST(McSimplePreLAG, LAGMembershipNotSet) {
+  McSimplePreLAG pre;
+  McSimplePreLAG::mgrp_t mgid = 0x400;
+  McSimplePreLAG::mgrp_hdl_t mgrp;
+  McSimplePreLAG::l1_hdl_t l1h;
+  McSimplePreLAG::rid_t rid = 0x200;
+  McSimplePreLAG::LagMap lag_map;
+  McSimplePreLAG::lag_id_t lag_id = 2;
+  lag_map[lag_id] = 1;
+
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_mgrp_create(mgid, &mgrp));
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_create(rid, {}, lag_map, &l1h));
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_associate(mgrp, l1h));
+
+  McSimplePre::McIn ingress_info{mgid};
+  auto egress_info = pre.replicate(ingress_info);
+  ASSERT_EQ(0u, egress_info.size());
+}
+
+TEST(McSimplePreLAG, LAGEmptyMembership) {
+  McSimplePreLAG pre;
+  McSimplePreLAG::mgrp_t mgid = 0x400;
+  McSimplePreLAG::mgrp_hdl_t mgrp;
+  McSimplePreLAG::l1_hdl_t l1h;
+  McSimplePreLAG::rid_t rid = 0x200;
+  McSimplePreLAG::LagMap lag_map;
+  McSimplePreLAG::lag_id_t lag_id = 2;
+  lag_map[lag_id] = 1;
+
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_mgrp_create(mgid, &mgrp));
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_create(rid, {}, lag_map, &l1h));
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_node_associate(mgrp, l1h));
+  // empty port map for this lag index
+  EXPECT_EQ(McSimplePre::SUCCESS, pre.mc_set_lag_membership(lag_id, {}));
+
+  McSimplePre::McIn ingress_info{mgid};
+  auto egress_info = pre.replicate(ingress_info);
+  ASSERT_EQ(0u, egress_info.size());
+}

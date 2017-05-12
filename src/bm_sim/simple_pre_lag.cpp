@@ -145,12 +145,10 @@ std::vector<McSimplePre::McOut>
 McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
   std::vector<McSimplePre::McOut> egress_info_list;
   egress_port_t port_id;
-  PortMap port_map;
   lag_id_t lag_index;
   int lag_hash = 0xFF;  // TODO(unknown): get lag hash from metadata
   int port_count1 = 0, port_count2 = 0;
   McSimplePre::McOut egress_info;
-  LagEntry lag_entry;
   boost::shared_lock<boost::shared_mutex> lock(mutex);
   auto mgid_it = mgid_entries.find(ingress_info.mgid);
   if (mgid_it == mgid_entries.end()) {
@@ -173,8 +171,19 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
     // Lag replication
     for (lag_index = 0; lag_index < l2_entry.lag_map.size(); lag_index++) {
       if (l2_entry.lag_map[lag_index]) {
-        lag_entry = lag_entries.at(lag_index);
-        port_map = lag_entry.port_map;
+        auto lag_entry_it = lag_entries.find(lag_index);
+        if (lag_entry_it == lag_entries.end()) {
+          Logger::get()->warn("PRE LAG membership for LAG index {} not set",
+                              lag_index);
+          continue;
+        }
+        const auto &lag_entry = lag_entry_it->second;
+        const auto &port_map = lag_entry.port_map;
+        if (lag_entry.member_count == 0) {
+          Logger::get()->debug("PRE LAG membership is empty for LAG index {}",
+                               lag_index);
+          continue;
+        }
         port_count1 = (lag_hash % lag_entry.member_count) + 1;
         port_count2 = 0;
         for (port_id = 0; port_id < port_map.size(); port_id++) {
