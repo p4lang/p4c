@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "lib/json.h"
 #include "JsonObjects.h"
+#include "helpers.h"
 
 namespace BMV2 {
 

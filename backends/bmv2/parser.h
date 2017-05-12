@@ -21,9 +21,12 @@ limitations under the License.
 #include "lib/json.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "backend.h"
 #include "expression.h"
 
 namespace BMV2 {
+
+class JsonObjects;
 
 class Parser : public Inspector {
     Backend* backend;
