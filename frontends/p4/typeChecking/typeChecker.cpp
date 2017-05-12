@@ -2434,12 +2434,14 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
                         em->expr, corelib.packetIn.extract.name);
             }
         } else if (em->method->name == corelib.packetIn.lookahead.name) {
-            if (em->method->actualMethodType->typeParameters->size() != 1) {
-                typeError("%1%: unexpected type for method", em->method);
+            // this is a call to packet_in.lookahead.
+            if (em->expr->typeArguments->size() != 1) {
+                typeError("Expected 1 type parameter for %1%", em->method);
                 return;
             }
-            auto targ = em->actualMethodType->typeParameters->parameters.at(0);
-            if (hasVarbitsOrUnions(targ)) {
+            auto targ = em->expr->typeArguments->at(0);
+            auto typearg = typeMap->getTypeType(targ, true);
+            if (hasVarbitsOrUnions(typearg)) {
                 typeError("%1%: type argument must be a fixed-width type", targ);
                 return;
             }
