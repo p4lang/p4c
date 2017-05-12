@@ -128,10 +128,7 @@ TEST(arch, instantiation) {
                 b.emit(h);
             }
         }
-        MyParser() p;
-        MyIngress() ig;
-        MyDeparser() dp;
-        PSA(p, ig, dp) main;
+        PSA(MyParser(), MyIngress(), MyDeparser()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -162,8 +159,7 @@ TEST(arch, psa_package_with_body) {
             apply {
             }
         }
-        MyIngress(2) ig;
-        PSA(ig) main;
+        PSA(MyIngress(2)) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -197,9 +193,8 @@ TEST(arch, psa_control_in_control) {
         control MyEgress(inout Metadata m) (MyIngress ig) {
             apply {}
         }
-        MyIngress() ig;
-        MyEgress(ig) eg;
-        PSA(ig) main;
+        //MyEgress(ig) eg;
+        PSA(MyIngress()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -258,8 +253,7 @@ TEST(arch, psa_clone_as_param_to_control) {
         control MyIngress (inout ParsedHeaders p, inout Metadata m) (clone<bit<32>> c) {
             apply{}
         }
-        MyIngress(clone<bit<32>>()) ig;
-        PSA(ig) main;
+        PSA(MyIngress(clone<bit<32>>())) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -301,8 +295,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
             apply{}
         }
         PRE<bit<32>>() pre;
-        MyIngress(pre) ig;
-        PSA(ig) main;
+        PSA(MyIngress(pre)) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -333,8 +326,7 @@ TEST(arch, clone_as_extern_method) {
                 // invoke clone3 triggers a compiler bug.
             }
         }
-        MyIngress() ig;
-        PSA(ig) main;
+        PSA(MyIngress()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
