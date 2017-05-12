@@ -1897,6 +1897,11 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
+    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
+        ::error("%1%: casts are only supported to base types", expression->destType);
+        return expression;
+    }
+
     if (!canCastBetween(castType, sourceType)) {
         // This cast is not legal, but let's try to see whether
         // performing a substitution can help
@@ -1910,7 +1915,8 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             sourceType = getTypeType(expression->destType);
         }
         if (!canCastBetween(castType, sourceType))
-            typeError("%1%: Illegal cast from %2% to %3%", expression, sourceType, castType);
+            typeError("%1%: Illegal cast from %2% to %3%",
+                      expression, sourceType->toString(), castType->toString());
     }
     setType(expression, castType);
     setType(getOriginal(), castType);

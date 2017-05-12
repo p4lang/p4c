@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ struct T
     int<32> t1;
     int<32> t2;
 }
-   
+
 struct S
 {
     T s1;
     T s2;
 }
-    
+
 const T t = { 32s10, 32s20 };
 const S s = { { 32s15, 32s25}, t };
 
@@ -40,4 +40,4 @@ const int<32> y = s.s1.t2;
 
 const int<32> w = .t.t1;
 
-const T t1 = (T)s.s1;
+const T t1 = s.s1;
