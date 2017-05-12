@@ -23,15 +23,19 @@ limitations under the License.
 
 namespace P4 {
 
-// Policy used to decide whether a key expression is too complex.
+/**
+ * Policy used to decide whether a key expression is too complex.
+ */
 class KeyIsComplex {
  public:
     virtual ~KeyIsComplex() {}
     virtual bool isTooComplex(const IR::Expression* expression) const = 0;
 };
 
-// Policy which returns 'true' whenever a key is not a left value
-// or a call to the isValid().
+/**
+ * Policy that tracks whether a key is not a left value or a call to the isValid().
+ * It returns 'true' if any of the conditions is met.
+ */
 class NonLeftValue : public KeyIsComplex {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
@@ -42,7 +46,9 @@ class NonLeftValue : public KeyIsComplex {
     bool isTooComplex(const IR::Expression* expression) const;
 };
 
-// Policy that allows masked lvalues as well as simple lvalues or isValid()
+/**
+ * Policy that tracks whether a expression is masked non-lvalue, simple non-lvalue or isValid()
+ */
 class NonMaskLeftValue : public NonLeftValue {
  public:
     NonMaskLeftValue(ReferenceMap* refMap, TypeMap* typeMap) : NonLeftValue(refMap, typeMap) {}
@@ -61,8 +67,36 @@ class TableInsertions {
     std::vector<const IR::AssignmentStatement*>  statements;
 };
 
-// If some of the fields of a table key are "too complex",
-// turn them into simpler expressions.
+/**
+ * Transform complex table keys into simpler expressions.
+ *
+ * \code{.cpp}
+ *  table t {
+ *    key = { h.a + 1 : exact; }
+ *    ...
+ *  }
+ *  apply {
+ *    t.apply();
+ *  }
+ * \endcode
+ *
+ * is transformed to
+ *
+ * \code{.cpp}
+ *  bit<32> key_0;
+ *  table t {
+ *    key = { key_0 : exact; }
+ *    ...
+ *  }
+ *  apply {
+ *    key_0 = h.a + 1;
+ *    t.apply();
+ *  }
+ * \endcode
+ *
+ * @pre none
+ * @post all complex non-lvalue table key expressions are replaced with a lvalue expression.
+ */
 class DoSimplifyKey : public Transform {
     ReferenceMap*       refMap;
     TypeMap*            typeMap;
@@ -86,7 +120,10 @@ class DoSimplifyKey : public Transform {
     const IR::Node* postorder(IR::P4Table* table) override;
 };
 
-// Use a policy to decide when a key expression is too complex.
+/**
+ * This pass uses 'policy' to determine whether a key expression is too complex
+ * and simplifies keys which are complex according to the policy.
+ */
 class SimplifyKey : public PassManager {
  public:
     SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, const KeyIsComplex* policy) {
