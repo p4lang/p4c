@@ -20,7 +20,7 @@ limitations under the License.
 namespace BMV2 {
 
 void ControlConverter::convertTableEntries(const IR::P4Table *table,
-                                  Util::JsonObject *jsonTable) {
+                                           Util::JsonObject *jsonTable) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
 
@@ -173,9 +173,9 @@ cstring ControlConverter::getKeyMatchType(const IR::KeyElement *ke) {
 
 bool
 ControlConverter::handleTableImplementation(const IR::Property* implementation,
-                                   const IR::Key* key,
-                                   Util::JsonObject* table,
-                                   Util::JsonArray* action_profiles) {
+                                            const IR::Key* key,
+                                            Util::JsonObject* table,
+                                            Util::JsonArray* action_profiles) {
     if (implementation == nullptr) {
         table->emplace("type", "simple");
         return true;
@@ -288,7 +288,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
 
 Util::IJson*
 ControlConverter::convertTable(const CFG::TableNode* node,
-                      Util::JsonArray* action_profiles) {
+                               Util::JsonArray* action_profiles) {
     auto table = node->table;
     LOG3("Processing " << dbp(table));
     auto result = new Util::JsonObject();
