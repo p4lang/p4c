@@ -18,6 +18,8 @@ limitations under the License.
 #include "ebpfObject.h"
 #include "ebpfType.h"
 #include "frontends/p4/enumInstance.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace EBPF {
 
