@@ -18,6 +18,7 @@ limitations under the License.
 #define _BACKENDS_BMV2_HELPERS_H_
 
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
 #include "analyzer.h"
 #include "frontends/common/model.h"
