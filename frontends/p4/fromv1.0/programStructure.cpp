@@ -285,12 +285,6 @@ class ProgramStructure::FixupExtern : public Modifier {
 };
 
 void ProgramStructure::createExterns() {
-    for (auto r : registers) {
-        auto reg = r.first;
-        if (reg->direct)
-            ::error("%1%: direct registers are not supported yet", reg);
-    }
-
     for (auto it : extern_types)
         declarations->push_back(it.first->apply(FixupExtern(*this, it.second)));
 }
