@@ -38,7 +38,8 @@ midend_UNIFIED = \
 	midend/validateProperties.cpp \
 	midend/expandLookahead.cpp \
 	midend/noMatch.cpp \
-	midend/tableHit.cpp
+	midend/tableHit.cpp \
+	midend/expandEmit.cpp
 
 noinst_HEADERS += \
 	midend/actionsInlining.h \
@@ -68,6 +69,7 @@ noinst_HEADERS += \
 	midend/expandLookahead.h \
 	midend/noMatch.h \
 	midend/tableHit.h \
-	midend/midEndLast.h
+	midend/midEndLast.h \
+	midend/expandEmit.h
 
 cpplint_FILES += $(midend_UNIFIED) $(midend_NONUNIFIED)

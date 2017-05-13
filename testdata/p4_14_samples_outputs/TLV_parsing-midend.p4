@@ -201,8 +201,12 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_base_t>(hdr.ipv4_base);
-        packet.emit<ipv4_option_EOL_t[3]>(hdr.ipv4_option_EOL);
-        packet.emit<ipv4_option_EOL_t[3]>(hdr.ipv4_option_NOP);
+        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[0]);
+        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[1]);
+        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[2]);
+        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_NOP[0]);
+        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_NOP[1]);
+        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_NOP[2]);
         packet.emit<ipv4_option_security_t>(hdr.ipv4_option_security);
         packet.emit<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp);
     }

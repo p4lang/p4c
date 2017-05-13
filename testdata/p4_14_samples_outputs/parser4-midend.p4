@@ -138,8 +138,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vlan_tag_t[2]>(hdr.vlan_tag_);
-        packet.emit<mpls_t[3]>(hdr.mpls);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[0]);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[1]);
+        packet.emit<mpls_t>(hdr.mpls[0]);
+        packet.emit<mpls_t>(hdr.mpls[1]);
+        packet.emit<mpls_t>(hdr.mpls[2]);
         packet.emit<mpls_t>(hdr.mpls_bos);
         packet.emit<ipv4_t>(hdr.ipv4);
     }

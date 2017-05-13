@@ -5018,7 +5018,9 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<vxlan_t>(hdr.vxlan);
         packet.emit<tcp_t>(hdr.tcp);
         packet.emit<icmp_t>(hdr.icmp);
-        packet.emit<mpls_t[3]>(hdr.mpls);
+        packet.emit<mpls_t>(hdr.mpls[0]);
+        packet.emit<mpls_t>(hdr.mpls[1]);
+        packet.emit<mpls_t>(hdr.mpls[2]);
         packet.emit<ethernet_t>(hdr.inner_ethernet);
         packet.emit<ipv6_t>(hdr.inner_ipv6);
         packet.emit<ipv4_t>(hdr.inner_ipv4);

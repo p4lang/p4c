@@ -36,6 +36,7 @@ limitations under the License.
 #include "midend/noMatch.h"
 #include "midend/tableHit.h"
 #include "midend/expandLookahead.h"
+#include "midend/expandEmit.h"
 #include "midend/midEndLast.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
@@ -120,6 +121,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifySelectCases(&refMap, &typeMap, false),  // non-constant keysets
         new P4::ExpandLookahead(&refMap, &typeMap),
+        new P4::ExpandEmit(&refMap, &typeMap),
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),

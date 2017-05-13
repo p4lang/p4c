@@ -872,7 +872,8 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<cpu_header_t>(hdr.cpu_header);
         packet.emit<fcoe_header_t>(hdr.fcoe);
         packet.emit<roce_header_t>(hdr.roce);
-        packet.emit<vlan_tag_t[2]>(hdr.vlan_tag_);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[0]);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[1]);
         packet.emit<arp_rarp_t>(hdr.arp_rarp);
         packet.emit<arp_rarp_ipv4_t>(hdr.arp_rarp_ipv4);
         packet.emit<ipv6_t>(hdr.ipv6);
@@ -890,7 +891,9 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<vxlan_t>(hdr.vxlan);
         packet.emit<tcp_t>(hdr.tcp);
         packet.emit<icmp_t>(hdr.icmp);
-        packet.emit<mpls_t[3]>(hdr.mpls);
+        packet.emit<mpls_t>(hdr.mpls[0]);
+        packet.emit<mpls_t>(hdr.mpls[1]);
+        packet.emit<mpls_t>(hdr.mpls[2]);
         packet.emit<mpls_t>(hdr.mpls_bos);
         packet.emit<eompls_t>(hdr.eompls);
         packet.emit<ethernet_t>(hdr.inner_ethernet);

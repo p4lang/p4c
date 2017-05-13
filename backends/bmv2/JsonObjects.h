@@ -30,7 +30,7 @@ class JsonObjects {
  public:
     void add_program_info(const cstring& name);
     void add_meta_info();
-    unsigned add_header_type(const cstring& name, Util::JsonArray*& fields);
+    unsigned add_header_type(const cstring& name, Util::JsonArray*& fields, unsigned max_length);
     unsigned add_header_type(const cstring& name);
     void add_header_field(const cstring& name, Util::JsonArray*& field);
     unsigned add_header(const cstring& type, const cstring& name);

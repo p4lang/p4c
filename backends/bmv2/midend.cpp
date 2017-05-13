@@ -48,6 +48,7 @@ limitations under the License.
 #include "midend/compileTimeOps.h"
 #include "midend/predication.h"
 #include "midend/expandLookahead.h"
+#include "midend/expandEmit.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
 
@@ -101,6 +102,7 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::StrengthReduction(),
         new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
         new P4::ExpandLookahead(&refMap, &typeMap),
+        new P4::ExpandEmit(&refMap, &typeMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),

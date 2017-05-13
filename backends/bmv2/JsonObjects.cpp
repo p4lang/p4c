@@ -109,13 +109,15 @@ JsonObjects::add_meta_info() {
 }
 
 /**
- * Create a header type in json
+ * Create a header type in json.
  * @param name header name
  * @param type header type
+ * @param max_length  maximum length for a header with varbit fields;
+ *                    if 0 header does not contain varbit fields
  * @param fields a JsonArray for the fields in the header
  */
 unsigned
-JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields) {
+JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields, unsigned max_length) {
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
     header_type->emplace("name", name);
@@ -126,6 +128,8 @@ JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields) {
         auto temp = new Util::JsonArray();
         header_type->emplace("fields", temp);
     }
+    if (max_length > 0)
+        header_type->emplace("max_length", max_length);
     header_types->append(header_type);
     return id;
 }
@@ -345,4 +349,3 @@ JsonObjects::add_extern(const cstring& name, const cstring& type,
 }
 
 }  // namespace BMV2
-

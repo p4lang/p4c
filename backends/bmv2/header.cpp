@@ -126,6 +126,9 @@ void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
 void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
     cstring name = extVisibleName(st);
     auto fields = new Util::JsonArray();
+    unsigned max_length = 0;  // for variable-sized headers
+    bool varbitFound = false;
+
     for (auto f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
@@ -135,24 +138,30 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
             field->append(f->name.name);
             field->append(boolWidth);
             field->append(0);
+            max_length += boolWidth;
         } else if (auto type = ftype->to<IR::Type_Bits>()) {
             auto field = pushNewArray(fields);
             field->append(f->name.name);
             field->append(type->size);
             field->append(type->isSigned);
+            max_length += type->size;
         } else if (auto type = ftype->to<IR::Type_Varbits>()) {
             auto field = pushNewArray(fields);
             field->append(f->name.name);
-            field->append(type->size);  // FIXME -- where does length go?
+            max_length += type->size;
+            field->append("*");
+            if (varbitFound)
+                ::error("%1%: headers with multiple varbit fields not supported", st);
+            varbitFound = true;
         } else if (ftype->to<IR::Type_Stack>()) {
             BUG("%1%: nested stack", st);
         } else {
             BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
         }
     }
+
     // must add padding
-    unsigned width = st->width_bits();
-    unsigned padding = width % 8;
+    unsigned padding = max_length % 8;
     if (padding != 0) {
         cstring name = refMap->newName("_padding");
         auto field = pushNewArray(fields);
@@ -161,7 +170,10 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
         field->append(false);
     }
 
-    json->add_header_type(name, fields);
+    if (!varbitFound)
+        // ignore
+        max_length = 0;
+    json->add_header_type(name, fields, max_length);
 
     LOG1("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {
@@ -302,4 +314,3 @@ bool ConvertHeaders::preorder(const IR::PackageBlock *block) {
 }
 
 }  // namespace BMV2
-
