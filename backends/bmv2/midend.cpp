@@ -51,6 +51,7 @@ limitations under the License.
 #include "midend/expandLookahead.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
+#include "copyAnnotations.h"
 
 namespace BMV2 {
 
