@@ -18,4 +18,7 @@ control C<H>() {
   apply {}
 }
 
-C() c;
+control cproto();
+package top(cproto _c);
+
+top(C()) c;

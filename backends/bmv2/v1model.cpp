@@ -392,6 +392,8 @@ void V1Model::convertExternInstances(BMV2::Backend *backend,
         auto sz = eb->getParameterValue(instance.registers.sizeParam.name);
         CHECK_NULL(sz);
         BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+        if (sz->to<IR::Constant>()->value == 0)
+            error("%1%: direct registers are not supported in bmv2", inst);
         jreg->emplace("size", sz->to<IR::Constant>()->value);
         BUG_CHECK(eb->instanceType->is<IR::Type_SpecializedCanonical>(),
                 "%1%: Expected a generic specialized type", eb->instanceType);

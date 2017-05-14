@@ -1,0 +1,12 @@
+../testdata/p4_16_errors/issue388.p4(29): error: c: cannot instantiate at top-level
+C() c;
+    ^
+../testdata/p4_16_errors/issue388.p4(29): error: Could not find type of c
+C() c;
+    ^
+../testdata/p4_16_errors/issue388.p4(32): error: Could not find type of c
+  apply { c.apply(); }
+          ^
+../testdata/p4_16_errors/issue388.p4(32): error: Could not find type of c.apply
+  apply { c.apply(); }
+          ^^^^^^^

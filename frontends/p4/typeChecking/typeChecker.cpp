@@ -842,6 +842,10 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             prune();
             return decl;
         }
+        if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
+            ::error("%1%: cannot instantiate at top-level", decl);
+            return decl;
+        }
         auto type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         if (type == nullptr) {
             prune();
