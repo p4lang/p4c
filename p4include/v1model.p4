@@ -47,7 +47,7 @@ struct standard_metadata_t {
     // intrinsic metadata
     @alias("intrinsic_metadata.ingress_global_timestamp") bit<48> ingress_global_timestamp;
     @alias("intrinsic_metadata.lf_field_list") bit<32> lf_field_list;
-    @alias("intrinsic_metadata.mcast_grp")     bit<16> mgast_grp;
+    @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
     @alias("intrinsic_metadata.resubmit_flag") bit<1>  resubmit_flag;
     @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
 }
