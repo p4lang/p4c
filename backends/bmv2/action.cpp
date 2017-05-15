@@ -60,7 +60,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
         } else if (s->is<IR::EmptyStatement>()) {
             continue;
         } else if (s->is<IR::MethodCallStatement>()) {
-            LOG1("Visit " << dbp(s));
+            LOG3("Visit " << dbp(s));
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
             auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
             if (mi->is<P4::ActionCall>()) {
@@ -97,7 +97,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
-                LOG1("P4V1:: convert " << s);
+                LOG3("P4V1:: convert " << s);
                 backend->getSimpleSwitch()->convertExternObjects(result, em, mc, s);
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {

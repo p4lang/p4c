@@ -194,7 +194,6 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     // TODO: deal with references that return bool
     auto result = new Util::JsonObject();
 
-    LOG1("member " << expression);
     auto parentType = backend->getTypeMap()->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
     if (parentType->is<IR::Type_StructLike>()) {
@@ -235,7 +234,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 auto field = parentType->to<IR::Type_StructLike>()->getField(
                     expression->member);
                 CHECK_NULL(field);
-                LOG1("looking up field " << field);
+                LOG3("looking up field " << field);
                 auto name = ::get(backend->scalarMetadataFields, field);
                 CHECK_NULL(name);
                 result->emplace("type", "field");
@@ -419,7 +418,6 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     // This is useful for action bodies mostly
     auto decl = backend->getRefMap()->getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
-        // LOG1("Expression: " << param << " " << expression);
         if (backend->getStructure().nonActionParameters.find(param) !=
             backend->getStructure().nonActionParameters.end()) {
             map.emplace(expression, new Util::JsonValue(param->name.name));
@@ -431,7 +429,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
         result->emplace("value", paramIndex);
         map.emplace(expression, result);
     } else if (auto var = decl->to<IR::Declaration_Variable>()) {
-        LOG1("Variable to json " << var);
+        LOG3("Variable to json " << var);
         auto result = new Util::JsonObject();
         auto type = backend->getTypeMap()->getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
