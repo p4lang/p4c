@@ -56,11 +56,6 @@ extern packet_out {
     /// @T can be a header type, a header stack, a header_union, or a struct
     /// containing fields with such types.
     void emit<T>(in T hdr);
-    /// If @condition is true write the specified @data into the output packet,
-    /// advancing cursor.  @T can be a header type, a header stack, a header_union,
-    /// or a struct containing fields with such types.  If @condition is false,
-    /// do nothing.
-    void emit<T>(in bool condition, in T data);
 }
 
 // TODO: remove from this file, convert to built-in
