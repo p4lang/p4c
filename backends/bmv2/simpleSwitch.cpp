@@ -593,7 +593,8 @@ SimpleSwitch::convertChecksumUpdate(const IR::P4Control* updateControl,
 }
 
 void
-SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
+SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
+                                  std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto ingress = main->getParameterValue(v1model.sw.ingress.name);
     auto egress = main->getParameterValue(v1model.sw.egress.name);
@@ -607,7 +608,8 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel, std::set<cs
 }
 
 void
-SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
+SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
+                                     std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto verify = main->getParameterValue(v1model.sw.verify.name);
     auto update = main->getParameterValue(v1model.sw.update.name);
@@ -624,10 +626,11 @@ SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel, std::set
 }
 
 void
-SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
+SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel,
+                                        std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto update = main->getParameterValue(v1model.sw.update.name);
-    if (update == nullptr || !update->is<IR::ControlBlock>()){
+    if (update == nullptr || !update->is<IR::ControlBlock>()) {
         BUG_CHECK("%1%: main package does not match the expected model %2%",
                   main, v1model.file.toString());
     }
@@ -635,10 +638,11 @@ SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel, std::
 }
 
 void
-SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
+SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel,
+                                  std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto deparser = main->getParameterValue(v1model.sw.deparser.name);
-    if (deparser == nullptr || !deparser->is<IR::ControlBlock>()){
+    if (deparser == nullptr || !deparser->is<IR::ControlBlock>()) {
         BUG_CHECK("%1%: main package does not match the expected model %2%",
                   main, v1model.file.toString());
     }

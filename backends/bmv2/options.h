@@ -25,7 +25,6 @@ namespace BMV2 {
 enum class Target { UNKNOWN, PORTABLE, SIMPLE };
 
 class BMV2Options : public CompilerOptions {
-
  public:
     BMV2::Target arch = BMV2::Target::UNKNOWN;
     BMV2Options() {
