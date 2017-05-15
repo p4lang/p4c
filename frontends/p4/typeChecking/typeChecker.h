@@ -200,7 +200,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Header* type) override;
     const IR::Node* postorder(IR::Type_Stack* type) override;
     const IR::Node* postorder(IR::Type_Struct* type) override;
-    const IR::Node* postorder(IR::Type_Union* type) override;
+    const IR::Node* postorder(IR::Type_HeaderUnion* type) override;
     const IR::Node* postorder(IR::Type_Typedef* type) override;
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::Type_SpecializedCanonical* type) override;

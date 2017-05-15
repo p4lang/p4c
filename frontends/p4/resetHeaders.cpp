@@ -23,7 +23,7 @@ void DoResetHeaders::generateResets(
     const IR::Type* type,
     const IR::Expression* expr,
     IR::Vector<IR::StatOrDecl>* resets) {
-    if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
+    if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : sl->fields) {
             auto ftype = typeMap->getType(f, true);

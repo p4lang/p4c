@@ -151,6 +151,7 @@ These methods are:
 - header.setValid(),
 - header.setInvalid(),
 - header.isValid(),
+- union.isValid(),
 - stack.push(int),
 - stack.pop(int)
 */
