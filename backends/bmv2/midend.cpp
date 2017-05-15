@@ -205,6 +205,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::TableHit(&refMap, &typeMap),
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
+        new P4::MidEndLast(),
+        // Here is actually the start of the BMv2-specific back-end
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
@@ -219,7 +221,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        new P4::MidEndLast()
     });
 }
 

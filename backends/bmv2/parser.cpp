@@ -279,6 +279,14 @@ Parser::createDefaultTransition() {
 bool Parser::preorder(const IR::P4Parser* parser) {
     // TODO(hanw): hard-coded parser name
     auto parser_id = json->add_parser("parser");
+
+    for (auto s : parser->parserLocals) {
+        if (s->is<IR::Declaration_Instance>()) {
+            ::error("%1%: not supported on parsers on this target", s);
+            return false;
+        }
+    }
+
     // convert parse state
     for (auto state : parser->states) {
         if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
