@@ -28,7 +28,9 @@ Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
 }
 
 /**
- * This function handles one layer of nested struct.
+ * Create header type and header instance from a IR::StructLike type
+ *
+ * @param meta this boolean indicates if the struct is a metadata or header.
  */
 void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
     LOG1("Adding " << type);
@@ -102,7 +104,6 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     }
 }
 
-/// TODO(hanw): only check immediate struct fields.
 bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
     bool result = false;
     for (auto f : st->fields) {
@@ -160,7 +161,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
         field->append(false);
     }
 
-    UNUSED auto id = json->add_header_type(name, fields);
+    json->add_header_type(name, fields);
 
     LOG1("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {
@@ -185,7 +186,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
  */
 Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
     json->add_header_type("scalars");
-    refMap->newName("scalars");  // TODO(hanw): avoid modifying refMap?
+    refMap->newName("scalars");
 
     // bit<n>, bool, error are packed into 'scalars' type,
     // struct and stack introduces new header types
@@ -235,7 +236,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
     return Inspector::init_apply(node);
 }
 
-void ConvertHeaders::end_apply(UNUSED const IR::Node* node) {
+void ConvertHeaders::end_apply(const IR::Node*) {
     // pad scalars to byte boundary
     unsigned padding = scalars_width % 8;
     if (padding != 0) {

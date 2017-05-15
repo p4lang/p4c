@@ -16,12 +16,10 @@ limitations under the License.
 
 #include "coreLibrary.h"
 #include "fromv1.0/v1model.h"
-#include "common/model.h"
 
 namespace P4 {
 
 P4CoreLibrary P4CoreLibrary::instance;
-V2Model V2Model::instance;
 
 }  // namespace P4
 

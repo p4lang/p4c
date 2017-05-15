@@ -38,6 +38,13 @@ struct standard_metadata_t {
     bit<1>  drop;
     bit<16> recirculate_port;
     bit<32> packet_length;
+    //
+    // @alias is used to generate the field_alias section of the BMV2 JSON.
+    // Field alias creates a mapping from the metadata name in P4 program to
+    // the behavioral model's internal metadata name. Here we use it to
+    // expose all metadata supported by simple switch to the user through
+    // standard_metadata_t.
+    //
     // flattening fields that exist in bmv2-ss
     // queueing metadata
     @alias("queueing_metadata.enq_timestamp") bit<32> enq_timestamp;

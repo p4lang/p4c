@@ -28,7 +28,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-using Input = std::vector<const IR::Expression *>;
+using SelectorInput = std::vector<const IR::Expression *>;
 
 // This pass makes sure that when several match tables share a selector, they use the same input for
 // the selection algorithm. This is because bmv2 considers that the selection key is part of the
@@ -36,7 +36,7 @@ using Input = std::vector<const IR::Expression *>;
 class SharedActionSelectorCheck : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap*      typeMap;
-    std::map<const IR::Declaration_Instance *, Input> selector_input_map{};
+    std::map<const IR::Declaration_Instance *, SelectorInput> selector_input_map{};
 
   static bool checkSameKeyExpr(const IR::Expression* expr0, const IR::Expression* expr1) {
       if (expr0->node_type_name() != expr1->node_type_name())
@@ -62,7 +62,7 @@ class SharedActionSelectorCheck : public Inspector {
     explicit SharedActionSelectorCheck(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
         refMap(refMap), typeMap(typeMap) {}
 
-    const Input* get_selector_input(const IR::Declaration_Instance* selector);
+    const SelectorInput* get_selector_input(const IR::Declaration_Instance* selector);
     bool preorder(const IR::P4Table* table) override;
 };
 

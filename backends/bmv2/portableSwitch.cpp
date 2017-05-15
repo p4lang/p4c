@@ -14,9 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "model.h"
+#include "frontends/common/model.h"
+#include "portableSwitch.h"
 
-bool P4::V2Model::find_match_kind(cstring kind_name) {
+namespace P4 {
+
+PortableModel PortableModel::instance;
+
+}
+
+bool P4::PortableModel::find_match_kind(cstring kind_name) {
     bool found = false;
     for (auto m : instance.match_kinds) {
         if (m->toString() == kind_name) {
@@ -27,7 +34,7 @@ bool P4::V2Model::find_match_kind(cstring kind_name) {
     return found;
 }
 
-bool P4::V2Model::find_extern(cstring extern_name) {
+bool P4::PortableModel::find_extern(cstring extern_name) {
     bool found = false;
     for (auto m : instance.externs) {
         if (m->type.toString() == extern_name) {
@@ -48,8 +55,8 @@ std::ostream& operator<<(std::ostream &out, Model::Param_Model& p) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream &out, P4::V2Model& e) {
-    out << "V2Model " << e.version << std::endl;
+std::ostream& operator<<(std::ostream &out, P4::PortableModel& e) {
+    out << "PortableModel " << e.version << std::endl;
     for (auto v : e.parsers)  out << v;
     for (auto v : e.controls) out << v;
     for (auto v : e.externs)  out << v;
@@ -87,4 +94,12 @@ std::ostream& operator<<(std::ostream &out, P4::Extern_Model* p) {
     }
     return out;
 }
+
+// getSkipControls();
+
+// getPipelineControls();
+
+// getUpdateChecksum();
+
+
 
