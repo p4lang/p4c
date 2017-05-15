@@ -217,7 +217,7 @@ bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool for
         if (type == nullptr)
             return false;
         if (p->direction != IR::Direction::None && type->is<IR::Type_Extern>()) {
-            ::error("%1%: a parameter with an extern type cannot have a direction", p);
+            typeError("%1%: a parameter with an extern type cannot have a direction", p);
             return false;
         }
         if (forbidModules && (type->is<IR::Type_Parser>() ||
@@ -225,7 +225,7 @@ bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool for
                               type->is<IR::Type_Package>() ||
                               type->is<IR::P4Parser>() ||
                               type->is<IR::P4Control>())) {
-            ::error("%1%: parameter cannot have type %2%", p, type);
+            typeError("%1%: parameter cannot have type %2%", p, type);
             return false;
         }
     }
@@ -982,7 +982,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Package* decl) {
                 // error
                 return decl;
             if (ptype->is<IR::P4Parser>() || ptype->is<IR::P4Control>())
-                ::error("%1%: Invalid package parameter type", p);
+                typeError("%1%: Invalid package parameter type", p);
         }
     }
     return decl;
@@ -1368,13 +1368,13 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
     const IR::Key* key = table->getKey();
     if (key == nullptr) {
-        ::error("Could not find key for table %1%", table);
+        typeError("Could not find key for table %1%", table);
         prune();
         return el;
     }
     auto keyTuple = getType(key, false);
     if (keyTuple == nullptr) {
-        ::error("Could not find type for table key %1%", key);
+        typeError("Could not find type for table key %1%", key);
         prune();
         return el;
     }
@@ -1414,17 +1414,17 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
 
     auto keyset = entry->getKeys();
     if (keyset == nullptr || !keyset->is<IR::ListExpression>()) {
-        ::error("%1%: key expression must be tuple", keyset);
+        typeError("%1%: key expression must be tuple", keyset);
         return entry;
     } else if (keyset->components.size() < key->keyElements.size()) {
-        ::error("%1%: Size of entry keyset must match the table key set size", keyset);
+        typeError("%1%: Size of entry keyset must match the table key set size", keyset);
         return entry;
     }
 
     bool nonConstantKeys = false;
     for (auto ke : keyset->components)
         if (!isCompileTimeConstant(ke)) {
-            ::error("Key entry must be a compile time constant: %1%", ke);
+            typeError("Key entry must be a compile time constant: %1%", ke);
             nonConstantKeys = true;
         }
     if (nonConstantKeys)
@@ -1442,7 +1442,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
 
     auto actionRef = entry->getAction();
     if (!actionRef->is<IR::MethodCallExpression>()) {
-        ::error("Invalid action %1% in entry");
+        typeError("Invalid action %1% in entry");
         return entry;
     }
     auto actionCall = actionRef->to<IR::MethodCallExpression>();
@@ -1459,7 +1459,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
         }
     }
     if (!found)
-         ::error("%1%: action not in the table action list", actionRef);
+         typeError("%1%: action not in the table action list", actionRef);
 
     return entry;
 }
@@ -2150,7 +2150,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             if (member == IR::Type_Header::setValid ||
                 member == IR::Type_Header::setInvalid) {
                 if (!isLeftValue(expression->expr))
-                    ::error("%1%: must be applied to a left-value", expression);
+                    typeError("%1%: must be applied to a left-value", expression);
                 // Built-in method
                 auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList);
                 auto ctype = canonicalize(type);
@@ -2234,7 +2234,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 typeError("%1%: '%2%' and '%3%' for stacks cannot be used in a parser",
                           expression, IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
             if (!isLeftValue(expression->expr))
-                ::error("%1%: must be applied to a left-value", expression);
+                typeError("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
             auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::In,
                                            new IR::Type_InfInt());
@@ -2366,13 +2366,25 @@ TypeInference::actionCall(bool inActionList,
     return actionCall;
 }
 
-bool TypeInference::hasVarbits(const IR::Type_Header* type) const {
-    for (auto f : type->fields) {
-        auto ftype = typeMap->getType(f);
-        if (ftype == nullptr)
-            continue;
-        if (ftype->is<IR::Type_Varbits>())
-            return true;
+bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
+    // called for a canonical type
+    if (type->is<IR::Type_HeaderUnion>() || type->is<IR::Type_Varbits>()) {
+        return true;
+    } else if (auto ht = type->to<IR::Type_StructLike>()) {
+        for (auto f : ht->fields) {
+            auto ftype = typeMap->getType(f);
+            if (ftype == nullptr)
+                continue;
+            if (hasVarbitsOrUnions(ftype))
+                return true;
+        }
+    } else if (auto at = type->to<IR::Type_Stack>()) {
+        return hasVarbitsOrUnions(at->elementType);
+    } else if (auto tpl = type->to<IR::Type_Tuple>()) {
+        for (auto f : tpl->components) {
+            if (hasVarbitsOrUnions(f))
+                return true;
+        }
     }
     return false;
 }
@@ -2392,7 +2404,7 @@ void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* ty
         return;
     }
 
-    ::error("%1%: argument must be a header, stack or union, or a struct of such types",
+    typeError("%1%: argument must be a header, stack or union, or a struct of such types",
             emit);
 }
 
@@ -2405,7 +2417,7 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
         if (em->method->name == corelib.packetIn.extract.name) {
             if (argCount == 0) {
                 // core.p4 is corrupted.
-                ::error("%1%: Expected exactly 1 argument for %2% method",
+                typeError("%1%: Expected exactly 1 argument for %2% method",
                         em->expr, corelib.packetIn.extract.name);
                 return;
             }
@@ -2413,20 +2425,33 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
             auto arg0 = em->expr->arguments->at(0);
             auto argType = typeMap->getType(arg0, true);
             if (!argType->is<IR::Type_Header>()) {
-                ::error("%1%: argument must be a header", em->expr->arguments->at(0));
+                typeError("%1%: argument must be a header", em->expr->arguments->at(0));
                 return;
             }
 
             if (argCount == 1) {
-                if (hasVarbits(argType->to<IR::Type_Header>()))
-                    ::error("%1%: argument cannot contain varbit fields", arg0);
+                if (hasVarbitsOrUnions(argType))
+                    // This will never have unions, but may have varbits
+                    typeError("%1%: argument cannot contain varbit fields", arg0);
             } else if (argCount == 2) {
-                if (!hasVarbits(argType->to<IR::Type_Header>()))
-                    ::error("%1%: argument should contain a varbit field", arg0);
+                if (!hasVarbitsOrUnions(argType))
+                    typeError("%1%: argument should contain a varbit field", arg0);
             } else {
                 // core.p4 is corrupted.
-                ::error("%1%: Expected 1 or 2 arguments for '%2%' method",
+                typeError("%1%: Expected 1 or 2 arguments for '%2%' method",
                         em->expr, corelib.packetIn.extract.name);
+            }
+        } else if (em->method->name == corelib.packetIn.lookahead.name) {
+            // this is a call to packet_in.lookahead.
+            if (em->expr->typeArguments->size() != 1) {
+                typeError("Expected 1 type parameter for %1%", em->method);
+                return;
+            }
+            auto targ = em->expr->typeArguments->at(0);
+            auto typearg = typeMap->getTypeType(targ, true);
+            if (hasVarbitsOrUnions(typearg)) {
+                typeError("%1%: type argument must be a fixed-width type", targ);
+                return;
             }
         }
     } else if (et->name == corelib.packetOut.name) {
@@ -2438,8 +2463,8 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
                 arg = em->expr->arguments->at(1);
             } else {
                 // core.p4 is corrupted.
-                ::error("%1%: Expected 1 or 2 arguments for '%2%' method",
-                        em->expr, corelib.packetOut.emit.name);
+                typeError("%1%: Expected 1 or 2 arguments for '%2%' method",
+                          em->expr, corelib.packetOut.emit.name);
                 return;
             }
 
@@ -2538,14 +2563,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         if (mi->isApply()) {
             auto a = mi->to<ApplyMethod>();
             if (a->isTableApply() && findContext<IR::P4Action>())
-                ::error("%1%: tables cannot be invoked from actions", expression);
+                typeError("%1%: tables cannot be invoked from actions", expression);
         }
 
         // Check that verify is only invoked from parsers.
         if (auto ef = mi->to<ExternFunction>()) {
             if (ef->method->name == IR::ParserState::verify)
                 if (!findContext<IR::P4Parser>())
-                    ::error("%1%: may only be invoked in parsers", ef->expr);
+                    typeError("%1%: may only be invoked in parsers", ef->expr);
         }
 
         if (mi->is<ExternMethod>())

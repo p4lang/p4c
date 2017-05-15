@@ -129,7 +129,7 @@ class TypeInference : public Transform {
     const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
-    bool hasVarbits(const IR::Type_Header* type) const;
+    bool hasVarbitsOrUnions(const IR::Type* type) const;
     void checkCorelibMethods(const ExternMethod* em) const;
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
