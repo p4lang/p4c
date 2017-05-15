@@ -128,7 +128,7 @@ struct HeaderFieldPath {
 
                 // Top-level structs and unions don't show up in P4Runtime field names, so we use a
                 // blank path component name.
-                if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
+                if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
                     return HeaderFieldPath::root("", type);
                 }
             }

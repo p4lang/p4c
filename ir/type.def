@@ -242,10 +242,10 @@ class Type_Struct : Type_StructLike {
     toString{ return cstring("struct ") + externalName(); }
 }
 
-class Type_Union : Type_StructLike {
+class Type_HeaderUnion : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + externalName(); }
-    /// this makes some assumptions on padding
+    // this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields)

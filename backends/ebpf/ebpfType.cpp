@@ -107,7 +107,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
         kind = "struct";
     else if (strct->is<IR::Type_Header>())
         kind = "struct";
-    else if (strct->is<IR::Type_Union>())
+    else if (strct->is<IR::Type_HeaderUnion>())
         kind = "union";
     else
         BUG("Unexpected struct type %1%", strct);
@@ -139,7 +139,7 @@ EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
 
 void EBPFStructType::emitInitializer(CodeBuilder* builder) {
     builder->blockStart();
-    if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
+    if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
         for (auto f : fields) {
             builder->emitIndent();
             builder->appendFormat(".%s = ", f->field->name.name);
