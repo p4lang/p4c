@@ -13,3 +13,6 @@ struct S {
     T s2;
 }
 
+struct Empty {
+}
+

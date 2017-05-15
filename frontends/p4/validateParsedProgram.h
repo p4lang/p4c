@@ -31,7 +31,6 @@ namespace P4 {
 
    - integer constants have valid types
    - don't care _ is not used as a name for methods, fields, variables, instances
-   - unions have at least one field
    - width of bit<> types is positive
    - width of int<> types is larger than 1
    - no parser state is named 'accept' or 'reject'
@@ -62,7 +61,6 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::StructField* f) override;
     void postorder(const IR::ParserState* s) override;
     void postorder(const IR::P4Table* t) override;
-    void postorder(const IR::Type_Union* type) override;
     void postorder(const IR::Type_Bits* type) override;
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Variable* decl) override;

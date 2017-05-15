@@ -641,7 +641,7 @@ structTypeDeclaration
 headerUnionDeclaration
     : optAnnotations
         HEADER_UNION name { driver.structure->declareType(*$3); }
-        "{" structFieldList "}" { $$ = new IR::Type_Union(@3, *$3, $1, *$6); }
+        "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, *$6); }
     ;
 
 structFieldList
@@ -928,7 +928,8 @@ argument
     ;
 
 expressionList
-    : expression                         { $$ = new IR::Vector<IR::Expression>();
+    : /* empty */                        { $$ = new IR::Vector<IR::Expression>(); }
+    | expression                         { $$ = new IR::Vector<IR::Expression>();
                                            $$->push_back($1); }
     | expressionList "," expression      { $$ = $1; $$->push_back($3); }
     ;
