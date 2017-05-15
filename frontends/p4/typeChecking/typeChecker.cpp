@@ -2442,7 +2442,6 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
                         em->expr, corelib.packetOut.emit.name);
                 return;
             }
-
             auto argType = typeMap->getType(arg, true);
             checkEmitType(em->expr, argType);
         }
