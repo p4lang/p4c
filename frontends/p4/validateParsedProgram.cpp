@@ -54,12 +54,6 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
         ::error("%1%: Illegal field name", f->name);
 }
 
-/// Unions must have at least one field
-void ValidateParsedProgram::postorder(const IR::Type_Union* type) {
-    if (type->fields.size() == 0)
-        ::error("%1%: empty union", type);
-}
-
 /// Width of a bit<> type is at least 0
 /// Width of an int<> type is at least 1
 void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
