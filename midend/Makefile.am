@@ -23,7 +23,6 @@ midend_UNIFIED = \
 	midend/nestedStructs.cpp \
 	midend/inlining.cpp \
 	midend/interpreter.cpp \
-	midend/isolateMethodCalls.cpp \
 	midend/local_copyprop.cpp \
 	midend/localizeActions.cpp \
 	midend/moveConstructors.cpp \
@@ -52,7 +51,6 @@ noinst_HEADERS += \
 	midend/has_side_effects.h \
 	midend/inlining.h \
 	midend/interpreter.h \
-	midend/isolateMethodCalls.h \
 	midend/local_copyprop.h \
 	midend/localizeActions.h \
 	midend/moveConstructors.h \

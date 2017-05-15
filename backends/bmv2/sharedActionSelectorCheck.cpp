@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-const Input*
+const SelectorInput*
 SharedActionSelectorCheck::get_selector_input(const IR::Declaration_Instance* selector) {
     auto it = selector_input_map.find(selector);
     if (it == selector_input_map.end()) return nullptr;  // selector never used
@@ -50,7 +50,7 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     if (type_extern_name != BMV2::TableImplementation::actionSelectorName) return false;
 
     auto key = table->getKey();
-    Input input;
+    SelectorInput input;
     for (auto ke : key->keyElements) {
         auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
         BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
@@ -64,7 +64,7 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
         return false;
     }
     // returns true if inputs are the same, false otherwise
-    auto cmp_inputs = [](const Input &i1, const Input &i2) {
+    auto cmp_inputs = [](const SelectorInput &i1, const SelectorInput &i2) {
         for (auto e1 : i1) {
             auto cmp_e = [e1](const IR::Expression *e2) {
                 return checkSameKeyExpr(e1, e2);

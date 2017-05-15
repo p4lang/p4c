@@ -27,6 +27,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
+#include "backend.h"
 
 namespace BMV2 {
 

@@ -25,10 +25,6 @@ limitations under the License.
 #include "lib/json.h"
 #include "backends/bmv2/sharedActionSelectorCheck.h"
 
-namespace BMV2 {
-class Backend;
-}
-
 namespace P4V1 {
 
 // This should be kept in sync with p4includes/v1model.p4
@@ -305,20 +301,6 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       recirculate;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
-
-    static void convertExternObjects(Util::JsonArray *o, BMV2::Backend *bmv2,
-                                     const P4::ExternMethod *em,
-                                     const IR::MethodCallExpression *mc,
-                                     const IR::StatOrDecl* s);
-    static void convertExternFunctions(Util::JsonArray *o, BMV2::Backend *bmv2,
-                                       const P4::ExternFunction *ef,
-                                       const IR::MethodCallExpression *mc,
-                                       const IR::StatOrDecl* s);
-    static void convertExternInstances(BMV2::Backend *bmv2,
-                                       const IR::Declaration *c,
-                                       const IR::ExternBlock* eb,
-                                       Util::JsonArray* action_profiles,
-                                       BMV2::SharedActionSelectorCheck& selector_check);
 
     static V1Model instance;
 };

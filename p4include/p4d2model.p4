@@ -18,7 +18,7 @@ limitations under the License.
 
 /* P4-16 declaration of the P4-D2 (P4 Developer's Day) switch model */
 
-#include "core.p4"
+#include <core.p4>
 
 /***************************************************************************
  *************** C O M M O N   P O R T A B L E   T Y P E S *****************

@@ -21,24 +21,24 @@ limitations under the License.
 #include "expression.h"
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "lib/assert.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
+#include "JsonObjects.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
-#include "copyAnnotations.h"
-#include "JsonObjects.h"
+#include "options.h"
+#include "portableSwitch.h"
+#include "simpleSwitch.h"
 
 namespace BMV2 {
 
-enum class CompilerMode { PSA, SIMPLE };
+class ExpressionConverter;
 
 class Backend : public PassManager {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
@@ -49,19 +49,25 @@ class Backend : public PassManager {
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
     P4::ConvertEnums::EnumMapping*   enumMap;
-    const IR::ToplevelBlock*         tlb;
+    const IR::ToplevelBlock*         toplevel;
     ExpressionConverter*             conv;
     P4::P4CoreLibrary&               corelib;
     ProgramParts                     structure;
-    Util::JsonObject                 toplevel;
-    P4::V2Model&                     model;
-    P4V1::V1Model&                   v1model;
+    Util::JsonObject                 jsonTop;
+    P4::PortableModel&               model;  // remove
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
 
+    // bmv2 backend supports multiple target architectures, we create different
+    // json generators for each architecture to handle the differences in json
+    // format for each architecture.
+    P4V1::SimpleSwitch*              simpleSwitch;
+    // PortableSwitchJsonConverter*  portableSwitch;
+
  public:
     BMV2::JsonObjects*               json;
+    Target                           target;
     Util::JsonArray*                 calculations;
     Util::JsonArray*                 checksums;
     Util::JsonArray*                 counters;
@@ -73,15 +79,20 @@ class Backend : public PassManager {
     Util::JsonArray*                 force_arith;
     Util::JsonArray*                 field_aliases;
 
-    CompilerMode                     mode;
-
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
 
-    /// map from block to its type as defined in architecture file
-    BlockTypeMap                     blockTypeMap;
+    // first element is container->name, second element is bmv2 hardcoded name
+    std::set<cstring>                pipeline_controls;
+    std::set<cstring>                non_pipeline_controls;
+    std::set<cstring>                update_checksum_controls;
+    std::set<cstring>                deparser_controls;
+
+    // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
+    // provide an map from user program block name to hard-coded names.
+    std::map<cstring, cstring>       pipeline_namemap;
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
@@ -89,29 +100,29 @@ class Backend : public PassManager {
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
 
  public:
-  explicit Backend(bool isV1,
-                   P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                   P4::ConvertEnums::EnumMapping* enumMap, BMV2::JsonObjects* json) :
-        refMap(refMap), typeMap(typeMap),
-        enumMap(enumMap), corelib(P4::P4CoreLibrary::instance),
-        model(P4::V2Model::instance), v1model(P4V1::V1Model::instance),
-        json(json),
-        mode(CompilerMode::SIMPLE)
-    { refMap->setIsV1(isV1); }
-    void process(const IR::ToplevelBlock* block);
-    void convert(const IR::ToplevelBlock* block, CompilerOptions& options);
+    Backend(bool isV1, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+            P4::ConvertEnums::EnumMapping* enumMap) :
+        refMap(refMap), typeMap(typeMap), enumMap(enumMap),
+        corelib(P4::P4CoreLibrary::instance),
+        model(P4::PortableModel::instance),
+        simpleSwitch(new P4V1::SimpleSwitch(this)),
+        json(new BMV2::JsonObjects()),
+        target(Target::SIMPLE) { refMap->setIsV1(isV1); }
+    void process(const IR::ToplevelBlock* block, BMV2Options& options);
+    void convert(BMV2Options& options);
     void serialize(std::ostream& out) const
-    { toplevel.serialize(out); }
+    { jsonTop.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
     ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
-    P4::V2Model &         getModel()     { return model; }
+    P4::PortableModel &   getModel()     { return model; }
     ProgramParts &        getStructure() { return structure; }
     P4::ReferenceMap*     getRefMap()    { return refMap; }
     P4::TypeMap*          getTypeMap()   { return typeMap; }
-    const IR::ToplevelBlock* getToplevelBlock() { return tlb; }
+    P4V1::SimpleSwitch*   getSimpleSwitch()        { return simpleSwitch; }
+    const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
 };
 
 }  // namespace BMV2

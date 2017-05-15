@@ -19,23 +19,24 @@ limitations under the License.
 #include <iostream>
 
 #include "ir/ir.h"
-#include "lib/log.h"
-#include "lib/error.h"
-#include "lib/exceptions.h"
-#include "lib/gc.h"
-#include "lib/nullstream.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
-#include "midend.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
+#include "lib/gc.h"
+#include "lib/log.h"
+#include "lib/nullstream.h"
 #include "backend.h"
+#include "midend.h"
+#include "options.h"
 #include "JsonObjects.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    CompilerOptions options;
-    options.langVersion = CompilerOptions::FrontendVersion::P4_16;
+    BMV2::BMV2Options options;
+    options.langVersion = BMV2::BMV2Options::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 
     if (options.process(argc, argv) != nullptr)
@@ -72,28 +73,16 @@ int main(int argc, char *const argv[]) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0 || toplevel == nullptr)
+    if (::errorCount() > 0)
         return 1;
-
-    BMV2::JsonObjects jsonObjects;
-    jsonObjects.add_program_info(options.file);
-    jsonObjects.add_meta_info();
-
-    // convert all enums to json
-    for (const auto &pEnum : midEnd.enumMap) {
-        auto name = pEnum.first->getName();
-        for (const auto &pEntry : *pEnum.second) {
-            jsonObjects.add_enum(name, pEntry.first, pEntry.second);
-        }
-    }
 
     // backend depends on the modified refMap and typeMap from midEnd.
     BMV2::Backend backend(options.isv1(), &midEnd.refMap,
-            &midEnd.typeMap, &midEnd.enumMap, &jsonObjects);
+            &midEnd.typeMap, &midEnd.enumMap);
     try {
         backend.addDebugHook(hook);
-        backend.process(toplevel);
-        backend.convert(toplevel, options);
+        backend.process(toplevel, options);
+        backend.convert(options);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

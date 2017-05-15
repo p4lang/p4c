@@ -14,23 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_INFERARCHITECTURE_H_
-#define _FRONTENDS_P4_INFERARCHITECTURE_H_
+#ifndef _BACKENDS_BMV2_EXTRACTARCHINFO_H_
+#define _BACKENDS_BMV2_EXTRACTARCHINFO_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "typeMap.h"
-#include "common/model.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace BMV2 {
 
-class InferArchitecture : public Inspector {
+class ExtractArchInfo : public Inspector {
  private:
-    TypeMap *typeMap;
-    V2Model& v2model;
+    P4::TypeMap*       typeMap;
+    P4::PortableModel& portable_model;
  public:
-    explicit InferArchitecture(TypeMap *typeMap)
-        : typeMap(typeMap), v2model(P4::V2Model::instance) {
+    explicit ExtractArchInfo(P4::TypeMap *typeMap)
+        : typeMap(typeMap), portable_model(P4::PortableModel::instance) {
     }
  public:
     bool preorder(const IR::Type_Control *node) override;
@@ -41,6 +42,6 @@ class InferArchitecture : public Inspector {
     bool preorder(const IR::Declaration_MatchKind* kind) override;
 };
 
-}  // namespace P4
+}  // namespace BMV2
 
-#endif  /* _FRONTENDS_P4_INFERARCHITECTURE_H_ */
+#endif  /* _BACKENDS_BMV2_EXTRACTARCHINFO_H_ */

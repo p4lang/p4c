@@ -24,13 +24,13 @@ limitations under the License.
 #include "midend/inlining.h"
 #include "midend/convertEnums.h"
 #include "helpers.h"
+#include "options.h"
 
 namespace BMV2 {
 
 class MidEnd : public PassManager {
     P4::InlineWorkList controlsToInline;
     P4::ActionsInlineList actionsToInline;
-    cstring updateControlBlockName;
 
  public:
     // These will be accurate when the mid-end completes evaluation
@@ -38,9 +38,8 @@ class MidEnd : public PassManager {
     P4::TypeMap         typeMap;
     const IR::ToplevelBlock   *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
-    BlockTypeMap        blockTypeMap;
 
-    explicit MidEnd(CompilerOptions& options);
+    explicit MidEnd(BMV2Options& options);
     const IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }

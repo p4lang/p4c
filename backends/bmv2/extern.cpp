@@ -66,6 +66,8 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
                 P4C_UNIMPLEMENTED("extern support for %1%", decl);
             auto attributes = addExternAttributes(decl, externBlock);
             json->add_extern(name, type, attributes);
+        } else {
+            BUG("%1% Unsupported block type for extern generation.", block->toString());
         }
     }
     return false;
@@ -73,7 +75,7 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
 
 /// Custom visitor to enable traversal on other blocks
 bool Extern::preorder(const IR::PackageBlock *block) {
-    if (backend->mode != CompilerMode::PSA)
+    if (backend->target != Target::PORTABLE)
         return false;
 
     for (auto it : block->constantValue) {

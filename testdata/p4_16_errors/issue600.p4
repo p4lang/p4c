@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,18 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <core.p4>
 
-#ifndef _P4C_LIB_ASSERT_H_
-#define _P4C_LIB_ASSERT_H_
+header H {
+    varbit<120> x;
+}
 
-/* Mark a function or variable possibly unused. */
-#ifndef UNUSED
-#define UNUSED __attribute__((__unused__))
-#endif
-
-/* Mark a function parameter as unused. */
-#ifndef UNUSED_PARAMETER
-#define UNUSED_PARAMETER(x) (void)(x)
-#endif
-
-#endif
+parser p(packet_in pkt) {
+    H h;
+    state start {
+        h = pkt.lookahead<H>();
+        transition accept;
+    }
+}

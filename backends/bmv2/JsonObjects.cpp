@@ -20,6 +20,9 @@ limitations under the License.
 
 namespace BMV2 {
 
+const int JSON_MAJOR_VERSION = 2;
+const int JSON_MINOR_VERSION = 7;
+
 JsonObjects::JsonObjects() {
     toplevel = new Util::JsonObject();
     header_types = insert_array_field(toplevel, "header_types");
@@ -43,7 +46,19 @@ JsonObjects::JsonObjects() {
     field_aliases = insert_array_field(toplevel, "field_aliases");
 }
 
-/// insert a json array to a parent object under key 'name'
+Util::JsonObject*
+JsonObjects::find_object_by_name(Util::JsonArray* array, const cstring& name) {
+    for (auto e : *array) {
+        auto obj = e->to<Util::JsonObject>();
+        auto val = obj->get("name")->to<Util::JsonValue>();
+        if (val != nullptr && val->isString() && val->getString() == name) {
+            return obj;
+        }
+    }
+    return nullptr;
+}
+
+/// Insert a json array to a parent object under key 'name'.
 Util::JsonArray*
 JsonObjects::insert_array_field(Util::JsonObject* parent, cstring name) {
     auto result = new Util::JsonArray();
@@ -51,7 +66,7 @@ JsonObjects::insert_array_field(Util::JsonObject* parent, cstring name) {
     return result;
 }
 
-/// append a json array to a parent json array
+/// Append a json array to a parent json array.
 Util::JsonArray*
 JsonObjects::append_array(Util::JsonArray* parent) {
     auto result = new Util::JsonArray();
@@ -59,14 +74,14 @@ JsonObjects::append_array(Util::JsonArray* parent) {
     return result;
 }
 
-/// insert a json array named 'parameters' in a parent json object
+/// Insert a json array named 'parameters' in a parent json object.
 Util::JsonArray*
 JsonObjects::create_parameters(Util::JsonObject* object) {
     return insert_array_field(object, "parameters");
 }
 
-/// append a json object r to a parent json array
-/// insert a field 'op' with 'name' to parent
+/// Append a json object r to a parent json array,
+/// insert a field 'op' with 'name' to parent.
 Util::JsonObject*
 JsonObjects::create_primitive(Util::JsonArray* parent, cstring name) {
     auto result = new Util::JsonObject();
@@ -83,8 +98,8 @@ JsonObjects::add_program_info(const cstring& name) {
 void
 JsonObjects::add_meta_info() {
     auto info = new Util::JsonObject();
-    static constexpr int version_major = 2;
-    static constexpr int version_minor = 7;
+    static constexpr int version_major = JSON_MAJOR_VERSION;
+    static constexpr int version_minor = JSON_MINOR_VERSION;
     auto version = insert_array_field(info, "version");
     version->append(version_major);
     version->append(version_minor);
@@ -94,7 +109,7 @@ JsonObjects::add_meta_info() {
 }
 
 /**
- * create a header type in json
+ * Create a header type in json
  * @param name header name
  * @param type header type
  * @param fields a JsonArray for the fields in the header
@@ -115,7 +130,7 @@ JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields) {
     return id;
 }
 
-/// create a heder type with empty field list.
+/// Create a header type with empty field list.
 unsigned
 JsonObjects::add_header_type(const cstring& name) {
     auto header_type = new Util::JsonObject();
@@ -128,25 +143,18 @@ JsonObjects::add_header_type(const cstring& name) {
     return id;
 }
 
-/// create a new field to an existing header type
+/// Create a set of fields to an existing header type.
+/// The header type is decribed by the name.
 void
 JsonObjects::add_header_field(const cstring& name, Util::JsonArray*& field) {
     CHECK_NULL(field);
-    Util::JsonArray* fields = nullptr;
-    for (auto h : *header_types) {
-        auto hdr = h->to<Util::JsonObject>();
-        auto hdrName = hdr->get("name")->to<Util::JsonValue>();
-        if (hdrName != nullptr && hdrName->isString() && hdrName->getString() == name) {
-            fields = hdr->get("fields")->to<Util::JsonArray>();
-            CHECK_NULL(fields);
-            break;
-        }
-    }
+    Util::JsonObject* headerType = find_object_by_name(header_types, name);
+    Util::JsonArray* fields = headerType->get("fields")->to<Util::JsonArray>();
     BUG_CHECK(fields != nullptr, "header '%1%' not found", name);
     fields->append(field);
 }
 
-/// create a header instance in json
+/// Create a header instance in json.
 unsigned
 JsonObjects::add_header(const cstring& type, const cstring& name) {
     auto header = new Util::JsonObject();
@@ -205,17 +213,7 @@ void
 JsonObjects::add_enum(const cstring& enum_name, const cstring& entry_name,
                       const unsigned entry_value) {
     // look up enum in json by name
-    Util::JsonObject* enum_json = nullptr;
-    for (auto e : *enums) {
-        auto obj = e->to<Util::JsonObject>();
-        if (obj != nullptr) {
-            auto jname = obj->get("name")->to<Util::JsonValue>();
-            if (jname != nullptr && jname->isString() && jname->getString() == enum_name) {
-                enum_json = obj;
-                break;
-            }
-        }
-    }
+    Util::JsonObject* enum_json = find_object_by_name(enums, enum_name);
     if (enum_json == nullptr) {  // first entry in a new enum
         enum_json = new Util::JsonObject();
         enum_json->emplace("name", enum_name);
@@ -236,7 +234,6 @@ JsonObjects::add_enum(const cstring& enum_name, const cstring& entry_name,
     }
 }
 
-///
 unsigned
 JsonObjects::add_parser(const cstring& name) {
     auto parser = new Util::JsonObject();
@@ -252,56 +249,56 @@ JsonObjects::add_parser(const cstring& name) {
     return id;
 }
 
+/// insert parser state into a parser identified by parser_id
+/// return the id of the parser state
 unsigned
-JsonObjects::add_parser_state(const unsigned id, const cstring& state_name) {
-    if (map_parser.find(id) != map_parser.end()) {
-        auto parser = map_parser[id];
-        auto states = parser->get("parse_states")->to<Util::JsonArray>();
+JsonObjects::add_parser_state(const unsigned parser_id, const cstring& state_name) {
+    if (map_parser.find(parser_id) == map_parser.end())
+        BUG("parser %1% not found.", parser_id);
+    auto parser = map_parser[parser_id];
+    auto states = parser->get("parse_states")->to<Util::JsonArray>();
+    auto state = new Util::JsonObject();
+    unsigned state_id = BMV2::nextId("parse_states");
+    state->emplace("name", state_name);
+    state->emplace("id", state_id);
+    auto operations = new Util::JsonArray();
+    state->emplace("parser_ops", operations);
+    auto transitions = new Util::JsonArray();
+    state->emplace("transitions", transitions);
+    states->append(state);
+    auto key = new Util::JsonArray();
+    state->emplace("transition_key", key);
 
-        auto state = new Util::JsonObject();
-        unsigned id = BMV2::nextId("parse_states");
-        state->emplace("name", state_name);
-        state->emplace("id", id);
-        auto operations = new Util::JsonArray();
-        state->emplace("parser_ops", operations);
-        auto transitions = new Util::JsonArray();
-        state->emplace("transitions", transitions);
-        states->append(state);
-        auto key = new Util::JsonArray();
-        state->emplace("transition_key", key);
-
-        map_parser_state.emplace(id, state);
-        return id;
-    } else {
-        BUG("%1% parser state not valid.", state_name);
-    }
+    map_parser_state.emplace(state_id, state);
+    return state_id;
 }
 
 void
-JsonObjects::add_parser_transition(const unsigned id, Util::IJson* transition) {
-    if (map_parser_state.find(id) != map_parser_state.end()) {
-       auto state = map_parser_state[id];
-       auto transitions = state->get("transitions")->to<Util::JsonArray>();
-       CHECK_NULL(transitions);
-       auto trans = transition->to<Util::JsonObject>();
-       CHECK_NULL(trans);
-       transitions->append(trans); }
+JsonObjects::add_parser_transition(const unsigned state_id, Util::IJson* transition) {
+    if (map_parser_state.find(state_id) == map_parser_state.end())
+        BUG("parser state %1% not found.", state_id);
+    auto state = map_parser_state[state_id];
+    auto transitions = state->get("transitions")->to<Util::JsonArray>();
+    CHECK_NULL(transitions);
+    auto trans = transition->to<Util::JsonObject>();
+    CHECK_NULL(trans);
+    transitions->append(trans);
 }
 
 void
-JsonObjects::add_parser_op(const unsigned id, Util::IJson* op) {
-    if (map_parser_state.find(id) != map_parser_state.end()) {
-        auto state = map_parser_state[id];
-        auto statements = state->get("parser_ops")->to<Util::JsonArray>();
-        CHECK_NULL(statements);
-        statements->append(op);
-    }
+JsonObjects::add_parser_op(const unsigned state_id, Util::IJson* op) {
+    if (map_parser_state.find(state_id) == map_parser_state.end())
+        BUG("parser state %1% not found.", state_id);
+    auto state = map_parser_state[state_id];
+    auto statements = state->get("parser_ops")->to<Util::JsonArray>();
+    CHECK_NULL(statements);
+    statements->append(op);
 }
 
 void
-JsonObjects::add_parser_transition_key(const unsigned id, Util::IJson* newKey) {
-    if (map_parser_state.find(id) != map_parser_state.end()) {
-       auto state = map_parser_state[id];
+JsonObjects::add_parser_transition_key(const unsigned state_id, Util::IJson* newKey) {
+    if (map_parser_state.find(state_id) != map_parser_state.end()) {
+       auto state = map_parser_state[state_id];
        auto keys = state->get("transition_key")->to<Util::JsonArray>();
        CHECK_NULL(keys);
        auto new_keys = newKey->to<Util::JsonArray>();

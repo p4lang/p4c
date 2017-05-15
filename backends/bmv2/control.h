@@ -28,10 +28,11 @@ limitations under the License.
 #include "expression.h"
 #include "helpers.h"
 #include "sharedActionSelectorCheck.h"
+#include "simpleSwitch.h"
 
 namespace BMV2 {
 
-class Control : public Inspector {
+class ControlConverter : public Inspector {
     Backend*               backend;
     P4::ReferenceMap*      refMap;
     P4::TypeMap*           typeMap;
@@ -43,7 +44,7 @@ class Control : public Inspector {
                               Util::JsonArray* action_profiles);
     void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
     cstring getKeyMatchType(const IR::KeyElement *ke);
-    // Return 'true' if the table is 'simple'
+    /// Return 'true' if the table is 'simple'
     bool handleTableImplementation(const IR::Property* implementation, const IR::Key* key,
                                    Util::JsonObject* table, Util::JsonArray* action_profiles);
     Util::IJson* convertIf(const CFG::IfNode* node, cstring prefix);
@@ -55,7 +56,7 @@ class Control : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::ControlBlock* b) override;
 
-    explicit Control(Backend *backend) : backend(backend),
+    explicit ControlConverter(Backend *backend) : backend(backend),
         refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
         conv(backend->getExpressionConverter()), json(backend->json)
     { setName("Control"); }
@@ -64,7 +65,7 @@ class Control : public Inspector {
 class ConvertControl final : public PassManager {
  public:
     explicit ConvertControl(Backend *backend) {
-        passes.push_back(new Control(backend));
+        passes.push_back(new ControlConverter(backend));
         setName("ConvertControl");
     }
 };

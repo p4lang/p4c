@@ -25,39 +25,43 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/backend.cpp \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/control.cpp \
-	backends/bmv2/copyAnnotations.cpp \
 	backends/bmv2/deparser.cpp \
 	backends/bmv2/errorcode.cpp \
 	backends/bmv2/expression.cpp \
 	backends/bmv2/extern.cpp \
 	backends/bmv2/header.cpp \
 	backends/bmv2/helpers.cpp \
+	backends/bmv2/extractArchInfo.cpp \
 	backends/bmv2/JsonObjects.cpp \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/midend.cpp \
 	backends/bmv2/metermap.cpp \
 	backends/bmv2/parser.cpp \
 	backends/bmv2/sharedActionSelectorCheck.cpp \
-	backends/bmv2/v1model.cpp
+	backends/bmv2/simpleSwitch.cpp \
+	backends/bmv2/portableSwitch.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
 	backends/bmv2/action.h \
 	backends/bmv2/backend.h \
 	backends/bmv2/control.h \
-	backends/bmv2/copyAnnotations.h \
 	backends/bmv2/deparser.h \
 	backends/bmv2/errorcode.h \
 	backends/bmv2/expression.h \
 	backends/bmv2/extern.h \
 	backends/bmv2/header.h \
 	backends/bmv2/helpers.h \
+	backends/bmv2/extractArchInfo.h \
 	backends/bmv2/JsonObjects.h \
 	backends/bmv2/lower.h \
 	backends/bmv2/midend.h \
 	backends/bmv2/metermap.h \
+	backends/bmv2/options.h \
 	backends/bmv2/parser.h \
-	backends/bmv2/sharedActionSelectorCheck.h
+	backends/bmv2/sharedActionSelectorCheck.h \
+	backends/bmv2/simpleSwitch.h \
+	backends/bmv2/portableSwitch.h
 
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
 
