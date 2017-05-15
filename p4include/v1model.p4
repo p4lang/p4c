@@ -38,6 +38,18 @@ struct standard_metadata_t {
     bit<1>  drop;
     bit<16> recirculate_port;
     bit<32> packet_length;
+    // flattening fields that exist in bmv2-ss
+    // queueing metadata
+    @alias("queueing_metadata.enq_timestamp") bit<32> enq_timestamp;
+    @alias("queueing_metadata.enq_qdepth")    bit<19> enq_qdepth;
+    @alias("queueing_metadata.deq_timedelta") bit<32> deq_timedelta;
+    @alias("queueing_metadata.deq_qdepth")    bit<19> deq_qdepth;
+    // intrinsic metadata
+    @alias("intrinsic_metadata.ingress_global_timestamp") bit<48> ingress_global_timestamp;
+    @alias("intrinsic_metadata.lf_field_list") bit<32> lf_field_list;
+    @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
+    @alias("intrinsic_metadata.resubmit_flag") bit<1>  resubmit_flag;
+    @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
 }
 
 extern Checksum16 {
@@ -133,14 +145,17 @@ parser Parser<H, M>(packet_in b,
                     inout standard_metadata_t standard_metadata);
 control VerifyChecksum<H, M>(in H hdr,
                              inout M meta);
+@pipeline
 control Ingress<H, M>(inout H hdr,
                       inout M meta,
                       inout standard_metadata_t standard_metadata);
+@pipeline
 control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
+@deparser
 control Deparser<H>(packet_out b, in H hdr);
 
 package V1Switch<H, M>(Parser<H, M> p,

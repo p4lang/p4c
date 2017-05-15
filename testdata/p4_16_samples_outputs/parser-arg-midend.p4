@@ -8,12 +8,10 @@ parser Parser1_0() {
     }
 }
 
-Parser1_0() p1;
 parser Parser2_0() {
     state start {
         transition accept;
     }
 }
 
-Parser2_0() p2;
-Package(p1, p2) main;
+Package(Parser1_0(), Parser2_0()) main;

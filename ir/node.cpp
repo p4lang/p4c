@@ -68,9 +68,16 @@ cstring IR::dbp(const IR::INode* node) {
 
 Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
     unsigned lineNumber, columnNumber;
-    const IR::Expression *lhs, *rhs;
-    cstring fName = srcInfo.toSourcePositionData(&lineNumber,
-                                                 &columnNumber);
+
+    Util::SourceInfo si = srcInfo;
+    if (!si.isValid()) {
+        return nullptr;
+    }
+    if (is<IR::AssignmentStatement>()) {
+        auto assign = to<IR::AssignmentStatement>();
+        si = (assign->left->srcInfo + si) + assign->right->srcInfo;
+    }
+    cstring fName = si.toSourcePositionData(&lineNumber, &columnNumber);
     if (fName == nullptr) {
         // Do not add anything to the bmv2 JSON file for this, as this
         // is likely a statement synthesized by the compiler, and
@@ -78,27 +85,11 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
         // directly with anything in the user's P4 source code.
         return nullptr;
     }
-    bool isAssignment = is<IR::AssignmentStatement>();
-    if (isAssignment) {
-        auto assign = to<IR::AssignmentStatement>();
-        lhs = assign->left;
-        rhs = assign->right;
-        lhs->srcInfo.toSourcePositionData(&lineNumber, &columnNumber);
-    }
     auto json = new Util::JsonObject();
-    cstring sourceFrag = srcInfo.toBriefSourceFragment();
     json->emplace("filename", fName);
     json->emplace("line", lineNumber);
     json->emplace("column", columnNumber);
-    cstring fullSourceFrag;
-    if (isAssignment) {
-        cstring lhsFrag = lhs->srcInfo.toBriefSourceFragment();
-        cstring rhsFrag = rhs->srcInfo.toBriefSourceFragment();
-        fullSourceFrag = lhsFrag + " " + sourceFrag + " " + rhsFrag;
-    } else {
-        fullSourceFrag = sourceFrag;
-    }
-    json->emplace("source_fragment", fullSourceFrag);
+    json->emplace("source_fragment", si.toBriefSourceFragment());
     return json;
 }
 

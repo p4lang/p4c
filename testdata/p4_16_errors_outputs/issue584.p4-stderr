@@ -1,0 +1,6 @@
+../testdata/p4_16_errors/issue584.p4(28): error: hash: cannot infer type for type parameter T
+        hash(var, HashAlgorithm.crc16, 0, hdr, 0xFFFF);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/mbudiu/git/p4c/build/p4include/v1model.p4(106)
+extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
+                    ^

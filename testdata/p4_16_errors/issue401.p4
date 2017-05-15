@@ -55,12 +55,4 @@ control MyDeparser(packet_out b, in my_packet p) {
   apply { }
 }
 
-/* Instantiate */
-MyParser() p;
-MyVerifyChecksum() vck;
-MyIngress() i;
-MyEgress() e;
-MyComputeChecksum() cck;
-MyDeparser() dp;
-
-V1Switch(p, vck, i, e, cck, dp) main;
+V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

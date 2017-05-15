@@ -35,7 +35,7 @@ path_test_LDADD = libp4ctoolkit.a
 json_test_SOURCES = test/unittests/json_test.cpp
 json_test_LDADD = libp4ctoolkit.a
 call_graph_test_SOURCES = test/unittests/call_graph_test.cpp
-call_graph_test_LDADD = libp4ctoolkit.a libfrontend.la
+call_graph_test_LDADD = libfrontend.la libp4ctoolkit.a
 unittest_transform1_SOURCES = test/unittests/transform1.cpp
 unittest_transform1_LDADD = libfrontend.la libp4ctoolkit.a
 dumpjson_SOURCES = test/unittests/dumpjson.cpp
@@ -62,7 +62,7 @@ gtestp4c_SOURCES = \
 	$(gtest_SOURCES)
 
 check_PROGRAMS += gtestp4c
-gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a
+gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a libbackendbmv2.a
 gtestp4c_CPPFLAGS = $(GTEST_CPPFLAGS)
 cpplint_FILES += test/gtest/gtestp4c.cpp
 TESTS += gtestp4c

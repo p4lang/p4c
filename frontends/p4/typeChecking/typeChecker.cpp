@@ -457,14 +457,14 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         else
             canon = str;
         return canon;
-    } else if (type->is<IR::Type_Union>()) {
-        auto str = type->to<IR::Type_Union>();
+    } else if (type->is<IR::Type_HeaderUnion>()) {
+        auto str = type->to<IR::Type_HeaderUnion>();
         auto fields = canonicalizeFields(str);
         if (fields == nullptr)
             return nullptr;
         const IR::Type* canon;
         if (fields != &str->fields)
-            canon = new IR::Type_Union(str->srcInfo, str->name, str->annotations, *fields);
+            canon = new IR::Type_HeaderUnion(str->srcInfo, str->name, str->annotations, *fields);
         else
             canon = str;
         return canon;
@@ -842,6 +842,10 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             prune();
             return decl;
         }
+        if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
+            ::error("%1%: cannot instantiate at top-level", decl);
+            return decl;
+        }
         auto type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         if (type == nullptr) {
             prune();
@@ -1107,7 +1111,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     if (etype == nullptr)
         return type;
 
-    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_Union>())
+    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>())
         typeError("Header stack %1% used with non-header type %2%",
                   type, etype->toString());
     return type;
@@ -1168,7 +1172,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) {
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
-        t->is<IR::Type_Header>() || t->is<IR::Type_Union>() ||
+        t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() ||
@@ -1177,7 +1181,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     return type;
 }
 
-const IR::Node* TypeInference::postorder(IR::Type_Union *type) {
+const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
     validateFields(canon, validator);
@@ -1897,6 +1901,11 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
+    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
+        ::error("%1%: casts are only supported to base types", expression->destType);
+        return expression;
+    }
+
     if (!canCastBetween(castType, sourceType)) {
         // This cast is not legal, but let's try to see whether
         // performing a substitution can help
@@ -1907,10 +1916,11 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
             expression = new IR::Cast(expression->srcInfo, expression->destType, rhs);
-            sourceType = expression->destType;
+            sourceType = getTypeType(expression->destType);
         }
         if (!canCastBetween(castType, sourceType))
-            typeError("%1%: Illegal cast from %2% to %3%", expression, sourceType, castType);
+            typeError("%1%: Illegal cast from %2% to %3%",
+                      expression, sourceType->toString(), castType->toString());
     }
     setType(expression, castType);
     setType(getOriginal(), castType);
@@ -2124,7 +2134,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     }
 
     if (type->is<IR::Type_StructLike>()) {
-        if (type->is<IR::Type_Header>()) {
+        if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             if (member == IR::Type_Header::isValid) {
                 // Built-in method
                 auto type = new IR::Type_Method(IR::Type_Boolean::get(), new IR::ParameterList());
@@ -2134,8 +2144,11 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
                 return expression;
-            } else if (member == IR::Type_Header::setValid ||
-                       member == IR::Type_Header::setInvalid) {
+            }
+        }
+        if (type->is<IR::Type_Header>()) {
+            if (member == IR::Type_Header::setValid ||
+                member == IR::Type_Header::setInvalid) {
                 if (!isLeftValue(expression->expr))
                     ::error("%1%: must be applied to a left-value", expression);
                 // Built-in method
@@ -2365,7 +2378,8 @@ bool TypeInference::hasVarbits(const IR::Type_Header* type) const {
 }
 
 void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() || type->is<IR::Type_Union>())
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
+        type->is<IR::Type_HeaderUnion>())
         return;
 
     if (type->is<IR::Type_Struct>()) {
@@ -2527,6 +2541,13 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
                 ::error("%1%: tables cannot be invoked from actions", expression);
         }
 
+        // Check that verify is only invoked from parsers.
+        if (auto ef = mi->to<ExternFunction>()) {
+            if (ef->method->name == IR::ParserState::verify)
+                if (!findContext<IR::P4Parser>())
+                    ::error("%1%: may only be invoked in parsers", ef->expr);
+        }
+
         if (mi->is<ExternMethod>())
             checkCorelibMethods(mi->to<ExternMethod>());
 
@@ -2630,7 +2651,8 @@ const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
 }
 
 bool TypeInference::containsHeader(const IR::Type* type) {
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() || type->is<IR::Type_Union>())
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
+        type->is<IR::Type_HeaderUnion>())
         return true;
     if (type->is<IR::Type_Struct>()) {
         auto st = type->to<IR::Type_Struct>();

@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser Parser();
 package Package(Parser p1, Parser p2);
 parser Parser1()(Parser p) {
@@ -20,6 +22,4 @@ parser Inside() {
     }
 }
 
-Parser1(Inside()) p1;
-Parser2(Inside()) p2;
-Package(p1, p2) main;
+Package(Parser1(Inside()), Parser2(Inside())) main;
