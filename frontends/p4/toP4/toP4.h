@@ -126,7 +126,7 @@ class ToP4 : public Inspector {
     { return process(t, "struct"); }
     bool preorder(const IR::Type_Header* t) override
     { return process(t, "header"); }
-    bool preorder(const IR::Type_Union* t) override
+    bool preorder(const IR::Type_HeaderUnion* t) override
     { return process(t, "header_union"); }
     bool preorder(const IR::Type_Package* t) override;
     bool preorder(const IR::Type_Parser* t) override;
