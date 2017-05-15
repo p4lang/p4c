@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "frontends/p4/fromv1.0/v1model.h"
 #include "lower.h"
 #include "frontends/p4/methodInstance.h"
 #include "lib/gmputil.h"
@@ -411,7 +412,7 @@ RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
 }
 
 const IR::Vector<IR::Expression>*
-RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* vec) {
+RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* vec, bool force) {
     // This is more complicated than I'd like.  If an expression is
     // a list expression, then we actually simplify the elements
     // of the list.  Otherwise we simplify the argument itself.
@@ -433,7 +434,7 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
         } else {
             ComplexExpression ce;
             (void)e->apply(ce);
-            if (ce.isComplex) {
+            if (force || ce.isComplex) {
                 changes = true;
                 LOG3("Moved into temporary " << dbp(e));
                 auto tmp = createTemporary(e);
@@ -473,6 +474,39 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
     auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
     if (mi->isApply() || mi->is<P4::BuiltInMethod>())
         return expression;
+
+    if (auto ef = mi->to<P4::ExternFunction>()) {
+        if (ef->method->name == P4V1::V1Model::instance.digest_receiver.name) {
+            // Special handling for digest; the semantics on bmv2 is to
+            // execute the digest at the very end of the pipeline, and to
+            // pass a reference to the fields, so fields can be modified
+            // and the latest value is part of the digest.  We want the
+            // digest to appear as if it is executed instantly, so we copy
+            // the data to temporaries.  This could be a problem for P4-14
+            // programs that depend on this semantics, but we hope that no
+            // one knew of this feature, since it was not very clearly
+            // documented.
+            if (expression->arguments->size() != 2) {
+                ::error("%1% expected 2 arguments", expression);
+                return expression;
+            }
+            auto vec = new IR::Vector<IR::Expression>();
+            // Digest has two arguments, we have to save the second one.
+            // It should be a list expression.
+            vec->push_back(expression->arguments->at(0));
+            auto arg1 = expression->arguments->at(1);
+            if (arg1->is<IR::ListExpression>()) {
+                auto list = simplifyExpressions(&arg1->to<IR::ListExpression>()->components, true);
+                arg1 = new IR::ListExpression(arg1->srcInfo, *list);
+                vec->push_back(arg1);
+            } else {
+                auto tmp = createTemporary(expression->arguments->at(1));
+                vec->push_back(tmp);
+            }
+            expression->arguments = vec;
+            return expression;
+        }
+    }
 
     auto vec = simplifyExpressions(expression->arguments);
     if (vec != expression->arguments)

@@ -94,7 +94,8 @@ class RemoveComplexExpressions : public Transform {
     IR::IndexedVector<IR::StatOrDecl>  assignments;
 
     const IR::PathExpression* createTemporary(const IR::Expression* expression);
-    const IR::Vector<IR::Expression>* simplifyExpressions(const IR::Vector<IR::Expression>* vec);
+    const IR::Vector<IR::Expression>* simplifyExpressions(
+        const IR::Vector<IR::Expression>* vec, bool force = false);
 
  public:
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
@@ -118,7 +119,11 @@ class RemoveComplexExpressions : public Transform {
     }
     const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Control* control) override {
-        control->controlLocals.append(newDecls);
+        if (newDecls.size() != 0) {
+            // prepend declarations
+            newDecls.append(control->controlLocals);
+            control->controlLocals = newDecls;
+        }
         return control;
     }
     const IR::Node* postorder(IR::Statement* statement) override;

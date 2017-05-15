@@ -57,8 +57,8 @@ class Control : public Inspector {
 
     explicit Control(Backend *backend) : backend(backend),
         refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-        conv(backend->getExpressionConverter()),
-        json(backend->json) {}
+        conv(backend->getExpressionConverter()), json(backend->json)
+    { setName("Control"); }
 };
 
 class ConvertControl final : public PassManager {
