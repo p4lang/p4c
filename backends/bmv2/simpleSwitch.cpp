@@ -593,9 +593,9 @@ SimpleSwitch::convertChecksumUpdate(const IR::P4Control* updateControl,
 }
 
 std::set<cstring>*
-SimpleSwitch::getPipelineControls() {
+SimpleSwitch::getPipelineControls(const IR::ToplevelBlock* toplevel) {
     auto pipelines = new std::set<cstring>();
-    auto main = backend->getToplevelBlock()->getMain();
+    auto main = toplevel->getMain();
     auto ingress = main->getParameterValue(v1model.sw.ingress.name);
     auto egress = main->getParameterValue(v1model.sw.egress.name);
     if (ingress == nullptr || egress == nullptr ||
@@ -609,9 +609,9 @@ SimpleSwitch::getPipelineControls() {
 }
 
 std::set<cstring>*
-SimpleSwitch::getSkipControls() {
+SimpleSwitch::getSkipControls(const IR::ToplevelBlock* toplevel) {
     auto skipControls = new std::set<cstring>();
-    auto main = backend->getToplevelBlock()->getMain();
+    auto main = toplevel->getMain();
     auto verify = main->getParameterValue(v1model.sw.verify.name);
     auto update = main->getParameterValue(v1model.sw.update.name);
     auto deparser = main->getParameterValue(v1model.sw.deparser.name);
@@ -628,8 +628,8 @@ SimpleSwitch::getSkipControls() {
 }
 
 cstring
-SimpleSwitch::getUpdateChecksumControl() {
-    auto main = backend->getToplevelBlock()->getMain();
+SimpleSwitch::getUpdateChecksumControl(const IR::ToplevelBlock* toplevel) {
+    auto main = toplevel->getMain();
     auto update = main->getParameterValue(v1model.sw.update.name);
     if (update == nullptr || !update->is<IR::ControlBlock>()){
         BUG_CHECK("%1%: main package does not match the expected model %2%",

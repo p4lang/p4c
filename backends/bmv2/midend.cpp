@@ -50,7 +50,6 @@ limitations under the License.
 #include "midend/expandLookahead.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
-#include "copyAnnotations.h"
 
 namespace BMV2 {
 
@@ -81,7 +80,6 @@ MidEnd::MidEnd(BMV2Options& options) {
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
-
     addPasses({
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
@@ -121,7 +119,6 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
-        new P4::MidEndLast(),
         //new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(skipv1controls)),
         //new P4::MoveActionsToTables(&refMap, &typeMap),
         //new P4::TypeChecking(&refMap, &typeMap),
@@ -136,6 +133,9 @@ MidEnd::MidEnd(BMV2Options& options) {
         //// new FixupChecksum(&updateControlBlockName),
         //new P4::SimplifyControlFlow(&refMap, &typeMap),
         //new P4::RemoveAllUnusedDeclarations(&refMap),
+        new P4::RemoveLeftSlices(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap),
+        new P4::MidEndLast(),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });

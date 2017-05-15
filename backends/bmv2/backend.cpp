@@ -80,26 +80,27 @@ class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
 };
 
 void
-Backend::process(const IR::ToplevelBlock* block, BMV2Options& options) {
-    CHECK_NULL(block);
+Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
+    CHECK_NULL(tlb);
     setName("BackEnd");
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+
     // in these controls we remove complex expressions
     std::set<cstring>* pipelines;
     // in these controls we don't synthesize actions
     std::set<cstring>* skipControls;
     cstring updateControlBlockName;
-    toplevel = block;
 
     if (options.arch == Target::SIMPLE){
-        // TODO(hanw): implement psa
-        // pipelines = portableSwitch->getPipelineControls();
-        // skipControls = portableSwitch->getSkipControls();
-        // updateControlBlockName = portableSwitch->getUpdateChecksumControl();
+        // TODO(hanw): need to invoke portableSwitch function to populate these.
+        pipelines = new std::set<cstring>();
+        skipControls = new std::set<cstring>();
+        updateControlBlockName = "TODO";
     } else {
         // default architecture is simple-switch
-        pipelines = simpleSwitch->getPipelineControls();
-        skipControls = simpleSwitch->getSkipControls();
-        updateControlBlockName = simpleSwitch->getUpdateChecksumControl();
+        pipelines = simpleSwitch->getPipelineControls(tlb);
+        skipControls = simpleSwitch->getSkipControls(tlb);
+        updateControlBlockName = simpleSwitch->getUpdateChecksumControl(tlb);
     }
 
     // These passes are logically bmv2-specific
@@ -108,8 +109,6 @@ Backend::process(const IR::ToplevelBlock* block, BMV2Options& options) {
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
-        new P4::RemoveLeftSlices(refMap, typeMap),
-        new P4::TypeChecking(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
@@ -119,9 +118,11 @@ Backend::process(const IR::ToplevelBlock* block, BMV2Options& options) {
         new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
-        //new ExtractArchInfo(typeMap),
+        new ExtractArchInfo(typeMap),
+        evaluator,
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });
-    block->getProgram()->apply(*this);
+    tlb->getProgram()->apply(*this);
 }
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject
