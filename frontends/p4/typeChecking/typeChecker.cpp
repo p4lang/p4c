@@ -2368,7 +2368,7 @@ TypeInference::actionCall(bool inActionList,
 
 bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
     // called for a canonical type
-    if (type->is<IR::Type_Union>() || type->is<IR::Type_Varbits>()) {
+    if (type->is<IR::Type_HeaderUnion>() || type->is<IR::Type_Varbits>()) {
         return true;
     } else if (auto ht = type->to<IR::Type_StructLike>()) {
         for (auto f : ht->fields) {
