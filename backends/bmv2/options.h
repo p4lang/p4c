@@ -22,12 +22,12 @@ limitations under the License.
 
 namespace BMV2 {
 
-enum class Target { PORTABLE, SIMPLE };
+enum class Target { UNKNOWN, PORTABLE, SIMPLE };
 
 class BMV2Options : public CompilerOptions {
 
  public:
-    BMV2::Target arch;
+    BMV2::Target arch = BMV2::Target::UNKNOWN;
     BMV2Options() {
         registerOption("--arch", "arch",
                        [this](const char* arg) {
@@ -36,10 +36,10 @@ class BMV2Options : public CompilerOptions {
                         } else if (!strcmp(arg, "ss")) {
                             arch = BMV2::Target::SIMPLE;
                         } else {
-                            arch = BMV2::Target::SIMPLE;
+                            ::error("Unknown architecture %1%", arg);
                         }
                         return true; },
-                       "Compile for the specified architecture (psa or ss)");
+                       "Compile for the specified architecture (psa or ss), default is ss.");
      }
 };
 

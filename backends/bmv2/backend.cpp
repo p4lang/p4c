@@ -17,7 +17,6 @@ limitations under the License.
 #include "action.h"
 #include "backend.h"
 #include "control.h"
-#include "mapAnnotations.h"
 #include "deparser.h"
 #include "errorcode.h"
 #include "expression.h"
@@ -85,35 +84,29 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     setName("BackEnd");
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
 
-    // in these controls we remove complex expressions
-    std::set<cstring>* pipelines;
-    // in these controls we don't synthesize actions
-    std::set<cstring>* skipControls;
-    cstring updateControlBlockName;
+    if (options.arch != Target::UNKNOWN)
+        target = options.arch;
 
-    if (options.arch == Target::SIMPLE){
-        // TODO(hanw): need to invoke portableSwitch function to populate these.
-        pipelines = new std::set<cstring>();
-        skipControls = new std::set<cstring>();
-        updateControlBlockName = "TODO";
-    } else {
-        // default architecture is simple-switch
-        pipelines = simpleSwitch->getPipelineControls(tlb);
-        skipControls = simpleSwitch->getSkipControls(tlb);
-        updateControlBlockName = simpleSwitch->getUpdateChecksumControl(tlb);
+    if (target == Target::SIMPLE) {
+        simpleSwitch->setPipelineControls(tlb, &pipeline_controls);
+        simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
+        simpleSwitch->setUpdateChecksumControls(tlb, &update_checksum_controls);
+        simpleSwitch->setDeparserControls(tlb, &deparser_controls);
+    } else if (target == Target::PORTABLE) {
+        P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
     }
 
     // These passes are logically bmv2-specific
     addPasses({
-        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(skipControls)),
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(pipelines)),
-        new FixupChecksum(&updateControlBlockName),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new FixupChecksum(&update_checksum_controls),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),
@@ -174,7 +167,6 @@ void Backend::convert(BMV2Options& options) {
     // if (psa) tlb->apply(new ConvertExterns());
 
     PassManager codegen_passes = {
-        new MapAnnotations(refMap, &blockTypeMap),
         new ConvertHeaders(this),
         new ConvertExterns(this),  // only run when target == PSA
         new ConvertParser(this),

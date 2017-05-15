@@ -90,12 +90,9 @@ bool ConvertDeparser::preorder(const IR::PackageBlock* block) {
 }
 
 bool ConvertDeparser::preorder(const IR::ControlBlock* block) {
-    auto bt = backend->blockTypeMap.find(block);
-    if (bt != backend->blockTypeMap.end()) {
-        // only generate control block marked with @deparser
-        if (!bt->second->getAnnotation("deparser")) {
-            return false;
-        }
+    auto bt = backend->deparser_controls.find(block->container->name);
+    if (bt == backend->deparser_controls.end()) {
+        return false;
     }
     const IR::P4Control* cont = block->container;
     auto deparserJson = convertDeparser(cont);

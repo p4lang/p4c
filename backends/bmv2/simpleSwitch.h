@@ -53,9 +53,10 @@ class SimpleSwitch {
     void convertChecksumUpdate(const IR::P4Control* updateControl,
                                Util::JsonArray* checksums, Util::JsonArray* calculations);
 
-    std::set<cstring>* getPipelineControls(const IR::ToplevelBlock* blk);
-    std::set<cstring>* getSkipControls(const IR::ToplevelBlock* blk);
-    cstring getUpdateChecksumControl(const IR::ToplevelBlock* blk);
+    void setPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* ctrls);
+    void setNonPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* ctrls);
+    void setUpdateChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* ctrls);
+    void setDeparserControls(const IR::ToplevelBlock* blk, std::set<cstring>* ctrls);
 
     explicit SimpleSwitch(BMV2::Backend* backend) :
         backend(backend), v1model(V1Model::instance)

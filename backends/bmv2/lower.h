@@ -59,10 +59,10 @@ real extern for computing and verifying checksums.  Then this hack
 would not be necessary anymore.
 */
 class FixupChecksum : public Transform {
-    const cstring* updateBlockName;
+    const std::set<cstring>* updateChecksumBlocks;
  public:
-    explicit FixupChecksum(const cstring* updateBlockName) :
-            updateBlockName(updateBlockName)
+    explicit FixupChecksum(const std::set<cstring>* updateChecksumBlocks) :
+            updateChecksumBlocks(updateChecksumBlocks)
     { setName("FixupChecksum"); }
     const IR::Node* preorder(IR::P4Control* control) override;
 };

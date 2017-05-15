@@ -592,9 +592,8 @@ SimpleSwitch::convertChecksumUpdate(const IR::P4Control* updateControl,
     generateUpdate(updateControl->body, checksums, calculations);
 }
 
-std::set<cstring>*
-SimpleSwitch::getPipelineControls(const IR::ToplevelBlock* toplevel) {
-    auto pipelines = new std::set<cstring>();
+void
+SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto ingress = main->getParameterValue(v1model.sw.ingress.name);
     auto egress = main->getParameterValue(v1model.sw.egress.name);
@@ -603,14 +602,12 @@ SimpleSwitch::getPipelineControls(const IR::ToplevelBlock* toplevel) {
         BUG_CHECK("%1%: main package does not match the expected model %2%",
                   main, v1model.file.toString());
     }
-    pipelines->emplace(ingress->to<IR::ControlBlock>()->container->name);
-    pipelines->emplace(egress->to<IR::ControlBlock>()->container->name);
-    return pipelines;
+    controls->emplace(ingress->to<IR::ControlBlock>()->container->name);
+    controls->emplace(egress->to<IR::ControlBlock>()->container->name);
 }
 
-std::set<cstring>*
-SimpleSwitch::getSkipControls(const IR::ToplevelBlock* toplevel) {
-    auto skipControls = new std::set<cstring>();
+void
+SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto verify = main->getParameterValue(v1model.sw.verify.name);
     auto update = main->getParameterValue(v1model.sw.update.name);
@@ -621,21 +618,31 @@ SimpleSwitch::getSkipControls(const IR::ToplevelBlock* toplevel) {
         BUG_CHECK("%1%: main package does not match the expected model %2%",
                   main, v1model.file.toString());
     }
-    skipControls->emplace(verify->to<IR::ControlBlock>()->container->name);
-    skipControls->emplace(update->to<IR::ControlBlock>()->container->name);
-    skipControls->emplace(deparser->to<IR::ControlBlock>()->container->name);
-    return skipControls;
+    controls->emplace(verify->to<IR::ControlBlock>()->container->name);
+    controls->emplace(update->to<IR::ControlBlock>()->container->name);
+    controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
 }
 
-cstring
-SimpleSwitch::getUpdateChecksumControl(const IR::ToplevelBlock* toplevel) {
+void
+SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto update = main->getParameterValue(v1model.sw.update.name);
     if (update == nullptr || !update->is<IR::ControlBlock>()){
         BUG_CHECK("%1%: main package does not match the expected model %2%",
                   main, v1model.file.toString());
     }
-    return update->to<IR::ControlBlock>()->container->name;
+    controls->emplace(update->to<IR::ControlBlock>()->container->name);
+}
+
+void
+SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel, std::set<cstring>* controls) {
+    auto main = toplevel->getMain();
+    auto deparser = main->getParameterValue(v1model.sw.deparser.name);
+    if (deparser == nullptr || !deparser->is<IR::ControlBlock>()){
+        BUG_CHECK("%1%: main package does not match the expected model %2%",
+                  main, v1model.file.toString());
+    }
+    controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
 }
 
 }  // namespace P4V1

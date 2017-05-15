@@ -367,7 +367,7 @@ class SimpleCopyProp : public PassManager {
 }  // namespace
 
 const IR::Node* FixupChecksum::preorder(IR::P4Control* control) {
-    if (control->name == *updateBlockName) {
+    if (updateChecksumBlocks->find(control->name) != updateChecksumBlocks->end()) {
         SimpleCopyProp scp;
         return control->apply(scp);
     }

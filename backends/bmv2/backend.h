@@ -30,7 +30,6 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "JsonObjects.h"
-#include "mapAnnotations.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
 #include "options.h"
@@ -68,6 +67,7 @@ class Backend : public PassManager {
 
  public:
     BMV2::JsonObjects*               json;
+    Target                           target;
     Util::JsonArray*                 calculations;
     Util::JsonArray*                 checksums;
     Util::JsonArray*                 counters;
@@ -79,15 +79,15 @@ class Backend : public PassManager {
     Util::JsonArray*                 force_arith;
     Util::JsonArray*                 field_aliases;
 
-    Target                           target;
-
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
 
-    /// map from block to its type as defined in architecture file
-    BlockTypeMap                     blockTypeMap;
+    std::set<cstring>                pipeline_controls;
+    std::set<cstring>                non_pipeline_controls;
+    std::set<cstring>                update_checksum_controls;
+    std::set<cstring>                deparser_controls;
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;

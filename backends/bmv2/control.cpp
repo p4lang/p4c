@@ -677,13 +677,9 @@ bool ControlConverter::preorder(const IR::PackageBlock *block) {
 }
 
 bool ControlConverter::preorder(const IR::ControlBlock* block) {
-    auto bt = backend->blockTypeMap.find(block);
-    if (bt != backend->blockTypeMap.end()) {
-        LOG3(bt->second->getAnnotation("pipeline"));
-        // only generate control block marked with @pipeline
-        if (!bt->second->getAnnotation("pipeline")) {
-            return false;
-        }
+    auto bt = backend->pipeline_controls.find(block->container->name);
+    if (bt == backend->pipeline_controls.end()) {
+        return false;
     }
 
     const IR::P4Control* cont = block->container;
