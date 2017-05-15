@@ -88,7 +88,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         target = options.arch;
 
     if (target == Target::SIMPLE) {
-        simpleSwitch->setPipelineControls(tlb, &pipeline_controls);
+        simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
         simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
         simpleSwitch->setUpdateChecksumControls(tlb, &update_checksum_controls);
         simpleSwitch->setDeparserControls(tlb, &deparser_controls);

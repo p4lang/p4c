@@ -684,7 +684,10 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
 
     const IR::P4Control* cont = block->container;
     auto result = new Util::JsonObject();
-    result->emplace("name", cont->name);
+    auto it = backend->pipeline_namemap.find(block->container->name);
+    BUG_CHECK(it != backend->pipeline_namemap.end(),
+              "Expected to find %1% in control block name map", block->container->name);
+    result->emplace("name", it->second);
     result->emplace("id", nextId("control"));
     result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 

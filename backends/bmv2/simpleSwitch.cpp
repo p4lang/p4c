@@ -594,7 +594,8 @@ SimpleSwitch::convertChecksumUpdate(const IR::P4Control* updateControl,
 
 void
 SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
-                                  std::set<cstring>* controls) {
+                                  std::set<cstring>* controls,
+                                  std::map<cstring, cstring>* map) {
     auto main = toplevel->getMain();
     auto ingress = main->getParameterValue(v1model.sw.ingress.name);
     auto egress = main->getParameterValue(v1model.sw.egress.name);
@@ -603,8 +604,12 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
         BUG_CHECK("%1%: main package does not match the expected model %2%",
                   main, v1model.file.toString());
     }
-    controls->emplace(ingress->to<IR::ControlBlock>()->container->name);
-    controls->emplace(egress->to<IR::ControlBlock>()->container->name);
+    auto ingress_name = ingress->to<IR::ControlBlock>()->container->name;
+    auto egress_name = egress->to<IR::ControlBlock>()->container->name;
+    controls->emplace(ingress_name);
+    controls->emplace(egress_name);
+    map->emplace(ingress_name, "ingress");
+    map->emplace(egress_name, "egress");
 }
 
 void

@@ -84,10 +84,15 @@ class Backend : public PassManager {
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
 
+    // first element is container->name, second element is bmv2 hardcoded name
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
     std::set<cstring>                update_checksum_controls;
     std::set<cstring>                deparser_controls;
+
+    // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
+    // provide an map from user program block name to hard-coded names.
+    std::map<cstring, cstring>       pipeline_namemap;
 
  protected:
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
