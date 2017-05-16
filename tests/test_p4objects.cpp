@@ -24,6 +24,9 @@
 
 #include <bm/bm_sim/P4Objects.h>
 
+#include <ctype.h>
+
+#include <algorithm>  // std::all_of
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -950,9 +953,29 @@ TEST(P4Objects, ActionControl) {
   JsonBuilder builder;
   builder.add_action("a");
   builder.add_control_action("ca", 0);
-  std::cout << builder.to_string() << "\n";
   std::stringstream is(builder.to_string());
   P4Objects objects;
   LookupStructureFactory factory;
   ASSERT_EQ(0, objects.init_objects(&is, &factory));
+}
+
+TEST(P4Objects, JsonVersionStr) {
+  auto json_version_str = P4Objects::get_json_version_string();
+  // not worth using <regex> for this, which would require checking compiler
+  // compatibility (e.g. __GLIBCXX__ >= 20140422) and may create portability
+  // concerns
+  auto check_digit = [](char c) {
+    return isdigit(static_cast<unsigned char>(c));
+  };
+  auto check_version = [&json_version_str, &check_digit]() {
+    auto dot = json_version_str.find('.');
+    ASSERT_NE(std::string::npos, dot);
+    ASSERT_NE(0u, dot);
+    ASSERT_NE(json_version_str.size(), dot);
+    EXPECT_TRUE(std::all_of(
+        &json_version_str.front(), &json_version_str[dot], check_digit));
+    EXPECT_TRUE(std::all_of(
+        &json_version_str[dot + 1], &json_version_str.back(), check_digit));
+  };
+  check_version();
 }

@@ -21,6 +21,7 @@
 #include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/P4Objects.h>
 
 #include <boost/program_options.hpp>
 
@@ -137,6 +138,9 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
        "'info', so make sure the log level you have set does not exclude "
        "'info' messages; default is 0, which means that nothing is logged.")
       ("version,v", "Display version information")
+      ("json-version", "Display max bmv2 JSON version supported in the format "
+       "<major>.<minor>; all bmv2 JSON versions with the same <major> version "
+       "number are also supported.")
       ("no-p4", "Enable the switch to start without an inout configuration")
       ;  // NOLINT(whitespace/semicolon)
 
@@ -192,6 +196,11 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   if (vm.count("version")) {
     std::string version_str(bm_version_str);
     std::cout << version_str << "\n";
+    exit(0);
+  }
+
+  if (vm.count("json-version")) {
+    std::cout << P4Objects::get_json_version_string() << "\n";
     exit(0);
   }
 

@@ -38,6 +38,11 @@ using std::string;
 
 namespace {
 
+constexpr int required_major_version = 2;
+constexpr int max_minor_version = 12;
+// not needed for now
+// constexpr int min_minor_version = 0;
+
 template <typename T,
           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
 T hexstr_to_int(const std::string &hexstr) {
@@ -107,6 +112,12 @@ using EFormat = ExceptionFormatter;
 enum class P4Objects::ExprType {
   UNKNOWN, DATA, HEADER, HEADER_STACK, BOOL, UNION, UNION_STACK
 };
+
+std::string
+P4Objects::get_json_version_string() {
+  return std::to_string(required_major_version) + "."
+      + std::to_string(max_minor_version);
+}
 
 void
 P4Objects::build_expression(const Json::Value &json_expression,
