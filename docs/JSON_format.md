@@ -20,8 +20,8 @@ not be able to consume newer JSON files.
 Starting with version 2.0, the version number is included in the JSON file
 itself, under the key `__meta__` -> `version`.
 
-Note that the bmv2 code currently does not perform any version check, even
-though it is recommended for all consummers of the JSON.
+Note that the bmv2 code will perform a version check against the provided input
+JSON.
 
 ## General information
 

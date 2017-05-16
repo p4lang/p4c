@@ -43,6 +43,10 @@ constexpr int max_minor_version = 12;
 // not needed for now
 // constexpr int min_minor_version = 0;
 
+std::string get_version_str(int major, int minor) {
+  return std::to_string(major) + "." + std::to_string(minor);
+}
+
 template <typename T,
           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
 T hexstr_to_int(const std::string &hexstr) {
@@ -115,8 +119,7 @@ enum class P4Objects::ExprType {
 
 std::string
 P4Objects::get_json_version_string() {
-  return std::to_string(required_major_version) + "."
-      + std::to_string(max_minor_version);
+  return get_version_str(required_major_version, max_minor_version);
 }
 
 void
@@ -581,6 +584,33 @@ void check_json_tuple_size(const Json::Value &cfg_parent,
         EFormat() << "Expected '" << key << "' to be a JSON array of size "
                   << expected_size << " but array has size " << cfg_v.size(),
         cfg_parent);
+  }
+}
+
+void check_json_version(const Json::Value &cfg_root) {
+  // to avoid a huge number of backward-compatibility issues, we accept JSON
+  // inputs which are not tagged with a version number.
+  if (!cfg_root.isMember("__meta__")) return;
+  const auto &cfg_meta = cfg_root["__meta__"];
+  if (!cfg_meta.isMember("version")) return;
+  const auto &cfg_version = cfg_meta["version"];
+  check_json_tuple_size(cfg_meta, "version", 2);
+  auto major = cfg_version[0].asInt();
+  auto minor = cfg_version[1].asInt();
+  if (major != required_major_version) {
+    throw json_exception(
+        EFormat() << "We require a bmv2 JSON major version number of "
+                  << required_major_version << " but this JSON input is "
+                  << "tagged with a major version number of " << major,
+        cfg_meta);
+  }
+  if (minor > max_minor_version) {
+    throw json_exception(
+        EFormat() << "The most recent bmv2 JSON version number supported is "
+                  << get_version_str(required_major_version, max_minor_version)
+                  << " but this JSON input is tagged with version number "
+                  << get_version_str(major, minor),
+        cfg_meta);
   }
 }
 
@@ -1945,6 +1975,8 @@ P4Objects::init_objects(std::istream *is,
   InitState init_state;
 
   try {
+    check_json_version(cfg_root);
+
     init_enums(cfg_root);
 
     init_header_types(cfg_root);
