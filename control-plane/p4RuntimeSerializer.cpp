@@ -296,7 +296,7 @@ template <typename Kind> struct CounterlikeTraits;
 template<> struct CounterlikeTraits<IR::Counter> {
     static const cstring name() { return "counter"; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.directCounter.name;
+        return P4V1::V1Model::instance.tableAttributes.counters.name;
     }
     static const cstring typeName() {
         return P4V1::V1Model::instance.counter.name;
@@ -309,7 +309,7 @@ template<> struct CounterlikeTraits<IR::Counter> {
 template<> struct CounterlikeTraits<IR::Meter> {
     static const cstring name() { return "meter"; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.directMeter.name;
+        return P4V1::V1Model::instance.tableAttributes.meters.name;
     }
     static const cstring typeName() {
         return P4V1::V1Model::instance.meter.name;

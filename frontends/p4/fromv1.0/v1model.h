@@ -234,12 +234,12 @@ struct Switch_Model : public ::Model::Elem {
 
 struct TableAttributes_Model {
     TableAttributes_Model() : tableImplementation("implementation"),
-                              directCounter("counters"),
-                              directMeter("meters"), size("size"),
+                              counters("counters"),
+                              meters("meters"), size("size"),
                               supportTimeout("support_timeout") {}
     ::Model::Elem       tableImplementation;
-    ::Model::Elem       directCounter;
-    ::Model::Elem       directMeter;
+    ::Model::Elem       counters;
+    ::Model::Elem       meters;
     ::Model::Elem       size;
     ::Model::Elem       supportTimeout;
     const unsigned defaultTableSize = 1024;
