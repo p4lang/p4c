@@ -822,7 +822,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto propvalue = new IR::ExpressionValue(constructor);
         auto annos = addNameAnnotation(ctr);
         auto prop = new IR::Property(
-            IR::ID(v1model.tableAttributes.directCounter.Id()),
+            IR::ID(v1model.tableAttributes.counters.Id()),
             annos, propvalue, false);
         props->push_back(prop);
     }
@@ -831,7 +831,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto meter = new IR::PathExpression(mtr->name);
         auto propvalue = new IR::ExpressionValue(meter);
         auto prop = new IR::Property(
-            IR::ID(v1model.tableAttributes.directMeter.Id()), propvalue, false);
+            IR::ID(v1model.tableAttributes.meters.Id()), propvalue, false);
         props->push_back(prop);
     }
 

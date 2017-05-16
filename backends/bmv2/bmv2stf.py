@@ -494,7 +494,10 @@ class RunBMV2(object):
             return FAILURE
         thriftPort = str(9090 + rand)
         rv = SUCCESS
-
+        try:
+            os.remove("/tmp/bmv2-%d-notifications.ipc" % rand)
+        except OSError:
+            pass
         try:
             runswitch = [FindExe("behavioral-model", "simple_switch"),
                          "--log-file", self.switchLogFile, "--log-flush",
@@ -552,6 +555,10 @@ class RunBMV2(object):
                 reportError("CLI process failed with exit code", cli.returncode)
                 rv = FAILURE
         finally:
+            try:
+                os.remove("/tmp/bmv2-%d-notifications.ipc" % rand)
+            except OSError:
+                pass
             concurrent.release(rand)
         if self.options.verbose:
             print("Execution completed")

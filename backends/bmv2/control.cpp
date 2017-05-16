@@ -401,8 +401,11 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         size = BMV2::TableAttributes::defaultTableSize;
 
     result->emplace("max_size", size);
-    auto ctrs = table->properties->getProperty(BMV2::TableImplementation::directCounterName);
+    auto ctrs = table->properties->getProperty(BMV2::TableAttributes::countersName);
     if (ctrs != nullptr) {
+        // The counters attribute should list the counters of the table, accessed in
+        // actions of the table.  We should be checking that this attribute and the
+        // actions are consistent?
         if (ctrs->value->is<IR::ExpressionValue>()) {
             auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
             if (expr->is<IR::ConstructorCallExpression>()) {
@@ -472,7 +475,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     }
     result->emplace("support_timeout", sup_to);
 
-    auto dm = table->properties->getProperty(BMV2::TableAttributes::directMeterName);
+    auto dm = table->properties->getProperty(BMV2::TableAttributes::metersName);
     if (dm != nullptr) {
         if (dm->value->is<IR::ExpressionValue>()) {
             auto expr = dm->value->to<IR::ExpressionValue>()->expression;
