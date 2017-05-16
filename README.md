@@ -224,55 +224,10 @@ access them from the IR
 
 ## Backends
 
-### Bmv2
+### Bmv2 Backend
+
 * All checksum verification happens in the parser.
-* Range match types in tables
+* Range "set" not supported in parser transitions
 * Tables with multiple apply calls
 
-
-## Unsupported P4_16 language features
-
-These are some of the unsupported features we are aware of. We will
-update this list as more features get supported in the bmv2 compiler
-backend, as the spec evolves, and as we discover more issues.
-
-- header_union support is incomplete
-
-- nested structs in structs used as block constructor parameters
-```
-struct s0_t {
-  bit<8> f1;
-  bit<8> f2;
-};
-
-struct s1_t {
-  s1_t s01;
-  s1_t s02;
-};
-
-parser parse(packet_in pkt, out parsed_packet_t hdr,
-             inout s1_t my_metadata,
-             inout standard_metadata_t standard_metadata) {
-  // ...
-}
-```
-
-- explicit transition to reject in parse state
-
-- compound action parameters (can only be `bit<>` or `int<>`)
-
-- functions or methods with a compound return type
-```
-struct s_t {
-    bit<8> f0;
-    bit<8> f1;
-};
-
-extern s_t my_extern_function();
-
-controlc c() {
-    apply { s_t s1 = my_extern_function(); }
-}
-```
-
-- user-defined extern types / methods which are not defined in `v1model.p4`
+See also (unsupported P4_16 language features)[bmv2/README.md#unsupported-p4_16-language-features]
