@@ -193,3 +193,86 @@ containers used during the `docker build` process. On macOS in particular the
 default is 2GB, which is not enough to build p4c. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
+
+# Known issues
+
+The P4C compiler is in early development. Issues with the compiler are
+tracked on [GitHub](https://github.com/p4lang/p4c/issues). Before
+opening a new issue, please check whether a similar issue is already
+opened. Opening issues and submitting a pull request with fixes for
+those issues is much appreciated.
+
+In addition to the list of issues on Github, there are a number of
+currently unsupported features listed below:
+
+## Frontend
+
+### P4_14 features not supported in P4_16
+
+* extern/blackbox attributes -- there is support for carrying them in
+the IR, but they are lost if P4_16 code is output.  Backends can
+access them from the IR
+
+* Nonstandard extension primitives from P4_14
+  * Execute_meter extra arguments
+  * Recirculate variants
+  * Bypass_egress
+  * Sample_ primitives
+  * invalidate
+
+* No support for P4_14 parser exceptions.
+
+## Backends
+
+### Bmv2
+* All checksum verification happens in the parser.
+* Range match types in tables
+* Tables with multiple apply calls
+
+
+## Unsupported P4_16 language features
+
+These are some of the unsupported features we are aware of. We will
+update this list as more features get supported in the bmv2 compiler
+backend, as the spec evolves, and as we discover more issues.
+
+- header_union support is incomplete
+
+- nested structs in structs used as block constructor parameters
+```
+struct s0_t {
+  bit<8> f1;
+  bit<8> f2;
+};
+
+struct s1_t {
+  s1_t s01;
+  s1_t s02;
+};
+
+parser parse(packet_in pkt, out parsed_packet_t hdr,
+             inout s1_t my_metadata,
+             inout standard_metadata_t standard_metadata) {
+  // ...
+}
+```
+
+- explicit transition to reject in parse state
+
+- compound action parameters (can only be `bit<>` or `int<>`)
+
+- functions or methods with a compound return type
+```
+struct s_t {
+    bit<8> f0;
+    bit<8> f1;
+};
+
+extern s_t my_extern_function();
+
+controlc c() {
+    apply { s_t s1 = my_extern_function(); }
+}
+```
+
+- user-defined extern types / methods which are not defined in `v1model.p4`
