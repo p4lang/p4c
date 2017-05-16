@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.11*.
+The version described in this document is *2.12*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -260,16 +260,15 @@ parser. The attributes for these objects are:
   - `id`: a unique integer; note that it has to be unique with respect to *all*
   parse states in the JSON file, not just the parse states included in this
   parser object
-  - `parser_ops`: a JSON array of the operations (set or extract) performed in
-  this parse state, in the correct order. Each parser operation is represented
-  by a JSON object, whose attributes are:
+  - `parser_ops`: a JSON array of the operations performed in this parse state,
+  in the correct order. Each parser operation is represented by a JSON object,
+  whose attributes are:
     - `op`: the type of operation, either `extract`, `extract_VL`, `set`,
-    `verify` or `shift`
+    `verify`, `shift` or `primitive`.
     - `parameters`: a JSON array of objects encoding the parameters to the
-    parser operation. Each parameter object has 2 string attributes: `type` for
-    the parameter type and `value` for its value. Depending on the type of
-    operation, the constraints are different. A description of these constraints
-    is included [later in this section](#parser-operations).
+    parser operation. Depending on the type of operation, the constraints are
+    different. A description of these constraints is included [later in this
+    section](#parser-operations).
   - `transition_key`: a JSON array (in the correct order) of objects which
   describe the different fields of the parse state transition key. Each object
   has 2 attributes, `type` and `value`, where `type` can be either
@@ -327,6 +326,40 @@ In the `parser_ops` array, the format of the `parameters` array depends on the
   valid integral value for an error constant (see [here](#errors)).
   - `shift`: we expect a single parameter, the number of bytes to shift (shifted
   packet data will be discarded).
+  - `primitive`: introduced for P4_16, where extern methods can be called from
+  parser states. It only takes one parameter, which is itself a JSON object with
+  the following attributes:
+    - `op`: the primitive name. This primitive has to be supported by the
+      target.
+    - `parameters`: a JSON array of the arguments passed to the primitive (has
+  to match the target primitive definition). Each argument is represented by a
+  [type-value](#the-type-value-object) JSON object. This is consistent with how
+  control-flow actions are described in the JSON, so you can refer to the
+  [actions](#actions) section for more details.
+
+We provide an example of parser operations for a parser state:
+```json
+"parser_ops": [
+    {
+        "op": "extract",
+        "parameters": [
+            {"type": "regular", "value": "ethernet"}
+        ]
+    },
+    {
+        "op": "primitive",
+        "parameters": [
+            {
+                "op": "assign_header",
+                "parameters": [
+                    {"type": "header", "value": "ethernet_copy"},
+                    {"type": "header", "value": "ethernet"},
+                ]
+            }
+        ]
+    }
+]
+```
 
 ### `parse_vsets`
 
@@ -426,6 +459,7 @@ bmv2 supports the following core primitives:
 - `assign`, `assign_VL` (for variable-length fields), `assign_header` and
 `assign_union`.
 - `push` and `pop` for stack (header stack or header union stack) manipulation.
+
 Support for additional primitives depends on the architecture being used.
 
 ### `pipelines`
