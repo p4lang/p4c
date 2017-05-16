@@ -207,7 +207,10 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto metadata_type = extVisibleName(st);
-            json->add_metadata(metadata_type, v->name);
+            if (type->is<IR::Type_Header>())
+                json->add_header(metadata_type, v->name);
+            else
+                json->add_metadata(metadata_type, v->name);
             // only create header type only
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
                 continue;  // already seen
@@ -256,7 +259,6 @@ void ConvertHeaders::end_apply(const IR::Node*) {
         addHeaderField("scalars", name, 8-padding, false);
     }
 }
-
 
 /**
  * Generate json for header from IR::Block's constructor parameters
