@@ -193,3 +193,41 @@ containers used during the `docker build` process. On macOS in particular the
 default is 2GB, which is not enough to build p4c. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
+
+# Known issues
+
+The P4C compiler is in early development. Issues with the compiler are
+tracked on [GitHub](https://github.com/p4lang/p4c/issues). Before
+opening a new issue, please check whether a similar issue is already
+opened. Opening issues and submitting a pull request with fixes for
+those issues is much appreciated.
+
+In addition to the list of issues on Github, there are a number of
+currently unsupported features listed below:
+
+## Frontend
+
+### P4_14 features not supported in P4_16
+
+* extern/blackbox attributes -- there is support for carrying them in
+the IR, but they are lost if P4_16 code is output.  Backends can
+access them from the IR
+
+* Nonstandard extension primitives from P4_14
+  * Execute_meter extra arguments
+  * Recirculate variants
+  * Bypass_egress
+  * Sample_ primitives
+  * invalidate
+
+* No support for P4_14 parser exceptions.
+
+## Backends
+
+### Bmv2 Backend
+
+* All checksum verification happens in the parser.
+* Range "set" not supported in parser transitions
+* Tables with multiple apply calls
+
+See also [unsupported P4_16 language features](bmv2/README.md#unsupported-p4_16-language-features).
