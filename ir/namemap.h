@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _IR_NAMEMAP_H_
 #define _IR_NAMEMAP_H_
 
+class JSONLoader;
+
 namespace IR {
 
 template<class T, template<class K, class V, class COMP, class ALLOC> class MAP = std::map,

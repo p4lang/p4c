@@ -25,9 +25,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
-#include "json_parser.h"
-
 #include "ir.h"
+#include "json_parser.h"
 
 class JSONLoader {
     template<typename T> class has_fromJSON {
@@ -201,5 +200,34 @@ class JSONLoader {
         unpack_json(v);
         return *this; }
 };
+
+template<class T>
+IR::Vector<T>::Vector(JSONLoader &json) : VectorBase(json) {
+    json.load("vec", vec);
+}
+template<class T>
+IR::Vector<T>* IR::Vector<T>::fromJSON(JSONLoader &json) {
+    return new Vector<T>(json);
+}
+template<class T>
+IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
+    json.load("declarations", declarations);
+}
+template<class T>
+IR::IndexedVector<T>* IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
+    return new IndexedVector<T>(json);
+}
+template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
+         class COMP /*= std::less<cstring>*/,
+         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+IR::NameMap<T, MAP, COMP, ALLOC>::NameMap(JSONLoader &json) : Node(json) {
+    json.load("symbols", symbols);
+}
+template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
+         class COMP /*= std::less<cstring>*/,
+         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
+    return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
+}
 
 #endif /* _IR_JSON_LOADER_H_ */

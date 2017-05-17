@@ -46,7 +46,7 @@ limitations under the License.
 // generated ir file
 #include "ir/ir-generated.h"
 
-#include "json_loader.h"
+class JSONLoader;
 #include "json_generator.h"
 
 #include "pass_manager.h"

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "ir/ir.h"
+#include "ir/json_loader.h"
 #include "ir/visitor.h"
 #include <assert.h>
 #include <unordered_set>

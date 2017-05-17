@@ -146,15 +146,6 @@ template<class T> void IR::Vector<T>::toJSON(JSONGenerator &json) const {
     if (*sep) json << std::endl << json.indent;
     json << "]";
 }
-template<class T>
-IR::Vector<T>::Vector(JSONLoader &json) : VectorBase(json) {
-    json.load("vec", vec);
-}
-template<class T>
-IR::Vector<T>* IR::Vector<T>::fromJSON(JSONLoader &json) {
-    return new Vector<T>(json);
-}
-
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);
 inline std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
@@ -192,14 +183,6 @@ void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
     --json.indent;
     if (*sep) json << std::endl << json.indent;
     json << "}";
-}
-template<class T>
-IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
-    json.load("declarations", declarations);
-}
-template<class T>
-IR::IndexedVector<T>* IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
-    return new IndexedVector<T>(json);
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template<class T>, <T>)
 
@@ -273,18 +256,6 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator &json) const {
     --json.indent;
     if (*sep) json << std::endl << json.indent;
     json << "}";
-}
-template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
-         class COMP /*= std::less<cstring>*/,
-         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-IR::NameMap<T, MAP, COMP, ALLOC>::NameMap(JSONLoader &json) : Node(json) {
-    json.load("symbols", symbols);
-}
-template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
-         class COMP /*= std::less<cstring>*/,
-         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
-    return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
 
 template<class KEY, class VALUE,
