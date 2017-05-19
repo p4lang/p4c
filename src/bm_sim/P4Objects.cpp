@@ -1856,6 +1856,7 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
     header_id_t header_id = get_header_id(header_name);
     const string field_name = cfg_cksum_field[1].asString();
     int field_offset = get_field_offset(header_id, field_name);
+    enable_arith(header_id, field_offset);
 
     Checksum *checksum;
     if (checksum_type == "ipv4") {
