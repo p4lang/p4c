@@ -190,7 +190,8 @@ class bitvec {
             idx += sz;
             while (++i < idx/bits_per_unit) {
                 ptr[i] = ~(uintptr_t)0; }
-            ptr[i] |= (((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
+            if (i < size)
+                ptr[i] |= (((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
     void setraw(uintptr_t raw) {
         if (size == 1) {
             data = raw;
