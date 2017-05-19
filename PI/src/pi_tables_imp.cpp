@@ -399,7 +399,13 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
   Buffer buffer;
   for (const auto &e : entries) {
     emit_entry_handle(buffer.extend(sizeof(s_pi_entry_handle_t)), e.handle);
-    emit_uint32(buffer.extend(sizeof(uint32_t)), e.priority);
+    // TODO(antonin): temporary hack; for match types which do not require a
+    // priority, bmv2 returns -1, but the PI tends to expect 0, which is a
+    // problem for looking up entry state in the PI software. A better
+    // solution would be to ignore this value in the PI based on the key match
+    // type.
+    int priority = (e.priority == -1) ? 0 : e.priority;
+    emit_uint32(buffer.extend(sizeof(uint32_t)), priority);
     for (const auto &p : e.match_key) {
       switch (p.type) {
         case bm::MatchKeyParam::Type::EXACT:
