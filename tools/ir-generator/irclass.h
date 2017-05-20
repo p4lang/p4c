@@ -93,7 +93,7 @@ class IrMethod : public IrElement {
     std::vector<const IrField *>        args;
     cstring                             body;
     bool inImpl = false, isConst = false, isOverride = false, isStatic = false, isVirtual = false,
-         isUser = false;
+         isUser = false, isFriend = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
     : IrElement(info), name(name), body(body) {}
     IrMethod(Util::SourceInfo info, cstring name) : IrElement(info), name(name) {}
@@ -261,6 +261,7 @@ class IrClass : public IrElement {
     void generateTreeMacro(std::ostream &out) const;
     void resolve() override;
     cstring toString() const override { return name; }
+    std::string fullName() const;
     Util::Enumerator<IrField*>* getFields() const;
     Util::Enumerator<IrMethod*>* getUserMethods() const;
 };
