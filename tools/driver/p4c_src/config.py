@@ -38,7 +38,10 @@ class Config(object):
         cfg_globals['__file__'] = path
         cfg_globals['output_dir'] = output_dir
         cfg_globals['source_fullname'] = source_file
-        cfg_globals['source_basename'] = os.path.splitext(os.path.basename(source_file))[0]
+        if source_file is None:
+            cfg_globals['source_basename'] = None
+        else:
+            cfg_globals['source_basename'] = os.path.splitext(os.path.basename(source_file))[0]
 
         data = None
         f = open(path)
@@ -122,5 +125,3 @@ class Config(object):
             return self.toolchain[backend]['linker']
         else:
             return None
-
-
