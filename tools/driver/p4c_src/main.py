@@ -208,8 +208,8 @@ def main():
         options = cfg.options[backend][step]
         for option in options:
             cmd = cmd + shlex.split(option)
-        # check if cmd in PATH
-        if (util.find_bin(cmd[0]) == None):
+        # check if cmd in PATH unless absolute path
+        if cmd[0].find('/') != 0 and (util.find_bin(cmd[0]) == None):
             print "{}: command not found".format(cmd[0])
             sys.exit(1)
         # only dry-run
