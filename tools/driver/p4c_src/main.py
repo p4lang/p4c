@@ -202,6 +202,7 @@ def main():
         commands['compiler'].append("--p4v=14")
 
     for idx, step in enumerate(cfg.steps[backend]):
+
         cmd = []
         for c in commands[step]:
             cmd = cmd + shlex.split(c)
@@ -220,11 +221,19 @@ def main():
         if not step_enable[idx]:
             continue
         # run command
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except:
+            import traceback
+            print "error invoking {}".format(" ".join(cmd))
+            print traceback.format_exc()
+            sys.exit(1)
+
         if opts.debug:
             print 'running {}'.format(' '.join(cmd))
         out, err = p.communicate() # now wait
         if p.returncode != 0:
             print "{}\n{}".format(out, err)
             sys.exit(p.returncode)
-        print out
+        if len(out) > 0:
+            print out
