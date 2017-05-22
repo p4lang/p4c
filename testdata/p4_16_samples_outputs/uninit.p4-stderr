@@ -13,27 +13,45 @@
 ../testdata/p4_16_samples/uninit.p4(41): warning: h.data3 may be uninitialized
         h.data2 = h.data3 + 1; // uninitialized
                   ^^^^^^^
+../testdata/p4_16_samples/uninit.p4(41): warning: + may be uninitialized
+        h.data2 = h.data3 + 1; // uninitialized
+                  ^^^^^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(42): warning: [] may not be completely initialized
         stack[0] = stack[1]; // uninitialized
                    ^^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(62): warning: c may be uninitialized
         c = !c; // uninitialized;
              ^
+../testdata/p4_16_samples/uninit.p4(62): warning: ! may be uninitialized
+        c = !c; // uninitialized;
+            ^^
 ../testdata/p4_16_samples/uninit.p4(82): warning: b may be uninitialized
-        b = b + 1;
+        b = b + 1; // uninitialized
             ^
+../testdata/p4_16_samples/uninit.p4(82): warning: + may be uninitialized
+        b = b + 1; // uninitialized
+            ^^^^^
 ../testdata/p4_16_samples/uninit.p4(86): warning: e may be uninitialized
-        if (e > 0) {
+        if (e > 0) { // uninitialized
             ^
+../testdata/p4_16_samples/uninit.p4(86): warning: > may be uninitialized
+        if (e > 0) { // uninitialized
+            ^^^^^
 ../testdata/p4_16_samples/uninit.p4(92): warning: e may be uninitialized
-        e = e + 1;
+        e = e + 1; // uninitialized
             ^
+../testdata/p4_16_samples/uninit.p4(92): warning: + may be uninitialized
+        e = e + 1; // uninitialized
+            ^^^^^
 ../testdata/p4_16_samples/uninit.p4(97): warning: touched may be uninitialized
-        touched = !touched;
+        touched = !touched; // uninitialized
                    ^^^^^^^
+../testdata/p4_16_samples/uninit.p4(97): warning: ! may be uninitialized
+        touched = !touched; // uninitialized
+                  ^^^^^^^^
 ../testdata/p4_16_samples/uninit.p4(68): warning: out parameter v may be uninitialized when c terminates
-control c(out bit<32> v) {
+control c(out bit<32> v) { // uninitialized
                       ^
 ../testdata/p4_16_samples/uninit.p4(68)
-control c(out bit<32> v) {
+control c(out bit<32> v) { // uninitialized
         ^
