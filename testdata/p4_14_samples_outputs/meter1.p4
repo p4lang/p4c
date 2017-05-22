@@ -53,8 +53,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop() {
     }
     @name(".m_action") action m_action(bit<9> meter_idx) {
-        standard_metadata.egress_spec = (bit<9>)meter_idx;
-        standard_metadata.egress_spec = (bit<9>)9w1;
+        standard_metadata.egress_spec = meter_idx;
+        standard_metadata.egress_spec = 9w1;
     }
     @name("m_filter") table m_filter {
         actions = {
@@ -68,8 +68,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".m_action") action m_action_0(bit<9> meter_idx) {
         my_meter.read(meta.meta.meter_tag);
-        standard_metadata.egress_spec = (bit<9>)meter_idx;
-        standard_metadata.egress_spec = (bit<9>)9w1;
+        standard_metadata.egress_spec = meter_idx;
+        standard_metadata.egress_spec = 9w1;
     }
     @name("._nop") action _nop_0() {
         my_meter.read(meta.meta.meter_tag);

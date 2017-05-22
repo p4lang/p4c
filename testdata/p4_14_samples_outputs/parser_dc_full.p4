@@ -622,8 +622,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".mark_forward") action mark_forward() {
-        hdr.data.data = (bit<8>)8w255;
-        standard_metadata.egress_spec = (bit<9>)9w10;
+        hdr.data.data = 8w255;
+        standard_metadata.egress_spec = 9w10;
     }
     @name("mark_check") table mark_check {
         actions = {

@@ -38,8 +38,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".setb1") action setb1(bit<8> val, bit<9> port) {
-        hdr.data.b1 = (bit<8>)val;
-        standard_metadata.egress_spec = (bit<9>)port;
+        hdr.data.b1 = val;
+        standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop() {
     }

@@ -37,7 +37,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
                   "Expected to be called on the visitor's current node");
         currentNode->type = type;
         if (type != getOriginal<NodeType>()->type)
-            LOG1("Set initial type " << type << " for expression " << currentNode);
+            LOG3("Set initial type " << type << " for expression " << currentNode);
     }
 
     const IR::Node *preorder(IR::V1Program *glob) override { global = glob; return glob; }
@@ -209,7 +209,8 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
                   "Expected to be called on the visitor's current node");
         currentNode->type = type;
         if (type != getOriginal<IR::Expression>()->type)
-            LOG1("Inferred type " << type << " for expression " << currentNode);
+            LOG3("Inferred (up) type " << type << " for expression " << currentNode <<
+                 " [" << currentNode->id <<"]");
     }
     void postorder(IR::Operation_Binary *op) override {
         if (op->left->type->is<IR::Type_InfInt>()) {
@@ -226,13 +227,13 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
                     op->left = new IR::Cast(rt, op->left);
                 else if (rt->size < lt->size)
                     op->right = new IR::Cast(lt, op->right);
-                LOG1("Inserted cast in " << op);
+                LOG3("Inserted cast in " << op);
             }
         }
     }
     void logic_operand(const IR::Expression *&op) {
         if (auto *bit = op->type->to<IR::Type::Bits>()) {
-            LOG1("Inserted bool conversion for " << op);
+            LOG3("Inserted bool conversion for " << op);
             op = new IR::Neq(IR::Type::Boolean::get(), op, new IR::Constant(bit, 0));
         } }
     void postorder(IR::LAnd *op) override {
@@ -262,6 +263,11 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
             else
                 BUG("Unepxected child index");
         } else if (parent->is<IR::Operation::Binary>()) {
+            if ((parent->is<IR::Shl>() || parent->is<IR::Shr>()) && ctxt->child_index == 1) {
+                // don't propagate into shift count -- maybe should infer log2 bits?
+            } else {
+                rv = parent->type; }
+        } else if (parent->is<IR::Neg>() || parent->is<IR::Cmpl>()) {
             rv = parent->type;
         } else if (!global) {
         } else if (auto prim = parent->to<IR::Primitive>()) {
@@ -290,13 +296,15 @@ class TypeCheck::InferExpressionsTopDown : public Modifier {
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
         return Modifier::init_apply(root); }
+    bool preorder(IR::ActionArg *) override { return false; }  // don't infer these yet
     bool preorder(IR::Expression *op) override {
         if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {
             auto *type = inferTypeFromContext(getContext(), global);
             if (type != IR::Type::Unknown::get() &&
                 type != getOriginal<IR::Expression>()->type) {
                 op->type = type;
-                LOG1("Inferred type " << type << " for expression " << op);
+                LOG3("Inferred (down) type " << type << " for expression " << op <<
+                     " [" << op->id <<"]");
             }
         }
         return true; }
@@ -401,7 +409,8 @@ class TypeCheck::AssignActionArgTypes : public Modifier {
         auto type = self.actionArgUseTypes[getOriginal()];
         if (type != getOriginal<IR::ActionArg>()->type) {
             arg->type = type;
-            LOG1("Inferred type " << arg->type << " for action argument " << arg);
+            LOG3("Inferred type " << arg->type << " for action argument " << arg <<
+                 " [" << arg->id <<"]");
         }
 
         return true;
@@ -409,6 +418,36 @@ class TypeCheck::AssignActionArgTypes : public Modifier {
 
  public:
     explicit AssignActionArgTypes(TypeCheck &s) : self(s) { setName("AssignActionArgTypes"); }
+};
+
+class TypeCheck::MakeImplicitCastsExplicit : public Transform, P4WriteContext {
+    const IR::V1Program *global = nullptr;
+    bool        inAction = false;
+    profile_t init_apply(const IR::Node *root) override {
+        global = root->to<IR::V1Program>();
+        return Transform::init_apply(root); }
+    IR::Annotation *preorder(IR::Annotation *a) override { prune(); return a; }
+    IR::ActionFunction *preorder(IR::ActionFunction *af) override {
+        inAction = true;
+        visit(af->action);
+        inAction = false;
+        prune();
+        return af; }
+    IR::Expression *postorder(IR::Expression *op) override {
+        if (!inAction || isWrite()) return op;  // don't cast lvalues or refs outside actions
+        auto *type = inferTypeFromContext(getContext(), global);
+        if (type != IR::Type::Unknown::get() && !type->is<IR::Type_InfInt>() && type != op->type) {
+                LOG3("Need cast " << op->type << " -> " << type << " on " << op);
+                const IR::Expression *e = getOriginal<IR::Expression>();
+                if (*op != *e) e = op;  // undo Transform clone if it wasn't needed
+                return new IR::Cast(type, e);
+            }
+        return op; }
+
+ public:
+    MakeImplicitCastsExplicit() {
+        visitDagOnce = false;
+        setName("MakeImplicitCastsExplicit"); }
 };
 
 TypeCheck::TypeCheck() : PassManager({
@@ -419,7 +458,8 @@ TypeCheck::TypeCheck() : PassManager({
         new InferActionArgsBottomUp(*this),
         new InferActionArgsTopDown(*this),
         new AssignActionArgTypes(*this)
-    }))->setRepeats(100)   // avoid infinite loop if there's a bug
+    }))->setRepeats(100),  // avoid infinite loop if there's a bug
+    new MakeImplicitCastsExplicit
 }) { setStopOnError(true); setName("TypeCheck"); }
 
 const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {

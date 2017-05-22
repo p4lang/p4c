@@ -31,16 +31,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop() {
     }
     @name(".setb1") action setb1(bit<8> val) {
-        hdr.data.b1 = (bit<8>)val;
+        hdr.data.b1 = val;
     }
     @name(".setb2") action setb2(bit<8> val) {
-        hdr.data.b2 = (bit<8>)val;
+        hdr.data.b2 = val;
     }
     @name(".setb3") action setb3(bit<8> val) {
-        hdr.data.b3 = (bit<8>)val;
+        hdr.data.b3 = val;
     }
     @name(".setb4") action setb4(bit<8> val) {
-        hdr.data.b4 = (bit<8>)val;
+        hdr.data.b4 = val;
     }
     @name("test1") table test1 {
         actions = {

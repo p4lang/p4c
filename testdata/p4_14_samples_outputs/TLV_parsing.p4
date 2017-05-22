@@ -105,17 +105,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_ipv4_option_EOL") state parse_ipv4_option_EOL {
         packet.extract(hdr.ipv4_option_EOL.next);
-        meta.my_metadata.parse_ipv4_counter = (bit<8>)(meta.my_metadata.parse_ipv4_counter - 8w1);
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w1;
         transition parse_ipv4_options;
     }
     @name("parse_ipv4_option_NOP") state parse_ipv4_option_NOP {
         packet.extract(hdr.ipv4_option_NOP.next);
-        meta.my_metadata.parse_ipv4_counter = (bit<8>)(meta.my_metadata.parse_ipv4_counter - 8w1);
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w1;
         transition parse_ipv4_options;
     }
     @name("parse_ipv4_option_security") state parse_ipv4_option_security {
         packet.extract(hdr.ipv4_option_security);
-        meta.my_metadata.parse_ipv4_counter = (bit<8>)(meta.my_metadata.parse_ipv4_counter - 8w11);
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w11;
         transition parse_ipv4_options;
     }
     @name("parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
@@ -125,7 +125,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.ipv4_option_timestamp.value = tmp_hdr.value;
         hdr.ipv4_option_timestamp.len = tmp_hdr.len;
         hdr.ipv4_option_timestamp.data = tmp_hdr_0.data;
-        meta.my_metadata.parse_ipv4_counter = (bit<8>)(meta.my_metadata.parse_ipv4_counter - hdr.ipv4_option_timestamp.len);
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - hdr.ipv4_option_timestamp.len;
         transition parse_ipv4_options;
     }
     @name("parse_ipv4_options") state parse_ipv4_options {
@@ -147,19 +147,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_option_EOL.push_front(1);
-        hdr.ipv4_base.ihl = (bit<4>)4w8;
+        hdr.ipv4_base.ihl = 4w8;
     }
     @name(".format_options_timestamp") action format_options_timestamp() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
-        hdr.ipv4_base.ihl = (bit<4>)(8w5 + (hdr.ipv4_option_timestamp.len >> 8w3));
+        hdr.ipv4_base.ihl = (bit<4>)(8w5 + (hdr.ipv4_option_timestamp.len >> 3));
     }
     @name(".format_options_both") action format_options_both() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_option_NOP.push_front(1);
-        hdr.ipv4_option_NOP[0].value = (bit<8>)8w0x1;
-        hdr.ipv4_base.ihl = (bit<4>)(8w8 + (hdr.ipv4_option_timestamp.len >> 8w2));
+        hdr.ipv4_option_NOP[0].value = 8w0x1;
+        hdr.ipv4_base.ihl = (bit<4>)(8w8 + (hdr.ipv4_option_timestamp.len >> 2));
     }
     @name("._nop") action _nop() {
     }

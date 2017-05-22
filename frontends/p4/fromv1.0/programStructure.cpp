@@ -304,13 +304,9 @@ const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* para
 const IR::AssignmentStatement* ProgramStructure::assign(
     Util::SourceInfo srcInfo, const IR::Expression* left,
     const IR::Expression* right, const IR::Type* type) {
-    const IR::Expression* cast;
-    if (type != nullptr)
-        cast = new IR::Cast(type, right);
-    else
-        cast = right;
-    auto result = new IR::AssignmentStatement(srcInfo, left, cast);
-    return result;
+    if (type != nullptr && type != right->type)
+        right = new IR::Cast(type, right);
+    return new IR::AssignmentStatement(srcInfo, left, right);
 }
 
 const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expression* expr) {

@@ -66,10 +66,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".action_0") action action_0(bit<8> my_param0, bit<8> my_param1) {
         hdr.ipv4.protocol[7:3] = my_param0[7:3];
-        hdr.ipv4.ttl = (bit<8>)my_param1;
+        hdr.ipv4.ttl = my_param1;
     }
     @name(".action_1") action action_1(bit<8> my_param2) {
-        hdr.ipv4.totalLen = (bit<16>)hdr.ipv4.totalLen;
+        hdr.ipv4.totalLen = hdr.ipv4.totalLen;
     }
     @name("table_0") table table_0 {
         actions = {
