@@ -99,6 +99,12 @@ Checksum::update(Packet *pkt) const {
 
 bool
 Checksum::verify(const Packet &pkt) const {
+  if (!is_target_field_valid(pkt)) {
+    BMLOG_TRACE_PKT(
+        pkt, "Skipping checksum '{}' verification because target field invalid",
+        get_name());
+    return true;
+  }
   if (!is_checksum_condition_met(pkt)) {
     BMLOG_TRACE_PKT(
         pkt, "Skipping checksum '{}' verification because condition not met",
@@ -121,6 +127,12 @@ Checksum::is_checksum_condition_met(const Packet &pkt) const {
   return (!condition) || (condition->eval_bool(*pkt.get_phv()));
 }
 
+bool
+Checksum::is_target_field_valid(const Packet &pkt) const {
+  auto &hdr = pkt.get_phv()->get_header(header_id);
+  return hdr.is_valid();
+}
+
 CalcBasedChecksum::CalcBasedChecksum(const std::string &name, p4object_id_t id,
                                      header_id_t header_id, int field_offset,
                                      const NamedCalculation *calculation)
@@ -130,14 +142,14 @@ CalcBasedChecksum::CalcBasedChecksum(const std::string &name, p4object_id_t id,
 void
 CalcBasedChecksum::update_(Packet *pkt) const {
   const uint64_t cksum = calculation->output(*pkt);
-  Field &f_cksum = pkt->get_phv()->get_field(header_id, field_offset);
+  auto &f_cksum = pkt->get_phv()->get_field(header_id, field_offset);
   f_cksum.set(cksum);
 }
 
 bool
 CalcBasedChecksum::verify_(const Packet &pkt) const {
   const uint64_t cksum = calculation->output(pkt);
-  const Field &f_cksum = pkt.get_phv()->get_field(header_id, field_offset);
+  const auto &f_cksum = pkt.get_phv()->get_field(header_id, field_offset);
   return (cksum == f_cksum.get<uint64_t>());
 }
 

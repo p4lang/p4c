@@ -52,6 +52,8 @@ class Checksum : public NamedP4Object{
 
   bool is_checksum_condition_met(const Packet &pkt) const;
 
+  bool is_target_field_valid(const Packet &pkt) const;
+
  protected:
   header_id_t header_id;
   int field_offset;

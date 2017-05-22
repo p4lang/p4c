@@ -201,29 +201,44 @@ class ChecksumTest : public ::testing::Test {
 
 TEST_F(ChecksumTest, IPv4ChecksumVerify) {
   uint16_t cksum;
-  Packet packet = get_ipv4_pkt(&cksum);
-  PHV *phv = packet.get_phv();
+  auto packet = get_ipv4_pkt(&cksum);
+  auto phv = packet.get_phv();
   parser.parse(&packet);
 
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
   ASSERT_TRUE(cksum_engine.verify(packet));
 
-  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
+  auto &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ipv4_checksum.set(0);
   ASSERT_FALSE(cksum_engine.verify(packet));
 }
 
-TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
+TEST_F(ChecksumTest, IPv4ChecksumVerifyInvalidField) {
   uint16_t cksum;
-  Packet packet = get_ipv4_pkt(&cksum);
-  PHV *phv = packet.get_phv();
+  auto packet = get_ipv4_pkt(&cksum);
+  auto phv = packet.get_phv();
   parser.parse(&packet);
 
-  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
+  IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
+  auto &ipv4_checksum = phv->get_field(ipv4Header, 9);
+  ipv4_checksum.set(0);
+  ASSERT_FALSE(cksum_engine.verify(packet));
+  // if the ipv4 checksum field is not valid, we shouldn't see an error
+  phv->get_header(ipv4Header).mark_invalid();
+  ASSERT_TRUE(cksum_engine.verify(packet));
+}
+
+TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
+  uint16_t cksum;
+  auto packet = get_ipv4_pkt(&cksum);
+  auto phv = packet.get_phv();
+  parser.parse(&packet);
+
+  auto &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 
   ipv4_checksum.set(0);
-  ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
+  ASSERT_EQ(0u, ipv4_checksum.get_uint());
 
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
   cksum_engine.update(&packet);
@@ -232,17 +247,17 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
   uint16_t cksum;
-  Packet packet = get_ipv4_pkt(&cksum);
-  PHV *phv = packet.get_phv();
+  auto packet = get_ipv4_pkt(&cksum);
+  auto phv = packet.get_phv();
   parser.parse(&packet);
 
-  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
+  auto &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
   for (int i = 0; i < 100000; i++) {
     ipv4_checksum.set(0);
-    ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
+    ASSERT_EQ(0u, ipv4_checksum.get_uint());
 
     cksum_engine.update(&packet);
     ASSERT_EQ(cksum, ipv4_checksum.get_uint());
@@ -253,29 +268,46 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
 TEST_F(ChecksumTest, TCPChecksumVerify) {
   uint16_t cksum;
   uint16_t tcp_len;
-  Packet packet = get_tcp_pkt(&cksum, &tcp_len);
-  PHV *phv = packet.get_phv();
+  auto packet = get_tcp_pkt(&cksum, &tcp_len);
+  auto phv = packet.get_phv();
   parser.parse(&packet);
 
   phv->get_field(metaHeader, 0).set(tcp_len);
 
   ASSERT_TRUE(tcp_cksum_engine->verify(packet));
 
-  Field &tcp_checksum = phv->get_field(tcpHeader, 8);
+  auto &tcp_checksum = phv->get_field(tcpHeader, 8);
   tcp_checksum.set(0);
   ASSERT_FALSE(tcp_cksum_engine->verify(packet));
+}
+
+TEST_F(ChecksumTest, TCPChecksumVerifyInvalidField) {
+  uint16_t cksum;
+  uint16_t tcp_len;
+  auto packet = get_tcp_pkt(&cksum, &tcp_len);
+  auto phv = packet.get_phv();
+  parser.parse(&packet);
+
+  phv->get_field(metaHeader, 0).set(tcp_len);
+
+  auto &tcp_checksum = phv->get_field(tcpHeader, 8);
+  tcp_checksum.set(0);
+  ASSERT_FALSE(tcp_cksum_engine->verify(packet));
+  // if the TCP checksum field is not valid, we shouldn't see an error
+  phv->get_header(tcpHeader).mark_invalid();
+  ASSERT_TRUE(tcp_cksum_engine->verify(packet));
 }
 
 TEST_F(ChecksumTest, TCPChecksumUpdate) {
   uint16_t cksum;
   uint16_t tcp_len;
-  Packet packet = get_tcp_pkt(&cksum, &tcp_len);
-  PHV *phv = packet.get_phv();
+  auto packet = get_tcp_pkt(&cksum, &tcp_len);
+  auto phv = packet.get_phv();
   parser.parse(&packet);
 
   phv->get_field(metaHeader, 0).set(tcp_len);
 
-  Field &tcp_checksum = phv->get_field(tcpHeader, 8);
+  auto &tcp_checksum = phv->get_field(tcpHeader, 8);
   ASSERT_EQ(cksum, tcp_checksum.get_uint());
 
   tcp_checksum.set(0);
