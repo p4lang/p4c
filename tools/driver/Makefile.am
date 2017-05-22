@@ -15,14 +15,4 @@
 bin_SCRIPTS += p4c
 CLEANFILES += $(bin_SCRIPTS)
 
-do_substitution = sed -e 's,[@]pkgdatadir[@],$(pkgdir),g' -e 's,[@]datadir[@],$(datadir),g' -e 's,[@]bindir[@],$(bindir),g'
-
-# generate the p4c for installation
-# this runs before install-data-hook
-p4c: $(srcdir)/tools/driver/p4c
-	echo "generating p4c driver: $@"
-	@cp $< $@
-	@chmod +x $@
-
-
 include $(srcdir)/tools/driver/p4c_src/Makefile.am

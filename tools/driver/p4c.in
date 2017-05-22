@@ -22,7 +22,13 @@ import sys
 install_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 if not os.path.exists(os.path.join(install_dir, 'p4c_src')):
     # this is the installed configuration
-    artifacts_dir = os.path.join(install_dir, "../share/p4c")
+    artifacts_dir = '@datarootdir@'
+    if artifacts_dir == '${prefix}/share':
+        # datadir based on prefix
+        artifacts_dir = os.path.normpath(os.path.join(install_dir, "../share/p4c"))
+    else:
+        # explicit datadir. add package name
+        artifacts_dir = os.path.join(artifacts_dir, 'p4c')
 else:
     artifacts_dir = install_dir
 
