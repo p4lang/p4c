@@ -77,11 +77,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop() {
     }
     @name("._set_port") action _set_port(bit<9> port) {
-        standard_metadata.egress_spec = (bit<9>)port;
-        meta.metaA.f1 = (bit<8>)8w1;
+        standard_metadata.egress_spec = port;
+        meta.metaA.f1 = 8w1;
     }
     @name("._multicast") action _multicast(bit<4> mgrp) {
-        meta.intrinsic_metadata.mcast_grp = (bit<4>)mgrp;
+        meta.intrinsic_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
         resubmit({ standard_metadata, meta.metaA });

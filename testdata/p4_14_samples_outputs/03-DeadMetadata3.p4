@@ -27,10 +27,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".a1") action a1() {
-        meta.m.f1 = (bit<32>)32w1;
+        meta.m.f1 = 32w1;
     }
     @name(".a2") action a2() {
-        meta.m.f2 = (bit<32>)32w2;
+        meta.m.f2 = 32w2;
     }
     @name("t1") table t1 {
         actions = {

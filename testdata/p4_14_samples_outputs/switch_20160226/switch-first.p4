@@ -2191,7 +2191,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.ipv6.setInvalid();
     }
     @name(".inner_non_ip_rewrite") action inner_non_ip_rewrite() {
-        meta.egress_metadata.payload_length = (bit<16>)(standard_metadata.packet_length + 32w65522);
+        meta.egress_metadata.payload_length = (bit<16>)standard_metadata.packet_length + 16w65522;
     }
     @name(".f_insert_vxlan_header") action f_insert_vxlan_header() {
         hdr.inner_ethernet = hdr.ethernet;
@@ -2277,7 +2277,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta.tunnel_metadata.vnid;
-        hdr.nvgre.flow_id[7:0] = meta.hash_metadata.entropy_hash[7:0];
+        hdr.nvgre.flow_id[7:0] = ((bit<8>)meta.hash_metadata.entropy_hash)[7:0];
     }
     @name(".ipv4_nvgre_rewrite") action ipv4_nvgre_rewrite() {
         f_insert_nvgre_header();
@@ -4461,7 +4461,7 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
 control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ingress_bd_stats_count") @min_width(32) counter(32w1024, CounterType.packets_and_bytes) ingress_bd_stats_count;
     @name(".update_ingress_bd_stats") action update_ingress_bd_stats() {
-        ingress_bd_stats_count.count((bit<32>)meta.l2_metadata.bd_stats_idx);
+        ingress_bd_stats_count.count((bit<32>)(bit<10>)meta.l2_metadata.bd_stats_idx);
     }
     @name("ingress_bd_stats") table ingress_bd_stats {
         actions = {
@@ -4479,7 +4479,7 @@ control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout s
 control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("acl_stats_count") counter(32w1024, CounterType.packets_and_bytes) acl_stats_count;
     @name(".acl_stats_update") action acl_stats_update() {
-        acl_stats_count.count((bit<32>)meta.acl_metadata.acl_stats_index);
+        acl_stats_count.count((bit<32>)(bit<10>)meta.acl_metadata.acl_stats_index);
     }
     @name("acl_stats") table acl_stats {
         actions = {
@@ -4735,7 +4735,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     @name("drop_stats") counter(32w1024, CounterType.packets) drop_stats;
     @name("drop_stats_2") counter(32w1024, CounterType.packets) drop_stats_2;
     @name(".drop_stats_update") action drop_stats_update() {
-        drop_stats_2.count((bit<32>)meta.ingress_metadata.drop_reason);
+        drop_stats_2.count((bit<32>)(bit<10>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action nop() {
     }

@@ -50,7 +50,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".set_f1") action set_f1(bit<8> f1) {
-        meta.ing_metadata.f1 = (bit<8>)f1;
+        meta.ing_metadata.f1 = f1;
     }
     @name("i_t1") table i_t1 {
         actions = {

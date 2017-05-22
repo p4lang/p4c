@@ -49,13 +49,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".setmeta") action setmeta(bit<32> v0, bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<16> v5, bit<16> v6) {
-        meta.m.m0 = (bit<32>)v0;
-        meta.m.m1 = (bit<32>)v1;
-        meta.m.m2 = (bit<32>)v2;
-        meta.m.m3 = (bit<32>)v3;
-        meta.m.m4 = (bit<32>)v4;
-        meta.m.m5 = (bit<16>)v5;
-        meta.m.m6 = (bit<16>)v6;
+        meta.m.m0 = v0;
+        meta.m.m1 = v1;
+        meta.m.m2 = v2;
+        meta.m.m3 = v3;
+        meta.m.m4 = v4;
+        meta.m.m5 = v5;
+        meta.m.m6 = v6;
     }
     @name("test1") table test1 {
         actions = {

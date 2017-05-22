@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.counter_metadata.counter_run = 4w1;
     }
     @name(".count_entries") action count_entries_0() {
-        count1.count((bit<32>)meta.counter_metadata.counter_index);
+        count1.count((bit<32>)(bit<14>)meta.counter_metadata.counter_index);
     }
     @name(".seth2") action seth2_0(bit<16> val) {
         hdr.data.h2 = val;

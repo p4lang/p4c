@@ -38,19 +38,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<32> tmp_4;
     bit<32> tmp_5;
-    bit<32> tmp_6;
+    int<32> tmp_6;
     int<32> tmp_7;
     int<32> tmp_8;
     @name("NoAction") action NoAction_0() {
     }
     @name(".action_0") action action_14() {
-        hdr.pkt.field_a_32 = (bit<32>)~(hdr.pkt.field_b_32 | (int<32>)hdr.pkt.field_c_32);
+        hdr.pkt.field_a_32 = ~((bit<32>)hdr.pkt.field_b_32 | hdr.pkt.field_c_32);
     }
     @name(".action_1") action action_15(bit<32> param0) {
         hdr.pkt.field_a_32 = ~(param0 & hdr.pkt.field_c_32);
     }
     @name(".action_2") action action_16(bit<32> param0) {
-        hdr.pkt.field_a_32 = (bit<32>)~(hdr.pkt.field_b_32 ^ (int<32>)param0);
+        hdr.pkt.field_a_32 = ~((bit<32>)hdr.pkt.field_b_32 ^ param0);
     }
     @name(".action_3") action action_17() {
         hdr.pkt.field_a_32 = ~hdr.pkt.field_d_32;
@@ -66,9 +66,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.pkt.field_a_32 = tmp_5;
     }
     @name(".action_6") action action_20() {
-        tmp_6 = (hdr.pkt.field_d_32 <= 32w7 ? hdr.pkt.field_d_32 : tmp_6);
-        tmp_6 = (!(hdr.pkt.field_d_32 <= 32w7) ? 32w7 : tmp_6);
-        hdr.pkt.field_b_32 = (int<32>)tmp_6;
+        tmp_6 = ((int<32>)hdr.pkt.field_d_32 <= 32s7 ? (int<32>)hdr.pkt.field_d_32 : tmp_6);
+        tmp_6 = (!((int<32>)hdr.pkt.field_d_32 <= 32s7) ? 32s7 : tmp_6);
+        hdr.pkt.field_b_32 = tmp_6;
     }
     @name(".action_7") action action_21(int<32> param0) {
         tmp_7 = (param0 >= (int<32>)hdr.pkt.field_d_32 ? param0 : tmp_7);

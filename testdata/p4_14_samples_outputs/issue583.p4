@@ -174,7 +174,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("start") state start {
-        meta.routing_metadata.drop = (bit<1>)1w0;
+        meta.routing_metadata.drop = 1w0;
         transition parse_ethernet;
     }
 }
@@ -192,7 +192,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         reg2.write((bit<32>)0, meta.ipv4_meta);
     }
     @name(".hop") action hop(inout bit<8> ttl, bit<9> egress_spec) {
-        ttl = (bit<8>)(ttl + 8w255);
+        ttl = ttl + 8w255;
         standard_metadata.egress_spec[8:0] = egress_spec[8:0];
     }
     @name(".hop_ipv4") action hop_ipv4(bit<9> egress_spec) {

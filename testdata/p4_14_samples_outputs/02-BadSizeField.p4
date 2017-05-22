@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta.ing_metadata.egress_port = (bit<8>)egress_port;
+        meta.ing_metadata.egress_port = egress_port;
     }
     @name("i_t1") table i_t1 {
         actions = {

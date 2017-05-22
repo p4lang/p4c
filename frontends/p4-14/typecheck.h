@@ -29,6 +29,7 @@ class TypeCheck : public PassManager {
     class InferActionArgsBottomUp;
     class InferActionArgsTopDown;
     class AssignActionArgTypes;
+    class MakeImplicitCastsExplicit;
  public:
     TypeCheck();
     const IR::Node *apply_visitor(const IR::Node *, const char *) override;

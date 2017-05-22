@@ -88,24 +88,24 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     @name(".nop") action nop() {
     }
     @name(".rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac(bit<48> smac) {
-        hdr.ethernet.srcAddr = (bit<48>)smac;
-        hdr.ethernet.dstAddr = (bit<48>)meta.egress_metadata.mac_da;
-        hdr.ipv4.ttl = (bit<8>)(hdr.ipv4.ttl + 8w255);
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac(bit<48> smac) {
-        hdr.ethernet.srcAddr = (bit<48>)smac;
+        hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr[47:23] = 48w0x1005e000000[47:23];
-        hdr.ipv4.ttl = (bit<8>)(hdr.ipv4.ttl + 8w255);
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac(bit<48> smac) {
-        hdr.ethernet.srcAddr = (bit<48>)smac;
-        hdr.ethernet.dstAddr = (bit<48>)meta.egress_metadata.mac_da;
-        hdr.ipv6.hopLimit = (bit<8>)(hdr.ipv6.hopLimit + 8w255);
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
     @name(".rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac(bit<48> smac) {
-        hdr.ethernet.srcAddr = (bit<48>)smac;
+        hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr[47:32] = 48w0x333300000000[47:32];
-        hdr.ipv6.hopLimit = (bit<8>)(hdr.ipv6.hopLimit + 8w255);
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
     @name("mac_rewrite") table mac_rewrite {
         actions = {
@@ -131,9 +131,9 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_setup") action do_setup(bit<9> idx, bit<1> routed) {
-        meta.egress_metadata.mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.egress_metadata.smac_idx = (bit<9>)idx;
-        meta.egress_metadata.routed = (bit<1>)routed;
+        meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
+        meta.egress_metadata.smac_idx = idx;
+        meta.egress_metadata.routed = routed;
     }
     @name("setup") table setup {
         actions = {
