@@ -75,11 +75,9 @@ class ErrorCodeMap {
     NoMatch,
     //! Reference to invalid element of a header stack (partial support)
     StackOutOfBounds,
-    //! Extracting on top of a valid header
-    OverwritingHeader,
     //! Extracting too many bits into a varbit field (unused for now)
     HeaderTooShort,
-    //! %Parser execution time limit exceeded (unused for now)
+    //! Parser execution time limit exceeded (unused for now)
     ParserTimeout
   };
 

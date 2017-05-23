@@ -1613,19 +1613,6 @@ TEST_F(ParserCoreErrorsTest, StackOutOfBounds) {
   parse_and_check_error(&packet, ErrorCodeMap::Core::StackOutOfBounds);
 }
 
-TEST_F(ParserCoreErrorsTest, OverwritingHeader) {
-  HeaderType testHeaderType("test_header_t", 0);
-  testHeaderType.push_back_field("f", 8);
-  header_id_t testHeader(0);
-  phv_factory.push_back_header("test_header", testHeader, testHeaderType);
-
-  auto packet = get_pkt(packet_nbytes);
-  // extract twice, try to overwrite
-  parse_state.add_extract(testHeader);
-  parse_state.add_extract(testHeader);
-  parse_and_check_error(&packet, ErrorCodeMap::Core::OverwritingHeader);
-}
-
 namespace {
 
 template <typename It>
@@ -1889,18 +1876,6 @@ TEST_F(ParserExtractVLTest, MultiplePackets) {
     const auto &f = packet.get_phv()->get_field(testHeader, 0);  // fVL
     ASSERT_EQ(packet_data, f.get_string());
   }
-}
-
-TEST_F(ParserExtractVLTest, OverwritingHeader) {
-  constexpr size_t expr_bytes = max_header_bytes / 2;
-  constexpr size_t packet_bytes = max_header_bytes;
-  parse_state.add_extract_VL(testHeader, make_expr(expr_bytes * 8),
-                             max_header_bytes);
-  parse_state.add_extract_VL(testHeader, make_expr(expr_bytes * 8),
-                             max_header_bytes);
-  std::string packet_data(packet_bytes, '\xaa');
-  auto packet = get_pkt(packet_data);
-  parse_and_check_error(&packet, ErrorCodeMap::Core::OverwritingHeader);
 }
 
 TEST_F(ParserExtractVLTest, PacketTooShort) {

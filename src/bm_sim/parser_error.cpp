@@ -57,8 +57,8 @@ ErrorCodeMap::add_core() {
   auto max_v = (max_p == map_v_to_name.end()) ? 0 : (max_p->first + 1);
   // TODO(antonin): write an iterator for Core enum class instead
   for (const auto core : {Core::NoError, Core::PacketTooShort, Core::NoMatch,
-                          Core::StackOutOfBounds, Core::OverwritingHeader,
-                          Core::HeaderTooShort, Core::ParserTimeout}) {
+                          Core::StackOutOfBounds, Core::HeaderTooShort,
+                          Core::ParserTimeout}) {
     auto name = core_to_name(core);
     if (!exists(name)) assert(add(name, max_v++));
   }
@@ -98,8 +98,6 @@ ErrorCodeMap::core_to_name(const Core &core) {
       return "NoMatch";
     case Core::StackOutOfBounds:
       return "StackOutOfBounds";
-    case Core::OverwritingHeader:
-      return "OverwritingHeader";
     case Core::HeaderTooShort:
       return "HeaderTooShort";
     case Core::ParserTimeout:

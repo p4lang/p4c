@@ -252,8 +252,6 @@ struct ParserOpExtract : ParserOp {
                   size_t *bytes_parsed) const override {
     auto phv = pkt->get_phv();
     auto &hdr = phv->get_header(header);
-    if (hdr.is_valid())
-      throw parser_exception_core(ErrorCodeMap::Core::OverwritingHeader);
     BMELOG(parser_extract, *pkt, header);
     BMLOG_DEBUG_PKT(*pkt, "Extracting header '{}'", hdr.get_name());
     check_enough_data_for_extract(*pkt, *bytes_parsed, hdr);
@@ -278,8 +276,6 @@ struct ParserOpExtractVL : ParserOp {
     auto phv = pkt->get_phv();
     auto &hdr = phv->get_header(header);
     assert(hdr.is_VL_header());
-    if (hdr.is_valid())
-      throw parser_exception_core(ErrorCodeMap::Core::OverwritingHeader);
 
     static thread_local Data computed_nbits;
     field_length_expr.eval(*phv, &computed_nbits);
