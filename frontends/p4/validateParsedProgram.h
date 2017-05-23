@@ -35,7 +35,7 @@ namespace P4 {
    - width of int<> types is larger than 1
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
-   - tables have an actions and a default_action properties
+   - tables have an actions property
    - instantiations appear at the top-level only
    - switch statements do not occur in actions
    - instantiations do not occur in actions
