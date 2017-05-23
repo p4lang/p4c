@@ -4,15 +4,6 @@
 ../testdata/p4_16_samples/issue561.p4(35): warning: u.h2.g may be uninitialized
         x = u.h1.f + u.h2.g;
                      ^^^^^^
-../testdata/p4_16_samples/issue561.p4(35): warning: + may be uninitialized
-        x = u.h1.f + u.h2.g;
-            ^^^^^^^^^^^^^^^
 ../testdata/p4_16_samples/issue561.p4(45): warning: [].h2.g may be uninitialized
         x = x + u2[1].h2.g + u2[0].h1.f;
                 ^^^^^^^^^^
-../testdata/p4_16_samples/issue561.p4(45): warning: + may be uninitialized
-        x = x + u2[1].h2.g + u2[0].h1.f;
-            ^^^^^^^^^^^^^^
-../testdata/p4_16_samples/issue561.p4(45): warning: + may be uninitialized
-        x = x + u2[1].h2.g + u2[0].h1.f;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
