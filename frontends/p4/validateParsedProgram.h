@@ -52,7 +52,7 @@ class ValidateParsedProgram final : public Inspector {
         const IR::ParameterList* constr);
 
  public:
-    explicit ValidateParsedProgram()
+    ValidateParsedProgram()
     { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;

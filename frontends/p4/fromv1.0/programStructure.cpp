@@ -694,7 +694,8 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         !actionList->getDeclaration(table->default_action)) {
         actionList->push_back(
             new IR::ActionListElement(
-                new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
+                new IR::Annotations(
+                    {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
                 new IR::PathExpression(table->default_action))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
