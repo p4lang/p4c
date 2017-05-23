@@ -312,7 +312,7 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
     BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
     visit(ctrl->type, "type");
     visit(ctrl->constructorParams, "constructorParams");
-    ctrl->controlLocals.visit_children(*this);
+    visit(ctrl->controlLocals, "controlLocals");
     if (working || !available.empty()) BUG("corrupt internal data struct");
     working = true;
     LOG2("DoLocalCopyPropagation working on control " << ctrl->name);

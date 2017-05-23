@@ -603,7 +603,7 @@ bool ComputeWriteSet::preorder(const IR::SelectExpression* expression) {
 }
 
 bool ComputeWriteSet::preorder(const IR::ListExpression* expression) {
-    expression->components.visit_children(*this);
+    visit(expression->components, "components");
     auto l = LocationSet::empty;
     for (auto c : expression->components) {
         auto cl = get(c);
@@ -776,7 +776,7 @@ bool ComputeWriteSet::preorder(const IR::IfStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::BlockStatement* statement) {
-    statement->components.visit_children(*this);
+    visit(statement->components, "components");
     return setDefinitions(currentDefinitions);
 }
 

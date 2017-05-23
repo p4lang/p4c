@@ -138,7 +138,7 @@ class FindLocationSets : public Inspector {
     }
 
     bool preorder(const IR::ListExpression* expression) {
-        expression->components.visit_children(*this);
+        visit(expression->components, "components");
         auto l = LocationSet::empty;
         for (auto c : expression->components) {
             auto cl = get(c);
@@ -444,7 +444,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
         inlineList->addInstantiation(parent->container, callee, instance);
     }
     visit_all(block);
-    block->container->states.visit_children(*this);
+    visit(block->container->states, "states");
     return false;
 }
 
@@ -681,7 +681,7 @@ class RenameStates : public Transform {
         return path;
     }
     const IR::Node* preorder(IR::SelectExpression* expression) override {
-        expression->selectCases.parallel_visit_children(*this);
+        parallel_visit(expression->selectCases, "selectCases", 1);
         prune();
         return expression;
     }
@@ -704,7 +704,7 @@ class RenameStates : public Transform {
         return state;
     }
     const IR::Node* preorder(IR::P4Parser* parser) override {
-        parser->states.visit_children(*this);
+        visit(parser->states, "states");
         prune();
         return parser;
     }
@@ -871,7 +871,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
         }
     }
 
-    caller->states.visit_children(*this);
+    visit(caller->states, "states");
     caller->parserLocals = locals;
     list->replace(orig, caller);
     workToDo = nullptr;

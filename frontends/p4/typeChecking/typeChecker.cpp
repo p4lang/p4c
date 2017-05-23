@@ -799,10 +799,10 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
     // the declaration, and then typecheck the initializer if present.
     if (done())
         return decl;
-    visit(decl->type);
-    visit(decl->arguments);
-    visit(decl->annotations);
-    decl->properties.visit_children(*this);
+    visit(decl->type, "type");
+    visit(decl->arguments, "arguments");
+    visit(decl->annotations, "annotations");
+    visit(decl->properties, "properties");
 
     auto type = getTypeType(decl->type);
     if (type == nullptr) {

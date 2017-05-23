@@ -92,6 +92,38 @@ class Visitor {
     void visit(IR::CLASS *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
+    void visit(IR::Node &n, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        n.visit_children(*this); }
+    void visit(const IR::Node &n, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        n.visit_children(*this); }
+    void visit(IR::Node &n, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        n.visit_children(*this); }
+    void visit(const IR::Node &n, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        n.visit_children(*this); }
+    template<class T> void parallel_visit(IR::Vector<T> &v, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        v.parallel_visit_children(*this); }
+    template<class T> void parallel_visit(const IR::Vector<T> &v, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        v.parallel_visit_children(*this); }
+    template<class T> void parallel_visit(IR::Vector<T> &v, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        v.parallel_visit_children(*this); }
+    template<class T> void parallel_visit(const IR::Vector<T> &v, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        v.parallel_visit_children(*this); }
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }

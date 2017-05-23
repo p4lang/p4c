@@ -56,7 +56,7 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     builder->blockStart();
 
     setVecSep("\n", "\n");
-    parserState->components.visit_children(*this);
+    visit(parserState->components, "components");
     doneVec();
 
     if (parserState->selectExpression == nullptr) {

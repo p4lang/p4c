@@ -65,7 +65,7 @@ parser p1(packet_in p, out Header h) {
     }
 }
 
-control c(out bit<32> v) {
+control c(out bit<32> v) {  // uninitialized
     bit<32> b;
     bit<32> d = 1;
     bit<32> setByAction;
@@ -79,22 +79,22 @@ control c(out bit<32> v) {
     }
 
     apply {
-        b = b + 1;
+        b = b + 1;  // uninitialized
         d = d + 1;
         bit<32> e;
         bit<32> f;
-        if (e > 0) {
+        if (e > 0) {  // uninitialized
             e = 1;
             f = 2;
         } else {
             f = 3;
         }
-        e = e + 1;
+        e = e + 1;  // uninitialized
         bool touched;
         switch (t.apply().action_run) {
             a1: { touched = true; }
         }
-        touched = !touched;
+        touched = !touched;  // uninitialized
         if (e > 0)
             t.apply();
         else
