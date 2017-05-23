@@ -17,24 +17,52 @@ limitations under the License.
 #include "irclass.h"
 #include "lib/algorithm.h"
 
-enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16,
-             CONST = 32, CLASSREF = 64, INCL_NESTED = 128, CONSTRUCTOR = 256, FACTORY = 512};
+enum flags {
+    // flags that control the creation of auto-created methods
+    EXTEND = 1,          // call the creation function to extend even when user-defined
+    IN_IMPL = 2,         // output in the implementation file, not the header
+    OVERRIDE = 4,        // give an 'override' tag (overrides something in IR::Node)
+    NOT_DEFAULT = 8,     // don't create if not user-defined
+    CONCRETE_ONLY = 16,  // don't create in abstract classes
+    CONST = 32,          // give a 'const' tag
+    CLASSREF = 64,       // add an argument `const CLASS &a'
+    INCL_NESTED = 128,   // create even in nested (non-Node sublass) classes
+    CONSTRUCTOR = 256,   // is a constructor
+    FACTORY = 512,       // factory (static) method
+    FRIEND = 1024        // friend function, not a method
+};
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
-{ "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
+{ "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + INCL_NESTED + OVERRIDE + CLASSREF,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl << cl->indent << cl->indent << "return ";
-        if (cl->getParent()->name == "Node")
-            buf << "typeid(*this) == typeid(a)";
-        else
-            buf << cl->getParent()->name << "::operator==(static_cast<const "
-                << cl->getParent()->name << " &>(a))";
+        bool first = true;
+        if (auto parent = cl->getParent()) {
+            if (parent->name == "Node")
+                buf << "typeid(*this) == typeid(a)";
+            else
+                buf << parent->name << "::operator==(static_cast<const "
+                    << parent->name << " &>(a))";
+            first = false; }
         for (auto f : *cl->getFields()) {
-            buf << std::endl;
-            buf << cl->indent << cl->indent << "&& " << f->name << " == a." << f->name; }
+            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
+            if (!first)
+                buf << std::endl << cl->indent << cl->indent << "&& ";
+            first = false;
+            buf << f->name << " == a." << f->name; }
+        if (first) {  // a nested class with no fields?
+            buf << "false"; }
         buf << ";" << std::endl;
         buf << cl->indent << "}";
+        return buf.str(); } } },
+{ "operator<<", { &ReferenceType::OstreamRef, { new IrField(&ReferenceType::OstreamRef, "out") },
+  EXTEND + IN_IMPL + NOT_DEFAULT + INCL_NESTED + CLASSREF + FRIEND,
+    [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+        std::stringstream buf;
+        buf << "{";
+        if (body) buf << LineDirective(srcInfo, true) << body;
+        buf << LineDirective(true) << cl->indent << "return out; }";
         return buf.str(); } } },
 { "visit_children", { &NamedType::Void, { new IrField(&ReferenceType::VisitorRef, "v") },
   IN_IMPL + OVERRIDE,
@@ -42,7 +70,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         bool needed = false;
         std::stringstream buf;
         buf << "{" << std::endl;
-        buf << cl->indent << cl->getParent()->name << "::visit_children(v);" << std::endl;
+        if (auto parent = cl->getParent())
+            buf << cl->indent << parent->name << "::visit_children(v);" << std::endl;
         for (auto f : *cl->getFields()) {
             if (f->type->resolve(cl->containedIn) == nullptr)
                 // This is not an IR pointer
@@ -71,7 +100,9 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             else
                 continue;
             needed = true; }
-        if (body) buf << LineDirective(srcInfo, true) << body;
+        if (body) {
+            buf << LineDirective(srcInfo, true) << body;
+            needed = true; }
         buf << " }";
         return needed ? buf.str() : cstring(); } } },
 { "node_type_name", { &NamedType::Cstring, {}, CONST + OVERRIDE,
@@ -88,9 +119,11 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl;
-        buf << cl->indent << cl->getParent()->name << "::dump_fields(out);" << std::endl;
+        if (auto parent = cl->getParent())
+            buf << cl->indent << parent->name << "::dump_fields(out);" << std::endl;
         bool needed = false;
         for (auto f : *cl->getFields()) {
+            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
             if (f->type->resolve(cl->containedIn) == nullptr &&
                 !dynamic_cast<const TemplateInstantiation*>(f->type)) {
                 // not an IR pointer
@@ -101,12 +134,14 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return needed ? buf.str() : cstring(); } } },
 { "toJSON", { &NamedType::Void, {
         new IrField(new ReferenceType(&NamedType::JSONGenerator), "json")
-    }, CONST + IN_IMPL + OVERRIDE,
+    }, CONST + IN_IMPL + OVERRIDE + INCL_NESTED,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
-        buf << "{" << std::endl
-            << cl->indent << cl->getParent()->name << "::toJSON(json);" << std::endl;
+        buf << "{" << std::endl;
+        if (auto parent = cl->getParent())
+            buf << cl->indent << parent->name << "::toJSON(json);" << std::endl;
         for (auto f : *cl->getFields()) {
+            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
             if (!f->isInline && f->nullOK)
                 buf << cl->indent << "if (" << f->name << " != nullptr) ";
             buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\""
@@ -114,18 +149,21 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         buf << "}";
         return buf.str(); } } },
 { nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
-    }, IN_IMPL + CONSTRUCTOR,
+    }, IN_IMPL + CONSTRUCTOR + INCL_NESTED,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
-        buf << ": " << cl->getParent()->name << "(json) {" << std::endl;
+        if (auto parent = cl->getParent())
+            buf << ": " << parent->name << "(json)";
+        buf << " {" << std::endl;
         for (auto f : *cl->getFields()) {
+            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
             buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
                 << std::endl; }
         buf << "}";
         return buf.str(); } } },
 { "fromJSON", { nullptr, {
         new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
-    }, FACTORY + IN_IMPL + CONCRETE_ONLY,
+    }, FACTORY + IN_IMPL + CONCRETE_ONLY + INCL_NESTED,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return new " << cl->name << "(json); }";
@@ -137,12 +175,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 
 void IrClass::generateMethods() {
     if (this == nodeClass || this == vectorClass) return;
-    if (kind != NodeKind::Interface && kind != NodeKind::Nested) {
-        // FIXME -- some methods should be auto-generated for Nested classes
+    if (kind != NodeKind::Interface) {
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
                 continue;
-            if ((def.second.flags & CONCRETE_ONLY) && kind != NodeKind::Concrete)
+            if (kind == NodeKind::Nested && !(def.second.flags & INCL_NESTED))
+                continue;
+            if ((def.second.flags & CONCRETE_ONLY) && kind == NodeKind::Abstract)
                 continue;
             if (Util::Enumerator<IrElement*>::createEnumerator(elements)
                 ->where([] (IrElement *el) { return el->is<IrNo>(); })
@@ -166,8 +205,12 @@ void IrClass::generateMethods() {
                     body = nullptr;
                 if (exist) {
                     exist->body = body;
+                    if (def.second.flags & FRIEND)
+                        exist->isFriend = true;
                 } else {
                     auto *m = new IrMethod(def.first, body);
+                    if (def.second.flags & FRIEND)
+                        m->isFriend = true;
                     m->clss = this;
                     elements.push_back(m); } } }
         for (auto *parent = getParent(); parent; parent = parent->getParent()) {
@@ -180,6 +223,7 @@ void IrClass::generateMethods() {
             eq_overload->isConst = true;
             elements.push_back(eq_overload); } }
     IrMethod *ctor = nullptr;
+    bool user_defined_default_ctor = false;
     for (auto m : *getUserMethods()) {
         if (m->rtype) {
             m->rtype->resolve(&local);
@@ -187,28 +231,33 @@ void IrClass::generateMethods() {
         if (!m->args.empty())
             continue;
         if (m->name == name) {
-            if (!m->isUser) ctor = m;
+            if (!m->isUser)
+                ctor = m;
+            else
+                user_defined_default_ctor = true;
             continue; }
         if (!IrMethod::Generate.count(m->name))
-            throw Util::CompilationError("Unrecognized predefined method %1%", m);
+            throw Util::CompilationError("Unrecognized predefined method %1%", m->name);
         auto &info = IrMethod::Generate.at(m->name);
         if (m->name) {
             if (info.rtype) {
                 // This predefined method has an explicit return type.
                 m->rtype = info.rtype;
-            } else if (info.flags & FACTORY) {
+            } else if ((info.flags & FACTORY) && kind != NodeKind::Nested) {
                 // This is a factory method. These return an IR:Node*. The
                 // exception is nested classes, which typically aren't IR::Nodes
                 // and therefore just return a pointer to their concrete type.
-                m->rtype = kind == NodeKind::Nested
-                         ? new PointerType(new NamedType(this))
-                         : new PointerType(new NamedType(IrClass::nodeClass));
+                m->rtype = new PointerType(new NamedType(IrClass::nodeClass));
             } else {
                 // By default predefined methods return a pointer to their
                 // concrete type.
-                m->rtype = new PointerType(new NamedType(this)); } }
-        else
-            m->name = name;
+                m->rtype = new PointerType(new NamedType(this)); }
+            if (info.flags & EXTEND)
+                m->body = info.create(this, m->srcInfo, m->body);
+            if (info.flags & FRIEND)
+                m->isFriend = true;
+        } else {
+            m->name = name; }
         m->args = info.args;
         if (info.flags & CLASSREF)
             m->args.push_back(
@@ -225,7 +274,7 @@ void IrClass::generateMethods() {
     if (kind != NodeKind::Interface && !shouldSkip("constructor")) {
         ctor_args_t args;
         computeConstructorArguments(args);
-        if (!args.empty()) {
+        if (!user_defined_default_ctor || !args.empty()) {
             int optargs = generateConstructor(args, ctor, 0);
             for (unsigned skip = 1; skip < (1U << optargs); ++skip)
                 generateConstructor(args, ctor, skip); } }
