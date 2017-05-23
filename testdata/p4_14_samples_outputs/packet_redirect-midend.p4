@@ -68,7 +68,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop_0();
             _recirculate_0();
             _clone_e2e_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
@@ -109,7 +109,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop_1();
             _set_port_0();
             _multicast_0();
-            @default_only NoAction_1();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.hdrA.f1  : exact @name("hdr.hdrA.f1") ;
@@ -123,7 +123,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop_4();
             _resubmit_0();
             _clone_i2e_0();
-            @default_only NoAction_5();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;

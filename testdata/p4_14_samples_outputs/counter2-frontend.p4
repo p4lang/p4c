@@ -37,14 +37,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("tab1") table tab1_0 {
         actions = {
             act();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.ethernet.dstAddr: ternary @name("hdr.ethernet.dstAddr") ;
         }
         size = 6100;
-        default_action = NoAction();
         @name("cnt") counters = direct_counter(CounterType.packets);
+        default_action = NoAction();
     }
     apply {
         tab1_0.apply();

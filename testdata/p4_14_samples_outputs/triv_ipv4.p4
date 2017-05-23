@@ -64,13 +64,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             do_drop;
             route_ipv4;
-            @default_only NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
         size = 2048;
-        default_action = NoAction();
     }
     apply {
         routing.apply();

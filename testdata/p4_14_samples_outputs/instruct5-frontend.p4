@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             output_1();
         }
-        const default_action = output_1(9w1);
+        default_action = output_1(9w1);
     }
     @name("test1") table test1_0 {
         actions = {
@@ -78,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             push1_0();
             push2_0();
             pop1_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.data.f1: exact @name("hdr.data.f1") ;

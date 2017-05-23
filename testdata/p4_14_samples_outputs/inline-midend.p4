@@ -27,7 +27,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("d.c.t") table d_c_t_0 {
         actions = {
             _x_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }

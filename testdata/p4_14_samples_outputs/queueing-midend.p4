@@ -59,7 +59,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("t_egress") table t_egress {
         actions = {
             copy_queueing_data_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
@@ -81,7 +81,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_port_0();
             _drop_0();
-            @default_only NoAction_1();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.hdr1.f1: exact @name("hdr.hdr1.f1") ;

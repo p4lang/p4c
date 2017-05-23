@@ -56,13 +56,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action;
             _nop;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
-        default_action = NoAction();
     }
     apply {
         m_table.apply();

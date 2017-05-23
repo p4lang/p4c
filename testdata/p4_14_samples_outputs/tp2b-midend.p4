@@ -53,7 +53,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setf1_0();
             noop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.f2: ternary @name("hdr.data.f2") ;
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setb1_0();
             noop_1();
-            @default_only NoAction_1();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.data.f3: ternary @name("hdr.data.f3") ;
@@ -75,7 +75,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setb2_0();
             noop_8();
-            @default_only NoAction_9();
+            @defaultonly NoAction_9();
         }
         key = {
             hdr.data.f3: ternary @name("hdr.data.f3") ;
@@ -124,7 +124,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1_1();
             noop_9();
-            @default_only NoAction_10();
+            @defaultonly NoAction_10();
         }
         key = {
             hdr.data.f1: ternary @name("hdr.data.f1") ;
@@ -135,7 +135,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb3_0();
             noop_10();
-            @default_only NoAction_11();
+            @defaultonly NoAction_11();
         }
         key = {
             hdr.data.b1: ternary @name("hdr.data.b1") ;
@@ -146,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb2_1();
             noop_11();
-            @default_only NoAction_12();
+            @defaultonly NoAction_12();
         }
         key = {
             hdr.data.f2: ternary @name("hdr.data.f2") ;
@@ -157,7 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb4_0();
             noop_12();
-            @default_only NoAction_13();
+            @defaultonly NoAction_13();
         }
         key = {
             hdr.data.b2: ternary @name("hdr.data.b2") ;

@@ -51,40 +51,34 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("index_setter") table index_setter {
         actions = {
             set_index;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: exact;
             hdr.data.f2: exact;
         }
         size = 2048;
-        default_action = NoAction();
     }
     @name("stats") table stats {
         actions = {
             count_entries;
         }
-        const default_action = count_entries();
+        default_action = count_entries();
     }
     @name("test1") table test1 {
         actions = {
             seth2;
-            @default_only NoAction;
         }
         key = {
             hdr.data.h1: exact;
         }
-        default_action = NoAction();
     }
     @name("test2") table test2 {
         actions = {
             seth4;
-            @default_only NoAction;
         }
         key = {
             hdr.data.h2: exact;
         }
-        default_action = NoAction();
     }
     apply {
         index_setter.apply();

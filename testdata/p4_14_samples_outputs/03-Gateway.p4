@@ -49,12 +49,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("e_t1") table e_t1 {
         actions = {
             nop;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction();
     }
     apply {
         e_t1.apply();
@@ -88,49 +86,41 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ing_drop;
             set_egress_port;
             set_f1;
-            @default_only NoAction;
         }
         key = {
             hdr.vag.f1: exact;
         }
         size = 1024;
-        default_action = NoAction();
     }
     @name("i_t2") table i_t2 {
         actions = {
             nop;
             set_f2;
-            @default_only NoAction;
         }
         key = {
             hdr.vag.f2: exact;
         }
         size = 1024;
-        default_action = NoAction();
     }
     @name("i_t3") table i_t3 {
         actions = {
             nop;
             set_f3;
-            @default_only NoAction;
         }
         key = {
             hdr.vag.f3: exact;
         }
         size = 1024;
-        default_action = NoAction();
     }
     @name("i_t4") table i_t4 {
         actions = {
             nop;
             set_f4;
-            @default_only NoAction;
         }
         key = {
             hdr.vag.f4: exact;
         }
         size = 1024;
-        default_action = NoAction();
     }
     apply {
         i_t1.apply();
