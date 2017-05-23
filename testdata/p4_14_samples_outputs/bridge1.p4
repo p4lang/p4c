@@ -38,7 +38,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             copyb1;
         }
-        const default_action = copyb1();
+        default_action = copyb1();
     }
     apply {
         output.apply();
@@ -56,22 +56,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
     }
     @name("test2") table test2 {
         actions = {
             noop;
-            @default_only NoAction;
         }
         key = {
             meta.meta.val: exact;
         }
-        default_action = NoAction();
     }
     apply {
         test1.apply();

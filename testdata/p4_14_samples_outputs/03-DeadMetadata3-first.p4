@@ -35,14 +35,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1 {
         actions = {
             a1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         default_action = NoAction();
     }
     @name("t2") table t2 {
         actions = {
             a2();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.m.f1: exact @name("meta.m.f1") ;

@@ -842,7 +842,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags_0();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags_0();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             meta.ingress_metadata.ifindex: exact @name("meta.ingress_metadata.ifindex") ;
@@ -852,8 +852,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].vid         : exact @name("hdr.vlan_tag_[1].vid") ;
         }
         size = 32768;
-        default_action = NoAction_0();
         @name("outer_bd_action_profile") implementation = action_profile(32w256);
+        default_action = NoAction_0();
     }
     apply {
         port_vlan_mapping.apply();

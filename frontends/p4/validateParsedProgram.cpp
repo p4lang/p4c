@@ -85,10 +85,6 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     if (ac == nullptr)
         ::error("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::actionsPropertyName);
-    auto da = t->getDefaultAction();
-    if (!isv1 && da == nullptr)
-        ::warning("Table %1% does not have an `%2%' property",
-                t->name, IR::TableProperties::defaultActionPropertyName);
 }
 
 /// Checks that the names of the three parameter lists for some constructs

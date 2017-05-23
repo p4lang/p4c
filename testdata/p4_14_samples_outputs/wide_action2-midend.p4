@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("bd") table bd_1 {
         actions = {
             set_bd_info_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;

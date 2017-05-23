@@ -152,7 +152,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set1_0();
             noop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.f1_1: exact @name("hdr.data.f1_1") ;
@@ -163,7 +163,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set2_0();
             noop_8();
-            @default_only NoAction_9();
+            @defaultonly NoAction_9();
         }
         key = {
             hdr.data.f2_1: exact @name("hdr.data.f2_1") ;
@@ -174,7 +174,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set3_0();
             noop_9();
-            @default_only NoAction_10();
+            @defaultonly NoAction_10();
         }
         key = {
             hdr.data.f3_1: exact @name("hdr.data.f3_1") ;
@@ -185,7 +185,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set4_0();
             noop_10();
-            @default_only NoAction_11();
+            @defaultonly NoAction_11();
         }
         key = {
             hdr.data.f4_1: exact @name("hdr.data.f4_1") ;
@@ -196,7 +196,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set5_0();
             noop_11();
-            @default_only NoAction_12();
+            @defaultonly NoAction_12();
         }
         key = {
             hdr.data.f5_1: exact @name("hdr.data.f5_1") ;
@@ -207,7 +207,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set6_0();
             noop_12();
-            @default_only NoAction_13();
+            @defaultonly NoAction_13();
         }
         key = {
             hdr.data.f6_1: exact @name("hdr.data.f6_1") ;
@@ -218,7 +218,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set7_0();
             noop_13();
-            @default_only NoAction_14();
+            @defaultonly NoAction_14();
         }
         key = {
             hdr.data.f7_1: exact @name("hdr.data.f7_1") ;
@@ -229,7 +229,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set8_0();
             noop_14();
-            @default_only NoAction_15();
+            @defaultonly NoAction_15();
         }
         key = {
             hdr.data.f8_1: exact @name("hdr.data.f8_1") ;

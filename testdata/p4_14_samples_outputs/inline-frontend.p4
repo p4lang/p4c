@@ -25,7 +25,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
     @name("t") table t_0 {
         actions = {
             x_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         default_action = NoAction();
     }

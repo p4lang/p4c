@@ -183,7 +183,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet();
             mpls_packet();
             mim_packet();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
@@ -194,7 +194,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             drop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.icmp.typeCode: exact @name("hdr.icmp.typeCode") ;
@@ -205,7 +205,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             set_egress_port();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
@@ -216,7 +216,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             set_egress_port();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.ipv6.dstAddr: exact @name("hdr.ipv6.dstAddr") ;
@@ -227,7 +227,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             set_egress_port();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
@@ -238,7 +238,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             send_packet();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.ing_metadata.drop: exact @name("meta.ing_metadata.drop") ;
@@ -249,7 +249,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             drop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
@@ -260,7 +260,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             drop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.udp.dstPort: exact @name("hdr.udp.dstPort") ;

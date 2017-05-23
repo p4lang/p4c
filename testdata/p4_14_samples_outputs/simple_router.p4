@@ -66,13 +66,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             rewrite_mac;
             _drop;
-            @default_only NoAction;
         }
         key = {
             standard_metadata.egress_port: exact;
         }
         size = 256;
-        default_action = NoAction();
     }
     apply {
         send_frame.apply();
@@ -95,25 +93,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac;
             _drop;
-            @default_only NoAction;
         }
         key = {
             meta.routing_metadata.nhop_ipv4: exact;
         }
         size = 512;
-        default_action = NoAction();
     }
     @name("ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop;
             _drop;
-            @default_only NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
         size = 1024;
-        default_action = NoAction();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {

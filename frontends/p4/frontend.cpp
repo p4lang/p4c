@@ -111,7 +111,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     PassManager passes = {
         new PrettyPrint(options),
         // Simple checks on parsed program
-        new ValidateParsedProgram(isv1),
+        new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
         new ResolveReferences(&refMap, true),  // check shadowing

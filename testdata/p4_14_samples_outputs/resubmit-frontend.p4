@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop_0();
             set_port_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
@@ -72,7 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop_0();
             _resubmit_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.mymeta.f1: exact @name("meta.mymeta.f1") ;

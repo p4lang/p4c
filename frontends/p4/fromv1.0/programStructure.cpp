@@ -690,15 +690,11 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto ale = new IR::ActionListElement(a.srcInfo, new IR::PathExpression(newname));
         actionList->push_back(ale);
     }
-    if (!table->default_action) {
+    if (!table->default_action.name.isNullOrEmpty() &&
+        !actionList->getDeclaration(table->default_action)) {
         actionList->push_back(
             new IR::ActionListElement(
-                new IR::Annotations({new IR::Annotation("default_only", {})}),
-                new IR::PathExpression(p4lib.noAction.Id())));
-    } else if (!actionList->getDeclaration(table->default_action)) {
-        actionList->push_back(
-            new IR::ActionListElement(
-                new IR::Annotations({new IR::Annotation("default_only", {})}),
+                new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
                 new IR::PathExpression(table->default_action))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
@@ -770,17 +766,15 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         props->push_back(prop);
     }
 
-    {
-        const bool hasExplicitDefaultAction = !table->default_action.name.isNullOrEmpty();
-        auto act = new IR::PathExpression(hasExplicitDefaultAction ? table->default_action
-                                                                   : p4lib.noAction.Id());
-        auto args = table->default_action_args != nullptr ?
+    if (!table->default_action.name.isNullOrEmpty()) {
+        auto act = new IR::PathExpression(table->default_action);
+        auto args = table->default_action_args ?
                 table->default_action_args : new IR::Vector<IR::Expression>();
         auto methodCall = new IR::MethodCallExpression(act, args);
         auto prop = new IR::Property(
             IR::ID(IR::TableProperties::defaultActionPropertyName),
             new IR::ExpressionValue(methodCall),
-            /* isConstant = */ hasExplicitDefaultAction);
+            /* isConstant = */ false);
         props->push_back(prop);
     }
 

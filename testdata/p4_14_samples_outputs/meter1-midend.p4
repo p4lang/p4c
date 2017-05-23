@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_0();
             _nop_1();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             meta.meta.meter_tag: exact @name("meta.meta.meter_tag") ;
@@ -79,14 +79,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action();
             _nop_2();
-            @default_only NoAction_3();
+            @defaultonly NoAction_3();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         size = 16384;
-        default_action = NoAction_3();
         meters = my_meter;
+        default_action = NoAction_3();
     }
     apply {
         m_table.apply();

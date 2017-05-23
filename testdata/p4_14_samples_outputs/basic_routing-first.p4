@@ -68,7 +68,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             on_miss();
             rewrite_src_dst_mac();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
@@ -100,7 +100,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("bd") table bd {
         actions = {
             set_vrf();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
@@ -112,7 +112,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss();
             fib_hit_nexthop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss();
             fib_hit_nexthop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
@@ -138,7 +138,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss();
             set_egress_details();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
@@ -149,7 +149,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("port_mapping") table port_mapping {
         actions = {
             set_bd();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
