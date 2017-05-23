@@ -42,7 +42,7 @@ ENV GRPC_DEPS build-essential \
               libtool
 RUN git clone https://github.com/google/grpc.git
 WORKDIR /grpc/
-RUN git checkout tags/v1.2.3 && \
+RUN git checkout tags/v1.3.2 && \
     git submodule update --init --recursive
 
 RUN apt-get update && \
