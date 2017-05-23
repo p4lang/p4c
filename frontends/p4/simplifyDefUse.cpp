@@ -475,8 +475,10 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::Operation_Unary* expression) override {
         BUG_CHECK(!lhs, "%1%: Unary operation on LHS?", expression);
         visit(expression->expr);
-        auto storage = getReads(expression->expr, true);
-        reads(expression, storage);
+        // This expression in fact reads the result of the operation,
+        // which is a temporary storage location, which we do not model
+        // in the def-use analysis.
+        reads(expression, LocationSet::empty);
         registerUses(expression);
         return false;
     }
@@ -485,9 +487,10 @@ class FindUninitialized : public Inspector {
         BUG_CHECK(!lhs, "%1%: Binary operation on LHS?", expression);
         visit(expression->left);
         visit(expression->right);
-        auto storageLeft = getReads(expression->left, true);
-        auto storageRight = getReads(expression->right, true);
-        reads(expression, storageLeft->join(storageRight));
+        // This expression in fact reads the result of the operation,
+        // which is a temporary storage location, which we do not model
+        // in the def-use analysis.
+        reads(expression, LocationSet::empty);
         registerUses(expression);
         return false;
     }
