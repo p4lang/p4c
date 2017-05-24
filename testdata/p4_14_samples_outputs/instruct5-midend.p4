@@ -101,7 +101,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<data_t>(hdr.data);
-        packet.emit<data2_t_0[4]>(hdr.extra);
+        packet.emit<data2_t_0>(hdr.extra[0]);
+        packet.emit<data2_t_0>(hdr.extra[1]);
+        packet.emit<data2_t_0>(hdr.extra[2]);
+        packet.emit<data2_t_0>(hdr.extra[3]);
     }
 }
 

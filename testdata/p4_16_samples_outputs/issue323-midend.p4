@@ -36,7 +36,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Headers>(h);
+        b.emit<hdr>(h.h);
     }
 }
 

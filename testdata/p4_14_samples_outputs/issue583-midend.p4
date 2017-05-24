@@ -240,7 +240,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vlan_tag_t[4]>(hdr.vlan_tag_);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[0]);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[1]);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[2]);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag_[3]);
         packet.emit<ipv6_t>(hdr.ipv6);
         packet.emit<icmpv6_t>(hdr.icmpv6);
         packet.emit<ipv4_t_0>(hdr.ipv4);

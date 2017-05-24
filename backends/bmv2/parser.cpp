@@ -25,13 +25,28 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
     auto params = mkArrayField(result, "parameters");
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
-        result->emplace("op", "set");
-        auto l = conv->convertLeftValue(assign->left);
         auto type = typeMap->getType(assign->left, true);
+        cstring operation;
+        if (type->is<IR::Type_StructLike>())
+            operation = "assign_header";
+        else
+            operation = "set";
+        result->emplace("op", operation);
+        auto l = conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
         auto r = conv->convert(assign->right, true, true, convertBool);
         params->append(l);
         params->append(r);
+
+        if (operation == "assign_header") {
+            // must wrap into another outer object
+            auto wrap = new Util::JsonObject();
+            wrap->emplace("op", "primitive");
+            auto params = mkParameters(wrap);
+            params->append(result);
+            result = wrap;
+        }
+
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
