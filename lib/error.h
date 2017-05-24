@@ -491,10 +491,14 @@ inline void error(const char* format, T... args) {
 
 inline unsigned errorCount() { return ErrorReporter::instance.getErrorCount(); }
 
+#define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
+
 template <typename... T>
 inline void warning(const char* format, T... args) {
     ErrorReporter::instance.warning(format, args...);
 }
+
+#define WARN_CHECK(e, ...) do { if (!(e)) ::warning(__VA_ARGS__); } while (0)
 
 inline void clearErrorReporter() {
   ErrorReporter::instance.clear();
