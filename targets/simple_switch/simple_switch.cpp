@@ -243,8 +243,8 @@ SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
     }
 
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
-    size_t priority =
-        phv->get_field(SSWITCH_PRIORITY_QUEUEING_SRC).get<size_t>();
+    size_t priority = phv->has_field(SSWITCH_PRIORITY_QUEUEING_SRC) ?
+        phv->get_field(SSWITCH_PRIORITY_QUEUEING_SRC).get<size_t>() : 0u;
     if (priority >= SSWITCH_PRIORITY_QUEUEING_NB_QUEUES) {
       bm::Logger::get()->error("Priority out of range, dropping packet");
       return;
