@@ -154,8 +154,13 @@ cpplint_FILES += $(noinst_HEADERS)
 clean-local:
 	-rm -f $(BUILT_SOURCES) $(CLEANFILES)
 
+check-local: cpplint-quiet
+
 cpplint:
 	@cd $(srcdir); tools/cpplint.py --root=. --extensions=h,hpp,c,cpp,ypp,l $(sort $(cpplint_FILES))
+
+cpplint-quiet:
+	@cd $(srcdir); tools/cpplint.py --root=. --extensions=h,hpp,c,cpp,ypp,l --quiet $(sort $(cpplint_FILES))
 
 tags:
 	cd $(srcdir); ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp \

@@ -77,6 +77,9 @@ Syntax: cpplint.py [--verbose=#] [--output=vs7] [--filter=-x,+y,...]
 
   Flags:
 
+    quiet
+      Only write something on errors.
+
     output=vs7
       By default, the output is formatted to ease emacs parsing.  Visual Studio
       compatible output (vs7) may also be used.  Other formats are unsupported.
@@ -503,6 +506,9 @@ _line_length = 80
 # The allowed extensions for file names
 # This is set by --extensions flag.
 _valid_extensions = set(['cc', 'h', 'cpp', 'cu', 'cuh'])
+
+# If quiet only write output on errors
+_quiet = False
 
 def ParseNolintSuppressions(filename, raw_line, linenum, error):
   """Updates the global list of error-suppressions.
@@ -6247,7 +6253,8 @@ def ProcessFile(filename, vlevel, extra_check_functions=[]):
         Error(filename, linenum, 'whitespace/newline', 1,
               'Unexpected \\r (^M) found; better to use only \\n')
 
-  sys.stderr.write('Done processing %s\n' % filename)
+  if not _quiet:
+    sys.stderr.write('Done processing %s\n' % filename)
   _RestoreFilters()
 
 
@@ -6285,7 +6292,7 @@ def ParseArguments(args):
     The list of filenames to lint.
   """
   try:
-    (opts, filenames) = getopt.getopt(args, '', ['help', 'output=', 'verbose=',
+    (opts, filenames) = getopt.getopt(args, '', ['help', 'quiet', 'output=', 'verbose=',
                                                  'counting=',
                                                  'filter=',
                                                  'root=',
@@ -6331,6 +6338,9 @@ def ParseArguments(args):
           _valid_extensions = set(val.split(','))
       except ValueError:
           PrintUsage('Extensions must be comma seperated list.')
+    elif opt == "--quiet":
+      global _quiet
+      _quiet = True;
 
   if not filenames:
     PrintUsage('No files were specified.')
