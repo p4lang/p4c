@@ -238,10 +238,10 @@ std::string bug_helper(boost::format& f, std::string message, std::string positi
 
 template<typename T, class... Args>
 auto
-bug_helper(boost::format& f, std::string message,
-           std::string position, std::string tail,
-           const T& t, Args... args) ->
-    typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type;
+bug_helper(boost::format& f, std::string message, std::string position,
+           std::string tail, const T& t, Args... args) ->
+    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
+                            std::string>::type;
 
 // actual implementations
 
@@ -283,7 +283,8 @@ template<typename T, class... Args>
 auto
 bug_helper(boost::format& f, std::string message, std::string position,
            std::string tail, const T& t, Args... args) ->
-    typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type {
+    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
+                            std::string>::type {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
