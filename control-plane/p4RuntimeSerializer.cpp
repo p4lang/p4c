@@ -1112,19 +1112,6 @@ private:
     TypeMap* typeMap;
 };
 
-/// Invoke @function for every node of type @Node in the subtree rooted at
-/// @root. The nodes are visited in postorder.
-template <typename Node, typename Func>
-static void forAllMatching(const IR::Node* root, Func&& function) {
-    struct NodeVisitor : public Inspector {
-        explicit NodeVisitor(Func&& function) : function(function) { }
-        Func function;
-        void postorder(const Node* node) override { function(node); }
-    };
-
-    root->apply(NodeVisitor(std::forward<Func>(function)));
-}
-
 static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
                                   const IR::ControlBlock* controlBlock,
                                   TypeMap* typeMap) {

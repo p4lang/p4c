@@ -309,4 +309,53 @@ class P4WriteContext : public virtual Visitor {
     // as it might be an 'inout' access or it might be unable to decide.
 };
 
+
+/**
+ * Invoke an inspector @function for every node of type @NodeType in the subtree
+ * rooted at @root. The behavior is the same as a postorder Inspector.
+ */
+template <typename NodeType, typename Func>
+void forAllMatching(const IR::Node* root, Func&& function) {
+    struct NodeVisitor : public Inspector {
+        explicit NodeVisitor(Func&& function) : function(function) { }
+        Func function;
+        void postorder(const NodeType* node) override { function(node); }
+    };
+    root->apply(NodeVisitor(std::forward<Func>(function)));
+}
+
+/**
+ * Invoke a modifier @function for every node of type @NodeType in the subtree
+ * rooted at @root. The behavior is the same as a postorder Modifier.
+ *
+ * @return the root of the new, modified version of the subtree.
+ */
+template <typename NodeType, typename RootType, typename Func>
+const RootType* modifyAllMatching(const RootType* root, Func&& function) {
+    struct NodeVisitor : public Modifier {
+        explicit NodeVisitor(Func&& function) : function(function) { }
+        Func function;
+        void postorder(NodeType* node) override { function(node); }
+    };
+    return root->apply(NodeVisitor(std::forward<Func>(function)));
+}
+
+/**
+ * Invoke a transform @function for every node of type @NodeType in the subtree
+ * rooted at @root. The behavior is the same as a postorder Transform.
+ *
+ * @return the root of the new, transformed version of the subtree.
+ */
+template <typename NodeType, typename RootType, typename Func>
+const RootType* transformAllMatching(const RootType* root, Func&& function) {
+    struct NodeVisitor : public Transform {
+        explicit NodeVisitor(Func&& function) : function(function) { }
+        Func function;
+        const IR::Node* postorder(NodeType* node) override {
+            return function(node);
+        }
+    };
+    return root->apply(NodeVisitor(std::forward<Func>(function)));
+}
+
 #endif /* _IR_VISITOR_H_ */
