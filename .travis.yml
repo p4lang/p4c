@@ -11,4 +11,3 @@ install:
 
 script:
   - docker run -w /p4c/build -e MAKEFLAGS p4c make check VERBOSE=1
-  - docker run -w /p4c/build -e MAKEFLAGS p4c make cpplint
