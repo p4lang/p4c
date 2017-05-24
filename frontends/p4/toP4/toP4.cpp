@@ -345,6 +345,10 @@ bool ToP4::preorder(const IR::Type_Extern* t) {
     builder.spc();
     builder.blockStart();
 
+    if (t->attributes.size() != 0)
+        ::warning("%1%: extern has attributes, which are not supported "
+                  "in P4-16, and thus are not emitted as P4-16", t);
+
     setVecSep(";\n", ";\n");
     bool decl = isDeclaration;
     isDeclaration = true;

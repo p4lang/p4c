@@ -179,7 +179,7 @@ void IrMethod::generate_proto(std::ostream &out, bool fullname, bool defaults) c
         if (rtype->isResolved()) out << "const ";
         out << rtype->toString() << " ";
         if (rtype->isResolved()) out << "*"; }
-    if (fullname)
+    if (fullname && !isFriend)
         out << "IR::" << clss->containedIn << clss->name << "::";
     out << name << "(";
     const char *sep = "";
@@ -198,6 +198,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     out << IrClass::indent;
     if (isStatic) out << "static ";
     if (isVirtual) out << "virtual ";
+    if (isFriend) out << "friend ";
     generate_proto(out, false, isUser);
     if (isOverride) out << " override";
     if (inImpl || !body)
@@ -246,6 +247,12 @@ void IrApply::generate_impl(std::ostream &out) const {
 
 void IrClass::declare(std::ostream &out) const {
     out << "class " << name << ";" << std::endl;
+}
+
+std::string IrClass::fullName() const {
+    std::stringstream tmp;
+    tmp << "IR::" << containedIn << name;
+    return tmp.str();
 }
 
 static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope,
@@ -303,14 +310,8 @@ void IrClass::generate_hdr(std::ostream &out) const {
 }
 
 void IrClass::generate_impl(std::ostream &out) const {
-    if (kind != NodeKind::Nested) {
-        out << "namespace IR {" << std::endl;
-        enter_namespace(out, containedIn); }
     for (auto e : elements)
         e->generate_impl(out);
-    if (kind != NodeKind::Nested) {
-        exit_namespace(out, containedIn);
-        out << "}  // namespace IR" << std::endl; }
 }
 
 void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {

@@ -2456,20 +2456,16 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
         }
     } else if (et->name == corelib.packetOut.name) {
         if (em->method->name == corelib.packetOut.emit.name) {
-            const IR::Expression* arg = nullptr;
             if (argCount == 1) {
-                arg = em->expr->arguments->at(0);
-            } else if (argCount == 2) {
-                arg = em->expr->arguments->at(1);
+                auto arg = em->expr->arguments->at(0);
+                auto argType = typeMap->getType(arg, true);
+                checkEmitType(em->expr, argType);
             } else {
                 // core.p4 is corrupted.
-                typeError("%1%: Expected 1 or 2 arguments for '%2%' method",
+                typeError("%1%: Expected 1 argument for '%2%' method",
                           em->expr, corelib.packetOut.emit.name);
                 return;
             }
-
-            auto argType = typeMap->getType(arg, true);
-            checkEmitType(em->expr, argType);
         }
     }
 }

@@ -626,7 +626,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         unsigned actionid = get(backend->getStructure().ids, action);
         auto entry = new Util::JsonObject();
         entry->emplace("action_id", actionid);
-        entry->emplace("action_const", false);
+        entry->emplace("action_const", defact->isConstant);
         auto fields = mkArrayField(entry, "action_data");
         if (args != nullptr) {
             for (auto a : *args) {

@@ -53,6 +53,7 @@ struct LookupScope : public Util::IHasSourceInfo {
     cstring             name;
     LookupScope() : in(nullptr), global(true), name(nullptr) {}
     LookupScope(const LookupScope *in, cstring name) : in(in), global(false), name(name) {}
+    explicit LookupScope(cstring name) : in(nullptr), global(false), name(name) {}
     explicit LookupScope(const IrNamespace *);
 
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
@@ -73,10 +74,11 @@ class NamedType : public Type {
  public:
     NamedType(Util::SourceInfo si, const LookupScope *l, cstring n)
     : Type(si), lookup(l), name(n) {}
+    NamedType(const LookupScope *l, cstring n) : lookup(l), name(n) {}
     explicit NamedType(cstring n) : lookup(nullptr), name(n) {}
     explicit NamedType(const IrClass *);
 
-    cstring toString() const override { return lookup ? lookup->toString() + name : name; }
+    cstring toString() const override;
     const IrClass *resolve(const IrNamespace *) const override;
     bool isResolved() const override { return resolved != nullptr; }
     bool operator==(const Type &t) const override { return t == *this; }
@@ -86,7 +88,7 @@ class NamedType : public Type {
         return (lookup == t.lookup || (lookup && t.lookup && *lookup == *t.lookup)); }
 
     static NamedType Bool, Int, Void, Cstring, Ostream, Visitor, Unordered_Set, JSONGenerator,
-        JSONLoader, JsonObject;
+        JSONLoader, JsonObject, SourceInfo;
 };
 
 class TemplateInstantiation : public Type {
