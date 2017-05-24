@@ -54,10 +54,18 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
 }
 
 NamedType NamedType::Bool("bool"), NamedType::Int("int"), NamedType::Void("void"),
-          NamedType::Cstring("cstring"), NamedType::Ostream("std::ostream"),
-          NamedType::Visitor("Visitor"), NamedType::Unordered_Set("std::unordered_set"),
+          NamedType::Cstring("cstring"), NamedType::Visitor("Visitor"),
+          NamedType::Ostream(new LookupScope("std"), "ostream"),
+          NamedType::Unordered_Set(new LookupScope("std"), "unordered_set"),
           NamedType::JSONGenerator("JSONGenerator"), NamedType::JSONLoader("JSONLoader"),
-          NamedType::JsonObject("JsonObject");
+          NamedType::JsonObject("JsonObject"),
+          NamedType::SourceInfo(new LookupScope("Util"), "SourceInfo");
+
+cstring NamedType::toString() const {
+    if (resolved) return resolved->fullName();
+    if (!lookup && name == "ID") return "IR::ID";  // hack -- ID is in namespace IR
+    return lookup ? lookup->toString() + name : name;
+}
 
 cstring TemplateInstantiation::toString() const {
     std::string rv = base->toString().c_str();
