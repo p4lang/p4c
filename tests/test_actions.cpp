@@ -632,6 +632,44 @@ TEST_F(ActionsTest, HeaderUnion) {
   EXPECT_EQ("test_union", primitive.get_union_name());
 }
 
+TEST_F(ActionsTest, Jump) {
+  auto primitive_if = ActionOpcodesMap::get_instance()->get_primitive(
+      "_jump_if_zero");
+  ASSERT_NE(nullptr, primitive_if);
+  auto primitive_else = ActionOpcodesMap::get_instance()->get_primitive(
+      "_jump");
+  ASSERT_NE(nullptr, primitive_else);
+  Set primitive_set;
+
+  // this implements the following code:
+  // if (hdr1.f8)           0
+  //   hdr1.f32 = 0xaa;     1
+  // else                   2
+  //   hdr1.f32 = 0xbb;     3
+  testActionFn.push_back_primitive(primitive_if.get());
+  testActionFn.parameter_push_back_field(testHeader1, 2);  // f8
+  testActionFn.parameter_push_back_const(Data(3));
+  testActionFn.push_back_primitive(&primitive_set);
+  testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
+  testActionFn.parameter_push_back_const(Data(0xaa));
+  testActionFn.push_back_primitive(primitive_else.get());
+  testActionFn.parameter_push_back_const(Data(4));
+  testActionFn.push_back_primitive(&primitive_set);
+  testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
+  testActionFn.parameter_push_back_const(Data(0xbb));
+
+  auto &f8 = phv->get_field(testHeader1, 2);
+  auto &f32 = phv->get_field(testHeader1, 0);
+
+  f8.set(0);
+  testActionFnEntry(pkt.get());
+  EXPECT_EQ(0xbb, f32.get<int>());
+
+  f8.set(1);
+  testActionFnEntry(pkt.get());
+  EXPECT_EQ(0xaa, f32.get<int>());
+}
+
 template <typename Primitive>
 class ActionsStringParamTest : public ActionsTest {
  protected:

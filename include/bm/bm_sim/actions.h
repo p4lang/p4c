@@ -524,7 +524,11 @@ class ActionPrimitive_ {
       ActionEngineState *state,
       const ActionParam *args) = 0;
 
-  virtual size_t get_num_params() = 0;
+  virtual size_t get_num_params() const = 0;
+
+  virtual size_t get_jump_offset(size_t current_offset) const {
+    return current_offset + 1;
+  }
 
   void _set_p4objects(P4Objects *p4objects) {
     this->p4objects = p4objects;
@@ -553,26 +557,26 @@ class ActionPrimitive_ {
 template <typename... Args>
 class ActionPrimitive :  public ActionPrimitive_ {
  public:
-  void execute(ActionEngineState *state, const ActionParam *args) {
+  void execute(ActionEngineState *state, const ActionParam *args) override {
     phv = &(state->phv);
     pkt = &(state->pkt);
     caller(this, state, args);
   }
 
   // cannot make it constexpr because it is virtual
-  size_t get_num_params() { return sizeof...(Args); }
+  size_t get_num_params() const override { return sizeof...(Args); }
 
   virtual void operator ()(Args...) = 0;
 
  protected:
   //! Returns a reference to the Field with name \p name. \p name must follow
   //! the usual format `"hdrA.f1"`.
-  Field &get_field(std::string name) {
+  Field &get_field(const std::string &name) {
     return phv->get_field(name);
   }
 
   //! Returns a reference to the Header with name \p name.
-  Header &get_header(std::string name) {
+  Header &get_header(const std::string &name) {
     return phv->get_header(name);
   }
 
@@ -598,6 +602,28 @@ class ActionPrimitive :  public ActionPrimitive_ {
 
 // forward declaration
 class ActionFnEntry;
+
+class ActionPrimitiveCall {
+ public:
+  explicit ActionPrimitiveCall(
+      ActionPrimitive_ *primitive, size_t param_offset,
+      std::unique_ptr<SourceInfo> source_info = nullptr);
+
+  void execute(ActionEngineState *state, const ActionParam *args) const;
+
+  size_t get_num_params() const;
+
+  size_t get_param_offset() const { return param_offset; }
+
+  size_t get_jump_offset(size_t current_offset) const {
+    return primitive->get_jump_offset(current_offset);
+  }
+
+ private:
+  ActionPrimitive_ *primitive;
+  size_t param_offset;
+  std::unique_ptr<SourceInfo> source_info;
+};
 
 class ActionFn :  public NamedP4Object {
   friend class ActionFnEntry;
@@ -635,14 +661,15 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_extern_instance(ExternType *extern_instance);
   void parameter_push_back_string(const std::string &str);
 
-  void push_back_primitive(ActionPrimitive_ *primitive);
+  void push_back_primitive(ActionPrimitive_ *primitive,
+                           std::unique_ptr<SourceInfo> source_info = nullptr);
 
   void grab_register_accesses(RegisterSync *register_sync) const;
 
   size_t get_num_params() const;
 
  private:
-  std::vector<ActionPrimitive_ *> primitives{};
+  std::vector<ActionPrimitiveCall> primitives{};
   std::vector<ActionParam> params{};
   RegisterSync register_sync{};
   std::vector<Data> const_values{};

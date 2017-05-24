@@ -25,7 +25,6 @@
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/logger.h>
 
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -219,8 +218,14 @@ ActionFn::parameter_push_back_string(const std::string &str) {
 }
 
 void
-ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
-  primitives.push_back(primitive);
+ActionFn::push_back_primitive(ActionPrimitive_ *primitive,
+                              std::unique_ptr<SourceInfo> source_info) {
+  size_t param_offset = 0;
+  if (!primitives.empty()) {
+    param_offset = primitives.back().get_param_offset();
+    param_offset += primitives.back().get_num_params();
+  }
+  primitives.emplace_back(primitive, param_offset, std::move(source_info));
 }
 
 void
@@ -268,6 +273,24 @@ ActionOpcodesMap::get_instance() {
   return &instance;
 }
 
+ActionPrimitiveCall::ActionPrimitiveCall(
+    ActionPrimitive_ *primitive, size_t param_offset,
+    std::unique_ptr<SourceInfo> source_info)
+    : primitive(primitive), param_offset(param_offset),
+      source_info(std::move(source_info)) { }
+
+void
+ActionPrimitiveCall::execute(ActionEngineState *state,
+                             const ActionParam *args) const {
+  // TODO(unknown): log source info?
+  primitive->execute(state, args);
+}
+
+size_t
+ActionPrimitiveCall::get_num_params() const {
+  return primitive->get_num_params();
+}
+
 void
 ActionFnEntry::push_back_action_data(const Data &data) {
   action_data.push_back_action_data(data);
@@ -289,12 +312,13 @@ ActionFnEntry::execute(Packet *pkt) const {
 
   auto &primitives = action_fn->primitives;
   size_t param_offset = 0;
-  // primitives is a vector of pointers
   BMLOG_TRACE_SI_PKT(*pkt, action_fn->get_source_info(),
                      "Executing action {}", action_fn->get_name());
-  for (auto primitive : primitives) {
-    primitive->execute(&state, &(action_fn->params[param_offset]));
-    param_offset += primitive->get_num_params();
+  for (size_t idx = 0; idx < primitives.size();) {
+    const auto &primitive = primitives[idx];
+    param_offset = primitive.get_param_offset();
+    primitive.execute(&state, &(action_fn->params[param_offset]));
+    idx = primitive.get_jump_offset(idx);
   }
 }
 
@@ -365,5 +389,47 @@ ActionFnEntry::deserialize(std::istream *in, const P4Objects &objs) {
 
 thread_local Packet *ActionPrimitive_::pkt = nullptr;
 thread_local PHV *ActionPrimitive_::phv = nullptr;
+
+// TODO(antonin): should this be moved to core/ ?
+namespace core {
+
+struct _jump_if_zero : public ActionPrimitive<const Data &, const Data &> {
+  void operator ()(const Data &test_v, const Data &jump_offset) override {
+    if (test_v.get<int>() == 0)
+      offset = jump_offset.get<int>();
+    else
+      offset = -1;
+  }
+
+  size_t get_jump_offset(size_t current_offset) const override {
+    return (offset < 0) ? (current_offset + 1) : static_cast<size_t>(offset);
+  }
+
+ private:
+  static thread_local int offset;
+};
+
+thread_local int _jump_if_zero::offset = -1;
+
+struct _jump : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &jump_offset) override {
+    offset = jump_offset.get<int>();
+  }
+
+  size_t get_jump_offset(size_t current_offset) const override {
+    (void) current_offset;
+    return static_cast<size_t>(offset);
+  }
+
+ private:
+  static thread_local int offset;
+};
+
+thread_local int _jump::offset = 0;
+
+REGISTER_PRIMITIVE(_jump_if_zero);
+REGISTER_PRIMITIVE(_jump);
+
+}  // namespace core
 
 }  // namespace bm

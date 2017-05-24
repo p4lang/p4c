@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.12*.
+The version described in this document is *2.13*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -459,6 +459,13 @@ bmv2 supports the following core primitives:
 - `assign`, `assign_VL` (for variable-length fields), `assign_header` and
 `assign_union`.
 - `push` and `pop` for stack (header stack or header union stack) manipulation.
+- `_jump`: takes one parameter which must resolve to an integral value
+`offset`. When it is executed, we jump to the primitive call at index `offset`
+in the enclosing action.
+- `_jump_if_zero`: implements a conditional jump and takes two parameters which
+must both resolve to integral values, which we call respectively `cond` and
+`offset`. If `cond` is 0, the primitive behaves exactly like `_jump` and we jump
+to the primitive call at index `offset`; otherwise the primitive is a no-op.
 
 Support for additional primitives depends on the architecture being used.
 
