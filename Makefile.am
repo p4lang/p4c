@@ -154,6 +154,8 @@ cpplint_FILES += $(noinst_HEADERS)
 clean-local:
 	-rm -f $(BUILT_SOURCES) $(CLEANFILES)
 
+check: cpplint
+
 cpplint:
 	@cd $(srcdir); tools/cpplint.py --root=. --extensions=h,hpp,c,cpp,ypp,l $(sort $(cpplint_FILES))
 
