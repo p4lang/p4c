@@ -423,6 +423,12 @@ class ErrorReporter final {
         return warningCount;
     }
 
+    /// @return the number of diagnostics (warnings and errors) encountered
+    /// since the last time clear() was called.
+    unsigned getDiagnosticCount() const {
+        return errorCount + warningCount;
+    }
+
     // Resets this ErrorReporter to its initial state.
     void clear() {
       errorCount = 0;
