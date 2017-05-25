@@ -414,8 +414,10 @@ parserStates
     ;
 
 parserState
-    : optAnnotations STATE name "{" parserStatements transitionStatement "}"
-                                      { $$ = new IR::ParserState(@3, *$3, $1, *$5, $6); }
+    : optAnnotations STATE name { driver.structure->pushContainerType(*$3, false); }
+      "{" parserStatements transitionStatement "}"
+                                      { driver.structure->pop();
+                                        $$ = new IR::ParserState(@3, *$3, $1, *$6, $7); }
     ;
 
 parserStatements
