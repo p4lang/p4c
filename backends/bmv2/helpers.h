@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/json.h"
+#include "lib/ordered_map.h"
 #include "analyzer.h"
 #include "frontends/common/model.h"
 
@@ -56,7 +57,7 @@ class V1ModelProperties {
 };
 
 using ErrorValue = unsigned int;
-using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
+using ErrorCodesMap = ordered_map<const IR::IDeclaration *, ErrorValue>;
 using BlockTypeMap = std::map<const IR::Block*, const IR::Type*>;
 
 Util::IJson* nodeName(const CFG::Node* node);
