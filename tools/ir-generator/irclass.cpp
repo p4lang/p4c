@@ -81,7 +81,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#define " << macroname << "\n" << std::endl;
 
     impl << "#include \"ir/ir.h\"\n"
-         << "#include \"ir/visitor.h\"\n" << std::endl;
+         << "#include \"ir/visitor.h\"\n"
+         << "#include \"ir/json_loader.h\"\n" << std::endl;
 
     out << "#include <map>\n"
         << "#include <functional>\n" << std::endl

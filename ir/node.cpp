@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "ir.h"
+#include "ir/json_loader.h"
 
 void IR::Node::traceVisit(const char* visitor) const
 { LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }

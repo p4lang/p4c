@@ -21,6 +21,8 @@ limitations under the License.
 #include "lib/enumerator.h"
 #include "lib/null.h"
 
+class JSONLoader;
+
 namespace IR {
 
 

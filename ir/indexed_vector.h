@@ -25,6 +25,8 @@ limitations under the License.
 #include "vector.h"
 #include "id.h"
 
+class JSONLoader;
+
 namespace IR {
 
 // declaration interface: objects with names

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "ir/ir.h"
+#include "ir/json_loader.h"
 #include "lib/log.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
