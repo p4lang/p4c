@@ -38,7 +38,26 @@ limitations under the License.
 namespace P4 {
 class P4Lexer;
 class P4ParserDriver;
+
+// This is a workaround for an UndefinedBehaviorSanitizer issue triggered by
+// Bison's variant implementation. When variant::move() is used to move a value
+// from an initialized instance of variant to an uninitialized instance, it uses
+// placement new to initialize the uninitialized instance, then calls
+// variant::swap(), then destroys the moved-from instance. The problem is that
+// placement new does not perform any initialization for primitive types, and
+// for bool or enum types that can result in a value that isn't a valid element
+// of those types, which UndefinedBehaviorSanitizer doesn't like.
+struct OptionalConst {
+    OptionalConst() = default;
+    explicit OptionalConst(bool isConst) : isConst(isConst) { }
+    bool isConst = false;
+};
 }  // namespace P4
+
+inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) {
+    out << "OptionalConst(" << oc.isConst << ')';
+    return out;
+}
 
 // Bison uses the types you provide to %type to make constructors for the
 // variant type it uses under the hood, but its code generation is a little
@@ -148,7 +167,7 @@ typedef const IR::Type ConstType;
                             typeRef tupleType typeArg
 %type<IR::Type_Name*>       typeName
 %type<IR::Parameter*>       parameter
-%type<bool>                 optCONST
+%type<OptionalConst>        optCONST
 %type<IR::Annotations*>     optAnnotations
 %type<IR::Vector<IR::Annotation>*>  annotations
 %type<IR::Annotation*>      annotation
@@ -265,8 +284,8 @@ name
     ;
 
 optCONST
-    : /* empty */ { $$ = false; }
-    | CONST       { $$ = true; }
+    : /* empty */ { $$ = OptionalConst{false}; }
+    | CONST       { $$ = OptionalConst{true}; }
     ;
 
 optAnnotations
@@ -809,11 +828,11 @@ tableProperty
     | optAnnotations optCONST ENTRIES "=" "{" entriesList "}"
         { auto l = new IR::EntriesList(@3, *$6);
           auto id = IR::ID(@3+@7, "entries");
-          $$ = new IR::Property(@3, id, $1, l, $2); }
+          $$ = new IR::Property(@3, id, $1, l, $2.isConst); }
     | optAnnotations optCONST IDENTIFIER "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
           auto id = IR::ID(@3, $3);
-          $$ = new IR::Property(@3, id, $1, v, $2); }
+          $$ = new IR::Property(@3, id, $1, v, $2.isConst); }
     ;
 
 keyElementList
