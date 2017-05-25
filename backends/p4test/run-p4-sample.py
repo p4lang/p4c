@@ -109,10 +109,11 @@ def compare_files(options, produced, expected):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    # include paths are different
-    # also, error messages that contain core.p4 or v1model.p4 will have
-    # different paths
-    cmd = "diff -B -u -w -I \"#include\" -I \"core\.p4([0-9]\+)\" -I \"v1model.p4([0-9]\+)\" " + expected + " " + produced + " >&2"
+    # include paths are different also, error messages that contain core.p4 or
+    # v1model.p4 or come from p4_14include will have different paths
+    cmd = ("diff -B -u -w -I \"#include\" -I \"core\.p4([0-9]\+)\" " +
+           "-I \"v1model.p4([0-9]\+)\" -I \"/p4_14include/\" " + expected +
+           " " + produced + " >&2")
     if options.verbose:
         print(cmd)
     exitcode = subprocess.call(cmd, shell=True);
