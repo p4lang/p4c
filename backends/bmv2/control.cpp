@@ -753,4 +753,27 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
     return false;
 }
 
+bool ChecksumConverter::preorder(const IR::PackageBlock *block) {
+    for (auto it : block->constantValue) {
+        if (it.second->is<IR::ControlBlock>()) {
+            visit(it.second->getNode());
+        }
+    }
+    return false;
+}
+
+bool ChecksumConverter::preorder(const IR::ControlBlock* block) {
+    auto it = backend->update_checksum_controls.find(block->container->name);
+    if (it == backend->update_checksum_controls.end()) {
+        return false;
+    }
+
+    if (backend->target == Target::SIMPLE) {
+        P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
+        ss->convertChecksumUpdate(block->container, backend->json->checksums,
+                                  backend->json->calculations);
+    }
+    return false;
+}
+
 }  // namespace BMV2

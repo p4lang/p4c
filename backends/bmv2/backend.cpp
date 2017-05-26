@@ -134,11 +134,11 @@ void Backend::convert(BMV2Options& options) {
     meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
     counters = mkArrayField(&jsonTop, "counter_arrays");
     register_arrays = mkArrayField(&jsonTop, "register_arrays");
-    calculations = mkArrayField(&jsonTop, "calculations");
+    jsonTop.emplace("calculations", json->calculations);
     learn_lists = mkArrayField(&jsonTop, "learn_lists");
     jsonTop.emplace("actions", json->actions);
     jsonTop.emplace("pipelines", json->pipelines);
-    checksums = mkArrayField(&jsonTop, "checksums");
+    jsonTop.emplace("checksums", json->checksums);
     force_arith = mkArrayField(&jsonTop, "force_arith");
     jsonTop.emplace("extern_instances", json->externs);
     jsonTop.emplace("field_aliases", json->field_aliases);
@@ -165,7 +165,6 @@ void Backend::convert(BMV2Options& options) {
     conv = new ExpressionConverter(this);
 
     // if (psa) tlb->apply(new ConvertExterns());
-
     PassManager codegen_passes = {
         new ConvertHeaders(this),
         new ConvertExterns(this),  // only run when target == PSA
