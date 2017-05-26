@@ -601,8 +601,8 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
     auto egress = main->getParameterValue(v1model.sw.egress.name);
     if (ingress == nullptr || egress == nullptr ||
         !ingress->is<IR::ControlBlock>() || !egress->is<IR::ControlBlock>()) {
-        BUG_CHECK("%1%: main package does not match the expected model %2%",
-                  main, v1model.file.toString());
+        BUG("%1%: main package does not match the expected model %2%",
+            main, v1model.file.toString());
     }
     auto ingress_name = ingress->to<IR::ControlBlock>()->container->name;
     auto egress_name = egress->to<IR::ControlBlock>()->container->name;
@@ -622,8 +622,8 @@ SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
     if (verify == nullptr || update == nullptr || deparser == nullptr ||
         !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
         !deparser->is<IR::ControlBlock>()) {
-        BUG_CHECK("%1%: main package does not match the expected model %2%",
-                  main, v1model.file.toString());
+        BUG("%1%: main package does not match the expected model %2%",
+            main, v1model.file.toString());
     }
     controls->emplace(verify->to<IR::ControlBlock>()->container->name);
     controls->emplace(update->to<IR::ControlBlock>()->container->name);
@@ -636,8 +636,8 @@ SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel,
     auto main = toplevel->getMain();
     auto update = main->getParameterValue(v1model.sw.update.name);
     if (update == nullptr || !update->is<IR::ControlBlock>()) {
-        BUG_CHECK("%1%: main package does not match the expected model %2%",
-                  main, v1model.file.toString());
+        BUG("%1%: main package does not match the expected model %2%",
+            main, v1model.file.toString());
     }
     controls->emplace(update->to<IR::ControlBlock>()->container->name);
 }
@@ -648,8 +648,8 @@ SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel,
     auto main = toplevel->getMain();
     auto deparser = main->getParameterValue(v1model.sw.deparser.name);
     if (deparser == nullptr || !deparser->is<IR::ControlBlock>()) {
-        BUG_CHECK("%1%: main package does not match the expected model %2%",
-                  main, v1model.file.toString());
+        BUG("%1%: main package does not match the expected model %2%",
+            main, v1model.file.toString());
     }
     controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
 }
