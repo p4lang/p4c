@@ -275,8 +275,9 @@ def main(argv):
             argv = argv[1:]
             options.compilerOptions.append(argv[0])
         else:
-            reportError("Uknown option ", argv[0])
+            reportError("Unknown option ", argv[0])
             usage(options)
+            sys.exit(FAILURE)
         argv = argv[1:]
 
     config = ConfigH("config.h")
