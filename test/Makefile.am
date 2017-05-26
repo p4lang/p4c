@@ -17,11 +17,9 @@
 ################################################################################
 
 check_PROGRAMS += exception_test format_test source_file_test path_test \
-		  enumerator_test default_test unittest_transform1 json_test \
+		  enumerator_test unittest_transform1 json_test \
 		  call_graph_test dumpjson
 
-default_test_SOURCES = test/unittests/default_test.cpp
-default_test_LDADD = libp4ctoolkit.a
 exception_test_SOURCES = test/unittests/exception_test.cpp
 exception_test_LDADD = libp4ctoolkit.a
 enumerator_test_SOURCES = test/unittests/enumerator_test.cpp
