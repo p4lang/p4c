@@ -35,15 +35,21 @@ import p4c_src
 
 commands = {}
 
+def display_supported_targets(cfg):
+    print "Supported targets in \"target-arch-vendor\" triplet:"
+    for target in cfg.target:
+        print target
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-V", "--version", dest="show_version",
                         help="show version and exit",
                         action="store_true", default=False)
-    parser.add_argument("-v", dest="debug",
+    parser.add_argument("-v", "--debug", dest="debug",
                         help="verbose",
                         action="store_true", default=False)
-    parser.add_argument("-###", dest="dry_run",
+    parser.add_argument("-###", "--test-only", dest="dry_run",
                         help="print (but do not run) the commands",
                         action="store_true", default=False)
     parser.add_argument("-Xpreprocessor", dest="preprocessor_options",
@@ -62,7 +68,7 @@ def main():
                         metavar="<arg>",
                         help="Pass <arg> to the linker",
                         action="append", default=[])
-    parser.add_argument("-b", dest="backend",
+    parser.add_argument("-b", "--target", dest="backend",
                         help="specify target backend",
                         action="store", default="bmv2-*-p4org")
     parser.add_argument("-E", dest="run_preprocessor_only",
@@ -101,18 +107,6 @@ def main():
         print("p4c %s" % (p4c_src.__version__))
         sys.exit(0)
 
-    # target-arch-vendor, e.g.
-    # bmv2-*-p4org
-    # bmv2-ssa-p4org
-    # ebpf-psa-p4org
-    triplet = opts.backend.split('-')
-    if (len(triplet) != 3):
-        print "Invalid target-arch-vendor triplet."
-        sys.exit(1)
-
-    if not source:
-        parser.error('No input specified.')
-
     # load supported configuration
     cfg_files = glob.glob("{}/*.cfg".format(os.environ['P4C_CFG_PATH']))
     cfg = config.Config(config_prefix = "p4c")
@@ -122,10 +116,21 @@ def main():
         cfg.load_from_config(cf, opts.output_directory, opts.source_file)
 
     if opts.show_target_help:
-        print "Supported backends in \"target-arch-vendor\" triplet:"
-        for target in cfg.target:
-            print target
+        display_supported_targets(cfg)
         sys.exit(0)
+
+    # target-arch-vendor, e.g.
+    # bmv2-*-p4org
+    # bmv2-ssa-p4org
+    # ebpf-psa-p4org
+    triplet = opts.backend.split('-')
+    if (len(triplet) != 3):
+        print "Invalid target-arch-vendor triplet."
+        display_supported_targets(cfg)
+        sys.exit(1)
+
+    if not source:
+        parser.error('No input specified.')
 
     backend = None
     for triplet, _ in cfg.steps.iteritems():
@@ -197,14 +202,15 @@ def main():
         commands['compiler'].append("--p4v=14")
 
     for idx, step in enumerate(cfg.steps[backend]):
+
         cmd = []
         for c in commands[step]:
             cmd = cmd + shlex.split(c)
         options = cfg.options[backend][step]
         for option in options:
             cmd = cmd + shlex.split(option)
-        # check if cmd in PATH
-        if (util.find_bin(cmd[0]) == None):
+        # check if cmd in PATH unless absolute path
+        if cmd[0].find('/') != 0 and (util.find_bin(cmd[0]) == None):
             print "{}: command not found".format(cmd[0])
             sys.exit(1)
         # only dry-run
@@ -215,11 +221,19 @@ def main():
         if not step_enable[idx]:
             continue
         # run command
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except:
+            import traceback
+            print "error invoking {}".format(" ".join(cmd))
+            print traceback.format_exc()
+            sys.exit(1)
+
         if opts.debug:
             print 'running {}'.format(' '.join(cmd))
         out, err = p.communicate() # now wait
         if p.returncode != 0:
             print "{}\n{}".format(out, err)
             sys.exit(p.returncode)
-        print out
+        if len(out) > 0:
+            print out

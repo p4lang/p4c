@@ -110,12 +110,6 @@ p4include_HEADERS += $(wildcard $(srcdir)/p4include/*.p4)
 all-local:
 	@$(MAKE) install-data pkgdatadir=$(abs_builddir)
 
-# install-data-hook runs after other install rules
-# for testing, p4c is regenerated to look up cfg files in build directory
-install-data-hook:
-	@sed -e 's,[@]pkgdatadir[@],$(abs_builddir),g' < $(srcdir)/tools/driver/p4c.in > $(builddir)/p4c
-	@chmod +x $(builddir)/p4c
-
 # FIXME -- should be a way of getting configure to do this automatcially? or automake?
 setup.h: $(srcdir)/setup.h.in Makefile
 	@sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
