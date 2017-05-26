@@ -23,6 +23,9 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
+
 namespace BMV2 {
 
 unsigned CFG::Node::crtId = 0;

@@ -174,14 +174,14 @@ class CFG final : public IHasDbPrint {
 class ProgramParts {
  public:
     // map action to parent
-    std::map<const IR::P4Action*, const IR::P4Control*> actions;
+    ordered_map<const IR::P4Action*, const IR::P4Control*> actions;
     // Maps each Parameter of an action to its positional index.
     // Needed to generate code for actions.
-    std::map<const IR::Parameter*, unsigned> index;
+    ordered_map<const IR::Parameter*, unsigned> index;
     // Parameters of controls/parsers
-    std::set<const IR::Parameter*> nonActionParameters;
+    ordered_set<const IR::Parameter*> nonActionParameters;
     // for each action its json id
-    std::map<const IR::P4Action*, unsigned> ids;
+    ordered_map<const IR::P4Action*, unsigned> ids;
     // All local variables
     std::vector<const IR::Declaration_Variable*> variables;
     // All the parsers
