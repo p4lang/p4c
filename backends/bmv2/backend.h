@@ -68,8 +68,6 @@ class Backend : public PassManager {
  public:
     BMV2::JsonObjects*               json;
     Target                           target;
-    Util::JsonArray*                 calculations;
-    Util::JsonArray*                 checksums;
     Util::JsonArray*                 counters;
     Util::JsonArray*                 externs;
     Util::JsonArray*                 field_lists;
@@ -84,7 +82,6 @@ class Backend : public PassManager {
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
 
-    // first element is container->name, second element is bmv2 hardcoded name
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
     std::set<cstring>                update_checksum_controls;
