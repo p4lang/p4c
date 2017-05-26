@@ -26,7 +26,6 @@ limitations under the License.
 #include <functional>
 #include <cstdint>
 #include "lib/cstring.h"
-#include "lib/default.h"
 
 namespace Util {
 enum class EnumeratorState {
@@ -535,7 +534,7 @@ template <typename T>
 T Enumerator<T>::nextOrDefault() {
     bool next = moveNext();
     if (!next)
-        return Util::Default<T>();
+        return T{};
     return getCurrent();
 }
 

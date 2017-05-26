@@ -39,7 +39,6 @@ noinst_HEADERS += \
 	lib/bitvec.h \
 	lib/crash.h \
 	lib/cstring.h \
-	lib/default.h \
 	lib/enumerator.h \
 	lib/error.h \
 	lib/exceptions.h \
