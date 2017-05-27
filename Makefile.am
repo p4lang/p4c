@@ -149,8 +149,6 @@ cpplint_FILES += $(noinst_HEADERS)
 clean-local:
 	-rm -f $(BUILT_SOURCES) $(CLEANFILES)
 
-check-local: cpplint-quiet
-
 cpplint:
 	@cd $(srcdir); tools/cpplint.py --root=. --extensions=h,hpp,c,cpp,ypp,l $(sort $(cpplint_FILES))
 
@@ -167,6 +165,19 @@ etags:
 	    backends extensions frontends ir lib tools midend
 	cd $(srcdir)/tools/ir-generator; ctags -e -R --langmap=Flex:+.l,YACC:+.ypp \
 	    . ../../lib
+
+# automake's default "make check" rule runs into "Argument list too long" errors on
+# Linux when TESTS gets to big, because of the peculiar way in which it recursively
+# invokes make with assignments on the command line.  These in turn end up in the
+# MAKEFLAGS environment variable which causes the problem when invoking bash, as
+# it exceeds Linux's 128K limit on a single environment variable.  So we override
+# with a simpler recipe that doesn't do that.  This gives us warnings from make
+# about multiple recipes for 'check-am', but the right one (this one) ends up being used
+check-am: all-am cpplint-quiet $(check_LTLIBRARIES) $(check_PROGRAMS)
+	@rm -f $(TEST_LOGS)
+	@rm -f $(TEST_LOGS:.log=.trs)
+	@rm -f $(TEST_SUITE_LOG)
+	@$(MAKE) $(TEST_SUITE_LOG)
 
 # XXX(seth): automake as of version 1.15 has a bug that makes "recheck" interact
 # very badly with parallel make.
@@ -202,14 +213,14 @@ recheck: all-am $(check_LTLIBRARIES) $(check_PROGRAMS)
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
 
-check-%:
-	@$(MAKE) check TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
+check-%: all-am $(check_LTLIBRARIES) $(check_PROGRAMS)
+	@$(MAKE) check-TESTS TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
 
 recheck-%:
 	@$(MAKE) recheck TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
 
-check-ifail:
-	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
+check-ifail: all-am $(check_LTLIBRARIES) $(check_PROGRAMS)
+	@$(MAKE) check-TESTS TESTS="$(IFAIL_TESTS)"
 
 gtest:
 	@$(MAKE) gtestp4c
