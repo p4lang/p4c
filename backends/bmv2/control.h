@@ -62,10 +62,20 @@ class ControlConverter : public Inspector {
     { setName("Control"); }
 };
 
+class ChecksumConverter : public Inspector {
+    Backend* backend;
+ public:
+    bool preorder(const IR::PackageBlock* b) override;
+    bool preorder(const IR::ControlBlock* b) override;
+    explicit ChecksumConverter(Backend *backend) : backend(backend)
+    { setName("UpdateChecksum"); }
+};
+
 class ConvertControl final : public PassManager {
  public:
     explicit ConvertControl(Backend *backend) {
         passes.push_back(new ControlConverter(backend));
+        passes.push_back(new ChecksumConverter(backend));
         setName("ConvertControl");
     }
 };

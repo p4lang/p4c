@@ -260,7 +260,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         }
         auto jright = conv->convert(fields);
         calc->emplace("input", jright);
-        backend->calculations->append(calc);
+        backend->json->calculations->append(calc);
         calculation->emplace("type", "calculation");
         calculation->emplace("value", calcName);
         parameters->append(calculation);
