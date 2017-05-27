@@ -118,8 +118,14 @@ JsonObjects::add_meta_info() {
  */
 unsigned
 JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields, unsigned max_length) {
+    std::string sname(name, name.size());
+    try {
+        return header_type_id.at(sname);
+    } catch (const std::out_of_range &x) {
+    }
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
+    header_type_id[sname] = id;
     header_type->emplace("name", name);
     header_type->emplace("id", id);
     if (fields != nullptr) {
@@ -137,8 +143,14 @@ JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields, unsi
 /// Create a header type with empty field list.
 unsigned
 JsonObjects::add_header_type(const cstring& name) {
+    std::string sname(name, name.size());
+    try {
+        return header_type_id.at(sname);
+    } catch (const std::out_of_range &x) {
+    }
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
+    header_type_id[sname] = id;
     header_type->emplace("name", name);
     header_type->emplace("id", id);
     auto temp = new Util::JsonArray();
