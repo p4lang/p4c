@@ -119,9 +119,9 @@ JsonObjects::add_meta_info() {
 unsigned
 JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields, unsigned max_length) {
     std::string sname(name, name.size());
-    try {
-        return header_type_id.at(sname);
-    } catch (const std::out_of_range &x) {
+    auto header_type_id_it = header_type_id.find(sname);
+    if (header_type_id_it != header_type_id.end()) {
+        return header_type_id_it->second;
     }
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
@@ -144,9 +144,9 @@ JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields, unsi
 unsigned
 JsonObjects::add_header_type(const cstring& name) {
     std::string sname(name, name.size());
-    try {
-        return header_type_id.at(sname);
-    } catch (const std::out_of_range &x) {
+    auto header_type_id_it = header_type_id.find(sname);
+    if (header_type_id_it != header_type_id.end()) {
+        return header_type_id_it->second;
     }
     auto header_type = new Util::JsonObject();
     unsigned id = BMV2::nextId("header_types");
