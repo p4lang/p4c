@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <map>
 #include "lib/json.h"
+#include "lib/ordered_map.h"
 
 namespace BMV2 {
 
@@ -74,6 +75,7 @@ class JsonObjects {
     Util::JsonArray* headers;
     Util::JsonArray* header_stacks;
     Util::JsonArray* header_types;
+    ordered_map<std::string, unsigned> header_type_id;
     Util::JsonArray* learn_lists;
     Util::JsonArray* meter_arrays;
     Util::JsonArray* parsers;
