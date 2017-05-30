@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/model.h"
 #include "frontends/p4/methodInstance.h"
+#include "portableSwitch.h"
 
 namespace BMV2 {
 
