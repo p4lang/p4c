@@ -764,19 +764,23 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_table_show_actions(self, line):
         "List one table's actions as per the P4 program: table_show_actions <table_name>"
-        self.exactly_n_args(line.split(), 1)
-        table = TABLES[line]
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
         for action_name in sorted(table.actions):
             print ACTIONS[action_name].action_str()
 
     def complete_table_show_actions(self, text, line, start_index, end_index):
-        return self._complete_tables(self, text)
+        return self._complete_tables(text)
 
     @handle_bad_input
     def do_table_info(self, line):
         "Show info about a table: table_info <table_name>"
-        self.exactly_n_args(line.split(), 1)
-        table = TABLES[line]
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
         print table.table_str()
         print "*" * 80
         for action_name in sorted(table.actions):
