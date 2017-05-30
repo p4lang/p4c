@@ -23,7 +23,6 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "lib/json.h"
-#include "backends/bmv2/sharedActionSelectorCheck.h"
 
 namespace P4V1 {
 
