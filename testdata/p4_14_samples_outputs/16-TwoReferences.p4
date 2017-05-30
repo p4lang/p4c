@@ -45,47 +45,35 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_b;
             do_d;
             do_e;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction();
     }
     @name("B") table B {
         actions = {
             nop;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     @name("C") table C {
         actions = {
             nop;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     @name("D") table D {
         actions = {
             nop;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     @name("E") table E {
         actions = {
             nop;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     @name("F") table F {
         actions = {
             nop;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     apply {
         switch (A.apply().action_run) {

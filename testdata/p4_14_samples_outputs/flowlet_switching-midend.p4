@@ -105,7 +105,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             rewrite_mac_0();
             _drop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
@@ -197,7 +197,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_1();
             set_ecmp_select_0();
-            @default_only NoAction_1();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
@@ -209,7 +209,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_5();
             set_nhop_0();
-            @default_only NoAction_8();
+            @defaultonly NoAction_8();
         }
         key = {
             meta.ingress_metadata.ecmp_offset: exact @name("meta.ingress_metadata.ecmp_offset") ;
@@ -220,7 +220,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("flowlet") table flowlet {
         actions = {
             lookup_flowlet_map_0();
-            @default_only NoAction_9();
+            @defaultonly NoAction_9();
         }
         default_action = NoAction_9();
     }
@@ -228,7 +228,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac_0();
             _drop_6();
-            @default_only NoAction_10();
+            @defaultonly NoAction_10();
         }
         key = {
             meta.ingress_metadata.nhop_ipv4: exact @name("meta.ingress_metadata.nhop_ipv4") ;
@@ -239,7 +239,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("new_flowlet") table new_flowlet {
         actions = {
             update_flowlet_id_0();
-            @default_only NoAction_11();
+            @defaultonly NoAction_11();
         }
         default_action = NoAction_11();
     }

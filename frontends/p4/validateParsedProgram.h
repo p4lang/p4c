@@ -35,7 +35,7 @@ namespace P4 {
    - width of int<> types is larger than 1
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
-   - tables have an actions and a default_action properties
+   - tables have an actions property
    - instantiations appear at the top-level only
    - switch statements do not occur in actions
    - instantiations do not occur in actions
@@ -44,7 +44,6 @@ namespace P4 {
    - extern constructors have the same name as the enclosing extern
  */
 class ValidateParsedProgram final : public Inspector {
-    bool isv1;
     void container(const IR::IContainer* type);
     // Make sure that type, apply and constructor parameters are distinct
     void distinctParameters(
@@ -53,7 +52,7 @@ class ValidateParsedProgram final : public Inspector {
         const IR::ParameterList* constr);
 
  public:
-    explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
+    ValidateParsedProgram()
     { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;

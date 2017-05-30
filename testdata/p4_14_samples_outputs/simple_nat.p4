@@ -142,20 +142,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             do_rewrites;
             _drop;
-            @default_only NoAction;
         }
         key = {
             standard_metadata.egress_port: exact;
         }
         size = 256;
-        default_action = NoAction();
     }
     @name("send_to_cpu") table send_to_cpu {
         actions = {
             do_cpu_encap;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     apply {
         if (standard_metadata.instance_type == 32w0) {
@@ -208,36 +204,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac;
             _drop;
-            @default_only NoAction;
         }
         key = {
             meta.meta.nhop_ipv4: exact;
         }
         size = 512;
-        default_action = NoAction();
     }
     @name("if_info") table if_info {
         actions = {
             _drop;
             set_if_info;
-            @default_only NoAction;
         }
         key = {
             meta.meta.if_index: exact;
         }
-        default_action = NoAction();
     }
     @name("ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop;
             _drop;
-            @default_only NoAction;
         }
         key = {
             meta.meta.ipv4_da: lpm;
         }
         size = 1024;
-        default_action = NoAction();
     }
     @name("nat") table nat {
         actions = {
@@ -247,7 +237,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nat_hit_int_to_ext;
             nat_hit_ext_to_int;
             nat_no_nat;
-            @default_only NoAction;
         }
         key = {
             meta.meta.is_ext_if: exact;
@@ -259,7 +248,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.tcp.dstPort    : ternary;
         }
         size = 128;
-        default_action = NoAction();
     }
     apply {
         if_info.apply();

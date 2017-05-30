@@ -849,8 +849,7 @@ keyElement
     ;
 
 actionList
-    : actionRef ";"                      { $$ = new IR::IndexedVector<IR::ActionListElement>();
-                                           $$->push_back($1); }
+    : /* empty */                        { $$ = new IR::IndexedVector<IR::ActionListElement>(); }
     | actionList actionRef ";"           { $$ = $1; $$->push_back($2); }
     ;
 

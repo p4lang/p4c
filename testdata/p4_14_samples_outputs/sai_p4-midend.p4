@@ -221,7 +221,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("fdb") table fdb {
         actions = {
             fdb_set_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
             meta.ingress_metadata.vlan_id: exact @name("meta.ingress_metadata.vlan_id") ;
@@ -233,7 +233,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop_0();
             generate_learn_notify_0();
-            @default_only NoAction_10();
+            @defaultonly NoAction_10();
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
@@ -245,7 +245,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("neighbor") table neighbor {
         actions = {
             set_dmac_0();
-            @default_only NoAction_11();
+            @defaultonly NoAction_11();
         }
         key = {
             meta.ingress_metadata.vrf        : exact @name("meta.ingress_metadata.vrf") ;
@@ -257,7 +257,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("next_hop") table next_hop {
         actions = {
             set_next_hop_0();
-            @default_only NoAction_12();
+            @defaultonly NoAction_12();
         }
         key = {
             meta.ingress_metadata.nhop: exact @name("meta.ingress_metadata.nhop") ;
@@ -285,20 +285,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("port") table port_1 {
         actions = {
             set_in_port();
-            @default_only NoAction_13();
+            @defaultonly NoAction_13();
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
         }
-        default_action = NoAction_13();
         @name("port_counters") counters = direct_counter(CounterType.packets);
+        default_action = NoAction_13();
     }
     @name("route") table route {
         actions = {
             route_set_trap_0();
             route_set_nexthop_0();
             route_set_nexthop_group_0();
-            @default_only NoAction_14();
+            @defaultonly NoAction_14();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
@@ -310,7 +310,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_router_interface_0();
             router_interface_miss_0();
-            @default_only NoAction_15();
+            @defaultonly NoAction_15();
         }
         key = {
             hdr.eth.dstAddr: exact @name("hdr.eth.dstAddr") ;
@@ -320,14 +320,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("switch") table switch_0 {
         actions = {
             set_switch_0();
-            @default_only NoAction_16();
+            @defaultonly NoAction_16();
         }
         default_action = NoAction_16();
     }
     @name("virtual_router") table virtual_router {
         actions = {
             set_router_0();
-            @default_only NoAction_17();
+            @defaultonly NoAction_17();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;

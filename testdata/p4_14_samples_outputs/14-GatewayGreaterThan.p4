@@ -39,9 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1 {
         actions = {
             nop;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     apply {
         if (hdr.h.f1 > 13w1) {

@@ -463,14 +463,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1 {
         actions = {
             a1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         default_action = NoAction();
     }
     @name("t2_1") table t2_1 {
         actions = {
             a2_1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.m.field_8_01: exact @name("meta.m.field_8_01") ;
@@ -543,7 +543,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t2_2") table t2_2 {
         actions = {
             a2_2();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.m.field_32_01: exact @name("meta.m.field_32_01") ;
@@ -568,7 +568,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t2_3") table t2_3 {
         actions = {
             a2_3();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.m.field_32_17: ternary @name("meta.m.field_32_17") ;
@@ -593,7 +593,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t3_1") table t3_1 {
         actions = {
             a3_1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.m.field_32_33: exact @name("meta.m.field_32_33") ;
@@ -621,7 +621,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t4_1") table t4_1 {
         actions = {
             a4_1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.m.field_16_01: exact @name("meta.m.field_16_01") ;

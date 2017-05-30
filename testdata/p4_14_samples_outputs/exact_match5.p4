@@ -63,7 +63,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data1.f1: exact;
@@ -71,7 +70,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data3.f3: exact;
         }
         size = 100000;
-        default_action = NoAction();
     }
     apply {
         test1.apply();

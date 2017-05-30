@@ -144,7 +144,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             do_rewrites_0();
             _drop_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
@@ -155,7 +155,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("send_to_cpu") table send_to_cpu_0 {
         actions = {
             do_cpu_encap_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         default_action = NoAction();
     }
@@ -208,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac_0();
             _drop_1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.meta.nhop_ipv4: exact @name("meta.meta.nhop_ipv4") ;
@@ -220,7 +220,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_1();
             set_if_info_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.meta.if_index: exact @name("meta.meta.if_index") ;
@@ -231,7 +231,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_nhop_0();
             _drop_1();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.meta.ipv4_da: lpm @name("meta.meta.ipv4_da") ;
@@ -247,7 +247,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nat_hit_int_to_ext_0();
             nat_hit_ext_to_int_0();
             nat_no_nat_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             meta.meta.is_ext_if: exact @name("meta.meta.is_ext_if") ;

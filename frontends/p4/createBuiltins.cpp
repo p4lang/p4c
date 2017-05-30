@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "createBuiltins.h"
 #include "ir/ir.h"
+#include "frontends/p4/coreLibrary.h"
 
 namespace P4 {
 void CreateBuiltins::postorder(IR::P4Parser* parser) {
@@ -51,6 +52,40 @@ void CreateBuiltins::postorder(IR::ParserState* state) {
         warning("%1%: implicit transition to `reject'", state);
         state->selectExpression = new IR::PathExpression(IR::ParserState::reject);
     }
+}
+
+void CreateBuiltins::postorder(IR::ActionList* actions) {
+    if (!addNoAction)
+        return;
+    auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance.noAction.str());
+    if (decl != nullptr)
+        return;
+    actions->push_back(
+        new IR::ActionListElement(
+            new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
+            new IR::MethodCallExpression(
+                new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(actions->srcInfo)),
+                new IR::Vector<IR::Type>(), new IR::Vector<IR::Expression>())));
+}
+
+bool CreateBuiltins::preorder(IR::P4Table* table) {
+    addNoAction = false;
+    if (table->getDefaultAction() == nullptr)
+        addNoAction = true;
+    return true;
+}
+
+void CreateBuiltins::postorder(IR::TableProperties* properties) {
+    if (!addNoAction)
+        return;
+    auto act = new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(properties->srcInfo));
+    auto args = new IR::Vector<IR::Expression>();
+    auto methodCall = new IR::MethodCallExpression(act, args);
+    auto prop = new IR::Property(
+        IR::ID(IR::TableProperties::defaultActionPropertyName),
+        new IR::ExpressionValue(methodCall),
+        /* isConstant = */ false);
+    properties->properties.push_back(prop);
 }
 
 }  // namespace P4

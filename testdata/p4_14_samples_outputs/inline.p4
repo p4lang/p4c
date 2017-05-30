@@ -25,9 +25,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
     @name("t") table t {
         actions = {
             x;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     apply {
         if (meta.m.b == 1w1) {

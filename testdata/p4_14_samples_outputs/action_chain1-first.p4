@@ -74,7 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             act2();
             act3();
             noop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.extra[0].h: ternary @name("hdr.extra[0].h") ;
@@ -85,7 +85,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb2();
             noop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.data.f2: ternary @name("hdr.data.f2") ;
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set1b1();
             noop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.data.f2: ternary @name("hdr.data.f2") ;
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set2b2();
             noop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.data.f2: ternary @name("hdr.data.f2") ;
@@ -118,7 +118,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1();
             noop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.data.f1: ternary @name("hdr.data.f1") ;

@@ -37,34 +37,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: ternary;
         }
-        default_action = NoAction();
     }
     @name("test2") table test2 {
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
-        default_action = NoAction();
     }
     @name("test3") table test3 {
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f3: ternary;
         }
-        default_action = NoAction();
     }
     apply {
         if (test1.apply().hit) {

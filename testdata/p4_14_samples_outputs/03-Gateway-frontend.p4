@@ -49,7 +49,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("e_t1") table e_t1_0 {
         actions = {
             nop_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ing_drop_0();
             set_egress_port_0();
             set_f1_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.vag.f1: exact @name("hdr.vag.f1") ;
@@ -100,7 +100,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop_1();
             set_f2_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.vag.f2: exact @name("hdr.vag.f2") ;
@@ -112,7 +112,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop_1();
             set_f3_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.vag.f3: exact @name("hdr.vag.f3") ;
@@ -124,7 +124,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop_1();
             set_f4_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.vag.f4: exact @name("hdr.vag.f4") ;

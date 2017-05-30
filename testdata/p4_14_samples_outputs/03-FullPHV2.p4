@@ -463,14 +463,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1 {
         actions = {
             a1;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     @name("t2_1") table t2_1 {
         actions = {
             a2_1;
-            @default_only NoAction;
         }
         key = {
             meta.m.field_8_01: exact;
@@ -538,12 +535,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_8_63: exact;
             meta.m.field_8_64: exact;
         }
-        default_action = NoAction();
     }
     @name("t2_2") table t2_2 {
         actions = {
             a2_2;
-            @default_only NoAction;
         }
         key = {
             meta.m.field_32_01: exact;
@@ -563,12 +558,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_15: exact;
             meta.m.field_32_16: exact;
         }
-        default_action = NoAction();
     }
     @name("t2_3") table t2_3 {
         actions = {
             a2_3;
-            @default_only NoAction;
         }
         key = {
             meta.m.field_32_17: ternary;
@@ -588,12 +581,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_31: ternary;
             meta.m.field_32_32: ternary;
         }
-        default_action = NoAction();
     }
     @name("t3_1") table t3_1 {
         actions = {
             a3_1;
-            @default_only NoAction;
         }
         key = {
             meta.m.field_32_33: exact;
@@ -616,12 +607,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_50: exact;
             meta.m.field_32_51: exact;
         }
-        default_action = NoAction();
     }
     @name("t4_1") table t4_1 {
         actions = {
             a4_1;
-            @default_only NoAction;
         }
         key = {
             meta.m.field_16_01: exact;
@@ -651,7 +640,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_16_25: exact;
             meta.m.field_16_26: exact;
         }
-        default_action = NoAction();
     }
     apply {
         t1.apply();

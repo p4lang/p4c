@@ -33,7 +33,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("test1") table test1 {
         actions = {
             noop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
             hdr.data.b1: exact @name("hdr.data.b1") ;
@@ -43,8 +43,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f4: selector @name("hdr.data.f4") ;
         }
         size = 1024;
-        default_action = NoAction();
         @name("sel_profile") @mode("fair") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
+        default_action = NoAction();
     }
     apply {
         test1.apply();
