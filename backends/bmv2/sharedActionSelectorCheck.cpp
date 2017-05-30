@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "sharedActionSelectorCheck.h"
 
+#include <algorithm>
+
 namespace BMV2 {
 
 const SelectorInput*
@@ -65,13 +67,8 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     }
     // returns true if inputs are the same, false otherwise
     auto cmp_inputs = [](const SelectorInput &i1, const SelectorInput &i2) {
-        for (auto e1 : i1) {
-            auto cmp_e = [e1](const IR::Expression *e2) {
-                return checkSameKeyExpr(e1, e2);
-            };
-            if (std::find_if(i2.begin(), i2.end(), cmp_e) == i2.end()) return false;
-        }
-        return true;
+        if (i1.size() != i2.size()) return false;
+        return std::equal(i1.begin(), i1.end(), i2.begin(), checkSameKeyExpr);
     };
 
     if (!cmp_inputs(it->second, input)) {
