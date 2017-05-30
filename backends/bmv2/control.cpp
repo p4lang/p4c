@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "backend.h"
 #include "control.h"
+#include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 

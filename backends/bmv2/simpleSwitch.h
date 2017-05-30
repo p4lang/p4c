@@ -21,6 +21,7 @@ limitations under the License.
 #include <cstring>
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "backend.h"
+#include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 class Backend;
