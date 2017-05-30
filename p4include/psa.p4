@@ -36,8 +36,6 @@ typedef bit<unspecified> ParserErrorLocation_t;
 typedef bit<unspecified> entry_key;           /// for DirectMeters
 const   InstanceType_t   INSTANCE_NORMAL = unspecified;
 const   PortId_t         PORT_CPU = unspecified;
-#else
-#error "Please define the core types for PSA and the PSA_CORE_TYPES macro"
 #endif
 
 #include "core.p4"
