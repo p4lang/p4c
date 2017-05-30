@@ -554,12 +554,11 @@ parser Parser<H, M>(packet_in buffer, out H parsed_hdr, inout M user_meta,
 
 control VerifyChecksum<H, M>(in H hdr, inout M user_meta);
 
-@control
 control Ingress<H, M>(inout H hdr, inout M user_meta,
                       PacketReplicationEngine pre,
                       in  psa_ingress_input_metadata_t  istd,
                       out psa_ingress_output_metadata_t ostd);
-@control
+
 control Egress<H, M>(inout H hdr, inout M user_meta,
                      PacketReplicationEngine pre,
                      in  psa_egress_input_metadata_t  istd);
