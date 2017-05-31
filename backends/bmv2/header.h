@@ -26,6 +26,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+class Backend;
+
 class ConvertHeaders : public Inspector {
     Backend*             backend;
     P4::ReferenceMap*    refMap;
@@ -52,12 +54,7 @@ class ConvertHeaders : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Parameter* param) override;
 
-    explicit ConvertHeaders(Backend* backend):
-        backend(backend), refMap(backend->getRefMap()),
-        typeMap(backend->getTypeMap()), json(backend->json) {
-        setName("ConvertHeaders");
-        CHECK_NULL(backend->json);
-    }
+    explicit ConvertHeaders(Backend* backend);
 };
 
 }  // namespace BMV2

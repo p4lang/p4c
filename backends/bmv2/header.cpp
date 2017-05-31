@@ -27,6 +27,13 @@ Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
     return result;
 }
 
+ConvertHeaders::ConvertHeaders(Backend* backend)
+    : backend(backend), refMap(backend->getRefMap()),
+      typeMap(backend->getTypeMap()), json(backend->json) {
+    setName("ConvertHeaders");
+    CHECK_NULL(backend->json);
+}
+
 /**
  * Create header type and header instance from a IR::StructLike type
  *
