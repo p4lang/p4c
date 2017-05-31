@@ -34,6 +34,11 @@ gtestp4c_SOURCES = \
 	test/gtest/gtestp4c.cpp \
 	$(gtest_SOURCES)
 
+# Configure GTest to disable support for SEH (which is irrelevant for p4c since
+# we don't currently support Windows) and pthreads (which prevents GTest from
+# using its internal TLS implementation, which interacts badly with libgc).
+gtestp4c_CPPFLAGS = -DGTEST_HAS_SEH=0 -DGTEST_HAS_PTHREAD=0 $(AM_CPPFLAGS)
+
 # Makefiles can add libraries to $(gtest_LDADD) to include them in the test
 # executable.
 gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a $(gtest_LDADD)
