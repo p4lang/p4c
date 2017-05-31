@@ -16,9 +16,18 @@
 # elsewhere in the codebase.
 gtest_unittest_UNIFIED = \
 	test/gtest/arch_test.cpp \
+	test/gtest/call_graph_test.cpp \
+	test/gtest/dumpjson.cpp \
+	test/gtest/enumerator_test.cpp \
+	test/gtest/exception_test.cpp \
+	test/gtest/format_test.cpp \
 	test/gtest/helpers.cpp \
+	test/gtest/json_test.cpp \
 	test/gtest/midend_test.cpp \
-	test/gtest/opeq_test.cpp
+	test/gtest/opeq_test.cpp \
+	test/gtest/path_test.cpp \
+	test/gtest/source_file_test.cpp \
+	test/gtest/transforms.cpp
 
 noinst_HEADERS += \
 	test/gtest/helpers.h
