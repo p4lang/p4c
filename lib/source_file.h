@@ -23,11 +23,12 @@ limitations under the License.
 
 #include <vector>
 
+#include "gtest/gtest_prod.h"
 #include "cstring.h"
 #include "stringref.h"
 #include "map.h"
 
-namespace Test { class TestSourceFile; }
+namespace Test { class UtilSourceFile; }
 
 class IHasDbPrint {
  public:
@@ -248,7 +249,7 @@ struct SourceFileLine {
   This class implements a singleton pattern: there is a single instance of this class.
 */
 class InputSources final {
-    friend class Test::TestSourceFile;
+    FRIEND_TEST(UtilSourceFile, InputSources);
 
  public:
     cstring getLine(unsigned lineNumber) const;

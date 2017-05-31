@@ -14,23 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include <assert.h>
+#include "lib/source_file.h"
 
-static IR::Constant *c1;
+TEST(IR, Transform) {
+    struct TestTrans : public Transform {
+        explicit TestTrans(IR::Constant* c) : c(c) { }
 
-class TestTrans : public Transform {
-    IR::Node *postorder(IR::Add *a) override {
-        assert(a->left == c1);
-        assert(a->right == c1);
-        return a;
-    }
-};
+        IR::Node* postorder(IR::Add* a) override {
+            EXPECT_EQ(c, a->left);
+            EXPECT_EQ(c, a->right);
+            return a;
+        }
 
-int main() {
-    c1 = new IR::Constant(2);
-    IR::Expression *e = new IR::Add(Util::SourceInfo(), c1, c1);
-    auto *n = e->apply(TestTrans());
-    assert(n == e);
+        IR::Constant* c;
+    };
+
+    auto c = new IR::Constant(2);
+    IR::Expression* e = new IR::Add(Util::SourceInfo(), c, c);
+    auto* n = e->apply(TestTrans(c));
+    EXPECT_EQ(e, n);
 }

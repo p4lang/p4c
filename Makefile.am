@@ -135,7 +135,7 @@ libfrontend_la_SOURCES = \
 
 ################ Testing
 
-# C++ unit tests.
+# Test-related make rules.
 include $(srcdir)/test/Makefile.am
 
 # GTest unit tests.

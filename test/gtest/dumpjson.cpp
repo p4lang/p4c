@@ -14,8 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "test.h"
+#include <iostream>
 
-int TestBase::isSuccess(TestBase::TestResult result) {
-    return result == TestBase::TestResult::Success;
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "ir/json_loader.h"
+#include "ir/visitor.h"
+
+TEST(IR, DumpJSON) {
+    auto c = new IR::Constant(2);
+    IR::Expression* e1 = new IR::Add(Util::SourceInfo(), c, c);
+
+    std::stringstream ss, ss2;
+    JSONGenerator(ss) << e1 << std::endl;
+    std::cout << ss.str();
+
+    JSONLoader loader(ss);
+    std::cout << loader.json;
+
+    const IR::Node* e2 = nullptr;
+    loader >> e2;
+    JSONGenerator(std::cout) << e2 << std::endl;
 }
