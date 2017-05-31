@@ -68,6 +68,14 @@ of a parser to access a field in the last valid union instance in the stack.
   `valid_union`)
   - `left`: the left side of the operation, or `null` if unary operation
   - `right`: the right side of the operation
+- if `type` is `local`, `value` is an integer representing an index inside an
+array of local integral values. This `type` can only be used inside of an
+expression, i.e. if this JSON object has a parent whose `type` attribute is
+`expression`. The meaning of these "local integral values" depend on the context
+in which the parent expression is evaluated. In the case of an expression being
+evaluated inside of an action function belonging to a match-action table, the
+local integral values correspond to the runtime data available for a given table
+entry (see the [actions](#actions) section for more details on runtime data).
 
 For an expression, `left` and `right` will themselves be JSON objects, where the
 `value` attribute can be one of `field`, `hexstr`, `header`, `expression`,
