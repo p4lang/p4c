@@ -17,13 +17,14 @@
 # To be included in the main P4C compiler makefile
 
 bin_PROGRAMS += p4c-bm2-ss
-p4c_bm2_ss_LDADD = libfrontend.la libp4ctoolkit.a
+p4c_bm2_ss_LDADD = libbackendbmv2.la
+p4c_bm2_ss_SOURCES = backends/bmv2/bmv2.cpp
+cpplint_FILES += $(p4c_bm2_ss_SOURCES)
 
-p4c_bm2_ss_UNIFIED = \
+libbackendbmv2_la_UNIFIED = \
 	backends/bmv2/analyzer.cpp \
 	backends/bmv2/action.cpp \
 	backends/bmv2/backend.cpp \
-	backends/bmv2/bmv2.cpp \
 	backends/bmv2/control.cpp \
 	backends/bmv2/deparser.cpp \
 	backends/bmv2/errorcode.cpp \
@@ -63,14 +64,12 @@ noinst_HEADERS += \
 	backends/bmv2/simpleSwitch.h \
 	backends/bmv2/portableSwitch.h
 
-cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
+cpplint_FILES += $(libbackendbmv2_la_UNIFIED) $(libbackendbmv2_la_NONUNIFIED)
 
 ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
 
-noinst_LIBRARIES += libbackendbmv2.a
-libbackendbmv2_a_LIBADD = libfrontend.la
-libbackendbmv2_a_SOURCES = \
-	$(p4c_bm2_ss_SOURCES)
+noinst_LTLIBRARIES += libbackendbmv2.la
+libbackendbmv2_la_LIBADD = libfrontend.la
 
 # Tests
 -include bmv2tests.mk
@@ -85,4 +84,4 @@ bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 	      $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_14_samples
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
 
-gtest_LDADD += libbackendbmv2.a
+gtest_LDADD += libbackendbmv2.la

@@ -41,7 +41,7 @@ gtestp4c_CPPFLAGS = -DGTEST_HAS_SEH=0 -DGTEST_HAS_PTHREAD=0 $(AM_CPPFLAGS)
 
 # Makefiles can add libraries to $(gtest_LDADD) to include them in the test
 # executable.
-gtestp4c_LDADD = libgtest.la libfrontend.la libp4ctoolkit.a $(gtest_LDADD)
+gtestp4c_LDADD = libgtest.la libfrontend.la $(gtest_LDADD)
 
 check_PROGRAMS += gtestp4c
 cpplint_FILES += test/gtest/gtestp4c.cpp
