@@ -36,7 +36,7 @@ tools/ir-generator/ir-generator-lex.c: tools/ir-generator/ir-generator-lex.l
 BUILT_SOURCES += \
 	tools/ir-generator/ir-generator-lex.c
 
-irgenerator_LDADD = libp4ctoolkit.a
+irgenerator_LDADD = libp4ctoolkit.la
 
 noinst_PROGRAMS += irgenerator
 

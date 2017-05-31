@@ -123,7 +123,9 @@ setup.o setup.lo: setup.h
 
 # Front-end library
 noinst_LTLIBRARIES += libfrontend.la
-libfrontend_la_LIBADD = libcontrolplane.la
+libfrontend_la_LIBADD = \
+	libcontrolplane.la \
+	libp4ctoolkit.la
 libfrontend_la_SOURCES = \
 	setup.h \
 	setup.cpp \

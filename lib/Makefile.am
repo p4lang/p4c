@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-noinst_LIBRARIES += libp4ctoolkit.a
-libp4ctoolkit_a_UNIFIED = \
+noinst_LTLIBRARIES += libp4ctoolkit.la
+libp4ctoolkit_la_UNIFIED = \
 	lib/bitvec.cpp \
 	lib/crash.cpp \
 	lib/cstring.cpp \
@@ -66,4 +66,4 @@ noinst_HEADERS += \
 	lib/stringref.h \
 	lib/symbitmatrix.h
 
-cpplint_FILES += $(libp4ctoolkit_a_UNIFIED) $(libp4ctoolkit_a_NONUNIFIED)
+cpplint_FILES += $(libp4ctoolkit_la_UNIFIED) $(libp4ctoolkit_la_NONUNIFIED)
