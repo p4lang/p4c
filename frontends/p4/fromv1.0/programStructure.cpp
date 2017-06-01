@@ -22,7 +22,6 @@ limitations under the License.
 #include <set>
 #include <algorithm>
 
-#include "setup.h"
 #include "lib/path.h"
 #include "lib/gmputil.h"
 #include "converters.h"

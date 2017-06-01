@@ -19,7 +19,6 @@ limitations under the License.
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "setup.h"
 #include "options.h"
 #include "lib/log.h"
 #include "lib/exceptions.h"
@@ -27,6 +26,9 @@ limitations under the License.
 #include "lib/path.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/json_generator.h"
+
+const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
+const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
