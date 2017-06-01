@@ -224,25 +224,25 @@ extern PacketReplicationEngine {
 }
 
 extern Clone {
-  /// create a copy of the packet and send it to the specified port.
+  /// create a copy of the packet to the specified mirror session.
   ///
   /// The PSA specifies four types of cloning, with the packet sourced
   /// from different points in the pipeline and sent back to ingress
   /// or to the buffering queue in the egress (@see CloneMethod_t).
   ///
   /// @param clone_method  The type of cloning.
-  /// @param port          The port to send the cloned packet to.
+  /// @param session_id    Port mirror session id.
   ///
   void clone (in CloneMethod_t clone_method, in SessionId_t session_id);
 
-  /// create a copy of the packet with additional data and send it to the specified port.
+  /// create a copy of the packet with additional data to the specified mirror session.
   ///
   /// The PSA specifies four types of cloning, with the packet sourced
   /// from different points in the pipeline and sent back to ingress
   /// or to the buffering queue in the egress (@see CloneMethod_t).
   ///
   /// @param clone_method  The type of cloning.
-  /// @param port          The port to send the cloned packet to.
+  /// @param session_id    Port mirror session id.
   /// @param data additional header data attached to the packet
   void clone<T> (in CloneMethod_t clone_method, in SessionId_t session_id, in T data);
 
