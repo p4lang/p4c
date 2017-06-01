@@ -24,6 +24,10 @@ AM_CPPFLAGS = -I$(srcdir)/frontends \
 	      -I$(srcdir)/backends \
 	      -I$(srcdir)/extensions
 
+# Make installation locations available to source code.
+AM_CPPFLAGS += -DCONFIG_PREFIX=\"$(prefix)\"
+AM_CPPFLAGS += -DCONFIG_PKGDATADIR=\"$(pkgdatadir)\"
+
 TOOLSDIR=$(srcdir)/tools
 GENTESTS=$(TOOLSDIR)/gen-tests.py
 GEN_UNIFIED_MAKEFILE=$(TOOLSDIR)/gen-unified-makefile.py
@@ -99,7 +103,7 @@ BUILT_SOURCES += \
 
 ######## P4 header files to install
 
-# FIXME -- should these be in $(pkgdatadir) or $(prefix)?  setup.h.in
+# FIXME -- should these be in $(pkgdatadir) or $(prefix)?  setup.cpp
 # FIXME -- and check-install-headers: below need to be consistent
 p4includedir = $(pkgdatadir)/p4include
 p4_14includedir = $(pkgdatadir)/p4_14include
@@ -110,15 +114,6 @@ p4include_HEADERS += $(wildcard $(srcdir)/p4include/*.p4)
 all-local:
 	@$(MAKE) install-data pkgdatadir=$(abs_builddir)
 
-# FIXME -- should be a way of getting configure to do this automatcially? or automake?
-setup.h: $(srcdir)/setup.h.in Makefile
-	@sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
-	     -e 's|@prefix[@]|$(prefix)|g' \
-	     -e 's|@p4includedir[@]|$(p4includedir)|g' \
-	     -e 's|@p4_14includedir[@]|$(p4_14includedir)|g' \
-	$< >$@
-setup.o setup.lo: setup.h
-
 ################
 
 # Front-end library
@@ -127,8 +122,6 @@ libfrontend_la_LIBADD = \
 	libcontrolplane.la \
 	libp4ctoolkit.la
 libfrontend_la_SOURCES = \
-	setup.h \
-	setup.cpp \
 	$(frontend_SOURCES) \
 	$(midend_SOURCES) \
 	$(ir_SOURCES) \

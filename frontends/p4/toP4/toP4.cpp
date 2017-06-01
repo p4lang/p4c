@@ -17,7 +17,7 @@ limitations under the License.
 #include <sstream>
 #include <string>
 #include "toP4.h"
-#include "setup.h"
+#include "frontends/common/options.h"
 
 namespace P4 {
 

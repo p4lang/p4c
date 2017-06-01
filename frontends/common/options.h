@@ -26,6 +26,11 @@ limitations under the License.
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeSerializer.h"
 
+// Standard include paths for .p4 header files. The values are determined by
+// `configure`.
+extern const char* p4includePath;
+extern const char* p4_14includePath;
+
 // Base class for compiler options.
 // This class contains the options for the front-ends.
 // Each back-end should subclass this file.
