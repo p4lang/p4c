@@ -597,6 +597,10 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
                                   std::set<cstring>* controls,
                                   std::map<cstring, cstring>* map) {
     auto main = toplevel->getMain();
+    if (main == nullptr) {
+        ::error("`%1%' module not found for simple switch", IR::P4Program::main);
+        exit(1);
+    }
     auto ingress = main->getParameterValue(v1model.sw.ingress.name);
     auto egress = main->getParameterValue(v1model.sw.egress.name);
     if (ingress == nullptr || egress == nullptr ||
