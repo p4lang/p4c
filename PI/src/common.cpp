@@ -32,7 +32,7 @@ char *
 Buffer::extend(size_t s) {
   const auto size = data.size();
   data.resize(size + s);
-  return &data.at(size);
+  return &data[size];
 }
 
 char *
