@@ -26,6 +26,7 @@ limitations under the License.
  * and the macro protecting them should be defined.
  */
 #ifndef PSA_CORE_TYPES
+typedef bit<unspecified> SessionId_t;
 typedef bit<unspecified> PortId_t;
 typedef bit<unspecified> MulticastGroup_t;
 typedef bit<unspecified> PacketLength_t;
@@ -187,32 +188,6 @@ extern PacketReplicationEngine {
   /// the end of the pipeline (ingress or egress).
   void drop      ();
 
-  /// Clone operation: create a copy of the packet and send it to the
-  ///                  specified port.
-  ///
-  /// The PSA specifies four types of cloning, with the packet sourced
-  /// from different points in the pipeline and sent back to ingress
-  /// or to the buffering queue in the egress (@see CloneMethod_t).
-  ///
-  /// @param clone_method  The type of cloning.
-  /// @param port          The port to send the cloned packet to.
-  ///
-  /// Note: based on discussions with Antonin, we can ignore session now
-  void clone     (in CloneMethod_t clone_method, in PortId_t port);
-
-  /// Clone operation: create a copy of the packet with additional
-  ///                  data and send it to the specified port.
-  ///
-  /// The PSA specifies four types of cloning, with the packet sourced
-  /// from different points in the pipeline and sent back to ingress
-  /// or to the buffering queue in the egress (@see CloneMethod_t).
-  ///
-  /// @param clone_method  The type of cloning.
-  /// @param port          The port to send the cloned packet to.
-  /// @param data additional header data attached to the packet
-  void clone<T>  (in CloneMethod_t clone_method, in PortId_t port, in T data);
-
-
   /// Resubmit operation: send a packet to the ingress port with
   ///                     additional data appended
   ///
@@ -246,6 +221,36 @@ extern PacketReplicationEngine {
   // TBD
   }
   */
+}
+
+extern Clone {
+  /// create a copy of the packet and send it to the specified port.
+  ///
+  /// The PSA specifies four types of cloning, with the packet sourced
+  /// from different points in the pipeline and sent back to ingress
+  /// or to the buffering queue in the egress (@see CloneMethod_t).
+  ///
+  /// @param clone_method  The type of cloning.
+  /// @param port          The port to send the cloned packet to.
+  ///
+  void clone (in CloneMethod_t clone_method, in SessionId_t session_id);
+
+  /// create a copy of the packet with additional data and send it to the specified port.
+  ///
+  /// The PSA specifies four types of cloning, with the packet sourced
+  /// from different points in the pipeline and sent back to ingress
+  /// or to the buffering queue in the egress (@see CloneMethod_t).
+  ///
+  /// @param clone_method  The type of cloning.
+  /// @param port          The port to send the cloned packet to.
+  /// @param data additional header data attached to the packet
+  void clone<T> (in CloneMethod_t clone_method, in SessionId_t session_id, in T data);
+
+  /// emit additional data T passed in from clone<T> in deparser.
+  ///
+  /// This method can only be called in deparser, if there is no additional
+  /// data to emit, this method is a nop.
+  void emit();
 }
 
 /* --------------------------------------------------------------------- */
