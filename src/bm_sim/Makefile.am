@@ -24,6 +24,8 @@ conditionals.cpp \
 context.cpp \
 control_action.cpp \
 counters.cpp \
+crc_map.h \
+crc_map.cpp \
 crc_tables.h \
 debugger.cpp \
 deparser.cpp \

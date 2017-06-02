@@ -370,8 +370,10 @@ std::ostream &operator<<(std::ostream &out, const crc_config_t<T> &c);
 
 }  // namespace detail
 
+// can be used for crc8, with T == uint8_t
 // can be used for crc16, with T == uint16_t
-// can be used for crc32, with T uint32_t
+// can be used for crc32, with T == uint32_t
+// can be used for crc64, with T == uint64_t
 template <typename T>
 class CustomCrcMgr {
  public:

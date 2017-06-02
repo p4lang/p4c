@@ -10,6 +10,7 @@ libtestutils_la_SOURCES = utils.h utils.cpp
 libtestutils_la_LIBADD = $(top_builddir)/src/bm_sim/libbmsim.la
 
 AM_CPPFLAGS += \
+-I$(top_srcdir)/src/bm_sim \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -isystem $(top_srcdir)/third_party/jsoncpp/include \
 -DTESTDATADIR=\"$(abs_srcdir)/testdata\"

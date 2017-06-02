@@ -30,6 +30,7 @@
 #include <exception>
 
 #include "jsoncpp/json.h"
+#include "crc_map.h"
 
 namespace bm {
 
@@ -2211,9 +2212,20 @@ P4Objects::check_required_fields(
 
 std::unique_ptr<CalculationsMap::MyC>
 P4Objects::check_hash(const std::string &name) const {
-  auto h = CalculationsMap::get_instance()->get_copy(name);
-  if (!h) throw json_exception(EFormat() << "Unknown hash algorithm: " << name);
-  return h;
+  {
+    auto h = CalculationsMap::get_instance()->get_copy(name);
+    if (h) return h;
+  }
+  {
+    auto h = CrcMap::get_instance()->get_copy(name);
+    if (h) return h;
+  }
+  {
+    auto h = CrcMap::get_instance()->get_copy_from_custom_str(name);
+    if (h) return h;
+  }
+  throw json_exception(EFormat() << "Unknown hash algorithm: " << name);
+  return nullptr;
 }
 
 std::unique_ptr<Calculation>

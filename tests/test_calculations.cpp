@@ -26,8 +26,13 @@
 #include <bm/bm_sim/phv_source.h>
 #include <bm/bm_sim/phv.h>
 
+#include <algorithm>  // for std::copy, std::transform
+#include <iterator>  // for std::back_inserter
 #include <random>
-#include <algorithm>  // for std::copy
+#include <string>
+#include <vector>
+
+#include "crc_map.h"
 
 using namespace bm;
 
@@ -453,4 +458,81 @@ TEST(HashTest, Crc32Custom) {
   ASSERT_EQ(CustomCrcErrorCode::WRONG_TYPE_CALCULATION,
             CustomCrcMgr<uint16_t>::update_config(
                 ptr.get(), {0, 0, 0, true, true}));
+}
+
+class CrcMapTest : public ::testing::TestWithParam<const char *> { };
+
+namespace {
+
+class CrcCheckMap {
+ public:
+  CrcCheckMap();
+
+  static CrcCheckMap *get_instance() {
+    static CrcCheckMap instance;
+    return &instance;
+  }
+
+  uint64_t get_check(const char *name) const {
+    return map_.at(name);
+  }
+
+  std::vector<const char *> names() const {
+    std::vector<const char *> v;
+    std::transform(map_.begin(), map_.end(), std::back_inserter(v),
+                   [](const decltype(map_)::value_type &p) { return p.first; });
+    return v;
+  }
+
+ private:
+  std::unordered_map<const char *, uint64_t> map_;
+};
+
+CrcCheckMap::CrcCheckMap() {
+  map_ = {
+    {"crc_8", 0xf4}, {"crc_8_darc", 0x15}, {"crc_8_i_code", 0x7e},
+    {"crc_8_itu", 0xa1}, {"crc_8_maxim", 0xa1}, {"crc_8_rohc", 0xd0},
+    {"crc_8_wcdma", 0x25},
+    {"crc_16", 0xbb3d}, {"crc_16_buypass", 0xfee8}, {"crc_16_dds_110", 0x9ecf},
+    {"crc_16_dect", 0x007e}, {"crc_16_dnp", 0xea82},
+    {"crc_16_en_13757", 0xc2b7}, {"crc_16_genibus", 0xd64e},
+    {"crc_16_maxim", 0x44c2}, {"crc_16_mcrf4xx", 0x6f91},
+    {"crc_16_riello", 0x63d0}, {"crc_16_t10_dif", 0xd0db},
+    {"crc_16_teledisk", 0x0fb3}, {"crc_16_usb", 0xb4c8}, {"x_25", 0x906e},
+    {"xmodem", 0x31c3}, {"modbus", 0x4b37}, {"kermit", 0x2189},
+    {"crc_ccitt_false", 0x29b1}, {"crc_aug_ccitt", 0xe5cc},
+    {"crc_32", 0xcbf43926}, {"crc_32_bzip2", 0xfc891918},
+    {"crc_32c", 0xe3069283}, {"crc_32d", 0x87315576},
+    {"crc_32_mpeg", 0x0376e6e7}, {"posix", 0x765e7680},
+    {"crc_32q", 0x3010bf7f}, {"jamcrc", 0x340bc6d9}, {"xfer", 0xbd0be338},
+    {"crc_64", 0x46a5a9388a5beffeULL},
+    {"crc_64_we", 0x62ec59e3f1a4f00aULL},
+    {"crc_64_jones", 0xcaa717168609f281ULL}
+  };
+}
+
+}  // namespace
+
+TEST_P(CrcMapTest, Check) {
+  auto crc = CrcMap::get_instance()->get_copy(GetParam());
+  ASSERT_NE(nullptr, crc);
+  std::string buffer("123456789");
+  auto output = crc->output(buffer.data(), buffer.size());
+  auto expected_output = CrcCheckMap::get_instance()->get_check(GetParam());
+  EXPECT_EQ(expected_output, output);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    CrcMapList, CrcMapTest,
+    ::testing::ValuesIn(CrcCheckMap::get_instance()->names()));
+
+
+TEST(CrcMapCustomStr, Crc32Bzip2) {
+  std::string input("poly_0x104c11db7_init_0xffffffff_xout_0xffffffff_not_rev");
+  auto crc = CrcMap::get_instance()->get_copy_from_custom_str(input);
+  ASSERT_NE(nullptr, crc);
+  std::string buffer("123456789");
+  auto output = crc->output(buffer.data(), buffer.size());
+  auto expected_output = CrcCheckMap::get_instance()->get_check("crc_32_bzip2");
+  EXPECT_EQ(expected_output, output);
 }

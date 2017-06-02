@@ -137,15 +137,16 @@ namespace {
 /* This code was adapted from:
    http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code */
 
-uint32_t reflect(uint32_t data, int nBits) {
-  uint32_t reflection = 0x00000000;
+template <typename T>
+T reflect(T data, int nBits) {
+  T reflection = static_cast<T>(0x00);
   int bit;
 
   // Reflect the data about the center bit.
   for (bit = 0; bit < nBits; ++bit) {
     // If the LSB bit is set, set the reflection of it.
     if (data & 0x01) {
-      reflection |= (1 << ((nBits - 1) - bit));
+      reflection |= (static_cast<T>(1) << ((nBits - 1) - bit));
     }
     data = (data >> 1);
   }
@@ -164,35 +165,58 @@ struct crc16 {
     uint16_t remainder = 0x0000;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
-      int data = reflect(buf[byte], 8) ^ (remainder >> 8);
+      int data = reflect<uint16_t>(buf[byte], 8) ^ (remainder >> 8);
       remainder = table_crc16[data] ^ (remainder << 8);
     }
-    return reflect(remainder, 16) ^ final_xor_value;
+    return reflect<uint16_t>(remainder, 16) ^ final_xor_value;
   }
 };
 
 template <typename T>
 struct crc_custom_init { };
 
+// explicit template instantiation
+
+// crc8
+
+template <>
+struct crc_custom_init<uint8_t> {
+  static CustomCrcMgr<uint8_t>::crc_config_t config;
+};
+
+CustomCrcMgr<uint8_t>::crc_config_t crc_custom_init<uint8_t>::config =
+{0x07, 0x00, 0x00, false, false};
+
+// crc16
+
 template <>
 struct crc_custom_init<uint16_t> {
-  static uint16_t *crc_table;
   static CustomCrcMgr<uint16_t>::crc_config_t config;
 };
 
-uint16_t *crc_custom_init<uint16_t>::crc_table = table_crc16;
 CustomCrcMgr<uint16_t>::crc_config_t crc_custom_init<uint16_t>::config =
 {0x8005, 0x0000, 0x0000, true, true};
 
+// crc32
+
 template <>
 struct crc_custom_init<uint32_t> {
-  static uint32_t *crc_table;
   static CustomCrcMgr<uint32_t>::crc_config_t config;
 };
 
-uint32_t *crc_custom_init<uint32_t>::crc_table = table_crc32;
 CustomCrcMgr<uint32_t>::crc_config_t crc_custom_init<uint32_t>::config =
 {0x04c11db7, 0xffffffff, 0xffffffff, true, true};
+
+// crc64
+
+template <>
+struct crc_custom_init<uint64_t> {
+  static CustomCrcMgr<uint64_t>::crc_config_t config;
+};
+
+CustomCrcMgr<uint64_t>::crc_config_t crc_custom_init<uint64_t>::config =
+{0x000000000000001bULL, 0x0000000000000000ULL, 0x0000000000000000ULL,
+true, true};
 
 template <typename T>
 struct crc_custom {
@@ -201,8 +225,8 @@ struct crc_custom {
   using crc_config_t = typename CustomCrcMgr<T>::crc_config_t;
 
   crc_custom() {
-    std::memcpy(crc_table, crc_custom_init<T>::crc_table, sizeof(crc_table));
     config = crc_custom_init<T>::config;
+    recompute_crc_table(config, crc_table);
   }
 
   T operator()(const char *buf, size_t len) const {
@@ -214,12 +238,12 @@ struct crc_custom {
     for (unsigned int byte = 0; byte < len; byte++) {
       unsigned char uchar = static_cast<unsigned char>(buf[byte]);
       int data = (config.data_reflected) ?
-          reflect(uchar, 8) ^ (remainder >> (width - 8)) :
+          reflect<T>(uchar, 8) ^ (remainder >> (width - 8)) :
           uchar ^ (remainder >> (width - 8));
       remainder = crc_table[data] ^ (remainder << 8);
     }
     return (config.remainder_reflected) ?
-        reflect(remainder, width) ^ config.final_xor_value :
+        reflect<T>(remainder, width) ^ config.final_xor_value :
         remainder ^ config.final_xor_value;
   }
 
@@ -237,11 +261,11 @@ struct crc_custom {
     // Compute the remainder of each possible dividend
     for (size_t dividend = 0; dividend < kTEntries; dividend++) {
       // Start with the dividend followed by zeros
-      T remainder = dividend << (width - 8);
+      T remainder = static_cast<T>(dividend) << (width - 8);
       // Perform modulo-2 division, a bit at a time
       for (unsigned char bit = 8; bit > 0; bit--) {
         // Try to divide the current data bit
-        if (remainder & (1 << (width - 1))) {
+        if (remainder & (static_cast<T>(1) << (width - 1))) {
           remainder = (remainder << 1) ^ new_config.polynomial;
         } else {
           remainder = (remainder << 1);
@@ -263,10 +287,10 @@ struct crc32 {
     uint32_t remainder = 0xFFFFFFFF;
     uint32_t final_xor_value = 0xFFFFFFFF;
     for (unsigned int byte = 0; byte < len; byte++) {
-      int data = reflect(buf[byte], 8) ^ (remainder >> 24);
+      int data = reflect<uint32_t>(buf[byte], 8) ^ (remainder >> 24);
       remainder = table_crc32[data] ^ (remainder << 8);
     }
-    return reflect(remainder, 32) ^ final_xor_value;
+    return reflect<uint32_t>(remainder, 32) ^ final_xor_value;
   }
 };
 
@@ -357,10 +381,14 @@ REGISTER_HASH(cksum16);
 REGISTER_HASH(csum16);
 REGISTER_HASH(identity);
 
+using crc8_custom = crc_custom<uint8_t>;
+REGISTER_HASH(crc8_custom);
 using crc16_custom = crc_custom<uint16_t>;
 REGISTER_HASH(crc16_custom);
 using crc32_custom = crc_custom<uint32_t>;
 REGISTER_HASH(crc32_custom);
+using crc64_custom = crc_custom<uint64_t>;
+REGISTER_HASH(crc64_custom);
 
 namespace detail {
 
@@ -397,8 +425,10 @@ CustomCrcMgr<T>::update_config(RawCalculationIface<uint64_t> *c,
 }
 
 // explicit instantiation, should prevent implicit instantiation
+template class CustomCrcMgr<uint8_t>;
 template class CustomCrcMgr<uint16_t>;
 template class CustomCrcMgr<uint32_t>;
+template class CustomCrcMgr<uint64_t>;
 
 CalculationsMap * CalculationsMap::get_instance() {
   static CalculationsMap map;
