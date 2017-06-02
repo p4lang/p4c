@@ -248,6 +248,22 @@ class bitvec {
             return rv & ~(~(uintptr_t)1 << (sz-1));
         } else {
             return (data >> idx) & ~(~(uintptr_t)1 << (sz-1)); }}
+    void putrange(size_t idx, size_t sz, uintptr_t v) {
+        assert(sz > 0 && sz <= bits_per_unit);
+        uintptr_t mask = ~(uintptr_t)0 >> (bits_per_unit - sz);
+        v &= mask;
+        if (idx+sz > size * bits_per_unit) expand(1 + (idx+sz-1)/bits_per_unit);
+        if (size == 1) {
+            data &= ~(mask << idx);
+            data |= v << idx;
+        } else {
+            unsigned shift = idx % bits_per_unit;
+            idx /= bits_per_unit;
+            ptr[idx] &= ~(mask >> shift);
+            ptr[idx] |= v >> shift;
+            if (shift != 0 && idx + 1 < size) {
+                ptr[idx + 1] &= ~(mask << (bits_per_unit - shift));
+                ptr[idx + 1] |= v << (bits_per_unit - shift); } } }
     bitvec getslice(size_t idx, size_t sz) const;
     nonconst_bitref operator[](int idx) { return nonconst_bitref(*this, idx); }
     bool operator[](int idx) const { return getbit(idx); }
