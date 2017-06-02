@@ -136,8 +136,11 @@ p4include_HEADERS += $(wildcard $(srcdir)/p4include/*.p4)
 
 #### For testing, install headers in the build directory
 
-all-local:
+all-local: installed-data.stamp
+
+installed-data.stamp: $(p4include_HEADERS) $(p4_14include_HEADERS) $(p4c_PYTHON)
 	@$(MAKE) install-data pkgdatadir=$(abs_builddir)
+	@touch $@
 
 ################
 
