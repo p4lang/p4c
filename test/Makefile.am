@@ -20,6 +20,11 @@
 GTEST_ROOT = $(top_srcdir)/test/frameworks/gtest/googletest
 GTEST_CPPFLAGS = -I$(GTEST_ROOT) -I$(GTEST_ROOT)/include
 
+# Configure GTest to disable support for SEH (which is irrelevant for p4c since
+# we don't currently support Windows) and pthreads (which prevents GTest from
+# using its internal TLS implementation, which interacts badly with libgc).
+GTEST_CPPFLAGS += -DGTEST_HAS_SEH=0 -DGTEST_HAS_PTHREAD=0
+
 # Make the GTest headers globally available for code which needs to include
 # `gtest_prod.h`.
 AM_CPPFLAGS += $(GTEST_CPPFLAGS)
@@ -33,11 +38,6 @@ libgtest_la_SOURCES = test/frameworks/gtest/googletest/src/gtest-all.cc
 gtestp4c_SOURCES = \
 	test/gtest/gtestp4c.cpp \
 	$(gtest_SOURCES)
-
-# Configure GTest to disable support for SEH (which is irrelevant for p4c since
-# we don't currently support Windows) and pthreads (which prevents GTest from
-# using its internal TLS implementation, which interacts badly with libgc).
-gtestp4c_CPPFLAGS = -DGTEST_HAS_SEH=0 -DGTEST_HAS_PTHREAD=0 $(AM_CPPFLAGS)
 
 # Makefiles can add libraries to $(gtest_LDADD) to include them in the test
 # executable.
