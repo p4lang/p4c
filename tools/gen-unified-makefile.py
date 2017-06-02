@@ -226,12 +226,30 @@ def generate_rules(output, target, unified_file_chunks, nonunified_file_set):
     for index in xrange(0, len(unified_file_chunks)):
         files_in_chunk = ' '.join(unified_file_chunks[index])
         chunk_target = 'unified-sources-{}-{}.cpp'.format(target, index)
+        tmp_file = '.{}.tmp'.format(chunk_target)
+        stamp_file = '.{}.stamp'.format(chunk_target)
 
-        print('{}: $(GEN_UNIFIED_CPP) {} {}'
-                .format(chunk_target, output.name, files_in_chunk), file=output)
+        # If any file in the chunk has changed, a recompile is required.
+        # Regenerate the unified .cpp file unconditionally.
+        print('{}: {}'.format(chunk_target, files_in_chunk), file=output)
         print('\t@$(GEN_UNIFIED_CPP) {} > $@'.format(files_in_chunk), file=output)
         print(file=output)
+
+        # If the automake rules we're generating have changed, a recompile may
+        # be required. We regenerate the unified .cpp file, but we don't replace
+        # the previous version (and trigger a recompile) unless something
+        # actually changed. Regardless, we update the stamp file for this chunk
+        # to indicate that we've performed this check.
+        print('{}: $(GEN_UNIFIED_CPP) {}'.format(stamp_file, output.name), file=output)
+        print('\t@touch $@', file=output)
+        print('\t@$(GEN_UNIFIED_CPP) {} > {}'.format(files_in_chunk, tmp_file), file=output)
+        print('\t@if ! cmp -s {0} {1}; then cp -f {0} {1}; fi'
+                      .format(tmp_file, chunk_target), file=output)
+        print('\t@rm -f {}'.format(tmp_file), file=output)
+        print(file=output)
+
         print('{}_SOURCES += {}'.format(target, chunk_target), file=output)
+        print('BUILT_SOURCES += {}'.format(stamp_file), file=output)
         print(file=output)
 
 def generate_regen_file(regen, script_name, args, automake_files):
