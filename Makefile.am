@@ -30,8 +30,6 @@ AM_CPPFLAGS += -DCONFIG_PKGDATADIR=\"$(pkgdatadir)\"
 
 TOOLSDIR=$(srcdir)/tools
 GENTESTS=$(TOOLSDIR)/gen-tests.py
-GEN_UNIFIED_MAKEFILE=$(TOOLSDIR)/gen-unified-makefile.py
-GEN_UNIFIED_CPP=$(TOOLSDIR)/gen-unified-sources.py
 
 ################ Utility functions
 
