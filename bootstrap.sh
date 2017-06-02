@@ -19,12 +19,8 @@
 set -e  # exit on error
 ./find-makefiles.sh # creates otherMakefiles.am, included in Makefile.am
 
-# Generate the unified compilation makefile, which is included in Makefile.am.
-# This needs to be done before automake runs. See the source code of the tool
-# for more discussion.
-tools/gen-unified-makefile.py --max-chunk-size 10 \
-                              --regenerate-with regenerate-unified-compilation.am \
-                              -o unified-compilation.am
+# Generates unified compilation rules; needs to be done before automake runs.
+./tools/autounify --max-chunk-size 10
 
 mkdir -p extensions # place where additional back-ends are expected
 echo "Running autoconf/configure tools"
