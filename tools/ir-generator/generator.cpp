@@ -28,6 +28,7 @@ void usage(const char* progname) {
     fprintf(stderr, "usage:\n");
     fprintf(stderr, "%s [options] file.def file2.def ... >ir.h\n", progname);
     fprintf(stderr, "options supported:\n");
+    fprintf(stderr, "     -o file: file where the header code is written\n");
     fprintf(stderr, "     -i file: file where implementation code is written\n");
     fprintf(stderr, "     -t file: file where the tree macro is written\n");
     fprintf(stderr, "     -h: print this message and exit\n");
@@ -36,10 +37,11 @@ void usage(const char* progname) {
 
 int main(int argc, char* argv[]) {
     std::ostream *t = new nullstream();
+    std::ostream *header = new nullstream();
     std::ostream *impl = new nullstream();
 
     while (true) {
-        int opt = getopt(argc, argv, "i:t:hP");
+        int opt = getopt(argc, argv, "o:i:t:hP");
         if (opt == -1)
             break;
 
@@ -47,6 +49,10 @@ int main(int argc, char* argv[]) {
             case 'h':
                 usage(argv[0]);
                 return 1;
+            case 'o':
+                header = openFile(optarg, false);
+                if (header == nullptr) return 1;
+                break;
             case 'i':
                 impl = openFile(optarg, false);
                 if (impl == nullptr) return 1;
@@ -70,7 +76,7 @@ int main(int argc, char* argv[]) {
         return 1;
 
     defs->resolve();
-    defs->generate(*t, std::cout, *impl);
+    defs->generate(*t, *header, *impl);
     t->flush();
     return 0;
 }
