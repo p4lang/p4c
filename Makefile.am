@@ -33,6 +33,15 @@ GENTESTS=$(TOOLSDIR)/gen-tests.py
 GEN_UNIFIED_MAKEFILE=$(TOOLSDIR)/gen-unified-makefile.py
 GEN_UNIFIED_CPP=$(TOOLSDIR)/gen-unified-sources.py
 
+################ Utility functions
+
+# Overwrite a file $(1) with $(2) if the two have different contents, and remove
+# $(2). Useful to avoid unnecessary rebuilds when generated files are updated.
+define update_if_changed
+	@if ! cmp -s $(1) $(2); then cp -f $(2) $(1); fi
+	@rm -f $(2)
+endef
+
 ################ Variables populated in subproject Makefiles
 # Please use += to append values to these variables.
 
@@ -79,27 +88,43 @@ $(srcdir)/otherMakefiles.am: $(srcdir)/find-makefiles.sh $(wildcard $(srcdir)/ba
 	cd $(srcdir); ./find-makefiles.sh
 
 include $(srcdir)/unified-compilation.am
-include $(srcdir)/regenerate-unified-compilation.am
 
 ######## Generate C++ IR files from *.def files using ir-generator
 
-# make is very stupid regarding multiple files generated from the same source
-# this pattern ensures that parallel builds continue to work
-ir/ir-generated.h: irgenerator $(ir_DEF_FILES)
-	./irgenerator -t ir/gen-tree-macro.h -i ir/ir-generated.cpp $(ir_DEF_FILES) >$@ || ( rm $@ && false )
-	@$(srcdir)/tools/fixup-line-directives $@ >$@.tmp
-	@mv $@.tmp $@
-ir/gen-tree-macro.h: ir/ir-generated.h
-	@$(srcdir)/tools/fixup-line-directives $@ >$@.tmp
-	@mv $@.tmp $@
-ir/ir-generated.cpp: ir/ir-generated.h
-	@$(srcdir)/tools/fixup-line-directives $@ >$@.tmp
-	@mv $@.tmp $@
+# Add support for automake's verbosity options for the IR generator.
+V_IRGEN = $(__v_IRGEN_$(V))
+__v_IRGEN_ = $(__v_IRGEN_$(AM_DEFAULT_VERBOSITY))
+__v_IRGEN_0 = @echo "  IRGEN   " $?;
+__v_IRGEN_1 = 
+
+# Helper that rewrites the empty `#` directives placed in $(2) by the IR
+# generator to reference the correct line number in the file $(1). $(1) and $(2)
+# may be distinct so that temporary files may be processed before being moved to
+# their final place in the file system.
+define fixup_ir_line_directives
+	@awk '/^#$$/ { printf "#line %d \"%s\"\n", NR+1, "$(abspath $(1))"; next; } 1' \
+	     $(2) > $(2).fixup
+	@mv -f $(2).fixup $(2)
+endef
+
+# This rule actually runs the IR generator. To avoid unnecessary rebuilds, its
+# output files are only overwritten if their contents actually changed.
+.ir-generated-files.stamp: irgenerator $(ir_DEF_FILES)
+	$(V_IRGEN) ./irgenerator -i .ir-generated.cpp.tmp \
+				 -o .ir-generated.h.tmp \
+	                         -t .gen-tree-macro.h.tmp \
+				 $(ir_DEF_FILES) \
+			|| (rm -f $@; false)
+	$(call fixup_ir_line_directives,ir/ir-generated.cpp,.ir-generated.cpp.tmp)
+	$(call fixup_ir_line_directives,ir/ir-generated.h,.ir-generated.h.tmp)
+	$(call fixup_ir_line_directives,ir/gen-tree-macro.h,.gen-tree-macro.h.tmp)
+	$(call update_if_changed,ir/ir-generated.cpp,.ir-generated.cpp.tmp)
+	$(call update_if_changed,ir/ir-generated.h,.ir-generated.h.tmp)
+	$(call update_if_changed,ir/gen-tree-macro.h,.gen-tree-macro.h.tmp)
+	@touch $@
 
 BUILT_SOURCES += \
-	ir/ir-generated.h \
-	ir/ir-generated.cpp \
-	ir/gen-tree-macro.h
+	.ir-generated-files.stamp
 
 ######## P4 header files to install
 
