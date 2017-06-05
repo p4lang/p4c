@@ -29,6 +29,8 @@ limitations under the License.
 
 namespace P4V1 {
 
+class ExternConverter;
+
 /// Information about the structure of a P4-14 program, used to convert it to a P4-16 program.
 class ProgramStructure {
     // In P4-14 one can have multiple objects with different types with the same name
@@ -82,15 +84,15 @@ class ProgramStructure {
         /// Lookup using the original name
         T get(cstring name) const { return ::get(nameToObject, name); }
         /// Get the new name
-        cstring get(T object) const { return ::get(objectToNewName, object); }
+        cstring get(T object) const { return ::get(objectToNewName, object, object->name.name); }
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }
     };
-    class FixupExtern;
+    ExternConverter *extCvt;
 
  public:
-    ProgramStructure();
+    explicit ProgramStructure(ExternConverter *);
 
     P4V1::V1Model &v1model;
     P4::P4CoreLibrary &p4lib;
@@ -112,6 +114,7 @@ class ProgramStructure {
     NamedObjectInfo<const IR::FieldListCalculation*> field_list_calculations;
     NamedObjectInfo<const IR::ActionSelector*>  action_selectors;
     NamedObjectInfo<const IR::Type_Extern *>    extern_types;
+    std::map<const IR::Type_Extern *, const IR::Type_Extern *>  extern_remap;
     NamedObjectInfo<const IR::Declaration_Instance *>  externs;
     std::vector<const IR::CalculatedField*>     calculated_fields;
     P4::CallGraph<cstring> calledActions;
@@ -164,7 +167,6 @@ class ProgramStructure {
     IR::IndexedVector<IR::Node>* declarations;
 
  protected:
-    void include(cstring filename);
     const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
     void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
     const IR::Annotations* addNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
@@ -206,6 +208,7 @@ class ProgramStructure {
     void createMain();
 
  public:
+    void include(cstring filename);
     const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                           const IR::Expression* right, const IR::Type* type);
     const IR::Expression* paramReference(const IR::Parameter* param);

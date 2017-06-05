@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_COMMON_PARSEINPUT_H_
 
 #include "options.h"
+#include "frontends/p4/fromv1.0/converters.h"
 
 namespace IR {
 class P4Program;
@@ -38,7 +39,8 @@ namespace P4 {
  * @return a P4-16 IR tree representing the contents of the given file, or null
  * on failure. If failure occurs, an error will also be reported.
  */
-const IR::P4Program* parseP4File(CompilerOptions& options);
+const IR::P4Program* parseP4File(CompilerOptions& options,
+                                 P4V1::ExternConverter *extCvt = nullptr);
 
 /**
  * Parse P4 source from the string @input, interpreting it as having language
@@ -55,7 +57,8 @@ const IR::P4Program* parseP4File(CompilerOptions& options);
  * null on failure. If failure occurs, an error will also be reported.
  */
 const IR::P4Program* parseP4String(const std::string& input,
-                                   CompilerOptions::FrontendVersion version);
+                                   CompilerOptions::FrontendVersion version,
+                                   P4V1::ExternConverter *extCvt = nullptr);
 
 /**
  * Clear global program state so that a new program can be parsed.

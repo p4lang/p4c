@@ -78,12 +78,23 @@ class TypeConverter : public ExpressionConverter {
     explicit TypeConverter(ProgramStructure* structure) : ExpressionConverter(structure) {}
 };
 
+class ExternConverter {
+ public:
+    ProgramStructure *structure = nullptr;
+
+    virtual const IR::Type_Extern *convertExternType(const IR::Type_Extern *, cstring);
+    virtual const IR::Declaration_Instance *convertExternInstance(
+                const IR::Declaration_Instance *, cstring);
+    ExternConverter() {}
+    explicit ExternConverter(ProgramStructure *s) : structure(s) {}
+};
+
 // Is fed a P4 v1.0 program and outputs an equivalent P4 v1.2 program
 class Converter : public PassManager {
     ProgramStructure structure;
 
  public:
-    Converter();
+    explicit Converter(ExternConverter *extCvt);
     void loadModel() { structure.loadModel(); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };
