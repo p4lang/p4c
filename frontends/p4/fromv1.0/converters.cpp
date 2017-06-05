@@ -168,7 +168,12 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::GlobalRef *ref) {
-    return new IR::PathExpression(new IR::Path(ref->srcInfo, ref->toString()));
+    // FIXME -- this is broken when the GlobalRef refers to something that the converter
+    // FIXME -- has put into a different control.  In that case, ResolveReferences on this
+    // FIXME -- path will later fail as the declaration is not in scope.  We should at
+    // FIXME -- least detect that here and give a warning or other indication of the problem.
+    return new IR::PathExpression(ref->srcInfo,
+            new IR::Path(ref->srcInfo, IR::ID(ref->srcInfo, ref->toString())));
 }
 
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
@@ -316,6 +321,70 @@ const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
     str->annotations = str->annotations->where([](const IR::Annotation *a) -> bool {
         return a->name != "length" && a->name != "max_length"; });
     return str;
+}
+
+///////////////////////////////////////////////////////////////
+
+namespace {
+class FixupExtern : public Modifier {
+    ProgramStructure            *structure;
+    cstring                     origname, extname;
+    IR::TypeParameters          *typeParams = nullptr;
+
+    bool preorder(IR::Type_Extern *type) override {
+        BUG_CHECK(!origname, "Nested extern");
+        origname = type->name;
+        return true; }
+    void postorder(IR::Type_Extern *type) override {
+        if (extname != type->name) {
+            type->annotations = type->annotations->addAnnotationIfNew(
+                IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name));
+            type->name = extname; }
+        // FIXME -- should create ctors based on attributes?  For now just create a
+        // FIXME -- 0-arg one if needed
+        if (!type->lookupMethod(type->name, 0)) {
+            type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
+                                                new IR::ParameterList()))); } }
+    void postorder(IR::Method *meth) override {
+        if (meth->name == origname) meth->name = extname; }
+    // Convert extern methods that take a field_list_calculation to take a type param instead
+    bool preorder(IR::Type_MethodBase *mtype) override {
+        BUG_CHECK(!typeParams, "recursion failure");
+        typeParams = mtype->typeParameters->clone();
+        return true; }
+    bool preorder(IR::Parameter *param) override {
+        BUG_CHECK(typeParams, "recursion failure");
+        if (param->type->is<IR::Type_FieldListCalculation>()) {
+            auto n = new IR::Type_Var(structure->makeUniqueName("FL"));
+            param->type = n;
+            typeParams->push_back(n); }
+        return false; }
+    void postorder(IR::Type_MethodBase *mtype) override {
+        BUG_CHECK(typeParams, "recursion failure");
+        if (*typeParams != *mtype->typeParameters)
+            mtype->typeParameters = typeParams;
+        typeParams = nullptr; }
+
+ public:
+    FixupExtern(ProgramStructure *s, cstring n) : structure(s), extname(n) {}
+};
+}  // end anon namespace
+
+const IR::Type_Extern *
+ExternConverter::convertExternType(const IR::Type_Extern *ext, cstring name) {
+    return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
+}
+
+const IR::Declaration_Instance *
+ExternConverter::convertExternInstance(const IR::Declaration_Instance *ext, cstring name) {
+    auto *rv = ext->clone();
+    auto *et = rv->type->to<IR::Type_Extern>();
+    BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
+    if (structure->extern_remap.count(et))
+        et = structure->extern_remap.at(et);
+    rv->name = name;
+    rv->type = new IR::Type_Name(new IR::Path(structure->extern_types.get(et)));
+    return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
 }
 
 ///////////////////////////////////////////////////////////////
@@ -716,7 +785,9 @@ class FixExtracts final : public Transform {
 
 ///////////////////////////////////////////////////////////////
 
-Converter::Converter() {
+Converter::Converter(ExternConverter *eCvt)
+: structure(eCvt ? eCvt : new ExternConverter(&structure)) {
+    if (eCvt) eCvt->structure = &structure;
     setStopOnError(true); setName("Converter");
 
     // Discover types using P4 v1.1 type-checker

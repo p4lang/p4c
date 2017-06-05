@@ -870,9 +870,9 @@ blackbox_config: /* epsilon */ { $$ = new IR::NameMap<IR::Property>; }
     | blackbox_config name ":" expressions ";"
           { const IR::PropertyValue *pv;
             if ($4->size() == 1)
-                pv = new IR::ExpressionValue($4->front());
+                pv = new IR::ExpressionValue(@4, $4->front());
             else
-                pv = new IR::ExpressionListValue(std::move(*$4));
+                pv = new IR::ExpressionListValue(@4, std::move(*$4));
             ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
     | blackbox_config name "{" expressions "}"
           { auto *pv = new IR::ExpressionListValue(std::move(*$4));

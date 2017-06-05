@@ -386,7 +386,7 @@ class ActionSelector : Attached {
     const char *kind() const override { return "action_selector"; }
 }
 
-class V1Table {
+class V1Table : IInstance {
     optional ID                 name;
     NullOK Vector<Expression>   reads = 0;
     vector<ID>                  reads_types = {};
@@ -402,6 +402,8 @@ class V1Table {
 
     void addProperty(Property prop) { properties.push_back(prop); }
     toString { return node_type_name() + " " + name; }
+    cstring Name() const override { return name; }
+    Type getType() const override { return Type_AnyTable::get(); }
 }
 
 class V1Control {

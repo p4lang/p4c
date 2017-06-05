@@ -34,7 +34,8 @@ limitations under the License.
 
 namespace P4V1 {
 
-ProgramStructure::ProgramStructure() :
+ProgramStructure::ProgramStructure(ExternConverter *extCvt) :
+        extCvt(extCvt),
         v1model(P4V1::V1Model::instance), p4lib(P4::P4CoreLibrary::instance),
         types(&allNames), metadata(&allNames), headers(&allNames), stacks(&allNames),
         controls(&allNames), parserStates(&allNames), tables(&allNames),
@@ -241,51 +242,13 @@ void ProgramStructure::createStructures() {
     declarations->push_back(headers);
 }
 
-class ProgramStructure::FixupExtern : public Modifier {
-    ProgramStructure            &self;
-    cstring                     origname, extname;
-    IR::TypeParameters          *typeParams = nullptr;
-
-    bool preorder(IR::Type_Extern *type) override {
-        BUG_CHECK(!origname, "Nested extern");
-        origname = type->name;
-        return true; }
-    void postorder(IR::Type_Extern *type) override {
-        if (extname != type->name) {
-            type->annotations = self.addNameAnnotation(type->name.name, type->annotations);
-            type->name = extname; }
-        // FIXME -- should create ctors based on attributes?  For now just create a
-        // FIXME -- 0-arg one if needed
-        if (!type->lookupMethod(type->name, 0)) {
-            type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
-                                                new IR::ParameterList()))); } }
-    void postorder(IR::Method *meth) override {
-        if (meth->name == origname) meth->name = extname; }
-    // Convert extern methods that take a field_list_calculation to take a type param instead
-    bool preorder(IR::Type_MethodBase *mtype) override {
-        BUG_CHECK(!typeParams, "recursion failure");
-        typeParams = mtype->typeParameters->clone();
-        return true; }
-    bool preorder(IR::Parameter *param) override {
-        BUG_CHECK(typeParams, "recursion failure");
-        if (param->type->is<IR::Type_FieldListCalculation>()) {
-            auto n = new IR::Type_Var(self.makeUniqueName("FL"));
-            param->type = n;
-            typeParams->push_back(n); }
-        return false; }
-    void postorder(IR::Type_MethodBase *mtype) override {
-        BUG_CHECK(typeParams, "recursion failure");
-        if (*typeParams != *mtype->typeParameters)
-            mtype->typeParameters = typeParams;
-        typeParams = nullptr; }
-
- public:
-    FixupExtern(ProgramStructure &self, cstring n) : self(self), extname(n) {}
-};
-
 void ProgramStructure::createExterns() {
-    for (auto it : extern_types)
-        declarations->push_back(it.first->apply(FixupExtern(*this, it.second)));
+    for (auto it : extern_types) {
+        auto et = extCvt->convertExternType(it.first, it.second);
+        if (et != it.first)
+            extern_remap[it.first] = et;
+        if (et != declarations->getDeclaration(et->name))
+            declarations->push_back(et); }
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -1532,13 +1495,7 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
 
 const IR::Declaration_Instance*
 ProgramStructure::convertExtern(const IR::Declaration_Instance *ext, cstring newName) {
-    LOG1("Synthesizing " << ext);
-    auto *rv = ext->clone();
-    auto *et = rv->type->to<IR::Type_Extern>();
-    BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
-    rv->name = newName;
-    rv->type = new IR::Type_Name(new IR::Path(extern_types.get(et)));
-    return rv->apply(TypeConverter(this))->to<IR::Declaration_Instance>();;
+    return extCvt->convertExternInstance(ext, newName);
 }
 
 const IR::Declaration_Instance*

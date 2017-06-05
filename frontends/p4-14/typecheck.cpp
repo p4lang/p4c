@@ -37,10 +37,9 @@ class TypeCheck::AssignInitialTypes : public Transform {
                   "Expected to be called on the visitor's current node");
         currentNode->type = type;
         if (type != getOriginal<NodeType>()->type)
-            LOG3("Set initial type " << type << " for expression " << currentNode);
-    }
-
+            LOG3("Set initial type " << type << " for expression " << currentNode); }
     const IR::Node *preorder(IR::V1Program *glob) override { global = glob; return glob; }
+
     const IR::Node *preorder(IR::PathExpression *ref) override {
         if (auto af = findContext<IR::ActionFunction>())
             if (auto arg = af->arg(ref->path->name))
@@ -60,6 +59,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
             } else if (global) {
                 BUG("extern type is not extern_type?"); } }
         return ref; }
+
     const IR::Node *preorder(IR::Metadata *m) override {
         if (!global) return m;
         if (auto ht = global->get<IR::v1HeaderType>(m->type_name))
@@ -67,9 +67,11 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else
             error("%s: No header type %s defined", m->srcInfo, m->type_name);
         return m; }
+
     const IR::Node *preorder(IR::BoolLiteral* b) override {
         setType(b, IR::Type_Boolean::get());
         return b; }
+
     const IR::Node *preorder(IR::HeaderOrMetadata *hm) override {
         if (!global) return hm;
         if (auto ht = global->get<IR::v1HeaderType>(hm->type_name))
@@ -77,6 +79,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else
             error("%s: No header type %s defined", hm->srcInfo, hm->type_name);
         return hm; }
+
     const IR::Node *preorder(IR::ActionSelector *sel) override {
         if (!global) return sel;
         if (sel->key_fields != nullptr) return sel;
@@ -86,6 +89,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else
             error("%s: Key must coordinate to a field_list_calculation", sel->srcInfo);
         return sel; }
+
     const IR::Node *preorder(IR::FieldListCalculation *flc) override {
         if (!global) return flc;
         if (flc->input_fields != nullptr) return flc;
@@ -103,6 +107,15 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 fl->srcInfo += name.srcInfo; }
             flc->input_fields = fl; }
         return flc; }
+
+    template<typename T> void prop_update(IR::Property *prop, const char *tname) {
+        auto ev = prop->value->to<IR::ExpressionValue>();
+        auto pe = ev ? ev->expression->to<IR::PathExpression>() : nullptr;
+        if (auto t = pe ? global->get<T>(pe->path->name) : nullptr) {
+            prop->value = new IR::ExpressionValue(ev->srcInfo,
+                            new IR::GlobalRef(pe->srcInfo, t));
+        } else {
+            error("property %s must be a %s", prop, tname); } }
     const IR::Node *preorder(IR::Property *prop) override {
         if (auto di = findContext<IR::Declaration_Instance>()) {
             auto ext = di->type->to<IR::Type_Extern>();
@@ -111,9 +124,18 @@ class TypeCheck::AssignInitialTypes : public Transform {
             if (auto attr = ext->attributes[prop->name]) {
                 if (attr->type->is<IR::Type::String>())
                     prune();
+                else if (attr->type->is<IR::Type_AnyTable>())
+                    prop_update<IR::V1Table>(prop, "table");
+                else if (attr->type->is<IR::Type_Counter>())
+                    prop_update<IR::Counter>(prop, "counter");
+                else if (attr->type->is<IR::Type_Meter>())
+                    prop_update<IR::Meter>(prop, "meter");
+                else if (attr->type->is<IR::Type_Register>())
+                    prop_update<IR::Register>(prop, "register");
             } else {
                 error("No property name %s in extern %s", prop->name, ext->name); } }
         return prop; }
+
     const IR::Node *postorder(IR::PathExpression *ref) override {
         if (!global) return ref;
         IR::Node *new_node = ref;
@@ -142,6 +164,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
                     return ref; } }
             error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
         return new_node; }
+
     const IR::Node *postorder(IR::Type_Name *ref) override {
         if (!global) return ref;
         if (auto t = global->get<IR::Type>(ref->path->name)) {
@@ -150,6 +173,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         } else {
             error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
         return ref; }
+
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             setType(ref, ht);
@@ -159,6 +183,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         visit(ref->type);
         return ref; }
+
     const IR::Node *postorder(IR::Member *ref) override {
         if (ref->member.toString()[0] == '$') {
             if (ref->member == "$valid")
@@ -171,6 +196,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 return ref; }
             error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
         return ref; }
+
     const IR::Node *postorder(IR::Expression *e) override {
         visit(e->type);
         return e; }

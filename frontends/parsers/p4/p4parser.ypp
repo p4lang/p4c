@@ -533,6 +533,11 @@ externDeclaration
         "{" methodPrototypes "}" { driver.structure->pop();
                                    $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
     | optAnnotations EXTERN functionPrototype ";" { $$ = $3; $3->annotations = $1; }
+    | optAnnotations EXTERN name ";" {
+            // forward declaration;
+            driver.structure->pushContainerType(*$3, true);
+            driver.structure->pop();
+            $$ = nullptr; }
     ;
 
 methodPrototypes

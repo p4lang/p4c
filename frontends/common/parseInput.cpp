@@ -31,11 +31,11 @@ namespace P4 {
 
 template <typename Input>
 static const IR::P4Program*
-parseV1Program(const char* name, Input& stream,
+parseV1Program(const char* name, Input& stream, P4V1::ExternConverter *extCvt,
                boost::optional<DebugHook> debugHook = boost::none) {
     // We load the model before parsing the input file, so that the SourceInfo
     // in the model comes first.
-    P4V1::Converter converter;
+    P4V1::Converter converter(extCvt);
     if (debugHook) converter.addDebugHook(*debugHook);
     converter.loadModel();
 
@@ -56,7 +56,7 @@ parseV1Program(const char* name, Input& stream,
     return nullptr;  // Conversion failed.
 }
 
-const IR::P4Program* parseP4File(CompilerOptions& options) {
+const IR::P4Program* parseP4File(CompilerOptions& options, P4V1::ExternConverter *extCvt) {
     clearProgramState();
 
     FILE* in = nullptr;
@@ -73,7 +73,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     }
 
     auto result = options.isv1()
-                ? parseV1Program(options.file, in, options.getDebugHook())
+                ? parseV1Program(options.file, in, extCvt, options.getDebugHook())
                 : P4ParserDriver::parse(options.file, in);
     options.closeInput(in);
 
@@ -86,12 +86,13 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
 }
 
 const IR::P4Program* parseP4String(const std::string& input,
-                                   CompilerOptions::FrontendVersion version) {
+                                   CompilerOptions::FrontendVersion version,
+                                   P4V1::ExternConverter *extCvt) {
     clearProgramState();
 
     std::istringstream stream(input);
     auto result = version == CompilerOptions::FrontendVersion::P4_14
-                ? parseV1Program("(string)", stream)
+                ? parseV1Program("(string)", stream, extCvt)
                 : P4ParserDriver::parse("(string)", stream);
 
     if (::errorCount() > 0) {

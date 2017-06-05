@@ -194,7 +194,7 @@ void IrMethod::generate_proto(std::ostream &out, bool fullname, bool defaults) c
 }
 
 void IrMethod::generate_hdr(std::ostream &out) const {
-    if (!inImpl)
+    if (srcInfo.isValid())
         out << LineDirective(srcInfo);
     out << IrClass::indent;
     if (isStatic) out << "static ";
@@ -216,7 +216,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     } else if (name == "node_type_name") {
         out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype->toString()
             << " static_type_name() " << body << std::endl; }
-    if (!inImpl && srcInfo.isValid())
+    if (srcInfo.isValid())
         out << LineDirective();
 }
 
