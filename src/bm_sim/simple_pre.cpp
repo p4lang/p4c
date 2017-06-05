@@ -96,7 +96,7 @@ McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl,
   auto mgid_entry_it = mgid_entries.find(mgrp_hdl);
   if (mgid_entry_it == mgid_entries.end()) {
     Logger::get()->error("node associate failed, invalid mgrp handle");
-    return INVALID_MGID;
+    return INVALID_MGRP_HANDLE;
   }
   auto &mgid_entry = mgid_entry_it->second;
   auto &l1_entry = l1_entries.at(l1_hdl);
@@ -122,7 +122,7 @@ McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl,
   auto mgid_entry_it = mgid_entries.find(mgrp_hdl);
   if (mgid_entry_it == mgid_entries.end()) {
     Logger::get()->error("node dissociate failed, invalid mgrp handle");
-    return INVALID_MGID;
+    return INVALID_MGRP_HANDLE;
   }
   auto &mgid_entry = mgid_entry_it->second;
   auto &l1_entry = l1_entries.at(l1_hdl);

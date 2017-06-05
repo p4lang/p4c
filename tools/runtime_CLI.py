@@ -615,6 +615,27 @@ def handle_bad_input(f):
             print "Invalid crc operation (%s)" % error
     return handle
 
+def handle_bad_input_mc(f):
+    @wraps(f)
+    def handle(*args, **kwargs):
+        pre_type = args[0].pre_type
+        if pre_type == PreType.None:
+            return handle_bad_input(f)(*args, **kwargs)
+        EType = {
+            PreType.SimplePre : SimplePre.InvalidMcOperation,
+            PreType.SimplePreLAG : SimplePreLAG.InvalidMcOperation
+        }[pre_type]
+        Codes = {
+            PreType.SimplePre : SimplePre.McOperationErrorCode,
+            PreType.SimplePreLAG : SimplePreLAG.McOperationErrorCode
+        }[pre_type]
+        try:
+            return handle_bad_input(f)(*args, **kwargs)
+        except EType as e:
+            error = Codes._VALUES_TO_NAMES[e.code]
+            print "Invalid PRE operation (%s)" % error
+    return handle
+
 def deprecated_act_prof(substitute, with_selection=False,
                         strictly_deprecated=True):
     # need two levels here because our decorator takes arguments
@@ -1458,7 +1479,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for multicast group id")
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_mgrp_create(self, line):
         "Create multicast group: mc_mgrp_create <group id>"
         self.check_has_pre()
@@ -1469,7 +1490,7 @@ class RuntimeAPI(cmd.Cmd):
         mgrp_hdl = self.mc_client.bm_mc_mgrp_create(0, mgrp)
         assert(mgrp == mgrp_hdl)
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_mgrp_destroy(self, line):
         "Destroy multicast group: mc_mgrp_destroy <group id>"
         self.check_has_pre()
@@ -1510,7 +1531,7 @@ class RuntimeAPI(cmd.Cmd):
             lag_map_str = None
         return port_map_str, lag_map_str
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_node_create(self, line):
         "Create multicast node: mc_node_create <rid> <space-separated port list> [ | <space-separated lag list> ]"
         self.check_has_pre()
@@ -1535,7 +1556,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for node handle")
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_node_update(self, line):
         "Update multicast node: mc_node_update <node handle> <space-separated port list> [ | <space-separated lag list> ]"
         self.check_has_pre()
@@ -1550,7 +1571,7 @@ class RuntimeAPI(cmd.Cmd):
             print "Updating node", l1_hdl, "with port map", port_map_str, "and lag map", lag_map_str
             self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str, lag_map_str)
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_node_associate(self, line):
         "Associate node to multicast group: mc_node_associate <group handle> <node handle>"
         self.check_has_pre()
@@ -1561,7 +1582,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Associating node", l1_hdl, "to multicast group", mgrp
         self.mc_client.bm_mc_node_associate(0, mgrp, l1_hdl)
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_node_dissociate(self, line):
         "Dissociate node from multicast group: mc_node_associate <group handle> <node handle>"
         self.check_has_pre()
@@ -1572,7 +1593,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Dissociating node", l1_hdl, "from multicast group", mgrp
         self.mc_client.bm_mc_node_dissociate(0, mgrp, l1_hdl)
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_node_destroy(self, line):
         "Destroy multicast node: mc_node_destroy <node handle>"
         self.check_has_pre()
@@ -1582,7 +1603,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Destroying node", l1_hdl
         self.mc_client.bm_mc_node_destroy(0, l1_hdl)
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_set_lag_membership(self, line):
         "Set lag membership of port list: mc_set_lag_membership <lag index> <space-separated port list>"
         self.check_has_pre()
@@ -1601,7 +1622,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Setting lag membership:", lag_index, "<-", port_map_str
         self.mc_client.bm_mc_set_lag_membership(0, lag_index, port_map_str)
 
-    @handle_bad_input
+    @handle_bad_input_mc
     def do_mc_dump(self, line):
         "Dump entries in multicast engine"
         self.check_has_pre()

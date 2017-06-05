@@ -62,6 +62,7 @@ class McSimplePre {
     SUCCESS = 0,
     TABLE_FULL,
     INVALID_MGID,
+    INVALID_MGRP_HANDLE,
     INVALID_L1_HANDLE,
     ERROR
   };

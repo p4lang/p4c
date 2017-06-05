@@ -29,11 +29,10 @@ typedef string BmMcPortMap // string of 0s and 1s
 
 enum McOperationErrorCode {
   TABLE_FULL = 1,
-  INVALID_HANDLE = 2,
-  INVALID_MGID = 3,
+  INVALID_MGID = 2,
+  INVALID_MGRP_HANDLE = 3,
   INVALID_L1_HANDLE = 4,
-  INVALID_L2_HANLDE = 5,
-  ERROR = 6
+  ERROR = 5
 }
 
 exception InvalidMcOperation {
