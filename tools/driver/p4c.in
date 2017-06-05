@@ -25,7 +25,11 @@ if not os.path.exists(os.path.join(install_dir, 'p4c_src')):
     artifacts_dir = '@datarootdir@'
     if artifacts_dir == '${prefix}/share':
         # datadir based on prefix
-        artifacts_dir = os.path.normpath(os.path.join(install_dir, "../share/p4c"))
+        if '@exec_prefix@' != '${prefix}':
+            bin2prefix = os.path.relpath('@prefix@', '@exec_prefix@/bin')
+        else:
+            bin2prefix = '..'
+        artifacts_dir = os.path.normpath(os.path.join(install_dir, bin2prefix, "share/p4c"))
     else:
         # explicit datadir. add package name
         artifacts_dir = os.path.join(artifacts_dir, 'p4c')
