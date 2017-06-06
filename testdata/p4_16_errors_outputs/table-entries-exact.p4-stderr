@@ -1,3 +1,3 @@
-../testdata/p4_16_errors/table-entries-exact.p4(72): error: Entry: Cannot match tuples with different sizes 1 vs 2
+table-entries-exact.p4(72): error: Entry: Cannot match tuples with different sizes 1 vs 2
             (0x1111 &&& 0xF, 0x1 ) : a(); // invalid exact key
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

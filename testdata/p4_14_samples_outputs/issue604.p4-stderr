@@ -1,12 +1,12 @@
-../testdata/p4_14_samples/issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
+issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
 extern_type extern_test {
 ^
-../testdata/p4_14_samples/issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
+issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
 extern_type extern_test {
 ^
-../testdata/p4_14_samples/issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
+issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
 extern_type extern_test {
 ^
-../testdata/p4_14_samples/issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
+issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
 extern_type extern_test {
 ^

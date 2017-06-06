@@ -16,7 +16,7 @@
 # Runs the compiler on a sample P4 V1.2 program
 
 from __future__ import print_function
-from subprocess import Popen
+from subprocess import Popen,PIPE
 from threading import Thread
 import sys
 import re
@@ -75,12 +75,20 @@ def run_timeout(options, args, timeout, stderr):
     print(" ".join(args))
     local = Local()
     local.process = None
+    local.filter = None
     def target():
         procstderr = None
         if stderr is not None:
-            procstderr = open(stderr, "w")
+            # copy stderr to the specified file, stripping file path prefixes
+            # from the start of lines
+            outfile = open(stderr, "w")
+            local.filter = Popen(['sed', '-e', 's|^[./].*/||'], stdin=PIPE, stdout=outfile)
+            procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
+        if local.filter is not None:
+            local.filter.stdin.close()
+            local.filter.wait()
     thread = Thread(target=target)
     thread.start()
     thread.join(timeout)
@@ -109,11 +117,7 @@ def compare_files(options, produced, expected):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    # include paths are different also, error messages that contain core.p4 or
-    # v1model.p4 or come from p4_14include will have different paths
-    cmd = ("diff -B -u -w -I \"#include\" -I \"core\.p4([0-9]\+)\" " +
-           "-I \"v1model.p4([0-9]\+)\" -I \"/p4_14include/\" " + expected +
-           " " + produced + " >&2")
+    cmd = ("diff -B -u -w " + expected + " " + produced + " >&2")
     if options.verbose:
         print(cmd)
     exitcode = subprocess.call(cmd, shell=True);

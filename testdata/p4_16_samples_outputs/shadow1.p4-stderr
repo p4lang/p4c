@@ -1,7 +1,7 @@
-../testdata/p4_16_samples/shadow1.p4(20): warning: counter shadows counter
+shadow1.p4(20): warning: counter shadows counter
   bit<16> counter;
   ^^^^^^^^^^^^^^^^
-../testdata/p4_16_samples/shadow1.p4(17)
+shadow1.p4(17)
 extern counter {}
        ^^^^^^^
 warning: Program does not contain a `main' module

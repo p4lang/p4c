@@ -1,12 +1,12 @@
-../testdata/p4_16_errors/default_action1.p4(20): warning: b shadows b
+default_action1.p4(20): warning: b shadows b
     action b() {}
            ^
-../testdata/p4_16_errors/default_action1.p4(16)
+default_action1.p4(16)
 action b() {}
        ^
-../testdata/p4_16_errors/default_action1.p4(23): error: .b and b refer to different actions
+default_action1.p4(23): error: .b and b refer to different actions
         default_action = .b(); // not the same b
                           ^
-../testdata/p4_16_errors/default_action1.p4(22)
+default_action1.p4(22)
         actions = { a; b; }
                        ^

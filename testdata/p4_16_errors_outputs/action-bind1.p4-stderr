@@ -1,18 +1,18 @@
-../testdata/p4_16_errors/action-bind1.p4(22): error: a: parameter b must be bound
+action-bind1.p4(22): error: a: parameter b must be bound
         default_action = a(); // error: too few arguments
                          ^^^
-../testdata/p4_16_errors/action-bind1.p4(17)
+action-bind1.p4(17)
     action a(inout bit<32> b, bit<32> d) {
                            ^
-../testdata/p4_16_errors/action-bind1.p4(22): error: a: parameter d must be bound
+action-bind1.p4(22): error: a: parameter d must be bound
         default_action = a(); // error: too few arguments
                          ^^^
-../testdata/p4_16_errors/action-bind1.p4(17)
+action-bind1.p4(17)
     action a(inout bit<32> b, bit<32> d) {
                                       ^
-../testdata/p4_16_errors/action-bind1.p4(22): error: Action for ExpressionValue has some unbound arguments
+action-bind1.p4(22): error: Action for ExpressionValue has some unbound arguments
         default_action = a(); // error: too few arguments
                          ^^^
-../testdata/p4_16_errors/action-bind1.p4(22): error: a: not enough arguments
+action-bind1.p4(22): error: a: not enough arguments
         default_action = a(); // error: too few arguments
                          ^^^
