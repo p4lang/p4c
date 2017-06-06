@@ -1,5 +1,3 @@
-#include <core.p4>
-
 header header_h {
     bit<8> field;
 }

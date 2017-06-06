@@ -1,3 +1,5 @@
+#include <core.p4>
+
 header H {
     bit<32> a;
     bit<32> b;

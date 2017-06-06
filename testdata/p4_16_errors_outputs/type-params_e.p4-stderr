@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/type-params_e.p4(18):syntax error, unexpected IDENTIFIER "D"
+type-params_e.p4(18):syntax error, unexpected IDENTIFIER "D"
 package m(p<D
             ^
 error: 1 errors encountered, aborting compilation

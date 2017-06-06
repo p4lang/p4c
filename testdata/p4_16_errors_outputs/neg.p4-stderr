@@ -1,12 +1,12 @@
-../testdata/p4_16_errors/neg.p4(21): error: /: Cannot operate on signed values
+: Cannot operate on signed values
     c = a / b; // not defined for signed values
         ^^^^^
-../testdata/p4_16_errors/neg.p4(21): error: Could not find type of /
+
     c = a / b; // not defined for signed values
         ^^^^^
-../testdata/p4_16_errors/neg.p4(22): error: %: Cannot operate on signed values
+neg.p4(22): error: %: Cannot operate on signed values
     c = a % b;
         ^^^^^
-../testdata/p4_16_errors/neg.p4(22): error: Could not find type of %
+neg.p4(22): error: Could not find type of %
     c = a % b;
         ^^^^^

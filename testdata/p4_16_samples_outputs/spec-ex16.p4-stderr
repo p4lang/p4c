@@ -1,9 +1,9 @@
-../testdata/p4_16_samples/spec-ex16.p4(32): warning: main1: unused instance
+spec-ex16.p4(32): warning: main1: unused instance
                 Map1()) main1;
                         ^^^^^
-../testdata/p4_16_samples/spec-ex16.p4(24): warning: out parameter d may be uninitialized when P terminates
+spec-ex16.p4(24): warning: out parameter d may be uninitialized when P terminates
 parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
                                   ^
-../testdata/p4_16_samples/spec-ex16.p4(24)
+spec-ex16.p4(24)
 parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
        ^
