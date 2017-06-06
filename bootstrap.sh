@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This command bootstraps the autoconf-based configuratino
+# This command bootstraps the autoconf-based configuration
 # for the P4c compiler
 
 set -e  # exit on error
