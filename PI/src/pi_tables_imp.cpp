@@ -330,7 +330,7 @@ void get_default_entry(const pi_p4info_t *p4info, const std::string &t_name,
 
 using pibmv2::Buffer;
 
-// The difference with build_action_entry is the putput format.
+// The difference with build_action_entry is the output format.
 template <typename E>
 void build_action_entry_2(const pi_p4info_t *p4info, const E &entry,
                           Buffer *buffer);
@@ -349,8 +349,10 @@ void build_action_entry_2<bm::MatchTable::Entry>(
 
   emit_p4_id(buffer->extend(sizeof(s_pi_p4_id_t)), action_id);
   emit_uint32(buffer->extend(sizeof(uint32_t)), adata_size);
-  pibmv2::dump_action_data(p4info, buffer->extend(adata_size), action_id,
-                           entry.action_data);
+  if (adata_size > 0) {
+    pibmv2::dump_action_data(p4info, buffer->extend(adata_size), action_id,
+                             entry.action_data);
+  }
 }
 
 template <>

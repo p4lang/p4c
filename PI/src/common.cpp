@@ -30,6 +30,7 @@ Buffer::Buffer() {
 
 char *
 Buffer::extend(size_t s) {
+  if (s == 0) return nullptr;
   const auto size = data.size();
   data.resize(size + s);
   return &data[size];
