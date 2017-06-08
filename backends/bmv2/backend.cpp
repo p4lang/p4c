@@ -161,12 +161,14 @@ void Backend::convert(BMV2Options& options) {
         json->add_error(name, type);
     }
 
+    cstring scalarsName = refMap->newName("scalars");
+
     // This visitor is used in multiple passes to convert expression to json
-    conv = new ExpressionConverter(this);
+    conv = new ExpressionConverter(this, scalarsName);
 
     // if (psa) tlb->apply(new ConvertExterns());
     PassManager codegen_passes = {
-        new ConvertHeaders(this),
+        new ConvertHeaders(this, scalarsName),
         new ConvertExterns(this),  // only run when target == PSA
         new ConvertParser(this),
         new ConvertActions(this),

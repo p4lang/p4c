@@ -49,16 +49,16 @@ class ArithmeticFixup : public Transform {
 class ExpressionConverter : public Inspector {
     Backend*           backend;
     P4::P4CoreLibrary& corelib;
-    cstring            scalarsName = "scalars";
+    cstring            scalarsName;
 
     /// after translating an Expression to JSON, save the result to 'map'.
     std::map<const IR::Expression*, Util::IJson*> map;
     bool leftValue;  // true if converting a left value
 
  public:
-    explicit ExpressionConverter(Backend *backend) :
+    ExpressionConverter(Backend *backend, cstring scalarsName) :
             backend(backend), corelib(P4::P4CoreLibrary::instance),
-            leftValue(false), simpleExpressionsOnly(false) {}
+            scalarsName(scalarsName), leftValue(false), simpleExpressionsOnly(false) {}
     bool simpleExpressionsOnly;  // if set we fail to convert complex expressions
 
     // Non-null if the expression refers to a parameter from the enclosing control

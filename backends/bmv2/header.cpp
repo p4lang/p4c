@@ -27,9 +27,9 @@ Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
     return result;
 }
 
-ConvertHeaders::ConvertHeaders(Backend* backend)
-    : backend(backend), refMap(backend->getRefMap()),
-      typeMap(backend->getTypeMap()), json(backend->json) {
+ConvertHeaders::ConvertHeaders(Backend* backend, cstring scalarsName)
+        : backend(backend), scalarsName(scalarsName), refMap(backend->getRefMap()),
+          typeMap(backend->getTypeMap()), json(backend->json) {
     setName("ConvertHeaders");
     CHECK_NULL(backend->json);
 }
@@ -204,11 +204,12 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
  * and we pack all the scalar-typed locals into a 'scalar' type
  */
 Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
-    json->add_header_type("scalars");
-    refMap->newName("scalars");
+    cstring scalarsTypeName = refMap->newName("scalars");
+    json->add_header_type(scalarsTypeName);
+    scalarsName = refMap->newName("scalars");
 
-    // bit<n>, bool, error are packed into 'scalars' type,
-    // struct and stack introduces new header types
+    // bit<n>, bool, error are packed into scalars type,
+    // varbit, struct and stack introduce new header types
     for (auto v : backend->getStructure().variables) {
         LOG1("variable " << v);
         auto type = typeMap->getType(v, true);
@@ -218,7 +219,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
                 json->add_header(metadata_type, v->name);
             else
                 json->add_metadata(metadata_type, v->name);
-            // only create header type only
+            // only create header type
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
                 continue;  // already seen
             else
@@ -237,15 +238,17 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
                 header_ids.push_back(header_id);
             }
             json->add_header_stack(header_type, v->name, stack->getSize(), header_ids);
+        } else if (type->is<IR::Type_Varbits>()) {
+            // TODO
         } else if (type->is<IR::Type_Bits>()) {
             auto tb = type->to<IR::Type_Bits>();
-            addHeaderField("scalars", v->name.name, tb->size, tb->isSigned);
+            addHeaderField(scalarsName, v->name.name, tb->size, tb->isSigned);
             scalars_width += tb->size;
         } else if (type->is<IR::Type_Boolean>()) {
-            addHeaderField("scalars", v->name.name, boolWidth, false);
+            addHeaderField(scalarsName, v->name.name, boolWidth, false);
             scalars_width += boolWidth;
         } else if (type->is<IR::Type_Error>()) {
-            addHeaderField("scalars", v->name.name, 32, 0);
+            addHeaderField(scalarsName, v->name.name, 32, 0);
             scalars_width += 32;
         } else {
             P4C_UNIMPLEMENTED("%1%: type not yet handled on this target", type);
@@ -253,7 +256,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
     }
 
     // always-have metadata instance
-    json->add_metadata("scalars", "scalars");
+    json->add_metadata(scalarsTypeName, scalarsName);
     json->add_metadata("standard_metadata", "standard_metadata");
     return Inspector::init_apply(node);
 }
@@ -263,7 +266,7 @@ void ConvertHeaders::end_apply(const IR::Node*) {
     unsigned padding = scalars_width % 8;
     if (padding != 0) {
         cstring name = refMap->newName("_padding");
-        addHeaderField("scalars", name, 8-padding, false);
+        addHeaderField(scalarsName, name, 8-padding, false);
     }
 }
 

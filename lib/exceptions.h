@@ -67,7 +67,7 @@ class CompilerUnimplemented final : public P4CExceptionBase {
     template <typename... T>
     CompilerUnimplemented(const char* format, T... args)
             : P4CExceptionBase(format, args...)
-    { message = cstring(ANSI_BLUE) +"Unimplemented compiler support"+ ANSI_CLR + ":\n" + message; }
+    { message = cstring(ANSI_BLUE) +"Not yet implemented"+ ANSI_CLR + ":\n" + message; }
     template <typename... T>
     CompilerUnimplemented(const char* file, int line, const char* format, T... args)
             : P4CExceptionBase(format, args...)
