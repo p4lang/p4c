@@ -30,6 +30,7 @@ class Backend;
 
 class ConvertHeaders : public Inspector {
     Backend*             backend;
+    cstring              scalarsName;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
     JsonObjects*         json;
@@ -54,7 +55,7 @@ class ConvertHeaders : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Parameter* param) override;
 
-    explicit ConvertHeaders(Backend* backend);
+    ConvertHeaders(Backend* backend, cstring scalarsName);
 };
 
 }  // namespace BMV2

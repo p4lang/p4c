@@ -435,7 +435,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
         if (type->is<IR::Type_StructLike>()) {
             result->emplace("type", "header");
             result->emplace("value", var->name);
-        } else if (type->is<IR::Type_Bits>() ||
+        } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Varbits>() ||
                    (type->is<IR::Type_Boolean>() && leftValue)) {
             // no convertion d2b when writing (leftValue is true) to a boolean
             result->emplace("type", "field");
