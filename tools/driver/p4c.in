@@ -22,6 +22,7 @@ import sys
 install_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 if not os.path.exists(os.path.join(install_dir, 'p4c_src')):
     # this is the installed configuration
+    build_type = "INSTALLED"
     artifacts_dir = '@datarootdir@'
     if artifacts_dir == '${prefix}/share':
         # datadir based on prefix
@@ -34,9 +35,11 @@ if not os.path.exists(os.path.join(install_dir, 'p4c_src')):
         # explicit datadir. add package name
         artifacts_dir = os.path.join(artifacts_dir, 'p4c')
 else:
+    build_type = "DEVELOPER"
     artifacts_dir = install_dir
 
 sys.path.insert(1, artifacts_dir)
+os.environ['P4C_BUILD_TYPE'] = build_type
 os.environ['P4C_BIN_DIR'] = install_dir
 os.environ['P4C_CFG_PATH'] = os.path.join(artifacts_dir, "p4c_src")
 os.environ['P4C_16_INCLUDE_PATH'] = os.path.join(artifacts_dir, "p4include")
