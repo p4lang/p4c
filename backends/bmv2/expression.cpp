@@ -435,13 +435,21 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
         if (type->is<IR::Type_StructLike>()) {
             result->emplace("type", "header");
             result->emplace("value", var->name);
-        } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Varbits>() ||
+        } else if (type->is<IR::Type_Bits>() ||
                    (type->is<IR::Type_Boolean>() && leftValue)) {
-            // no convertion d2b when writing (leftValue is true) to a boolean
+            // no conversion d2b when writing (leftValue is true) to a boolean
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");
             e->append(scalarsName);
             e->append(var->name);
+        } else if (type->is<IR::Type_Varbits>()) {
+            // varbits are synthesized in separate metadata instances
+            // with a single field each, where the field is named
+            // "field".
+            result->emplace("type", "field");
+            auto e = mkArrayField(result, "value");
+            e->append(var->name);
+            e->append("field");
         } else if (type->is<IR::Type_Boolean>()) {
             // Boolean variables are stored as ints, so we have to insert a conversion when
             // reading such a variable

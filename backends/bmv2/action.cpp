@@ -45,7 +45,11 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             cstring operation;
             auto type = typeMap->getType(l, true);
             if (type->is<IR::Type_StructLike>())
-                operation = "copy_header";
+                operation = "assign_header";
+            else if (type->is<IR::Type_Varbits>())
+                operation = "assign_VL";
+            else if (type->is<IR::Type_HeaderUnion>())
+                operation = "assign_union";
             else
                 operation = "assign";
             auto primitive = mkPrimitive(operation, result);
