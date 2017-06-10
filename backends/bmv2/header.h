@@ -31,6 +31,7 @@ class Backend;
 class ConvertHeaders : public Inspector {
     Backend*             backend;
     cstring              scalarsName;
+    cstring              scalarsTypeName;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
     JsonObjects*         json;

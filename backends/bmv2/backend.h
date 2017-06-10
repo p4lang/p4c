@@ -78,7 +78,7 @@ class Backend : public PassManager {
     Util::JsonArray*                 field_aliases;
 
     // We place scalar user metadata fields (i.e., bit<>, bool)
-    // in the "scalars" metadata object, so we may need to rename
+    // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
 

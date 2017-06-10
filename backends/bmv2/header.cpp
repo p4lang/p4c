@@ -73,11 +73,11 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             cstring newName = refMap->newName(type->getName() + "." + f->name);
             if (ft->is<IR::Type_Bits>()) {
                 auto tb = ft->to<IR::Type_Bits>();
-                addHeaderField("scalars", newName, tb->size, tb->isSigned);
+                addHeaderField(scalarsTypeName, newName, tb->size, tb->isSigned);
                 scalars_width += tb->size;
                 backend->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Boolean>()) {
-                addHeaderField("scalars", newName, boolWidth, 0);
+                addHeaderField(scalarsTypeName, newName, boolWidth, 0);
                 scalars_width += boolWidth;
                 backend->scalarMetadataFields.emplace(f, newName);
             } else {
@@ -122,7 +122,7 @@ bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
 }
 
 void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
-                                     int size, bool is_signed) {
+                                    int size, bool is_signed) {
     Util::JsonArray* field = new Util::JsonArray();
     field->append(name);
     field->append(size);
@@ -204,10 +204,8 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
  * and we pack all the scalar-typed locals into a 'scalar' type
  */
 Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
-    cstring scalarsTypeName = refMap->newName("scalars");
+    scalarsTypeName = refMap->newName("scalars");
     json->add_header_type(scalarsTypeName);
-    scalarsName = refMap->newName("scalars");
-
     // bit<n>, bool, error are packed into scalars type,
     // varbit, struct and stack introduce new header types
     for (auto v : backend->getStructure().variables) {
@@ -222,8 +220,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
             // only create header type
             if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
                 continue;  // already seen
-            else
-                visitedHeaders.emplace(st->getName());
+            visitedHeaders.emplace(st->getName());
             addHeaderType(st);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto type = typeMap->getTypeType(stack->elementType, true);
@@ -239,16 +236,30 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
             }
             json->add_header_stack(header_type, v->name, stack->getSize(), header_ids);
         } else if (type->is<IR::Type_Varbits>()) {
-            // TODO
+            // For each varbit variable we synthesize a separate header instance,
+            // since we cannot have multiple varbit fields in a single header.
+            auto vbt = type->to<IR::Type_Varbits>();
+            cstring headerName = "$varbit" + Util::toString(vbt->size);  // This name will be unique
+            auto vec = new IR::IndexedVector<IR::StructField>();
+            auto sf = new IR::StructField("field", type);
+            vec->push_back(sf);
+            typeMap->setType(sf, type);
+            auto hdrType = new IR::Type_Header(headerName, *vec);
+            typeMap->setType(hdrType, hdrType);
+            json->add_metadata(headerName, v->name);
+            if (visitedHeaders.find(headerName) != visitedHeaders.end())
+                continue;  // already seen
+            visitedHeaders.emplace(headerName);
+            addHeaderType(hdrType);
         } else if (type->is<IR::Type_Bits>()) {
             auto tb = type->to<IR::Type_Bits>();
-            addHeaderField(scalarsName, v->name.name, tb->size, tb->isSigned);
+            addHeaderField(scalarsTypeName, v->name.name, tb->size, tb->isSigned);
             scalars_width += tb->size;
         } else if (type->is<IR::Type_Boolean>()) {
-            addHeaderField(scalarsName, v->name.name, boolWidth, false);
+            addHeaderField(scalarsTypeName, v->name.name, boolWidth, false);
             scalars_width += boolWidth;
         } else if (type->is<IR::Type_Error>()) {
-            addHeaderField(scalarsName, v->name.name, 32, 0);
+            addHeaderField(scalarsTypeName, v->name.name, 32, 0);
             scalars_width += 32;
         } else {
             P4C_UNIMPLEMENTED("%1%: type not yet handled on this target", type);
@@ -266,7 +277,7 @@ void ConvertHeaders::end_apply(const IR::Node*) {
     unsigned padding = scalars_width % 8;
     if (padding != 0) {
         cstring name = refMap->newName("_padding");
-        addHeaderField(scalarsName, name, 8-padding, false);
+        addHeaderField(scalarsTypeName, name, 8-padding, false);
     }
 }
 
