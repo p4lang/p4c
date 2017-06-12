@@ -93,6 +93,14 @@ def main():
     parser.add_argument("-o", dest="output_directory",
                         help="Write output to the provided path",
                         action="store", metavar="PATH", default=".")
+    parser.add_argument("-T", dest="log_levels",
+                        action="append", default=[],
+                        help="[Compiler debugging] Adjust logging level per file (see below)")
+    parser.add_argument("--top4", dest="passes",
+                        action="append", default=[],
+                        help="[Compiler debugging] Dump the P4 representation after \
+                               passes whose name contains one of `passX' substrings. \
+                               When '-v' is used this will include the compiler IR.")
     parser.add_argument("--target-help", dest="show_target_help",
                         help="Display target specific command line options.",
                         action="store_true", default=False)
@@ -153,6 +161,15 @@ def main():
 
     for option in opts.compiler_options:
         commands["compiler"] += shlex.split(option)
+
+    for option in opts.log_levels:
+        commands["compiler"].append("-T{}".format(option))
+
+    if opts.passes:
+        commands["compiler"].append("--top4 {}".format(",".join(opts.passes)))
+
+    if opts.debug:
+        commands["compiler"].append("-vvv")
 
     for option in opts.assembler_options:
         commands["assembler"] += shlex.split(option)
@@ -222,7 +239,7 @@ def main():
             continue
         # run command
         try:
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except:
             import traceback
             print "error invoking {}".format(" ".join(cmd))
