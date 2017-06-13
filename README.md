@@ -230,4 +230,4 @@ access them from the IR
 * Range "set" not supported in parser transitions
 * Tables with multiple apply calls
 
-See also [unsupported P4_16 language features](bmv2/README.md#unsupported-p4_16-language-features).
+See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
