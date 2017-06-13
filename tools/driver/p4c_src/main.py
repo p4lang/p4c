@@ -40,6 +40,19 @@ def display_supported_targets(cfg):
     for target in cfg.target:
         print target
 
+def add_developer_options(parser):
+    parser.add_argument("-T", dest="log_levels",
+                        action="append", default=[],
+                        help="[Compiler debugging] Adjust logging level per file (see below)")
+    parser.add_argument("--top4", dest="passes",
+                        action="append", default=[],
+                        help="[Compiler debugging] Dump the P4 representation after \
+                               passes whose name contains one of `passX' substrings. \
+                               When '-v' is used this will include the compiler IR.")
+    parser.add_argument("--dump", dest="dump_dir", default=None,
+                        help="[Compiler debugging] Folder where P4 programs are dumped.")
+    parser.add_argument("--toJson", dest="json", default=None,
+                        help="Dump IR to JSON in the specified file.")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -97,6 +110,9 @@ def main():
                         help="Display target specific command line options.",
                         action="store_true", default=False)
 
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        add_developer_options(parser)
+
     parser.add_argument("source_file", nargs='?', help="Files to compile", default=None)
 
     # many more options
@@ -153,6 +169,18 @@ def main():
 
     for option in opts.compiler_options:
         commands["compiler"] += shlex.split(option)
+
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        for option in opts.log_levels:
+            commands["compiler"].append("-T{}".format(option))
+        if opts.passes:
+            commands["compiler"].append("--top4 {}".format(",".join(opts.passes)))
+        if opts.debug:
+            commands["compiler"].append("-vvv")
+        if opts.dump_dir:
+            commands["compiler"].append("--dump {}".format(opts.dump_dir))
+        if opts.json:
+            commands["compiler"].append("--toJSON {}".format(opts.json))
 
     for option in opts.assembler_options:
         commands["assembler"] += shlex.split(option)
@@ -222,7 +250,7 @@ def main():
             continue
         # run command
         try:
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except:
             import traceback
             print "error invoking {}".format(" ".join(cmd))
