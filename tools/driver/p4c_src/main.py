@@ -260,10 +260,7 @@ def main():
         if opts.debug:
             print 'running {}'.format(' '.join(cmd))
         out, err = p.communicate() # now wait
-        if p.returncode != 0:
-            print "{}\n{}".format(out, err)
-            sys.exit(p.returncode)
         if len(out) > 0:
             print out
-        if len(err) > 0:
-            print err
+        if p.returncode != 0:
+            sys.exit(p.returncode)
