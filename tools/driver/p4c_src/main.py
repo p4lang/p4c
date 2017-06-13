@@ -237,3 +237,5 @@ def main():
             sys.exit(p.returncode)
         if len(out) > 0:
             print out
+        if len(err) > 0:
+            print err
