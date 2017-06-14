@@ -53,6 +53,8 @@ def add_developer_options(parser):
                         help="[Compiler debugging] Folder where P4 programs are dumped.")
     parser.add_argument("--toJson", dest="json", default=None,
                         help="Dump IR to JSON in the specified file.")
+    parser.add_argument("--pp", dest="pretty_print", default=None,
+                        help="Pretty-print the program in the specified file.")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -181,6 +183,8 @@ def main():
             commands["compiler"].append("--dump {}".format(opts.dump_dir))
         if opts.json:
             commands["compiler"].append("--toJSON {}".format(opts.json))
+        if opts.pretty_print:
+            commands["compiler"].append("--pp {}".format(opts.pretty_print))
 
     for option in opts.assembler_options:
         commands["assembler"] += shlex.split(option)
