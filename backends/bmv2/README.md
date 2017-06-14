@@ -32,8 +32,8 @@ struct s0_t {
 };
 
 struct s1_t {
-  s1_t s01;
-  s1_t s02;
+  s0_t s01;
+  s0_t s02;
 };
 
 parser parse(packet_in pkt, out parsed_packet_t hdr,
