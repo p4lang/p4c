@@ -25,6 +25,7 @@ const int JSON_MINOR_VERSION = 7;
 
 JsonObjects::JsonObjects() {
     toplevel = new Util::JsonObject();
+    meta = new Util::JsonObject();
     header_types = insert_array_field(toplevel, "header_types");
     headers = insert_array_field(toplevel, "headers");
     header_stacks = insert_array_field(toplevel, "header_stacks");
@@ -35,7 +36,7 @@ JsonObjects::JsonObjects() {
     deparsers = insert_array_field(toplevel, "deparsers");
     meter_arrays = insert_array_field(toplevel, "meter_arrays");
     counters = insert_array_field(toplevel, "counter_arrays");
-    register_arrays = insert_array_field(toplevel, "register_arrays");
+    register_arrays = insert_array_field(toplevel, "register_arrays");
     calculations = insert_array_field(toplevel, "calculations");
     learn_lists = insert_array_field(toplevel, "learn_lists");
     actions = insert_array_field(toplevel, "actions");
@@ -97,15 +98,13 @@ JsonObjects::add_program_info(const cstring& name) {
 
 void
 JsonObjects::add_meta_info() {
-    auto info = new Util::JsonObject();
     static constexpr int version_major = JSON_MAJOR_VERSION;
     static constexpr int version_minor = JSON_MINOR_VERSION;
-    auto version = insert_array_field(info, "version");
+    auto version = insert_array_field(meta, "version");
     version->append(version_major);
     version->append(version_minor);
-    info->emplace("compiler", "https://github.com/p4lang/p4c");
-    toplevel->emplace("__meta__", info);
-    meta = info;  // TODO(hanw): remove
+    meta->emplace("compiler", "https://github.com/p4lang/p4c");
+    toplevel->emplace("__meta__", meta);
 }
 
 /**
