@@ -37,8 +37,9 @@ class ConvertHeaders : public Inspector {
     JsonObjects*         json;
     std::set<cstring>    visitedHeaders;
 
-    const unsigned     boolWidth = 1;
-    unsigned           scalars_width = 0;
+    const unsigned       boolWidth = 1;    // convert booleans to 1-bit integers
+    const unsigned       errorWidth = 32;  // convert errors to 32-bit integers
+    unsigned             scalars_width = 0;
 
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);

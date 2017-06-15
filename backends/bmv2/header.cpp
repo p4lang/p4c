@@ -80,6 +80,10 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 addHeaderField(scalarsTypeName, newName, boolWidth, 0);
                 scalars_width += boolWidth;
                 backend->scalarMetadataFields.emplace(f, newName);
+            } else if (ft->is<IR::Type_Error>()) {
+                addHeaderField(scalarsTypeName, newName, errorWidth, 0);
+                scalars_width += errorWidth;
+                backend->scalarMetadataFields.emplace(f, newName);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
@@ -259,8 +263,8 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
             addHeaderField(scalarsTypeName, v->name.name, boolWidth, false);
             scalars_width += boolWidth;
         } else if (type->is<IR::Type_Error>()) {
-            addHeaderField(scalarsTypeName, v->name.name, 32, 0);
-            scalars_width += 32;
+            addHeaderField(scalarsTypeName, v->name.name, errorWidth, 0);
+            scalars_width += errorWidth;
         } else {
             P4C_UNIMPLEMENTED("%1%: type not yet handled on this target", type);
         }

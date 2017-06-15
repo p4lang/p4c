@@ -196,6 +196,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
     auto parentType = backend->getTypeMap()->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
+    auto type = backend->getTypeMap()->getType(expression, true);
+
     if (parentType->is<IR::Type_StructLike>()) {
         auto st = parentType->to<IR::Type_StructLike>();
         auto field = st->getField(expression->member);
@@ -205,11 +207,12 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     }
 
     {
-        auto type = backend->getTypeMap()->getType(expression, true);
-        if (type->is<IR::Type_Error>()) {
+        if (type->is<IR::Type_Error>() && expression->expr->is<IR::TypeNameExpression>()) {
+            // this deals with constants that have type 'error'
             result->emplace("type", "hexstr");
             auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
-            auto errorValue = backend->getErrorCodesMap().at(decl);
+            ErrorCodesMap errCodes = backend->getErrorCodesMap();
+            auto errorValue = errCodes.at(decl);
             result->emplace("value", Util::toString(errorValue));
             map.emplace(expression, result);
             return;
@@ -218,7 +221,6 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
-        auto type = backend->getTypeMap()->getType(expression, true);
         // hanw: need a function isStandardMetadata();
         if (param->type->toString() == "standard_metadata_t") {
             result->emplace("type", "field");
@@ -230,7 +232,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 result->emplace("type", "header_stack");
                 result->emplace("value", fieldName);
             } else if (parentType->is<IR::Type_StructLike>() &&
-                       (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>())) {
+                       (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
+                        type->is<IR::Type_Error>())) {
                 auto field = parentType->to<IR::Type_StructLike>()->getField(
                     expression->member);
                 CHECK_NULL(field);
