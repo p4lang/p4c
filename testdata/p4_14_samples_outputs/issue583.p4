@@ -199,7 +199,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hop(hdr.ipv4.ttl, egress_spec);
     }
     @name(".act") action act() {
-        cnt1.count((bit<32>)5w10);
+        cnt1.count((bit<32>)32w10);
     }
     @name("ipv4_routing") table ipv4_routing {
         actions = {

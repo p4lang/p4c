@@ -41,10 +41,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
-        count1.count((bit<32>)(bit<14>)meta.counter_metadata.counter_index_first);
+        count1.count((bit<32>)(bit<32>)meta.counter_metadata.counter_index_first);
     }
     @name(".count_entries2") action count_entries2() {
-        count2.count((bit<32>)(bit<14>)meta.counter_metadata.counter_index_second);
+        count2.count((bit<32>)(bit<32>)meta.counter_metadata.counter_index_second);
     }
     @name("index_setter") table index_setter {
         actions = {

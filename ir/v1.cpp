@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <algorithm>
+
 #include "ir.h"
 #include "dbprint.h"
 #include "lib/gmputil.h"
@@ -131,14 +133,10 @@ unsigned IR::Primitive::inferOperandTypes() const {
 const IR::Type *IR::Primitive::inferOperandType(int operand) const {
     if (name == "truncate")
         return IR::Type::Bits::get(32);
-    if ((name == "count" || name == "execute_meter") && operand == 1) {
-        if (auto obj = operands[0]->to<IR::GlobalRef>()) {
-            if (auto tbl = obj->obj->to<IR::Stateful>()) {
-                if (tbl->instance_count > 0) {
-                    int width = ceil_log2(tbl->instance_count);
-                    return IR::Type::Bits::get(width); } } } }
-    if (name.startsWith("execute_stateful") && operand == 1) {
-            return IR::Type::Bits::get(32); }
+    if ((name == "count" || name == "execute_meter") && operand == 1)
+        return IR::Type::Bits::get(32);
+    if (name.startsWith("execute_stateful") && operand == 1)
+        return IR::Type::Bits::get(32);
     if ((name == "clone_ingress_pkt_to_egress" || name == "clone_i2e" ||
          name == "clone_egress_pkt_to_egress" || name == "clone_e2e") &&
         operand == 0) {
