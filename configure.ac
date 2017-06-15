@@ -112,12 +112,23 @@ AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 AC_CHECK_LIB([gmpxx], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 AX_CXX_CHECK_LIB([boost_iostreams], [boost::iostreams::file_descriptor], [], [])
 
+AC_ARG_ENABLE([p4runtime-to-pd],
+    AS_HELP_STRING([--enable-p4runtime-to-pd],
+                   [Build the P4Runtime PD generator @<:@default=yes@:>@]))
+AM_CONDITIONAL([ENABLE_P4RUNTIME_TO_PD],
+               [test "x$enable_p4runtime_to_pd" = "xyes"])
+AM_COND_IF([ENABLE_P4RUNTIME_TO_PD],
+           [AC_CONFIG_FILES(p4runtime-to-pd:p4runtime-to-pd/p4runtime-to-pd.in,
+                            [chmod +x p4runtime-to-pd])])
+
 AC_CONFIG_FILES([Makefile])
 AX_PYTHON_MODULE([difflib], [fatal], [python])
 AX_PYTHON_MODULE([shutil], [fatal], [python])
 AX_PYTHON_MODULE([tempfile], [fatal], [python])
 AX_PYTHON_MODULE([subprocess], [fatal], [python])
 AX_PYTHON_MODULE([re], [fatal], [python])
+AM_COND_IF([ENABLE_P4RUNTIME_TO_PD],
+           [AX_PYTHON_MODULE([tenjin], [fatal], [python])])
 
 DX_INIT_DOXYGEN([P4C], [$(top_srcdir)/docs/doxygen/doxygen.cfg], [$(builddir)/doxygen-out])
 

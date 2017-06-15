@@ -42,7 +42,8 @@ PROTOFLAGS = $(addprefix -I,$(control_plane_proto_DIRS))
 .protoc.stamp: $(control_plane_proto_FILES)
 	@mkdir -p control-plane
 	$(V_PROTOC) $(PROTOC) $(PROTOFLAGS) $^ \
-		--cpp_out control-plane
+		--cpp_out control-plane \
+		--python_out control-plane
 	@touch $@
 
 BUILT_SOURCES += \
