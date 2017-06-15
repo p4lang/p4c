@@ -66,8 +66,11 @@ gtest_LDADD =                  # Libraries needed by GTests
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
-p4include_HEADERS =		# p4_16 include files
-p4_14include_HEADERS =		# p4_14 include files
+p4include_HEADERS =            # p4_16 include files
+p4_14include_HEADERS =         # p4_14 include files
+control_plane_proto_DIRS =     # Locations for .proto files; must be absolute paths
+control_plane_proto_FILES =    # .proto files; must be inside one of the proto_DIRS
+control_plane_SOURCES =        # Files added to libcontrolplane by extensions
 
 ################ Subproject Makefile inclusions
 

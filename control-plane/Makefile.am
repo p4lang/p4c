@@ -12,26 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# The `.proto` definitions live in the PI repo, which is included in this repo
-# as a submodule.
-PROTO_ROOT = $(abs_srcdir)/%reldir%/PI/proto
-PROTOFLAGS = -I$(PROTO_ROOT)
+# The standard P4Runtime protocol buffers message definitions live in the PI
+# repo, which is included in this repo as a submodule.
+P4RUNTIME_STD_DIR = $(abs_srcdir)/%reldir%/PI/proto
+control_plane_proto_DIRS += $(P4RUNTIME_STD_DIR)
+control_plane_proto_FILES += $(P4RUNTIME_STD_DIR)/p4/config/p4info.proto
+control_plane_SOURCES += control-plane/p4/config/p4info.pb.cc
 
-# We need to generate `p4.config.P4Info` protobuf data, so pull in `p4info.proto`.
-p4info_proto = $(PROTO_ROOT)/p4/config/p4info.proto
+# Add support for automake's verbosity options for protoc.
+V_PROTOC = $(__v_PROTOC_$(V))
+__v_PROTOC_ = $(__v_PROTOC_$(AM_DEFAULT_VERBOSITY))
+__v_PROTOC_0 = @echo "  PROTOC   " $?;
+__v_PROTOC_1 =
 
-# Generate C++ source code from the `.proto` definitions using protoc.
-# protoc generates multiple outputs at once, which is handled very awkwardly
-# by make. We take the simplest approach here. For the alternatives see:
-#   http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
-control-plane/p4/config/p4info.pb.cc: $(p4info_proto)
+# Generate source code from the .proto definitions using protoc. The output is
+# placed in the build directory inside `control-plane`. For example,
+# p4info.proto produces:
+#   control-plane/p4/config/p4info.pb.h
+#   control-plane/p4/config/p4info.pb.cc
+# These files aren't automatically included in libcontrolplane; the `.cc` files
+# need to be added to control_plane_SOURCES.
+PROTOFLAGS = $(addprefix -I,$(control_plane_proto_DIRS))
+.protoc.stamp: $(control_plane_proto_FILES)
 	@mkdir -p control-plane
-	$(PROTOC) $^ --cpp_out control-plane $(PROTOFLAGS)
-control-plane/p4/config/p4info.pb.h: $(p4info_proto) control-plane/p4/config/p4info.pb.cc
+	$(V_PROTOC) $(PROTOC) $(PROTOFLAGS) $^ \
+		--cpp_out control-plane
+	@touch $@
 
 BUILT_SOURCES += \
-	control-plane/p4/config/p4info.pb.cc \
-	control-plane/p4/config/p4info.pb.h
+	.protoc.stamp
 
 # Create a separate library for the control plane API code. This allows libtool
 # to automatically link $(PROTOBUF_LIBS) into every library and executable that
@@ -44,8 +53,8 @@ libcontrolplane_la_CPPFLAGS = \
 	-Icontrol-plane \
 	$(AM_CPPFLAGS)
 libcontrolplane_la_SOURCES = \
-	control-plane/p4/config/p4info.pb.cc \
-	control-plane/p4RuntimeSerializer.cpp
+	control-plane/p4RuntimeSerializer.cpp \
+	$(control_plane_SOURCES)
 
 noinst_HEADERS += \
 	control-plane/p4RuntimeSerializer.h
