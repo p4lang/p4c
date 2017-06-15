@@ -3326,8 +3326,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("process_storm_control.storm_control_meter") meter(32w1024, MeterType.bytes) process_storm_control_storm_control_meter_0;
     @name(".nop") action _nop_19() {
     }
-    @name(".set_storm_control_meter") action _set_storm_control_meter(bit<10> meter_idx) {
-        process_storm_control_storm_control_meter_0.execute_meter<bit<1>>((bit<32>)meter_idx, meta.security_metadata.storm_control_color);
+    @name(".set_storm_control_meter") action _set_storm_control_meter(bit<32> meter_idx) {
+        process_storm_control_storm_control_meter_0.execute_meter<bit<1>>(meter_idx, meta.security_metadata.storm_control_color);
     }
     @name("process_storm_control.storm_control") table process_storm_control_storm_control_0 {
         actions = {
@@ -4538,7 +4538,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @min_width(32) @name("process_ingress_bd_stats.ingress_bd_stats_count") counter(32w1024, CounterType.packets_and_bytes) process_ingress_bd_stats_ingress_bd_stats_count_0;
     @name(".update_ingress_bd_stats") action _update_ingress_bd_stats() {
-        process_ingress_bd_stats_ingress_bd_stats_count_0.count((bit<32>)(bit<10>)meta.l2_metadata.bd_stats_idx);
+        process_ingress_bd_stats_ingress_bd_stats_count_0.count((bit<32>)meta.l2_metadata.bd_stats_idx);
     }
     @name("process_ingress_bd_stats.ingress_bd_stats") table process_ingress_bd_stats_ingress_bd_stats_0 {
         actions = {
@@ -4550,7 +4550,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_ingress_acl_stats.acl_stats_count") counter(32w1024, CounterType.packets_and_bytes) process_ingress_acl_stats_acl_stats_count_0;
     @name(".acl_stats_update") action _acl_stats_update() {
-        process_ingress_acl_stats_acl_stats_count_0.count((bit<32>)(bit<10>)meta.acl_metadata.acl_stats_index);
+        process_ingress_acl_stats_acl_stats_count_0.count((bit<32>)meta.acl_metadata.acl_stats_index);
     }
     @name("process_ingress_acl_stats.acl_stats") table process_ingress_acl_stats_acl_stats_0 {
         actions = {
@@ -4756,7 +4756,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("process_system_acl.drop_stats") counter(32w1024, CounterType.packets) process_system_acl_drop_stats_2;
     @name("process_system_acl.drop_stats_2") counter(32w1024, CounterType.packets) process_system_acl_drop_stats_3;
     @name(".drop_stats_update") action _drop_stats_update() {
-        process_system_acl_drop_stats_3.count((bit<32>)(bit<10>)meta.ingress_metadata.drop_reason);
+        process_system_acl_drop_stats_3.count((bit<32>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action _nop_80() {
     }
@@ -4773,8 +4773,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".drop_packet") action _drop_packet() {
         mark_to_drop();
     }
-    @name(".drop_packet_with_reason") action _drop_packet_with_reason(bit<10> drop_reason) {
-        process_system_acl_drop_stats_2.count((bit<32>)drop_reason);
+    @name(".drop_packet_with_reason") action _drop_packet_with_reason(bit<32> drop_reason) {
+        process_system_acl_drop_stats_2.count(drop_reason);
         mark_to_drop();
     }
     @name(".negative_mirror") action _negative_mirror(bit<32> session_id) {

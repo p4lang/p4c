@@ -180,8 +180,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".drop_packet") action drop_packet_0() {
     }
-    @name(".drop_packet_with_reason") action drop_packet_with_reason_0(bit<8> drop_reason) {
-        drop_stats_1.count((bit<32>)drop_reason);
+    @name(".drop_packet_with_reason") action drop_packet_with_reason_0(bit<32> drop_reason) {
+        drop_stats_1.count(drop_reason);
     }
     @name(".negative_mirror") action negative_mirror_0(bit<8> session_id) {
     }
