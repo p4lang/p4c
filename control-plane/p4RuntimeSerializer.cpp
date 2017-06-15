@@ -966,10 +966,6 @@ public:
         action->mutable_preamble()->set_alias(symbols.getAlias(name));
         addAnnotations(action->mutable_preamble(), annotations);
 
-        // XXX(seth): We add all action parameters below. However, this is not what
-        // the BMV2 JSON converter does; it strips out parameters which aren't used.
-        // Unless there's a good reason to do otherwise, we should probably either
-        // retain the parameters or strip them out a separate compiler pass.
         size_t index = 1;
         for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
             auto param = action->add_params();
