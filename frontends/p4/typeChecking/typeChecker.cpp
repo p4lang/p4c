@@ -195,9 +195,9 @@ const IR::ParameterList* TypeInference::canonicalizeParameters(const IR::Paramet
     auto vec = new IR::IndexedVector<IR::Parameter>();
     for (auto p : *params->getEnumerator()) {
         auto paramType = getType(p);
-        BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: Unexpected parameter type", paramType);
         if (paramType == nullptr)
             return nullptr;
+        BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: Unexpected parameter type", paramType);
         if (paramType != p->type) {
             p = new IR::Parameter(p->srcInfo, p->name, p->annotations, p->direction, paramType);
             changes = true;
@@ -1193,9 +1193,9 @@ const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
 const IR::Node* TypeInference::postorder(IR::Parameter* param) {
     if (done()) return param;
     const IR::Type* paramType = getTypeType(param->type);
-    BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: unexpected type", paramType);
     if (paramType == nullptr)
         return param;
+    BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: unexpected type", paramType);
 
     // The parameter type cannot have free type variables
     if (paramType->is<IR::IMayBeGenericType>()) {
