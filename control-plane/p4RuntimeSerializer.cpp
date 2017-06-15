@@ -69,8 +69,13 @@ static bool isMetadataType(const IR::Type* type) {
 }
 
 /// @return true if @node has an @hidden annotation.
-static bool isHidden(const IR::Node *node) {
+static bool isHidden(const IR::Node* node) {
     return node->getAnnotation("hidden") != nullptr;
+}
+
+/// @return true if @type has an @controller_header annotation.
+static bool isControllerHeader(const IR::Type_Header* type) {
+    return type->getAnnotation("controller_header") != nullptr;
 }
 
 /// @return a version of @name which has been sanitized for exposure to the
@@ -437,6 +442,7 @@ externalId(const IR::IDeclaration* declaration) {
 enum class P4RuntimeSymbolType {
     ACTION,
     ACTION_PROFILE,
+    CONTROLLER_HEADER,
     COUNTER,
     METER,
     TABLE
@@ -583,6 +589,7 @@ public:
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::ACTION_PROFILE);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::COUNTER);
         symbols.computeIdsForSymbols(P4RuntimeSymbolType::METER);
+        symbols.computeIdsForSymbols(P4RuntimeSymbolType::CONTROLLER_HEADER);
 
         return symbols;
     }
@@ -751,6 +758,9 @@ private:
         switch (symbolType) {
             case P4RuntimeSymbolType::ACTION: return PI_ACTION_ID;
             case P4RuntimeSymbolType::ACTION_PROFILE: return PI_ACT_PROF_ID;
+            // XXX(antonin): no support from PI library for now
+            // the choice for the resource type id has little importance here
+            case P4RuntimeSymbolType::CONTROLLER_HEADER: return 0xab;
             case P4RuntimeSymbolType::COUNTER: return PI_COUNTER_ID;
             case P4RuntimeSymbolType::METER: return PI_METER_ID;
             case P4RuntimeSymbolType::TABLE: return PI_TABLE_ID;
@@ -768,6 +778,7 @@ private:
     std::map<P4RuntimeSymbolType, SymbolTable> symbolTables = {
         { P4RuntimeSymbolType::ACTION, SymbolTable() },
         { P4RuntimeSymbolType::ACTION_PROFILE, SymbolTable() },
+        { P4RuntimeSymbolType::CONTROLLER_HEADER, SymbolTable() },
         { P4RuntimeSymbolType::COUNTER, SymbolTable() },
         { P4RuntimeSymbolType::METER, SymbolTable() },
         { P4RuntimeSymbolType::TABLE, SymbolTable() }
@@ -973,6 +984,50 @@ public:
                 continue;
             }
             param->set_bitwidth(paramType->width_bits());
+        }
+    }
+
+    void addControllerHeader(const IR::Type_Header* type) {
+        if (isHidden(type)) return;
+
+        auto name = controlPlaneName(type);
+        auto id = symbols.getId(P4RuntimeSymbolType::CONTROLLER_HEADER, name);
+        auto annotations = type->to<IR::IAnnotated>();
+
+        auto controllerAnnotation = type->getAnnotation("controller_header");
+        CHECK_NULL(controllerAnnotation);
+
+        if (controllerAnnotation->expr.size() != 1) {
+            ::error("@controller_header should be a string for declaration %1%", type);
+            return;
+        }
+        auto nameConstant = controllerAnnotation->expr[0]->to<IR::StringLiteral>();
+        if (nameConstant == nullptr) {
+            ::error("@controller_header should be a string for declaration %1%", type);
+            return;
+        }
+        auto controllerName = nameConstant->value;
+
+        auto header = p4Info->add_controller_packet_metadata();
+        header->mutable_preamble()->set_id(id);
+        // According to the p4info specification, we use the name specified in the annotation for
+        // the p4info preamble, not the P4 fully-qualified name.
+        header->mutable_preamble()->set_name(controllerName);
+        addAnnotations(header->mutable_preamble(), annotations);
+
+        size_t index = 1;
+        for (auto headerField : type->fields) {
+            auto metadata = header->add_metadata();
+            auto fieldName = controlPlaneName(headerField);
+            metadata->set_id(index++);
+            metadata->set_name(fieldName);
+            addAnnotations(metadata, headerField->to<IR::IAnnotated>());
+
+            auto fieldType = typeMap->getType(headerField, true);
+            BUG_CHECK(fieldType->is<IR::Type_Bits>(),
+                      "Header field %1% has a type which is not bit<> or int<>",
+                      headerField);
+            metadata->set_bitwidth(fieldType->width_bits());
         }
     }
 
@@ -1612,6 +1667,11 @@ void serializeP4Runtime(std::ostream* destination,
                 collectTableSymbols(symbols, block->to<IR::TableBlock>(), refMap, typeMap);
             }
         });
+        forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header* type) {
+            if (isControllerHeader(type)) {
+                symbols.add(P4RuntimeSymbolType::CONTROLLER_HEADER, type);
+            }
+        });
     });
 
     // Construct and serialize a P4Runtime control plane API from the program.
@@ -1626,6 +1686,11 @@ void serializeP4Runtime(std::ostream* destination,
         }
     });
     serializeActionProfiles(serializer, evaluatedProgram, refMap, typeMap);
+    forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header* type) {
+        if (isControllerHeader(type)) {
+            serializer.addControllerHeader(type);
+        }
+    });
 
     // Write the serialization out in the requested format.
     switch (format) {
