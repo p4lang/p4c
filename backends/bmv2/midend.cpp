@@ -40,6 +40,7 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/removeParameters.h"
 #include "midend/removeReturns.h"
+#include "midend/removeUnusedParameters.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
@@ -122,6 +123,11 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
+
+        // p4c-bm removed unused action parameters. To produce a compatible
+        // control plane API, we remove them as well for P4-14 programs.
+        isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr,
+
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::MidEndLast(),
         evaluator,

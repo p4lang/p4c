@@ -30,6 +30,7 @@ midend_UNIFIED = \
 	midend/parserUnroll.cpp \
 	midend/removeParameters.cpp \
 	midend/removeReturns.cpp \
+	midend/removeUnusedParameters.cpp \
 	midend/removeLeftSlices.cpp \
 	midend/simplifyKey.cpp \
 	midend/simplifySelectCases.cpp \
@@ -61,6 +62,7 @@ noinst_HEADERS += \
 	midend/removeLeftSlices.h \
 	midend/removeParameters.h \
 	midend/removeReturns.h \
+	midend/removeUnusedParameters.h \
 	midend/simplifyKey.h \
 	midend/simplifySelectCases.h \
 	midend/simplifySelectList.h \
