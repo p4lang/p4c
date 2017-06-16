@@ -186,7 +186,7 @@ array item has the following attributes:
 a header instance included in the stack. These ids have to be in the correct
 order: stack[0], stack[1], ...
 
-### `header_unions_types`
+### `header_union_types`
 
 It is a JSON array of all the header union types declared in the P4
 program. Each array item has the following attributes:
