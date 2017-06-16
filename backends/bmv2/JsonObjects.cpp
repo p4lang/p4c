@@ -29,6 +29,9 @@ JsonObjects::JsonObjects() {
     header_types = insert_array_field(toplevel, "header_types");
     headers = insert_array_field(toplevel, "headers");
     header_stacks = insert_array_field(toplevel, "header_stacks");
+    header_union_types = insert_array_field(toplevel, "header_union_types");
+    header_unions = insert_array_field(toplevel, "header_unions");
+    header_union_stacks = insert_array_field(toplevel, "header_union_stacks");
     field_lists = insert_array_field(toplevel, "field_lists");
     errors = insert_array_field(toplevel, "errors");
     enums = insert_array_field(toplevel, "enums");
@@ -139,6 +142,28 @@ JsonObjects::add_header_type(const cstring& name, Util::JsonArray*& fields, unsi
     return id;
 }
 
+unsigned
+JsonObjects::add_union_type(const cstring& name, Util::JsonArray*& fields) {
+    std::string sname(name, name.size());
+    auto it = union_type_id.find(sname);
+    if (it != union_type_id.end())
+        return it->second;
+    auto union_type = new Util::JsonObject();
+    unsigned id = BMV2::nextId("header_union_types");
+    union_type_id[sname] = id;
+    union_type->emplace("name", name);
+    union_type->emplace("id", id);
+    if (fields != nullptr) {
+        union_type->emplace("headers", fields);
+    } else {
+        auto temp = new Util::JsonArray();
+        union_type->emplace("headers", temp);
+    }
+    header_union_types->append(union_type);
+    return id;
+}
+
+
 /// Create a header type with empty field list.
 unsigned
 JsonObjects::add_header_type(const cstring& name) {
@@ -181,6 +206,21 @@ JsonObjects::add_header(const cstring& type, const cstring& name) {
     header->emplace("metadata", false);
     header->emplace("pi_omit", true);
     headers->append(header);
+    return id;
+}
+
+/// Create a header_union instance in json.
+unsigned
+JsonObjects::add_union(const cstring& type, Util::JsonArray*& headers, const cstring& name) {
+    auto u = new Util::JsonObject();
+    unsigned id = BMV2::nextId("header_unions");
+    LOG3("add header_union id " << id);
+    u->emplace("name", name);
+    u->emplace("id", id);
+    u->emplace("union_type", type);
+    u->emplace("header_ids", headers);
+    u->emplace("pi_omit", true);
+    header_unions->append(u);
     return id;
 }
 

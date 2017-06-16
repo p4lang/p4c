@@ -45,8 +45,9 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
-            if (!meta && !ft->is<IR::Type_Header>()) {
-                ::error("Type %1% should only contain headers or header stacks", type);
+            if (!meta && ft->is<IR::Type_Struct>()) {
+                ::error("Type %1% should only contain headers, header stacks, or header unions",
+                        type);
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
@@ -62,7 +63,21 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
             if (meta == true) {
                 json->add_metadata(header_type, header_name);
             } else {
-                json->add_header(header_type, header_name);
+                if (ft->is<IR::Type_Header>()) {
+                    json->add_header(header_type, header_name);
+                } else if (ft->is<IR::Type_HeaderUnion>()) {
+                    Util::JsonArray* fields = new Util::JsonArray();
+                    for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
+                        auto uft = typeMap->getType(uf, true);
+                        auto h_name = header_name + "." + extVisibleName(uf);
+                        auto h_type = extVisibleName(uft->to<IR::Type_StructLike>());
+                        unsigned id = json->add_header(h_type, h_name);
+                        fields->append(id);
+                    }
+                    json->add_union(header_type, fields, header_name);
+                } else {
+                    BUG("Unexpected type %1%", ft);
+                }
             }
         } else if (ft->is<IR::Type_Stack>()) {
             // Done elsewhere
@@ -139,6 +154,20 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
     auto fields = new Util::JsonArray();
     unsigned max_length = 0;  // for variable-sized headers
     bool varbitFound = false;
+
+    if (st->is<IR::Type_HeaderUnion>()) {
+        for (auto f : st->fields) {
+            auto ftype = typeMap->getType(f, true);
+            auto ht = ftype->to<IR::Type_Header>();
+            CHECK_NULL(ht);
+            addHeaderType(ht);
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(ht->name.name);
+        }
+        json->add_union_type(st->name, fields);
+        return;
+    }
 
     for (auto f : st->fields) {
         auto ftype = typeMap->getType(f, true);

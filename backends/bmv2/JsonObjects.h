@@ -32,6 +32,8 @@ class JsonObjects {
     void add_program_info(const cstring& name);
     void add_meta_info();
     unsigned add_header_type(const cstring& name, Util::JsonArray*& fields, unsigned max_length);
+    unsigned add_union_type(const cstring& name, Util::JsonArray*& fields);
+    unsigned add_union(const cstring& type, Util::JsonArray*& fields, const cstring& name);
     unsigned add_header_type(const cstring& name);
     void add_header_field(const cstring& name, Util::JsonArray*& field);
     unsigned add_header(const cstring& type, const cstring& name);
@@ -75,7 +77,11 @@ class JsonObjects {
     Util::JsonArray* headers;
     Util::JsonArray* header_stacks;
     Util::JsonArray* header_types;
+    Util::JsonArray* header_union_types;
+    Util::JsonArray* header_unions;
+    Util::JsonArray* header_union_stacks;
     ordered_map<std::string, unsigned> header_type_id;
+    ordered_map<std::string, unsigned> union_type_id;
     Util::JsonArray* learn_lists;
     Util::JsonArray* meter_arrays;
     Util::JsonArray* parsers;

@@ -231,6 +231,19 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             if (type->is<IR::Type_Stack>()) {
                 result->emplace("type", "header_stack");
                 result->emplace("value", fieldName);
+            } else if (parentType->is<IR::Type_HeaderUnion>()) {
+                auto l = get(expression->expr);
+                cstring nestedField = fieldName;
+                if (l->is<Util::JsonObject>()) {
+                    auto lv = l->to<Util::JsonObject>()->get("value");
+                    if (lv->is<Util::JsonValue>()) {
+                        // header in union reference ["u", "f"] => "u.x"
+                        cstring prefix = lv->to<Util::JsonValue>()->getString();
+                        nestedField = prefix + "." + nestedField;
+                    }
+                }
+                result->emplace("type", "header");
+                result->emplace("value", nestedField);
             } else if (parentType->is<IR::Type_StructLike>() &&
                        (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
                         type->is<IR::Type_Error>())) {
@@ -274,31 +287,42 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         if (!done) {
             auto l = get(expression->expr);
             CHECK_NULL(l);
-            result->emplace("type", "field");
-            auto e = mkArrayField(result, "value");
-            if (l->is<Util::JsonObject>()) {
+            if (parentType->is<IR::Type_HeaderUnion>()) {
+                BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
                 auto lv = l->to<Util::JsonObject>()->get("value");
-                if (lv->is<Util::JsonArray>()) {
-                    // TODO: is this case still necessary after eliminating nested structs?
-                    // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
-                    auto array = lv->to<Util::JsonArray>();
-                    BUG_CHECK(array->size() == 2, "expected 2 elements");
-                    auto first = array->at(0);
-                    auto second = array->at(1);
-                    BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
-                    e->append(first);
-                    cstring nestedField = second->to<Util::JsonValue>()->getString();
-                    nestedField += "." + fieldName;
-                    e->append(nestedField);
-                } else if (lv->is<Util::JsonValue>()) {
-                    e->append(lv);
-                    e->append(fieldName);
-                } else {
-                    BUG("%1%: Unexpected json", lv);
-                }
+                BUG_CHECK(lv->is<Util::JsonValue>(), "Not a JsonValue");
+                fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
+                // Each header in a union is allocated a separate header instance.
+                // Refer to that instance directly.
+                result->emplace("type", "header");
+                result->emplace("value", fieldName);
             } else {
-                e->append(l);
-                e->append(fieldName);
+                result->emplace("type", "field");
+                auto e = mkArrayField(result, "value");
+                if (l->is<Util::JsonObject>()) {
+                    auto lv = l->to<Util::JsonObject>()->get("value");
+                    if (lv->is<Util::JsonArray>()) {
+                        // TODO: is this case still necessary after eliminating nested structs?
+                        // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
+                        auto array = lv->to<Util::JsonArray>();
+                        BUG_CHECK(array->size() == 2, "expected 2 elements");
+                        auto first = array->at(0);
+                        auto second = array->at(1);
+                        BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
+                        e->append(first);
+                        cstring nestedField = second->to<Util::JsonValue>()->getString();
+                        nestedField += "." + fieldName;
+                        e->append(nestedField);
+                    } else if (lv->is<Util::JsonValue>()) {
+                        e->append(lv);
+                        e->append(fieldName);
+                    } else {
+                        BUG("%1%: Unexpected json", lv);
+                    }
+                } else {
+                    e->append(l);
+                    e->append(fieldName);
+                }
             }
         }
     }
