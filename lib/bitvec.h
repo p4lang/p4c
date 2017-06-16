@@ -395,6 +395,7 @@ class bitvec {
                 ++rv;
 #endif
         return rv; }
+    bool is_contiguous() const;
 
  private:
     void expand(size_t newsize) {
