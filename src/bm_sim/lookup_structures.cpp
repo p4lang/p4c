@@ -361,9 +361,7 @@ class EntryList {
   static constexpr size_t cache_activation_min_entries = 16;
 
   internal_handle_t handle_from_entry(const Entry *entry) const {
-    // a bit sad that this cast is needed, almost makes me want to do the
-    // pointer arithmetic by hand
-    return std::distance(static_cast<const Entry *>(head), entry);
+    return std::distance(&entries[0], entry);
   }
 
   const Entry *find_entry(const K &key) const {

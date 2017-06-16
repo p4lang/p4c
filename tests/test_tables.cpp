@@ -385,6 +385,50 @@ TYPED_TEST(TableSizeTwo, LookupEntry) {
   ASSERT_FALSE(hit);
 }
 
+// This test was added after a bug was found in entry management for Ternary and
+// Range tables: when adding 2 entries to the table, then removing the first
+// added; we would observe an error when sending a packet matching the second
+// entry added only (bmv2 would report a table hit instead of a miss, with a
+// corrupt entry handle).
+TYPED_TEST(TableSizeTwo, DeleteEntry2) {
+  std::string key_ = "\xaa\xaa";
+  std::string bad_key_ = "\xbb\xbb";
+  ByteContainer key("0xaaaa");
+  entry_handle_t handle_1, handle_2, lookup_handle;
+  MatchErrorCode rc;
+
+  bool hit;
+  auto pkt = this->get_pkt(64);
+  auto &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+  f.set(key);
+
+  rc = this->add_entry(bad_key_, &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_FALSE(hit);
+
+  rc = this->add_entry(key_, &handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+  ASSERT_EQ(handle_2, lookup_handle);
+
+  rc = this->table->delete_entry(handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+  ASSERT_EQ(handle_2, lookup_handle);
+
+  rc = this->table->delete_entry(handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_FALSE(hit);
+}
+
 TYPED_TEST(TableSizeTwo, PacketEntryIndex) {
   std::string key = "\x0a\xba";
   entry_handle_t handle;
