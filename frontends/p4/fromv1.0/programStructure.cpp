@@ -1198,6 +1198,14 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
             cond = new IR::Neq(cond, new IR::Constant(0));
         src = new IR::Mux(primitive->srcInfo, cond, src, dest);
         return assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
+    } else if (primitive->name == "modify_field_with_shift") {
+        OPS_CK(primitive, 4);
+        auto dest = conv.convert(primitive->operands.at(0));
+        auto src = conv.convert(primitive->operands.at(1));
+        auto shift = conv.convert(primitive->operands.at(2));
+        auto mask = conv.convert(primitive->operands.at(3));
+        auto result = sliceAssign(primitive->srcInfo, dest, new IR::Shr(src, shift), mask);
+        return result;
     } else if (primitive->name == "generate_digest") {
         OPS_CK(primitive, 2);
         auto args = new IR::Vector<IR::Expression>();

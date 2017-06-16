@@ -78,6 +78,7 @@ class StrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Mul* expr) override;
     const IR::Node* postorder(IR::Div* expr) override;
     const IR::Node* postorder(IR::Mod* expr) override;
+    const IR::Node* postorder(IR::Slice* expr) override;
 };
 
 }  // namespace P4
