@@ -244,4 +244,25 @@ const IR::Node* StrengthReduction::postorder(IR::Mod* expr) {
     return expr;
 }
 
+const IR::Node* StrengthReduction::postorder(IR::Slice* expr) {
+    int shift_amt = 0;
+    const IR::Expression *shift_of = nullptr;
+    if (auto sh = expr->e0->to<IR::Shr>()) {
+        if (auto k = sh->right->to<IR::Constant>()) {
+            shift_amt = k->asInt();
+            shift_of = sh->left; } }
+    if (auto sh = expr->e0->to<IR::Shl>()) {
+        if (auto k = sh->right->to<IR::Constant>()) {
+            shift_amt = -k->asInt();
+            shift_of = sh->left; } }
+    if (shift_of) {
+        int hi = expr->getH();
+        int lo = expr->getL();
+        if (lo + shift_amt >= 0 && hi + shift_amt < shift_of->type->width_bits()) {
+            expr->e0 = shift_of;
+            expr->e1 = new IR::Constant(hi + shift_amt);
+            expr->e2 = new IR::Constant(lo + shift_amt); } }
+    return expr;
+}
+
 }  // namespace P4
