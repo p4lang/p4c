@@ -19,6 +19,12 @@ control_plane_proto_DIRS += $(P4RUNTIME_STD_DIR)
 control_plane_proto_FILES += $(P4RUNTIME_STD_DIR)/p4/config/p4info.proto
 control_plane_SOURCES += control-plane/p4/config/p4info.pb.cc
 
+# Architecture-specific P4Runtime extern definitions.
+P4RUNTIME_ARCH_DIR = $(abs_srcdir)/%reldir%/proto
+control_plane_proto_DIRS += $(P4RUNTIME_ARCH_DIR)
+control_plane_proto_FILES += $(P4RUNTIME_ARCH_DIR)/p4/config/v1model.proto
+control_plane_SOURCES += control-plane/p4/config/v1model.pb.cc
+
 # Add support for automake's verbosity options for protoc.
 V_PROTOC = $(__v_PROTOC_$(V))
 __v_PROTOC_ = $(__v_PROTOC_$(AM_DEFAULT_VERBOSITY))

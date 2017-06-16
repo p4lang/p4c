@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// This must be included before any of our internal headers because ir/std.h
+// These must be included before any of our internal headers because ir/std.h
 // places a vector class in the global namespace, which breaks protobuf.
 #include "p4/config/p4info.pb.h"
+#include "p4/config/v1model.pb.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -24,6 +25,7 @@ limitations under the License.
 #include <boost/variant.hpp>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
+#include <algorithm>
 #include <iostream>
 #include <typeinfo>
 #include <utility>
@@ -220,6 +222,20 @@ private:
         return parent != nullptr ? parent->serialize(serialized)
                                  : serialized;
     }
+};
+
+/// The information about a digest call which is needed to serialize it.
+struct Digest {
+    struct Field {
+        const cstring name;       // The name of a field included in the digest.
+        const uint32_t bitwidth;  // How wide the field is.
+    };
+
+    const cstring name;       // The fully qualified external name of the digest
+                              // *data* - in P4-14, the field list name, or in
+                              // P4-16, the type of the 'data' parameter.
+    const uint64_t receiver;  // The numeric id of the digest receiver.
+    const std::vector<Field> fields;  // The fields that make up the digest data.
 };
 
 /// The information about a default action which is needed to serialize it.
@@ -438,12 +454,14 @@ externalId(const IR::IDeclaration* declaration) {
 }
 
 /// The global symbols which are exposed to P4Runtime. Non-global symbols
-/// include action parameters and header instance fields.
+/// include action parameters and extern instances.
 enum class P4RuntimeSymbolType {
     ACTION,
     ACTION_PROFILE,
     CONTROLLER_HEADER,
     COUNTER,
+    EXTERN,
+    EXTERN_INSTANCE,
     METER,
     TABLE
 };
@@ -584,12 +602,8 @@ public:
         function(symbols);
 
         // Now that the symbol table is initialized, we can compute ids.
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::ACTION);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::TABLE);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::ACTION_PROFILE);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::COUNTER);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::METER);
-        symbols.computeIdsForSymbols(P4RuntimeSymbolType::CONTROLLER_HEADER);
+        for (auto& table : symbols.symbolTables)
+            symbols.computeIdsForSymbols(table.first);
 
         return symbols;
     }
@@ -660,11 +674,9 @@ private:
     }
 
     /**
-     * Given a @collection of resources (such as actions or tables) of type
-     * @resourceType (PI_ACTION_ID, PI_TABLE_ID, etc...), assign an id to each
-     * resource which does not yet have an id, and update the resource in place.
-     * Existing @assignedIds are avoided to ensure that each id is unique, and
-     * @assignedIds is updated with the newly added ids.
+     * Assign an id to each resource of @type (PI_ACTION_ID, PI_TABLE_ID, etc..)
+     * which does not yet have an id, and update the resource in place.
+     * Existing ids are avoided to ensure that each id is unique.
      */
     void computeIdsForSymbols(P4RuntimeSymbolType type) {
         // The id for most resources follows a standard format:
@@ -758,10 +770,18 @@ private:
         switch (symbolType) {
             case P4RuntimeSymbolType::ACTION: return PI_ACTION_ID;
             case P4RuntimeSymbolType::ACTION_PROFILE: return PI_ACT_PROF_ID;
+
             // XXX(antonin): no support from PI library for now
             // the choice for the resource type id has little importance here
             case P4RuntimeSymbolType::CONTROLLER_HEADER: return 0xab;
+
             case P4RuntimeSymbolType::COUNTER: return PI_COUNTER_ID;
+
+            // XXX(seth): These are arbitrary values for now, but we'll create
+            // official PI resource types for these soon.
+            case P4RuntimeSymbolType::EXTERN: return 0x98;
+            case P4RuntimeSymbolType::EXTERN_INSTANCE: return 0x99;
+
             case P4RuntimeSymbolType::METER: return PI_METER_ID;
             case P4RuntimeSymbolType::TABLE: return PI_TABLE_ID;
         }
@@ -780,6 +800,8 @@ private:
         { P4RuntimeSymbolType::ACTION_PROFILE, SymbolTable() },
         { P4RuntimeSymbolType::CONTROLLER_HEADER, SymbolTable() },
         { P4RuntimeSymbolType::COUNTER, SymbolTable() },
+        { P4RuntimeSymbolType::EXTERN, SymbolTable() },
+        { P4RuntimeSymbolType::EXTERN_INSTANCE, SymbolTable() },
         { P4RuntimeSymbolType::METER, SymbolTable() },
         { P4RuntimeSymbolType::TABLE, SymbolTable() }
     };
@@ -797,6 +819,7 @@ class P4RuntimeSerializer {
     using Meter = ::p4::config::Meter;
     using CounterSpec = ::p4::config::CounterSpec;
     using MeterSpec = ::p4::config::MeterSpec;
+    using Extern = ::p4::config::Extern;
     using Preamble = ::p4::config::Preamble;
     using P4Info = ::p4::config::P4Info;
 
@@ -934,6 +957,36 @@ public:
             setMeterCommon(meter, meterInstance);
             meter->set_size(meterInstance.size);
         }
+    }
+
+    void addDigest(const Digest& digest) {
+        // XXX(seth): It's a bit unclear when two calls to digest() should be
+        // treated as being the same from the control plane's perspective.
+        // Right now we only take the type of data included in the digest
+        // (encoded in its name) into account, but it may be that we should also
+        // consider the receiver.
+        auto id = symbols.getId(P4RuntimeSymbolType::EXTERN_INSTANCE, digest.name);
+        if (serializedInstances.find(id) != serializedInstances.end()) return;
+        serializedInstances.insert(id);
+
+        auto digestExtern = findExtern(P4V1::V1Model::instance.digest_receiver.name);
+        auto instance = digestExtern->add_instances();
+        instance->mutable_preamble()->set_id(id);
+        instance->mutable_preamble()->set_name(digest.name);
+        instance->mutable_preamble()->set_alias(symbols.getAlias(digest.name));
+
+        ::p4::config::v1model::Digest digestInstance;
+        digestInstance.set_receiver(digest.receiver);
+
+        size_t index = 1;
+        for (auto& field : digest.fields) {
+            auto instanceField = digestInstance.add_fields();
+            instanceField->set_id(index++);
+            instanceField->set_name(field.name);
+            instanceField->set_bitwidth(field.bitwidth);
+        }
+
+        instance->mutable_info()->PackFrom(digestInstance);
     }
 
     void addAction(const IR::P4Action* actionDeclaration) {
@@ -1157,24 +1210,141 @@ private:
         }
     }
 
-    P4Info* p4Info;  // P4Runtime's representation of a program's control plane API.
-    const P4RuntimeSymbolTable& symbols;  // The symbols used in the API and their ids.
-    std::set<pi_p4_id_t> serializedActions;  // The actions we've serialized so far.
+    /// @return the P4Runtime Extern message for the extern @name, creating a
+    /// new one if no existing one is found.
+    Extern* findExtern(cstring name) {
+        auto externs = p4Info->mutable_externs();
+        auto existingExtern =
+          std::find_if(externs->pointer_begin(), externs->pointer_end(),
+              [&](const Extern* e) { return e->extern_type_name() == name; });
+        if (existingExtern != externs->pointer_end()) return *existingExtern;
+
+        auto newExtern = p4Info->add_externs();
+        auto id = symbols.getId(P4RuntimeSymbolType::EXTERN, name);
+        newExtern->set_extern_type_id(id);
+        newExtern->set_extern_type_name(name);
+        return newExtern;
+    }
+
+    /// P4Runtime's representation of a program's control plane API.
+    P4Info* p4Info;
+    /// The symbols used in the API and their ids.
+    const P4RuntimeSymbolTable& symbols;
+    /// The actions we've serialized so far. Used for deduplication.
+    std::set<pi_p4_id_t> serializedActions;
+    /// The extern instances we've serialized so far. Used for deduplication.
+    std::set<pi_p4_id_t> serializedInstances;
+    /// Type information for the P4 program we're serializing.
     TypeMap* typeMap;
 };
 
+/// @return serialization information for the digest() call represented by
+/// @call, or boost::none if @call is not a digest() call or is invalid.
+static boost::optional<Digest>
+getDigestCall(const IR::MethodCallExpression* call,
+              ReferenceMap* refMap,
+              TypeMap* typeMap) {
+    auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+    if (!instance->is<P4::ExternFunction>()) return boost::none;
+
+    auto function = instance->to<P4::ExternFunction>();
+    if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
+        return boost::none;
+
+    BUG_CHECK(call->typeArguments->size() == 1,
+              "%1%: Expected one type argument", call);
+    BUG_CHECK(call->arguments->size() == 2, "%1%: Expected 2 arguments", call);
+
+    // An invocation of digest() looks like this:
+    //   digest<T>(receiver, { fields });
+    // The name that shows up in the control plane API is the type name T.
+    auto typeArg = call->typeArguments->at(0);
+    if (!typeArg->is<IR::Type_Name>()) {
+        ::error("%1%: Expected type name", typeArg);
+        return boost::none;
+    }
+
+    auto type = refMap->getDeclaration(typeArg->to<IR::Type_Name>()->path, true);
+    if (!type->is<IR::Type_Struct>()) {
+        ::error("%1%: Expected a struct type", type);
+        return boost::none;
+    }
+
+    // The first argument is a numeric constant identifying the receiver.
+    auto receiver = call->arguments->at(0);
+    if (!receiver->is<IR::Constant>()) {
+        ::error("%1%: Expected constant receiver", call);
+        return boost::none;
+    }
+
+    // The second argument is either a value of struct type or a list of values.
+    // In either case we try to boil things down to a list of fields. In P4-16
+    // we could theoretically support passing more complicated expressions to
+    // digest(), but it's not well supported right now.
+    std::vector<Digest::Field> fields;
+    auto data = call->arguments->at(1);
+    auto dataType = typeMap->getType(data, true);
+    if (data->is<IR::ListExpression>()) {
+        for (auto expression : data->to<IR::ListExpression>()->components) {
+            auto path = HeaderFieldPath::from(expression, refMap, typeMap);
+            if (!path) {
+                ::error("Digest data '%1%' is too complicated to represent in "
+                        "P4Runtime", expression);
+                return boost::none;
+            }
+            fields.push_back({path->serialize(),
+                              uint32_t(path->type->width_bits())});
+        }
+    } else if (dataType->is<IR::Type_StructLike>()) {
+        for (auto field : dataType->to<IR::Type_StructLike>()->fields) {
+            auto member = new IR::Member(data, field->name);
+            typeMap->setType(member, typeMap->getType(field, true));
+            auto path = HeaderFieldPath::from(member, refMap, typeMap);
+            if (!path) {
+                ::error("Digest data '%1%' is too complicated to represent in "
+                        "P4Runtime", data);
+                return boost::none;
+            }
+            fields.push_back({path->serialize(),
+                              uint32_t(path->type->width_bits())});
+        }
+    } else {
+        ::error("Digest data '%1%' is too complicated to represent in "
+                "P4Runtime", data);
+        return boost::none;
+    }
+
+    return Digest{controlPlaneName(type->to<IR::Type_Struct>()),
+                  receiver->to<IR::Constant>()->value.get_ui(),
+                  std::move(fields)};
+}
+
 static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
                                   const IR::ControlBlock* controlBlock,
+                                  ReferenceMap* refMap,
                                   TypeMap* typeMap) {
     CHECK_NULL(controlBlock);
+    CHECK_NULL(refMap);
+    CHECK_NULL(typeMap);
 
     auto control = controlBlock->container;
     CHECK_NULL(control);
 
-    // Collect action symbols.
     forAllMatching<IR::P4Action>(&control->controlLocals,
                                  [&](const IR::P4Action* action) {
+        // Collect the action itself.
         symbols.add(P4RuntimeSymbolType::ACTION, action);
+
+        // Collect any extern functions it may invoke.
+        forAllMatching<IR::MethodCallExpression>(action->body,
+                      [&](const IR::MethodCallExpression* call) {
+            auto digest = getDigestCall(call, refMap, typeMap);
+            if (digest) {
+                symbols.add(P4RuntimeSymbolType::EXTERN,
+                            P4V1::V1Model::instance.digest_receiver.name);
+                symbols.add(P4RuntimeSymbolType::EXTERN_INSTANCE, digest->name);
+            }
+        });
     });
 }
 
@@ -1189,10 +1359,17 @@ static void serializeControl(P4RuntimeSerializer& serializer,
     auto control = controlBlock->container;
     CHECK_NULL(control);
 
-    // Serialize actions and, implicitly, their parameters.
     forAllMatching<IR::P4Action>(&control->controlLocals,
                                  [&](const IR::P4Action* action) {
+        // Serialize the action and, implicitly, its parameters.
         serializer.addAction(action);
+
+        // Serialize any extern functions it may invoke.
+        forAllMatching<IR::MethodCallExpression>(action->body,
+                      [&](const IR::MethodCallExpression* call) {
+            auto digest = getDigestCall(call, refMap, typeMap);
+            if (digest) serializer.addDigest(*digest);
+        });
     });
 }
 
@@ -1656,7 +1833,7 @@ void serializeP4Runtime(std::ostream* destination,
     auto symbols = P4RuntimeSymbolTable::create([=](P4RuntimeSymbolTable& symbols) {
         forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
             if (block->is<IR::ControlBlock>()) {
-                collectControlSymbols(symbols, block->to<IR::ControlBlock>(), typeMap);
+                collectControlSymbols(symbols, block->to<IR::ControlBlock>(), refMap, typeMap);
             } else if (block->is<IR::ExternBlock>()) {
                 collectExternSymbols(symbols, block->to<IR::ExternBlock>());
             } else if (block->is<IR::TableBlock>()) {
