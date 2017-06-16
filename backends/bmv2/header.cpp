@@ -66,6 +66,9 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                 if (ft->is<IR::Type_Header>()) {
                     json->add_header(header_type, header_name);
                 } else if (ft->is<IR::Type_HeaderUnion>()) {
+                    // We have to add separately a header instance for all
+                    // headers in the union.  Each instance will be named with
+                    // a prefix including the union name, e.g., "u.h"
                     Util::JsonArray* fields = new Util::JsonArray();
                     for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                         auto uft = typeMap->getType(uf, true);

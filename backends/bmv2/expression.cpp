@@ -237,7 +237,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 if (l->is<Util::JsonObject>()) {
                     auto lv = l->to<Util::JsonObject>()->get("value");
                     if (lv->is<Util::JsonValue>()) {
-                        // header in union reference ["u", "f"] => "u.x"
+                        // header in union reference ["u", "f"] => "u.f"
                         cstring prefix = lv->to<Util::JsonValue>()->getString();
                         nestedField = prefix + "." + nestedField;
                     }
