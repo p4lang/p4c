@@ -137,3 +137,10 @@ unsigned bitvec::ffz(unsigned start) const {
 #endif
     return rv;
 }
+
+bool bitvec::is_contiguous() const {
+    // Empty bitvec is not contiguous
+    if (empty())
+        return false;
+    return max().index() - min().index() + 1 == popcount();
+}
