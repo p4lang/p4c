@@ -119,15 +119,16 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     }
     if (src->returnType != nullptr)
         constraints->addEqualityConstraint(dest->returnType, src->returnType);
-    if (dest->parameters->size() != src->parameters->size()) {
-        if (reportErrors)
-            ::error("%1%: Cannot unify functions with different number of arguments: %2% to %3%",
-                    errorPosition, src, dest);
-        return false;
-    }
 
     auto sit = src->parameters->parameters.begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
+        if (sit == src->parameters->parameters.end()) {
+            if (dit->getAnnotation("optional"))
+                continue;
+            if (reportErrors)
+                ::error("%1%: Cannot unify functions with different number of arguments: "
+                        "%2% to %3%", errorPosition, src, dest);
+            return false; }
         if ((*sit)->direction != dit->direction) {
             if (reportErrors)
                 ::error("%1%: Cannot unify parameter %2% with %3% "
@@ -138,7 +139,14 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         constraints->addEqualityConstraint(dit->type, (*sit)->type);
         ++sit;
     }
-
+    while (sit != src->parameters->parameters.end()) {
+        if ((*sit)->getAnnotation("optional")) {
+            ++sit;
+            continue; }
+        if (reportErrors)
+            ::error("%1%: Cannot unify functions with different number of arguments: "
+                    "%2% to %3%", errorPosition, src, dest);
+        return false; }
     return true;
 }
 
