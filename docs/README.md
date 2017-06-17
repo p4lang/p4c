@@ -302,20 +302,18 @@ p4c_PYTHON += p4c.custom.cfg
 There is an global variable `config` in p4c compiler driver that stores the build steps
 for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
 is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is
-identified as `bmv2-*-p4org`. The * is a wildcard to represent any architecture. User may choose
-to specify the architecture string to use different compilation flow for different backend
-architecture.
+identified as `bmv2-ss-p4org`. Users may choose to implement different architectures running
+on the same target, and they should configure the compilation flow as follows:
 
-A sample configuration file looks as follows:
 ```
-config.add_preprocessor_options("bmv2-psa-p4org", "-E")
-config.add_compiler_options("bmv2-psa-p4org", "{}/{}.o".format(output_dir, source_basename))
-config.add_assembler_options("bmv2-psa-p4org", "{}/{}.asm".format(output_dir, source_basename))
-config.add_linker_options("bmv2-psa-p4org", "{}/{}.json".format(output_dir, source_basename))
+config.add_preprocessor_options("bmv2-newarch-p4org", "-E")
+config.add_compiler_options("bmv2-newarch-p4org", "{}/{}.o".format(output_dir, source_basename))
+config.add_assembler_options("bmv2-newarch-p4org", "{}/{}.asm".format(output_dir, source_basename))
+config.add_linker_options("bmv2-newarch-p4org", "{}/{}.json".format(output_dir, source_basename))
 
-config.add_toolchain("bmv2-psa-p4org", {"preprocessor": "cc", "compiler": "p4c-bm2-ss", "assembler": "", "linker": ""})
+config.add_toolchain("bmv2-newarch-p4org", {"preprocessor": "cc", "compiler": "p4c-bm2-newarch", "assembler": "", "linker": ""})
 config.add_compilation_steps(["preprocessor", "compiler"])
-config.target.append("bmv2-psa-p4org")
+config.target.append("bmv2-newarch-p4org")
 ```
 
 After adding the new configuration file, rerun `bootstrap.sh`
