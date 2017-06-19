@@ -36,11 +36,22 @@ class IDeclaration : public virtual INode {
     virtual ID getName() const = 0;
 
     /**
-     * @return the user-visible name of the object.
+     * @return the user-visible name of the object, derived from its '@name'
+     * annotation if available.
      * @param replace  If provided, a fallback name which is used if the object
      *                 doesn't have an explicit '@name' annotation.
      */
     virtual cstring externalName(cstring replace = cstring()) const;
+
+    /**
+     * @return the name by which the object should be referred to from the
+     * control plane. This is usually the same as externalName(), but any
+     * leading "." (which indicates that the name is global) is stripped out.
+     *
+     * @param replace  If provided, a fallback name which is used if the object
+     *                 doesn't have an explicit '@name' annotation.
+     */
+    cstring controlPlaneName(cstring replace = cstring()) const;
 
     virtual ~IDeclaration() {}
 };
