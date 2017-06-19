@@ -203,7 +203,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         auto field = st->getField(expression->member);
         if (field != nullptr)
             // field could be a method call, i.e., isValid.
-            fieldName = extVisibleName(field);
+            fieldName = field->controlPlaneName();
     }
 
     {

@@ -79,23 +79,23 @@ struct headers {
     ipv4_option_security_t  ipv4_option_security;
     @name("ipv4_option_timestamp") 
     ipv4_option_timestamp_t ipv4_option_timestamp;
-    @name("ipv4_option_EOL") 
+    @name(".ipv4_option_EOL") 
     ipv4_option_EOL_t[3]    ipv4_option_EOL;
-    @name("ipv4_option_NOP") 
+    @name(".ipv4_option_NOP") 
     ipv4_option_NOP_t[3]    ipv4_option_NOP;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_option_timestamp_t_1 tmp_hdr;
     ipv4_option_timestamp_t_2 tmp_hdr_0;
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4_base);
         meta.my_metadata.parse_ipv4_counter = (bit<8>)(hdr.ipv4_base.ihl * 4w4 - 4w4);
         transition select(hdr.ipv4_base.ihl) {
@@ -103,22 +103,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_ipv4_options;
         }
     }
-    @name("parse_ipv4_option_EOL") state parse_ipv4_option_EOL {
+    @name(".parse_ipv4_option_EOL") state parse_ipv4_option_EOL {
         packet.extract(hdr.ipv4_option_EOL.next);
         meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w1;
         transition parse_ipv4_options;
     }
-    @name("parse_ipv4_option_NOP") state parse_ipv4_option_NOP {
+    @name(".parse_ipv4_option_NOP") state parse_ipv4_option_NOP {
         packet.extract(hdr.ipv4_option_NOP.next);
         meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w1;
         transition parse_ipv4_options;
     }
-    @name("parse_ipv4_option_security") state parse_ipv4_option_security {
+    @name(".parse_ipv4_option_security") state parse_ipv4_option_security {
         packet.extract(hdr.ipv4_option_security);
         meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w11;
         transition parse_ipv4_options;
     }
-    @name("parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
+    @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
         packet.extract(tmp_hdr);
         packet.extract(tmp_hdr_0, (bit<32>)tmp_hdr.len);
         hdr.ipv4_option_timestamp.setValid();
@@ -128,7 +128,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - hdr.ipv4_option_timestamp.len;
         transition parse_ipv4_options;
     }
-    @name("parse_ipv4_options") state parse_ipv4_options {
+    @name(".parse_ipv4_options") state parse_ipv4_options {
         transition select(meta.my_metadata.parse_ipv4_counter, (packet.lookahead<bit<8>>())[7:0]) {
             (8w0x0 &&& 8w0xff, 8w0x0 &&& 8w0x0): accept;
             (8w0x0 &&& 8w0x0, 8w0x0 &&& 8w0xff): parse_ipv4_option_EOL;
@@ -137,7 +137,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             (8w0x0 &&& 8w0x0, 8w0x44 &&& 8w0xff): parse_ipv4_option_timestamp;
         }
     }
-    @header_ordering("ethernet", "ipv4_base", "ipv4_option_security", "ipv4_option_NOP", "ipv4_option_timestamp", "ipv4_option_EOL") @name("start") state start {
+    @header_ordering("ethernet", "ipv4_base", "ipv4_option_security", "ipv4_option_NOP", "ipv4_option_timestamp", "ipv4_option_EOL") @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -163,7 +163,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("._nop") action _nop() {
     }
-    @name("format_options") table format_options {
+    @name(".format_options") table format_options {
         actions = {
             format_options_security;
             format_options_timestamp;

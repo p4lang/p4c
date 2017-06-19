@@ -101,7 +101,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_eth") state parse_eth {
+    @name(".parse_eth") state parse_eth {
         packet.extract(hdr.eth);
         transition select(hdr.eth.ethType) {
             16w0x8100: parse_vlan;
@@ -109,15 +109,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition accept;
     }
-    @name("parse_vlan") state parse_vlan {
+    @name(".parse_vlan") state parse_vlan {
         packet.extract(hdr.vlan);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_eth;
     }
 }
@@ -137,7 +137,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("port_counters") direct_counter(CounterType.packets) port_counters;
+    @name(".port_counters") direct_counter(CounterType.packets) port_counters;
     @name(".fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -222,7 +222,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;
     }
-    @name("fdb") table fdb {
+    @name(".fdb") table fdb {
         actions = {
             fdb_set;
         }
@@ -231,7 +231,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.eth.dstAddr              : exact;
         }
     }
-    @name("learn_notify") table learn_notify {
+    @name(".learn_notify") table learn_notify {
         actions = {
             nop;
             generate_learn_notify;
@@ -242,7 +242,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.eth.srcAddr                     : exact;
         }
     }
-    @name("neighbor") table neighbor {
+    @name(".neighbor") table neighbor {
         actions = {
             set_dmac;
         }
@@ -252,7 +252,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.router_intf: exact;
         }
     }
-    @name("next_hop") table next_hop {
+    @name(".next_hop") table next_hop {
         actions = {
             set_next_hop;
         }
@@ -278,16 +278,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.vlan_id = default_vlan;
     }
-    @name("port") table port {
+    @name(".port") table port {
         actions = {
             set_in_port_0;
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
         }
-        @name("port_counters") counters = direct_counter(CounterType.packets);
+        @name(".port_counters") counters = direct_counter(CounterType.packets);
     }
-    @name("route") table route {
+    @name(".route") table route {
         actions = {
             route_set_trap;
             route_set_nexthop;
@@ -298,7 +298,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr         : lpm;
         }
     }
-    @name("router_interface") table router_interface {
+    @name(".router_interface") table router_interface {
         actions = {
             set_router_interface;
             router_interface_miss;
@@ -307,12 +307,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.eth.dstAddr: exact;
         }
     }
-    @name("switch") table switch_0 {
+    @name(".switch") table switch_0 {
         actions = {
             set_switch;
         }
     }
-    @name("virtual_router") table virtual_router {
+    @name(".virtual_router") table virtual_router {
         actions = {
             set_router;
         }

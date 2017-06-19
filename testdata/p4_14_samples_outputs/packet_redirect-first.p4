@@ -41,7 +41,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<hdrA_t>(hdr.hdrA);
         transition accept;
     }
@@ -56,7 +56,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_egress") table t_egress {
+    @name(".t_egress") table t_egress {
         actions = {
             _nop();
             _recirculate();
@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_ingress_1") table t_ingress_1 {
+    @name(".t_ingress_1") table t_ingress_1 {
         actions = {
             _nop();
             _set_port();
@@ -105,7 +105,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 128;
         default_action = NoAction();
     }
-    @name("t_ingress_2") table t_ingress_2 {
+    @name(".t_ingress_2") table t_ingress_2 {
         actions = {
             _nop();
             _resubmit();

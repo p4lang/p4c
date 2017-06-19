@@ -25,7 +25,6 @@ limitations under the License.
 #include "backends/bmv2/backend.h"
 #include "simpleSwitch.h"
 
-using BMV2::extVisibleName;
 using BMV2::mkArrayField;
 using BMV2::mkParameters;
 using BMV2::mkPrimitive;
@@ -114,7 +113,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             auto ctr = new Util::JsonObject();
             ctr->emplace("type", "counter_array");
-            ctr->emplace("value", extVisibleName(em->object));
+            ctr->emplace("value", em->object->controlPlaneName());
             parameters->append(ctr);
             auto index = conv->convert(mc->arguments->at(0));
             parameters->append(index);
@@ -127,7 +126,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             auto mtr = new Util::JsonObject();
             mtr->emplace("type", "meter_array");
-            mtr->emplace("value", extVisibleName(em->object));
+            mtr->emplace("value", em->object->controlPlaneName());
             parameters->append(mtr);
             auto index = conv->convert(mc->arguments->at(0));
             parameters->append(index);
@@ -138,7 +137,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
         auto reg = new Util::JsonObject();
         reg->emplace("type", "register_array");
-        cstring name = extVisibleName(em->object);
+        cstring name = em->object->controlPlaneName();
         reg->emplace("value", name);
         if (em->method->name == v1model.registers.read.name) {
             auto primitive = mkPrimitive("register_read", result);
@@ -285,7 +284,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 BUG_CHECK(origType->is<IR::Type_Struct>(),
                           "%1%: expected a struct type", origType);
                 auto st = origType->to<IR::Type_Struct>();
-                listName = extVisibleName(st);
+                listName = st->controlPlaneName();
             }
         }
         int id = createFieldList(mc->arguments->at(1), "learn_lists",
@@ -314,7 +313,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 BUG_CHECK(origType->is<IR::Type_Struct>(),
                           "%1%: expected a struct type", origType);
                 auto st = origType->to<IR::Type_Struct>();
-                listName = extVisibleName(st);
+                listName = st->controlPlaneName();
             }
         }
         int id = createFieldList(mc->arguments->at(0), "field_lists",
@@ -360,7 +359,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
     CHECK_NULL(backend);
     auto conv = backend->getExpressionConverter();
     auto inst = c->to<IR::Declaration_Instance>();
-    cstring name = extVisibleName(inst);
+    cstring name = inst->controlPlaneName();
     if (eb->type->name == v1model.counter.name) {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name", name);
@@ -454,7 +453,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             ::error("%1%: unexpected meter type", mkind);
         jmtr->emplace("type", type);
         jmtr->emplace("size", info->tableSize);
-        cstring tblname = extVisibleName(info->table);
+        cstring tblname = info->table->controlPlaneName();
         jmtr->emplace("binding", tblname);
         auto result = conv->convert(info->destinationField);
         jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));

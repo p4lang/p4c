@@ -21,7 +21,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
@@ -33,7 +33,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".setf1") action setf1_0(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("test1") table test1_0 {
+    @name(".test1") table test1_0 {
         actions = {
             noop_0();
             setf1_0();
@@ -47,7 +47,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f4: selector @name("hdr.data.f4") ;
         }
         size = 1024;
-        @name("sel_profile") @mode("fair") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
+        @name(".sel_profile") @mode("fair") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
         default_action = NoAction();
     }
     apply {

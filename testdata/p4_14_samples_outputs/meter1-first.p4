@@ -31,11 +31,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -46,7 +46,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
+    @name(".my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
     @name("._drop") action _drop() {
         mark_to_drop();
     }
@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = meter_idx;
         standard_metadata.egress_spec = 9w1;
     }
-    @name("m_filter") table m_filter {
+    @name(".m_filter") table m_filter {
         actions = {
             _drop();
             _nop();
@@ -76,7 +76,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop_0() {
         my_meter.read(meta.meta.meter_tag);
     }
-    @name("m_table") table m_table {
+    @name(".m_table") table m_table {
         actions = {
             m_action_0();
             _nop_0();

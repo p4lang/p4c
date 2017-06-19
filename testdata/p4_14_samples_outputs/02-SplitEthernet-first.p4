@@ -26,19 +26,19 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_len_or_type") state parse_len_or_type {
+    @name(".parse_len_or_type") state parse_len_or_type {
         packet.extract<len_or_type_t>(hdr.len_or_type);
         transition accept;
     }
-    @name("parse_mac_da") state parse_mac_da {
+    @name(".parse_mac_da") state parse_mac_da {
         packet.extract<mac_da_t>(hdr.mac_da);
         transition parse_mac_sa;
     }
-    @name("parse_mac_sa") state parse_mac_sa {
+    @name(".parse_mac_sa") state parse_mac_sa {
         packet.extract<mac_sa_t>(hdr.mac_sa);
         transition parse_len_or_type;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_mac_da;
     }
 }
@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t2") table t2 {
+    @name(".t2") table t2 {
         actions = {
             nop();
             @defaultonly NoAction();
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             nop();
             @defaultonly NoAction();

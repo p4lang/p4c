@@ -134,7 +134,7 @@ void
 ConvertActions::createActions() {
     for (auto it : backend->getStructure().actions) {
         auto action = it.first;
-        cstring name = extVisibleName(action);
+        cstring name = action->controlPlaneName();
         auto params = new Util::JsonArray();
         convertActionParams(action->parameters, params);
         auto body = new Util::JsonArray();

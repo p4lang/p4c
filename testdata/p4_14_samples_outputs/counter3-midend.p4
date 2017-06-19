@@ -14,11 +14,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -31,12 +31,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("cnt") direct_counter(CounterType.bytes) cnt;
+    @name(".cnt") direct_counter(CounterType.bytes) cnt;
     @name(".act") action act(bit<9> port) {
         cnt.count();
         standard_metadata.egress_spec = port;
     }
-    @name("tab1") table tab1 {
+    @name(".tab1") table tab1 {
         actions = {
             act();
             @defaultonly NoAction_0();
@@ -45,7 +45,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         size = 128;
-        @name("cnt") counters = direct_counter(CounterType.bytes);
+        @name(".cnt") counters = direct_counter(CounterType.bytes);
         default_action = NoAction_0();
     }
     apply {

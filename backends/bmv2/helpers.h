@@ -66,7 +66,6 @@ Util::JsonArray* mkArrayField(Util::JsonObject* parent, cstring name);
 Util::JsonArray* mkParameters(Util::JsonObject* object);
 Util::JsonArray* pushNewArray(Util::JsonArray* parent);
 Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo);
-cstring extVisibleName(const IR::IDeclaration* decl);
 cstring stringRepr(mpz_class value, unsigned bytes = 0);
 unsigned nextId(cstring group);
 

@@ -32,21 +32,21 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_my_tag") state parse_my_tag {
+    @name(".parse_my_tag") state parse_my_tag {
         packet.extract<my_tag_t>(hdr.my_tag);
         transition select(hdr.my_tag.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
             default: accept;
         }
     }
-    @name("parse_vlan_tag") state parse_vlan_tag {
+    @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract<vlan_tag_t>(hdr.vlan_tag);
         transition select(hdr.vlan_tag.ethertype) {
             16w0x9000: parse_my_tag;
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
@@ -59,7 +59,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop_0() {
     }
-    @name("t2") table t2_0 {
+    @name(".t2") table t2_0 {
         actions = {
             nop_0();
             @defaultonly NoAction();
@@ -77,7 +77,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop_1() {
     }
-    @name("t1") table t1_0 {
+    @name(".t1") table t1_0 {
         actions = {
             nop_1();
             @defaultonly NoAction();

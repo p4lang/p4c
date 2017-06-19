@@ -42,7 +42,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         meta.ingress_metadata.bd = hdr.data.f2;
         transition accept;
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.intrinsic_metadata.exclusion_id1 = exclusion_id;
     }
-    @name("bd") table bd_0 {
+    @name(".bd") table bd_0 {
         actions = {
             set_bd_info_0();
             @defaultonly NoAction();

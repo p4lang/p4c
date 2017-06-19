@@ -351,29 +351,29 @@ struct headers {
     udp_t                udp;
     @name("vxlan") 
     vxlan_t              vxlan;
-    @name("mpls") 
+    @name(".mpls") 
     mpls_t[3]            mpls;
-    @name("vlan_tag_") 
+    @name(".vlan_tag_") 
     vlan_tag_t[2]        vlan_tag_;
-    @name("vlan_tag_3b") 
+    @name(".vlan_tag_3b") 
     vlan_tag_3b_t[2]     vlan_tag_3b;
-    @name("vlan_tag_5b") 
+    @name(".vlan_tag_5b") 
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_arp_rarp") state parse_arp_rarp {
+    @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
             16w0x800: parse_arp_rarp_ipv4;
             default: parse_payload;
         }
     }
-    @name("parse_arp_rarp_ipv4") state parse_arp_rarp_ipv4 {
+    @name(".parse_arp_rarp_ipv4") state parse_arp_rarp_ipv4 {
         packet.extract<arp_rarp_ipv4_t>(hdr.arp_rarp_ipv4);
         transition parse_payload;
     }
-    @name("parse_cpu_header") state parse_cpu_header {
+    @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         transition select(hdr.cpu_header.etherType) {
             16w0 &&& 16w0xf800: parse_snap_header;
@@ -392,20 +392,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_eompls") state parse_eompls {
+    @name(".parse_eompls") state parse_eompls {
         packet.extract<eompls_t>(hdr.eompls);
         packet.extract<ethernet_t>(hdr.inner_ethernet);
         transition parse_payload;
     }
-    @name("parse_erspan_v1") state parse_erspan_v1 {
+    @name(".parse_erspan_v1") state parse_erspan_v1 {
         packet.extract<erspan_header_v1_t_0>(hdr.erspan_v1_header);
         transition parse_payload;
     }
-    @name("parse_erspan_v2") state parse_erspan_v2 {
+    @name(".parse_erspan_v2") state parse_erspan_v2 {
         packet.extract<erspan_header_v2_t_0>(hdr.erspan_v2_header);
         transition parse_payload;
     }
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0 &&& 16w0xf800: parse_snap_header;
@@ -426,15 +426,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_fcoe") state parse_fcoe {
+    @name(".parse_fcoe") state parse_fcoe {
         packet.extract<fcoe_header_t>(hdr.fcoe);
         transition parse_payload;
     }
-    @name("parse_geneve") state parse_geneve {
+    @name(".parse_geneve") state parse_geneve {
         packet.extract<genv_t>(hdr.genv);
         transition parse_genv_inner;
     }
-    @name("parse_genv_inner") state parse_genv_inner {
+    @name(".parse_genv_inner") state parse_genv_inner {
         transition select(hdr.genv.protoType) {
             16w0x6558: parse_inner_ethernet;
             16w0x800: parse_inner_ipv4;
@@ -442,7 +442,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_gre") state parse_gre {
+    @name(".parse_gre") state parse_gre {
         packet.extract<gre_t>(hdr.gre);
         transition select(hdr.gre.K, hdr.gre.proto) {
             (1w0x0, 16w0x6558): parse_nvgre;
@@ -452,15 +452,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_icmp") state parse_icmp {
+    @name(".parse_icmp") state parse_icmp {
         packet.extract<icmp_t>(hdr.icmp);
         transition parse_payload;
     }
-    @name("parse_icmpv6") state parse_icmpv6 {
+    @name(".parse_icmpv6") state parse_icmpv6 {
         packet.extract<icmpv6_t>(hdr.icmpv6);
         transition parse_payload;
     }
-    @name("parse_inner_ethernet") state parse_inner_ethernet {
+    @name(".parse_inner_ethernet") state parse_inner_ethernet {
         packet.extract<ethernet_t>(hdr.inner_ethernet);
         transition select(hdr.inner_ethernet.etherType) {
             16w0x800: parse_inner_ipv4;
@@ -468,15 +468,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_inner_icmp") state parse_inner_icmp {
+    @name(".parse_inner_icmp") state parse_inner_icmp {
         packet.extract<icmp_t>(hdr.inner_icmp);
         transition parse_payload;
     }
-    @name("parse_inner_icmpv6") state parse_inner_icmpv6 {
+    @name(".parse_inner_icmpv6") state parse_inner_icmpv6 {
         packet.extract<icmpv6_t>(hdr.inner_icmpv6);
         transition parse_payload;
     }
-    @name("parse_inner_ipv4") state parse_inner_ipv4 {
+    @name(".parse_inner_ipv4") state parse_inner_ipv4 {
         packet.extract<ipv4_t>(hdr.inner_ipv4);
         transition select(hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.protocol) {
             (13w0, 8w1): parse_inner_icmp;
@@ -485,7 +485,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_inner_ipv6") state parse_inner_ipv6 {
+    @name(".parse_inner_ipv6") state parse_inner_ipv6 {
         packet.extract<ipv6_t>(hdr.inner_ipv6);
         transition select(hdr.inner_ipv6.nextHdr) {
             8w58: parse_inner_icmpv6;
@@ -494,23 +494,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_inner_sctp") state parse_inner_sctp {
+    @name(".parse_inner_sctp") state parse_inner_sctp {
         packet.extract<sctp_t>(hdr.inner_sctp);
         transition parse_payload;
     }
-    @name("parse_inner_tcp") state parse_inner_tcp {
+    @name(".parse_inner_tcp") state parse_inner_tcp {
         packet.extract<tcp_t>(hdr.inner_tcp);
         transition parse_payload;
     }
-    @name("parse_inner_udp") state parse_inner_udp {
+    @name(".parse_inner_udp") state parse_inner_udp {
         packet.extract<udp_t>(hdr.inner_udp);
         transition parse_payload;
     }
-    @name("parse_input_port") state parse_input_port {
+    @name(".parse_input_port") state parse_input_port {
         packet.extract<input_port_hdr_t>(hdr.input_port_hdr);
         transition parse_ethernet;
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.protocol) {
             (13w0, 8w1): parse_icmp;
@@ -520,7 +520,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_ipv6") state parse_ipv6 {
+    @name(".parse_ipv6") state parse_ipv6 {
         packet.extract<ipv6_t>(hdr.ipv6);
         transition select(hdr.ipv6.nextHdr) {
             8w58: parse_icmpv6;
@@ -530,14 +530,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_mpls") state parse_mpls {
+    @name(".parse_mpls") state parse_mpls {
         transition select((packet.lookahead<bit<24>>())[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: parse_payload;
         }
     }
-    @name("parse_mpls_bos") state parse_mpls_bos {
+    @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
         transition select((packet.lookahead<bit<4>>())[3:0]) {
             4w0x4: parse_inner_ipv4;
@@ -545,11 +545,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_eompls;
         }
     }
-    @name("parse_mpls_not_bos") state parse_mpls_not_bos {
+    @name(".parse_mpls_not_bos") state parse_mpls_not_bos {
         packet.extract<mpls_t>(hdr.mpls.next);
         transition parse_mpls;
     }
-    @name("parse_nsh") state parse_nsh {
+    @name(".parse_nsh") state parse_nsh {
         packet.extract<nsh_t>(hdr.nsh);
         packet.extract<nsh_context_t>(hdr.nsh_context);
         transition select(hdr.nsh.protoType) {
@@ -559,35 +559,35 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_nvgre") state parse_nvgre {
+    @name(".parse_nvgre") state parse_nvgre {
         packet.extract<nvgre_t>(hdr.nvgre);
         transition parse_inner_ethernet;
     }
-    @name("parse_payload") state parse_payload {
+    @name(".parse_payload") state parse_payload {
         packet.extract<payload_t>(hdr.data);
         transition accept;
     }
-    @name("parse_roce") state parse_roce {
+    @name(".parse_roce") state parse_roce {
         packet.extract<roce_header_t>(hdr.roce);
         transition parse_payload;
     }
-    @name("parse_roce_v2") state parse_roce_v2 {
+    @name(".parse_roce_v2") state parse_roce_v2 {
         packet.extract<roce_v2_header_t>(hdr.roce_v2);
         transition parse_payload;
     }
-    @name("parse_sctp") state parse_sctp {
+    @name(".parse_sctp") state parse_sctp {
         packet.extract<sctp_t>(hdr.sctp);
         transition parse_payload;
     }
-    @name("parse_snap_header") state parse_snap_header {
+    @name(".parse_snap_header") state parse_snap_header {
         packet.extract<snap_header_t>(hdr.snap_header);
         transition parse_payload;
     }
-    @name("parse_tcp") state parse_tcp {
+    @name(".parse_tcp") state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
         transition parse_payload;
     }
-    @name("parse_udp") state parse_udp {
+    @name(".parse_udp") state parse_udp {
         packet.extract<udp_t>(hdr.udp);
         transition select(hdr.udp.dstPort) {
             16w4789: parse_vxlan;
@@ -596,7 +596,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_vlan") state parse_vlan {
+    @name(".parse_vlan") state parse_vlan {
         packet.extract<vlan_tag_t>(hdr.vlan_tag_.next);
         transition select(hdr.vlan_tag_.last.etherType) {
             16w0x8100: parse_vlan;
@@ -611,11 +611,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
-    @name("parse_vxlan") state parse_vxlan {
+    @name(".parse_vxlan") state parse_vxlan {
         packet.extract<vxlan_t>(hdr.vxlan);
         transition parse_inner_ethernet;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_input_port;
     }
 }
@@ -625,7 +625,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.data = 8w255;
         standard_metadata.egress_spec = 9w10;
     }
-    @name("mark_check") table mark_check {
+    @name(".mark_check") table mark_check {
         actions = {
             mark_forward();
         }

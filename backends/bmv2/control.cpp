@@ -203,7 +203,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
         auto ecc = cc->to<P4::ExternConstructorCall>();
         auto implementationType = ecc->type;
         auto arguments = ecc->cce->arguments;
-        apname = implementation->externalName(refMap->newName("action_profile"));
+        apname = implementation->controlPlaneName(refMap->newName("action_profile"));
         action_profile = new Util::JsonObject();
         action_profiles->append(action_profile);
         action_profile->emplace("name", apname);
@@ -263,7 +263,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
             ::error("%1%: expected a reference to an instance", pathe);
             return false;
         }
-        apname = extVisibleName(decl);
+        apname = decl->controlPlaneName();
         auto dcltype = typeMap->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
             ::error("%1%: unexpected type for implementation", dcltype);
@@ -293,7 +293,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     auto table = node->table;
     LOG3("Processing " << dbp(table));
     auto result = new Util::JsonObject();
-    cstring name = extVisibleName(table);
+    cstring name = table->controlPlaneName();
     result->emplace("name", name);
     result->emplace("id", nextId("tables"));
     result->emplace_non_null("source_info", table->sourceInfoJsonObj());
@@ -424,7 +424,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 }
                 result->emplace("with_counters", true);
                 auto jctr = new Util::JsonObject();
-                cstring ctrname = ctrs->externalName("counter");
+                cstring ctrname = ctrs->controlPlaneName("counter");
                 jctr->emplace("name", ctrname);
                 jctr->emplace("id", nextId("counter_arrays"));
                 // TODO(jafingerhut) - what kind of P4_16 code causes this
@@ -442,7 +442,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     ::error("%1%: expected an instance", decl->getNode());
                     return result;
                 }
-                cstring ctrname = decl->externalName();
+                cstring ctrname = decl->controlPlaneName();
                 auto it = backend->getDirectCounterMap().find(ctrname);
                 LOG3("Looking up " << ctrname);
                 if (it != backend->getDirectCounterMap().end()) {
@@ -506,7 +506,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 backend->getMeterMap().setSize(decl, size);
                 BUG_CHECK(decl->is<IR::Declaration_Instance>(),
                           "%1%: expected an instance", decl->getNode());
-                cstring name = extVisibleName(decl);
+                cstring name = decl->controlPlaneName();
                 result->emplace("direct_meters", name);
             }
         } else {
@@ -533,7 +533,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         unsigned id = get(backend->getStructure().ids, action);
         LOG3("look up id " << action << " " << id);
         action_ids->append(id);
-        auto name = extVisibleName(action);
+        auto name = action->controlPlaneName();
         actions->append(name);
         useActionName.emplace(action->name, name);
     }

@@ -41,18 +41,18 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("rewrite_mac") table rewrite_mac_0 {
+    @name(".rewrite_mac") table rewrite_mac_0 {
         actions = {
             on_miss_0();
             rewrite_src_dst_mac_0();
@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_bd") action set_bd_0(bit<16> bd) {
         meta.ingress_metadata.bd = bd;
     }
-    @name("bd") table bd_0 {
+    @name(".bd") table bd_0 {
         actions = {
             set_vrf_0();
             @defaultonly NoAction();
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 65536;
         default_action = NoAction();
     }
-    @name("ipv4_fib") table ipv4_fib_0 {
+    @name(".ipv4_fib") table ipv4_fib_0 {
         actions = {
             on_miss_1();
             fib_hit_nexthop_0();
@@ -121,7 +121,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 131072;
         default_action = NoAction();
     }
-    @name("ipv4_fib_lpm") table ipv4_fib_lpm_0 {
+    @name(".ipv4_fib_lpm") table ipv4_fib_lpm_0 {
         actions = {
             on_miss_1();
             fib_hit_nexthop_0();
@@ -134,7 +134,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16384;
         default_action = NoAction();
     }
-    @name("nexthop") table nexthop_0 {
+    @name(".nexthop") table nexthop_0 {
         actions = {
             on_miss_1();
             set_egress_details_0();
@@ -146,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 32768;
         default_action = NoAction();
     }
-    @name("port_mapping") table port_mapping_0 {
+    @name(".port_mapping") table port_mapping_0 {
         actions = {
             set_bd_0();
             @defaultonly NoAction();

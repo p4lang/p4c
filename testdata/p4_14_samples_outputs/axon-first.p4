@@ -27,19 +27,19 @@ struct metadata {
 struct headers {
     @name("axon_head") 
     axon_head_t    axon_head;
-    @name("axon_fwdHop") 
+    @name(".axon_fwdHop") 
     axon_hop_t[64] axon_fwdHop;
-    @name("axon_revHop") 
+    @name(".axon_revHop") 
     axon_hop_t[64] axon_revHop;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_fwdHop") state parse_fwdHop {
+    @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
         transition parse_next_fwdHop;
     }
-    @name("parse_head") state parse_head {
+    @name(".parse_head") state parse_head {
         packet.extract<axon_head_t>(hdr.axon_head);
         meta.my_metadata.fwdHopCount = hdr.axon_head.fwdHopCount;
         meta.my_metadata.revHopCount = hdr.axon_head.revHopCount;
@@ -49,24 +49,24 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_next_fwdHop;
         }
     }
-    @name("parse_next_fwdHop") state parse_next_fwdHop {
+    @name(".parse_next_fwdHop") state parse_next_fwdHop {
         transition select(meta.my_metadata.fwdHopCount) {
             8w0x0: parse_next_revHop;
             default: parse_fwdHop;
         }
     }
-    @name("parse_next_revHop") state parse_next_revHop {
+    @name(".parse_next_revHop") state parse_next_revHop {
         transition select(meta.my_metadata.revHopCount) {
             8w0x0: accept;
             default: parse_revHop;
         }
     }
-    @name("parse_revHop") state parse_revHop {
+    @name(".parse_revHop") state parse_revHop {
         packet.extract<axon_hop_t>(hdr.axon_revHop.next);
         meta.my_metadata.revHopCount = meta.my_metadata.revHopCount + 8w255;
         transition parse_next_revHop;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_head;
             default: accept;
@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_revHop.push_front(1);
         hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
-    @name("drop_pkt") table drop_pkt {
+    @name(".drop_pkt") table drop_pkt {
         actions = {
             _drop();
             @defaultonly NoAction();
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-    @name("route_pkt") table route_pkt {
+    @name(".route_pkt") table route_pkt {
         actions = {
             _drop();
             route();
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         key = {
             hdr.axon_head.isValid()     : exact @name("hdr.axon_head.isValid()") ;
-            hdr.axon_fwdHop[0].isValid(): exact @name("hdr.axon_fwdHop[0].isValid()") ;
+            hdr.axon_fwdHop[0].isValid(): exact @name("hdr..axon_fwdHop[0].isValid()") ;
         }
         size = 1;
         default_action = NoAction();

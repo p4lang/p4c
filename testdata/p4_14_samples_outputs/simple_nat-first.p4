@@ -82,19 +82,19 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_cpu_header") state parse_cpu_header {
+    @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         meta.meta.if_index = hdr.cpu_header.if_index;
         transition parse_ethernet;
     }
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         meta.meta.ipv4_sa = hdr.ipv4.srcAddr;
         meta.meta.ipv4_da = hdr.ipv4.dstAddr;
@@ -104,13 +104,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_tcp") state parse_tcp {
+    @name(".parse_tcp") state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
         meta.meta.tcp_sp = hdr.tcp.srcPort;
         meta.meta.tcp_dp = hdr.tcp.dstPort;
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
         transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_cpu_header;
@@ -138,7 +138,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.cpu_header.reason = 8w0xab;
         hdr.cpu_header.if_index = meta.meta.if_index;
     }
-    @name("send_frame") table send_frame {
+    @name(".send_frame") table send_frame {
         actions = {
             do_rewrites();
             _drop();
@@ -150,7 +150,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 256;
         default_action = NoAction();
     }
-    @name("send_to_cpu") table send_to_cpu {
+    @name(".send_to_cpu") table send_to_cpu {
         actions = {
             do_cpu_encap();
             @defaultonly NoAction();
@@ -202,7 +202,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nat_no_nat") action nat_no_nat() {
         meta.meta.do_forward = 1w1;
     }
-    @name("forward") table forward {
+    @name(".forward") table forward {
         actions = {
             set_dmac();
             _drop();
@@ -214,7 +214,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction();
     }
-    @name("if_info") table if_info {
+    @name(".if_info") table if_info {
         actions = {
             _drop();
             set_if_info();
@@ -225,7 +225,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("ipv4_lpm") table ipv4_lpm {
+    @name(".ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop();
             _drop();
@@ -237,7 +237,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-    @name("nat") table nat {
+    @name(".nat") table nat {
         actions = {
             _drop();
             nat_miss_int_to_ext();

@@ -22,18 +22,18 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<64> tmp;
-    @name("parse_head") state parse_head {
+    @name(".parse_head") state parse_head {
         packet.extract<easyroute_head_t>(hdr.easyroute_head);
         transition select(hdr.easyroute_head.num_valid) {
             32w0: accept;
             default: parse_port;
         }
     }
-    @name("parse_port") state parse_port {
+    @name(".parse_port") state parse_port {
         packet.extract<easyroute_port_t>(hdr.easyroute_port);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         tmp = packet.lookahead<bit<64>>();
         transition select(tmp[63:0]) {
             64w0: parse_head;
@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
         hdr.easyroute_port.setInvalid();
     }
-    @name("route_pkt") table route_pkt_0 {
+    @name(".route_pkt") table route_pkt_0 {
         actions = {
             _drop_0();
             route_0();

@@ -16,7 +16,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
@@ -29,7 +29,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop_0() {
     }
-    @name("routing") table routing_0 {
+    @name(".routing") table routing_0 {
         actions = {
             route_eth_0();
             noop_0();
