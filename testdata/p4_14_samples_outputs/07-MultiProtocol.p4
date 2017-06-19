@@ -94,11 +94,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_icmp") state parse_icmp {
+    @name(".parse_icmp") state parse_icmp {
         packet.extract(hdr.icmp);
         transition accept;
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
             (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x1 &&& 8w0xff): parse_icmp;
@@ -107,7 +107,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv6") state parse_ipv6 {
+    @name(".parse_ipv6") state parse_ipv6 {
         packet.extract(hdr.ipv6);
         transition select(hdr.ipv6.nextHdr) {
             8w0x1: parse_icmp;
@@ -116,15 +116,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_tcp") state parse_tcp {
+    @name(".parse_tcp") state parse_tcp {
         packet.extract(hdr.tcp);
         transition accept;
     }
-    @name("parse_udp") state parse_udp {
+    @name(".parse_udp") state parse_udp {
         packet.extract(hdr.udp);
         transition accept;
     }
-    @name("parse_vlan_tag") state parse_vlan_tag {
+    @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract(hdr.vlan_tag);
         transition select(hdr.vlan_tag.etherType) {
             16w0x800: parse_ipv4;
@@ -132,7 +132,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan_tag;
@@ -176,7 +176,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".send_packet") action send_packet() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
-    @name("ethertype_match") table ethertype_match {
+    @name(".ethertype_match") table ethertype_match {
         actions = {
             l2_packet;
             ipv4_packet;
@@ -188,7 +188,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.etherType: exact;
         }
     }
-    @name("icmp_check") table icmp_check {
+    @name(".icmp_check") table icmp_check {
         actions = {
             nop;
             drop;
@@ -197,7 +197,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.icmp.typeCode: exact;
         }
     }
-    @name("ipv4_match") table ipv4_match {
+    @name(".ipv4_match") table ipv4_match {
         actions = {
             nop;
             set_egress_port;
@@ -206,7 +206,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr: exact;
         }
     }
-    @name("ipv6_match") table ipv6_match {
+    @name(".ipv6_match") table ipv6_match {
         actions = {
             nop;
             set_egress_port;
@@ -215,7 +215,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv6.dstAddr: exact;
         }
     }
-    @name("l2_match") table l2_match {
+    @name(".l2_match") table l2_match {
         actions = {
             nop;
             set_egress_port;
@@ -224,7 +224,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.dstAddr: exact;
         }
     }
-    @name("set_egress") table set_egress {
+    @name(".set_egress") table set_egress {
         actions = {
             nop;
             send_packet;
@@ -233,7 +233,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ing_metadata.drop: exact;
         }
     }
-    @name("tcp_check") table tcp_check {
+    @name(".tcp_check") table tcp_check {
         actions = {
             nop;
             drop;
@@ -242,7 +242,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.tcp.dstPort: exact;
         }
     }
-    @name("udp_check") table udp_check {
+    @name(".udp_check") table udp_check {
         actions = {
             nop;
             drop;

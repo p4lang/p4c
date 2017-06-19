@@ -158,15 +158,15 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("drop_stats") counter(32w256, CounterType.packets) drop_stats;
-    @name("drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
+    @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
+    @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
     @name(".drop_stats_update") action drop_stats_update() {
         drop_stats_2.count((bit<32>)(bit<32>)meta.ingress_metadata.drop_reason);
     }
@@ -187,13 +187,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".congestion_mirror_set") action congestion_mirror_set() {
     }
-    @name("drop_stats") table drop_stats_0 {
+    @name(".drop_stats") table drop_stats_0 {
         actions = {
             drop_stats_update;
         }
         size = 256;
     }
-    @name("system_acl") table system_acl {
+    @name(".system_acl") table system_acl {
         actions = {
             nop;
             redirect_to_cpu;

@@ -21,7 +21,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
@@ -56,7 +56,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".setb1") action setb1_1(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("E1") table E1 {
+    @name(".E1") table E1 {
         actions = {
             setf1_0();
             noop_0();
@@ -67,7 +67,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction_0();
     }
-    @name("E2") table E2 {
+    @name(".E2") table E2 {
         actions = {
             setb4_0();
             noop_1();
@@ -78,7 +78,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction_1();
     }
-    @name("EA") table EA {
+    @name(".EA") table EA {
         actions = {
             setb1_0();
             noop_10();
@@ -89,7 +89,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction_11();
     }
-    @name("EB") table EB {
+    @name(".EB") table EB {
         actions = {
             setb1_1();
             noop_11();
@@ -146,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".setb4") action setb4_1(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1 {
+    @name(".A1") table A1 {
         actions = {
             setb1_5();
             noop_12();
@@ -157,7 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_13();
     }
-    @name("A2") table A2 {
+    @name(".A2") table A2 {
         actions = {
             setb3_0();
             noop_13();
@@ -168,7 +168,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_14();
     }
-    @name("A3") table A3 {
+    @name(".A3") table A3 {
         actions = {
             setb1_6();
             noop_14();
@@ -179,7 +179,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_15();
     }
-    @name("B1") table B1 {
+    @name(".B1") table B1 {
         actions = {
             setb2_0();
             noop_15();
@@ -190,7 +190,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_16();
     }
-    @name("B2") table B2 {
+    @name(".B2") table B2 {
         actions = {
             setb4_1();
             noop_16();

@@ -58,8 +58,8 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
     for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
-            auto header_name = extVisibleName(f);
-            auto header_type = extVisibleName(ft->to<IR::Type_StructLike>());
+            auto header_name = f->controlPlaneName();
+            auto header_type = ft->to<IR::Type_StructLike>()->controlPlaneName();
             if (meta == true) {
                 json->add_metadata(header_type, header_name);
             } else {
@@ -72,8 +72,9 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
                     Util::JsonArray* fields = new Util::JsonArray();
                     for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                         auto uft = typeMap->getType(uf, true);
-                        auto h_name = header_name + "." + extVisibleName(uf);
-                        auto h_type = extVisibleName(uft->to<IR::Type_StructLike>());
+                        auto h_name = header_name + "." + uf->controlPlaneName();
+                        auto h_type = uft->to<IR::Type_StructLike>()
+                                         ->controlPlaneName();
                         unsigned id = json->add_header(h_type, h_name);
                         fields->append(id);
                     }
@@ -116,16 +117,17 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto stack = ft->to<IR::Type_Stack>();
         if (stack == nullptr)
             continue;
-        auto stack_name = extVisibleName(f);
+        auto stack_name = f->controlPlaneName();
         auto stack_size = stack->getSize();
         auto type = typeMap->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
         addHeaderType(ht);
-        cstring stack_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
+        cstring stack_type = stack->elementType->to<IR::Type_Header>()
+                                               ->controlPlaneName();
         std::vector<unsigned> ids;
         for (unsigned i = 0; i < stack_size; i++) {
-            cstring hdrName = extVisibleName(f) + "[" + Util::toString(i) + "]";
+            cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
             auto id = json->add_header(stack_type, hdrName);
             ids.push_back(id);
         }
@@ -153,7 +155,7 @@ void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
 }
 
 void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
-    cstring name = extVisibleName(st);
+    cstring name = st->controlPlaneName();
     auto fields = new Util::JsonArray();
     unsigned max_length = 0;  // for variable-sized headers
     bool varbitFound = false;
@@ -248,7 +250,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
         LOG1("variable " << v);
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
-            auto metadata_type = extVisibleName(st);
+            auto metadata_type = st->controlPlaneName();
             if (type->is<IR::Type_Header>())
                 json->add_header(metadata_type, v->name);
             else
@@ -263,7 +265,8 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             addHeaderType(ht);
-            cstring header_type = extVisibleName(stack->elementType->to<IR::Type_Header>());
+            cstring header_type = stack->elementType->to<IR::Type_Header>()
+                                                    ->controlPlaneName();
             std::vector<unsigned> header_ids;
             for (unsigned i=0; i < stack->getSize(); i++) {
                 cstring name = v->name + "[" + Util::toString(i) + "]";

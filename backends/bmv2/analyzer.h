@@ -75,7 +75,7 @@ class CFG final : public IHasDbPrint {
         const IR::P4Table* table;
         const IR::Expression*      invocation;
         explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation)
-        : Node(table->externalName()), table(table), invocation(invocation)
+        : Node(table->controlPlaneName()), table(table), invocation(invocation)
         { CHECK_NULL(table); CHECK_NULL(invocation); }
     };
 

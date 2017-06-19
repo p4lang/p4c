@@ -14,7 +14,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         transition accept;
     }
 }
@@ -27,7 +27,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         a(meta.md.b);
         a(meta.md.b);
     }
-    @name("t") table t {
+    @name(".t") table t {
         actions = {
             b();
             @defaultonly NoAction();

@@ -21,19 +21,19 @@ struct metadata {
 struct headers {
     @name("data") 
     data_t     data;
-    @name("extra") 
+    @name(".extra") 
     extra_t[4] extra;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("extra") state extra {
+    @name(".extra") state extra {
         packet.extract<extra_t>(hdr.extra.next);
         transition select(hdr.extra.last.b2) {
             8w0x80 &&& 8w0x80: extra;
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition extra;
     }
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("ex1") table ex1_0 {
+    @name(".ex1") table ex1_0 {
         actions = {
             set0b1_0();
             act1_0();
@@ -77,11 +77,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.extra[0].h: ternary @name("hdr.extra[0].h") ;
+            hdr.extra[0].h: ternary @name("hdr..extra[0].h") ;
         }
         default_action = NoAction();
     }
-    @name("tbl1") table tbl1_0 {
+    @name(".tbl1") table tbl1_0 {
         actions = {
             setb2_0();
             noop_0();
@@ -92,7 +92,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl2") table tbl2_0 {
+    @name(".tbl2") table tbl2_0 {
         actions = {
             set1b1_0();
             noop_0();
@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl3") table tbl3_0 {
+    @name(".tbl3") table tbl3_0 {
         actions = {
             set2b2_0();
             noop_0();
@@ -114,7 +114,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test1") table test1_0 {
+    @name(".test1") table test1_0 {
         actions = {
             setb1_0();
             noop_0();

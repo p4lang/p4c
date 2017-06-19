@@ -21,7 +21,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
@@ -39,7 +39,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".setb2") action setb2(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("E1") table E1 {
+    @name(".E1") table E1 {
         actions = {
             setf1;
             noop;
@@ -48,7 +48,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             hdr.data.f2: ternary;
         }
     }
-    @name("EA") table EA {
+    @name(".EA") table EA {
         actions = {
             setb1;
             noop;
@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             hdr.data.f3: ternary;
         }
     }
-    @name("EB") table EB {
+    @name(".EB") table EB {
         actions = {
             setb2;
             noop;
@@ -92,7 +92,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".setb4") action setb4(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1 {
+    @name(".A1") table A1 {
         actions = {
             setb1;
             noop;
@@ -101,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f1: ternary;
         }
     }
-    @name("A2") table A2 {
+    @name(".A2") table A2 {
         actions = {
             setb3;
             noop;
@@ -110,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.b1: ternary;
         }
     }
-    @name("B1") table B1 {
+    @name(".B1") table B1 {
         actions = {
             setb2;
             noop;
@@ -119,7 +119,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f2: ternary;
         }
     }
-    @name("B2") table B2 {
+    @name(".B2") table B2 {
         actions = {
             setb4;
             noop;

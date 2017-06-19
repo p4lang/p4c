@@ -64,14 +64,6 @@ Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo) {
     return result;
 }
 
-/// Helper function to trim leading '.' in a name
-cstring extVisibleName(const IR::IDeclaration* decl) {
-    cstring name = decl->externalName();
-    if (name.startsWith("."))
-        return name.substr(1);
-    return name;
-}
-
 cstring stringRepr(mpz_class value, unsigned bytes) {
     cstring sign = "";
     const char* r;

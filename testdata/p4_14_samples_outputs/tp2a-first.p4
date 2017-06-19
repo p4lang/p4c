@@ -21,7 +21,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".setb4") action setb4(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1 {
+    @name(".A1") table A1 {
         actions = {
             setb1();
             noop();
@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("A2") table A2 {
+    @name(".A2") table A2 {
         actions = {
             setb3();
             noop();
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B1") table B1 {
+    @name(".B1") table B1 {
         actions = {
             setb2();
             noop();
@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B2") table B2 {
+    @name(".B2") table B2 {
         actions = {
             setb4();
             noop();

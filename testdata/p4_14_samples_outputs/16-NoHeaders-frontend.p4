@@ -8,7 +8,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         transition accept;
     }
 }
@@ -21,7 +21,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".a1") action a1_0() {
     }
-    @name("t1") table t1_0 {
+    @name(".t1") table t1_0 {
         actions = {
             a1_0();
             @defaultonly NoAction();

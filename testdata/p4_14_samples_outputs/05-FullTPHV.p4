@@ -298,7 +298,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.h);
         transition accept;
     }
@@ -539,12 +539,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_egress_spec") action set_egress_spec(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             a1;
         }
     }
-    @name("use_16bit_fields_1") table use_16bit_fields_1 {
+    @name(".use_16bit_fields_1") table use_16bit_fields_1 {
         actions = {
             set_egress_spec;
         }
@@ -615,7 +615,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_16_64: exact;
         }
     }
-    @name("use_16bit_fields_2") table use_16bit_fields_2 {
+    @name(".use_16bit_fields_2") table use_16bit_fields_2 {
         actions = {
             set_egress_spec;
         }
@@ -654,7 +654,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_16_96: exact;
         }
     }
-    @name("use_32bit_fields_1") table use_32bit_fields_1 {
+    @name(".use_32bit_fields_1") table use_32bit_fields_1 {
         actions = {
             set_egress_spec;
         }
@@ -693,7 +693,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_32: exact;
         }
     }
-    @name("use_32bit_fields_2") table use_32bit_fields_2 {
+    @name(".use_32bit_fields_2") table use_32bit_fields_2 {
         actions = {
             set_egress_spec;
         }
@@ -731,7 +731,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_63: exact;
         }
     }
-    @name("use_8bit_fields") table use_8bit_fields {
+    @name(".use_8bit_fields") table use_8bit_fields {
         actions = {
             set_egress_spec;
         }

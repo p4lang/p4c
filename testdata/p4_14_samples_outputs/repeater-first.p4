@@ -14,7 +14,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
@@ -32,7 +32,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
         standard_metadata.egress_spec = egress_port;
     }
-    @name("repeater") table repeater {
+    @name(".repeater") table repeater {
         actions = {
             my_drop();
             set_egress_port();

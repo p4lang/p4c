@@ -21,19 +21,19 @@ struct metadata {
 struct headers {
     @name("data") 
     data_t       data;
-    @name("extra") 
+    @name(".extra") 
     data2_t_0[4] extra;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_extra") state parse_extra {
+    @name(".parse_extra") state parse_extra {
         packet.extract<data2_t_0>(hdr.extra.next);
         transition select(hdr.extra.last.more) {
             8w0: accept;
             default: parse_extra;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition select(hdr.data.more) {
             8w0: accept;
@@ -68,13 +68,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.more = hdr.extra[0].more;
         hdr.extra.pop_front(1);
     }
-    @name("output") table output_1 {
+    @name(".output") table output_1 {
         actions = {
             output_0();
         }
         default_action = output_0(9w1);
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             noop_0();
             push1_0();

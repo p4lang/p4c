@@ -33,17 +33,17 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ethernet") state ethernet {
+    @name(".ethernet") state ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x800: ipv4;
         }
     }
-    @name("ipv4") state ipv4 {
+    @name(".ipv4") state ipv4 {
         packet.extract(hdr.ipv4);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition ethernet;
     }
 }
@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         standard_metadata.egress_spec = egress_spec;
     }
-    @name("routing") table routing {
+    @name(".routing") table routing {
         actions = {
             do_drop;
             route_ipv4;

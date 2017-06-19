@@ -245,7 +245,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
@@ -460,14 +460,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".a4_1") action a4() {
     }
-    @name("t1") table t1_0 {
+    @name(".t1") table t1_0 {
         actions = {
             a1_0();
             @defaultonly NoAction();
         }
         default_action = NoAction();
     }
-    @name("t2_1") table t2 {
+    @name(".t2_1") table t2 {
         actions = {
             a2();
             @defaultonly NoAction();
@@ -540,7 +540,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("t2_2") table t2_0 {
+    @name(".t2_2") table t2_0 {
         actions = {
             a2_0();
             @defaultonly NoAction();
@@ -565,7 +565,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("t2_3") table t2_4 {
+    @name(".t2_3") table t2_4 {
         actions = {
             a2_4();
             @defaultonly NoAction();
@@ -590,7 +590,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("t3_1") table t3 {
+    @name(".t3_1") table t3 {
         actions = {
             a3();
             @defaultonly NoAction();
@@ -618,7 +618,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("t4_1") table t4 {
+    @name(".t4_1") table t4 {
         actions = {
             a4();
             @defaultonly NoAction();

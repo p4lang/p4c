@@ -46,16 +46,16 @@ struct headers {
     ipv4_t        ipv4;
     @name("mpls_bos") 
     mpls_t        mpls_bos;
-    @name("mpls") 
+    @name(".mpls") 
     mpls_t[3]     mpls;
-    @name("vlan_tag_") 
+    @name(".vlan_tag_") 
     vlan_tag_t[2] vlan_tag_;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<24> tmp;
     bit<4> tmp_0;
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan;
@@ -67,13 +67,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.protocol) {
             default: accept;
         }
     }
-    @name("parse_mpls") state parse_mpls {
+    @name(".parse_mpls") state parse_mpls {
         tmp = packet.lookahead<bit<24>>();
         transition select(tmp[0:0]) {
             1w0: parse_mpls_not_bos;
@@ -81,7 +81,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_mpls_bos") state parse_mpls_bos {
+    @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
         tmp_0 = packet.lookahead<bit<4>>();
         transition select(tmp_0[3:0]) {
@@ -89,11 +89,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_mpls_not_bos") state parse_mpls_not_bos {
+    @name(".parse_mpls_not_bos") state parse_mpls_not_bos {
         packet.extract<mpls_t>(hdr.mpls.next);
         transition parse_mpls;
     }
-    @name("parse_vlan") state parse_vlan {
+    @name(".parse_vlan") state parse_vlan {
         packet.extract<vlan_tag_t>(hdr.vlan_tag_.next);
         transition select(hdr.vlan_tag_.last.etherType) {
             16w0x8100: parse_vlan;
@@ -105,7 +105,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -113,7 +113,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_noop") action do_noop_0() {
     }
-    @name("do_nothing") table do_nothing_0 {
+    @name(".do_nothing") table do_nothing_0 {
         actions = {
             do_noop_0();
             @defaultonly NoAction();

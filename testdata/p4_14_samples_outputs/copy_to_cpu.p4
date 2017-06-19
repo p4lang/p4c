@@ -32,15 +32,15 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_cpu_header") state parse_cpu_header {
+    @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract(hdr.cpu_header);
         transition parse_ethernet;
     }
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;
     }
-    @name("redirect") table redirect {
+    @name(".redirect") table redirect {
         actions = {
             _drop;
             do_cpu_encap;
@@ -76,7 +76,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
         clone3(CloneType.I2E, (bit<32>)32w250, { standard_metadata });
     }
-    @name("copy_to_cpu") table copy_to_cpu {
+    @name(".copy_to_cpu") table copy_to_cpu {
         actions = {
             do_copy_to_cpu;
         }

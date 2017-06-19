@@ -34,19 +34,19 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("d2") state d2 {
+    @name(".d2") state d2 {
         packet.extract(hdr.data2);
         transition d3;
     }
-    @name("d3") state d3 {
+    @name(".d3") state d3 {
         packet.extract(hdr.data3);
         transition more;
     }
-    @name("more") state more {
+    @name(".more") state more {
         packet.extract(hdr.data);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data1);
         transition d2;
     }
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop() {
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             setb1;
             noop;

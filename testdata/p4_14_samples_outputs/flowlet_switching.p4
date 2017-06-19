@@ -69,25 +69,25 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition select(hdr.ipv4.protocol) {
             8w6: parse_tcp;
             default: accept;
         }
     }
-    @name("parse_tcp") state parse_tcp {
+    @name(".parse_tcp") state parse_tcp {
         packet.extract(hdr.tcp);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -99,7 +99,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name("send_frame") table send_frame {
+    @name(".send_frame") table send_frame {
         actions = {
             rewrite_mac;
             _drop;
@@ -115,8 +115,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("flowlet_id") register<bit<16>>(32w8192) flowlet_id;
-    @name("flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime;
+    @name(".flowlet_id") register<bit<16>>(32w8192) flowlet_id;
+    @name(".flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime;
     @name("._drop") action _drop() {
         mark_to_drop();
     }
@@ -143,7 +143,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.flowlet_id = meta.ingress_metadata.flowlet_id + 16w1;
         flowlet_id.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
     }
-    @name("ecmp_group") table ecmp_group {
+    @name(".ecmp_group") table ecmp_group {
         actions = {
             _drop;
             set_ecmp_select;
@@ -153,7 +153,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
     }
-    @name("ecmp_nhop") table ecmp_nhop {
+    @name(".ecmp_nhop") table ecmp_nhop {
         actions = {
             _drop;
             set_nhop;
@@ -163,12 +163,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 16384;
     }
-    @name("flowlet") table flowlet {
+    @name(".flowlet") table flowlet {
         actions = {
             lookup_flowlet_map;
         }
     }
-    @name("forward") table forward {
+    @name(".forward") table forward {
         actions = {
             set_dmac;
             _drop;
@@ -178,7 +178,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 512;
     }
-    @name("new_flowlet") table new_flowlet {
+    @name(".new_flowlet") table new_flowlet {
         actions = {
             update_flowlet_id;
         }

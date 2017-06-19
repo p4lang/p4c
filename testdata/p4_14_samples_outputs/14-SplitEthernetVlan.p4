@@ -44,31 +44,31 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_cfi") state parse_cfi {
+    @name(".parse_cfi") state parse_cfi {
         packet.extract(hdr.cfi);
         transition parse_vlan_id;
     }
-    @name("parse_len_or_type") state parse_len_or_type {
+    @name(".parse_len_or_type") state parse_len_or_type {
         packet.extract(hdr.len_or_type);
         transition parse_pcp;
     }
-    @name("parse_mac_da") state parse_mac_da {
+    @name(".parse_mac_da") state parse_mac_da {
         packet.extract(hdr.mac_da);
         transition parse_mac_sa;
     }
-    @name("parse_mac_sa") state parse_mac_sa {
+    @name(".parse_mac_sa") state parse_mac_sa {
         packet.extract(hdr.mac_sa);
         transition parse_len_or_type;
     }
-    @name("parse_pcp") state parse_pcp {
+    @name(".parse_pcp") state parse_pcp {
         packet.extract(hdr.pcp);
         transition parse_cfi;
     }
-    @name("parse_vlan_id") state parse_vlan_id {
+    @name(".parse_vlan_id") state parse_vlan_id {
         packet.extract(hdr.vlan_id);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_mac_da;
     }
 }
@@ -76,7 +76,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t2") table t2 {
+    @name(".t2") table t2 {
         actions = {
             nop;
         }
@@ -92,7 +92,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             nop;
         }

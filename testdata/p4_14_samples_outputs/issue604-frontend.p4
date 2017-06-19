@@ -13,7 +13,7 @@ extern extern_test {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         transition accept;
     }
 }
@@ -28,7 +28,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".a") action a_0() {
         my_extern_inst_0.my_extern_method();
     }
-    @name("t") table t_0 {
+    @name(".t") table t_0 {
         actions = {
             a_0();
             @defaultonly NoAction();
