@@ -205,7 +205,16 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
 }
 
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
-    if (as->left == as->right) {   // FIXME -- need deep equals here?
+    if (as->left->toString() == as->right->toString() &&
+        !as->left->to<IR::PathExpression>() ||
+        as->left->to<IR::PathExpression>() &&
+        as->right->to<IR::PathExpression>() &&
+        cstring(as->left->to<IR::PathExpression>()->path->name) ==
+        cstring(as->right->to<IR::PathExpression>()->path->name)) {
+        /* If left and right are variables, 
+        * extract variable name using cstring()
+        * otherwise use toString() to extract header field name. 
+        * FIXME -- Need deep equals here? */
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
     if (!working) return as;
