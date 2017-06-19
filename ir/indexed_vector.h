@@ -29,18 +29,26 @@ class JSONLoader;
 
 namespace IR {
 
-// declaration interface: objects with names
+/// The Declaration interface, representing objects with names.
 class IDeclaration : public virtual INode {
  public:
-    // name of the declared object
+    /// @return the name of the declared object.
     virtual ID getName() const = 0;
-    // User-visible name of the object, with optional replacement if no explicit @name
+
+    /**
+     * @return the user-visible name of the object.
+     * @param replace  If provided, a fallback name which is used if the object
+     *                 doesn't have an explicit '@name' annotation.
+     */
     virtual cstring externalName(cstring replace = cstring()) const;
+
     virtual ~IDeclaration() {}
 };
 
-// A Vector that also keeps an index of all IDeclaration objects.
-
+/**
+ * A Vector which holds objects which are instances of IDeclaration, and keeps
+ * an index so that they can be quickly looked up by name.
+ */
 template<class T>
 class IndexedVector : public Vector<T> {
     ordered_map<cstring, const IDeclaration*> declarations;
