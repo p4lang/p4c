@@ -25,7 +25,6 @@ ENV P4C_DEPS automake \
              libtool \
              pkg-config \
              python-ipaddr \
-             python-scapy \
              tcpdump
 ENV P4C_RUNTIME_DEPS cpp \
                      libboost-iostreams1.58.0 \
