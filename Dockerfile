@@ -40,10 +40,12 @@ RUN apt-get update && \
     cd build && \
     make && \
     make install && \
-    (test "$IMAGE_TYPE" = "build" && \
-      apt-get purge -y $P4C_DEPS && \
-      apt-get autoremove --purge -y && \
-      rm -rf /p4c /var/cache/apt/* /var/lib/apt/lists/* && \
-      echo 'Build image ready') || \
-    (test "$IMAGE_TYPE" = "test" && \
-      echo 'Test image ready')
+    ( \
+      (test "$IMAGE_TYPE" = "build" && \
+        apt-get purge -y $P4C_DEPS && \
+        apt-get autoremove --purge -y && \
+        rm -rf /p4c /var/cache/apt/* /var/lib/apt/lists/* && \
+        echo 'Build image ready') || \
+      (test "$IMAGE_TYPE" = "test" && \
+        echo 'Test image ready') \
+    )
