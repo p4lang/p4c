@@ -65,8 +65,14 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         if (s->ifTrue == nullptr) {
             /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
              * the if statement as needed */
-            if (s->ifFalse == nullptr)
-                return nullptr;
+            if (s->ifFalse == nullptr) {
+                if (!hasSideEffects(s->condition)) {
+                    return nullptr;
+                } else {
+                    s->ifTrue = new IR::EmptyStatement();
+                    return s;
+                }
+            }
             s->ifTrue = s->ifFalse;
             s->ifFalse = nullptr;
             s->condition = new IR::LNot(s->condition); }
@@ -204,8 +210,34 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     return postorder(as);
 }
 
+/* Function to check if left and right side of
+ * assignment statement are equivalent.
+ * FIXME -- This function is temporary, proper deep comparison may be required */
+bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Expression *right) {
+    // Compare names of variables (at this pass, all names are unique)
+    auto l1 = left->to<IR::PathExpression>();
+    auto r1 = right->to<IR::PathExpression>();
+    if (l1 && r1) {
+        return l1->path->name == r1->path->name;
+    }
+    // Compare references to arrays with indices
+    auto l2 = left->to<IR::Operation_Binary>();
+    auto r2 = right->to<IR::Operation_Binary>();
+    if (l2 && r2) {
+        return equiv(l2->left, r2->left) && equiv(l2->right, r2->right);
+    }
+    // Compare packet header/metadata fields
+    auto l3 = left->to<IR::Member>();
+    auto r3 = right->to<IR::Member>();
+    if (l3 && r3) {
+        return l3->member == r3->member && equiv(l3->expr, r3->expr);
+    } else {
+        return false;
+    }
+}
+
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
-    if (as->left == as->right) {   // FIXME -- need deep equals here?
+    if (equiv(as->left, as->right)) {
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
     if (!working) return as;
@@ -226,6 +258,26 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
         LOG3("dest of assignment is " << as->left << " so skipping");
     }
     return as;
+}
+
+IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
+    if (s->ifTrue == nullptr) {
+        /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
+         * the if statement as needed. We do not apply ElimDead as we don't want to
+         * modify other statements in the midst of analysis. */
+        if (s->ifFalse == nullptr) {
+            if (!hasSideEffects(s->condition)) {
+                return nullptr;
+            } else {
+                s->ifTrue = new IR::EmptyStatement();
+            }
+        } else {
+            s->ifTrue = s->ifFalse;
+            s->ifFalse = nullptr;
+            s->condition = new IR::LNot(s->condition);
+        }
+    }
+    return s;
 }
 
 IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
