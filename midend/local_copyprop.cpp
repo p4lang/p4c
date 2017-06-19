@@ -218,13 +218,15 @@ bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Express
     auto l1 = left->to<IR::PathExpression>();
     auto r1 = right->to<IR::PathExpression>();
     if (l1 && r1) {
-        return l1->path->name == r1->path->name;
+        return l1->path->name == r1->path->name &&
+        l1->path->absolute == r1->path->absolute;
     }
-    // Compare references to arrays with indices
+    // Compare binary operations (array indices)
     auto l2 = left->to<IR::Operation_Binary>();
     auto r2 = right->to<IR::Operation_Binary>();
     if (l2 && r2) {
-        return equiv(l2->left, r2->left) && equiv(l2->right, r2->right);
+        return equiv(l2->left, r2->left) && equiv(l2->right, r2->right) &&
+        typeid(*l2) == typeid(*r2);
     }
     // Compare packet header/metadata fields
     auto l3 = left->to<IR::Member>();
