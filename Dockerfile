@@ -25,6 +25,8 @@ ENV P4C_DEPS automake \
              libtool \
              pkg-config \
              python-ipaddr \
+             python-pip \
+             python-setuptools \
              tcpdump
 ENV P4C_RUNTIME_DEPS cpp \
                      libboost-iostreams1.58.0 \
@@ -36,7 +38,8 @@ COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_RUNTIME_DEPS && \
-    ./bootstrap.sh && \
+    pip install tenjin && \
+    ./bootstrap.sh --enable-p4runtime-to-pd && \
     cd build && \
     make && \
     make install && \
