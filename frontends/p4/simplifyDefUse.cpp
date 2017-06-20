@@ -160,6 +160,14 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    bool preorder(const IR::Function* func) override {
+        LOG3("FU Visiting " << dbp(func));
+        currentPoint = ProgramPoint(func);
+        visit(func->body);
+        checkOutParameters(func, func->type->parameters, getCurrentDefinitions());
+        return false;
+    }
+
     bool preorder(const IR::P4Parser* parser) override {
         LOG3("FU Visiting " << dbp(parser));
         visit(parser->states, "states");
