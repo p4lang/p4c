@@ -11,6 +11,7 @@ control c(inout bit<32> y) {
             bit<32> tmp_0;
             tmp = this.b();
             tmp_0 = arg + tmp;
+            arg = tmp_0;
         }
     };
     apply {
