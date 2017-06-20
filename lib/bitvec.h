@@ -170,6 +170,7 @@ class bitvec {
         if (size > 1) memset(ptr, 0, size * sizeof(*ptr));
         else data = 0; }  // NOLINT(whitespace/newline)
     bool setbit(size_t idx) {
+        assert(static_cast<int>(idx) >= 0);
         if (idx >= size * bits_per_unit) expand(1 + idx/bits_per_unit);
         if (size > 1)
             ptr[idx/bits_per_unit] |= (uintptr_t)1 << (idx%bits_per_unit);
@@ -177,6 +178,8 @@ class bitvec {
             data |= (uintptr_t)1 << idx;
         return true; }
     void setrange(size_t idx, size_t sz) {
+        assert(static_cast<int>(idx) >= 0);
+        assert(static_cast<int>(sz) >= 0);
         if (sz == 0) return;
         if (idx+sz > size * bits_per_unit) expand(1 + (idx+sz-1)/bits_per_unit);
         if (size == 1) {
@@ -200,6 +203,7 @@ class bitvec {
             for (size_t i = 1; i < size; i++)
                 ptr[i] = 0; } }
     void setraw(uintptr_t *raw, size_t sz) {
+        assert(static_cast<int>(sz) >= 0);
         if (sz > size) expand(sz);
         if (size == 1) {
             data = raw[0];
@@ -209,6 +213,7 @@ class bitvec {
             for (size_t i = sz; i < size; i++)
                 ptr[i] = 0; } }
     bool clrbit(size_t idx) {
+        assert(static_cast<int>(idx) >= 0);
         if (idx >= size * bits_per_unit) return false;
         if (size > 1)
             ptr[idx/bits_per_unit] &= ~((uintptr_t)1 << (idx%bits_per_unit));
@@ -216,6 +221,8 @@ class bitvec {
             data &= ~((uintptr_t)1 << idx);
         return false; }
     void clrrange(size_t idx, size_t sz) {
+        assert(static_cast<int>(idx) >= 0);
+        assert(static_cast<int>(sz) >= 0);
         if (sz == 0) return;
         if (idx >= size * bits_per_unit) return;
         if (size == 1) {
@@ -235,8 +242,10 @@ class bitvec {
             if (i < size)
                 ptr[i] &= ~(((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
     bool getbit(size_t idx) const {
+        assert(static_cast<int>(idx) >= 0);
         return (word(idx/bits_per_unit) >> (idx%bits_per_unit)) & 1; }
     uintptr_t getrange(size_t idx, size_t sz) const {
+        assert(static_cast<int>(idx) >= 0);
         assert(sz > 0 && sz <= bits_per_unit);
         if (idx >= size * bits_per_unit) return 0;
         if (size > 1) {
@@ -249,6 +258,7 @@ class bitvec {
         } else {
             return (data >> idx) & ~(~(uintptr_t)1 << (sz-1)); }}
     void putrange(size_t idx, size_t sz, uintptr_t v) {
+        assert(static_cast<int>(idx) >= 0);
         assert(sz > 0 && sz <= bits_per_unit);
         uintptr_t mask = ~(uintptr_t)0 >> (bits_per_unit - sz);
         v &= mask;
@@ -383,8 +393,12 @@ class bitvec {
         return true; }
     bitvec &operator>>=(size_t count);
     bitvec &operator<<=(size_t count);
-    bitvec operator>>(size_t count) const { bitvec rv(*this); rv >>= count; return rv; }
-    bitvec operator<<(size_t count) const { bitvec rv(*this); rv <<= count; return rv; }
+    bitvec operator>>(size_t count) const {
+        assert(static_cast<int>(count) >= 0);
+        bitvec rv(*this); rv >>= count; return rv; }
+    bitvec operator<<(size_t count) const {
+        assert(static_cast<int>(count) >= 0);
+        bitvec rv(*this); rv <<= count; return rv; }
     int popcount() const {
         int rv = 0;
         for (size_t i = 0; i < size; i++)

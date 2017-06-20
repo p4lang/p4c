@@ -36,6 +36,7 @@ std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
 }
 
 bitvec &bitvec::operator>>=(size_t count) {
+    assert(static_cast<int>(count) >= 0);
     if (size == 1) {
         if (count >= bits_per_unit)
             data = 0;
@@ -60,6 +61,7 @@ bitvec &bitvec::operator>>=(size_t count) {
 }
 
 bitvec &bitvec::operator<<=(size_t count) {
+    assert(static_cast<int>(count) >= 0);
     size_t needsize = (max().index() + count + bits_per_unit - 1)/bits_per_unit;
     if (needsize > size) expand(needsize);
     if (size == 1) {
@@ -78,6 +80,8 @@ bitvec &bitvec::operator<<=(size_t count) {
 }
 
 bitvec bitvec::getslice(size_t idx, size_t sz) const {
+    assert(static_cast<int>(idx) >= 0);
+    assert(static_cast<int>(sz) >= 0);
     if (idx >= size * bits_per_unit) return bitvec();
     if (idx + sz > size * bits_per_unit)
         sz = size * bits_per_unit - idx;
