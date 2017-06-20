@@ -52,6 +52,7 @@ class HeaderType : public NamedP4Object {
     std::string name;
     int bitwidth;
     bool is_signed;
+    bool is_saturating;
     bool is_VL;
     bool is_hidden;
   };
@@ -64,7 +65,8 @@ class HeaderType : public NamedP4Object {
 
   // returns field offset
   int push_back_field(const std::string &field_name, int field_bit_width,
-                      bool is_signed = false, bool is_VL = false);
+                      bool is_signed = false, bool is_saturating = false,
+                      bool is_VL = false);
 
   // if field_length_expr is nullptr it means that the length will have to be
   // provided to extract
@@ -72,7 +74,8 @@ class HeaderType : public NamedP4Object {
       const std::string &field_name,
       int max_header_bytes,
       std::unique_ptr<VLHeaderExpression> field_length_expr,
-      bool is_signed = false);
+      bool is_signed = false,
+      bool is_saturating = false);
 
   const FInfo &get_finfo(int field_offset) const {
     return fields_info.at(field_offset);

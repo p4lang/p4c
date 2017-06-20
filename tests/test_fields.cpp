@@ -27,6 +27,7 @@
 #include <tuple>
 
 using bm::ByteContainer;
+using bm::Data;
 using bm::Field;
 
 using ::testing::TestWithParam;
@@ -235,3 +236,35 @@ TEST_P(SignedFieldTest, ExportBytes) {
 INSTANTIATE_TEST_CASE_P(TestParameters,
                         SignedFieldTest,
                         Range(2, 17));
+
+
+class SaturatingFieldTest : public ::testing::Test {
+ protected:
+  static constexpr int bitwidth = 8;
+};
+
+TEST_F(SaturatingFieldTest, Unsigned) {
+  constexpr int max = (1 << bitwidth) - 1;
+  constexpr int min = 0;
+  Field f(bitwidth, nullptr  /* parent hdr */, true, false  /* is_signed */,
+          false, false, true  /* is_saturating */);
+  f.set(max + 1);
+  EXPECT_EQ(max, f.get<int>());
+  f.set(min);
+  EXPECT_EQ(min, f.get<int>());
+  f.sub(f, Data(1));
+  EXPECT_EQ(min, f.get<int>());
+}
+
+TEST_F(SaturatingFieldTest, Signed) {
+  constexpr int max = (1 << (bitwidth - 1)) - 1;
+  constexpr int min = -max - 1;
+  Field f(bitwidth, nullptr  /* parent hdr */, true, true  /* is_signed */,
+          false, false, true  /* is_saturating */);
+  f.set(max + 1);
+  EXPECT_EQ(max, f.get<int>());
+  f.set(min);
+  EXPECT_EQ(min, f.get<int>());
+  f.sub(f, Data(1));
+  EXPECT_EQ(min, f.get<int>());
+}

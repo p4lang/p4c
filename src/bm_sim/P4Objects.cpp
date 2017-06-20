@@ -660,6 +660,9 @@ P4Objects::init_header_types(const Json::Value &cfg_root) {
       bool is_signed = false;
       if (cfg_field.size() > 2)
         is_signed = cfg_field[2].asBool();
+      bool is_saturating = false;
+      if (cfg_field.size() > 3)
+        is_saturating = cfg_field[3].asBool();
       if (cfg_field[1].asString() == "*") {  // VL field
         std::unique_ptr<VLHeaderExpression> VL_expr(nullptr);
         if (cfg_header_type.isMember("length_exp")) {
@@ -673,10 +676,12 @@ P4Objects::init_header_types(const Json::Value &cfg_root) {
         if (cfg_header_type.isMember("max_length"))
           max_header_bytes = cfg_header_type["max_length"].asInt();
         header_type->push_back_VL_field(
-            field_name, max_header_bytes, std::move(VL_expr), is_signed);
+            field_name, max_header_bytes, std::move(VL_expr),
+            is_signed, is_saturating);
       } else {
         int field_bit_width = cfg_field[1].asInt();
-        header_type->push_back_field(field_name, field_bit_width, is_signed);
+        header_type->push_back_field(
+            field_name, field_bit_width, is_signed, is_saturating);
       }
     }
 

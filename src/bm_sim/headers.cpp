@@ -50,7 +50,7 @@ class HiddenFMap {
 
 HiddenFMap::HiddenFMap() {
   fmap = {
-    {HeaderType::HiddenF::VALID, {"$valid$", 1, false, false, true}},
+    {HeaderType::HiddenF::VALID, {"$valid$", 1, false, false, false, true}},
   };
 }
 
@@ -81,11 +81,12 @@ HeaderType::HeaderType(const std::string &name, p4object_id_t id)
 
 int
 HeaderType::push_back_field(const std::string &field_name, int field_bit_width,
-                            bool is_signed, bool is_VL) {
+                            bool is_signed, bool is_saturating, bool is_VL) {
   auto pos = fields_info.end() - HiddenFMap::size();
   auto offset = std::distance(fields_info.begin(), pos);
   fields_info.insert(
-      pos, {field_name, field_bit_width, is_signed, is_VL, false});
+      pos,
+      {field_name, field_bit_width, is_signed, is_saturating, is_VL, false});
   return offset;
 }
 
@@ -94,8 +95,9 @@ HeaderType::push_back_VL_field(
     const std::string &field_name,
     int max_header_bytes,
     std::unique_ptr<VLHeaderExpression> field_length_expr,
-    bool is_signed) {
-  auto offset = push_back_field(field_name, 0, is_signed, true);
+    bool is_signed,
+    bool is_saturating) {
+  auto offset = push_back_field(field_name, 0, is_signed, is_saturating, true);
   // TODO(antonin)
   assert(!is_VL_header() && "header can only have one VL field");
   VL_expr_raw = std::move(field_length_expr);
@@ -143,7 +145,7 @@ Header::Header(const std::string &name, p4object_id_t id,
       arith_flag = false;
     }
     fields.emplace_back(finfo.bitwidth, this, arith_flag, finfo.is_signed,
-                        finfo.is_hidden, finfo.is_VL);
+                        finfo.is_hidden, finfo.is_VL, finfo.is_saturating);
     uint64_t field_unique_id = id;
     field_unique_id <<= 32;
     field_unique_id |= i;

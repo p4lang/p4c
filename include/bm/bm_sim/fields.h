@@ -49,7 +49,8 @@ class Field : public Data {
   // indirection in Header (for the field vector), so I am sticking to this for
   // now.
   explicit Field(int nbits, Header *parent_hdr, bool arith_flag = true,
-                 bool is_signed = false, bool hidden = false, bool VL = false);
+                 bool is_signed = false, bool hidden = false, bool VL = false,
+                 bool is_saturating = false);
 
   // to avoid dynamic resizing of the Bytecontainer, which would invalide field
   // references
@@ -99,6 +100,11 @@ class Field : public Data {
 
   void export_bytes() override {
     std::fill(bytes.begin(), bytes.end(), 0);  // very important !
+
+    if (is_saturating) {
+      if (value < min) value = min;
+      else if (value > max) value = max;
+    }
 
     if (!is_signed) {
       // is this efficient enough?
@@ -178,6 +184,7 @@ class Field : public Data {
   bool is_signed{false};
   bool hidden{false};
   bool VL{false};
+  bool is_saturating{false};
   bool written_to{false};  // used to keep track of whether a field was modified
   Bignum mask{1};
   Bignum max{1};

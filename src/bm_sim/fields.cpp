@@ -28,10 +28,11 @@
 namespace bm {
 
 Field::Field(int nbits, Header *parent_hdr, bool arith_flag, bool is_signed,
-             bool hidden, bool VL)
+             bool hidden, bool VL, bool is_saturating)
     : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes),
       parent_hdr(parent_hdr),
-      is_signed(is_signed), hidden(hidden), VL(VL) {
+      is_signed(is_signed), hidden(hidden), VL(VL),
+      is_saturating(is_saturating) {
   arith = arith_flag;
   // TODO(antonin) ?
   // should I only do that for arith fields ?
@@ -40,6 +41,9 @@ Field::Field(int nbits, Header *parent_hdr, bool arith_flag, bool is_signed,
     assert(nbits > 1);
     max <<= (nbits - 1); max -= 1;
     min <<= (nbits - 1); min *= -1;
+  } else {
+    max = mask;
+    min = 0;
   }
 }
 
@@ -58,10 +62,9 @@ Field::swap_values(Field *other) {
     std::swap(nbytes, other->nbytes);
     std::swap(mask, other->mask);
     assert(is_signed == other->is_signed);
-    if (is_signed) {
-      std::swap(max, other->max);
-      std::swap(min, other->min);
-    }
+    assert(is_saturating == other->is_saturating);
+    std::swap(max, other->max);
+    std::swap(min, other->min);
   }
 }
 
@@ -84,6 +87,9 @@ Field::extract_VL(const char *data, int hdr_offset, int computed_nbits) {
     assert(nbits > 1);
     max <<= (nbits - 1); max -= 1;
     min <<= (nbits - 1); min *= -1;
+  } else {
+    max = mask;
+    min = 0;
   }
   return Field::extract(data, hdr_offset);
 }
@@ -133,10 +139,8 @@ Field::copy_value(const Field &src) {
     nbits = src.nbits;
     nbytes = src.nbytes;
     mask = src.mask;
-    if (is_signed) {
-      min = src.min;
-      max = src.max;
-    }
+    min = src.min;
+    max = src.max;
   }
 }
 
