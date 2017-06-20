@@ -59,7 +59,14 @@ const IR::Annotations*
 ProgramStructure::addNameAnnotation(cstring name, const IR::Annotations* annos) {
     if (annos == nullptr)
         annos = IR::Annotations::empty;
-    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
+    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(name));
+}
+
+const IR::Annotations*
+ProgramStructure::addGlobalNameAnnotation(cstring name,
+                                          const IR::Annotations* annos) {
+    return addNameAnnotation(cstring(".") + name, annos);
 }
 
 cstring ProgramStructure::makeUniqueName(cstring base) {
@@ -235,7 +242,7 @@ void ProgramStructure::createStructures() {
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
         auto stack = new IR::Type_Stack(id.srcInfo, tn, new IR::Constant(size));
-        auto annos = addNameAnnotation(id, it.first->annotations);
+        auto annos = addGlobalNameAnnotation(id, it.first->annotations);
         auto field = new IR::StructField(id.srcInfo, id, annos, stack);
         headers->fields.push_back(field);
     }
@@ -407,7 +414,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
         BUG("No select or default_return %1%", parser);
     }
     latest = nullptr;
-    auto annos = addNameAnnotation(parser->name, parser->annotations);
+    auto annos = addGlobalNameAnnotation(parser->name, parser->annotations);
     auto result = new IR::ParserState(parser->srcInfo, parser->name, annos, components, select);
     return result;
 }
@@ -751,7 +758,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         args->push_back(width);
         auto constructor = new IR::ConstructorCallExpression(type, args);
         auto propvalue = new IR::ExpressionValue(constructor);
-        auto annos = addNameAnnotation(action_profile->name);
+        auto annos = addGlobalNameAnnotation(action_profile->name);
         if (action_selector->mode)
             annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
         if (action_selector->type)
@@ -767,7 +774,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         args->push_back(size);
         auto constructor = new IR::ConstructorCallExpression(type, args);
         auto propvalue = new IR::ExpressionValue(constructor);
-        auto annos = addNameAnnotation(action_profile->name);
+        auto annos = addGlobalNameAnnotation(action_profile->name);
         auto prop = new IR::Property(
             IR::ID(v1model.tableAttributes.tableImplementation.Id()),
             annos, propvalue, false);
@@ -782,7 +789,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         args->push_back(kindarg);
         auto constructor = new IR::ConstructorCallExpression(type, args);
         auto propvalue = new IR::ExpressionValue(constructor);
-        auto annos = addNameAnnotation(ctr);
+        auto annos = addGlobalNameAnnotation(ctr);
         auto prop = new IR::Property(
             IR::ID(v1model.tableAttributes.counters.Id()),
             annos, propvalue, false);
@@ -797,7 +804,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         props->push_back(prop);
     }
 
-    auto annos = addNameAnnotation(table->name, table->annotations);
+    auto annos = addGlobalNameAnnotation(table->name, table->annotations);
     auto result = new IR::P4Table(table->srcInfo, newName, annos, props);
     return result;
 }
@@ -1379,8 +1386,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
             body->push_back(stat); }
 
     // Save the original action name in an annotation
-    // The leading dot indicates a global action
-    auto annos = addNameAnnotation(cstring(".") + action->name, action->annotations);
+    auto annos = addGlobalNameAnnotation(action->name, action->annotations);
     auto result = new IR::P4Action(action->srcInfo, newName, annos, params, body);
     return result;
 }
@@ -1470,7 +1476,7 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
         args->push_back(new IR::Constant(v1model.registers.size_type, 0));
     } else {
         args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count)); }
-    auto annos = addNameAnnotation(reg->name, reg->annotations);
+    auto annos = addGlobalNameAnnotation(reg->name, reg->annotations);
     auto decl = new IR::Declaration_Instance(newName, annos, spectype, args, nullptr);
     return decl;
 }
@@ -1489,7 +1495,7 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
     args->push_back(new IR::Constant(v1model.counterOrMeter.size_type, cm->instance_count));
     auto kindarg = counterType(cm);
     args->push_back(kindarg);
-    auto annos = addNameAnnotation(cm->name, cm->annotations);
+    auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
     if (auto *c = cm->to<IR::Counter>()) {
         if (c->min_width >= 0)
             annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
@@ -1526,7 +1532,7 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     auto args = new IR::Vector<IR::Expression>();
     auto kindarg = counterType(m);
     args->push_back(kindarg);
-    auto annos = addNameAnnotation(m->name, m->annotations);
+    auto annos = addGlobalNameAnnotation(m->name, m->annotations);
     auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
     return decl;
 }
@@ -1541,7 +1547,7 @@ ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
     auto args = new IR::Vector<IR::Expression>();
     auto kindarg = counterType(c);
     args->push_back(kindarg);
-    auto annos = addNameAnnotation(c->name, c->annotations);
+    auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
     return decl;
 }
@@ -1683,7 +1689,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             cstring newname = controls.get(control);
             auto typepath = new IR::Path(IR::ID(newname));
             auto type = new IR::Type_Name(typepath);
-            auto annos = addNameAnnotation(cc);
+            auto annos = addGlobalNameAnnotation(cc);
             auto decl = new IR::Declaration_Instance(IR::ID(iname), annos, type,
                 new IR::Vector<IR::Expression>(), nullptr);
             stateful.push_back(decl);
