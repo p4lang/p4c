@@ -249,21 +249,8 @@ bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Express
         typeid(*ul) == typeid(*ur);
     }
     // Compare literals (strings, booleans and integers)
-    auto booll = left->to<IR::BoolLiteral>();
-    auto boolr = right->to<IR::BoolLiteral>();
-    if (booll && boolr) {
-        return booll->value == boolr->value;
-    }
-    auto strl = left->to<IR::StringLiteral>();
-    auto strr = right->to<IR::StringLiteral>();
-    if (strl && strr) {
-        return strl->value == strr->value;
-    }
-    auto constl = left->to<IR::Constant>();
-    auto constr = right->to<IR::Constant>();
-    if (constl && constr) {
-        return constl->base == constr->base && constl->value == constr->value;
-    }
+    if (*left == *right)
+      return true;
     return false;
 }
 
