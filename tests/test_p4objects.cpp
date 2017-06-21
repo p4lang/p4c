@@ -979,3 +979,23 @@ TEST(P4Objects, JsonVersionStr) {
   };
   check_version();
 }
+
+TEST(P4Objects, LearnListIdFromName) {
+  auto create_json = [](const std::string &name, int id, std::ostream *os) {
+    *os << "{\"learn_lists\":[{\"id\":" << id << ",\"name\":\"" << name
+        << "\",\"elements\":[]}]}";
+  };
+
+  std::stringstream is;
+  const std::string name("MyLearnList");
+  const int id(2);
+  create_json(name, id, &is);
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  p4object_id_t queried_id;
+  auto rc = objects.id_from_name(
+      P4Objects::ResourceType::LEARNING_LIST, name, &queried_id);
+  ASSERT_EQ(P4Objects::IdLookupErrorCode::SUCCESS, rc);
+  EXPECT_EQ(id, queried_id);
+}

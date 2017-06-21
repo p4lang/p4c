@@ -1124,6 +1124,51 @@ public:
     _return.append(switch_->get_config_md5());
   }
 
+  int32_t bm_get_id_from_name(const int32_t cxt_id, const BmResourceType::type resource_type, const std::string& resource_name) {
+    Logger::get()->trace("bm_get_id_from_name");
+    auto map_type = [](BmResourceType::type resource_type) {
+      switch (resource_type) {
+        case BmResourceType::MATCH_TABLE:
+          return P4Objects::ResourceType::MATCH_TABLE;
+        case BmResourceType::ACTION_PROFILE:
+          return P4Objects::ResourceType::ACTION_PROFILE;
+        case BmResourceType::COUNTER:
+          return P4Objects::ResourceType::COUNTER;
+        case BmResourceType::METER:
+          return P4Objects::ResourceType::METER;
+        case BmResourceType::REGISTER:
+          return P4Objects::ResourceType::REGISTER;
+        case BmResourceType::LEARNING_LIST:
+          return P4Objects::ResourceType::LEARNING_LIST;
+        default:
+          {
+            InvalidIdLookup error;
+            error.code = IdLookupErrorCode::INVALID_RESOURCE_TYPE;
+            throw error;
+          }
+      }
+    };
+
+    p4object_id_t resource_id;
+    auto rc = switch_->p4objects_id_from_name(
+        cxt_id, map_type(resource_type), resource_name, &resource_id);
+    if (rc != P4Objects::IdLookupErrorCode::SUCCESS) {
+      InvalidIdLookup error;
+      switch (rc) {
+        case P4Objects::IdLookupErrorCode::INVALID_RESOURCE_TYPE:
+          error.code = IdLookupErrorCode::INVALID_RESOURCE_TYPE;
+          break;
+        case P4Objects::IdLookupErrorCode::INVALID_RESOURCE_NAME:
+          error.code = IdLookupErrorCode::INVALID_RESOURCE_NAME;
+          break;
+        default:
+          break;
+      }
+      throw error;
+    }
+    return static_cast<int32_t>(resource_id);
+  }
+
   void bm_serialize_state(std::string& _return) {
     Logger::get()->trace("bm_serialize_state");
     std::ostringstream stream;

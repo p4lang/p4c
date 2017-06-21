@@ -382,6 +382,10 @@ class Context final {
   parse_vset_remove(const std::string &parse_vset_name,
                     const ByteContainer &value);
 
+  P4Objects::IdLookupErrorCode p4objects_id_from_name(
+      P4Objects::ResourceType type, const std::string &name,
+      p4object_id_t *id) const;
+
   template <typename T>
   CustomCrcErrorCode
   set_crc_custom_parameters(

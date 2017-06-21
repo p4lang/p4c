@@ -64,6 +64,15 @@ class P4Objects {
  public:
   using header_field_pair = std::pair<std::string, std::string>;
 
+  enum class ResourceType {
+    MATCH_TABLE,
+    ACTION_PROFILE,
+    COUNTER,
+    METER,
+    REGISTER,
+    LEARNING_LIST
+  };
+
   class ForceArith {
     friend class P4Objects;
 
@@ -117,6 +126,15 @@ class P4Objects {
 
   void serialize(std::ostream *out) const;
   void deserialize(std::istream *in);
+
+  enum class IdLookupErrorCode {
+    SUCCESS,
+    INVALID_RESOURCE_TYPE,
+    INVALID_RESOURCE_NAME
+  };
+
+  IdLookupErrorCode id_from_name(ResourceType type, const std::string &name,
+                                 p4object_id_t *id);
 
   ActionFn *get_action_by_id(p4object_id_t id) const {
     return actions_map.at(id).get();
@@ -422,6 +440,14 @@ class P4Objects {
   std::unordered_map<std::string, std::unique_ptr<Deparser> > deparsers{};
 
   std::unique_ptr<LearnEngineIface> learn_engine{};
+  // for now, used exclusively as a way to map list names to ids
+  class LearnList : public NamedP4Object {
+   public:
+    LearnList(const std::string &name, p4object_id_t id)
+        : NamedP4Object(name, id) { }
+  };
+  std::unordered_map<std::string, std::unique_ptr<LearnList> > learn_lists{};
+
   std::shared_ptr<TransportIface> notifications_transport{};
 
   std::unique_ptr<AgeingMonitorIface> ageing_monitor{};

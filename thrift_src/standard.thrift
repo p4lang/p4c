@@ -277,6 +277,24 @@ struct BmConfig {
  5:optional string debugger_socket
 }
 
+enum BmResourceType {
+  MATCH_TABLE = 0,
+  ACTION_PROFILE = 1,
+  COUNTER = 2,
+  METER = 3,
+  REGISTER = 4,
+  LEARNING_LIST = 5
+}
+
+enum IdLookupErrorCode {
+  INVALID_RESOURCE_TYPE = 0,
+  INVALID_RESOURCE_NAME = 1
+}
+
+exception InvalidIdLookup {
+ 1:IdLookupErrorCode code
+}
+
 service Standard {
 	
   // table operations
@@ -672,6 +690,12 @@ service Standard {
 
   string bm_get_config()
   string bm_get_config_md5()
+
+  i32 bm_get_id_from_name(
+    1:i32 cxt_id,
+    2:BmResourceType resource_type,
+    3:string resource_name
+  ) throws (1:InvalidIdLookup ouch)
 
   string bm_serialize_state()
 }

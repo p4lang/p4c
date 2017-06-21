@@ -1907,6 +1907,13 @@ P4Objects::init_learn_lists(const Json::Value &cfg_root) {
     LearnEngineIface::list_id_t list_id = cfg_learn_list["id"].asInt();
     learn_engine->list_create(list_id, 16);  // 16 is max nb of samples
     learn_engine->list_set_learn_writer(list_id, notifications_transport);
+    auto list_name = cfg_learn_list["name"].asString();
+    // does not compile with g++4.8
+    // learn_lists.emplace(
+    //     list_name, new P4Objects::LearnList(list_name, list_id));
+    std::unique_ptr<P4Objects::LearnList> learn_list(
+        new P4Objects::LearnList(list_name, list_id));
+    learn_lists.emplace(list_name, std::move(learn_list));
 
     const Json::Value &cfg_learn_elements = cfg_learn_list["elements"];
     for (const auto &cfg_learn_element : cfg_learn_elements) {
@@ -2139,6 +2146,41 @@ P4Objects::deserialize(std::istream *in) {
   for (const auto &e : meter_arrays) {
     e.second->deserialize(in);
   }
+}
+
+namespace {
+
+template <typename T>
+P4Objects::IdLookupErrorCode
+id_from_name_(const T &map, const std::string &name, p4object_id_t *id) {
+  auto it = map.find(name);
+  if (it == map.end())
+    return P4Objects::IdLookupErrorCode::INVALID_RESOURCE_NAME;
+  *id = it->second->get_id();
+  return P4Objects::IdLookupErrorCode::SUCCESS;
+}
+
+}  // namespace
+
+P4Objects::IdLookupErrorCode
+P4Objects::id_from_name(ResourceType type, const std::string &name,
+                        p4object_id_t *id) {
+  switch (type) {
+    case ResourceType::MATCH_TABLE:
+      return id_from_name_(match_action_tables_map, name, id);
+    case ResourceType::ACTION_PROFILE:
+      return id_from_name_(action_profiles_map, name, id);
+    case ResourceType::COUNTER:
+      return id_from_name_(counter_arrays, name, id);
+    case ResourceType::METER:
+      return id_from_name_(meter_arrays, name, id);
+    case ResourceType::REGISTER:
+      return id_from_name_(register_arrays, name, id);
+    case ResourceType::LEARNING_LIST:
+      return id_from_name_(learn_lists, name, id);
+  }
+  // needed to make GCC happy
+  return P4Objects::IdLookupErrorCode::INVALID_RESOURCE_TYPE;
 }
 
 int

@@ -648,6 +648,13 @@ Context::parse_vset_remove(const std::string &parse_vset_name,
   return ParseVSet::ErrorCode::SUCCESS;
 }
 
+P4Objects::IdLookupErrorCode
+Context::p4objects_id_from_name(
+    P4Objects::ResourceType type, const std::string &name,
+    p4object_id_t *id) const {
+  return p4objects->id_from_name(type, name, id);
+}
+
 template <typename T>
 CustomCrcErrorCode
 Context::set_crc_custom_parameters(

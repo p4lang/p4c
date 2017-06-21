@@ -440,6 +440,13 @@ SwitchWContexts::get_config_md5() const {
   return get_config_md5_();
 }
 
+P4Objects::IdLookupErrorCode
+SwitchWContexts::p4objects_id_from_name(
+    size_t cxt_id, P4Objects::ResourceType type,
+    const std::string &name, p4object_id_t *id) const {
+  return contexts.at(cxt_id).p4objects_id_from_name(type, name, id);
+}
+
 CustomCrcErrorCode
 SwitchWContexts::set_crc16_custom_parameters(
     size_t cxt_id, const std::string &calc_name,

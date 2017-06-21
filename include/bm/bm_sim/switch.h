@@ -753,6 +753,10 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::string get_config() const override;
   std::string get_config_md5() const override;
 
+  P4Objects::IdLookupErrorCode p4objects_id_from_name(
+      size_t cxt_id, P4Objects::ResourceType type, const std::string &name,
+      p4object_id_t *id) const;
+
   // conscious choice not to use templates here (or could not use virtual)
   CustomCrcErrorCode
   set_crc16_custom_parameters(
