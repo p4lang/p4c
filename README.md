@@ -212,8 +212,8 @@ writing some doxygen documentation specifically targetted at programmers who
 want to implement their own switch model using the bmv2 building blocks. You can
 generate this documentation yourself (if you have doxygen installed) by running
 `doxygen Doxyfile`. The output can be found under the `doxygen-out`
-directory. You can also browse this documentation [online]
-(http://104.236.137.35/).
+directory. You can also browse this documentation
+[online](http://104.236.137.35/).
 
 ### What else is new in bmv2 ?
 
@@ -250,11 +250,10 @@ All developers must sign the [P4.org](http://p4.org) CLA and return it to
 (membership@p4.org) before making contributions. The CLA is available
 [here](http://p4.org/wp-content/uploads/2015/07/P4_Language_Consortium_Membership_Agreement.pdf).
 
-Any contribution to the C++ core code (in particular the [bm_sim]
-(src/bm_sim) module) must respect the coding guidelines. We rely heavily on
-the [Google C++ Style Guide]
-(https://google.github.io/styleguide/cppguide.html), with some differences
-listed in this repository's [wiki]
-(https://github.com/p4lang/behavioral-model/wiki/Coding-guidelines). Every
+Any contribution to the C++ core code (in particular the [bm_sim](src/bm_sim)
+module) must respect the coding guidelines. We rely heavily on the [Google C++
+Style Guide](https://google.github.io/styleguide/cppguide.html), with some
+differences listed in this repository's
+[wiki](https://github.com/p4lang/behavioral-model/wiki/Coding-guidelines). Every
 submitted pull request will go through our Travis tests, which include running
 `cpplint.py` to ensure correct style and formatting.
