@@ -210,32 +210,61 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     return postorder(as);
 }
 
-/* Function to check if left and right side of
- * assignment statement are equivalent.
- * FIXME -- This function is temporary, proper deep comparison may be required */
+/* Function to check if two expressions are equivalent -
+ * used to remove no-op assignments.
+ * FIXME -- This function only covers a limited subset of expressions,
+ * but will not output true for expressions which are not equivalent.
+ * Proper deep comparisons may be required */
 bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Expression *right) {
     // Compare names of variables (at this pass, all names are unique)
-    auto l1 = left->to<IR::PathExpression>();
-    auto r1 = right->to<IR::PathExpression>();
-    if (l1 && r1) {
-        return l1->path->name == r1->path->name &&
-        l1->path->absolute == r1->path->absolute;
+    auto pl = left->to<IR::PathExpression>();
+    auto pr = right->to<IR::PathExpression>();
+    if (pl && pr) {
+        return pl->path->name == pr->path->name &&
+        pl->path->absolute == pr->path->absolute;
+    }
+    auto al = left->to<IR::ArrayIndex>();
+    auto ar = right->to<IR::ArrayIndex>();
+    if (al && ar) {
+        return equiv(al->left, ar->left) && equiv(al->right, ar->right);
     }
     // Compare binary operations (array indices)
-    auto l2 = left->to<IR::Operation_Binary>();
-    auto r2 = right->to<IR::Operation_Binary>();
-    if (l2 && r2) {
-        return equiv(l2->left, r2->left) && equiv(l2->right, r2->right) &&
-        typeid(*l2) == typeid(*r2);
+    auto bl = left->to<IR::Operation_Binary>();
+    auto br = right->to<IR::Operation_Binary>();
+    if (bl && br) {
+        return equiv(bl->left, br->left) && equiv(bl->right, br->right) &&
+        typeid(*bl) == typeid(*br);
     }
     // Compare packet header/metadata fields
-    auto l3 = left->to<IR::Member>();
-    auto r3 = right->to<IR::Member>();
-    if (l3 && r3) {
-        return l3->member == r3->member && equiv(l3->expr, r3->expr);
-    } else {
-        return false;
+    auto ml = left->to<IR::Member>();
+    auto mr = right->to<IR::Member>();
+    if (ml && mr) {
+        return ml->member == mr->member && equiv(ml->expr, mr->expr);
     }
+    // Compare unary operations (can be used inside array indices)
+    auto ul = left->to<IR::Operation_Unary>();
+    auto ur = right->to<IR::Operation_Unary>();
+    if (ul && ur) {
+        return equiv(ul->expr, ur->expr) &&
+        typeid(*ul) == typeid(*ur);
+    }
+    // Compare literals (strings, booleans and integers)
+    auto booll = left->to<IR::BoolLiteral>();
+    auto boolr = right->to<IR::BoolLiteral>();
+    if (booll && boolr) {
+        return booll->value == boolr->value;
+    }
+    auto strl = left->to<IR::StringLiteral>();
+    auto strr = right->to<IR::StringLiteral>();
+    if (strl && strr) {
+        return strl->value == strr->value;
+    }
+    auto constl = left->to<IR::Constant>();
+    auto constr = right->to<IR::Constant>();
+    if (constl && constr) {
+        return constl->base == constr->base && constl->value == constr->value;
+    }
+    return false;
 }
 
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
