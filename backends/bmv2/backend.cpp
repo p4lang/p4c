@@ -126,6 +126,9 @@ void Backend::convert(BMV2Options& options) {
     jsonTop.emplace("header_types", json->header_types);
     jsonTop.emplace("headers", json->headers);
     jsonTop.emplace("header_stacks", json->header_stacks);
+    jsonTop.emplace("header_union_types", json->header_union_types);
+    jsonTop.emplace("header_unions", json->header_unions);
+    jsonTop.emplace("header_union_stacks", json->header_union_stacks);
     field_lists = mkArrayField(&jsonTop, "field_lists");
     jsonTop.emplace("errors", json->errors);
     jsonTop.emplace("enums", json->enums);
