@@ -126,7 +126,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
         } else if (minst->is<P4::BuiltInMethod>()) {
             auto bi = minst->to<P4::BuiltInMethod>();
             if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
-                auto mem = new IR::Member(bi->appliedTo, "$valid$");
+                auto mem = new IR::Member(bi->appliedTo, V1ModelProperties::validField);
                 typeMap->setType(mem, IR::Type_Void::get());
                 auto jexpr = conv->convert(mem, true, false);
                 result->emplace("op", "set");

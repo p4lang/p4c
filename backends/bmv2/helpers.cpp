@@ -33,6 +33,7 @@ const cstring TableAttributes::countersName = "counters";
 const cstring TableAttributes::metersName = "meters";
 const unsigned TableAttributes::defaultTableSize = 1024;
 const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata";
+const cstring V1ModelProperties::validField = "$valid$";
 
 Util::IJson* nodeName(const CFG::Node* node) {
     if (node->name.isNullOrEmpty())

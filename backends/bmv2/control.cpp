@@ -41,12 +41,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
             auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
             key->emplace("match_type", matchType);
-            if (matchType == "valid") {
-                if (k->is<IR::BoolLiteral>())
-                    key->emplace("key", k->to<IR::BoolLiteral>()->value);
-                else
-                    ::error("%1% invalid 'valid' key expression", k);
-            } else if (matchType == backend->getCoreLibrary().exactMatch.name) {
+            if (matchType == backend->getCoreLibrary().exactMatch.name) {
                 if (k->is<IR::Constant>())
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                 else
@@ -141,7 +136,6 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
 /**
     Computes the type of the key based on the declaration in the path.
 
-    If the key expression invokes .isValid(), we return "valid".
     @param ke A table match key element
     @return the key type
 */
@@ -149,27 +143,16 @@ cstring ControlConverter::getKeyMatchType(const IR::KeyElement *ke) {
     auto path = ke->matchType->path;
     auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
-    auto expr = ke->expression;
 
-    cstring match_type = "invalid";
     if (mt->name.name == backend->getCoreLibrary().exactMatch.name ||
-        mt->name.name == backend->getCoreLibrary().ternaryMatch.name) {
-        match_type = mt->name.name;
-        if (expr->is<IR::MethodCallExpression>()) {
-            auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                                                  refMap, typeMap);
-            if (mi->is<P4::BuiltInMethod>())
-                if (mi->to<P4::BuiltInMethod>()->name == IR::Type_Header::isValid)
-                    match_type = "valid";
-        }
-    } else if (mt->name.name == backend->getCoreLibrary().lpmMatch.name) {
-        match_type = mt->name.name;
-    } else if (backend->getModel().find_match_kind(mt->name.name)) {
-        match_type = mt->name.name;
-    } else {
-        ::error("%1%: match type not supported on this target", mt);
+        mt->name.name == backend->getCoreLibrary().ternaryMatch.name ||
+        mt->name.name == backend->getCoreLibrary().lpmMatch.name ||
+        backend->getModel().find_match_kind(mt->name.name)) {
+        return mt->name.name;
     }
-    return match_type;
+
+    ::error("%1%: match type not supported on this target", mt);
+    return "invalid";
 }
 
 bool
@@ -325,6 +308,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             } else if (match_type == backend->getCoreLibrary().lpmMatch.name) {
                 ::error("%1%, Multiple LPM keys in table", table);
             }
+
             auto expr = ke->expression;
             mpz_class mask;
             if (auto mexp = expr->to<IR::BAnd>()) {
@@ -342,32 +326,18 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 int l = slice->getL();
                 mask = Util::maskFromSlice(h, l);
             }
-            if (match_type == "valid") {
-                auto mt = refMap->getDeclaration(ke->matchType->path, true)
-                          ->to<IR::Declaration_ID>();
-                if (expr->is<IR::MethodCallExpression>()) {
-                    auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                                            refMap, typeMap);
-                    if (mi->is<P4::BuiltInMethod>()) {
-                        auto bim = mi->to<P4::BuiltInMethod>();
-                        if (bim->name == IR::Type_Header::isValid) {
-                            if (mt->name.name == backend->getCoreLibrary().ternaryMatch.name) {
-                                expr = new IR::Member(IR::Type::Boolean::get(), bim->appliedTo,
-                                                      "$valid$");
-                                typeMap->setType(expr, expr->type);
-                                match_type = backend->getCoreLibrary().ternaryMatch.name;
-                                if (match_type != table_match_type &&
-                                    table_match_type !=
-                                        BMV2::MatchImplementation::rangeMatchTypeName)
-                                    table_match_type =
-                                        backend->getCoreLibrary().ternaryMatch.name;
-                            } else {
-                                expr = bim->appliedTo; }}}}
-            }
 
             auto keyelement = new Util::JsonObject();
             keyelement->emplace("match_type", match_type);
-            auto jk = conv->convert(expr);
+
+            // XXX(seth): Boolean variables are stored as data, so we normally
+            // cast them back to bool via the 'd2b' primitive when they're used
+            // in expressions. We don't want to do that when we match against
+            // them, though; they're already in the form we want. That's what
+            // convertLeftValue() does. The name is a bit misleading in this
+            // context.
+            auto jk = conv->convertLeftValue(expr);
+
             keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
             if (mask != 0)
                 keyelement->emplace("mask", stringRepr(mask, (expr->type->width_bits() + 7) / 8));

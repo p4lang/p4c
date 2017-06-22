@@ -52,7 +52,7 @@ def get_p4_14_field_name(name):
     # field names do include a dot, so we remove every dot-separated component
     # except the last two.
     n = '.'.join(name.rsplit('.', 2)[-2:])
-    n = n.replace("._valid", ".valid")
+    n = n.replace(".$valid$", ".valid")
 
     return n
 
