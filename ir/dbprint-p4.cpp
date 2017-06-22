@@ -204,6 +204,8 @@ void IR::P4Control::dbprint(std::ostream &out) const {
     out << "control " << name;
     if (type->typeParameters && !type->typeParameters->empty())
         out << type->typeParameters;
+    if (type->applyParams)
+        out << '(' << type->applyParams << ')';
     if (constructorParams)
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;
