@@ -346,8 +346,8 @@ const RootType* modifyAllMatching(const RootType* root, Func&& function) {
  *
  * @return the root of the new, transformed version of the subtree.
  */
-template <typename NodeType, typename RootType, typename Func>
-const RootType* transformAllMatching(const RootType* root, Func&& function) {
+template <typename NodeType, typename Func>
+const IR::Node* transformAllMatching(const IR::Node* root, Func&& function) {
     struct NodeVisitor : public Transform {
         explicit NodeVisitor(Func&& function) : function(function) { }
         Func function;
