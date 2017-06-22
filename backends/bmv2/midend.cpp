@@ -52,6 +52,7 @@ limitations under the License.
 #include "midend/expandEmit.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
+#include "synthesizeValidField.h"
 
 namespace BMV2 {
 
@@ -97,6 +98,8 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
+        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonMaskLeftValue(&refMap, &typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap),

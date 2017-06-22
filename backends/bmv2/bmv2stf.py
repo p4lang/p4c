@@ -199,6 +199,9 @@ class TableKeyInstance(object):
         elif key + '$' in self.key.fields:
             key = key + '$'
             found = True
+        elif key + '.$valid$' in self.key.fields:
+            key = key + '.$valid$'
+            found = True
         elif key.endswith(".valid"):
             alt = key[:-5] + "$valid$"
             if alt in self.key.fields:

@@ -53,7 +53,6 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 // XXX(seth): Here are the known issues:
-// - @id is not supported for action parameters or match fields.
 // - We don't currently distinguish between the case where the const default
 //   action has mutable params and the case where it doesn't.
 // - Locals are intentionally not exposed, but this prevents table match keys
@@ -61,9 +60,6 @@ namespace ControlPlaneAPI {
 //   are desugared into a match against a local. This could be fixed just by
 //   exposing locals, but first we need to decide how it makes sense to expose
 //   this information to the control plane.
-// - There is some hardcoded stuff which is tied to BMV2 and won't necessarily
-//   suit other backends. These can all be dealt with on a case-by-case basis,
-//   but they require work outside of this code.
 
 /// @return true if @type has an @metadata annotation.
 static bool isMetadataType(const IR::Type* type) {
@@ -1474,20 +1470,6 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
     }
 }
 
-/// @return true iff @expression is a call to the 'isValid()' builtin.
-static const P4::BuiltInMethod*
-tryCastToIsValidBuiltin(const IR::Expression* expression,
-                        ReferenceMap* refMap,
-                        TypeMap* typeMap) {
-    if (!expression->is<IR::MethodCallExpression>()) return nullptr;
-    auto methodCall = expression->to<IR::MethodCallExpression>();
-    auto instance = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
-    if (!instance->is<P4::BuiltInMethod>()) return nullptr;
-    auto builtin = instance->to<P4::BuiltInMethod>();
-    if (builtin->name != IR::Type_Header::isValid) return nullptr;
-    return builtin;
-}
-
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
@@ -1509,34 +1491,13 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             expr = expr->to<IR::Slice>()->e0;
         }
 
-        bool synthesizeValidField = false;
         MatchField::MatchType matchType;
         if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
             matchType = MatchField::MatchTypes::EXACT;
-
-            // If this is an exact match on the result of an isValid() call, we
-            // desugar that to a "valid" match.
-            auto callToIsValid = tryCastToIsValidBuiltin(expr, refMap, typeMap);
-            if (callToIsValid != nullptr) {
-                expr = callToIsValid->appliedTo;
-                synthesizeValidField = true;
-                matchType = MatchField::MatchTypes::VALID;
-            }
         } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
             matchType = MatchField::MatchTypes::LPM;
         } else if (matchTypeName == P4CoreLibrary::instance.ternaryMatch.name) {
             matchType = MatchField::MatchTypes::TERNARY;
-
-            // If this is a ternary match on the result of an isValid() call, desugar
-            // that to a ternary match against the '_valid' field of the appropriate
-            // header instance.
-            // XXX(seth): This is baking in BMV2-specific stuff. We should remove this
-            // by performing the desugaring in a separate compiler pass.
-            auto callToIsValid = tryCastToIsValidBuiltin(expr, refMap, typeMap);
-            if (callToIsValid != nullptr) {
-                expr = callToIsValid->appliedTo;
-                synthesizeValidField = true;
-            }
         } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
             matchType = MatchField::MatchTypes::RANGE;
         } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
@@ -1562,13 +1523,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             ::error("Table '%1%': Match field '%2%' is too complicated "
                     "to represent in P4Runtime", table->controlPlaneName(), expr);
             break;
-        }
-
-        // If we're performing some variety of "valid" match, we desugar it into
-        // a match against a hidden '_valid' field. That field doesn't really
-        // exist in the program, of course, so we have to append it manually.
-        if (synthesizeValidField) {
-            path = path->append("_valid", new IR::Type_Boolean);
         }
 
         // XXX(seth): If there's only one component in the path, then it represents

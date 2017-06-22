@@ -114,11 +114,17 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
     } else if (instance->is<P4::BuiltInMethod>()) {
         auto bim = instance->to<P4::BuiltInMethod>();
         if (bim->name == IR::Type_Header::isValid) {
+            // This should be applied to a header union; isValid() calls on
+            // headers should've been removed by SynthesizeValidField.
+            auto type = backend->getTypeMap()->getType(bim->appliedTo, true);
+            BUG_CHECK(type->is<IR::Type_HeaderUnion>(),
+                      "Expected isValid() to be eliminated in %1%", expression);
+
             auto result = new Util::JsonObject();
             result->emplace("type", "expression");
             auto e = new Util::JsonObject();
             result->emplace("value", e);
-            e->emplace("op", "valid");
+            e->emplace("op", "valid_union");
             e->emplace("left", Util::JsonValue::null);
             auto l = get(bim->appliedTo);
             e->emplace("right", l);
@@ -126,6 +132,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             return;
         }
     }
+
     BUG("%1%: unhandled case", expression);
 }
 
@@ -230,6 +237,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else {
             if (type->is<IR::Type_Stack>()) {
                 result->emplace("type", "header_stack");
+                result->emplace("value", fieldName);
+            } else if (type->is<IR::Type_HeaderUnion>()) {
+                result->emplace("type", "header_union");
                 result->emplace("value", fieldName);
             } else if (parentType->is<IR::Type_HeaderUnion>()) {
                 auto l = get(expression->expr);

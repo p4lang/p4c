@@ -55,6 +55,11 @@ class TableAttributes {
 class V1ModelProperties {
  public:
     static const cstring jsonMetadataParameterName;
+
+    /// The name of BMV2's valid field. This is a hidden bit<1> field
+    /// automatically added by BMV2 to all header types; reading from it tells
+    /// you whether the header is valid, just as if you had called isValid().
+    static const cstring validField;
 };
 
 using ErrorValue = unsigned int;

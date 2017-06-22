@@ -40,6 +40,7 @@ libbackendbmv2_la_UNIFIED = \
 	backends/bmv2/parser.cpp \
 	backends/bmv2/sharedActionSelectorCheck.cpp \
 	backends/bmv2/simpleSwitch.cpp \
+	backends/bmv2/synthesizeValidField.cpp \
 	backends/bmv2/portableSwitch.cpp
 
 noinst_HEADERS += \
@@ -62,6 +63,7 @@ noinst_HEADERS += \
 	backends/bmv2/parser.h \
 	backends/bmv2/sharedActionSelectorCheck.h \
 	backends/bmv2/simpleSwitch.h \
+	backends/bmv2/synthesizeValidField.h \
 	backends/bmv2/portableSwitch.h
 
 cpplint_FILES += $(libbackendbmv2_la_UNIFIED) $(libbackendbmv2_la_NONUNIFIED)
