@@ -2323,8 +2323,8 @@ P4Objects::enable_arith(header_id_t header_id, int field_offset) {
       if (it2 != union_id_to_union_stack_id.end()) {
         phv_factory.enable_union_stack_field_arith(
             it2->second, union_pos.offset, field_offset);
+        return;
       }
-      return;
     }
   }
   {
@@ -2347,8 +2347,8 @@ P4Objects::enable_arith(header_id_t header_id) {
       if (it2 != union_id_to_union_stack_id.end()) {
         phv_factory.enable_all_union_stack_field_arith(
             it2->second, union_pos.offset);
+        return;
       }
-      return;
     }
   }
   {
