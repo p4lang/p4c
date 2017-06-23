@@ -702,14 +702,10 @@ identifierList
     ;
 
 typedefDeclaration
-    : annotations TYPEDEF typeRef name   { driver.structure->declareType(*$4);
+    : optAnnotations TYPEDEF typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
-    | TYPEDEF typeRef name               { driver.structure->declareType(*$3);
-          $$ = new IR::Type_Typedef(@3, *$3, $2); }
-    | annotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+    | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
-    | TYPEDEF derivedTypeDeclaration name { driver.structure->declareType(*$3);
-                        $$ = new IR::Type_Typedef(@3, *$3, $2); }
     ;
 
 /*************************** STATEMENTS *************************/
