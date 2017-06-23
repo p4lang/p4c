@@ -33,6 +33,7 @@ header_union U {
 struct Headers {
     Hdr1 h1;
     U u;
+    Hdr2 h2;
 }
 
 struct Meta {}
@@ -66,11 +67,20 @@ control deparser(packet_out b, in Headers h) {
     apply {
         b.emit(h.h1);
         b.emit(h.u);
+        b.emit(h.h2);
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {}
+    apply {
+        if (h.u.h2.isValid()) {
+            h.h2.setValid();
+            h.h2.b = h.u.h2.b;
+            h.u.h1.setValid();
+            h.u.h1.a = h.u.h2.b[7:0];
+            h.u.h2.setInvalid();
+        }
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

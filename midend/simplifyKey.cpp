@@ -37,8 +37,13 @@ bool NonLeftValueOrIsValid::isTooComplex(const IR::Expression* expression) const
     if (!mi->is<BuiltInMethod>())
         return true;
     auto bi = mi->to<BuiltInMethod>();
-    if (bi->name.name == IR::Type_Header::isValid)
+    if (bi->name.name == IR::Type_Header::isValid) {
+        // isValid() is simple when applied to headers, but complicated when applied to unions.
+        auto baseType = typeMap->getType(bi->appliedTo, true);
+        if (baseType->is<IR::Type_HeaderUnion>())
+            return true;
         return false;
+    }
     return true;
 }
 

@@ -70,7 +70,13 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {}
+    apply {
+        if (h.u.h2.isValid()) {
+            h.u.h2.setInvalid();
+            h.u.h1.setValid();
+            h.u.h1.a = 0xFF;
+        }
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

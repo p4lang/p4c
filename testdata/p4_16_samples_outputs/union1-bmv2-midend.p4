@@ -64,7 +64,18 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @hidden action act() {
+        h.u.h2.setInvalid();
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
     apply {
+        if (h.u.h2.isValid()) 
+            tbl_act.apply();
     }
 }
 

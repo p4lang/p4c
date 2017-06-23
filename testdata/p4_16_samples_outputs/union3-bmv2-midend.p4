@@ -17,6 +17,7 @@ header_union U {
 struct Headers {
     Hdr1 h1;
     U    u;
+    Hdr2 h2;
 }
 
 struct Meta {
@@ -60,11 +61,26 @@ control deparser(packet_out b, in Headers h) {
         b.emit<Hdr1>(h.h1);
         b.emit<Hdr1>(h.u.h1);
         b.emit<Hdr2>(h.u.h2);
+        b.emit<Hdr2>(h.h2);
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @hidden action act() {
+        h.h2.setValid();
+        h.h2.b = h.u.h2.b;
+        h.u.h2.setInvalid();
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
     apply {
+        if (h.u.h2.isValid()) {
+            tbl_act.apply();
+        }
     }
 }
 

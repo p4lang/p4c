@@ -2,11 +2,11 @@
 #include <v1model.p4>
 
 header Hdr1 {
-    bit<32> a;
+    bit<8> a;
 }
 
 header Hdr2 {
-    bit<64> b;
+    bit<16> b;
 }
 
 header_union U {
@@ -26,12 +26,16 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     state start {
         b.extract<Hdr1>(h.h1);
         transition select(h.h1.a) {
-            32w0: getH1;
-            default: getH1;
+            8w0: getH1;
+            default: getH2;
         }
     }
     state getH1 {
         b.extract<Hdr1>(h.u.h1);
+        transition accept;
+    }
+    state getH2 {
+        b.extract<Hdr2>(h.u.h2);
         transition accept;
     }
 }
