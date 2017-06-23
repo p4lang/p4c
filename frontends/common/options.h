@@ -19,7 +19,6 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
-#include <regex>
 #include "lib/cstring.h"
 #include "lib/options.h"
 #include "ir/ir.h"  // for DebugHook definition
