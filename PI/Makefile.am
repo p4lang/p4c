@@ -13,7 +13,8 @@ src/common.cpp \
 src/action_helpers.h \
 src/action_helpers.cpp \
 src/direct_res_spec.h \
-src/direct_res_spec.cpp
+src/direct_res_spec.cpp \
+src/gnmi_mgr.cpp
 
 libbmpi_la_LIBADD = \
 $(top_builddir)/src/bm_sim/libbmsim.la
