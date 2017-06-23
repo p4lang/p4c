@@ -44,6 +44,7 @@ struct ${lq.cname}Client {
 struct LearnState {
 //:: for lq_name, lq in learn_quantas.items():
   std::map<p4_pd_sess_hdl_t, ${lq.cname}Client> ${lq.cname}_clients;
+  BmLearningListId ${lq.cname}_id;
   std::mutex ${lq.cname}_mutex;
 //:: #endfor
 };
@@ -157,7 +158,8 @@ p4_pd_status_t ${pd_prefix}set_learning_timeout
     // RPC function is called for each learn list
     // bmv2 also takes a timeout in ms, thus the "/ 1000"
 //:: for lq_name, lq in learn_quantas.items():
-    pd_client(device_id).c->bm_learning_set_timeout(0, ${lq.id_}, usecs / 1000);
+    auto lq_id = device_state[device_id]->${lq.cname}_id;
+    pd_client(device_id).c->bm_learning_set_timeout(0, lq_id, usecs / 1000);
 //:: #endfor
   } catch (InvalidLearnOperation &ilo) {
     const char *what =
@@ -204,9 +206,16 @@ p4_pd_status_t ${pd_prefix}${lq.cname}_notify_ack
  p4_pd_sess_hdl_t sess_hdl,
  ${pd_prefix}${lq.cname}_digest_msg_t *msg
 ) {
+  if (msg == nullptr) {
+    // XXX(seth): This should *not* happen, ever, but for some reason it happens
+    // reliably when running switch.p4's PTF tests. This needs to be debugged.
+    std::cerr << "empty notify ack for ${lq.name}" << std::endl;
+    return 0;
+  }
   assert(my_devices[msg->dev_tgt.device_id]);
+  auto lq_id = device_state[msg->dev_tgt.device_id]->${lq.cname}_id;
   pd_client(msg->dev_tgt.device_id).c->bm_learning_ack_buffer(
-      0, ${lq.id_}, msg->buffer_id);
+      0, lq_id, msg->buffer_id);
   return 0;
 }
 
@@ -214,6 +223,25 @@ p4_pd_status_t ${pd_prefix}${lq.cname}_notify_ack
 
 p4_pd_status_t ${pd_prefix}learning_new_device(int dev_id) {
   device_state[dev_id] = new LearnState();
+  return 0;
+}
+
+p4_pd_status_t ${pd_prefix}learning_setup_device(int dev_id) {
+  // P4Runtime doesn't give us access to the learn quanta ids that end up in the
+  // BMV2 JSON, so we need to determine them at runtime.
+  try {
+//:: for lq_name, lq in learn_quantas.items():
+    device_state[dev_id]->${lq.cname}_id = pd_client(dev_id).c
+      ->bm_get_id_from_name(0, BmResourceType::LEARNING_LIST, "${lq.name}");
+//:: #endfor
+  } catch (InvalidIdLookup &iil) {
+    const char *what =
+      _IdLookupErrorCode_VALUES_TO_NAMES.find(iil.code)->second;
+    std::cout << "Invalid learn quanta (" << iil.code << "): "
+              << what << std::endl;
+    return iil.code;
+  }
+
   return 0;
 }
 
@@ -227,16 +255,14 @@ void ${pd_prefix}learning_notification_cb(const char *hdr, const char *data) {
   const learn_hdr_t *learn_hdr = reinterpret_cast<const learn_hdr_t *>(hdr);
   // std::cout << "I received " << learn_hdr->num_samples << " samples"
   //           << std::endl;
-  switch(learn_hdr->list_id) {
+  LearnState *state = device_state[learn_hdr->switch_id];
 //:: for lq_name, lq in learn_quantas.items():
-  case ${lq.id_}:
+  if (learn_hdr->list_id == state->${lq.cname}_id) {
     ${lq.cname}_handle_learn_msg(learn_hdr, data);
-    break;
+    return;
+  }
 //:: #endfor
-  default:
-    assert(0 && "invalid lq id");
-    break;
-  }  
+  assert(0 && "invalid lq id");
 }
 
 }

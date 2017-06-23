@@ -33,6 +33,7 @@ extern "C" {
 
 void ${pd_prefix}learning_notification_cb(const char *hdr, const char *data);
 p4_pd_status_t ${pd_prefix}learning_new_device(int dev_id);
+p4_pd_status_t ${pd_prefix}learning_setup_device(int dev_id);
 p4_pd_status_t ${pd_prefix}learning_remove_device(int dev_id);
 
 void ${pd_prefix}ageing_notification_cb(const char *hdr, const char *data);
@@ -54,7 +55,9 @@ p4_pd_status_t ${pd_prefix}assign_device(int dev_id,
                               ${pd_prefix}ageing_notification_cb,
                               ${pd_prefix}learning_notification_cb);
   my_devices[dev_id] = 1;
-  return conn_mgr_state->client_init(dev_id, rpc_port_num);
+  p4_pd_status_t status = conn_mgr_state->client_init(dev_id, rpc_port_num);
+  ${pd_prefix}learning_setup_device(dev_id);
+  return status;
 }
 
 p4_pd_status_t ${pd_prefix}remove_device(int dev_id) {
