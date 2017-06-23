@@ -100,8 +100,7 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new SynthesizeValidField(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
-        new P4::SimplifyKey(&refMap, &typeMap,
-                            new P4::NonMaskLeftValue(&refMap, &typeMap)),
+        new P4::SimplifyKey(&refMap, &typeMap, new P4::NonMaskLeftValue(&typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
