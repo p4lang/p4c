@@ -355,6 +355,7 @@ void Transform::revisit(const IR::CLASS *o, const IR::Node *n) {                
     return revisit(static_cast<const IR::BASE *>(o), n); }                              \
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+#undef DEFINE_VISIT_FUNCTIONS
 
 class SetupJoinPoints : public Inspector {
     map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> &join_points;
@@ -416,3 +417,29 @@ ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
     assert(rv->check_clone(this));
     return *rv;
 }
+
+IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
+
+#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \
+    void Visitor::visit(const IR::CLASS *&n, const char *name) {                 \
+        auto t = apply_visitor(n, name);                                                \
+        n = dynamic_cast<const IR::CLASS *>(t);                                         \
+        if (t && !n)                                                                    \
+            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
+    void Visitor::visit(const IR::CLASS *const &n, const char *name) {           \
+        /* This function needed solely due to order of declaration issues */            \
+        visit(static_cast<const IR::Node *const &>(n), name); }                         \
+    void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
+        ctxt->child_index = cidx;                                                       \
+        auto t = apply_visitor(n, name);                                                \
+        n = dynamic_cast<const IR::CLASS *>(t);                                         \
+        if (t && !n)                                                                    \
+            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
+    void Visitor::visit(const IR::CLASS *const &n, const char *name, int cidx) { \
+        /* This function needed solely due to order of declaration issues */            \
+        visit(static_cast<const IR::Node *const &>(n), name, cidx); }
+    IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+#undef DEFINE_VISIT_FUNCTIONS
+
+std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
+    return v ? out << *v : out << "<null>"; }

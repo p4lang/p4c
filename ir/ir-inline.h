@@ -17,49 +17,27 @@ limitations under the License.
 #ifndef _IR_IR_INLINE_H_
 #define _IR_IR_INLINE_H_
 
-#define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT)                                             \
-    TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)                      \
+#define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT, INLINE)                                     \
+    TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)                      \
     { Node::traceVisit("Mod pre"); return v.preorder(this); }                                   \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Modifier &v)                     \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_postorder(Modifier &v)                     \
     { Node::traceVisit("Mod post"); v.postorder(this); }                                        \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_revisit(Modifier &v, const Node *n) const  \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(Modifier &v, const Node *n) const  \
     { Node::traceVisit("Mod revisit"); v.revisit(this, n); }                                    \
-    TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const               \
+    TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const               \
     { Node::traceVisit("Insp pre"); return v.preorder(this); }                                  \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Inspector &v) const              \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_postorder(Inspector &v) const              \
     { Node::traceVisit("Insp post"); v.postorder(this); }                                       \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_revisit(Inspector &v) const                \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(Inspector &v) const                \
     { Node::traceVisit("Insp revisit"); v.revisit(this); }                                      \
-    TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v)          \
+    TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v)          \
     { Node::traceVisit("Trans pre"); return v.preorder(this); }                                 \
-    TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v)         \
+    TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v)         \
     { Node::traceVisit("Trans post"); return v.postorder(this); }                               \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_revisit(Transform &v, const Node *n) const \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(Transform &v, const Node *n) const \
     { Node::traceVisit("Trans revisit"); v.revisit(this, n); }
-    IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , )
-    IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS)
-#undef DEFINE_APPLY_FUNCTIONS
 
-#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \
-    inline void Visitor::visit(const IR::CLASS *&n, const char *name) {                 \
-        auto t = apply_visitor(n, name);                                                \
-        n = dynamic_cast<const IR::CLASS *>(t);                                         \
-        if (t && !n)                                                                    \
-            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
-    inline void Visitor::visit(const IR::CLASS *const &n, const char *name) {           \
-        /* This function needed solely due to order of declaration issues */            \
-        visit(static_cast<const IR::Node *const &>(n), name); }                         \
-    inline void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
-        ctxt->child_index = cidx;                                                       \
-        auto t = apply_visitor(n, name);                                                \
-        n = dynamic_cast<const IR::CLASS *>(t);                                         \
-        if (t && !n)                                                                    \
-            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
-    inline void Visitor::visit(const IR::CLASS *const &n, const char *name, int cidx) { \
-        /* This function needed solely due to order of declaration issues */            \
-        visit(static_cast<const IR::Node *const &>(n), name, cidx); }
-    IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
-#undef DEFINE_VISIT_FUNCTIONS
+IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS, inline)
 
 template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
     for (auto i = vec.begin(); i != vec.end();) {
@@ -148,8 +126,6 @@ template<class T> void IR::Vector<T>::toJSON(JSONGenerator &json) const {
 }
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);
-inline std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
-    return v ? out << *v : out << "<null>"; }
 
 template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) {
     for (auto i = begin(); i != end();) {
