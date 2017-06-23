@@ -33,25 +33,39 @@ class KeyIsComplex {
 };
 
 /**
- * Policy that tracks whether a key is not a left value or a call to the isValid().
- * It returns 'true' if any of the conditions is met.
+ * Policy that treats a key as complex if it's not an lvalue.
  */
 class NonLeftValue : public KeyIsComplex {
-    ReferenceMap* refMap;
+ protected:
     TypeMap*      typeMap;
  public:
-    NonLeftValue(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    explicit NonLeftValue(TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); }
+    bool isTooComplex(const IR::Expression* expression) const {
+        return !typeMap->isLeftValue(expression);
+    }
+};
+
+/**
+ * Policy that treats a key as complex if it's not either (1) an lvalue, or (2)
+ * a call to isValid().
+ */
+class NonLeftValueOrIsValid : public NonLeftValue {
+    ReferenceMap* refMap;
+ public:
+    NonLeftValueOrIsValid(ReferenceMap* refMap, TypeMap* typeMap)
+        : NonLeftValue(typeMap), refMap(refMap)
+    { CHECK_NULL(refMap); }
     bool isTooComplex(const IR::Expression* expression) const;
 };
 
 /**
- * Policy that tracks whether a expression is masked non-lvalue, simple non-lvalue or isValid()
+ * Policy that treats a key as complex if it's not either (1) a simple lvalue,
+ * or (2) a mask applied to a simple lvalue.
  */
 class NonMaskLeftValue : public NonLeftValue {
  public:
-    NonMaskLeftValue(ReferenceMap* refMap, TypeMap* typeMap) : NonLeftValue(refMap, typeMap) {}
+    using NonLeftValue::NonLeftValue;
     bool isTooComplex(const IR::Expression* expression) const {
         if (auto mask = expression->to<IR::BAnd>()) {
             if (mask->right->is<IR::Constant>())

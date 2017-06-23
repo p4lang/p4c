@@ -102,7 +102,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
-                            new P4::NonLeftValue(&refMap, &typeMap)),
+                            new P4::NonLeftValueOrIsValid(&refMap, &typeMap)),
         new P4::RemoveExits(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets

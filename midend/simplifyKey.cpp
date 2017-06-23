@@ -29,9 +29,8 @@ class HasTableApply : public Inspector {
 };
 }  // namespace
 
-bool NonLeftValue::isTooComplex(const IR::Expression* expression) const {
-    if (typeMap->isLeftValue(expression))
-        return false;
+bool NonLeftValueOrIsValid::isTooComplex(const IR::Expression* expression) const {
+    if (!NonLeftValue::isTooComplex(expression)) return false;
     if (!expression->is<IR::MethodCallExpression>())
         return true;
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
