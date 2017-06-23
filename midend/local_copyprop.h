@@ -70,6 +70,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     const IR::Expression *postorder(IR::PathExpression *) override;
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
+    IR::IfStatement *postorder(IR::IfStatement *) override;
     IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
     IR::P4Action *preorder(IR::P4Action *) override;
     IR::P4Action *postorder(IR::P4Action *) override;
@@ -80,6 +81,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void apply_function(FuncInfo *tbl);
     IR::P4Table *preorder(IR::P4Table *) override;
     IR::P4Table *postorder(IR::P4Table *) override;
+    bool equiv(const IR::Expression *left, const IR::Expression *right);
     class ElimDead;
     class RewriteTableKeys;
 

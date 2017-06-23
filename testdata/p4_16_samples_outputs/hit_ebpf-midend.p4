@@ -77,9 +77,6 @@ control pipe(inout Headers_t headers, out bool pass) {
     @hidden action act_2() {
         tmp_0 = false;
     }
-    @hidden action act_3() {
-        pass = pass;
-    }
     @hidden table tbl_act {
         actions = {
             act_0();
@@ -104,25 +101,16 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_2();
     }
-    @hidden table tbl_act_3 {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
-    }
     apply {
         tbl_act.apply();
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0) 
             if (Check_src_ip.apply().hit) 
                 tbl_act_1.apply();
             else 
                 tbl_act_2.apply();
-            if (tmp_0) 
-                tbl_act_3.apply();
-        }
     }
 }
 

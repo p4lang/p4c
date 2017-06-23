@@ -65,8 +65,14 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         if (s->ifTrue == nullptr) {
             /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
              * the if statement as needed */
-            if (s->ifFalse == nullptr)
-                return nullptr;
+            if (s->ifFalse == nullptr) {
+                if (!hasSideEffects(s->condition)) {
+                    return nullptr;
+                } else {
+                    s->ifTrue = new IR::EmptyStatement();
+                    return s;
+                }
+            }
             s->ifTrue = s->ifFalse;
             s->ifFalse = nullptr;
             s->condition = new IR::LNot(s->condition); }
@@ -204,8 +210,52 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     return postorder(as);
 }
 
+/* Function to check if two expressions are equivalent -
+ * used to remove no-op assignments.
+ * FIXME -- This function only covers a limited subset of expressions,
+ * but will not output true for expressions which are not equivalent.
+ * Proper deep comparisons may be required */
+bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Expression *right) {
+    // Compare names of variables (at this pass, all names are unique)
+    auto pl = left->to<IR::PathExpression>();
+    auto pr = right->to<IR::PathExpression>();
+    if (pl && pr) {
+        return pl->path->name == pr->path->name &&
+        pl->path->absolute == pr->path->absolute;
+    }
+    auto al = left->to<IR::ArrayIndex>();
+    auto ar = right->to<IR::ArrayIndex>();
+    if (al && ar) {
+        return equiv(al->left, ar->left) && equiv(al->right, ar->right);
+    }
+    // Compare binary operations (array indices)
+    auto bl = left->to<IR::Operation_Binary>();
+    auto br = right->to<IR::Operation_Binary>();
+    if (bl && br) {
+        return equiv(bl->left, br->left) && equiv(bl->right, br->right) &&
+        typeid(*bl) == typeid(*br);
+    }
+    // Compare packet header/metadata fields
+    auto ml = left->to<IR::Member>();
+    auto mr = right->to<IR::Member>();
+    if (ml && mr) {
+        return ml->member == mr->member && equiv(ml->expr, mr->expr);
+    }
+    // Compare unary operations (can be used inside array indices)
+    auto ul = left->to<IR::Operation_Unary>();
+    auto ur = right->to<IR::Operation_Unary>();
+    if (ul && ur) {
+        return equiv(ul->expr, ur->expr) &&
+        typeid(*ul) == typeid(*ur);
+    }
+    // Compare literals (strings, booleans and integers)
+    if (*left == *right)
+      return true;
+    return false;
+}
+
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
-    if (as->left == as->right) {   // FIXME -- need deep equals here?
+    if (equiv(as->left, as->right)) {
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
     if (!working) return as;
@@ -226,6 +276,26 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
         LOG3("dest of assignment is " << as->left << " so skipping");
     }
     return as;
+}
+
+IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
+    if (s->ifTrue == nullptr) {
+        /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
+         * the if statement as needed. We do not apply ElimDead as we don't want to
+         * modify other statements in the midst of analysis. */
+        if (s->ifFalse == nullptr) {
+            if (!hasSideEffects(s->condition)) {
+                return nullptr;
+            } else {
+                s->ifTrue = new IR::EmptyStatement();
+            }
+        } else {
+            s->ifTrue = s->ifFalse;
+            s->ifFalse = nullptr;
+            s->condition = new IR::LNot(s->condition);
+        }
+    }
+    return s;
 }
 
 IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
