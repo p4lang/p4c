@@ -22,6 +22,7 @@ ir_UNIFIED = \
 	ir/dump.cpp \
 	ir/expression.cpp \
 	ir/ir.cpp \
+	ir/json_parser.cpp \
 	ir/node.cpp \
 	ir/pass_manager.cpp \
 	ir/type.cpp \
