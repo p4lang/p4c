@@ -627,6 +627,8 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             auto b = dest->to<IR::Type_Bits>();
             return b->size == 1 && !b->isSigned;
         }
+    } else if (src->is<IR::Type_InfInt>()) {
+        return dest->is<IR::Type_Bits>();
     }
     return false;
 }
