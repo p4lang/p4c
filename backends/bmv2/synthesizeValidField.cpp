@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace BMV2 {
 
