@@ -249,10 +249,12 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
             auto *lt = op->left->type->to<IR::Type::Bits>();
             auto *rt = op->right->type->to<IR::Type::Bits>();
             if (lt && rt) {
-                if (lt->size < rt->size)
+                if (lt->size < rt->size) {
+                    setType(op, rt);
                     op->left = new IR::Cast(rt, op->left);
-                else if (rt->size < lt->size)
-                    op->right = new IR::Cast(lt, op->right);
+                } else if (rt->size < lt->size) {
+                    setType(op, lt);
+                    op->right = new IR::Cast(lt, op->right); }
                 LOG3("Inserted cast in " << op);
             }
         }
@@ -280,6 +282,7 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
 static const IR::Type*
 inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) {
     const IR::Type *rv = IR::Type::Unknown::get();
+    if (!ctxt) return rv;
     if (auto parent = ctxt->node->to<IR::Expression>()) {
         if (auto p = parent->to<IR::Operation_Relation>()) {
             if (ctxt->child_index == 0)
@@ -448,19 +451,15 @@ class TypeCheck::AssignActionArgTypes : public Modifier {
 
 class TypeCheck::MakeImplicitCastsExplicit : public Transform, P4WriteContext {
     const IR::V1Program *global = nullptr;
-    bool        inAction = false;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
         return Transform::init_apply(root); }
     IR::Annotation *preorder(IR::Annotation *a) override { prune(); return a; }
-    IR::ActionFunction *preorder(IR::ActionFunction *af) override {
-        inAction = true;
-        visit(af->action);
-        inAction = false;
-        prune();
-        return af; }
     IR::Expression *postorder(IR::Expression *op) override {
-        if (!inAction || isWrite()) return op;  // don't cast lvalues or refs outside actions
+        visitAgain();
+        if (isWrite()) return op;  // don't cast lvalues or refs outside actions
+        if (!findContext<IR::ActionFunction>() && !findContext<IR::Property>())
+            return op;  // only while in action functions or extern properties
         auto *type = inferTypeFromContext(getContext(), global);
         if (type != IR::Type::Unknown::get() && !type->is<IR::Type_InfInt>() && type != op->type) {
                 LOG3("Need cast " << op->type << " -> " << type << " on " << op);
@@ -471,9 +470,7 @@ class TypeCheck::MakeImplicitCastsExplicit : public Transform, P4WriteContext {
         return op; }
 
  public:
-    MakeImplicitCastsExplicit() {
-        visitDagOnce = false;
-        setName("MakeImplicitCastsExplicit"); }
+    MakeImplicitCastsExplicit() { setName("MakeImplicitCastsExplicit"); }
 };
 
 TypeCheck::TypeCheck() : PassManager({
