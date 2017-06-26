@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _BACKENDS_BMV2_SYNTHESIZEVALIDFIELD_H_
 #define _BACKENDS_BMV2_SYNTHESIZEVALIDFIELD_H_
 
+#include "ir/ir.h"
 #include "ir/pass_manager.h"
 
 namespace P4 {
