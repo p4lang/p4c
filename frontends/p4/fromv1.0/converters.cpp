@@ -387,6 +387,20 @@ ExternConverter::convertExternInstance(const IR::Declaration_Instance *ext, cstr
     return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
 }
 
+const IR::Statement *
+ExternConverter::convertExternCall(const IR::Declaration_Instance *ext, const IR::Primitive *prim) {
+    ExpressionConverter conv(structure);
+    auto extref = new IR::PathExpression(structure->externs.get(ext));
+    auto method = new IR::Member(prim->srcInfo, extref, prim->name);
+    auto args = new IR::Vector<IR::Expression>();
+    for (unsigned i = 1; i < prim->operands.size(); ++i)
+        args->push_back(conv.convert(prim->operands.at(i)));
+    auto mc = new IR::MethodCallExpression(prim->srcInfo, method, args);
+    return new IR::MethodCallStatement(prim->srcInfo, mc);
+}
+
+
+
 ///////////////////////////////////////////////////////////////
 
 namespace {

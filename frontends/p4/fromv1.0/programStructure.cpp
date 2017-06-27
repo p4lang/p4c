@@ -255,11 +255,11 @@ void ProgramStructure::createStructures() {
 
 void ProgramStructure::createExterns() {
     for (auto it : extern_types) {
-        auto et = extCvt->convertExternType(it.first, it.second);
-        if (et != it.first)
-            extern_remap[it.first] = et;
-        if (et != declarations->getDeclaration(et->name))
-            declarations->push_back(et); }
+        if (auto et = extCvt->convertExternType(it.first, it.second)) {
+            if (et != it.first)
+                extern_remap[it.first] = et;
+            if (et != declarations->getDeclaration(et->name))
+                declarations->push_back(et); } }
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -906,13 +906,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
 
     if (extrn) {
-        auto extref = new IR::PathExpression(externs.get(extrn));
-        auto method = new IR::Member(primitive->srcInfo, extref, primitive->name);
-        auto args = new IR::Vector<IR::Expression>();
-        for (unsigned i = 1; i < primitive->operands.size(); ++i)
-            args->push_back(conv.convert(primitive->operands.at(i)));
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(primitive->srcInfo, mc);
+        return extCvt->convertExternCall(extrn, primitive);
     } else if (primitive->name == "modify_field") {
         if (primitive->operands.size() == 2) {
             auto left = conv.convert(primitive->operands.at(0));
