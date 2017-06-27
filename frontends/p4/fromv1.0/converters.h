@@ -85,6 +85,8 @@ class ExternConverter {
     virtual const IR::Type_Extern *convertExternType(const IR::Type_Extern *, cstring);
     virtual const IR::Declaration_Instance *convertExternInstance(
                 const IR::Declaration_Instance *, cstring);
+    virtual const IR::Statement *convertExternCall(const IR::Declaration_Instance *,
+                                                   const IR::Primitive *);
     ExternConverter() {}
     explicit ExternConverter(ProgramStructure *s) : structure(s) {}
 };
