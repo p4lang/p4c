@@ -1045,6 +1045,7 @@ public:
 
         size_t index = 1;
         for (auto headerField : type->fields) {
+            if (isHidden(headerField)) continue;
             auto metadata = header->add_metadata();
             auto fieldName = headerField->controlPlaneName();
             metadata->set_id(index++);
