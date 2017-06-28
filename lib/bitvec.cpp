@@ -78,6 +78,7 @@ bitvec &bitvec::operator<<=(size_t count) {
 }
 
 bitvec bitvec::getslice(size_t idx, size_t sz) const {
+    if (sz == 0) return bitvec();
     if (idx >= size * bits_per_unit) return bitvec();
     if (idx + sz > size * bits_per_unit)
         sz = size * bits_per_unit - idx;
