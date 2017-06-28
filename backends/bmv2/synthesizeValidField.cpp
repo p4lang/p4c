@@ -37,7 +37,9 @@ class AddValidField final : public Modifier {
     bool preorder(IR::Type_Header* header) override {
         const cstring validField = V1ModelProperties::validField;
         if (header->getField(validField) != nullptr) return true;
-        auto field = new IR::StructField(validField, IR::Type::Bits::get(1));
+        auto annotations = new IR::Annotations(
+            {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})});
+        auto field = new IR::StructField(validField, annotations, IR::Type::Bits::get(1));
         header->fields.push_back(field);
         return true;
     }
