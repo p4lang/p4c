@@ -32,6 +32,7 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <functional>
 
 // TODO(antonin)
 // experimental support for priority queueing
@@ -67,6 +68,8 @@ using bm::p4object_id_t;
 class SimpleSwitch : public Switch {
  public:
   using mirror_id_t = int;
+
+  using TransmitFn = std::function<void(int, const char *, int)>;
 
  private:
   using clock = std::chrono::high_resolution_clock;
@@ -105,6 +108,8 @@ class SimpleSwitch : public Switch {
 
   // returns the number of microseconds elasped since the clock's epoch
   uint64_t get_time_since_epoch_us() const;
+
+  void set_transmit_fn(TransmitFn fn);
 
  private:
   static constexpr size_t nb_egress_threads = 4u;
@@ -162,6 +167,7 @@ class SimpleSwitch : public Switch {
 #endif
   egress_buffers;
   Queue<std::unique_ptr<Packet> > output_buffer;
+  TransmitFn my_transmit_fn;
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;
   std::unordered_map<mirror_id_t, int> mirroring_map;

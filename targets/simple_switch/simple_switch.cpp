@@ -64,6 +64,7 @@ REGISTER_HASH(bmv2_hash);
 
 extern int import_primitives();
 
+
 SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   : Switch(enable_swap),
     max_port(max_port),
@@ -77,6 +78,10 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
                    64, EgressThreadMapper(nb_egress_threads)),
 #endif
     output_buffer(128),
+    // cannot use std::bind because of a clang bug
+    // https://stackoverflow.com/questions/32030141/is-this-incorrect-use-of-stdbind-or-a-compiler-bug
+    my_transmit_fn([this](int port_num, const char *buffer, int len) {
+        this->transmit_fn(port_num, buffer, len); }),
     pre(new McSimplePreLAG()),
     start(clock::now()) {
   add_component<McSimplePreLAG>(pre);
@@ -213,6 +218,11 @@ SimpleSwitch::get_time_since_epoch_us() const {
 }
 
 void
+SimpleSwitch::set_transmit_fn(TransmitFn fn) {
+  my_transmit_fn = std::move(fn);
+}
+
+void
 SimpleSwitch::transmit_thread() {
   while (1) {
     std::unique_ptr<Packet> packet;
@@ -220,8 +230,8 @@ SimpleSwitch::transmit_thread() {
     BMELOG(packet_out, *packet);
     BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
                     packet->get_data_size(), packet->get_egress_port());
-    transmit_fn(packet->get_egress_port(),
-                packet->data(), packet->get_data_size());
+    my_transmit_fn(packet->get_egress_port(),
+                   packet->data(), packet->get_data_size());
   }
 }
 
