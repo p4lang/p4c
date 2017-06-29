@@ -45,6 +45,8 @@ p4tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 		   $(srcdir)/testdata/p4_14_samples/*.p4 \
 		   $(srcdir)/testdata/p4_14_samples \
+		   $(srcdir)/testdata/p4_14_errors/*.p4 \
+		   $(srcdir)/testdata/p4_14_errors \
 		   $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4
 	@$(GENTESTS) $(srcdir) p14_to_16 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 

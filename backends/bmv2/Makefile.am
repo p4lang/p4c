@@ -87,3 +87,8 @@ bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
 
 gtest_LDADD += libbackendbmv2.la
+
+# This test defines two lpm keys for a table.
+# Even though the P4 spec allows it, it doesn't really make sense in a switch
+# so we allow it to fail on BMv2.
+XFAIL_TESTS += bmv2/testdata/p4_14_samples/issue60.p4.test
