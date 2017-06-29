@@ -174,12 +174,16 @@ void ProgramStructure::createTypes() {
 }
 
 const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expression* expression) {
-    if (!expression->is<IR::PathExpression>())
-        ::error("%1%: expected a field list", expression);
+    if (!expression->is<IR::PathExpression>()) {
+      ::error("%1%: expected a field list", expression);
+      return nullptr;
+    }
     auto nr = expression->to<IR::PathExpression>();
     auto fl = field_lists.get(nr->path->name);
-    if (fl == nullptr)
-        ::error("%1%: Expected a field list", expression);
+    if (fl == nullptr) {
+      ::error("%1%: Expected a field list", expression);
+      return nullptr;
+    }
 
     auto name = makeUniqueName(nr->path->name);
     auto annos = addNameAnnotation(nr->path->name);
@@ -878,12 +882,16 @@ const IR::Statement* ProgramStructure::sliceAssign(
 const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* expression) {
     ExpressionConverter conv(this);
 
-    if (!expression->is<IR::PathExpression>())
-        ::error("%1%: expected a field list", expression);
+    if (!expression->is<IR::PathExpression>()) {
+      ::error("%1%: expected a field list", expression);
+      return expression;
+    }
     auto nr = expression->to<IR::PathExpression>();
     auto fl = field_lists.get(nr->path->name);
-    if (fl == nullptr)
-        ::error("%1%: Expected a field list", expression);
+    if (fl == nullptr) {
+      ::error("%1%: Expected a field list", expression);
+      return expression;
+    }
     auto result = conv.convert(fl);
     return result;
 }
@@ -1178,8 +1186,10 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
 
         auto nr = primitive->operands.at(2)->to<IR::PathExpression>();
         auto flc = field_list_calculations.get(nr->path->name);
-        if (flc == nullptr)
+        if (flc == nullptr) {
             ::error("%1%: Expected a field_list_calculation", primitive->operands.at(1));
+            return nullptr;
+        }
         auto ttype = IR::Type_Bits::get(flc->output_width);
         auto fl = getFieldLists(flc);
         if (fl == nullptr)
@@ -1806,8 +1816,10 @@ ProgramStructure::checksumUnit(const IR::FieldListCalculation* flc) {
 // into a temporary field list
 const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculation* flc) {
     // FIXME -- this duplicates P4_14::TypeCheck.  Why not just use flc->input_fields?
-    if (flc->input->names.size() == 0)
+    if (flc->input->names.size() == 0) {
         ::error("%1%: field_list_calculation with zero inputs", flc);
+        return nullptr;
+    }
     if (flc->input->names.size() == 1) {
         auto name = flc->input->names.at(0);
         auto result = field_lists.get(name);
