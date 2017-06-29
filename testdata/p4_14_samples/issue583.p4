@@ -134,7 +134,6 @@ parser parse_vlan {
 #define IP_PROTOCOLS_ICMPV6 58
 
 header ipv4_t ipv4;
-metadata ipv4_t ipv4_meta;
 
 parser parse_ipv4 {
     extract(ipv4);
@@ -197,7 +196,6 @@ action hop_ipv4(egress_spec) {
 /* This should not be necessary if drop is allowed in table action specs */
 action drop_pkt() {
     drop();
-    register_write(reg2, 0, ipv4_meta);
 }
 
 table ipv4_routing {
@@ -238,8 +236,7 @@ register reg1 {
 
 register reg2 {
     layout : ipv4_t;
-    static : ipv4_routing;
-    instance_count : 100;
+    direct : ipv4_routing;
 }
 
 
