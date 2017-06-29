@@ -92,7 +92,7 @@ int main(int argc, char *const argv[]) {
             log_dump(program, "After midend");
             log_dump(top, "Top level block");
             if (options.dumpJsonFile)
-                JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+                JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);

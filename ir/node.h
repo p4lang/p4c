@@ -79,6 +79,9 @@ class Node : public virtual INode {
     friend class ::Inspector;
     friend class ::Modifier;
     friend class ::Transform;
+    cstring prepareSourceInfoForJSON(Util::SourceInfo& si,
+                                     unsigned *lineNumber,
+                                     unsigned *columnNumber) const;
 
  public:
     Util::SourceInfo    srcInfo;
@@ -105,6 +108,7 @@ class Node : public virtual INode {
     explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
+    void sourceInfoToJSON(JSONGenerator &json) const;
     Util::JsonObject* sourceInfoJsonObj() const;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
