@@ -28,6 +28,7 @@ limitations under the License.
 class JSONGenerator {
     std::unordered_set<int> node_refs;
     std::ostream &out;
+    bool dumpSourceInfo;
 
     template<typename T>
     class has_toJSON {
@@ -43,7 +44,8 @@ class JSONGenerator {
  public:
     indent_t indent;
 
-    explicit JSONGenerator(std::ostream &out) : out(out) {}
+    explicit JSONGenerator(std::ostream &out, bool dumpSourceInfo = false) :
+        out(out), dumpSourceInfo(dumpSourceInfo) {}
 
     template<typename T>
     void generate(const vector<T> &v) {
@@ -140,7 +142,11 @@ class JSONGenerator {
             out << indent << "\"Node_ID\" : " << v.id;
         } else {
             node_refs.insert(v.id);
-            v.toJSON(*this); }
+            v.toJSON(*this);
+            if (dumpSourceInfo) {
+                v.sourceInfoToJSON(*this);
+            }
+        }
         out << std::endl << --indent << "}";
     }
 
