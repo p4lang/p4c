@@ -395,7 +395,8 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
     throw json_exception(
         EFormat() << "Unknown primitive action: " << primitive_name);
 
-  action_fn->push_back_primitive(primitive);
+  action_fn->push_back_primitive(primitive,
+                                 object_source_info(cfg_primitive));
 
   const auto &cfg_primitive_parameters = cfg_primitive["parameters"];
 

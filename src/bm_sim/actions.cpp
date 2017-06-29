@@ -313,9 +313,13 @@ ActionFnEntry::execute(Packet *pkt) const {
   auto &primitives = action_fn->primitives;
   size_t param_offset = 0;
   BMLOG_TRACE_SI_PKT(*pkt, action_fn->get_source_info(),
-                     "Executing action {}", action_fn->get_name());
+                     "Action {}", action_fn->get_name());
   for (size_t idx = 0; idx < primitives.size();) {
     const auto &primitive = primitives[idx];
+    BMLOG_TRACE_SI_PKT(*pkt, primitive.get_source_info(),
+      "Primitive {}",
+        (primitive.get_source_info() == nullptr) ? "(no source info)"
+        : primitive.get_source_info()->get_source_fragment());
     param_offset = primitive.get_param_offset();
     primitive.execute(&state, &(action_fn->params[param_offset]));
     idx = primitive.get_jump_offset(idx);

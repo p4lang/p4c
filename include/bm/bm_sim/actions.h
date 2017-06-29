@@ -619,6 +619,8 @@ class ActionPrimitiveCall {
     return primitive->get_jump_offset(current_offset);
   }
 
+  SourceInfo *get_source_info() const { return source_info.get(); }
+
  private:
   ActionPrimitive_ *primitive;
   size_t param_offset;
