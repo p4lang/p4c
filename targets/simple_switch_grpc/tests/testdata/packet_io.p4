@@ -13,24 +13,21 @@
  * limitations under the License.
  */
 
-/*
- * Antonin Bas (antonin@barefootnetworks.com)
- *
- */
+#define CPU_PORT 64
 
-#ifndef BM_PI_PI_H_
-#define BM_PI_PI_H_
+parser start {
+    return ingress;
+}
 
-namespace bm {
+action redirect() { modify_field(standard_metadata.egress_spec, CPU_PORT); }
 
-class SwitchWContexts;  // forward declaration
+table t_redirect {
+    actions { redirect; }
+    default_action: redirect();
+}
 
-namespace pi {
+control ingress {
+    apply(t_redirect);
+}
 
-void register_switch(bm::SwitchWContexts *sw, int cpu_port = -1);
-
-}  // namespace pi
-
-}  // namespace bm
-
-#endif  // BM_PI_PI_H_
+control egress { }

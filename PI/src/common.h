@@ -49,6 +49,8 @@ extern device_info_t device_info_state;
 
 extern bm::SwitchWContexts *switch_;
 
+extern int cpu_port;
+
 static inline device_info_t *get_device_info(size_t dev_id) {
   (void) dev_id;
   return &device_info_state;

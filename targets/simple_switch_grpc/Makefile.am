@@ -3,8 +3,9 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 SUBDIRS = . tests
 
 AM_CPPFLAGS += \
--I$(srcdir)/../../include/ \
--I$(srcdir)/../simple_switch
+-I$(srcdir)/../../include \
+-I$(srcdir)/../simple_switch \
+-I$(srcdir)/../../PI
 
 bin_PROGRAMS = simple_switch_grpc
 

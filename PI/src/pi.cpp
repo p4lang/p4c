@@ -26,14 +26,17 @@ namespace pibmv2 {
 
 bm::SwitchWContexts *switch_ = nullptr;
 
+int cpu_port = -1;
+
 }  // namespace pibmv2
 
 namespace bm {
 
 namespace pi {
 
-void register_switch(bm::SwitchWContexts *sw) {
+void register_switch(bm::SwitchWContexts *sw, int cpu_port) {
   ::pibmv2::switch_ = sw;
+  ::pibmv2::cpu_port = cpu_port;
 }
 
 }  // namespace pi

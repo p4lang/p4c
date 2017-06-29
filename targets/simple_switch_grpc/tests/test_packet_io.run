@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+json=./testdata/packet_io.json
+
+./../simple_switch_grpc --log-console $json --device-id 1 -- --cpu-port 64 --grpc-server-addr localhost:50052 &
+switch_PID=$!
+# making sure switch is ready
+echo "Sleeping 10 seconds..."
+sleep 10
+
+./test_packet_io
+test_status=$?
+
+kill $switch_PID
+
+exit $test_status

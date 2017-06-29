@@ -18,6 +18,8 @@
  *
  */
 
+#include <bm/bm_sim/switch.h>
+
 #include <PI/pi.h>
 #include <PI/target/pi_imp.h>
 
@@ -102,8 +104,9 @@ pi_status_t _pi_batch_end(pi_session_handle_t session_handle, bool hw_sync) {
 
 pi_status_t _pi_packetout_send(pi_dev_id_t dev_id, const char *pkt,
                                size_t size) {
-  (void) dev_id; (void) pkt; (void) size;
-  return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  (void) dev_id;
+  pibmv2::switch_->receive(pibmv2::cpu_port, pkt, static_cast<int>(size));
+  return PI_STATUS_SUCCESS;
 }
 
 }

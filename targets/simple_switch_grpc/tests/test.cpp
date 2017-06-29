@@ -22,13 +22,13 @@
 
 #include <p4/p4runtime.grpc.pb.h>
 
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/text_format.h>
 #include <google/protobuf/util/message_differencer.h>
 
 #include <memory>
-#include <fstream>
-#include <streambuf>
+
+#include "utils.h"
+
+namespace testing {
 
 using grpc::ClientContext;
 using grpc::Status;
@@ -39,50 +39,10 @@ namespace {
 
 const char *test_proto_txt = TESTDATADIR "/simple_router.proto.txt";
 
-int get_table_id(const p4::config::P4Info &p4info,
-                 const std::string &t_name) {
-  for (const auto &table : p4info.tables()) {
-    const auto &pre = table.preamble();
-    if (pre.name() == t_name) return pre.id();
-  }
-  return 0;
-}
-
-int get_action_id(const p4::config::P4Info &p4info,
-                  const std::string &a_name) {
-  for (const auto &action : p4info.actions()) {
-    const auto &pre = action.preamble();
-    if (pre.name() == a_name) return pre.id();
-  }
-  return 0;
-}
-
-int get_mf_id(const p4::config::P4Info &p4info,
-              const std::string &t_name, const std::string &mf_name) {
-  for (const auto &table : p4info.tables()) {
-    const auto &pre = table.preamble();
-    if (pre.name() != t_name) continue;
-    for (const auto &mf : table.match_fields())
-      if (mf.name() == mf_name) return mf.id();
-  }
-  return -1;
-}
-
-int get_param_id(const p4::config::P4Info &p4info,
-                 const std::string &a_name, const std::string &param_name) {
-  for (const auto &action : p4info.actions()) {
-    const auto &pre = action.preamble();
-    if (pre.name() != a_name) continue;
-    for (const auto &param : action.params())
-      if (param.name() == param_name) return param.id();
-  }
-  return -1;
-}
-
 }  // namespace
 
 int
-main() {
+test() {
   int dev_id = 0;
 
   auto channel = grpc::CreateChannel(
@@ -90,11 +50,7 @@ main() {
   std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
       p4::P4Runtime::NewStub(channel));
 
-  p4::config::P4Info p4info;
-  std::ifstream istream(test_proto_txt);
-  // p4info.ParseFromIstream(&istream);
-  google::protobuf::io::IstreamInputStream istream_(&istream);
-  google::protobuf::TextFormat::Parse(&istream_, &p4info);
+  auto p4info = parse_p4info(test_proto_txt);
 
   {
     p4::SetForwardingPipelineConfigRequest request;
@@ -198,4 +154,11 @@ main() {
   }
 
   return 0;
+}
+
+}  // namespace testing
+
+int
+main() {
+  return testing::test();
 }

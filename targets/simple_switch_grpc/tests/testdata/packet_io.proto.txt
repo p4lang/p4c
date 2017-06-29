@@ -1,0 +1,18 @@
+tables {
+  preamble {
+    id: 33591959
+    name: "t_redirect"
+    alias: "t_redirect"
+  }
+  action_refs {
+    id: 16794474
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16794474
+    name: "redirect"
+    alias: "redirect"
+  }
+}
