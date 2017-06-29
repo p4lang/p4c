@@ -626,7 +626,7 @@ Util::IJson* ControlConverter::convertIf(const CFG::IfNode* node, cstring prefix
     result->emplace("name", node->name);
     result->emplace("id", nextId("conditionals"));
     result->emplace_non_null("source_info", node->statement->condition->sourceInfoJsonObj());
-    auto j = conv->convert(node->statement->condition, true, false);
+    auto j = conv->convert(node->statement->condition, true, false, true);
     CHECK_NULL(j);
     result->emplace("expression", j);
     for (auto e : node->successors.edges) {

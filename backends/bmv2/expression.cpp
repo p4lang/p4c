@@ -83,10 +83,24 @@ Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
     return result;
 }
 
+Util::JsonObject* ExpressionConverter::cast_d2b(Util::IJson* result) {
+    auto obj = new Util::JsonObject();
+    obj->emplace("type", "expression");
+    auto conv = new Util::JsonObject();
+    obj->emplace("value", conv);
+    conv->emplace("op", "b2d");  // boolean to data cast
+    conv->emplace("left", Util::JsonValue::null);
+    conv->emplace("right", result);
+    return obj;
+}
+
 void ExpressionConverter::postorder(const IR::BoolLiteral* expression)  {
     auto result = new Util::JsonObject();
     result->emplace("type", "bool");
     result->emplace("value", expression->value);
+    if (convertBoolean) {
+        result = cast_d2b(result);
+    }
     map.emplace(expression, result);
 }
 
@@ -128,6 +142,9 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             e->emplace("left", Util::JsonValue::null);
             auto l = get(bim->appliedTo);
             e->emplace("right", l);
+            if (convertBoolean) {
+                result = cast_d2b(result);
+            }
             map.emplace(expression, result);
             return;
         }
@@ -528,6 +545,7 @@ void ExpressionConverter::postorder(const IR::Expression* expression)  {
 // see below for wrap
 Util::IJson*
 ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, bool convertBool) {
+    convertBoolean = convertBool;
     const IR::Expression *expr = e;
     if (doFixup) {
         ArithmeticFixup af(backend->getTypeMap());
@@ -540,17 +558,6 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
     auto result = ::get(map, expr->to<IR::Expression>());
     if (result == nullptr)
         BUG("%1%: Could not convert expression", e);
-
-    if (convertBool) {
-        auto obj = new Util::JsonObject();
-        obj->emplace("type", "expression");
-        auto conv = new Util::JsonObject();
-        obj->emplace("value", conv);
-        conv->emplace("op", "b2d");  // boolean to data cast
-        conv->emplace("left", Util::JsonValue::null);
-        conv->emplace("right", result);
-        result = obj;
-    }
 
     std::set<cstring> to_wrap({"expression", "stack_field"});
 

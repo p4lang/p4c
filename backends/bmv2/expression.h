@@ -66,12 +66,14 @@ class ExpressionConverter : public Inspector {
     void binary(const IR::Operation_Binary* expression);
     Util::IJson* get(const IR::Expression* expression) const;
     Util::IJson* fixLocal(Util::IJson* json);
+    bool convertBoolean = false;
 
     // doFixup = true -> insert masking operations for proper arithmetic implementation
     // see below for wrap
     Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
                          bool wrap = true, bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);
+    Util::JsonObject* cast_d2b(Util::IJson* e);
 
     void postorder(const IR::BoolLiteral* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
