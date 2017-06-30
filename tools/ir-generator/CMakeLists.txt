@@ -1,7 +1,21 @@
+# Copyright 2013-present Barefoot Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 set (TOOLSDIR, "${P4C_SOURCE_DIR}/tools")
 set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
 
-set (IRGENERATOR_SRC_FILES
+set (IRGENERATOR_SRCS
   generator.cpp
   irclass.cpp
   methods.cpp
@@ -18,10 +32,12 @@ BISON_TARGET(IRgenParser ir-generator.ypp ${CMAKE_CURRENT_BINARY_DIR}/ir-generat
 FLEX_TARGET(IRgenLexer ir-generator-lex.l  ${CMAKE_CURRENT_BINARY_DIR}/ir-generator-lex.c)
 ADD_FLEX_BISON_DEPENDENCY(IRgenLexer IRgenParser)
 
-set (IRGENERATOR_GEN_FILES
+set (IRGENERATOR_GEN_SRCS
     ${BISON_IRgenParser_OUTPUTS}
   )
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
-add_executable (irgenerator ${IRGENERATOR_SRC_FILES} ${IRGENERATOR_GEN_FILES})
+add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
 target_link_libraries (irgenerator p4ctoolkit gc gmp)
+
+set (CPPLINT_FILES "{CPPLINT_FILES} ${IRGENERATOR_SRCS}")

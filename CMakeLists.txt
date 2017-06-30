@@ -1,3 +1,17 @@
+# Copyright 2013-present Barefoot Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
 
 project (P4C)
@@ -127,9 +141,6 @@ include_directories (
 add_definitions (-DCONFIG_PREFIX="${CMAKE_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_DATADIR}")
 
-set (TOOLSDIR, "${P4C_SOURCE_DIR}/tools")
-set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
-
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
@@ -137,13 +148,29 @@ set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
 
+set (IR_GENERATED_SRCS ir/ir-generated.h ir/ir-generated.cpp ir/gen-tree-macro.h)
+set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
+
+# the order of adding subdirectories matters because of target dependencies
 add_subdirectory (lib)
 add_subdirectory (tools/ir-generator)
-# add_subdirectory (lib  tools/driver ir frontends midend control-plane)
+add_subdirectory (ir)
+MESSAGE("IR_DEF_FILES= ${IR_DEF_FILES}")
+# add_subdirectory (tools/driver ir frontends midend control-plane)
 #if (ENABLE_P4RUNTIME_TO_PD)
 #  add_subdirectory (p4runtime-to-pd)
 #endif()
 
+set (TOOLSDIR, "${P4C_SOURCE_DIR}/tools")
+set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
 
 # custom targets:
 # cpplint, cpplint-quiet, tags, etags, check, recheck, check-*, check-ifail, gtest, docs
+
+# Need to add all the fixup code
+add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
+  COMMAND ${IR_GENERATOR} -i ir/ir-generated-cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
+  MAIN_DEPENDENCY ${IR_GENERATOR}
+  COMMENT "Generating IR class files")
+
+add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
