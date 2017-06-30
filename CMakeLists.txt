@@ -1,0 +1,149 @@
+cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
+
+project (P4C)
+
+set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+OPTION (WITH_CCACHE "Enable ccache to save compilation time" OFF)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  OPTION (WITH_LIBCXX "Enable libc++ for Clang" ON)
+else ()
+  OPTION (WITH_LIBCXX "Enable libc++ for Clang" OFF)
+endif ()
+OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" ON)
+OPTION (ENABLE_DOXYGEN_DOCS "Build documentation" OFF)
+
+# # search in /usr/local first
+# set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
+set (P4C_CXX_FLAGS "")
+set (P4C_LIBRARIES "")
+
+# required tools and libraries
+find_package (PythonInterp REQUIRED)
+find_package (FLEX REQUIRED)
+find_package (BISON REQUIRED)
+find_package (Protobuf 3.0.0 REQUIRED)
+find_package (Boost REQUIRED COMPONENTS iostreams)
+if (Boost_IOSTREAMS_FOUND)
+  set (HAVE_LIBBOOST_IOSTREAMS 1)
+  set (P4C_LIBRARIES "${P4C_LIBRARIES} ${BOOST_LIBRARIES}")
+endif()
+# other required libraries
+include (CheckLibraryExists)
+check_library_exists (gc GC_malloc "" HAVE_LIBGC)
+if (HAVE_LIBGC)
+  set (P4C_LIBRARIES "${P4C_LIBRARIES} gc")
+endif()
+check_library_exists (gmp __gmpz_init "" HAVE_GMP)
+if (HAVE_LIBGMP)
+  set (P4C_LIBRARIES "${P4C_LIBRARIES} gmp")
+endif()
+check_library_exists (rt clock_gettime "" HAVE_CLOCK_GETTIME)
+if (HAVE_CLOCK_GETTIME)
+  set (P4C_LIBRARIES "${P4C_LIBRARIES} rt")
+endif()
+find_library (HAVE_GMPXX gmpxx PATHS /usr/local/lib)
+if (HAVE_LIBGMPXX)
+  set (P4C_LIBRARIES "${P4C_LIBRARIES} gmpxx")
+endif()
+find_package_handle_standard_args (libgmpxx DEFAULT_MSG HAVE_GMPXX)
+
+
+# python modules
+include (FindPythonModule)
+find_python_module (difflib REQUIRED)
+find_python_module (shutil REQUIRED)
+find_python_module (tempfile REQUIRED)
+find_python_module (subprocess REQUIRED)
+find_python_module (re REQUIRED)
+if (ENABLE_P4RUNTIME_TO_PD)
+  find_python_module (tenjin REQUIRED)
+endif ()
+
+# doxygen if docs required
+if (ENABLE_DOXYGEN_DOCS)
+  find_package (Doxygen)
+endif ()
+
+# if we want to manage versions in CMake ...
+# include (cmake/P4CVersion.cmake)
+# set (CPACK_PACKAGE_VERSION_MAJOR ${__P4C_VERSION_MAJOR})
+# set (CPACK_PACKAGE_VERSION_MINOR ${__P4C_VERSION_MINOR})
+# set (CPACK_PACKAGE_VERSION_PATCH ${__P4C_VERSION_PATCH})
+# if (__P4C_VERSION_RC)
+#   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
+# endif ()
+
+set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include (CheckCCompilerFlag)
+include (CheckCXXCompilerFlag)
+
+# macro to test and add a C++ compiler option if supported
+MACRO (add_cxx_compiler_option option)
+  string (REPLACE "+" "P" escaped_option1 ${option})
+  string (REPLACE "-" "" escaped_option ${escaped_option1})
+  set (_success "_HAVE_OPTION_${escaped_option}_")
+  set (__required_flags_backup "${CMAKE_REQUIRED_FLAGS}")
+  set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${P4C_CXX_FLAGS}")
+  check_cxx_compiler_flag (${option} ${_success})
+  set (CMAKE_REQUIRED_FLAGS ${__required_flags_backup})
+  if (${_success})
+    set (P4C_CXX_FLAGS "${P4C_CXX_FLAGS} ${option}")
+  endif (${_success})
+endmacro (add_cxx_compiler_option)
+
+include (CheckCXXSourceCompiles)
+MACRO (check_compiler_feature option program var)
+  set (__required_flags_backup "${CMAKE_REQUIRED_FLAGS}")
+  set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${option}")
+
+  check_cxx_source_compiles ("${program}" ${var})
+
+  IF (${var} AND NOT "${option}" STREQUAL "")
+    set (P4C_CXX_FLAGS "${P4C_CXX_FLAGS} ${option}")
+  ENDIF ()
+  if (${var})
+    add_definitions (-D${var})
+  endif ()
+  set (CMAKE_REQUIRED_FLAGS ${__required_flags_backup})
+endmacro (check_compiler_feature)
+
+add_cxx_compiler_option ("-Wall")
+add_cxx_compiler_option ("-Wextra")
+add_cxx_compiler_option ("-Wno-overloaded-virtual")
+add_cxx_compiler_option ("-Wno-deprecated")
+add_cxx_compiler_option ("-Wall")
+
+include_directories (
+  ${P4C_SOURCE_DIR}/frontends
+  ${P4C_SOURCE_DIR}/backends
+  ${P4C_SOURCE_DIR}/extensions
+  ${P4C_SOURCE_DIR}
+  ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
+  ${P4C_BINARY_DIR}
+  )
+add_definitions (-DCONFIG_PREFIX="${CMAKE_PREFIX}")
+add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_DATADIR}")
+
+set (TOOLSDIR, "${P4C_SOURCE_DIR}/tools")
+set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
+
+set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
+
+# Other configuration files that need to be generated
+configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
+
+add_subdirectory (lib)
+add_subdirectory (tools/ir-generator)
+# add_subdirectory (lib  tools/driver ir frontends midend control-plane)
+#if (ENABLE_P4RUNTIME_TO_PD)
+#  add_subdirectory (p4runtime-to-pd)
+#endif()
+
+
+# custom targets:
+# cpplint, cpplint-quiet, tags, etags, check, recheck, check-*, check-ifail, gtest, docs
