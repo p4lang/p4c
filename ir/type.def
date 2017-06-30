@@ -475,6 +475,7 @@ class Method : Declaration {
 class Type_Typedef : Type_Declaration, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Type                 type;
+    int width_bits() const override { return type->width_bits(); }
     Annotations getAnnotations() const override { return annotations; }
 #nodbprint
 }
