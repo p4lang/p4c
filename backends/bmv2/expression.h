@@ -73,7 +73,7 @@ class ExpressionConverter : public Inspector {
     Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
                          bool wrap = true, bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);
-    Util::JsonObject* cast_d2b(Util::IJson* e);
+    Util::JsonObject* cast_b2d(Util::IJson* e);
 
     void postorder(const IR::BoolLiteral* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;

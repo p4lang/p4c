@@ -83,7 +83,7 @@ Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
     return result;
 }
 
-Util::JsonObject* ExpressionConverter::cast_d2b(Util::IJson* result) {
+Util::JsonObject* ExpressionConverter::cast_b2d(Util::IJson* result) {
     auto obj = new Util::JsonObject();
     obj->emplace("type", "expression");
     auto conv = new Util::JsonObject();
@@ -99,7 +99,7 @@ void ExpressionConverter::postorder(const IR::BoolLiteral* expression)  {
     result->emplace("type", "bool");
     result->emplace("value", expression->value);
     if (convertBoolean) {
-        result = cast_d2b(result);
+        result = cast_b2d(result);
     }
     map.emplace(expression, result);
 }
@@ -143,7 +143,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             auto l = get(bim->appliedTo);
             e->emplace("right", l);
             if (convertBoolean) {
-                result = cast_d2b(result);
+                result = cast_b2d(result);
             }
             map.emplace(expression, result);
             return;
