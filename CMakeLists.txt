@@ -148,15 +148,21 @@ set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
 
-set (IR_GENERATED_SRCS ir/ir-generated.h ir/ir-generated.cpp ir/gen-tree-macro.h)
+set (IR_GENERATED_SRCS
+  ${CMAKE_BINARY_DIR}/ir/ir-generated.h
+  ${CMAKE_BINARY_DIR}/ir/ir-generated.cpp
+  ${CMAKE_BINARY_DIR}/ir/gen-tree-macro.h)
 set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (lib)
 add_subdirectory (tools/ir-generator)
 add_subdirectory (ir)
-MESSAGE("IR_DEF_FILES= ${IR_DEF_FILES}")
-# add_subdirectory (tools/driver ir frontends midend control-plane)
+add_subdirectory (frontends)
+add_subdirectory (midend)
+#add_subdirectory (control-plane)
+#add_subdirectory (backends)
+# add_subdirectory (tools/driver control-plane)
 #if (ENABLE_P4RUNTIME_TO_PD)
 #  add_subdirectory (p4runtime-to-pd)
 #endif()
@@ -168,8 +174,10 @@ set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
 # cpplint, cpplint-quiet, tags, etags, check, recheck, check-*, check-ifail, gtest, docs
 
 # Need to add all the fixup code
+MESSAGE("IR_DEF_FILES= ${IR_DEF_FILES}")
+set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
-  COMMAND ${IR_GENERATOR} -i ir/ir-generated-cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
+  COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
   MAIN_DEPENDENCY ${IR_GENERATOR}
   COMMENT "Generating IR class files")
 
