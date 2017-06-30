@@ -32,7 +32,10 @@ ByteContainer::to_hex(size_t start, size_t s, bool upper_case) const {
   assert(start + s <= size());
 
   std::ostringstream ret;
-  utils::dump_hexstring(ret, &bytes[start], &bytes[start + s], upper_case);
+  // in debug mode, some compilers perform bound-checking even for operator[]
+  // utils::dump_hexstring(ret, &bytes[start], &bytes[start + s], upper_case);
+  auto first = bytes.begin() + start;
+  utils::dump_hexstring(ret, first, first + s, upper_case);
   return ret.str();
 }
 
