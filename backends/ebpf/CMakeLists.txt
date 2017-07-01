@@ -44,7 +44,7 @@ set (P4C_EBPF_HDRS
   target.h
   )
 
-set (CPPLINT_FILES ${CPPLINT_FILES} ${P4C_EBPF_SRCS})
+set(EBPF_CPPLINT_FILES ${P4C_EBPF_SRCS} ${P4C_EBPF_HDRS} PARENT_SCOPE)
 
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})

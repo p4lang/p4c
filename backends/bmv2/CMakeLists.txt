@@ -64,9 +64,7 @@ set (BMV2_BACKEND_HDRS
   synthesizeValidField.h
   )
 
-set (BACKEND_IR_DEFS ${BACKEND_IR_DEFS} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
-
-set (CPPLINT_FILES "${CPPLINT_FILES} ${BMV2_BACKEND_SRCS} $(BMV2_SRCS)")
+set (IR_DEF_FILESS ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
 
 add_library(backendbmv2 ${BMV2_BACKEND_SRCS})
 add_dependencies(backendbmv2 genIR)
@@ -74,6 +72,7 @@ add_dependencies(backendbmv2 genIR)
 add_executable(p4c-bm2-ss ${BMV2_SRCS})
 target_link_libraries (p4c-bm2-ss backendbmv2 ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
+set(BMV2_CPPLINT_FILES ${BMV2_BACKEND_SRCS} ${BMV2_SRCS} ${BMV2_BACKEND_HDRS} PARENT_SCOPE)
 
 # # Tests
 # -include bmv2tests.mk

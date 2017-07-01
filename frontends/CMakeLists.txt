@@ -55,7 +55,7 @@ set (P4_FRONTEND_SRCS
   p4/setHeaders.cpp
   )
 
-set (P4_FRONTEND_HEADERS
+set (P4_FRONTEND_HDRS
   p4/callGraph.h
   p4/cloner.h
   p4/coreLibrary.h
@@ -102,7 +102,6 @@ set (P4_FRONTEND_HEADERS
   p4/setHeaders.h
   )
 
-set (CPPLINT_FILES "${CPPLINT_FILES} ${P4_FRONTEND_SRCS}")
 
 set (COMMON_FRONTEND_SRCS
   common/options.cpp
@@ -113,7 +112,7 @@ set (COMMON_FRONTEND_SRCS
   common/constantParsing.cpp
   )
 
-set (COMMON_FRONTEND_HEADERS
+set (COMMON_FRONTEND_HDRS
   common/constantFolding.h
   common/constantParsing.h
   common/model.h
@@ -125,8 +124,6 @@ set (COMMON_FRONTEND_HEADERS
   common/resolveReferences/resolveReferences.h
   )
 
-set (CPPLINT_FILES "${CPPLINT_FILES} ${COMMON_FRONTEND_SRCS}")
-
 
 set (V1_FRONTEND_SRCS
   p4-14/typecheck.cpp
@@ -135,23 +132,19 @@ set (V1_FRONTEND_SRCS
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/ir-v1.def PARENT_SCOPE)
 
-set (V1_FRONTEND_HEADERS
+set (V1_FRONTEND_HDRS
   p4-14/header_type.h
   p4-14/inline_control_flow.h
   p4-14/typecheck.h
   )
 
-set (CPPLINT_FILES "${CPPLINT_FILES} ${V1_FRONTEND_SRCS}")
-
 set (PARSERS_SRCS
   parsers/parserDriver.cpp
   )
 
-set (PARSER_HEADERS
+set (PARSER_HDRS
   parsers/parserDriver.h
   )
-
-set (CPPLINT_FILES "${CPPLINT_FILES} ${PARSERS_SRCS}")
 
 add_custom_target (mkV1dirs
   ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/v1)
@@ -207,3 +200,10 @@ set_source_files_properties(${P4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_library (frontend STATIC ${FRONTEND_SOURCES})
 add_dependencies (frontend genIR)
 add_dependencies (frontend mkP4dirs mkV1dirs)
+
+set (FRONTEND_CPPLINT_FILES
+  ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
+  ${COMMON_FRONTEND_SRCS} ${COMMON_FRONTEND_HDRS}
+  ${V1_FRONTEND_SRCS} ${V1_FRONTEND_HDRS}
+  ${PARSERS_SRCS} ${PARSERS_HDRS}
+  PARENT_SCOPE)

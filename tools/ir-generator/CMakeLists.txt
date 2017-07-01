@@ -22,7 +22,7 @@ set (IRGENERATOR_SRCS
   type.cpp
   )
 
-set (IRGENERATOR_HEADERS
+set (IRGENERATOR_HDRS
   ir-generator.h
   irclass.h
   type.h
@@ -42,4 +42,4 @@ set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES OBJECT_DEPENDS ${
 add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
 target_link_libraries (irgenerator p4ctoolkit gc gmp)
 
-set (CPPLINT_FILES "{CPPLINT_FILES} ${IRGENERATOR_SRCS}")
+set (IRGEN_CPPLINT_FILES ${IRGENERATOR_SRCS} ${IRGENERATOR_HDRS} PARENT_SCOPE)

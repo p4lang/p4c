@@ -22,11 +22,11 @@ set (P4TEST_HDRS
   midend.h
   )
 
-set (CPPLINT_FILES "${CPPLINT_FILES} $(P4TEST_SRCS)")
-
 add_executable(p4test ${P4TEST_SRCS})
 target_link_libraries (p4test ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4test genIR)
+
+set (P4TEST_CPPLINT_FILES ${P4TEST_SRCS} ${P4TEST_HDRS} PARENT_SCOPE)
 
 # # Tests
 

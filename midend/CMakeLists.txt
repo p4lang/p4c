@@ -41,7 +41,7 @@ set (MIDEND_SRCS
   expandEmit.cpp
   )
 
-set (MIDEND_HEADERS
+set (MIDEND_HDRS
   actionsInlining.h
   actionSynthesis.h
   compileTimeOps.h
@@ -74,8 +74,7 @@ set (MIDEND_HEADERS
   validateProperties.h
   )
 
-set (CPPLINT_FILES "${CPPLINT_FILES} ${MIDEND_SRCS}")
-
-set (MIDEND_SOURCES ${MIDEND_SRCS})
-add_library (midend STATIC ${MIDEND_SOURCES})
+add_library (midend STATIC ${MIDEND_SRCS})
 add_dependencies(midend genIR)
+
+set (MIDEND_CPPLINT_FILES ${MIDEND_SRCS} ${MIDEND_HDRS} PARENT_SCOPE)

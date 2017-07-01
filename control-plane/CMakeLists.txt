@@ -57,21 +57,24 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
 #PROTOBUF_GENERATE_PYTHON (P4RUNTIME_GEN_PYTHON P4RUNTIME_INFO_GEN_HDRS ${P4RUNTIME_INFO_PROTO})
 
 set (CONTROLPLANE_SRCS
-  ${P4RUNTIME_GEN_SRCS}
   p4RuntimeSerializer.cpp
+  )
+set (CONTROLPLANE_SOURCES
+  ${P4RUNTIME_GEN_SRCS}
+  ${CONTROLPLANE_SRCS}
   )
 
 set (CONTROLPLANE_HDRS
   p4RuntimeSerializer.h
   )
 
-set (CPPLINT_FILES "${CPPLINT_FILES} p4RuntimeSerializer.cpp")
-
 set (_saved_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter")
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/PI/include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
-add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
+add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
 target_link_libraries (controlplane ${PROTOBUF_LIBRARY})
 add_dependencies (controlplane mkP4configdir genIR)
 set (CMAKE_CXX_FLAGS ${_saved_CMAKE_CXX_FLAGS})
+
+set (CONTROLPLANE_CPPLINT_FILES ${CONTROLPLANE_SRCS} ${CONTROLPLANE_HDRS})

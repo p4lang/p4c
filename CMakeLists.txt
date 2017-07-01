@@ -145,6 +145,14 @@ set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
 
+# Macro to use in subdirectories
+set (CPPLINT_FILES)
+macro(add_cpplint_files dir filelist)
+  foreach(__f ${filelist})
+    list (APPEND CPPLINT_FILES "${dir}/${__f}")
+  endforeach(__f)
+endmacro(add_cpplint_files)
+
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
 
@@ -156,15 +164,29 @@ set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (lib)
+add_cpplint_files(lib "${LIB_CPPLINT_FILES}")
 add_subdirectory (tools/ir-generator)
+add_cpplint_files(tools/ir-generator "${IRGEN_CPPLINT_FILES}")
 add_subdirectory (ir)
+add_cpplint_files(ir "${IR_CPPLINT_FILES}")
 add_subdirectory (frontends)
+add_cpplint_files(frontends "${FRONTEND_CPPLINT_FILES}")
 add_subdirectory (midend)
+add_cpplint_files(midend "${MIDEND_CPPLINT_FILES}")
 add_subdirectory (control-plane)
+add_cpplint_files(control-plane "${CONTROLPLANE_CPPLINT_FILES}")
 
-# component libraries
+# component libraries: must be after the targets for libraries are defined
+# and before being used in the backend executables
 set (P4C_LIBRARIES frontend midend controlplane ir p4ctoolkit)
-add_subdirectory (backends)
+
+add_subdirectory (backends/bmv2)
+add_cpplint_files(backends/bmv2 "${BMV2_CPPLINT_FILES}")
+add_subdirectory (backends/ebpf)
+add_cpplint_files(backends/ebpf "${EBPF_CPPLINT_FILES}")
+add_subdirectory (backends/p4test)
+add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
+
 #add_subdirectory (tools/driver)
 #if (ENABLE_P4RUNTIME_TO_PD)
 #  add_subdirectory (p4runtime-to-pd)
@@ -173,11 +195,7 @@ add_subdirectory (backends)
 set (TOOLSDIR, "${P4C_SOURCE_DIR}/tools")
 set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
 
-# custom targets:
-# cpplint, cpplint-quiet, tags, etags, check, recheck, check-*, check-ifail, gtest, docs
-
 # Need to add all the fixup code
-MESSAGE("IR_DEF_FILES= ${IR_DEF_FILES}")
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
@@ -185,3 +203,36 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMENT "Generating IR class files")
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
+
+# cpplint
+list ( SORT CPPLINT_FILES )
+set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
+set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
+add_custom_target(cpplint
+  COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+  COMMENT "cpplint"
+  )
+add_custom_target(cpplint-quiet
+  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+  COMMENT "cpplint quietly"
+  )
+
+# tags, etags
+set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
+add_custom_target(tags
+  COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp $(CTAGS_DIRS)
+  COMMAND cd tools/ir-generator && ctags -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
+  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+  COMMENT "Generating ctags"
+  )
+add_custom_target(etags
+  COMMAND ctags -e -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp $(CTAGS_DIRS)
+  COMMAND cd tools/ir-generator && ctags -e -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
+  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+  COMMENT "Generating extended ctags"
+  )
+
+# custom targets:
+# check, recheck, check-*, check-ifail, gtest, docs
