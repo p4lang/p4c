@@ -15,6 +15,23 @@
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
 # compiling for the simple_switch target.
 
+# check for simple_switch
+find_program (SIMPLE_SWITCH_CLI simple_switch_CLI
+  PATHS ${CMAKE_INSTALL_PREFIX}/bin )
+if (SIMPLE_SWITCH_CLI)
+  find_program (SIMPLE_SWITCH simple_switch
+    PATHS ${CMAKE_INSTALL_PREFIX}/bin )
+  if (SIMPLE_SWITCH)
+    set (HAVE_SIMPLE_SWITCH 1)
+    find_python_module (scapy REQUIRED)
+    find_python_module (ipaddr REQUIRED)
+  endif(SIMPLE_SWITCH)
+endif(SIMPLE_SWITCH_CLI)
+find_package_handle_standard_args ("BMv2 programs"
+  "Program 'simple_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found; will not run BMv2 tests."
+  SIMPLE_SWITCH SIMPLE_SWITCH_CLI)
+
+# sources for backend executable
 set (BMV2_SRCS bmv2.cpp)
 
 set (BMV2_BACKEND_SRCS
@@ -64,7 +81,7 @@ set (BMV2_BACKEND_HDRS
   synthesizeValidField.h
   )
 
-set (IR_DEF_FILESS ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
+set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
 
 add_library(backendbmv2 ${BMV2_BACKEND_SRCS})
 add_dependencies(backendbmv2 genIR)

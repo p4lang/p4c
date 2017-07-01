@@ -1,3 +1,6 @@
+/* Define to 1 if you have the boost iostreams library */
+#cmakedefine HAVE_LIBBOOST_IOSTREAMS 1
+
 /* Define to 1 if you have the execinfo.h header */
 #cmakedefine HAVE_EXECINFO_H 1
 

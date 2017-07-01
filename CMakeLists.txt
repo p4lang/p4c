@@ -40,7 +40,7 @@ find_package(Protobuf 3.0.0 REQUIRED)
 find_package (Boost REQUIRED COMPONENTS iostreams)
 if (Boost_IOSTREAMS_FOUND)
   set (HAVE_LIBBOOST_IOSTREAMS 1)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${BOOST_LIBRARIES}")
+  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
 endif()
 # other required libraries
 include (CheckLibraryExists)
@@ -60,8 +60,17 @@ find_library (HAVE_LIBGMPXX gmpxx PATHS /usr/local/lib)
 if (HAVE_LIBGMPXX)
   set (P4C_LIB_DEPS "${P4C_LIB_DEPS};gmpxx")
 endif()
-find_package_handle_standard_args (libgmpxx DEFAULT_MSG HAVE_GMPXX)
+find_package_handle_standard_args (libgmpxx DEFAULT_MSG HAVE_LIBGMPXX)
 
+# check includes
+include (CheckIncludeFile)
+check_include_file (execinfo.h HAVE_EXECINFO_H)
+check_include_file (ucontext.h HAVE_UCONTEXT_H)
+
+# check functions
+include (CheckFunctionExists)
+check_function_exists (memchr HAVE_MEMCHR)
+check_function_exists (pipe2 HAVE_PIPE2)
 
 # python modules
 include (FindPythonModule)
@@ -88,6 +97,7 @@ endif ()
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
 
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++11 rather than -std=gnu++11
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -128,7 +138,6 @@ add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
-add_cxx_compiler_option ("-Wall")
 
 include_directories (
   ${P4C_SOURCE_DIR}/frontends
@@ -236,3 +245,5 @@ add_custom_target(etags
 
 # custom targets:
 # check, recheck, check-*, check-ifail, gtest, docs
+
+# tools/driver

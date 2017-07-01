@@ -68,13 +68,11 @@ set (CONTROLPLANE_HDRS
   p4RuntimeSerializer.h
   )
 
-set (_saved_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter")
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/PI/include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
 target_link_libraries (controlplane ${PROTOBUF_LIBRARY})
 add_dependencies (controlplane mkP4configdir genIR)
-set (CMAKE_CXX_FLAGS ${_saved_CMAKE_CXX_FLAGS})
 
 set (CONTROLPLANE_CPPLINT_FILES ${CONTROLPLANE_SRCS} ${CONTROLPLANE_HDRS})

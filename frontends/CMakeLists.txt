@@ -146,35 +146,27 @@ set (PARSER_HDRS
   parsers/parserDriver.h
   )
 
-add_custom_target (mkV1dirs
-  ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/v1)
-BISON_TARGET (V1Parser parsers/v1/v1parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/v1/v1parser.cpp)
-# FLEX_TARGET (V1Lexer parsers/v1/v1lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/v1/v1lexer.cc)
-set (FLEX_V1Lexer_OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parsers/v1/v1lexer.cc)
-add_custom_command (OUTPUT ${FLEX_V1Lexer_OUTPUTS}
-  COMMAND ${FLEX_EXECUTABLE} -t ${CMAKE_CURRENT_SOURCE_DIR}/parsers/v1/v1lexer.ll > ${FLEX_V1Lexer_OUTPUTS}
-  COMMENT "Running Flex on parsers/v1")
-# ADD_FLEX_BISON_DEPENDENCY(V1Lexer V1Parser)
+macro(add_parser pname)
+  add_custom_target (mk${pname}dirs
+    ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname})
+  BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp)
+  # regardless of the output name, flex puts out yy.lex.c, so we use a custom command to generate
+  # the file to stdout and redirect to the desired name
+  # FLEX_TARGET (${pname}Lexer parsers/${pname}/${pname}lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
+  set (FLEX_${pname}Lexer_OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
+  add_custom_command (OUTPUT ${FLEX_${pname}Lexer_OUTPUTS}
+    COMMAND ${FLEX_EXECUTABLE} -t ${CMAKE_CURRENT_SOURCE_DIR}/parsers/${pname}/${pname}lexer.ll > ${FLEX_${pname}Lexer_OUTPUTS}
+    DEPENDS ${BISON_${pname}Parser_OUTPUTS}
+    COMMENT "Running Flex on parsers/${pname}")
 
-set (V1PARSER_GEN_SRCS
-    ${FLEX_V1Lexer_OUTPUTS}
-    ${BISON_V1Parser_OUTPUTS}
-  )
+  set (${pname}PARSER_GEN_SRCS
+    ${FLEX_${pname}Lexer_OUTPUTS}
+    ${BISON_${pname}Parser_OUTPUTS}
+    )
+endmacro(add_parser)
 
-add_custom_target (mkP4dirs
-  ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/p4)
-BISON_TARGET (P4Parser parsers/p4/p4parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/p4/p4parser.cpp)
-# FLEX_TARGET (P4Lexer parsers/p4/p4lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/p4/p4lexer.cc)
-set (FLEX_P4Lexer_OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parsers/p4/p4lexer.cc)
-add_custom_command (OUTPUT ${FLEX_P4Lexer_OUTPUTS}
-  COMMAND ${FLEX_EXECUTABLE} -t ${CMAKE_CURRENT_SOURCE_DIR}/parsers/p4/p4lexer.ll > ${FLEX_P4Lexer_OUTPUTS}
-  COMMENT "Running Flex on parsers/p4")
-# ADD_FLEX_BISON_DEPENDENCY(P4Lexer P4Parser)
-
-set (P4PARSER_GEN_SRCS
-    ${FLEX_P4Lexer_OUTPUTS}
-    ${BISON_P4Parser_OUTPUTS}
-  )
+add_parser(v1)
+add_parser(p4)
 
 # BUILT_SOURCES += \
 # 	parsers/p4/p4parser.hpp \
@@ -189,17 +181,17 @@ set (FRONTEND_SOURCES
   ${PARSERS_SRCS}
   ${P4_FRONTEND_SRCS}
   ${V1_FRONTEND_SRCS}
-  ${P4PARSER_GEN_SRCS}
-  ${V1PARSER_GEN_SRCS}
+  ${p4PARSER_GEN_SRCS}
+  ${v1PARSER_GEN_SRCS}
   ${IR_GENERATED_SRCS}
   )
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(${V1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(${P4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
+set_source_files_properties(${v1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
+set_source_files_properties(${p4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_library (frontend STATIC ${FRONTEND_SOURCES})
 add_dependencies (frontend genIR)
-add_dependencies (frontend mkP4dirs mkV1dirs)
+add_dependencies (frontend mkp4dirs mkv1dirs)
 
 set (FRONTEND_CPPLINT_FILES
   ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
