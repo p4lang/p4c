@@ -77,7 +77,5 @@ set (MIDEND_HEADERS
 set (CPPLINT_FILES "${CPPLINT_FILES} ${MIDEND_SRCS}")
 
 set (MIDEND_SOURCES ${MIDEND_SRCS})
-#set_source_files_properties(${V1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
-#set_source_files_properties(${P4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_library (midend STATIC ${MIDEND_SOURCES})
 add_dependencies(midend genIR)
