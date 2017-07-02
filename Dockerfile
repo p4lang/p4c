@@ -15,6 +15,7 @@ ARG IMAGE_TYPE=build
 ENV P4C_DEPS automake \
              bison \
              build-essential \
+             cmake \
              flex \
              g++ \
              libboost-dev \
@@ -39,8 +40,8 @@ WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_RUNTIME_DEPS && \
     pip install tenjin && \
-    ./bootstrap.sh --enable-p4runtime-to-pd && \
-    cd build && \
+    mkdir build && cd build \
+    cmake .. && \
     make && \
     make install && \
     ( \
