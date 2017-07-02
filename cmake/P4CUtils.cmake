@@ -71,4 +71,6 @@ macro(p4c_add_tests tag driver testsuites xfail)
       endif() # __xfail_length
     endforeach()
   endforeach()
+  # add the tag to the list
+  set (TEST_TAGS ${TEST_TAGS} ${tag} PARENT_SCOPE)
 endmacro(p4c_add_tests)

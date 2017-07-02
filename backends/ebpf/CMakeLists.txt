@@ -71,6 +71,3 @@ set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
 p4c_add_tests("ebpf" ${EBPF_DRIVER} ${EBPF_TEST_SUITES} "")
-
-# store the tags in a global list to enable check-* make rules
-set (TEST_TAGS ${TEST_TAGS} "ebpf" PARENT_SCOPE)

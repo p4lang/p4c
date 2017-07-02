@@ -103,8 +103,6 @@ set (XFAIL_TESTS
 
 if (HAVE_SIMPLE_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_TEST_SUITES}" ${XFAIL_TESTS})
-  # store the tags in a global list to enable check-* make rules
-  set (TEST_TAGS ${TEST_TAGS} "bmv2" PARENT_SCOPE)
 else()
   MESSAGE(WARN "BMv2 simple switch is not available, not adding BMv2 tests")
 endif()

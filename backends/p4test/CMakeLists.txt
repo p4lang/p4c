@@ -55,6 +55,3 @@ set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
   )
 p4c_add_tests("p14_to_16" ${P4TEST_DRIVER} "${P4_14_SUITES}" "")
-
-# store the tags in a global list to enable check-* make rules
-set (TEST_TAGS ${TEST_TAGS} "p4" "p14_to_16" PARENT_SCOPE)

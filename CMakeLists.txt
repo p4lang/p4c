@@ -170,7 +170,6 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
-MESSAGE("********* EXT_FRNT_SRCS=${EXTENSION_FRONTEND_SOURCES}")
 add_subdirectory (frontends)
 add_cpplint_files(frontends "${FRONTEND_CPPLINT_FILES}")
 add_subdirectory (midend)
@@ -192,7 +191,6 @@ add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
 
 # Need to add all the fixup code
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
-MESSAGE("**** IR_DEF_FILES=${IR_DEF_FILES}")
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
   MAIN_DEPENDENCY ${IR_GENERATOR}
@@ -241,6 +239,7 @@ add_custom_target(recheck
   COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --rerun-failed
   COMMENT "Re-running failed tests")
 
+list (REMOVE_DUPLICATES TEST_TAGS)
 foreach(t ${TEST_TAGS})
   add_custom_target(check-${t}
     COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*"
