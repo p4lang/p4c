@@ -46,8 +46,15 @@ set (P4C_EBPF_HDRS
 
 set(EBPF_CPPLINT_FILES ${P4C_EBPF_SRCS} ${P4C_EBPF_HDRS} PARENT_SCOPE)
 
+set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
+
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+
+install (TARGETS p4c-ebpf
+  RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/p4include
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we
@@ -55,7 +62,7 @@ target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_custom_target(linkp4cebpf
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-ebpf ${CMAKE_BINARY_DIR}/p4c-ebpf
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4include &&
-          ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/p4include/ebpf_model.p4 ${CMAKE_BINARY_DIR}/p4include
+          ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${P4C_EBPF_DIST_HEADERS} ${CMAKE_BINARY_DIR}/p4include
   )
 
 add_dependencies(p4c_driver linkp4cebpf)

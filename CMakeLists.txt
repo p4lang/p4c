@@ -17,17 +17,12 @@ cmake_minimum_required (VERSION 3.0.2 FATAL_ERROR)
 project (P4C)
 
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PREFIX})
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PREFIX})
-set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PREFIX})
+set (P4C_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+set (P4C_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
+set (P4C_ARTIFACTS_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/p4c)
 set (CMAKE_USE_RELATIVE_PATHS 1)
 
-OPTION (WITH_CCACHE "Enable ccache to save compilation time" OFF)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  OPTION (WITH_LIBCXX "Enable libc++ for Clang" ON)
-else ()
-  OPTION (WITH_LIBCXX "Enable libc++ for Clang" OFF)
-endif ()
+OPTION (ENABLE_DOCS "Build the documentation" OFF)
 OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" OFF)
 
 # # search in /usr/local first
@@ -124,7 +119,7 @@ include_directories (
   ${P4C_BINARY_DIR}
   )
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
-add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/share/p4c")
+add_definitions (-DCONFIG_PKGDATADIR="${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
@@ -189,7 +184,8 @@ add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
 #  add_subdirectory (p4runtime-to-pd)
 #endif()
 
-# Need to add all the fixup code
+# IR Generation
+# \TODO: Add all the fixup code. Is it still needed?
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
@@ -198,6 +194,12 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 
+# Installation
+# Targets install themselves. Here we install the core headers
+install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
+  FILES_MATCHING PATTERN "*.p4")
+
 # cpplint
 list ( SORT CPPLINT_FILES )
 set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
@@ -205,13 +207,11 @@ set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
 add_custom_target(cpplint
   COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint"
-  )
+  COMMENT "cpplint")
 add_custom_target(cpplint-quiet
   COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint quietly"
-  )
+  COMMENT "cpplint quietly")
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
@@ -219,14 +219,12 @@ add_custom_target(tags
   COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp $(CTAGS_DIRS)
   COMMAND cd tools/ir-generator && ctags -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "Generating ctags"
-  )
+  COMMENT "Generating ctags")
 add_custom_target(etags
   COMMAND ctags -e -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp $(CTAGS_DIRS)
   COMMAND cd tools/ir-generator && ctags -e -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "Generating extended ctags"
-  )
+  COMMENT "Generating extended ctags")
 
 # check, recheck, check-*, check-ifail, gtest
 set (P4C_TEST_FLAGS --test-timeout 90 --output-on-failure -j 4)
@@ -250,14 +248,14 @@ foreach(t ${TEST_TAGS})
 endforeach()
 
 # docs
-if (DOXYGEN_FOUND)
+if (ENABLE_DOCS AND DOXYGEN_FOUND)
   if(DOXYGEN_DOT_FOUND)
     set (HAVE_DOT 'YES')
   else()
     set (HAVE_DOT 'NO')
   endif()
   set (DOXYGEN_FILE ${P4C_SOURCE_DIR}/docs/doxygen/doxygen.cfg)
-  add_custom_target(docs
+  add_custom_target(docs ALL
     COMMAND export SRCDIR="${P4C_SOURCE_DIR}" &&
             export PROJECT=${PROJECT_NAME} &&
             export HAVE_DOT=${HAVE_DOT} &&
@@ -268,7 +266,9 @@ if (DOXYGEN_FOUND)
             ${DOXYGEN_EXECUTABLE} ${DOXYGEN_FILE}
     DEPENDS genIR
     COMMENT "Generating documentation")
-endif(DOXYGEN_FOUND)
+  install (FILES ${P4C_BINARY_DIR}/doxygen_out/html
+    RESOURCE DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
+endif()
 
 # install
 # package

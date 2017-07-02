@@ -73,6 +73,8 @@ add_dependencies(bmv2backend genIR)
 add_executable(p4c-bm2-ss ${BMV2_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
+install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
 set(BMV2_CPPLINT_FILES ${BMV2_BACKEND_SRCS} ${BMV2_SRCS} ${BMV2_BACKEND_HDRS} PARENT_SCOPE)
 
 # hack to get around the fact that the test scripts expect the backend

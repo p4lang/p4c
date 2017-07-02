@@ -29,6 +29,12 @@ set (P4C_DRIVER_SRCS
   p4c_src/p4c.ebpf.cfg
   )
 
+install (PROGRAMS ${CMAKE_BINARY_DIR}/p4c
+  DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+install (DIRECTORY p4c_src
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
+  FILES_MATCHING PATTERN "*.py" PATTERN "*.cfg")
+
 # p4cdir=$(pkgdatadir)/p4c_src
 
 set (P4C_DRIVER_DST)

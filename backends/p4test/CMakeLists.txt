@@ -26,6 +26,9 @@ add_executable(p4test ${P4TEST_SRCS})
 target_link_libraries (p4test ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4test genIR)
 
+install (TARGETS p4test
+  RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we
 # remove automake and fix the scripts.
