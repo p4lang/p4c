@@ -23,7 +23,7 @@ set (P4C_ARTIFACTS_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/p4c)
 set (CMAKE_USE_RELATIVE_PATHS 1)
 
 OPTION (ENABLE_DOCS "Build the documentation" OFF)
-OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" OFF)
+OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" ON)
 
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
@@ -180,9 +180,9 @@ add_cpplint_files(backends/ebpf "${EBPF_CPPLINT_FILES}")
 add_subdirectory (backends/p4test)
 add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
 
-#if (ENABLE_P4RUNTIME_TO_PD)
-#  add_subdirectory (p4runtime-to-pd)
-#endif()
+if (ENABLE_P4RUNTIME_TO_PD)
+  add_subdirectory (p4runtime-to-pd)
+endif()
 
 # IR Generation
 # \TODO: Add all the fixup code. Is it still needed?
@@ -270,9 +270,4 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
     RESOURCE DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
-# install
-# package
-
-# Force the execution of all hacks that are needed because of
-# compatibility with automake. Needs to go into bootstrap.
-# execute_process(${CMAKE_MAKE_COMMAND} p4c_driver)
+# \TODO: packaging
