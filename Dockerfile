@@ -40,7 +40,8 @@ WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_RUNTIME_DEPS && \
     pip install tenjin && \
-    mkdir build && cd build \
+    mkdir build && \
+    cd build && \
     cmake .. && \
     make && \
     make install && \
