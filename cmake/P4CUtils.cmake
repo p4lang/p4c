@@ -72,5 +72,5 @@ macro(p4c_add_tests tag driver testsuites xfail)
     endforeach()
   endforeach()
   # add the tag to the list
-  set (TEST_TAGS ${TEST_TAGS} ${tag} PARENT_SCOPE)
+  set (TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
 endmacro(p4c_add_tests)

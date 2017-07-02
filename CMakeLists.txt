@@ -130,7 +130,7 @@ set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
 set (CPPLINT_FILES)          # list to collect all files that need lint
-set (TEST_TAGS)              # list to collect all test tags
+set (TEST_TAGS "p4" CACHE INTERNAL "test tags") # list to collect all test tags
 set (IR_DEF_FILES)           # list to collect all .def files
 
 # Other configuration files that need to be generated
