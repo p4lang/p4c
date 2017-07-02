@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.0.2 FATAL_ERROR)
 
 project (P4C)
 
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PREFIX})
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PREFIX})
+set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PREFIX})
+set (CMAKE_USE_RELATIVE_PATHS 1)
 
 OPTION (WITH_CCACHE "Enable ccache to save compilation time" OFF)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -25,7 +29,6 @@ else ()
   OPTION (WITH_LIBCXX "Enable libc++ for Clang" OFF)
 endif ()
 OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" OFF)
-OPTION (ENABLE_DOXYGEN_DOCS "Build documentation" OFF)
 
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
@@ -83,10 +86,13 @@ if (ENABLE_P4RUNTIME_TO_PD)
   find_python_module (tenjin REQUIRED)
 endif ()
 
-# doxygen if docs required
-if (ENABLE_DOXYGEN_DOCS)
-  find_package (Doxygen)
-endif ()
+# other packages
+find_package (Doxygen)
+find_package (BMV2)
+
+# enable CTest
+enable_testing ()
+
 
 # if we want to manage versions in CMake ...
 # include (cmake/P4CVersion.cmake)
@@ -101,38 +107,7 @@ endif ()
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include (CheckCCompilerFlag)
-include (CheckCXXCompilerFlag)
-
-# macro to test and add a C++ compiler option if supported
-MACRO (add_cxx_compiler_option option)
-  string (REPLACE "+" "P" escaped_option1 ${option})
-  string (REPLACE "-" "" escaped_option ${escaped_option1})
-  set (_success "_HAVE_OPTION_${escaped_option}_")
-  set (__required_flags_backup "${CMAKE_REQUIRED_FLAGS}")
-  set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${P4C_CXX_FLAGS}")
-  check_cxx_compiler_flag (${option} ${_success})
-  set (CMAKE_REQUIRED_FLAGS ${__required_flags_backup})
-  if (${_success})
-    set (P4C_CXX_FLAGS "${P4C_CXX_FLAGS} ${option}")
-  endif (${_success})
-endmacro (add_cxx_compiler_option)
-
-include (CheckCXXSourceCompiles)
-MACRO (check_compiler_feature option program var)
-  set (__required_flags_backup "${CMAKE_REQUIRED_FLAGS}")
-  set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${option}")
-
-  check_cxx_source_compiles ("${program}" ${var})
-
-  IF (${var} AND NOT "${option}" STREQUAL "")
-    set (P4C_CXX_FLAGS "${P4C_CXX_FLAGS} ${option}")
-  ENDIF ()
-  if (${var})
-    add_definitions (-D${var})
-  endif ()
-  set (CMAKE_REQUIRED_FLAGS ${__required_flags_backup})
-endmacro (check_compiler_feature)
+include(P4CUtils)
 
 add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
@@ -153,14 +128,8 @@ add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_DATADIR}")
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
-
-# Macro to use in subdirectories
-set (CPPLINT_FILES)
-macro(add_cpplint_files dir filelist)
-  foreach(__f ${filelist})
-    list (APPEND CPPLINT_FILES "${dir}/${__f}")
-  endforeach(__f)
-endmacro(add_cpplint_files)
+set (CPPLINT_FILES)          # list to collect all files that need lint
+set (TEST_TAGS)              # list to collect all test tags
 
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
@@ -172,6 +141,7 @@ set (IR_GENERATED_SRCS
 set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
 
 # the order of adding subdirectories matters because of target dependencies
+add_subdirectory (tools/driver)
 add_subdirectory (lib)
 add_cpplint_files(lib "${LIB_CPPLINT_FILES}")
 add_subdirectory (tools/ir-generator)
@@ -195,14 +165,9 @@ add_subdirectory (backends/ebpf)
 add_cpplint_files(backends/ebpf "${EBPF_CPPLINT_FILES}")
 add_subdirectory (backends/p4test)
 add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
-
-#add_subdirectory (tools/driver)
 #if (ENABLE_P4RUNTIME_TO_PD)
 #  add_subdirectory (p4runtime-to-pd)
 #endif()
-
-set (TOOLSDIR, "${P4C_SOURCE_DIR}/tools")
-set (GENTESTS, "${TOOLSDIR}/gen-tests.py")
 
 # Need to add all the fixup code
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
@@ -243,7 +208,50 @@ add_custom_target(etags
   COMMENT "Generating extended ctags"
   )
 
-# custom targets:
-# check, recheck, check-*, check-ifail, gtest, docs
+# check, recheck, check-*, check-ifail, gtest
+set (P4C_TEST_FLAGS --test-timeout 90 --output-on-failure -j 4)
+add_custom_target(check
+  COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS}
+  COMMAND ${CMAKE_MAKE_PROGRAM} cpplint-quiet
+  COMMENT "Running tests")
 
-# tools/driver
+add_custom_target(recheck
+  COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --rerun-failed
+  COMMENT "Re-running failed tests")
+
+foreach(t ${TEST_TAGS})
+  add_custom_target(check-${t}
+    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*"
+    COMMENT "Running tests for tag ${t}")
+  add_custom_target(recheck-${t}
+    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*" --rerun-failed
+    COMMENT "Re-running failed tests for tag ${t}")
+endforeach()
+
+# docs
+if (DOXYGEN_FOUND)
+  if(DOXYGEN_DOT_FOUND)
+    set (HAVE_DOT 'YES')
+  else()
+    set (HAVE_DOT 'NO')
+  endif()
+  set (DOXYGEN_FILE ${P4C_SOURCE_DIR}/docs/doxygen/doxygen.cfg)
+  add_custom_target(docs
+    COMMAND export SRCDIR="${P4C_SOURCE_DIR}" &&
+            export PROJECT=${PROJECT_NAME} &&
+            export HAVE_DOT=${HAVE_DOT} &&
+            export DOT_PATH=${DOXYGEN_DOT_PATH} &&
+            export GENERATE_HTML='YES' &&
+            export GENERATE_PDF='NO' &&
+            export DOCDIR=${P4C_BINARY_DIR}/doxygen_out &&
+            ${DOXYGEN_EXECUTABLE} ${DOXYGEN_FILE}
+    DEPENDS genIR
+    COMMENT "Generating documentation")
+endif(DOXYGEN_FOUND)
+
+# install
+# package
+
+# Force the execution of all hacks that are needed because of
+# compatibility with automake. Needs to go into bootstrap.
+# execute_process(${CMAKE_MAKE_COMMAND} p4c_driver)

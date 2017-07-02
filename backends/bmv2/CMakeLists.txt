@@ -15,22 +15,6 @@
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
 # compiling for the simple_switch target.
 
-# check for simple_switch
-find_program (SIMPLE_SWITCH_CLI simple_switch_CLI
-  PATHS ${CMAKE_INSTALL_PREFIX}/bin )
-if (SIMPLE_SWITCH_CLI)
-  find_program (SIMPLE_SWITCH simple_switch
-    PATHS ${CMAKE_INSTALL_PREFIX}/bin )
-  if (SIMPLE_SWITCH)
-    set (HAVE_SIMPLE_SWITCH 1)
-    find_python_module (scapy REQUIRED)
-    find_python_module (ipaddr REQUIRED)
-  endif(SIMPLE_SWITCH)
-endif(SIMPLE_SWITCH_CLI)
-find_package_handle_standard_args ("BMv2 programs"
-  "Program 'simple_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found; will not run BMv2 tests."
-  SIMPLE_SWITCH SIMPLE_SWITCH_CLI)
-
 # sources for backend executable
 set (BMV2_SRCS bmv2.cpp)
 
@@ -91,22 +75,36 @@ target_link_libraries (p4c-bm2-ss backendbmv2 ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 set(BMV2_CPPLINT_FILES ${BMV2_BACKEND_SRCS} ${BMV2_SRCS} ${BMV2_BACKEND_HDRS} PARENT_SCOPE)
 
-# # Tests
-# -include bmv2tests.mk
+# hack to get around the fact that the test scripts expect the backend
+# binary to be in the top level directory. This should go away when we
+# remove automake and fix the scripts.
+add_custom_target(linkbmv2
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm2-ss ${CMAKE_BINARY_DIR}/p4c-bm2-ss)
+add_dependencies(p4c_driver linkbmv2)
 
-# CLEANFILES += bmv2tests.mk
 
-# bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
-# 	      $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 \
-# 	      $(srcdir)/testdata/p4_16_bmv_errors/*-bmv2.p4 \
-# 	      $(srcdir)/testdata/p4_14_samples/*.p4 \
-# 	      $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4 \
-# 	      $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_14_samples
-# 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
+# Tests
 
-# gtest_LDADD += libbackendbmv2.la
+set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
 
-# # This test defines two lpm keys for a table.
-# # Even though the P4 spec allows it, it doesn't really make sense in a switch
-# # so we allow it to fail on BMv2.
-# XFAIL_TESTS += bmv2/testdata/p4_14_samples/issue60.p4.test
+set (BMV2_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
+  )
+
+# This test defines two lpm keys for a table.
+# Even though the P4 spec allows it, it doesn't really make sense in a switch
+# so we allow it to fail on BMv2.
+set (XFAIL_TESTS
+  testdata/p4_14_samples/issue60.p4
+  )
+
+if (HAVE_SIMPLE_SWITCH)
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_TEST_SUITES}" ${XFAIL_TESTS})
+  # store the tags in a global list to enable check-* make rules
+  set (TEST_TAGS ${TEST_TAGS} "bmv2" PARENT_SCOPE)
+else()
+  MESSAGE(WARN "BMv2 simple switch is not available, not adding BMv2 tests")
+endif()
