@@ -42,6 +42,7 @@ find_package (BISON REQUIRED)
 find_package(Protobuf 3.0.0 REQUIRED)
 find_package (Boost REQUIRED COMPONENTS iostreams)
 if (Boost_IOSTREAMS_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
   set (HAVE_LIBBOOST_IOSTREAMS 1)
   set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
 endif()
@@ -122,14 +123,15 @@ include_directories (
   ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
   ${P4C_BINARY_DIR}
   )
-add_definitions (-DCONFIG_PREFIX="${CMAKE_PREFIX}")
-add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_DATADIR}")
+add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
+add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/share/p4c")
 
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
 set (CPPLINT_FILES)          # list to collect all files that need lint
 set (TEST_TAGS)              # list to collect all test tags
+set (IR_DEF_FILES)           # list to collect all .def files
 
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
@@ -148,6 +150,27 @@ add_subdirectory (tools/ir-generator)
 add_cpplint_files(tools/ir-generator "${IRGEN_CPPLINT_FILES}")
 add_subdirectory (ir)
 add_cpplint_files(ir "${IR_CPPLINT_FILES}")
+
+# component libraries: must be defined before being used in the
+# backend executables
+set (P4C_LIBRARIES frontend midend controlplane ir p4ctoolkit)
+
+# add extensions - before the frontends as they produce IR and extra frontend
+set(EXTENSION_FRONTEND_SOURCES)
+file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
+MESSAGE ("-- Available extensions ${p4c_extensions}")
+foreach (ext ${p4c_extensions})
+  if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/CMakeLists.txt)
+    add_subdirectory (extensions/${ext})
+    set (__cpplint_list "${${ext}_CPPLINT_FILES}")
+    list (LENGTH __cpplint_list __list_len)
+    if (__list_len GREATER 0)
+      add_cpplint_files(extensions/${ext} "${${ext}_CPPLINT_FILES}")
+    endif()
+  endif()
+endforeach(ext)
+
+MESSAGE("********* EXT_FRNT_SRCS=${EXTENSION_FRONTEND_SOURCES}")
 add_subdirectory (frontends)
 add_cpplint_files(frontends "${FRONTEND_CPPLINT_FILES}")
 add_subdirectory (midend)
@@ -155,9 +178,6 @@ add_cpplint_files(midend "${MIDEND_CPPLINT_FILES}")
 add_subdirectory (control-plane)
 add_cpplint_files(control-plane "${CONTROLPLANE_CPPLINT_FILES}")
 
-# component libraries: must be after the targets for libraries are defined
-# and before being used in the backend executables
-set (P4C_LIBRARIES frontend midend controlplane ir p4ctoolkit)
 
 add_subdirectory (backends/bmv2)
 add_cpplint_files(backends/bmv2 "${BMV2_CPPLINT_FILES}")
@@ -165,12 +185,14 @@ add_subdirectory (backends/ebpf)
 add_cpplint_files(backends/ebpf "${EBPF_CPPLINT_FILES}")
 add_subdirectory (backends/p4test)
 add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
+
 #if (ENABLE_P4RUNTIME_TO_PD)
 #  add_subdirectory (p4runtime-to-pd)
 #endif()
 
 # Need to add all the fixup code
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+MESSAGE("**** IR_DEF_FILES=${IR_DEF_FILES}")
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
   MAIN_DEPENDENCY ${IR_GENERATOR}
