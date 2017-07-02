@@ -36,13 +36,23 @@ The code contains three sample backends:
     for Ubuntu 16.04 [here](#ubuntu-dependencies) and for macOS 10.12
     [here](#macos-dependencies).
 
-3.  Build. By default, building takes place in a subdirectory named `build`.
+3.  Build. There are currently two build systems: automake and cmake. Automake will be deprecated.
+3.1 Automake: By default, building takes place in a subdirectory named `build`.
     ```
     ./bootstrap.sh
     cd build
     make -j4
     make check -j4
     ```
+3.2 CMake: Building should also take place in a subdirectory named `build`.
+    ```
+    mkdir build
+    cd build
+    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=1]
+    make -j4
+    make -j4 check
+    ```
+    If adding new targets to this build system, please see [instructions](#defining-new-cmake-targets).
 
 4.  (Optional) Install the compiler and the P4 shared headers globally.
     ```
@@ -72,6 +82,8 @@ use them, but YMMV.
 - `git` for version control
 
 - GNU autotools for the build process
+
+- CMake 3.0.2 or higher
 
 - Boehm-Weiser garbage-collector C++ library
 
@@ -193,6 +205,102 @@ containers used during the `docker build` process. On macOS in particular the
 default is 2GB, which is not enough to build p4c. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
+
+# Defining new CMake targets
+
+When building a new backend target, add it into the development tree in the
+extensions subdirectory. The cmake-based build system will automatically include
+it if it contains a CMakeLists.txt file.
+
+For a new backend, the cmake file should contain the following rules:
+
+## IR definition files
+
+Backend specific IR definition files should be added to the global list
+of IR_DEF_FILES as they are processed together with the core IR files.
+Use the following rule:
+
+```
+set (IR_DEF_FILES ${IR_DEF_FILES} ${MY_IR_DEF_FILES} PARENT_SCOPE)
+```
+where `MY_IR_DEF_FILES` is a list of file names with absolute path
+(for example, use `${CMAKE_CURRENT_SOURCE_DIR}`).
+
+If in addition you have additional supporting source files, they
+should be added to the frontend sources, as follows:
+
+```
+set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${MY_IR_SRCS} PARENT_SCOPE)
+```
+Again, `MY_IR_SRCS` is a list of file names with absolute path.
+
+## Source files
+
+Sources (.cpp and .h) should be added to the cpplint target using the following rule:
+
+```
+set (mybackend_CPPLINT_FILES ${MY_SOURCES_AND_HEADERS} PARENT_SCOPE)
+```
+
+where `mybackend` is the name of the directory you added under extensions.
+The p4c CMakeLists.txt will use that name to figure the full path of the files to lint.
+
+## Target
+
+Define a target for your executable. The target should link against
+the core `P4C_LIBRARIES` and `P4C_LIB_DEPS`.  `P4C_LIB_DEPS` are
+package dependencies. If you need additional libraries for your
+project, add them to `P4C_LIB_DEPS`.
+
+In addition, your target should depend on the `genIR` target, since
+you need all the IR generation to happen before you start compiling
+your backend. If you chose to have your backend as a library (seem the
+backends/bmv2 example), the library should depend on `genIR`, and
+there is no longer necessary for your executable to depend on it.
+
+```
+add_executable(p4c-mybackend ${MY_SOURCES})
+target_link_libraries (p4c-mybackend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+add_dependencies(p4c-mybackend genIR)
+```
+
+## Tests
+
+We implemented support equivalent to the automake `make check` rules.
+All tests should be included in `make check` and in addition, we support
+`make check-*` rules. To enable this support, add the following rules:
+
+```
+set(MY_DRIVER <driver or compiler executable>)
+
+set (MY_TEST_SUITES
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4
+  ${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4
+  )
+set (MY_XFAIL_TESTS
+  testdata/p4_16_errors/this_test_fails.p4
+ )
+p4c_add_tests("mybackend" ${MY_DRIVER} "${MY_TEST_SUITES}" "${MY_XFAIL_TESTS}")
+```
+
+See the [documentation for `p4c_add_tests`](cmake/P4CUtils.cmake) for
+more information on the arguments to this macro.
+
+## Installation
+
+Define rules to install your backend. Typically you need to install
+the binary, the additional architecture headers, and the configuration
+file for the p4c driver.
+
+```
+install (TARGETS p4c-mybackend
+  RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/p4include
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
+```
+
 
 # Known issues
 
