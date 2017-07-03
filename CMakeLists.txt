@@ -148,7 +148,7 @@ add_cpplint_files(ir "${IR_CPPLINT_FILES}")
 
 # component libraries: must be defined before being used in the
 # backend executables
-set (P4C_LIBRARIES frontend midend controlplane ir p4ctoolkit)
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit)
 
 # add extensions - before the frontends as they produce IR and extra frontend
 set(EXTENSION_FRONTEND_SOURCES)
