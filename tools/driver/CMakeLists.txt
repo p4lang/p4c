@@ -29,7 +29,7 @@ set (P4C_DRIVER_SRCS
   p4c_src/p4c.ebpf.cfg
   )
 
-install (PROGRAMS ${CMAKE_BINARY_DIR}/p4c
+install (PROGRAMS ${P4C_BINARY_DIR}/p4c
   DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 install (DIRECTORY p4c_src
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
@@ -39,26 +39,26 @@ install (DIRECTORY p4c_src
 
 set (P4C_DRIVER_DST)
 foreach (__f IN LISTS P4C_DRIVER_SRCS)
-  list (APPEND P4C_DRIVER_DST "${CMAKE_BINARY_DIR}/${__f}")
+  list (APPEND P4C_DRIVER_DST "${P4C_BINARY_DIR}/${__f}")
 endforeach(__f)
 
 add_custom_command(OUTPUT ${P4C_DRIVER_DST}
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4c_src &&
-          ${CMAKE_COMMAND} -E copy_if_different ${P4C_DRIVER_SRCS} ${CMAKE_BINARY_DIR}/p4c_src
-  COMMAND chmod a+x ${CMAKE_BINARY_DIR}/p4c
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4c_src &&
+          ${CMAKE_COMMAND} -E copy_if_different ${P4C_DRIVER_SRCS} ${P4C_BINARY_DIR}/p4c_src
+  COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c
   # hack to make the tests work. If the p4include directory is
   # provided with -I to the compiler the output files include the
   # contents of the includes. If the compiler finds them in the
   # current directory, it leaves the #include directive in the output,
   # and this is how the current sample outputs are stored.
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E copy ${P4C_SOURCE_DIR}/p4include/*.p4 ${CMAKE_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E copy ${P4C_SOURCE_DIR}/p4include/*.p4 ${P4C_BINARY_DIR}/p4include
   # hack to link the generated executables at the top level directory
   # because the test run scripts expect them there. This should go
   # away when removing automake and runscripts can be adjusted.
-  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_BINARY_DIR}/backends/bmv2/p4c-bm2-ss ${CMAKE_BINARY_DIR}/p4c-bm2-ss
-  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_BINARY_DIR}/backends/p4test/p4test ${CMAKE_BINARY_DIR}/p4test
-  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_BINARY_DIR}/backends/ebpf/p4c-ebpf ${CMAKE_BINARY_DIR}/p4c-ebpf
+  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/bmv2/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
+  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/p4test/p4test ${P4C_BINARY_DIR}/p4test
+  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/ebpf/p4c-ebpf ${P4C_BINARY_DIR}/p4c-ebpf
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Copying p4c driver"
   )

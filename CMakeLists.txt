@@ -132,9 +132,9 @@ set (IR_DEF_FILES)           # list to collect all .def files
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
 
 set (IR_GENERATED_SRCS
-  ${CMAKE_BINARY_DIR}/ir/ir-generated.h
-  ${CMAKE_BINARY_DIR}/ir/ir-generated.cpp
-  ${CMAKE_BINARY_DIR}/ir/gen-tree-macro.h)
+  ${P4C_BINARY_DIR}/ir/ir-generated.h
+  ${P4C_BINARY_DIR}/ir/ir-generated.cpp
+  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
 set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
 
 # the order of adding subdirectories matters because of target dependencies
