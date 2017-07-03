@@ -79,16 +79,32 @@ class TypeConverter : public ExpressionConverter {
 };
 
 class ExternConverter {
- public:
-    ProgramStructure *structure = nullptr;
+    static std::map<cstring, ExternConverter *> *cvtForType;
 
-    virtual const IR::Type_Extern *convertExternType(const IR::Type_Extern *, cstring);
-    virtual const IR::Declaration_Instance *convertExternInstance(
+ public:
+    virtual const IR::Type_Extern *convertExternType(ProgramStructure *,
+                const IR::Type_Extern *, cstring);
+    virtual const IR::Declaration_Instance *convertExternInstance(ProgramStructure *,
                 const IR::Declaration_Instance *, cstring);
-    virtual const IR::Statement *convertExternCall(const IR::Declaration_Instance *,
-                                                   const IR::Primitive *);
+    virtual const IR::Statement *convertExternCall(ProgramStructure *,
+                const IR::Declaration_Instance *, const IR::Primitive *);
     ExternConverter() {}
-    explicit ExternConverter(ProgramStructure *s) : structure(s) {}
+    /// register a converter for a p4_14 extern_type
+    /// @type: extern_type that the converter works on
+    static void addConverter(cstring type, ExternConverter *);
+    static ExternConverter *get(cstring type);
+    static ExternConverter *get(const IR::Type_Extern *type) { return get(type->name); }
+    static ExternConverter *get(const IR::Declaration_Instance *ext) {
+        return get(ext->type->to<IR::Type_Extern>()); }
+    static const IR::Type_Extern *cvtExternType(ProgramStructure *s,
+                const IR::Type_Extern *e, cstring name) {
+        return get(e)->convertExternType(s, e, name); }
+    static const IR::Declaration_Instance *cvtExternInstance(ProgramStructure *s,
+                const IR::Declaration_Instance *di, cstring name) {
+        return get(di)->convertExternInstance(s, di, name); }
+    static const IR::Statement *cvtExternCall(ProgramStructure *s,
+                const IR::Declaration_Instance *di, const IR::Primitive *p) {
+        return get(di)->convertExternCall(s, di, p); }
 };
 
 // Is fed a P4 v1.0 program and outputs an equivalent P4 v1.2 program
@@ -96,7 +112,7 @@ class Converter : public PassManager {
     ProgramStructure structure;
 
  public:
-    explicit Converter(ExternConverter *extCvt);
+    Converter();
     void loadModel() { structure.loadModel(); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };

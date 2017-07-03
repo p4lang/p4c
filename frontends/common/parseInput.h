@@ -39,8 +39,7 @@ namespace P4 {
  * @return a P4-16 IR tree representing the contents of the given file, or null
  * on failure. If failure occurs, an error will also be reported.
  */
-const IR::P4Program* parseP4File(CompilerOptions& options,
-                                 P4V1::ExternConverter *extCvt = nullptr);
+const IR::P4Program* parseP4File(CompilerOptions& options);
 
 /**
  * Parse P4 source from the string @input, interpreting it as having language
@@ -57,8 +56,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options,
  * null on failure. If failure occurs, an error will also be reported.
  */
 const IR::P4Program* parseP4String(const std::string& input,
-                                   CompilerOptions::FrontendVersion version,
-                                   P4V1::ExternConverter *extCvt = nullptr);
+                                   CompilerOptions::FrontendVersion version);
 
 /**
  * Clear global program state so that a new program can be parsed.
