@@ -29,8 +29,6 @@ limitations under the License.
 
 namespace P4V1 {
 
-class ExternConverter;
-
 /// Information about the structure of a P4-14 program, used to convert it to a P4-16 program.
 class ProgramStructure {
     // In P4-14 one can have multiple objects with different types with the same name
@@ -89,10 +87,9 @@ class ProgramStructure {
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }
     };
-    ExternConverter *extCvt;
 
  public:
-    explicit ProgramStructure(ExternConverter *);
+    ProgramStructure();
 
     P4V1::V1Model &v1model;
     P4::P4CoreLibrary &p4lib;
@@ -163,6 +160,7 @@ class ProgramStructure {
     const IR::Parameter* parserPacketIn;
     const IR::Parameter* parserHeadersOut;
 
+ public:
     // output is constructed here
     IR::IndexedVector<IR::Node>* declarations;
 
@@ -205,8 +203,6 @@ class ProgramStructure {
     const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
     const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
-    const IR::Declaration_Instance*
-    convertExtern(const IR::Declaration_Instance* ext, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
                  IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);

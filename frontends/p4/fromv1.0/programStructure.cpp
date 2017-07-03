@@ -34,8 +34,7 @@ limitations under the License.
 
 namespace P4V1 {
 
-ProgramStructure::ProgramStructure(ExternConverter *extCvt) :
-        extCvt(extCvt),
+ProgramStructure::ProgramStructure() :
         v1model(P4V1::V1Model::instance), p4lib(P4::P4CoreLibrary::instance),
         types(&allNames), metadata(&allNames), headers(&allNames), stacks(&allNames),
         controls(&allNames), parserStates(&allNames), tables(&allNames),
@@ -255,7 +254,7 @@ void ProgramStructure::createStructures() {
 
 void ProgramStructure::createExterns() {
     for (auto it : extern_types) {
-        if (auto et = extCvt->convertExternType(it.first, it.second)) {
+        if (auto et = ExternConverter::cvtExternType(this, it.first, it.second)) {
             if (et != it.first)
                 extern_remap[it.first] = et;
             if (et != declarations->getDeclaration(et->name))
@@ -906,7 +905,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
 
     if (extrn) {
-        return extCvt->convertExternCall(extrn, primitive);
+        return ExternConverter::cvtExternCall(this, extrn, primitive);
     } else if (primitive->name == "modify_field") {
         if (primitive->operands.size() == 2) {
             auto left = conv.convert(primitive->operands.at(0));
@@ -1512,11 +1511,6 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
 }
 
 const IR::Declaration_Instance*
-ProgramStructure::convertExtern(const IR::Declaration_Instance *ext, cstring newName) {
-    return extCvt->convertExternInstance(ext, newName);
-}
-
-const IR::Declaration_Instance*
 ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     LOG1("Synthesizing " << m);
     auto meterOutput = m->result;
@@ -1659,7 +1653,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     for (auto c : externsToDo) {
         auto ext = externs.get(c);
-        ext = convertExtern(ext, externs.get(ext));
+        ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext));
         stateful.push_back(ext);
     }
 

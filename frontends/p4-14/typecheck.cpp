@@ -285,12 +285,18 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
     if (!ctxt) return rv;
     if (auto parent = ctxt->node->to<IR::Expression>()) {
         if (auto p = parent->to<IR::Operation_Relation>()) {
-            if (ctxt->child_index == 0)
+            const IR::Type::Bits *t, *ct = nullptr;
+            if (ctxt->child_index == 0) {
                 rv = p->right->type;
-            else if (ctxt->child_index == 1)
+                ct = p->left->type->to<IR::Type::Bits>();
+            } else if (ctxt->child_index == 1) {
                 rv = p->left->type;
-            else
-                BUG("Unepxected child index");
+                ct = p->right->type->to<IR::Type::Bits>();
+            } else {
+                BUG("Unepxected child index"); }
+            if (ct && (t = rv->to<IR::Type::Bits>()) && ct->size > t->size)
+                // if both children have bit types, use the larger
+                rv = ct;
         } else if (parent->is<IR::Operation::Binary>()) {
             if ((parent->is<IR::Shl>() || parent->is<IR::Shr>()) && ctxt->child_index == 1) {
                 // don't propagate into shift count -- maybe should infer log2 bits?
@@ -457,9 +463,7 @@ class TypeCheck::MakeImplicitCastsExplicit : public Transform, P4WriteContext {
     IR::Annotation *preorder(IR::Annotation *a) override { prune(); return a; }
     IR::Expression *postorder(IR::Expression *op) override {
         visitAgain();
-        if (isWrite()) return op;  // don't cast lvalues or refs outside actions
-        if (!findContext<IR::ActionFunction>() && !findContext<IR::Property>())
-            return op;  // only while in action functions or extern properties
+        if (isWrite()) return op;  // don't cast lvalues
         auto *type = inferTypeFromContext(getContext(), global);
         if (type != IR::Type::Unknown::get() && !type->is<IR::Type_InfInt>() && type != op->type) {
                 LOG3("Need cast " << op->type << " -> " << type << " on " << op);

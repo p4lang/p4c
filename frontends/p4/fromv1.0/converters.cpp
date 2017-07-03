@@ -370,13 +370,13 @@ class FixupExtern : public Modifier {
 };
 }  // end anon namespace
 
-const IR::Type_Extern *
-ExternConverter::convertExternType(const IR::Type_Extern *ext, cstring name) {
+const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *structure,
+            const IR::Type_Extern *ext, cstring name) {
     return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
 }
 
-const IR::Declaration_Instance *
-ExternConverter::convertExternInstance(const IR::Declaration_Instance *ext, cstring name) {
+const IR::Declaration_Instance *ExternConverter::convertExternInstance(ProgramStructure *structure,
+            const IR::Declaration_Instance *ext, cstring name) {
     auto *rv = ext->clone();
     auto *et = rv->type->to<IR::Type_Extern>();
     BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
@@ -387,8 +387,8 @@ ExternConverter::convertExternInstance(const IR::Declaration_Instance *ext, cstr
     return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
 }
 
-const IR::Statement *
-ExternConverter::convertExternCall(const IR::Declaration_Instance *ext, const IR::Primitive *prim) {
+const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *structure,
+            const IR::Declaration_Instance *ext, const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
     auto extref = new IR::PathExpression(structure->externs.get(ext));
     auto method = new IR::Member(prim->srcInfo, extref, prim->name);
@@ -399,7 +399,20 @@ ExternConverter::convertExternCall(const IR::Declaration_Instance *ext, const IR
     return new IR::MethodCallStatement(prim->srcInfo, mc);
 }
 
+std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
 
+void ExternConverter::addConverter(cstring type, ExternConverter *cvt) {
+    static std::map<cstring, ExternConverter *> tbl;
+    cvtForType = &tbl;
+    tbl[type] = cvt;
+}
+
+ExternConverter *ExternConverter::get(cstring type) {
+    static ExternConverter default_cvt;
+    if (cvtForType && cvtForType->count(type))
+        return cvtForType->at(type);
+    return &default_cvt;
+}
 
 ///////////////////////////////////////////////////////////////
 
@@ -799,9 +812,7 @@ class FixExtracts final : public Transform {
 
 ///////////////////////////////////////////////////////////////
 
-Converter::Converter(ExternConverter *eCvt)
-: structure(eCvt ? eCvt : new ExternConverter(&structure)) {
-    if (eCvt) eCvt->structure = &structure;
+Converter::Converter() {
     setStopOnError(true); setName("Converter");
 
     // Discover types using P4 v1.1 type-checker
