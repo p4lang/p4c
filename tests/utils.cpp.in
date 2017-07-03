@@ -23,6 +23,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <bm/bm_sim/_assert.h>
+
 #include <string>
 
 #include <cstdio>
@@ -52,7 +54,7 @@ class CLIWrapperImp {
   }
 
   ~CLIWrapperImp() {
-    assert(pclose(CLI_f) == 0);
+    _BM_ASSERT(pclose(CLI_f) == 0);
   }
 
   void send_cmd(const std::string &cmd) {

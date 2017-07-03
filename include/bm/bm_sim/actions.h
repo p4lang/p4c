@@ -84,6 +84,7 @@
 #include "named_p4object.h"
 #include "expressions.h"
 #include "stateful.h"
+#include "_assert.h"
 
 namespace bm {
 
@@ -278,7 +279,7 @@ Data &ActionParam::to<Data &>(ActionEngineState *state) const {
       return state->phv.get_header_stack(stack_field.header_stack).get_last()
           .get_field(stack_field.field_offset);
     default:
-      assert(0);
+      _BM_UNREACHABLE("Default switch case should not be reachable");
   }
 }
 
@@ -314,7 +315,7 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
       return state->phv.get_header_stack(stack_field.header_stack).get_last()
           .get_field(stack_field.field_offset);
     default:
-      assert(0);
+      _BM_UNREACHABLE("Default switch case should not be reachable");
   }
 }
 
@@ -363,7 +364,7 @@ StackIface &ActionParam::to<StackIface &>(ActionEngineState *state) const {
     case HEADER_UNION_STACK:
       return state->phv.get_header_union_stack(header_union_stack);
     default:
-      assert(0);
+      _BM_UNREACHABLE("Default switch case should not be reachable");
   }
 }
 

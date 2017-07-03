@@ -76,9 +76,10 @@ bm::MatchErrorCode add_entry_3(SwitchTest *sw, const ethernet_t &hdr) {
                           &handle);
 }
 
-bool check_rc(bm::MatchErrorCode rc) {
-  return (rc == bm::MatchErrorCode::SUCCESS ||
-          rc == bm::MatchErrorCode::DUPLICATE_ENTRY);
+void check_rc(bm::MatchErrorCode rc) {
+  _BM_UNUSED(rc);
+  assert(rc == bm::MatchErrorCode::SUCCESS ||
+         rc == bm::MatchErrorCode::DUPLICATE_ENTRY);
 }
 
 }  // namespace
@@ -101,9 +102,9 @@ int main(int argc, char* argv[]) {
   for (const auto &pkt : packets) {
     ethernet_t *hdr = reinterpret_cast<ethernet_t *>(pkt->data());
     assert(ntohs(hdr->etherType) == 0x0800);  // check for IPv4 ethertype
-    if (rgen.get_bool(p_add)) assert(check_rc(add_entry_1(&sw, *hdr)));
-    if (rgen.get_bool(p_add)) assert(check_rc(add_entry_2(&sw, *hdr)));
-    if (rgen.get_bool(p_add)) assert(check_rc(add_entry_3(&sw, *hdr)));
+    if (rgen.get_bool(p_add)) check_rc(add_entry_1(&sw, *hdr));
+    if (rgen.get_bool(p_add)) check_rc(add_entry_2(&sw, *hdr));
+    if (rgen.get_bool(p_add)) check_rc(add_entry_3(&sw, *hdr));
   }
 
   auto parser = sw.get_parser("parser");

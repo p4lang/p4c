@@ -375,13 +375,11 @@ DebuggerNN::packet_in_(const PacketId &packet_id, int port) {
       wait_for_resume_packet_in(lock);
   }
 
-  auto it = packet_registers_map.find(packet_id);
-  assert(it == packet_registers_map.end());
+  assert(packet_registers_map.find(packet_id) == packet_registers_map.end());
   packet_registers_map.emplace_hint(packet_registers_map.end(),
                                     packet_id, PacketRegisters());
 
-  auto it2 = packet_ctr_stacks.find(packet_id);
-  assert(it2 == packet_ctr_stacks.end());
+  assert(packet_ctr_stacks.find(packet_id) == packet_ctr_stacks.end());
   packet_ctr_stacks.emplace_hint(packet_ctr_stacks.end(),
                                  packet_id, std::vector<uint32_t>());
 

@@ -83,7 +83,7 @@ TEST(Switch, GetConfig) {
     std::ifstream fs(md5_path.string());
     for (size_t i = 0; i < md5.size(); i++) {
       char c1, c2;
-      assert(fs.get(c1)); assert(fs.get(c2));
+      ASSERT_TRUE(fs.get(c1)); ASSERT_TRUE(fs.get(c2));
       md5[i] = (char2digit(c1) << 4) | char2digit(c2);
     }
   }

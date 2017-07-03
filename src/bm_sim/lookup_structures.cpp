@@ -19,6 +19,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/lookup_structures.h>
 #include <bm/bm_sim/match_key_types.h>
 
@@ -172,7 +173,9 @@ class TernaryCache {
     if (it != cache.end()) return false;
     if (cache.size() == S) {  // cache is full
       auto evict = entries.back();
-      assert(cache.erase(evict.key) == 1);
+      int success = cache.erase(evict.key);
+      _BM_UNUSED(success);
+      assert(success == 1);
       entries.pop_back();
     }
     entries.emplace_front(handle, key_data);

@@ -18,6 +18,7 @@ bm/bm_runtime/bm_runtime.h
 endif
 
 nobase_include_HEADERS += \
+bm/bm_sim/_assert.h \
 bm/bm_sim/action_entry.h \
 bm/bm_sim/action_profile.h \
 bm/bm_sim/actions.h \

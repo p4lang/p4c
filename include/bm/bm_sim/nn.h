@@ -95,6 +95,7 @@ namespace nn
       inline ~socket ()
       {
 	int rc = nn_close (s);
+        (void) rc;
 	assert (rc == 0);
       }
 

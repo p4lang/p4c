@@ -21,6 +21,7 @@
 #ifndef TESTS_STRESS_TESTS_STRESS_UTILS_H_
 #define TESTS_STRESS_TESTS_STRESS_UTILS_H_
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
 #include <chrono>

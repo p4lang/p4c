@@ -347,10 +347,13 @@ TEST(P4Objects, HeaderStackArith) {
   ASSERT_NO_THROW(h1_f1.get_int());
   ASSERT_NO_THROW(h0_f1.get_int());
 
+  (void) h0_f2; (void) h1_f2;
+#ifndef NDEBUG
   if (!WITH_VALGRIND) {
     ASSERT_DEATH(h0_f2.get_int(), "Assertion .*failed");
     ASSERT_DEATH(h1_f2.get_int(), "Assertion .*failed");
   }
+#endif
 }
 
 TEST(P4Objects, Errors) {

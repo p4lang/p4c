@@ -22,6 +22,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
 #include <string>
@@ -50,7 +51,7 @@ class RuntimeIfaceTest : public ::testing::Test {
   virtual void SetUp() {
     // load JSON
     fs::path json_path = fs::path(testdata_dir) / fs::path(test_json);
-    assert(sw.init_objects(json_path.string()) == 0);
+    _BM_ASSERT(sw.init_objects(json_path.string()) == 0);
   }
 
   // virtual void TearDown() { }

@@ -60,7 +60,7 @@ ErrorCodeMap::add_core() {
                           Core::StackOutOfBounds, Core::HeaderTooShort,
                           Core::ParserTimeout}) {
     auto name = core_to_name(core);
-    if (!exists(name)) assert(add(name, max_v++));
+    if (!exists(name)) add(name, max_v++);
   }
 }
 

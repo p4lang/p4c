@@ -32,6 +32,8 @@ typedef unsigned char byte_t;
 
 typedef unsigned long value_t;
 
+#define _unused(x) ((void)(x))
+
 typedef struct node_s {
   Pvoid_t PJLarray_branches;
   Pvoid_t PJLarray_prefixes;
@@ -270,14 +272,18 @@ bool bf_lpm_trie_delete(bf_lpm_trie_t *trie, const char *prefix,
   pdata = get_prefix_ptr(current_node, prefix_key);
   if(!pdata) return false;
 
+  int success;
+  _unused(success);
   if(trie->release_memory) {
-    assert(delete_prefix(current_node, prefix_key) == 1);
+    success = delete_prefix(current_node, prefix_key);
+    assert(success == 1);
     current_node->pref_num--;
     while(current_node->pref_num == 0 && current_node->branch_num == 0) {
       node_t *tmp = current_node;
       current_node = current_node->parent;
       if(!current_node) break;
-      assert(delete_branch(current_node, tmp->child_id) == 1);
+      success = delete_branch(current_node, tmp->child_id);
+      assert(success == 1);
       free(tmp);
       current_node->branch_num--;
     }
@@ -286,4 +292,4 @@ bool bf_lpm_trie_delete(bf_lpm_trie_t *trie, const char *prefix,
   return true;
 }
 
-
+#undef _unused

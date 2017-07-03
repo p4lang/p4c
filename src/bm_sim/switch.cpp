@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/P4Objects.h>
 #include <bm/bm_sim/options_parse.h>
@@ -317,7 +318,9 @@ SwitchWContexts::swap_configs() {
   {
     std::unique_lock<std::mutex> config_lock(config_mutex);
     if (!config_loaded) config_loaded = true;
-    assert(do_swap() == 0);
+    int error = do_swap();
+    _BM_UNUSED(error);
+    assert(!error);
   }
   config_loaded_cv.notify_one();
   return ErrorCode::SUCCESS;

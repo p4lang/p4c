@@ -19,11 +19,13 @@
  */
 
 #include <bm/bm_sim/dev_mgr.h>
+#include <bm/bm_sim/logger.h>
 
-#include <string>
 #include <cassert>
+#include <cstdlib>
 #include <mutex>
 #include <map>
+#include <string>
 
 extern "C" {
 #include "BMI/bmi_port.h"
@@ -43,7 +45,10 @@ class BmiDevMgrImp : public DevMgrIface {
  public:
   BmiDevMgrImp(int device_id,
                std::shared_ptr<TransportIface> notifications_transport) {
-    assert(!bmi_port_create_mgr(&port_mgr));
+    if (bmi_port_create_mgr(&port_mgr)) {
+      Logger::get()->critical("Could not initialize BMI port manager");
+      std::exit(1);
+    }
 
     p_monitor = PortMonitorIface::make_active(device_id,
                                               notifications_transport);
@@ -86,7 +91,8 @@ class BmiDevMgrImp : public DevMgrIface {
 
   void start_() override {
     assert(port_mgr);
-    assert(!bmi_start_mgr(port_mgr));
+    if (bmi_start_mgr(port_mgr))
+      Logger::get()->critical("Could not start BMI port manager");
   }
 
   ReturnCode set_packet_handler_(const PacketHandler &handler, void *cookie)
@@ -95,7 +101,10 @@ class BmiDevMgrImp : public DevMgrIface {
     function_t * const*ptr_fun = handler.target<function_t *>();
     assert(ptr_fun);
     assert(*ptr_fun);
-    assert(!bmi_set_packet_handler(port_mgr, *ptr_fun, cookie));
+    if (bmi_set_packet_handler(port_mgr, *ptr_fun, cookie)) {
+      Logger::get()->critical("Could not set BMI packet handler");
+      return ReturnCode::ERROR;
+    }
     return ReturnCode::SUCCESS;
   }
 

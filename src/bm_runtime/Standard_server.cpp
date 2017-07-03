@@ -20,8 +20,9 @@
 
 #include <bm/Standard.h>
 
-#include <bm/bm_sim/switch.h>
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/switch.h>
 
 #include <functional>
 
@@ -94,7 +95,7 @@ public:
       case MatchErrorCode::ERROR:
         return TableOperationErrorCode::ERROR;
       default:
-        assert(0 && "invalid error code");
+        _BM_UNREACHABLE("Default switch case should not be reachable");
     }
   }
 

@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/action_profile.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/packet.h>
@@ -243,7 +244,9 @@ ActionProfile::delete_member(mbr_hdl_t mbr) {
     } else if (index_ref_count.get(IndirectIndex::make_mbr_index(mbr)) > 0) {
       rc = MatchErrorCode::MBR_STILL_USED;
     } else {
-      assert(!mbr_handles.release_handle(mbr));
+      int error = mbr_handles.release_handle(mbr);
+      _BM_UNUSED(error);
+      assert(!error);
       num_members--;
     }
   }
@@ -338,7 +341,9 @@ ActionProfile::delete_group(grp_hdl_t grp) {
       for (auto mbr : group_info)
         index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
 
-      assert(!grp_handles.release_handle(grp));
+      int error = grp_handles.release_handle(grp);
+      _BM_UNUSED(error);
+      assert(!error);
 
       num_groups--;
     }
@@ -448,6 +453,7 @@ ActionProfile::get_members() const {
   size_t idx = 0;
   for (const auto h : mbr_handles) {
     MatchErrorCode rc = get_member_(h, &members[idx++]);
+    _BM_UNUSED(rc);
     assert(rc == MatchErrorCode::SUCCESS);
   }
   return members;
@@ -478,6 +484,7 @@ ActionProfile::get_groups() const {
   size_t idx = 0;
   for (const auto h : grp_handles) {
     MatchErrorCode rc = get_group_(h, &groups[idx++]);
+    _BM_UNUSED(rc);
     assert(rc == MatchErrorCode::SUCCESS);
   }
   return groups;
@@ -540,14 +547,18 @@ ActionProfile::deserialize(std::istream *in, const P4Objects &objs) {
   (*in) >> num_members;
   for (size_t i = 0; i < num_members; i++) {
     mbr_hdl_t mbr_hdl; (*in) >> mbr_hdl;
-    assert(!mbr_handles.set_handle(mbr_hdl));
+    int error = mbr_handles.set_handle(mbr_hdl);
+    _BM_UNUSED(error);
+    assert(!error);
     action_entries.at(mbr_hdl).deserialize(in, objs);
   }
   index_ref_count.deserialize(in);
   (*in) >> num_groups;
   for (size_t i = 0; i < num_groups; i++) {
     grp_hdl_t grp_hdl; (*in) >> grp_hdl;
-    assert(!grp_handles.set_handle(grp_hdl));
+    int error = grp_handles.set_handle(grp_hdl);
+    _BM_UNUSED(error);
+    assert(!error);
     grp_mgr.insert_group(grp_hdl);
     grp_mgr.at(grp_hdl).deserialize(in);
     for (const auto mbr : grp_mgr.at(grp_hdl))

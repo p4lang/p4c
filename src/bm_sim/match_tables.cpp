@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/match_tables.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/event_logger.h>
@@ -529,6 +530,7 @@ MatchTable::get_entries() const {
   for (auto it = match_unit->handles_begin(); it != match_unit->handles_end();
        it++) {
     MatchErrorCode rc = get_entry_(*it, &entries[idx++]);
+    _BM_UNUSED(rc);
     assert(rc == MatchErrorCode::SUCCESS);
   }
 
@@ -574,6 +576,7 @@ MatchTable::set_default_entry(const ActionFn *action_fn,
                               ActionData action_data, bool is_const) {
   assert(!const_default_entry);
   auto rc = set_default_action(action_fn, std::move(action_data));
+  _BM_UNUSED(rc);
   assert(rc == MatchErrorCode::SUCCESS);
   const_default_entry = is_const;
 }
@@ -824,6 +827,7 @@ MatchTableIndirect::get_entries() const {
   for (auto it = match_unit->handles_begin(); it != match_unit->handles_end();
        it++) {
     MatchErrorCode rc = get_entry_(*it, &entries[idx++]);
+    _BM_UNUSED(rc);
     assert(rc == MatchErrorCode::SUCCESS);
   }
 
@@ -1044,6 +1048,7 @@ MatchTableIndirectWS::get_entries() const {
   for (auto it = match_unit->handles_begin(); it != match_unit->handles_end();
        it++) {
     MatchErrorCode rc = get_entry_(*it, &entries[idx++]);
+    _BM_UNUSED(rc);
     assert(rc == MatchErrorCode::SUCCESS);
   }
 
