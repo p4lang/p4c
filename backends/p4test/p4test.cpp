@@ -31,6 +31,18 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "midend.h"
 
+class P4TestOptions : public CompilerOptions {
+ public:
+    bool parseOnly = false;
+    P4TestOptions() {
+        registerOption("--parse-only", nullptr,
+                       [this](const char*) {
+                           parseOnly = true;
+                           return true; },
+                       "only parse the P4 input, without any further processing", true);
+     }
+};
+
 static void log_dump(const IR::Node *node, const char *head) {
     if (node && LOGGING(1)) {
         if (head)
@@ -47,7 +59,7 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    CompilerOptions options;
+    P4TestOptions options;
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 
@@ -60,37 +72,41 @@ int main(int argc, char *const argv[]) {
     auto hook = options.getDebugHook();
 
     if (program != nullptr && ::errorCount() == 0) {
-        try {
-            P4::FrontEnd fe;
-            fe.addDebugHook(hook);
-            program = fe.run(options, program);
-        } catch (const Util::P4CExceptionBase &bug) {
-            std::cerr << bug.what() << std::endl;
-            return 1;
-        }
-        log_dump(program, "Initial program");
-        if (program != nullptr && ::errorCount() == 0) {
-            P4Test::MidEnd midEnd(options);
-            midEnd.addDebugHook(hook);
-#if 0
-            /* doing this breaks the output until we get dump/undump of srcInfo */
-            if (options.debugJson) {
-                std::stringstream tmp;
-                JSONGenerator gen(tmp);
-                gen << program;
-                JSONLoader loader(tmp);
-                loader >> program;
-            }
-#endif
-            const IR::ToplevelBlock *top = nullptr;
+        if (!options.parseOnly) {
             try {
-                top = midEnd.process(program);
+                P4::FrontEnd fe;
+                fe.addDebugHook(hook);
+                program = fe.run(options, program);
             } catch (const Util::P4CExceptionBase &bug) {
                 std::cerr << bug.what() << std::endl;
                 return 1;
             }
-            log_dump(program, "After midend");
-            log_dump(top, "Top level block");
+        }
+        log_dump(program, "Initial program");
+        if (program != nullptr && ::errorCount() == 0) {
+            if (!options.parseOnly) {
+                P4Test::MidEnd midEnd(options);
+                midEnd.addDebugHook(hook);
+#if 0
+                /* doing this breaks the output until we get dump/undump of srcInfo */
+                if (options.debugJson) {
+                    std::stringstream tmp;
+                    JSONGenerator gen(tmp);
+                    gen << program;
+                    JSONLoader loader(tmp);
+                    loader >> program;
+                }
+#endif
+                const IR::ToplevelBlock *top = nullptr;
+                try {
+                    top = midEnd.process(program);
+                } catch (const Util::P4CExceptionBase &bug) {
+                    std::cerr << bug.what() << std::endl;
+                    return 1;
+                }
+                log_dump(program, "After midend");
+                log_dump(top, "Top level block");
+            }
             if (options.dumpJsonFile)
                 JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
             if (options.debugJson) {
