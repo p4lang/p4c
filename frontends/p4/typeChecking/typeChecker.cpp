@@ -716,6 +716,9 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     auto result = new IR::Vector<IR::Expression>();
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
+        if (i >= arguments->size()) {
+            BUG_CHECK(pi->getAnnotation("optional"), "Missing nonoptional arg %s", pi);
+            break; }
         auto arg = arguments->at(i++);
         if (!isCompileTimeConstant(arg))
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
