@@ -157,6 +157,9 @@ void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) 
     CHECK_NULL(args);
     auto it = args->begin();
     for (auto p : *getConstructorParameters()->getEnumerator()) {
+        if (it == args->end()) {
+            BUG_CHECK(p->getAnnotation("optional"), "Missing nonoptional arg %s", p);
+            continue; }
         LOG1("Set " << p << " to " << *it << " in " << id);
         setValue(p, *it);
         ++it;
