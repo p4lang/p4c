@@ -54,3 +54,6 @@ p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 # issue #13
 XFAIL_TESTS += \
     p4/testdata/p4_16_samples/cast-call.p4.test
+
+# issue #759
+XFAIL_TESTS += p4/testdata/p4_16_samples/tuple0.p4.test
