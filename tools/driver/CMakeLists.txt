@@ -18,6 +18,7 @@ set (prefix ${CMAKE_INSTALL_PREFIX})
 set (exec_prefix ${CMAKE_INSTALL_PREFIX})
 set (datarootdir "\${prefix}/share")
 configure_file ("p4c.in" "${P4C_BINARY_DIR}/p4c" @ONLY)
+execute_process(COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c)
 
 
 set (P4C_DRIVER_SRCS
