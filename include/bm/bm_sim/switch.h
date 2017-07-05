@@ -89,6 +89,7 @@
 
 namespace bm {
 
+class OptionsParser;
 class Packet;
 
 // multiple inheritance in accordance with Google C++ guidelines:
@@ -221,6 +222,20 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   int init_from_command_line_options(
       int argc, char *argv[],
       TargetParserIface *tp = nullptr,
+      std::shared_ptr<TransportIface> my_transport = nullptr,
+      std::unique_ptr<DevMgrIface> my_dev_mgr = nullptr);
+
+  //! Initialize the switch using an bm::OptionsParser instance. This is similar
+  //! to init_from_command_line_options() but the target is responsible for
+  //! parsing the command-line options itself. In other words, the target needs
+  //! to instantiate a bm::OptionsParser object, invoke
+  //! bm::OptionsParser::parse() on it and pass the object to this method as \p
+  //! parser. This is useful if the target needs to access some of the
+  //! command-line options before initializing the switch. For example, the
+  //! target may want to use a custom bm::DevMgrIface implementation and may
+  //! need some information from the command-line to instantiate it.
+  int init_from_options_parser(
+      const OptionsParser &parser,
       std::shared_ptr<TransportIface> my_transport = nullptr,
       std::unique_ptr<DevMgrIface> my_dev_mgr = nullptr);
 

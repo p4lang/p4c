@@ -185,9 +185,17 @@ SwitchWContexts::init_from_command_line_options(
     int argc, char *argv[], TargetParserIface *tp,
     std::shared_ptr<TransportIface> my_transport,
     std::unique_ptr<DevMgrIface> my_dev_mgr) {
-  int status = 0;
   OptionsParser parser;
   parser.parse(argc, argv, tp);
+  return init_from_options_parser(parser, my_transport, std::move(my_dev_mgr));
+}
+
+int
+SwitchWContexts::init_from_options_parser(
+    const OptionsParser &parser,
+    std::shared_ptr<TransportIface> my_transport,
+    std::unique_ptr<DevMgrIface> my_dev_mgr) {
+  int status = 0;
 
   auto transport = my_transport;
   if (transport == nullptr) {
