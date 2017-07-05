@@ -98,3 +98,6 @@ VERSION-build
 
 # dist archives
 *.tar.gz
+
+core
+vgcore*

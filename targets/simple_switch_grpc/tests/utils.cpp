@@ -25,6 +25,9 @@
 
 #include <fstream>
 #include <streambuf>
+#include <string>
+
+namespace sswitch_grpc {
 
 namespace testing {
 
@@ -78,3 +81,5 @@ p4::config::P4Info parse_p4info(const char *path) {
 }
 
 }  // namespace testing
+
+}  // namespace sswitch_grpc

@@ -20,6 +20,7 @@ run_cpplint $ROOT_DIR/include/bm/bm_apps include
 run_cpplint $ROOT_DIR/targets/simple_switch targets
 run_cpplint $ROOT_DIR/targets/l2_switch targets
 run_cpplint $ROOT_DIR/targets/simple_router targets
+run_cpplint $ROOT_DIR/targets/simple_switch_grpc targets
 
 run_cpplint $ROOT_DIR/tests .
 

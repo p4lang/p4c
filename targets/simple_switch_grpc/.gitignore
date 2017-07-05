@@ -9,3 +9,8 @@ tests/test
 tests/test.run
 tests/test_packet_io
 tests/test_packet_io.run
+tests/test_grpc_dp
+
+cpp_out
+grpc_out
+py_out

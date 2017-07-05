@@ -18,10 +18,14 @@
  *
  */
 
-#ifndef SIMPLE_SWITCH_GRPC_UTILS_H_
-#define SIMPLE_SWITCH_GRPC_UTILS_H_
+#ifndef SIMPLE_SWITCH_GRPC_TESTS_UTILS_H_
+#define SIMPLE_SWITCH_GRPC_TESTS_UTILS_H_
 
 #include <p4/config/p4info.grpc.pb.h>
+
+#include <string>
+
+namespace sswitch_grpc {
 
 namespace testing {
 
@@ -39,4 +43,6 @@ p4::config::P4Info parse_p4info(const char *path);
 
 }  // namespace testing
 
-#endif  // SIMPLE_SWITCH_GRPC_UTILS_H_
+}  // namespace sswitch_grpc
+
+#endif  // SIMPLE_SWITCH_GRPC_TESTS_UTILS_H_

@@ -25,22 +25,21 @@
 #include <google/protobuf/util/message_differencer.h>
 
 #include <memory>
+#include <string>
 
 #include "utils.h"
 
+namespace sswitch_grpc {
+
 namespace testing {
+
+namespace {
 
 using grpc::ClientContext;
 using grpc::ClientReaderWriter;
 using grpc::Status;
 
-using google::protobuf::util::MessageDifferencer;
-
-namespace {
-
-const char *test_proto_txt = TESTDATADIR "/packet_io.proto.txt";
-
-}  // namespace
+constexpr char test_proto_txt[] = TESTDATADIR "/packet_io.proto.txt";
 
 int
 test() {
@@ -97,9 +96,13 @@ test() {
   return 0;
 }
 
+}  // namespace
+
 }  // namespace testing
+
+}  // namespace sswitch_grpc
 
 int
 main() {
-  return testing::test();
+  return sswitch_grpc::testing::test();
 }
