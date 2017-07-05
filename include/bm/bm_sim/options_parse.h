@@ -23,6 +23,7 @@
 #ifndef BM_BM_SIM_OPTIONS_PARSE_H_
 #define BM_BM_SIM_OPTIONS_PARSE_H_
 
+#include <iosfwd>
 #include <string>
 #include <map>
 
@@ -53,12 +54,11 @@ class InterfaceList {
 };
 
 class OptionsParser {
-  friend class SwitchWContexts;
-
  public:
-  void parse(int argc, char *argv[], TargetParserIface *tp);
+  void parse(int argc, char *argv[], TargetParserIface *tp,
+             // NOLINTNEXTLINE(runtime/references)
+             std::ostream &outstream = std::cout);
 
- private:
   std::string config_file_path{};
   bool no_p4{false};
   InterfaceList ifaces{};

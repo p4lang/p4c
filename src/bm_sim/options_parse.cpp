@@ -78,7 +78,9 @@ void validate(boost::any& v,  // NOLINT(runtime/references)
 }
 
 void
-OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
+OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
+                     // NOLINTNEXTLINE(runtime/references)
+                     std::ostream &outstream) {
   namespace po = boost::program_options;
 
   po::options_description description("Options");
@@ -169,11 +171,11 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
     }
   }
   catch(...) {
-    std::cout << "Error while parsing command line arguments\n";
-    std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
-    std::cout << description;
+    outstream << "Error while parsing command line arguments\n";
+    outstream << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
+    outstream << description;
     if (tp) {
-      std::cout << "Your target comes with its own command line parser, "
+      outstream << "Your target comes with its own command line parser, "
                 << "make sure you separate general bmv2 options from, "
                 << "target specific options with '--'\n";
     }
@@ -181,34 +183,34 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   }
 
   if (vm.count("help")) {
-    std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
-    std::cout << description;
+    outstream << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
+    outstream << description;
     if (tp) {
-      std::cout << "This target also comes with its own command line parser, "
+      outstream << "This target also comes with its own command line parser, "
                 << "make sure you separate general bmv2 options from, "
                 << "target specific options with '--'\n"
                 << "Target specific options:\n";
-      tp->help_msg(&std::cout);
+      tp->help_msg(&outstream);
     }
     exit(0);
   }
 
   if (vm.count("version")) {
     std::string version_str(bm_version_str);
-    std::cout << version_str << "\n";
+    outstream << version_str << "\n";
     exit(0);
   }
 
   if (vm.count("json-version")) {
-    std::cout << P4Objects::get_json_version_string() << "\n";
+    outstream << P4Objects::get_json_version_string() << "\n";
     exit(0);
   }
 
   no_p4 = vm.count("no-p4");
   if (!no_p4 && !vm.count("input-config")) {
-    std::cout << "Error: please specify an input JSON configuration file\n";
-    std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
-    std::cout << description;
+    outstream << "Error: please specify an input JSON configuration file\n";
+    outstream << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
+    outstream << description;
     exit(1);
   }
   // this is a little hacky because we are mixing positional arguments; ideally
@@ -222,7 +224,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
     if (tp && (!is_pos || !has_json_extension)) {
       to_pass_further.insert(to_pass_further.begin(), path);
     } else {
-      std::cout << "Warning: ignoring input config as '--no-p4' was used\n";
+      outstream << "Warning: ignoring input config as '--no-p4' was used\n";
     }
   }
   if (!no_p4 && vm.count("input-config"))
@@ -244,7 +246,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
 
   if (vm.count("nanolog")) {
 #ifndef BMELOG_ON
-    std::cout << "Warning: you requested the nanomsg event logger, but bmv2 "
+    outstream << "Warning: you requested the nanomsg event logger, but bmv2 "
               << "was compiled without -DBMELOG, and the event logger cannot "
               << "be activated\n";
 #else
@@ -256,7 +258,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   }
 
   if (vm.count("log-console") && vm.count("log-file")) {
-    std::cout << "Error: --log-console and --log-file are exclusive\n";
+    outstream << "Error: --log-console and --log-file are exclusive\n";
     exit(1);
   }
 
@@ -278,7 +280,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
       {"error", Logger::LogLevel::ERROR},
       {"off", Logger::LogLevel::OFF} };
     if (!levels_map.count(log_level_str)) {
-      std::cout << "Invalid value " << log_level_str << " for --log-level\n"
+      outstream << "Invalid value " << log_level_str << " for --log-level\n"
                 << "Run with -h to see possible values\n";
       exit(1);
     }
@@ -294,7 +296,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   missing_macros |= log_level <= Logger::LogLevel::DEBUG;
 #endif
   if (log_requested && missing_macros) {
-    std::cout << "You disabled logging macros when building this binary; "
+    outstream << "You disabled logging macros when building this binary; "
               << "however, the log level is currenty set to include 'debug' "
               << "and possibly 'trace' messages; therefore the logs will be "
               << "missing most messages\n";
@@ -302,7 +304,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
 
   if (vm.count("log-flush")) {
     if (!vm.count("log-file")) {
-      std::cout << "Ignoring --log-flush option because --log-file "
+      outstream << "Ignoring --log-flush option because --log-file "
                 << "not specified\n";
     } else {
       log_flush = true;
@@ -312,7 +314,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   if (vm.count("dump-packet-data")) {
     dump_packet_data = vm["dump-packet-data"].as<size_t>();
     if (dump_packet_data > 0 && log_level > Logger::LogLevel::INFO) {
-      std::cout << "You asked for some packet data to be dumped for each "
+      outstream << "You asked for some packet data to be dumped for each "
                 << "packet on ingress and egress, but you set a log level "
                 << "which excludes 'info' messages. Therefore, "
                 << "'--dump-packet-data' will be ignored.\n";
@@ -346,7 +348,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
 #endif
 
   if (use_files && packet_in) {
-    std::cout << "Error: --use-files and --packet-in are exclusive\n";
+    outstream << "Error: --use-files and --packet-in are exclusive\n";
     exit(1);
   }
 
@@ -364,7 +366,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   if (vm.count("thrift-port")) {
     thrift_port = vm["thrift-port"].as<int>();
   } else {
-    std::cout << "Thrift port was not specified, will use "
+    outstream << "Thrift port was not specified, will use "
               << default_thrift_port
               << std::endl;
     thrift_port = default_thrift_port;
@@ -376,9 +378,9 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   }
 
   if (tp) {
-    std::cout << "Calling target program-options parser\n";
-    if (tp->parse(to_pass_further, &std::cout)) {
-      std::cout << "Target parser returned an error\n";
+    outstream << "Calling target program-options parser\n";
+    if (tp->parse(to_pass_further, &outstream)) {
+      outstream << "Target parser returned an error\n";
     }
   }
 }
