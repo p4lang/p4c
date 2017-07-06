@@ -51,8 +51,6 @@ char char2digit(char c) {
   return 0;
 }
 
-}  // namespace
-
 class SwitchTest : public Switch {
  public:
   int receive_(int port_num, const char *buffer, int len) override {
@@ -68,6 +66,30 @@ class SwitchTest : public Switch {
     return Switch::deserialize(in);
   }
 };
+
+// dummy DevMgrIface implementation for testing
+class MyDevMgr : public DevMgrIface {
+ public:
+  MyDevMgr() { p_monitor = PortMonitorIface::make_dummy(); }
+
+ private:
+  bool port_is_up_(port_t) const override { return true; }
+  std::map<port_t, PortInfo> get_port_info_() const override {
+    return {{99, PortInfo(99, "dummy_port")}};
+  }
+  ReturnCode port_add_(const std::string &, port_t,
+                       const char *, const char *) override {
+    return ReturnCode::SUCCESS;
+  }
+  ReturnCode port_remove_(port_t) override { return ReturnCode::SUCCESS; }
+  ReturnCode set_packet_handler_(const PacketHandler &, void *) override {
+    return ReturnCode::SUCCESS;
+  }
+  void transmit_fn_(int, const char *, int) override { }
+  void start_() override { }
+};
+
+}  // namespace
 
 TEST(Switch, GetConfig) {
   fs::path config_path = fs::path(TESTDATADIR) / fs::path("empty_config.json");
@@ -122,6 +144,8 @@ TEST(Switch, InitObjectsEmpty) {
       sw.swap_configs();
       std::this_thread::sleep_for(std::chrono::seconds(1));
   });
+  // start_and_return needs the DevMgr to be set
+  sw.set_dev_mgr(std::unique_ptr<DevMgrIface>(new MyDevMgr()));
   sw.start_and_return();
   auto end = clock::now();
   config_push_thread.join();
@@ -235,32 +259,6 @@ TEST(Switch, ExternSafeAccess) {
   auto extern_instance = extern_wrapper.get();
   ASSERT_NE(nullptr, extern_instance);
 }
-
-namespace {
-
-// dummy DevMgrIface implementation for testing
-class MyDevMgr : public DevMgrIface {
- public:
-  MyDevMgr() { p_monitor = PortMonitorIface::make_dummy(); }
-
- private:
-  bool port_is_up_(port_t) const override { return true; }
-  std::map<port_t, PortInfo> get_port_info_() const override {
-    return {{99, PortInfo(99, "dummy_port")}};
-  }
-  ReturnCode port_add_(const std::string &, port_t,
-                       const char *, const char *) override {
-    return ReturnCode::SUCCESS;
-  }
-  ReturnCode port_remove_(port_t) override { return ReturnCode::SUCCESS; }
-  ReturnCode set_packet_handler_(const PacketHandler &, void *) override {
-    return ReturnCode::SUCCESS;
-  }
-  void transmit_fn_(int, const char *, int) override { }
-  void start_() override { }
-};
-
-}  // namespace
 
 TEST(Switch, MyDevMgr) {
   std::unique_ptr<MyDevMgr> my_dev_mgr(new MyDevMgr());
