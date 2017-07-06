@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-@builddir@/../simple_switch_grpc --log-console --no-p4 -- --enable-swap &
+@builddir@/../simple_switch_grpc --log-console --no-p4 &
 switch_PID=$!
 # making sure switch is ready
 echo "Sleeping 10 seconds..."

@@ -29,8 +29,8 @@ int
 main(int argc, char* argv[]) {
   bm::TargetParserBasic simple_switch_parser;
   simple_switch_parser.add_flag_option(
-      "enable-swap",
-      "enable JSON swapping at runtime");
+      "disable-swap",
+      "disable JSON swapping at runtime");
   simple_switch_parser.add_string_option(
       "grpc-server-addr",
       "bind gRPC server to given address [default is 0.0.0.0:50051]");
@@ -55,10 +55,10 @@ main(int argc, char* argv[]) {
       std::exit(1);
   }
 
-  bool enable_swap_flag = false;
+  bool disable_swap_flag = false;
   {
     auto rc = simple_switch_parser.get_flag_option(
-        "enable-swap", &enable_swap_flag);
+        "disable-swap", &disable_swap_flag);
     if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS) std::exit(1);
   }
 
@@ -82,7 +82,7 @@ main(int argc, char* argv[]) {
   }
 
   auto &runner = sswitch_grpc::SimpleSwitchGrpcRunner::get_instance(
-      512, enable_swap_flag, grpc_server_addr, cpu_port, dp_grpc_server_addr);
+      512, !disable_swap_flag, grpc_server_addr, cpu_port, dp_grpc_server_addr);
   int status = runner.init_and_start(parser);
   if (status != 0) std::exit(status);
 
