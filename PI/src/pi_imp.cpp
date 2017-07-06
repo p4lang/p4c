@@ -57,16 +57,23 @@ pi_status_t _pi_update_device_start(pi_dev_id_t dev_id,
                                     const pi_p4info_t *p4info,
                                     const char *device_data,
                                     size_t device_data_size) {
-  (void) dev_id;
-  (void) p4info;
-  (void) device_data;
-  (void) device_data_size;
-  return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
+  assert(d_info->assigned);
+  auto error_code = pibmv2::switch_->load_new_config(
+      std::string(device_data, device_data_size));
+  if (error_code != bm::RuntimeInterface::ErrorCode::SUCCESS)
+    return PI_STATUS_TARGET_ERROR;
+  d_info->p4info = p4info;
+  return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_update_device_end(pi_dev_id_t dev_id) {
-  (void) dev_id;
-  return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
+  assert(d_info->assigned);
+  auto error_code = pibmv2::switch_->swap_configs();
+  if (error_code != bm::RuntimeInterface::ErrorCode::SUCCESS)
+    return PI_STATUS_TARGET_ERROR;
+  return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_remove_device(pi_dev_id_t dev_id) {
