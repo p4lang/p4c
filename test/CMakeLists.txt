@@ -50,7 +50,7 @@ set (GTEST_UNITTEST_HEADERS
   gtest/helpers.h
   )
 
-set (GTEST_SOURCES ${GTEST_UNITTEST_SOURCES} ${GTEST_UNITTEST_HEADERS})
+set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_UNITTEST_SOURCES} ${GTEST_UNITTEST_HEADERS})
 
 set (GTESTP4C_SOURCES
   gtest/gtestp4c.cpp
@@ -59,10 +59,10 @@ set (GTESTP4C_SOURCES
 
 # Build `gtestp4c`, which will contain all of our tests. Makefiles can add tests
 # to $(GTEST_SOURCES) to include them in the test executable.
-# Makefiles can add libraries to $(gtest_LDADD) to include them in the test
+# Makefiles can add libraries to $(GTEST_LDADD) to include them in the test
 # executable.
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
-target_link_libraries (gtestp4c ${gtest_LDADD} bmv2backend ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
+target_link_libraries (gtestp4c ${GTEST_LDADD} bmv2backend ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
 
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
