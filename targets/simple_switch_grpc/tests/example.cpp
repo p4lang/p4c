@@ -21,10 +21,13 @@
 #include <grpc++/grpc++.h>
 
 #include <p4/p4runtime.grpc.pb.h>
+#include <p4/tmp/p4config.grpc.pb.h>
 
 #include <google/protobuf/util/message_differencer.h>
 
+#include <fstream>
 #include <memory>
+#include <streambuf>
 #include <string>
 
 #include "utils.h"
@@ -40,6 +43,7 @@ using grpc::Status;
 
 using google::protobuf::util::MessageDifferencer;
 
+constexpr char test_json[] = TESTDATADIR "/simple_router.json";
 constexpr char test_proto_txt[] = TESTDATADIR "/simple_router.proto.txt";
 
 int
@@ -60,6 +64,12 @@ test() {
     auto config = request.add_configs();
     config->set_device_id(dev_id);
     config->set_allocated_p4info(&p4info);
+    p4::tmp::P4DeviceConfig device_config;
+    std::ifstream istream(test_json);
+    device_config.mutable_device_data()->assign(
+        (std::istreambuf_iterator<char>(istream)),
+         std::istreambuf_iterator<char>());
+    device_config.SerializeToString(config->mutable_p4_device_config());
 
     p4::SetForwardingPipelineConfigResponse rep;
     ClientContext context;

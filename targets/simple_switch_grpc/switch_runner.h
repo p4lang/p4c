@@ -42,7 +42,7 @@ namespace sswitch_grpc {
 
 class SimpleSwitchGrpcRunner {
  public:
-  // there is no real need for a singleton here, except for the case that we use
+  // there is no real need for a singleton here, except for the fact that we use
   // PIGrpcServerRunAddr, ... which uses static state
   static SimpleSwitchGrpcRunner &get_instance(
       int max_port = 512, bool enable_swap = false,

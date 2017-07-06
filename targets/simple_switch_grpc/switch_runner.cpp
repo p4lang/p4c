@@ -222,8 +222,8 @@ SimpleSwitchGrpcRunner::wait() {
 
 void
 SimpleSwitchGrpcRunner::shutdown() {
-  PIGrpcServerShutdown();
   dp_grpc_server->Shutdown();
+  PIGrpcServerShutdown();
 }
 
 SimpleSwitchGrpcRunner::~SimpleSwitchGrpcRunner() {

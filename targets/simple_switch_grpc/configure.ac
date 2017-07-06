@@ -60,6 +60,6 @@ AM_CONDITIONAL([HAVE_GRPC_PY_PLUGIN], [test "x$GRPC_PY_PLUGIN" != x])
 AC_CONFIG_FILES([Makefile
                  tests/Makefile])
 
-AC_CONFIG_FILES([tests/test.run], [chmod +x tests/test.run])
+AC_CONFIG_FILES([tests/example.run], [chmod +x tests/example.run])
 
 AC_OUTPUT

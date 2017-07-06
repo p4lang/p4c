@@ -5,11 +5,9 @@ m4/lt~obsolete.m4
 
 simple_switch_grpc
 
-tests/test
-tests/test.run
-tests/test_packet_io
-tests/test_packet_io.run
-tests/test_grpc_dp
+tests/example
+tests/example.run
+tests/test_gtest
 
 cpp_out
 grpc_out
