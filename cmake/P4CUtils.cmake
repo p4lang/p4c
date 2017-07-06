@@ -32,6 +32,22 @@ MACRO (check_compiler_feature option program var)
   set (CMAKE_REQUIRED_FLAGS ${__required_flags_backup})
 endmacro (check_compiler_feature)
 
+# add a required library
+include (CheckLibraryExists)
+# checks if a library exists and adds it to the list of p4c dependencies
+# supports an additional argument: REQUIRED. If present, it will throw
+# a fatal error if the library does not exist.
+macro (p4c_add_library name symbol var)
+  check_library_exists (${name} ${symbol} "" ${var})
+  if (${var})
+    set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${name}")
+  else()
+    if("${ARGN}" STREQUAL "REQUIRED")
+      MESSAGE (FATAL_ERROR "Can not find required library: ${name}")
+    endif()
+  endif()
+endmacro(p4c_add_library)
+
 # Add files with the appropriate path to the list of linted files
 macro(add_cpplint_files dir filelist)
   foreach(__f ${filelist})

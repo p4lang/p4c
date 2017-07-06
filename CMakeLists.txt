@@ -25,6 +25,8 @@ set (CMAKE_USE_RELATIVE_PATHS 1)
 OPTION (ENABLE_DOCS "Build the documentation" OFF)
 OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" ON)
 
+include(P4CUtils)
+
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
 set (P4C_CXX_FLAGS "")
@@ -36,28 +38,21 @@ find_package (FLEX REQUIRED)
 find_package (BISON REQUIRED)
 find_package(Protobuf 3.0.0 REQUIRED)
 find_package (Boost REQUIRED COMPONENTS iostreams)
-if (Boost_IOSTREAMS_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-  set (HAVE_LIBBOOST_IOSTREAMS 1)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
-endif()
+include_directories(${Boost_INCLUDE_DIRS})
+set (HAVE_LIBBOOST_IOSTREAMS 1)
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
+
 # other required libraries
-include (CheckLibraryExists)
-check_library_exists (gc GC_malloc "" HAVE_LIBGC)
-if (HAVE_LIBGC)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};gc")
-endif()
-check_library_exists (gmp __gmpz_init "" HAVE_LIBGMP)
-if (HAVE_LIBGMP)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};gmp")
-endif()
-check_library_exists (rt clock_gettime "" HAVE_CLOCK_GETTIME)
-if (HAVE_CLOCK_GETTIME)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};rt")
-endif()
+p4c_add_library (gc GC_malloc HAVE_LIBGC REQUIRED)
+p4c_add_library (gmp __gmpz_init HAVE_LIBGMP REQUIRED)
+p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
+# gmpxx is a C++ library, so can't check using the builtin cmake or
+# check for C symbols. And the C++ symbols are different between gcc and clang
 find_library (HAVE_LIBGMPXX gmpxx PATHS /usr/local/lib)
 if (HAVE_LIBGMPXX)
   set (P4C_LIB_DEPS "${P4C_LIB_DEPS};gmpxx")
+else()
+  MESSAGE(FATAL_ERROR "Can not find required library: gmpxx")
 endif()
 find_package_handle_standard_args (libgmpxx DEFAULT_MSG HAVE_LIBGMPXX)
 
@@ -102,8 +97,6 @@ enable_testing ()
 # set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++11 rather than -std=gnu++11
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
-
-include(P4CUtils)
 
 add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
@@ -183,6 +176,8 @@ add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
 if (ENABLE_P4RUNTIME_TO_PD)
   add_subdirectory (p4runtime-to-pd)
 endif()
+
+add_subdirectory (test)
 
 # IR Generation
 # \TODO: Add all the fixup code. Is it still needed?
