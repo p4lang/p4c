@@ -117,7 +117,7 @@ add_definitions (-DCONFIG_PKGDATADIR="${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
-set (CPPLINT_FILES)          # list to collect all files that need lint
+set (CPPLINT_FILES)           # list to collect all files that need lint
 set (TEST_TAGS "p4" CACHE INTERNAL "test tags") # list to collect all test tags
 set (IR_DEF_FILES)           # list to collect all .def files
 
@@ -133,11 +133,8 @@ set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
 add_subdirectory (lib)
-add_cpplint_files(lib "${LIB_CPPLINT_FILES}")
 add_subdirectory (tools/ir-generator)
-add_cpplint_files(tools/ir-generator "${IRGEN_CPPLINT_FILES}")
 add_subdirectory (ir)
-add_cpplint_files(ir "${IR_CPPLINT_FILES}")
 
 # component libraries: must be defined before being used in the
 # backend executables
@@ -150,28 +147,17 @@ MESSAGE ("-- Available extensions ${p4c_extensions}")
 foreach (ext ${p4c_extensions})
   if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/CMakeLists.txt)
     add_subdirectory (extensions/${ext})
-    set (__cpplint_list "${${ext}_CPPLINT_FILES}")
-    list (LENGTH __cpplint_list __list_len)
-    if (__list_len GREATER 0)
-      add_cpplint_files(extensions/${ext} "${${ext}_CPPLINT_FILES}")
-    endif()
   endif()
 endforeach(ext)
 
 add_subdirectory (frontends)
-add_cpplint_files(frontends "${FRONTEND_CPPLINT_FILES}")
 add_subdirectory (midend)
-add_cpplint_files(midend "${MIDEND_CPPLINT_FILES}")
 add_subdirectory (control-plane)
-add_cpplint_files(control-plane "${CONTROLPLANE_CPPLINT_FILES}")
 
 
 add_subdirectory (backends/bmv2)
-add_cpplint_files(backends/bmv2 "${BMV2_CPPLINT_FILES}")
 add_subdirectory (backends/ebpf)
-add_cpplint_files(backends/ebpf "${EBPF_CPPLINT_FILES}")
 add_subdirectory (backends/p4test)
-add_cpplint_files(backends/p4test "${P4TEST_CPPLINT_FILES}")
 
 if (ENABLE_P4RUNTIME_TO_PD)
   add_subdirectory (p4runtime-to-pd)

@@ -42,4 +42,4 @@ set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES OBJECT_DEPENDS ${
 add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
 target_link_libraries (irgenerator p4ctoolkit gc gmp)
 
-set (IRGEN_CPPLINT_FILES ${IRGENERATOR_SRCS} ${IRGENERATOR_HDRS} PARENT_SCOPE)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${IRGENERATOR_SRCS};${IRGENERATOR_HDRS}")

@@ -69,4 +69,4 @@ add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
 set_tests_properties (gtestp4c PROPERTIES LABELS "gtest")
 
 # add to cpplint
-# set (CPPLINT_FILES ${CPPLINT_FILES} ${GTESTP4C_SOURCES} CACHE INTERNAL "cpplint sources")
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${GTESTP4C_SOURCES}")

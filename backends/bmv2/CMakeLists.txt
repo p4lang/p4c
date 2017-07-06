@@ -75,7 +75,8 @@ target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
-set(BMV2_CPPLINT_FILES ${BMV2_BACKEND_SRCS} ${BMV2_SRCS} ${BMV2_BACKEND_HDRS} PARENT_SCOPE)
+set (BMV2_SOURCES ${BMV2_BACKEND_SRCS} ${BMV2_SRCS} ${BMV2_BACKEND_HDRS})
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SOURCES}")
 
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we

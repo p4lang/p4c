@@ -39,7 +39,7 @@ add_custom_target(linkp4test
   )
 add_dependencies(p4c_driver linkp4test)
 
-set (P4TEST_CPPLINT_FILES ${P4TEST_SRCS} ${P4TEST_HDRS} PARENT_SCOPE)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${P4TEST_SRCS};${P4TEST_HDRS}")
 
 # Tests
 

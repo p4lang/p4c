@@ -44,7 +44,7 @@ set (P4C_EBPF_HDRS
   target.h
   )
 
-set(EBPF_CPPLINT_FILES ${P4C_EBPF_SRCS} ${P4C_EBPF_HDRS} PARENT_SCOPE)
+add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
 set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
 

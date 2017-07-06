@@ -75,4 +75,7 @@ add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
 target_link_libraries (controlplane ${PROTOBUF_LIBRARY})
 add_dependencies (controlplane mkP4configdir genIR)
 
-set (CONTROLPLANE_CPPLINT_FILES ${CONTROLPLANE_SRCS} ${CONTROLPLANE_HDRS})
+# exclude p4RuntimeSerializer.cpp because it is has issues with
+# include order. It would be nice to implement region-based NOLINT to
+# handle this case.
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS}")

@@ -51,8 +51,9 @@ endmacro(p4c_add_library)
 # Add files with the appropriate path to the list of linted files
 macro(add_cpplint_files dir filelist)
   foreach(__f ${filelist})
-    list (APPEND CPPLINT_FILES "${dir}/${__f}")
+    list (APPEND __cpplintFileList "${dir}/${__f}")
   endforeach(__f)
+  set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
 endmacro(add_cpplint_files)
 
 # generate all the tests specified in the testsuites

@@ -239,7 +239,7 @@ Again, `MY_IR_SRCS` is a list of file names with absolute path.
 Sources (.cpp and .h) should be added to the cpplint target using the following rule:
 
 ```
-set (mybackend_CPPLINT_FILES ${MY_SOURCES_AND_HEADERS} PARENT_SCOPE)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
 where `mybackend` is the name of the directory you added under extensions.

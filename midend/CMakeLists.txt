@@ -77,4 +77,4 @@ set (MIDEND_HDRS
 add_library (midend STATIC ${MIDEND_SRCS})
 add_dependencies(midend genIR)
 
-set (MIDEND_CPPLINT_FILES ${MIDEND_SRCS} ${MIDEND_HDRS} PARENT_SCOPE)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")

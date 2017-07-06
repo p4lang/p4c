@@ -61,7 +61,7 @@ set (BASE_IR_DEF_FILES
 )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
-set (IR_CPPLINT_FILES ${IR_SRCS} ${IR_HDRS} PARENT_SCOPE)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${IR_SRCS};${IR_HDRS}")
 
 add_library (ir STATIC ${IR_SRCS})
 add_dependencies(ir genIR)

@@ -19,7 +19,7 @@ limitations under the License.
 #include "p4/config/p4info.pb.h"
 #include "p4/config/v1model.pb.h"
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>  // NOLINT(*)
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/variant.hpp>
@@ -155,7 +155,8 @@ struct HeaderFieldPath {
 
             auto index = indexExpression->right;
             if (!index->is<IR::Constant>()) {
-              ::error("Index expression '%1%' is too complicated to represent in P4Runtime", expression);
+              ::error("Index expression '%1%' is too complicated to represent in P4Runtime",
+                      expression);
               return nullptr;
             }
 
@@ -181,7 +182,7 @@ struct HeaderFieldPath {
     /// Serialize this path to a string.
     std::string serialize() const { return serialize(""); }
 
-private:
+ private:
     std::string serialize(const std::string& rest) const {
         std::string serialized;
         if (field.type() == typeid(uint32_t)) {
@@ -532,7 +533,7 @@ struct P4SymbolSuffixSet {
         return uniqueSuffix;
     }
 
-private:
+ private:
     // All symbols in the set. We store these separately to make sure that no
     // symbol is added to the tree of suffixes more than once.
     std::set<cstring> symbols;
@@ -558,7 +559,7 @@ private:
 
 /// A table which tracks the symbols which are visible to P4Runtime and their ids.
 class P4RuntimeSymbolTable {
-public:
+ public:
     /**
      * @return a fully constructed P4Runtime symbol table with a unique id
      * computed for each symbol. The table is populated by @function, which can
@@ -629,7 +630,7 @@ public:
         return suffixSet.shortestUniqueSuffix(name);
     }
 
-private:
+ private:
     // Rather than call this constructor, use P4RuntimeSymbolTable::create().
     P4RuntimeSymbolTable() { }
 
@@ -802,13 +803,12 @@ class P4RuntimeSerializer {
     using Preamble = ::p4::config::Preamble;
     using P4Info = ::p4::config::P4Info;
 
-public:
+ public:
     P4RuntimeSerializer(const P4RuntimeSymbolTable& symbols,
                         TypeMap* typeMap)
         : p4Info(new P4Info)
         , symbols(symbols)
-        , typeMap(typeMap)
-    {
+        , typeMap(typeMap) {
         CHECK_NULL(typeMap);
     }
 
@@ -1159,12 +1159,11 @@ public:
         addAnnotations(profile->mutable_preamble(), actionProfile.annotations);
     }
 
-private:
+ private:
     /// Serialize @annotated's P4 annotations and attach them to a P4Info message
     /// with an 'annotations' field. '@name' and '@id' are ignored.
     template <typename Message>
-    static void addAnnotations(Message* message, const IR::IAnnotated* annotated)
-    {
+    static void addAnnotations(Message* message, const IR::IAnnotated* annotated) {
         CHECK_NULL(message);
 
         // Synthesized resources may have no annotations.
@@ -1757,7 +1756,7 @@ static void serializeActionProfiles(P4RuntimeSerializer& serializer,
     }
 }
 
-} // namespace ControlPlaneAPI
+}  // namespace ControlPlaneAPI
 
 void serializeP4Runtime(std::ostream* destination,
                         const IR::P4Program* program,
@@ -1812,5 +1811,5 @@ void serializeP4Runtime(std::ostream* destination,
     }
 }
 
-/** @} *//* end group control_plane */
+/** @} */  /* end group control_plane */
 }  // namespace P4
