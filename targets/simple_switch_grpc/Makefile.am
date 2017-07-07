@@ -50,7 +50,7 @@ proto_grpc_files = \
 grpc_out/p4/bm/dataplane_interface.grpc.pb.cc \
 grpc_out/p4/bm/dataplane_interface.grpc.pb.h
 
-includep4bmdir = $(includep4bmdir)/p4/bm/
+includep4bmdir = $(includedir)/p4/bm/
 nodist_includep4bm_HEADERS = \
 cpp_out/p4/bm/dataplane_interface.pb.h \
 grpc_out/p4/bm/dataplane_interface.grpc.pb.h
