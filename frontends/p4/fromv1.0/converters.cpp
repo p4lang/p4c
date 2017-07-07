@@ -416,6 +416,44 @@ ExternConverter *ExternConverter::get(cstring type) {
 
 ///////////////////////////////////////////////////////////////
 
+std::map<cstring, std::vector<PrimitiveConverter *>> *PrimitiveConverter::all_converters;
+
+PrimitiveConverter::PrimitiveConverter(cstring name, int prio) : prim_name(name), priority(prio) {
+    static std::map<cstring, std::vector<PrimitiveConverter *>> converters;
+    all_converters = &converters;
+    auto &vec = converters[name];
+    auto it = vec.begin();
+    while (it != vec.end() && (*it)->priority > prio) ++it;
+    if (it != vec.end() && (*it)->priority == prio)
+        BUG("duplicate primitive converter for %s at priority %d", name, prio);
+    vec.insert(it, this);
+}
+
+PrimitiveConverter::~PrimitiveConverter() {
+    auto &vec = all_converters->at(prim_name);
+    vec.erase(std::find(vec.begin(), vec.end(), this));
+}
+
+const IR::Statement *PrimitiveConverter::cvtPrimitive(ProgramStructure *structure,
+                                                      const IR::Primitive *primitive) {
+    if (all_converters->count(primitive->name))
+        for (auto cvt : all_converters->at(primitive->name))
+            if (auto *rv = cvt->convert(structure, primitive))
+                return rv;
+    return nullptr;
+}
+
+vector<const IR::Expression *>
+PrimitiveConverter::convertArgs(ProgramStructure *structure, const IR::Primitive *prim) {
+    ExpressionConverter conv(structure);
+    vector<const IR::Expression *> rv;
+    for (auto arg : prim->operands)
+        rv.push_back(conv.convert(arg));
+    return rv;
+}
+
+///////////////////////////////////////////////////////////////
+
 namespace {
 class DiscoverStructure : public Inspector {
     ProgramStructure* structure;

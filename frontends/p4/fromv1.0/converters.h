@@ -107,6 +107,41 @@ class ExternConverter {
         return get(di)->convertExternCall(s, di, p); }
 };
 
+class PrimitiveConverter {
+    static std::map<cstring, std::vector<PrimitiveConverter *>> *all_converters;
+    cstring     prim_name;
+    int         priority;
+
+ protected:
+    PrimitiveConverter(cstring name, int prio);
+    virtual ~PrimitiveConverter();
+
+    // helper functions
+    vector<const IR::Expression *> convertArgs(ProgramStructure *, const IR::Primitive *);
+
+ public:
+    virtual const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) = 0;
+    static  const IR::Statement *cvtPrimitive(ProgramStructure *, const IR::Primitive *);
+};
+
+/** Macro for defining PrimitiveConverter subclass singleton instances.
+ * @name must be an identifier token -- the name of the primitive
+ * second (optional) argument must be an integer constant priority
+ * Multiple converters for the same primitive can be defined with different priorities
+ * the highest priority converter will be run first, and if it returns nullptr, the
+ * next highest will be run, etc.  The macro invocation is followed by the body of the
+ * converter function.
+ */
+#define CONVERT_PRIMITIVE(NAME, ...) \
+    class PrimitiveConverter_##NAME##_##__VA_ARGS__ : public PrimitiveConverter {               \
+        const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) override;       \
+        PrimitiveConverter_##NAME##_##__VA_ARGS__()                                             \
+        : PrimitiveConverter(#NAME, __VA_ARGS__ + 0) {}                                         \
+        static PrimitiveConverter_##NAME##_##__VA_ARGS__ singleton;                             \
+    } PrimitiveConverter_##NAME##_##__VA_ARGS__::singleton;                                     \
+    const IR::Statement *PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(                    \
+        ProgramStructure *structure, const IR::Primitive *primitive)
+
 // Is fed a P4 v1.0 program and outputs an equivalent P4 v1.2 program
 class Converter : public PassManager {
     ProgramStructure structure;
