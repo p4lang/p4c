@@ -211,20 +211,32 @@ add_custom_target(etags
 set (P4C_TEST_FLAGS --test-timeout 90 --output-on-failure -j 4)
 add_custom_target(check
   COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS}
+  # list the xfail tests
+  COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" &&
+          ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL
   COMMAND ${CMAKE_MAKE_PROGRAM} cpplint-quiet
   COMMENT "Running tests")
 
 add_custom_target(recheck
   COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --rerun-failed
+  # list the xfail tests
+  COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" &&
+          ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL
   COMMENT "Re-running failed tests")
 
 list (REMOVE_DUPLICATES TEST_TAGS)
 foreach(t ${TEST_TAGS})
   add_custom_target(check-${t}
     COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*"
+    # list the xfail tests
+    COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" &&
+            ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL
     COMMENT "Running tests for tag ${t}")
   add_custom_target(recheck-${t}
     COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*" --rerun-failed
+    # list the xfail tests
+    COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" &&
+            ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL
     COMMENT "Re-running failed tests for tag ${t}")
 endforeach()
 
