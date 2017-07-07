@@ -4,6 +4,7 @@ AM_CPPFLAGS += \
 -isystem $(top_srcdir)/../../third_party/gtest/include \
 -I$(top_srcdir) \
 -I$(top_srcdir)/../../include \
+-isystem$(top_srcdir)/../../third_party/spdlog \
 -I$(top_builddir)/cpp_out -I$(top_builddir)/grpc_out \
 -DTESTDATADIR=\"$(abs_srcdir)/testdata\"
 

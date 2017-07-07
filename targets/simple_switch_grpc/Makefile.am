@@ -5,7 +5,8 @@ SUBDIRS = . tests
 AM_CPPFLAGS += \
 -I$(srcdir)/../../include \
 -I$(srcdir)/../simple_switch \
--I$(srcdir)/../../PI
+-I$(srcdir)/../../PI \
+-isystem$(srcdir)/../../third_party/spdlog
 
 bin_PROGRAMS = simple_switch_grpc
 
