@@ -55,7 +55,7 @@ set (P4_XFAIL_TESTS
   # issue 759
   testdata/p4_16_samples/tuple0.p4
   )
-p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" ${P4_XFAIL_TESTS})
+p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}")
 
 set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
