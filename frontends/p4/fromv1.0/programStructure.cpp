@@ -875,9 +875,6 @@ const IR::Statement* ProgramStructure::sliceAssign(
     return assign(srcInfo, left, result, type);
 }
 
-#define OPS_CK(primitive, n) BUG_CHECK((primitive)->operands.size() == n, \
-                                       "Expected " #n " operands for %1%", primitive)
-
 const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* expression) {
     ExpressionConverter conv(this);
 
@@ -904,414 +901,10 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         glob = primitive->operands[0]->to<IR::GlobalRef>();
     if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
 
-    if (extrn) {
+    if (extrn)
         return ExternConverter::cvtExternCall(this, extrn, primitive);
-    } else if (primitive->name == "modify_field") {
-        if (primitive->operands.size() == 2) {
-            auto left = conv.convert(primitive->operands.at(0));
-            auto right = conv.convert(primitive->operands.at(1));
-            return assign(primitive->srcInfo, left, right, primitive->operands.at(0)->type);
-        } else if (primitive->operands.size() == 3) {
-            auto left = conv.convert(primitive->operands.at(0));
-            auto right = conv.convert(primitive->operands.at(1));
-            auto mask = conv.convert(primitive->operands.at(2));
-            auto result = sliceAssign(primitive->srcInfo, left, right, mask);
-            return result;
-        }
-    } else if (primitive->name == "bit_xor" || primitive->name == "add" ||
-               primitive->name == "bit_nor" || primitive->name == "subtract" ||
-               primitive->name == "bit_nand" || primitive->name == "shift_left" ||
-               primitive->name == "shift_right" || primitive->name == "bit_and" ||
-               primitive->name == "bit_orca" || primitive->name == "bit_orcb" ||
-               primitive->name == "bit_andca" || primitive->name == "bit_andcb" ||
-               primitive->name == "bit_xnor" ||
-               primitive->name == "bit_or" || primitive->name == "min" ||
-               primitive->name == "max") {
-        OPS_CK(primitive, 3);
-        auto dest = conv.convert(primitive->operands.at(0));
-        auto left = conv.convert(primitive->operands.at(1));
-        auto right = conv.convert(primitive->operands.at(2));
-        IR::Expression* op = nullptr;
-
-        if (!sameBitsType(left->type, right->type) && !primitive->name.startsWith("shift")) {
-            auto r = new IR::Cast(right->srcInfo, left->type, right);
-            r->type = left->type;
-            right = r;
-        }
-        if (primitive->name == "bit_xor")
-            op = new IR::BXor(dest->srcInfo, left, right);
-        else if (primitive->name == "min")
-            op = new IR::Mux(dest->srcInfo, new IR::Leq(dest->srcInfo, left, right),
-                             left, right);
-        else if (primitive->name == "max")
-            op = new IR::Mux(dest->srcInfo, new IR::Geq(dest->srcInfo, left, right),
-                             left, right);
-        else if (primitive->name == "bit_or")
-            op = new IR::BOr(dest->srcInfo, left, right);
-        else if (primitive->name == "bit_xnor")
-            op = new IR::Cmpl(dest->srcInfo, new IR::BXor(dest->srcInfo, left, right));
-        else if (primitive->name == "add")
-            op = new IR::Add(dest->srcInfo, left, right);
-        else if (primitive->name == "bit_nor")
-            op = new IR::Cmpl(dest->srcInfo, new IR::BOr(dest->srcInfo, left, right));
-        else if (primitive->name == "bit_nand")
-            op = new IR::Cmpl(dest->srcInfo, new IR::BAnd(dest->srcInfo, left, right));
-        else if (primitive->name == "bit_orca")
-            op = new IR::BOr(dest->srcInfo, new IR::Cmpl(dest->srcInfo, left), right);
-        else if (primitive->name == "bit_orcb")
-            op = new IR::BOr(dest->srcInfo, left, new IR::Cmpl(dest->srcInfo, right));
-        else if (primitive->name == "bit_andca")
-            op = new IR::BAnd(dest->srcInfo, new IR::Cmpl(dest->srcInfo, left), right);
-        else if (primitive->name == "bit_andcb")
-            op = new IR::BAnd(dest->srcInfo, left, new IR::Cmpl(dest->srcInfo, right));
-        else if (primitive->name == "bit_and")
-            op = new IR::BAnd(dest->srcInfo, left, right);
-        else if (primitive->name == "subtract")
-            op = new IR::Sub(dest->srcInfo, left, right);
-        else if (primitive->name == "shift_left")
-            op = new IR::Shl(dest->srcInfo, left, right);
-        else if (primitive->name == "shift_right")
-            op = new IR::Shr(dest->srcInfo, left, right);
-        return assign(primitive->srcInfo, dest, op, primitive->operands.at(0)->type);
-    } else if (primitive->name == "bit_not") {
-        OPS_CK(primitive, 2);
-        auto dest = conv.convert(primitive->operands.at(0));
-        auto right = conv.convert(primitive->operands.at(1));
-        IR::Expression* op = nullptr;
-        if (primitive->name == "bit_not")
-            op = new IR::Cmpl(right);
-        return assign(primitive->srcInfo, dest, op, primitive->operands.at(0)->type);
-    } else if (primitive->name == "no_op") {
-        return new IR::EmptyStatement();
-    } else if (primitive->name == "add_to_field" || primitive->name == "subtract_from_field") {
-        OPS_CK(primitive, 2);
-        auto left = conv.convert(primitive->operands.at(0));
-        auto left2 = conv.convert(primitive->operands.at(0));
-        // convert twice, so we have different expression trees on RHS and LHS
-        auto right = conv.convert(primitive->operands.at(1));
-        const IR::Expression* op;
-        if (primitive->name == "add_to_field")
-            op = new IR::Add(primitive->srcInfo, left, right);
-        else
-            op = new IR::Sub(primitive->srcInfo, left, right);
-        return assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
-    } else if (primitive->name == "remove_header") {
-        OPS_CK(primitive, 1);
-        auto hdr = conv.convert(primitive->operands.at(0));
-        auto method = new IR::Member(hdr, IR::ID(IR::Type_Header::setInvalid));
-        auto args = new IR::Vector<IR::Expression>();
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "add_header") {
-        OPS_CK(primitive, 1);
-        auto hdr = conv.convert(primitive->operands.at(0));
-        auto method = new IR::Member(hdr, IR::ID(IR::Type_Header::setValid));
-        auto args = new IR::Vector<IR::Expression>();
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "copy_header") {
-        OPS_CK(primitive, 2);
-        auto left = conv.convert(primitive->operands.at(0));
-        auto right = conv.convert(primitive->operands.at(1));
-        return new IR::AssignmentStatement(primitive->srcInfo, left, right);
-    } else if (primitive->name == "drop" || primitive->name == "mark_for_drop") {
-        auto method = new IR::PathExpression(v1model.drop.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "push" || primitive->name == "pop") {
-        OPS_CK(primitive, 2);
-        auto hdr = conv.convert(primitive->operands.at(0));
-        auto count = conv.convert(primitive->operands.at(1));
-        auto methodName = primitive->name == "push" ?
-                IR::Type_Stack::push_front : IR::Type_Stack::pop_front;
-        auto method = new IR::Member(hdr, IR::ID(methodName));
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(count);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "count") {
-        OPS_CK(primitive, 2);
-        auto ref = primitive->operands.at(0);
-        const IR::Counter *counter = nullptr;
-        if (auto gr = ref->to<IR::GlobalRef>())
-            counter = gr->obj->to<IR::Counter>();
-        else if (auto nr = ref->to<IR::PathExpression>())
-            counter = counters.get(nr->path->name);
-        if (counter == nullptr) {
-            ::error("Expected a counter reference %1%", ref);
-            return nullptr; }
-        auto newname = counters.get(counter);
-        auto counterref = new IR::PathExpression(newname);
-        auto methodName = v1model.counter.increment.Id();
-        auto method = new IR::Member(counterref, methodName);
-        auto args = new IR::Vector<IR::Expression>();
-        auto arg = new IR::Cast(v1model.counter.index_type,
-                                conv.convert(primitive->operands.at(1)));
-        args->push_back(arg);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "modify_field_from_rng") {
-        BUG_CHECK(primitive->operands.size() == 2 || primitive->operands.size() == 3,
-                  "Expected 2 or 3 operands for %1%", primitive);
-        auto field = conv.convert(primitive->operands.at(0));
-        auto logRange = conv.convert(primitive->operands.at(1));
-        const IR::Expression* mask = nullptr;
-        if (primitive->operands.size() == 3)
-            mask = conv.convert(primitive->operands.at(2));
-
-        cstring tmpvar = makeUniqueName("tmp");
-        auto decl = new IR::Declaration_Variable(tmpvar, v1model.random.resultType, nullptr);
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(new IR::PathExpression(tmpvar));
-        args->push_back(new IR::Constant(primitive->operands.at(1)->srcInfo,
-                                         v1model.random.resultType, 0));
-        auto one = new IR::Constant(primitive->operands.at(1)->srcInfo, 1);
-        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo, v1model.random.resultType,
-                                     new IR::Sub(new IR::Shl(one, logRange), one)));
-        auto random = new IR::PathExpression(v1model.random.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
-        auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
-        auto block = new IR::BlockStatement;
-        const IR::Statement* assgn;
-        if (mask != nullptr)
-            assgn = sliceAssign(primitive->srcInfo, field,
-                                 new IR::PathExpression(IR::ID(tmpvar)), mask);
-        else
-            assgn = new IR::AssignmentStatement(field, new IR::PathExpression(tmpvar));
-        block->push_back(decl);
-        block->push_back(call);
-        block->push_back(assgn);
-        return block;
-    } else if (primitive->name == "modify_field_rng_uniform") {
-        BUG_CHECK(primitive->operands.size() == 3, "Expected 3 operands for %1%", primitive);
-        auto field = conv.convert(primitive->operands.at(0));
-        auto lo = conv.convert(primitive->operands.at(1));
-        auto hi = conv.convert(primitive->operands.at(2));
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(field);
-        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                     v1model.random.resultType, lo));
-        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                     v1model.random.resultType, hi));
-        auto random = new IR::PathExpression(v1model.random.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
-        auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
-        return call;
-    } else if (primitive->name == "recirculate") {
-        OPS_CK(primitive, 1);
-        auto right = convertFieldList(primitive->operands.at(0));
-        if (right == nullptr)
-            return nullptr;
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(right);
-        auto path = new IR::PathExpression(v1model.recirculate.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, path, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "clone_egress_pkt_to_egress" ||
-               primitive->name == "clone_ingress_pkt_to_egress" ||
-               primitive->name == "clone_i2e" || primitive->name == "clone_e2e") {
-        BUG_CHECK(primitive->operands.size() == 1 || primitive->operands.size() == 2,
-                  "Expected 1 or 2 operands for %1%", primitive);
-        auto kind = primitive->name ==
-                "clone_egress_pkt_to_egress" || primitive->name == "clone_e2e" ?
-                v1model.clone.cloneType.e2e : v1model.clone.cloneType.i2e;
-
-        auto session = conv.convert(primitive->operands.at(0));
-
-        auto args = new IR::Vector<IR::Expression>();
-        auto enumref = new IR::TypeNameExpression(
-            new IR::Type_Name(new IR::Path(v1model.clone.cloneType.Id())));
-        auto kindarg = new IR::Member(enumref, kind.Id());
-        args->push_back(kindarg);
-        args->push_back(new IR::Cast(primitive->operands.at(0)->srcInfo,
-                                     v1model.clone.sessionType, session));
-        if (primitive->operands.size() == 2) {
-            auto list = convertFieldList(primitive->operands.at(1));
-            if (list != nullptr)
-                args->push_back(list);
-        }
-
-        auto id = primitive->operands.size() == 2 ? v1model.clone.clone3.Id() : v1model.clone.Id();
-        auto clone = new IR::PathExpression(id);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, clone, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "resubmit") {
-        OPS_CK(primitive, 1);
-        auto args = new IR::Vector<IR::Expression>();
-        auto list = convertFieldList(primitive->operands.at(0));
-        if (list != nullptr)
-            args->push_back(list);
-        auto resubmit = new IR::PathExpression(v1model.resubmit.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, resubmit, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "execute_meter") {
-        OPS_CK(primitive, 3);
-        auto ref = primitive->operands.at(0);
-        const IR::Meter *meter = nullptr;
-        if (auto gr = ref->to<IR::GlobalRef>())
-            meter = gr->obj->to<IR::Meter>();
-        else if (auto nr = ref->to<IR::PathExpression>())
-            meter = meters.get(nr->path->name);
-        if (!meter) {
-            ::error("Expected a meter reference %1%", ref);
-            return nullptr; }
-        if (!meter->implementation.name.isNullOrEmpty())
-            ::warning("Ignoring `implementation' field of meter %1%", meter);
-        auto newname = meters.get(meter);
-        auto meterref = new IR::PathExpression(newname);
-        auto methodName = v1model.meter.executeMeter.Id();
-        auto method = new IR::Member(meterref, methodName);
-        auto args = new IR::Vector<IR::Expression>();
-        auto arg = new IR::Cast(v1model.meter.index_type,
-                                conv.convert(primitive->operands.at(1)));
-        args->push_back(arg);
-        auto dest = conv.convert(primitive->operands.at(2));
-        args->push_back(dest);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(primitive->srcInfo, mc);
-    } else if (primitive->name == "modify_field_with_hash_based_offset") {
-        OPS_CK(primitive, 4);
-
-        auto dest = conv.convert(primitive->operands.at(0));
-        auto base = conv.convert(primitive->operands.at(1));
-        auto max = conv.convert(primitive->operands.at(3));
-        auto args = new IR::Vector<IR::Expression>();
-
-        auto nr = primitive->operands.at(2)->to<IR::PathExpression>();
-        auto flc = field_list_calculations.get(nr->path->name);
-        if (flc == nullptr) {
-            ::error("%1%: Expected a field_list_calculation", primitive->operands.at(1));
-            return nullptr;
-        }
-        auto ttype = IR::Type_Bits::get(flc->output_width);
-        auto fl = getFieldLists(flc);
-        if (fl == nullptr)
-            return nullptr;
-        auto list = conv.convert(fl);
-
-        auto algorithm = convertHashAlgorithm(flc->algorithm);
-        args->push_back(dest);
-        args->push_back(algorithm);
-        args->push_back(new IR::Cast(ttype, base));
-        args->push_back(list);
-        args->push_back(new IR::Cast(IR::Type_Bits::get(2 * flc->output_width), max));
-        auto hash = new IR::PathExpression(v1model.hash.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, hash, args);
-        auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
-        return result;
-    } else if (primitive->name == "modify_field_conditionally") {
-        OPS_CK(primitive, 3);
-        auto dest = conv.convert(primitive->operands.at(0));
-        auto cond = conv.convert(primitive->operands.at(1));
-        auto src = conv.convert(primitive->operands.at(2));
-        if (!cond->type->is<IR::Type::Boolean>())
-            cond = new IR::Neq(cond, new IR::Constant(0));
-        src = new IR::Mux(primitive->srcInfo, cond, src, dest);
-        return assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
-    } else if (primitive->name == "modify_field_with_shift") {
-        OPS_CK(primitive, 4);
-        auto dest = conv.convert(primitive->operands.at(0));
-        auto src = conv.convert(primitive->operands.at(1));
-        auto shift = conv.convert(primitive->operands.at(2));
-        auto mask = conv.convert(primitive->operands.at(3));
-        auto result = sliceAssign(primitive->srcInfo, dest, new IR::Shr(src, shift), mask);
-        return result;
-    } else if (primitive->name == "generate_digest") {
-        OPS_CK(primitive, 2);
-        auto args = new IR::Vector<IR::Expression>();
-        auto receiver = conv.convert(primitive->operands.at(0));
-        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                     v1model.digest_receiver.receiverType, receiver));
-        auto list = convertFieldList(primitive->operands.at(1));
-        auto type = createFieldListType(primitive->operands.at(1));
-        declarations->push_back(type);  // In P4 v1.0 programs we can have declarations out of order
-        if (list != nullptr)
-            args->push_back(list);
-        auto typeArgs = new IR::Vector<IR::Type>();
-        auto typeName = new IR::Type_Name(new IR::Path(type->name));
-        typeArgs->push_back(typeName);
-        auto random = new IR::PathExpression(v1model.digest_receiver.Id());
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, typeArgs, args);
-        auto result = new IR::MethodCallStatement(mc->srcInfo, mc);
-        return result;
-    } else if (primitive->name == "register_read") {
-        OPS_CK(primitive, 3);
-        auto left = conv.convert(primitive->operands.at(0));
-        auto ref = primitive->operands.at(1);
-        const IR::Register *reg = nullptr;
-        if (auto gr = ref->to<IR::GlobalRef>())
-            reg = gr->obj->to<IR::Register>();
-        else if (auto nr = ref->to<IR::PathExpression>())
-            reg = registers.get(nr->path->name);
-        if (!reg) {
-            ::error("Expected a register reference %1%", ref);
-            return nullptr; }
-        auto newname = registers.get(reg);
-        auto registerref = new IR::PathExpression(newname);
-        auto methodName = v1model.registers.read.Id();
-        auto method = new IR::Member(registerref, methodName);
-        auto args = new IR::Vector<IR::Expression>();
-        auto arg = new IR::Cast(v1model.registers.index_type,
-                                conv.convert(primitive->operands.at(2)));
-        args->push_back(left);
-        args->push_back(arg);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "register_write") {
-        OPS_CK(primitive, 3);
-        auto ref = primitive->operands.at(0);
-        const IR::Register *reg = nullptr;
-        if (auto gr = ref->to<IR::GlobalRef>())
-            reg = gr->obj->to<IR::Register>();
-        else if (auto nr = ref->to<IR::PathExpression>())
-            reg = registers.get(nr->path->name);
-        if (!reg) {
-            ::error("Expected a register reference %1%", ref);
-            return nullptr; }
-
-        const IR::Type* castType = nullptr;
-        int width = reg->width;
-        if (width > 0)
-            castType = IR::Type_Bits::get(width);
-        // Else this is a structured type, so no cast is inserted below.
-
-        auto newname = registers.get(reg);
-        auto registerref = new IR::PathExpression(newname);
-        auto methodName = v1model.registers.write.Id();
-        auto method = new IR::Member(registerref, methodName);
-        auto args = new IR::Vector<IR::Expression>();
-        auto arg0 = new IR::Cast(primitive->operands.at(1)->srcInfo, v1model.registers.index_type,
-                                 conv.convert(primitive->operands.at(1)));
-        const IR::Expression* arg1 = conv.convert(primitive->operands.at(2));
-        if (castType != nullptr)
-            arg1 = new IR::Cast(primitive->operands.at(2)->srcInfo, castType, arg1);
-        args->push_back(arg0);
-        args->push_back(arg1);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "truncate") {
-        OPS_CK(primitive, 1);
-        auto len = primitive->operands.at(0);
-        auto methodName = v1model.truncate.Id();
-        auto method = new IR::PathExpression(methodName);
-        auto args = new IR::Vector<IR::Expression>();
-        auto arg0 = new IR::Cast(len->srcInfo, v1model.truncate.length_type, conv.convert(len));
-        args->push_back(arg0);
-        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-        return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "exit") {
-        OPS_CK(primitive, 0);
-        return new IR::ExitStatement(primitive->srcInfo);
-    } else if (primitive->name == "funnel_shift_right") {
-        OPS_CK(primitive, 4);
-        auto dest = conv.convert(primitive->operands.at(0));
-        auto hi = conv.convert(primitive->operands.at(1));
-        auto lo = conv.convert(primitive->operands.at(2));
-        auto shift = conv.convert(primitive->operands.at(3));
-        auto src = new IR::Shr(new IR::Concat(hi, lo), shift);
-        return assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
-    }
-
+    if (auto *st = PrimitiveConverter::cvtPrimitive(this, primitive))
+        return st;
     // If everything else failed maybe we are invoking an action
     auto action = actions.get(primitive->name);
     if (action != nullptr) {
@@ -1326,9 +919,603 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
     }
-
     BUG("Unhandled primitive %1%", primitive);
     return nullptr;
+}
+
+#define OPS_CK(primitive, n) BUG_CHECK((primitive)->operands.size() == n, \
+                                       "Expected " #n " operands for %1%", primitive)
+
+CONVERT_PRIMITIVE(modify_field) {
+    auto args = convertArgs(structure, primitive);
+    if (args.size() == 2) {
+        return structure->assign(primitive->srcInfo, args[0], args[1],
+                                 primitive->operands.at(0)->type);
+    } else if (args.size() == 3) {
+        return structure->sliceAssign(primitive->srcInfo, args[0], args[1], args[2]); }
+    return nullptr;
+}
+
+CONVERT_PRIMITIVE(bit_xor) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BXor(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(min) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Mux(primitive->srcInfo,
+                          new IR::Leq(primitive->srcInfo, args[1], args[2]), args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(max) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Mux(primitive->srcInfo,
+                          new IR::Geq(primitive->srcInfo, args[1], args[2]), args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_or) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BOr(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_xnor) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Cmpl(primitive->srcInfo, new IR::BXor(primitive->srcInfo, args[1], args[2]));
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(add) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Add(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_nor) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Cmpl(primitive->srcInfo, new IR::BOr(primitive->srcInfo, args[1], args[2]));
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_nand) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Cmpl(primitive->srcInfo, new IR::BAnd(primitive->srcInfo, args[1], args[2]));
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_orca) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BOr(primitive->srcInfo, new IR::Cmpl(primitive->srcInfo, args[1]), args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_orcb) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BOr(primitive->srcInfo, args[1], new IR::Cmpl(primitive->srcInfo, args[2]));
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_andca) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BAnd(primitive->srcInfo, new IR::Cmpl(primitive->srcInfo, args[1]), args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_andcb) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BAnd(primitive->srcInfo, args[1], new IR::Cmpl(primitive->srcInfo, args[2]));
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_and) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::BAnd(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(subtract) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    if (!sameBitsType(args[1]->type, args[2]->type))
+        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
+    auto op = new IR::Sub(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(shift_left) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    auto op = new IR::Shl(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(shift_right) {
+    OPS_CK(primitive, 3);
+    auto args = convertArgs(structure, primitive);
+    auto op = new IR::Shr(primitive->srcInfo, args[1], args[2]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(bit_not) {
+    OPS_CK(primitive, 2);
+    auto args = convertArgs(structure, primitive);
+    auto op = new IR::Cmpl(primitive->srcInfo, args[1]);
+    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(no_op) {
+    (void)structure;
+    (void)primitive;
+    return new IR::EmptyStatement();
+}
+
+CONVERT_PRIMITIVE(add_to_field) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto left = conv.convert(primitive->operands.at(0));
+    auto left2 = conv.convert(primitive->operands.at(0));
+    // convert twice, so we have different expression trees on RHS and LHS
+    auto right = conv.convert(primitive->operands.at(1));
+    auto op = new IR::Add(primitive->srcInfo, left, right);
+    return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(subtract_from_field) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto left = conv.convert(primitive->operands.at(0));
+    auto left2 = conv.convert(primitive->operands.at(0));
+    // convert twice, so we have different expression trees on RHS and LHS
+    auto right = conv.convert(primitive->operands.at(1));
+    auto op = new IR::Sub(primitive->srcInfo, left, right);
+    return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(remove_header) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 1);
+    auto hdr = conv.convert(primitive->operands.at(0));
+    auto method = new IR::Member(hdr, IR::ID(IR::Type_Header::setInvalid));
+    auto args = new IR::Vector<IR::Expression>();
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(add_header) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 1);
+    auto hdr = conv.convert(primitive->operands.at(0));
+    auto method = new IR::Member(hdr, IR::ID(IR::Type_Header::setValid));
+    auto args = new IR::Vector<IR::Expression>();
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(copy_header) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto left = conv.convert(primitive->operands.at(0));
+    auto right = conv.convert(primitive->operands.at(1));
+    return new IR::AssignmentStatement(primitive->srcInfo, left, right);
+}
+
+CONVERT_PRIMITIVE(drop) {
+    ExpressionConverter conv(structure);
+    auto method = new IR::PathExpression(structure->v1model.drop.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(mark_for_drop) {
+    ExpressionConverter conv(structure);
+    auto method = new IR::PathExpression(structure->v1model.drop.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(push) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto hdr = conv.convert(primitive->operands.at(0));
+    auto count = conv.convert(primitive->operands.at(1));
+    auto methodName = IR::Type_Stack::push_front;
+    auto method = new IR::Member(hdr, IR::ID(methodName));
+    auto args = new IR::Vector<IR::Expression>();
+    args->push_back(count);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+CONVERT_PRIMITIVE(pop) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto hdr = conv.convert(primitive->operands.at(0));
+    auto count = conv.convert(primitive->operands.at(1));
+    auto methodName = IR::Type_Stack::pop_front;
+    auto method = new IR::Member(hdr, IR::ID(methodName));
+    auto args = new IR::Vector<IR::Expression>();
+    args->push_back(count);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(count) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto ref = primitive->operands.at(0);
+    const IR::Counter *counter = nullptr;
+    if (auto gr = ref->to<IR::GlobalRef>())
+        counter = gr->obj->to<IR::Counter>();
+    else if (auto nr = ref->to<IR::PathExpression>())
+        counter = structure->counters.get(nr->path->name);
+    if (counter == nullptr) {
+        ::error("Expected a counter reference %1%", ref);
+        return nullptr; }
+    auto newname = structure->counters.get(counter);
+    auto counterref = new IR::PathExpression(newname);
+    auto methodName = structure->v1model.counter.increment.Id();
+    auto method = new IR::Member(counterref, methodName);
+    auto args = new IR::Vector<IR::Expression>();
+    auto arg = new IR::Cast(structure->v1model.counter.index_type,
+                            conv.convert(primitive->operands.at(1)));
+    args->push_back(arg);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(modify_field_from_rng) {
+    ExpressionConverter conv(structure);
+    BUG_CHECK(primitive->operands.size() == 2 || primitive->operands.size() == 3,
+              "Expected 2 or 3 operands for %1%", primitive);
+    auto field = conv.convert(primitive->operands.at(0));
+    auto logRange = conv.convert(primitive->operands.at(1));
+    const IR::Expression* mask = nullptr;
+    if (primitive->operands.size() == 3)
+        mask = conv.convert(primitive->operands.at(2));
+
+    cstring tmpvar = structure->makeUniqueName("tmp");
+    auto decl = new IR::Declaration_Variable(tmpvar, structure->v1model.random.resultType);
+    auto args = new IR::Vector<IR::Expression>();
+    args->push_back(new IR::PathExpression(tmpvar));
+    args->push_back(new IR::Constant(primitive->operands.at(1)->srcInfo,
+                                     structure->v1model.random.resultType, 0));
+    auto one = new IR::Constant(primitive->operands.at(1)->srcInfo, 1);
+    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
+                                 structure->v1model.random.resultType,
+                                 new IR::Sub(new IR::Shl(one, logRange), one)));
+    auto random = new IR::PathExpression(structure->v1model.random.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
+    auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
+    auto block = new IR::BlockStatement;
+    const IR::Statement* assgn;
+    if (mask != nullptr)
+        assgn = structure->sliceAssign(primitive->srcInfo, field,
+                             new IR::PathExpression(IR::ID(tmpvar)), mask);
+    else
+        assgn = new IR::AssignmentStatement(field, new IR::PathExpression(tmpvar));
+    block->push_back(decl);
+    block->push_back(call);
+    block->push_back(assgn);
+    return block;
+}
+
+CONVERT_PRIMITIVE(modify_field_rng_uniform) {
+    ExpressionConverter conv(structure);
+    BUG_CHECK(primitive->operands.size() == 3, "Expected 3 operands for %1%", primitive);
+    auto field = conv.convert(primitive->operands.at(0));
+    auto lo = conv.convert(primitive->operands.at(1));
+    auto hi = conv.convert(primitive->operands.at(2));
+    auto args = new IR::Vector<IR::Expression>();
+    args->push_back(field);
+    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
+                                 structure->v1model.random.resultType, lo));
+    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
+                                 structure->v1model.random.resultType, hi));
+    auto random = new IR::PathExpression(structure->v1model.random.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
+    auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
+    return call;
+}
+
+CONVERT_PRIMITIVE(recirculate) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 1);
+    auto right = structure->convertFieldList(primitive->operands.at(0));
+    if (right == nullptr)
+        return nullptr;
+    auto args = new IR::Vector<IR::Expression>();
+    args->push_back(right);
+    auto path = new IR::PathExpression(structure->v1model.recirculate.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, path, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+static const IR::Statement *
+convertClone(ProgramStructure *structure, const IR::Primitive *primitive, Model::Elem kind) {
+    BUG_CHECK(primitive->operands.size() == 1 || primitive->operands.size() == 2,
+              "Expected 1 or 2 operands for %1%", primitive);
+    ExpressionConverter conv(structure);
+    auto session = conv.convert(primitive->operands.at(0));
+
+    auto args = new IR::Vector<IR::Expression>();
+    auto enumref = new IR::TypeNameExpression(
+        new IR::Type_Name(new IR::Path(structure->v1model.clone.cloneType.Id())));
+    auto kindarg = new IR::Member(enumref, kind.Id());
+    args->push_back(kindarg);
+    args->push_back(new IR::Cast(primitive->operands.at(0)->srcInfo,
+                                 structure->v1model.clone.sessionType, session));
+    if (primitive->operands.size() == 2) {
+        auto list = structure->convertFieldList(primitive->operands.at(1));
+        if (list != nullptr)
+            args->push_back(list);
+    }
+
+    auto id = primitive->operands.size() == 2 ? structure->v1model.clone.clone3.Id()
+                                               : structure->v1model.clone.Id();
+    auto clone = new IR::PathExpression(id);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, clone, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(clone_egress_pkt_to_egress) {
+    return convertClone(structure, primitive, structure->v1model.clone.cloneType.e2e); }
+CONVERT_PRIMITIVE(clone_e2e) {
+    return convertClone(structure, primitive, structure->v1model.clone.cloneType.e2e); }
+CONVERT_PRIMITIVE(clone_ingress_pkt_to_egress) {
+    return convertClone(structure, primitive, structure->v1model.clone.cloneType.i2e); }
+CONVERT_PRIMITIVE(clone_i2e) {
+    return convertClone(structure, primitive, structure->v1model.clone.cloneType.i2e); }
+
+CONVERT_PRIMITIVE(resubmit) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 1);
+    auto args = new IR::Vector<IR::Expression>();
+    auto list = structure->convertFieldList(primitive->operands.at(0));
+    if (list != nullptr)
+        args->push_back(list);
+    auto resubmit = new IR::PathExpression(structure->v1model.resubmit.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, resubmit, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(execute_meter) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 3);
+    auto ref = primitive->operands.at(0);
+    const IR::Meter *meter = nullptr;
+    if (auto gr = ref->to<IR::GlobalRef>())
+        meter = gr->obj->to<IR::Meter>();
+    else if (auto nr = ref->to<IR::PathExpression>())
+        meter = structure->meters.get(nr->path->name);
+    if (!meter) {
+        ::error("Expected a meter reference %1%", ref);
+        return nullptr; }
+    if (!meter->implementation.name.isNullOrEmpty())
+        ::warning("Ignoring `implementation' field of meter %1%", meter);
+    auto newname = structure->meters.get(meter);
+    auto meterref = new IR::PathExpression(newname);
+    auto methodName = structure->v1model.meter.executeMeter.Id();
+    auto method = new IR::Member(meterref, methodName);
+    auto args = new IR::Vector<IR::Expression>();
+    auto arg = new IR::Cast(structure->v1model.meter.index_type,
+                            conv.convert(primitive->operands.at(1)));
+    args->push_back(arg);
+    auto dest = conv.convert(primitive->operands.at(2));
+    args->push_back(dest);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(primitive->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 4);
+
+    auto dest = conv.convert(primitive->operands.at(0));
+    auto base = conv.convert(primitive->operands.at(1));
+    auto max = conv.convert(primitive->operands.at(3));
+    auto args = new IR::Vector<IR::Expression>();
+
+    auto nr = primitive->operands.at(2)->to<IR::PathExpression>();
+    auto flc = structure->field_list_calculations.get(nr->path->name);
+    if (flc == nullptr) {
+        ::error("%1%: Expected a field_list_calculation", primitive->operands.at(1));
+        return nullptr;
+    }
+    auto ttype = IR::Type_Bits::get(flc->output_width);
+    auto fl = structure->getFieldLists(flc);
+    if (fl == nullptr)
+        return nullptr;
+    auto list = conv.convert(fl);
+
+    auto algorithm = structure->convertHashAlgorithm(flc->algorithm);
+    args->push_back(dest);
+    args->push_back(algorithm);
+    args->push_back(new IR::Cast(ttype, base));
+    args->push_back(list);
+    args->push_back(new IR::Cast(IR::Type_Bits::get(2 * flc->output_width), max));
+    auto hash = new IR::PathExpression(structure->v1model.hash.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, hash, args);
+    auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
+    return result;
+}
+
+CONVERT_PRIMITIVE(modify_field_conditionally) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 3);
+    auto dest = conv.convert(primitive->operands.at(0));
+    auto cond = conv.convert(primitive->operands.at(1));
+    auto src = conv.convert(primitive->operands.at(2));
+    if (!cond->type->is<IR::Type::Boolean>())
+        cond = new IR::Neq(cond, new IR::Constant(0));
+    src = new IR::Mux(primitive->srcInfo, cond, src, dest);
+    return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
+}
+
+CONVERT_PRIMITIVE(modify_field_with_shift) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 4);
+    auto dest = conv.convert(primitive->operands.at(0));
+    auto src = conv.convert(primitive->operands.at(1));
+    auto shift = conv.convert(primitive->operands.at(2));
+    auto mask = conv.convert(primitive->operands.at(3));
+    auto result = structure->sliceAssign(primitive->srcInfo, dest, new IR::Shr(src, shift), mask);
+    return result;
+}
+
+CONVERT_PRIMITIVE(generate_digest) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 2);
+    auto args = new IR::Vector<IR::Expression>();
+    auto receiver = conv.convert(primitive->operands.at(0));
+    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
+                                 structure->v1model.digest_receiver.receiverType, receiver));
+    auto list = structure->convertFieldList(primitive->operands.at(1));
+    auto type = structure->createFieldListType(primitive->operands.at(1));
+    // In P4 v1.0 programs we can have declarations out of order
+    structure->declarations->push_back(type);
+    if (list != nullptr)
+        args->push_back(list);
+    auto typeArgs = new IR::Vector<IR::Type>();
+    auto typeName = new IR::Type_Name(new IR::Path(type->name));
+    typeArgs->push_back(typeName);
+    auto random = new IR::PathExpression(structure->v1model.digest_receiver.Id());
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, typeArgs, args);
+    auto result = new IR::MethodCallStatement(mc->srcInfo, mc);
+    return result;
+}
+
+CONVERT_PRIMITIVE(register_read) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 3);
+    auto left = conv.convert(primitive->operands.at(0));
+    auto ref = primitive->operands.at(1);
+    const IR::Register *reg = nullptr;
+    if (auto gr = ref->to<IR::GlobalRef>())
+        reg = gr->obj->to<IR::Register>();
+    else if (auto nr = ref->to<IR::PathExpression>())
+        reg = structure->registers.get(nr->path->name);
+    if (!reg) {
+        ::error("Expected a register reference %1%", ref);
+        return nullptr; }
+    auto newname = structure->registers.get(reg);
+    auto registerref = new IR::PathExpression(newname);
+    auto methodName = structure->v1model.registers.read.Id();
+    auto method = new IR::Member(registerref, methodName);
+    auto args = new IR::Vector<IR::Expression>();
+    auto arg = new IR::Cast(structure->v1model.registers.index_type,
+                            conv.convert(primitive->operands.at(2)));
+    args->push_back(left);
+    args->push_back(arg);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(register_write) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 3);
+    auto ref = primitive->operands.at(0);
+    const IR::Register *reg = nullptr;
+    if (auto gr = ref->to<IR::GlobalRef>())
+        reg = gr->obj->to<IR::Register>();
+    else if (auto nr = ref->to<IR::PathExpression>())
+        reg = structure->registers.get(nr->path->name);
+    if (!reg) {
+        ::error("Expected a register reference %1%", ref);
+        return nullptr; }
+
+    const IR::Type* castType = nullptr;
+    int width = reg->width;
+    if (width > 0)
+        castType = IR::Type_Bits::get(width);
+    // Else this is a structured type, so no cast is inserted below.
+
+    auto newname = structure->registers.get(reg);
+    auto registerref = new IR::PathExpression(newname);
+    auto methodName = structure->v1model.registers.write.Id();
+    auto method = new IR::Member(registerref, methodName);
+    auto args = new IR::Vector<IR::Expression>();
+    auto arg0 = new IR::Cast(primitive->operands.at(1)->srcInfo,
+                             structure->v1model.registers.index_type,
+                             conv.convert(primitive->operands.at(1)));
+    const IR::Expression* arg1 = conv.convert(primitive->operands.at(2));
+    if (castType != nullptr)
+        arg1 = new IR::Cast(primitive->operands.at(2)->srcInfo, castType, arg1);
+    args->push_back(arg0);
+    args->push_back(arg1);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(truncate) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 1);
+    auto len = primitive->operands.at(0);
+    auto methodName = structure->v1model.truncate.Id();
+    auto method = new IR::PathExpression(methodName);
+    auto args = new IR::Vector<IR::Expression>();
+    auto arg0 = new IR::Cast(len->srcInfo, structure->v1model.truncate.length_type,
+                             conv.convert(len));
+    args->push_back(arg0);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
+CONVERT_PRIMITIVE(exit) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 0);
+    return new IR::ExitStatement(primitive->srcInfo);
+}
+
+CONVERT_PRIMITIVE(funnel_shift_right) {
+    ExpressionConverter conv(structure);
+    OPS_CK(primitive, 4);
+    auto dest = conv.convert(primitive->operands.at(0));
+    auto hi = conv.convert(primitive->operands.at(1));
+    auto lo = conv.convert(primitive->operands.at(2));
+    auto shift = conv.convert(primitive->operands.at(3));
+    auto src = new IR::Shr(new IR::Concat(hi, lo), shift);
+    return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
 }
 
 const IR::P4Action*

@@ -211,12 +211,6 @@ class ProgramStructure {
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
     const IR::Declaration_Instance* checksumUnit(const IR::FieldListCalculation* flc);
-    const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
-    const IR::Expression* convertFieldList(const IR::Expression* expression);
-    const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
-    const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
-    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
-                                     const IR::Expression* right, const IR::Expression* mask);
     const IR::Expression* counterType(const IR::CounterOrMeter* cm) const;
     cstring mapAlgorithm(IR::ID algorithm) const;
     void createChecksumVerifications();
@@ -235,7 +229,13 @@ class ProgramStructure {
     void include(cstring filename);
     const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                           const IR::Expression* right, const IR::Type* type);
+    const IR::Expression* convertFieldList(const IR::Expression* expression);
+    const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
+    const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
+    const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
     const IR::Expression* paramReference(const IR::Parameter* param);
+    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
+                                     const IR::Expression* right, const IR::Expression* mask);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
