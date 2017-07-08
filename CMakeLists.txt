@@ -208,38 +208,22 @@ add_custom_target(etags
   COMMENT "Generating extended ctags")
 
 # check, recheck, check-*, check-ifail, gtest
+p4c_get_nprocs(__parallel_test)
+MESSAGE("Parallel ctest: ${__parallel_test}")
 set (P4C_XFAIL_LOG ${CMAKE_CURRENT_BINARY_DIR}/Testing/Temporary/LastXfail.txt)
-set (P4C_TEST_FLAGS --test-timeout 90 --output-on-failure -j 4)
-add_custom_target(check
-  # list the xfail tests
-  COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
-          ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL >> ${P4C_XFAIL_LOG}
-  COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS}
-  COMMAND ${CMAKE_MAKE_PROGRAM} cpplint-quiet
-  COMMENT "Running tests")
+set (P4C_TEST_FLAGS --test-timeout 90 --output-on-failure -j "${__parallel_test}")
 
-add_custom_target(recheck
-  # list the xfail tests
-  COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
-          ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL >> ${P4C_XFAIL_LOG}
-  COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --rerun-failed
-  COMMENT "Re-running failed tests")
-
+p4c_add_make_check(all)
 list (REMOVE_DUPLICATES TEST_TAGS)
 foreach(t ${TEST_TAGS})
-  add_custom_target(check-${t}
-    # list the xfail tests
-    COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
-            ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL --tests-regex "${t}/.*" >> ${P4C_XFAIL_LOG}
-    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*"
-    COMMENT "Running tests for tag ${t}")
-  add_custom_target(recheck-${t}
-    # list the xfail tests
-    COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
-            ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL --tests-regex "${t}/.*" >> ${P4C_XFAIL_LOG}
-    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${t}/.*" --rerun-failed
-    COMMENT "Re-running failed tests for tag ${t}")
+  p4c_add_make_check(${t})
 endforeach()
+
+add_custom_target(check
+  DEPENDS check-all cpplint-quiet)
+
+add_custom_target(recheck
+  DEPENDS recheck-all)
 
 # docs
 if (ENABLE_DOCS AND DOXYGEN_FOUND)

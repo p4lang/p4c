@@ -91,3 +91,47 @@ macro(p4c_add_tests tag driver testsuites xfail)
   # add the tag to the list
   set (TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
 endmacro(p4c_add_tests)
+
+# add rules to make check and recheck for a specific test suite
+macro (p4c_add_make_check tag)
+  if ( "${tag}" STREQUAL "all")
+    set (__tests_regex "'.*'")
+  else()
+    # avoid escaping spaces
+    set (__tests_regex "'${tag}/.*'")
+  endif()
+  get_filename_component (__logDir ${P4C_XFAIL_LOG} DIRECTORY)
+  add_custom_target(check-${tag}
+    # list the xfail tests
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${__logDir}
+    COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
+            ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL  --tests-regex "${__tests_regex}" >> ${P4C_XFAIL_LOG}
+    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${__tests_regex}"
+    COMMENT "Running tests for tag ${tag}")
+  add_custom_target(recheck-${tag}
+    # list the xfail tests
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${__logDir}
+    COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
+            ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL --tests-regex "${__tests_regex}" >> ${P4C_XFAIL_LOG}
+    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${__tests_regex}" --rerun-failed
+    COMMENT "Re-running failed tests for tag ${tag}")
+endmacro(p4c_add_make_check)
+
+# check for the number of cores on the machine and return them in ${var}
+macro (p4c_get_nprocs var)
+  if(APPLE)
+    execute_process (COMMAND sysctl -n hw.logicalcpu
+      OUTPUT_VARIABLE ${var}
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE rc)
+  else()
+    execute_process (COMMAND nproc
+      OUTPUT_VARIABLE ${var}
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE rc)
+  endif()
+  MESSAGE ("p4c_get_nprocs: ${rc} ${${var}}")
+  if (NOT ${rc} EQUAL 0)
+    set (${var} 4)
+  endif()
+endmacro (p4c_get_nprocs)
