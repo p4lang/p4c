@@ -51,7 +51,12 @@ endmacro(p4c_add_library)
 # Add files with the appropriate path to the list of linted files
 macro(add_cpplint_files dir filelist)
   foreach(__f ${filelist})
-    list (APPEND __cpplintFileList "${dir}/${__f}")
+    string(REGEX MATCH "^/.*" abs_path "${__f}")
+    if (NOT ${abs_path} EQUAL "")
+      list (APPEND __cpplintFileList "${__f}")
+    else()
+      list (APPEND __cpplintFileList "${dir}/${__f}")
+    endif()
   endforeach(__f)
   set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
 endmacro(add_cpplint_files)
@@ -66,9 +71,12 @@ endmacro(add_cpplint_files)
 # The macro generates the test files in a directory prefixed by tag.
 #
 macro(p4c_add_tests tag driver testsuites xfail)
-  set(__xfail_list "${xfail}")
+  set (__xfail_list "${xfail}")
+  set (__testCounter 0)
+  set (__xfailCounter 0)
   foreach(ts "${testsuites}")
     file (GLOB __testfiles RELATIVE ${P4C_SOURCE_DIR} ${ts})
+    list (LENGTH __testfiles __nTests)
     foreach(t ${__testfiles})
       set(__testfile "${P4C_BINARY_DIR}/${tag}/${t}.test")
       file (WRITE  ${__testfile} "#! /bin/bash\n")
@@ -84,12 +92,15 @@ macro(p4c_add_tests tag driver testsuites xfail)
         list (FIND __xfail_list ${t} __xfail_test)
         if(__xfail_test GREATER -1)
           set_tests_properties(${__testname} PROPERTIES WILL_FAIL 1 LABELS "XFAIL")
+          math (EXPR __xfailCounter "${__xfailCounter} + 1")
         endif() # __xfail_test
       endif() # __xfail_length
-    endforeach()
+    endforeach() # testfiles
+    math (EXPR __testCounter "${__testCounter} + ${__nTests}")
   endforeach()
   # add the tag to the list
   set (TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
+  MESSAGE(STATUS "Added ${__testCounter} tests to '${tag}' (${__xfailCounter} xfails)")
 endmacro(p4c_add_tests)
 
 # add rules to make check and recheck for a specific test suite
