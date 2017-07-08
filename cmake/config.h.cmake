@@ -13,5 +13,8 @@
 /* Define to 1 if you have the pipe2 function. */
 #cmakedefine HAVE_PIPE2 1
 
+/* Define if you have simple switch installed */
+#cmakedefine HAVE_SIMPLE_SWITCH 1
+
 /* Define to 1 if you have the ucontext.h header */
 #cmakedefine HAVE_UCONTEXT_H 1
