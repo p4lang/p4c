@@ -139,6 +139,7 @@ class ResolveReferences : public Inspector {
     bool preorder(const IR::Type_Name* type) override;
     bool preorder(const IR::PathExpression* path) override;
     bool preorder(const IR::This* pointer) override;
+    bool preorder(const IR::Declaration_Instance *decl) override;
 
 #define DECLARE(TYPE)                           \
     bool preorder(const IR::TYPE* t) override;  \
@@ -156,8 +157,6 @@ class ResolveReferences : public Inspector {
     DECLARE(Type_ArchBlock)
     DECLARE(Type_StructLike)
     DECLARE(BlockStatement)
-    DECLARE(Declaration_Instance)
-    DECLARE(Property)
 #undef DECLARE
 
     bool preorder(const IR::P4Table* table) override;

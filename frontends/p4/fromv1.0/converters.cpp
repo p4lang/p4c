@@ -372,6 +372,9 @@ class FixupExtern : public Modifier {
 
 const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *structure,
             const IR::Type_Extern *ext, cstring name) {
+    if (!ext->attributes.empty())
+        warning("%s: P4_14 extern type with attributes cannot be used in P4_16 "
+                "without conversion", ext);
     return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
 }
 
@@ -380,6 +383,9 @@ const IR::Declaration_Instance *ExternConverter::convertExternInstance(ProgramSt
     auto *rv = ext->clone();
     auto *et = rv->type->to<IR::Type_Extern>();
     BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
+    if (!ext->properties.empty())
+        warning("%s: P4_14 extern with properties cannot be used in P4_16 "
+                "without conversion", ext);
     if (structure->extern_remap.count(et))
         et = structure->extern_remap.at(et);
     rv->name = name;
