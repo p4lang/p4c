@@ -423,47 +423,7 @@ void ResolveReferences::postorder(const IR::BlockStatement *b)
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
     refMap->usedName(decl->name.name);
-    if (auto ext = context->resolveType(decl->type)->to<IR::Type_Extern>()) {
-        // FIXME -- this is special-case handling for P4_14 externs with properties,
-        // FIXME -- so that visitors for IR::Propertty can find the corresponding
-        // FIXME -- IR::Attribute in the extern.  It should go away once we no
-        // FIXME -- longer need to deal with P4_14 externs
-        addToContext(ext); }
-    if (decl->initializer != nullptr)
-        addToContext(decl->initializer);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::Declaration_Instance *decl) {
-    if (decl->initializer != nullptr)
-        removeFromContext(decl->initializer);
-    if (auto ext = context->resolveType(decl->type)->to<IR::Type_Extern>())
-        removeFromContext(ext);
-}
-
-bool ResolveReferences::preorder(const IR::Property *prop) {
-    /// @todo: why is `dynamic_cast` used here instead of `to`?
-    /// @todo: why is `forwardOK` set to `true` here?
-    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
-                    resolveUnique(prop->name, ResolutionType::Any, true))) {
-        // FIXME -- this is special-case handling for P4_14 extern properties.
-        // It should go away once we no longer need to deal with P4_14 externs
-        // The 'dynamic_cast' above is used (instead of 'to') in case resolveUnique
-        // returns a nullptr.
-        if (attr->locals)
-            addToContext(attr->locals);
-        if (attr->type->is<IR::Type::String>())
-            // Attribute is arbitrary string -- need not match anything
-            return false;
-    }
-    return true;
-}
-void ResolveReferences::postorder(const IR::Property *prop) {
-    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
-                    resolveUnique(prop->name, ResolutionType::Any, true))) {
-        if (attr->locals)
-            removeFromContext(attr->locals);
-    }
 }
 
 #undef PROCESS_NAMESPACE
