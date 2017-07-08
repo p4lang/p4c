@@ -130,8 +130,85 @@ macro (p4c_get_nprocs var)
       OUTPUT_STRIP_TRAILING_WHITESPACE
       RESULT_VARIABLE rc)
   endif()
-  MESSAGE ("p4c_get_nprocs: ${rc} ${${var}}")
+  # MESSAGE ("p4c_get_nprocs: ${rc} ${${var}}")
   if (NOT ${rc} EQUAL 0)
     set (${var} 4)
   endif()
 endmacro (p4c_get_nprocs)
+
+# poor's cmake replacement for $(shell grep -L xxx $(shell -l yyy))
+# It takes as arguments:
+#  - input_files: a pattern for files (full path)
+#  - test_list: a variable to be set to the resulting list of tests matching
+#  - pairs of:
+#  - pattern selector: INCLUDE or EXCLUDE
+#  - pattern list: a list of patterns that should be included or excluded
+# Returns:
+#  - the list of tests matching search_patterns and not exclude_patterns
+function(p4c_find_tests input_files test_list incl_excl patterns)
+
+  if (${ARGC} EQUAL 4)
+    if (${ARGV2} STREQUAL INCLUDE)
+      set(search_patterns "${ARGV3}")
+    elseif (${ARGV2} STREQUAL EXCLUDE)
+      set(exclude_patterns "${ARGV3}")
+    else()
+      MESSAGE (FATAL_ERROR "Invalid pattern selector ${ARGV2}")
+    endif()
+  elseif(${ARGC} EQUAL 6)
+    if (${ARGV2} STREQUAL INCLUDE AND ${ARGV4} STREQUAL EXCLUDE)
+      set(search_patterns "${ARGV3}")
+      set(exclude_patterns "${ARGV5}")
+    elseif (${ARGV4} STREQUAL INCLUDE AND ${ARGV2} STREQUAL EXCLUDE)
+      set(search_patterns "${ARGV5}")
+      set(exclude_patterns "${ARGV3}")
+    else()
+      MESSAGE (FATAL_ERROR "Invalid pattern selector combo: ${ARGV2}/${ARGV4}")
+    endif()
+  else()
+    MESSAGE(FATAL_ERROR "Invalid number of arguments ${ARGC} for find_tests")
+  endif()
+
+  if (DEFINED search_patterns)
+    list (LENGTH search_patterns __pLen)
+  #   MESSAGE ("include pattern: ${search_patterns}, length ${__pLen}")
+  else()
+    # only exclude patterns
+    set(__pLen 0)
+  endif()
+  # if (DEFINED exclude_patterns)
+  #   MESSAGE ("exclude pattern: ${exclude_patterns}, length ${__pLen}")
+  # endif()
+
+  set (inputList "")
+  foreach (l ${input_files})
+    file (GLOB __inputList ${l})
+    list (APPEND inputList ${__inputList})
+  endforeach()
+  list (REMOVE_DUPLICATES inputList)
+  foreach (f IN LISTS inputList)
+    set (__found 0)
+
+    foreach(p ${search_patterns})
+      file  (STRINGS ${f} __found_strings REGEX ${p})
+      list (LENGTH __found_strings __found_len)
+      if (__found_len GREATER 0)
+        math (EXPR __found "${__found} + 1")
+      endif()
+    endforeach() # search_patterns
+
+    foreach(p ${exclude_patterns})
+      file  (STRINGS ${f} __found_strings REGEX ${p})
+      list (LENGTH __found_strings __found_len)
+      if (__found_len GREATER 0)
+        set (__found -1)
+      endif()
+    endforeach() # exclude_patterns
+    if (__found EQUAL __pLen)
+      list (APPEND __p4tests ${f})
+    endif()
+  endforeach() # test files
+
+  # return
+  set(${test_list} ${__p4tests} PARENT_SCOPE)
+endfunction(p4c_find_tests)
