@@ -211,7 +211,7 @@ add_custom_target(etags
 p4c_get_nprocs(__parallel_test)
 MESSAGE(STATUS "CTest parallel: -j ${__parallel_test}")
 set (P4C_XFAIL_LOG ${CMAKE_CURRENT_BINARY_DIR}/Testing/Temporary/LastXfail.txt)
-set (P4C_TEST_FLAGS --test-timeout 90 --output-on-failure -j "${__parallel_test}")
+set (P4C_TEST_FLAGS --test-timeout 90 -j "${__parallel_test}")
 
 p4c_add_make_check(all)
 list (REMOVE_DUPLICATES TEST_TAGS)
