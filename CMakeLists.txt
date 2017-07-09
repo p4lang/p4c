@@ -170,10 +170,20 @@ endif()
 add_subdirectory (test)
 
 # IR Generation
-# \TODO: Add all the fixup code. Is it still needed?
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+
+# Fixup #line directives in the generated IR files
+# This is a vestige of automake. CMake handles dependencies correctly,
+# so we should output the line directives directly from the generator
+set (fixup_file "${CMAKE_CURRENT_BINARY_DIR}/irgen-fixup.awk")
+set_source_files_properties (${fixup_file} PROPERTIES GENERATED TRUE)
+file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${CMAKE_CURRENT_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
+
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
-  COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
+  COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
+  COMMAND awk -v name=ir-generated.cpp -f ${fixup_file} ir/ir-generated.cpp.tmp > ir/ir-generated.cpp
+  COMMAND awk -v name=ir-generated.h   -f ${fixup_file} ir/ir-generated.h.tmp > ir/ir-generated.h
+  COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h
   MAIN_DEPENDENCY ${IR_GENERATOR}
   DEPENDS ${IR_DEF_FILES}
   COMMENT "Generating IR class files")
