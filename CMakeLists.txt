@@ -140,8 +140,12 @@ add_subdirectory (ir)
 # backend executables
 set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit)
 
-# add extensions - before the frontends as they produce IR and extra frontend
+# add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_FRONTEND_SOURCES)
+# extra sources that need to be linked directly into p4test so that
+# extensions can provide specific conversions (e.g., for externs)
+set(EXTENSION_P4_14_CONV_SOURCES)
+
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")
 foreach (ext ${p4c_extensions})
@@ -171,6 +175,7 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp -o ir/ir-generated.h -t ir/gen-tree-macro.h ${IR_DEF_FILES}
   MAIN_DEPENDENCY ${IR_GENERATOR}
+  DEPENDS ${IR_DEF_FILES}
   COMMENT "Generating IR class files")
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
