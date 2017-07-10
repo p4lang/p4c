@@ -175,15 +175,29 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 # Fixup #line directives in the generated IR files
 # This is a vestige of automake. CMake handles dependencies correctly,
 # so we should output the line directives directly from the generator
+#
+# Moreover, we generate these files to a temporary location and update the
+# build files only if they have changed. This avoids rebuilding the whole
+# tree when small changes to the .def files affect only the .cpp file and
+# not the headers.
 set (fixup_file "${CMAKE_CURRENT_BINARY_DIR}/irgen-fixup.awk")
 set_source_files_properties (${fixup_file} PROPERTIES GENERATED TRUE)
 file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${CMAKE_CURRENT_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
+set(temp_ir_genfiles
+  ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
+  ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
+  ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
+  )
+set_source_files_properties (${temp_ir_genfiles} PROPERTIES GENERATED TRUE)
 
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
-  COMMAND awk -v name=ir-generated.cpp -f ${fixup_file} ir/ir-generated.cpp.tmp > ir/ir-generated.cpp
-  COMMAND awk -v name=ir-generated.h   -f ${fixup_file} ir/ir-generated.h.tmp > ir/ir-generated.h
-  COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h
+  COMMAND awk -v name=ir-generated.cpp -f ${fixup_file} ir/ir-generated.cpp.tmp > ir/ir-generated.cpp.fixup
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/ir-generated.cpp.fixup ir/ir-generated.cpp
+  COMMAND awk -v name=ir-generated.h   -f ${fixup_file} ir/ir-generated.h.tmp > ir/ir-generated.h.fixup
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/ir-generated.h.fixup ir/ir-generated.h
+  COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h.fixup
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
   MAIN_DEPENDENCY ${IR_GENERATOR}
   DEPENDS ${IR_DEF_FILES}
   COMMENT "Generating IR class files")
