@@ -45,15 +45,16 @@ endforeach(__f)
 
 add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4c_src &&
-          ${CMAKE_COMMAND} -E copy_if_different ${P4C_DRIVER_SRCS} ${P4C_BINARY_DIR}/p4c_src
+          for f in ${P4C_DRIVER_SRCS} \; do
+          ${CMAKE_COMMAND} -E copy_if_different \$$f ${P4C_BINARY_DIR}/p4c_src \;
+          done
   COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c
   # hack to make the tests work. If the p4include directory is
   # provided with -I to the compiler the output files include the
   # contents of the includes. If the compiler finds them in the
   # current directory, it leaves the #include directive in the output,
   # and this is how the current sample outputs are stored.
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E copy ${P4C_SOURCE_DIR}/p4include/*.p4 ${P4C_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}
   # hack to link the generated executables at the top level directory
   # because the test run scripts expect them there. This should go
   # away when removing automake and runscripts can be adjusted.
