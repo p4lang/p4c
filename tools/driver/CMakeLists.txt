@@ -54,7 +54,7 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   # contents of the includes. If the compiler finds them in the
   # current directory, it leaves the #include directive in the output,
   # and this is how the current sample outputs are stored.
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}/p4include
   # hack to link the generated executables at the top level directory
   # because the test run scripts expect them there. This should go
   # away when removing automake and runscripts can be adjusted.
