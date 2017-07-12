@@ -222,8 +222,15 @@ FILE* CompilerOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
+        // the p4c driver sets environment variables for include
+        // paths.  check the environment and add these to the command
+        // line for the preporicessor
+        char * driverP4IncludePath =
+          isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
         cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options
+            + (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "")
             + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
+
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
