@@ -32,6 +32,21 @@ const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
+template <size_t N>
+static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
+    output[0] = '\0';  // Default to the empty string, indicating failure.
+
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    const size_t cwdLen = strlen(cwd);
+    if (cwdLen == 0) return;
+    const char* separator = cwd[cwdLen - 1] == '/' ? "" : "/";
+
+    // Construct an absolute path. We're assuming that @relPath is relative to
+    // the current working directory.
+    snprintf(output, N, "%s%s%s", cwd, separator, relPath);
+}
+
 CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--help", nullptr,
                    [this](const char*) { usage(); exit(0); return false; },
@@ -43,7 +58,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        exit(0); return false; }, "Print compiler version");
     registerOption("-I", "path",
                    [this](const char* arg) {
-                       preprocessor_options += std::string(" -I") + arg; return true; },
+                       char buffer[PATH_MAX];
+                       convertToAbsPath(arg, buffer);
+                       preprocessor_options += std::string(" -I") + strdup(buffer); return true; },
                    "Specify include path (passed to preprocessor)");
     registerOption("-D", "arg=value",
                    [this](const char* arg) {
@@ -155,21 +172,6 @@ void CompilerOptions::setInputFile() {
     } else {
         file = remainingOptions.at(0);
     }
-}
-
-template <size_t N>
-static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
-    output[0] = '\0';  // Default to the empty string, indicating failure.
-
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
-    const size_t cwdLen = strlen(cwd);
-    if (cwdLen == 0) return;
-    const char* separator = cwd[cwdLen - 1] == '/' ? "" : "/";
-
-    // Construct an absolute path. We're assuming that @relPath is relative to
-    // the current working directory.
-    snprintf(output, N, "%s%s%s", cwd, separator, relPath);
 }
 
 std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[]) {
