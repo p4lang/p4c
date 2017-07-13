@@ -222,6 +222,10 @@ add_custom_target(cpplint-quiet
   COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
   COMMENT "cpplint quietly")
+# add cpplint as a test so that make check can proceed in parallel
+add_test(NAME cpplint
+  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+  WORKING_DIRECTORY ${P4C_SOURCE_DIR})
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
@@ -249,7 +253,7 @@ foreach(t ${TEST_TAGS})
 endforeach()
 
 add_custom_target(check
-  DEPENDS check-all cpplint-quiet)
+  DEPENDS check-all)
 
 add_custom_target(recheck
   DEPENDS recheck-all)
