@@ -61,6 +61,38 @@ macro(add_cpplint_files dir filelist)
   set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
 endmacro(add_cpplint_files)
 
+# add a single test to the testsuite
+# Arguments:
+#   - tag is a label for the set of test suite where this test belongs
+#     (for example, p4, p14_to_16, bmv2, ebpf
+#   - driver is the script that is used to run the test and compare the results
+#   - isXfail is boolean that specifies whether this test is expected to fail
+#   - alias is a possibly different name for the test such that the
+#     same p4 program can be used in different test configurations.
+#     Must be unique across the test suite.
+#   - p4test is the name of the p4 program to test (path relative to the p4c directory)
+#   - args is a list of arguments to pass to the test
+#
+# It generates a ${p4name}.test file invoking ${driver} on the p4
+# program with command line arguments ${args}
+#
+macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
+  set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
+  file (WRITE  ${__testfile} "#! /bin/bash\n")
+  file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
+  file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
+  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} $* ${P4C_SOURCE_DIR}/${p4test}")
+  execute_process(COMMAND chmod +x ${__testfile})
+  set(__testname ${tag}/${alias})
+  add_test (NAME ${__testname}
+    COMMAND ${tag}/${p4test}.test ${args}
+    WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  set_tests_properties(${__testname} PROPERTIES LABELS ${tag})
+  if (${isXfail})
+    set_tests_properties(${__testname} PROPERTIES WILL_FAIL 1 LABELS "XFAIL")
+  endif()
+endmacro(p4c_add_test_with_args)
+
 # generate all the tests specified in the testsuites
 # Arguments:
 #   - tag is a label for the set of tests, for example, p4, p14_to_16, bmv2, ebpf
@@ -78,23 +110,13 @@ macro(p4c_add_tests tag driver testsuites xfail)
     file (GLOB __testfiles RELATIVE ${P4C_SOURCE_DIR} ${ts})
     list (LENGTH __testfiles __nTests)
     foreach(t ${__testfiles})
-      set(__testfile "${P4C_BINARY_DIR}/${tag}/${t}.test")
-      file (WRITE  ${__testfile} "#! /bin/bash\n")
-      file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
-      file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-      file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} $* ${P4C_SOURCE_DIR}/${t}")
-      execute_process(COMMAND chmod +x ${__testfile})
-      set(__testname ${tag}/${t})
-      add_test (NAME ${__testname} COMMAND ${tag}/${t}.test WORKING_DIRECTORY ${P4C_BINARY_DIR})
-      set_tests_properties(${__testname} PROPERTIES LABELS ${tag})
-      list (LENGTH __xfail_list __xfail_length)
-      if (${__xfail_length} GREATER 0)
-        list (FIND __xfail_list ${t} __xfail_test)
-        if(__xfail_test GREATER -1)
-          set_tests_properties(${__testname} PROPERTIES WILL_FAIL 1 LABELS "XFAIL")
-          math (EXPR __xfailCounter "${__xfailCounter} + 1")
-        endif() # __xfail_test
-      endif() # __xfail_length
+      list (FIND __xfail_list ${t} __xfail_test)
+      if(__xfail_test GREATER -1)
+        p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "")
+        math (EXPR __xfailCounter "${__xfailCounter} + 1")
+      else()
+        p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "")
+      endif() # __xfail_test
     endforeach() # testfiles
     math (EXPR __testCounter "${__testCounter} + ${__nTests}")
   endforeach()

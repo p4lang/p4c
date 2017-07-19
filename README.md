@@ -283,8 +283,19 @@ set (MY_XFAIL_TESTS
 p4c_add_tests("mybackend" ${MY_DRIVER} "${MY_TEST_SUITES}" "${MY_XFAIL_TESTS}")
 ```
 
-See the [documentation for `p4c_add_tests`](cmake/P4CUtils.cmake) for
-more information on the arguments to this macro.
+In addition, you can add individual tests to a suite using the following macro:
+```
+set(isXFail FALSE)
+set(SWITCH_P4 testdata/p4_14_samples/switch_20160512/switch.p4)
+
+p4c_add_test_with_args ("mybackend" ${MY_DRIVER} ${isXFail}
+  "switch_with_custom_profile" ${SWITCH_P4} "-DCUSTOM_PROFILE")
+```
+
+See the documentation for
+[`p4c_add_test_with_args`](cmake/P4CUtils.cmake) and
+[`p4c_add_tests`](cmake/P4CUtils.cmake) for more information on the
+arguments to these macros.
 
 ## Installation
 
