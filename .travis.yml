@@ -7,6 +7,13 @@ dist: trusty
 # ImportError exceptions, so I am using the minimal trusty image
 language: generic
 
+# New travis trusty images give me Python import errors for nnpy & thrift,
+# forcing use of the old ones for now. These will be deprecated in
+# September. Either this issue will be resolved before then or I will have to
+# run the tests in the docker image and find a way to upload coverage data to
+# codecov.
+group: deprecated-2017Q3
+
 matrix:
   include:
     - os: linux
