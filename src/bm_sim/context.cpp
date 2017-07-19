@@ -36,6 +36,7 @@ Context::Context() {
 MatchErrorCode
 Context::mt_get_num_entries(const std::string &table_name,
                             size_t *num_entries) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   *num_entries = 0;
   auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
@@ -46,6 +47,7 @@ Context::mt_get_num_entries(const std::string &table_name,
 MatchErrorCode
 Context::mt_clear_entries(const std::string &table_name,
                           bool reset_default_entry) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   // TODO(antonin)
@@ -116,6 +118,7 @@ MatchErrorCode
 Context::mt_set_entry_ttl(const std::string &table_name,
                           entry_handle_t handle,
                           unsigned int ttl_ms) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->set_entry_ttl(handle, ttl_ms);
@@ -277,6 +280,7 @@ MatchErrorCode
 Context::mt_indirect_set_entry_ttl(const std::string &table_name,
                                    entry_handle_t handle,
                                    unsigned int ttl_ms) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->set_entry_ttl(handle, ttl_ms);
@@ -633,6 +637,7 @@ P4Objects::IdLookupErrorCode
 Context::p4objects_id_from_name(
     P4Objects::ResourceType type, const std::string &name,
     p4object_id_t *id) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   return p4objects->id_from_name(type, name, id);
 }
 
