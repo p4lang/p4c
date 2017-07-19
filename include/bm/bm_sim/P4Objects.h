@@ -182,6 +182,9 @@ class P4Objects {
     return match_action_tables_map.at(name)->get_match_table();
   }
 
+  MatchTableAbstract *get_abstract_match_table_rt(
+      const std::string &name) const;
+
   MatchActionTable *get_match_action_table(const std::string &name) const {
     return match_action_tables_map.at(name).get();
   }

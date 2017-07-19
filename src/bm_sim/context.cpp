@@ -37,8 +37,7 @@ MatchErrorCode
 Context::mt_get_num_entries(const std::string &table_name,
                             size_t *num_entries) const {
   *num_entries = 0;
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   *num_entries = abstract_table->get_num_entries();
   return MatchErrorCode::SUCCESS;
@@ -47,7 +46,7 @@ Context::mt_get_num_entries(const std::string &table_name,
 MatchErrorCode
 Context::mt_clear_entries(const std::string &table_name,
                           bool reset_default_entry) {
-  auto abstract_table = p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   // TODO(antonin)
   if (reset_default_entry) return MatchErrorCode::ERROR;
@@ -63,10 +62,9 @@ Context::mt_add_entry(const std::string &table_name,
                       entry_handle_t *handle,
                       int priority) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   assert(action);
@@ -79,10 +77,9 @@ Context::mt_set_default_action(const std::string &table_name,
                                const std::string &action_name,
                                ActionData action_data) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   assert(action);
@@ -93,10 +90,9 @@ MatchErrorCode
 Context::mt_delete_entry(const std::string &table_name,
                          entry_handle_t handle) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   return table->delete_entry(handle);
 }
@@ -107,10 +103,9 @@ Context::mt_modify_entry(const std::string &table_name,
                          const std::string &action_name,
                          const ActionData action_data) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   assert(action);
@@ -121,8 +116,7 @@ MatchErrorCode
 Context::mt_set_entry_ttl(const std::string &table_name,
                           entry_handle_t handle,
                           unsigned int ttl_ms) {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->set_entry_ttl(handle, ttl_ms);
 }
@@ -130,8 +124,7 @@ Context::mt_set_entry_ttl(const std::string &table_name,
 MatchErrorCode
 Context::get_mt_indirect(const std::string &table_name,
                          MatchTableIndirect **table) const {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   *table = dynamic_cast<MatchTableIndirect *>(abstract_table);
   if (!(*table)) return MatchErrorCode::WRONG_TABLE_TYPE;
@@ -284,8 +277,7 @@ MatchErrorCode
 Context::mt_indirect_set_entry_ttl(const std::string &table_name,
                                    entry_handle_t handle,
                                    unsigned int ttl_ms) {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->set_entry_ttl(handle, ttl_ms);
 }
@@ -304,8 +296,7 @@ Context::mt_indirect_set_default_member(const std::string &table_name,
 MatchErrorCode
 Context::get_mt_indirect_ws(const std::string &table_name,
                             MatchTableIndirectWS **table) const {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   *table = dynamic_cast<MatchTableIndirectWS *>(abstract_table);
   if (!(*table)) return MatchErrorCode::WRONG_TABLE_TYPE;
@@ -354,8 +345,7 @@ Context::mt_read_counters(const std::string &table_name,
                           MatchTableAbstract::counter_value_t *bytes,
                           MatchTableAbstract::counter_value_t *packets) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->query_counters(handle, bytes, packets);
 }
@@ -363,8 +353,7 @@ Context::mt_read_counters(const std::string &table_name,
 MatchErrorCode
 Context::mt_reset_counters(const std::string &table_name) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->reset_counters();
 }
@@ -375,8 +364,7 @@ Context::mt_write_counters(const std::string &table_name,
                            MatchTableAbstract::counter_value_t bytes,
                            MatchTableAbstract::counter_value_t packets) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->write_counters(handle, bytes, packets);
 }
@@ -386,8 +374,7 @@ Context::mt_set_meter_rates(const std::string &table_name,
                             entry_handle_t handle,
                             const std::vector<Meter::rate_config_t> &configs) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->set_meter_rates(handle, configs);
 }
@@ -397,8 +384,7 @@ Context::mt_get_meter_rates(const std::string &table_name,
                             entry_handle_t handle,
                             std::vector<Meter::rate_config_t> *configs) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   return abstract_table->get_meter_rates(handle, configs);
 }
@@ -406,8 +392,7 @@ Context::mt_get_meter_rates(const std::string &table_name,
 MatchTableType
 Context::mt_get_type(const std::string &table_name) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-      p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchTableType::NONE;
   return abstract_table->get_table_type();
 }
@@ -416,10 +401,9 @@ template <typename T>
 std::vector<typename T::Entry>
 Context::mt_get_entries(const std::string &table_name) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-      p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return {};
-  T *table = dynamic_cast<T *>(abstract_table);
+  auto table = dynamic_cast<T *>(abstract_table);
   // TODO(antonin): return an error code instead?
   if (!table) return {};
   return table->get_entries();
@@ -438,10 +422,9 @@ MatchErrorCode
 Context::mt_get_entry(const std::string &table_name,
                       entry_handle_t handle, typename T::Entry *entry) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-      p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  T *table = dynamic_cast<T *>(abstract_table);
+  auto table = dynamic_cast<T *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   return table->get_entry(handle, entry);
 }
@@ -462,10 +445,9 @@ MatchErrorCode
 Context::mt_get_default_entry(const std::string &table_name,
                               typename T::Entry *default_entry) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-      p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  T *table = dynamic_cast<T *>(abstract_table);
+  auto table = dynamic_cast<T *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   return table->get_default_entry(default_entry);
 }
@@ -488,10 +470,9 @@ Context::mt_get_entry_from_key(const std::string &table_name,
                                typename T::Entry *entry,
                                int priority) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-      p4objects_rt->get_abstract_match_table(table_name);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  T *table = dynamic_cast<T *>(abstract_table);
+  auto table = dynamic_cast<T *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   return table->get_entry_from_key(match_key, entry, priority);
 }

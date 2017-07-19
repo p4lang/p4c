@@ -2368,6 +2368,13 @@ P4Objects::get_action_for_action_profile(
   return aprof_actions_map.at(std::make_pair(act_prof_name, action_name));
 }
 
+MatchTableAbstract *
+P4Objects::get_abstract_match_table_rt(const std::string &name) const {
+  auto it = match_action_tables_map.find(name);
+  return (it != match_action_tables_map.end()) ?
+      it->second->get_match_table() : nullptr;
+}
+
 MeterArray *
 P4Objects::get_meter_array_rt(const std::string &name) const {
   auto it = meter_arrays.find(name);
