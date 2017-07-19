@@ -638,7 +638,7 @@ Context::p4objects_id_from_name(
     P4Objects::ResourceType type, const std::string &name,
     p4object_id_t *id) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  return p4objects->id_from_name(type, name, id);
+  return p4objects_rt->id_from_name(type, name, id);
 }
 
 template <typename T>
