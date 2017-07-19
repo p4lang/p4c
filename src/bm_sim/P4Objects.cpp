@@ -2368,6 +2368,20 @@ P4Objects::get_action_for_action_profile(
   return aprof_actions_map.at(std::make_pair(act_prof_name, action_name));
 }
 
+ActionFn *
+P4Objects::get_action_rt(const std::string &table_name,
+                         const std::string &action_name) const {
+  auto it = t_actions_map.find(std::make_pair(table_name, action_name));
+  return (it != t_actions_map.end()) ? it->second : nullptr;
+}
+
+ActionFn *
+P4Objects::get_action_for_action_profile_rt(
+    const std::string &act_prof_name, const std::string &action_name) const {
+  auto it = aprof_actions_map.find(std::make_pair(act_prof_name, action_name));
+  return (it != aprof_actions_map.end()) ? it->second : nullptr;
+}
+
 MatchTableAbstract *
 P4Objects::get_abstract_match_table_rt(const std::string &name) const {
   auto it = match_action_tables_map.find(name);

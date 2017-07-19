@@ -156,6 +156,12 @@ class P4Objects {
   ActionFn *get_action_for_action_profile(
       const std::string &act_prof_name, const std::string &action_name) const;
 
+  ActionFn *get_action_rt(const std::string &table_name,
+                          const std::string &action_name) const;
+
+  ActionFn *get_action_for_action_profile_rt(
+      const std::string &act_prof_name, const std::string &action_name) const;
+
   // For most functions I have a get_* version that will throw an exception if
   // an element does not exist (exception not caught) and a get_*_rt version
   // that returns a nullptr if it does not exist. I should probably get rid of

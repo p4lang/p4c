@@ -68,8 +68,8 @@ Context::mt_add_entry(const std::string &table_name,
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
-  assert(action);
+  const ActionFn *action = p4objects_rt->get_action_rt(table_name, action_name);
+  if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return table->add_entry(
     match_key, action, std::move(action_data), handle, priority);
 }
@@ -83,8 +83,8 @@ Context::mt_set_default_action(const std::string &table_name,
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
-  assert(action);
+  const ActionFn *action = p4objects_rt->get_action_rt(table_name, action_name);
+  if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return table->set_default_action(action, std::move(action_data));
 }
 
@@ -109,8 +109,8 @@ Context::mt_modify_entry(const std::string &table_name,
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
   auto table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
-  assert(action);
+  const ActionFn *action = p4objects_rt->get_action_rt(table_name, action_name);
+  if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return table->modify_entry(handle, action, std::move(action_data));
 }
 
@@ -141,7 +141,7 @@ Context::mt_act_prof_add_member(const std::string &act_prof_name,
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
   if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
-  const ActionFn *action = p4objects_rt->get_action_for_action_profile(
+  const ActionFn *action = p4objects_rt->get_action_for_action_profile_rt(
       act_prof_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return act_prof->add_member(action, std::move(action_data), mbr);
@@ -164,7 +164,7 @@ Context::mt_act_prof_modify_member(const std::string &act_prof_name,
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
   if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
-  const ActionFn *action = p4objects_rt->get_action_for_action_profile(
+  const ActionFn *action = p4objects_rt->get_action_for_action_profile_rt(
       act_prof_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return act_prof->modify_member(mbr, action, std::move(action_data));
