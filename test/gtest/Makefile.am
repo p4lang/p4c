@@ -16,6 +16,7 @@
 # elsewhere in the codebase.
 gtest_unittest_UNIFIED = \
 	test/gtest/arch_test.cpp \
+	test/gtest/bitvec_test.cpp \
 	test/gtest/bmv2_isvalid.cpp \
 	test/gtest/call_graph_test.cpp \
 	test/gtest/dumpjson.cpp \

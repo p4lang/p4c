@@ -60,7 +60,7 @@ bitvec &bitvec::operator>>=(size_t count) {
 }
 
 bitvec &bitvec::operator<<=(size_t count) {
-    size_t needsize = (max().index() + count + bits_per_unit - 1)/bits_per_unit;
+    size_t needsize = (max().index() + count + bits_per_unit)/bits_per_unit;
     if (needsize > size) expand(needsize);
     if (size == 1) {
         data <<= count;
