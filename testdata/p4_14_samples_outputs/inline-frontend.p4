@@ -5,21 +5,23 @@ struct h {
     bit<1> b;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("m") 
-    h m;
+    h                   m;
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".start") state start {
         transition accept;
     }
 }
 
-control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control c(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".x") action x_0() {
     }
     @name(".t") table t_0 {
@@ -35,38 +37,38 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
     }
 }
 
-control d(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control d(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".c") c() c_1;
     apply {
-        c_1.apply(hdr, meta, standard_metadata);
+        c_1.apply(hdr, meta, __standard_metadata);
     }
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".d") d() d_1;
     apply {
-        d_1.apply(hdr, meta, standard_metadata);
+        d_1.apply(hdr, meta, __standard_metadata);
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     apply {
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

@@ -26,74 +26,48 @@ header hdrA_t {
     bit<8> f2;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
     @name("metaA") 
     metaA_t              metaA;
     @name("metaB") 
     metaB_t              metaB;
+    @name("standard_metadata") 
+    standard_metadata_t  standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("hdrA") 
     hdrA_t hdrA;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".start") state start {
         packet.extract<hdrA_t>(hdr.hdrA);
         transition accept;
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name("._nop") action _nop_0() {
     }
-    @name("._recirculate") action _recirculate_0() {
-        recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
-    }
-    @name("._clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
-    }
-    @name(".t_egress") table t_egress_0 {
-        actions = {
-            _nop_0();
-            _recirculate_0();
-            _clone_e2e_0();
-            @defaultonly NoAction();
-        }
-        key = {
-            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
-        }
-        size = 128;
-        default_action = NoAction();
-    }
-    apply {
-        t_egress_0.apply();
-    }
-}
-
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("._nop") action _nop_1() {
-    }
     @name("._set_port") action _set_port_0(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
         meta.metaA.f1 = 8w1;
     }
     @name("._multicast") action _multicast_0(bit<4> mgrp) {
         meta.intrinsic_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit_0() {
-        resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        resubmit<tuple<standard_metadata_t, metaA_t>>({ meta.standard_metadata, meta.metaA });
     }
     @name("._clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
+        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { meta.standard_metadata, meta.metaA });
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {
-            _nop_1();
+            _nop_0();
             _set_port_0();
             _multicast_0();
             @defaultonly NoAction();
@@ -107,14 +81,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".t_ingress_2") table t_ingress_0 {
         actions = {
-            _nop_1();
+            _nop_0();
             _resubmit_0();
             _clone_i2e_0();
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                         : exact @name("hdr.hdrA.f1") ;
+            meta.standard_metadata.instance_type: ternary @name("meta.standard_metadata.instance_type") ;
         }
         size = 128;
         default_action = NoAction();
@@ -125,20 +99,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<hdrA_t>(hdr.hdrA);
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

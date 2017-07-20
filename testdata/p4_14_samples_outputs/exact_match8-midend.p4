@@ -12,22 +12,24 @@ header data_t {
     bit<8>  b4;
 }
 
-struct metadata {
+struct __metadataImpl {
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("data") 
     data_t data;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name(".noop") action noop_0() {
@@ -93,25 +95,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     apply {
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<data_t>(hdr.data);
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

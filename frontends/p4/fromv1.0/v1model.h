@@ -33,7 +33,7 @@ namespace P4V1 {
 struct Parser_Model : public ::Model::Elem {
     Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType,
                  Model::Type_Model standardMetadataType) :
-            Model::Elem("ParserImpl"),
+            Model::Elem("__ParserImpl"),
             packetParam("packet", P4::P4CoreLibrary::instance.packetIn, 0),
             headersParam("hdr", headersType, 1),
             metadataParam("meta", userMetaType, 2),
@@ -47,7 +47,7 @@ struct Parser_Model : public ::Model::Elem {
 
 struct Deparser_Model : public ::Model::Elem {
     explicit Deparser_Model(Model::Type_Model headersType) :
-            Model::Elem("DeparserImpl"),
+            Model::Elem("__DeparserImpl"),
             packetParam("packet", P4::P4CoreLibrary::instance.packetOut, 0),
             headersParam("hdr", headersType, 1)
     {}
@@ -62,7 +62,7 @@ struct Control_Model : public ::Model::Elem {
             Model::Elem(name),
             headersParam("hdr", headersType, 0),
             metadataParam("meta", metadataType, 1),
-            standardMetadataParam("standard_metadata", standardMetadataType, 2) {}
+            standardMetadataParam("__standard_metadata", standardMetadataType, 2) {}
     ::Model::Param_Model headersParam;
     ::Model::Param_Model metadataParam;
     ::Model::Param_Model standardMetadataParam;
@@ -250,17 +250,18 @@ class V1Model : public ::Model::Model {
  protected:
     V1Model() :
             Model::Model("0.1"), file("v1model.p4"),
-            standardMetadata("standard_metadata"),
-            headersType("headers"),
-            metadataType("metadata"),
+            standardMetadata("__standard_metadataImpl"),
+            headersType("__headersImpl"),
+            metadataType("__metadataImpl"),
             standardMetadataType("standard_metadata_t"),
             parser(headersType, metadataType, standardMetadataType), deparser(headersType),
-            egress("egress", headersType, metadataType, standardMetadataType),
-            ingress("ingress", headersType, metadataType, standardMetadataType),
+            egress("__egressImpl", headersType, metadataType, standardMetadataType),
+            ingress("__ingressImpl", headersType, metadataType, standardMetadataType),
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
             action_selector(), clone(), resubmit("resubmit"),
             tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
-            verify("verifyChecksum", headersType), update("computeChecksum", headersType),
+            verify("__verifyChecksumImpl", headersType),
+            update("__computeChecksumImpl", headersType),
             ck16(), digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
             recirculate("recirculate"), directMeter(), directCounter()

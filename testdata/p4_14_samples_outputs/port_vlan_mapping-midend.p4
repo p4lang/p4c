@@ -377,12 +377,14 @@ header vlan_tag_5b_t {
     bit<16> etherType;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("ingress_metadata") 
-    ingress_metadata_t ingress_metadata;
+    ingress_metadata_t  ingress_metadata;
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("arp_rarp") 
     arp_rarp_t           arp_rarp;
     @name("arp_rarp_ipv4") 
@@ -473,7 +475,7 @@ struct headers {
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     bit<24> tmp_9;
     bit<4> tmp_10;
     @name(".parse_arp_rarp") state parse_arp_rarp {
@@ -724,7 +726,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name(".set_bd") action set_bd_0(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
@@ -860,12 +862,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     apply {
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<input_port_hdr_t>(hdr.input_port_hdr);
         packet.emit<ethernet_t>(hdr.ethernet);
@@ -921,7 +923,7 @@ struct tuple_0 {
     bit<32> field_9;
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     bool tmp_11;
     bit<16> tmp_12;
     bool tmp_14;
@@ -948,7 +950,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     bit<16> tmp_17;
     bit<16> tmp_18;
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_2;
@@ -965,4 +967,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

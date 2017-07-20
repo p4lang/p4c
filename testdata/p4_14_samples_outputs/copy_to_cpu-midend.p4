@@ -19,19 +19,21 @@ header ethernet_t {
     bit<16> etherType;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
+    @name("standard_metadata") 
+    standard_metadata_t  standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("cpu_header") 
     cpu_header_t cpu_header;
     @name("ethernet") 
     ethernet_t   ethernet;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     bit<64> tmp_0;
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
@@ -50,72 +52,49 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
-    }
-    @name("._drop") action _drop_0() {
-        mark_to_drop();
-    }
-    @name(".do_cpu_encap") action do_cpu_encap_0() {
-        hdr.cpu_header.setValid();
-        hdr.cpu_header.device = 8w0;
-        hdr.cpu_header.reason = 8w0xab;
-    }
-    @name(".redirect") table redirect {
-        actions = {
-            _drop_0();
-            do_cpu_encap_0();
-            @defaultonly NoAction_0();
-        }
-        key = {
-            standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
-        }
-        size = 16;
-        default_action = NoAction_0();
-    }
-    apply {
-        redirect.apply();
-    }
-}
-
 struct tuple_0 {
     standard_metadata_t field;
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_1() {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    @name("NoAction") action NoAction_0() {
     }
     @name(".do_copy_to_cpu") action do_copy_to_cpu_0() {
-        clone3<tuple_0>(CloneType.I2E, 32w250, { standard_metadata });
+        clone3<tuple_0>(CloneType.I2E, 32w250, { meta.standard_metadata });
     }
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {
             do_copy_to_cpu_0();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_0();
         }
         size = 1;
-        default_action = NoAction_1();
+        default_action = NoAction_0();
     }
     apply {
         copy_to_cpu.apply();
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<cpu_header_t>(hdr.cpu_header);
         packet.emit<ethernet_t>(hdr.ethernet);
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

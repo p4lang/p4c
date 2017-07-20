@@ -131,7 +131,7 @@ header data_t {
     bit<8>  b4;
 }
 
-struct metadata {
+struct __metadataImpl {
     @pa_solitary("ingress", "acl_metadata.if_label") @name("acl_metadata") 
     acl_metadata_t      acl_metadata;
     @name("fabric_metadata") 
@@ -148,23 +148,25 @@ struct metadata {
     l3_metadata_t       l3_metadata;
     @name("security_metadata") 
     security_metadata_t security_metadata;
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
     @name("tunnel_metadata") 
     tunnel_metadata_t   tunnel_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("data") 
     data_t data;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
     @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
     @name(".drop_stats_update") action drop_stats_update() {
@@ -242,25 +244,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     apply {
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit(hdr.data);
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

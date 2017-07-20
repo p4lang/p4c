@@ -63,14 +63,16 @@ header ipv4_option_NOP_t {
     bit<8> value;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
     @name("my_metadata") 
     my_metadata_t        my_metadata;
+    @name("standard_metadata") 
+    standard_metadata_t  standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("ethernet") 
     ethernet_t              ethernet;
     @name("ipv4_base") 
@@ -85,7 +87,7 @@ struct headers {
     ipv4_option_NOP_t[3]    ipv4_option_NOP;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     ipv4_option_timestamp_t_1 tmp_hdr;
     ipv4_option_timestamp_t_2 tmp_hdr_0;
     @name(".parse_ethernet") state parse_ethernet {
@@ -142,7 +144,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".format_options_security") action format_options_security() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
@@ -183,12 +185,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     apply {
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_base_t>(hdr.ipv4_base);
@@ -199,16 +206,16 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     Checksum16() ipv4_checksum;
     apply {
         hdr.ipv4_base.hdrChecksum = ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>, ipv4_option_security_t, ipv4_option_EOL_t, ipv4_option_timestamp_t>>({ hdr.ipv4_base.version, hdr.ipv4_base.ihl, hdr.ipv4_base.diffserv, hdr.ipv4_base.totalLen, hdr.ipv4_base.identification, hdr.ipv4_base.flags, hdr.ipv4_base.fragOffset, hdr.ipv4_base.ttl, hdr.ipv4_base.protocol, hdr.ipv4_base.srcAddr, hdr.ipv4_base.dstAddr, hdr.ipv4_option_security, hdr.ipv4_option_NOP[0], hdr.ipv4_option_timestamp });
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

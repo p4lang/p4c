@@ -12,85 +12,33 @@ header data_t {
     bit<32> b4;
 }
 
-struct metadata {
+struct __metadataImpl {
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("data") 
     data_t data;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".setf1") action setf1_0(bit<32> val) {
-        hdr.data.f1 = val;
-    }
-    @name(".noop") action noop_0() {
-    }
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name(".setb2") action setb2_0(bit<32> val) {
-        hdr.data.b2 = val;
-    }
-    @name(".E1") table E1_0 {
-        actions = {
-            setf1_0();
-            noop_0();
-            @defaultonly NoAction();
-        }
-        key = {
-            hdr.data.f2: ternary @name("hdr.data.f2") ;
-        }
-        default_action = NoAction();
-    }
-    @name(".EA") table EA_0 {
-        actions = {
-            setb1_0();
-            noop_0();
-            @defaultonly NoAction();
-        }
-        key = {
-            hdr.data.f3: ternary @name("hdr.data.f3") ;
-        }
-        default_action = NoAction();
-    }
-    @name(".EB") table EB_0 {
-        actions = {
-            setb2_0();
-            noop_0();
-            @defaultonly NoAction();
-        }
-        key = {
-            hdr.data.f3: ternary @name("hdr.data.f3") ;
-        }
-        default_action = NoAction();
-    }
-    apply {
-        E1_0.apply();
-        if (hdr.data.f1 == 32w0) 
-            EA_0.apply();
-        else 
-            EB_0.apply();
-    }
-}
-
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".setb1") action setb1_1(bit<32> val) {
-        hdr.data.b1 = val;
-    }
-    @name(".noop") action noop_1() {
+    @name(".noop") action noop_0() {
     }
     @name(".setb3") action setb3_0(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name(".setb2") action setb2_1(bit<32> val) {
+    @name(".setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
     @name(".setb4") action setb4_0(bit<32> val) {
@@ -98,8 +46,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".A1") table A1_0 {
         actions = {
-            setb1_1();
-            noop_1();
+            setb1_0();
+            noop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -110,7 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".A2") table A2_0 {
         actions = {
             setb3_0();
-            noop_1();
+            noop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -120,8 +68,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".B1") table B1_0 {
         actions = {
-            setb2_1();
-            noop_1();
+            setb2_0();
+            noop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -132,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".B2") table B2_0 {
         actions = {
             setb4_0();
-            noop_1();
+            noop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -150,20 +98,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<data_t>(hdr.data);
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

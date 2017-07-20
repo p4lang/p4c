@@ -265,10 +265,12 @@ header vlan_tag_5b_t {
     bit<16> etherType;
 }
 
-struct metadata {
+struct __metadataImpl {
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("arp_rarp") 
     arp_rarp_t           arp_rarp;
     @name("arp_rarp_ipv4") 
@@ -361,7 +363,7 @@ struct headers {
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     bit<24> tmp;
     bit<4> tmp_0;
     @name(".parse_arp_rarp") state parse_arp_rarp {
@@ -616,10 +618,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".mark_forward") action mark_forward_0() {
         hdr.data.data = 8w255;
-        standard_metadata.egress_spec = 9w10;
+        meta.standard_metadata.egress_spec = 9w10;
     }
     @name(".mark_check") table mark_check_0 {
         actions = {
@@ -635,12 +637,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     apply {
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<input_port_hdr_t>(hdr.input_port_hdr);
         packet.emit<ethernet_t>(hdr.ethernet);
@@ -680,7 +682,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     bool tmp_1;
     bit<16> tmp_2;
     bool tmp_3;
@@ -711,7 +713,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     bit<16> tmp_7;
     bit<16> tmp_8;
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_1;
@@ -728,4 +730,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

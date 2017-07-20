@@ -25,10 +25,12 @@ header vlan_id_t {
     bit<12> vlan_id_t;
 }
 
-struct metadata {
+struct __metadataImpl {
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("cfi") 
     cfi_t         cfi;
     @name("len_or_type") 
@@ -43,7 +45,7 @@ struct headers {
     vlan_id_t     vlan_id;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".parse_cfi") state parse_cfi {
         packet.extract<cfi_t>(hdr.cfi);
         transition parse_vlan_id;
@@ -73,30 +75,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".nop") action nop_0() {
-    }
-    @name(".t2") table t2_0 {
-        actions = {
-            nop_0();
-            @defaultonly NoAction();
-        }
-        key = {
-            hdr.mac_sa.mac: exact @name("hdr.mac_sa.mac") ;
-        }
-        default_action = NoAction();
-    }
-    apply {
-        t2_0.apply();
-    }
-}
-
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop_1() {
     }
     @name(".t1") table t1_0 {
         actions = {
-            nop_1();
+            nop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -110,7 +94,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<mac_da_t>(hdr.mac_da);
         packet.emit<mac_sa_t>(hdr.mac_sa);
@@ -121,14 +110,14 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

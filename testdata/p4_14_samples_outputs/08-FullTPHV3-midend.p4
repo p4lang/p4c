@@ -380,12 +380,14 @@ header h_8_4_t {
     bit<8> field_8_16;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("m") 
-    m_t m;
+    m_t                 m;
+    @name("standard_metadata") 
+    standard_metadata_t standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("h_16_1") 
     h_16_1_t  h_16_1;
     @name("h_16_10") 
@@ -452,7 +454,7 @@ struct headers {
     h_8_4_t   h_8_4;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".start") state start {
         packet.extract<h_8_1_t>(hdr.h_8_1);
         packet.extract<h_8_2_t>(hdr.h_8_2);
@@ -490,12 +492,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    apply {
-    }
-}
-
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_7() {
@@ -735,19 +732,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.h_32_15.setInvalid();
     }
     @name(".set_egress_spec") action set_egress_spec_0(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
     }
     @name(".set_egress_spec") action set_egress_spec_5(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
     }
     @name(".set_egress_spec") action set_egress_spec_6(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
     }
     @name(".set_egress_spec") action set_egress_spec_7(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
     }
     @name(".set_egress_spec") action set_egress_spec_8(bit<9> port) {
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
     }
     @name(".t1") table t1 {
         actions = {
@@ -1034,7 +1031,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<h_8_1_t>(hdr.h_8_1);
         packet.emit<h_8_2_t>(hdr.h_8_2);
@@ -1071,14 +1073,14 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     apply {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;

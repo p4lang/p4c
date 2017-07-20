@@ -63,14 +63,16 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
     @name("meta") 
     meta_t               meta;
+    @name("standard_metadata") 
+    standard_metadata_t  standard_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("cpu_header") 
     cpu_header_t cpu_header;
     @name("ethernet") 
@@ -81,7 +83,7 @@ struct headers {
     tcp_t        tcp;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     bit<64> tmp;
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
@@ -112,7 +114,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".start") state start {
-        meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
+        meta.meta.if_index = (bit<8>)meta.standard_metadata.ingress_port;
         tmp = packet.lookahead<bit<64>>();
         transition select(tmp[63:0]) {
             64w0: parse_cpu_header;
@@ -121,57 +123,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".do_rewrites") action do_rewrites_0(bit<48> smac) {
-        hdr.cpu_header.setInvalid();
-        hdr.ethernet.srcAddr = smac;
-        hdr.ipv4.srcAddr = meta.meta.ipv4_sa;
-        hdr.ipv4.dstAddr = meta.meta.ipv4_da;
-        hdr.tcp.srcPort = meta.meta.tcp_sp;
-        hdr.tcp.dstPort = meta.meta.tcp_dp;
-    }
-    @name("._drop") action _drop_0() {
-        mark_to_drop();
-    }
-    @name(".do_cpu_encap") action do_cpu_encap_0() {
-        hdr.cpu_header.setValid();
-        hdr.cpu_header.preamble = 64w0;
-        hdr.cpu_header.device = 8w0;
-        hdr.cpu_header.reason = 8w0xab;
-        hdr.cpu_header.if_index = meta.meta.if_index;
-    }
-    @name(".send_frame") table send_frame_0 {
-        actions = {
-            do_rewrites_0();
-            _drop_0();
-            @defaultonly NoAction();
-        }
-        key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
-        }
-        size = 256;
-        default_action = NoAction();
-    }
-    @name(".send_to_cpu") table send_to_cpu_0 {
-        actions = {
-            do_cpu_encap_0();
-            @defaultonly NoAction();
-        }
-        default_action = NoAction();
-    }
-    apply {
-        if (standard_metadata.instance_type == 32w0) 
-            send_frame_0.apply();
-        else 
-            send_to_cpu_0.apply();
-    }
-}
-
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
     @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("._drop") action _drop_1() {
+    @name("._drop") action _drop_0() {
         mark_to_drop();
     }
     @name(".set_if_info") action set_if_info_0(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
@@ -181,11 +137,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.meta.nhop_ipv4 = nhop_ipv4;
-        standard_metadata.egress_spec = port;
+        meta.standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext_0() {
-        clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { standard_metadata });
+        clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { meta.standard_metadata });
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int_0() {
         meta.meta.do_forward = 1w0;
@@ -207,7 +163,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".forward") table forward_0 {
         actions = {
             set_dmac_0();
-            _drop_1();
+            _drop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -218,7 +174,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".if_info") table if_info_0 {
         actions = {
-            _drop_1();
+            _drop_0();
             set_if_info_0();
             @defaultonly NoAction();
         }
@@ -230,7 +186,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".ipv4_lpm") table ipv4_lpm_0 {
         actions = {
             set_nhop_0();
-            _drop_1();
+            _drop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -241,7 +197,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nat") table nat_0 {
         actions = {
-            _drop_1();
+            _drop_0();
             nat_miss_int_to_ext_0();
             nat_miss_ext_to_int_0();
             nat_hit_int_to_ext_0();
@@ -271,7 +227,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+    apply {
+    }
+}
+
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<cpu_header_t>(hdr.cpu_header);
         packet.emit<ethernet_t>(hdr.ethernet);
@@ -280,7 +241,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     bit<16> tmp_0;
     bool tmp_1;
     bool tmp_2;
@@ -305,7 +266,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     bit<16> tmp_5;
     bit<16> tmp_6;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
@@ -320,4 +281,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
