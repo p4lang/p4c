@@ -102,6 +102,17 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
     return json;
 }
 
+static cstring quote(cstring s) {
+    std::string out;
+    for (size_t i = 0; i < s.size(); i++) {
+        char c = s.get(i);
+        if (c == '\\' || c == '"')
+            out += "\\";
+        out += c;
+    }
+    return cstring(out);
+}
+
 void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
     Util::SourceInfo si = srcInfo;
     unsigned lineNumber, columnNumber;
@@ -117,7 +128,7 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
     json << json.indent << "\"filename\" : " << fName << "," << std::endl;
     json << json.indent << "\"line\" : " << lineNumber << "," << std::endl;
     json << json.indent << "\"column\" : " << columnNumber << "," << std::endl;
-    json << json.indent << "\"source_fragment\" : " << si.toBriefSourceFragment() << std::endl;
+    json << json.indent << "\"source_fragment\" : " << quote(si.toBriefSourceFragment()) << std::endl;
 
     json << --json.indent << "}";
 }

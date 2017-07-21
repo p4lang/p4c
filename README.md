@@ -37,6 +37,16 @@ The code contains three sample backends:
     [here](#macos-dependencies).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
+
+3.1. Automake: By default, building takes place in a subdirectory named `build`.
+    ```
+    ./bootstrap.sh
+    cd build
+    make -j4
+    make check -j4
+    ```
+
+3.2. CMake: Building should also take place in a subdirectory named `build`.
     ```
     mkdir build
     cd build
@@ -102,7 +112,7 @@ included with `p4c` are documented here:
 
 Most dependencies can be installed using `apt-get install`:
 
-`sudo apt-get install g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev pkg-config python python-scapy python-ipaddr tcpdump`
+`sudo apt-get install g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev pkg-config python python-scapy python-ipaddr tcpdump cmake`
 
 For documentation building:
 `sudo apt-get install -y doxygen graphviz texlive-full`
