@@ -32,6 +32,7 @@ add_library(gtest ${GTEST_ROOT}/src/gtest-all.cc)
 
 set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp
+  gtest/bitvec_test.cpp
   gtest/bmv2_isvalid.cpp
   gtest/call_graph_test.cpp
   gtest/dumpjson.cpp
