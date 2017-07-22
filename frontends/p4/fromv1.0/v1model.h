@@ -62,7 +62,7 @@ struct Control_Model : public ::Model::Elem {
             Model::Elem(name),
             headersParam("hdr", headersType, 0),
             metadataParam("meta", metadataType, 1),
-            standardMetadataParam("__standard_metadata", standardMetadataType, 2) {}
+            standardMetadataParam("standard_metadata", standardMetadataType, 2) {}
     ::Model::Param_Model headersParam;
     ::Model::Param_Model metadataParam;
     ::Model::Param_Model standardMetadataParam;
@@ -250,7 +250,7 @@ class V1Model : public ::Model::Model {
  protected:
     V1Model() :
             Model::Model("0.1"), file("v1model.p4"),
-            standardMetadata("__standard_metadataImpl"),
+            standardMetadata("standard_metadata"),
             headersType("__headersImpl"),
             metadataType("__metadataImpl"),
             standardMetadataType("standard_metadata_t"),
