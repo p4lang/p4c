@@ -75,6 +75,7 @@ endmacro(add_cpplint_files)
 #
 # It generates a ${p4name}.test file invoking ${driver} on the p4
 # program with command line arguments ${args}
+# Sets the timeout on tests at 300s (for the slow Travis machines)
 #
 macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
   set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
@@ -88,7 +89,7 @@ macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
     COMMAND ${tag}/${p4test}.test ${args}
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
   if (NOT DEFINED ${tag}_timeout)
-    set (${tag}_timeout 120)
+    set (${tag}_timeout 300)
   endif()
   set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
   if (${isXfail})
