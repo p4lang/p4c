@@ -1,2 +1,0 @@
-
-AC_CONFIG_FILES(p4c:tools/driver/p4c.in, [chmod +x p4c])

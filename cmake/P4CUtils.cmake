@@ -87,7 +87,10 @@ macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
   add_test (NAME ${__testname}
     COMMAND ${tag}/${p4test}.test ${args}
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
-  set_tests_properties(${__testname} PROPERTIES LABELS ${tag})
+  if (NOT DEFINED ${tag}_timeout)
+    set (${tag}_timeout 120)
+  endif()
+  set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
   if (${isXfail})
     set_tests_properties(${__testname} PROPERTIES WILL_FAIL 1 LABELS "XFAIL")
   endif()

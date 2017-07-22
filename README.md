@@ -36,19 +36,11 @@ The code contains three sample backends:
     for Ubuntu 16.04 [here](#ubuntu-dependencies) and for macOS 10.12
     [here](#macos-dependencies).
 
-3.  Build. There are currently two build systems: automake and cmake. Automake will be deprecated.
-3.1 Automake: By default, building takes place in a subdirectory named `build`.
-    ```
-    ./bootstrap.sh
-    cd build
-    make -j4
-    make check -j4
-    ```
-3.2 CMake: Building should also take place in a subdirectory named `build`.
+3.  Build. Building should also take place in a subdirectory named `build`.
     ```
     mkdir build
     cd build
-    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=1]
+    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=ON (default off)] [-DENABLE_P4RUNTIME_TO_PD=OFF (default on)]
     make -j4
     make -j4 check
     ```
@@ -187,7 +179,7 @@ using the correct version of ctags; there are several competing programs with
 the same name in existence.)
 
 To enable building code documentation, please run
-`bootstrap.sh --enable-doxygen-doc`. This enables the `make docs` rule to
+`bootstrap.sh -DENABLE_DOCS=ON`. This enables the `make docs` rule to
 generate documentation. The HTML output is available in
 `build/doxygen-out/html/index.html`.
 

@@ -13,29 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This command bootstraps the autoconf-based configuration
-# for the P4c compiler
 
 set -e  # exit on error
-./find-makefiles.sh # creates otherMakefiles.am, included in Makefile.am
-
-# Generates unified compilation rules; needs to be done before automake runs.
-./tools/autounify --max-chunk-size 10
 
 mkdir -p extensions # place where additional back-ends are expected
-echo "Running autoconf/configure tools"
-rm -f aclocal.m4  # Needed to ensure we see updates to extension addconfig.ac files.
-case "$(uname)" in
-    Darwin) #MAC OS
-        glibtoolize
-        ;;
-    *)
-        libtoolize
-        ;;
-esac
-autoreconf -i
-mkdir -p build # recommended folder for build
-sourcedir=`pwd`
+mkdir -p build      # recommended folder for build
 cd build
-../configure CXXFLAGS="-g -O0" --disable-doxygen-doc $*
+# Configure for a debug build
+cmake .. -DCMAKE_BUILD_TYPE=DEBUG $*
 echo "### Configured for building in 'build' folder"
