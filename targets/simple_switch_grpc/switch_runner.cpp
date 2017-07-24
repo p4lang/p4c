@@ -96,11 +96,10 @@ class DataplaneInterfaceServiceImpl
   }
 
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                       const char *in_pcap, const char *out_pcap) override {
+                       const PortExtras &port_extras) override {
     _BM_UNUSED(iface_name);
     _BM_UNUSED(port_num);
-    _BM_UNUSED(in_pcap);
-    _BM_UNUSED(out_pcap);
+    _BM_UNUSED(port_extras);
     return ReturnCode::UNSUPPORTED;
   }
 

@@ -78,7 +78,7 @@ class MyDevMgr : public DevMgrIface {
     return {{99, PortInfo(99, "dummy_port")}};
   }
   ReturnCode port_add_(const std::string &, port_t,
-                       const char *, const char *) override {
+                       const PortExtras &) override {
     return ReturnCode::SUCCESS;
   }
   ReturnCode port_remove_(port_t) override { return ReturnCode::SUCCESS; }

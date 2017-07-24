@@ -36,6 +36,9 @@
 
 namespace bm {
 
+constexpr char DevMgrIface::kPortExtraInPcap[];
+constexpr char DevMgrIface::kPortExtraOutPcap[];
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Implementation which uses Pcap files to read/write packets
@@ -48,14 +51,18 @@ class FilesDevMgrImp : public DevMgrIface {
 
  private:
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                       const char *in_pcap, const char *out_pcap) override {
+                       const PortExtras &port_extras) override {
     UNUSED(iface_name);
-    reader.addFile(port_num, std::string(in_pcap));
-    writer.addFile(port_num, std::string(out_pcap));
+    auto it_in_pcap = port_extras.find(kPortExtraInPcap);
+    auto it_out_pcap = port_extras.find(kPortExtraOutPcap);
+    if (it_in_pcap == port_extras.end() || it_out_pcap == port_extras.end()) {
+      Logger::get()->critical("Missing pcap file when adding port");
+      return ReturnCode::ERROR;
+    }
+    reader.addFile(port_num, it_in_pcap->second);
+    writer.addFile(port_num, it_out_pcap->second);
 
-    PortInfo p_info(port_num, iface_name);
-    if (in_pcap) p_info.add_extra("in_pcap", std::string(in_pcap));
-    if (out_pcap) p_info.add_extra("out_pcap", std::string(out_pcap));
+    PortInfo p_info(port_num, iface_name, port_extras);
 
     Lock lock(mutex);
     port_info.emplace(port_num, std::move(p_info));
@@ -113,10 +120,10 @@ DevMgrIface::~DevMgrIface() {
 
 PacketDispatcherIface::ReturnCode
 DevMgrIface::port_add(const std::string &iface_name, port_t port_num,
-                      const char *in_pcap, const char *out_pcap) {
+                      const PortExtras &port_extras) {
   assert(p_monitor);
   p_monitor->notify(port_num, PortStatus::PORT_ADDED);
-  return port_add_(iface_name, port_num, in_pcap, out_pcap);
+  return port_add_(iface_name, port_num, port_extras);
 }
 
 PacketDispatcherIface::ReturnCode
@@ -184,10 +191,10 @@ DevMgr::start() {
 
 PacketDispatcherIface::ReturnCode
 DevMgr::port_add(const std::string &iface_name, port_t port_num,
-                 const char *pcap_in, const char *pcap_out) {
+                 const PortExtras &port_extras) {
   assert(pimp);
   BMLOG_DEBUG("Adding interface {} as port {}", iface_name, port_num);
-  ReturnCode rc = pimp->port_add(iface_name, port_num, pcap_in, pcap_out);
+  ReturnCode rc = pimp->port_add(iface_name, port_num, port_extras);
   if (rc != ReturnCode::SUCCESS)
     Logger::get()->error("Add port operation failed");
   return rc;

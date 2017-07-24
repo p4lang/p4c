@@ -63,12 +63,11 @@ class PacketInDevMgrImp : public DevMgrIface {
   }
 
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                       const char *in_pcap, const char *out_pcap) override {
+                       const PortExtras &port_extras) override {
     // TODO(antonin): do we want to allow this on top of IPC messages?
     (void) iface_name;
     (void) port_num;
-    (void) in_pcap;
-    (void) out_pcap;
+    (void) port_extras;
     Logger::get()->warn("When using packet in, port_add is done "
                         "through IPC messages");
     return ReturnCode::UNSUPPORTED;

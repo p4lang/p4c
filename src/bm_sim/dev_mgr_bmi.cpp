@@ -60,14 +60,18 @@ class BmiDevMgrImp : public DevMgrIface {
   }
 
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                       const char *in_pcap, const char *out_pcap) override {
+                       const PortExtras &port_extras) override {
+    auto it_in_pcap = port_extras.find(kPortExtraInPcap);
+    auto it_out_pcap = port_extras.find(kPortExtraOutPcap);
+    const char *in_pcap = (it_in_pcap == port_extras.end()) ?
+        NULL : it_in_pcap->second.c_str();
+    const char *out_pcap = (it_out_pcap == port_extras.end()) ?
+        NULL : it_out_pcap->second.c_str();
     if (bmi_port_interface_add(port_mgr, iface_name.c_str(), port_num, in_pcap,
                                out_pcap))
       return ReturnCode::ERROR;
 
-    PortInfo p_info(port_num, iface_name);
-    if (in_pcap) p_info.add_extra("in_pcap", std::string(in_pcap));
-    if (out_pcap) p_info.add_extra("out_pcap", std::string(out_pcap));
+    PortInfo p_info(port_num, iface_name, port_extras);
 
     Lock lock(mutex);
     port_info.emplace(port_num, std::move(p_info));

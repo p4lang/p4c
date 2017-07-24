@@ -1027,10 +1027,13 @@ public:
 
   void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
     Logger::get()->trace("bm_dev_mgr_add_port");
-    const char *pcap = NULL;
-    if(pcap_path != "") pcap = pcap_path.c_str();
+    DevMgrIface::PortExtras port_extras;
+    if (!pcap_path.empty()) {
+      port_extras.emplace(DevMgrIface::kPortExtraInPcap, pcap_path);
+      port_extras.emplace(DevMgrIface::kPortExtraOutPcap, pcap_path);
+    }
     DevMgr::ReturnCode error_code;
-    error_code = switch_->port_add(iface_name, port_num, pcap, pcap);
+    error_code = switch_->port_add(iface_name, port_num, port_extras);
     if(error_code != DevMgr::ReturnCode::SUCCESS) {
       InvalidDevMgrOperation idmo;
       idmo.code = (DevMgrErrorCode::type) 1; // TODO

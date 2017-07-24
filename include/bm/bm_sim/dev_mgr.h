@@ -49,10 +49,15 @@ class DevMgrIface : public PacketDispatcherIface {
   using port_t = PortMonitorIface::port_t;
   using PortStatus = PortMonitorIface::PortStatus;
   using PortStatusCb = PortMonitorIface::PortStatusCb;
+  using PortExtras = std::map<std::string, std::string>;
+
+  static constexpr char kPortExtraInPcap[] = "in_pcap";
+  static constexpr char kPortExtraOutPcap[] = "out_pcap";
 
   struct PortInfo {
-    PortInfo(port_t port_num, const std::string &iface_name)
-        : port_num(port_num), iface_name(iface_name) { }
+    PortInfo(port_t port_num, const std::string &iface_name,
+             const PortExtras &port_extras = {})
+        : port_num(port_num), iface_name(iface_name), extra(port_extras) { }
 
     void set_is_up(bool status) {
       is_up = status;
@@ -65,13 +70,13 @@ class DevMgrIface : public PacketDispatcherIface {
     port_t port_num{};
     std::string iface_name{};
     bool is_up{true};
-    std::map<std::string, std::string> extra{};
+    PortExtras extra{};
   };
 
   virtual ~DevMgrIface();
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
-                      const char *in_pcap, const char *out_pcap);
+                      const PortExtras &port_extras);
 
   ReturnCode port_remove(port_t port_num);
 
@@ -99,7 +104,7 @@ class DevMgrIface : public PacketDispatcherIface {
 
  private:
   virtual ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                               const char *in_pcap, const char *out_pcap) = 0;
+                               const PortExtras &port_extras) = 0;
 
   virtual ReturnCode port_remove_(port_t port_num) = 0;
 
@@ -128,6 +133,7 @@ class DevMgr : public PacketDispatcherIface {
   using PortStatus = PortMonitorIface::PortStatus;
   //! @copydoc PortMonitorIface::PortStatusCb
   using PortStatusCb = PortMonitorIface::PortStatusCb;
+  using PortExtras = DevMgrIface::PortExtras;
 
   DevMgr();
 
@@ -155,7 +161,7 @@ class DevMgr : public PacketDispatcherIface {
 #endif
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
-                      const char *in_pcap, const char *out_pcap);
+                      const PortExtras &port_extras);
 
   ReturnCode port_remove(port_t port_num);
 

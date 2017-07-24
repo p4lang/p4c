@@ -83,10 +83,9 @@ class TestDevMgrImp : public DevMgrIface {
   }
 
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                       const char *in_pcap, const char *out_pcap) override {
+                       const PortExtras &port_extras) override {
     (void) iface_name;
-    (void) in_pcap;
-    (void) out_pcap;
+    (void) port_extras;
     std::lock_guard<std::mutex> lock(status_mutex);
     auto it = port_status.find(port_num);
     if (it != port_status.end()) return ReturnCode::ERROR;
@@ -169,7 +168,7 @@ TEST_F(DevMgrTest, cb_test) {
   register_callback();
 
   for (unsigned int i = 0; i < NPORTS; i++) {
-    g_mgr->port_add("dummyport", i, nullptr, nullptr);
+    g_mgr->port_add("dummyport", i, {});
   }
   std::this_thread::sleep_for(std::chrono::seconds(2));
   ASSERT_EQ(NPORTS, get_count(DevMgrIface::PortStatus::PORT_ADDED))

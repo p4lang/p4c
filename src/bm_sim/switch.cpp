@@ -258,24 +258,22 @@ SwitchWContexts::init_from_options_parser(
               << (parser.use_files ? " (files)" : "")
               << std::endl;
 
-    const char* inFileName = NULL;
-    const char* outFileName = NULL;
-
     std::string inFile;
     std::string outFile;
-
     if (parser.use_files) {
       inFile = iface.second + "_in.pcap";
-      inFileName = inFile.c_str();
       outFile = iface.second + "_out.pcap";
-      outFileName = outFile.c_str();
     } else if (parser.pcap) {
       inFile = iface.second + ".pcap";
-      inFileName = inFile.c_str();
-      outFileName = inFileName;
+      outFile = inFile;
     }
 
-    port_add(iface.second, iface.first, inFileName, outFileName);
+    PortExtras port_extras;
+    if (!inFile.empty())
+      port_extras.emplace(DevMgrIface::kPortExtraInPcap, inFile);
+    if (!outFile.empty())
+      port_extras.emplace(DevMgrIface::kPortExtraOutPcap, outFile);
+    port_add(iface.second, iface.first, port_extras);
   }
   thrift_port = parser.thrift_port;
 
