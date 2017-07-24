@@ -32,9 +32,7 @@ header data_t {
 
 struct __metadataImpl {
     @name("m") 
-    metadata_t          m;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    metadata_t m;
 }
 
 struct __headersImpl {
@@ -42,14 +40,14 @@ struct __headersImpl {
     data_t data;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".setmeta") action setmeta_0(bit<8> v0, bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<16> v5, bit<16> v6) {
         meta.m.m10 = v0;
         meta.m.m1 = v1;
@@ -75,7 +73,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -96,4 +94,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

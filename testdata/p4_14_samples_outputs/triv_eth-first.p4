@@ -8,8 +8,6 @@ header ethernet_t {
 }
 
 struct __metadataImpl {
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
 }
 
 struct __headersImpl {
@@ -17,16 +15,16 @@ struct __headersImpl {
     ethernet_t ethernet;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
-        meta.standard_metadata.egress_spec = egress_spec;
+        standard_metadata.egress_spec = egress_spec;
         hdr.ethernet.src_addr = src_addr;
     }
     @name(".noop") action noop() {
@@ -47,7 +45,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -68,4 +66,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

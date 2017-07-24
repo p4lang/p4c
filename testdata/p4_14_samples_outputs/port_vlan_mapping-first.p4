@@ -379,9 +379,7 @@ header vlan_tag_5b_t {
 
 struct __metadataImpl {
     @name("ingress_metadata") 
-    ingress_metadata_t  ingress_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    ingress_metadata_t ingress_metadata;
 }
 
 struct __headersImpl {
@@ -475,7 +473,7 @@ struct __headersImpl {
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -730,7 +728,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".set_bd") action set_bd(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.ipv4_unicast_enabled = ipv4_unicast_enabled;
@@ -864,7 +862,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -930,4 +928,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

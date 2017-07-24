@@ -266,8 +266,6 @@ header vlan_tag_5b_t {
 }
 
 struct __metadataImpl {
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
 }
 
 struct __headersImpl {
@@ -363,7 +361,7 @@ struct __headersImpl {
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     bit<24> tmp_9;
     bit<4> tmp_10;
     @name(".parse_arp_rarp") state parse_arp_rarp {
@@ -618,10 +616,10 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".mark_forward") action mark_forward_0() {
         hdr.data.data = 8w255;
-        meta.standard_metadata.egress_spec = 9w10;
+        standard_metadata.egress_spec = 9w10;
     }
     @name(".mark_check") table mark_check {
         actions = {
@@ -637,7 +635,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -743,4 +741,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

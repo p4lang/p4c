@@ -14,9 +14,7 @@ header ethernet_t {
 
 struct __metadataImpl {
     @name("ing_metadata") 
-    ingress_metadata_t  ing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    ingress_metadata_t ing_metadata;
 }
 
 struct __headersImpl {
@@ -24,14 +22,14 @@ struct __headersImpl {
     ethernet_t ethernet;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract(hdr.ethernet);
         transition accept;
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
     @name(".e_t1") table e_t1 {
@@ -47,7 +45,7 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
     @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
@@ -80,11 +78,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit(hdr.ethernet);
@@ -101,4 +94,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

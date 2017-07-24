@@ -23,8 +23,6 @@ header queueing_metadata_t {
 struct __metadataImpl {
     @name("queueing_metadata") 
     queueing_metadata_t_0 queueing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t   standard_metadata;
 }
 
 struct __headersImpl {
@@ -34,21 +32,21 @@ struct __headersImpl {
     queueing_metadata_t queueing_hdr;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".queueing_dummy") state queueing_dummy {
         packet.extract<queueing_metadata_t>(hdr.queueing_hdr);
         transition accept;
     }
     @name(".start") state start {
         packet.extract<hdr1_t>(hdr.hdr1);
-        transition select(meta.standard_metadata.packet_length) {
+        transition select(standard_metadata.packet_length) {
             32w0: queueing_dummy;
             default: accept;
         }
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
         hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
@@ -68,9 +66,9 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".set_port") action set_port(bit<9> port) {
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
     }
     @name("._drop") action _drop() {
         mark_to_drop();
@@ -92,11 +90,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<hdr1_t>(hdr.hdr1);
@@ -114,4 +107,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

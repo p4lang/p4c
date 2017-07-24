@@ -320,6 +320,13 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
 const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
     str->annotations = str->annotations->where([](const IR::Annotation *a) -> bool {
         return a->name != "length" && a->name != "max_length"; });
+    // auto reservedWord = structure->v1model.isReservedWord(str->name.name);
+    // // this seems to be too late anyway
+    // if (!reservedWord.isNullOrEmpty() && reservedWord != "struct") {
+    //   // the name of the type is a reserved word in out translation.
+    //   // we rename it add the converter will add a name annotation
+    //   structure->types.emplace(str);
+    // }
     return str;
 }
 
@@ -466,14 +473,38 @@ class DiscoverStructure : public Inspector {
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
-    void postorder(const IR::Metadata* md) override
-    { structure->metadata.emplace(md); }
-    void postorder(const IR::Header* hd) override
-    { structure->headers.emplace(hd); }
-    void postorder(const IR::Type_StructLike *t) override
-    { structure->types.emplace(t); }
-    void postorder(const IR::V1Control* control) override
-    { structure->controls.emplace(control); }
+    void postorder(const IR::Metadata* md) override {
+      auto reservedWord = structure->v1model.isReservedWord(md->name.name);
+      if (!reservedWord.isNullOrEmpty() && reservedWord != "metadata")
+        ::error("'%1%' is reserved in P4_14 as a '%2%' and can not be used as metadata",
+                md->name.name, reservedWord);
+      else
+        structure->metadata.emplace(md);
+    }
+    void postorder(const IR::Header* hd) override {
+      auto reservedWord = structure->v1model.isReservedWord(hd->name.name);
+      if (!reservedWord.isNullOrEmpty() && reservedWord != "header")
+        ::error("'%1%' is reserved in P4_14 as a '%2%' and can not be used as header",
+                hd->name.name, reservedWord);
+      else
+        structure->headers.emplace(hd);
+    }
+    void postorder(const IR::Type_StructLike *t) override {
+      auto reservedWord = structure->v1model.isReservedWord(t->name.name);
+      if (!reservedWord.isNullOrEmpty() && reservedWord != "struct")
+        ::error("'%1%' is reserved in P4_14 as a '%2%' and can not be used as struct",
+                t->name.name, reservedWord);
+      else
+        structure->types.emplace(t);
+    }
+    void postorder(const IR::V1Control* control) override {
+      auto reservedWord = structure->v1model.isReservedWord(control->name.name);
+      if (!reservedWord.isNullOrEmpty() && reservedWord != "control")
+        ::error("'%1%' is reserved in P4_14 as a '%2%' and can not be used as control",
+                control->name.name, reservedWord);
+      else
+        structure->controls.emplace(control);
+    }
     void postorder(const IR::V1Parser* parser) override
     { structure->parserStates.emplace(parser); }
     void postorder(const IR::V1Table* table) override
@@ -498,8 +529,14 @@ class DiscoverStructure : public Inspector {
     { structure->meters.emplace(m); }
     void postorder(const IR::ActionSelector* as) override
     { structure->action_selectors.emplace(as); }
-    void postorder(const IR::Type_Extern *ext) override
-    { structure->extern_types.emplace(ext); }
+    void postorder(const IR::Type_Extern *ext) override {
+      auto reservedWord = structure->v1model.isReservedWord(ext->name.name);
+      if (!reservedWord.isNullOrEmpty() && reservedWord != "extern")
+        ::error("'%1%' is reserved in P4_14 as a '%2%' and can not be used as extern",
+                ext->name.name, reservedWord);
+      else
+      structure->extern_types.emplace(ext);
+    }
     void postorder(const IR::Declaration_Instance *ext) override
     { structure->externs.emplace(ext); }
 };
@@ -862,6 +899,8 @@ Converter::Converter() {
     passes.emplace_back(new CheckHeaderTypes());
     passes.emplace_back(new TypeCheck());
     // Convert
+    // add all the reserved names for P4V1
+    // structure.v1model.addReservedWords(structure.allNames);
     passes.emplace_back(new DiscoverStructure(&structure));
     passes.emplace_back(new ComputeCallGraph(&structure));
     passes.emplace_back(new Rewriter(&structure));

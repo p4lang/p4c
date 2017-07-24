@@ -28,9 +28,7 @@ header ipv4_t {
 
 struct __metadataImpl {
     @name("routing_metadata") 
-    routing_metadata_t  routing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    routing_metadata_t routing_metadata;
 }
 
 struct __headersImpl {
@@ -40,7 +38,7 @@ struct __headersImpl {
     ipv4_t     ipv4;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -57,22 +55,46 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
-        hdr.ethernet.dstAddr = dmac;
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+        hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
+    @name(".send_frame") table send_frame_0 {
+        actions = {
+            rewrite_mac_0();
+            _drop_0();
+            @defaultonly NoAction();
+        }
+        key = {
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+        }
+        size = 256;
+        default_action = NoAction();
+    }
+    apply {
+        send_frame_0.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
+        hdr.ethernet.dstAddr = dmac;
+    }
+    @name("._drop") action _drop_1() {
+        mark_to_drop();
+    }
     @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
-        meta.standard_metadata.egress_port = port;
+        standard_metadata.egress_port = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".forward") table forward_0 {
         actions = {
             set_dmac_0();
-            _drop_0();
+            _drop_1();
             @defaultonly NoAction();
         }
         key = {
@@ -84,7 +106,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name(".ipv4_lpm") table ipv4_lpm_0 {
         actions = {
             set_nhop_0();
-            _drop_0();
+            _drop_1();
             @defaultonly NoAction();
         }
         key = {
@@ -98,11 +120,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             ipv4_lpm_0.apply();
             forward_0.apply();
         }
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -134,4 +151,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

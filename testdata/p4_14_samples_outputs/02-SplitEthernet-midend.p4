@@ -14,8 +14,6 @@ header mac_sa_t {
 }
 
 struct __metadataImpl {
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
 }
 
 struct __headersImpl {
@@ -27,7 +25,7 @@ struct __headersImpl {
     mac_sa_t      mac_sa;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_len_or_type") state parse_len_or_type {
         packet.extract<len_or_type_t>(hdr.len_or_type);
         transition accept;
@@ -45,29 +43,44 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name(".nop") action nop_0() {
     }
-    @name(".t1") table t1 {
+    @name(".t2") table t2 {
         actions = {
             nop_0();
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.mac_da.mac       : exact @name("hdr.mac_da.mac") ;
-            hdr.len_or_type.value: exact @name("hdr.len_or_type.value") ;
+            hdr.mac_sa.mac: exact @name("hdr.mac_sa.mac") ;
         }
         default_action = NoAction_0();
     }
     apply {
-        t1.apply();
+        t2.apply();
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_1() {
+    }
+    @name(".nop") action nop_1() {
+    }
+    @name(".t1") table t1 {
+        actions = {
+            nop_1();
+            @defaultonly NoAction_1();
+        }
+        key = {
+            hdr.mac_da.mac       : exact @name("hdr.mac_da.mac") ;
+            hdr.len_or_type.value: exact @name("hdr.len_or_type.value") ;
+        }
+        default_action = NoAction_1();
+    }
     apply {
+        t1.apply();
     }
 }
 
@@ -89,4 +102,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

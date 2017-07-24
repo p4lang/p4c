@@ -23,8 +23,6 @@ header queueing_metadata_t {
 struct __metadataImpl {
     @name("queueing_metadata") 
     queueing_metadata_t_0 queueing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t   standard_metadata;
 }
 
 struct __headersImpl {
@@ -34,25 +32,47 @@ struct __headersImpl {
     queueing_metadata_t queueing_hdr;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".queueing_dummy") state queueing_dummy {
         packet.extract<queueing_metadata_t>(hdr.queueing_hdr);
         transition accept;
     }
     @name(".start") state start {
         packet.extract<hdr1_t>(hdr.hdr1);
-        transition select(meta.standard_metadata.packet_length) {
+        transition select(standard_metadata.packet_length) {
             32w0: queueing_dummy;
             default: accept;
         }
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
+    @name(".copy_queueing_data") action copy_queueing_data_0() {
+        hdr.queueing_hdr.setValid();
+        hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
+        hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
+        hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
+        hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
+    }
+    @name(".t_egress") table t_egress {
+        actions = {
+            copy_queueing_data_0();
+            @defaultonly NoAction_0();
+        }
+        default_action = NoAction_0();
+    }
+    apply {
+        t_egress.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_1() {
+    }
     @name(".set_port") action set_port_0(bit<9> port) {
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
@@ -61,21 +81,16 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         actions = {
             set_port_0();
             _drop_0();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.hdr1.f1: exact @name("hdr.hdr1.f1") ;
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_ingress.apply();
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -96,4 +111,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

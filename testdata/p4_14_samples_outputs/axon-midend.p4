@@ -21,9 +21,7 @@ header axon_hop_t {
 
 struct __metadataImpl {
     @name("my_metadata") 
-    my_metadata_t       my_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    my_metadata_t my_metadata;
 }
 
 struct __headersImpl {
@@ -35,7 +33,7 @@ struct __headersImpl {
     axon_hop_t[64] axon_revHop;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     bit<64> tmp_0;
     @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
@@ -78,7 +76,12 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_3() {
@@ -90,12 +93,12 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         mark_to_drop();
     }
     @name(".route") action route_0() {
-        meta.standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
+        standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);
         hdr.axon_head.revHopCount = hdr.axon_head.revHopCount + 8w1;
         hdr.axon_revHop.push_front(1);
-        hdr.axon_revHop[0].port = (bit<8>)meta.standard_metadata.ingress_port;
+        hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
     @name(".drop_pkt") table drop_pkt {
         actions = {
@@ -123,11 +126,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             drop_pkt.apply();
         else 
             route_pkt.apply();
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -275,4 +273,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

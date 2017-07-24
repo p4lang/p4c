@@ -33,8 +33,6 @@ struct __metadataImpl {
     metaA_t              metaA;
     @name("metaB") 
     metaB_t              metaB;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -42,7 +40,7 @@ struct __headersImpl {
     hdrA_t hdrA;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract<hdrA_t>(hdr.hdrA);
         transition accept;
@@ -54,64 +52,89 @@ struct tuple_0 {
     metaA_t             field_0;
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
-    }
-    @name("NoAction") action NoAction_3() {
     }
     @name("._nop") action _nop_0() {
     }
-    @name("._nop") action _nop_2() {
+    @name("._recirculate") action _recirculate_0() {
+        recirculate<tuple_0>({ standard_metadata, meta.metaA });
+    }
+    @name("._clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
+        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
+    }
+    @name(".t_egress") table t_egress {
+        actions = {
+            _nop_0();
+            _recirculate_0();
+            _clone_e2e_0();
+            @defaultonly NoAction_0();
+        }
+        key = {
+            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+        }
+        size = 128;
+        default_action = NoAction_0();
+    }
+    apply {
+        t_egress.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_1() {
+    }
+    @name("NoAction") action NoAction_5() {
+    }
+    @name("._nop") action _nop_1() {
+    }
+    @name("._nop") action _nop_4() {
     }
     @name("._set_port") action _set_port_0(bit<9> port) {
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
         meta.metaA.f1 = 8w1;
     }
     @name("._multicast") action _multicast_0(bit<4> mgrp) {
         meta.intrinsic_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit_0() {
-        resubmit<tuple_0>({ meta.standard_metadata, meta.metaA });
+        resubmit<tuple_0>({ standard_metadata, meta.metaA });
     }
     @name("._clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.I2E, mirror_id, { meta.standard_metadata, meta.metaA });
+        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {
-            _nop_0();
+            _nop_1();
             _set_port_0();
             _multicast_0();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.hdrA.f1  : exact @name("hdr.hdrA.f1") ;
             meta.metaA.f1: exact @name("meta.metaA.f1") ;
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".t_ingress_2") table t_ingress_2 {
         actions = {
-            _nop_2();
+            _nop_4();
             _resubmit_0();
             _clone_i2e_0();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_5();
         }
         key = {
-            hdr.hdrA.f1                         : exact @name("hdr.hdrA.f1") ;
-            meta.standard_metadata.instance_type: ternary @name("meta.standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
-        default_action = NoAction_3();
+        default_action = NoAction_5();
     }
     apply {
         t_ingress_1.apply();
         t_ingress_2.apply();
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -131,4 +154,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

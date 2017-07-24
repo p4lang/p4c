@@ -50,9 +50,7 @@ header ipv6_t {
 
 struct __metadataImpl {
     @name("egress_metadata") 
-    egress_metadata_t   egress_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    egress_metadata_t egress_metadata;
 }
 
 struct __headersImpl {
@@ -64,7 +62,7 @@ struct __headersImpl {
     ipv6_t     ipv6;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -86,7 +84,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control process_mac_rewrite(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control process_mac_rewrite(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
     @name(".rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac(bit<48> smac) {
@@ -131,7 +129,7 @@ control process_mac_rewrite(inout __headersImpl hdr, inout __metadataImpl meta, 
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".do_setup") action do_setup(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
@@ -148,11 +146,11 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name(".process_mac_rewrite") process_mac_rewrite() process_mac_rewrite_0;
     apply {
         setup.apply();
-        process_mac_rewrite_0.apply(hdr, meta, __standard_metadata);
+        process_mac_rewrite_0.apply(hdr, meta, standard_metadata);
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -175,4 +173,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

@@ -15,9 +15,7 @@ header data_t {
 
 struct __metadataImpl {
     @name("meta") 
-    metadata_t          meta;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    metadata_t meta;
 }
 
 struct __headersImpl {
@@ -25,17 +23,32 @@ struct __headersImpl {
     data_t data;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".copyb1") action copyb1_0() {
+        hdr.data.b1 = meta.meta.val;
+    }
+    @name(".output") table output_0 {
+        actions = {
+            copyb1_0();
+        }
+        default_action = copyb1_0();
+    }
+    apply {
+        output_0.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
         meta.meta.val = val;
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop_0() {
     }
@@ -66,11 +79,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<data_t>(hdr.data);
@@ -87,4 +95,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

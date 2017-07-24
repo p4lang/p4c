@@ -55,8 +55,6 @@ header vlan_tag_t {
 }
 
 struct __metadataImpl {
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
 }
 
 struct __headersImpl {
@@ -68,7 +66,7 @@ struct __headersImpl {
     vlan_tag_t[2] vlan_tag;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     ipv4_t_1 tmp_hdr_1;
     ipv4_t_2 tmp_hdr_2;
     @name(".parse_ethernet") state parse_ethernet {
@@ -113,12 +111,30 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop_0() {
+    }
+    @name(".t2") table t2_0 {
+        actions = {
+            nop_0();
+            @defaultonly NoAction();
+        }
+        key = {
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+        }
+        default_action = NoAction();
+    }
+    apply {
+        t2_0.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".nop") action nop_1() {
     }
     @name(".t1") table t1_0 {
         actions = {
-            nop_0();
+            nop_1();
             @defaultonly NoAction();
         }
         key = {
@@ -128,11 +144,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     apply {
         t1_0.apply();
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -154,4 +165,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

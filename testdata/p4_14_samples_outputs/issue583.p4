@@ -94,9 +94,7 @@ header vlan_tag_t {
 
 struct __metadataImpl {
     @name("routing_metadata") 
-    routing_metadata_t  routing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    routing_metadata_t routing_metadata;
 }
 
 struct __headersImpl {
@@ -118,7 +116,7 @@ struct __headersImpl {
     vlan_tag_t[4] vlan_tag_;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -179,19 +177,19 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".cnt1") counter(32w32, CounterType.packets) cnt1;
     @name(".drop_pkt") action drop_pkt() {
         mark_to_drop();
     }
     @name(".hop") action hop(inout bit<8> ttl, bit<9> egress_spec) {
         ttl = ttl + 8w255;
-        meta.standard_metadata.egress_spec[8:0] = egress_spec[8:0];
+        standard_metadata.egress_spec[8:0] = egress_spec[8:0];
     }
     @name(".hop_ipv4") action hop_ipv4(bit<9> egress_spec) {
         hop(hdr.ipv4.ttl, egress_spec);
@@ -222,11 +220,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit(hdr.ethernet);
@@ -250,4 +243,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

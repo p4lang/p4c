@@ -68,8 +68,6 @@ struct __metadataImpl {
     intrinsic_metadata_t intrinsic_metadata;
     @name("meta") 
     meta_t               meta;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -83,7 +81,7 @@ struct __headersImpl {
     tcp_t        tcp;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     bit<64> tmp_7;
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
@@ -114,7 +112,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
         transition accept;
     }
     @name(".start") state start {
-        meta.meta.if_index = (bit<8>)meta.standard_metadata.ingress_port;
+        meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
         tmp_7 = packet.lookahead<bit<64>>();
         transition select(tmp_7[63:0]) {
             64w0: parse_cpu_header;
@@ -123,32 +121,82 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-struct tuple_0 {
-    standard_metadata_t field;
-}
-
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_5() {
+    @name("NoAction") action NoAction_1() {
     }
-    @name("NoAction") action NoAction_6() {
-    }
-    @name("NoAction") action NoAction_7() {
-    }
-    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
-        hdr.ethernet.dstAddr = dmac;
+    @name(".do_rewrites") action do_rewrites_0(bit<48> smac) {
+        hdr.cpu_header.setInvalid();
+        hdr.ethernet.srcAddr = smac;
+        hdr.ipv4.srcAddr = meta.meta.ipv4_sa;
+        hdr.ipv4.dstAddr = meta.meta.ipv4_da;
+        hdr.tcp.srcPort = meta.meta.tcp_sp;
+        hdr.tcp.dstPort = meta.meta.tcp_dp;
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("._drop") action _drop_4() {
-        mark_to_drop();
+    @name(".do_cpu_encap") action do_cpu_encap_0() {
+        hdr.cpu_header.setValid();
+        hdr.cpu_header.preamble = 64w0;
+        hdr.cpu_header.device = 8w0;
+        hdr.cpu_header.reason = 8w0xab;
+        hdr.cpu_header.if_index = meta.meta.if_index;
     }
-    @name("._drop") action _drop_5() {
+    @name(".send_frame") table send_frame {
+        actions = {
+            do_rewrites_0();
+            _drop_0();
+            @defaultonly NoAction_0();
+        }
+        key = {
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+        }
+        size = 256;
+        default_action = NoAction_0();
+    }
+    @name(".send_to_cpu") table send_to_cpu {
+        actions = {
+            do_cpu_encap_0();
+            @defaultonly NoAction_1();
+        }
+        default_action = NoAction_1();
+    }
+    apply {
+        if (standard_metadata.instance_type == 32w0) 
+            send_frame.apply();
+        else 
+            send_to_cpu.apply();
+    }
+}
+
+struct tuple_0 {
+    standard_metadata_t field;
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_8() {
+    }
+    @name("NoAction") action NoAction_9() {
+    }
+    @name("NoAction") action NoAction_10() {
+    }
+    @name("NoAction") action NoAction_11() {
+    }
+    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
+        hdr.ethernet.dstAddr = dmac;
+    }
+    @name("._drop") action _drop_1() {
         mark_to_drop();
     }
     @name("._drop") action _drop_6() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_7() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_8() {
         mark_to_drop();
     }
     @name(".set_if_info") action set_if_info_0(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
@@ -158,11 +206,11 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.meta.nhop_ipv4 = nhop_ipv4;
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext_0() {
-        clone3<tuple_0>(CloneType.I2E, 32w250, { meta.standard_metadata });
+        clone3<tuple_0>(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int_0() {
         meta.meta.do_forward = 1w0;
@@ -184,47 +232,47 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name(".forward") table forward {
         actions = {
             set_dmac_0();
-            _drop_0();
-            @defaultonly NoAction_0();
+            _drop_1();
+            @defaultonly NoAction_8();
         }
         key = {
             meta.meta.nhop_ipv4: exact @name("meta.meta.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction_0();
+        default_action = NoAction_8();
     }
     @name(".if_info") table if_info {
         actions = {
-            _drop_4();
+            _drop_6();
             set_if_info_0();
-            @defaultonly NoAction_5();
+            @defaultonly NoAction_9();
         }
         key = {
             meta.meta.if_index: exact @name("meta.meta.if_index") ;
         }
-        default_action = NoAction_5();
+        default_action = NoAction_9();
     }
     @name(".ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop_0();
-            _drop_5();
-            @defaultonly NoAction_6();
+            _drop_7();
+            @defaultonly NoAction_10();
         }
         key = {
             meta.meta.ipv4_da: lpm @name("meta.meta.ipv4_da") ;
         }
         size = 1024;
-        default_action = NoAction_6();
+        default_action = NoAction_10();
     }
     @name(".nat") table nat {
         actions = {
-            _drop_6();
+            _drop_8();
             nat_miss_int_to_ext_0();
             nat_miss_ext_to_int_0();
             nat_hit_int_to_ext_0();
             nat_hit_ext_to_int_0();
             nat_no_nat_0();
-            @defaultonly NoAction_7();
+            @defaultonly NoAction_11();
         }
         key = {
             meta.meta.is_ext_if: exact @name("meta.meta.is_ext_if") ;
@@ -236,7 +284,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             hdr.tcp.dstPort    : ternary @name("hdr.tcp.dstPort") ;
         }
         size = 128;
-        default_action = NoAction_7();
+        default_action = NoAction_11();
     }
     apply {
         if_info.apply();
@@ -245,11 +293,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             ipv4_lpm.apply();
             forward.apply();
         }
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -329,4 +372,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

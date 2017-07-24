@@ -22,8 +22,6 @@ header ethernet_t {
 struct __metadataImpl {
     @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -33,7 +31,7 @@ struct __headersImpl {
     ethernet_t   ethernet;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract(hdr.cpu_header);
         transition parse_ethernet;
@@ -50,7 +48,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("._drop") action _drop() {
         mark_to_drop();
     }
@@ -65,7 +63,7 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
             do_cpu_encap;
         }
         key = {
-            meta.standard_metadata.instance_type: exact;
+            standard_metadata.instance_type: exact;
         }
         size = 16;
     }
@@ -74,9 +72,9 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone3(CloneType.I2E, (bit<32>)32w250, { meta.standard_metadata });
+        clone3(CloneType.I2E, (bit<32>)32w250, { standard_metadata });
     }
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {
@@ -86,11 +84,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     apply {
         copy_to_cpu.apply();
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -111,4 +104,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

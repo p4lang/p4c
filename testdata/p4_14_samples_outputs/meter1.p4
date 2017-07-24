@@ -23,8 +23,6 @@ struct __metadataImpl {
     intrinsic_metadata_t intrinsic_metadata;
     @name("meta") 
     meta_t               meta;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -32,7 +30,7 @@ struct __headersImpl {
     ethernet_t ethernet;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition accept;
@@ -42,12 +40,12 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
     @name("._drop") action _drop() {
         mark_to_drop();
@@ -55,8 +53,8 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name("._nop") action _nop() {
     }
     @name(".m_action") action m_action(bit<9> meter_idx) {
-        meta.standard_metadata.egress_spec = meter_idx;
-        meta.standard_metadata.egress_spec = 9w1;
+        standard_metadata.egress_spec = meter_idx;
+        standard_metadata.egress_spec = 9w1;
     }
     @name(".m_filter") table m_filter {
         actions = {
@@ -70,8 +68,8 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".m_action") action m_action_0(bit<9> meter_idx) {
         my_meter.read(meta.meta.meter_tag);
-        meta.standard_metadata.egress_spec = meter_idx;
-        meta.standard_metadata.egress_spec = 9w1;
+        standard_metadata.egress_spec = meter_idx;
+        standard_metadata.egress_spec = 9w1;
     }
     @name("._nop") action _nop_0() {
         my_meter.read(meta.meta.meter_tag);
@@ -93,11 +91,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit(hdr.ethernet);
@@ -114,4 +107,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

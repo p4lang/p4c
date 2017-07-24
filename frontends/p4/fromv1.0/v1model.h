@@ -254,8 +254,12 @@ class V1Model : public ::Model::Model {
             headersType("__headersImpl"),
             metadataType("__metadataImpl"),
             standardMetadataType("standard_metadata_t"),
-            parser(headersType, metadataType, standardMetadataType), deparser(headersType),
-            egress("__egressImpl", headersType, metadataType, standardMetadataType),
+            parser(headersType, metadataType, standardMetadataType),
+            deparser(headersType),
+            // 'egress' is fixed in P4_14
+            egress("egress", headersType, metadataType, standardMetadataType),
+            // ingress is determined based on which state is called from parser
+            // so we can use any name to initialize the control
             ingress("__ingressImpl", headersType, metadataType, standardMetadataType),
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
             action_selector(), clone(), resubmit("resubmit"),
@@ -266,6 +270,48 @@ class V1Model : public ::Model::Model {
             registers(), drop("mark_to_drop"),
             recirculate("recirculate"), directMeter(), directCounter()
     {}
+
+  // a map of reserved words (not language keywords but defined in
+  // v1model.p4 and core.p4) and the type they represent
+  using ReservedWordsMap = std::map<const cstring, const cstring>;
+  ReservedWordsMap _reservedWords = {
+    // core.p4
+    { "packet_in",  "extern" },
+    { "packet_out", "extern" },
+    { "NoAction",   "action" },
+    { "exact",      "match_kind"},
+    { "ternary",    "match_kind"},
+    { "lpm",        "match_kind"},
+    // v1model.p4
+    { "standard_metadata",   "metadata"},
+    { "standard_metadata_t", "struct"},
+    { "range",          "match_kind"},
+    { "selector",       "match_kind"},
+    { "Checksum16",     "extern" },
+    { "CounterType",    "enum" },
+    { "MeterType",      "enum" },
+    { "HashAlgorithm",  "enum" },
+    { "CloneType",      "enum" },
+    { "egress",         "control"},
+    { "counter",        "extern" },
+    { "direct_counter", "extern" },
+    { "meter",          "extern" },
+    { "direct_meter",   "extern" },
+    { "register",       "extern" },
+    { "action_profile", "extern" },
+    { "action_selector", "extern" },
+    { "random",         "extern" },
+    { "digest",         "extern" },
+    { "mark_to_drop",   "extern" },
+    { "hash",           "extern" },
+    { "resubmit",       "extern" },
+    { "recirculate",    "extern" },
+    { "clone",          "extern" },
+    { "clone3",         "extern" },
+    { "truncate",       "extern" },
+    { "V1Switch",       "package" },
+    { "main",           "package" }
+  };
 
  public:
     ::Model::Elem       file;
@@ -303,6 +349,22 @@ class V1Model : public ::Model::Model {
     DirectCounter_Model directCounter;
 
     static V1Model instance;
+
+
+  // check and return the type of a reserved word, empty otherwise
+  const cstring &isReservedWord(const cstring &word) const {
+    auto it = _reservedWords.find(word);
+    if (it != _reservedWords.end())
+      return it->second;
+    else
+      return cstring::empty;
+  }
+
+  // // add all the reserved words to the set
+  // void addReservedWords(std::unordered_set<cstring> &aSet) {
+  //   for (auto it = _reservedWords.begin(); it != _reservedWords.end(); it++)
+  //     aSet.emplace(it->first);
+  // }
 };
 
 }  // namespace P4V1

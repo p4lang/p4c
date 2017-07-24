@@ -18,9 +18,7 @@ header ethernet_t {
 
 struct __metadataImpl {
     @name("ing_metadata") 
-    ingress_metadata_t  ing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    ingress_metadata_t ing_metadata;
 }
 
 struct __headersImpl {
@@ -28,15 +26,33 @@ struct __headersImpl {
     ethernet_t ethernet;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop_0() {
+    }
+    @name(".e_t1") table e_t1_0 {
+        actions = {
+            nop_0();
+            @defaultonly NoAction();
+        }
+        key = {
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+        }
+        default_action = NoAction();
+    }
+    apply {
+        e_t1_0.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".nop") action nop_1() {
     }
     @name(".ing_drop") action ing_drop_0() {
         meta.ing_metadata.drop = 8w1;
@@ -58,7 +74,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".i_t1") table i_t1_0 {
         actions = {
-            nop_0();
+            nop_1();
             ing_drop_0();
             set_f1_0();
             set_f2_0();
@@ -73,7 +89,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".i_t2") table i_t2_0 {
         actions = {
-            nop_0();
+            nop_1();
             set_f2_0();
             @defaultonly NoAction();
         }
@@ -84,7 +100,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".i_t3") table i_t3_0 {
         actions = {
-            nop_0();
+            nop_1();
             set_f3_0();
             @defaultonly NoAction();
         }
@@ -95,7 +111,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".i_t4") table i_t4_0 {
         actions = {
-            nop_0();
+            nop_1();
             set_f4_0();
             @defaultonly NoAction();
         }
@@ -109,7 +125,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             default: {
                 i_t4_0.apply();
             }
-            nop_0: {
+            nop_1: {
                 i_t2_0.apply();
             }
             set_egress_port_0: {
@@ -117,11 +133,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             }
         }
 
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -141,4 +152,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

@@ -68,8 +68,6 @@ struct __metadataImpl {
     intrinsic_metadata_t intrinsic_metadata;
     @name("my_metadata") 
     my_metadata_t        my_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -87,7 +85,7 @@ struct __headersImpl {
     ipv4_option_NOP_t[3]    ipv4_option_NOP;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     ipv4_option_timestamp_t_1 tmp_hdr_1;
     ipv4_option_timestamp_t_2 tmp_hdr_2;
     bit<8> tmp;
@@ -146,12 +144,48 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".format_options_security") action format_options_security_0() {
+        hdr.ipv4_option_NOP.pop_front(3);
+        hdr.ipv4_option_EOL.pop_front(3);
+        hdr.ipv4_option_EOL.push_front(1);
+        hdr.ipv4_base.ihl = 4w8;
+    }
+    @name(".format_options_timestamp") action format_options_timestamp_0() {
+        hdr.ipv4_option_NOP.pop_front(3);
+        hdr.ipv4_option_EOL.pop_front(3);
+        hdr.ipv4_base.ihl = (bit<4>)(8w5 + (hdr.ipv4_option_timestamp.len >> 3));
+    }
+    @name(".format_options_both") action format_options_both_0() {
+        hdr.ipv4_option_NOP.pop_front(3);
+        hdr.ipv4_option_EOL.pop_front(3);
+        hdr.ipv4_option_NOP.push_front(1);
+        hdr.ipv4_option_NOP[0].value = 8w0x1;
+        hdr.ipv4_base.ihl = (bit<4>)(8w8 + (hdr.ipv4_option_timestamp.len >> 2));
+    }
+    @name("._nop") action _nop_0() {
+    }
+    @name(".format_options") table format_options_0 {
+        actions = {
+            format_options_security_0();
+            format_options_timestamp_0();
+            format_options_both_0();
+            _nop_0();
+            @defaultonly NoAction();
+        }
+        key = {
+            hdr.ipv4_option_security.isValid() : exact @name("hdr.ipv4_option_security.isValid()") ;
+            hdr.ipv4_option_timestamp.isValid(): exact @name("hdr.ipv4_option_timestamp.isValid()") ;
+        }
+        size = 4;
+        default_action = NoAction();
+    }
     apply {
+        format_options_0.apply();
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -181,4 +215,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

@@ -30,9 +30,7 @@ header ipv4_t {
 
 struct __metadataImpl {
     @name("ingress_metadata") 
-    ingress_metadata_t  ingress_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    ingress_metadata_t ingress_metadata;
 }
 
 struct __headersImpl {
@@ -42,7 +40,7 @@ struct __headersImpl {
     ipv4_t     ipv4;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -59,7 +57,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".on_miss") action on_miss() {
     }
     @name(".rewrite_src_dst_mac") action rewrite_src_dst_mac(bit<48> smac, bit<48> dmac) {
@@ -81,7 +79,7 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".set_vrf") action set_vrf(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;
     }
@@ -92,7 +90,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".set_egress_details") action set_egress_details(bit<9> egress_spec) {
-        meta.standard_metadata.egress_spec = egress_spec;
+        standard_metadata.egress_spec = egress_spec;
     }
     @name(".set_bd") action set_bd(bit<16> bd) {
         meta.ingress_metadata.bd = bd;
@@ -143,7 +141,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
             set_bd;
         }
         key = {
-            meta.standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port: exact;
         }
         size = 32768;
     }
@@ -159,11 +157,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
 
             nexthop.apply();
         }
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -189,4 +182,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

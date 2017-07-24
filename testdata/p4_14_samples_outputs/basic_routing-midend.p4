@@ -30,9 +30,7 @@ header ipv4_t {
 
 struct __metadataImpl {
     @name("ingress_metadata") 
-    ingress_metadata_t  ingress_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    ingress_metadata_t ingress_metadata;
 }
 
 struct __headersImpl {
@@ -42,7 +40,7 @@ struct __headersImpl {
     ipv4_t     ipv4;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -59,25 +57,51 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_6() {
+    @name(".on_miss") action on_miss_0() {
     }
-    @name("NoAction") action NoAction_7() {
+    @name(".rewrite_src_dst_mac") action rewrite_src_dst_mac_0(bit<48> smac, bit<48> dmac) {
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr = dmac;
+    }
+    @name(".rewrite_mac") table rewrite_mac {
+        actions = {
+            on_miss_0();
+            rewrite_src_dst_mac_0();
+            @defaultonly NoAction_0();
+        }
+        key = {
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
+        }
+        size = 32768;
+        default_action = NoAction_0();
+    }
+    apply {
+        rewrite_mac.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_1() {
     }
     @name("NoAction") action NoAction_8() {
     }
     @name("NoAction") action NoAction_9() {
     }
+    @name("NoAction") action NoAction_10() {
+    }
+    @name("NoAction") action NoAction_11() {
+    }
     @name(".set_vrf") action set_vrf_0(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;
     }
-    @name(".on_miss") action on_miss_0() {
+    @name(".on_miss") action on_miss_1() {
     }
-    @name(".on_miss") action on_miss_3() {
+    @name(".on_miss") action on_miss_5() {
     }
-    @name(".on_miss") action on_miss_4() {
+    @name(".on_miss") action on_miss_6() {
     }
     @name(".fib_hit_nexthop") action fib_hit_nexthop_0(bit<16> nexthop_index) {
         meta.ingress_metadata.nexthop_index = nexthop_index;
@@ -88,7 +112,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".set_egress_details") action set_egress_details_0(bit<9> egress_spec) {
-        meta.standard_metadata.egress_spec = egress_spec;
+        standard_metadata.egress_spec = egress_spec;
     }
     @name(".set_bd") action set_bd_0(bit<16> bd) {
         meta.ingress_metadata.bd = bd;
@@ -96,80 +120,75 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name(".bd") table bd_1 {
         actions = {
             set_vrf_0();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
         }
         size = 65536;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".ipv4_fib") table ipv4_fib {
         actions = {
-            on_miss_0();
+            on_miss_1();
             fib_hit_nexthop_0();
-            @defaultonly NoAction_6();
+            @defaultonly NoAction_8();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
             hdr.ipv4.dstAddr         : exact @name("hdr.ipv4.dstAddr") ;
         }
         size = 131072;
-        default_action = NoAction_6();
+        default_action = NoAction_8();
     }
     @name(".ipv4_fib_lpm") table ipv4_fib_lpm {
         actions = {
-            on_miss_3();
+            on_miss_5();
             fib_hit_nexthop_2();
-            @defaultonly NoAction_7();
+            @defaultonly NoAction_9();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
             hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 16384;
-        default_action = NoAction_7();
+        default_action = NoAction_9();
     }
     @name(".nexthop") table nexthop {
         actions = {
-            on_miss_4();
+            on_miss_6();
             set_egress_details_0();
-            @defaultonly NoAction_8();
+            @defaultonly NoAction_10();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
-        default_action = NoAction_8();
+        default_action = NoAction_10();
     }
     @name(".port_mapping") table port_mapping {
         actions = {
             set_bd_0();
-            @defaultonly NoAction_9();
+            @defaultonly NoAction_11();
         }
         key = {
-            meta.standard_metadata.ingress_port: exact @name("meta.standard_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         size = 32768;
-        default_action = NoAction_9();
+        default_action = NoAction_11();
     }
     apply {
         if (hdr.ipv4.isValid()) {
             port_mapping.apply();
             bd_1.apply();
             switch (ipv4_fib.apply().action_run) {
-                on_miss_0: {
+                on_miss_1: {
                     ipv4_fib_lpm.apply();
                 }
             }
 
             nexthop.apply();
         }
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -213,4 +232,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

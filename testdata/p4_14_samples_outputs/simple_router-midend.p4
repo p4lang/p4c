@@ -28,9 +28,7 @@ header ipv4_t {
 
 struct __metadataImpl {
     @name("routing_metadata") 
-    routing_metadata_t  routing_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    routing_metadata_t routing_metadata;
 }
 
 struct __headersImpl {
@@ -40,7 +38,7 @@ struct __headersImpl {
     ipv4_t     ipv4;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -57,59 +55,80 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
-    }
-    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
-        hdr.ethernet.dstAddr = dmac;
+    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+        hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("._drop") action _drop_2() {
+    @name(".send_frame") table send_frame {
+        actions = {
+            rewrite_mac_0();
+            _drop_0();
+            @defaultonly NoAction_0();
+        }
+        key = {
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+        }
+        size = 256;
+        default_action = NoAction_0();
+    }
+    apply {
+        send_frame.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_1() {
+    }
+    @name("NoAction") action NoAction_5() {
+    }
+    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
+        hdr.ethernet.dstAddr = dmac;
+    }
+    @name("._drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_4() {
         mark_to_drop();
     }
     @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
-        meta.standard_metadata.egress_port = port;
+        standard_metadata.egress_port = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".forward") table forward {
         actions = {
             set_dmac_0();
-            _drop_0();
-            @defaultonly NoAction_0();
+            _drop_1();
+            @defaultonly NoAction_1();
         }
         key = {
             meta.routing_metadata.nhop_ipv4: exact @name("meta.routing_metadata.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop_0();
-            _drop_2();
-            @defaultonly NoAction_3();
+            _drop_4();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 1024;
-        default_action = NoAction_3();
+        default_action = NoAction_5();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
             ipv4_lpm.apply();
             forward.apply();
         }
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -153,4 +172,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

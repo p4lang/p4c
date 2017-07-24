@@ -68,8 +68,6 @@ struct __metadataImpl {
     intrinsic_metadata_t intrinsic_metadata;
     @name("meta") 
     meta_t               meta;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -83,7 +81,7 @@ struct __headersImpl {
     tcp_t        tcp;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract(hdr.cpu_header);
         meta.meta.if_index = hdr.cpu_header.if_index;
@@ -113,7 +111,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
         transition accept;
     }
     @name(".start") state start {
-        meta.meta.if_index = (bit<8>)meta.standard_metadata.ingress_port;
+        meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
         transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
@@ -121,7 +119,7 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".do_rewrites") action do_rewrites(bit<48> smac) {
         hdr.cpu_header.setInvalid();
         hdr.ethernet.srcAddr = smac;
@@ -146,7 +144,7 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
             _drop;
         }
         key = {
-            meta.standard_metadata.egress_port: exact;
+            standard_metadata.egress_port: exact;
         }
         size = 256;
     }
@@ -156,7 +154,7 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
         }
     }
     apply {
-        if (meta.standard_metadata.instance_type == 32w0) {
+        if (standard_metadata.instance_type == 32w0) {
             send_frame.apply();
         }
         else {
@@ -165,7 +163,7 @@ control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standar
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
@@ -179,11 +177,11 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.meta.nhop_ipv4 = nhop_ipv4;
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext() {
-        clone3(CloneType.I2E, (bit<32>)32w250, { meta.standard_metadata });
+        clone3(CloneType.I2E, (bit<32>)32w250, { standard_metadata });
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta.meta.do_forward = 1w0;
@@ -261,11 +259,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit(hdr.cpu_header);
@@ -296,4 +289,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

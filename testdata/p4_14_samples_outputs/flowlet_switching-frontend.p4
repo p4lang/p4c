@@ -57,8 +57,6 @@ struct __metadataImpl {
     ingress_metadata_t   ingress_metadata;
     @name("intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t  standard_metadata;
 }
 
 struct __headersImpl {
@@ -70,7 +68,7 @@ struct __headersImpl {
     tcp_t      tcp;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -94,7 +92,31 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+        hdr.ethernet.srcAddr = smac;
+    }
+    @name("._drop") action _drop_0() {
+        mark_to_drop();
+    }
+    @name(".send_frame") table send_frame_0 {
+        actions = {
+            rewrite_mac_0();
+            _drop_0();
+            @defaultonly NoAction();
+        }
+        key = {
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+        }
+        size = 256;
+        default_action = NoAction();
+    }
+    apply {
+        send_frame_0.apply();
+    }
+}
+
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     bit<14> tmp;
     tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>> tmp_0;
     bit<16> tmp_1;
@@ -103,7 +125,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     bit<32> tmp_4;
     @name(".flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
     @name(".flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
-    @name("._drop") action _drop_0() {
+    @name("._drop") action _drop_1() {
         mark_to_drop();
     }
     @name(".set_ecmp_select") action set_ecmp_select_0(bit<8> ecmp_base, bit<8> ecmp_count) {
@@ -113,7 +135,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.ingress_metadata.nhop_ipv4 = nhop_ipv4;
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".lookup_flowlet_map") action lookup_flowlet_map_0() {
@@ -137,7 +159,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".ecmp_group") table ecmp_group_0 {
         actions = {
-            _drop_0();
+            _drop_1();
             set_ecmp_select_0();
             @defaultonly NoAction();
         }
@@ -149,7 +171,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
     @name(".ecmp_nhop") table ecmp_nhop_0 {
         actions = {
-            _drop_0();
+            _drop_1();
             set_nhop_0();
             @defaultonly NoAction();
         }
@@ -169,7 +191,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name(".forward") table forward_0 {
         actions = {
             set_dmac_0();
-            _drop_0();
+            _drop_1();
             @defaultonly NoAction();
         }
         key = {
@@ -192,11 +214,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         ecmp_group_0.apply();
         ecmp_nhop_0.apply();
         forward_0.apply();
-    }
-}
-
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
     }
 }
 
@@ -229,4 +246,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

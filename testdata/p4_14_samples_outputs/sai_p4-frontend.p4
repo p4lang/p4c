@@ -89,8 +89,6 @@ struct __metadataImpl {
     ingress_metadata_t           ingress_metadata;
     @name("intrinsic_metadata") 
     ingress_intrinsic_metadata_t intrinsic_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t          standard_metadata;
 }
 
 struct __headersImpl {
@@ -102,7 +100,7 @@ struct __headersImpl {
     vlan_t     vlan;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_eth") state parse_eth {
         packet.extract<ethernet_t>(hdr.eth);
         transition select(hdr.eth.ethType) {
@@ -124,6 +122,11 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     }
 }
 
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
 @name("mac_learn_digest") struct mac_learn_digest {
     bit<12> vlan_id;
     bit<48> srcAddr;
@@ -131,12 +134,12 @@ parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImp
     bit<2>  learning;
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".port_counters") direct_counter(CounterType.packets) port_counters_0;
     @name(".fdb_set") action fdb_set_0(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
-        meta.standard_metadata.egress_spec = port_id;
+        standard_metadata.egress_spec = port_id;
         meta.ingress_metadata.routed = 1w0;
     }
     @name(".nop") action nop_0() {
@@ -148,7 +151,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         hdr.eth.dstAddr = dst_mac_address;
         hdr.eth.srcAddr = meta.ingress_metadata.def_smac;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
-        meta.standard_metadata.egress_spec = port_id;
+        standard_metadata.egress_spec = port_id;
     }
     @name(".set_next_hop") action set_next_hop_0(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
         meta.ingress_metadata.router_intf = router_interface_id;
@@ -193,7 +196,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
         meta.ingress_metadata.cpu_port = cpu_port;
         meta.ingress_metadata.max_ports = port_number;
         meta.ingress_metadata.oper_status = oper_status;
-        meta.intrinsic_metadata.ingress_port = meta.standard_metadata.ingress_port;
+        meta.intrinsic_metadata.ingress_port = standard_metadata.ingress_port;
     }
     @name(".set_router") action set_router_0(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
         meta.ingress_metadata.def_smac = src_mac_address;
@@ -337,11 +340,6 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
-    apply {
-    }
-}
-
 control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.eth);
@@ -379,4 +377,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

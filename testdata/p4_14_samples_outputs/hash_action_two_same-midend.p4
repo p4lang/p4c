@@ -23,11 +23,9 @@ header data_t {
 
 struct __metadataImpl {
     @name("counter_metadata") 
-    counter_metadata_t  counter_metadata;
+    counter_metadata_t counter_metadata;
     @name("meter_metadata") 
-    meter_metadata_t    meter_metadata;
-    @name("standard_metadata") 
-    standard_metadata_t standard_metadata;
+    meter_metadata_t   meter_metadata;
 }
 
 struct __headersImpl {
@@ -35,14 +33,14 @@ struct __headersImpl {
     data_t data;
 }
 
-parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
-control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_3() {
@@ -52,7 +50,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     @name(".set_index") action set_index_0(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
         meta.meter_metadata.meter_index = index;
-        meta.standard_metadata.egress_spec = port;
+        standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries_0() {
         count1.count((bit<32>)meta.counter_metadata.counter_index);
@@ -83,7 +81,7 @@ control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standa
     }
 }
 
-control __egressImpl(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t __standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -104,4 +102,4 @@ control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta
     }
 }
 
-V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), __egressImpl(), __computeChecksumImpl(), __DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;
