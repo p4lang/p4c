@@ -27,6 +27,9 @@ class exprUses : public Inspector {
     bool preorder(const IR::Path *p) override {
         if (p->name == look_for) result = true;
         return !result; }
+    bool preorder(const IR::Member *m) override {
+        if (m->toString() == look_for) result = true;
+        return !result; }
     bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result; }
