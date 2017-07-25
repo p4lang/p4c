@@ -12,8 +12,7 @@ ARG MAKEFLAGS=-j2
 # removed from the image.
 ARG IMAGE_TYPE=build
 
-ENV P4C_DEPS automake \
-             bison \
+ENV P4C_DEPS bison \
              build-essential \
              cmake \
              flex \
@@ -23,7 +22,6 @@ ENV P4C_DEPS automake \
              libfl-dev \
              libgc-dev \
              libgmp-dev \
-             libtool \
              pkg-config \
              python-ipaddr \
              python-pip \
