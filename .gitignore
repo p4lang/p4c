@@ -1,10 +1,3 @@
-# Autotools generated files
-
-compile
-depcomp
-missing
-test-driver
-ylwrap
 frontends/p4/p4-lex.c
 frontends/p4/p4-parse.cpp
 py-compile
