@@ -91,11 +91,18 @@ macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
   if (NOT DEFINED ${tag}_timeout)
     set (${tag}_timeout 300)
   endif()
-  set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
   if (${isXfail})
-    set_tests_properties(${__testname} PROPERTIES WILL_FAIL 1 LABELS "XFAIL")
+    set_tests_properties(${__testname} PROPERTIES LABELS "${tag};XFAIL" TIMEOUT ${${tag}_timeout})
+  else()
+    set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
   endif()
 endmacro(p4c_add_test_with_args)
+
+macro(p4c_add_test_label tag newLabel testname)
+  set (__testname ${tag}/${testname})
+  get_property(__labels TEST ${__testname})
+  set_tests_properties(${__testname} PROPERTIES LABELS "${__labels};${newLabel}")
+endmacro(p4c_add_test_label)
 
 # generate all the tests specified in the testsuites
 # Arguments:
