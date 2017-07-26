@@ -37,16 +37,6 @@ The code contains three sample backends:
     [here](#macos-dependencies).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
-
-3.1. Automake: By default, building takes place in a subdirectory named `build`.
-    ```
-    ./bootstrap.sh
-    cd build
-    make -j4
-    make check -j4
-    ```
-
-3.2. CMake: Building should also take place in a subdirectory named `build`.
     ```
     mkdir build
     cd build
