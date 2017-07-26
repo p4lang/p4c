@@ -117,7 +117,8 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
     json << json.indent << "\"filename\" : " << fName << "," << std::endl;
     json << json.indent << "\"line\" : " << lineNumber << "," << std::endl;
     json << json.indent << "\"column\" : " << columnNumber << "," << std::endl;
-    json << json.indent << "\"source_fragment\" : " << si.toBriefSourceFragment() << std::endl;
+    json << json.indent << "\"source_fragment\" : " <<
+            si.toBriefSourceFragment().escapeJson() << std::endl;
 
     json << --json.indent << "}";
 }

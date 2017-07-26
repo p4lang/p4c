@@ -313,9 +313,9 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
         ASSERT_TRUE(falses[1]->is<IR::Constant>());
         EXPECT_EQ(0, falses[1]->to<IR::Constant>()->asInt());
         ASSERT_TRUE(falses[2]->is<IR::BoolLiteral>());
-        EXPECT_EQ(false, falses[2]->to<IR::BoolLiteral>()->value);
+        ASSERT_FALSE(falses[2]->to<IR::BoolLiteral>()->value);
         ASSERT_TRUE(falses[3]->is<IR::BoolLiteral>());
-        EXPECT_EQ(false, falses[3]->to<IR::BoolLiteral>()->value);
+        ASSERT_FALSE(falses[3]->to<IR::BoolLiteral>()->value);
     });
 
     program = program->apply(P4::TypeChecking(&refMap, &typeMap));
