@@ -60,18 +60,29 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    bool key_0;
     @name("a") action a_0() {
     }
     @name("t") table t {
         key = {
-            h.u.isValid(): exact @name("h.u.isValid()") ;
+            key_0: exact @name("h.u.isValid()") ;
         }
         actions = {
             a_0();
         }
         default_action = a_0();
     }
+    @hidden action act() {
+        key_0 = h.u.isValid();
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
     apply {
+        tbl_act.apply();
         t.apply();
     }
 }
