@@ -28,7 +28,10 @@ class exprUses : public Inspector {
         if (p->name == look_for) result = true;
         return !result; }
     bool preorder(const IR::Member *m) override {
-        if (m->toString() == look_for) result = true;
+        if (look_for.endsWith(m->member)) {
+            if (exprUses(m->expr, look_for.before(look_for.findlast('.'))))
+                result = true;
+        }
         return !result; }
     bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
