@@ -124,19 +124,47 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 return result;
             }
         } else if (minst->is<P4::BuiltInMethod>()) {
-            auto bi = minst->to<P4::BuiltInMethod>();
-            if (bi->name == IR::Type_Header::setValid || bi->name == IR::Type_Header::setInvalid) {
-                auto mem = new IR::Member(bi->appliedTo, V1ModelProperties::validField);
-                typeMap->setType(mem, IR::Type_Void::get());
-                auto jexpr = conv->convert(mem, true, false);
-                result->emplace("op", "set");
-                params->append(jexpr);
+            /* example result:
+             {
+                "parameters" : [
+                {
+                  "op" : "add_header",
+                  "parameters" : [{"type" : "header", "value" : "ipv4"}]
+                }
+              ],
+              "op" : "primitive"
+            } */
+            result->emplace("op", "primitive");
 
-                auto bl = new IR::BoolLiteral(bi->name == IR::Type_Header::setValid);
-                auto r = conv->convert(bl, true, true, true);
-                params->append(r);
-                return result;
+            auto bi = minst->to<P4::BuiltInMethod>();
+            cstring primitive;
+            auto paramsValue = new Util::JsonObject();
+            params->append(paramsValue);
+
+            auto pp = mkArrayField(paramsValue, "parameters");
+            auto obj = conv->convert(bi->appliedTo);
+            pp->append(obj);
+
+            if (bi->name == IR::Type_Header::setValid) {
+                primitive = "add_header";
+            } else if (bi->name == IR::Type_Header::setInvalid) {
+                primitive = "remove_header";
+            } else if (bi->name == IR::Type_Stack::push_front ||
+                       bi->name == IR::Type_Stack::pop_front) {
+                if (bi->name == IR::Type_Stack::push_front)
+                    primitive = "push";
+                else
+                    primitive = "pop";
+
+                BUG_CHECK(mce->arguments->size() == 1, "Expected 1 argument for %1%", mce);
+                auto arg = conv->convert(mce->arguments->at(0));
+                pp->append(arg);
+            } else {
+                BUG("%1%: Unexpected built-in method", bi->name);
             }
+
+            paramsValue->emplace("op", primitive);
+            return result;
         }
     }
     ::error("%1%: not supported in parser on this target", stat);
