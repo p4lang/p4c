@@ -111,6 +111,15 @@ def main():
     parser.add_argument("--target-help", dest="show_target_help",
                         help="Display target specific command line options.",
                         action="store_true", default=False)
+    parser.add_argument("--p4runtime-file",
+                        help="Write a P4Runtime control plane API description "
+                        "to the specified file.",
+                        action="store", default=None)
+    parser.add_argument("--p4runtime-format",
+                        choices=["binary", "json", "text"],
+                        help="Choose output format for the P4Runtime API "
+                        "description (default is binary).",
+                        action="store", default="binary")
 
     if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
         add_developer_options(parser)
@@ -231,6 +240,11 @@ def main():
         commands['compiler'].append("--p4v=16")
     else:
         commands['compiler'].append("--p4v=14")
+
+    # P4Runtime options
+    if opts.p4runtime_file:
+        commands['compiler'].append("--p4runtime-file {}".format(opts.p4runtime_file))
+        commands['compiler'].append("--p4runtime-format {}".format(opts.p4runtime_format))
 
     for idx, step in enumerate(cfg.steps[backend]):
 
