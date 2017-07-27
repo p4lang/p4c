@@ -61,6 +61,7 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/bmv2/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
   # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/p4test/p4test ${P4C_BINARY_DIR}/p4test
   # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/ebpf/p4c-ebpf ${P4C_BINARY_DIR}/p4c-ebpf
+  DEPENDS ${P4C_DRIVER_SRCS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Copying p4c driver"
   )
