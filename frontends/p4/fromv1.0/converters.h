@@ -23,8 +23,8 @@ limitations under the License.
 
 namespace P4V1 {
 
-// Converts expressions from v1.0 to v1.2
-// However, the type in each expression is still a v1.0 type.
+// Converts expressions from P4-14 to P4-16
+// However, the type in each expression is still a P4-14 type.
 class ExpressionConverter : public Transform {
  protected:
     ProgramStructure* structure;
@@ -142,7 +142,7 @@ class PrimitiveConverter {
     const IR::Statement *PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(                    \
         ProgramStructure *structure, const IR::Primitive *primitive)
 
-// Is fed a P4 v1.0 program and outputs an equivalent P4 v1.2 program
+// Is fed a P4-14 program and outputs an equivalent P4-16 program
 class Converter : public PassManager {
     ProgramStructure structure;
 

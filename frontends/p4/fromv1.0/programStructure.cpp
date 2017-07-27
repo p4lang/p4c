@@ -164,10 +164,12 @@ void ProgramStructure::createTypes() {
     converted.clear();
     for (auto it : headers) {
         auto type = it.first->type;
+        CHECK_NULL(type);
         createType(type, true, &converted);
     }
     for (auto it : stacks) {
         auto type = it.first->type;
+        CHECK_NULL(type);
         createType(type, true, &converted);
     }
 }
@@ -344,9 +346,11 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
                 ingressReference = dest;
             }
             return new IR::PathExpression(IR::ParserState::accept);
+        } else {
+            ::error("%1%: unknown state", dest);
+            return nullptr;
         }
     }
-    BUG("Unexpected destination %1%", dest);
 }
 
 static const IR::Expression*
@@ -403,6 +407,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
         for (auto c : *parser->cases) {
             IR::ID state = c->action;
             auto deststate = getState(state);
+            if (deststate == nullptr)
+                return nullptr;
             for (auto v : c->values) {
                 auto expr = explodeLabel(v.first, v.second, sizes);
                 auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
@@ -413,6 +419,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     } else if (!parser->default_return.name.isNullOrEmpty()) {
         IR::ID id = parser->default_return;
         select = getState(id);
+        if (select == nullptr)
+            return nullptr;
     } else {
         BUG("No select or default_return %1%", parser);
     }
@@ -456,6 +464,8 @@ void ProgramStructure::createParser() {
     IR::IndexedVector<IR::ParserState> states;
     for (auto p : parserStates) {
         auto ps = convertParser(p.first);
+        if (ps == nullptr)
+            return;
         states.push_back(ps);
     }
 
@@ -467,11 +477,11 @@ void ProgramStructure::createParser() {
 }
 
 void ProgramStructure::include(cstring filename) {
-  // the p4c driver sets environment variables for include
-  // paths.  check the environment and add these to the command
-  // line for the preporicessor
-  char * drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
-  Util::PathName path(drvP4IncludePath ? drvP4IncludePath : p4includePath);
+    // the p4c driver sets environment variables for include
+    // paths.  check the environment and add these to the command
+    // line for the preporicessor
+    char * drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
+    Util::PathName path(drvP4IncludePath ? drvP4IncludePath : p4includePath);
     path = path.join(filename);
 
     CompilerOptions options;
@@ -487,7 +497,7 @@ void ProgramStructure::include(cstring filename) {
 }
 
 void ProgramStructure::loadModel() {
-    // This includes in turn stdlib.p4
+    // This includes in turn core.p4
     include("v1model.p4");
 }
 
@@ -1902,7 +1912,7 @@ void ProgramStructure::createControls() {
     std::vector<cstring> knownControls;
 
     for (auto it : controls)
-        knownControls.push_back(it.second);
+        knownControls.push_back(it.first->name);
     bool cycles = calledControls.sort(knownControls, controlsToDo);
     if (cycles) {
         // TODO: give a better error message
@@ -2211,6 +2221,59 @@ ProgramStructure::tablesReferred(const IR::V1Control* control,
     std::sort(out.begin(), out.end(),
               [](const IR::V1Table* left, const IR::V1Table* right) {
                   return left->name.name < right->name.name; });
+}
+
+void ProgramStructure::populateOutputNames() {
+    static const char* used_names[] = {
+        // core.p4
+        "packet_in",
+        "packet_out",
+        "NoAction",
+        "exact",
+        "ternary",
+        "lpm",
+        // v1model.p4
+        "range",
+        "selector",
+        // v1model externs
+        "Checksum16",
+        "CounterType",
+        "MeterType",
+        "HashAlgorithm",
+        "CloneType",
+        "counter",
+        "direct_counter",
+        "meter",
+        "direct_meter",
+        "register",
+        "action_profile",
+        "action_selector",
+        "random",
+        "digest",
+        "mark_to_drop",
+        "hash",
+        "resubmit",
+        "recirculate",
+        "clone",
+        "clone3",
+        "truncate",
+        "V1Switch",
+        // other v1model names
+        "main",
+        "headers",
+        "metadata",
+        "computeChecksum",
+        "verifyChecksum",
+        "ParserImpl",
+        "DeparserImpl",
+        // parameters
+        "packet",
+        "hdr",
+        "meta",
+        nullptr
+    };
+    for (const char** c = used_names; *c != nullptr; ++c)
+        allNames.emplace(*c);
 }
 
 }  // namespace P4V1

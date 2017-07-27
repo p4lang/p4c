@@ -462,46 +462,64 @@ namespace {
 class DiscoverStructure : public Inspector {
     ProgramStructure* structure;
 
+    // These names can only be used for very specific purposes
+    std::map<cstring, cstring> reserved_names = {
+        { "standard_metadata_t", "type" },
+        { "standard_metadata", "metadata" },
+        { "egress", "control" }
+    };
+
+    void checkReserved(const IR::Node* node, cstring nodeName, cstring kind) const {
+        auto it = reserved_names.find(nodeName);
+        if (it == reserved_names.end())
+            return;
+        if (it->second != kind)
+            ::error("%1% cannot have this name; it can only be used for %2%", node, it->second);
+    }
+    void checkReserved(const IR::Node* node, cstring nodeName) const {
+        checkReserved(node, nodeName, nullptr);
+    }
+
  public:
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
     void postorder(const IR::Metadata* md) override
-    { structure->metadata.emplace(md); }
+    { structure->metadata.emplace(md); checkReserved(md, md->name, "metadata"); }
     void postorder(const IR::Header* hd) override
-    { structure->headers.emplace(hd); }
+    { structure->headers.emplace(hd); checkReserved(hd, hd->name); }
     void postorder(const IR::Type_StructLike *t) override
-    { structure->types.emplace(t); }
+    { structure->types.emplace(t); checkReserved(t, t->name, "type"); }
     void postorder(const IR::V1Control* control) override
-    { structure->controls.emplace(control); }
+    { structure->controls.emplace(control); checkReserved(control, control->name, "control"); }
     void postorder(const IR::V1Parser* parser) override
-    { structure->parserStates.emplace(parser); }
+    { structure->parserStates.emplace(parser); checkReserved(parser, parser->name); }
     void postorder(const IR::V1Table* table) override
-    { structure->tables.emplace(table); }
+    { structure->tables.emplace(table); checkReserved(table, table->name); }
     void postorder(const IR::ActionFunction* action) override
-    { structure->actions.emplace(action); }
+    { structure->actions.emplace(action); checkReserved(action, action->name); }
     void postorder(const IR::HeaderStack* stack) override
-    { structure->stacks.emplace(stack); }
+    { structure->stacks.emplace(stack); checkReserved(stack, stack->name); }
     void postorder(const IR::Counter* count) override
-    { structure->counters.emplace(count); }
+    { structure->counters.emplace(count); checkReserved(count, count->name); }
     void postorder(const IR::Register* reg) override
-    { structure->registers.emplace(reg); }
+    { structure->registers.emplace(reg); checkReserved(reg, reg->name); }
     void postorder(const IR::ActionProfile* ap) override
-    { structure->action_profiles.emplace(ap); }
+    { structure->action_profiles.emplace(ap); checkReserved(ap, ap->name); }
     void postorder(const IR::FieldList* fl) override
-    { structure->field_lists.emplace(fl); }
+    { structure->field_lists.emplace(fl); checkReserved(fl, fl->name); }
     void postorder(const IR::FieldListCalculation* flc) override
-    { structure->field_list_calculations.emplace(flc); }
+    { structure->field_list_calculations.emplace(flc); checkReserved(flc, flc->name); }
     void postorder(const IR::CalculatedField* cf) override
     { structure->calculated_fields.push_back(cf); }
     void postorder(const IR::Meter* m) override
-    { structure->meters.emplace(m); }
+    { structure->meters.emplace(m); checkReserved(m, m->name); }
     void postorder(const IR::ActionSelector* as) override
-    { structure->action_selectors.emplace(as); }
+    { structure->action_selectors.emplace(as); checkReserved(as, as->name); }
     void postorder(const IR::Type_Extern *ext) override
-    { structure->extern_types.emplace(ext); }
+    { structure->extern_types.emplace(ext); checkReserved(ext, ext->name); }
     void postorder(const IR::Declaration_Instance *ext) override
-    { structure->externs.emplace(ext); }
+    { structure->externs.emplace(ext); checkReserved(ext, ext->name); }
 };
 
 class ComputeCallGraph : public Inspector {
@@ -856,6 +874,7 @@ class FixExtracts final : public Transform {
 
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
+    structure.populateOutputNames();
 
     // Discover types using P4 v1.1 type-checker
     passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
