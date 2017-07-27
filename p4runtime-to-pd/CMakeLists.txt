@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+set (prefix ${CMAKE_INSTALL_PREFIX})
+set (exec_prefix ${CMAKE_INSTALL_PREFIX})
+set (datarootdir "\${prefix}/share")
 configure_file ("p4runtime-to-pd.in" "${CMAKE_CURRENT_BINARY_DIR}/p4runtime-to-pd" @ONLY)
 
 # p4runtime-to-pd is a script to generate PD files directly from P4Runtime. The
@@ -30,5 +32,5 @@ install (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/p4runtime-to-pd
 install (FILES ${P4RUNTIME_TO_PD_SRCS}
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4runtime_to_pd_src)
 install (DIRECTORY templates
-  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4runtime-to-pd
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4runtime_to_pd_src/p4runtime-to-pd
   FILES_MATCHING PATTERN "*.h" PATTERN "*.cpp" PATTERN "*.ipp" PATTERN "*.thrift")
