@@ -216,10 +216,8 @@ class ProgramStructure {
     void createChecksumVerifications();
     void createChecksumUpdates();
     void createStructures();
-    void createExterns();
     cstring createType(const IR::Type_StructLike* type, bool header,
                        std::unordered_set<const IR::Type*> *converted);
-    void createTypes();
     void createParser();
     void createControls();
     void createDeparser();
@@ -251,6 +249,8 @@ class ProgramStructure {
     const int defaultRegisterWidth = 32;
 
     void loadModel();
+    void createExterns();
+    void createTypes();
     const IR::P4Program* create(Util::SourceInfo info);
 };
 
