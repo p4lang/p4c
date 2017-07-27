@@ -61,6 +61,10 @@ macro(add_cpplint_files dir filelist)
   set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
 endmacro(add_cpplint_files)
 
+macro(p4c_test_set_name name tag alias)
+  set(${name} ${tag}/${alias})
+endmacro(p4c_test_set_name)
+
 # add a single test to the testsuite
 # Arguments:
 #   - tag is a label for the set of test suite where this test belongs
@@ -84,7 +88,7 @@ macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
   file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
   file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} $* ${P4C_SOURCE_DIR}/${p4test}")
   execute_process(COMMAND chmod +x ${__testfile})
-  set(__testname ${tag}/${alias})
+  p4c_test_set_name(__testname ${tag} ${alias})
   add_test (NAME ${__testname}
     COMMAND ${tag}/${p4test}.test ${args}
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
@@ -123,10 +127,10 @@ macro(p4c_add_tests tag driver testsuites xfail)
     foreach(t ${__testfiles})
       list (FIND __xfail_list ${t} __xfail_test)
       if(__xfail_test GREATER -1)
-        p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "")
+        p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}")
         math (EXPR __xfailCounter "${__xfailCounter} + 1")
       else()
-        p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "")
+        p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}")
       endif() # __xfail_test
     endforeach() # testfiles
     math (EXPR __testCounter "${__testCounter} + ${__nTests}")
