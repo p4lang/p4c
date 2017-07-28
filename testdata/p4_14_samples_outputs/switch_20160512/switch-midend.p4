@@ -640,7 +640,7 @@ header vlan_tag_t {
     bit<16> etherType;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("acl_metadata") 
     acl_metadata_t               acl_metadata;
     @name("egress_filter_metadata") 
@@ -687,7 +687,7 @@ struct metadata {
     tunnel_metadata_t            tunnel_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("arp_rarp") 
     arp_rarp_t                              arp_rarp;
     @name("arp_rarp_ipv4") 
@@ -806,7 +806,7 @@ struct headers {
     vlan_tag_t[2]                           vlan_tag_;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     bit<4> tmp_0;
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
@@ -1209,7 +1209,7 @@ struct tuple_1 {
     bit<9>  field_4;
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_1() {
@@ -3178,7 +3178,7 @@ struct tuple_9 {
     bit<8>  field_39;
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     bit<16> _process_hashes_tmp_9;
     tuple_2 _process_hashes_tmp_10;
     bit<16> _process_hashes_tmp_11;
@@ -5971,7 +5971,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<fabric_header_t>(hdr.fabric_header);
@@ -6059,7 +6059,7 @@ struct tuple_10 {
     bit<32> field_50;
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     bool tmp_1;
     bit<16> tmp_2;
     bool tmp_4;
@@ -6086,7 +6086,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     bit<16> tmp_7;
     bit<16> tmp_8;
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_2;
@@ -6103,4 +6103,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;

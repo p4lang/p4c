@@ -82,7 +82,7 @@ header vlan_t {
     bit<16> ethType;
 }
 
-struct metadata {
+struct __metadataImpl {
     @name("egress_metadata") 
     egress_metadata_t            egress_metadata;
     @name("ingress_metadata") 
@@ -91,7 +91,7 @@ struct metadata {
     ingress_intrinsic_metadata_t intrinsic_metadata;
 }
 
-struct headers {
+struct __headersImpl {
     @name("eth") 
     ethernet_t eth;
     @name("ipv4") 
@@ -100,7 +100,7 @@ struct headers {
     vlan_t     vlan;
 }
 
-parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+parser __ParserImpl(packet_in packet, out __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_eth") state parse_eth {
         packet.extract<ethernet_t>(hdr.eth);
         transition select(hdr.eth.ethType) {
@@ -122,7 +122,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control egress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }
@@ -134,7 +134,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     bit<2>  learning;
 }
 
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control ingress(inout __headersImpl hdr, inout __metadataImpl meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
     @name("NoAction") action NoAction_10() {
@@ -355,7 +355,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 }
 
-control DeparserImpl(packet_out packet, in headers hdr) {
+control __DeparserImpl(packet_out packet, in __headersImpl hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.eth);
         packet.emit<ipv4_t>(hdr.ipv4);
@@ -377,7 +377,7 @@ struct tuple_0 {
     bit<32> field_9;
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control __verifyChecksumImpl(in __headersImpl hdr, inout __metadataImpl meta) {
     bool tmp_3;
     bit<16> tmp_4;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
@@ -393,7 +393,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control __computeChecksumImpl(inout __headersImpl hdr, inout __metadataImpl meta) {
     bit<16> tmp_6;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     apply {
@@ -404,4 +404,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<__headersImpl, __metadataImpl>(__ParserImpl(), __verifyChecksumImpl(), ingress(), egress(), __computeChecksumImpl(), __DeparserImpl()) main;
