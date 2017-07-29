@@ -65,6 +65,8 @@ void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
 
 /// The accept and reject states cannot be implemented
 void ValidateParsedProgram::postorder(const IR::ParserState* s) {
+    if (policy != nullptr && !policy->validate(s))
+        return;
     if (s->name == IR::ParserState::accept ||
         s->name == IR::ParserState::reject)
         ::error("%1%: parser state should not be implemented, it is built-in", s->name);

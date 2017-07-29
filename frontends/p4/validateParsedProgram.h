@@ -22,6 +22,19 @@ limitations under the License.
 namespace P4 {
 
 /**
+Policy which selects the whether certain checks are applied.
+*/
+class ValidateParsedProgramPolicy {
+public:
+    virtual ~ValidateParsedProgramPolicy() {}
+    /**
+       If the policy returns true the check is applied,
+       otherwise the check is skipped.
+    */
+    virtual bool validate(const IR::ParserState* state) const = 0;
+};
+
+/**
    This pass performs some simple semantic checks on the program;
    since the grammar accepts many programs that are actually illegal,
    this pass does some additional validation.
@@ -44,6 +57,7 @@ namespace P4 {
    - extern constructors have the same name as the enclosing extern
  */
 class ValidateParsedProgram final : public Inspector {
+    ValidateParsedProgramPolicy* policy;
     void container(const IR::IContainer* type);
     // Make sure that type, apply and constructor parameters are distinct
     void distinctParameters(
@@ -52,8 +66,8 @@ class ValidateParsedProgram final : public Inspector {
         const IR::ParameterList* constr);
 
  public:
-    ValidateParsedProgram()
-    { setName("ValidateParsedProgram"); }
+    ValidateParsedProgram(ValidateParsedProgramPolicy* policy)
+        : policy(policy) { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;
     void postorder(const IR::Method* t) override;
