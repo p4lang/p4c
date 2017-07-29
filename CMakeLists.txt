@@ -46,7 +46,11 @@ include_directories(${LibGmp_INCLUDE_DIRS})
 include_directories(${LibGc_INCLUDE_DIRS})
 
 set (HAVE_LIBBOOST_IOSTREAMS 1)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES};${LibGmp_LIBRARIES};${LibGc_LIBRARIES}")
+set (HAVE_LIBGC 1)
+set (HAVE_LIBGMP 1)
+set (HAVE_LIBGMPXX ${LibGmpxx_LIBRARY})
+
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES};${LibGmp_LIBRARIES};${LibGc_LIBRARIES};gmp;gmpxx;gc")
 
 # other required libraries
 p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
