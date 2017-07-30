@@ -225,6 +225,9 @@ class ProgramStructure {
 
  public:
     void include(cstring filename);
+    /// This inserts the names of the identifiers used in the output P4-16 programs
+    /// into allNames, forcing P4-14 names that clash to be renamed.
+    void populateOutputNames();
     const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                           const IR::Expression* right, const IR::Type* type);
     const IR::Expression* convertFieldList(const IR::Expression* expression);
