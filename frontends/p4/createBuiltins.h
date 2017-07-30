@@ -42,7 +42,7 @@ class CreateBuiltins final : public Modifier {
     CreateBuiltinsPolicy* policy;
  public:
     using Modifier::postorder;
-    CreateBuiltins(CreateBuiltinsPolicy* policy)
+    CreateBuiltins(CreateBuiltinsPolicy* policy = nullptr)
             : policy(policy) { setName("CreateBuiltins"); }
     void postorder(IR::ParserState* state) override;
     void postorder(IR::P4Parser* parser) override;

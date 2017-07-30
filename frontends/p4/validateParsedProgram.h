@@ -66,7 +66,7 @@ class ValidateParsedProgram final : public Inspector {
         const IR::ParameterList* constr);
 
  public:
-    ValidateParsedProgram(ValidateParsedProgramPolicy* policy)
+    ValidateParsedProgram(ValidateParsedProgramPolicy* policy = nullptr)
         : policy(policy) { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;

@@ -96,7 +96,7 @@ TEST(BMV2_SynthesizeValidField, Expressions) {
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     PassManager passes = {
-        new P4::CreateBuiltins(nullptr),
+        new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
         new SynthesizeValidField(&refMap, &typeMap),
     };
@@ -182,7 +182,7 @@ TEST(BMV2_SynthesizeValidField, MatchKeys) {
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     PassManager passes = {
-        new P4::CreateBuiltins(nullptr),
+        new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
         new SynthesizeValidField(&refMap, &typeMap),
     };
@@ -284,7 +284,7 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     PassManager passes = {
-        new P4::CreateBuiltins(nullptr),
+        new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
         new SynthesizeValidField(&refMap, &typeMap),
     };
@@ -362,7 +362,7 @@ TEST(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     PassManager passes = {
-        new P4::CreateBuiltins(nullptr),
+        new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
         new SynthesizeValidField(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
