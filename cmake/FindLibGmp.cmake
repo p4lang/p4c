@@ -12,19 +12,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-find_path(LibGmp_INCLUDE_DIR NAMES gmp.h)
-find_library(LibGmp_LIBRARY NAMES gmp libgmp)
-find_library(LibGmpxx_LIBRARY NAMES gmpxx libgmpxx)
+# FindLibGmp
+# -----------
+#
+# Try to find LibGmp the GNU Multiple Precision Arithmetic Library
+#
+# Once done this will define
+#
+# ::
+#
+#   LIBGMP_FOUND - System has LibGmp
+#   LIBGMP_INCLUDE_DIR - The LibGmp include directory
+#   LIBGMP_LIBRARIES - The libraries needed to use LibGmp
+#   LIBGMP_DEFINITIONS - Compiler switches required for using LibGmp
+find_package(PkgConfig QUIET)
+PKG_CHECK_MODULES(PC_LIBGMP QUIET gmp)
+set(LIBGMP_DEFINITIONS ${PC_LIBGMP_CFLAGS_OTHER})
 
-include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(LibGmp
-    REQUIRED_VARS LibGmp_INCLUDE_DIR LibGmp_LIBRARY LibGmpxx_LIBRARY
+
+find_path(LIBGMP_INCLUDE_DIR NAMES gmp.h
+    HINTS
+    ${PC_LIBGMP_INCLUDEDIR}
+    ${PC_LIBGMP_INCLUDE_DIRS}
     )
 
-set(LibGmp_FOUND ${LIBGMP_FOUND})
-unset(LIBGMP_FOUND)
+find_library(LIBGMP_LIBRARY NAMES gmp libgmp
+    HINTS
+    ${PC_LIBGMP_LIBDIR}
+    ${PC_LIBGMP_LIBRARY_DIRS}
+    )
 
-if(LibGmp_FOUND)
-    set(LibGmp_INCLUDE_DIRS ${LibGmp_INCLUDE_DIR})
-    set(LibGmp_LIBRARIES    ${LibGmp_LIBRARY};${LibGmpxx_LIBRARY})
+find_library(LIBGMPXX_LIBRARY NAMES gmpxx libgmpxx
+    HINTS
+    ${PC_LIBGMP_LIBDIR}
+    ${PC_LIBGMP_LIBRARY_DIRS}
+    )
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LibGmp
+    REQUIRED_VARS LIBGMPXX_LIBRARY LIBGMP_LIBRARY LIBGMP_INCLUDE_DIR
+    )
+mark_as_advanced(LIBGMP_INCLUDE_DIR LIBGMP_LIBRARY LIBGMPXX_LIBRARY)
+
+if(LIBGMP_FOUND)
+    set(LIBGMP_LIBRARIES ${LIBGMP_LIBRARY} ${LIBGMPXX_LIBRARY})
 endif()
+

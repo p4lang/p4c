@@ -38,19 +38,16 @@ find_package (FLEX REQUIRED)
 find_package (BISON REQUIRED)
 find_package (Protobuf 3.0.0 REQUIRED)
 find_package (Boost REQUIRED COMPONENTS iostreams)
-find_package (LibGmp REQUIRED)
 find_package (LibGc REQUIRED)
-
+find_package (LibGmp REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${LibGmp_INCLUDE_DIRS})
-include_directories(${LibGc_INCLUDE_DIRS})
-
+include_directories(${LIBGMP_INCLUDE_DIR})
+include_directories(${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
 set (HAVE_LIBGC 1)
 set (HAVE_LIBGMP 1)
-set (HAVE_LIBGMPXX ${LibGmpxx_LIBRARY})
-
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES};${LibGmp_LIBRARIES};${LibGc_LIBRARIES};gmp;gmpxx;gc")
+set (HAVE_LIBGMPXX ${LIBGMPXX_LIBRARY})
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES};${LIBGMP_LIBRARIES};${LIBGC_LIBRARIES}")
 
 # other required libraries
 p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
