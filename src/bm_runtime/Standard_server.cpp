@@ -969,6 +969,18 @@ public:
     return value.get<int64_t>();
   }
 
+  void bm_register_read_all(std::vector<BmRegisterValue> & _return, const int32_t cxt_id, const std::string& register_array_name) {
+    Logger::get()->trace("bm_register_read_all");
+    auto entries = switch_->register_read_all(cxt_id, register_array_name);
+    if (entries.empty()) {
+      InvalidRegisterOperation iro;
+      iro.code = RegisterOperationErrorCode::INVALID_REGISTER_NAME;
+      throw iro;
+    }
+    for (const auto &entry : entries)
+      _return.push_back(entry.get<BmRegisterValue>());
+  }
+
   void bm_register_write(const int32_t cxt_id, const std::string& register_array_name, const int32_t index, const BmRegisterValue value) {
     Logger::get()->trace("bm_register_write");
     Register::RegisterErrorCode error_code = switch_->register_write(

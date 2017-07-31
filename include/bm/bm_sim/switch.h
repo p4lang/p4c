@@ -719,6 +719,11 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).register_read(register_name, idx, value);
   }
 
+  std::vector<Data>
+  register_read_all(size_t cxt_id, const std::string &register_name) override {
+    return contexts.at(cxt_id).register_read_all(register_name);
+  }
+
   RegisterErrorCode
   register_write(size_t cxt_id,
                  const std::string &register_name,

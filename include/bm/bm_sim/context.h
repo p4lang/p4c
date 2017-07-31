@@ -363,6 +363,9 @@ class Context final {
   register_read(const std::string &register_name,
                 const size_t idx, Data *value);
 
+  std::vector<Data>
+  register_read_all(const std::string &register_name);
+
   RegisterErrorCode
   register_write(const std::string &register_name,
                  const size_t idx, Data value);

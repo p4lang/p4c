@@ -1826,18 +1826,25 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_register_read(self, line):
-        "Read register value: register_read <name> <index>"
+        "Read register value: register_read <name> [index]"
         args = line.split()
-        self.exactly_n_args(args, 2)
+        self.at_least_n_args(args, 1)
         register_name = args[0]
         register = self.get_res("register", register_name, REGISTER_ARRAYS)
-        index = args[1]
-        try:
-            index = int(index)
-        except:
-            raise UIn_Error("Bad format for index")
-        value = self.client.bm_register_read(0, register_name, index)
-        print "%s[%d]= " % (register_name, index), value
+        if len(args) > 1:
+            self.exactly_n_args(args, 2)
+            index = args[1]
+            try:
+                index = int(index)
+            except:
+                raise UIn_Error("Bad format for index")
+            value = self.client.bm_register_read(0, register_name, index)
+            print "{}[{}]=".format(register_name, index), value
+        else:
+            sys.stderr.write("register index omitted, reading entire array\n")
+            entries = self.client.bm_register_read_all(0, register_name)
+            print "{}=".format(register_name), ", ".join(
+                [str(e) for e in entries])
 
     def complete_register_read(self, text, line, start_index, end_index):
         return self._complete_registers(text)

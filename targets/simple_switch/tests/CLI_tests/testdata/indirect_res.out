@@ -11,7 +11,7 @@ Invalid meter operation (INVALID_INFO_RATE_VALUE)
 0: info rate = 1.0, burst size = 1
 1: info rate = 2.0, burst size = 1
 ????
-my_register[0]=  0
+my_register[0]= 0
 ????
 Invalid register operation (INVALID_INDEX)
 ????

@@ -574,6 +574,18 @@ Context::register_read(const std::string &register_name,
   return Register::SUCCESS;
 }
 
+std::vector<Data>
+Context::register_read_all(const std::string &register_name) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto register_array = p4objects_rt->get_register_array_rt(register_name);
+  if (!register_array) return {};
+  auto register_lock = register_array->unique_lock();
+  std::vector<Data> entries;
+  entries.reserve(register_array->size());
+  for (const auto &reg : *register_array) entries.push_back(reg);
+  return entries;
+}
+
 Context::RegisterErrorCode
 Context::register_write(const std::string &register_name,
                         const size_t idx, Data value) {

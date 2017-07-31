@@ -620,6 +620,11 @@ service Standard {
     3:i32 idx
   ) throws (1:InvalidRegisterOperation ouch)
 
+  list<BmRegisterValue> bm_register_read_all(
+    1:i32 cxt_id,
+    2:string register_array_name
+  ) throws (1:InvalidRegisterOperation ouch)
+
   void bm_register_write(
     1:i32 cxt_id,
     2:string register_array_name,

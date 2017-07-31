@@ -334,6 +334,9 @@ class RuntimeInterface {
                 const std::string &register_name,
                 const size_t idx, Data *value) = 0;
 
+  virtual std::vector<Data>
+  register_read_all(size_t cxt_id, const std::string &register_name) = 0;
+
   virtual RegisterErrorCode
   register_write(size_t cxt_id,
                  const std::string &register_name,
