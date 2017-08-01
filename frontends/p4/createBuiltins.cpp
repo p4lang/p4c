@@ -20,6 +20,8 @@ limitations under the License.
 
 namespace P4 {
 void CreateBuiltins::postorder(IR::P4Parser* parser) {
+    if (policy != nullptr && !policy->convert(parser))
+        return;
     parser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
     parser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
 }

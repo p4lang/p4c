@@ -19,14 +19,24 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "../common/options.h"
+#include "validateParsedProgram.h"
+#include "createBuiltins.h"
 
 namespace P4 {
 
 class FrontEnd {
     std::vector<DebugHook> hooks;
+    ValidateParsedProgramPolicy* validateParsedProgramPolicy;
+    CreateBuiltinsPolicy* createBuiltinsPolicy;
+
  public:
     FrontEnd() = default;
-    explicit FrontEnd(DebugHook hook) { hooks.push_back(hook); }
+    explicit FrontEnd(DebugHook hook,
+                      ValidateParsedProgramPolicy* validateParsedProgramPolicy = nullptr,
+                      CreateBuiltinsPolicy* createBuiltinsPolicy = nullptr)
+        : validateParsedProgramPolicy(validateParsedProgramPolicy),
+          createBuiltinsPolicy(createBuiltinsPolicy)
+        { hooks.push_back(hook); }
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program,
                              bool skipSideEffectOrdering = false);

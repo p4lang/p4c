@@ -26,11 +26,24 @@ limitations under the License.
  * Parser states without selects will transition to reject.
  */
 namespace P4 {
+
+class CreateBuiltinsPolicy {
+public:
+    virtual ~CreateBuiltinsPolicy() {}
+    /**
+       If the policy returns true the parser is processed,
+       otherwise it is left unchanged.
+    */
+    virtual bool convert(const IR::P4Parser* parser) const = 0;
+};
+
 class CreateBuiltins final : public Modifier {
     bool addNoAction;
+    CreateBuiltinsPolicy* policy;
  public:
     using Modifier::postorder;
-    CreateBuiltins() { setName("CreateBuiltins"); }
+    CreateBuiltins(CreateBuiltinsPolicy* policy = nullptr)
+            : policy(policy) { setName("CreateBuiltins"); }
     void postorder(IR::ParserState* state) override;
     void postorder(IR::P4Parser* parser) override;
     void postorder(IR::ActionListElement* element) override;
