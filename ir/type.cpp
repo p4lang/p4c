@@ -137,6 +137,15 @@ size_t Type_MethodBase::minParameterCount() const {
     return rv;
 }
 
+const Type* Type_Tuple::getP4Type() const {
+    auto args = new IR::Vector<Type>();
+    for (auto a : components) {
+        auto at = a->getP4Type();
+        args->push_back(at);
+    }
+    return new IR::Type_Tuple(srcInfo, *args);
+}
+
 const Type* Type_Specialized::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : *arguments) {

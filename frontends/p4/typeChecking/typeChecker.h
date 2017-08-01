@@ -96,11 +96,7 @@ class TypeInference : public Transform {
 
     template<typename... T>
     void typeError(const char* format, T... args) const {
-        if (readOnly)
-            // At this point we should no longer find new type errors
-            BUG(format, args...);
-        else
-            ::error(format, args...);
+        ::error(format, args...);
     }
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.

@@ -311,9 +311,20 @@ const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
 
 const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     if (!field->type->is<IR::Type_Varbits>()) return field;
-    if (auto type = findContext<IR::Type_StructLike>())
-        if (auto len = type->getAnnotation("length"))
-            field->annotations = field->annotations->add(len);
+    // given a struct with length and max_length, the
+    // varbit field size is max_length * 8 - struct_size
+    if (auto type = findContext<IR::Type_StructLike>()) {
+        if (auto len = type->getAnnotation("length")) {
+            if (len->expr.size() == 1) {
+                auto lenexpr = len->expr[0];
+                auto scale = new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(8));
+                auto fieldlen = new IR::Sub(
+                    scale->srcInfo, scale, new IR::Constant(type->width_bits()));
+                field->annotations = field->annotations->add(
+                    new IR::Annotation("length", { fieldlen }));
+            }
+        }
+    }
     return field;
 }
 
@@ -850,16 +861,73 @@ class FixExtracts final : public Transform {
     }
 };
 
+/*
+  This class is used to adjust the expressions in a @length
+  annotation on a varbit field.  The P4-14 to P4-16 converter inserts
+  these annotations on the unique varbit field in a header; the
+  annotations are created from the header max_length and length
+  fields.  The length annotation contains an expression which is used
+  to compute the length of the varbit field.  The problem that we are
+  solving here is that expression semantics is different in P4-14 and
+  P4-16.  Consider the canonical case of an IPv4 header:
+
+  header_type ipv4_t {
+     fields {
+        version : 4;
+        ihl : 4;
+        // lots of other fields...
+        options: *;
+    }
+    length     : ihl*4;
+    max_length : 64;
+  }
+
+  This generates the following P4-16 structure:
+  struct ipv4_t {
+      bit<4> version;
+      bit<4> ihl;
+      @length((ihl*4) * 8 - 20)  // 20 is the size of the fixed part of the header
+      varbit<(64 - 20) * 8> options;
+  }
+
+  When such a header is used in an extract statement, the @length
+  annotation is used to compute the second argument of the extract
+  method.  The problem we are solving here is the fact that ihl is
+  only represented on 4 bits, so the evaluation ihl*4 will actually
+  overflow.  This is not a problem in P4-14, but it is a problem in
+  P4-16.  Unfortunately there is no easy way to guess how many bits
+  are required to evaluate this computation.  So what we do is to cast
+  all PathExpressions to 32-bits.  This is really just a heuristic,
+  but since the semantics of P4-14 expressions is unclear, we cannot
+  do much better than this.
+*/
+class AdjustLengths : public Transform {
+    const IR::Node* postorder(IR::PathExpression* expression) override {
+        auto anno = findContext<IR::Annotation>();
+        if (anno == nullptr)
+            return expression;
+        if (anno->name != "length")
+            return expression;
+
+        LOG3("Inserting cast in length annotation");
+        auto type = IR::Type_Bits::get(32);
+        auto cast = new IR::Cast(expression->srcInfo, type, expression);
+        return cast;
+    }
+};
 }  // namespace
+
+
 
 ///////////////////////////////////////////////////////////////
 
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
 
-    // Discover types using P4 v1.1 type-checker
+    // Discover types using P4-14 type-checker
     passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
     passes.emplace_back(new CheckHeaderTypes());
+    passes.emplace_back(new AdjustLengths());
     passes.emplace_back(new TypeCheck());
     // Convert
     passes.emplace_back(new DiscoverStructure(&structure));

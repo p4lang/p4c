@@ -51,6 +51,7 @@ struct EvaluationOrder {
     { return temporaries->empty() && statements->empty(); }
 
     cstring createTemporary(const IR::Type* type) {
+        type = type->getP4Type();
         auto tmp = refMap->newName("tmp");
         auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
         temporaries->push_back(decl);
@@ -470,7 +471,8 @@ class DismantleExpression : public Transform {
                 // declare temporary variable
                 auto tmp = refMap->newName("tmp");
                 argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), paramtype);
+                auto decl = new IR::Declaration_Variable(
+                    IR::ID(tmp, nullptr), paramtype->getP4Type());
                 result->temporaries->push_back(decl);
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();

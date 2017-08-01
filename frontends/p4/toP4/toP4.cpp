@@ -79,11 +79,16 @@ class DumpIR : public Inspector {
             node->Node::dbprint(str);
         }
     }
+
+    bool goDeeper(const IR::Node* node) const {
+        return node->is<IR::Expression>() || node->is<IR::Path>() || node->is<IR::Type>();
+    }
+
     bool preorder(const IR::Node* node) override {
         if (depth == 0)
             return false;
         display(node);
-        if (node->is<IR::Expression>() || node->is<IR::Path>())
+        if (goDeeper(node))
             // increase depth limit for expressions.
             depth++;
         else
@@ -92,7 +97,7 @@ class DumpIR : public Inspector {
         return true;
     }
     void postorder(const IR::Node* node) override {
-        if (node->is<IR::Expression>() || node->is<IR::Path>())
+        if (goDeeper(node))
             depth--;
         else
             depth++;
@@ -247,7 +252,7 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
 }
 
 bool ToP4::preorder(const IR::Type_Tuple* t) {
-    dump(1);
+    dump(3);
     builder.append("tuple<");
     bool first = true;
     for (auto a : t->components) {
@@ -382,7 +387,7 @@ bool ToP4::preorder(const IR::Type_Package* package) {
 }
 
 bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
-    dump(1);
+    dump(2);
     builder.emitIndent();
     visit(t->annotations);
     builder.appendFormat("%s ", name);
@@ -404,7 +409,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
     }
 
     for (auto f : t->fields) {
-        dump(2, f, 1);
+        dump(4, f, 1);  // this will dump annotations
         if (f->annotations->size() > 0) {
             builder.emitIndent();
             visit(f->annotations);
