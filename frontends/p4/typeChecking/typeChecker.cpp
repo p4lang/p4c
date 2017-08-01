@@ -2608,6 +2608,15 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             typeError("Cannot infer return type %1%", expression);
             return expression;
         }
+        if (returnType->is<IR::Type_Control>() ||
+            returnType->is<IR::Type_Parser>() ||
+            returnType->is<IR::P4Parser>() ||
+            returnType->is<IR::P4Control>() ||
+            returnType->is<IR::Type_Package>() ||
+            returnType->is<IR::Type_Extern>()) {
+            typeError("%1%: illegal return type %2%", expression, returnType);
+            return expression;
+        }
 
         setType(getOriginal(), returnType);
         setType(expression, returnType);
