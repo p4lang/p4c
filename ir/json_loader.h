@@ -18,10 +18,12 @@ limitations under the License.
 #define _IR_JSON_LOADER_H_
 
 #include <assert.h>
+#include <boost/optional.hpp>
 #include <gmpxx.h>
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <utility>
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
@@ -142,6 +144,20 @@ class JSONLoader {
         const JsonObject* obj = json->to<JsonObject>();
         load(::get(obj, "first"), v.first);
         load(::get(obj, "second"), v.second);
+    }
+
+    template<typename T>
+    void unpack_json(boost::optional<T> &v) {
+        const JsonObject* obj = json->to<JsonObject>();
+        bool isValid = false;
+        load(::get(obj, "valid"), isValid);
+        if (!isValid) {
+            v = boost::none;
+            return;
+        }
+        T value;
+        load(::get(obj, "value"), value),
+        v = std::move(value);
     }
 
     void unpack_json(bool &v) { v = *json->to<JsonBoolean>(); }

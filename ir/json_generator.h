@@ -18,6 +18,7 @@ limitations under the License.
 #define _IR_JSON_GENERATOR_H_
 
 #include <assert.h>
+#include <boost/optional.hpp>
 #include <gmpxx.h>
 #include <string>
 #include "lib/cstring.h"
@@ -79,6 +80,19 @@ class JSONGenerator {
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
         generate(v.second);
+        out << std::endl << --indent << "}";
+    }
+
+    template<typename T>
+    void generate(const boost::optional<T> &v) {
+        if (!v) {
+            out << "{ \"valid\" : false }";
+            return;
+        }
+        out << "{" << std::endl << ++indent;
+        out << "\"valid\" : true," << std::endl;
+        out << "\"value\" : ";
+        generate(*v);
         out << std::endl << --indent << "}";
     }
 

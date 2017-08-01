@@ -325,6 +325,7 @@ lookup_scope
 nonRefType
     : IDENTIFIER                        { $$ = new NamedType(@1, 0, $1); }
     | lookup_scope IDENTIFIER           { $$ = new NamedType(@2, $1, $2); }
+    | lookup_scope OPTIONAL             { $$ = new NamedType(@2, $1, "optional"); }
     | nonRefType '<' type_args '>'      { $$ = new TemplateInstantiation(@1+@4, $1, *$3); }
     | nonRefType '[' INTEGER ']'        { $$ = new ArrayType(@1+@4, $1, atoi($3)); }
     ;
