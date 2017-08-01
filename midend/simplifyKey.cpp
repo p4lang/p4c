@@ -91,7 +91,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
 }
 
 const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
-                                         const IR::Expression *expression) {
+                                           const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     (void)expression->apply(hta);
@@ -105,7 +105,8 @@ const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
     for (auto assign : insertions->statements)
         result->push_back(assign);
     result->push_back(statement);
-    return result;
+    auto block = new IR::BlockStatement(*result);
+    return block;
 }
 
 }  // namespace P4
