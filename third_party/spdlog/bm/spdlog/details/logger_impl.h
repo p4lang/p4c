@@ -295,6 +295,18 @@ inline bool spdlog::logger::should_log(spdlog::level::level_enum msg_level) cons
     return msg_level >= _level.load(std::memory_order_relaxed);
 }
 
+template <typename T>
+inline spdlog::details::line_logger spdlog::logger::log(level::level_enum lvl, const T& msg)
+{
+  return _log_if_enabled(lvl, msg);
+}
+
+template <typename... Args>
+inline spdlog::details::line_logger spdlog::logger::log(level::level_enum lvl, const char* fmt, const Args&... args)
+{
+  return _log_if_enabled(lvl, fmt, args...);
+}
+
 //
 // protected virtual called at end of each user log call (if enabled) by the line_logger
 //

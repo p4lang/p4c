@@ -62,6 +62,9 @@ public:
     const std::string& name() const;
     bool should_log(level::level_enum) const;
 
+    template <typename T> details::line_logger log(level::level_enum, const T&);
+    template <typename... Args> details::line_logger log(level::level_enum, const char* fmt, const Args&... args);
+
     // logger.info(cppformat_string, arg1, arg2, arg3, ...) call style
     template <typename... Args> details::line_logger trace(const char* fmt, const Args&... args);
     template <typename... Args> details::line_logger debug(const char* fmt, const Args&... args);
