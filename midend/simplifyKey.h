@@ -109,7 +109,7 @@ class TableInsertions {
  * \endcode
  *
  * @pre none
- * @post all complex non-lvalue table key expressions are replaced with a lvalue expression.
+ * @post all complex table key expressions are replaced with a simpler expression.
  */
 class DoSimplifyKey : public Transform {
     ReferenceMap*       refMap;
