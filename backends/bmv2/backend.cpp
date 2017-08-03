@@ -139,6 +139,7 @@ void Backend::convert(BMV2Options& options) {
     register_arrays = mkArrayField(&jsonTop, "register_arrays");
     jsonTop.emplace("calculations", json->calculations);
     learn_lists = mkArrayField(&jsonTop, "learn_lists");
+    BMV2::nextId("learn_lists");
     jsonTop.emplace("actions", json->actions);
     jsonTop.emplace("pipelines", json->pipelines);
     jsonTop.emplace("checksums", json->checksums);
