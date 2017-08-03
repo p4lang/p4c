@@ -1,15 +1,3 @@
-self-call.p4(16): error: Could not find type of control c
-control c() {
-        ^
-self-call.p4(17): error: Could not find type of c
+self-call.p4(17): error: c: Cannot refer to control inside itself
     c() c_inst;
     ^
-self-call.p4(17): error: Could not find type of c_inst
-    c() c_inst;
-        ^^^^^^
-self-call.p4(19): error: Could not find type of c_inst
-        c_inst.apply();
-        ^^^^^^
-self-call.p4(19): error: Could not find type of c_inst.apply
-        c_inst.apply();
-        ^^^^^^^^^^^^

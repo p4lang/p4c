@@ -82,7 +82,7 @@ class TypeInference : public Transform {
                   bool readOnly = false);
 
  protected:
-    const IR::Type* getType(const IR::Node* element, bool verbose = true) const;
+    const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
     void setLeftValue(const IR::Expression* expression)

@@ -4,12 +4,3 @@ scope.p4(25): error: Cannot extract field x from q which has type Type(control q
 scope.p4(25)
         bit<8> y = .q.x.get(); // should be unreachable
                    ^^
-scope.p4(25): error: Could not find type of q.x
-        bit<8> y = .q.x.get(); // should be unreachable
-                   ^^^^
-scope.p4(25): error: Could not find type of q.x.get
-        bit<8> y = .q.x.get(); // should be unreachable
-                   ^^^^^^^^
-scope.p4(25): error: Could not find type of q.x.get
-        bit<8> y = .q.x.get(); // should be unreachable
-                   ^^^^^^^^^^

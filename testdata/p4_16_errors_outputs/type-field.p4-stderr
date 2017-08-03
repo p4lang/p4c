@@ -4,6 +4,3 @@ type-field.p4(60): error: Cannot extract field d from h which has type Type(stru
 type-field.p4(60)
     b.emit(h.d);
            ^
-type-field.p4(60): error: Could not find type of h.d
-    b.emit(h.d);
-           ^^^

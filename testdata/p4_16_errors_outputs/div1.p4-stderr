@@ -1,24 +1,12 @@
 : not defined on negative numbers
     a = a / -1; // not defined for negative numbers
         ^^^^^^
-
-    a = a / -1; // not defined for negative numbers
-        ^^^^^^
 : not defined on negative numbers
-    a = -5 / a;
-        ^^^^^^
-
     a = -5 / a;
         ^^^^^^
 div1.p4(20): error: %: not defined on negative numbers
     a = a % -1;
         ^^^^^^
-div1.p4(20): error: Could not find type of %
-    a = a % -1;
-        ^^^^^^
 div1.p4(21): error: %: not defined on negative numbers
-    a = -5 % a;
-        ^^^^^^
-div1.p4(21): error: Could not find type of %
     a = -5 % a;
         ^^^^^^
