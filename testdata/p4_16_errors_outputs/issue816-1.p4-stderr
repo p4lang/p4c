@@ -1,5 +1,6 @@
-In file: /home/mbudiu/git/p4c/frontends/p4/typeChecking/typeChecker.h:101
-[31mCompiler Bug[0m: /home/mbudiu/git/p4c/testdata/p4_16_errors/issue816-1.p4(14):  package P<>( C c1,  C c2); p: parameter cannot be a package
+issue816-1.p4(14): error: p: parameter cannot be a package
 control MyC1()(P p) {
                  ^
-
+issue816-1.p4(18): error: p: parameter cannot be a package
+control MyC2()(P p) {
+                 ^
