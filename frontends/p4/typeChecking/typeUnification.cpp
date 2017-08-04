@@ -25,7 +25,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                                      bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying function " << dest << " with caller " << src);
+    LOG3("Unifying function " << dest << " with caller " << src);
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
@@ -104,7 +104,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                                      const IR::Type_MethodBase* src,
                                      bool reportErrors) {
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying functions " << dest << " to " << src);
+    LOG3("Unifying functions " << dest << " to " << src);
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
@@ -156,7 +156,7 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
                                   bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying blocks " << dest << " to " << src);
+    LOG3("Unifying blocks " << dest << " to " << src);
     if (typeid(*dest) != typeid(*src)) {
         if (reportErrors)
             ::error("%1%: Cannot unify %2% to %3%",
@@ -168,9 +168,17 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
     for (auto tv : src->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
     if (dest->is<IR::IApply>()) {
+        // parsers, controls
         auto srcapply = src->to<IR::IApply>()->getApplyMethodType();
         auto destapply = dest->to<IR::IApply>()->getApplyMethodType();
         bool success = unifyFunctions(errorPosition, destapply, srcapply, reportErrors);
+        return success;
+    }
+    if (dest->is<IR::IContainer>()) {
+        // handles packages, parsers and controls
+        auto destConstructor = dest->to<IR::IContainer>()->getConstructorMethodType();
+        auto srcConstructor = src->to<IR::IContainer>()->getConstructorMethodType();
+        bool success = unifyFunctions(errorPosition, destConstructor, srcConstructor, reportErrors);
         return success;
     }
     ::error("%1%: Cannot unify %2% to %3%",
@@ -184,7 +192,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                             bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying " << dest->toString() << " to " << src->toString());
+    LOG3("Unifying " << dest->toString() << " to " << src->toString());
 
     if (TypeMap::equivalent(dest, src))
         return true;

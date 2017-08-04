@@ -501,7 +501,7 @@ inline void warning(const char* format, T... args) {
 #define WARN_CHECK(e, ...) do { if (!(e)) ::warning(__VA_ARGS__); } while (0)
 
 inline void clearErrorReporter() {
-  ErrorReporter::instance.clear();
+    ErrorReporter::instance.clear();
 }
 
 #endif /* P4C_LIB_ERROR_H_ */
