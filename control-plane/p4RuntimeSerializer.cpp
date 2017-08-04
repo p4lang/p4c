@@ -1401,7 +1401,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (expr->is<IR::ConstructorCallExpression>()
-        && expr->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
+        && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
         ::error("Table '%1%' has an anonymous table property '%2%' with no name annotation, "
                 "which is not supported by P4Runtime", table->controlPlaneName(), propertyName);
         return boost::none;
