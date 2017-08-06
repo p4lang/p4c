@@ -104,7 +104,7 @@ endmacro(p4c_add_test_with_args)
 
 macro(p4c_add_test_label tag newLabel testname)
   set (__testname ${tag}/${testname})
-  get_property(__labels TEST ${__testname})
+  get_property(__labels TEST ${__testname} PROPERTY LABELS)
   set_tests_properties(${__testname} PROPERTIES LABELS "${__labels};${newLabel}")
 endmacro(p4c_add_test_label)
 
