@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/p4/substitution.h"
 #include "typeConstraints.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/toP4/toP4.h"
 #include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
@@ -117,8 +118,15 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
 }
 
 void TypeInference::end_apply(const IR::Node* node) {
-    if (readOnly && !(*node == *initialNode))
-        BUG("%1%: typechecker mutated node %2%", dbp(node), dbp(initialNode));
+    if (readOnly && !(*node == *initialNode)) {
+        ToP4 top4(&std::cout, true, nullptr);
+        std::cout << "Initial program" << std::endl;
+        initialNode->apply(top4);
+        std::cout << "============\nFinal program" << std::endl;
+        ToP4 top41(&std::cout, true, nullptr);
+        node->apply(top41);
+        BUG("typechecker mutated program");
+    }
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
         LOG4("Typemap: " << std::endl << typeMap);
@@ -959,12 +967,16 @@ const IR::Node* TypeInference::postorder(IR::Method* method) {
 
 const IR::Type* TypeInference::setTypeType(const IR::Type* type, bool learn) {
     if (done()) return type;
-    auto orig = getOriginal<IR::Type>();
-    auto canon = canonicalize(orig);
+    const IR::Type* typeToCanonicalize;
+    if (readOnly)
+        typeToCanonicalize = getOriginal<IR::Type>();
+    else
+        typeToCanonicalize = type;
+    auto canon = canonicalize(typeToCanonicalize);
     if (canon != nullptr) {
         // Learn the new type
-        if (canon != orig && learn) {
-            TypeInference tc(refMap, typeMap, readOnly);
+        if (canon != typeToCanonicalize && learn) {
+            TypeInference tc(refMap, typeMap, true);
             unsigned e = ::errorCount();
             (void)canon->apply(tc);
             if (::errorCount() > e)

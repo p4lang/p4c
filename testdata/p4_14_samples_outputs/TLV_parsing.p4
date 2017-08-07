@@ -51,7 +51,7 @@ header ipv4_option_security_t {
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
-    @length(len) 
+    @length((bit<32>)len * 8 - 16) 
     varbit<304> data;
 }
 
@@ -120,7 +120,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
         packet.extract(tmp_hdr);
-        packet.extract(tmp_hdr_0, (bit<32>)tmp_hdr.len);
+        packet.extract(tmp_hdr_0, (bit<32>)((bit<32>)tmp_hdr.len * 8 - 16));
         hdr.ipv4_option_timestamp.setValid();
         hdr.ipv4_option_timestamp.value = tmp_hdr.value;
         hdr.ipv4_option_timestamp.len = tmp_hdr.len;
