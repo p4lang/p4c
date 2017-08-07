@@ -23,6 +23,9 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
                                        const IR::ITypeVar* var, const IR::Type* substitution) {
     LOG3("Adding " << var->toString() << "->" << substitution->toString() << " to substitution");
 
+    if (substitution->is<IR::Type_Dontcare>())
+        return true;
+
     // Type variables that represent Type_InfInt can only be unified to bit<> types
     // or to other Type_InfInt types.
     if (var->is<IR::Type_InfInt>()) {
