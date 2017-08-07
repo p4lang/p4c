@@ -7,6 +7,3 @@ extern X {
 interface1_e.p4(25)
         x.f();
           ^
-interface1_e.p4(25): error: Could not find type of x.f
-        x.f();
-        ^^^

@@ -1,15 +1,3 @@
-functors2_e.p4(20): error: Could not find type of p
-        p.apply();
-        ^^^^^^^^^
-functors2_e.p4(20): error: Could not find type of p_inst
-        p.apply();
-        ^^^^^^^^^
-functors2_e.p4(20): error: Could not find type of p_inst.apply
-        p.apply();
-        ^^^^^^^^^
-functors2_e.p4(16): error: Could not find type of control p
-control p()
-        ^
-functors2_e.p4(20): error: Could not find type of p
+functors2_e.p4(20): error: p: Cannot refer to control inside itself
         p.apply();
         ^

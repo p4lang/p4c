@@ -49,7 +49,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     action a() { standard_meta.egress_spec = 0; }
     action a_with_control_params(bit<9> x) { standard_meta.egress_spec = x; }
 
-
     table t_ternary {
 
 #if ENABLE_NEGATIVE_TESTS

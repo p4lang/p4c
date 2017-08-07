@@ -7,9 +7,6 @@ stack3.p4(34): error: header h[]: Size of header stack type should be a constant
 stack3.p4(34): error: header h[]: Size of header stack type should be a constant
         h[s1.size + 1] s2;
         ^^^^^^^^^^^^^^
-stack3.p4(34): error: Could not find type of h[]
-        h[s1.size + 1] s2;
-        ^^^^^^^^^^^^^^
 stack3.p4(35): error: header h[]: Size of header stack type should be a constant
         h[x] s3;
         ^^^^
@@ -29,8 +26,5 @@ stack3.p4(35): error: header h[]: Size of header stack type should be a constant
         h[x] s3;
         ^^^^
 stack3.p4(35): error: header h[]: Size of header stack type should be a constant
-        h[x] s3;
-        ^^^^
-stack3.p4(35): error: Could not find type of h[]
         h[x] s3;
         ^^^^

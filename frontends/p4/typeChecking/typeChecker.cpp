@@ -131,17 +131,22 @@ bool TypeInference::done() const {
     return done;
 }
 
-const IR::Type* TypeInference::getType(const IR::Node* element, bool verbose) const {
+const IR::Type* TypeInference::getType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
-    if (result == nullptr && verbose)
-        typeError("Could not find type of %1%", element);
+    // This should be happening only when type-checking already failed
+    // for some node; we are now just trying to typecheck a parent node.
+    // So an error should have already been signalled.
+    if ((result == nullptr) && (::errorCount() == 0))
+        BUG("Could not find type of %1%", element);
     return result;
 }
 
 const IR::Type* TypeInference::getTypeType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
+    // See comment in getType() above.
     if (result == nullptr) {
-        typeError("Could not find type of %1%", element);
+        if (::errorCount() == 0)
+            BUG("Could not find type of %1%", element);
         return nullptr;
     }
     BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", dbp(result));
@@ -274,6 +279,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         type->is<IR::Type_Action>() ||
         type->is<IR::Type_Error>()) {
         return type;
+    } else if (type->is<IR::Type_Dontcare>()) {
+        return IR::Type_Dontcare::get();
     } else if (type->is<IR::Type_Base>()) {
         if (!type->is<IR::Type_Bits>())
             // all other base types are singletons
@@ -492,7 +499,18 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
         IR::Vector<IR::Type> *args = new IR::Vector<IR::Type>();
         for (const IR::Type* a : *st->arguments) {
-            const IR::Type* canon = canonicalize(a);
+            auto atype = getTypeType(a);
+            if (atype == nullptr)
+                return nullptr;
+            if (atype->is<IR::Type_Control>() ||
+                atype->is<IR::Type_Parser>() ||
+                atype->is<IR::Type_Package>() ||
+                atype->is<IR::P4Parser>() ||
+                atype->is<IR::P4Control>()) {
+                typeError("%1%: Cannot use %2% as a type parameter", type, atype);
+                return nullptr;
+            }
+            const IR::Type* canon = canonicalize(atype);
             if (canon == nullptr)
                 return nullptr;
             args->push_back(canon);
@@ -726,6 +744,13 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         auto paramType = getType(pi);
         if (argType == nullptr || paramType == nullptr)
             return nullptr;
+
+        if (paramType->is<IR::Type_Control>() ||
+            paramType->is<IR::Type_Parser>() ||
+            paramType->is<IR::P4Control>() ||
+            paramType->is<IR::P4Parser>() ||
+            paramType->is<IR::Type_Package>())
+            typeError("%1%: parameter cannot have type %2%", pi, paramType);
 
         auto tvs = unify(errorPosition, paramType, argType, true);
         if (tvs == nullptr) {
@@ -1012,6 +1037,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Name* typeName) {
         type = new IR::Type_Type(t);
     } else {
         auto decl = refMap->getDeclaration(typeName->path, true);
+        // Check for references of a control or parser within itself.
+        auto ctrl = findContext<IR::P4Control>();
+        if (ctrl != nullptr && ctrl->name == decl->getName()) {
+            typeError("%1%: Cannot refer to control inside itself", typeName);
+            return typeName;
+        }
+        auto parser = findContext<IR::P4Parser>();
+        if (parser != nullptr && parser->name == decl->getName()) {
+            typeError("%1%: Cannot refer parser inside itself", typeName);
+            return typeName;
+        }
+
         type = getType(decl->getNode());
         if (type == nullptr)
             return typeName;
@@ -1377,14 +1414,21 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
         prune();
         return el;
     }
-    auto keyTuple = getType(key, false);
+    auto keyTuple = typeMap->getType(key);  // direct typeMap call to skip checks
     if (keyTuple == nullptr) {
-        typeError("Could not find type for table key %1%", key);
-        prune();
-        return el;
+        // The keys have to be before the entries list.  If they are not,
+        // at this point they have not yet been type-checked.
+        if (key->srcInfo.isValid() && el->srcInfo.isValid() && key->srcInfo >= el->srcInfo) {
+            typeError("%1%: Entries list must be after table key %2%",
+                      el, key);
+            prune();
+            return el;
+        }
+        // otherwise the type-checking of the keys must have failed
     }
     return el;
 }
+
 /**
  *  typecheck a table initializer entry
  *
@@ -1408,9 +1452,9 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     if (key == nullptr)
         return entry;
     auto keyTuple = getType(key);
-    if (keyTuple == nullptr) {
+    if (keyTuple == nullptr)
         return entry;
-    }
+
     auto entryKeyType = getType(entry->keys);
     if (entryKeyType == nullptr)
         return entry;

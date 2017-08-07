@@ -628,7 +628,7 @@ typeParameterList
 
 typeArg
     : typeRef                     { $$ = $1; }
-    | "_"                         { $$ = IR::Type_Dontcare::get(); }
+    | "_"                         { $$ = new IR::Type_Dontcare(@1); }
     ;
 
 typeArgumentList

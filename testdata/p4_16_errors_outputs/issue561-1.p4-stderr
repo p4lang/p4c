@@ -13,6 +13,3 @@ header_union U {
 issue561-1.p4(30)
         u.setValid(); // no such method
           ^^^^^^^^
-issue561-1.p4(30): error: Could not find type of u.setValid
-        u.setValid(); // no such method
-        ^^^^^^^^^^

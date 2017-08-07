@@ -10,6 +10,3 @@ signs.p4(18): error: b: Cannot unify bit<8> to int<8>
 signs.p4(19): error: -: Cannot operate on values with different signs
     a = a - b;
         ^^^^^
-signs.p4(19): error: Could not find type of -
-    a = a - b;
-        ^^^^^

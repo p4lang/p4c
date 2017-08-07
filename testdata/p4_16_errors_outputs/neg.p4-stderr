@@ -1,12 +1,6 @@
 : Cannot operate on signed values
     c = a / b; // not defined for signed values
         ^^^^^
-
-    c = a / b; // not defined for signed values
-        ^^^^^
 neg.p4(22): error: %: Cannot operate on signed values
-    c = a % b;
-        ^^^^^
-neg.p4(22): error: Could not find type of %
     c = a % b;
         ^^^^^
