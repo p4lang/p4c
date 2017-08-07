@@ -86,6 +86,9 @@ def main():
     parser.add_argument("-b", "--target", dest="backend",
                         help="specify target backend",
                         action="store", default="bmv2-ss-p4org")
+    parser.add_argument("-D", dest="preprocessor_defines",
+                        help="define a macro to be used by the preprocessor",
+                        action="append", default=[])
     parser.add_argument("-E", dest="run_preprocessor_only",
                         help="Only run the preprocessor",
                         action="store_true", default=False)
@@ -219,6 +222,11 @@ def main():
         step_enable = [True, True, False, False]
     elif opts.run_all:
         step_enable = [True, True, True, True]
+
+    # append to the list of defines
+    for d in opts.preprocessor_defines:
+        commands['preprocessor'].append("-D"+d)
+        commands['compiler'].append("-D"+d)
 
     # default search path
     if opts.language == 'p4-16':
