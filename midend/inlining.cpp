@@ -650,7 +650,9 @@ class ComputeNewStateNames : public Inspector {
     { CHECK_NULL(refMap); CHECK_NULL(stateRenameMap); }
     bool preorder(const IR::ParserState* state) override {
         cstring newName;
-        if (state->name.name == IR::ParserState::accept) {
+        if (state->name.name == IR::ParserState::reject) {
+            newName = state->name.name;
+        } else if (state->name.name == IR::ParserState::accept) {
             newName = acceptName;
         } else {
             cstring base = prefix + "_" + state->name.name;
