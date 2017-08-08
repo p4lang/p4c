@@ -77,12 +77,23 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* oth
     CHECK_NULL(other);
     for (auto v : other->binding) {
         auto find = binding.find(v.first);
-        if (find != binding.end() &&
-            !TypeMap::equivalent(find->second, v.second))
-            BUG("Changing binding for %1% from %2% to %3%",
-                v.first, find->second, v.second);
-        else
-            binding[v.first] = v.second;
+        // If we are mapping a type variable to another one, first look-up the value
+        // of the second one.
+        const IR::Type* subst = v.second;
+        if (subst->is<IR::ITypeVar>()) {
+            auto substValue = binding.find(subst->to<IR::ITypeVar>());
+            // We expect that the second one already has a value.
+            BUG_CHECK(substValue != binding.end(), "Cannot find value for %1%", subst);
+            subst = substValue->second;
+        }
+        // Check if we already have a value for the first type variable;
+        // if yes, the current binding must be the same
+        if (find != binding.end()) {
+            if (!TypeMap::equivalent(find->second, subst))
+                BUG("Changing binding for %1% from %2% to %3%",
+                    v.first, find->second, subst);
+        }
+        binding[v.first] = subst;
     }
 }
 
