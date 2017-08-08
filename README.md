@@ -289,6 +289,11 @@ See the documentation for
 [`p4c_add_tests`](cmake/P4CUtils.cmake) for more information on the
 arguments to these macros.
 
+To pass custom arguments to p4c, you can set the environment variable `P4C_ARGS`:
+```
+make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
+```
+
 ## Installation
 
 Define rules to install your backend. Typically you need to install
