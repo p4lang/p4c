@@ -229,15 +229,19 @@ bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool for
         auto type = getType(p);
         if (type == nullptr)
             return false;
+        if (type->is<IR::Type_Package>()) {
+            typeError("%1%: parameter cannot be a package", p);
+            return false;
+        }
         if (p->direction != IR::Direction::None && type->is<IR::Type_Extern>()) {
             typeError("%1%: a parameter with an extern type cannot have a direction", p);
             return false;
         }
-        if (forbidModules && (type->is<IR::Type_Parser>() ||
-                              type->is<IR::Type_Control>() ||
-                              type->is<IR::Type_Package>() ||
-                              type->is<IR::P4Parser>() ||
-                              type->is<IR::P4Control>())) {
+        if ((forbidModules || p->direction != IR::Direction::None) &&
+            (type->is<IR::Type_Parser>() ||
+             type->is<IR::Type_Control>() ||
+             type->is<IR::P4Parser>() ||
+             type->is<IR::P4Control>())) {
             typeError("%1%: parameter cannot have type %2%", p, type);
             return false;
         }
@@ -577,6 +581,8 @@ const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     if (done()) return action;
     auto pl = canonicalizeParameters(action->parameters);
     if (pl == nullptr)
+        return action;
+    if (!checkParameters(action->parameters, true))
         return action;
     auto type = new IR::Type_Action(new IR::TypeParameters(), nullptr, pl);
 
