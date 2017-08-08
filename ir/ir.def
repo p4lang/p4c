@@ -291,7 +291,7 @@ class P4Table : Declaration, IAnnotated, IApply {
 
     Annotations getAnnotations() const override { return annotations; }
     Type_Method getApplyMethodType() const override;
-    ParameterList getApplyParameters() const override { return nullptr; }
+    ParameterList getApplyParameters() const override { return new ParameterList(); }
     ActionList getActionList() const {
         auto ap = properties->getProperty(TableProperties::actionsPropertyName);
         if (ap == nullptr)
