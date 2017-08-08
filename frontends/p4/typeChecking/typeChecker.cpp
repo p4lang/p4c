@@ -582,8 +582,7 @@ const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     auto pl = canonicalizeParameters(action->parameters);
     if (pl == nullptr)
         return action;
-    auto ok = checkParameters(action->parameters, true);
-    if (!ok)
+    if (!checkParameters(action->parameters, true))
         return action;
     auto type = new IR::Type_Action(new IR::TypeParameters(), nullptr, pl);
 
