@@ -299,12 +299,14 @@ class Type_Package : Type_ArchBlock, IContainer {
 class Type_Parser : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return applyParams; }
     toString { return cstring("parser ") + externalName(); }
 }
 
 class Type_Control : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return applyParams; }
     toString { return cstring("control ") + externalName(); }
 }
 
@@ -389,6 +391,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
 class Type_Table : Type, IApply {
     P4Table  table;
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return new ParameterList(); }
     /// names for the fields of the struct returned
     /// by applying a table
     static const ID hit;

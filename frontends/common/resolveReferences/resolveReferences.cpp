@@ -290,34 +290,34 @@ bool ResolveReferences::preorder(const IR::Type_Name* type) {
 
 bool ResolveReferences::preorder(const IR::P4Control *c) {
     refMap->usedName(c->name.name);
-    addToContext(c->type->typeParameters);
-    addToContext(c->type->applyParams);
-    addToContext(c->constructorParams);
+    addToContext(c->getTypeParameters());
+    addToContext(c->getApplyParameters());
+    addToContext(c->getConstructorParameters());
     addToContext(c);  // add the locals
     return true;
 }
 
 void ResolveReferences::postorder(const IR::P4Control *c) {
     removeFromContext(c);
-    removeFromContext(c->constructorParams);
-    removeFromContext(c->type->applyParams);
-    removeFromContext(c->type->typeParameters);
+    removeFromContext(c->getConstructorParameters());
+    removeFromContext(c->getApplyParameters());
+    removeFromContext(c->getTypeParameters());
 }
 
 bool ResolveReferences::preorder(const IR::P4Parser *p) {
     refMap->usedName(p->name.name);
-    addToContext(p->type->typeParameters);
-    addToContext(p->type->applyParams);
-    addToContext(p->constructorParams);
+    addToContext(p->getTypeParameters());
+    addToContext(p->getApplyParameters());
+    addToContext(p->getConstructorParameters());
     addToContext(p);
     return true;
 }
 
 void ResolveReferences::postorder(const IR::P4Parser *p) {
     removeFromContext(p);
-    removeFromContext(p->constructorParams);
-    removeFromContext(p->type->applyParams);
-    removeFromContext(p->type->typeParameters);
+    removeFromContext(p->getConstructorParameters());
+    removeFromContext(p->getApplyParameters());
+    removeFromContext(p->getTypeParameters());
 }
 
 bool ResolveReferences::preorder(const IR::Function* function) {

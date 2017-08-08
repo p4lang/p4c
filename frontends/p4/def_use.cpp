@@ -702,7 +702,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     LOG3("CWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
-    enterScope(parser->type->applyParams, &parser->parserLocals, startPoint);
+    enterScope(parser->getApplyParameters(), &parser->parserLocals, startPoint);
     for (auto l : parser->parserLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
@@ -747,7 +747,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     LOG3("CWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
-    enterScope(control->type->applyParams, &control->controlLocals, startPoint);
+    enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
     for (auto l : control->controlLocals) {

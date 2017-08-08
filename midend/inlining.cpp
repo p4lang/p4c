@@ -537,7 +537,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
 
             // Substitute applyParameters which are not directionless
             // with fresh variable names or with the call arguments.
-            for (auto param : callee->type->applyParams->parameters) {
+            for (auto param : callee->getApplyParameters()->parameters) {
                 if (param->direction == IR::Direction::None)
                     continue;
                 if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
@@ -744,7 +744,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
 
         // Evaluate in and inout parameters in order.
         auto it = call->methodCall->arguments->begin();
-        for (auto param : callee->type->applyParams->parameters) {
+        for (auto param : callee->getApplyParameters()->parameters) {
             auto initializer = *it;
             LOG3("Looking for " << param->name);
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
@@ -788,7 +788,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
 
         // Copy back out and inout parameters
         it = call->methodCall->arguments->begin();
-        for (auto param : callee->type->applyParams->parameters) {
+        for (auto param : callee->getApplyParameters()->parameters) {
             auto left = *it;
             if (param->direction == IR::Direction::InOut ||
                 param->direction == IR::Direction::Out) {
@@ -851,7 +851,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
 
             // Substitute applyParameters which are not directionless
             // with fresh variable names.
-            for (auto param : callee->type->applyParams->parameters) {
+            for (auto param : callee->getApplyParameters()->parameters) {
                 if (param->direction == IR::Direction::None)
                     continue;
                 cstring newName = refMap->newName(param->name);

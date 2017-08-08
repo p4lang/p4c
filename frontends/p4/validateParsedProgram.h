@@ -72,14 +72,14 @@ class ValidateParsedProgram final : public Inspector {
     { container(package); }
     void postorder(const IR::P4Control* control) override {
         container(control);
-        distinctParameters(control->type->typeParameters,
-                           control->type->applyParams,
-                           control->constructorParams); }
+        distinctParameters(control->getTypeParameters(),
+                           control->getApplyParameters(),
+                           control->getConstructorParameters()); }
     void postorder(const IR::P4Parser* parser) override {
         container(parser);
-        distinctParameters(parser->type->typeParameters,
-                           parser->type->applyParams,
-                           parser->constructorParams); }
+        distinctParameters(parser->getTypeParameters(),
+                           parser->getApplyParameters(),
+                           parser->getConstructorParameters()); }
 };
 
 }  // namespace P4
