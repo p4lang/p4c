@@ -55,7 +55,7 @@ class ParserSymbolicInterpreter {
         ValueMap* result = new ValueMap();
         ExpressionEvaluator ev(refMap, typeMap, result);
 
-        for (auto p : parser->type->applyParams->parameters) {
+        for (auto p : parser->getApplyParameters()->parameters) {
             auto type = typeMap->getType(p);
             bool initialized = p->direction == IR::Direction::In ||
                     p->direction == IR::Direction::InOut;
