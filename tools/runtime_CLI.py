@@ -1500,7 +1500,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Destroying multicast group", mgrp
         self.mc_client.bm_mc_mgrp_destroy(0, mgrp)
 
-    def ports_to_port_map_str(self, ports):
+    def ports_to_port_map_str(self, ports, description="port"):
         last_port_num = 0
         port_map_str = ""
         ports_int = []
@@ -1508,10 +1508,17 @@ class RuntimeAPI(cmd.Cmd):
             try:
                 port_num = int(port_num_str)
             except:
-                raise UIn_Error("'%s' is not a valid port number" % port_num_str)
+                raise UIn_Error("'%s' is not a valid %s number"
+                                "" % (port_num_str, description))
+            if port_num < 0:
+                raise UIn_Error("'%s' is not a valid %s number"
+                                "" % (port_num_str, description))
             ports_int.append(port_num)
         ports_int.sort()
         for port_num in ports_int:
+            if port_num == (last_port_num - 1):
+                raise UIn_Error("Found duplicate %s number '%s'"
+                                "" % (description, port_num))
             port_map_str += "0" * (port_num - last_port_num) + "1"
             last_port_num = port_num + 1
         return port_map_str[::-1]
@@ -1526,7 +1533,7 @@ class RuntimeAPI(cmd.Cmd):
         if self.pre_type == PreType.SimplePreLAG:
             i += 1
             lags = [] if i == len(args) else args[i:]
-            lag_map_str = self.ports_to_port_map_str(lags)
+            lag_map_str = self.ports_to_port_map_str(lags, description="lag")
         else:
             lag_map_str = None
         return port_map_str, lag_map_str
@@ -1618,7 +1625,7 @@ class RuntimeAPI(cmd.Cmd):
             lag_index = int(args[0])
         except:
             raise UIn_Error("Bad format for lag index")
-        port_map_str = self.ports_to_port_map_str(args[1:])
+        port_map_str = self.ports_to_port_map_str(args[1:], description="lag")
         print "Setting lag membership:", lag_index, "<-", port_map_str
         self.mc_client.bm_mc_set_lag_membership(0, lag_index, port_map_str)
 
