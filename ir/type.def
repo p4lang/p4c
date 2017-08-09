@@ -148,7 +148,7 @@ class Type_Var : Type_Declaration, ITypeVar {
     cstring getVarName() const override { return getName(); }
     int getDeclId() const override { return declid; }
     dbprint { out << name << "/" << getDeclId(); }
-    toString { return getName() + "/" + Util::toString(getDeclId()); }
+    toString { return getName(); }
 }
 
 /// Stands for the 'int' type: infinite precision constant

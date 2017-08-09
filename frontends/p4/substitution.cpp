@@ -21,8 +21,7 @@ limitations under the License.
 namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
                                        const IR::ITypeVar* var, const IR::Type* substitution) {
-    LOG3("Adding " << var->toString() << "->" << substitution->toString() << " to substitution");
-
+    LOG3("Adding " << var << "->" << substitution << " to substitution");
     if (substitution->is<IR::Type_Dontcare>())
         return true;
 
@@ -82,12 +81,12 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* oth
         const IR::Type* subst = v.second;
         if (subst->is<IR::ITypeVar>()) {
             auto substValue = binding.find(subst->to<IR::ITypeVar>());
-            // We expect that the second one already has a value.
-            BUG_CHECK(substValue != binding.end(), "Cannot find value for %1%", subst);
-            subst = substValue->second;
+            if (substValue != binding.end())
+                // I think that this does not need to be in a loop...
+                subst = substValue->second;
         }
         // Check if we already have a value for the first type variable;
-        // if yes, the current binding must be the same
+        // if yes, the current binding must be the same with the new one.
         if (find != binding.end()) {
             if (!TypeMap::equivalent(find->second, subst))
                 BUG("Changing binding for %1% from %2% to %3%",

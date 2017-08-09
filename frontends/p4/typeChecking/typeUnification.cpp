@@ -183,10 +183,10 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         }
         auto destConstructor = dest->to<IR::Type_Package>()->getConstructorMethodType();
         auto srcConstructor = src->to<IR::Type_Package>()->getConstructorMethodType();
-        bool success = unifyFunctions(errorPosition, destConstructor, srcConstructor, reportErrors, true);
+        bool success = unifyFunctions(
+            errorPosition, destConstructor, srcConstructor, reportErrors, true);
         return success;
-    }
-    else if (dest->is<IR::IApply>()) {
+    } else if (dest->is<IR::IApply>()) {
         // parsers, controls
         auto srcapply = src->to<IR::IApply>()->getApplyMethodType();
         auto destapply = dest->to<IR::IApply>()->getApplyMethodType();
