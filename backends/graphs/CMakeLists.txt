@@ -27,13 +27,10 @@ add_dependencies(p4c-graphs genIR)
 install (TARGETS p4c-graphs
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
-# hack to get around the fact that the test scripts expect the backend
-# binary to be in the top level directory. This should go away when we
-# remove automake and fix the scripts.
+# This link is not required but it is convenient to have access to this
+# backend in the top-level build directory, along with all the other backends.
 add_custom_target(linkgraphs
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-graphs ${P4C_BINARY_DIR}/p4c-graphs
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   )
 add_dependencies(p4c_driver linkgraphs)
 

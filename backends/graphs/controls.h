@@ -76,25 +76,15 @@ class ControlGraphs : public Inspector {
     vertex_t add_vertex(const cstring &name);
 
     bool preorder(const IR::PackageBlock *block) override;
-
     bool preorder(const IR::ControlBlock *block) override;
-
     bool preorder(const IR::P4Control *cont) override;
-
     bool preorder(const IR::BlockStatement *statement) override;
-
     bool preorder(const IR::IfStatement *statement) override;
-
     bool preorder(const IR::SwitchStatement *statement) override;
-
     bool preorder(const IR::MethodCallStatement *statement) override;
-
     bool preorder(const IR::AssignmentStatement *statement) override;
-
     bool preorder(const IR::ReturnStatement *) override;
-
     bool preorder(const IR::ExitStatement *) override;
-
     bool preorder(const IR::P4Table *table) override;
 
     void writeGraphToFile(const Graph &g, const cstring &name);
@@ -105,8 +95,6 @@ class ControlGraphs : public Inspector {
     Graph *g{nullptr};
     vertex_t root{};
     vertex_t exit_v{};
-    // boost::optional<vertex_t> local_root{};
-    // std::vector<vertex_t> local_leaves{};
     Parents parents{};
     Parents return_parents{};
     std::vector<const IR::Statement *> statements_stack{};

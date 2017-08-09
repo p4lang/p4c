@@ -49,7 +49,7 @@ class EdgeIf : public EdgeTypeIface {
           case Branch::FALSE:
               return "FALSE";
         }
-        assert(0 && "unreachable");
+        BUG("unreachable");
         return "";
     };
 
