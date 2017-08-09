@@ -57,10 +57,22 @@ class NameStack {
 
 class ControlGraphs : public Inspector {
  public:
+    enum class VertexType {
+        TABLE,
+        CONDITION,
+        SWITCH,
+        STATEMENTS,
+        CONTROL,
+        OTHER
+    };
+    struct Vertex {
+        cstring name;
+        VertexType type;
+    };
+    class VertexWriter;
     using edgeProperty = boost::property<boost::edge_name_t, cstring>;
-    using vertexProperty = boost::property<boost::vertex_name_t, cstring>;
     using Graph = boost::adjacency_list<boost::vecS, boost::vecS,
-        boost::directedS, vertexProperty, edgeProperty>;
+        boost::directedS, Vertex, edgeProperty>;
     using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
 
     using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface *> >;
@@ -71,7 +83,7 @@ class ControlGraphs : public Inspector {
     // assignments) into a single vertex to reduce graph complexity
     boost::optional<vertex_t> merge_other_statements_into_vertex();
 
-    vertex_t add_vertex(const cstring &name);
+    vertex_t add_vertex(const cstring &name, VertexType type);
 
     bool preorder(const IR::PackageBlock *block) override;
     bool preorder(const IR::ControlBlock *block) override;

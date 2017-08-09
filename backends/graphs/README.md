@@ -20,8 +20,6 @@ dot <name>.dot -Tpng > <name>.png
 
 ## Improvement ideas
 
-  - use different shapes for vertices of different types (e.g. rectangles for
-    tables)
   - change representation of controls: instead of adding a vertex labelled with
     the control name when the control is invoked, group the control contents
     into a "subgraph"
