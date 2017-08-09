@@ -18,6 +18,7 @@ limitations under the License.
 #include "ebpfType.h"
 #include "ir/ir.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 
@@ -54,6 +55,30 @@ class ActionTranslationVisitor : public CodeGenInspector {
     bool preorder(const IR::P4Action* act) {
         action = act;
         visit(action->body);
+        return false;
+    }
+
+    bool preorder(const IR::MethodCallExpression* expression) {
+        auto mi = P4::MethodInstance::resolve(
+            expression, program->refMap, program->typeMap);
+        auto bim = mi->to<P4::BuiltInMethod>();
+        if (bim != nullptr) {
+            builder->emitIndent();
+            if (bim->name == IR::Type_Header::isValid) {
+                visit(bim->appliedTo);
+                builder->append(".ebpf_valid");
+                return false;
+            } else if (bim->name == IR::Type_Header::setValid) {
+                visit(bim->appliedTo);
+                builder->append(".ebpf_valid = true");
+                return false;
+            } else if (bim->name == IR::Type_Header::setInvalid) {
+                visit(bim->appliedTo);
+                builder->append(".ebpf_valid = false");
+                return false;
+            }
+        }
+        ::error("Unsupported method invocation %1%", expression);
         return false;
     }
 };  // ActionTranslationVisitor

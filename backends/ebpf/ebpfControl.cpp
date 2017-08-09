@@ -260,7 +260,6 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
     P4::ParameterSubstitution binding;
-    binding.populate(method->getActualParameters(), method->expr->arguments);
     cstring actionVariableName;
     if (!saveAction.empty()) {
         actionVariableName = saveAction.at(saveAction.size() - 1);
@@ -271,6 +270,9 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     }
     builder->blockStart();
 
+    BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
+#if 0
+    binding.populate(method->getActualParameters(), method->expr->arguments);
     if (!binding.empty()) {
         builder->emitIndent();
         builder->appendLine("/* bind parameters */");
@@ -291,6 +293,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
         }
         builder->newline();
     }
+#endif
 
     builder->emitIndent();
     builder->appendLine("/* construct key */");
