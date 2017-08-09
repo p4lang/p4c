@@ -26,10 +26,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
 
-#include "config.h"
-#ifdef HAVE_LIBBOOST_GRAPH
 #include "controls.h"
-#endif
 
 namespace graphs {
 
@@ -115,14 +112,10 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-#ifdef HAVE_LIBBOOST_GRAPH
     LOG1("Generating graphs under " << options.graphsDir);
     LOG1("Generating control graphs");
     graphs::ControlGraphs cgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
     top->getMain()->apply(cgen);
-#else
-    ::error("This backend requires the boost graph headers, which could not be found");
-#endif
 
     return ::errorCount() > 0;
 }

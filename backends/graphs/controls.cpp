@@ -14,9 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "config.h"
-
-#ifdef HAVE_LIBBOOST_GRAPH
+#include "controls.h"
 
 #include <boost/graph/graphviz.hpp>
 
@@ -27,8 +25,6 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
-
-#include "controls.h"
 
 namespace graphs {
 
@@ -337,5 +333,3 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
 }
 
 }  // namespace graphs
-
-#endif  // HAVE_LIBBOOST_GRAPH

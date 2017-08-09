@@ -17,6 +17,14 @@ limitations under the License.
 #ifndef _BACKENDS_GRAPHS_CONTROLS_H_
 #define _BACKENDS_GRAPHS_CONTROLS_H_
 
+#include "config.h"
+
+// Shouldn't happen as cmake will not try to build this backend if the boost
+// graph headers couldn't be found.
+#ifndef HAVE_LIBBOOST_GRAPH
+#error "This backend requires the boost graph headers, which could not be found"
+#endif
+
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
@@ -27,6 +35,13 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
+
+namespace P4 {
+
+class ReferenceMap;
+class TypeMap;
+
+}  // namespace P4
 
 namespace graphs {
 
