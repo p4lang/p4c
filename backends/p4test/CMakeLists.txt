@@ -52,8 +52,6 @@ set (P4TEST_SUITES
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
-  # issue 759
-  testdata/p4_16_samples/tuple0.p4
   )
 p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}")
 
