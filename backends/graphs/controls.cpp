@@ -35,14 +35,14 @@ namespace graphs {
 class EdgeUnconditional : public EdgeTypeIface {
  public:
     EdgeUnconditional() = default;
-    std::string label() const override { return ""; };
+    cstring label() const override { return ""; };
 };
 
 class EdgeIf : public EdgeTypeIface {
  public:
     enum class Branch { TRUE, FALSE };
     explicit EdgeIf(Branch branch) : branch(branch) { }
-    std::string label() const override {
+    cstring label() const override {
         switch (branch) {
           case Branch::TRUE:
               return "TRUE";
@@ -61,10 +61,10 @@ class EdgeSwitch : public EdgeTypeIface {
  public:
     explicit EdgeSwitch(const IR::Expression *labelExpr)
         : labelExpr(labelExpr) { }
-    std::string label() const override {
+    cstring label() const override {
         std::stringstream sstream;
         labelExpr->dbprint(sstream);
-        return sstream.str();
+        return cstring(sstream);
     };
 
  private:
@@ -93,7 +93,7 @@ boost::optional<vertex_t> ControlGraphs::merge_other_statements_into_vertex() {
         sstream << "\n...\n";
         statements_stack.back()->dbprint(sstream);
     }
-    auto v = boost::add_vertex(sstream.str(), *g);
+    auto v = boost::add_vertex(cstring(sstream), *g);
     for (auto parent : parents) {
         boost::add_edge(parent.first, v, parent.second->label(), *g);
     }
@@ -102,17 +102,13 @@ boost::optional<vertex_t> ControlGraphs::merge_other_statements_into_vertex() {
     return v;
 }
 
-vertex_t ControlGraphs::add_vertex(const std::string &name) {
+vertex_t ControlGraphs::add_vertex(const cstring &name) {
     merge_other_statements_into_vertex();
     auto v = boost::add_vertex(name, *g);
     for (auto parent : parents) {
         boost::add_edge(parent.first, v, parent.second->label(), *g);
     }
     return v;
-}
-
-vertex_t ControlGraphs::add_vertex(const cstring &name) {
-    return add_vertex(std::string(name));
 }
 
 void ControlGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
@@ -135,8 +131,8 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
             LOG1("Generating graph for top-level control " << name);
             Graph g_;
             g = &g_;
-            root = boost::add_vertex(std::string("root"), g_);
-            exit_v = boost::add_vertex(std::string("__EXIT__"), g_);
+            root = boost::add_vertex(cstring("root"), g_);
+            exit_v = boost::add_vertex(cstring("__EXIT__"), g_);
             parents = {{root, new EdgeUnconditional()}};
             visit(it.second->getNode());
             for (auto parent : parents)
@@ -153,7 +149,7 @@ bool ControlGraphs::preorder(const IR::ControlBlock *block) {
 }
 
 bool ControlGraphs::preorder(const IR::P4Control *cont) {
-    std::string name;
+    cstring name;
     bool doPop = false;
     if (instance_name != boost::none) {
         name = name_stack.get(instance_name.get());
@@ -183,7 +179,7 @@ bool ControlGraphs::preorder(const IR::BlockStatement *statement) {
 bool ControlGraphs::preorder(const IR::IfStatement *statement) {
     std::stringstream sstream;
     statement->condition->dbprint(sstream);
-    auto v = add_vertex(sstream.str());
+    auto v = add_vertex(cstring(sstream));
     Parents new_parents;
     parents = {{v, new EdgeIf(EdgeIf::Branch::TRUE)}};
     visit(statement->ifTrue);
@@ -206,7 +202,7 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     if (tbl == nullptr) {
         std::stringstream sstream;
         statement->expression->dbprint(sstream);
-        v = add_vertex(sstream.str());
+        v = add_vertex(cstring(sstream));
     } else {
         visit(tbl);
         BUG_CHECK(parents.size() == 1, "Unexpected parents size");

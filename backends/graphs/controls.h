@@ -22,7 +22,6 @@ limitations under the License.
 
 #include <boost/optional.hpp>
 
-#include <string>
 #include <utility>  // std::pair
 #include <vector>
 
@@ -34,7 +33,7 @@ namespace graphs {
 class EdgeTypeIface {
  public:
     virtual ~EdgeTypeIface() { }
-    virtual std::string label() const = 0;
+    virtual cstring label() const = 0;
 };
 
 class NameStack {
@@ -46,11 +45,11 @@ class NameStack {
     void pop_back() {
         stack.pop_back();
     }
-    std::string get(const cstring &name) const {
+    cstring get(const cstring &name) const {
         std::stringstream sstream;
         for (auto &n : stack) sstream << n << ".";
         sstream << name;
-        return sstream.str();
+        return cstring(sstream);
     }
  private:
     std::vector<cstring> stack;
@@ -58,8 +57,8 @@ class NameStack {
 
 class ControlGraphs : public Inspector {
  public:
-    using edgeProperty = boost::property<boost::edge_name_t, std::string>;
-    using vertexProperty = boost::property<boost::vertex_name_t, std::string>;
+    using edgeProperty = boost::property<boost::edge_name_t, cstring>;
+    using vertexProperty = boost::property<boost::vertex_name_t, cstring>;
     using Graph = boost::adjacency_list<boost::vecS, boost::vecS,
         boost::directedS, vertexProperty, edgeProperty>;
     using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
@@ -72,7 +71,6 @@ class ControlGraphs : public Inspector {
     // assignments) into a single vertex to reduce graph complexity
     boost::optional<vertex_t> merge_other_statements_into_vertex();
 
-    vertex_t add_vertex(const std::string &name);
     vertex_t add_vertex(const cstring &name);
 
     bool preorder(const IR::PackageBlock *block) override;
