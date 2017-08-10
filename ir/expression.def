@@ -316,6 +316,11 @@ class MethodCallExpression : Expression {
     optional Vector<Expression> arguments = new Vector<Expression>;
     toString{ return method->toString(); }
     validate{ typeArguments->check_null(); arguments->check_null(); }
+    MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
+    : Expression(si), method(new PathExpression(m)), arguments(new Vector<Expression>(a)) {}
+    MethodCallExpression(Util::SourceInfo si, Expression m,
+                         const std::initializer_list<Expression> &a)
+    : Expression(si), method(m), arguments(new Vector<Expression>(a)) {}
 }
 
 class ConstructorCallExpression : Expression {

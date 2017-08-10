@@ -88,6 +88,8 @@ class ProgramStructure {
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }
     };
 
+    std::set<cstring>   included_files;
+
  public:
     ProgramStructure();
 
@@ -224,7 +226,7 @@ class ProgramStructure {
     void createMain();
 
  public:
-    void include(cstring filename);
+    void include(cstring filename, cstring ppoptions = cstring());
     /// This inserts the names of the identifiers used in the output P4-16 programs
     /// into allNames, forcing P4-14 names that clash to be renamed.
     void populateOutputNames();
