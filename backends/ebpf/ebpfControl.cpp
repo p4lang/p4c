@@ -295,26 +295,29 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     }
 #endif
 
-    builder->emitIndent();
-    builder->appendLine("/* construct key */");
-    builder->emitIndent();
     cstring keyname = "key";
-    builder->appendFormat("struct %s %s = {}", table->keyTypeName, keyname);
-    builder->endOfStatement(true);
-
-    table->emitKey(builder, keyname);
+    if (table->keyGenerator != nullptr) {
+        builder->emitIndent();
+        builder->appendLine("/* construct key */");
+        builder->emitIndent();
+        builder->appendFormat("struct %s %s = {}", table->keyTypeName, keyname);
+        builder->endOfStatement(true);
+        table->emitKey(builder, keyname);
+    }
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
     cstring valueName = "value";
-    builder->appendFormat("struct %s *%s", table->valueTypeName, valueName);
+    builder->appendFormat("struct %s *%s = NULL", table->valueTypeName, valueName);
     builder->endOfStatement(true);
 
-    builder->emitIndent();
-    builder->appendLine("/* perform lookup */");
-    builder->emitIndent();
-    builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
-    builder->endOfStatement(true);
+    if (table->keyGenerator != nullptr) {
+        builder->emitIndent();
+        builder->appendLine("/* perform lookup */");
+        builder->emitIndent();
+        builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
+        builder->endOfStatement(true);
+    }
 
     builder->emitIndent();
     builder->appendFormat("if (%s == NULL) ", valueName);
