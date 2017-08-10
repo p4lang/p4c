@@ -29,7 +29,7 @@ parser start {
 // which expects a field list. It exposed issue #747, where the code
 // expected that calling ::error will exit out of the function.
 action local_recirc(local_port) {
-    recirculate( local_port );
+    resubmit( local_port );
 }
 table do_local_recirc {
     actions { local_recirc; }

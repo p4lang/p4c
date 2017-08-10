@@ -290,7 +290,7 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
         auto primitive = expr->to<IR::Primitive>();
         if (primitive->name == "extract") {
             BUG_CHECK(primitive->operands.size() == 1, "Expected 1 operand for %1%", primitive);
-            auto dest = primitive->operands.at(0);
+            auto dest = conv.convert(primitive->operands.at(0));
             auto destType = dest->type;
             CHECK_NULL(destType);
             BUG_CHECK(destType->is<IR::Type_Header>(), "%1%: expected a header", destType);
@@ -301,23 +301,19 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             destType = finalDestType;
             BUG_CHECK(destType->is<IR::Type_Header>(), "%1%: expected a header", destType);
 
-            auto current = conv.convert(dest);
-            auto args = new IR::Vector<IR::Expression>();
-            args->push_back(current);
-
             // A second conversion of dest is used to compute the
             // 'latest' (P4-14 keyword) value if referenced later.
+            // Some passes somewhere are apparently broken and can't deal with dags
             conv.replaceNextWithLast = true;
-            this->latest = conv.convert(dest);
+            this->latest = conv.convert(primitive->operands.at(0));
             conv.replaceNextWithLast = false;
             const IR::Expression* method = new IR::Member(
                 paramReference(parserPacketIn),
                 p4lib.packetIn.extract.Id());
-            auto mce = new IR::MethodCallExpression(expr->srcInfo, method, args);
+            auto result = new IR::MethodCallStatement(expr->srcInfo, method, { dest });
 
-            LOG3("Inserted extract " << dbp(mce) << " " << dbp(destType));
-            extractsSynthesized.emplace(mce, destType->to<IR::Type_Header>());
-            auto result = new IR::MethodCallStatement(expr->srcInfo, mce);
+            LOG3("Inserted extract " << dbp(result->methodCall) << " " << dbp(destType));
+            extractsSynthesized.emplace(result->methodCall, destType->to<IR::Type_Header>());
             return result;
         } else if (primitive->name == "set_metadata") {
             BUG_CHECK(primitive->operands.size() == 2, "Expected 2 operands for %1%", primitive);
@@ -476,7 +472,9 @@ void ProgramStructure::createParser() {
     conversionContext.clear();
 }
 
-void ProgramStructure::include(cstring filename) {
+void ProgramStructure::include(cstring filename, cstring ppoptions) {
+    if (included_files.count(filename)) return;
+    included_files.insert(filename);
     // the p4c driver sets environment variables for include
     // paths.  check the environment and add these to the command
     // line for the preporicessor
@@ -485,6 +483,9 @@ void ProgramStructure::include(cstring filename) {
     path = path.join(filename);
 
     CompilerOptions options;
+    if (ppoptions) {
+        options.preprocessor_options += " ";
+        options.preprocessor_options += ppoptions; }
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
     if (FILE* file = options.preprocess()) {
@@ -933,7 +934,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
     }
-    BUG("Unhandled primitive %1%", primitive);
+    error("Unsupported primitive %1%", primitive);
     return nullptr;
 }
 
@@ -1132,9 +1133,7 @@ CONVERT_PRIMITIVE(remove_header) {
     OPS_CK(primitive, 1);
     auto hdr = conv.convert(primitive->operands.at(0));
     auto method = new IR::Member(hdr, IR::ID(IR::Type_Header::setInvalid));
-    auto args = new IR::Vector<IR::Expression>();
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, method, {});
 }
 
 CONVERT_PRIMITIVE(add_header) {
@@ -1142,9 +1141,7 @@ CONVERT_PRIMITIVE(add_header) {
     OPS_CK(primitive, 1);
     auto hdr = conv.convert(primitive->operands.at(0));
     auto method = new IR::Member(hdr, IR::ID(IR::Type_Header::setValid));
-    auto args = new IR::Vector<IR::Expression>();
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, method, {});
 }
 
 CONVERT_PRIMITIVE(copy_header) {
@@ -1156,17 +1153,11 @@ CONVERT_PRIMITIVE(copy_header) {
 }
 
 CONVERT_PRIMITIVE(drop) {
-    ExpressionConverter conv(structure);
-    auto method = new IR::PathExpression(structure->v1model.drop.Id());
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, structure->v1model.drop.Id(), {});
 }
 
 CONVERT_PRIMITIVE(mark_for_drop) {
-    ExpressionConverter conv(structure);
-    auto method = new IR::PathExpression(structure->v1model.drop.Id());
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, structure->v1model.drop.Id(), {});
 }
 
 CONVERT_PRIMITIVE(push) {
@@ -1176,10 +1167,7 @@ CONVERT_PRIMITIVE(push) {
     auto count = conv.convert(primitive->operands.at(1));
     auto methodName = IR::Type_Stack::push_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
-    auto args = new IR::Vector<IR::Expression>();
-    args->push_back(count);
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, method, { count });
 }
 CONVERT_PRIMITIVE(pop) {
     ExpressionConverter conv(structure);
@@ -1188,10 +1176,7 @@ CONVERT_PRIMITIVE(pop) {
     auto count = conv.convert(primitive->operands.at(1));
     auto methodName = IR::Type_Stack::pop_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
-    auto args = new IR::Vector<IR::Expression>();
-    args->push_back(count);
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, method, { count });
 }
 
 CONVERT_PRIMITIVE(count) {
@@ -1210,12 +1195,9 @@ CONVERT_PRIMITIVE(count) {
     auto counterref = new IR::PathExpression(newname);
     auto methodName = structure->v1model.counter.increment.Id();
     auto method = new IR::Member(counterref, methodName);
-    auto args = new IR::Vector<IR::Expression>();
     auto arg = new IR::Cast(structure->v1model.counter.index_type,
                             conv.convert(primitive->operands.at(1)));
-    args->push_back(arg);
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    return new IR::MethodCallStatement(primitive->srcInfo, method, { arg });
 }
 
 CONVERT_PRIMITIVE(modify_field_from_rng) {

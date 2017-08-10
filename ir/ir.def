@@ -436,6 +436,12 @@ class BlockStatement : Statement, ISimpleNamespace {
 
 class MethodCallStatement : Statement {
     MethodCallExpression methodCall;
+    MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
+    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
+    : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
+    MethodCallStatement(Util::SourceInfo si, Expression m,
+                        const std::initializer_list<Expression> &a)
+    : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
 }
 
 class SwitchCase {
