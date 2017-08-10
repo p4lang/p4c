@@ -149,7 +149,7 @@ set (PARSER_HDRS
 macro(add_parser pname)
   add_custom_target (mk${pname}dirs
     ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname})
-  BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp)
+  BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.output)
   # regardless of the output name, flex puts out yy.lex.c, so we use a custom command to generate
   # the file to stdout and redirect to the desired name
   # FLEX_TARGET (${pname}Lexer parsers/${pname}/${pname}lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)

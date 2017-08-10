@@ -186,6 +186,8 @@ typedef const IR::Type ConstType;
 %left PLUS MINUS
 %left MUL DIV MOD
 %right PREFIX
+%precedence IF
+%precedence ELSE
 
 %type<int>                          opt_field_modifiers attributes attrib
 %type<cstring>                      name
@@ -209,7 +211,7 @@ typedef const IR::Type ConstType;
 %type<IR::Expression*>              expression header_ref header_or_field_ref
                                     field_or_masked_ref opt_condition pragma_operand
 %type<IR::Vector<IR::Expression>*>  expression_list opt_expression_list
-                                    control_statement_list opt_else
+                                    control_statement control_statement_list
                                     field_match_list expressions pragma_operands
 %type<IR::FieldList*>               field_list_entries
 %type<IR::FieldListCalculation*>    field_list_calculation_body
@@ -753,32 +755,33 @@ control_function_declaration: CONTROL name "{" control_statement_list "}"
 ;
 
 control_statement_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>; }
-    | control_statement_list APPLY "(" name ")" ";"
-      { ($$=$1)->push_back(new IR::Apply(@2+@5, IR::ID(@4, $4))); }
-    | control_statement_list APPLY "(" name ")" "{" apply_case_list "}"
-      { $7->name = IR::ID(@4, $4); $7->srcInfo = @2+@5; ($$=$1)->push_back($7); }
-    | control_statement_list IF "(" expression ")" "{" control_statement_list "}" opt_else
-        { ($$=$1)->push_back(new IR::If(@2+@4, $4, $7, $9)); }
-    | control_statement_list name "(" ")" ";"
-      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $2)); }
+    | control_statement_list control_statement { ($$=$1)->append(*$2); }
     | control_statement_list error ";" { $$ = $1; }
     | control_statement_list error { $$ = $1; }
 ;
 
-opt_else: /* epsilon */ { $$ = nullptr; }
-    | ELSE "{" control_statement_list "}"
-      { $$ = $3; }
-    | ELSE IF "(" expression ")" "{" control_statement_list "}" opt_else
-      { $$ = new IR::Vector<IR::Expression>(new IR::If(@2+@5, $4, $7, $9)); }
+control_statement:
+      APPLY "(" name ")" ";"
+      { $$ = new IR::Vector<IR::Expression>(new IR::Apply(@1+@4, IR::ID(@3, $3))); }
+    | APPLY "(" name ")" "{" apply_case_list "}"
+      { $6->name = IR::ID(@3, $3); $6->srcInfo = @1+@4; $$ = new IR::Vector<IR::Expression>($6); }
+    | IF "(" expression ")" control_statement %prec IF
+      { $$ = new IR::Vector<IR::Expression>(new IR::If(@1+@3, $3, $5, nullptr)); }
+    | IF "(" expression ")" control_statement ELSE control_statement %prec IF
+      { $$ = new IR::Vector<IR::Expression>(new IR::If(@1+@3, $3, $5, $7)); }
+    | name "(" ")" ";"
+      { $$ = new IR::Vector<IR::Expression>(new IR::Primitive(@1+@3, $1)); }
+    | "{" control_statement_list "}"
+      { $$ = $2; }
 ;
 
 apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
-    | apply_case_list name_list "{" control_statement_list "}"
+    | apply_case_list name_list control_statement
         { for (auto name : $2->names)
-              $1->actions[name] = $4;
+              $1->actions[name] = $3;
           $$ = $1; }
-    | apply_case_list DEFAULT "{" control_statement_list "}"
-        { ($$=$1)->actions["default"] = $4; }
+    | apply_case_list DEFAULT control_statement
+        { ($$=$1)->actions["default"] = $3; }
 ;
 
 /************/
