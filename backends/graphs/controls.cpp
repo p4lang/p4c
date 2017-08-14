@@ -67,6 +67,44 @@ class EdgeSwitch : public EdgeTypeIface {
     const IR::Expression *labelExpr;
 };
 
+using Graph = ControlGraphs::Graph;
+
+Graph *ControlGraphs::ControlStack::pushBack(Graph &currentSubgraph, const cstring &name) {
+    auto &newSubgraph = currentSubgraph.create_subgraph();
+    boost::get_property(newSubgraph, boost::graph_name) = "cluster" + getName(name);
+    boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"] = getName(name);
+    // Justify the subgraph label to the right as it usually makes the generated
+    // graph more readable than the default (center).
+    boost::get_property(newSubgraph, boost::graph_graph_attribute)["labeljust"] = "r";
+    boost::get_property(newSubgraph, boost::graph_graph_attribute)["style"] = "bold";
+    names.push_back(name);
+    subgraphs.push_back(&newSubgraph);
+    return getSubgraph();
+}
+
+Graph *ControlGraphs::ControlStack::popBack() {
+    names.pop_back();
+    subgraphs.pop_back();
+    return getSubgraph();
+}
+
+Graph *ControlGraphs::ControlStack::getSubgraph() const {
+    return subgraphs.empty() ? nullptr : subgraphs.back();
+}
+
+cstring ControlGraphs::ControlStack::getName(const cstring &name) const {
+    std::stringstream sstream;
+    for (auto &n : names) {
+      if (n != "") sstream << n << ".";
+    }
+    sstream << name;
+    return cstring(sstream);
+}
+
+bool ControlGraphs::ControlStack::isEmpty() const {
+    return subgraphs.empty();
+}
+
 using vertex_t = ControlGraphs::vertex_t;
 
 ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
@@ -75,64 +113,68 @@ ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
     visitDagOnce = false;
 }
 
-boost::optional<vertex_t> ControlGraphs::merge_other_statements_into_vertex() {
-    if (statements_stack.empty()) return boost::none;
-    std::stringstream sstream;
-    if (statements_stack.size() == 1) {
-        statements_stack[0]->dbprint(sstream);
-    } else if (statements_stack.size() == 2) {
-        statements_stack[0]->dbprint(sstream);
-        sstream << "\n";
-        statements_stack[1]->dbprint(sstream);
-    } else {
-        statements_stack[0]->dbprint(sstream);
-        sstream << "\n...\n";
-        statements_stack.back()->dbprint(sstream);
-    }
-    auto v = boost::add_vertex({cstring(sstream), VertexType::STATEMENTS}, *g);
-    for (auto parent : parents) {
-        boost::add_edge(parent.first, v, parent.second->label(), *g);
-    }
-    parents = {{v, new EdgeUnconditional()}};
-    statements_stack.clear();
-    return v;
-}
-
 vertex_t ControlGraphs::add_vertex(const cstring &name, VertexType type) {
-    merge_other_statements_into_vertex();
-    auto v = boost::add_vertex({name, type}, *g);
-    for (auto parent : parents) {
-        boost::add_edge(parent.first, v, parent.second->label(), *g);
+    auto v = boost::add_vertex(*g);
+    boost::put(&Vertex::name, *g, v, name);
+    boost::put(&Vertex::type, *g, v, type);
+    return g->local_to_global(v);
+}
+
+void ControlGraphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &name) {
+    auto ep = boost::add_edge(from, to, g->root());
+    boost::put(boost::edge_name, g->root(), ep.first, name);
+}
+
+boost::optional<vertex_t> ControlGraphs::merge_other_statements_into_vertex() {
+    if (statementsStack.empty()) return boost::none;
+    std::stringstream sstream;
+    if (statementsStack.size() == 1) {
+        statementsStack[0]->dbprint(sstream);
+    } else if (statementsStack.size() == 2) {
+        statementsStack[0]->dbprint(sstream);
+        sstream << "\n";
+        statementsStack[1]->dbprint(sstream);
+    } else {
+        statementsStack[0]->dbprint(sstream);
+        sstream << "\n...\n";
+        statementsStack.back()->dbprint(sstream);
     }
+    auto v = add_vertex(cstring(sstream), VertexType::STATEMENTS);
+    for (auto parent : parents)
+        add_edge(parent.first, v, parent.second->label());
+    parents = {{v, new EdgeUnconditional()}};
+    statementsStack.clear();
     return v;
 }
 
-class ControlGraphs::VertexWriter {
+vertex_t ControlGraphs::add_and_connect_vertex(const cstring &name, VertexType type) {
+    merge_other_statements_into_vertex();
+    auto v = add_vertex(name, type);
+    for (auto parent : parents)
+        add_edge(parent.first, v, parent.second->label());
+    return v;
+}
+
+class ControlGraphs::GraphAttributeSetter {
  public:
-    explicit VertexWriter(const Graph &g) : g(g) { }
+  void operator()(Graph &g) const {
+      auto vertices = boost::vertices(g);
+      for (auto vit = vertices.first; vit != vertices.second; ++vit) {
+          const auto &vinfo = g[*vit];
+          auto attrs = boost::get(boost::vertex_attribute, g);
+          attrs[*vit]["label"] = vinfo.name;
+          attrs[*vit]["style"] = vertexTypeGetStyle(vinfo.type);
+          attrs[*vit]["shape"] = vertexTypeGetShape(vinfo.type);
+      }
+      auto edges = boost::edges(g);
+      for (auto eit = edges.first; eit != edges.second; ++eit) {
+          auto attrs = boost::get(boost::edge_attribute, g);
+          attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
+      }
+  }
 
-    void operator()(std::ostream &out, const vertex_t &v) const {
-        // out << "[label=\"" << name[v] << "\"]";
-        const auto &vinfo = g[v];
-        out << "["
-            << "label=\"" << vinfo.name << "\" "
-            << "shape=" << getShape(vinfo.type) << " "
-            << "style=" << getStyle(vinfo.type)
-            << "]";
-    }
-
-    static cstring getStyle(VertexType type) {
-        switch (type) {
-          case VertexType::CONTROL:
-              return "dashed";
-          default:
-              return "solid";
-        }
-        BUG("unreachable");
-        return "";
-    }
-
-    static cstring getShape(VertexType type) {
+ private:
+    static cstring vertexTypeGetShape(VertexType type) {
         switch (type) {
           case VertexType::TABLE:
               return "ellipse";
@@ -143,8 +185,16 @@ class ControlGraphs::VertexWriter {
         return "";
     }
 
- private:
-    const Graph &g;
+    static cstring vertexTypeGetStyle(VertexType type) {
+        switch (type) {
+          case VertexType::CONTROL:
+              return "dashed";
+          default:
+              return "solid";
+        }
+        BUG("unreachable");
+        return "";
+    }
 };
 
 void ControlGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
@@ -154,11 +204,9 @@ void ControlGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
         ::error("Failed to open file %1%", path.toString());
         return;
     }
-    boost::write_graphviz(
-        *out, g,
-        VertexWriter(g),
-        // boost::make_label_writer(boost::get(boost::vertex_name, g)),
-        boost::make_label_writer(boost::get(boost::edge_name, g)));
+    // custom label writers not supported with subgraphs, so we populate
+    // *_attribute_t properties instead using our GraphAttributeSetter class.
+    boost::write_graphviz(*out, g);
 }
 
 bool ControlGraphs::preorder(const IR::PackageBlock *block) {
@@ -168,12 +216,19 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
             LOG1("Generating graph for top-level control " << name);
             Graph g_;
             g = &g_;
-            root = boost::add_vertex({cstring("root"), VertexType::OTHER}, g_);
-            exit_v = boost::add_vertex({cstring("__EXIT__"), VertexType::OTHER}, g_);
-            parents = {{root, new EdgeUnconditional()}};
+            BUG_CHECK(controlStack.isEmpty(), "Invalid control stack state");
+            g = controlStack.pushBack(g_, "");
+            instanceName = boost::none;
+            boost::get_property(g_, boost::graph_name) = name;
+            start_v = add_vertex("__START__", VertexType::OTHER);
+            exit_v = add_vertex("__EXIT__", VertexType::OTHER);
+            parents = {{start_v, new EdgeUnconditional()}};
             visit(it.second->getNode());
             for (auto parent : parents)
-                boost::add_edge(parent.first, exit_v, parent.second->label(), *g);
+                add_edge(parent.first, exit_v, parent.second->label());
+            BUG_CHECK(g_.is_root(), "Invalid graph");
+            controlStack.popBack();
+            GraphAttributeSetter()(g_);
             writeGraphToFile(g_, name);
         }
     }
@@ -186,23 +241,18 @@ bool ControlGraphs::preorder(const IR::ControlBlock *block) {
 }
 
 bool ControlGraphs::preorder(const IR::P4Control *cont) {
-    cstring name;
     bool doPop = false;
-    if (instance_name != boost::none) {
-        name = name_stack.get(instance_name.get());
-        name_stack.push_back(instance_name.get());
+    // instanceName == boost::none <=> top level
+    if (instanceName != boost::none) {
+        g = controlStack.pushBack(*g, instanceName.get());
         doPop = true;
-    } else {
-        name = name_stack.get(cont->controlPlaneName());
     }
-    auto v = add_vertex(name, VertexType::CONTROL);
     return_parents.clear();
-    parents = {{v, new EdgeUnconditional()}};
     visit(cont->body);
     merge_other_statements_into_vertex();
     parents.insert(parents.end(), return_parents.begin(), return_parents.end());
     return_parents.clear();
-    if (doPop) name_stack.pop_back();
+    if (doPop) g = controlStack.popBack();
     return false;
 }
 
@@ -216,7 +266,7 @@ bool ControlGraphs::preorder(const IR::BlockStatement *statement) {
 bool ControlGraphs::preorder(const IR::IfStatement *statement) {
     std::stringstream sstream;
     statement->condition->dbprint(sstream);
-    auto v = add_vertex(cstring(sstream), VertexType::CONDITION);
+    auto v = add_and_connect_vertex(cstring(sstream), VertexType::CONDITION);
     Parents new_parents;
     parents = {{v, new EdgeIf(EdgeIf::Branch::TRUE)}};
     visit(statement->ifTrue);
@@ -239,7 +289,7 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     if (tbl == nullptr) {
         std::stringstream sstream;
         statement->expression->dbprint(sstream);
-        v = add_vertex(cstring(sstream), VertexType::SWITCH);
+        v = add_and_connect_vertex(cstring(sstream), VertexType::SWITCH);
     } else {
         visit(tbl);
         BUG_CHECK(parents.size() == 1, "Unexpected parents size");
@@ -289,7 +339,7 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
             BUG_CHECK(am->object->is<IR::Declaration_Instance>(),
                       "Unsupported control invocation: %1%", am->object);
             auto instantiation = am->object->to<IR::Declaration_Instance>();
-            instance_name = instantiation->controlPlaneName();
+            instanceName = instantiation->controlPlaneName();
             auto type = instantiation->type;
             if (type->is<IR::Type_Name>()) {
                 auto tn = type->to<IR::Type_Name>();
@@ -300,13 +350,13 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
             BUG("Unsupported apply method: %1%", instance);
         }
     } else {
-        statements_stack.push_back(statement);
+        statementsStack.push_back(statement);
     }
     return false;
 }
 
 bool ControlGraphs::preorder(const IR::AssignmentStatement *statement) {
-    statements_stack.push_back(statement);
+    statementsStack.push_back(statement);
     return false;
 }
 
@@ -320,14 +370,14 @@ bool ControlGraphs::preorder(const IR::ReturnStatement *) {
 bool ControlGraphs::preorder(const IR::ExitStatement *) {
     merge_other_statements_into_vertex();
     for (auto parent : parents)
-        boost::add_edge(parent.first, exit_v, parent.second->label(), *g);
+        add_edge(parent.first, exit_v, parent.second->label());
     parents.clear();
     return false;
 }
 
 bool ControlGraphs::preorder(const IR::P4Table *table) {
-    auto name = name_stack.get(table->controlPlaneName());
-    auto v = add_vertex(name, VertexType::TABLE);
+    auto name = controlStack.getName(table->controlPlaneName());
+    auto v = add_and_connect_vertex(name, VertexType::TABLE);
     parents = {{v, new EdgeUnconditional()}};
     return false;
 }

@@ -18,13 +18,6 @@ cd out
 dot <name>.dot -Tpng > <name>.png
 ```
 
-## Improvement ideas
-
-  - change representation of controls: instead of adding a vertex labelled with
-    the control name when the control is invoked, group the control contents
-    into a "subgraph"
-
-
 ## Example
 
 Here is the graph generated for the ingress control block of the
