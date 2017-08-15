@@ -39,17 +39,17 @@ void TypeMap::setLeftValue(const IR::Expression* expression) {
 
 void TypeMap::setCompileTimeConstant(const IR::Expression* expression) {
     constants.insert(expression);
-    LOG1("Constant value " << dbp(expression));
+    LOG3("Constant value " << dbp(expression));
 }
 
 bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     bool result = constants.find(expression) != constants.end();
-    LOG1(dbp(expression) << (result ? " constant" : " not constant"));
+    LOG3(dbp(expression) << (result ? " constant" : " not constant"));
     return result;
 }
 
 void TypeMap::clear() {
-    LOG1("Clearing typeMap");
+    LOG3("Clearing typeMap");
     typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
     program = nullptr;
 }
@@ -70,14 +70,14 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
                 dbp(element), dbp(existingType), dbp(type));
         return;
     }
-    LOG1("setType " << dbp(element) << " => " << dbp(type));
+    LOG3("setType " << dbp(element) << " => " << dbp(type));
     typeMap.emplace(element, type);
 }
 
 const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     CHECK_NULL(element);
     auto result = get(typeMap, element);
-    LOG2("Looking up type for " << dbp(element) << " => " << dbp(result));
+    LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr) {
         BUG("Could not find type for %1%", dbp(element));
     }
@@ -96,7 +96,7 @@ const IR::Type* TypeMap::getTypeType(const IR::Node* element, bool notNull) cons
 void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
     if (tvs == nullptr || tvs->isIdentity())
         return;
-    LOG1("New type variables " << tvs);
+    LOG3("New type variables " << tvs);
     allTypeVariables.simpleCompose(tvs);
 }
 

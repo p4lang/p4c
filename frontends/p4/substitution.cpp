@@ -21,7 +21,9 @@ limitations under the License.
 namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
                                        const IR::ITypeVar* var, const IR::Type* substitution) {
-    LOG3("Adding " << var->toString() << "->" << substitution->toString() << " to substitution");
+    LOG3("Adding " << var << "->" << substitution << " to substitution");
+    if (substitution->is<IR::Type_Dontcare>())
+        return true;
 
     // Type variables that represent Type_InfInt can only be unified to bit<> types
     // or to other Type_InfInt types.
@@ -74,12 +76,23 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* oth
     CHECK_NULL(other);
     for (auto v : other->binding) {
         auto find = binding.find(v.first);
-        if (find != binding.end() &&
-            !TypeMap::equivalent(find->second, v.second))
-            BUG("Changing binding for %1% from %2% to %3%",
-                v.first, find->second, v.second);
-        else
-            binding[v.first] = v.second;
+        // If we are mapping a type variable to another one, first look-up the value
+        // of the second one.
+        const IR::Type* subst = v.second;
+        if (subst->is<IR::ITypeVar>()) {
+            auto substValue = binding.find(subst->to<IR::ITypeVar>());
+            if (substValue != binding.end())
+                // I think that this does not need to be in a loop...
+                subst = substValue->second;
+        }
+        // Check if we already have a value for the first type variable;
+        // if yes, the current binding must be the same with the new one.
+        if (find != binding.end()) {
+            if (!TypeMap::equivalent(find->second, subst))
+                BUG("Changing binding for %1% from %2% to %3%",
+                    v.first, find->second, subst);
+        }
+        binding[v.first] = subst;
     }
 }
 
