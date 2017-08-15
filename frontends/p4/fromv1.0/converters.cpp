@@ -195,11 +195,11 @@ const IR::Node* ExpressionConverter::postorder(IR::Equ *equ) {
 
     auto val = constExpr->to<IR::Constant>()->asInt();
     if (val == 1)
-        return boolExpr; // == 1 return the boolean
+        return boolExpr;  // == 1 return the boolean
     else if (val == 0)
-        return new IR::LNot(equ->srcInfo, boolExpr); // return the !boolean
+        return new IR::LNot(equ->srcInfo, boolExpr);  // return the !boolean
     else
-        return new IR::BoolLiteral(equ->srcInfo, false); // everything else is false
+        return new IR::BoolLiteral(equ->srcInfo, false);  // everything else is false
 }
 
 /// And the Neq
@@ -223,7 +223,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Neq *neq) {
     else if (val == 1)
         return new IR::LNot(neq->srcInfo, boolExpr);
     else
-        return new IR::BoolLiteral(neq->srcInfo, true); // everything else is true
+        return new IR::BoolLiteral(neq->srcInfo, true);  // everything else is true
 }
 
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
