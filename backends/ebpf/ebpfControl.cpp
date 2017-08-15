@@ -260,7 +260,6 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
     P4::ParameterSubstitution binding;
-    binding.populate(method->getActualParameters(), method->expr->arguments);
     cstring actionVariableName;
     if (!saveAction.empty()) {
         actionVariableName = saveAction.at(saveAction.size() - 1);
@@ -271,47 +270,30 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     }
     builder->blockStart();
 
-    if (!binding.empty()) {
-        builder->emitIndent();
-        builder->appendLine("/* bind parameters */");
-        for (auto p : *method->getActualParameters()->getEnumerator()) {
-            toDereference.emplace(p);
-            auto etype = EBPFTypeFactory::instance->create(p->type);
-            builder->emitIndent();
-
-            bool pointer = p->direction != IR::Direction::In;
-            etype->declare(builder, p->name.name, pointer);
-
-            builder->append(" = ");
-            auto e = binding.lookup(p);
-            if (pointer)
-                builder->append("&");
-            visit(e);
-            builder->endOfStatement(true);
-        }
-        builder->newline();
-    }
-
-    builder->emitIndent();
-    builder->appendLine("/* construct key */");
-    builder->emitIndent();
+    BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
     cstring keyname = "key";
-    builder->appendFormat("struct %s %s = {}", table->keyTypeName, keyname);
-    builder->endOfStatement(true);
-
-    table->emitKey(builder, keyname);
+    if (table->keyGenerator != nullptr) {
+        builder->emitIndent();
+        builder->appendLine("/* construct key */");
+        builder->emitIndent();
+        builder->appendFormat("struct %s %s = {}", table->keyTypeName, keyname);
+        builder->endOfStatement(true);
+        table->emitKey(builder, keyname);
+    }
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
     cstring valueName = "value";
-    builder->appendFormat("struct %s *%s", table->valueTypeName, valueName);
+    builder->appendFormat("struct %s *%s = NULL", table->valueTypeName, valueName);
     builder->endOfStatement(true);
 
-    builder->emitIndent();
-    builder->appendLine("/* perform lookup */");
-    builder->emitIndent();
-    builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
-    builder->endOfStatement(true);
+    if (table->keyGenerator != nullptr) {
+        builder->emitIndent();
+        builder->appendLine("/* perform lookup */");
+        builder->emitIndent();
+        builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
+        builder->endOfStatement(true);
+    }
 
     builder->emitIndent();
     builder->appendFormat("if (%s == NULL) ", valueName);

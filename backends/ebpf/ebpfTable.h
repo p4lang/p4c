@@ -45,11 +45,9 @@ class EBPFTableBase : public EBPFObject {
 };
 
 class EBPFTable final : public EBPFTableBase {
- protected:
+ public:
     const IR::Key*            keyGenerator;
     const IR::ActionList*     actionList;
-
- public:
     const IR::TableBlock*    table;
     cstring               defaultActionMapName;
     cstring               actionEnumName;
