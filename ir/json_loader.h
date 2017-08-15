@@ -183,11 +183,28 @@ class JSONLoader {
             s->c_str() >> v; }
 
     template<typename T>
-    typename std::enable_if<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
+    typename std::enable_if<
+        has_fromJSON<T>::value &&
+        !std::is_base_of<IR::Node, T>::value &&
+        std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader&>()))>::value
+    >::type
     unpack_json(T *&v) { v = T::fromJSON(*this); }
+
     template<typename T>
-    typename std::enable_if<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
+    typename std::enable_if<
+        has_fromJSON<T>::value &&
+        !std::is_base_of<IR::Node, T>::value &&
+        std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader&>()))>::value
+    >::type
     unpack_json(T &v) { v = *(T::fromJSON(*this)); }
+
+    template<typename T>
+    typename std::enable_if<
+        has_fromJSON<T>::value &&
+        !std::is_base_of<IR::Node, T>::value &&
+        !std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader&>()))>::value
+    >::type
+    unpack_json(T &v) { v = T::fromJSON(*this); }
 
     template<typename T> typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type
     unpack_json(T &v) { v = *(get_node()->to<T>()); }
