@@ -271,30 +271,6 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->blockStart();
 
     BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
-#if 0
-    binding.populate(method->getActualParameters(), method->expr->arguments);
-    if (!binding.empty()) {
-        builder->emitIndent();
-        builder->appendLine("/* bind parameters */");
-        for (auto p : *method->getActualParameters()->getEnumerator()) {
-            toDereference.emplace(p);
-            auto etype = EBPFTypeFactory::instance->create(p->type);
-            builder->emitIndent();
-
-            bool pointer = p->direction != IR::Direction::In;
-            etype->declare(builder, p->name.name, pointer);
-
-            builder->append(" = ");
-            auto e = binding.lookup(p);
-            if (pointer)
-                builder->append("&");
-            visit(e);
-            builder->endOfStatement(true);
-        }
-        builder->newline();
-    }
-#endif
-
     cstring keyname = "key";
     if (table->keyGenerator != nullptr) {
         builder->emitIndent();

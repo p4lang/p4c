@@ -224,7 +224,8 @@ void EBPFTable::emitTypes(CodeBuilder* builder) {
 
 void EBPFTable::emitInstance(CodeBuilder* builder) {
     if (keyGenerator != nullptr) {
-        auto impl = table->container->properties->getProperty(program->model.tableImplProperty.name);
+        auto impl = table->container->properties->getProperty(
+            program->model.tableImplProperty.name);
         if (impl == nullptr) {
             ::error("Table %1% does not have an %2% property",
                     table->container, program->model.tableImplProperty.name);
