@@ -11,7 +11,7 @@ p4c is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
 
-The code contains three sample backends:
+The code contains four sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model
 * p4c-ebpf: can be used to generate C code which can be compiled to EBPF
@@ -19,6 +19,8 @@ The code contains three sample backends:
   in the Linux kernel for packet filtering
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging.
+* p4c-graphs: can be used to generate visual representations of a P4 program;
+  for now it only supports generating graphs of top-level control flows.
 
 # Getting started
 
@@ -97,6 +99,7 @@ Backends may have additional dependencies. The dependencies for the backends
 included with `p4c` are documented here:
   * [BMv2](backends/bmv2/README.md)
   * [eBPF](backends/ebpf/README.md)
+  * [graphs](backends/graphs/README.md)
 
 ## Ubuntu dependencies
 
