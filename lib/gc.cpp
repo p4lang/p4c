@@ -56,10 +56,17 @@ extern "C" size_t GC_get_heap_size(void);
 extern "C" int GC_print_stats;
 
 static void gc_callback() {
-    size_t count;
-    LOG1("****** GC called ****** (heap size " << GC_get_heap_size() << ")");
-    LOG2("cstring cache size " << cstring::cache_size(count) << " (count=" << count << ")");
-    GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
+    if (Log::verbose())
+        std::clog << "****** GC called ****** (heap size " << GC_get_heap_size() << ")";
+
+    if (Log::verbosity() >= 2) {
+        size_t count;
+        std::clog << "cstring cache size " << cstring::cache_size(count)
+                  << " (count=" << count << ")";
+    }
+
+    // Maybe print GC statistics. Unfortunately they go directly to stderr!
+    GC_print_stats = Log::verbosity() >= 2 ? 1 : 0;
 }
 
 void silent(char *, GC_word) {}
