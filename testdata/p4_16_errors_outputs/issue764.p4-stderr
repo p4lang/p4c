@@ -1,4 +1,4 @@
-issue764.p4(8): error: func: cannot infer bitwidth for type parameter T
+issue764.p4(8): error: func: cannot infer bitwidth for integer-valued type parameter T
         func(5);
         ^^^^^^^
 issue764.p4(1)
