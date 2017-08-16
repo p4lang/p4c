@@ -173,6 +173,14 @@ const IR::CompileTimeValue* InstantiatedBlock::getParameterValue(cstring paramNa
     return getValue(param->getNode());
 }
 
+const IR::CompileTimeValue*
+InstantiatedBlock::findParameterValue(cstring paramName) const {
+    auto* param = getConstructorParameters()->getDeclByName(paramName);
+    if (!param) return nullptr;
+    if (!param->is<IR::Parameter>()) return nullptr;
+    return getValue(param->getNode());
+}
+
 Util::Enumerator<const IDeclaration*>* P4Action::getDeclarations() const
 { return body->getDeclarations(); }
 
