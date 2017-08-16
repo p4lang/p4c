@@ -98,9 +98,27 @@ class Vector : public VectorBase {
         int index = i - vec.begin();
         vec.insert(i, b, e);
         return vec.begin() + index; }
+
     template<typename Container>
     iterator append(const Container &toAppend)
     { return insert(end(), toAppend.begin(), toAppend.end()); }
+
+    /**
+     * Appends the provided node or vector of nodes to the end of this Vector.
+     *
+     * @param item  A node to append; if this is a Vector, its contents will be
+     *              appended.
+     */
+    void pushBackOrAppend(const IR::Node* item) {
+        if (item == nullptr) return;
+        if (auto* itemAsVector = item->to<IR::Vector<T>>()) {
+            append(*itemAsVector);
+            return;
+        }
+        BUG_CHECK(item->is<T>(), "Unexpected vector element: %1%", item);
+        push_back(item->to<T>());
+    }
+
     iterator insert(iterator i, const T* v) {
         /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void
          * FIXME -- rather than an iterator.  So we recalculate it from an index */
