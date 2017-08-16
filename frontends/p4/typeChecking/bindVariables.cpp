@@ -12,7 +12,7 @@ const IR::Type* BindTypeVariables::getVarValue(
     if (rtype == nullptr) {
         cstring errorMessage;
         if (type != nullptr && type->is<IR::Type_InfInt>())
-            errorMessage = "%1%: cannot infer bitwidth for integer-valued type parameter 2%";
+            errorMessage = "%1%: cannot infer bitwidth for integer-valued type parameter %2%";
         else
             errorMessage = "%1%: cannot infer type for type parameter %2%";
         ::error(errorMessage.c_str(), errorPosition, var);
