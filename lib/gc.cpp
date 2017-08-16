@@ -78,7 +78,7 @@ void silent(char *, GC_word) {}
 void setup_gc_logging() {
 #if HAVE_LIBGC
 #if HAVE_GC_PRINT_STATS
-    GC_print_stats = LOGGING(2) ? 1 : 0;
+    GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
 #endif /* HAVE_GC_PRINT_STATS */
     GC_set_start_callback(gc_callback);
     GC_set_warn_proc(&silent);
