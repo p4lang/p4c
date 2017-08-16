@@ -517,7 +517,15 @@ abstract InstantiatedBlock : Block {
 
     virtual ParameterList getConstructorParameters() const = 0;
     void instantiate(std::vector<CompileTimeValue> *args);
+
+    /// @return the argument that the given parameter was instantiated with.
+    /// It's a fatal error if no such parameter exists.
     CompileTimeValue getParameterValue(cstring paramName) const;
+
+    /// @return the argument that the given parameter was instantiated with, or
+    /// null if no such parameter exists.
+    CompileTimeValue findParameterValue(cstring paramName) const;
+
     virtual void dbprint(std::ostream& out) const override;
 }
 
