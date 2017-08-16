@@ -109,7 +109,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
 
     if (keyGenerator != nullptr) {
         // Use this to order elements by size
-        std::map<size_t, const IR::KeyElement*> ordered;
+        std::multimap<size_t, const IR::KeyElement*> ordered;
         unsigned fieldNumber = 0;
         for (auto c : keyGenerator->keyElements) {
             auto type = program->typeMap->getType(c->expression);
@@ -126,7 +126,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
             fieldNumber++;
         }
 
-        // Emit key in decreasing order size - this way there will be no haps
+        // Emit key in decreasing order size - this way there will be no gaps
         for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
             auto c = it->second;
 
