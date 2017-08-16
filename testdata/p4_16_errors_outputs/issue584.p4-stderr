@@ -1,4 +1,4 @@
-issue584.p4(28): error: hash: cannot infer type for type parameter T
+issue584.p4(28): error: hash: cannot infer bitwidth for type parameter T
         hash(var, HashAlgorithm.crc16, 0, hdr, 0xFFFF);
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 v1model.p4(125)
