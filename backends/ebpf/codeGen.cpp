@@ -170,6 +170,24 @@ bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
 bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
     P4::MethodCallDescription mcd(expression, refMap, typeMap);
 
+    auto bim = mcd.instance->to<P4::BuiltInMethod>();
+    if (bim != nullptr) {
+        builder->emitIndent();
+        if (bim->name == IR::Type_Header::isValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid");
+            return false;
+        } else if (bim->name == IR::Type_Header::setValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = true");
+            return false;
+        } else if (bim->name == IR::Type_Header::setInvalid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = false");
+            return false;
+        }
+    }
+
     visit(expression->method);
     builder->append("(");
     bool first = true;

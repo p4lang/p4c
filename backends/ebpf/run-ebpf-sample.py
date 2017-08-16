@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Runs the compiler on a sample P4 V1.2 program
+# Runs the p4c-ebpf compiler on a P4-16 program
+# TODO: do something with the output of the compiler
 
 from __future__ import print_function
 from subprocess import Popen
@@ -127,7 +128,7 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return result
     return SUCCESS
 
-def process_v1_2_file(options, argv):
+def process_file(options, argv):
     assert isinstance(options, Options)
 
     tmpdir = tempfile.mkdtemp(dir=".")
@@ -159,9 +160,6 @@ def process_v1_2_file(options, argv):
             result = FAILURE
         else:
             result = SUCCESS
-
-    #if (result == SUCCESS):
-    #    result = check_generated_files(options, tmpdir, expected_dirname);
 
     if options.cleanupTmp:
         if options.verbose:
@@ -213,7 +211,7 @@ def main(argv):
         if options.testName.endswith('.p4'):
             options.testName = options.testName[:-3]
 
-    result = process_v1_2_file(options, argv)
+    result = process_file(options, argv)
     sys.exit(result)
 
 if __name__ == "__main__":
