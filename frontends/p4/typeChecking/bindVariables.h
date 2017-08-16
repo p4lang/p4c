@@ -11,9 +11,7 @@ namespace P4 {
 class BindTypeVariables : public Transform {
     IR::IndexedVector<IR::Node> *newTypes;
     TypeMap                     *typeMap;
-    const IR::Type* getP4Type(const IR::Type* type) const;
-    const IR::Type* getVarValue(const IR::Type_Var* var) const;
-
+    const IR::Type* getVarValue(const IR::Type_Var* var, const IR::Node* errorPosition) const;
     const IR::Node* insertTypes(const IR::Node* node);
  public:
     explicit BindTypeVariables(TypeMap* typeMap) :

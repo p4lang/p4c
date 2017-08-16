@@ -2,16 +2,21 @@
 
 namespace P4 {
 
-const IR::Type* BindTypeVariables::getVarValue(const IR::Type_Var* var) const {
-    // Lookup a type variable
+/// Lookup a type variable
+const IR::Type* BindTypeVariables::getVarValue(
+    const IR::Type_Var* var, const IR::Node* errorPosition) const {
+    const IR::Type* rtype = nullptr;
     auto type = typeMap->getSubstitution(var);
-    return getP4Type(type);
-}
-
-const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
-    if (type == nullptr)
-        return type;
-    auto rtype = type->getP4Type();
+    if (type != nullptr)
+        rtype = type->getP4Type();
+    if (rtype == nullptr) {
+        cstring errorMessage;
+        if (type != nullptr && type->is<IR::Type_InfInt>())
+            errorMessage = "%1%: cannot infer bitwidth for integer-valued type parameter %2%";
+        else
+            errorMessage = "%1%: cannot infer type for type parameter %2%";
+        ::error(errorMessage.c_str(), errorPosition, var);
+    }
     return rtype;  // This may be nullptr
 }
 
@@ -34,11 +39,9 @@ const IR::Node* BindTypeVariables::postorder(IR::Declaration_Instance* decl) {
         return decl;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : mt->getTypeParameters()->parameters) {
-        auto type = getVarValue(p);
-        if (type == nullptr) {
-            ::error("%1%: cannot infer type for type parameter %2%", decl, p);
+        auto type = getVarValue(p, decl);
+        if (type == nullptr)
             return decl;
-        }
         typeArgs->push_back(type);
     }
     decl->type = new IR::Type_Specialized(
@@ -57,11 +60,9 @@ const IR::Node* BindTypeVariables::postorder(IR::MethodCallExpression* expressio
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : mt->getTypeParameters()->parameters) {
-        auto type = getVarValue(p);
-        if (type == nullptr) {
-            ::error("%1%: cannot infer type for type parameter %2%", expression, p);
+        auto type = getVarValue(p, expression);
+        if (type == nullptr)
             return expression;
-        }
         typeArgs->push_back(type);
     }
     expression->typeArguments = typeArgs;
@@ -79,11 +80,9 @@ const IR::Node* BindTypeVariables::postorder(IR::ConstructorCallExpression* expr
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : mt->getTypeParameters()->parameters) {
-        auto type = getVarValue(p);
-        if (type == nullptr) {
-            ::error("%1%: cannot infer type for type parameter %2%", expression, p);
+        auto type = getVarValue(p, expression);
+        if (type == nullptr)
             return expression;
-        }
         typeArgs->push_back(type);
     }
     expression->constructedType = new IR::Type_Specialized(
