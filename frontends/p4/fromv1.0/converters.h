@@ -29,6 +29,7 @@ class ExpressionConverter : public Transform {
  protected:
     ProgramStructure* structure;
     P4::P4CoreLibrary &p4lib;
+
  public:
     bool replaceNextWithLast;  // if true p[next] becomes p.last
     explicit ExpressionConverter(ProgramStructure* structure)
@@ -45,6 +46,8 @@ class ExpressionConverter : public Transform {
     const IR::Node* postorder(IR::ConcreteHeaderRef* nhr) override;
     const IR::Node* postorder(IR::HeaderStackItemRef* ref) override;
     const IR::Node* postorder(IR::GlobalRef *gr) override;
+    const IR::Node* postorder(IR::Equ *equ) override;
+    const IR::Node* postorder(IR::Neq *neq) override;
     const IR::Expression* convert(const IR::Node* node) {
         auto result = node->apply(*this);
         return result->to<IR::Expression>();

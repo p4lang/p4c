@@ -176,6 +176,56 @@ const IR::Node* ExpressionConverter::postorder(IR::GlobalRef *ref) {
             new IR::Path(ref->srcInfo, IR::ID(ref->srcInfo, ref->toString())));
 }
 
+/// P4_16 is stricter on comparing booleans with ints
+/// Therefore we convert such expressions into simply the boolean test
+const IR::Node* ExpressionConverter::postorder(IR::Equ *equ) {
+    const IR::Expression *boolExpr = nullptr;
+    const IR::Expression *constExpr = nullptr;
+    if (equ->left->type->is<IR::Type_Boolean>() && equ->right->is<IR::Constant>()) {
+        boolExpr = equ->left;
+        constExpr = equ->right;
+    } else if (equ->right->type->is<IR::Type_Boolean>() && equ->left->is<IR::Constant>()) {
+        boolExpr = equ->right;
+        constExpr = equ->left;
+    }
+
+    // not a case we support
+    if (boolExpr == nullptr)
+        return equ;
+
+    auto val = constExpr->to<IR::Constant>()->asInt();
+    if (val == 1)
+        return boolExpr;  // == 1 return the boolean
+    else if (val == 0)
+        return new IR::LNot(equ->srcInfo, boolExpr);  // return the !boolean
+    else
+        return new IR::BoolLiteral(equ->srcInfo, false);  // everything else is false
+}
+
+/// And the Neq
+const IR::Node* ExpressionConverter::postorder(IR::Neq *neq) {
+    const IR::Expression *boolExpr = nullptr;
+    const IR::Expression *constExpr = nullptr;
+    if (neq->left->type->is<IR::Type_Boolean>() && neq->right->is<IR::Constant>()) {
+        boolExpr = neq->left;
+        constExpr = neq->right;
+    } else if (neq->right->type->is<IR::Type_Boolean>() && neq->left->is<IR::Constant>()) {
+        boolExpr = neq->right;
+        constExpr = neq->left;
+    }
+
+    if (boolExpr == nullptr)
+        return neq;
+
+    auto val = constExpr->to<IR::Constant>()->asInt();
+    if (val == 0)
+        return boolExpr;
+    else if (val == 1)
+        return new IR::LNot(neq->srcInfo, boolExpr);
+    else
+        return new IR::BoolLiteral(neq->srcInfo, true);  // everything else is true
+}
+
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
