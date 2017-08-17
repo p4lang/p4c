@@ -297,10 +297,10 @@ abstract Stateful : Attached {
 abstract CounterOrMeter : Stateful {
     CounterType   type = CounterType::NONE;
     void settype(cstring t) {
-        if (t == "packets" || t == "PACKETS") type = CounterType::PACKETS;
-        else if (t == "bytes" || t == "BYTES") type = CounterType::BYTES;
-        else if (t == "packets_and_bytes" ||
-                 t == "PACKETS_AND_BYTES") type = CounterType::BOTH;
+        if (strcasecmp(t.c_str(), "packets") == 0) type = CounterType::PACKETS;
+        else if (strcasecmp(t.c_str(), "bytes") == 0) type = CounterType::BYTES;
+        else if (strcasecmp(t.c_str(), "packets_and_bytes") == 0 ||
+                 strcasecmp(t.c_str(), "PacketAndBytes") == 0) type = CounterType::BOTH;
         else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
 }
 

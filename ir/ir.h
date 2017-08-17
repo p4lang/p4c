@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <cassert>
 #include <sstream>
+#include <strings.h>
 
 #include "lib/log.h"
 #include "lib/null.h"
