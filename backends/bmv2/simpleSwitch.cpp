@@ -37,9 +37,9 @@ namespace P4V1 {
 cstring jsonMetadataParameterName = "standard_metadata";
 
 void
-SimpleSwitch::modelError(const char* format, const IR::Node* node) {
+SimpleSwitch::modelError(const char* format, const IR::Node* node) const {
     ::error(format, node);
-    ::error("v1model.p4 does not match expectations");
+    ::error("Are you using an up-to-date v1model.p4?");
 }
 
 void
@@ -101,7 +101,7 @@ SimpleSwitch::convertHashAlgorithm(cstring algorithm) {
     else if (algorithm == v1model.algorithm.identity.name)
         result = "identity";
     else
-        modelError("%1%: unexpected algorithm", algorithm);
+        ::error("%1%: unexpected algorithm", algorithm);
     return result;
 }
 
@@ -129,7 +129,10 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
         }
     } else if (em->originalExternType->name == v1model.meter.name) {
         if (em->method->name == v1model.meter.executeMeter.name) {
-            if (mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
+            if (mc->arguments->size() != 2) {
+                modelError("Expected 2 arguments for %1%", mc);
+                return;
+            }
             auto primitive = mkPrimitive("execute_meter", result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
@@ -261,7 +264,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         auto ei = P4::EnumInstance::resolve(mc->arguments->at(1), typeMap);
         CHECK_NULL(ei);
         if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end()) {
-            modelError("%1%: unexpected algorithm", ei->name);
+            ::error("%1%: unexpected algorithm", ei->name);
             return;
         }
         auto fields = mc->arguments->at(3);
@@ -315,7 +318,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 auto origType = refMap->getDeclaration(
                     typeArg->to<IR::Type_Name>()->path, true);
                 if (!origType->is<IR::Type_Struct>()) {
-                    modelError("%1%: expected a struct type", origType);
+                    modelError("%1%: expected a struct type", origType->getNode());
                     return;
                 }
                 auto st = origType->to<IR::Type_Struct>();
@@ -349,7 +352,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 auto origType = refMap->getDeclaration(
                     typeArg->to<IR::Type_Name>()->path, true);
                 if (!origType->is<IR::Type_Struct>()) {
-                    modelError("%1%: expected a struct type", origType);
+                    modelError("%1%: expected a struct type", origType->getNode());
                     return;
                 }
                 auto st = origType->to<IR::Type_Struct>();
@@ -414,10 +417,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         jctr->emplace("name", name);
         jctr->emplace("id", nextId("counter_arrays"));
         jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
-        auto sz = eb->getParameterValue(v1model.counter.sizeParam.name);
+        auto sz = eb->findParameterValue(v1model.counter.sizeParam.name);
         CHECK_NULL(sz);
         if (!sz->is<IR::Constant>()) {
-            modelError("%1%: expected a constant", sz);
+            modelError("%1%: expected a constant", sz->getNode());
             return;
         }
         jctr->emplace("size", sz->to<IR::Constant>()->value);
@@ -429,18 +432,18 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         jmtr->emplace("id", nextId("meter_arrays"));
         jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
         jmtr->emplace("is_direct", false);
-        auto sz = eb->getParameterValue(v1model.meter.sizeParam.name);
+        auto sz = eb->findParameterValue(v1model.meter.sizeParam.name);
         CHECK_NULL(sz);
         if (!sz->is<IR::Constant>()) {
-            modelError("%1%: expected a constant", sz);
+            modelError("%1%: expected a constant", sz->getNode());
             return;
         }
         jmtr->emplace("size", sz->to<IR::Constant>()->value);
         jmtr->emplace("rate_count", 2);
-        auto mkind = eb->getParameterValue(v1model.meter.typeParam.name);
+        auto mkind = eb->findParameterValue(v1model.meter.typeParam.name);
         CHECK_NULL(mkind);
         if (!mkind->is<IR::Declaration_ID>()) {
-            modelError("%1%: expected a member", mkind);
+            modelError("%1%: expected a member", mkind->getNode());
             return;
         }
         cstring name = mkind->to<IR::Declaration_ID>()->name;
@@ -450,7 +453,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         else if (name == v1model.meter.meterType.bytes.name)
             type = "bytes";
         else
-            modelError("Unexpected meter type %1%", mkind);
+            ::error("Unexpected meter type %1%", mkind->getNode());
         jmtr->emplace("type", type);
         backend->meter_arrays->append(jmtr);
     } else if (eb->type->name == v1model.registers.name) {
@@ -458,10 +461,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         jreg->emplace("name", name);
         jreg->emplace("id", nextId("register_arrays"));
         jreg->emplace_non_null("source_info", eb->sourceInfoJsonObj());
-        auto sz = eb->getParameterValue(v1model.registers.sizeParam.name);
+        auto sz = eb->findParameterValue(v1model.registers.sizeParam.name);
         CHECK_NULL(sz);
         if (!sz->is<IR::Constant>()) {
-            modelError("%1%: expected a constant", sz);
+            modelError("%1%: expected a constant", sz->getNode());
             return;
         }
         if (sz->to<IR::Constant>()->value == 0)
@@ -508,10 +511,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
         jmtr->emplace("is_direct", true);
         jmtr->emplace("rate_count", 2);
-        auto mkind = eb->getParameterValue(v1model.directMeter.typeParam.name);
+        auto mkind = eb->findParameterValue(v1model.directMeter.typeParam.name);
         CHECK_NULL(mkind);
         if (!mkind->is<IR::Declaration_ID>()) {
-            modelError("%1%: expected a member", mkind);
+            modelError("%1%: expected a member", mkind->getNode());
             return;
         }
         cstring name = mkind->to<IR::Declaration_ID>()->name;
@@ -521,7 +524,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         else if (name == v1model.meter.meterType.bytes.name)
             type = "bytes";
         else
-            modelError("%1%: unexpected meter type", mkind);
+            modelError("%1%: unexpected meter type", mkind->getNode());
         jmtr->emplace("type", type);
         jmtr->emplace("size", info->tableSize);
         cstring tblname = info->table->controlPlaneName();
@@ -537,9 +540,9 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         // TODO(jafingerhut) - add line/col here?
 
         auto add_size = [&action_profile, &eb](const cstring &pname) {
-            auto sz = eb->getParameterValue(pname);
+            auto sz = eb->findParameterValue(pname);
             if (!sz->is<IR::Constant>()) {
-                modelError("%1%: expected a constant", sz);
+                ::error("%1%: expected a constant", sz);
                 return;
             }
             action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
@@ -550,10 +553,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         } else {
             add_size(v1model.action_selector.sizeParam.name);
             auto selector = new Util::JsonObject();
-            auto hash = eb->getParameterValue(
+            auto hash = eb->findParameterValue(
                     v1model.action_selector.algorithmParam.name);
             if (!hash->is<IR::Declaration_ID>()) {
-                modelError("%1%: expected a member", hash);
+                modelError("%1%: expected a member", hash->getNode());
                 return;
             }
             auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
@@ -597,7 +600,7 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
         auto type = typeMap->getType(fields, true);
         if (!type->is<IR::Type_StructLike>()) {
             modelError("%1%: expected a struct", fields);
-            return;
+            return calcName;
         }
         for (auto f : type->to<IR::Type_StructLike>()->fields) {
             auto e = new IR::Member(fields, f->name);
@@ -681,11 +684,11 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
         return;
     auto main = toplevel->getMain();
     if (main == nullptr) {
-        modelError("`%1%' module not found for simple switch", IR::P4Program::main);
+        ::error("`%1%' module not found for simple switch", IR::P4Program::main);
         return;
     }
-    auto ingress = main->getParameterValue(v1model.sw.ingress.name);
-    auto egress = main->getParameterValue(v1model.sw.egress.name);
+    auto ingress = main->findParameterValue(v1model.sw.ingress.name);
+    auto egress = main->findParameterValue(v1model.sw.egress.name);
     if (ingress == nullptr || egress == nullptr ||
         !ingress->is<IR::ControlBlock>() || !egress->is<IR::ControlBlock>()) {
         modelError("%1%: main package does not match the expected model", main);
@@ -705,9 +708,9 @@ SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
     if (errorCount() != 0)
         return;
     auto main = toplevel->getMain();
-    auto verify = main->getParameterValue(v1model.sw.verify.name);
-    auto update = main->getParameterValue(v1model.sw.update.name);
-    auto deparser = main->getParameterValue(v1model.sw.deparser.name);
+    auto verify = main->findParameterValue(v1model.sw.verify.name);
+    auto update = main->findParameterValue(v1model.sw.update.name);
+    auto deparser = main->findParameterValue(v1model.sw.deparser.name);
     if (verify == nullptr || update == nullptr || deparser == nullptr ||
         !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
         !deparser->is<IR::ControlBlock>()) {
@@ -725,7 +728,7 @@ SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel,
     if (errorCount() != 0)
         return;
     auto main = toplevel->getMain();
-    auto update = main->getParameterValue(v1model.sw.update.name);
+    auto update = main->findParameterValue(v1model.sw.update.name);
     if (update == nullptr || !update->is<IR::ControlBlock>()) {
         modelError("%1%: main package does not match the expected model", main);
         return;
@@ -737,7 +740,7 @@ void
 SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel,
                                   std::set<cstring>* controls) {
     auto main = toplevel->getMain();
-    auto deparser = main->getParameterValue(v1model.sw.deparser.name);
+    auto deparser = main->findParameterValue(v1model.sw.deparser.name);
     if (deparser == nullptr || !deparser->is<IR::ControlBlock>()) {
         modelError("%1%: main package does not match the expected model", main);
         return;

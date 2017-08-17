@@ -533,6 +533,7 @@ class ParserBlock : InstantiatedBlock {
     P4Parser container;
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
+    toString { return container->toString(); }
 #nodbprint
 }
 
@@ -540,12 +541,14 @@ class ControlBlock : InstantiatedBlock {
     P4Control container;
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
+    toString { return container->toString(); }
 #nodbprint
 }
 
 class PackageBlock : InstantiatedBlock {
     Type_Package type;
     ParameterList getConstructorParameters() const override { return type->constructorParams; }
+    toString { return type->toString(); }
 #nodbprint
 }
 
@@ -554,6 +557,7 @@ class ExternBlock : InstantiatedBlock {
     Method      constructor;  // used to instantiate this block
     ParameterList getConstructorParameters() const override {
         return constructor->type->parameters; }
+    toString { return type->toString(); }
 #nodbprint
 }
 
