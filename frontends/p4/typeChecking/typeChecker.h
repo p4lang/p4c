@@ -139,9 +139,10 @@ class TypeInference : public Transform {
     const IR::Node* typeSet(const IR::Operation_Binary* op);
 
     const IR::Type* cloneWithFreshTypeVariables(const IR::IMayBeGenericType* type);
-    const IR::Type* containerInstantiation(const IR::Node* node,
-                                           const IR::Vector<IR::Expression>* args,
-                                           const IR::IContainer* container);
+    std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>
+    containerInstantiation(const IR::Node* node,
+                           const IR::Vector<IR::Expression>* args,
+                           const IR::IContainer* container);
     const IR::Expression* actionCall(
         bool inActionList,   // if true this "call" is in the action list of a table
         const IR::MethodCallExpression* actionCall);
