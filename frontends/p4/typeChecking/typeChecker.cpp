@@ -62,6 +62,8 @@ class ConstantTypeSubstitution : public Transform {
 
     const IR::Expression* convert(const IR::Expression* expr)
     { return expr->apply(*this)->to<IR::Expression>(); }
+    const IR::Vector<IR::Expression>* convert(const IR::Vector<IR::Expression>* vec)
+    { return vec->apply(*this)->to<IR::Vector<IR::Expression>>(); }
 };
 }  // namespace
 
@@ -890,11 +892,16 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             ::error("%1%: cannot instantiate at top-level", decl);
             return decl;
         }
-        auto type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
-        if (type == nullptr) {
+        auto typeAndArgs = containerInstantiation(
+            decl, decl->arguments, simpleType->to<IR::IContainer>());
+        auto type = typeAndArgs.first;
+        auto args = typeAndArgs.second;
+        if (type == nullptr || args == nullptr) {
             prune();
             return decl;
         }
+        if (args != decl->arguments)
+            decl->arguments = args;
         setType(decl, type);
         setType(orig, type);
     } else {
@@ -904,8 +911,9 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
     return decl;
 }
 
-// Return type created by constructor
-const IR::Type*
+/// @returns: A pair containing the type returned by the constructor and the new arguments
+///           (which may change due to insertion of casts).
+std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>
 TypeInference::containerInstantiation(
     const IR::Node* node,  // can be Declaration_Instance or ConstructorCallExpression
     const IR::Vector<IR::Expression>* constructorArguments,
@@ -924,7 +932,7 @@ TypeInference::containerInstantiation(
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         if (argType == nullptr)
-            return nullptr;
+            return std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>(nullptr, nullptr);
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType);
         args->push_back(argInfo);
     }
@@ -937,13 +945,16 @@ TypeInference::containerInstantiation(
     TypeConstraints constraints;
     constraints.addEqualityConstraint(constructor, callType);
     auto tvs = constraints.solve(node, true);
-    typeMap->addSubstitutions(tvs);
     if (tvs == nullptr)
-        return nullptr;
+        return std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>(nullptr, nullptr);
+
+    ConstantTypeSubstitution cts(tvs, typeMap);
+    auto newArgs = cts.convert(constructorArguments);
+    typeMap->addSubstitutions(tvs);
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
-    return returnType;
+    return std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>(returnType, newArgs);
 }
 
 const IR::Node* TypeInference::preorder(IR::Function* function) {
@@ -2675,15 +2686,19 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
         setType(getOriginal(), type);
         setType(expression, type);
     } else if (simpleType->is<IR::IContainer>()) {
-        auto conttype = containerInstantiation(expression, expression->arguments,
-                                               simpleType->to<IR::IContainer>());
-        if (conttype == nullptr)
+        auto typeAndArgs = containerInstantiation(expression, expression->arguments,
+                                                  simpleType->to<IR::IContainer>());
+        auto conttype = typeAndArgs.first;
+        auto args = typeAndArgs.second;
+        if (conttype == nullptr || args == nullptr)
             return expression;
         if (type->is<IR::Type_SpecializedCanonical>()) {
             auto st = type->to<IR::Type_SpecializedCanonical>();
             conttype = new IR::Type_SpecializedCanonical(
                 type->srcInfo, st->baseType, st->arguments, conttype);
         }
+        if (args != expression->arguments)
+            expression->arguments = args;
         setType(expression, conttype);
         setType(getOriginal(), conttype);
     } else {
