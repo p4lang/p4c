@@ -157,6 +157,8 @@ void Backend::convert(BMV2Options& options) {
             json->add_enum(name, pEntry.first, pEntry.second);
         }
     }
+    if (::errorCount() > 0)
+        return;
 
     /// generate error types
     for (const auto &p : errorCodesMap) {
@@ -179,9 +181,13 @@ void Backend::convert(BMV2Options& options) {
         new ConvertControl(this),
         new ConvertDeparser(this),
     };
+
     codegen_passes.setName("CodeGen");
     CHECK_NULL(toplevel);
-    toplevel->getMain()->apply(codegen_passes);
+    auto main = toplevel->getMain();
+    if (main == nullptr)
+        return;
+    main->apply(codegen_passes);
 }
 
 }  // namespace BMV2

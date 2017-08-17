@@ -34,6 +34,8 @@ class SimpleSwitch {
     BMV2::Backend* backend;
     V1Model&       v1model;
 
+    void modelError(const char* format, const IR::Node* place) const;
+
  protected:
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
     int createFieldList(const IR::Expression* expr, cstring group,
