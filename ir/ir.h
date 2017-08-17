@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _IR_IR_H_
 #define _IR_IR_H_
 
+#include <strings.h>
 #include <cassert>
 #include <sstream>
-#include <strings.h>
 
 #include "lib/log.h"
 #include "lib/null.h"
