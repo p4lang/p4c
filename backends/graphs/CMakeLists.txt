@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Makefile for a fake backend that is used for testing the P4-16 front-end.
-
 set (GRAPHS_SRCS
   graphs.cpp
   controls.h
