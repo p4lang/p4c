@@ -69,12 +69,16 @@ check_include_file (ucontext.h HAVE_UCONTEXT_H)
 # check functions
 
 # set libraries to be used with check_function_exists
-set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} gc)
+set (CMAKE_REQUIRED_LIBRARIES_PRECHECK ${CMAKE_REQUIRED_LIBRARIES})
+set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${LIBGC_LIBRARIES})
 
 include (CheckFunctionExists)
 check_function_exists (memchr HAVE_MEMCHR)
 check_function_exists (pipe2 HAVE_PIPE2)
 check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
+
+# restore CMAKE_REQUIRED_LIBRARIES
+set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_PRECHECK})
 
 # python modules
 include (FindPythonModule)
