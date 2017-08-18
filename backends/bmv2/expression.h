@@ -54,6 +54,10 @@ class ExpressionConverter : public Inspector {
     /// after translating an Expression to JSON, save the result to 'map'.
     std::map<const IR::Expression*, Util::IJson*> map;
     bool leftValue;  // true if converting a left value
+    // in some cases the bmv2 JSON requires a 'bitwidth' attribute for hex
+    // strings (e.g. for constants in calculation inputs). When this flag is set
+    // to true, we add this attribute.
+    bool withConstantWidths{false};
 
  public:
     ExpressionConverter(Backend *backend, cstring scalarsName) :
@@ -72,6 +76,7 @@ class ExpressionConverter : public Inspector {
     Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
                          bool wrap = true, bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);
+    Util::IJson* convertWithConstantWidths(const IR::Expression* e);
 
     void postorder(const IR::BoolLiteral* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;

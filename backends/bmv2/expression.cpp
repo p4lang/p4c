@@ -145,10 +145,10 @@ void ExpressionConverter::postorder(const IR::Cast* expression)  {
 void ExpressionConverter::postorder(const IR::Constant* expression)  {
     auto result = new Util::JsonObject();
     result->emplace("type", "hexstr");
-
-    cstring repr = stringRepr(expression->value,
-                              ROUNDUP(expression->type->width_bits(), 8));
+    auto bitwidth = expression->type->width_bits();
+    cstring repr = stringRepr(expression->value, ROUNDUP(bitwidth, 8));
     result->emplace("value", repr);
+    if (withConstantWidths) result->emplace("bitwidth", bitwidth);
     map.emplace(expression, result);
 }
 
@@ -586,6 +586,13 @@ Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
         BUG("%1%: Could not convert expression", e);
     leftValue = false;
     return result;
+}
+
+Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression* e) {
+  withConstantWidths = true;
+  auto result = convert(e);
+  withConstantWidths = false;
+  return result;
 }
 
 }  // namespace BMV2

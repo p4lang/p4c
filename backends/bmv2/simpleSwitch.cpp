@@ -588,7 +588,7 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
         fields = list;
         typeMap->setType(fields, type);
     }
-    auto jright = conv->convert(fields);
+    auto jright = conv->convertWithConstantWidths(fields);
     calc->emplace("input", jright);
     calculations->append(calc);
     return calcName;
