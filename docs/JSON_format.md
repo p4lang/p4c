@@ -631,7 +631,12 @@ attributes:
 - `input`: a JSON array of objects with the following attributes:
   - `type`: one of `field`, `hexstr`, `header`, `payload`
   - `value`: the appropriate value or reference (see
-    [here](#the-type-value-object))
+    [here](#the-type-value-object)). For `hexstr`, we require an extra attribute
+    (in addition to `type` and `value`), `bitwidth`, whose value must be a
+    positive integer equal to the desired bitwidth for the constant. Note that
+    we require this attribute because the bitwidth cannot be inferred from the
+    hexadecimal string directly, as the desired bitwidth may not be a multiple
+    of a byte.
 
 If `type` is `payload`, all the headers present after the last included header
 (or after the enclosing header of the last included field) will be included in
