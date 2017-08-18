@@ -30,7 +30,7 @@ test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp
 LDADD = \
 $(top_builddir)/libsimple_switch_grpc.la \
 $(top_builddir)/../simple_switch/libsimpleswitch.la \
--lpiproto \
+-lpiprotogrpc -lpiprotobuf \
 $(PROTOBUF_LIBS) $(GRPC_LIBS) \
 $(top_builddir)/../../third_party/gtest/libgtest.la
 
