@@ -268,31 +268,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             return;
         }
         auto fields = mc->arguments->at(3);
-        cstring calcName = refMap->newName("calc_");
-        auto calc = new Util::JsonObject();
-        calc->emplace("name", calcName);
-        calc->emplace("id", nextId("calculations"));
-        calc->emplace("algo", ei->name);
-        if (!fields->is<IR::ListExpression>()) {
-            // expand it into a list
-            auto list = new IR::ListExpression({});
-            auto type = typeMap->getType(fields, true);
-            if (!type->is<IR::Type_StructLike>()) {
-                modelError("%1%: expected a struct", fields);
-                return;
-            }
-            for (auto f : type->to<IR::Type_StructLike>()->fields) {
-                auto e = new IR::Member(fields, f->name);
-                auto ftype = typeMap->getType(f);
-                typeMap->setType(e, ftype);
-                list->push_back(e);
-            }
-            fields = list;
-            typeMap->setType(fields, type);
-        }
-        auto jright = conv->convert(fields);
-        calc->emplace("input", jright);
-        backend->json->calculations->append(calc);
+        auto calcName = createCalculation(ei->name, fields, backend->json->calculations, nullptr);
         calculation->emplace("type", "calculation");
         calculation->emplace("value", calcName);
         parameters->append(calculation);
@@ -584,7 +560,8 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
 
 cstring
 SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
-                                Util::JsonArray* calculations, const IR::Node* node) {
+                                Util::JsonArray* calculations,
+                                const IR::Node* node = nullptr) {
     auto typeMap = backend->getTypeMap();
     auto refMap = backend->getRefMap();
     auto conv = backend->getExpressionConverter();
@@ -592,7 +569,7 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
     calc->emplace("id", nextId("calculations"));
-    calc->emplace_non_null("source_info", node->sourceInfoJsonObj());
+    if (node != nullptr) calc->emplace_non_null("source_info", node->sourceInfoJsonObj());
     calc->emplace("algo", algo);
     if (!fields->is<IR::ListExpression>()) {
         // expand it into a list
