@@ -90,13 +90,6 @@ struct MeterType_Model : public ::Model::Enum_Model {
     ::Model::Elem bytes;
 };
 
-struct Checksum16_Model : public ::Model::Extern_Model {
-    Checksum16_Model() : Extern_Model("Checksum16"), get("get"),
-                         resultType(IR::Type_Bits::get(32)) {}
-    ::Model::Elem get;
-    const IR::Type* resultType;
-};
-
 struct ActionProfile_Model : public ::Model::Extern_Model {
     ActionProfile_Model() : Extern_Model("action_profile"),
                             sizeType(IR::Type_Bits::get(32)), sizeParam("size") {}
@@ -261,9 +254,10 @@ class V1Model : public ::Model::Model {
             action_selector(), clone(), resubmit("resubmit"),
             tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
             verify("verifyChecksum", headersType), update("computeChecksum", headersType),
-            ck16(), digest_receiver(), hash(), algorithm(),
+            digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
-            recirculate("recirculate"), directMeter(), directCounter()
+            recirculate("recirculate"), verify_checksum("verify_checksum"),
+            update_checksum("update_checksum"), directMeter(), directCounter()
     {}
 
  public:
@@ -291,13 +285,14 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       selectorMatchType;
     VerifyUpdate_Model  verify;
     VerifyUpdate_Model  update;
-    Checksum16_Model    ck16;
     DigestReceiver_Model digest_receiver;
     Hash_Model          hash;
     Algorithm_Model     algorithm;
     Register_Model      registers;
     ::Model::Elem       drop;
     ::Model::Elem       recirculate;
+    ::Model::Elem       verify_checksum;
+    ::Model::Elem       update_checksum;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 

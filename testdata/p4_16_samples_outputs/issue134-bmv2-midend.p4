@@ -40,17 +40,12 @@ control VerifyChecksumI(in H hdr, inout M meta) {
 }
 
 struct tuple_0 {
-    bit<1> field;
+    bit<16> field;
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    bit<16> tmp_0;
-    @name("c16") Checksum16() c16;
     apply {
-        if (hdr.ipv4.ihl == 4w5) {
-            tmp_0 = c16.get<tuple_0>({ 1w0 });
-            hdr.ipv4.hdrChecksum = tmp_0;
-        }
+        update_checksum<tuple_0>(hdr.ipv4.ihl == 4w5, { 16w0 }, hdr.ipv4.hdrChecksum);
     }
 }
 

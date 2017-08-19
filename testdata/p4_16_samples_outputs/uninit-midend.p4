@@ -12,20 +12,19 @@ parser p1(packet_in p, out Header h) {
     Header[2] stack;
     bool c_1;
     bool d;
+    bit<32> tmp_3;
     bit<32> tmp_4;
     bit<32> tmp_5;
     bit<32> tmp_6;
-    bit<32> tmp_7;
-    bit<32> tmp_8;
     state start {
         h.data1 = 32w0;
         func(h);
+        tmp_3 = h.data2;
         tmp_4 = h.data2;
-        tmp_5 = h.data2;
-        tmp_6 = h.data2;
-        tmp_7 = g(tmp_5, tmp_6);
-        tmp_8 = tmp_7;
-        g(tmp_4, tmp_8);
+        tmp_5 = g(tmp_3, tmp_4);
+        h.data2 = tmp_3;
+        tmp_6 = tmp_5;
+        g(h.data2, tmp_6);
         h.data2 = h.data3 + 32w1;
         stack[1].isValid();
         transition select((bit<1>)h.isValid()) {

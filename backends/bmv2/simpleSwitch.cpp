@@ -600,47 +600,32 @@ SimpleSwitch::generateUpdate(const IR::BlockStatement *block,
     auto typeMap = backend->getTypeMap();
     auto refMap = backend->getRefMap();
     auto conv = backend->getExpressionConverter();
-    // Currently this is very hacky to target the very limited support
-    // for checksums in BMv2 This will work much better when BMv2
-    // offers a checksum extern.
     for (auto stat : block->components) {
-        if (stat->is<IR::IfStatement>()) {
-            // The way checksums work in Json, they always ignore the condition!
-            stat = stat->to<IR::IfStatement>()->ifTrue;
-        }
         if (auto blk = stat->to<IR::BlockStatement>()) {
             generateUpdate(blk, checksums, calculations);
             continue;
-        } else if (auto assign = stat->to<IR::AssignmentStatement>()) {
-            if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
-                auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
-                if (auto em = mi->to<P4::ExternMethod>()) {
-                    if (em->method->name.name == v1model.ck16.get.name &&
-                        em->originalExternType->name.name == v1model.ck16.name) {
-                        if (mi->expr->arguments->size() != 1) {
-                            modelError("%1%: Expected 1 argument", assign->right);
-                            return;
-                        }
-                        auto cksum = new Util::JsonObject();
-                        cstring calcName = createCalculation("csum16", mi->expr->arguments->at(0),
-                                                             calculations, mc);
-                        cksum->emplace("name", refMap->newName("cksum_"));
-                        cksum->emplace("id", nextId("checksums"));
-                        // TODO(jafingerhut) - add line/col here?
-                        auto jleft = conv->convert(assign->left);
-                        cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
-                        cksum->emplace("type", "generic");
-                        cksum->emplace("calculation", calcName);
-                        checksums->append(cksum);
-                        continue;
-                    }
+        } else if (auto mc = stat->to<IR::MethodCallStatement>()) {
+            auto mi = P4::MethodInstance::resolve(mc->methodCall, refMap, typeMap);
+            if (auto em = mi->to<P4::ExternFunction>()) {
+                if (em->method->name.name == v1model.update_checksum.name) {
+                    BUG_CHECK(mi->expr->arguments->size() == 3, "%1%: Expected 3 arguments", mc);
+                    auto cksum = new Util::JsonObject();
+                    cstring calcName = createCalculation("csum16", mi->expr->arguments->at(1),
+                                                         calculations, mc);
+                    cksum->emplace("name", refMap->newName("cksum_"));
+                    cksum->emplace("id", nextId("checksums"));
+                    // TODO(jafingerhut) - add line/col here?
+                    auto jleft = conv->convert(mi->expr->arguments->at(2));
+                    cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
+                    cksum->emplace("type", "generic");
+                    cksum->emplace("calculation", calcName);
+                    checksums->append(cksum);
+                    continue;
                 }
             }
-        } else if (auto mc = stat->to<IR::MethodCallStatement>()) {
-            auto mi = P4::MethodInstance::resolve(mc->methodCall, refMap, typeMap, true);
-            BUG_CHECK(mi && mi->isApply(), "Call of something other than an apply method");
         }
-        BUG("%1%: not handled yet", stat);
+        ::error("%1%: Only calls to %2% allowed", stat, v1model.update_checksum);
+        return;
     }
 }
 

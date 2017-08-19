@@ -89,7 +89,7 @@ bool ProgramStructure::isHeader(const IR::ConcreteHeaderRef* nhr) const {
 }
 
 void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool metadata) {
-    LOG1("Checking " << hdr << " " << (metadata ? "M" : "H"));
+    LOG3("Checking " << hdr << " " << (metadata ? "M" : "H"));
     for (auto f : hdr->fields) {
         if (f->type->is<IR::Type_Varbits>()) {
             if (metadata)
@@ -1518,7 +1518,7 @@ const IR::P4Action*
 ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName,
                                 const IR::Meter* meterToAccess,
                                 cstring counterToAccess) {
-    LOG1("Converting action " << action->name);
+    LOG3("Converting action " << action->name);
     auto body = new IR::BlockStatement;
     auto params = new IR::ParameterList;
     bool isCalled = calledActions.isCallee(action->name.name);
@@ -1537,7 +1537,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
             type = new IR::Type_Name(path);
         }
         auto param = new IR::Parameter(p->srcInfo, p->name, direction, type);
-        LOG2("  " << p << " is " << direction << " " << param);
+        LOG3("  " << p << " is " << direction << " " << param);
         params->push_back(param); }
 
     if (meterToAccess != nullptr) {
@@ -1635,7 +1635,7 @@ const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm
 
 const IR::Declaration_Instance*
 ProgramStructure::convert(const IR::Register* reg, cstring newName) {
-    LOG1("Synthesizing " << reg);
+    LOG3("Synthesizing " << reg);
     const IR::Type *regElementType = nullptr;
     if (reg->width > 0) {
         regElementType = IR::Type_Bits::get(reg->width);
@@ -1669,7 +1669,7 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
 
 const IR::Declaration_Instance*
 ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
-    LOG1("Synthesizing " << cm);
+    LOG3("Synthesizing " << cm);
     IR::ID ext;
     if (cm->is<IR::Counter>())
         ext = v1model.counter.Id();
@@ -1695,7 +1695,7 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
 
 const IR::Declaration_Instance*
 ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
-    LOG1("Synthesizing " << m);
+    LOG3("Synthesizing " << m);
     auto meterOutput = m->result;
     if (meterOutput == nullptr) {
         ::error("%1%: direct meter with no result", m);
@@ -1720,7 +1720,7 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
 
 const IR::Declaration_Instance*
 ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
-    LOG1("Synthesizing " << c);
+    LOG3("Synthesizing " << c);
 
     IR::ID ext = v1model.directCounter.Id();
     auto typepath = new IR::Path(ext);
@@ -1962,27 +1962,6 @@ void ProgramStructure::createMain() {
     declarations->push_back(result);
 }
 
-cstring ProgramStructure::mapAlgorithm(IR::ID algorithm) const {
-    if (algorithm.name == "csum16")
-        return v1model.ck16.name;
-    ::error("Unsupported algorithm %1%", algorithm);
-    return nullptr;
-}
-
-const IR::Declaration_Instance*
-ProgramStructure::checksumUnit(const IR::FieldListCalculation* flc) {
-    auto ext = mapAlgorithm(flc->algorithm);
-    if (ext == nullptr)
-        return nullptr;
-    auto typePath = new IR::Path(IR::ID(ext));
-    auto extType = new IR::Type_Name(typePath);
-    auto newName = field_list_calculations.get(flc);
-    auto inst = new IR::Declaration_Instance(
-        flc->srcInfo, newName, flc->annotations, extType,
-        new IR::Vector<IR::Expression>(), nullptr);
-    return inst;
-}
-
 // if a FieldListCalculation contains multiple field lists concatenate them all
 // into a temporary field list
 const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculation* flc) {
@@ -2016,7 +1995,6 @@ const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculat
 void ProgramStructure::createChecksumVerifications() {
     ExpressionConverter conv(this);
 
-    // verify
     auto params = new IR::ParameterList;
     auto headpath = new IR::Path(v1model.headersType.Id());
     auto headtype = new IR::Type_Name(headpath);
@@ -2029,68 +2007,41 @@ void ProgramStructure::createChecksumVerifications() {
     auto metatype = new IR::Type_Name(metapath);
     auto meta = new IR::Parameter(v1model.parser.metadataParam.Id(),
                                   IR::Direction::InOut, metatype);
+    auto body = new IR::BlockStatement;
     params->push_back(meta);
     conversionContext.userMetadata = paramReference(meta);
 
     conversionContext.standardMetadata = nullptr;
 
     auto type = new IR::Type_Control(v1model.verify.Id(), params);
-
-    std::map<const IR::FieldListCalculation*, const IR::Declaration_Instance*> map;
-    IR::IndexedVector<IR::Declaration> stateful;
     for (auto cf : calculated_fields) {
-        // FIXME -- do something with cf->annotations?
-        for (auto uov : cf->specs) {
-            if (uov.update) continue;
-            auto flc = field_list_calculations.get(uov.name.name);
-            if (flc == nullptr) {
-                ::error("Cannot find field_list_calculation %1%", uov.name);
-                continue;
-            }
-            if (map.find(flc) != map.end())
-                continue;
-            auto inst = checksumUnit(flc);
-            if (inst == nullptr)
-                continue;
-            stateful.push_back(inst);
-            map.emplace(flc, inst);
-        }
-    }
-
-    auto body = new IR::BlockStatement;
-    for (auto cf : calculated_fields) {
-        LOG1("Converting " << cf);
+        LOG3("Converting " << cf);
         auto dest = conv.convert(cf->field);
 
         for (auto uov : cf->specs) {
             if (uov.update) continue;
             auto flc = field_list_calculations.get(uov.name.name);
-            auto inst = get(map, flc);
-
             auto fl = getFieldLists(flc);
             if (fl == nullptr) continue;
             auto le = conv.convert(fl);
-            auto extObj = new IR::PathExpression(inst->name);
-            // The only method we currently know about is v1model.ck16.get
-            auto method = new IR::Member(extObj, v1model.ck16.get.Id());
+            auto method = new IR::PathExpression(v1model.verify_checksum.Id());
             auto args = new IR::Vector<IR::Expression>();
+            const IR::Expression* condition;
+            if (uov.cond != nullptr)
+                condition = conv.convert(uov.cond);
+            else
+                condition = new IR::BoolLiteral(true);
+            args->push_back(condition);
             args->push_back(le);
-            auto mc = new IR::MethodCallExpression(method, args);
-            const IR::Expression* cond = new IR::Equ(uov.srcInfo, dest, mc);
-            if (uov.cond != nullptr) {
-                auto cond2 = conv.convert(uov.cond);
-                // cond2 is evaluated first
-                cond = new IR::LAnd(cond2, cond);
-            }
-            auto dropmethod = new IR::PathExpression(v1model.drop.Id());
-            auto dropmc = new IR::MethodCallExpression(dropmethod);
-            auto drop = new IR::MethodCallStatement(mc->srcInfo, dropmc);
-            auto ifstate = new IR::IfStatement(cond, drop, nullptr);
-            body->push_back(ifstate);
-            LOG1("Converted " << flc);
+            args->push_back(dest);
+            auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
+            body->push_back(mc);
+            LOG3("Converted " << flc);
         }
     }
-    verifyChecksums = new IR::P4Control(v1model.verify.Id(), type, stateful, body);
+
+    verifyChecksums = new IR::P4Control(
+        v1model.verify.Id(), type, *new IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(verifyChecksums);
     conversionContext.clear();
 }
@@ -2116,57 +2067,35 @@ void ProgramStructure::createChecksumUpdates() {
 
     auto type = new IR::Type_Control(v1model.update.Id(), params);
 
-    IR::IndexedVector<IR::Declaration> stateful;
     auto body = new IR::BlockStatement;
-
-    std::map<const IR::FieldListCalculation*, const IR::Declaration_Instance*> map;
     for (auto cf : calculated_fields) {
-        for (auto uov : cf->specs) {
-            if (!uov.update) continue;
-            auto flc = field_list_calculations.get(uov.name.name);
-            if (flc == nullptr) {
-                ::error("Cannot find field_list_calculation %1%", uov.name);
-                continue;
-            }
-            if (map.find(flc) != map.end())
-                continue;
-            auto inst = checksumUnit(flc);
-            if (inst == nullptr)
-                continue;
-            stateful.push_back(inst);
-            map.emplace(flc, inst);
-        }
-    }
-
-    for (auto cf : calculated_fields) {
-        LOG1("Converting " << cf);
+        LOG3("Converting " << cf);
         auto dest = conv.convert(cf->field);
 
         for (auto uov : cf->specs) {
             if (!uov.update) continue;
             auto flc = field_list_calculations.get(uov.name.name);
-            auto inst = get(map, flc);
-
             auto fl = getFieldLists(flc);
             if (fl == nullptr) continue;
             auto le = conv.convert(fl);
 
-            auto extObj = new IR::PathExpression(inst->name);
-            // The only method we currently know about is v1model.ck16.get
-            auto method = new IR::Member(extObj, v1model.ck16.get.Id());
+            auto method = new IR::PathExpression(v1model.update_checksum.Id());
             auto args = new IR::Vector<IR::Expression>();
+            const IR::Expression* condition;
+            if (uov.cond != nullptr)
+                condition = conv.convert(uov.cond);
+            else
+                condition = new IR::BoolLiteral(true);
+            args->push_back(condition);
             args->push_back(le);
-            auto mc = new IR::MethodCallExpression(method, args);
-            const IR::Statement* set = new IR::AssignmentStatement(flc->srcInfo, dest, mc);
-            if (uov.cond != nullptr) {
-                auto cond = conv.convert(uov.cond);
-                set = new IR::IfStatement(cond, set, nullptr);
-            }
-            body->push_back(set);
-            LOG1("Converted " << flc);
+            args->push_back(dest);
+            auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
+            body->push_back(mc);
+            LOG3("Converted " << flc);
         }
     }
-    updateChecksums = new IR::P4Control(v1model.update.Id(), type, stateful, body);
+    updateChecksums = new IR::P4Control(
+        v1model.update.Id(), type, *new IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(updateChecksums);
     conversionContext.clear();
 }
@@ -2194,7 +2123,7 @@ const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
 void
 ProgramStructure::tablesReferred(const IR::V1Control* control,
                                  std::vector<const IR::V1Table*> &out) {
-    LOG1("Inspecting " << control->name);
+    LOG3("Inspecting " << control->name);
     for (auto it : tableMapping) {
         if (it.second == control)
             out.push_back(it.first);
@@ -2218,7 +2147,8 @@ void ProgramStructure::populateOutputNames() {
         "range",
         "selector",
         // v1model externs
-        "Checksum16",
+        "verify_checksum",
+        "update_checksum",
         "CounterType",
         "MeterType",
         "HashAlgorithm",

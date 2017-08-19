@@ -40,12 +40,8 @@ control VerifyChecksumI(in H hdr, inout M meta) {
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    Checksum16() c16;
     apply {
-        if (hdr.ipv4.ihl == 5) {
-            hdr.ipv4.hdrChecksum = c16.get({1w0});
-            ;
-        }
+        update_checksum(hdr.ipv4.ihl == 5, { 16w0 }, hdr.ipv4.hdrChecksum);
     }
 }
 
