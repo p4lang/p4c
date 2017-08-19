@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
 #include <PI/pi.h>
@@ -69,6 +70,7 @@ pi_status_t _pi_update_device_start(pi_dev_id_t dev_id,
 
 pi_status_t _pi_update_device_end(pi_dev_id_t dev_id) {
   pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
+  _BM_UNUSED(d_info);
   assert(d_info->assigned);
   auto error_code = pibmv2::switch_->swap_configs();
   if (error_code != bm::RuntimeInterface::ErrorCode::SUCCESS)
