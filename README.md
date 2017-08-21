@@ -181,9 +181,9 @@ etags` generate tags for vi and Emacs respectively.  (Make sure that you are
 using the correct version of ctags; there are several competing programs with
 the same name in existence.)
 
-To enable building code documentation, please run
-`bootstrap.sh -DENABLE_DOCS=ON`. This enables the `make docs` rule to
-generate documentation. The HTML output is available in
+To enable building code documentation, please run `cmake
+.. -DENABLE_DOCS=ON`.  This enables the `make docs` rule to generate
+documentation. The HTML output is available in
 `build/doxygen-out/html/index.html`.
 
 # Docker
@@ -201,7 +201,11 @@ default is 2GB, which is not enough to build p4c. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
 
-# Defining new CMake targets
+# Build system
+
+The build system is based on cmake.  This section describes how it can be customized.
+
+## Defining new CMake targets
 
 When building a new backend target, add it into the development tree in the
 extensions subdirectory. The cmake-based build system will automatically include
@@ -209,7 +213,7 @@ it if it contains a CMakeLists.txt file.
 
 For a new backend, the cmake file should contain the following rules:
 
-## IR definition files
+### IR definition files
 
 Backend specific IR definition files should be added to the global list
 of IR_DEF_FILES as they are processed together with the core IR files.
@@ -229,7 +233,7 @@ set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${MY_IR_SRCS} PAREN
 ```
 Again, `MY_IR_SRCS` is a list of file names with absolute path.
 
-## Source files
+### Source files
 
 Sources (.cpp and .h) should be added to the cpplint target using the following rule:
 
@@ -240,7 +244,7 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 where `mybackend` is the name of the directory you added under extensions.
 The p4c CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-## Target
+### Target
 
 Define a target for your executable. The target should link against
 the core `P4C_LIBRARIES` and `P4C_LIB_DEPS`.  `P4C_LIB_DEPS` are
@@ -259,7 +263,7 @@ target_link_libraries (p4c-mybackend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-mybackend genIR)
 ```
 
-## Tests
+### Tests
 
 We implemented support equivalent to the automake `make check` rules.
 All tests should be included in `make check` and in addition, we support
@@ -297,7 +301,7 @@ To pass custom arguments to p4c, you can set the environment variable `P4C_ARGS`
 make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
 ```
 
-## Installation
+### Installation
 
 Define rules to install your backend. Typically you need to install
 the binary, the additional architecture headers, and the configuration
@@ -311,7 +315,6 @@ install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/p4include
 install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 ```
-
 
 # Known issues
 
@@ -345,7 +348,6 @@ access them from the IR
 
 ### Bmv2 Backend
 
-* All checksum verification happens in the parser.
 * Range "set" not supported in parser transitions
 * Tables with multiple apply calls
 
