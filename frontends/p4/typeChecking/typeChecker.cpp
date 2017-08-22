@@ -2753,6 +2753,9 @@ const IR::Node* TypeInference::postorder(IR::This* expression) {
 }
 
 const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
+    // The type of a don't care depends on how it's used.
+    // As a function argument it's a left-value (_), otherwise it's a constant
+    // TODO
     if (!done()) {
         setType(expression, IR::Type_Dontcare::get());
         setType(getOriginal(), IR::Type_Dontcare::get());
