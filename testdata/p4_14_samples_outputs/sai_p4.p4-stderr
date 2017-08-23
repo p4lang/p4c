@@ -103,6 +103,12 @@ action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, d
 sai_p4.p4(282): warning: Could not infer type for fdb_learning_limit_violation, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sai_p4.p4(192): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+sai_p4.p4(192): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
 sai_p4.p4(282): warning: port shadows .port
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                    ^^^^

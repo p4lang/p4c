@@ -212,9 +212,7 @@ class ProgramStructure {
                                       const IR::Meter* meterToAccess, cstring counterToAccess);
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
-    const IR::Declaration_Instance* checksumUnit(const IR::FieldListCalculation* flc);
     const IR::Expression* counterType(const IR::CounterOrMeter* cm) const;
-    cstring mapAlgorithm(IR::ID algorithm) const;
     void createChecksumVerifications();
     void createChecksumUpdates();
     void createStructures();

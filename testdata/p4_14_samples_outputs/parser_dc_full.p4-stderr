@@ -1,1 +1,13 @@
 warning: The order of headers in deparser is not uniquely determined by parser!
+parser_dc_full.p4(744): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser_dc_full.p4(554): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser_dc_full.p4(744): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser_dc_full.p4(554): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^

@@ -7,3 +7,9 @@ action set_ecmp_select(ecmp_base, ecmp_count) {
 flowlet_switching.p4(72): warning: -1: negative value with unsigned type
     add_to_field(ipv4.ttl, -1);
                             ^
+parser.p4(53): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser.p4(53): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^

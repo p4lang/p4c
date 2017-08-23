@@ -20,3 +20,15 @@ fabric.p4(230): warning: Could not infer type for fabric_mgid, using bit<8>
 action set_fabric_multicast(fabric_mgid) {
                             ^^^^^^^^^^^
 warning: The order of headers in deparser is not uniquely determined by parser!
+parser.p4(571): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser.p4(280): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser.p4(571): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+parser.p4(280): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
