@@ -1877,6 +1877,10 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
                                        header_id, field_offset, calculation);
     }
 
+    const Json::Value true_value(true);
+    const auto do_update = cfg_checksum.get("update", true_value).asBool();
+    const auto do_verify = cfg_checksum.get("verify", true_value).asBool();
+
     if (cfg_checksum.isMember("if_cond") && !cfg_checksum["if_cond"].isNull()) {
       auto cksum_condition = std::unique_ptr<Expression>(new Expression());
       build_expression(cfg_checksum["if_cond"], cksum_condition.get());
@@ -1886,12 +1890,16 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
 
     checksums.push_back(unique_ptr<Checksum>(checksum));
 
-    for (auto it = deparsers.begin(); it != deparsers.end(); ++it) {
-      it->second->add_checksum(checksum);
+    if (do_update) {
+      for (auto it = deparsers.begin(); it != deparsers.end(); ++it) {
+        it->second->add_checksum(checksum);
+      }
     }
 
-    for (auto it = parsers.begin(); it != parsers.end(); ++it) {
-      it->second->add_checksum(checksum);
+    if (do_verify) {
+      for (auto it = parsers.begin(); it != parsers.end(); ++it) {
+        it->second->add_checksum(checksum);
+      }
     }
   }
 }

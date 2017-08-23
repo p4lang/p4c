@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.13*.
+The version described in this document is *2.14*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -654,10 +654,14 @@ the following attributes:
 - `target`: the field where the checksum result is written
 - `type`: always set to `generic`
 - `calculation`: the name of the calculation to use to compute the checksum
-- `if_cond`: null if the checksum needs to be updated unconditionally, otherwise
-a boolean expression, which will determine whether or not the checksum gets
-updated. See [here](#the-type-value-object) for more information on expressions
-format.
+- `update`: an optional boolean value, which defaults to `true`; indicates
+whether the checksum needs to be updated in deparsers.
+- `verify`: an optional boolean value, which defaults to `true`; indicates
+whether the checksum needs to be verified in parsers.
+- `if_cond`: null if the checksum needs to be verified and / or updated
+unconditionally, otherwise a boolean expression, which will determine whether or
+not the checksum gets verified and / or updated. See
+[here](#the-type-value-object) for more information on expressions format.
 
 ### `learn_lists`
 
