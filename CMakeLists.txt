@@ -67,9 +67,14 @@ check_include_file (execinfo.h HAVE_EXECINFO_H)
 check_include_file (ucontext.h HAVE_UCONTEXT_H)
 
 # check functions
+
+# set libraries to be used with check_function_exists
+set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} gc)
+
 include (CheckFunctionExists)
 check_function_exists (memchr HAVE_MEMCHR)
 check_function_exists (pipe2 HAVE_PIPE2)
+check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
 
 # python modules
 include (FindPythonModule)

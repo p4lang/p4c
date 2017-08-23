@@ -30,13 +30,6 @@ limitations under the License.
 #define _GLIBCXX_USE_NOEXCEPT _NOEXCEPT
 #endif
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-/* GC_print_stats is not an official GC API and is not available on
- * Windows builds
- */
-#define NO_GC_PRINT_STATS
-#endif
-
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h
 #if HAVE_LIBGC
 static bool done_init;
@@ -59,9 +52,10 @@ void *operator new[](std::size_t size) {
 void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 
-#ifndef NO_GC_PRINT_STATS
+#if HAVE_GC_PRINT_STATS
+/* GC_print_stats is not exported as an API symbol and cannot be used on some systems */
 extern "C" int GC_print_stats;
-#endif
+#endif /* HAVE_GC_PRINT_STATS */
 
 static void gc_callback() {
     if (Log::verbose())
@@ -72,11 +66,10 @@ static void gc_callback() {
         std::clog << "cstring cache size " << cstring::cache_size(count)
                   << " (count=" << count << ")";
     }
-#ifndef NO_GC_PRINT_STATS
+#if HAVE_GC_PRINT_STATS
     // Maybe print GC statistics. Unfortunately they go directly to stderr!
-    /* GC_print_stats is not exported as an API symbol and cannot be set on windows builds */
     GC_print_stats = Log::verbosity() >= 2 ? 1 : 0;
-#endif /* ! NO_GC_PRINT_STATS */
+#endif /* HAVE_GC_PRINT_STATS */
 }
 
 void silent(char *, GC_word) {}
@@ -84,9 +77,9 @@ void silent(char *, GC_word) {}
 
 void setup_gc_logging() {
 #if HAVE_LIBGC
-#ifndef NO_GC_PRINT_STATS
+#if HAVE_GC_PRINT_STATS
     GC_print_stats = LOGGING(2) ? 1 : 0;
-#endif /* ! NO_GC_PRINT_STATS */
+#endif /* HAVE_GC_PRINT_STATS */
     GC_set_start_callback(gc_callback);
     GC_set_warn_proc(&silent);
 #endif  /* HAVE_LIBGC */
