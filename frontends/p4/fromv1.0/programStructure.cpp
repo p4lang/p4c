@@ -2031,9 +2031,11 @@ void ProgramStructure::createChecksumVerifications() {
                 condition = conv.convert(uov.cond);
             else
                 condition = new IR::BoolLiteral(true);
+            auto algo = convertHashAlgorithm(flc->algorithm);
             args->push_back(condition);
             args->push_back(le);
             args->push_back(dest);
+            args->push_back(algo);
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
             LOG3("Converted " << flc);
@@ -2086,9 +2088,11 @@ void ProgramStructure::createChecksumUpdates() {
                 condition = conv.convert(uov.cond);
             else
                 condition = new IR::BoolLiteral(true);
+            auto algo = convertHashAlgorithm(flc->algorithm);
             args->push_back(condition);
             args->push_back(le);
             args->push_back(dest);
+            args->push_back(algo);
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
             LOG3("Converted " << flc);

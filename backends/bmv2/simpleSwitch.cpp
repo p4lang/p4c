@@ -100,6 +100,10 @@ SimpleSwitch::convertHashAlgorithm(cstring algorithm) {
         result = "random";
     else if (algorithm == v1model.algorithm.identity.name)
         result = "identity";
+    else if (algorithm == v1model.algorithm.csum16.name)
+        result = "csum16";
+    else if (algorithm == v1model.algorithm.xor16.name)
+        result = "xor16";
     else
         ::error("%1%: unexpected algorithm", algorithm);
     return result;
@@ -247,7 +251,9 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         static std::set<cstring> supportedHashAlgorithms = {
             v1model.algorithm.crc32.name, v1model.algorithm.crc32_custom.name,
             v1model.algorithm.crc16.name, v1model.algorithm.crc16_custom.name,
-            v1model.algorithm.random.name, v1model.algorithm.identity.name };
+            v1model.algorithm.random.name, v1model.algorithm.identity.name,
+            v1model.algorithm.csum16, v1model.algorithm.xor16
+        };
 
         if (mc->arguments->size() != 5) {
             modelError("Expected 5 arguments for %1%", mc);
@@ -608,9 +614,15 @@ SimpleSwitch::generateUpdate(const IR::BlockStatement *block,
             auto mi = P4::MethodInstance::resolve(mc->methodCall, refMap, typeMap);
             if (auto em = mi->to<P4::ExternFunction>()) {
                 if (em->method->name.name == v1model.update_checksum.name) {
-                    BUG_CHECK(mi->expr->arguments->size() == 3, "%1%: Expected 3 arguments", mc);
+                    BUG_CHECK(mi->expr->arguments->size() == 4, "%1%: Expected 4 arguments", mc);
                     auto cksum = new Util::JsonObject();
-                    cstring calcName = createCalculation("csum16", mi->expr->arguments->at(1),
+                    auto ei = P4::EnumInstance::resolve(mi->expr->arguments->at(3), typeMap);
+                    if (ei->name != "csum16") {
+                        ::error("%1%: the only supported algorithm is csum16",
+                                mi->expr->arguments->at(3));
+                        return;
+                    }
+                    cstring calcName = createCalculation(ei->name, mi->expr->arguments->at(1),
                                                          calculations, mc);
                     cksum->emplace("name", refMap->newName("cksum_"));
                     cksum->emplace("id", nextId("checksums"));

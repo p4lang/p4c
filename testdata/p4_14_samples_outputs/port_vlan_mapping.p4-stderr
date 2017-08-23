@@ -1,1 +1,13 @@
 warning: The order of headers in deparser is not uniquely determined by parser!
+port_vlan_mapping.p4(744): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+port_vlan_mapping.p4(554): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+port_vlan_mapping.p4(744): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+port_vlan_mapping.p4(554): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^

@@ -81,7 +81,7 @@ control VerifyChecksumI(in H hdr, inout M meta) {
             hdr.inner_ipv4.protocol,
             hdr.inner_ipv4.srcAddr,
             hdr.inner_ipv4.dstAddr
-        }, hdr.inner_ipv4.hdrChecksum);
+        }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
 
         verify_checksum(hdr.ipv4.ihl == 5, {
             // all ipv4 fields, except checksum itself
@@ -96,7 +96,7 @@ control VerifyChecksumI(in H hdr, inout M meta) {
             hdr.ipv4.protocol,
             hdr.ipv4.srcAddr,
             hdr.ipv4.dstAddr
-        }, hdr.ipv4.hdrChecksum);
+        }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
@@ -115,7 +115,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
             hdr.inner_ipv4.protocol,
             hdr.inner_ipv4.srcAddr,
             hdr.inner_ipv4.dstAddr
-        }, hdr.inner_ipv4.hdrChecksum);
+        }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
 
         update_checksum(hdr.ipv4.ihl == 5, {
             // all ipv4 fields, except checksum itself
@@ -130,7 +130,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
             hdr.ipv4.protocol,
             hdr.ipv4.srcAddr,
             hdr.ipv4.dstAddr
-        }, hdr.ipv4.hdrChecksum);
+        }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

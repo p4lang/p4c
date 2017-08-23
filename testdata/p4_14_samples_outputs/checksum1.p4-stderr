@@ -1,3 +1,9 @@
 checksum1.p4(122): warning: -1: negative value with unsigned type
     add_to_field(ipv4.ttl, -1);
                             ^
+checksum1.p4(77): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+checksum1.p4(77): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^

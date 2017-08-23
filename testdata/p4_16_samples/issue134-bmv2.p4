@@ -50,7 +50,7 @@ control VerifyChecksumI(in H hdr, inout M meta) {
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
     apply {
-        update_checksum(hdr.ipv4.ihl == 5, { 16w0 }, hdr.ipv4.hdrChecksum);
+        update_checksum(hdr.ipv4.ihl == 5, { 16w0 }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

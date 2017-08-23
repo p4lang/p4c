@@ -1,3 +1,9 @@
 simple_router.p4(108): warning: -1: negative value with unsigned type
     add_to_field(ipv4.ttl, -1);
                             ^
+simple_router.p4(78): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+simple_router.p4(78): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^

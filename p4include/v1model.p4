@@ -108,6 +108,8 @@ extern void random(out bit<32> result, in bit<32> lo, in bit<32> hi);
 extern void digest<T>(in bit<32> receiver, in T data);
 
 enum HashAlgorithm {
+    csum16,
+    xor16,
     crc32,
     crc32_custom,
     crc16,
@@ -144,17 +146,21 @@ sets an internal error flag.
 @param condition  If 'false' the verification always succeeds.
 @param data       Data whose checksum is verified.
 @param checksum   Expected checksum of the data.
+@param algo       Algorithm to use for checksum (not all algorithms may be supported).
+                  Must be a compile-time constant.
 */
-extern void verify_checksum<T>(in bool condition, in T data, in bit<16> checksum);
+extern void verify_checksum<T>(in bool condition, in T data, in bit<16> checksum, HashAlgorithm algo);
 /**
 Computes the 16-bit checksum of the supplied data.
 @param condition  If 'false' the checksum is not changed
 @param data       Data whose checksum is computed.
 @param checksum   Checksum of the data.
+@param algo       Algorithm to use for checksum (not all algorithms may be supported).
+                  Must be a compile-time constant.
 T must be a list expression where all the fields are bit-fields or varbits
 and where the total dynamic length of the fields is a multiple of 16 bits.
 */
-extern void update_checksum<T>(in bool condition, in T data, inout bit<16> checksum);
+extern void update_checksum<T>(in bool condition, in T data, inout bit<16> checksum, HashAlgorithm algo);
 
 // The name 'standard_metadata' is reserved
 

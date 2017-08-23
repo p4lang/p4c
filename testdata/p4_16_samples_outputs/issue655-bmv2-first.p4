@@ -39,13 +39,13 @@ control cEgress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
 
 control vc(in Parsed_packet hdr, inout Metadata meta) {
     apply {
-        verify_checksum<tuple<bit<16>, bit<16>>>(true, { hdr.h.d, hdr.h.c }, 16w0);
+        verify_checksum<tuple<bit<16>, bit<16>>>(true, { hdr.h.d, hdr.h.c }, 16w0, HashAlgorithm.csum16);
     }
 }
 
 control uc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        update_checksum<tuple<bit<16>>>(true, { hdr.h.d }, hdr.h.c);
+        update_checksum<tuple<bit<16>>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
     }
 }
 

@@ -1,0 +1,6 @@
+checksum.p4(78): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
+checksum.p4(78): warning: csum16: unexpected algorithm
+    algorithm : csum16;
+                ^^^^^^
