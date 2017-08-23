@@ -138,29 +138,31 @@ extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 extern void truncate(in bit<32> length);
 
 /**
-Verifies the 16-bit checksum of the supplied data.
-T must be a list expression where all the fields are bit-fields or varbits
-and where the total dynamic length of the fields is a multiple of 16 bits.
+Verifies the checksum of the supplied data.
 If this method detects that a checksum of the data is not correct it
 sets an internal error flag.
+@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+                  The total dynamic length of the fields is a multiple of the output size.
+@param O          Output type; must be bit<X> type.
 @param condition  If 'false' the verification always succeeds.
 @param data       Data whose checksum is verified.
 @param checksum   Expected checksum of the data.
 @param algo       Algorithm to use for checksum (not all algorithms may be supported).
                   Must be a compile-time constant.
 */
-extern void verify_checksum<T>(in bool condition, in T data, in bit<16> checksum, HashAlgorithm algo);
+extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 /**
-Computes the 16-bit checksum of the supplied data.
+Computes the checksum of the supplied data.
+@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+                  The total dynamic length of the fields is a multiple of the output size.
+@param O          Output type; must be bit<X> type.
 @param condition  If 'false' the checksum is not changed
 @param data       Data whose checksum is computed.
 @param checksum   Checksum of the data.
 @param algo       Algorithm to use for checksum (not all algorithms may be supported).
                   Must be a compile-time constant.
-T must be a list expression where all the fields are bit-fields or varbits
-and where the total dynamic length of the fields is a multiple of 16 bits.
 */
-extern void update_checksum<T>(in bool condition, in T data, inout bit<16> checksum, HashAlgorithm algo);
+extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 // The name 'standard_metadata' is reserved
 

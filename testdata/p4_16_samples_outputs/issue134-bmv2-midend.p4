@@ -45,7 +45,7 @@ struct tuple_0 {
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
     apply {
-        update_checksum<tuple_0>(hdr.ipv4.ihl == 4w5, { 16w0 }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, { 16w0 }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
