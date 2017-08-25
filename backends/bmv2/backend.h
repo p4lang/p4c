@@ -85,6 +85,7 @@ class Backend : public PassManager {
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
     std::set<cstring>                update_checksum_controls;
+    std::set<cstring>                verify_checksum_controls;
     std::set<cstring>                deparser_controls;
 
     // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.

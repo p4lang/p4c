@@ -57,6 +57,8 @@ struct standard_metadata_t {
     @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
     @alias("intrinsic_metadata.resubmit_flag") bit<1>  resubmit_flag;
     @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
+    /// Indicates that a verify_checksum() method has failed.
+    bit<1> checksum_error;
 }
 
 enum CounterType {
