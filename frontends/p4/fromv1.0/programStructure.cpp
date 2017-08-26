@@ -1999,7 +1999,7 @@ void ProgramStructure::createChecksumVerifications() {
     auto headpath = new IR::Path(v1model.headersType.Id());
     auto headtype = new IR::Type_Name(headpath);
     auto headers = new IR::Parameter(v1model.verify.headersParam.Id(),
-                                     IR::Direction::In, headtype);
+                                     IR::Direction::InOut, headtype);
     params->push_back(headers);
     conversionContext.header = paramReference(headers);
 

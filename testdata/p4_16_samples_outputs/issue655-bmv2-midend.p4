@@ -51,7 +51,7 @@ struct tuple_0 {
     bit<16> field_0;
 }
 
-control vc(in Parsed_packet hdr, inout Metadata meta) {
+control vc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
         verify_checksum<tuple_0, bit<16>>(true, { hdr.h.d, hdr.h.c }, 16w0, HashAlgorithm.csum16);
     }
