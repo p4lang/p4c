@@ -601,19 +601,22 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
 }
 
 void
-SimpleSwitch::generateUpdate(const IR::BlockStatement *block,
-                             Util::JsonArray* checksums, Util::JsonArray* calculations) {
+SimpleSwitch::convertChecksum(const IR::BlockStatement* block, Util::JsonArray* checksums,
+                              Util::JsonArray* calculations, bool verify) {
+    if (errorCount() != 0)
+        return;
+    cstring functionName = verify ? v1model.verify_checksum.name : v1model.update_checksum.name;
     auto typeMap = backend->getTypeMap();
     auto refMap = backend->getRefMap();
     auto conv = backend->getExpressionConverter();
     for (auto stat : block->components) {
         if (auto blk = stat->to<IR::BlockStatement>()) {
-            generateUpdate(blk, checksums, calculations);
+            convertChecksum(blk, checksums, calculations, verify);
             continue;
         } else if (auto mc = stat->to<IR::MethodCallStatement>()) {
             auto mi = P4::MethodInstance::resolve(mc->methodCall, refMap, typeMap);
             if (auto em = mi->to<P4::ExternFunction>()) {
-                if (em->method->name.name == v1model.update_checksum.name) {
+                if (em->method->name.name == functionName) {
                     BUG_CHECK(mi->expr->arguments->size() == 4, "%1%: Expected 4 arguments", mc);
                     auto cksum = new Util::JsonObject();
                     auto ei = P4::EnumInstance::resolve(mi->expr->arguments->at(3), typeMap);
@@ -631,23 +634,15 @@ SimpleSwitch::generateUpdate(const IR::BlockStatement *block,
                     cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
                     cksum->emplace("type", "generic");
                     cksum->emplace("calculation", calcName);
+                    cksum->emplace("verify", verify ? "true" : "false");
                     checksums->append(cksum);
                     continue;
                 }
             }
         }
-        ::error("%1%: Only calls to %2% allowed", stat, v1model.update_checksum);
+        ::error("%1%: Only calls to %2% allowed", stat, functionName);
         return;
     }
-}
-
-void
-SimpleSwitch::convertChecksumUpdate(const IR::P4Control* updateControl,
-                                    Util::JsonArray* checksums,
-                                    Util::JsonArray* calculations) {
-    if (errorCount() != 0)
-        return;
-    generateUpdate(updateControl->body, checksums, calculations);
 }
 
 void
@@ -703,6 +698,20 @@ SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel,
         return;
     auto main = toplevel->getMain();
     auto update = main->findParameterValue(v1model.sw.update.name);
+    if (update == nullptr || !update->is<IR::ControlBlock>()) {
+        modelError("%1%: main package does not match the expected model", main);
+        return;
+    }
+    controls->emplace(update->to<IR::ControlBlock>()->container->name);
+}
+
+void
+SimpleSwitch::setVerifyChecksumControls(const IR::ToplevelBlock* toplevel,
+                                        std::set<cstring>* controls) {
+    if (errorCount() != 0)
+        return;
+    auto main = toplevel->getMain();
+    auto update = main->findParameterValue(v1model.sw.verify.name);
     if (update == nullptr || !update->is<IR::ControlBlock>()) {
         modelError("%1%: main package does not match the expected model", main);
         return;

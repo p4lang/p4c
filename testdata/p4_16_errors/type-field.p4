@@ -35,8 +35,8 @@ parser MyParser(packet_in b,
   }
 }
 
-control MyVerifyChecksum(in h hdr,
-                       inout m meta) {
+control MyVerifyChecksum(inout h hdr,
+                         inout m meta) {
   apply {}
 
 }

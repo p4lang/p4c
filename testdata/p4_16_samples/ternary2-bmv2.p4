@@ -51,7 +51,7 @@ parser p(packet_in b, out packet_t hdrs, inout Meta m, inout standard_metadata_t
         }
     }
 }
-control vrfy(in packet_t h, inout Meta m) { apply {} }
+control vrfy(inout packet_t h, inout Meta m) { apply {} }
 control update(inout packet_t h, inout Meta m) { apply {} }
 
 control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {

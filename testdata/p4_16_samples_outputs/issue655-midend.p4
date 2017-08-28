@@ -48,22 +48,17 @@ control cEgress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
 
 struct tuple_0 {
     bit<16> field;
-    bit<16> field_0;
 }
 
-control vc(in Parsed_packet hdr, inout Metadata meta) {
+control vc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(true, { hdr.h.d, hdr.h.c }, 16w0, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
     }
-}
-
-struct tuple_1 {
-    bit<16> field_1;
 }
 
 control uc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        update_checksum<tuple_1, bit<16>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
     }
 }
 

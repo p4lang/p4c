@@ -57,6 +57,8 @@ struct standard_metadata_t {
     @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
     @alias("intrinsic_metadata.resubmit_flag") bit<1>  resubmit_flag;
     @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
+    /// Indicates that a verify_checksum() method has failed.
+    bit<1> checksum_error;
 }
 
 enum CounterType {
@@ -143,14 +145,14 @@ If this method detects that a checksum of the data is not correct it
 sets an internal error flag.
 @param T          Must be a tuple type where all the fields are bit-fields or varbits.
                   The total dynamic length of the fields is a multiple of the output size.
-@param O          Output type; must be bit<X> type.
+@param O          Checksum type; must be bit<X> type.
 @param condition  If 'false' the verification always succeeds.
 @param data       Data whose checksum is verified.
-@param checksum   Expected checksum of the data.
+@param checksum   Expected checksum of the data; note that this must be a left-value.
 @param algo       Algorithm to use for checksum (not all algorithms may be supported).
                   Must be a compile-time constant.
 */
-extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
+extern void verify_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 /**
 Computes the checksum of the supplied data.
 @param T          Must be a tuple type where all the fields are bit-fields or varbits.
@@ -176,7 +178,7 @@ parser Parser<H, M>(packet_in b,
                     inout standard_metadata_t standard_metadata);
 /// The only legal statements in VerifyChecksum are: block statements,
 /// calls to the verify_checksum method, and returns.
-control VerifyChecksum<H, M>(in H hdr,
+control VerifyChecksum<H, M>(inout H hdr,
                              inout M meta);
 @pipeline
 control Ingress<H, M>(inout H hdr,

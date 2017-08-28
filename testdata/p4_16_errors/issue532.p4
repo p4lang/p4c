@@ -54,13 +54,13 @@ control deparser(packet_out b, in parsed_packet_t hdr) {
   apply { }
 }
 
-control verify_ck(in parsed_packet_t hdr,
-                        inout my_meta_t my_meta) {
+control verify_ck(inout parsed_packet_t hdr,
+                  inout my_meta_t my_meta) {
   apply { }
 }
 
 control compute_ck(inout parsed_packet_t hdr,
-                         inout my_meta_t my_meta) {
+                   inout my_meta_t my_meta) {
   apply { }
 }
 

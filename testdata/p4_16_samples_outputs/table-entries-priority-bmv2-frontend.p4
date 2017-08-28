@@ -23,7 +23,7 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(in Header_t h, inout Meta_t m) {
+control vrfy(inout Header_t h, inout Meta_t m) {
     apply {
     }
 }
@@ -61,9 +61,12 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a_0();
         const entries = {
-            16w0x1111 &&& 16w0xf : a_with_control_params_0(9w1) @priority(3);
-            16w0x1181 : a_with_control_params_0(9w2);
-            16w0x1181 &&& 16w0xf00f : a_with_control_params_0(9w3) @priority(1);
+                        16w0x1111 &&& 16w0xf : a_with_control_params_0(9w1)@priority(3) ;
+
+                        16w0x1181 : a_with_control_params_0(9w2);
+
+                        16w0x1181 &&& 16w0xf00f : a_with_control_params_0(9w3)@priority(1) ;
+
         }
 
     }

@@ -66,7 +66,7 @@ control Eg(inout H hdrs,
 
 action drop() {}
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
         verify_checksum(hdr.inner_ipv4.ihl == 5, {
             // all inner_ipv4 fields, except checksum itself
