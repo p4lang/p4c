@@ -217,6 +217,13 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 
+# Header files 
+add_custom_target(update_includes ALL
+  #FIXME -- should only run this when headers change -- how to accomplish that?
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4_14include ${P4C_BINARY_DIR}/p4_14include
+)
+
 # Installation
 # Targets install themselves. Here we install the core headers
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
