@@ -36,6 +36,7 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     void addPasses(const std::initializer_list<Visitor *> &init) {
         never_backtracks_cache = -1;
         for (auto p : init) if (p) passes.emplace_back(p); }
+    void deletePasses() { passes = vector<Visitor *>(); }
     void runDebugHooks(const char* visitorName, const IR::Node* node);
     profile_t init_apply(const IR::Node *root) override {
         running = true;
