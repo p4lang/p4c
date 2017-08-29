@@ -67,8 +67,11 @@ control Eg(inout H hdrs,
 action drop() {}
 
 control VerifyChecksumI(in H hdr, inout M meta) {
+    Checksum16() inner_ipv4_checksum;
+    Checksum16() ipv4_checksum;
+
     apply {
-        verify_checksum(hdr.inner_ipv4.ihl == 5, {
+        bit<16> inner_cksum = inner_ipv4_checksum.get({
             // all inner_ipv4 fields, except checksum itself
             hdr.inner_ipv4.version,
             hdr.inner_ipv4.ihl,
@@ -81,9 +84,9 @@ control VerifyChecksumI(in H hdr, inout M meta) {
             hdr.inner_ipv4.protocol,
             hdr.inner_ipv4.srcAddr,
             hdr.inner_ipv4.dstAddr
-        }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        });
 
-        verify_checksum(hdr.ipv4.ihl == 5, {
+        bit<16> cksum = ipv4_checksum.get({
             // all ipv4 fields, except checksum itself
             hdr.ipv4.version,
             hdr.ipv4.ihl,
@@ -96,13 +99,29 @@ control VerifyChecksumI(in H hdr, inout M meta) {
             hdr.ipv4.protocol,
             hdr.ipv4.srcAddr,
             hdr.ipv4.dstAddr
-        }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        });
+
+        if (hdr.inner_ipv4.ihl == 5 &&
+            hdr.inner_ipv4.hdrChecksum != inner_cksum) {
+            // SJS / FIXME: make sure that's what we're supposed to do here!
+            drop();
+        }
+
+        if (hdr.ipv4.ihl == 5 &&
+            hdr.ipv4.hdrChecksum != cksum) {
+            // SJS / FIXME: make sure that's what we're supposed to do here!
+            drop();
+        }
     }
+
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
+    Checksum16() inner_ipv4_checksum;
+    Checksum16() ipv4_checksum;
+
     apply {
-        update_checksum(hdr.inner_ipv4.ihl == 5, {
+        bit<16> inner_cksum = inner_ipv4_checksum.get({
             // all inner_ipv4 fields, except checksum itself
             hdr.inner_ipv4.version,
             hdr.inner_ipv4.ihl,
@@ -115,9 +134,9 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
             hdr.inner_ipv4.protocol,
             hdr.inner_ipv4.srcAddr,
             hdr.inner_ipv4.dstAddr
-        }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        });
 
-        update_checksum(hdr.ipv4.ihl == 5, {
+        bit<16> cksum = ipv4_checksum.get({
             // all ipv4 fields, except checksum itself
             hdr.ipv4.version,
             hdr.ipv4.ihl,
@@ -130,7 +149,15 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
             hdr.ipv4.protocol,
             hdr.ipv4.srcAddr,
             hdr.ipv4.dstAddr
-        }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        });
+
+        if (hdr.inner_ipv4.ihl == 5) {
+            hdr.inner_ipv4.hdrChecksum = inner_cksum;
+        }
+
+        if (hdr.ipv4.ihl == 5) {
+            hdr.ipv4.hdrChecksum = cksum;
+        }
     }
 }
 

@@ -203,8 +203,9 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
+    Checksum16() ipv4_checksum;
     apply {
-        update_checksum(true, { hdr.ipv4_base.version, hdr.ipv4_base.ihl, hdr.ipv4_base.diffserv, hdr.ipv4_base.totalLen, hdr.ipv4_base.identification, hdr.ipv4_base.flags, hdr.ipv4_base.fragOffset, hdr.ipv4_base.ttl, hdr.ipv4_base.protocol, hdr.ipv4_base.srcAddr, hdr.ipv4_base.dstAddr, hdr.ipv4_option_security, hdr.ipv4_option_NOP[0], hdr.ipv4_option_timestamp }, hdr.ipv4_base.hdrChecksum, HashAlgorithm.csum16);
+        hdr.ipv4_base.hdrChecksum = ipv4_checksum.get({ hdr.ipv4_base.version, hdr.ipv4_base.ihl, hdr.ipv4_base.diffserv, hdr.ipv4_base.totalLen, hdr.ipv4_base.identification, hdr.ipv4_base.flags, hdr.ipv4_base.fragOffset, hdr.ipv4_base.ttl, hdr.ipv4_base.protocol, hdr.ipv4_base.srcAddr, hdr.ipv4_base.dstAddr, hdr.ipv4_option_security, hdr.ipv4_option_NOP[0], hdr.ipv4_option_timestamp });
     }
 }
 

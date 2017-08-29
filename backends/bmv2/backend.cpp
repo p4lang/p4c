@@ -106,6 +106,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new FixupChecksum(&update_checksum_controls),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),

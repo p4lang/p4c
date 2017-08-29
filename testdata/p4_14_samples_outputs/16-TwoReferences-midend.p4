@@ -82,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name(".D") table D {
+    @name(".D") table D_1 {
         actions = {
             nop_6();
             @defaultonly NoAction_9();
@@ -110,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 C.apply();
             }
             do_d_0: {
-                D.apply();
+                D_1.apply();
                 C.apply();
             }
             do_e_0: {

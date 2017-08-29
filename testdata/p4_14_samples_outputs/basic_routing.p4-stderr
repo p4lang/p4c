@@ -1,9 +1,3 @@
-basic_routing.p4(78): warning: csum16: unexpected algorithm
-    algorithm : csum16;
-                ^^^^^^
-basic_routing.p4(78): warning: csum16: unexpected algorithm
-    algorithm : csum16;
-                ^^^^^^
 basic_routing.p4(117): warning: bd shadows .bd
 action set_bd(bd) {
               ^^
