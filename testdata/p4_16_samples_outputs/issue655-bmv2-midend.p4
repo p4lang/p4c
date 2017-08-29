@@ -52,8 +52,12 @@ struct tuple_0 {
 }
 
 control vc(in Parsed_packet hdr, inout Metadata meta) {
+    bit<16> tmp_4;
+    @name("ck") Checksum16() ck_2;
     apply {
-        verify_checksum<tuple_0, bit<16>>(true, { hdr.h.d, hdr.h.c }, 16w0, HashAlgorithm.csum16);
+        tmp_4 = ck_2.get<tuple_0>({ hdr.h.d, hdr.h.c });
+        if (16w0 != tmp_4) 
+            mark_to_drop();
     }
 }
 
@@ -62,8 +66,11 @@ struct tuple_1 {
 }
 
 control uc(inout Parsed_packet hdr, inout Metadata meta) {
+    bit<16> tmp_6;
+    @name("ck") Checksum16() ck_3;
     apply {
-        update_checksum<tuple_1, bit<16>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
+        tmp_6 = ck_3.get<tuple_1>({ hdr.h.d });
+        hdr.h.c = tmp_6;
     }
 }
 
