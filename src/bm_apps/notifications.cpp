@@ -35,30 +35,32 @@ namespace {
 
 struct LEA_hdr_t {
   char sub_topic[4];
-  int switch_id;
-  int cxt_id;
+  uint64_t switch_id;
+  uint32_t cxt_id;
   int list_id;
   uint64_t buffer_id;
   unsigned int num_samples;
-  char _padding[4];
 } __attribute__((packed));
 
 struct AGE_hdr_t {
   char sub_topic[4];
-  int switch_id;
-  int cxt_id;
+  uint64_t switch_id;
+  uint32_t cxt_id;
   uint64_t buffer_id;
   int table_id;
   unsigned int num_entries;
-  char _padding[4];
 } __attribute__((packed));
 
 struct PRT_hdr_t {
   char sub_topic[4];
-  int switch_id;
+  uint64_t switch_id;
   unsigned int num_statuses;
-  char _padding[20];
+  char _padding[16];
 } __attribute__((packed));
+
+static_assert(sizeof(LEA_hdr_t) == 32u, "Invalid size for notification header");
+static_assert(sizeof(AGE_hdr_t) == 32u, "Invalid size for notification header");
+static_assert(sizeof(PRT_hdr_t) == 32u, "Invalid size for notification header");
 
 }  // namespace
 

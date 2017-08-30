@@ -89,7 +89,7 @@ Packet::set_ingress_ts() {
     ingress_ts.time_since_epoch()).count();
 }
 
-Packet::Packet(size_t cxt_id, int ingress_port, packet_id_t id,
+Packet::Packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
                copy_id_t copy_id, int ingress_length, PacketBuffer &&buffer,
                PHVSourceIface *phv_source)
     : cxt_id(cxt_id), ingress_port(ingress_port), packet_id(id),
@@ -120,7 +120,7 @@ Packet::~Packet() {
 }
 
 void
-Packet::change_context(size_t new_cxt) {
+Packet::change_context(cxt_id_t new_cxt) {
   if (cxt_id == new_cxt) return;
   assert(phv);
   phv->reset();
@@ -183,7 +183,7 @@ Packet::clone_with_phv_reset_metadata_ptr() const {
 }
 
 Packet
-Packet::clone_choose_context(size_t new_cxt) const {
+Packet::clone_choose_context(cxt_id_t new_cxt) const {
   copy_id_t new_copy_id = copy_id_gen->add_one(packet_id);
   Packet pkt(new_cxt, ingress_port, packet_id, new_copy_id, ingress_length,
              buffer.clone(buffer.get_data_size()), phv_source);
@@ -193,7 +193,7 @@ Packet::clone_choose_context(size_t new_cxt) const {
 }
 
 std::unique_ptr<Packet>
-Packet::clone_choose_context_ptr(size_t new_cxt) const {
+Packet::clone_choose_context_ptr(cxt_id_t new_cxt) const {
   return std::unique_ptr<Packet>(new Packet(clone_choose_context(new_cxt)));
 }
 
@@ -254,7 +254,7 @@ Packet::make_new(int ingress_length, PacketBuffer &&buffer,
 }
 
 Packet
-Packet::make_new(size_t cxt, int ingress_port, packet_id_t id,
+Packet::make_new(cxt_id_t cxt, int ingress_port, packet_id_t id,
                  copy_id_t copy_id, int ingress_length,
                  PacketBuffer &&buffer, PHVSourceIface *phv_source) {
   return Packet(cxt, ingress_port, id, copy_id, ingress_length,

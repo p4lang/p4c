@@ -270,7 +270,7 @@ struct BmMtActProfGroup {
 }
 
 struct BmConfig {
- 1:i32 device_id,
+ 1:i64 device_id,
  2:i32 thrift_port,
  3:optional string notifications_socket,
  4:optional string elogger_socket,

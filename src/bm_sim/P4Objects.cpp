@@ -1981,7 +1981,7 @@ P4Objects::init_field_lists(const Json::Value &cfg_root) {
 int
 P4Objects::init_objects(std::istream *is,
                         LookupStructureFactory *lookup_factory,
-                        int device_id, size_t cxt_id,
+                        device_id_t device_id, cxt_id_t cxt_id,
                         std::shared_ptr<TransportIface> notifications_transport,
                         const std::set<header_field_pair> &required_fields,
                         const ForceArith &arith_objects) {

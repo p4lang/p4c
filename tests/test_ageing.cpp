@@ -49,8 +49,8 @@ class AgeingTest : public ::testing::Test {
  protected:
   PHVFactory phv_factory;
 
-  const int device_id = 0;
-  const int cxt_id = 0;
+  const device_id_t device_id = 0;
+  const cxt_id_t cxt_id = 0;
 
   MatchKeyBuilder key_builder;
   std::unique_ptr<MatchTable> table;

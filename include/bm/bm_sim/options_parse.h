@@ -27,6 +27,7 @@
 #include <string>
 #include <map>
 
+#include "device_id.h"
 #include "logger.h"
 #include "target_parser.h"
 
@@ -64,7 +65,7 @@ class OptionsParser {
   InterfaceList ifaces{};
   bool pcap{false};
   int thrift_port{0};
-  int device_id{};
+  device_id_t device_id{};
   // if true read/write packets from files instead of interfaces
   bool use_files{false};
   // time to wait (in seconds) before starting packet processing

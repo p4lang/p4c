@@ -62,6 +62,7 @@
 #include "match_tables.h"
 #include "runtime_interface.h"
 #include "lookup_structures.h"
+#include "device_id.h"
 
 namespace bm {
 
@@ -422,9 +423,9 @@ class Context final {
 
   void set_notifications_transport(std::shared_ptr<TransportIface> transport);
 
-  void set_device_id(int device_id);
+  void set_device_id(device_id_t device_id);
 
-  void set_cxt_id(int cxt_id);
+  void set_cxt_id(cxt_id_t cxt_id);
 
   void set_force_arith(bool force_arith);
 
@@ -463,9 +464,9 @@ class Context final {
   ErrorCodeMap get_error_codes() const;
 
  private:  // data members
-  size_t cxt_id{};
+  cxt_id_t cxt_id{};
 
-  int device_id{0};
+  device_id_t device_id{0};
 
   std::shared_ptr<P4Objects> p4objects{nullptr};
   std::shared_ptr<P4Objects> p4objects_rt{nullptr};

@@ -52,7 +52,7 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
  protected:
   static constexpr size_t kMaxBufSize = 512;
 
-  static constexpr int device_id{0};
+  static constexpr bm::device_id_t device_id{0};
 
   SimpleSwitch_PacketRedirectP4()
       : packet_inject(packet_in_addr),

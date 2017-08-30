@@ -54,7 +54,7 @@ class PortMonitorDummy : public PortMonitorIface {
 
 class PortMonitorPassive : public PortMonitorIface {
  public:
-  PortMonitorPassive(int device_id,
+  PortMonitorPassive(device_id_t device_id,
                      std::shared_ptr<TransportIface> notifications_writer)
       : device_id(device_id), notifications_writer(notifications_writer) { }
 
@@ -95,7 +95,7 @@ class PortMonitorPassive : public PortMonitorIface {
   mutable std::mutex cb_map_mutex{};
   std::unordered_map<port_t, bool> curr_ports{};
   mutable std::mutex port_mutex{};
-  int device_id{};
+  device_id_t device_id{};
   std::shared_ptr<TransportIface> notifications_writer{nullptr};
 
  private:
@@ -143,7 +143,7 @@ class PortMonitorPassive : public PortMonitorIface {
 
 class PortMonitorActive : public PortMonitorPassive {
  public:
-  PortMonitorActive(int device_id,
+  PortMonitorActive(device_id_t device_id,
                     std::shared_ptr<TransportIface> notifications_writer)
       : PortMonitorPassive(device_id, notifications_writer) { }
 
@@ -216,14 +216,16 @@ PortMonitorIface::make_dummy() {
 
 std::unique_ptr<PortMonitorIface>
 PortMonitorIface::make_passive(
-    int device_id, std::shared_ptr<TransportIface> notifications_writer) {
+    device_id_t device_id,
+    std::shared_ptr<TransportIface> notifications_writer) {
   return std::unique_ptr<PortMonitorIface>(
       new PortMonitorPassive(device_id, notifications_writer));
 }
 
 std::unique_ptr<PortMonitorIface>
 PortMonitorIface::make_active(
-    int device_id, std::shared_ptr<TransportIface> notifications_writer) {
+    device_id_t device_id,
+    std::shared_ptr<TransportIface> notifications_writer) {
   return std::unique_ptr<PortMonitorIface>(
       new PortMonitorActive(device_id, notifications_writer));
 }

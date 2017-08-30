@@ -28,6 +28,9 @@
 
 namespace bm {
 
+using device_id_t = uint64_t;
+using s_device_id_t = device_id_t;
+
 /* This whole code if for a proof of concept and is temporary */
 
 // forward declaration
@@ -70,7 +73,7 @@ class Debugger {
     }
   };
 
-  static void init_debugger(const std::string &addr);
+  static void init_debugger(const std::string &addr, device_id_t device_id);
 
   static DebuggerIface *get() {
     return debugger;

@@ -26,6 +26,7 @@
 #include <string>
 #include <memory>
 
+#include "device_id.h"
 #include "phv_forward.h"
 #include "transport.h"
 
@@ -65,7 +66,7 @@ using entry_handle_t = uint32_t;
 class EventLogger {
  public:
   explicit EventLogger(std::unique_ptr<TransportIface> transport,
-                       int device_id = 0)
+                       device_id_t device_id = 0)
       : transport_instance(std::move(transport)), device_id(device_id) { }
 
   // we need the ingress / egress ports, but they are part of the Packet
@@ -104,14 +105,14 @@ class EventLogger {
   }
 
   static void init(std::unique_ptr<TransportIface> transport,
-                   int device_id = 0) {
+                   device_id_t device_id = 0) {
     get()->transport_instance = std::move(transport);
     get()->device_id = device_id;
   }
 
  private:
   std::unique_ptr<TransportIface> transport_instance{nullptr};
-  int device_id{};
+  device_id_t device_id{};
 };
 
 }  // namespace bm

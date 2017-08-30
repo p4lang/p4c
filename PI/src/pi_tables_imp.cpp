@@ -287,7 +287,7 @@ void build_action_entry<bm::MatchTableIndirectWS::Entry>(
 
 template <typename M,
           bm::MatchErrorCode (bm::RuntimeInterface::*GetFn)(
-              size_t, const std::string &, typename M::Entry *) const>
+              bm::cxt_id_t, const std::string &, typename M::Entry *) const>
 typename M::Entry get_default_entry_common(
     const pi_p4info_t *p4info, const std::string &t_name,
     pi_table_entry_t *table_entry) {
@@ -388,7 +388,7 @@ void build_action_entry_2<bm::MatchTableIndirectWS::Entry>(
 template <
   typename M,
   typename std::vector<typename M::Entry> (bm::RuntimeInterface::*GetFn)(
-      size_t, const std::string &) const>
+      bm::cxt_id_t, const std::string &) const>
 void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
                         pi_table_fetch_res_t *res) {
   std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
@@ -502,7 +502,7 @@ void set_direct_resources(const pi_p4info_t *p4info, pi_dev_id_t dev_id,
 
 template <typename M,
           bm::MatchErrorCode (bm::RuntimeInterface::*GetFn)(
-              size_t, const std::string &,
+              bm::cxt_id_t, const std::string &,
               const std::vector<bm::MatchKeyParam> &,
               typename M::Entry *, int) const>
 pi_entry_handle_t get_entry_handle_from_key_common(

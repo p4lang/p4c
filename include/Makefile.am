@@ -36,6 +36,7 @@ bm/bm_sim/data.h \
 bm/bm_sim/debugger.h \
 bm/bm_sim/deparser.h \
 bm/bm_sim/dev_mgr.h \
+bm/bm_sim/device_id.h \
 bm/bm_sim/entries.h \
 bm/bm_sim/enums.h \
 bm/bm_sim/event_logger.h \

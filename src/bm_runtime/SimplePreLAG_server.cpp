@@ -31,7 +31,7 @@ using namespace bm;
 class SimplePreLAGHandler : virtual public SimplePreLAGIf {
 public:
   SimplePreLAGHandler(SwitchWContexts *sw) {
-    for (size_t cxt_id = 0; cxt_id < sw->get_nb_cxts(); cxt_id++) {
+    for (cxt_id_t cxt_id = 0; cxt_id < sw->get_nb_cxts(); cxt_id++) {
       auto pre = sw->get_cxt_component<McSimplePreLAG>(cxt_id);
       assert(pre != nullptr);
       pres.push_back(pre);

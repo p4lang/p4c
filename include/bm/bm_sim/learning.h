@@ -28,6 +28,7 @@
 #include <memory>
 #include <functional>
 
+#include "device_id.h"
 #include "transport.h"
 #include "phv_forward.h"
 
@@ -51,14 +52,14 @@ class LearnEngineIface {
     ERROR
   };
 
+  // the header size for notifications is always 32 bytes
   struct msg_hdr_t {
     char sub_topic[4];
-    int switch_id;
-    int cxt_id;
+    s_device_id_t switch_id;
+    s_cxt_id_t cxt_id;
     int list_id;
     uint64_t buffer_id;
     unsigned int num_samples;
-    char _padding[4];  // the header size for notifications is always 32 bytes
   } __attribute__((packed));
 
   using LearnCb = std::function<void(const msg_hdr_t &, size_t,
@@ -107,8 +108,8 @@ class LearnEngineIface {
 
   virtual void reset_state() = 0;
 
-  static std::unique_ptr<LearnEngineIface> make(int device_id = 0,
-                                                int cxt_id = 0);
+  static std::unique_ptr<LearnEngineIface> make(device_id_t device_id = 0,
+                                                cxt_id_t cxt_id = 0);
 };
 
 }  // namespace bm

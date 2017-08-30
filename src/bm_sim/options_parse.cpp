@@ -105,7 +105,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
       ("thrift-port", po::value<int>(),
        "TCP port on which to run the Thrift runtime server")
 #endif
-      ("device-id", po::value<int>(),
+      ("device-id", po::value<device_id_t>(),
        "Device ID, used to identify the device in IPC messages (default 0)")
       ("nanolog", po::value<std::string>(),
        "IPC socket to use for nanomsg pub/sub logs "
@@ -232,7 +232,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
 
   device_id = 0;
   if (vm.count("device-id")) {
-    device_id = vm["device-id"].as<int>();
+    device_id = vm["device-id"].as<device_id_t>();
   }
 
 #ifdef BMNANOMSG_ON

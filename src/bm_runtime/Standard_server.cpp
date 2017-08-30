@@ -575,8 +575,8 @@ public:
 
   template <typename M,
             typename std::vector<typename M::Entry> (RuntimeInterface::*GetFn)(
-                size_t, const std::string &) const>
-  void get_entries_common(size_t cxt_id, const std::string &table_name,
+                cxt_id_t, const std::string &) const>
+  void get_entries_common(cxt_id_t cxt_id, const std::string &table_name,
                           std::vector<BmMtEntry> &_return) {
     const auto entries = std::bind(GetFn, switch_, cxt_id, table_name)();
     for (const auto &entry : entries) {
@@ -590,8 +590,8 @@ public:
 
   template <typename M,
             MatchErrorCode (RuntimeInterface::*GetFn)(
-                size_t, const std::string &, entry_handle_t, typename M::Entry *) const>
-  void get_entry_common(size_t cxt_id, const std::string &table_name,
+                cxt_id_t, const std::string &, entry_handle_t, typename M::Entry *) const>
+  void get_entry_common(cxt_id_t cxt_id, const std::string &table_name,
                         BmEntryHandle handle, BmMtEntry &e) {
     typename M::Entry entry;
     auto rc = std::bind(GetFn, switch_, cxt_id, table_name, handle, &entry)();
@@ -651,9 +651,9 @@ public:
 
   template <typename M,
             MatchErrorCode (RuntimeInterface::*GetFn)(
-                size_t, const std::string &, typename M::Entry *) const>
+                cxt_id_t, const std::string &, typename M::Entry *) const>
   typename M::Entry get_default_entry_common(
-      size_t cxt_id, const std::string &table_name, BmActionEntry &e) {
+      cxt_id_t cxt_id, const std::string &table_name, BmActionEntry &e) {
     typename M::Entry entry;
     auto error_code = std::bind(GetFn, switch_, cxt_id, table_name, &entry)();
     if (error_code == MatchErrorCode::NO_DEFAULT_ENTRY) {
@@ -695,9 +695,9 @@ public:
 
   template <typename M,
             MatchErrorCode (RuntimeInterface::*GetFn)(
-                size_t, const std::string &, const std::vector<MatchKeyParam> &,
+                cxt_id_t, const std::string &, const std::vector<MatchKeyParam> &,
                 typename M::Entry *, int) const>
-  void get_entry_from_key_common(size_t cxt_id, const std::string &table_name,
+  void get_entry_from_key_common(cxt_id_t cxt_id, const std::string &table_name,
                                  const BmMatchParams &match_key,
                                  const BmAddEntryOptions &options,
                                  BmMtEntry &e) {

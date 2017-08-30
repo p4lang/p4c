@@ -27,6 +27,8 @@
 #include <functional>
 #include <memory>
 
+#include "device_id.h"
+
 namespace bm {
 
 class TransportIface;
@@ -49,9 +51,9 @@ class PortMonitorIface {
   // putting it in TransportIface so that it is visible (e.g. for tests)
   struct msg_hdr_t {
     char sub_topic[4];
-    int switch_id;
+    s_device_id_t switch_id;
     unsigned int num_statuses;
-    char _padding[20];  // the header size for notifications is always 32 bytes
+    char _padding[16];  // the header size for notifications is always 32 bytes
   } __attribute__((packed));
 
   struct one_status_t {
@@ -81,12 +83,12 @@ class PortMonitorIface {
   static std::unique_ptr<PortMonitorIface> make_dummy();
   // a passive monitor does not periodically query the port status
   static std::unique_ptr<PortMonitorIface> make_passive(
-      int device_id,
+      device_id_t device_id,
       std::shared_ptr<TransportIface> notifications_writer = nullptr);
   // an active monitor periodically queries the port status (using separate
   // thread)
   static std::unique_ptr<PortMonitorIface> make_active(
-      int device_id,
+      device_id_t device_id,
       std::shared_ptr<TransportIface> notifications_writer = nullptr);
 
  private:

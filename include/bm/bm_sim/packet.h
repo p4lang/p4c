@@ -35,6 +35,7 @@
 
 #include <cassert>
 
+#include "device_id.h"
 #include "packet_buffer.h"
 #include "parser_error.h"
 #include "phv_source.h"
@@ -266,10 +267,10 @@ class Packet final {
   //! if `new_cxt == cxt_id`, then this is a no-op,
   //! otherwise, release the old PHV and replace it with a new one, compatible
   //! with the new context
-  void change_context(size_t new_cxt);
+  void change_context(cxt_id_t new_cxt);
 
   //! Returns the id of the Context this packet currently belongs to
-  size_t get_context() const { return cxt_id; }
+  cxt_id_t get_context() const { return cxt_id; }
 
   // the *_ptr function are just here for convenience, the same can be achieved
   // by the client by constructing a unique_ptr
@@ -296,9 +297,9 @@ class Packet final {
   //! Same as clone_no_phv(), but also changes the context id for the clone.
   //! See change_context() for more information on how a Packet instance belongs
   //! to a specific Context
-  Packet clone_choose_context(size_t new_cxt) const;
+  Packet clone_choose_context(cxt_id_t new_cxt) const;
   //! @copydoc clone_choose_context
-  std::unique_ptr<Packet> clone_choose_context_ptr(size_t new_cxt) const;
+  std::unique_ptr<Packet> clone_choose_context_ptr(cxt_id_t new_cxt) const;
 
   //! Deleted copy constructor
   Packet(const Packet &other) = delete;
@@ -317,20 +318,20 @@ class Packet final {
   // NOLINTNEXTLINE(whitespace/operators)
   static Packet make_new(int ingress_length, PacketBuffer &&buffer,
                          PHVSourceIface *phv_source);
-  static Packet make_new(size_t cxt, int ingress_port, packet_id_t id,
+  static Packet make_new(cxt_id_t cxt, int ingress_port, packet_id_t id,
                          copy_id_t copy_id, int ingress_length,
                          // cpplint false positive
                          // NOLINTNEXTLINE(whitespace/operators)
                          PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
  private:
-  Packet(size_t cxt, int ingress_port, packet_id_t id, copy_id_t copy_id,
+  Packet(cxt_id_t cxt, int ingress_port, packet_id_t id, copy_id_t copy_id,
          int ingress_length, PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
   void update_signature(uint64_t seed = 0);
   void set_ingress_ts();
 
-  size_t cxt_id{0};
+  cxt_id_t cxt_id{0};
   int ingress_port{-1};
   int egress_port{-1};
   packet_id_t packet_id{0};

@@ -133,7 +133,7 @@ class Msg(object):
 
     def extract_hdr(self):
         # < required to prevent 8-byte alignment
-        struct_ = struct.Struct("<iiiQQQ")
+        struct_ = struct.Struct("<iQIQQQ")
         (_, self.switch_id, self.cxt_id,
          self.sig, self.id_, self.copy_id) = struct_.unpack_from(self.msg)
         return struct_.size

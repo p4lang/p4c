@@ -288,9 +288,9 @@ TEST(Switch, MyTransport) {
   sw.transport_send_probe(0xaba);
   struct msg_t {
     char sub_topic[4];
-    int switch_id;
+    uint64_t switch_id;
     uint64_t x;
-    char _padding[16];  // the header size for notifications is always 32 bytes
+    char _padding[12];  // the header size for notifications is always 32 bytes
   } __attribute__((packed));
   msg_t msg;
   transport->read(reinterpret_cast<char *>(&msg), sizeof(msg));

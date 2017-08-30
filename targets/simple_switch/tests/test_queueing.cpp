@@ -54,7 +54,7 @@ class SimpleSwitch_QueueingP4 : public ::testing::Test {
  protected:
   static constexpr size_t kQueueingHdrSize = (48u + 24u + 32u + 24u) / 8u;
 
-  static constexpr int device_id{0};
+  static constexpr bm::device_id_t device_id{0};
 
   SimpleSwitch_QueueingP4()
       : packet_inject(packet_in_addr) { }

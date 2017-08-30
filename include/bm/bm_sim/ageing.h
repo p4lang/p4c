@@ -23,6 +23,7 @@
 
 #include <memory>
 
+#include "device_id.h"
 #include "transport.h"
 
 namespace bm {
@@ -31,14 +32,14 @@ class MatchTableAbstract;
 
 class AgeingMonitorIface {
  public:
+  // the header size for notifications is always 32 bytes
   struct msg_hdr_t {
     char sub_topic[4];
-    int switch_id;
-    int cxt_id;
+    s_device_id_t switch_id;
+    s_cxt_id_t cxt_id;
     uint64_t buffer_id;
     int table_id;
     unsigned int num_entries;
-    char _padding[4];  // the header size for notifications is always 32 bytes
   } __attribute__((packed));
 
   virtual ~AgeingMonitorIface() { }
@@ -50,7 +51,8 @@ class AgeingMonitorIface {
   virtual void reset_state() = 0;
 
   static std::unique_ptr<AgeingMonitorIface> make(
-      int device_id, int cxt_id, std::shared_ptr<TransportIface> writer,
+      device_id_t device_id, cxt_id_t cxt_id,
+      std::shared_ptr<TransportIface> writer,
       unsigned int sweep_interval_ms = 1000u);
 };
 

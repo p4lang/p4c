@@ -37,8 +37,8 @@ class NotificationsListenerImp;
 class NotificationsListener {
  public:
   using buffer_id_t = uint64_t;
-  using switch_id_t = int;
-  using cxt_id_t = int;
+  using switch_id_t = uint64_t;
+  using cxt_id_t = uint32_t;
   using list_id_t = int;
   using table_id_t = int;
 

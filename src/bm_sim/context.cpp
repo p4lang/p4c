@@ -702,12 +702,12 @@ Context::set_notifications_transport(
 }
 
 void
-Context::set_device_id(int dev_id) {
+Context::set_device_id(device_id_t dev_id) {
   device_id = dev_id;
 }
 
 void
-Context::set_cxt_id(int id) {
+Context::set_cxt_id(cxt_id_t id) {
   cxt_id = id;
 }
 

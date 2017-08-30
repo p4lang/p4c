@@ -51,8 +51,8 @@ class LearningTest : public ::testing::Test {
  protected:
   PHVFactory phv_factory;
 
-  const int device_id = 0;
-  const int cxt_id = 0;
+  const device_id_t device_id = 0;
+  const cxt_id_t cxt_id = 0;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};

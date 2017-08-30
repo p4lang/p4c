@@ -48,6 +48,7 @@
 #include "extern.h"
 #include "enums.h"
 #include "control_action.h"
+#include "device_id.h"
 
 // forward declaration of Json::Value
 namespace Json {
@@ -102,7 +103,7 @@ class P4Objects {
 
   int init_objects(std::istream *is,
                    LookupStructureFactory *lookup_factory,
-                   int device_id = 0, size_t cxt_id = 0,
+                   device_id_t device_id = 0, cxt_id_t cxt_id = 0,
                    std::shared_ptr<TransportIface> transport = nullptr,
                    const std::set<header_field_pair> &required_fields =
                      std::set<header_field_pair>(),

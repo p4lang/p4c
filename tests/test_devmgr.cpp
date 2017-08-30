@@ -456,7 +456,7 @@ class PortMonitorTest : public ::testing::Test {
   using port_t = DevMgrIface::port_t;
   using PortStatus = DevMgrIface::PortStatus;
 
-  static constexpr int device_id = 0;
+  static constexpr device_id_t device_id = 0;
 
   PortMonitorTest()
       : notifications_writer(new MemoryAccessor(4096)) {
@@ -493,7 +493,7 @@ class PortMonitorTest : public ::testing::Test {
 };
 
 template <typename PMType>
-constexpr int PortMonitorTest<PMType>::device_id;
+constexpr device_id_t PortMonitorTest<PMType>::device_id;
 
 template<>
 void

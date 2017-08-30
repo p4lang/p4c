@@ -60,7 +60,7 @@ class DataplaneInterfaceServiceImpl
     : public p4::bm::DataplaneInterface::Service,
       public bm::DevMgrIface {
  public:
-  explicit DataplaneInterfaceServiceImpl(int device_id)
+  explicit DataplaneInterfaceServiceImpl(bm::device_id_t device_id)
       : device_id(device_id) {
     p_monitor = bm::PortMonitorIface::make_dummy();
   }
@@ -140,7 +140,7 @@ class DataplaneInterfaceServiceImpl
     return {};
   }
 
-  int device_id;
+  bm::device_id_t device_id;
   // protects the shared state (active) and prevents concurrent Write calls by
   // different threads
   std::mutex mutex{};

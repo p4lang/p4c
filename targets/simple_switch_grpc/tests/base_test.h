@@ -48,7 +48,7 @@ class SimpleSwitchGrpcBaseTest : public ::testing::Test {
   static constexpr char grpc_server_addr[] = "0.0.0.0:50056";
   static constexpr char dp_grpc_server_addr[] = "0.0.0.0:50057";
   static constexpr int cpu_port = 64;
-  static constexpr int device_id = 3;
+  static constexpr uint64_t device_id = 3;
 
  protected:
   explicit SimpleSwitchGrpcBaseTest(const char *p4info_proto_txt_path);

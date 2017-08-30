@@ -47,34 +47,34 @@ class PHVSourceTest : public PHVSourceIface {
   explicit PHVSourceTest(size_t size)
       : phv_factories(size, nullptr), created(size, 0u), destroyed(size, 0u) { }
 
-  size_t get_created(size_t cxt) {
+  size_t get_created(cxt_id_t cxt) {
     return created.at(cxt);
   }
 
-  size_t get_destroyed(size_t cxt) {
+  size_t get_destroyed(cxt_id_t cxt) {
     return destroyed.at(cxt);
   }
 
  private:
-  std::unique_ptr<PHV> get_(size_t cxt) override {
+  std::unique_ptr<PHV> get_(cxt_id_t cxt) override {
     assert(phv_factories[cxt]);
     ++count;
     ++created.at(cxt);
     return phv_factories[cxt]->create();
   }
 
-  void release_(size_t cxt, std::unique_ptr<PHV> phv) override {
+  void release_(cxt_id_t cxt, std::unique_ptr<PHV> phv) override {
     // let the PHV be destroyed
     (void) cxt; (void) phv;
     --count;
     ++destroyed.at(cxt);
   }
 
-  void set_phv_factory_(size_t cxt, const PHVFactory *factory) override {
+  void set_phv_factory_(cxt_id_t cxt, const PHVFactory *factory) override {
     phv_factories.at(cxt) = factory;
   }
 
-  size_t phvs_in_use_(size_t cxt) override {
+  size_t phvs_in_use_(cxt_id_t cxt) override {
     (void)cxt;
     return count;
   }
@@ -102,7 +102,7 @@ class PacketTest : public ::testing::Test {
 
   // virtual void TearDown() { }
 
-  Packet get_packet(size_t cxt, packet_id_t id = 0) {
+  Packet get_packet(cxt_id_t cxt, packet_id_t id = 0) {
     // dummy packet, never parsed
     return Packet::make_new(cxt, 0, id, 0, 0, PacketBuffer(), phv_source.get());
   }
@@ -132,7 +132,7 @@ TEST_F(PacketTest, ChangeContext) {
 }
 
 TEST_F(PacketTest, Truncate) {
-  const size_t cxt = 0;
+  const cxt_id_t cxt = 0;
   const size_t first_length = 128;
   std::vector<char> data;
   data.reserve(first_length);

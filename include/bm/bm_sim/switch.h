@@ -79,6 +79,7 @@
 #include <condition_variable>
 
 #include "context.h"
+#include "device_id.h"
 #include "queue.h"
 #include "learning.h"
 #include "runtime_interface.h"
@@ -111,7 +112,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // TODO(antonin): return reference instead?
   //! Access a Context by context id, throws a std::out_of_range exception if
   //! \p cxt_id is invalid.
-  Context *get_context(size_t cxt_id = 0u) {
+  Context *get_context(cxt_id_t cxt_id = 0u) {
     return &contexts.at(cxt_id);
   }
 
@@ -129,7 +130,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   int get_runtime_port() const { return thrift_port; }
 
   //! Returns the device id for this switch instance.
-  int get_device_id() const { return device_id; }
+  device_id_t get_device_id() const { return device_id; }
 
   //! Returns the nanomsg IPC address for this switch.
   std::string get_notifications_addr() const { return notifications_addr; }
@@ -162,7 +163,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   //! Checks that the given field exists for context \p cxt_id, i.e. checks that
   //! the field was defined in the input JSON used to configure that context.
-  bool field_exists(size_t cxt_id, const std::string &header_name,
+  bool field_exists(cxt_id_t cxt_id, const std::string &header_name,
                     const std::string &field_name) const {
     return contexts.at(cxt_id).field_exists(header_name, field_name);
   }
@@ -190,10 +191,11 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! Get the number of contexts included in this switch
   size_t get_nb_cxts() { return nb_cxts; }
 
-  int init_objects(const std::string &json_path, int device_id = 0,
+  int init_objects(const std::string &json_path, device_id_t device_id = 0,
                    std::shared_ptr<TransportIface> notif_transport = nullptr);
 
-  int init_objects_empty(int dev_id, std::shared_ptr<TransportIface> transport);
+  int init_objects_empty(device_id_t dev_id,
+                         std::shared_ptr<TransportIface> transport);
 
   //! Initialize the switch using command line options. This function is meant
   //! to be called right after your switch instance has been constructed. For
@@ -251,7 +253,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! Retrieve the shared pointer to an object of type `T` previously added to
   //! one of the switch contexts using add_cxt_component().
   template<typename T>
-  std::shared_ptr<T> get_cxt_component(size_t cxt_id) {
+  std::shared_ptr<T> get_cxt_component(cxt_id_t cxt_id) {
     return contexts.at(cxt_id).get_component<T>();
   }
 
@@ -269,37 +271,37 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   int do_swap();
 
   //! Construct and return a Packet instance for the given \p cxt_id.
-  std::unique_ptr<Packet> new_packet_ptr(size_t cxt_id, int ingress_port,
+  std::unique_ptr<Packet> new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
                                          PacketBuffer &&buffer);
 
   //! @copydoc new_packet_ptr
-  Packet new_packet(size_t cxt_id, int ingress_port, packet_id_t id,
+  Packet new_packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
                     int ingress_length, PacketBuffer &&buffer);
 
   //! Obtain a pointer to the LearnEngine for a given Context
-  LearnEngineIface *get_learn_engine(size_t cxt_id) {
+  LearnEngineIface *get_learn_engine(cxt_id_t cxt_id) {
     return contexts.at(cxt_id).get_learn_engine();
   }
 
-  AgeingMonitorIface *get_ageing_monitor(size_t cxt_id) {
+  AgeingMonitorIface *get_ageing_monitor(cxt_id_t cxt_id) {
     return contexts.at(cxt_id).get_ageing_monitor();
   }
 
   //! Return string-to-string map of the target-specific options included in the
   //! input config JSON for a given context.
-  ConfigOptionMap get_config_options(size_t cxt_id) const {
+  ConfigOptionMap get_config_options(cxt_id_t cxt_id) const {
     return contexts.at(cxt_id).get_config_options();
   }
 
   //! Return a copy of the error codes map (a bi-directional map between an
   //! error code's integral value and its name / description) for a given
   //! context.
-  ErrorCodeMap get_error_codes(size_t cxt_id) const {
+  ErrorCodeMap get_error_codes(cxt_id_t cxt_id) const {
     return contexts.at(cxt_id).get_error_codes();
   }
 
@@ -309,14 +311,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // ---------- RuntimeInterface ----------
 
   MatchErrorCode
-  mt_get_num_entries(size_t cxt_id,
+  mt_get_num_entries(cxt_id_t cxt_id,
                      const std::string &table_name,
                      size_t *num_entries) const override {
     return contexts.at(cxt_id).mt_get_num_entries(table_name, num_entries);
   }
 
   MatchErrorCode
-  mt_clear_entries(size_t cxt_id,
+  mt_clear_entries(cxt_id_t cxt_id,
                    const std::string &table_name,
                    bool reset_default_entry) override {
     return contexts.at(cxt_id).mt_clear_entries(table_name,
@@ -324,7 +326,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_add_entry(size_t cxt_id,
+  mt_add_entry(cxt_id_t cxt_id,
                const std::string &table_name,
                const std::vector<MatchKeyParam> &match_key,
                const std::string &action_name,
@@ -337,7 +339,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_set_default_action(size_t cxt_id,
+  mt_set_default_action(cxt_id_t cxt_id,
                         const std::string &table_name,
                         const std::string &action_name,
                         ActionData action_data) override {
@@ -346,14 +348,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_delete_entry(size_t cxt_id,
+  mt_delete_entry(cxt_id_t cxt_id,
                   const std::string &table_name,
                   entry_handle_t handle) override {
     return contexts.at(cxt_id).mt_delete_entry(table_name, handle);
   }
 
   MatchErrorCode
-  mt_modify_entry(size_t cxt_id,
+  mt_modify_entry(cxt_id_t cxt_id,
                   const std::string &table_name,
                   entry_handle_t handle,
                   const std::string &action_name,
@@ -363,7 +365,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_set_entry_ttl(size_t cxt_id,
+  mt_set_entry_ttl(cxt_id_t cxt_id,
                    const std::string &table_name,
                    entry_handle_t handle,
                    unsigned int ttl_ms) override {
@@ -373,7 +375,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // action profiles
 
   MatchErrorCode
-  mt_act_prof_add_member(size_t cxt_id,
+  mt_act_prof_add_member(cxt_id_t cxt_id,
                          const std::string &act_prof_name,
                          const std::string &action_name,
                          ActionData action_data,
@@ -383,14 +385,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_act_prof_delete_member(size_t cxt_id,
+  mt_act_prof_delete_member(cxt_id_t cxt_id,
                             const std::string &act_prof_name,
                             mbr_hdl_t mbr) override {
     return contexts.at(cxt_id).mt_act_prof_delete_member(act_prof_name, mbr);
   }
 
   MatchErrorCode
-  mt_act_prof_modify_member(size_t cxt_id,
+  mt_act_prof_modify_member(cxt_id_t cxt_id,
                             const std::string &act_prof_name,
                             mbr_hdl_t mbr,
                             const std::string &action_name,
@@ -400,21 +402,21 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_act_prof_create_group(size_t cxt_id,
+  mt_act_prof_create_group(cxt_id_t cxt_id,
                            const std::string &act_prof_name,
                            grp_hdl_t *grp) override {
     return contexts.at(cxt_id).mt_act_prof_create_group(act_prof_name, grp);
   }
 
   MatchErrorCode
-  mt_act_prof_delete_group(size_t cxt_id,
+  mt_act_prof_delete_group(cxt_id_t cxt_id,
                            const std::string &act_prof_name,
                            grp_hdl_t grp) override {
     return contexts.at(cxt_id).mt_act_prof_delete_group(act_prof_name, grp);
   }
 
   MatchErrorCode
-  mt_act_prof_add_member_to_group(size_t cxt_id,
+  mt_act_prof_add_member_to_group(cxt_id_t cxt_id,
                                   const std::string &act_prof_name,
                                   mbr_hdl_t mbr, grp_hdl_t grp) override {
     return contexts.at(cxt_id).mt_act_prof_add_member_to_group(
@@ -422,7 +424,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_act_prof_remove_member_from_group(size_t cxt_id,
+  mt_act_prof_remove_member_from_group(cxt_id_t cxt_id,
                                        const std::string &act_prof_name,
                                        mbr_hdl_t mbr, grp_hdl_t grp) override {
     return contexts.at(cxt_id).mt_act_prof_remove_member_from_group(
@@ -430,13 +432,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   std::vector<ActionProfile::Member>
-  mt_act_prof_get_members(size_t cxt_id,
+  mt_act_prof_get_members(cxt_id_t cxt_id,
                           const std::string &act_prof_name) const override {
     return contexts.at(cxt_id).mt_act_prof_get_members(act_prof_name);
   }
 
   MatchErrorCode
-  mt_act_prof_get_member(size_t cxt_id, const std::string &act_prof_name,
+  mt_act_prof_get_member(cxt_id_t cxt_id, const std::string &act_prof_name,
                          mbr_hdl_t mbr,
                          ActionProfile::Member *member) const override {
     return contexts.at(cxt_id).mt_act_prof_get_member(
@@ -444,13 +446,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   std::vector<ActionProfile::Group>
-  mt_act_prof_get_groups(size_t cxt_id,
+  mt_act_prof_get_groups(cxt_id_t cxt_id,
                          const std::string &act_prof_name) const override {
     return contexts.at(cxt_id).mt_act_prof_get_groups(act_prof_name);
   }
 
   MatchErrorCode
-  mt_act_prof_get_group(size_t cxt_id, const std::string &act_prof_name,
+  mt_act_prof_get_group(cxt_id_t cxt_id, const std::string &act_prof_name,
                         grp_hdl_t grp,
                         ActionProfile::Group *group) const override {
     return contexts.at(cxt_id).mt_act_prof_get_group(act_prof_name, grp, group);
@@ -459,7 +461,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // indirect tables
 
   MatchErrorCode
-  mt_indirect_add_entry(size_t cxt_id,
+  mt_indirect_add_entry(cxt_id_t cxt_id,
                         const std::string &table_name,
                         const std::vector<MatchKeyParam> &match_key,
                         mbr_hdl_t mbr,
@@ -470,7 +472,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_modify_entry(size_t cxt_id,
+  mt_indirect_modify_entry(cxt_id_t cxt_id,
                            const std::string &table_name,
                            entry_handle_t handle,
                            mbr_hdl_t mbr) override {
@@ -479,14 +481,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_delete_entry(size_t cxt_id,
+  mt_indirect_delete_entry(cxt_id_t cxt_id,
                            const std::string &table_name,
                            entry_handle_t handle) override {
     return contexts.at(cxt_id).mt_indirect_delete_entry(table_name, handle);
   }
 
   MatchErrorCode
-  mt_indirect_set_entry_ttl(size_t cxt_id,
+  mt_indirect_set_entry_ttl(cxt_id_t cxt_id,
                             const std::string &table_name,
                             entry_handle_t handle,
                             unsigned int ttl_ms) override {
@@ -495,14 +497,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_set_default_member(size_t cxt_id,
+  mt_indirect_set_default_member(cxt_id_t cxt_id,
                                  const std::string &table_name,
                                  mbr_hdl_t mbr) override {
     return contexts.at(cxt_id).mt_indirect_set_default_member(table_name, mbr);
   }
 
   MatchErrorCode
-  mt_indirect_ws_add_entry(size_t cxt_id,
+  mt_indirect_ws_add_entry(cxt_id_t cxt_id,
                            const std::string &table_name,
                            const std::vector<MatchKeyParam> &match_key,
                            grp_hdl_t grp,
@@ -513,7 +515,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_ws_modify_entry(size_t cxt_id,
+  mt_indirect_ws_modify_entry(cxt_id_t cxt_id,
                               const std::string &table_name,
                               entry_handle_t handle,
                               grp_hdl_t grp) override {
@@ -522,7 +524,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_ws_set_default_group(size_t cxt_id,
+  mt_indirect_ws_set_default_group(cxt_id_t cxt_id,
                                    const std::string &table_name,
                                    grp_hdl_t grp) override {
     return contexts.at(cxt_id).mt_indirect_ws_set_default_group(
@@ -530,36 +532,37 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchTableType
-  mt_get_type(size_t cxt_id, const std::string &table_name) const override {
+  mt_get_type(cxt_id_t cxt_id, const std::string &table_name) const override {
     return contexts.at(cxt_id).mt_get_type(table_name);
   }
 
   std::vector<MatchTable::Entry>
-  mt_get_entries(size_t cxt_id, const std::string &table_name) const override {
+  mt_get_entries(cxt_id_t cxt_id,
+                 const std::string &table_name) const override {
     return contexts.at(cxt_id).mt_get_entries<MatchTable>(table_name);
   }
 
   std::vector<MatchTableIndirect::Entry>
-  mt_indirect_get_entries(size_t cxt_id,
+  mt_indirect_get_entries(cxt_id_t cxt_id,
                           const std::string &table_name) const override {
     return contexts.at(cxt_id).mt_get_entries<MatchTableIndirect>(table_name);
   }
 
   std::vector<MatchTableIndirectWS::Entry>
-  mt_indirect_ws_get_entries(size_t cxt_id,
+  mt_indirect_ws_get_entries(cxt_id_t cxt_id,
                              const std::string &table_name) const override {
     return contexts.at(cxt_id).mt_get_entries<MatchTableIndirectWS>(table_name);
   }
 
   MatchErrorCode
-  mt_get_entry(size_t cxt_id, const std::string &table_name,
+  mt_get_entry(cxt_id_t cxt_id, const std::string &table_name,
                entry_handle_t handle, MatchTable::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_entry<MatchTable>(
         table_name, handle, entry);
   }
 
   MatchErrorCode
-  mt_indirect_get_entry(size_t cxt_id, const std::string &table_name,
+  mt_indirect_get_entry(cxt_id_t cxt_id, const std::string &table_name,
                         entry_handle_t handle,
                         MatchTableIndirect::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_entry<MatchTableIndirect>(
@@ -567,7 +570,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_ws_get_entry(size_t cxt_id, const std::string &table_name,
+  mt_indirect_ws_get_entry(cxt_id_t cxt_id, const std::string &table_name,
                            entry_handle_t handle,
                            MatchTableIndirectWS::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_entry<MatchTableIndirectWS>(
@@ -575,7 +578,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_get_default_entry(size_t cxt_id, const std::string &table_name,
+  mt_get_default_entry(cxt_id_t cxt_id, const std::string &table_name,
                        MatchTable::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_default_entry<MatchTable>(
         table_name, entry);
@@ -583,7 +586,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   MatchErrorCode
   mt_indirect_get_default_entry(
-      size_t cxt_id, const std::string &table_name,
+      cxt_id_t cxt_id, const std::string &table_name,
       MatchTableIndirect::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_default_entry<MatchTableIndirect>(
         table_name, entry);
@@ -591,14 +594,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   MatchErrorCode
   mt_indirect_ws_get_default_entry(
-      size_t cxt_id, const std::string &table_name,
+      cxt_id_t cxt_id, const std::string &table_name,
       MatchTableIndirectWS::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_default_entry<MatchTableIndirectWS>(
         table_name, entry);
   }
 
   MatchErrorCode
-  mt_get_entry_from_key(size_t cxt_id, const std::string &table_name,
+  mt_get_entry_from_key(cxt_id_t cxt_id, const std::string &table_name,
                         const std::vector<MatchKeyParam> &match_key,
                         MatchTable::Entry *entry,
                         int priority = 1) const override {
@@ -607,7 +610,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_get_entry_from_key(size_t cxt_id, const std::string &table_name,
+  mt_indirect_get_entry_from_key(cxt_id_t cxt_id, const std::string &table_name,
                                  const std::vector<MatchKeyParam> &match_key,
                                  MatchTableIndirect::Entry *entry,
                                  int priority = 1) const override {
@@ -616,7 +619,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_indirect_ws_get_entry_from_key(size_t cxt_id,
+  mt_indirect_ws_get_entry_from_key(cxt_id_t cxt_id,
                                     const std::string &table_name,
                                     const std::vector<MatchKeyParam> &match_key,
                                     MatchTableIndirectWS::Entry *entry,
@@ -626,7 +629,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_read_counters(size_t cxt_id,
+  mt_read_counters(cxt_id_t cxt_id,
                    const std::string &table_name,
                    entry_handle_t handle,
                    MatchTableAbstract::counter_value_t *bytes,
@@ -636,13 +639,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
-  mt_reset_counters(size_t cxt_id,
+  mt_reset_counters(cxt_id_t cxt_id,
                     const std::string &table_name) override {
     return contexts.at(cxt_id).mt_reset_counters(table_name);
   }
 
   MatchErrorCode
-  mt_write_counters(size_t cxt_id,
+  mt_write_counters(cxt_id_t cxt_id,
                     const std::string &table_name,
                     entry_handle_t handle,
                     MatchTableAbstract::counter_value_t bytes,
@@ -653,20 +656,20 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   MatchErrorCode
   mt_set_meter_rates(
-      size_t cxt_id, const std::string &table_name, entry_handle_t handle,
+      cxt_id_t cxt_id, const std::string &table_name, entry_handle_t handle,
       const std::vector<Meter::rate_config_t> &configs) override {
     return contexts.at(cxt_id).mt_set_meter_rates(table_name, handle, configs);
   }
 
   MatchErrorCode
   mt_get_meter_rates(
-      size_t cxt_id, const std::string &table_name, entry_handle_t handle,
+      cxt_id_t cxt_id, const std::string &table_name, entry_handle_t handle,
       std::vector<Meter::rate_config_t> *configs) override {
     return contexts.at(cxt_id).mt_get_meter_rates(table_name, handle, configs);
   }
 
   Counter::CounterErrorCode
-  read_counters(size_t cxt_id,
+  read_counters(cxt_id_t cxt_id,
                 const std::string &counter_name,
                 size_t index,
                 MatchTableAbstract::counter_value_t *bytes,
@@ -676,13 +679,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   Counter::CounterErrorCode
-  reset_counters(size_t cxt_id,
+  reset_counters(cxt_id_t cxt_id,
                  const std::string &counter_name) override {
     return contexts.at(cxt_id).reset_counters(counter_name);
   }
 
   Counter::CounterErrorCode
-  write_counters(size_t cxt_id,
+  write_counters(cxt_id_t cxt_id,
                  const std::string &counter_name,
                  size_t index,
                  MatchTableAbstract::counter_value_t bytes,
@@ -693,39 +696,40 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   MeterErrorCode
   meter_array_set_rates(
-      size_t cxt_id, const std::string &meter_name,
+      cxt_id_t cxt_id, const std::string &meter_name,
       const std::vector<Meter::rate_config_t> &configs) override {
     return contexts.at(cxt_id).meter_array_set_rates(meter_name, configs);
   }
 
   MeterErrorCode
-  meter_set_rates(size_t cxt_id,
+  meter_set_rates(cxt_id_t cxt_id,
                   const std::string &meter_name, size_t idx,
                   const std::vector<Meter::rate_config_t> &configs) override {
     return contexts.at(cxt_id).meter_set_rates(meter_name, idx, configs);
   }
 
   MeterErrorCode
-  meter_get_rates(size_t cxt_id,
+  meter_get_rates(cxt_id_t cxt_id,
                   const std::string &meter_name, size_t idx,
                   std::vector<Meter::rate_config_t> *configs) override {
     return contexts.at(cxt_id).meter_get_rates(meter_name, idx, configs);
   }
 
   RegisterErrorCode
-  register_read(size_t cxt_id,
+  register_read(cxt_id_t cxt_id,
                 const std::string &register_name,
                 const size_t idx, Data *value) override {
     return contexts.at(cxt_id).register_read(register_name, idx, value);
   }
 
   std::vector<Data>
-  register_read_all(size_t cxt_id, const std::string &register_name) override {
+  register_read_all(cxt_id_t cxt_id,
+                    const std::string &register_name) override {
     return contexts.at(cxt_id).register_read_all(register_name);
   }
 
   RegisterErrorCode
-  register_write(size_t cxt_id,
+  register_write(cxt_id_t cxt_id,
                  const std::string &register_name,
                  const size_t idx, Data value) override {
     return contexts.at(cxt_id).register_write(
@@ -733,7 +737,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   RegisterErrorCode
-  register_write_range(size_t cxt_id,
+  register_write_range(cxt_id_t cxt_id,
                        const std::string &register_name,
                        const size_t start, const size_t end,
                        Data value) override {
@@ -742,18 +746,18 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   RegisterErrorCode
-  register_reset(size_t cxt_id, const std::string &register_name) override {
+  register_reset(cxt_id_t cxt_id, const std::string &register_name) override {
     return contexts.at(cxt_id).register_reset(register_name);
   }
 
   ParseVSet::ErrorCode
-  parse_vset_add(size_t cxt_id, const std::string &parse_vset_name,
+  parse_vset_add(cxt_id_t cxt_id, const std::string &parse_vset_name,
                  const ByteContainer &value) override {
     return contexts.at(cxt_id).parse_vset_add(parse_vset_name, value);
   }
 
   ParseVSet::ErrorCode
-  parse_vset_remove(size_t cxt_id, const std::string &parse_vset_name,
+  parse_vset_remove(cxt_id_t cxt_id, const std::string &parse_vset_name,
                     const ByteContainer &value) override {
     return contexts.at(cxt_id).parse_vset_remove(parse_vset_name, value);
   }
@@ -774,18 +778,18 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::string get_config_md5() const override;
 
   P4Objects::IdLookupErrorCode p4objects_id_from_name(
-      size_t cxt_id, P4Objects::ResourceType type, const std::string &name,
+      cxt_id_t cxt_id, P4Objects::ResourceType type, const std::string &name,
       p4object_id_t *id) const;
 
   // conscious choice not to use templates here (or could not use virtual)
   CustomCrcErrorCode
   set_crc16_custom_parameters(
-      size_t cxt_id, const std::string &calc_name,
+      cxt_id_t cxt_id, const std::string &calc_name,
       const CustomCrcMgr<uint16_t>::crc_config_t &crc16_config) override;
 
   CustomCrcErrorCode
   set_crc32_custom_parameters(
-      size_t cxt_id, const std::string &calc_name,
+      cxt_id_t cxt_id, const std::string &calc_name,
       const CustomCrcMgr<uint32_t>::crc_config_t &crc32_config) override;
 
   // ---------- End RuntimeInterface ----------
@@ -819,7 +823,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! switch, otherwise you can use add_component(). The pointer can be
   //! retrieved at a later time by using get_cxt_component().
   template<typename T>
-  bool add_cxt_component(size_t cxt_id, std::shared_ptr<T> ptr) {
+  bool add_cxt_component(cxt_id_t cxt_id, std::shared_ptr<T> ptr) {
     return contexts.at(cxt_id).add_component<T>(ptr);
   }
 
@@ -833,7 +837,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   int deserialize_from_file(const std::string &state_dump_path);
 
  private:
-  int init_objects(std::istream *is, int dev_id,
+  int init_objects(std::istream *is, device_id_t dev_id,
                    std::shared_ptr<TransportIface> transport);
 
   void reset_target_state();
@@ -884,7 +888,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   int thrift_port{};
 
-  int device_id{};
+  device_id_t device_id{};
 
   // same transport used for all notifications, irrespective of the thread, made
   // possible by multi-threading support in nanomsg

@@ -354,7 +354,7 @@ def decorate_msg(P, t, fmt):
 
 @decorate_msg(
     Msg, None,
-    [("type", "i", None), ("switch_id", "i", None), ("req_id", "Q", None)],
+    [("type", "i", None), ("switch_id", "Q", None), ("req_id", "Q", None)],
 )
 class BasicMsg(Msg):
     pass
@@ -389,7 +389,8 @@ class Msg_FieldValue(EventMsg):
 
 def _test():
     m = Msg_FieldValue()
-    req = struct.pack("iiQQQQi", MsgType.FIELD_VALUE, 0, 99, 1, 2, 55, 3)
+    # < required to prevent 8-byte alignment
+    req = struct.pack("<iQQQQQi", MsgType.FIELD_VALUE, 0, 99, 1, 2, 55, 3)
     req += struct.pack(">3s", "\x01\x02\x03")
     m.extract(req)
     s = m.generate()

@@ -50,7 +50,7 @@ class LearnEngine final : public LearnEngineIface {
   using LearnEngineIface::msg_hdr_t;
   using LearnEngineIface::LearnCb;
 
-  explicit LearnEngine(int device_id = 0, int cxt_id = 0);
+  explicit LearnEngine(device_id_t device_id = 0, cxt_id_t cxt_id = 0);
 
   void list_create(list_id_t list_id, size_t max_samples = 1,
                    unsigned int timeout_ms = 1000) override;
@@ -135,7 +135,7 @@ class LearnEngine final : public LearnEngineIface {
     enum class LearnMode {NONE, WRITER, CB};
 
    public:
-    LearnList(list_id_t list_id, int device_id, int cxt_id,
+    LearnList(list_id_t list_id, device_id_t device_id, cxt_id_t cxt_id,
               size_t max_samples, unsigned int timeout);
 
     void init();
@@ -179,8 +179,8 @@ class LearnEngine final : public LearnEngineIface {
 
     list_id_t list_id;
 
-    int device_id;
-    int cxt_id;
+    device_id_t device_id;
+    cxt_id_t cxt_id;
 
     LearnSampleBuilder builder{};
     std::vector<char> buffer{};
@@ -217,8 +217,8 @@ class LearnEngine final : public LearnEngineIface {
  private:
   LearnList *get_learn_list(list_id_t list_id);
 
-  int device_id{};
-  int cxt_id{};
+  device_id_t device_id{};
+  cxt_id_t cxt_id{};
   // LearnList is not movable because of the mutex, I am using pointers
   std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
 };
@@ -263,8 +263,9 @@ LearnEngine::LearnSampleBuilder::operator()(const PHV &phv,
   }
 }
 
-LearnEngine::LearnList::LearnList(list_id_t list_id, int device_id, int cxt_id,
-                                  size_t max_samples, unsigned int timeout)
+LearnEngine::LearnList::LearnList(list_id_t list_id, device_id_t device_id,
+                                  cxt_id_t cxt_id, size_t max_samples,
+                                  unsigned int timeout)
     : list_id(list_id), device_id(device_id), cxt_id(cxt_id),
       max_samples(max_samples), timeout(timeout), with_timeout(timeout > 0) { }
 
@@ -514,7 +515,7 @@ LearnEngine::LearnList::reset_state() {
   buffer_tmp.clear();
 }
 
-LearnEngine::LearnEngine(int device_id, int cxt_id)
+LearnEngine::LearnEngine(device_id_t device_id, cxt_id_t cxt_id)
     : device_id(device_id), cxt_id(cxt_id) { }
 
 LearnEngine::LearnList *
@@ -656,7 +657,7 @@ LearnEngine::reset_state() {
 }
 
 std::unique_ptr<LearnEngineIface>
-LearnEngineIface::make(int device_id, int cxt_id) {
+LearnEngineIface::make(device_id_t device_id, cxt_id_t cxt_id) {
   return std::unique_ptr<LearnEngineIface>(new LearnEngine(device_id, cxt_id));
 }
 

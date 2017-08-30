@@ -45,8 +45,8 @@ enum EventType {
 
 struct msg_hdr_t {
   int type;
-  int switch_id;
-  int cxt_id;
+  s_device_id_t switch_id;
+  s_cxt_id_t cxt_id;
   uint64_t sig;
   uint64_t id;
   uint64_t copy_id;
@@ -55,7 +55,7 @@ struct msg_hdr_t {
 namespace {
 
 void
-fill_msg_hdr(EventType type, int device_id,
+fill_msg_hdr(EventType type, device_id_t device_id,
              const Packet &packet, msg_hdr_t *msg_hdr) {
   msg_hdr->type = static_cast<int>(type);
   msg_hdr->switch_id = device_id;

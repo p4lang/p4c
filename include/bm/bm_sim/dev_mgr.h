@@ -143,7 +143,7 @@ class DevMgr : public PacketDispatcherIface {
   void set_dev_mgr(std::unique_ptr<DevMgrIface> my_pimp);
 
   void set_dev_mgr_bmi(
-      int device_id,
+      device_id_t device_id,
       std::shared_ptr<TransportIface> notifications_transport = nullptr);
 
   // The interface names are instead interpreted as file names.
@@ -155,7 +155,7 @@ class DevMgr : public PacketDispatcherIface {
   // if enforce ports is set to true, packets coming in on un-registered ports
   // are dropped
   void set_dev_mgr_packet_in(
-      int device_id, const std::string &addr,
+      device_id_t device_id, const std::string &addr,
       std::shared_ptr<TransportIface> notifications_transport = nullptr,
       bool enforce_ports = false);
 #endif

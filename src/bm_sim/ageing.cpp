@@ -43,7 +43,7 @@ class AgeingMonitor final : public AgeingMonitorIface {
   using buffer_id_t = uint64_t;
   using clock = Packet::clock;
 
-  AgeingMonitor(int device_id, int cxt_id,
+  AgeingMonitor(device_id_t device_id, cxt_id_t cxt_id,
                 std::shared_ptr<TransportIface> writer,
                 unsigned int sweep_interval_ms = 1000u);
 
@@ -79,8 +79,8 @@ class AgeingMonitor final : public AgeingMonitorIface {
 
   std::map<p4object_id_t, TableData> tables_with_ageing{};
 
-  int device_id{};
-  int cxt_id{};
+  device_id_t device_id{};
+  cxt_id_t cxt_id{};
 
   std::shared_ptr<TransportIface> writer{nullptr};
 
@@ -95,7 +95,7 @@ class AgeingMonitor final : public AgeingMonitorIface {
   mutable std::condition_variable stop_condvar{};
 };
 
-AgeingMonitor::AgeingMonitor(int device_id, int cxt_id,
+AgeingMonitor::AgeingMonitor(device_id_t device_id, cxt_id_t cxt_id,
                              std::shared_ptr<TransportIface> writer,
                              unsigned int sweep_interval_ms)
     : device_id(device_id), cxt_id(cxt_id), writer(writer),
@@ -201,7 +201,7 @@ AgeingMonitor::do_sweep() {
 }
 
 std::unique_ptr<AgeingMonitorIface>
-AgeingMonitorIface::make(int device_id, int cxt_id,
+AgeingMonitorIface::make(device_id_t device_id, cxt_id_t cxt_id,
                          std::shared_ptr<TransportIface> writer,
                          unsigned int sweep_interval_ms) {
   return std::unique_ptr<AgeingMonitorIface>(new AgeingMonitor(

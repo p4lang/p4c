@@ -41,7 +41,7 @@ namespace bm {
 class PacketInDevMgrImp : public DevMgrIface {
  public:
   explicit PacketInDevMgrImp(
-      int device_id, const std::string &addr,
+      device_id_t device_id, const std::string &addr,
       std::shared_ptr<TransportIface> notifications_transport,
       bool enforce_ports = false)
       : addr(addr), s(AF_SP, NN_PAIR), enforce_ports(enforce_ports) {
@@ -314,7 +314,7 @@ PacketInDevMgrImp::receive_loop() {
 
 void
 DevMgr::set_dev_mgr_packet_in(
-    int device_id, const std::string &addr,
+    device_id_t device_id, const std::string &addr,
     std::shared_ptr<TransportIface> notifications_transport,
     bool enforce_ports) {
   assert(!pimp);

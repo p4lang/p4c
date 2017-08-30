@@ -72,19 +72,19 @@ class PHVSourceContextPools : public PHVSourceIface {
     size_t count{0};
   };
 
-  std::unique_ptr<PHV> get_(size_t cxt) override {
+  std::unique_ptr<PHV> get_(cxt_id_t cxt) override {
     return phv_pools.at(cxt).get();
   }
 
-  void release_(size_t cxt, std::unique_ptr<PHV> phv) override {
+  void release_(cxt_id_t cxt, std::unique_ptr<PHV> phv) override {
     return phv_pools.at(cxt).release(std::move(phv));
   }
 
-  void set_phv_factory_(size_t cxt, const PHVFactory *factory) override {
+  void set_phv_factory_(cxt_id_t cxt, const PHVFactory *factory) override {
     phv_pools.at(cxt).set_phv_factory(factory);
   }
 
-  size_t phvs_in_use_(size_t cxt) override {
+  size_t phvs_in_use_(cxt_id_t cxt) override {
     return phv_pools.at(cxt).phvs_in_use();
   }
 
@@ -92,20 +92,20 @@ class PHVSourceContextPools : public PHVSourceIface {
 };
 
 std::unique_ptr<PHV>
-PHVSourceIface::get(size_t cxt) { return get_(cxt); }
+PHVSourceIface::get(cxt_id_t cxt) { return get_(cxt); }
 
 void
-PHVSourceIface::release(size_t cxt, std::unique_ptr<PHV> phv) {
+PHVSourceIface::release(cxt_id_t cxt, std::unique_ptr<PHV> phv) {
   release_(cxt, std::move(phv));
 }
 
 void
-PHVSourceIface::set_phv_factory(size_t cxt, const PHVFactory *factory) {
+PHVSourceIface::set_phv_factory(cxt_id_t cxt, const PHVFactory *factory) {
   set_phv_factory_(cxt, factory);
 }
 
 size_t
-PHVSourceIface::phvs_in_use(size_t cxt) {
+PHVSourceIface::phvs_in_use(cxt_id_t cxt) {
   return phvs_in_use_(cxt);
 }
 

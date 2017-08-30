@@ -34,7 +34,7 @@ namespace testing {
 constexpr char SimpleSwitchGrpcBaseTest::grpc_server_addr[];
 constexpr char SimpleSwitchGrpcBaseTest::dp_grpc_server_addr[];
 constexpr int SimpleSwitchGrpcBaseTest::cpu_port;
-constexpr int SimpleSwitchGrpcBaseTest::device_id;
+constexpr uint64_t SimpleSwitchGrpcBaseTest::device_id;
 
 SimpleSwitchGrpcBaseTest::SimpleSwitchGrpcBaseTest(
     const char *p4info_proto_txt_path)

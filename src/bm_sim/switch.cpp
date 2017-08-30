@@ -127,7 +127,7 @@ SwitchWContexts::force_arith_header(const std::string &header_name) {
 }
 
 int
-SwitchWContexts::init_objects(std::istream *is, int dev_id,
+SwitchWContexts::init_objects(std::istream *is, device_id_t dev_id,
                               std::shared_ptr<TransportIface> transport) {
   int status = 0;
 
@@ -140,7 +140,7 @@ SwitchWContexts::init_objects(std::istream *is, int dev_id,
     notifications_transport = std::move(transport);
   }
 
-  for (size_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
+  for (cxt_id_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
     auto &cxt = contexts.at(cxt_id);
     cxt.set_device_id(device_id);
     cxt.set_notifications_transport(notifications_transport);
@@ -158,7 +158,7 @@ SwitchWContexts::init_objects(std::istream *is, int dev_id,
 }
 
 int
-SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
+SwitchWContexts::init_objects(const std::string &json_path, device_id_t dev_id,
                               std::shared_ptr<TransportIface> transport) {
   std::ifstream fs(json_path, std::ios::in);
   if (!fs) {
@@ -180,7 +180,7 @@ SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
 }
 
 int
-SwitchWContexts::init_objects_empty(int dev_id,
+SwitchWContexts::init_objects_empty(device_id_t dev_id,
                                     std::shared_ptr<TransportIface> transport) {
   return init_objects(nullptr, dev_id, transport);
 }
@@ -221,7 +221,7 @@ SwitchWContexts::init_from_options_parser(
   if (parser.debugger) {
     for (Context &c : contexts)
       c.set_force_arith(true);
-    Debugger::init_debugger(parser.debugger_addr);
+    Debugger::init_debugger(parser.debugger_addr, device_id);
   }
 #endif
 
@@ -413,7 +413,7 @@ SwitchWContexts::do_swap() {
   int rc = 1;
   if (!enable_swap || !swap_requested()) return rc;
   boost::unique_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
-  for (size_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
+  for (cxt_id_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
     auto &cxt = contexts[cxt_id];
     if (!cxt.swap_requested()) continue;
     // TODO(antonin): we spin until no more packets exist for this context, is
@@ -455,14 +455,14 @@ SwitchWContexts::get_config_md5() const {
 
 P4Objects::IdLookupErrorCode
 SwitchWContexts::p4objects_id_from_name(
-    size_t cxt_id, P4Objects::ResourceType type,
+    cxt_id_t cxt_id, P4Objects::ResourceType type,
     const std::string &name, p4object_id_t *id) const {
   return contexts.at(cxt_id).p4objects_id_from_name(type, name, id);
 }
 
 CustomCrcErrorCode
 SwitchWContexts::set_crc16_custom_parameters(
-    size_t cxt_id, const std::string &calc_name,
+    cxt_id_t cxt_id, const std::string &calc_name,
     const CustomCrcMgr<uint16_t>::crc_config_t &crc16_config) {
   return contexts.at(cxt_id).set_crc_custom_parameters<uint16_t>(
       calc_name, crc16_config);
@@ -470,14 +470,14 @@ SwitchWContexts::set_crc16_custom_parameters(
 
 CustomCrcErrorCode
 SwitchWContexts::set_crc32_custom_parameters(
-    size_t cxt_id, const std::string &calc_name,
+    cxt_id_t cxt_id, const std::string &calc_name,
     const CustomCrcMgr<uint32_t>::crc_config_t &crc32_config) {
   return contexts.at(cxt_id).set_crc_custom_parameters<uint32_t>(
       calc_name, crc32_config);
 }
 
 std::unique_ptr<Packet>
-SwitchWContexts::new_packet_ptr(size_t cxt_id, int ingress_port,
+SwitchWContexts::new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
                                 packet_id_t id, int ingress_length,
                                 // NOLINTNEXTLINE(whitespace/operators)
                                 PacketBuffer &&buffer) {
@@ -488,7 +488,7 @@ SwitchWContexts::new_packet_ptr(size_t cxt_id, int ingress_port,
 }
 
 Packet
-SwitchWContexts::new_packet(size_t cxt_id, int ingress_port, packet_id_t id,
+SwitchWContexts::new_packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
                             // NOLINTNEXTLINE(whitespace/operators)
                             int ingress_length, PacketBuffer &&buffer) {
   boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
@@ -500,9 +500,9 @@ int
 SwitchWContexts::transport_send_probe(uint64_t x) const {
   struct msg_t {
     char sub_topic[4];
-    int switch_id;
+    s_device_id_t switch_id;
     uint64_t x;
-    char _padding[16];  // the header size for notifications is always 32 bytes
+    char _padding[12];  // the header size for notifications is always 32 bytes
   } __attribute__((packed));
   msg_t msg;
   char *msg_ = reinterpret_cast<char *>(&msg);

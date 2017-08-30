@@ -94,7 +94,7 @@ class DebuggerDummy final : public DebuggerIface {
 
 class DebuggerNN final : public DebuggerIface {
  public:
-  explicit DebuggerNN(const std::string &addr);
+  explicit DebuggerNN(const std::string &addr, device_id_t switch_id);
 
   ~DebuggerNN();
 
@@ -216,10 +216,10 @@ class DebuggerNN final : public DebuggerIface {
   bool reply_ready{false};
   mutable std::condition_variable cvar_reply_ready{};
 
-  int switch_id{0};
   uint64_t req_id{0};
 
   std::string addr{};
+  device_id_t switch_id{0};
 };
 
 // IMPLEMENTATION
@@ -243,13 +243,13 @@ enum MsgType {
 
 struct req_msg_hdr_t {
   int type;
-  int switch_id;
+  s_device_id_t switch_id;
   uint64_t req_id;
 } __attribute__((packed));
 
 struct rep_status_msg_hdr_t {
   int type;
-  int switch_id;
+  s_device_id_t switch_id;
   uint64_t req_id;
   int status;
   uint64_t aux;
@@ -257,13 +257,14 @@ struct rep_status_msg_hdr_t {
 
 struct rep_event_msg_hdr_t {
   int type;
-  int switch_id;
+  s_device_id_t switch_id;
   uint64_t req_id;
   uint64_t packet_id;
   uint64_t copy_id;
 } __attribute__((packed));
 
-DebuggerNN::DebuggerNN(const std::string &addr) : s(AF_SP, NN_REP), addr(addr) {
+DebuggerNN::DebuggerNN(const std::string &addr, device_id_t switch_id)
+    : s(AF_SP, NN_REP), addr(addr), switch_id(switch_id) {
   request_thread = std::thread(&DebuggerNN::request_in, this);
 }
 
@@ -916,14 +917,14 @@ DebuggerIface *Debugger::debugger = new DebuggerDummy();
 bool Debugger::is_init = false;
 
 void
-Debugger::init_debugger(const std::string &addr) {
+Debugger::init_debugger(const std::string &addr, device_id_t device_id) {
   if (is_init) return;
   is_init = true;
 #ifdef BMDEBUG_ON
   DebuggerDummy *dummy = dynamic_cast<DebuggerDummy *>(debugger);
   assert(dummy);
   delete dummy;
-  DebuggerNN *debugger_nn = new DebuggerNN(addr);
+  DebuggerNN *debugger_nn = new DebuggerNN(addr, device_id);
   debugger_nn->open();
   debugger = debugger_nn;
 #else
