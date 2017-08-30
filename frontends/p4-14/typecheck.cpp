@@ -224,6 +224,15 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
     return a;
 }
 
+static IR::Cast *makeP14Cast(const IR::Type *type, const IR::Expression *exp) {
+    auto t1 = type->to<IR::Type::Bits>(), t2 = exp->type->to<IR::Type::Bits>();
+    if (t1 && t2 && t1->size != t2->size && t1->isSigned != t2->isSigned) {
+        // P4_16 does not allow bit cast to different size AND signedness in one step,
+        // while P4_14 does, so we insert an extra intermediate cast
+        exp = new IR::Cast(IR::Type::Bits::get(t1->size, t2->isSigned), exp); }
+    return new IR::Cast(type, exp);
+}
+
 /// Bottom up type inferencing -- set the types of expression nodes based on operands.
 class TypeCheck::InferExpressionsBottomUp : public Modifier {
  public:
@@ -251,10 +260,10 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
             if (lt && rt) {
                 if (lt->size < rt->size) {
                     setType(op, rt);
-                    op->left = new IR::Cast(rt, op->left);
+                    op->left = makeP14Cast(rt, op->left);
                 } else if (rt->size < lt->size) {
                     setType(op, lt);
-                    op->right = new IR::Cast(lt, op->right); }
+                    op->right = makeP14Cast(lt, op->right); }
                 LOG3("Inserted cast in " << op);
             }
         }
@@ -469,8 +478,7 @@ class TypeCheck::MakeImplicitCastsExplicit : public Transform, P4WriteContext {
                 LOG3("Need cast " << op->type << " -> " << type << " on " << op);
                 const IR::Expression *e = getOriginal<IR::Expression>();
                 if (*op != *e) e = op;  // undo Transform clone if it wasn't needed
-                return new IR::Cast(type, e);
-            }
+                return makeP14Cast(type, e); }
         return op; }
 
  public:
