@@ -44,14 +44,17 @@ class TypeVariableSubstitutionVisitor : public Transform {
     bool  replace;  // If true variables that map to variables are just replaced
                     // in the ParameterList of the replaced object; else they
                     // are removed.
+    const IR::Node* replacement(IR::ITypeVar* typeVariable);
  public:
     explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings,
                                              bool replace = false)
             : bindings(bindings), replace(replace) { setName("TypeVariableSubstitution"); }
 
     const IR::Node* preorder(IR::TypeParameters *tps) override;
-    const IR::Node* preorder(IR::Type_Var* typeVariable) override;
-    const IR::Node* preorder(IR::Type_InfInt* typeVariable) override;
+    const IR::Node* preorder(IR::Type_Var* typeVariable) override
+    { return replacement(typeVariable); }
+    const IR::Node* preorder(IR::Type_InfInt* typeVariable) override
+    { return replacement(typeVariable); }
 };
 
 /* Replaces TypeNames with other Types. */

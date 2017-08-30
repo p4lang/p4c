@@ -64,7 +64,7 @@ class TypeSubstitution : public IHasDbPrint {
         for (auto it : binding) {
             if (!first)
                 out << std::endl;
-            out << it.first << " -> " << it.second;
+            out << dbp(it.first) << " -> " << dbp(it.second);
             first = false;
         }
     }

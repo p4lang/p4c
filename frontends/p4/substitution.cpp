@@ -21,7 +21,7 @@ limitations under the License.
 namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
                                        const IR::ITypeVar* var, const IR::Type* substitution) {
-    LOG3("Adding " << var << "->" << substitution << " to substitution");
+    LOG3("Adding " << dbp(var) << "->" << dbp(substitution) << " to substitution");
     if (substitution->is<IR::Type_Dontcare>())
         return true;
 
