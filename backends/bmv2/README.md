@@ -62,3 +62,7 @@ controlc c() {
 ```
 
 - user-defined extern types / methods which are not defined in `v1model.p4`
+
+- stacks of headers containing varbit fields
+
+- stacks of header unions
