@@ -27,6 +27,7 @@ set (P4C_EBPF_SRCS
   codeGen.cpp
   ebpfModel.cpp
   midend.cpp
+  lower.cpp
   )
 
 set (P4C_EBPF_HDRS
@@ -42,6 +43,7 @@ set (P4C_EBPF_HDRS
   ebpfType.h
   midend.h
   target.h
+  lower.h
   )
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
