@@ -929,6 +929,7 @@ Debugger::init_debugger(const std::string &addr, device_id_t device_id) {
   debugger = debugger_nn;
 #else
   (void) addr;
+  (void) device_id;
 #endif
 }
 
