@@ -69,6 +69,11 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                 ::error("%1%: Not enough arguments for call", errorPosition);
             return false; }
         auto arg = *sit;
+        if (arg->type->is<IR::Type_Dontcare>() && dit->direction != IR::Direction::Out) {
+            if (reportErrors)
+                ::error("%1%: don't care argument only allowed for out parameters", arg->srcInfo);
+            return false;
+        }
         if ((dit->direction == IR::Direction::Out || dit->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
             if (optarg) continue;

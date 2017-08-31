@@ -2502,7 +2502,7 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
             auto arg0 = em->expr->arguments->at(0);
             auto argType = typeMap->getType(arg0, true);
-            if (!argType->is<IR::Type_Header>()) {
+            if (!argType->is<IR::Type_Header>() && !argType->is<IR::Type_Dontcare>()) {
                 typeError("%1%: argument must be a header", em->expr->arguments->at(0));
                 return;
             }
@@ -2753,9 +2753,6 @@ const IR::Node* TypeInference::postorder(IR::This* expression) {
 }
 
 const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
-    // The type of a don't care depends on how it's used.
-    // As a function argument it's a left-value (_), otherwise it's a constant
-    // TODO
     if (!done()) {
         setType(expression, IR::Type_Dontcare::get());
         setType(getOriginal(), IR::Type_Dontcare::get());
