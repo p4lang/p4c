@@ -72,9 +72,8 @@ class CodeGenInspector : public Inspector {
     { return notSupported(expression); }
     bool preorder(const IR::Mask* expression) override
     { return notSupported(expression); }
-    bool preorder(const IR::Slice* expression) override
+    bool preorder(const IR::Slice* expression) override  // should not happen
     { return notSupported(expression); }
-
     bool preorder(const IR::StringLiteral* expression) override;
     bool preorder(const IR::ListExpression* expression) override;
     bool preorder(const IR::PathExpression* expression) override;

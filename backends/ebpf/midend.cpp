@@ -31,6 +31,7 @@ limitations under the License.
 #include "midend/noMatch.h"
 #include "midend/convertEnums.h"
 #include "midend/midEndLast.h"
+#include "midend/removeLeftSlices.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeMap.h"
@@ -43,6 +44,7 @@ limitations under the License.
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "lower.h"
 
 namespace EBPF {
 
@@ -115,6 +117,8 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ValidateTableProperties({"implementation"}),
+        new P4::RemoveLeftSlices(&refMap, &typeMap),
+        new EBPF::Lower(&refMap, &typeMap),
         evaluator,
         new P4::MidEndLast()
     };
