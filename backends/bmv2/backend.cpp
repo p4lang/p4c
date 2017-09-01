@@ -190,4 +190,39 @@ void Backend::convert(BMV2Options& options) {
     main->apply(codegen_passes);
 }
 
+bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
+    if (target == Target::SIMPLE) {
+        auto parser = simpleSwitch->getParser(getToplevelBlock());
+        auto params = parser->getApplyParameters();
+        if (params->size() != 4) {
+            simpleSwitch->modelError("%1%: Expected 4 parameter for parser", parser);
+            return false;
+        }
+        if (params->parameters.at(3) == param)
+            return true;
+
+        auto ingress = simpleSwitch->getIngress(getToplevelBlock());
+        params = ingress->getApplyParameters();
+        if (params->size() != 3) {
+            simpleSwitch->modelError("%1%: Expected 3 parameter for ingress", ingress);
+            return false;
+        }
+        if (params->parameters.at(2) == param)
+            return true;
+
+        auto egress = simpleSwitch->getEgress(getToplevelBlock());
+        params = egress->getApplyParameters();
+        if (params->size() != 3) {
+            simpleSwitch->modelError("%1%: Expected 3 parameter for egress", egress);
+            return false;
+        }
+        if (params->parameters.at(2) == param)
+            return true;
+
+        return false;
+    } else {
+        P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
+    }
+}
+
 }  // namespace BMV2

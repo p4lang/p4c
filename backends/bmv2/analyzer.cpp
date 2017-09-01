@@ -279,6 +279,7 @@ void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
         index++;
     }
 }
+
 void DiscoverStructure::postorder(const IR::P4Action* action) {
     LOG1("discovery action " << action);
     auto control = findContext<IR::P4Control>();

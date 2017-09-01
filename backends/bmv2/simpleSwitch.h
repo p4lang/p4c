@@ -34,7 +34,6 @@ class SimpleSwitch {
     BMV2::Backend* backend;
     V1Model&       v1model;
 
-    void modelError(const char* format, const IR::Node* place) const;
 
  protected:
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
@@ -47,6 +46,7 @@ class SimpleSwitch {
                         Util::JsonArray* checksums, Util::JsonArray* calculations);
 
  public:
+    void modelError(const char* format, const IR::Node* place) const;
     void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
                               const IR::MethodCallExpression *mc, const IR::StatOrDecl *s);
     void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
@@ -62,6 +62,10 @@ class SimpleSwitch {
     void setNonPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setUpdateChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setDeparserControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
+
+    const IR::P4Control* getIngress(const IR::ToplevelBlock* blk);
+    const IR::P4Control* getEgress(const IR::ToplevelBlock* blk);
+    const IR::P4Parser*  getParser(const IR::ToplevelBlock* blk);
 
     explicit SimpleSwitch(BMV2::Backend* backend) :
         backend(backend), v1model(V1Model::instance)
