@@ -95,7 +95,6 @@ class Backend : public PassManager {
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
     void createFieldAliases(const char *remapFile);
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
-    /// True if this parameter represents the standard_metadata input.
 
  public:
     Backend(bool isV1, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
@@ -121,6 +120,7 @@ class Backend : public PassManager {
     P4::TypeMap*          getTypeMap()   { return typeMap; }
     P4V1::SimpleSwitch*   getSimpleSwitch()        { return simpleSwitch; }
     const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
+    /// True if this parameter represents the standard_metadata input.
     bool isStandardMetadataParameter(const IR::Parameter* param);
 };
 
