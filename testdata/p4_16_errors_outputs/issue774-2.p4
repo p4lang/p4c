@@ -5,10 +5,12 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    Header arg_0;
     state start {
-        p.extract<Header>(arg_0);
-        p.extract<Header>(h);
+        p.extract(_);
+        transition next;
+    }
+    state next {
+        p.extract(h);
         transition accept;
     }
 }

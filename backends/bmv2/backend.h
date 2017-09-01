@@ -104,7 +104,7 @@ class Backend : public PassManager {
         model(P4::PortableModel::instance),
         simpleSwitch(new P4V1::SimpleSwitch(this)),
         json(new BMV2::JsonObjects()),
-        target(Target::SIMPLE) { refMap->setIsV1(isV1); }
+        target(Target::SIMPLE) { refMap->setIsV1(isV1); setName("BackEnd"); }
     void process(const IR::ToplevelBlock* block, BMV2Options& options);
     void convert(BMV2Options& options);
     void serialize(std::ostream& out) const

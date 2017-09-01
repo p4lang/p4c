@@ -81,8 +81,9 @@ class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
 void
 Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
-    setName("BackEnd");
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    if (tlb->getMain() == nullptr)
+        return;  // no main
 
     if (options.arch != Target::UNKNOWN)
         target = options.arch;
