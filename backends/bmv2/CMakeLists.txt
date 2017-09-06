@@ -105,6 +105,10 @@ set (BMV2_TEST_SUITES
 # so we allow it to fail on BMv2.
 set (XFAIL_TESTS
   testdata/p4_14_samples/issue60.p4
+  # Program checksum1-bmv2.p4 uses new verify_checksum and
+  # update_checksum extern functions that were added but then reverted
+  # until they can be deployed without breaking existing programs.
+  testdata/p4_16_samples/checksum1-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
