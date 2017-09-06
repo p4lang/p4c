@@ -96,7 +96,7 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "register_read",          { 3, 3, 0x1, 0x0 } },
     { "register_write",         { 3, 3, 0x0, 0x0 } },
     { "remove_header",          { 1, 1, 0x1, 0x0 } },
-    { "resubmit",               { 1, 1, 0x0, 0x0 } },
+    { "resubmit",               { 0, 1, 0x0, 0x0 } },
     { "sample_e2e",             { 2, 3, 0x0, 0x0 } },
     { "set_metadata",           { 2, 2, 0x1, 0x3 } },
     { "shift_left",             { 3, 3, 0x1, 0x3 } },

@@ -253,7 +253,7 @@ add_test(NAME cpplint
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
 add_custom_target(tags
-  COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp $(CTAGS_DIRS)
+  COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp -I abstract=class -I interface=class $(CTAGS_DIRS)
   COMMAND cd tools/ir-generator && ctags -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
   COMMENT "Generating ctags")

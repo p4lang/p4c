@@ -1305,14 +1305,14 @@ CONVERT_PRIMITIVE(clone_i2e) {
 
 CONVERT_PRIMITIVE(resubmit) {
     ExpressionConverter conv(structure);
-    OPS_CK(primitive, 1);
-    auto args = new IR::Vector<IR::Expression>();
-    auto list = structure->convertFieldList(primitive->operands.at(0));
-    if (list != nullptr)
-        args->push_back(list);
-    auto resubmit = new IR::PathExpression(structure->v1model.resubmit.Id());
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, resubmit, args);
-    return new IR::MethodCallStatement(mc->srcInfo, mc);
+    BUG_CHECK(primitive->operands.size() <= 1, "Expected 0 or 1 operands for %1%", primitive);
+    const IR::Expression *list = nullptr;
+    if (primitive->operands.size() > 0)
+        list = structure->convertFieldList(primitive->operands.at(0));
+    if (list == nullptr)
+        list = new IR::ListExpression({});
+    return new IR::MethodCallStatement(primitive->srcInfo, structure->v1model.resubmit.Id(),
+                                       { list });
 }
 
 CONVERT_PRIMITIVE(execute_meter) {
