@@ -1,5 +1,10 @@
 # Travis CI integration for p4c using Docker.
 
+branches:
+  only:
+  - master
+  - stable
+
 services:
   - docker
 
