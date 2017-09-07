@@ -18,6 +18,7 @@
 from __future__ import print_function
 from subprocess import Popen,PIPE
 from threading import Thread
+import errno
 import sys
 import re
 import os
@@ -189,8 +190,16 @@ def process_file(options, argv):
     referenceOutputs = ",".join(rename.keys())
     stderr = tmpdir + "/" + basename + "-stderr"
 
-    if not os.path.exists("json_outputs"):
+    # Create the `json_outputs` directory if it doesn't already exist. There's a
+    # race here since multiple tests may run this code in parallel, so we can't
+    # check if it exists beforehand.
+    try:
         os.mkdir("./json_outputs")
+    except OSError as exc:
+        if exc.errno == errno.EEXIST:
+            pass
+        else:
+            raise
 
     jsonfile = "./json_outputs" + "/" + basename + ".json"
 
