@@ -43,6 +43,7 @@ RUN apt-get update && \
     cmake .. && \
     make && \
     make install && \
+    /usr/local/bin/ccache -p -s && \
     ( \
       (test "$IMAGE_TYPE" = "build" && \
         apt-get purge -y $P4C_DEPS && \
