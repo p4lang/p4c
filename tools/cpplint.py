@@ -198,6 +198,7 @@ _ERROR_CATEGORIES = [
     'readability/alt_tokens',
     'readability/braces',
     'readability/casting',
+    'readability/completely_reasonable_casts',
     'readability/check',
     'readability/constructors',
     'readability/fn_size',
@@ -5287,7 +5288,7 @@ def CheckCasts(filename, clean_lines, linenum, error):
               matched_funcptr.startswith('(*)'))) and
         not Match(r'\s*using\s+\S+\s*=\s*' + matched_type, line) and
         not Search(r'new\(\S+\)\s*' + matched_type, line)):
-      error(filename, linenum, 'readability/casting', 4,
+      error(filename, linenum, 'readability/completely_reasonable_casts', 4,
             'Using deprecated casting style.  '
             'Use static_cast<%s>(...) instead' %
             matched_type)
