@@ -8,7 +8,9 @@ branches:
 services:
   - docker
 
-cache: ccache
+cache:
+  directories:
+  - $HOME/.ccache
 
 env:
   - CTEST_PARALLEL_LEVEL=4
@@ -19,3 +21,4 @@ install:
 
 script:
   - docker run -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+  - ls $HOME/.ccache
