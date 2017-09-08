@@ -12,8 +12,15 @@ ARG MAKEFLAGS=-j2
 # removed from the image.
 ARG IMAGE_TYPE=build
 
+ARG CC=gcc
+ARG CXX=g++
+ARG GCOV=
+
 ENV BM_DEPS automake \
             build-essential \
+            clang-3.8 \
+            curl \
+            g++-6 \
             git \
             libjudy-dev \
             libgmp-dev \
@@ -33,9 +40,13 @@ ENV BM_RUNTIME_DEPS libboost-program-options1.58.0 \
 COPY . /behavioral-model/
 WORKDIR /behavioral-model/
 RUN apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get update && \
     apt-get install -y --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
     ./autogen.sh && \
-    ./configure --enable-debugger --with-pdfixed --with-stress-tests && \
+    if [ "$GCOV" != "" ]; then ./configure --with-pdfixed --with-stress-tests --enable-debugger --enable-coverage; fi && \
+    if [ "$GCOV" = "" ]; then ./configure --with-pdfixed --with-stress-tests --enable-debugger; fi && \
     make && \
     make install-strip && \
     ldconfig && \

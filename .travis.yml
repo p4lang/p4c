@@ -1,84 +1,29 @@
 # Config file for automatic testing at travis-ci.org
 
 sudo: required
+
 dist: trusty
 
-# using cpp here leads to some weird version of Python being used and Python
-# ImportError exceptions, so I am using the minimal trusty image
 language: generic
 
-# New travis trusty images give me Python import errors for nnpy & thrift,
-# forcing use of the old ones for now. These will be deprecated in
-# September. Either this issue will be resolved before then or I will have to
-# run the tests in the docker image and find a way to upload coverage data to
-# codecov.
-group: deprecated-2017Q3
+services:
+  - docker
 
 matrix:
   include:
-    - os: linux
-      compiler: gcc
-      env: COMPILER=g++-4.8 GCOV=gcov-4.8
-
-    - os: linux
-      compiler: gcc
-      env: COMPILER=g++-6 GCOV=gcov-6
-
-    - os: linux
-      env: COMPILER=clang++-3.8
+    - env: CXX=g++ CC=gcc
+    - env: CXX=g++-6 CC=gcc-6 GCOV=gcov-6
+    - env: CXX=clang++-3.8 CC=clang-3.8
 
 addons:
   apt:
     sources:
-      - boost-latest
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.8
-    packages:
-      - libjudy-dev
-      - libgmp-dev
-      - libpcap-dev
-      - libboost1.55-dev
-      - libboost-test1.55-dev
-      - libboost-program-options1.55-dev
-      - libboost-system1.55-dev
-      - libboost-filesystem1.55-dev
-      - libboost-thread1.55-dev
-      - libevent-dev
-      - automake
-      - libtool
-      - flex 
-      - bison
-      - pkg-config
-      - g++-4.8
-      - g++-6
-      - clang-3.8
-      - libssl-dev
-      - python-pip
-
-before_install:
-  - wget https://s3-us-west-2.amazonaws.com/p4lang/thrift_bin.tar.gz
-  - tar -xzvf thrift_bin.tar.gz -C $HOME/
-  - export PATH=$PATH:$HOME/thrift/bin/
-  - export LDFLAGS="$LDFLAGS -L$HOME/thrift/lib"
-  - export CPPFLAGS="$CPPFLAGS -I$HOME/thrift/include"
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/thrift/lib
-  - sudo pip install --upgrade thrift
-  - bash travis/install-nanomsg.sh
-  - sudo ldconfig
-  - bash travis/install-nnpy.sh
 
 install:
-  - ./autogen.sh
-  - if [ "$GCOV" != "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests --enable-debugger --enable-coverage; fi
-  - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests --enable-debugger; fi
-  - make all -j2
+  - docker build -t bm --build-arg IMAGE_TYPE=test --build-arg CC=$CC --build-arg CXX=$CXX --build-arg GCOV=$GCOV .
 
 script:
-  - python travis/check-nnpy.py
-  - make check
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker run $ci_env --env GCOV -w /behavioral-model bm /bin/bash -c "make check -j2 && ./travis/codecov.sh"
   - bash tools/check_style.sh
-
-# code coverage
-after_success:
-  - if [ "$GCOV" != "" ]; then (cd src/bm_sim; $GCOV -p -r -o .libs/ *.cpp; rm *third_party*); fi
-  - if [ "$GCOV" != "" ]; then bash <(curl -s https://codecov.io/bash) -x $GCOV -p src/bm_sim; fi
