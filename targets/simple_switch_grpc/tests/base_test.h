@@ -53,10 +53,25 @@ class SimpleSwitchGrpcBaseTest : public ::testing::Test {
  protected:
   explicit SimpleSwitchGrpcBaseTest(const char *p4info_proto_txt_path);
 
+  void SetUp() override;
+
+  void TearDown() override;
+
   void update_json(const char *json_path);
+
+  void set_election_id(p4::Uint128 *election_id) const;
+
+  // calls p4runtime_stub->Write, with the appropriate election_id
+  grpc::Status Write(ClientContext *context,
+                     p4::WriteRequest &request,
+                     p4::WriteResponse *response);
 
   std::shared_ptr<grpc::Channel> p4runtime_channel;
   std::unique_ptr<p4::P4Runtime::Stub> p4runtime_stub;
+  using ReaderWriter = ::grpc::ClientReaderWriter<p4::StreamMessageRequest,
+                                                  p4::StreamMessageResponse>;
+  ClientContext stream_context;
+  std::unique_ptr<ReaderWriter> stream{nullptr};
   p4::config::P4Info p4info{};
 };
 

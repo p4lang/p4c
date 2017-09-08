@@ -48,6 +48,7 @@ class SimpleSwitchGrpcTest_Basic : public SimpleSwitchGrpcBaseTest {
       : SimpleSwitchGrpcBaseTest(simple_router_proto) { }
 
   void SetUp() override {
+    SimpleSwitchGrpcBaseTest::SetUp();
     update_json(simple_router_json);
   }
 };
@@ -90,7 +91,7 @@ TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
     update->set_allocated_entity(&entity);
     ClientContext context;
     p4::WriteResponse rep;
-    auto status = p4runtime_stub->Write(&context, request, &rep);
+    auto status = Write(&context, request, &rep);
     EXPECT_TRUE(status.ok());
     update->release_entity();
   }
@@ -127,7 +128,7 @@ TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
     update->set_allocated_entity(&entity);
     ClientContext context;
     p4::WriteResponse rep;
-    auto status = p4runtime_stub->Write(&context, request, &rep);
+    auto status = Write(&context, request, &rep);
     EXPECT_TRUE(status.ok());
     update->release_entity();
   }

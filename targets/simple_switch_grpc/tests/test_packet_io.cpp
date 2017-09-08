@@ -44,6 +44,7 @@ class SimpleSwitchGrpcTest_PacketIO : public SimpleSwitchGrpcBaseTest {
       : SimpleSwitchGrpcBaseTest(loopback_proto) { }
 
   void SetUp() override {
+    SimpleSwitchGrpcBaseTest::SetUp();
     update_json(loopback_json);
   }
 };
@@ -55,8 +56,12 @@ TEST_F(SimpleSwitchGrpcTest_PacketIO, SendAndReceiveCPUPacket) {
   ClientContext context;
   auto stream = p4runtime_stub->StreamChannel(&context);
 
+  // create a new master stream
   auto arbitration = request.mutable_arbitration();
   arbitration->set_device_id(device_id);
+  auto election_id = arbitration->mutable_election_id();
+  election_id->set_high(1);
+  election_id->set_low(0);
   stream->Write(request);
 
   auto packet_out = request.mutable_packet();

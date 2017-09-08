@@ -20,6 +20,7 @@
 
 #include <grpc++/grpc++.h>
 
+#include <google/rpc/code.pb.h>
 #include <p4/tmp/p4config.grpc.pb.h>
 
 #include <fstream>
@@ -45,6 +46,29 @@ SimpleSwitchGrpcBaseTest::SimpleSwitchGrpcBaseTest(
 }
 
 void
+SimpleSwitchGrpcBaseTest::SetUp() {
+  stream = p4runtime_stub->StreamChannel(&stream_context);
+  p4::StreamMessageRequest request;
+  auto arbitration = request.mutable_arbitration();
+  arbitration->set_device_id(device_id);
+  set_election_id(arbitration->mutable_election_id());
+  stream->Write(request);
+  p4::StreamMessageResponse response;
+  stream->Read(&response);
+  ASSERT_EQ(response.update_case(), p4::StreamMessageResponse::kArbitration);
+  ASSERT_EQ(response.arbitration().status().code(), ::google::rpc::Code::OK);
+}
+
+void
+SimpleSwitchGrpcBaseTest::TearDown() {
+  stream->WritesDone();
+  p4::StreamMessageResponse response;
+  while (stream->Read(&response)) { }
+  auto status = stream->Finish();
+  EXPECT_TRUE(status.ok());
+}
+
+void
 SimpleSwitchGrpcBaseTest::update_json(const char *json_path) {
   p4::SetForwardingPipelineConfigRequest request;
   request.set_action(
@@ -65,6 +89,20 @@ SimpleSwitchGrpcBaseTest::update_json(const char *json_path) {
       &context, request, &rep);
   config->release_p4info();
   ASSERT_TRUE(status.ok());
+}
+
+void
+SimpleSwitchGrpcBaseTest::set_election_id(p4::Uint128 *election_id) const {
+  election_id->set_high(0);
+  election_id->set_low(1);
+}
+
+grpc::Status
+SimpleSwitchGrpcBaseTest::Write(ClientContext *context,
+                                p4::WriteRequest &request,
+                                p4::WriteResponse *response) {
+  set_election_id(request.mutable_election_id());
+  return p4runtime_stub->Write(context, request, response);
 }
 
 }  // namespace testing

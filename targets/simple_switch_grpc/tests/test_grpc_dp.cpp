@@ -49,6 +49,7 @@ class SimpleSwitchGrpcTest_GrpcDataplane : public SimpleSwitchGrpcBaseTest {
             dataplane_channel)) { }
 
   void SetUp() override {
+    SimpleSwitchGrpcBaseTest::SetUp();
     update_json(loopback_json);
   }
 

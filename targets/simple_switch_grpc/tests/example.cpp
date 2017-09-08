@@ -20,6 +20,7 @@
 
 #include <grpc++/grpc++.h>
 
+#include <google/rpc/code.pb.h>
 #include <p4/p4runtime.grpc.pb.h>
 #include <p4/tmp/p4config.grpc.pb.h>
 
@@ -56,6 +57,27 @@ test() {
       p4::P4Runtime::NewStub(channel));
 
   auto p4info = parse_p4info(test_proto_txt);
+
+  auto set_election_id = [](p4::Uint128 *election_id) {
+    election_id->set_high(0);
+    election_id->set_low(1);
+  };
+
+  // initial handshake: open bidirectional stream and advertise election
+  // id. This stream needs to stay open for the lifetime of the controller.
+  ClientContext stream_context;
+  auto stream = pi_stub_->StreamChannel(&stream_context);
+  {
+    p4::StreamMessageRequest request;
+    auto arbitration = request.mutable_arbitration();
+    arbitration->set_device_id(dev_id);
+    set_election_id(arbitration->mutable_election_id());
+    stream->Write(request);
+    p4::StreamMessageResponse response;
+    stream->Read(&response);
+    assert(response.update_case() == p4::StreamMessageResponse::kArbitration);
+    assert(response.arbitration().status().code() == ::google::rpc::Code::OK);
+  }
 
   {
     p4::SetForwardingPipelineConfigRequest request;
@@ -110,6 +132,7 @@ test() {
   // add entry
   {
     p4::WriteRequest request;
+    set_election_id(request.mutable_election_id());
     request.set_device_id(dev_id);
     auto update = request.add_updates();
     update->set_type(p4::Update_Type_INSERT);
@@ -147,6 +170,7 @@ test() {
   // remove entry
   {
     p4::WriteRequest request;
+    set_election_id(request.mutable_election_id());
     request.set_device_id(dev_id);
     auto update = request.add_updates();
     update->set_type(p4::Update_Type_DELETE);
@@ -162,6 +186,14 @@ test() {
   {
     auto rep = read_one();
     assert(rep.entities().size() == 0);
+  }
+
+  {
+    stream->WritesDone();
+    p4::StreamMessageResponse response;
+    while (stream->Read(&response)) { }
+    auto status = stream->Finish();
+    assert(status.ok());
   }
 
   return 0;
