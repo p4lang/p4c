@@ -118,7 +118,9 @@ enum HashAlgorithm {
     crc16,
     crc16_custom,
     random,
-    identity
+    identity,
+    csum16,
+    xor16
 }
 
 extern void mark_to_drop();
