@@ -56,7 +56,7 @@ endif ()
 find_package (Boost REQUIRED COMPONENTS iostreams)
 # otherwise ordered_map code tries to use boost::get (graph)
 add_definitions ("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
-find_package (LibGc REQUIRED)
+find_package (LibGc 7.2.0 REQUIRED)
 find_package (LibGmp REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${LIBGMP_INCLUDE_DIR})
@@ -76,9 +76,18 @@ check_include_file (execinfo.h HAVE_EXECINFO_H)
 check_include_file (ucontext.h HAVE_UCONTEXT_H)
 
 # check functions
+
+# set libraries to be used with check_function_exists
+set (CMAKE_REQUIRED_LIBRARIES_PRECHECK ${CMAKE_REQUIRED_LIBRARIES})
+set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${LIBGC_LIBRARIES})
+
 include (CheckFunctionExists)
 check_function_exists (memchr HAVE_MEMCHR)
 check_function_exists (pipe2 HAVE_PIPE2)
+check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
+
+# restore CMAKE_REQUIRED_LIBRARIES
+set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_PRECHECK})
 
 # python modules
 include (FindPythonModule)

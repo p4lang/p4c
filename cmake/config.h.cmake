@@ -16,6 +16,9 @@
 /* Define to 1 if you have the pipe2 function. */
 #cmakedefine HAVE_PIPE2 1
 
+/* Define to 1 if you have the GC_print_stats function. */
+#cmakedefine HAVE_GC_PRINT_STATS 1
+
 /* Define if you have simple switch installed */
 #cmakedefine HAVE_SIMPLE_SWITCH 1
 
