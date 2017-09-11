@@ -39,6 +39,7 @@ set (MIDEND_SRCS
   noMatch.cpp
   tableHit.cpp
   expandEmit.cpp
+  dontcareArgs.cpp
   )
 
 set (MIDEND_HDRS
@@ -72,6 +73,7 @@ set (MIDEND_HDRS
   simplifySelectList.h
   tableHit.h
   validateProperties.h
+  dontcareArgs.h
   )
 
 add_library (midend STATIC ${MIDEND_SRCS})

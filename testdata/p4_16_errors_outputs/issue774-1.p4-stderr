@@ -1,0 +1,3 @@
+issue774-1.p4(7): error: : don't care argument only allowed for out parameters
+        f(_);
+          ^

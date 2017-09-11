@@ -38,6 +38,7 @@ limitations under the License.
 #include "midend/expandLookahead.h"
 #include "midend/expandEmit.h"
 #include "midend/midEndLast.h"
+#include "midend/dontcareArgs.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -79,6 +80,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: handle bit-slices as out arguments
     addPasses({
         new P4::RemoveReturns(&refMap),
+        new P4::RemoveDontcareArgs(&refMap, &typeMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),

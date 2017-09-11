@@ -31,6 +31,7 @@ class ToP4 : public Inspector {
     int expressionPrecedence;  // precedence of current IR::Operation
     bool isDeclaration;  // current type is a declaration
     bool showIR;  // if true dump IR as comments
+    bool withinArgument;  // if true we are within a method call argument
 
     struct VecPrint {
         cstring separator;
@@ -94,6 +95,7 @@ class ToP4 : public Inspector {
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
             showIR(showIR),
+            withinArgument(false),
             builder(builder),
             outStream(nullptr),
             mainFile(mainFile)
@@ -102,6 +104,7 @@ class ToP4 : public Inspector {
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
             showIR(showIR),
+            withinArgument(false),
             builder(* new Util::SourceCodeBuilder()),
             outStream(outStream),
             mainFile(mainFile)

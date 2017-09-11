@@ -2502,7 +2502,7 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
             auto arg0 = em->expr->arguments->at(0);
             auto argType = typeMap->getType(arg0, true);
-            if (!argType->is<IR::Type_Header>()) {
+            if (!argType->is<IR::Type_Header>() && !argType->is<IR::Type_Dontcare>()) {
                 typeError("%1%: argument must be a header", em->expr->arguments->at(0));
                 return;
             }

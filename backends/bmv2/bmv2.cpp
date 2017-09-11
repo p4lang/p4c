@@ -67,6 +67,9 @@ int main(int argc, char *const argv[]) {
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
+        if (::errorCount() > 1 || toplevel == nullptr ||
+            toplevel->getMain() == nullptr)
+            return 1;
         if (options.dumpJsonFile)
             JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
     } catch (const Util::P4CExceptionBase &bug) {

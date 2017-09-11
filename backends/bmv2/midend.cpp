@@ -52,6 +52,7 @@ limitations under the License.
 #include "midend/expandEmit.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
+#include "midend/dontcareArgs.h"
 #include "synthesizeValidField.h"
 
 namespace BMV2 {
@@ -87,6 +88,7 @@ MidEnd::MidEnd(BMV2Options& options) {
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
         new P4::RemoveReturns(&refMap),
+        new P4::RemoveDontcareArgs(&refMap, &typeMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),

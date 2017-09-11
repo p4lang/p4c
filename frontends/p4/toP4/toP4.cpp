@@ -658,7 +658,11 @@ bool ToP4::preorder(const IR::Slice* slice) {
 }
 
 bool ToP4::preorder(const IR::DefaultExpression*) {
-    builder.append("default");
+    // Within a method call this is rendered as a don't care
+    if (withinArgument)
+        builder.append("_");
+    else
+        builder.append("default");
     return false;
 }
 
@@ -774,7 +778,9 @@ bool ToP4::preorder(const IR::MethodCallExpression* e) {
     builder.append("(");
     setVecSep(", ");
     expressionPrecedence = DBPrint::Prec_Low;
+    withinArgument = true;
     visit(e->arguments);
+    withinArgument = false;
     doneVec();
     builder.append(")");
     if (useParens)

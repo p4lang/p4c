@@ -946,6 +946,7 @@ nonEmptyArgList
 
 argument
     : expression                         { $$ = $1; }
+    | "_"                                { $$ = new IR::DefaultExpression(@1); }
     ;
 
 expressionList
