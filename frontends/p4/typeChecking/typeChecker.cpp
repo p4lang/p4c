@@ -2600,9 +2600,10 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         if (tvs == nullptr)
             return expression;
 
-        LOG2("Method type before specialization " << methodType);
+        LOG2("Method type before specialization " << methodType << " with " << tvs);
         TypeVariableSubstitutionVisitor substVisitor(tvs);
         auto specMethodType = methodType->apply(substVisitor);
+        LOG2("Method type after specialization " << specMethodType);
 
         // construct types for the specMethodType, use a new typeChecker
         // that uses the same tables!
@@ -2615,7 +2616,6 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         auto functionType = specMethodType->to<IR::Type_MethodBase>();
         BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
-        LOG2("Method type after specialization " << specMethodType);
 
         if (!functionType->is<IR::Type_Method>())
             BUG("Unexpected type for function %1%", functionType);

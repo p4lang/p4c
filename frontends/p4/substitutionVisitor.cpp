@@ -35,7 +35,7 @@ const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tp
     for (auto it = tps->parameters.begin(); it != tps->parameters.end();) {
         const IR::Type* type = bindings->lookup(*it);
         if (type != nullptr && !replace) {
-            LOG1("Removing from generic parameters " << *it);
+            LOG3("Removing from generic parameters " << *it);
             it = tps->parameters.erase(it);
         } else {
             if (type != nullptr)
@@ -47,22 +47,25 @@ const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tp
     return tps;
 }
 
-const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_Var* typeVariable) {
-    LOG1("Visiting " << dbp(getOriginal()));
-    const IR::Type* type = bindings->lookup(getOriginal<IR::Type_Var>());
-    if (type == nullptr)
-        return typeVariable;
-    LOG1("Replacing " << getOriginal() << " with " << type);
-    return type;
-}
-
-const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_InfInt* typeVariable) {
-    LOG1("Visiting " << dbp(getOriginal()));
-    const IR::Type* type = bindings->lookup(getOriginal<IR::Type_InfInt>());
-    if (type == nullptr)
-        return typeVariable;
-    LOG1("Replacing " << getOriginal() << " with " << type);
-    return type;
+const IR::Node* TypeVariableSubstitutionVisitor::replacement(IR::ITypeVar* typeVariable) {
+    LOG3("Visiting " << dbp(getOriginal()));
+    const IR::ITypeVar* current = getOriginal<IR::ITypeVar>();
+    const IR::Type* replacement = nullptr;
+    while (true) {
+        // This will end because there should be no circular chain of variables pointing
+        // to each other.
+        const IR::Type* type = bindings->lookup(current);
+        if (type == nullptr)
+            break;
+        replacement = type;
+        if (!type->is<IR::ITypeVar>())
+            break;
+        current = type->to<IR::ITypeVar>();
+    }
+    if (replacement == nullptr)
+        return typeVariable->getNode();
+    LOG2("Replacing " << getOriginal() << " with " << replacement);
+    return replacement;
 }
 
 const IR::Node* TypeNameSubstitutionVisitor::preorder(IR::Type_Name* typeName) {
