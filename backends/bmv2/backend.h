@@ -120,6 +120,8 @@ class Backend : public PassManager {
     P4::TypeMap*          getTypeMap()   { return typeMap; }
     P4V1::SimpleSwitch*   getSimpleSwitch()        { return simpleSwitch; }
     const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
+    /// True if this parameter represents the standard_metadata input.
+    bool isStandardMetadataParameter(const IR::Parameter* param);
 };
 
 }  // namespace BMV2

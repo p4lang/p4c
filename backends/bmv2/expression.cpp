@@ -228,8 +228,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
-        // hanw: need a function isStandardMetadata();
-        if (param->type->toString() == "standard_metadata_t") {
+        if (backend->isStandardMetadataParameter(param)) {
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");
             e->append(BMV2::V1ModelProperties::jsonMetadataParameterName);

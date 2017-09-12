@@ -681,6 +681,42 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
     map->emplace(egress_name, "egress");
 }
 
+const IR::P4Control* SimpleSwitch::getIngress(const IR::ToplevelBlock* blk) {
+    auto main = blk->getMain();
+    auto ctrl = main->findParameterValue(v1model.sw.ingress.name);
+    if (ctrl == nullptr)
+        return nullptr;
+    if (!ctrl->is<IR::ControlBlock>()) {
+        modelError("%1%: main package  match the expected model", main);
+        return nullptr;
+    }
+    return ctrl->to<IR::ControlBlock>()->container;
+}
+
+const IR::P4Control* SimpleSwitch::getEgress(const IR::ToplevelBlock* blk) {
+    auto main = blk->getMain();
+    auto ctrl = main->findParameterValue(v1model.sw.egress.name);
+    if (ctrl == nullptr)
+        return nullptr;
+    if (!ctrl->is<IR::ControlBlock>()) {
+        modelError("%1%: main package  match the expected model", main);
+        return nullptr;
+    }
+    return ctrl->to<IR::ControlBlock>()->container;
+}
+
+const IR::P4Parser* SimpleSwitch::getParser(const IR::ToplevelBlock* blk) {
+    auto main = blk->getMain();
+    auto ctrl = main->findParameterValue(v1model.sw.parser.name);
+    if (ctrl == nullptr)
+        return nullptr;
+    if (!ctrl->is<IR::ParserBlock>()) {
+        modelError("%1%: main package  match the expected model", main);
+        return nullptr;
+    }
+    return ctrl->to<IR::ParserBlock>()->container;
+}
+
 void
 SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
                                      std::set<cstring>* controls) {

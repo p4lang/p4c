@@ -170,21 +170,21 @@ class CFG final : public IHasDbPrint {
              std::set<const IR::P4Table*> &stack) const;
 };
 
-// Represents global information about a P4 v1.2 program
+// Represents global information about a P4-16 program.
 class ProgramParts {
  public:
-    // map action to parent
+    /// Map action to parent control.
     ordered_map<const IR::P4Action*, const IR::P4Control*> actions;
-    // Maps each Parameter of an action to its positional index.
-    // Needed to generate code for actions.
+    /// Maps each Parameter of an action to its positional index.
+    /// Needed to generate code for actions.
     ordered_map<const IR::Parameter*, unsigned> index;
-    // Parameters of controls/parsers
+    /// Parameters of controls/parsers
     ordered_set<const IR::Parameter*> nonActionParameters;
-    // for each action its json id
+    /// For each action its json id.
     ordered_map<const IR::P4Action*, unsigned> ids;
-    // All local variables
+    /// All local variables.
     std::vector<const IR::Declaration_Variable*> variables;
-    // All the parsers
+    /// All the parsers.
     std::vector<const IR::P4Parser *> parsers;
 
     ProgramParts() {}
