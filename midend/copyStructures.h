@@ -54,10 +54,14 @@ namespace P4 {
  */
 class DoCopyStructures : public Transform {
     TypeMap* typeMap;
-    bool ignoreMethods;
+    /* Specific targets may allow functions or methods to return structs.
+     * Such methods will not be converted in this pass. Setting the
+     * errorOnMethodCall flag will produce an error message if such a
+     * method is encountered. */
+    bool errorOnMethodCall;
  public:
-    explicit DoCopyStructures(TypeMap* typeMap, bool ignoreMethods) :
-            typeMap(typeMap), ignoreMethods(ignoreMethods)
+    explicit DoCopyStructures(TypeMap* typeMap, bool errorOnMethodCall) :
+            typeMap(typeMap), errorOnMethodCall(errorOnMethodCall)
     { CHECK_NULL(typeMap); setName("DoCopyStructures"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
 };
@@ -65,11 +69,11 @@ class DoCopyStructures : public Transform {
 class CopyStructures : public PassRepeated {
  public:
     CopyStructures(ReferenceMap* refMap, TypeMap* typeMap,
-                   bool ignoreMethods = false) :
+                   bool errorOnMethodCall = true) :
             PassManager({}) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("CopyStructures");
         passes.emplace_back(new TypeChecking(refMap, typeMap));
-        passes.emplace_back(new DoCopyStructures(typeMap, ignoreMethods));
+        passes.emplace_back(new DoCopyStructures(typeMap, errorOnMethodCall));
     }
 };
 
