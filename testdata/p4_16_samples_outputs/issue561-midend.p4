@@ -21,12 +21,12 @@ control c(out bit<32> x) {
         x = u.h1.f + u.h2.g;
         u.h1.setValid();
         u.h1.f = 32w0;
-        x = x + u.h1.f;
+        x = x + 32w0;
         u.h2.g = 32w0;
-        x = x + u.h2.g;
+        x = x + 32w0;
         u2[0].h1.setValid();
         u2[0].h1.f = 32w2;
-        x = x + u2[1].h2.g + u2[0].h1.f;
+        x = x + u2[1].h2.g + 32w2;
     }
     @hidden table tbl_act {
         actions = {

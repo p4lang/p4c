@@ -22,7 +22,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.egress_port = smeta_1.egress_port;
         smeta.clone_spec = smeta_1.clone_spec;
         smeta.instance_type = smeta_1.instance_type;
-        smeta.drop = smeta_1.drop;
+        smeta.drop = 1w1;
         smeta.recirculate_port = smeta_1.recirculate_port;
         smeta.packet_length = smeta_1.packet_length;
         smeta.enq_timestamp = smeta_1.enq_timestamp;

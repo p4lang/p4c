@@ -63,12 +63,17 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     bool                                need_key_rewrite = false;
     DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
+    bool name_overlap(cstring, cstring);
+    void forOverlapAvail(cstring, std::function<void(VarInfo *)>);
     void dropValuesUsing(cstring);
 
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     IR::Expression *preorder(IR::Expression *m) override;
+    const IR::Expression *copyprop_name(cstring name);
     const IR::Expression *postorder(IR::PathExpression *) override;
+    const IR::Expression *preorder(IR::Member *) override;
+    const IR::Expression *preorder(IR::ArrayIndex *) override;
     IR::Statement *preorder(IR::Statement *) override;
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;

@@ -77,14 +77,11 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @hidden action act_0() {
         qArg1.field1 = p1_tArg1_0.field1;
-        qArg1.drop = p1_tArg1_0.drop;
-        p1_tArg1_0.field1 = qArg1.field1;
         p1_tArg1_0.drop = qArg1.drop;
         p1_aArg2_0.field2 = qArg2.field2;
     }
     @hidden action act_1() {
         qArg1.field1 = p1_tArg1_0.field1;
-        qArg1.drop = p1_tArg1_0.drop;
     }
     @hidden table tbl_act {
         actions = {

@@ -132,13 +132,34 @@ void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
     need_key_rewrite |= a.need_key_rewrite;
 }
 
+/// test to see if names denote overlapping locations
+bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
+    if (name1 == name2) return true;
+    if (name1.startsWith(name2) && strchr(".[", name1.get(name2.size())))
+        return true;
+    if (name2.startsWith(name1) && strchr(".[", name2.get(name1.size())))
+        return true;
+    return false;
+}
+
+void DoLocalCopyPropagation::forOverlapAvail(cstring name, std::function<void(VarInfo *)> fn) {
+    for (const char *pfx = name.c_str(); *pfx; pfx += strspn(pfx, ".[")) {
+        pfx += strcspn(pfx, ".[");
+        if (auto var = ::getref(available, name.before(pfx)))
+            fn(var); }
+    for (auto it = available.upper_bound(name); it != available.end(); ++it) {
+        if (!it->first.startsWith(name) || !strchr(".[", it->first.get(name.size())))
+            break;
+        fn(&it->second); }
+}
+
 void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
     LOG6("dropValuesUsing(" << name << ")");
     for (auto &var : available) {
         LOG7("  checking " << var.first << " = " << var.second.val);
-        if (var.first == name) {
-            LOG4("   dropping " << (var.second.val ? "" : "(nop) ") << name <<
-                 " as it is being assigned to");
+        if (name_overlap(var.first, name)) {
+            LOG4("   dropping " << (var.second.val ? "" : "(nop) ") << "as " << name <<
+                 " is being assigned to");
             var.second.val = nullptr;
         } else if (var.second.val && exprUses(var.second.val, name)) {
             LOG4("   dropping " << (var.second.val ? "" : "(nop) ") << var.first <<
@@ -171,37 +192,79 @@ IR::Expression *DoLocalCopyPropagation::preorder(IR::Expression *exp) {
     return exp;
 }
 
-const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
+const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
+    if (!name) return nullptr;
     if (inferForTable) {
         const Visitor::Context *ctxt = nullptr;
         if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1)
-            inferForTable->keyreads.insert(path->path->name); }
-    if (!working) return path;
+            inferForTable->keyreads.insert(name); }
+    if (!working) return nullptr;
     if (isWrite()) {
-        dropValuesUsing(path->path->name);
+        dropValuesUsing(name);
         if (inferForFunc)
-            inferForFunc->writes.insert(path->path->name);
+            inferForFunc->writes.insert(name);
         if (isRead() || findContext<IR::MethodCallExpression>()) {
             /* If this is being used as an 'out' param of a method call, its not really
              * read, but we can't dead-code eliminate it without eliminating the entire
              * call, so we mark it as live.  Unfortunate as we then won't dead-code
              * remove other assignmnents. */
-            if (auto var = ::getref(available, path->path->name)) {
-                LOG4("  using " << path->path->name << " in read-write");
-                var->live = true; }
+            forOverlapAvail(name, [name](VarInfo *var) {
+                LOG4("  using " << name << " in read-write");
+                var->live = true; });
             if (inferForFunc)
-                inferForFunc->reads.insert(path->path->name); }
-        return path; }
-    if (auto var = ::getref(available, path->path->name)) {
+                inferForFunc->reads.insert(name); }
+        return nullptr; }
+    if (auto var = ::getref(available, name)) {
         if (var->val) {
-            LOG3("  propagating value for " << path->path->name << ": " << var->val);
+            LOG3("  propagating value for " << name << ": " << var->val);
             return var->val;
         } else {
-            LOG4("  using " << path->path->name << " with no propagated value");
+            LOG4("  using " << name << " with no propagated value");
             var->live = true; } }
+    forOverlapAvail(name, [name](VarInfo *var) {
+        LOG4("  using part of " << name);
+        var->live = true; });
     if (inferForFunc)
-        inferForFunc->reads.insert(path->path->name);
-    return path;
+        inferForFunc->reads.insert(name);
+    return nullptr;
+}
+
+const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
+    auto rv = copyprop_name(path->path->name);
+    return rv ? rv : path;
+}
+
+/// convert an expression into a string that uniqely identifies the value referenced
+/// return null cstring if not a reference to a constant thing.
+static cstring expr_name(const IR::Expression *exp) {
+    if (auto p = exp->to<IR::PathExpression>())
+        return p->path->name;
+    if (auto m = exp->to<IR::Member>()) {
+        if (auto base = expr_name(m->expr))
+            return base + "." + m->member;
+    } else if (auto a = exp->to<IR::ArrayIndex>()) {
+        if (auto k = a->right->to<IR::Constant>())
+            if (auto base = expr_name(a->left))
+                return base + "." + std::to_string(k->asInt()); }
+    return cstring();
+}
+
+const IR::Expression *DoLocalCopyPropagation::preorder(IR::Member *member) {
+    visitAgain();
+    if (auto name = expr_name(member)) {
+        prune();
+        if (auto rv = copyprop_name(name))
+            return rv; }
+    return member;
+}
+
+const IR::Expression *DoLocalCopyPropagation::preorder(IR::ArrayIndex *arr) {
+    visitAgain();
+    if (auto name = expr_name(arr)) {
+        prune();
+        if (auto rv = copyprop_name(name))
+            return rv; }
+    return arr;
 }
 
 IR::Statement *DoLocalCopyPropagation::preorder(IR::Statement *s) {
@@ -273,20 +336,24 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     if (equiv(as->left, as->right)) {
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
+    // FIXME -- if as->right is an uninitialized value, we could legally eliminate this
+    // assignment, which would simplify (and minimize) the code.  This could be a separate
+    // pass, but doing it here would mesh nicely with ElimDead, and we have (or could
+    // compute) the necessary info for local vars.
     if (!working) return as;
-    if (auto dest = as->left->to<IR::PathExpression>()) {
+    if (auto dest = expr_name(as->left)) {
         if (!hasSideEffects(as->right)) {
             if (as->right->is<IR::ListExpression>()) {
                 /* FIXME -- List Expressions need to be turned into constructor calls before
                  * we can copyprop them */
                 return as; }
-            if (exprUses(as->right, dest->path->name)) {
+            if (exprUses(as->right, dest)) {
                 /* can't propagate the value as it is defined in terms of itself.
                  * FIXME -- we could propagate if we introduced a new temp, but that
                  * may make things worse rather than better */
                 return as; }
-            LOG3("  saving value for " << dest->path->name << ": " << as->right);
-            available[dest->path->name].val = as->right; }
+            LOG3("  saving value for " << dest << ": " << as->right);
+            available[dest].val = as->right; }
     } else {
         LOG3("dest of assignment is " << as->left << " so skipping");
     }
@@ -316,13 +383,13 @@ IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
 IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!working) return mc;
     if (auto mem = mc->method->to<IR::Member>()) {
-        if (auto obj = mem->expr->to<IR::PathExpression>()) {
-            if (tables.count(obj->path->name)) {
+        if (auto obj = expr_name(mem->expr)) {
+            if (tables.count(obj)) {
                 LOG3("table apply method call " << mc->method);
-                apply_table(&tables[obj->path->name]);
+                apply_table(&tables[obj]);
                 return mc;
-            } else if (obj->type->is<IR::Type_Extern>()) {
-                auto name = obj->path->name + '.' + mem->member;
+            } else if (mem->expr->type->is<IR::Type_Extern>()) {
+                auto name = obj + '.' + mem->member;
                 if (methods.count(name)) {
                     LOG3("concrete method call " << name);
                     apply_function(&methods[name]);
@@ -331,7 +398,31 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     LOG3("extern method call " << mc->method << " does nothing");
                     // FIXME -- is this safe? If an abstract method in outer scope that
                     // we haven't seen a definition for, it might affects non-locals?
-                    return mc; } } } }
+                    return mc; }
+            } else if (mem->expr->type->is<IR::Type_Header>()) {
+                if (mem->member == "isValid") {
+                    forOverlapAvail(obj, [obj](VarInfo *var) {
+                        LOG4("  using " << obj << " (isValid)");
+                        var->live = true; });
+                    if (inferForFunc)
+                        inferForFunc->reads.insert(obj);
+                } else {
+                    BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid",
+                              "Unexpected header method %s", mem->member);
+                    LOG3("header method call " << mc->method << " writes to " << obj);
+                    dropValuesUsing(obj);
+                    if (inferForFunc)
+                        inferForFunc->writes.insert(obj); }
+            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+                BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
+                          "Unexpected stack method %s", mem->member);
+                dropValuesUsing(obj);
+                forOverlapAvail(obj, [obj](VarInfo *var) {
+                    LOG4("  using " << obj << " (push/pop)");
+                    var->live = true; });
+                if (inferForFunc) {
+                    inferForFunc->reads.insert(obj);
+                    inferForFunc->writes.insert(obj); } } } }
     if (auto fn = mc->method->to<IR::PathExpression>()) {
         if (actions.count(fn->path->name)) {
             LOG3("action method call " << mc->method);
@@ -346,6 +437,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
 }
 
 IR::P4Action *DoLocalCopyPropagation::preorder(IR::P4Action *act) {
+    visitOnce();
     BUG_CHECK(!working && !inferForFunc && available.empty(), "corrupt internal data struct");
     working = true;
     inferForFunc = &actions[act->name];
@@ -369,6 +461,7 @@ IR::P4Action *DoLocalCopyPropagation::postorder(IR::P4Action *act) {
 }
 
 IR::Function *DoLocalCopyPropagation::preorder(IR::Function *fn) {
+    visitOnce();
     BUG_CHECK(!working && !inferForFunc && available.empty(), "corrupt internal data struct");
     auto name = findContext<IR::Declaration_Instance>()->name + '.' + fn->name;
     working = true;
@@ -394,6 +487,7 @@ IR::Function *DoLocalCopyPropagation::postorder(IR::Function *fn) {
 }
 
 IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
+    visitOnce();
     BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
     visit(ctrl->type, "type");
     visit(ctrl->constructorParams, "constructorParams");
@@ -425,14 +519,14 @@ void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *ac
     for (auto write : act->writes)
         dropValuesUsing(write);
     for (auto read : act->reads)
-        if (auto var = ::getref(available, read))
-            var->live = true;
+        forOverlapAvail(read, [](VarInfo *var) {
+            var->live = true; });
 }
 
 void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
     ++tbl->apply_count;
     for (auto key : tbl->keyreads) {
-        if (auto var = ::getref(available, key)) {
+        forOverlapAvail(key, [key, tbl, this](VarInfo *var) {
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
                     (!tbl->key_remap.count(key) || *tbl->key_remap.at(key) != *var->val)) {
@@ -448,12 +542,13 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                 tbl->key_remap.erase(key);
                 LOG4("  table using " << key << " with " <<
                      (var->val ? "value to complex for key" : "no propagated value"));
-                var->live = true; } } }
+                var->live = true; } }); }
     for (auto action : tbl->actions)
         apply_function(&actions[action]);
 }
 
 IR::P4Table *DoLocalCopyPropagation::preorder(IR::P4Table *tbl) {
+    visitOnce();
     BUG_CHECK(!inferForTable, "corrupt internal data struct");
     inferForTable = &tables[tbl->name];
     inferForTable->keyreads.clear();
