@@ -54,19 +54,22 @@ namespace P4 {
  */
 class DoCopyStructures : public Transform {
     TypeMap* typeMap;
+    bool ignoreMethods;
  public:
-    explicit DoCopyStructures(TypeMap* typeMap) : typeMap(typeMap)
+    explicit DoCopyStructures(TypeMap* typeMap, bool ignoreMethods) :
+            typeMap(typeMap), ignoreMethods(ignoreMethods)
     { CHECK_NULL(typeMap); setName("DoCopyStructures"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
 };
 
 class CopyStructures : public PassRepeated {
  public:
-    CopyStructures(ReferenceMap* refMap, TypeMap* typeMap) :
+    CopyStructures(ReferenceMap* refMap, TypeMap* typeMap,
+                   bool ignoreMethods = false) :
             PassManager({}) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("CopyStructures");
         passes.emplace_back(new TypeChecking(refMap, typeMap));
-        passes.emplace_back(new DoCopyStructures(typeMap));
+        passes.emplace_back(new DoCopyStructures(typeMap, ignoreMethods));
     }
 };
 
