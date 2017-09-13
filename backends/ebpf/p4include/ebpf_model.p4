@@ -19,20 +19,42 @@ limitations under the License.
 
 #include <core.p4>
 
+/**
+   A counter array is a dense or sparse array of unsigned 32-bit values, visible to the
+   control-plane as an EBPF map (array or hash).
+   Each counter is addressed by a 32-bit index.
+   Counters can only be incremented by the data-plane, but they can be read or
+   reset by the control-plane.
+ */
 extern CounterArray {
-    /* Allocate an array of counters.
-     * @param size    Maximum counter index supported.
-     * @param sparse  The counter array is supposed to be sparse. */
+    /** Allocate an array of counters.
+     * @param max_index  Maximum counter index supported.
+     * @param sparse     The counter array is supposed to be sparse. */
     CounterArray(bit<32> max_index, bool sparse);
-    /* Increment counter with specified index. */
+    /** Increment counter with specified index. */
     void increment(in bit<32> index);
 }
 
+/*
+ Each table must have an implementation property which is either an array_table
+ or a hash_table.
+*/
+
+/**
+ Implementation property for tables indicating that tables must be implemented
+ using EBPF array map.
+*/
 extern array_table {
+    /// @param size: maximum number of entries in table
     array_table(bit<32> size);
 }
 
+/**
+ Implementation property for tables indicating that tables must be implemented
+ using EBPF hash map.
+*/
 extern hash_table {
+    /// @param size: maximum number of entries in table
     hash_table(bit<32> size);
 }
 

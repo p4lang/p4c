@@ -390,10 +390,10 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block,
                                    cstring name, CodeGenInspector* codeGen) :
         EBPFTableBase(program, name, codeGen) {
-    auto sz = block->getParameterValue(program->model.counterArray.size.name);
+    auto sz = block->getParameterValue(program->model.counterArray.max_index.name);
     if (sz == nullptr || !sz->is<IR::Constant>()) {
         ::error("Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
-                program->model.counterArray.size, name);
+                program->model.counterArray.max_index, name);
         return;
     }
     auto cst = sz->to<IR::Constant>();
