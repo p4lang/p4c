@@ -1230,15 +1230,20 @@ getDigestCall(const IR::MethodCallExpression* call,
     // An invocation of digest() looks like this:
     //   digest<T>(receiver, { fields });
     // The name that shows up in the control plane API is the type name T.
-    auto typeArg = call->typeArguments->at(0);
-    if (!typeArg->is<IR::Type_Name>()) {
-        ::error("%1%: Expected type name", typeArg);
-        return boost::none;
-    }
-
-    auto type = refMap->getDeclaration(typeArg->to<IR::Type_Name>()->path, true);
-    if (!type->is<IR::Type_Struct>()) {
-        ::error("%1%: Expected a struct type", type);
+    const IR::Type_StructLike* structType = nullptr;
+    auto* typeArg = call->typeArguments->at(0);
+    if (typeArg->is<IR::Type_StructLike>()) {
+        structType = typeArg->to<IR::Type_StructLike>();
+    } else if (auto* typeName = typeArg->to<IR::Type_Name>()) {
+        auto* referencedType = refMap->getDeclaration(typeName->path, true);
+        if (!referencedType || !referencedType->is<IR::Type_StructLike>()) {
+            ::error("digest() is instantiated with an unexpected "
+                    "type name: %1%", typeArg);
+            return boost::none;
+        }
+        structType = referencedType->to<IR::Type_StructLike>();
+    } else {
+        ::error("digest() is instantiated with an unexpected type: %1%", typeArg);
         return boost::none;
     }
 
@@ -1286,7 +1291,7 @@ getDigestCall(const IR::MethodCallExpression* call,
         return boost::none;
     }
 
-    return Digest{type->to<IR::Type_Struct>()->controlPlaneName(),
+    return Digest{structType->controlPlaneName(),
                   receiver->to<IR::Constant>()->value.get_ui(),
                   std::move(fields)};
 }
