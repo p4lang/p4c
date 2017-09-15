@@ -38,6 +38,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
   gtest/exception_test.cpp
+  gtest/expr_uses_test.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
   gtest/json_test.cpp

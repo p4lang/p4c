@@ -78,11 +78,11 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     @name("reg") register<bit<32>>(32w1) reg;
     @name("test") action test_0() {
         val.field1 = 32w0;
-        tmp_1 = (val.field1 != 32w0 ? 32w1 : tmp_1);
-        tmp_1 = (!(val.field1 != 32w0) ? 32w0 : tmp_1);
+        tmp_1 = tmp_1;
+        tmp_1 = 32w0;
         inc = tmp_1;
-        tmp_2 = (val.field1 != 32w0 ? 32w1 : tmp_2);
-        tmp_2 = (!(val.field1 != 32w0) ? 32w0 : tmp_2);
+        tmp_2 = tmp_2;
+        tmp_2 = 32w0;
         debug.write(32w0, tmp_2);
         debug.write(32w1, inc);
         val.field1 = 32w1;
