@@ -30,6 +30,10 @@ set (CMAKE_USE_RELATIVE_PATHS 1)
 
 OPTION (ENABLE_DOCS "Build the documentation" OFF)
 OPTION (ENABLE_P4RUNTIME_TO_PD "Build the P4Runtime PD Generator" ON)
+OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON)
+OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
+OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
+OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 
 include(P4CUtils)
 
@@ -202,18 +206,24 @@ add_subdirectory (midend)
 add_subdirectory (control-plane)
 
 
+add_subdirectory (test)
+
+if (ENABLE_BMV2)
 add_subdirectory (backends/bmv2)
+endif ()
+if (ENABLE_EBPF)
 add_subdirectory (backends/ebpf)
+endif ()
+if (ENABLE_P4TEST)
 add_subdirectory (backends/p4test)
-if (HAVE_LIBBOOST_GRAPH EQUAL 1)
+endif ()
+if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
   add_subdirectory (backends/graphs)
 endif ()
 
 if (ENABLE_P4RUNTIME_TO_PD)
   add_subdirectory (p4runtime-to-pd)
 endif()
-
-add_subdirectory (test)
 
 # IR Generation
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)

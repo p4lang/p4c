@@ -116,3 +116,10 @@ if (HAVE_SIMPLE_SWITCH)
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding BMv2 tests")
 endif()
+
+set (GTEST_BMV2_SOURCES
+  ${CMAKE_SOURCE_DIR}/test/gtest/bmv2_isvalid.cpp
+  )
+
+set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BMV2_SOURCES} PARENT_SCOPE)
+set (GTEST_LDADD ${GTEST_LDADD} bmv2backend PARENT_SCOPE)
