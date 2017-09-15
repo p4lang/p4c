@@ -229,8 +229,6 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields) {
-            BUG(f->type->is<Type_Name>(),
-                "Type_Name %1% is not a canonical type, use getTypeType()?", f);
             rv += f->type->width_bits();
         }
         return rv; }
@@ -321,6 +319,10 @@ class Type_Name : Type {
     toString{ return path->name; }
     dbprint{ out << path->toString(); }
     const Type* getP4Type() const override { return this; }
+    int width_bits() const override {
+        BUG_CHECK(f->type->is<Type_Name>(),
+            "Type_Name %1% is not a canonical type, use getTypeType()?", f);
+    }
 }
 
 class Type_Stack : Type {
