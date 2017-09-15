@@ -228,8 +228,9 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
         return fields.getDeclaration<StructField>(name); }
     int width_bits() const override {
         int rv = 0;
-        for (auto f : fields)
+        for (auto f : fields) {
             rv += f->type->width_bits();
+        }
         return rv; }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return fields.getDeclaration(name); }
@@ -318,6 +319,10 @@ class Type_Name : Type {
     toString{ return path->name; }
     dbprint{ out << path->toString(); }
     const Type* getP4Type() const override { return this; }
+    int width_bits() const override {
+        BUG("Type_Name is not a canonical type, use getTypeType()?");
+        return 0;
+    }
 }
 
 class Type_Stack : Type {
