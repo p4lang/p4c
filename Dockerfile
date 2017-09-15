@@ -18,6 +18,7 @@ ENV P4C_DEPS bison \
              flex \
              g++ \
              libboost-dev \
+             libboost-graph-dev \
              libboost-iostreams1.58-dev \
              libfl-dev \
              libgc-dev \
@@ -28,6 +29,7 @@ ENV P4C_DEPS bison \
              python-setuptools \
              tcpdump
 ENV P4C_RUNTIME_DEPS cpp \
+                     libboost-graph1.58.0 \
                      libboost-iostreams1.58.0 \
                      libgc1c2 \
                      libgmp10 \
