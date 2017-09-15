@@ -33,7 +33,6 @@ add_library(gtest ${GTEST_ROOT}/src/gtest-all.cc)
 set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp
   gtest/bitvec_test.cpp
-  gtest/bmv2_isvalid.cpp
   gtest/call_graph_test.cpp
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
@@ -64,7 +63,7 @@ set (GTESTP4C_SOURCES
 # Makefiles can add libraries to $(GTEST_LDADD) to include them in the test
 # executable.
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
-target_link_libraries (gtestp4c ${GTEST_LDADD} bmv2backend ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
+target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
 
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
