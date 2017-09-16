@@ -48,7 +48,7 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
           --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
           --python_out ${CMAKE_CURRENT_BINARY_DIR}
           ${P4RUNTIME_PROTO}
-  COMMENT "Genrating protobuf files"
+  COMMENT "Generating protobuf files"
   )
 
 # These macros are much nicer than the custom command, but do not work for generating
