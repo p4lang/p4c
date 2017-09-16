@@ -214,9 +214,6 @@ add_subdirectory (frontends)
 add_subdirectory (midend)
 add_subdirectory (control-plane)
 
-
-add_subdirectory (test)
-
 if (ENABLE_BMV2)
     add_subdirectory (backends/bmv2)
 endif ()
@@ -229,10 +226,11 @@ endif ()
 if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
   add_subdirectory (backends/graphs)
 endif ()
-
 if (ENABLE_P4RUNTIME_TO_PD)
   add_subdirectory (p4runtime-to-pd)
 endif()
+
+add_subdirectory (test)
 
 # IR Generation
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)

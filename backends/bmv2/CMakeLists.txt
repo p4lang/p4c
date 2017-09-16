@@ -120,7 +120,7 @@ else()
 endif()
 
 set (GTEST_BMV2_SOURCES
-  ${CMAKE_SOURCE_DIR}/test/gtest/bmv2_isvalid.cpp
+  ${P4C_SOURCE_DIR}/test/gtest/bmv2_isvalid.cpp
   )
 
 set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BMV2_SOURCES} PARENT_SCOPE)
