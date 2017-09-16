@@ -76,6 +76,25 @@ static bool isControllerHeader(const IR::Type_Header* type) {
     return type->getAnnotation("controller_header") != nullptr;
 }
 
+/// @return the value of @item's explicit name annotation, if it has one. We use
+/// this rather than e.g. controlPlaneName() when we want to prevent any
+/// fallback.
+static boost::optional<cstring>
+explicitNameAnnotation(const IR::IAnnotated* item) {
+    auto* anno = item->getAnnotation(IR::Annotation::nameAnnotation);
+    if (!anno) return boost::none;
+    if (anno->expr.size() != 1) {
+        ::error("A %1% annotation must have one argument", anno);
+        return boost::none;
+    }
+    auto* str = anno->expr[0]->to<IR::StringLiteral>();
+    if (!str) {
+        ::error("An %1% annotation's argument must be a string", anno);
+        return boost::none;
+    }
+    return str->value;
+}
+
 /**
  * A path through a sequence of P4 data structures (headers, header stacks,
  * structs, etc.). This is used to represent fully-qualified external names for
@@ -1490,11 +1509,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
                                             keyElement->matchType);
         const auto matchTypeName = matchTypeDecl->name.name;
 
-        auto expr = keyElement->expression;
-        if (expr->is<IR::Slice>()) {
-            expr = expr->to<IR::Slice>()->e0;
-        }
-
         MatchField::MatchType matchType;
         if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
             matchType = MatchField::MatchTypes::EXACT;
@@ -1522,26 +1536,17 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             break;
         }
 
-        auto path = HeaderFieldPath::from(expr, refMap, typeMap);
-        if (!path) {
-            ::error("Table '%1%': Match field '%2%' is too complicated "
-                    "to represent in P4Runtime", table->controlPlaneName(), expr);
-            break;
-        }
+        auto matchFieldName = explicitNameAnnotation(keyElement);
+        BUG_CHECK(bool(matchFieldName), "Table '%1%': Match field '%2%' has no "
+                  "@name annotation", table->controlPlaneName(),
+                  keyElement->expression);
+        auto* matchFieldType =
+          typeMap->getType(keyElement->expression->getNode(), true);
+        BUG_CHECK(matchFieldType != nullptr,
+                  "Couldn't determine type for key element %1%", keyElement);
 
-        // XXX(seth): If there's only one component in the path, then it represents
-        // a local variable. We need to support locals to support complex
-        // expressions in keys, because such expressions are desugared into a match
-        // against an intermediate local, but before implementing anything we need
-        // to decide how it makes sense to present something like that in P4Runtime.
-        if (!path->parent) {
-            ::error("Table '%1%': Match field '%2%' references a local",
-                    table->controlPlaneName(), expr);
-            break;
-        }
-
-        matchFields.push_back(MatchField{path->serialize(), matchType,
-                                         uint32_t(path->type->width_bits()),
+        matchFields.push_back(MatchField{*matchFieldName, matchType,
+                                         uint32_t(matchFieldType->width_bits()),
                                          keyElement->to<IR::IAnnotated>()});
     }
 
