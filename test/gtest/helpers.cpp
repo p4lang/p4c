@@ -17,7 +17,11 @@ limitations under the License.
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+
 #include "helpers.h"
+
+#include "frontends/common/parseInput.h"
+#include "frontends/p4/frontend.h"
 
 namespace detail {
 
@@ -90,3 +94,38 @@ P4CTestEnvironment::P4CTestEnvironment() {
     _coreP4 = readHeader("p4include/core.p4");
     _v1Model = readHeader("p4include/v1model.p4");
 }
+
+namespace Test {
+
+/* static */ boost::optional<FrontendTestCase>
+FrontendTestCase::create(const std::string& source,
+                         CompilerOptions::FrontendVersion langVersion
+                            /* = CompilerOptions::FrontendVersion::P4_16 */) {
+    auto* program = P4::parseP4String(source, langVersion);
+    if (program == nullptr) {
+        std::cerr << "Couldn't parse test case source" << std::endl;
+        return boost::none;
+    }
+    if (::ErrorReporter::instance.getDiagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
+                  << " errors while parsing test case" << std::endl;
+        return boost::none;
+    }
+
+    CompilerOptions options;
+    options.langVersion = langVersion;
+    program = P4::FrontEnd().run(options, program, true);
+    if (program == nullptr) {
+        std::cerr << "Frontend failed" << std::endl;
+        return boost::none;
+    }
+    if (::ErrorReporter::instance.getDiagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
+                  << " errors while executing frontend" << std::endl;
+        return boost::none;
+    }
+
+    return FrontendTestCase{program};
+}
+
+}  // namespace Test

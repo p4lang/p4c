@@ -17,8 +17,15 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
+#include <boost/optional.hpp>
 #include <string>
+
+#include "frontends/common/options.h"
 #include "gtest/gtest.h"
+
+namespace IR {
+class P4Program;
+}  // namespace IR
 
 /// Specifies which standard headers should be included by a GTest.
 enum class P4Headers {
@@ -77,5 +84,20 @@ class P4CTestEnvironment {
     std::string _coreP4;
     std::string _v1Model;
 };
+
+namespace Test {
+
+struct FrontendTestCase {
+    /// Create a test case that only requires the frontend to run.
+    static boost::optional<FrontendTestCase>
+    create(const std::string& source,
+           CompilerOptions::FrontendVersion langVersion
+              = CompilerOptions::FrontendVersion::P4_16);
+
+    /// The output of the frontend.
+    const IR::P4Program* program;
+};
+
+}  // namespace Test
 
 #endif /* TEST_GTEST_HELPERS_H_ */
