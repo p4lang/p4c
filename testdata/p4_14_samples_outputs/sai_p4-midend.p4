@@ -83,20 +83,20 @@ header vlan_t {
 }
 
 struct metadata {
-    @name("egress_metadata") 
+    @name(".egress_metadata") 
     egress_metadata_t            egress_metadata;
-    @name("ingress_metadata") 
+    @name(".ingress_metadata") 
     ingress_metadata_t           ingress_metadata;
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     ingress_intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("eth") 
+    @name(".eth") 
     ethernet_t eth;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("vlan") 
+    @name(".vlan") 
     vlan_t     vlan;
 }
 
@@ -224,8 +224,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            meta.ingress_metadata.vlan_id: exact @name("meta.ingress_metadata.vlan_id") ;
-            hdr.eth.dstAddr              : exact @name("hdr.eth.dstAddr") ;
+            meta.ingress_metadata.vlan_id: exact @name("ingress_metadata.vlan_id") ;
+            hdr.eth.dstAddr              : exact @name("eth.dstAddr") ;
         }
         default_action = NoAction_0();
     }
@@ -236,9 +236,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_10();
         }
         key = {
-            meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
-            meta.ingress_metadata.vlan_id       : exact @name("meta.ingress_metadata.vlan_id") ;
-            hdr.eth.srcAddr                     : exact @name("hdr.eth.srcAddr") ;
+            meta.intrinsic_metadata.ingress_port: exact @name("intrinsic_metadata.ingress_port") ;
+            meta.ingress_metadata.vlan_id       : exact @name("ingress_metadata.vlan_id") ;
+            hdr.eth.srcAddr                     : exact @name("eth.srcAddr") ;
         }
         default_action = NoAction_10();
     }
@@ -248,9 +248,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_11();
         }
         key = {
-            meta.ingress_metadata.vrf        : exact @name("meta.ingress_metadata.vrf") ;
-            meta.ingress_metadata.ip_dest    : exact @name("meta.ingress_metadata.ip_dest") ;
-            meta.ingress_metadata.router_intf: exact @name("meta.ingress_metadata.router_intf") ;
+            meta.ingress_metadata.vrf        : exact @name("ingress_metadata.vrf") ;
+            meta.ingress_metadata.ip_dest    : exact @name("ingress_metadata.ip_dest") ;
+            meta.ingress_metadata.router_intf: exact @name("ingress_metadata.router_intf") ;
         }
         default_action = NoAction_11();
     }
@@ -260,7 +260,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_12();
         }
         key = {
-            meta.ingress_metadata.nhop: exact @name("meta.ingress_metadata.nhop") ;
+            meta.ingress_metadata.nhop: exact @name("ingress_metadata.nhop") ;
         }
         default_action = NoAction_12();
     }
@@ -288,7 +288,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_13();
         }
         key = {
-            meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
+            meta.intrinsic_metadata.ingress_port: exact @name("intrinsic_metadata.ingress_port") ;
         }
         @name(".port_counters") counters = direct_counter(CounterType.packets);
         default_action = NoAction_13();
@@ -301,8 +301,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_14();
         }
         key = {
-            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
-            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
+            meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("ipv4.dstAddr") ;
         }
         default_action = NoAction_14();
     }
@@ -313,7 +313,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_15();
         }
         key = {
-            hdr.eth.dstAddr: exact @name("hdr.eth.dstAddr") ;
+            hdr.eth.dstAddr: exact @name("eth.dstAddr") ;
         }
         default_action = NoAction_15();
     }
@@ -330,7 +330,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_17();
         }
         key = {
-            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf") ;
         }
         default_action = NoAction_17();
     }

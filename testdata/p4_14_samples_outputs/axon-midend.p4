@@ -20,12 +20,12 @@ header axon_hop_t {
 }
 
 struct metadata {
-    @name("my_metadata") 
+    @name(".my_metadata") 
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name("axon_head") 
+    @name(".axon_head") 
     axon_head_t    axon_head;
     @name(".axon_fwdHop") 
     axon_hop_t[64] axon_fwdHop;
@@ -115,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.axon_head.isValid()     : exact @name("hdr.axon_head.isValid()") ;
-            hdr.axon_fwdHop[0].isValid(): exact @name("hdr..axon_fwdHop[0].isValid()") ;
+            hdr.axon_head.isValid()     : exact @name("axon_head.$valid$") ;
+            hdr.axon_fwdHop[0].isValid(): exact @name("axon_fwdHop[0].$valid$") ;
         }
         size = 1;
         default_action = NoAction_3();

@@ -22,9 +22,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t     data;
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 

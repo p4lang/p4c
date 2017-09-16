@@ -41,7 +41,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("h") 
+    @name(".h") 
     ipv4_t h;
 }
 

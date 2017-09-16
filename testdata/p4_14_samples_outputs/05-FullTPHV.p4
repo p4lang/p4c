@@ -288,12 +288,12 @@ header h_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name(".m") 
     m_t m;
 }
 
 struct headers {
-    @name("h") 
+    @name(".h") 
     h_t h;
 }
 

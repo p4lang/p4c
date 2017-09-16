@@ -22,9 +22,9 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t     data;
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -74,7 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.dst_addr: lpm @name("hdr.ethernet.dst_addr") ;
+            hdr.ethernet.dst_addr: lpm @name("ethernet.dst_addr") ;
         }
         default_action = NoAction_0();
     }
@@ -85,7 +85,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            hdr.data.f1: exact @name("hdr.data.f1") ;
+            hdr.data.f1: exact @name("data.f1") ;
         }
         default_action = NoAction_4();
     }
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_5();
         }
         key = {
-            hdr.data.f2: exact @name("hdr.data.f2") ;
+            hdr.data.f2: exact @name("data.f2") ;
         }
         default_action = NoAction_5();
     }

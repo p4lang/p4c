@@ -37,11 +37,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6") 
+    @name(".ipv6") 
     ipv6_t     ipv6;
 }
 
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: ternary @name("ipv4.dstAddr") ;
         }
         default_action = NoAction_0();
     }
@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.isValid()") ;
+            hdr.ethernet.isValid(): exact @name("ethernet.$valid$") ;
         }
         default_action = NoAction_3();
     }

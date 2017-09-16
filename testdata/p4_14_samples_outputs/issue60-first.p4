@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -37,8 +37,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: lpm @name("hdr.ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr: lpm @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.dstAddr: lpm @name("ethernet.dstAddr") ;
+            hdr.ethernet.srcAddr: lpm @name("ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }

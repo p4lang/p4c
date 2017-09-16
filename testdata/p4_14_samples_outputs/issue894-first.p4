@@ -45,16 +45,16 @@ header tcp_t {
 }
 
 struct metadata {
-    @name("custom_metadata") 
+    @name(".custom_metadata") 
     custom_metadata_t custom_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("tcp") 
+    @name(".tcp") 
     tcp_t      tcp;
 }
 
@@ -145,7 +145,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.custom_metadata.nhop_ipv4: exact @name("meta.custom_metadata.nhop_ipv4") ;
+            meta.custom_metadata.nhop_ipv4: exact @name("custom_metadata.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction();
@@ -157,7 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
         size = 1024;
         default_action = NoAction();

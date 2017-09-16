@@ -49,16 +49,16 @@ header ipv6_t {
 }
 
 struct metadata {
-    @name("egress_metadata") 
+    @name(".egress_metadata") 
     egress_metadata_t egress_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6") 
+    @name(".ipv6") 
     ipv6_t     ipv6;
 }
 
@@ -100,7 +100,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.isValid()") ;
+            hdr.ethernet.isValid(): exact @name("ethernet.$valid$") ;
         }
         default_action = NoAction_0();
     }
@@ -136,9 +136,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta.egress_metadata.smac_idx: exact @name("meta.egress_metadata.smac_idx") ;
-            hdr.ipv4.isValid()           : exact @name("hdr.ipv4.isValid()") ;
-            hdr.ipv6.isValid()           : exact @name("hdr.ipv6.isValid()") ;
+            meta.egress_metadata.smac_idx: exact @name("egress_metadata.smac_idx") ;
+            hdr.ipv4.isValid()           : exact @name("ipv4.$valid$") ;
+            hdr.ipv6.isValid()           : exact @name("ipv6.$valid$") ;
         }
         size = 512;
         default_action = NoAction_3();

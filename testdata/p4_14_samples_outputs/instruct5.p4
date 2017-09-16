@@ -19,7 +19,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t       data;
     @name(".extra") 
     data2_t_0[4] extra;

@@ -235,12 +235,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name(".m") 
     m_t m;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 

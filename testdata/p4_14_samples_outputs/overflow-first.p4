@@ -7,7 +7,7 @@ struct metadata_t {
 }
 
 struct metadata {
-    @name("md") 
+    @name(".md") 
     metadata_t md;
 }
 

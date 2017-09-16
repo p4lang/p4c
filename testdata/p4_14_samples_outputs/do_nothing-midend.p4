@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -36,7 +36,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.etherType: ternary @name("hdr.ethernet.etherType") ;
+            hdr.ethernet.etherType: ternary @name("ethernet.etherType") ;
         }
         default_action = NoAction_0();
     }

@@ -6,7 +6,7 @@ struct ht {
 }
 
 struct metadata {
-    @name("md") 
+    @name(".md") 
     ht md;
 }
 

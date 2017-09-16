@@ -13,7 +13,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
@@ -37,7 +37,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1 & 32w0xff00ff: exact @name("hdr.data.f1") ;
+            hdr.data.f1 & 32w0xff00ff: exact;
         }
     }
     apply {

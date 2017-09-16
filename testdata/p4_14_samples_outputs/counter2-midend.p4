@@ -9,7 +9,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.dstAddr: ternary @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: ternary @name("ethernet.dstAddr") ;
         }
         size = 6100;
         @name(".cnt") counters = direct_counter(CounterType.packets);

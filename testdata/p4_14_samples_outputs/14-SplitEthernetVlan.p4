@@ -29,17 +29,17 @@ struct metadata {
 }
 
 struct headers {
-    @name("cfi") 
+    @name(".cfi") 
     cfi_t         cfi;
-    @name("len_or_type") 
+    @name(".len_or_type") 
     len_or_type_t len_or_type;
-    @name("mac_da") 
+    @name(".mac_da") 
     mac_da_t      mac_da;
-    @name("mac_sa") 
+    @name(".mac_sa") 
     mac_sa_t      mac_sa;
-    @name("pcp") 
+    @name(".pcp") 
     pcp_t         pcp;
-    @name("vlan_id") 
+    @name(".vlan_id") 
     vlan_id_t     vlan_id;
 }
 

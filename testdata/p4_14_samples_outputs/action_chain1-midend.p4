@@ -19,7 +19,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t     data;
     @name(".extra") 
     extra_t[4] extra;
@@ -95,7 +95,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.extra[0].h: ternary @name("hdr..extra[0].h") ;
+            hdr.extra[0].h: ternary @name("extra[0].h") ;
         }
         default_action = NoAction_0();
     }
@@ -106,7 +106,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            hdr.data.f2: ternary @name("hdr.data.f2") ;
+            hdr.data.f2: ternary @name("data.f2") ;
         }
         default_action = NoAction_6();
     }
@@ -117,7 +117,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            hdr.data.f2: ternary @name("hdr.data.f2") ;
+            hdr.data.f2: ternary @name("data.f2") ;
         }
         default_action = NoAction_7();
     }
@@ -128,7 +128,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_8();
         }
         key = {
-            hdr.data.f2: ternary @name("hdr.data.f2") ;
+            hdr.data.f2: ternary @name("data.f2") ;
         }
         default_action = NoAction_8();
     }
@@ -139,7 +139,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_9();
         }
         key = {
-            hdr.data.f1: ternary @name("hdr.data.f1") ;
+            hdr.data.f1: ternary @name("data.f1") ;
         }
         default_action = NoAction_9();
     }

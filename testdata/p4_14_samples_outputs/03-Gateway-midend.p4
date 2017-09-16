@@ -24,14 +24,14 @@ header vag_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name(".ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("vag") 
+    @name(".vag") 
     vag_t      vag;
 }
 
@@ -54,7 +54,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         default_action = NoAction_0();
     }
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.vag.f1: exact @name("hdr.vag.f1") ;
+            hdr.vag.f1: exact @name("vag.f1") ;
         }
         size = 1024;
         default_action = NoAction_1();
@@ -119,7 +119,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            hdr.vag.f2: exact @name("hdr.vag.f2") ;
+            hdr.vag.f2: exact @name("vag.f2") ;
         }
         size = 1024;
         default_action = NoAction_7();
@@ -131,7 +131,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_8();
         }
         key = {
-            hdr.vag.f3: exact @name("hdr.vag.f3") ;
+            hdr.vag.f3: exact @name("vag.f3") ;
         }
         size = 1024;
         default_action = NoAction_8();
@@ -143,7 +143,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_9();
         }
         key = {
-            hdr.vag.f4: exact @name("hdr.vag.f4") ;
+            hdr.vag.f4: exact @name("vag.f4") ;
         }
         size = 1024;
         default_action = NoAction_9();

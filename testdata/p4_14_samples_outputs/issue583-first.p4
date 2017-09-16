@@ -93,24 +93,24 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("routing_metadata") 
+    @name(".routing_metadata") 
     routing_metadata_t routing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t    ethernet;
-    @name("icmp") 
+    @name(".icmp") 
     icmp_t        icmp;
-    @name("icmpv6") 
+    @name(".icmpv6") 
     icmpv6_t      icmpv6;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t        ipv4;
-    @name("ipv6") 
+    @name(".ipv6") 
     ipv6_t        ipv6;
-    @name("tcp") 
+    @name(".tcp") 
     tcp_t         tcp;
-    @name("udp") 
+    @name(".udp") 
     udp_t         udp;
     @name(".vlan_tag_") 
     vlan_tag_t[4] vlan_tag_;
@@ -204,7 +204,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
         default_action = NoAction();
     }
@@ -214,7 +214,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
         default_action = NoAction();
     }

@@ -30,14 +30,14 @@ header data_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name(".ingress_metadata") 
     ingress_metadata_t   ingress_metadata;
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 

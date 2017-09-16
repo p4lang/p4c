@@ -18,7 +18,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t    ethernet;
     @name(".vlan_tag") 
     vlan_tag_t[5] vlan_tag;

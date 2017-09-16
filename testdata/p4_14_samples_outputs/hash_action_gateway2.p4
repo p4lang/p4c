@@ -16,12 +16,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata") 
+    @name(".counter_metadata") 
     counter_metadata_t counter_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 

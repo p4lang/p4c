@@ -9,7 +9,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("h") 
+    @name(".h") 
     h_t h;
 }
 

@@ -10,7 +10,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("hdr1") 
+    @name(".hdr1") 
     hdr1_t hdr1;
 }
 
@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdr1.f1: exact @name("hdr.hdr1.f1") ;
+            hdr.hdr1.f1: exact @name("hdr1.f1") ;
         }
         size = 128;
         default_action = NoAction();

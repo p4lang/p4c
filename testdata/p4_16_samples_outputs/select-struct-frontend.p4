@@ -11,8 +11,8 @@ parser p() {
     tuple<bit<8>, bit<8>> t_0;
     state start {
         x_0 = 8w5;
-        s_0 = {8w0, 8w0};
-        t_0 = {8w0, 8w0};
+        s_0 = { 8w0, 8w0 };
+        t_0 = { 8w0, 8w0 };
         transition select(x_0, x_0, { x_0, x_0 }, x_0) {
             (8w0, 8w0, { 8w0, 8w0 }, 8w0): accept;
             (8w1, 8w1, default, 8w1): accept;

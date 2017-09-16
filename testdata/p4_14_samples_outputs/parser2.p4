@@ -83,21 +83,21 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t    ethernet;
-    @name("icmp") 
+    @name(".icmp") 
     icmp_t        icmp;
-    @name("icmpv6") 
+    @name(".icmpv6") 
     icmpv6_t      icmpv6;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t        ipv4;
-    @name("ipv6") 
+    @name(".ipv6") 
     ipv6_t        ipv6;
-    @name("mpls_bos") 
+    @name(".mpls_bos") 
     mpls_t        mpls_bos;
-    @name("tcp") 
+    @name(".tcp") 
     tcp_t         tcp;
-    @name("udp") 
+    @name(".udp") 
     udp_t         udp;
     @name(".mpls") 
     mpls_t[3]     mpls;
