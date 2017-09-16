@@ -19,7 +19,7 @@
 # Flags needed for GTest tests.
 set (GTEST_ROOT ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest)
 
-include_directories(${GTEST_ROOT} ${GTEST_ROOT}/include)
+include_directories(${GTEST_ROOT} ${GTEST_ROOT}/include ${P4C_SOURCE_DIR}/control-plane/PI/include)
 
 # Configure GTest to disable support for SEH (which is irrelevant for p4c since
 # we don't currently support Windows) and pthreads (which prevents GTest from
