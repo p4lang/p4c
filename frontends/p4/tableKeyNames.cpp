@@ -30,17 +30,45 @@ void KeyNameGenerator::postorder(const IR::Expression* expression) {
 void KeyNameGenerator::postorder(const IR::PathExpression* expression)
 { name.emplace(expression, expression->path->toString()); }
 
-void KeyNameGenerator::postorder(const IR::Member* expression) {
+namespace {
+
+/// @return a canonicalized string representation of the given Member
+/// expression's right-hand side, suitable for use as part of a key name.
+cstring keyComponentNameForMember(const IR::Member* expression,
+                                  const P4::TypeMap* typeMap) {
     cstring fname = expression->member.name;
-    if (typeMap != nullptr) {
-        auto type = typeMap->getType(expression->expr, true);
-        if (type->is<IR::Type_StructLike>()) {
-            auto st = type->to<IR::Type_StructLike>();
-            auto field = st->getField(expression->member);
-            if (field != nullptr)
-                fname = field->externalName();
-        }
+
+    // Without type information, we can't do any deeper analysis.
+    if (!typeMap) return fname;
+    auto* type = typeMap->getType(expression->expr, true);
+
+    // Use `$valid$` to represent `isValid()` calls on headers and header
+    // unions; this is what P4Runtime expects.
+    // XXX(seth): Should we do this for header unions? It's not symmetric with
+    // SynthesizeValidField, which leaves `isValid()` as-is for header unions,
+    // but that's a BMV2-specific thing.
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>())
+        if (expression->member == "isValid")
+            return "$valid$";
+
+    // If this Member represents a field which has an @name annotation, use it.
+    if (type->is<IR::Type_StructLike>()) {
+        auto* st = type->to<IR::Type_StructLike>();
+        auto* field = st->getField(expression->member);
+        if (field != nullptr)
+            return field->externalName();
     }
+
+    return fname;
+}
+
+}  // namespace
+
+void KeyNameGenerator::postorder(const IR::Member* expression) {
+    cstring fname = keyComponentNameForMember(expression, typeMap);
+
+    // We can generate a name for the overall Member expression only if we were
+    // able to generate a name for its left-hand side.
     if (cstring n = getName(expression->expr))
         name.emplace(expression, n + "." + fname);
 }
@@ -77,12 +105,14 @@ void KeyNameGenerator::postorder(const IR::MethodCallExpression* expression) {
     cstring m = getName(expression->method);
     if (!m)
         return;
-    if (!m.endsWith(IR::Type_Header::isValid) || expression->arguments->size() != 0) {
-        // This is a heuristic
-        error(expression);
+
+    // This is a heuristic.
+    if (m.endsWith("$valid$") && expression->arguments->size() == 0) {
+        name.emplace(expression, m);
         return;
     }
-    name.emplace(expression, m + "()");
+
+    error(expression);
 }
 
 const IR::Node* DoTableKeyNames::postorder(IR::KeyElement* keyElement) {
