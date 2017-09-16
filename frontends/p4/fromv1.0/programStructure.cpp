@@ -219,7 +219,7 @@ void ProgramStructure::createStructures() {
         auto ht = type->to<IR::Type_Struct>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
-        auto annos = addNameAnnotation(id, it.first->annotations);
+        auto annos = addGlobalNameAnnotation(id, it.first->annotations);
         auto field = new IR::StructField(id.srcInfo, id, annos, tn);
         metadata->fields.push_back(field);
     }
@@ -233,7 +233,7 @@ void ProgramStructure::createStructures() {
         auto ht = type->to<IR::Type_Header>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
-        auto annos = addNameAnnotation(id, it.first->annotations);
+        auto annos = addGlobalNameAnnotation(id, it.first->annotations);
         auto field = new IR::StructField(id.srcInfo, id, annos, tn);
         headers->fields.push_back(field);
     }
