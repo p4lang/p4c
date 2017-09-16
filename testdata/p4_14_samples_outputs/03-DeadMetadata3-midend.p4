@@ -7,7 +7,7 @@ struct m_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name(".m") 
     m_t m;
 }
 
@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta.m.f1: exact @name("meta.m.f1") ;
+            meta.m.f1: exact @name("m.f1") ;
         }
         default_action = NoAction_3();
     }

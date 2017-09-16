@@ -9,7 +9,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("heartlands") 
+    @name(".heartlands") 
     headers_0 heartlands;
 }
 

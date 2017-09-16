@@ -14,12 +14,12 @@ header data_t {
 }
 
 struct metadata {
-    @name("meta") 
+    @name(".meta") 
     metadata_t meta;
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.f1: exact @name("hdr.data.f1") ;
+            hdr.data.f1: exact @name("data.f1") ;
         }
         default_action = NoAction_0();
     }
@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta.meta.val: exact @name("meta.meta.val") ;
+            meta.meta.val: exact @name("meta.val") ;
         }
         default_action = NoAction_3();
     }

@@ -21,11 +21,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t    data;
-    @name("hdr1") 
+    @name(".hdr1") 
     data2_t_0 hdr1;
-    @name("hdr2") 
+    @name(".hdr2") 
     data2_t_0 hdr2;
 }
 
@@ -66,7 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.f1: exact @name("hdr.data.f1") ;
+            hdr.data.f1: exact @name("data.f1") ;
         }
         default_action = NoAction_0();
     }

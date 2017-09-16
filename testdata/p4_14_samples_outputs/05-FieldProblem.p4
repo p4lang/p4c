@@ -14,12 +14,12 @@ header vag_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name(".ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("vag") 
+    @name(".vag") 
     vag_t vag;
 }
 

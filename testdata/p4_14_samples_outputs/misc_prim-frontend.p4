@@ -21,7 +21,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("pkt") 
+    @name(".pkt") 
     pkt_t pkt;
 }
 
@@ -125,12 +125,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.pkt.field_a_32: ternary @name("hdr.pkt.field_a_32") ;
-            hdr.pkt.field_b_32: ternary @name("hdr.pkt.field_b_32") ;
-            hdr.pkt.field_c_32: ternary @name("hdr.pkt.field_c_32") ;
-            hdr.pkt.field_d_32: ternary @name("hdr.pkt.field_d_32") ;
-            hdr.pkt.field_g_16: ternary @name("hdr.pkt.field_g_16") ;
-            hdr.pkt.field_h_16: ternary @name("hdr.pkt.field_h_16") ;
+            hdr.pkt.field_a_32: ternary @name("pkt.field_a_32") ;
+            hdr.pkt.field_b_32: ternary @name("pkt.field_b_32") ;
+            hdr.pkt.field_c_32: ternary @name("pkt.field_c_32") ;
+            hdr.pkt.field_d_32: ternary @name("pkt.field_d_32") ;
+            hdr.pkt.field_g_16: ternary @name("pkt.field_g_16") ;
+            hdr.pkt.field_h_16: ternary @name("pkt.field_h_16") ;
         }
         size = 512;
         default_action = NoAction();

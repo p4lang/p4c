@@ -20,14 +20,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("mymeta") 
+    @name(".mymeta") 
     mymeta_t             mymeta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -63,7 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction();
@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction();

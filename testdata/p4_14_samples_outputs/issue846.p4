@@ -14,12 +14,12 @@ header hdr0_t {
 }
 
 struct metadata {
-    @name("meta") 
+    @name(".meta") 
     meta_t meta;
 }
 
 struct headers {
-    @name("hdr0") 
+    @name(".hdr0") 
     hdr0_t hdr0;
 }
 

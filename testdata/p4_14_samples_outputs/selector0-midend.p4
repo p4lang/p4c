@@ -16,7 +16,7 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
@@ -38,11 +38,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.b1: exact @name("hdr.data.b1") ;
-            hdr.data.f1: selector @name("hdr.data.f1") ;
-            hdr.data.f2: selector @name("hdr.data.f2") ;
-            hdr.data.f3: selector @name("hdr.data.f3") ;
-            hdr.data.f4: selector @name("hdr.data.f4") ;
+            hdr.data.b1: exact @name("data.b1") ;
+            hdr.data.f1: selector @name("data.f1") ;
+            hdr.data.f2: selector @name("data.f2") ;
+            hdr.data.f3: selector @name("data.f3") ;
+            hdr.data.f4: selector @name("data.f4") ;
         }
         size = 1024;
         @name(".sel_profile") @mode("fair") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);

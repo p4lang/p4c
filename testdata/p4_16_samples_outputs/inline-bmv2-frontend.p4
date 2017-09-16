@@ -31,7 +31,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 control aux(inout M meta, in H hdr) {
     @name("adjust_lkp_fields") table adjust_lkp_fields_0 {
         key = {
-            hdr.ipv4.isValid(): exact @name("hdr.ipv4.isValid()") ;
+            hdr.ipv4.isValid(): exact @name("hdr.ipv4.$valid$") ;
         }
         actions = {
             NoAction();
