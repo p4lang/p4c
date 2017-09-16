@@ -105,8 +105,9 @@ int main(int argc, char *const argv[]) {
     if (!options.p4RuntimeFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.p4RuntimeFile, false);
         if (out != nullptr) {
-            serializeP4Runtime(out, program, toplevel, &midEnd.refMap,
-                               &midEnd.typeMap, options.p4RuntimeFormat);
+            auto p4Runtime =
+              generateP4Runtime(program, toplevel, &midEnd.refMap, &midEnd.typeMap);
+            p4Runtime.serializeTo(out, options.p4RuntimeFormat);
         }
     }
 
