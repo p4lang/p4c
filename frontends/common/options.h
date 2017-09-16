@@ -80,6 +80,9 @@ class CompilerOptions : public Util::Options {
     // Write a P4Runtime control plane API description to the specified file.
     cstring p4RuntimeFile = nullptr;
 
+    // Write static table entries as a P4Runtime WriteRequest message to the specified file.
+    cstring p4RuntimeEntriesFile = nullptr;
+
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
 

@@ -23,6 +23,7 @@ namespace p4 {
 namespace config {
 class P4Info;
 }  // namespace config
+class WriteRequest;
 }  // namespace p4
 
 namespace IR {
@@ -47,11 +48,17 @@ enum class P4RuntimeFormat {
 struct P4RuntimeAPI {
     /// Serialize this control-plane API to the provided output stream, using
     /// the given serialization format.
-    void serializeTo(std::ostream* destination, P4RuntimeFormat format);
+    void serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat format);
+    /// Serialize the WriteRequest message containing all the table entries to
+    /// the @destination stream in the requested protobuf serialization @format.
+    void serializeEntriesTo(std::ostream* destination, P4RuntimeFormat format);
 
     /// A P4Runtime P4Info message, which encodes the control-plane API of the
     /// program. Never null.
     const p4::config::P4Info* p4Info;
+    /// All static table entries as one P4Runtime WriteRequest object. Never
+    /// null.
+    const p4::WriteRequest* entries;
 };
 
 /**

@@ -96,6 +96,10 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
+    registerOption("--p4runtime-entries-file", "file",
+                   [this](const char* arg) { p4RuntimeEntriesFile = arg; return true; },
+                   "Write static table entries as a P4Runtime WriteRequest message"
+                   "to the specified file.");
     registerOption("--p4runtime-format", "{binary,json,text}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "binary")) {
