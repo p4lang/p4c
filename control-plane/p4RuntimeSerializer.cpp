@@ -1060,13 +1060,6 @@ class P4RuntimeSerializer {
         }
     }
 
-    void addSynthesizedAction(const cstring& name) {
-        auto action = p4Info->add_actions();
-        action->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::ACTION, name));
-        action->mutable_preamble()->set_name(name);
-        action->mutable_preamble()->set_alias(symbols.getAlias(name));
-    }
-
     void addTable(const IR::P4Table* tableDeclaration,
                   uint64_t tableSize,
                   const boost::optional<cstring>& implementation,
