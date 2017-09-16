@@ -67,6 +67,14 @@ cstring keyComponentNameForMember(const IR::Member* expression,
 void KeyNameGenerator::postorder(const IR::Member* expression) {
     cstring fname = keyComponentNameForMember(expression, typeMap);
 
+    // If the member name begins with `.`, it's a global name, and we can
+    // discard the left-hand side of the Member expression. (We'll also strip
+    // off the `.` so it doesn't appear in the key name.)
+    if (fname.startsWith(".")) {
+        name.emplace(expression, fname.substr(1));
+        return;
+    }
+
     // We can generate a name for the overall Member expression only if we were
     // able to generate a name for its left-hand side.
     if (cstring n = getName(expression->expr))
