@@ -1,0 +1,611 @@
+/*
+Copyright 2013-present Barefoot Networks, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+// These must be included before any of our internal headers because ir/std.h
+// places a vector class in the global namespace, which breaks protobuf.
+#include "control-plane/p4/config/p4info.pb.h"  // NOLINT
+#include "control-plane/p4/config/v1model.pb.h"  // NOLINT
+
+#include <map>  // NOLINT
+#include <tuple>  // NOLINT
+#include "gtest/gtest.h"
+
+#include "backends/bmv2/synthesizeValidField.h"
+#include "control-plane/p4RuntimeSerializer.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "helpers.h"
+#include "ir/ir.h"
+#include "midend/eliminateTuples.h"
+#include "PI/pi_base.h"
+
+namespace Test {
+
+namespace {
+
+boost::optional<P4::P4RuntimeAPI>
+createP4RuntimeTestCase(const std::string& source,
+                        CompilerOptions::FrontendVersion langVersion
+                            = CompilerOptions::FrontendVersion::P4_16) {
+    auto frontendTestCase = FrontendTestCase::create(source, langVersion);
+    if (!frontendTestCase) return boost::none;
+
+    // Run the bare minimum midend passes required by generateP4Runtime().
+    // XXX(seth): Ideally there'd be none of these.
+    P4::ReferenceMap refMap;
+    refMap.setIsV1(true);
+    P4::TypeMap typeMap;
+    auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    PassManager p4RuntimeFixups = {
+        new BMV2::SynthesizeValidField(&refMap, &typeMap),
+        new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap),
+        evaluator
+    };
+
+    auto* p4RuntimeProgram = frontendTestCase->program->apply(p4RuntimeFixups);
+    if (!p4RuntimeProgram) {
+        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
+                  << " errors while running P4Runtime fixup passes" << std::endl;
+        return boost::none;
+    }
+
+    auto* evaluatedProgram = evaluator->getToplevelBlock();
+    if (!evaluatedProgram) {
+        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
+                  << " errors while running evaluator pass" << std::endl;
+        return boost::none;
+    }
+
+    return generateP4Runtime(p4RuntimeProgram, evaluatedProgram,
+                             &refMap, &typeMap);
+}
+
+/// @return the P4Runtime representation of the table with the given name, or
+/// null if none is found.
+const ::p4::config::Table* findTable(const P4::P4RuntimeAPI& analysis,
+                                     const std::string& name) {
+    auto& tables = analysis.p4Info->tables();
+    auto desiredTable = std::find_if(tables.begin(), tables.end(),
+                                     [&](const ::p4::config::Table& table) {
+        return table.preamble().name() == name;
+    });
+    if (desiredTable == tables.end()) return nullptr;
+    return &*desiredTable;
+}
+
+/// @return the P4Runtime representation of the extern with the given name, or
+/// null if none is found.
+const ::p4::config::Extern* findExtern(const P4::P4RuntimeAPI& analysis,
+                                       const std::string& name) {
+    auto& externs = analysis.p4Info->externs();
+    auto desiredExtern = std::find_if(externs.begin(), externs.end(),
+                                      [&](const ::p4::config::Extern& e) {
+        return e.extern_type_name() == name;
+    });
+    if (desiredExtern == externs.end()) return nullptr;
+    return &*desiredExtern;
+}
+
+}  // namespace
+
+TEST(P4Runtime, IdAssignment) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action noop() { }
+
+            table igTable {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @name("igTableWithName")
+            table igTableWithoutName {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @id(1234)
+            table igTableWithId {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @id(5678)
+            @name("igTableWithNameAndId")
+            table igTableWithoutNameAndId {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @id(4321)
+            table conflictingTableA {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @id(4321)
+            table conflictingTableB {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            apply {
+                igTable.apply();
+                igTableWithoutName.apply();
+                igTableWithId.apply();
+                igTableWithoutNameAndId.apply();
+                conflictingTableA.apply();
+                conflictingTableB.apply();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+
+    // We expect exactly one error:
+    //   error: @id 4321 is assigned to multiple declarations
+    EXPECT_EQ(1u, ::ErrorReporter::instance.getDiagnosticCount());
+
+    {
+        // Check that 'igTable' ended up in the P4Info output.
+        auto* igTable = findTable(*test, "igTable");
+        ASSERT_TRUE(igTable != nullptr);
+
+        // Check that the id indicates the correct resource type.
+        EXPECT_EQ(unsigned(PI_TABLE_ID), igTable->preamble().id() >> 24);
+
+        // Check that the rest of the id matches the hash value that we expect.
+        // (If we were to ever change the hash algorithm we use when mapping P4
+        // names to P4Runtime ids, we'd need to change this test.)
+        EXPECT_EQ(0x00002C0Eu, igTable->preamble().id() & 0x00ffffff);
+    }
+
+    {
+        // Check that 'igTableWithName' ended up in the P4Info output under that
+        // name, which is determined by its @name annotation, and *not* under
+        // 'igTableWithoutName'.
+        EXPECT_TRUE(findTable(*test, "igTableWithoutName") == nullptr);
+        auto* igTableWithName = findTable(*test, "igTableWithName");
+        ASSERT_TRUE(igTableWithName != nullptr);
+
+        // Check that the id of 'igTableWithName' was computed based on its
+        // @name annotation. (See above for caveat re: the hash algorithm.)
+        EXPECT_EQ(unsigned(PI_TABLE_ID), igTableWithName->preamble().id() >> 24);
+        EXPECT_EQ(0x0000FFEFu, igTableWithName->preamble().id() & 0x00ffffff);
+    }
+
+    {
+        // Check that 'igTableWithId' ended up in the P4Info output, and that
+        // its id matches the one set by its @id annotation.
+        auto* igTableWithId = findTable(*test, "igTableWithId");
+        ASSERT_TRUE(igTableWithId != nullptr);
+        EXPECT_EQ(1234u, igTableWithId->preamble().id());
+    }
+
+    {
+        // Check that 'igTableWithNameAndId' ended up in the P4Info output under
+        // that name, and that its id matches the one set by its @id annotation
+        // - in other words, that @id takes precedence over @name.
+        EXPECT_TRUE(findTable(*test, "igTableWithoutNameAndId") == nullptr);
+        auto* igTableWithNameAndId = findTable(*test, "igTableWithNameAndId");
+        ASSERT_TRUE(igTableWithNameAndId != nullptr);
+        EXPECT_EQ(5678u, igTableWithNameAndId->preamble().id());
+    }
+
+    {
+        // Check that the two tables with conflicting ids are both present, and
+        // that they didn't end up with the same id in the P4Info output.
+        auto* conflictingTableA = findTable(*test, "conflictingTableA");
+        ASSERT_TRUE(conflictingTableA != nullptr);
+        auto* conflictingTableB = findTable(*test, "conflictingTableB");
+        ASSERT_TRUE(conflictingTableB != nullptr);
+        EXPECT_TRUE(conflictingTableA->preamble().id() == 4321 ||
+                    conflictingTableB->preamble().id() == 4321);
+        EXPECT_NE(conflictingTableA->preamble().id(),
+                  conflictingTableB->preamble().id());
+    }
+}
+
+namespace {
+
+/// A helper for the match fields tests; represents metadata about a match field
+/// that we expect to find in the generated P4Info.
+struct ExpectedMatchField {
+    unsigned id;
+    std::string name;
+    int bitWidth;
+    ::p4::config::MatchField::MatchType matchType;
+};
+
+}  // namespace
+
+TEST(P4Runtime, P4_16_MatchFields) {
+    using MatchField = ::p4::config::MatchField;
+
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<16> headerField; }
+        header AnotherHeader { bit<8> anotherHeaderField; }
+        header_union HeaderUnion { Header a; AnotherHeader b; }
+        struct Headers { Header h; Header[4] hStack; HeaderUnion hUnion; }
+        struct Metadata { bit<33> metadataField; }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action noop() { }
+
+            table igTable {
+                key = {
+                    // Standard match types.
+                    h.h.headerField : exact;             // 1
+                    m.metadataField : exact;             // 2
+                    h.hStack[3].headerField : exact;     // 3
+                    h.h.headerField : ternary;           // 4
+                    m.metadataField : ternary;           // 5
+                    h.hStack[3].headerField : ternary;   // 6
+                    h.h.headerField : lpm;               // 7
+                    m.metadataField : lpm;               // 8
+                    h.hStack[3].headerField : lpm;       // 9
+                    h.h.headerField : range;             // 10
+                    m.metadataField : range;             // 11
+                    h.hStack[3].headerField : range;     // 12
+
+                    // Built-in methods.
+                    h.h.isValid() : exact;            // 13
+                    h.h.isValid() : ternary;          // 14
+                    h.hStack[3].isValid() : exact;    // 15
+                    h.hStack[3].isValid() : ternary;  // 16
+
+                    // Simple bitwise operations.
+                    h.h.headerField & 13 : exact;     // 17
+                    h.h.headerField & 13 : ternary;   // 18
+                    h.h.headerField[13:4] : exact;    // 19
+                    h.h.headerField[13:4] : ternary;  // 20
+
+                    // Header unions.
+                    h.hUnion.a.headerField : exact;           // 21
+                    h.hUnion.a.headerField : ternary;         // 22
+                    h.hUnion.a.headerField : lpm;             // 23
+                    h.hUnion.a.headerField : range;           // 24
+                    h.hUnion.b.anotherHeaderField : exact;    // 25
+                    h.hUnion.b.anotherHeaderField : ternary;  // 26
+                    h.hUnion.b.anotherHeaderField : lpm;      // 27
+                    h.hUnion.b.anotherHeaderField : range;    // 28
+                    h.hUnion.a.isValid() : exact;             // 29
+                    h.hUnion.a.isValid() : ternary;           // 30
+                    h.hUnion.b.isValid() : exact;             // 31
+                    h.hUnion.b.isValid() : ternary;           // 32
+                    h.hUnion.isValid() : exact;               // 33
+                    h.hUnion.isValid() : ternary;             // 34
+
+                    // Complex operations which require an @name annotation.
+                    h.h.headerField << 13 : exact @name("lShift");    // 35
+                    h.h.headerField << 13 : ternary @name("lShift");  // 36
+                    h.h.headerField + 6 : exact @name("plusSix");     // 37
+                    h.h.headerField + 6 : ternary @name("plusSix");   // 38
+
+                    // Action selectors. These won't be included in the list of
+                    // match fields; they're just here as a sanity check.
+                    h.h.headerField : selector;          // skipped
+                    m.metadataField : selector;          // skipped
+                    h.hStack[3].headerField : selector;  // skipped
+                }
+
+                actions = { noop; }
+                default_action = noop;
+
+                // This is needed for the `selector` match type to be valid.
+                @name("action_profile") implementation = action_profile(32w128);
+            }
+
+            apply {
+                igTable.apply();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+
+    auto* igTable = findTable(*test, "igTable");
+    ASSERT_TRUE(igTable != nullptr);
+    EXPECT_EQ(38, igTable->match_fields_size());
+
+    std::vector<ExpectedMatchField> expected = {
+        { 1, "h.h.headerField", 16, MatchField::EXACT },
+        { 2, "m.metadataField", 33, MatchField::EXACT },
+        { 3, "h.hStack[3].headerField", 16, MatchField::EXACT },
+        { 4, "h.h.headerField", 16, MatchField::TERNARY },
+        { 5, "m.metadataField", 33, MatchField::TERNARY },
+        { 6, "h.hStack[3].headerField", 16, MatchField::TERNARY },
+        { 7, "h.h.headerField", 16, MatchField::LPM },
+        { 8, "m.metadataField", 33, MatchField::LPM },
+        { 9, "h.hStack[3].headerField", 16, MatchField::LPM },
+        { 10, "h.h.headerField", 16, MatchField::RANGE },
+        { 11, "m.metadataField", 33, MatchField::RANGE },
+        { 12, "h.hStack[3].headerField", 16, MatchField::RANGE },
+        { 13, "h.h.$valid$", 1, MatchField::EXACT },
+        { 14, "h.h.$valid$", 1, MatchField::TERNARY },
+        { 15, "h.hStack[3].$valid$", 1, MatchField::EXACT },
+        { 16, "h.hStack[3].$valid$", 1, MatchField::TERNARY },
+        { 17, "h.h.headerField & 13", 16, MatchField::EXACT },
+        { 18, "h.h.headerField & 13", 16, MatchField::TERNARY },
+        { 19, "h.h.headerField[13:4]", 10, MatchField::EXACT },
+        { 20, "h.h.headerField[13:4]", 10, MatchField::TERNARY },
+        { 21, "h.hUnion.a.headerField", 16, MatchField::EXACT },
+        { 22, "h.hUnion.a.headerField", 16, MatchField::TERNARY },
+        { 23, "h.hUnion.a.headerField", 16, MatchField::LPM },
+        { 24, "h.hUnion.a.headerField", 16, MatchField::RANGE },
+        { 25, "h.hUnion.b.anotherHeaderField", 8, MatchField::EXACT },
+        { 26, "h.hUnion.b.anotherHeaderField", 8, MatchField::TERNARY },
+        { 27, "h.hUnion.b.anotherHeaderField", 8, MatchField::LPM },
+        { 28, "h.hUnion.b.anotherHeaderField", 8, MatchField::RANGE },
+        { 29, "h.hUnion.a.$valid$", 1, MatchField::EXACT },
+        { 30, "h.hUnion.a.$valid$", 1, MatchField::TERNARY },
+        { 31, "h.hUnion.b.$valid$", 1, MatchField::EXACT },
+        { 32, "h.hUnion.b.$valid$", 1, MatchField::TERNARY },
+        { 33, "h.hUnion.$valid$", 1, MatchField::EXACT },
+        { 34, "h.hUnion.$valid$", 1, MatchField::TERNARY },
+        { 35, "lShift", 16, MatchField::EXACT },
+        { 36, "lShift", 16, MatchField::TERNARY },
+        { 37, "plusSix", 16, MatchField::EXACT },
+        { 38, "plusSix", 16, MatchField::TERNARY },
+    };
+
+    for (auto i = 0; i < igTable->match_fields_size(); i++) {
+        SCOPED_TRACE(expected[i].id);
+        EXPECT_EQ(expected[i].id, igTable->match_fields(i).id());
+        EXPECT_EQ(expected[i].name, igTable->match_fields(i).name());
+        EXPECT_EQ(expected[i].bitWidth, igTable->match_fields(i).bitwidth());
+        EXPECT_EQ(expected[i].matchType, igTable->match_fields(i).match_type());
+    }
+}
+
+TEST(P4Runtime, P4_14_MatchFields) {
+    using MatchField = ::p4::config::MatchField;
+
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::NONE, R"(
+        header_type header_t { fields { headerField : 16; } }
+        header header_t h;
+        header header_t hStack[4];
+        header_type metadata_t { fields { metadataField : 33; } }
+        metadata metadata_t m;
+        parser start { return ingress; }
+        action noop() { }
+        action_profile igTableProfile { actions { noop; } }
+
+        table igTable {
+            reads {
+                // Standard match types.
+                h.headerField : exact;            // 1
+                m.metadataField : exact;          // 2
+                hStack[3].headerField : exact;    // 3
+                h.headerField : ternary;          // 4
+                m.metadataField : ternary;        // 5
+                hStack[3].headerField : ternary;  // 6
+                h.headerField : lpm;              // 7
+                m.metadataField : lpm;            // 8
+                hStack[3].headerField : lpm;      // 9
+                h.headerField : range;            // 10
+                m.metadataField : range;          // 11
+                hStack[3].headerField : range;    // 12
+                h : valid;                        // 13
+                hStack[3] : valid;                // 14
+
+                // Masks. There are two variants here, because masks which have
+                // a binary representation that is a single, contiguous sequence
+                // of bits get converted to slices, while other masks get
+                // converted to bitwise AND.
+                h.headerField mask 12 : exact;     // 15 (will be a slice)
+                h.headerField mask 12 : ternary;   // 16 (will be a slice)
+                h.headerField mask 13 : exact;     // 17 (will be an AND)
+                h.headerField mask 13 : ternary;   // 18 (will be an AND)
+            }
+
+            actions { noop; }
+            default_action: noop;
+
+            // This will generate match fields when converted to P4-16. They
+            // won't be included in the list of match fields in P4Info; this is
+            // just here as a sanity check.
+            action_profile: igTableProfile;
+        }
+
+        control ingress { apply(igTable); }
+    )"), CompilerOptions::FrontendVersion::P4_14);
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+
+    auto* igTable = findTable(*test, "igTable");
+    ASSERT_TRUE(igTable != nullptr);
+    EXPECT_EQ(18, igTable->match_fields_size());
+
+    std::vector<ExpectedMatchField> expected = {
+        { 1, "h.headerField", 16, MatchField::EXACT },
+        { 2, "m.metadataField", 33, MatchField::EXACT },
+        { 3, "hStack[3].headerField", 16, MatchField::EXACT },
+        { 4, "h.headerField", 16, MatchField::TERNARY },
+        { 5, "m.metadataField", 33, MatchField::TERNARY },
+        { 6, "hStack[3].headerField", 16, MatchField::TERNARY },
+        { 7, "h.headerField", 16, MatchField::LPM },
+        { 8, "m.metadataField", 33, MatchField::LPM },
+        { 9, "hStack[3].headerField", 16, MatchField::LPM },
+        { 10, "h.headerField", 16, MatchField::RANGE },
+        { 11, "m.metadataField", 33, MatchField::RANGE },
+        { 12, "hStack[3].headerField", 16, MatchField::RANGE },
+        { 13, "h.$valid$", 1, MatchField::EXACT },
+        { 14, "hStack[3].$valid$", 1, MatchField::EXACT },
+        { 15, "h.headerField[3:2]", 2, MatchField::EXACT },
+        { 16, "h.headerField[3:2]", 2, MatchField::TERNARY },
+        { 17, "h.headerField & 13", 16, MatchField::EXACT },
+        { 18, "h.headerField & 13", 16, MatchField::TERNARY },
+    };
+
+    for (auto i = 0; i < igTable->match_fields_size(); i++) {
+        SCOPED_TRACE(expected[i].id);
+        EXPECT_EQ(expected[i].id, igTable->match_fields(i).id());
+        EXPECT_EQ(expected[i].name, igTable->match_fields(i).name());
+        EXPECT_EQ(expected[i].bitWidth, igTable->match_fields(i).bitwidth());
+        EXPECT_EQ(expected[i].matchType, igTable->match_fields(i).match_type());
+    }
+}
+
+TEST(P4Runtime, Digests) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<16> headerFieldA; bit<8> headerFieldB; }
+        struct Headers { Header h; }
+        struct Metadata { bit<3> metadataFieldA; bit<1> metadataFieldB; }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action generateDigest() {
+                // digest<T>() where T is a header.
+                digest(1, h.h);
+                // digest<T>() where T is a struct.
+                digest(2, m);
+                // digest<T>() where T is a tuple.
+                // XXX(seth): Right now this requires that the EliminateTuples
+                // pass has run; we may want to change that.
+                digest(3, { h.h.headerFieldA, m.metadataFieldB });
+            }
+            apply {
+                generateDigest();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+
+    auto* digestExtern = findExtern(*test, "digest");
+    ASSERT_TRUE(digestExtern != nullptr);
+    ASSERT_EQ(3, digestExtern->instances_size());
+
+    // Verify that that the digest() instances match the ones we expect from the
+    // program. Note that we don't check the resource type of the id (i.e., we
+    // mask off the first 8 bits) because extern instances haven't yet been
+    // assigned an "official" resource type.
+
+    // digest<T>() where T is a header.
+    {
+        auto& instance = digestExtern->instances(0);
+        EXPECT_EQ(std::string("Header"), instance.preamble().name());
+        EXPECT_EQ(0x0000B33Fu, instance.preamble().id() & 0x00ffffff);
+
+        ::p4::config::v1model::Digest digest;
+        instance.info().UnpackTo(&digest);
+        EXPECT_EQ(1u, digest.receiver());
+
+        // XXX(seth): There are actually three fields in this digest because
+        // `h.$valid$` is incorrectly included. We need to fix that.
+        ASSERT_EQ(3, digest.fields_size())
+          << "If you fixed the inclusion of $valid$ fields in digests, "
+             "please update this test.";
+
+        EXPECT_EQ(1u, digest.fields(0).id());
+        EXPECT_EQ(std::string("h.headerFieldA"), digest.fields(0).name());
+        EXPECT_EQ(16, digest.fields(0).bitwidth());
+
+        EXPECT_EQ(2u, digest.fields(1).id());
+        EXPECT_EQ(std::string("h.headerFieldB"), digest.fields(1).name());
+        EXPECT_EQ(8, digest.fields(1).bitwidth());
+    }
+
+    // digest<T>() where T is a struct.
+    {
+        auto& instance = digestExtern->instances(1);
+        EXPECT_EQ(std::string("Metadata"), instance.preamble().name());
+        EXPECT_EQ(0x0000D0C6u, instance.preamble().id() & 0x00ffffff);
+
+        ::p4::config::v1model::Digest digest;
+        instance.info().UnpackTo(&digest);
+        EXPECT_EQ(2u, digest.receiver());
+        ASSERT_EQ(2, digest.fields_size());
+
+        EXPECT_EQ(1u, digest.fields(0).id());
+        EXPECT_EQ(std::string("metadataFieldA"), digest.fields(0).name());
+        EXPECT_EQ(3, digest.fields(0).bitwidth());
+
+        EXPECT_EQ(2u, digest.fields(1).id());
+        EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
+        EXPECT_EQ(1, digest.fields(1).bitwidth());
+    }
+
+    // digest<T>() where T is a tuple.
+    {
+        // XXX(seth): The name is generated by EliminateTuples. We should do
+        // something nicer than this.
+        auto& instance = digestExtern->instances(2);
+        EXPECT_EQ(std::string("tuple_0"), instance.preamble().name());
+        EXPECT_EQ(0x00003620u, instance.preamble().id() & 0x00ffffff);
+
+        ::p4::config::v1model::Digest digest;
+        instance.info().UnpackTo(&digest);
+        EXPECT_EQ(3u, digest.receiver());
+        ASSERT_EQ(2, digest.fields_size());
+
+        EXPECT_EQ(1u, digest.fields(0).id());
+        EXPECT_EQ(std::string("h.headerFieldA"), digest.fields(0).name());
+        EXPECT_EQ(16, digest.fields(0).bitwidth());
+
+        EXPECT_EQ(2u, digest.fields(1).id());
+        EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
+        EXPECT_EQ(1, digest.fields(1).bitwidth());
+    }
+}
+
+}  // namespace Test
