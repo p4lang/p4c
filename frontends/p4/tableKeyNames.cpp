@@ -23,6 +23,10 @@ void KeyNameGenerator::error(const IR::Expression* expression) {
             expression);
 }
 
+void KeyNameGenerator::postorder(const IR::Expression* expression) {
+    error(expression);
+}
+
 void KeyNameGenerator::postorder(const IR::PathExpression* expression)
 { name.emplace(expression, expression->path->toString()); }
 
@@ -59,6 +63,14 @@ void KeyNameGenerator::postorder(const IR::Slice* expression) {
     if (!e0 || !e1 || !e2)
         return;
     name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
+}
+
+void KeyNameGenerator::postorder(const IR::BAnd* expression) {
+    cstring left = getName(expression->left);
+    if (!left) return;
+    cstring right = getName(expression->right);
+    if (!right) return;
+    name.emplace(expression, left + " & " + right);
 }
 
 void KeyNameGenerator::postorder(const IR::MethodCallExpression* expression) {
