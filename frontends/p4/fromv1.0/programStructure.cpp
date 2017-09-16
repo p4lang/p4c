@@ -692,24 +692,10 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                 rt.name = p4lib.exactMatch.Id();
             auto ce = conv.convert(e);
 
-            // If the key has a P4-14 mask, we add here a @name annotation.
-            // A mask generates a BAnd; a BAnd can only come from a mask.
-            const IR::Annotations* annos = IR::Annotations::empty;
-            if (ce->is<IR::BAnd>()) {
-                auto mask = ce->to<IR::BAnd>();
-                auto expr = mask->left;
-                if (mask->left->is<IR::Constant>())
-                    expr = mask->right;
-
-                P4::KeyNameGenerator kng(nullptr);
-                expr->apply(kng);
-                cstring anno = kng.getName(expr);
-                annos = annos->addAnnotation(IR::Annotation::nameAnnotation,
-                                             new IR::StringLiteral(key->srcInfo, anno));
-            }
             // Here we rely on the fact that the spelling of 'rt' is
             // the same in P4-14 and core.p4/v1model.p4.
-            auto keyComp = new IR::KeyElement(annos, ce, new IR::PathExpression(rt));
+            auto keyComp = new IR::KeyElement(IR::Annotations::empty, ce,
+                                              new IR::PathExpression(rt));
             key->push_back(keyComp);
         }
 
