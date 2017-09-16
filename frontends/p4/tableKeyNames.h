@@ -37,13 +37,13 @@ class KeyNameGenerator : public Inspector {
     explicit KeyNameGenerator(const TypeMap* typeMap) : typeMap(typeMap)
     { setName("KeyNameGenerator"); }
     void error(const IR::Expression* expression);
-    void postorder(const IR::Expression* expression) override
-    { error(expression); }
+    void postorder(const IR::Expression* expression) override;
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::Member* expression) override;
     void postorder(const IR::ArrayIndex* expression) override;
     void postorder(const IR::Constant* expression) override;
     void postorder(const IR::Slice* expression) override;
+    void postorder(const IR::BAnd* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
     cstring getName(const IR::Expression* expression) {
         return ::get(name, expression);
