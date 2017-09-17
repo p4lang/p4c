@@ -51,13 +51,27 @@ find_library(LIBGC_LIBRARIES NAMES gc libgc
 if(PC_LIBGC_VERSION)
     set(LIBGC_VERSION_STRING ${PC_LIBGC_VERSION})
 elseif(LIBGC_INCLUDE_DIR AND EXISTS "${LIBGC_INCLUDE_DIR}/gc/gc_version.h")
-    file(STRINGS "${LIBGC_INCLUDE_DIR}/gc/gc_version.h" libgc_version_str
+    file(STRINGS "${LIBGC_INCLUDE_DIR}/gc/gc_version.h" libgc_version_major
+        REGEX "^#define[\t ]+GC_TMP_VERSION_MAJOR[\t ]+[0-9]+.*")
+    file(STRINGS "${LIBGC_INCLUDE_DIR}/gc/gc_version.h" libgc_version_minor
+        REGEX "^#define[\t ]+GC_TMP_VERSION_MINOR[\t ]+[0-9]+.*")
+    file(STRINGS "${LIBGC_INCLUDE_DIR}/gc/gc_version.h" libgc_version_patch
         REGEX "^#define[\t ]+GC_TMP_VERSION_MICRO[\t ]+[0-9]+.*")
 
-    string(REGEX REPLACE "^#define[\t ]+GC_TMP_VERSION_MICRO[\t 0-9]+/\\*[\t ]+([0-9\\.]+)[\t ]+\\*/" "\\1"
-        # string(REGEX REPLACE "^#define[\t ]+GC_TMP_VERSION_MICRO[\t 0-9]+/\\* " ""
-        LIBGC_VERSION_STRING "${libgc_version_str}")
-    unset(libgc_version_str)
+    # some earlier versions do not put the full version as a comment
+    if (${libgc_version_patch})
+      string(REGEX REPLACE "^#define[\t ]+GC_TMP_VERSION_MICRO[\t 0-9]+/\\*[\t ]+([0-9\\.]+)[\t ]+\\*/" "\\1"
+        LIBGC_VERSION_STRING "${libgc_version_patch}")
+    else()
+      string(REGEX REPLACE "^#define[\t ]+GC_TMP_VERSION_MAJOR[\t ]+([0-9]+)" "\\1"
+        libgc_version_major "${libgc_version_major}")
+      string(REGEX REPLACE "^#define[\t ]+GC_TMP_VERSION_MINOR[\t ]+([0-9]+)" "\\1"
+        libgc_version_minor "${libgc_version_minor}")
+      set(LIBGC_VERSION_STRING "${libgc_version_major}.${libgc_version_minor}")
+    endif()
+    unset(libgc_version_major)
+    unset(libgc_version_minor)
+    unset(libgc_version_patch)
 endif()
 
 include(FindPackageHandleStandardArgs)
