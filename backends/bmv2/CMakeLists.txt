@@ -100,11 +100,13 @@ set (BMV2_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
   )
 
-# This test defines two lpm keys for a table.
-# Even though the P4 spec allows it, it doesn't really make sense in a switch
-# so we allow it to fail on BMv2.
 set (XFAIL_TESTS
+  # This test defines two lpm keys for a table.
+  # Even though the P4 spec allows it, it doesn't really make sense in a switch
+  # so we allow it to fail on BMv2.
   testdata/p4_14_samples/issue60.p4
+  # This test uses a feature currently unsupported in the BMv2 back-end.
+  testdata/p4_16_samples/issue907-bmv2.p4
   # Program checksum1-bmv2.p4 uses new verify_checksum and
   # update_checksum extern functions that were added but then reverted
   # until they can be deployed without breaking existing programs.
