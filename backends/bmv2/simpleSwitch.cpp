@@ -471,7 +471,12 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             modelError("%1%: expected 1 type argument", st);
             return;
         }
-        unsigned width = st->arguments->at(0)->width_bits();
+        auto regType = st->arguments->at(0);
+        if (!regType->is<IR::Type_Bits>()) {
+            ::error("%1%: Only registers with bit or int types are currently supported", eb);
+            return;
+        }
+        unsigned width = regType->width_bits();
         if (width == 0) {
             ::error("%1%: unknown width", st->arguments->at(0));
             return;
