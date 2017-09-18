@@ -247,14 +247,25 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
             LOG3("Inferred (up) type " << type << " for expression " << currentNode <<
                  " [" << currentNode->id <<"]");
     }
+    void checkBits(const IR::Node* node, const IR::Type* type) const {
+        if (type->is<IR::Type_Bits>())
+            return;
+        ::error("%1%: not defined on operands of type %2%", node, type);
+    }
+
     void postorder(IR::Operation_Binary *op) override {
         if (op->left->type->is<IR::Type_InfInt>()) {
+            checkBits(op, op->right->type);
             setType(op, op->right->type);
         } else if (op->right->type->is<IR::Type_InfInt>()) {
+            checkBits(op, op->left->type);
             setType(op, op->left->type);
         } else if (op->left->type == op->right->type) {
+            checkBits(op, op->left->type);
             setType(op, op->left->type);
         } else {
+            checkBits(op, op->left->type);
+            checkBits(op, op->right->type);
             auto *lt = op->left->type->to<IR::Type::Bits>();
             auto *rt = op->right->type->to<IR::Type::Bits>();
             if (lt && rt) {
