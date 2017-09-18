@@ -1128,6 +1128,8 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
     for (const auto &cfg_parse_state : cfg_parse_states) {
       const string parse_state_name = cfg_parse_state["name"].asString();
       ParseState *parse_state = current_parse_states[parse_state_name];
+      auto expected_transition_value_size = static_cast<size_t>(
+          parse_state->expected_switch_case_key_size());
       const Json::Value &cfg_transitions = cfg_parse_state["transitions"];
       for (const auto &cfg_transition : cfg_transitions) {
         // ensures compatibility with old JSON versions
@@ -1146,15 +1148,29 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           parse_state->set_default_switch_case(next_state);
         } else if (type == "hexstr") {
           const string value_hexstr = cfg_transition["value"].asString();
+          ByteContainer value(value_hexstr);
+          if (value.size() != expected_transition_value_size) {
+            throw json_exception(
+                EFormat() << "Parser transition value has incorrect width, "
+                          << "expected width is "
+                          << expected_transition_value_size << " bytes "
+                          << "but actual width is " << value.size() << " bytes",
+                cfg_transition);
+          }
           const auto &cfg_mask = cfg_transition["mask"];
           if (cfg_mask.isNull()) {
-            parse_state->add_switch_case(ByteContainer(value_hexstr),
-                                         next_state);
+            parse_state->add_switch_case(value, next_state);
           } else {
-            const string mask_hexstr = cfg_mask.asString();
-            parse_state->add_switch_case_with_mask(ByteContainer(value_hexstr),
-                                                   ByteContainer(mask_hexstr),
-                                                   next_state);
+            ByteContainer mask(cfg_mask.asString());
+            if (mask.size() != expected_transition_value_size) {
+              throw json_exception(
+                  EFormat() << "Parser transition mask has incorrect width, "
+                            << "expected width is "
+                            << expected_transition_value_size << " bytes "
+                            << "but actual width is " << mask.size()
+                            << " bytes", cfg_transition);
+            }
+            parse_state->add_switch_case_with_mask(value, mask, next_state);
           }
         } else if (type == "parse_vset") {
           const string vset_name = cfg_transition["value"].asString();

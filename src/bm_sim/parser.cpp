@@ -866,6 +866,14 @@ ParseState::set_default_switch_case(const ParseState *default_next) {
   default_next_state = default_next;
 }
 
+int
+ParseState::expected_switch_case_key_size() const {
+  int size = 0;
+  for (auto bitwidth : key_builder.get_bitwidths())
+    size += (bitwidth + 7) / 8;
+  return size;
+}
+
 const ParseState *
 ParseState::find_next_state(Packet *pkt, const char *data,
                             size_t *bytes_parsed) const {

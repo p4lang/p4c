@@ -273,6 +273,8 @@ class ParseState : public NamedP4Object {
 
   void set_default_switch_case(const ParseState *default_next);
 
+  int expected_switch_case_key_size() const;
+
   // Copy constructor
   ParseState(const ParseState& other) = delete;
 
