@@ -253,7 +253,7 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
         convertSimpleKey(keySet, value, mask);
         auto type = typeMap->getType(select->components.at(0), true);
-        return type->width_bits() / 8;
+        return ROUNDUP(type->width_bits(), 8);
     }
 }
 
