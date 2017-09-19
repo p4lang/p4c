@@ -34,6 +34,12 @@ class exprUses : public Inspector {
             if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[')
                 result = true; }
         return !result; }
+    bool preorder(const IR::Member *m) override {
+        if (look_for.endsWith(m->member)) {
+            if (exprUses(m->expr, look_for.before(look_for.findlast('.'))))
+                result = true;
+        }
+        return !result; }
     bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result; }
