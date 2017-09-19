@@ -763,7 +763,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<4> tmp_0;
+    bit<4> tmp_8;
     @name(".parse_all_int_meta_value_heders") state parse_all_int_meta_value_heders {
         packet.extract<int_switch_id_header_t>(hdr.int_switch_id_header);
         packet.extract<int_ingress_port_id_header_t>(hdr.int_ingress_port_id_header);
@@ -1017,8 +1017,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
-        tmp_0 = packet.lookahead<bit<4>>();
-        transition select(tmp_0[3:0]) {
+        tmp_8 = packet.lookahead<bit<4>>();
+        transition select(tmp_8[3:0]) {
             4w0x4: parse_mpls_inner_ipv4;
             4w0x6: parse_mpls_inner_ipv6;
             default: parse_eompls;
@@ -2963,16 +2963,6 @@ struct tuple_7 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> _process_hashes_tmp_9;
-    tuple_2 _process_hashes_tmp_10;
-    bit<16> _process_hashes_tmp_11;
-    tuple_3 _process_hashes_tmp_12;
-    bit<16> _process_hashes_tmp_13;
-    tuple_4 _process_hashes_tmp_14;
-    bit<16> _process_hashes_tmp_15;
-    tuple_5 _process_hashes_tmp_16;
-    bit<16> _process_hashes_tmp_17;
-    tuple_6 _process_hashes_tmp_18;
     @name("NoAction") action NoAction_114() {
     }
     @name("NoAction") action NoAction_115() {
@@ -4443,48 +4433,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_152();
     }
     @name(".compute_lkp_ipv4_hash") action _compute_lkp_ipv4_hash() {
-        _process_hashes_tmp_10.field_5 = meta.ipv4_metadata.lkp_ipv4_sa;
-        _process_hashes_tmp_10.field_6 = meta.ipv4_metadata.lkp_ipv4_da;
-        _process_hashes_tmp_10.field_7 = meta.l3_metadata.lkp_ip_proto;
-        _process_hashes_tmp_10.field_8 = meta.l3_metadata.lkp_l4_sport;
-        _process_hashes_tmp_10.field_9 = meta.l3_metadata.lkp_l4_dport;
-        hash<bit<16>, bit<16>, tuple_2, bit<32>>(_process_hashes_tmp_9, HashAlgorithm.crc16, 16w0, _process_hashes_tmp_10, 32w65536);
-        meta.hash_metadata.hash1 = _process_hashes_tmp_9;
-        _process_hashes_tmp_12.field_10 = meta.l2_metadata.lkp_mac_sa;
-        _process_hashes_tmp_12.field_11 = meta.l2_metadata.lkp_mac_da;
-        _process_hashes_tmp_12.field_12 = meta.ipv4_metadata.lkp_ipv4_sa;
-        _process_hashes_tmp_12.field_13 = meta.ipv4_metadata.lkp_ipv4_da;
-        _process_hashes_tmp_12.field_14 = meta.l3_metadata.lkp_ip_proto;
-        _process_hashes_tmp_12.field_15 = meta.l3_metadata.lkp_l4_sport;
-        _process_hashes_tmp_12.field_16 = meta.l3_metadata.lkp_l4_dport;
-        hash<bit<16>, bit<16>, tuple_3, bit<32>>(_process_hashes_tmp_11, HashAlgorithm.crc16, 16w0, _process_hashes_tmp_12, 32w65536);
-        meta.hash_metadata.hash2 = _process_hashes_tmp_11;
+        hash<bit<16>, bit<16>, tuple_2, bit<32>>(meta.hash_metadata.hash1, HashAlgorithm.crc16, 16w0, { meta.ipv4_metadata.lkp_ipv4_sa, meta.ipv4_metadata.lkp_ipv4_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_3, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.ipv4_metadata.lkp_ipv4_sa, meta.ipv4_metadata.lkp_ipv4_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
     }
     @name(".compute_lkp_ipv6_hash") action _compute_lkp_ipv6_hash() {
-        _process_hashes_tmp_14.field_17 = meta.ipv6_metadata.lkp_ipv6_sa;
-        _process_hashes_tmp_14.field_18 = meta.ipv6_metadata.lkp_ipv6_da;
-        _process_hashes_tmp_14.field_19 = meta.l3_metadata.lkp_ip_proto;
-        _process_hashes_tmp_14.field_20 = meta.l3_metadata.lkp_l4_sport;
-        _process_hashes_tmp_14.field_21 = meta.l3_metadata.lkp_l4_dport;
-        hash<bit<16>, bit<16>, tuple_4, bit<32>>(_process_hashes_tmp_13, HashAlgorithm.crc16, 16w0, _process_hashes_tmp_14, 32w65536);
-        meta.hash_metadata.hash1 = _process_hashes_tmp_13;
-        _process_hashes_tmp_16.field_22 = meta.l2_metadata.lkp_mac_sa;
-        _process_hashes_tmp_16.field_23 = meta.l2_metadata.lkp_mac_da;
-        _process_hashes_tmp_16.field_24 = meta.ipv6_metadata.lkp_ipv6_sa;
-        _process_hashes_tmp_16.field_25 = meta.ipv6_metadata.lkp_ipv6_da;
-        _process_hashes_tmp_16.field_26 = meta.l3_metadata.lkp_ip_proto;
-        _process_hashes_tmp_16.field_27 = meta.l3_metadata.lkp_l4_sport;
-        _process_hashes_tmp_16.field_28 = meta.l3_metadata.lkp_l4_dport;
-        hash<bit<16>, bit<16>, tuple_5, bit<32>>(_process_hashes_tmp_15, HashAlgorithm.crc16, 16w0, _process_hashes_tmp_16, 32w65536);
-        meta.hash_metadata.hash2 = _process_hashes_tmp_15;
+        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta.hash_metadata.hash1, HashAlgorithm.crc16, 16w0, { meta.ipv6_metadata.lkp_ipv6_sa, meta.ipv6_metadata.lkp_ipv6_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.ipv6_metadata.lkp_ipv6_sa, meta.ipv6_metadata.lkp_ipv6_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
     }
     @name(".compute_lkp_non_ip_hash") action _compute_lkp_non_ip_hash() {
-        _process_hashes_tmp_18.field_29 = meta.ingress_metadata.ifindex;
-        _process_hashes_tmp_18.field_30 = meta.l2_metadata.lkp_mac_sa;
-        _process_hashes_tmp_18.field_31 = meta.l2_metadata.lkp_mac_da;
-        _process_hashes_tmp_18.field_32 = meta.l2_metadata.lkp_mac_type;
-        hash<bit<16>, bit<16>, tuple_6, bit<32>>(_process_hashes_tmp_17, HashAlgorithm.crc16, 16w0, _process_hashes_tmp_18, 32w65536);
-        meta.hash_metadata.hash2 = _process_hashes_tmp_17;
+        hash<bit<16>, bit<16>, tuple_6, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, 32w65536);
     }
     @name(".computed_two_hashes") action _computed_two_hashes() {
         meta.intrinsic_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash1;
@@ -5045,45 +5002,45 @@ struct tuple_8 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
-    bool tmp_1;
-    bit<16> tmp_2;
-    bool tmp_4;
-    bit<16> tmp_5;
+    bool tmp_9;
+    bit<16> tmp_10;
+    bool tmp_12;
+    bit<16> tmp_13;
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     apply {
         if (hdr.inner_ipv4.ihl != 4w5) 
-            tmp_1 = false;
+            tmp_9 = false;
         else {
-            tmp_2 = inner_ipv4_checksum.get<tuple_8>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
-            tmp_1 = hdr.inner_ipv4.hdrChecksum == tmp_2;
+            tmp_10 = inner_ipv4_checksum.get<tuple_8>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
+            tmp_9 = hdr.inner_ipv4.hdrChecksum == tmp_10;
         }
-        if (tmp_1) 
+        if (tmp_9) 
             mark_to_drop();
         if (hdr.ipv4.ihl != 4w5) 
-            tmp_4 = false;
+            tmp_12 = false;
         else {
-            tmp_5 = ipv4_checksum.get<tuple_8>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-            tmp_4 = hdr.ipv4.hdrChecksum == tmp_5;
+            tmp_13 = ipv4_checksum.get<tuple_8>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+            tmp_12 = hdr.ipv4.hdrChecksum == tmp_13;
         }
-        if (tmp_4) 
+        if (tmp_12) 
             mark_to_drop();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_7;
-    bit<16> tmp_8;
+    bit<16> tmp_15;
+    bit<16> tmp_16;
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_2;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     apply {
         if (hdr.inner_ipv4.ihl == 4w5) {
-            tmp_7 = inner_ipv4_checksum_2.get<tuple_8>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
-            hdr.inner_ipv4.hdrChecksum = tmp_7;
+            tmp_15 = inner_ipv4_checksum_2.get<tuple_8>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
+            hdr.inner_ipv4.hdrChecksum = tmp_15;
         }
         if (hdr.ipv4.ihl == 4w5) {
-            tmp_8 = ipv4_checksum_2.get<tuple_8>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-            hdr.ipv4.hdrChecksum = tmp_8;
+            tmp_16 = ipv4_checksum_2.get<tuple_8>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+            hdr.ipv4.hdrChecksum = tmp_16;
         }
     }
 }

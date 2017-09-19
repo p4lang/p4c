@@ -108,6 +108,8 @@ bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
         if (!mi->is<ExternMethod>())
             return true;
         auto em = mi->to<ExternMethod>();
+        // TODO: this is wrong, there is no way a mid-end pass can depend on
+        // v1model.
         auto &v1model = P4V1::V1Model::instance;
         if (em->originalExternType->name.name == v1model.ck16.name)
             return false;
