@@ -37,6 +37,9 @@ class CompilerOptions : public Util::Options {
     bool close_input = false;
     static const char* defaultMessage;
 
+    // Checks if parsed options make sense with respect to each-other.
+    void validateOptions() const;
+
  protected:
     // Function that is returned by getDebugHook.
     void dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const;
@@ -79,6 +82,9 @@ class CompilerOptions : public Util::Options {
 
     // Write a P4Runtime control plane API description to the specified file.
     cstring p4RuntimeFile = nullptr;
+
+    // Write static table entries as a P4Runtime WriteRequest message to the specified file.
+    cstring p4RuntimeEntriesFile = nullptr;
 
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;

@@ -96,6 +96,10 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
+    registerOption("--p4runtime-entries-file", "file",
+                   [this](const char* arg) { p4RuntimeEntriesFile = arg; return true; },
+                   "Write static table entries as a P4Runtime WriteRequest message"
+                   "to the specified file.");
     registerOption("--p4runtime-format", "{binary,json,text}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "binary")) {
@@ -204,7 +208,16 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
         if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
             p4_14includePath = strdup(buffer); }
 
-    return Util::Options::process(argc, argv);
+    auto remainingOptions = Util::Options::process(argc, argv);
+    validateOptions();
+    return remainingOptions;
+}
+
+void CompilerOptions::validateOptions() const {
+    if (p4RuntimeFile.isNullOrEmpty() && !p4RuntimeEntriesFile.isNullOrEmpty()) {
+        ::warning("When '--p4runtime-entries-file' is used without '--p4runtime-file', "
+                  "it is ignored");
+    }
 }
 
 FILE* CompilerOptions::preprocess() {

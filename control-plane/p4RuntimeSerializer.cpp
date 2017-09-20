@@ -18,6 +18,7 @@ limitations under the License.
 // places a vector class in the global namespace, which breaks protobuf.
 #include "p4/config/p4info.pb.h"
 #include "p4/config/v1model.pb.h"
+#include "p4/p4runtime.pb.h"
 
 #include <boost/algorithm/string.hpp>  // NOLINT(*)
 #include <boost/optional.hpp>
@@ -94,6 +95,71 @@ explicitNameAnnotation(const IR::IAnnotated* item) {
     }
     return str->value;
 }
+
+namespace writers {
+
+using google::protobuf::Message;
+
+/// Serialize the protobuf @message to @destination in the binary protocol
+/// buffers format.
+static bool writeTo(const Message& message, std::ostream* destination) {
+    CHECK_NULL(destination);
+    if (!message.SerializeToOstream(destination)) return false;
+    destination->flush();
+    return true;
+}
+
+/// Serialize the protobuf @message to @destination in the JSON protocol buffers
+/// format. This is intended for debugging and testing.
+static bool writeJsonTo(const Message& message, std::ostream* destination) {
+    using namespace google::protobuf::util;
+    CHECK_NULL(destination);
+
+    // Serialize the JSON in a human-readable format.
+    JsonPrintOptions options;
+    options.add_whitespace = true;
+
+    std::string output;
+    if (MessageToJsonString(message, &output, options) != Status::OK) {
+        ::error("Failed to serialize protobuf message to JSON");
+        return false;
+    }
+
+    *destination << output;
+    if (!destination->good()) {
+        ::error("Failed to write JSON protobuf message to the output");
+        return false;
+    }
+
+    destination->flush();
+    return true;
+}
+
+/// Serialize the protobuf @message to @destination in the text protocol buffers
+/// format. This is intended for debugging and testing.
+static bool writeTextTo(const Message& message, std::ostream* destination) {
+    CHECK_NULL(destination);
+
+    // According to the protobuf documentation, it would be better to use Print
+    // with a FileOutputStream object for performance reasons. However all we
+    // have here is a std::ostream and performance is not a concern.
+    std::string output;
+    if (!google::protobuf::TextFormat::PrintToString(message, &output)) {
+        ::error("Failed to serialize protobuf message to text");
+        return false;
+    }
+
+    *destination << output;
+    if (!destination->good()) {
+        ::error("Failed to write text protobuf message to the output");
+        return false;
+    }
+
+    destination->flush();
+    return true;
+}
+
+}  // namespace writers
 
 /**
  * A path through a sequence of P4 data structures (headers, header stacks,
@@ -849,10 +915,10 @@ class P4RuntimeAnalyzer {
      * @return a P4Info message representing the program's control plane API.
      *         Never returns null.
      */
-    static const P4Info* analyze(const IR::P4Program* program,
-                                 const IR::ToplevelBlock* evaluatedProgram,
-                                 ReferenceMap* refMap,
-                                 TypeMap* typeMap);
+    static P4RuntimeAPI analyze(const IR::P4Program* program,
+                                const IR::ToplevelBlock* evaluatedProgram,
+                                ReferenceMap* refMap,
+                                TypeMap* typeMap);
 
     /// Set common fields between p4::config::Counter and p4::config::DirectCounter.
     template <typename Kind>
@@ -1729,72 +1795,239 @@ static void analyzeActionProfiles(P4RuntimeAnalyzer& analyzer,
     }
 }
 
-/// Serialize the control plane API to @destination as a message in the
-/// binary protocol buffers format.
-static void serializeToBinary(const ::p4::config::P4Info* p4Info,
-                              std::ostream* destination) {
-    CHECK_NULL(p4Info);
-    CHECK_NULL(destination);
-    if (!p4Info->SerializeToOstream(destination)) {
-        ::error("Failed to serialize the P4Runtime API to the output");
-        return;
-    }
-    destination->flush();
-}
+/// A converter which translates the 'const entries' for P4 tables (if any)
+/// into a P4Runtime WriteRequest message which can be used by a target to
+/// initialize its tables.
+class P4RuntimeEntriesConverter {
+ private:
+    friend class P4RuntimeAnalyzer;
 
-/// Serialize the control plane API to @destination as a message in the JSON
-/// protocol buffers format. This is intended for debugging and testing.
-static void serializeToJson(const ::p4::config::P4Info* p4Info,
-                            std::ostream* destination) {
-    using namespace google::protobuf::util;
-    CHECK_NULL(p4Info);
-    CHECK_NULL(destination);
+    P4RuntimeEntriesConverter(const P4RuntimeSymbolTable& symbols)
+        : entries(new p4::WriteRequest), symbols(symbols) { }
 
-    // Serialize the JSON in a human-readable format.
-    JsonPrintOptions options;
-    options.add_whitespace = true;
-
-    std::string output;
-    if (MessageToJsonString(*p4Info, &output, options) != Status::OK) {
-        ::error("Failed to serialize the P4Runtime API to JSON");
-        return;
+    /// @return the P4Runtime WriteRequest message generated by this analyzer.
+    const p4::WriteRequest* getEntries() const {
+        BUG_CHECK(entries != nullptr, "Didn't produce a P4Runtime WriteRequest object?");
+        return entries;
     }
 
-    *destination << output;
-    if (!destination->good()) {
-        ::error("Failed to write the P4Runtime JSON to the output");
-        return;
+    /// Appends the 'const entries' for the table to the WriteRequest message.
+    void addTableEntries(const IR::TableBlock* tableBlock,
+                         ReferenceMap* refMap,
+                         TypeMap* typeMap) {
+        CHECK_NULL(tableBlock);
+        auto table = tableBlock->container;
+
+        auto entriesList = table->getEntries();
+        if (entriesList == nullptr) return;
+
+        auto tableName = table->controlPlaneName();
+        auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE, tableName);
+
+        int entryPriority = 1;
+        auto needsPriority = tableNeedsPriority(table, refMap);
+        for (auto e : entriesList->entries) {
+            auto protoUpdate = entries->add_updates();
+            protoUpdate->set_type(p4::Update::INSERT);
+            auto protoEntity = protoUpdate->mutable_entity();
+            auto protoEntry = protoEntity->mutable_table_entry();
+            protoEntry->set_table_id(tableId);
+            addMatchKey(protoEntry, table, e->getKeys(), refMap);
+            addAction(protoEntry, e->getAction(), refMap);
+            // TODO(antonin): according to the P4 specification, "Entries in a
+            // table are matched in the program order, stopping at the first
+            // matching entry." Based on the definition of 'priority' in
+            // P4Runtime, we may need a different scheme to allocate priority
+            // values. For now this assumes that the entry with priority '1' has
+            // the highest priority.
+            if (needsPriority) protoEntry->set_priority(entryPriority++);
+        }
     }
 
-    destination->flush();
-}
-
-/// Serialize the control plane API to @destination as a message in the text
-/// protocol buffers format. This is intended for debugging and testing.
-static void serializeToText(const ::p4::config::P4Info* p4Info,
-                            std::ostream* destination) {
-    CHECK_NULL(p4Info);
-    CHECK_NULL(destination);
-
-    // According to the protobuf documentation, it would be better to use
-    // Print with a FileOutputStream object for performance reasons. However
-    // all we have here is a std::ostream and performance is not a concern.
-    std::string output;
-    if (!google::protobuf::TextFormat::PrintToString(*p4Info, &output)) {
-        ::error("Failed to serialize the P4Runtime API to text");
-        return;
+    /// Checks if the @table entries need to be assigned a priority, i.e. does
+    /// the match key for the table includes a ternary or range match?
+    bool tableNeedsPriority(const IR::P4Table* table, ReferenceMap* refMap) const {
+      for (auto e : table->getKey()->keyElements) {
+          auto matchType = getKeyMatchType(e, refMap);
+          if (matchType == P4CoreLibrary::instance.ternaryMatch.name ||
+              matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+              return true;
+          }
+      }
+      return false;
     }
 
-    *destination << output;
-    if (!destination->good()) {
-        ::error("Failed to write the P4Runtime text to the output");
-        return;
+    void addAction(p4::TableEntry* protoEntry,
+                   const IR::Expression* actionRef,
+                   ReferenceMap* refMap) const {
+        if (!actionRef->is<IR::MethodCallExpression>()) {
+            ::error("%1%: invalid action in entries list", actionRef);
+            return;
+        }
+        auto actionCall = actionRef->to<IR::MethodCallExpression>();
+        auto method = actionCall->method->to<IR::PathExpression>()->path;
+        auto decl = refMap->getDeclaration(method, true);
+        auto actionDecl = decl->to<IR::P4Action>();
+        auto actionName = actionDecl->controlPlaneName();
+        auto actionId = symbols.getId(P4RuntimeSymbolType::ACTION, actionName);
+
+        auto protoAction = protoEntry->mutable_action()->mutable_action();
+        protoAction->set_action_id(actionId);
+        int parameterIndex = 0;
+        int parameterId = 1;
+        for (auto arg : *actionCall->arguments) {
+            auto protoParam = protoAction->add_params();
+            protoParam->set_param_id(parameterId++);
+            auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
+            auto width = parameter->type->width_bits();
+            auto value = stringRepr(arg->to<IR::Constant>()->value, ROUNDUP(width, 8));
+            if (value == boost::none) continue;
+            protoParam->set_value(*value);
+        }
     }
 
-    destination->flush();
-}
+    void addMatchKey(p4::TableEntry* protoEntry,
+                     const IR::P4Table* table,
+                     const IR::ListExpression* keyset,
+                     ReferenceMap* refMap) const {
+        int keyIndex = 0;
+        int fieldId = 1;
+        for (auto k : keyset->components) {
+            auto tableKey = table->getKey()->keyElements.at(keyIndex++);
+            auto keyWidth = tableKey->expression->type->width_bits();
+            auto matchType = getKeyMatchType(tableKey, refMap);
 
-/* static */ const ::p4::config::P4Info*
+            auto protoMatch = protoEntry->add_match();
+            protoMatch->set_field_id(fieldId++);
+            if (matchType == P4CoreLibrary::instance.exactMatch.name) {
+                addExact(protoMatch, k, keyWidth);
+            } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
+                addLpm(protoMatch, k, keyWidth);
+            } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
+                addTernary(protoMatch, k, keyWidth);
+            } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+                addRange(protoMatch, k, keyWidth);
+            } else {
+                ::error("%1%: match type not supported by P4Runtime serializer", matchType);
+                continue;
+            }
+        }
+    }
+
+    void addExact(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+        auto bytes = ROUNDUP(keyWidth, 8);
+        auto protoExact = protoMatch->mutable_exact();
+        if (k->is<IR::Constant>()) {
+            auto value = stringRepr(k->to<IR::Constant>()->value, bytes);
+            if (value == boost::none) return;
+            protoExact->set_value(*value);
+        } else {
+            ::error("%1% invalid exact key expression", k);
+        }
+    }
+
+    void addLpm(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+        auto bytes = ROUNDUP(keyWidth, 8);
+        auto protoLpm = protoMatch->mutable_lpm();
+        if (k->is<IR::Mask>()) {
+            auto km = k->to<IR::Mask>();
+            auto value = stringRepr(km->left->to<IR::Constant>()->value, bytes);
+            if (value == boost::none) return;
+            protoLpm->set_value(*value);
+            auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
+            auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
+            unsigned long mask = km->right->to<IR::Constant>()->value.get_ui();
+            auto len = trailing_zeros(mask);
+            if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
+                ::error("%1% invalid mask for LPM key", k);
+                return;
+            }
+            protoLpm->set_prefix_len(keyWidth - len);
+        } else if (k->is<IR::Constant>()) {
+            auto value = stringRepr(k->to<IR::Constant>()->value, bytes);
+            if (value == boost::none) return;
+            protoLpm->set_value(*value);
+            protoLpm->set_prefix_len(keyWidth);
+        } else if (k->is<IR::DefaultExpression>()) {
+            protoLpm->set_value(*stringRepr(0, bytes));
+            protoLpm->set_prefix_len(0);
+        } else {
+            ::error("%1% invalid LPM key expression", k);
+        }
+    }
+
+    void addTernary(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+        auto bytes = ROUNDUP(keyWidth, 8);
+        auto protoTernary = protoMatch->mutable_ternary();
+        if (k->is<IR::Mask>()) {
+            auto km = k->to<IR::Mask>();
+            auto value = stringRepr(km->left->to<IR::Constant>()->value, bytes);
+            auto mask = stringRepr(km->right->to<IR::Constant>()->value, bytes);
+            if (value == boost::none || mask == boost::none) return;
+            protoTernary->set_value(*value);
+            protoTernary->set_mask(*mask);
+        } else if (k->is<IR::Constant>()) {
+            auto value = stringRepr(k->to<IR::Constant>()->value, bytes);
+            if (value == boost::none) return;
+            protoTernary->set_value(*value);
+            protoTernary->set_mask(*stringRepr(Util::mask(keyWidth), bytes));
+        } else if (k->is<IR::DefaultExpression>()) {
+            protoTernary->set_value(*stringRepr(0, bytes));
+            protoTernary->set_mask(*stringRepr(0, bytes));
+        } else {
+            ::error("%1% invalid ternary key expression", k);
+        }
+    }
+
+    void addRange(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+        auto bytes = ROUNDUP(keyWidth, 8);
+        auto protoRange = protoMatch->mutable_range();
+        if (k->is<IR::Range>()) {
+            auto kr = k->to<IR::Range>();
+            auto start = stringRepr(kr->left->to<IR::Constant>()->value, bytes);
+            auto end = stringRepr(kr->right->to<IR::Constant>()->value, bytes);
+            if (start == boost::none || end == boost::none) return;
+            protoRange->set_low(*start);
+            protoRange->set_high(*end);
+        } else if (k->is<IR::DefaultExpression>()) {
+            protoRange->set_low(*stringRepr(0, bytes));
+            protoRange->set_high(*stringRepr((1 << keyWidth)-1, bytes));
+        } else {
+            ::error("%1% invalid range key expression", k);
+        }
+    }
+
+    cstring getKeyMatchType(const IR::KeyElement* ke, ReferenceMap* refMap) const {
+        auto path = ke->matchType->path;
+        auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
+        BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+        return mt->name.name;
+    }
+
+    boost::optional<std::string> stringRepr(mpz_class value, int bytes) const {
+        if (value < 0) {
+            ::error("%1%: P4Runtime does not support negative values in match key", value);
+            return boost::none;
+        }
+        BUG_CHECK(bytes > 0, "Cannot have match fields with width 0");
+        auto bytes_required = [](mpz_class v) {
+            return ROUNDUP(mpz_sizeinbase(v.get_mpz_t(), 2), 8);
+        };
+        BUG_CHECK(static_cast<size_t>(bytes) >= bytes_required(value),
+                  "Cannot represent %1% on %2% bytes", value, bytes);
+        std::vector<char> data(bytes);
+        mpz_export(data.data(), NULL, 1 /* big endian word */, bytes,
+                   1 /* big endian bytes */, 0 /* full words */, value.get_mpz_t());
+        return std::string(data.begin(), data.end());
+    }
+
+    /// We represent all static table entries as one P4Runtime WriteRequest object
+    p4::WriteRequest *entries;
+    /// The symbols used in the API and their ids.
+    const P4RuntimeSymbolTable& symbols;
+};
+
+/* static */ P4RuntimeAPI
 P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
                            const IR::ToplevelBlock* evaluatedProgram,
                            ReferenceMap* refMap,
@@ -1838,7 +2071,15 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
         }
     });
 
-    return analyzer.getP4Info();
+    P4RuntimeEntriesConverter entriesConverter(symbols);
+    forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
+        if (block->is<IR::TableBlock>())
+            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap, typeMap);
+    });
+
+    auto* p4Info = analyzer.getP4Info();
+    auto* p4Entries = entriesConverter.getEntries();
+    return P4RuntimeAPI{p4Info, p4Entries};
 }
 
 }  // namespace ControlPlaneAPI
@@ -1848,20 +2089,47 @@ P4RuntimeAPI generateP4Runtime(const IR::P4Program* program,
                                ReferenceMap* refMap,
                                TypeMap* typeMap) {
     using namespace ControlPlaneAPI;
-    auto* p4Info = P4RuntimeAnalyzer::analyze(program, evaluatedProgram,
-                                              refMap, typeMap);
-    return P4RuntimeAPI{p4Info};
+    return P4RuntimeAnalyzer::analyze(program, evaluatedProgram, refMap, typeMap);
 }
 
-void P4RuntimeAPI::serializeTo(std::ostream* destination, P4RuntimeFormat format) {
+void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat format) {
     using namespace ControlPlaneAPI;
 
+    bool success = true;
     // Write the serialization out in the requested format.
     switch (format) {
-        case P4RuntimeFormat::BINARY: serializeToBinary(p4Info, destination); break;
-        case P4RuntimeFormat::JSON: serializeToJson(p4Info, destination); break;
-        case P4RuntimeFormat::TEXT: serializeToText(p4Info, destination); break;
+        case P4RuntimeFormat::BINARY:
+            success = writers::writeTo(*p4Info, destination);
+            break;
+        case P4RuntimeFormat::JSON:
+            success = writers::writeJsonTo(*p4Info, destination);
+            break;
+        case P4RuntimeFormat::TEXT:
+            success = writers::writeTextTo(*p4Info, destination);
+            break;
     }
+    if (!success)
+        ::error("Failed to serialize the P4Runtime API to the output");
+}
+
+void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat format) {
+    using namespace ControlPlaneAPI;
+
+    bool success = true;
+    // Write the serialization out in the requested format.
+    switch (format) {
+        case P4RuntimeFormat::BINARY:
+            success = writers::writeTo(*entries, destination);
+            break;
+        case P4RuntimeFormat::JSON:
+            success = writers::writeJsonTo(*entries, destination);
+            break;
+        case P4RuntimeFormat::TEXT:
+            success = writers::writeTextTo(*entries, destination);
+            break;
+    }
+    if (!success)
+        ::error("Failed to serialize the P4Runtime static table entries to the output");
 }
 
 /** @} */  /* end group control_plane */
