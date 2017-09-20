@@ -18,6 +18,7 @@ limitations under the License.
 // places a vector class in the global namespace, which breaks protobuf.
 #include "control-plane/p4/config/p4info.pb.h"  // NOLINT
 #include "control-plane/p4/config/v1model.pb.h"  // NOLINT
+#include "control-plane/p4/p4runtime.pb.h"  // NOLINT
 
 #include <map>  // NOLINT
 #include <tuple>  // NOLINT
@@ -33,7 +34,6 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/eliminateTuples.h"
 #include "midend/local_copyprop.h"
-#include "p4/p4runtime.pb.h"
 #include "PI/pi_base.h"
 
 namespace Test {
