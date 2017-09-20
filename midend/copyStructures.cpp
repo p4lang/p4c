@@ -22,9 +22,10 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
     auto ltype = typeMap->getType(statement->left, true);
     if (ltype->is<IR::Type_StructLike>()) {
         if (statement->right->is<IR::MethodCallExpression>()) {
-            ::error("%1%: functions or methods returning structures "
-                    "are not supported on this target",
-                    statement->right);
+            if (errorOnMethodCall)
+                ::error("%1%: functions or methods returning structures "
+                        "are not supported on this target",
+                        statement->right);
             return statement;
         }
 
