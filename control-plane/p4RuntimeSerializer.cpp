@@ -1891,12 +1891,14 @@ class P4RuntimeEntriesConverter {
                      const IR::ListExpression* keyset,
                      ReferenceMap* refMap) const {
         int keyIndex = 0;
+        int fieldId = 1;
         for (auto k : keyset->components) {
             auto tableKey = table->getKey()->keyElements.at(keyIndex++);
             auto keyWidth = tableKey->expression->type->width_bits();
             auto matchType = getKeyMatchType(tableKey, refMap);
 
             auto protoMatch = protoEntry->add_match();
+            protoMatch->set_field_id(fieldId++);
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
                 addExact(protoMatch, k, keyWidth);
             } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {

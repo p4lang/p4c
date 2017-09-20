@@ -32,6 +32,8 @@ limitations under the License.
 #include "helpers.h"
 #include "ir/ir.h"
 #include "midend/eliminateTuples.h"
+#include "midend/local_copyprop.h"
+#include "p4/p4runtime.pb.h"
 #include "PI/pi_base.h"
 
 namespace Test {
@@ -54,7 +56,10 @@ createP4RuntimeTestCase(const std::string& source,
     PassManager p4RuntimeFixups = {
         new BMV2::SynthesizeValidField(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap),
+        // Run TypeChecking with updateExpressions = true to ensure that the
+        // type field is correct. Otherwise a lot of code which relies on
+        // calling the width_bits() method in P4RuntimeAnalyzer will misbehave.
+        new P4::TypeChecking(&refMap, &typeMap, true /* = updateExpressions */),
         evaluator
     };
 
@@ -100,6 +105,19 @@ const ::p4::config::Extern* findExtern(const P4::P4RuntimeAPI& analysis,
     });
     if (desiredExtern == externs.end()) return nullptr;
     return &*desiredExtern;
+}
+
+/// @return the P4Runtime representation of the action with the given name, or
+/// null if none is found.
+const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
+                                       const std::string& name) {
+    auto& actions = analysis.p4Info->actions();
+    auto desiredAction = std::find_if(actions.begin(), actions.end(),
+                                     [&](const ::p4::config::Action& action) {
+        return action.preamble().name() == name;
+    });
+    if (desiredAction == actions.end()) return nullptr;
+    return &*desiredAction;
 }
 
 }  // namespace
@@ -606,6 +624,99 @@ TEST(P4Runtime, Digests) {
         EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
         EXPECT_EQ(1, digest.fields(1).bitwidth());
     }
+}
+
+TEST(P4Runtime, StaticTableEntries) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<8> hfA; bit<16> hfB; }
+        struct Headers { Header h; }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action a() { sm.egress_spec = 0; }
+            action a_with_control_params(bit<9> x) { sm.egress_spec = x; }
+
+            table t_exact_ternary {
+                key = { h.h.hfA : exact; h.h.hfB : ternary; }
+                actions = { a; a_with_control_params; }
+                default_action = a;
+                const entries = {
+                    (0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
+                    (0x02, 0x1181           ) : a_with_control_params(2);
+                    (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
+                    (0x04, _                ) : a_with_control_params(4);
+                }
+            }
+            apply { t_exact_ternary.apply(); }
+        }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+
+    auto table = findTable(*test, "t_exact_ternary");
+    ASSERT_TRUE(table != nullptr);
+    auto action = findAction(*test, "a_with_control_params");
+    ASSERT_TRUE(action != nullptr);
+    unsigned int hfAId = 1;
+    unsigned int hfBId = 2;
+    unsigned int xId = 1;
+
+    auto entries = test->entries;
+    const auto& updates = entries->updates();
+    ASSERT_EQ(4, updates.size());
+    int priority = 0;
+    auto check_entry = [&](const p4::Update& update,
+                           const std::string& exact_v,
+                           const std::string& ternary_v,
+                           const std::string& ternary_mask,
+                           const std::string& param_v) {
+        EXPECT_EQ(p4::Update::INSERT, update.type());
+        const auto& protoEntry = update.entity().table_entry();
+        EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
+
+        ASSERT_EQ(2, protoEntry.match().size());
+        const auto& mfA = protoEntry.match().Get(0);
+        EXPECT_EQ(hfAId, mfA.field_id());
+        EXPECT_EQ(exact_v, mfA.exact().value());
+        const auto& mfB = protoEntry.match().Get(1);
+        EXPECT_EQ(hfBId, mfB.field_id());
+        EXPECT_EQ(ternary_v, mfB.ternary().value());
+        EXPECT_EQ(ternary_mask, mfB.ternary().mask());
+
+        const auto& protoAction = protoEntry.action().action();
+        EXPECT_EQ(action->preamble().id(), protoAction.action_id());
+        ASSERT_EQ(1, protoAction.params().size());
+        const auto& param = protoAction.params().Get(0);
+        EXPECT_EQ(xId, param.param_id());
+        EXPECT_EQ(param_v, param.value());
+
+        // increasing numerical priority, i.e. decreasing logical priority
+        EXPECT_LT(priority, protoEntry.priority());
+        priority = protoEntry.priority();
+    };
+    // We assume that the entries are generated in the same order as they appear
+    // in the P4 program
+    check_entry(updates.Get(0), "\x01", "\x11\x11", std::string("\x00\x0f", 2),
+                std::string("\x00\x01", 2));
+    check_entry(updates.Get(1), "\x02", "\x11\x81", "\xff\xff",
+                std::string("\x00\x02", 2));
+    check_entry(updates.Get(2), "\x03", "\x11\x11", std::string("\xf0\x00", 2),
+                std::string("\x00\x03", 2));
+    check_entry(updates.Get(3), "\x04", std::string("\x00\x00", 2),
+                std::string("\x00\x00", 2), std::string("\x00\x04", 2));
 }
 
 }  // namespace Test
