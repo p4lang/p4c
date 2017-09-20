@@ -58,10 +58,8 @@ extern "C" int GC_print_stats;
 #endif /* HAVE_GC_PRINT_STATS */
 
 static void gc_callback() {
-    if (Log::verbose())
-        std::clog << "****** GC called ****** (heap size " << GC_get_heap_size() << ")";
-
     if (Log::verbosity() >= 2) {
+        std::clog << "****** GC called ****** (heap size " << GC_get_heap_size() << ")";
         size_t count;
         std::clog << "cstring cache size " << cstring::cache_size(count)
                   << " (count=" << count << ")";
