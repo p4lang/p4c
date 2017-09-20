@@ -200,9 +200,6 @@ set (FRONTEND_SOURCES
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${v1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${p4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
-add_library (frontend STATIC ${FRONTEND_SOURCES} ${EXTENSION_FRONTEND_SOURCES})
-add_dependencies (frontend genIR)
-add_dependencies (frontend mkp4dirs mkv1dirs)
 
 set (FRONTEND_CPPLINT_FILES
   ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
@@ -210,3 +207,9 @@ set (FRONTEND_CPPLINT_FILES
   ${V1_FRONTEND_SRCS} ${V1_FRONTEND_HDRS}
   ${PARSERS_SRCS} ${PARSERS_HDRS})
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${FRONTEND_CPPLINT_FILES}")
+
+build_unified(FRONTEND_SOURCES)
+build_unified(EXTENSION_FRONTEND_SOURCES)
+add_library (frontend STATIC ${FRONTEND_SOURCES} ${EXTENSION_FRONTEND_SOURCES})
+add_dependencies (frontend genIR)
+add_dependencies (frontend mkp4dirs mkv1dirs)

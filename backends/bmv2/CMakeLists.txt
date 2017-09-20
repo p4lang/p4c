@@ -17,6 +17,7 @@
 
 # sources for backend executable
 set (BMV2_SRCS bmv2.cpp)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SRCS}")
 
 set (BMV2_BACKEND_SRCS
   analyzer.cpp
@@ -66,17 +67,17 @@ set (BMV2_BACKEND_HDRS
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_SRCS}")
 
+build_unified(BMV2_BACKEND_SRCS)
 add_library(bmv2backend ${BMV2_BACKEND_SRCS})
 add_dependencies(bmv2backend genIR)
 
+build_unified(BMV2_SRCS)
 add_executable(p4c-bm2-ss ${BMV2_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
-
-set (BMV2_SOURCES ${BMV2_BACKEND_SRCS} ${BMV2_SRCS} ${BMV2_BACKEND_HDRS})
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SOURCES}")
 
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we

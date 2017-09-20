@@ -22,6 +22,9 @@ set (P4TEST_HDRS
   midend.h
   )
 
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${P4TEST_SRCS};${P4TEST_HDRS}")
+
+build_unified(P4TEST_SRCS ALL)
 add_executable(p4test ${P4TEST_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4test ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4test genIR)
@@ -38,8 +41,6 @@ add_custom_target(linkp4test
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   )
 add_dependencies(p4c_driver linkp4test)
-
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${P4TEST_SRCS};${P4TEST_HDRS}")
 
 # Tests
 

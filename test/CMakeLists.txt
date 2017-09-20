@@ -54,23 +54,33 @@ set (GTEST_UNITTEST_HEADERS
   gtest/helpers.h
   )
 
-set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_UNITTEST_SOURCES} ${GTEST_UNITTEST_HEADERS})
+# Add the non-backend-specific unit tests to cpplint.
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${GTEST_UNITTEST_SOURCES};${GTEST_UNITTEST_HEADERS}")
 
-set (GTESTP4C_SOURCES
+# Combine the executable and the non-backend-specific unit tests into a single
+# unified compilation group.
+set (GTEST_BASE_SOURCES
   gtest/gtestp4c.cpp
-  ${GTEST_SOURCES}
-  )
+  ${GTEST_UNITTEST_SOURCES}
+)
+build_unified(GTEST_BASE_SOURCES)
 
-# Build `gtestp4c`, which will contain all of our tests. Makefiles can add tests
-# to $(GTEST_SOURCES) to include them in the test executable.
-# Makefiles can add libraries to $(GTEST_LDADD) to include them in the test
-# executable.
+# Merge the base sources with the tests added to GTEST_SOURCES by specific
+# backends or by extensions. We can't assume that one extension's GTests can be
+# unified with another's, so we can't handle unified compilation transparently
+# for all GTests.
+# XXX(seth): The current approach is an awkward fit for cmake anyway. We should
+# restructure backend-specific GTests to live in their own libraries, and just
+# link the libraries in.
+set (GTESTP4C_SOURCES ${GTEST_SOURCES} ${GTEST_BASE_SOURCES})
+
+# Build `gtestp4c`, which will contain all of our tests. Backends and extensions
+# can add GTests to `GTEST_SOURCES` to include them in the test executable. They
+# can also link in additional libraries, if needed, by adding them to
+# `GTEST_LDADD`.
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
 target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
 
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
 set_tests_properties (gtestp4c PROPERTIES LABELS "gtest")
-
-# add to cpplint
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${GTESTP4C_SOURCES}")
