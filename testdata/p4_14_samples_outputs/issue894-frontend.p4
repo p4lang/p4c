@@ -107,10 +107,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp;
-    bit<32> tmp_0;
-    bit<16> tmp_1;
-    bit<32> tmp_2;
     @name(".heavy_hitter_counter1") register<bit<16>>(32w16) heavy_hitter_counter1_0;
     @name(".heavy_hitter_counter2") register<bit<16>>(32w16) heavy_hitter_counter2_0;
     @name("._drop") action _drop_1() {
@@ -126,15 +122,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_heavy_hitter_count") action set_heavy_hitter_count_0() {
         hash<bit<16>, bit<16>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>>, bit<32>>(meta.custom_metadata.hash_val1, HashAlgorithm.csum16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        tmp_0 = (bit<32>)meta.custom_metadata.hash_val1;
-        heavy_hitter_counter1_0.read(tmp, tmp_0);
-        meta.custom_metadata.count_val1 = tmp;
+        heavy_hitter_counter1_0.read(meta.custom_metadata.count_val1, (bit<32>)meta.custom_metadata.hash_val1);
         meta.custom_metadata.count_val1 = meta.custom_metadata.count_val1 + 16w1;
         heavy_hitter_counter1_0.write((bit<32>)meta.custom_metadata.hash_val1, meta.custom_metadata.count_val1);
         hash<bit<16>, bit<16>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>>, bit<32>>(meta.custom_metadata.hash_val2, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        tmp_2 = (bit<32>)meta.custom_metadata.hash_val2;
-        heavy_hitter_counter2_0.read(tmp_1, tmp_2);
-        meta.custom_metadata.count_val2 = tmp_1;
+        heavy_hitter_counter2_0.read(meta.custom_metadata.count_val2, (bit<32>)meta.custom_metadata.hash_val2);
         meta.custom_metadata.count_val2 = meta.custom_metadata.count_val2 + 16w1;
         heavy_hitter_counter2_0.write((bit<32>)meta.custom_metadata.hash_val2, meta.custom_metadata.count_val2);
     }
@@ -198,23 +190,23 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
-    bit<16> tmp_3;
-    bool tmp_4;
+    bit<16> tmp;
+    bool tmp_0;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
     apply {
-        tmp_3 = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tmp_4 = hdr.ipv4.hdrChecksum == tmp_3;
-        if (tmp_4) 
+        tmp = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        tmp_0 = hdr.ipv4.hdrChecksum == tmp;
+        if (tmp_0) 
             mark_to_drop();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_5;
+    bit<16> tmp_1;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
     apply {
-        tmp_5 = ipv4_checksum_1.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        hdr.ipv4.hdrChecksum = tmp_5;
+        tmp_1 = ipv4_checksum_1.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        hdr.ipv4.hdrChecksum = tmp_1;
     }
 }
 

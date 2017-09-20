@@ -117,8 +117,6 @@ struct tuple_0 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_6;
-    bit<16> tmp_8;
     @name("NoAction") action NoAction_1() {
     }
     @name("NoAction") action NoAction_7() {
@@ -148,15 +146,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_heavy_hitter_count") action set_heavy_hitter_count_0() {
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.custom_metadata.hash_val1, HashAlgorithm.csum16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        heavy_hitter_counter1.read(tmp_6, (bit<32>)meta.custom_metadata.hash_val1);
-        meta.custom_metadata.count_val1 = tmp_6;
-        meta.custom_metadata.count_val1 = tmp_6 + 16w1;
-        heavy_hitter_counter1.write((bit<32>)meta.custom_metadata.hash_val1, tmp_6 + 16w1);
+        heavy_hitter_counter1.read(meta.custom_metadata.count_val1, (bit<32>)meta.custom_metadata.hash_val1);
+        meta.custom_metadata.count_val1 = meta.custom_metadata.count_val1 + 16w1;
+        heavy_hitter_counter1.write((bit<32>)meta.custom_metadata.hash_val1, meta.custom_metadata.count_val1);
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.custom_metadata.hash_val2, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        heavy_hitter_counter2.read(tmp_8, (bit<32>)meta.custom_metadata.hash_val2);
-        meta.custom_metadata.count_val2 = tmp_8;
-        meta.custom_metadata.count_val2 = tmp_8 + 16w1;
-        heavy_hitter_counter2.write((bit<32>)meta.custom_metadata.hash_val2, tmp_8 + 16w1);
+        heavy_hitter_counter2.read(meta.custom_metadata.count_val2, (bit<32>)meta.custom_metadata.hash_val2);
+        meta.custom_metadata.count_val2 = meta.custom_metadata.count_val2 + 16w1;
+        heavy_hitter_counter2.write((bit<32>)meta.custom_metadata.hash_val2, meta.custom_metadata.count_val2);
     }
     @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table {
         actions = {
@@ -232,21 +228,21 @@ struct tuple_1 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
-    bit<16> tmp_10;
+    bit<16> tmp_2;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     apply {
-        tmp_10 = ipv4_checksum.get<tuple_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        if (hdr.ipv4.hdrChecksum == tmp_10) 
+        tmp_2 = ipv4_checksum.get<tuple_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        if (hdr.ipv4.hdrChecksum == tmp_2) 
             mark_to_drop();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_12;
+    bit<16> tmp_4;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     apply {
-        tmp_12 = ipv4_checksum_2.get<tuple_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        hdr.ipv4.hdrChecksum = tmp_12;
+        tmp_4 = ipv4_checksum_2.get<tuple_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        hdr.ipv4.hdrChecksum = tmp_4;
     }
 }
 

@@ -3,9 +3,6 @@ uninit.p4(35): warning: h may not be completely initialized
              ^
 uninit.p4(36): warning: h.data2 may be uninitialized
         g(h.data2, g(h.data2, h.data2)); // uninitialized
-          ^^^^^^^
-uninit.p4(36): warning: h.data2 may be uninitialized
-        g(h.data2, g(h.data2, h.data2)); // uninitialized
                      ^^^^^^^
 uninit.p4(36): warning: h.data2 may be uninitialized
         g(h.data2, g(h.data2, h.data2)); // uninitialized
