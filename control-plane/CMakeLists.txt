@@ -82,14 +82,15 @@ set (CONTROLPLANE_HDRS
   p4RuntimeSerializer.h
   )
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/PI/include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
-set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
-add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
-target_link_libraries (controlplane ${PROTOBUF_LIBRARY})
-add_dependencies (controlplane mkP4configdir genIR)
-
 # exclude p4RuntimeSerializer.cpp because it is has issues with
 # include order. It would be nice to implement region-based NOLINT to
 # handle this case.
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS}")
+
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/PI/include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
+set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
+build_unified(CONTROLPLANE_SOURCES)
+add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
+target_link_libraries (controlplane ${PROTOBUF_LIBRARY})
+add_dependencies (controlplane mkP4configdir genIR)

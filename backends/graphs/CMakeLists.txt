@@ -14,10 +14,16 @@
 
 set (GRAPHS_SRCS
   graphs.cpp
-  controls.h
   controls.cpp
   )
 
+set (GRAPHS_HDRS
+  controls.h
+  )
+
+add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${GRAPHS_SRCS};${GRAPHS_HDRS}")
+
+build_unified(GRAPHS_SRCS ALL)
 add_executable(p4c-graphs ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4c-graphs ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-graphs genIR)
@@ -31,5 +37,3 @@ add_custom_target(linkgraphs
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-graphs ${P4C_BINARY_DIR}/p4c-graphs
   )
 add_dependencies(p4c_driver linkgraphs)
-
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${GRAPHS_SRCS}")

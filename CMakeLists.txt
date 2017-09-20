@@ -36,6 +36,7 @@ OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suit
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 
 include(P4CUtils)
+include(UnifiedBuild)
 
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
