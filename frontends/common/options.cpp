@@ -208,7 +208,16 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
         if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
             p4_14includePath = strdup(buffer); }
 
-    return Util::Options::process(argc, argv);
+    auto remainingOptions = Util::Options::process(argc, argv);
+    validateOptions();
+    return remainingOptions;
+}
+
+void CompilerOptions::validateOptions() const {
+    if (p4RuntimeFile.isNullOrEmpty() && !p4RuntimeEntriesFile.isNullOrEmpty()) {
+        ::warning("When '--p4runtime-entries-file' is used without '--p4runtime-file', "
+                  "it is ignored");
+    }
 }
 
 FILE* CompilerOptions::preprocess() {

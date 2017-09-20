@@ -37,6 +37,9 @@ class CompilerOptions : public Util::Options {
     bool close_input = false;
     static const char* defaultMessage;
 
+    // Checks if parsed options make sense with respect to each-other.
+    void validateOptions() const;
+
  protected:
     // Function that is returned by getDebugHook.
     void dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const;
