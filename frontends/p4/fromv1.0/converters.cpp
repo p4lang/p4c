@@ -983,6 +983,36 @@ class AdjustLengths : public Transform {
         return cast;
     }
 };
+
+/// Detects whether there are two declarations in the P4-14 program
+/// with the same name and for the same kind of object.
+class DetectDuplicates: public Inspector {
+ public:
+    DetectDuplicates() { setName("DetectDuplicates"); }
+
+    bool preorder(const IR::V1Program* program) override {
+        auto &map = program->scope;;
+        auto firstWithKey = map.begin();
+        while (firstWithKey != map.end()) {
+            auto key = firstWithKey->first;
+            auto range = map.equal_range(key);
+            for (auto s = range.first; s != range.second; s++) {
+                auto n = s;
+                for (n++; n != range.second; n++) {
+                    auto e1 = s->second;
+                    auto e2 = n->second;
+                    if (e1->node_type_name() == e2->node_type_name())
+                        ::error("%1%: same name as %2%", e1, e2);
+                }
+            }
+            while (firstWithKey != map.end() && firstWithKey->first == key)
+                ++firstWithKey;
+        }
+        // prune; we're done; everything is top-level
+        return false;
+    }
+};
+
 }  // namespace
 
 
@@ -994,6 +1024,7 @@ Converter::Converter() {
     structure.populateOutputNames();
 
     // Discover types using P4-14 type-checker
+    passes.emplace_back(new DetectDuplicates());
     passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
     passes.emplace_back(new CheckHeaderTypes());
     passes.emplace_back(new AdjustLengths());
