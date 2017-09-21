@@ -1005,8 +1005,7 @@ class DetectDuplicates: public Inspector {
                         ::error("%1%: same name as %2%", e1, e2);
                 }
             }
-            while (firstWithKey != map.end() && firstWithKey->first == key)
-                ++firstWithKey;
+            firstWithKey = range.second;
         }
         // prune; we're done; everything is top-level
         return false;
