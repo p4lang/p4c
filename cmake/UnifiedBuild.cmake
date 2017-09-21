@@ -44,11 +44,11 @@ function(write_chunk_file chunk_filename sources)
       set(source_abs_path "${CMAKE_CURRENT_SOURCE_DIR}/${source_file}")
     endif()
 
-    # Convert it to a path relative to the root of the P4C source tree. It's
+    # Convert it to a path relative to the root of the project source tree. It's
     # important to avoid absolute paths in generated C++ code; including them
     # will prevent ccache from reusing results between different checkouts of
     # the same repo.
-    file(RELATIVE_PATH source_rel_path ${P4C_SOURCE_DIR} ${source_abs_path})
+    file(RELATIVE_PATH source_rel_path ${PROJECT_SOURCE_DIR} ${source_abs_path})
 
     set(include_directive "#include \"${source_rel_path}\"\n")
     string(CONCAT chunk_contents ${chunk_contents} ${include_directive})
