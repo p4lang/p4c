@@ -83,6 +83,7 @@ test() {
     p4::SetForwardingPipelineConfigRequest request;
     request.set_action(
         p4::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
+    set_election_id(request.mutable_election_id());
     auto config = request.add_configs();
     config->set_device_id(dev_id);
     config->set_allocated_p4info(&p4info);
