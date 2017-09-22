@@ -1057,7 +1057,8 @@ class P4RuntimeAnalyzer {
 
             auto paramType = typeMap->getType(actionParam, true);
             if (!paramType->is<IR::Type_Bits>()) {
-                ::error("Action %1% has a type which is not bit<> or int<>", actionParam);
+                ::error("Action parameter %1% has a type which is not bit<> or int<>",
+                        actionParam);
                 continue;
             }
             param->set_bitwidth(paramType->width_bits());
