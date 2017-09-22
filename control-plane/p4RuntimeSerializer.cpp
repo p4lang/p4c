@@ -1638,8 +1638,8 @@ static bool getSupportsTimeout(const IR::P4Table* table) {
     return expr->to<IR::BoolLiteral>()->value;
 }
 
-static std::vector<ActionRef> getActionRefs(const IR::P4Table* table, ReferenceMap* refMap,
-                                            TypeMap* typeMap) {
+static std::vector<ActionRef>
+getActionRefs(const IR::P4Table* table, ReferenceMap* refMap) {
     std::vector<ActionRef> actions;
     for (auto action : table->getActionList()->actionList) {
         auto decl = refMap->getDeclaration(action->getPath(), true);
@@ -1652,9 +1652,8 @@ static std::vector<ActionRef> getActionRefs(const IR::P4Table* table, ReferenceM
     return actions;
 }
 
-static boost::optional<cstring> getTableImplementationName(const IR::P4Table* table,
-                                                           ReferenceMap* refMap,
-                                                           TypeMap* typeMap) {
+static boost::optional<cstring>
+getTableImplementationName(const IR::P4Table* table, ReferenceMap* refMap) {
     auto impl = getTableImplementationProperty(table);
     if (impl == nullptr) return boost::none;
     if (!impl->value->is<IR::ExpressionValue>()) {
@@ -1681,9 +1680,9 @@ static void analyzeTable(P4RuntimeAnalyzer& analyzer,
     auto tableSize = getTableSize(table);
     auto defaultAction = getDefaultAction(table, refMap, typeMap);
     auto matchFields = getMatchFields(table, refMap, typeMap);
-    auto actions = getActionRefs(table, refMap, typeMap);
+    auto actions = getActionRefs(table, refMap);
 
-    auto implementation = getTableImplementationName(table, refMap, typeMap);
+    auto implementation = getTableImplementationName(table, refMap);
 
     auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
     auto directMeter = getDirectCounterlike<IR::Meter>(table, refMap, typeMap);
@@ -1722,7 +1721,7 @@ static void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock,
 }
 
 static const IR::IAnnotated*
-getActionProfileAnnotations(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+getActionProfileAnnotations(const IR::P4Table* table, ReferenceMap* refMap) {
     auto impl = getTableImplementationProperty(table);
     if (impl == nullptr) return nullptr;
     if (!impl->value->is<IR::ExpressionValue>()) return nullptr;
@@ -1768,7 +1767,7 @@ getActionProfile(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
 
     const int64_t size = sizeExpression->to<IR::Constant>()->asInt();
     return ActionProfile{*instance->name, actionProfileType, size,
-          getActionProfileAnnotations(table, refMap, typeMap)};
+                         getActionProfileAnnotations(table, refMap)};
 }
 
 static void analyzeActionProfiles(P4RuntimeAnalyzer& analyzer,
@@ -1812,9 +1811,7 @@ class P4RuntimeEntriesConverter {
     }
 
     /// Appends the 'const entries' for the table to the WriteRequest message.
-    void addTableEntries(const IR::TableBlock* tableBlock,
-                         ReferenceMap* refMap,
-                         TypeMap* typeMap) {
+    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap) {
         CHECK_NULL(tableBlock);
         auto table = tableBlock->container;
 
@@ -2074,7 +2071,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     P4RuntimeEntriesConverter entriesConverter(symbols);
     forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
-            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap, typeMap);
+            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap);
     });
 
     auto* p4Info = analyzer.getP4Info();
