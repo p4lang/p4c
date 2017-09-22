@@ -991,7 +991,7 @@ class DetectDuplicates: public Inspector {
     DetectDuplicates() { setName("DetectDuplicates"); }
 
     bool preorder(const IR::V1Program* program) override {
-        auto &map = program->scope;;
+        auto &map = program->scope;
         auto firstWithKey = map.begin();
         while (firstWithKey != map.end()) {
             auto key = firstWithKey->first;
@@ -1001,8 +1001,13 @@ class DetectDuplicates: public Inspector {
                 for (n++; n != range.second; n++) {
                     auto e1 = s->second;
                     auto e2 = n->second;
-                    if (e1->node_type_name() == e2->node_type_name())
-                        ::error("%1%: same name as %2%", e1, e2);
+                    if (e1->node_type_name() == e2->node_type_name()) {
+                        if (e1->srcInfo.getStart().isValid())
+                            ::error("%1%: same name as %2%", e1, e2);
+                        else
+                            // This name is probably standard_metadata_t, a built-in declaration
+                            ::error("%1%: name %2% is reserved", e2, key);
+                    }
                 }
             }
             firstWithKey = range.second;
