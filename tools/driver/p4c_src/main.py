@@ -97,6 +97,9 @@ def main():
     parser.add_argument("-b", "--target", dest="backend",
                         help="specify target backend",
                         action="store", default="bmv2-ss-p4org")
+    parser.add_argument("-c", dest="run_all",
+                        help="Only run preprocess, compile, and assemble steps",
+                        action="store_true", default=True)
     parser.add_argument("-D", dest="preprocessor_defines",
                         help="define a macro to be used by the preprocessor",
                         action="append", default=[])
@@ -106,25 +109,15 @@ def main():
     parser.add_argument("-e", dest="skip_preprocessor",
                         help="Skip the preprocessor",
                         action="store_true", default=False)
-    parser.add_argument("-S", dest="run_till_assembler",
-                        help="Only run the preprocess and compilation steps",
+    parser.add_argument("-g", dest="debug_info",
+                        help="Generate debug information",
                         action="store_true", default=False)
-    parser.add_argument("-c", dest="run_all",
-                        help="Only run preprocess, compile, and assemble steps",
-                        action="store_true", default=True)
-    parser.add_argument("-x", dest="language",
-                        choices = ["p4-14", "p4-16"],
-                        help="Treat subsequent input files as having type language.",
-                        action="store", default="p4-16")
     parser.add_argument("-I", dest="search_path",
                         help="Add directory to include search path",
                         action="append", default=[])
     parser.add_argument("-o", dest="output_directory",
                         help="Write output to the provided path",
                         action="store", metavar="PATH", default=".")
-    parser.add_argument("--target-help", dest="show_target_help",
-                        help="Display target specific command line options.",
-                        action="store_true", default=False)
     parser.add_argument("--p4runtime-file",
                         help="Write a P4Runtime control plane API description "
                         "to the specified file.",
@@ -134,6 +127,16 @@ def main():
                         help="Choose output format for the P4Runtime API "
                         "description (default is binary).",
                         action="store", default="binary")
+    parser.add_argument("--target-help", dest="show_target_help",
+                        help="Display target specific command line options.",
+                        action="store_true", default=False)
+    parser.add_argument("-S", dest="run_till_assembler",
+                        help="Only run the preprocess and compilation steps",
+                        action="store_true", default=False)
+    parser.add_argument("-x", dest="language",
+                        choices = ["p4-14", "p4-16"],
+                        help="Treat subsequent input files as having type language.",
+                        action="store", default="p4-16")
 
     if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
         add_developer_options(parser)
@@ -200,6 +203,7 @@ def main():
         if opts.passes:
             commands["compiler"].append("--top4 {}".format(",".join(opts.passes)))
         if opts.debug:
+            commands["assembler"].append("-vvv")
             commands["compiler"].append("-vvv")
         if opts.dump_dir:
             commands["compiler"].append("--dump {}".format(opts.dump_dir))
@@ -207,6 +211,11 @@ def main():
             commands["compiler"].append("--toJSON {}".format(opts.json))
         if opts.pretty_print:
             commands["compiler"].append("--pp {}".format(opts.pretty_print))
+
+    if opts.debug_info:
+        commands["assembler"].append("-g")
+        commands["compiler"].append("-g")
+        commands["linker"].append("-g")
 
     for option in opts.assembler_options:
         commands["assembler"] += shlex.split(option)
