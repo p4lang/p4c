@@ -46,5 +46,9 @@ os.environ['P4C_16_INCLUDE_PATH'] = os.path.join(artifacts_dir, "p4include")
 os.environ['P4C_14_INCLUDE_PATH'] = os.path.join(artifacts_dir, "p4_14include")
 
 from p4c_src.main import main
+from p4c_src.main import set_version
+
+set_version("@P4C_VERSION@")
+
 if __name__ == '__main__':
     main()

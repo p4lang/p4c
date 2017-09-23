@@ -35,6 +35,17 @@ import p4c_src
 
 commands = {}
 
+
+p4c_version = p4c_src.__version__
+
+def set_version(ver):
+    global p4c_version
+    p4c_version = ver
+
+def get_version():
+    return p4c_version
+
+
 def display_supported_targets(cfg):
     print "Supported targets in \"target-arch-vendor\" triplet:"
     for target in cfg.target:
@@ -134,7 +145,7 @@ def main():
     source = opts.source_file
 
     if opts.show_version:
-        print("p4c %s" % (p4c_src.__version__))
+        print("p4c %s" % (get_version()))
         sys.exit(0)
 
     # load supported configuration

@@ -35,6 +35,11 @@ OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" 
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 
+if (NOT $ENV{P4C_VERSION} STREQUAL "")
+  set (P4C_VERSION $ENV{P4C_VERSION})
+else()
+  set (P4C_VERSION "0.1")
+endif()
 include(P4CUtils)
 include(UnifiedBuild)
 
@@ -268,7 +273,7 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 
-# Header files 
+# Header files
 add_custom_target(update_includes ALL
   #FIXME -- should only run this when headers change -- how to accomplish that?
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}/p4include
