@@ -85,7 +85,7 @@ TEST(P4Runtime, IdAssignment) {
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
             state start { transition accept; } }
-        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
         control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
@@ -236,7 +236,7 @@ TEST(P4Runtime, P4_16_MatchFields) {
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
             state start { transition accept; } }
-        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
         control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
@@ -475,7 +475,7 @@ TEST(P4Runtime, Digests) {
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
             state start { transition accept; } }
-        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
         control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
@@ -591,7 +591,7 @@ TEST(P4Runtime, StaticTableEntries) {
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
             state start { transition accept; } }
-        control verifyChecksum(in Headers h, inout Metadata m) { apply { } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
         control computeChecksum(inout Headers h, inout Metadata m) { apply { } }

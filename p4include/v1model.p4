@@ -57,11 +57,8 @@ struct standard_metadata_t {
     @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
     @alias("intrinsic_metadata.resubmit_flag") bit<1>  resubmit_flag;
     @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
-}
-
-extern Checksum16 {
-    Checksum16();
-    bit<16> get<D>(in D data);
+    /// Indicates that a verify_checksum() method has failed.
+    bit<1>  checksum_error;
 }
 
 enum CounterType {
@@ -135,6 +132,33 @@ enum CloneType {
     E2E
 }
 
+/**
+Verifies the checksum of the supplied data.
+If this method detects that a checksum of the data is not correct it
+sets the standard_metadata checksum_error bit.
+@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+                  The total dynamic length of the fields is a multiple of the output size.
+@param O          Checksum type; must be bit<X> type.
+@param condition  If 'false' the verification always succeeds.
+@param data       Data whose checksum is verified.
+@param checksum   Expected checksum of the data; note that is must be a left-value.
+@param algo       Algorithm to use for checksum (not all algorithms may be supported).
+                  Must be a compile-time constant.
+*/
+extern void verify_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+/**
+Computes the checksum of the supplied data.
+@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+                  The total dynamic length of the fields is a multiple of the output size.
+@param O          Output type; must be bit<X> type.
+@param condition  If 'false' the checksum is not changed
+@param data       Data whose checksum is computed.
+@param checksum   Checksum of the data.
+@param algo       Algorithm to use for checksum (not all algorithms may be supported).
+                  Must be a compile-time constant.
+*/
+extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+
 extern void resubmit<T>(in T data);
 extern void recirculate<T>(in T data);
 extern void clone(in CloneType type, in bit<32> session);
@@ -151,8 +175,12 @@ extern void truncate(in bit<32> length);
 parser Parser<H, M>(packet_in b,
                     out H parsedHdr,
                     inout M meta,
-                    inout standard_metadata_t standard_metadata);
-control VerifyChecksum<H, M>(in H hdr,
+inout standard_metadata_t standard_metadata);
+
+/* The only legal statements in the implementation of the
+VerifyChecksum control are: block statements, calls to the
+verify_checksum method, and return statements. */
+control VerifyChecksum<H, M>(inout H hdr,
                              inout M meta);
 @pipeline
 control Ingress<H, M>(inout H hdr,
@@ -162,6 +190,10 @@ control Ingress<H, M>(inout H hdr,
 control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
+
+/* The only legal statements in the implementation of the
+ComputeChecksum control are: block statements, calls to the
+update_checksum method, and return statements. */
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
 @deparser

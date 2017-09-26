@@ -34,19 +34,14 @@ control DeparserI(packet_out pk, in H hdr) {
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    bit<16> tmp;
-    @name("c16") Checksum16() c16_0;
     apply {
-        if (hdr.ipv4.ihl == 4w5) {
-            tmp = c16_0.get<tuple<bit<1>>>({ 1w0 });
-            hdr.ipv4.hdrChecksum = tmp;
-        }
+        update_checksum<tuple<bit<1>>, bit<16>>(hdr.ipv4.ihl == 4w5, { 1w0 }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

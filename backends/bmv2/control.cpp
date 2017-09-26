@@ -738,14 +738,21 @@ bool ChecksumConverter::preorder(const IR::PackageBlock *block) {
 
 bool ChecksumConverter::preorder(const IR::ControlBlock* block) {
     auto it = backend->update_checksum_controls.find(block->container->name);
-    if (it == backend->update_checksum_controls.end()) {
-        return false;
-    }
-
-    if (backend->target == Target::SIMPLE) {
-        P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
-        ss->convertChecksumUpdate(block->container, backend->json->checksums,
-                                  backend->json->calculations);
+    if (it != backend->update_checksum_controls.end()) {
+        if (backend->target == Target::SIMPLE) {
+            P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
+            ss->convertChecksum(block->container->body, backend->json->checksums,
+                                backend->json->calculations, false);
+        }
+    } else {
+        it = backend->verify_checksum_controls.find(block->container->name);
+        if (it != backend->verify_checksum_controls.end()) {
+            if (backend->target == Target::SIMPLE) {
+                P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
+                ss->convertChecksum(block->container->body, backend->json->checksums,
+                                    backend->json->calculations, true);
+            }
+        }
     }
     return false;
 }

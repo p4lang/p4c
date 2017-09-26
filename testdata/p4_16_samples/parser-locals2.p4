@@ -104,7 +104,7 @@ control cEgress(inout Parsed_packet hdr,
     apply { }
 }
 
-control vc(in Parsed_packet hdr,
+control vc(inout Parsed_packet hdr,
            inout mystruct1 meta) {
     apply { }
 }

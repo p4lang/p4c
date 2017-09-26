@@ -92,6 +92,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
         simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
         simpleSwitch->setUpdateChecksumControls(tlb, &update_checksum_controls);
+        simpleSwitch->setVerifyChecksumControls(tlb, &verify_checksum_controls);
         simpleSwitch->setDeparserControls(tlb, &deparser_controls);
     } else if (target == Target::PORTABLE) {
         P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
@@ -107,7 +108,6 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
-        new FixupChecksum(&update_checksum_controls),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),

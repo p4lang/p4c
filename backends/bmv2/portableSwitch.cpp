@@ -94,12 +94,3 @@ std::ostream& operator<<(std::ostream &out, P4::Extern_Model* p) {
     }
     return out;
 }
-
-// getSkipControls();
-
-// getPipelineControls();
-
-// getUpdateChecksum();
-
-
-

@@ -37,7 +37,7 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(in Header_t h, inout Meta_t m) { apply {} }
+control vrfy(inout Header_t h, inout Meta_t m) { apply {} }
 control update(inout Header_t h, inout Meta_t m) { apply {} }
 control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) { apply {} }
 control deparser(packet_out b, in Header_t h) { apply { b.emit(h.h); } }

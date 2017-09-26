@@ -34,7 +34,7 @@ control egress(inout headers_t hdr, inout metadata_t meta, inout standard_metada
     }
 }
 
-control verifyChecksum(in headers_t hdr, inout metadata_t meta) {
+control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
         // Nothing to do
     }

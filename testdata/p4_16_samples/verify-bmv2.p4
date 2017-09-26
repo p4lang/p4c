@@ -32,7 +32,7 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
     }
 }
 
-control MyVerifyChecksum(in h hdr, inout m meta) {
+control MyVerifyChecksum(inout h hdr, inout m meta) {
     apply {}
 }
 control MyIngress(inout h hdr, inout m meta, inout standard_metadata_t std) {

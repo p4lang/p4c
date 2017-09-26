@@ -25,7 +25,7 @@ control c() {
         bit<16> var;
         bit<32> hdr = 0;
 
-        hash(var, HashAlgorithm.crc16, 0, hdr, 0xFFFF);
+        hash(var, HashAlgorithm.crc16, 16w0, hdr, 0xFFFF);
     }
 }
 

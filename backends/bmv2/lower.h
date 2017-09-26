@@ -50,24 +50,6 @@ class LowerExpressions : public Transform {
 };
 
 /**
-This pass is a hack to work around current BMv2 limitations:
-checksum computations must be expressed in a restricted way, since
-the JSON code generator uses simple pattern-matching.
-
-The real solution to this problem is to have the BMv2 simulator use a
-real extern for computing and verifying checksums.  Then this hack
-would not be necessary anymore.
-*/
-class FixupChecksum : public Transform {
-    const std::set<cstring>* updateChecksumBlocks;
- public:
-    explicit FixupChecksum(const std::set<cstring>* updateChecksumBlocks) :
-            updateChecksumBlocks(updateChecksumBlocks)
-    { setName("FixupChecksum"); }
-    const IR::Node* preorder(IR::P4Control* control) override;
-};
-
-/**
 Policy which selects the control blocks where remove
 complex expression is applied.
 */

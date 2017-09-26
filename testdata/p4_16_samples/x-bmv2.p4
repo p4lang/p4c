@@ -23,7 +23,7 @@ header T { bit<32> y; }
 struct H { T s; }
 struct M { S s; }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply { }
 }
 
