@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-find_package(Protobuf 3.0.0 REQUIRED)
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-
 # The standard P4Runtime protocol buffers message definitions live in the PI
 # repo, which is included in this repo as a submodule.
 set (P4RUNTIME_STD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PI/proto)
