@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_SYNTHESIZEVALIDFIELD_H_
-#define _BACKENDS_BMV2_SYNTHESIZEVALIDFIELD_H_
+#ifndef _MIDEND_SYNTHESIZEVALIDFIELD_H_
+#define _MIDEND_SYNTHESIZEVALIDFIELD_H_
 
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -25,12 +25,17 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
-namespace BMV2 {
+namespace P4 {
 
 /**
  * Adds an explicit valid bit to each header type and replaces calls to
  * isValid() with references to the new field. This better reflects how header
- * validity is actually implemented on BMV2, which simplifies later passes.
+ * validity is actually implemented on some backends, which can simplify later
+ * passes.
+ *
+ * XXX(seth): *There are known problems with this approach.* We're working on a
+ * better way to handle this. For now, you are advised against using this in new
+ * backends.
  *
  * In most situations, `foo.isValid()` is rewritten to `foo.$valid$ == 1`.
  * However, when `foo.isValid()` is a table key element (and isn't part of a
@@ -43,8 +48,10 @@ namespace BMV2 {
  * to a simple read of a hidden field.
  *
  * XXX(seth): It would be cleaner to rewrite setValid() and setInvalid() too,
- * but we currently can't. Those compile down into special BMV2 primitives that
- * are needed for certain features (e.g. header unions) to work correctly.
+ * but we currently can't if we want to use this pass with BMV2 (or at least,
+ * we'd need to make it optional). Those compile down into special BMV2
+ * primitives that are needed for certain features (e.g. header unions) to work
+ * correctly.
  *
  * Example:
  *
@@ -88,6 +95,6 @@ class SynthesizeValidField final : public PassManager {
     SynthesizeValidField(P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
 };
 
-}  // namespace BMV2
+}  // namespace P4
 
-#endif  /* _BACKENDS_BMV2_SYNTHESIZEVALIDFIELD_H_ */
+#endif  /* _MIDEND_SYNTHESIZEVALIDFIELD_H_ */

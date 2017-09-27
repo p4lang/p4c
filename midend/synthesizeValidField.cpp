@@ -19,7 +19,6 @@ limitations under the License.
 #include <boost/range/combine.hpp>
 #include <boost/range/irange.hpp>
 
-#include "backends/bmv2/helpers.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -27,7 +26,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace BMV2 {
+namespace P4 {
 
 /// Adds a valid bit to all header types.
 class AddValidField final : public Modifier {
@@ -35,11 +34,10 @@ class AddValidField final : public Modifier {
     AddValidField() { setName("AddValidField"); }
  private:
     bool preorder(IR::Type_Header* header) override {
-        const cstring validField = V1ModelProperties::validField;
-        if (header->getField(validField) != nullptr) return true;
+        if (header->getField("$valid$") != nullptr) return true;
         auto annotations = new IR::Annotations(
             {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})});
-        auto field = new IR::StructField(validField, annotations, IR::Type::Bits::get(1));
+        auto field = new IR::StructField("$valid$", annotations, IR::Type::Bits::get(1));
         header->fields.push_back(field);
         return true;
     }
@@ -78,8 +76,7 @@ RewriteIsValidCalls::postorder(IR::MethodCallExpression* expr) {
 
     // If isValid() is being used as a table key element, it already behaves
     // like a bit<1> value; just replace it with a reference to the valid bit.
-    const cstring validField = V1ModelProperties::validField;
-    auto member = new IR::Member(expr->srcInfo, builtin->appliedTo, validField);
+    auto member = new IR::Member(expr->srcInfo, builtin->appliedTo, "$valid$");
     if (getParent<IR::KeyElement>() != nullptr) return member;
 
     // In other contexts, rewrite isValid() into a comparison with a constant.
@@ -108,13 +105,12 @@ class RewriteIsValidTableEntries final : public Transform {
         // from boolean to bit<1>. Note that any isValid() calls which were
         // nested in another expression were transformed in a way that preserved
         // their boolean type, so we don't need to do anything special for them.
-        const IR::ID validField = V1ModelProperties::validField;
         auto& elems = key->keyElements;
         std::vector<unsigned> indicesToRewrite;
         for (auto elem : combine(elems, irange(size_t(0), elems.size()))) {
             auto expression = elem.get<0>()->expression;
             if (!expression->is<IR::Member>()) continue;
-            if (expression->to<IR::Member>()->member != validField) continue;
+            if (expression->to<IR::Member>()->member != "$valid$") continue;
             indicesToRewrite.push_back(elem.get<1>());
         }
         if (indicesToRewrite.empty()) return table;
@@ -151,4 +147,4 @@ SynthesizeValidField::SynthesizeValidField(P4::ReferenceMap* refMap,
     passes.push_back(new RewriteIsValidTableEntries);
 }
 
-}  // namespace BMV2
+}  // namespace P4
