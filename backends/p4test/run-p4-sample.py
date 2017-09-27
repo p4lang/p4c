@@ -83,7 +83,7 @@ def run_timeout(options, args, timeout, stderr):
             # copy stderr to the specified file, stripping file path prefixes
             # from the start of lines
             outfile = open(stderr, "w")
-            local.filter = Popen(['sed', '-e', 's|^[./].*/||'], stdin=PIPE, stdout=outfile)
+            local.filter = Popen(['sed', '-e', 's|^[\S*/]\S*/||'], stdin=PIPE, stdout=outfile)
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()

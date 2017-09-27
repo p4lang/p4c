@@ -1,4 +1,4 @@
-update_checksum instead.
+issue940.p4(2): warning: Checksum16: Using deprecated feature. Please use verify_checksum/update_checksum instead.
 extern Checksum16 {
        ^^^^^^^^^^
 issue940.p4(7): warning: wrong: Using deprecated feature. Please don't use this function.
