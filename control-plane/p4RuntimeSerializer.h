@@ -28,13 +28,9 @@ class WriteRequest;
 
 namespace IR {
 class P4Program;
-class ToplevelBlock;
 }  // namespace IR
 
 namespace P4 {
-
-class ReferenceMap;
-class TypeMap;
 
 /// P4Runtime serialization formats.
 enum class P4RuntimeFormat {
@@ -68,23 +64,11 @@ struct P4RuntimeAPI {
  * constructs may be excluded from the API. In this case, a program error will
  * be reported.
  *
- * XXX(seth): Ideally this should only depend on the frontend, but currently
- * some midend passes are also required. We depend on at least EliminateTuples,
- * SynthesizeValidField, and LocalizeAllActions.  That list is probably not
- * exhaustive.
- *
  * @param program  The program to construct the control-plane API from. All
  *                 frontend passes must have already run.
- * @param evaluatedProgram  An up-to-date version of the program with
- *                          compile-time evaluation performed.
- * @param refMap  An up-to-date reference map.
- * @param typeMap An up-to-date type map.
  * @return the generated P4Runtime API.
  */
-P4RuntimeAPI generateP4Runtime(const IR::P4Program* program,
-                               const IR::ToplevelBlock* evaluatedProgram,
-                               ReferenceMap* refMap,
-                               TypeMap* typeMap);
+P4RuntimeAPI generateP4Runtime(const IR::P4Program* program);
 
 }  // namespace P4
 
