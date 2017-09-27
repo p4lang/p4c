@@ -472,13 +472,14 @@ class Type_Action : Type_MethodBase {
 #nodbprint
 }
 
-class Method : Declaration {
+class Method : Declaration, IAnnotated {
     Type_Method type;
     optional bool isAbstract = false;
     optional Annotations annotations = Annotations::empty;
     size_t maxParameterCount() const { return type->maxParameterCount(); }
     size_t minParameterCount() const { return type->minParameterCount(); }
     void setAbstract() { isAbstract = true; }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
@@ -490,7 +491,7 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 }
 
 /// An 'extern' black-box (not a function)
-class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
+class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnnotated {
     optional TypeParameters typeParameters = new TypeParameters;
     optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
     optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
@@ -502,6 +503,7 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     Method lookupMethod(cstring name, int argCount) const;
     validate{ methods.check_null(); }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 /** @} *//* end group irdefs */

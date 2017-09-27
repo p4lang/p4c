@@ -48,6 +48,7 @@ limitations under the License.
 #include "uselessCasts.h"
 #include "directCalls.h"
 #include "setHeaders.h"
+#include "deprecated.h"
 
 namespace P4 {
 
@@ -124,6 +125,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new ResolveReferences(&refMap),  // check shadowing
+        new Deprecated(&refMap),
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.
