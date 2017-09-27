@@ -132,6 +132,12 @@ enum CloneType {
     E2E
 }
 
+@deprecated("Please use verify_checksum/update_checksum instead.")
+extern Checksum16 {
+    Checksum16();
+    bit<16> get<D>(in D data);
+}
+
 /**
 Verifies the checksum of the supplied data.
 If this method detects that a checksum of the data is not correct it
