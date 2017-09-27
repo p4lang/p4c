@@ -1700,7 +1700,7 @@ static void analyzeTable(P4RuntimeAnalyzer& analyzer,
 template <typename Func>
 static void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock,
                                   Func function) {
-    set<const IR::Block*> visited;
+    std::set<const IR::Block*> visited;
     ordered_set<const IR::Block*> frontier{aToplevelBlock};
 
     while (!frontier.empty()) {

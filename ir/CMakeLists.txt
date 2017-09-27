@@ -47,7 +47,6 @@ set (IR_HDRS
   node.h
   nodemap.h
   pass_manager.h
-  std.h
   vector.h
   visitor.h
 )

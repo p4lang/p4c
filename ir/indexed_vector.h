@@ -20,8 +20,9 @@ limitations under the License.
 
 #include "dbprint.h"
 #include "lib/enumerator.h"
-#include "lib/null.h"
 #include "lib/error.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 #include "vector.h"
 #include "id.h"
 
@@ -97,7 +98,7 @@ class IndexedVector : public Vector<T> {
     IndexedVector &operator=(IndexedVector &&) = default;
     explicit IndexedVector(const T *a) {
         push_back(std::move(a)); }
-    explicit IndexedVector(const vector<const T *> &a) {
+    explicit IndexedVector(const safe_vector<const T *> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
     explicit IndexedVector(const Vector<T> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }

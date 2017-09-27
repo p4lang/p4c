@@ -19,7 +19,7 @@ limitations under the License.
 #include "lib/n4.h"
 
 const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
-    vector<std::pair<vector<Visitor *>::iterator, const IR::Node *>> backup;
+    safe_vector<std::pair<safe_vector<Visitor *>::iterator, const IR::Node *>> backup;
 
     early_exit_flag = false;
     BUG_CHECK(running, "not calling apply properly");

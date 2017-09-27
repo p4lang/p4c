@@ -32,7 +32,7 @@ class Visitor::ChangeTracker {
         bool            visitOnce;
         const IR::Node  *result;
     };
-    typedef unordered_map<const IR::Node *, visit_info_t>  visited_t;
+    typedef std::unordered_map<const IR::Node *, visit_info_t>  visited_t;
     visited_t           visited;
 
  public:
@@ -374,7 +374,7 @@ IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
 
 class SetupJoinPoints : public Inspector {
-    map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> &join_points;
+    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> &join_points;
     bool preorder(const IR::Node *n) override {
         return ++join_points[n].second == 1; }
  public:

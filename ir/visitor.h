@@ -18,7 +18,7 @@ limitations under the License.
 #define _IR_VISITOR_H_
 
 #include <stdexcept>
-#include "std.h"
+#include <unordered_map>
 #include "lib/cstring.h"
 #include "ir/ir.h"
 #include "lib/exceptions.h"
@@ -234,7 +234,7 @@ class Modifier : public virtual Visitor {
 
 class Inspector : public virtual Visitor {
     struct info_t { bool done, visitOnce; };
-    typedef unordered_map<const IR::Node *, info_t>       visited_t;
+    typedef std::unordered_map<const IR::Node *, info_t>       visited_t;
     visited_t   *visited = nullptr;
     bool check_clone(const Visitor *) override;
  public:
@@ -282,7 +282,7 @@ class Transform : public virtual Visitor {
 };
 
 class ControlFlowVisitor : public virtual Visitor {
-    map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
+    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
  protected:
     virtual ControlFlowVisitor *clone() const = 0;
     void init_join_flows(const IR::Node *root) override;

@@ -18,7 +18,6 @@ limitations under the License.
 #define _IR_NODE_H_
 
 #include <memory>
-#include "std.h"
 #include "lib/cstring.h"
 #include "lib/stringify.h"
 #include "lib/indent.h"

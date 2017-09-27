@@ -14,26 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef IR_STD_H_
-#define IR_STD_H_
-#include <array>
-#include <map>
-#include <memory>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
+#ifndef P4C_LIB_SAFE_VECTOR_H_
+#define P4C_LIB_SAFE_VECTOR_H_
+
 #include <vector>
 
-using std::const_pointer_cast;
-using std::map;
-using std::set;
-using std::unordered_map;
-using std::unordered_set;
-// using std::vector;
-// using std::array;
-
+/// An enhanced version of std::vector that performs bounds checking for
+/// operator[].
 template<class T, class _Alloc = std::allocator<T>>
-class vector : public std::vector<T, _Alloc> {
+class safe_vector : public std::vector<T, _Alloc> {
  public:
     using std::vector<T, _Alloc>::vector;
     typedef typename std::vector<T, _Alloc>::reference reference;
@@ -44,15 +33,4 @@ class vector : public std::vector<T, _Alloc> {
     const_reference operator[](size_type n) const { return this->at(n); }
 };
 
-template<class T, size_t N>
-class array : public std::array<T, N> {
- public:
-    using std::array<T, N>::array;
-    typedef typename std::array<T, N>::reference reference;
-    typedef typename std::array<T, N>::const_reference const_reference;
-    typedef typename std::array<T, N>::size_type size_type;
-    reference operator[](size_type n) { return this->at(n); }
-    const_reference operator[](size_type n) const { return this->at(n); }
-};
-
-#endif /* IR_STD_H_ */
+#endif /* P4C_LIB_SAFE_VECTOR_H_ */
