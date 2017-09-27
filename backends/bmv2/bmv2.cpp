@@ -104,12 +104,11 @@ int main(int argc, char *const argv[]) {
     // Generate a PI control plane API for this program if requested.
     if (!options.p4RuntimeFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.p4RuntimeFile, false);
-        std::ostream *outEntries = nullptr;
+        std::ostream* outEntries = nullptr;
         if (!options.p4RuntimeEntriesFile.isNullOrEmpty())
             outEntries = openFile(options.p4RuntimeEntriesFile, false);
         if (out != nullptr) {
-            auto p4Runtime =
-              generateP4Runtime(program, toplevel, &midEnd.refMap, &midEnd.typeMap);
+            auto p4Runtime = P4::generateP4Runtime(program);
             p4Runtime.serializeP4InfoTo(out, options.p4RuntimeFormat);
             if (outEntries != nullptr)
                 p4Runtime.serializeEntriesTo(outEntries, options.p4RuntimeFormat);

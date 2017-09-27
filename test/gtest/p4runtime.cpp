@@ -14,26 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// These must be included before any of our internal headers because ir/std.h
-// places a vector class in the global namespace, which breaks protobuf.
-#include "control-plane/p4/config/p4info.pb.h"  // NOLINT
-#include "control-plane/p4/config/v1model.pb.h"  // NOLINT
-#include "control-plane/p4/p4runtime.pb.h"  // NOLINT
-
-#include <map>  // NOLINT
-#include <tuple>  // NOLINT
+#include "control-plane/p4/config/p4info.pb.h"
+#include "control-plane/p4/config/v1model.pb.h"
+#include "control-plane/p4/p4runtime.pb.h"
 #include "gtest/gtest.h"
 
-#include "backends/bmv2/synthesizeValidField.h"
 #include "control-plane/p4RuntimeSerializer.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "midend/eliminateTuples.h"
-#include "midend/local_copyprop.h"
 #include "PI/pi_base.h"
 
 namespace Test {
@@ -46,39 +34,7 @@ createP4RuntimeTestCase(const std::string& source,
                             = CompilerOptions::FrontendVersion::P4_16) {
     auto frontendTestCase = FrontendTestCase::create(source, langVersion);
     if (!frontendTestCase) return boost::none;
-
-    // Run the bare minimum midend passes required by generateP4Runtime().
-    // XXX(seth): Ideally there'd be none of these.
-    P4::ReferenceMap refMap;
-    refMap.setIsV1(true);
-    P4::TypeMap typeMap;
-    auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    PassManager p4RuntimeFixups = {
-        new BMV2::SynthesizeValidField(&refMap, &typeMap),
-        new P4::EliminateTuples(&refMap, &typeMap),
-        // Run TypeChecking with updateExpressions = true to ensure that the
-        // type field is correct. Otherwise a lot of code which relies on
-        // calling the width_bits() method in P4RuntimeAnalyzer will misbehave.
-        new P4::TypeChecking(&refMap, &typeMap, true /* = updateExpressions */),
-        evaluator
-    };
-
-    auto* p4RuntimeProgram = frontendTestCase->program->apply(p4RuntimeFixups);
-    if (!p4RuntimeProgram) {
-        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
-                  << " errors while running P4Runtime fixup passes" << std::endl;
-        return boost::none;
-    }
-
-    auto* evaluatedProgram = evaluator->getToplevelBlock();
-    if (!evaluatedProgram) {
-        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
-                  << " errors while running evaluator pass" << std::endl;
-        return boost::none;
-    }
-
-    return generateP4Runtime(p4RuntimeProgram, evaluatedProgram,
-                             &refMap, &typeMap);
+    return generateP4Runtime(frontendTestCase->program);
 }
 
 /// @return the P4Runtime representation of the table with the given name, or

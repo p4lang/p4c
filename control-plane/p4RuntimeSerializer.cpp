@@ -14,32 +14,43 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// These must be included before any of our internal headers because ir/std.h
-// places a vector class in the global namespace, which breaks protobuf.
-#include "p4/config/p4info.pb.h"
-#include "p4/config/v1model.pb.h"
-#include "p4/p4runtime.pb.h"
-
-#include <boost/algorithm/string.hpp>  // NOLINT(*)
-#include <boost/optional.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-#include <boost/variant.hpp>
-#include <google/protobuf/text_format.h>
-#include <google/protobuf/util/json_util.h>
 #include <algorithm>
 #include <iostream>
 #include <typeinfo>
 #include <utility>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/variant.hpp>
+#include <google/protobuf/text_format.h>
+#include <google/protobuf/util/json_util.h>
+#include "p4/config/p4info.pb.h"
+#include "p4/config/v1model.pb.h"
+#include "p4/p4runtime.pb.h"
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "frontends/p4/uniqueNames.h"
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
+#include "midend/actionsInlining.h"
+#include "midend/dontcareArgs.h"
+#include "midend/eliminateTuples.h"
+#include "midend/inlining.h"
+#include "midend/localizeActions.h"
+#include "midend/moveConstructors.h"
+#include "midend/removeParameters.h"
+#include "midend/removeReturns.h"
+#include "midend/synthesizeValidField.h"
 #include "PI/pi_base.h"
 
 #include "p4RuntimeSerializer.h"
@@ -2082,12 +2093,50 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
 }  // namespace ControlPlaneAPI
 
-P4RuntimeAPI generateP4Runtime(const IR::P4Program* program,
-                               const IR::ToplevelBlock* evaluatedProgram,
-                               ReferenceMap* refMap,
-                               TypeMap* typeMap) {
+P4RuntimeAPI generateP4Runtime(const IR::P4Program* program) {
     using namespace ControlPlaneAPI;
-    return P4RuntimeAnalyzer::analyze(program, evaluatedProgram, refMap, typeMap);
+
+    // Generate a new version of the program that satisfies the prerequisites of
+    // the P4Runtime analysis code.
+    // XXX(seth): Long term, generateP4Runtime() should be able to operate on
+    // the version of the program we have after the frontend, without any
+    // dependencies on additional passes. Clearly we have a way to go.
+    P4::ReferenceMap refMap;
+    refMap.setIsV1(true);
+    P4::TypeMap typeMap;
+    auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    PassManager p4RuntimeFixups = {
+        // These are prerequisites of LocalizeAllActions.
+        evaluator,
+        new P4::Inline(&refMap, &typeMap, evaluator),
+        new P4::InlineActions(&refMap, &typeMap),
+        // We currently can't handle global actions; they need to be associated
+        // with a table.
+        new P4::LocalizeAllActions(&refMap),
+        // We need to run these to avoid issues with duplicate or illegal names.
+        // (This is likely mostly or entirely due to the inlining passes above.)
+        new P4::UniqueNames(&refMap),
+        new P4::UniqueParameters(&refMap, &typeMap),
+        // We can only handle a very restricted class of action parameters - the
+        // types need to be bit<> or int<> - so we fail without this pass.
+        new P4::RemoveActionParameters(&refMap, &typeMap),
+        // We need a $valid$ field preinserted before we generate P4Runtime.
+        new P4::SynthesizeValidField(&refMap, &typeMap),
+        // We currently can't handle tuples.
+        new P4::EliminateTuples(&refMap, &typeMap),
+        // Update types and reevaluate the program.
+        new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true),
+        evaluator
+    };
+    auto* p4RuntimeProgram = program->apply(p4RuntimeFixups);
+    auto* evaluatedProgram = evaluator->getToplevelBlock();
+
+    BUG_CHECK(p4RuntimeProgram && evaluatedProgram,
+              "Failed to transform the program into a "
+              "P4Runtime-compatible form");
+
+    return P4RuntimeAnalyzer::analyze(p4RuntimeProgram, evaluatedProgram,
+                                      &refMap, &typeMap);
 }
 
 void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat format) {
