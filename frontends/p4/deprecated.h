@@ -31,7 +31,7 @@ class CheckDeprecated : public Inspector {
     explicit CheckDeprecated(const ReferenceMap* refMap): refMap(refMap)
     { CHECK_NULL(refMap); setName("CheckDeprecated"); }
 
-    void warnIfDeprecated(const IR::IAnnotated* annotated);
+    void warnIfDeprecated(const IR::IAnnotated* declaration, const IR::Node* errorNode);
 
     bool preorder(const IR::PathExpression* path) override;
     bool preorder(const IR::Type_Name* name) override;

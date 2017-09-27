@@ -18,7 +18,8 @@ limitations under the License.
 
 namespace P4 {
 
-void CheckDeprecated::warnIfDeprecated(const IR::IAnnotated* annotated) {
+void CheckDeprecated::warnIfDeprecated(
+    const IR::IAnnotated* annotated, const IR::Node* errorNode) {
     if (annotated == nullptr)
         return;
     auto anno = annotated->getAnnotations()->getSingle("deprecated");
@@ -26,24 +27,25 @@ void CheckDeprecated::warnIfDeprecated(const IR::IAnnotated* annotated) {
         return;
 
     cstring message = "";
-    for (auto a: anno->expr) {
+    for (auto a : anno->expr) {
         if (auto str = a->to<IR::StringLiteral>())
             message += str->value;
     }
-    ::warning("%1%: Using deprecated feature. %2%", annotated->getNode(), message);
+    ::warning("%1%: Using deprecated feature %2%. %3%",
+              errorNode, annotated->getNode(), message);
 }
 
 bool CheckDeprecated::preorder(const IR::PathExpression* expression) {
     auto decl = refMap->getDeclaration(expression->path);
     CHECK_NULL(decl);
-    warnIfDeprecated(decl->to<IR::IAnnotated>());
+    warnIfDeprecated(decl->to<IR::IAnnotated>(), expression);
     return false;
 }
 
 bool CheckDeprecated::preorder(const IR::Type_Name* name) {
     auto decl = refMap->getDeclaration(name->path);
     CHECK_NULL(decl);
-    warnIfDeprecated(decl->to<IR::IAnnotated>());
+    warnIfDeprecated(decl->to<IR::IAnnotated>(), name);
     return false;
 }
 
