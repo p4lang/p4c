@@ -508,10 +508,10 @@ const IR::Statement *PrimitiveConverter::cvtPrimitive(ProgramStructure *structur
     return nullptr;
 }
 
-vector<const IR::Expression *>
+safe_vector<const IR::Expression *>
 PrimitiveConverter::convertArgs(ProgramStructure *structure, const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
-    vector<const IR::Expression *> rv;
+    safe_vector<const IR::Expression *> rv;
     for (auto arg : prim->operands)
         rv.push_back(conv.convert(arg));
     return rv;

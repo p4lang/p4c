@@ -21,9 +21,11 @@ limitations under the License.
 #include <boost/optional.hpp>
 #include <gmpxx.h>
 #include <string>
+#include <unordered_set>
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
+#include "lib/safe_vector.h"
 
 #include "ir.h"
 class JSONGenerator {
@@ -49,7 +51,7 @@ class JSONGenerator {
         out(out), dumpSourceInfo(dumpSourceInfo) {}
 
     template<typename T>
-    void generate(const vector<T> &v) {
+    void generate(const safe_vector<T> &v) {
         out << "[";
         if (v.size() > 0) {
             out << std::endl << ++indent;

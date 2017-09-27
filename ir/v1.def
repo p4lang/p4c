@@ -164,7 +164,7 @@ class Apply : Expression {
         // HACK -- temp sort actions into program (source) order, so that condition names are
         // generated in the same order as p4-hlir
         typedef std::remove_reference<decltype(actions.at("any"))>::type action_t;
-        vector<action_t *> sort_actions;
+        safe_vector<action_t *> sort_actions;
         for (auto &p : Values(actions)) sort_actions.push_back(&p);
         std::sort(sort_actions.begin(), sort_actions.end(),
             [](action_t *a, action_t *b) {
@@ -244,7 +244,7 @@ class CalculatedField {
         update_or_verify(bool u, ID n, const Expression *c) : update(u), name(n), cond(c) {}
         update_or_verify() {}
     }
-    vector<update_or_verify>    specs = {};
+    safe_vector<update_or_verify> specs = {};
     Annotations                 annotations;
     visit_children {
         v.visit(field, "field");
@@ -253,7 +253,7 @@ class CalculatedField {
 }
 
 class CaseEntry {
-    vector<std::pair<Constant, Constant>>       values = {};
+    safe_vector<std::pair<Constant, Constant>>  values = {};
     optional ID                                 action;
 }
 
@@ -331,7 +331,7 @@ class Register : Stateful {
 class PrimitiveAction {}
 
 class NameList {
-    vector<ID>  names = {};
+    safe_vector<ID>  names = {};
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
     dump_fields { out << "names=" << names; }
 }
@@ -350,7 +350,7 @@ class ActionArg : Expression {
 class ActionFunction {
     optional ID                 name;
     inline Vector<Primitive>    action = {};
-    vector<ActionArg>           args = {};
+    safe_vector<ActionArg>      args = {};
     optional Annotations        annotations = Annotations::empty;
 
     ActionArg arg(cstring n) const {
@@ -373,7 +373,7 @@ class ActionFunction {
 
 class ActionProfile : Attached {
     ID          selector = {};
-    vector<ID>  actions = {};
+    safe_vector<ID> actions = {};
     int         size = 0;
     const char *kind() const override { return "action_profile"; }
     bool indexed() const override { return true; }
@@ -390,12 +390,12 @@ class ActionSelector : Attached {
 class V1Table : IInstance {
     optional ID                 name;
     NullOK Vector<Expression>   reads = 0;
-    vector<ID>                  reads_types = {};
+    safe_vector<ID>             reads_types = {};
     int                         min_size = 0;
     int                         max_size = 0;
     int                         size = 0;
     ID                          action_profile = {};
-    vector<ID>                  actions = {};
+    safe_vector<ID>             actions = {};
     ID                          default_action = {};
     NullOK Vector<Expression>   default_action_args = 0;
     inline TableProperties      properties = {};  // non-standard properties

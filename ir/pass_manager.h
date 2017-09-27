@@ -27,8 +27,8 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     mutable int never_backtracks_cache = -1;
 
  protected:
-    vector<DebugHook>   debugHooks;  // called after each pass
-    vector<Visitor *>   passes;
+    safe_vector<DebugHook>   debugHooks;  // called after each pass
+    safe_vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
     bool                stop_on_error = true;
     bool                running = false;

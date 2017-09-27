@@ -27,6 +27,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
+#include "lib/safe_vector.h"
 #include "ir.h"
 #include "json_parser.h"
 
@@ -74,7 +75,7 @@ class JSONLoader {
     }
 
     template<typename T>
-    void unpack_json(vector<T> &v) {
+    void unpack_json(safe_vector<T> &v) {
         T temp;
         for (auto e : *json->to<JsonVector>()) {
             load(e, temp);

@@ -20,6 +20,7 @@ limitations under the License.
 #include "dbprint.h"
 #include "lib/enumerator.h"
 #include "lib/null.h"
+#include "lib/safe_vector.h"
 
 class JSONLoader;
 
@@ -51,7 +52,7 @@ class VectorBase : public Node {
 // User-level code should use regular std::vector
 template<class T>
 class Vector : public VectorBase {
-    vector<const T *>   vec;
+    safe_vector<const T *>   vec;
 
  public:
     typedef const T* value_type;
@@ -63,12 +64,12 @@ class Vector : public VectorBase {
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) {
         vec.emplace_back(std::move(a)); }
-    explicit Vector(const vector<const T *> &a) {
+    explicit Vector(const safe_vector<const T *> &a) {
         vec.insert(vec.end(), a.begin(), a.end()); }
     Vector(const std::initializer_list<const T *> &a) : vec(a) {}
     static Vector<T>* fromJSON(JSONLoader &json);
-    typedef typename vector<const T *>::iterator        iterator;
-    typedef typename vector<const T *>::const_iterator  const_iterator;
+    typedef typename safe_vector<const T *>::iterator        iterator;
+    typedef typename safe_vector<const T *>::const_iterator  const_iterator;
     iterator begin() { return vec.begin(); }
     const_iterator begin() const { return vec.begin(); }
     VectorBase::iterator VectorBase_begin() const override {

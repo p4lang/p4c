@@ -59,6 +59,7 @@ set (LIBP4CTOOLKIT_HDRS
 	ordered_set.h
 	path.h
 	range.h
+	safe_vector.h
 	set.h
 	source_file.h
 	sourceCodeBuilder.h

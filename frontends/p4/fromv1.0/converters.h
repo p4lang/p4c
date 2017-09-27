@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_FROMV1_0_CONVERTERS_H_
 
 #include "ir/ir.h"
+#include "lib/safe_vector.h"
 #include "frontends/p4/coreLibrary.h"
 #include "programStructure.h"
 
@@ -120,7 +121,7 @@ class PrimitiveConverter {
     virtual ~PrimitiveConverter();
 
     // helper functions
-    vector<const IR::Expression *> convertArgs(ProgramStructure *, const IR::Primitive *);
+    safe_vector<const IR::Expression *> convertArgs(ProgramStructure *, const IR::Primitive *);
 
  public:
     virtual const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) = 0;
