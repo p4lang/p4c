@@ -53,6 +53,7 @@ set (P4_FRONTEND_SRCS
   p4/uselessCasts.cpp
   p4/directCalls.cpp
   p4/setHeaders.cpp
+  p4/deprecated.cpp
   )
 
 set (P4_FRONTEND_HDRS
@@ -100,6 +101,7 @@ set (P4_FRONTEND_HDRS
   p4/uselessCasts.h
   p4/directCalls.h
   p4/setHeaders.h
+  p4/deprecated.h
   )
 
 
