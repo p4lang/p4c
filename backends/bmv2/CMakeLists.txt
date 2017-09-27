@@ -39,7 +39,6 @@ set (BMV2_BACKEND_SRCS
   portableSwitch.cpp
   sharedActionSelectorCheck.cpp
   simpleSwitch.cpp
-  synthesizeValidField.cpp
   )
 
 set (BMV2_BACKEND_HDRS
@@ -63,7 +62,6 @@ set (BMV2_BACKEND_HDRS
   portableSwitch.h
   sharedActionSelectorCheck.h
   simpleSwitch.h
-  synthesizeValidField.h
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
@@ -122,11 +120,6 @@ endif()
 
 set (GTEST_BMV2_SOURCES
   ${P4C_SOURCE_DIR}/test/gtest/bmv2_isvalid.cpp
-
-  # XXX(seth): This should not depend on BMV2. The source of the dependency is
-  # the SynthesizeValidField pass; we should either promote it to a midend pass
-  # or remove the dependency in the P4Runtime code.
-  ${P4C_SOURCE_DIR}/test/gtest/p4runtime.cpp
   )
 
 set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BMV2_SOURCES} PARENT_SCOPE)

@@ -18,7 +18,6 @@ limitations under the License.
 
 #include "gtest/gtest.h"
 #include "backends/bmv2/helpers.h"
-#include "backends/bmv2/synthesizeValidField.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/createBuiltins.h"
@@ -28,6 +27,7 @@ limitations under the License.
 #include "helpers.h"
 #include "ir/ir.h"
 #include "midend/simplifyKey.h"
+#include "midend/synthesizeValidField.h"
 
 namespace BMV2 {
 
@@ -49,7 +49,7 @@ TEST(BMV2_SynthesizeValidField, ValidField) {
     P4::TypeMap typeMap;
     PassManager passes = {
         new P4::TypeChecking(&refMap, &typeMap),
-        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::SynthesizeValidField(&refMap, &typeMap),
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
@@ -98,7 +98,7 @@ TEST(BMV2_SynthesizeValidField, Expressions) {
     PassManager passes = {
         new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
-        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::SynthesizeValidField(&refMap, &typeMap),
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
@@ -184,7 +184,7 @@ TEST(BMV2_SynthesizeValidField, MatchKeys) {
     PassManager passes = {
         new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
-        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::SynthesizeValidField(&refMap, &typeMap),
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
@@ -286,7 +286,7 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
     PassManager passes = {
         new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
-        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::SynthesizeValidField(&refMap, &typeMap),
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
@@ -364,7 +364,7 @@ TEST(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
     PassManager passes = {
         new P4::CreateBuiltins(),
         new P4::TypeChecking(&refMap, &typeMap),
-        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::SynthesizeValidField(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap, new P4::NonMaskLeftValue(&typeMap)),
     };

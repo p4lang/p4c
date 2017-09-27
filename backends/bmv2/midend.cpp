@@ -44,6 +44,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
+#include "midend/synthesizeValidField.h"
 #include "midend/removeSelectBooleans.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
@@ -53,7 +54,6 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
 #include "midend/dontcareArgs.h"
-#include "synthesizeValidField.h"
 
 namespace BMV2 {
 
@@ -100,7 +100,7 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
-        new SynthesizeValidField(&refMap, &typeMap),
+        new P4::SynthesizeValidField(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap, new P4::NonMaskLeftValue(&typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap),
