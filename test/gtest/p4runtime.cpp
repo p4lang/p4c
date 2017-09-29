@@ -34,7 +34,7 @@ createP4RuntimeTestCase(const std::string& source,
                             = CompilerOptions::FrontendVersion::P4_16) {
     auto frontendTestCase = FrontendTestCase::create(source, langVersion);
     if (!frontendTestCase) return boost::none;
-    return generateP4Runtime(frontendTestCase->program);
+    return P4::generateP4Runtime(frontendTestCase->program);
 }
 
 /// @return the P4Runtime representation of the table with the given name, or
