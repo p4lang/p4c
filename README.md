@@ -105,7 +105,7 @@ included with `p4c` are documented here:
 
 Most dependencies can be installed using `apt-get install`:
 
-`sudo apt-get install g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev pkg-config python python-scapy python-ipaddr tcpdump cmake`
+`sudo apt-get install g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev libboost-graph-dev pkg-config python python-scapy python-ipaddr tcpdump cmake`
 
 For documentation building:
 `sudo apt-get install -y doxygen graphviz texlive-full`
