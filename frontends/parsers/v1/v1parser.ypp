@@ -490,12 +490,10 @@ case_value_list:
     ;
 
 case_value:
-      const_expression
+      expression
       { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), new IR::Constant(-1)); }
-    | const_expression MASK const_expression
+    | expression MASK const_expression
       { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), $3 ? $3 : new IR::Constant(0)); }
-    | name
-      { $$ = CaseValue(new IR::PathExpression(IR::ID(@1, $1)), new IR::Constant(-1)); }
     | DEFAULT
       { $$ = CaseValue(new IR::Constant(0), new IR::Constant(0)); }
     ;

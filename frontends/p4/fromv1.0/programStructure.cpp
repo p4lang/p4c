@@ -414,7 +414,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     // XXX(hanw): handle parser_value_set
                     P4C_UNIMPLEMENTED("parser_value_set is not yet implemented");
                 } else {
-                    BUG("Unknown type for select case", v.first);
+                    ::error("Expected constant or parser value set in %1%", v.first);
                 }
             }
         }
