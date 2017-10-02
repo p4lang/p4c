@@ -260,8 +260,8 @@ class ParserValueSet {
 }
 
 class CaseEntry {
-    safe_vector<std::pair<Literal, Constant>>    values = {};
-    optional ID                                 action;
+    safe_vector<std::pair<Expression, Constant>>    values = {};
+    optional ID                                     action;
 }
 
 class V1Parser {

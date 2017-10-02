@@ -410,9 +410,11 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     auto expr = explodeLabel(first, v.second, sizes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
-                }
-                if (auto first = v.first->to<IR::StringLiteral>()) {
+                } else if (auto first = v.first->to<IR::PathExpression>()) {
                     // XXX(hanw): handle parser_value_set
+                    P4C_UNIMPLEMENTED("parser_value_set is not yet implemented");
+                } else {
+                    BUG("Unknown type for select case", v.first);
                 }
             }
         }

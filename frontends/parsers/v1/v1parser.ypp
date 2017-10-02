@@ -60,7 +60,7 @@ inline std::ostream& operator<<(std::ostream& out, const V1::HeaderType& headerT
     return out;
 }
 
-typedef std::pair<const IR::Literal*, const IR::Constant*> CaseValue;
+typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
 
 inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
     out << "CaseValue(" << caseValue.first << ',' << caseValue.second << ')';
@@ -495,7 +495,7 @@ case_value:
     | const_expression MASK const_expression
       { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), $3 ? $3 : new IR::Constant(0)); }
     | name
-      { $$ = CaseValue(new IR::StringLiteral(@1, $1), new IR::Constant(-1)); }
+      { $$ = CaseValue(new IR::PathExpression(IR::ID(@1, $1)), new IR::Constant(-1)); }
     | DEFAULT
       { $$ = CaseValue(new IR::Constant(0), new IR::Constant(0)); }
     ;
