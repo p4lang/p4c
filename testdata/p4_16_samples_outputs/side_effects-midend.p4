@@ -35,6 +35,7 @@ control my() {
         a = tmp_22;
         tmp_23 = g(a[0:0]);
         a[0:0] = tmp_23;
+        g(a);
     }
     @hidden table tbl_act {
         actions = {

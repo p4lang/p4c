@@ -33,6 +33,16 @@ static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     return exp;
 }
 
+/* helper function to extract the side effects from an expression as a statement */
+static const IR::Statement *makeSideEffectStatement(const IR::Expression *exp) {
+    while (auto unary = exp->to<IR::Operation_Unary>())
+        exp = unary->expr;
+    if (auto mc = exp->to<IR::MethodCallExpression>())
+        return new IR::MethodCallStatement(mc);
+    BUG("Unhandled expression in makeSideEffectStatement");
+    return nullptr;
+}
+
 /* LocalCopyPropagation does copy propagation and dead code elimination within a 'block'
  * the body of an action or control (TODO -- extend to parsers/states).  Within the
  * block it tracks all variables defined in the block as well as those defined outside the
@@ -50,11 +60,13 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
                 LOG3("  removing dead local " << var->name);
                 return nullptr; } }
         return var; }
-    IR::AssignmentStatement *postorder(IR::AssignmentStatement *as) override {
+    const IR::Statement *postorder(IR::AssignmentStatement *as) override {
         if (auto dest = lvalue_out(as->left)->to<IR::PathExpression>()) {
             if (auto var = ::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
                     LOG3("  removing dead assignment to " << dest->path->name);
+                    if (hasSideEffects(as->right))
+                        return makeSideEffectStatement(as->right);
                     return nullptr;
                 } else if (var->local) {
                     LOG6("  not removing live assignment to " << dest->path->name);
