@@ -65,8 +65,8 @@ void IR::CaseEntry::dbprint(std::ostream &out) const {
                 out << sep << "default";
             else
                 out << sep << *val.first << " &&& " << *val.second;
-        } else if (val.first->is<IR::StringLiteral>()) {
-            out << sep << *val.first;
+        } else if (val.first->is<IR::PathExpression>()) {
+            out << sep << *val.first->to<IR::PathExpression>();
         }
         sep = ", "; }
     out << ':' << setprec(prec) << " " << action;
