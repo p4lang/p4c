@@ -58,12 +58,16 @@ void IR::CaseEntry::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Low);
     for (auto &val : values) {
-        if (val.second->asLong() == -1)
+        if (val.first->is<IR::Constant>()) {
+            if (val.second->asLong() == -1)
+                out << sep << *val.first;
+            else if (val.second->asLong() == 0)
+                out << sep << "default";
+            else
+                out << sep << *val.first << " &&& " << *val.second;
+        } else if (val.first->is<IR::StringLiteral>()) {
             out << sep << *val.first;
-        else if (val.second->asLong() == 0)
-            out << sep << "default";
-        else
-            out << sep << *val.first << " &&& " << *val.second;
+        }
         sep = ", "; }
     out << ':' << setprec(prec) << " " << action;
 }
