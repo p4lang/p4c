@@ -20,6 +20,7 @@ control my(out H[2] s) {
         s[tmp_12].z = tmp_13;
         tmp_15 = (bit<32>)tmp_17;
         tmp_16 = s[(bit<32>)tmp_17].z;
+        f(tmp_16, 1w1);
         s[tmp_15].z = tmp_16;
     }
     @name("tbl_act") table tbl_act {

@@ -17,6 +17,7 @@ control c(out bit<32> x) {
     U u;
     U[2] u2;
     @hidden action act() {
+        u.isValid();
         u.h1.isValid();
         x = u.h1.f + u.h2.g;
         u.h1.setValid();
