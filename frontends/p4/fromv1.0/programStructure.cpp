@@ -406,9 +406,16 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             if (deststate == nullptr)
                 return nullptr;
             for (auto v : c->values) {
-                auto expr = explodeLabel(v.first, v.second, sizes);
-                auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
-                cases.push_back(sc);
+                if (auto first = v.first->to<IR::Constant>()) {
+                    auto expr = explodeLabel(first, v.second, sizes);
+                    auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
+                    cases.push_back(sc);
+                } else if (auto first = v.first->to<IR::PathExpression>()) {
+                    // XXX(hanw): handle parser_value_set
+                    ::warning("parser_value_set is not yet implemented");
+                } else {
+                    ::error("Expected constant or parser value set in %1%", v.first);
+                }
             }
         }
         select = new IR::SelectExpression(parser->select->srcInfo, list, std::move(cases));

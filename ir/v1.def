@@ -252,9 +252,16 @@ class CalculatedField {
         v.visit(annotations, "annotations"); }
 }
 
+class ParserValueSet {
+    optional ID                 name;
+    Annotations                 annotations;
+    dbprint { out << node_type_name() << " " << name; }
+    toString { return node_type_name() + " " + name; }
+}
+
 class CaseEntry {
-    safe_vector<std::pair<Constant, Constant>>  values = {};
-    optional ID                                 action;
+    safe_vector<std::pair<Expression, Constant>>    values = {};
+    optional ID                                     action;
 }
 
 class V1Parser {
