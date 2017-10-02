@@ -412,7 +412,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     cases.push_back(sc);
                 } else if (auto first = v.first->to<IR::PathExpression>()) {
                     // XXX(hanw): handle parser_value_set
-                    P4C_UNIMPLEMENTED("parser_value_set is not yet implemented");
+                    ::warning("parser_value_set is not yet implemented");
                 } else {
                     ::error("Expected constant or parser value set in %1%", v.first);
                 }
