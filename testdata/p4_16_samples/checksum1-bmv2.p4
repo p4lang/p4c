@@ -141,7 +141,7 @@ control cEgress(inout headers hdr,
     }
 }
 
-control vc(in headers hdr,
+control vc(inout headers hdr,
            inout metadata meta)
 {
     apply {
