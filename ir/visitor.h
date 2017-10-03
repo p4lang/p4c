@@ -201,7 +201,7 @@ class Visitor {
     virtual void init_join_flows(const IR::Node *) { assert(0); }
 
     /** If @n is a join point in the control flow graph (i.e. has multiple incoming
-     * edges), then:
+     * edges) and is not filtered out by `filter_join_point`, then:
      *
      *   - if this is the first time a visitor has visited @n, store a clone of the
      *   visitor with this node and return true, deferring visiting this node until
@@ -315,9 +315,10 @@ class ControlFlowVisitor : public virtual Visitor {
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
 
-    /** @returns true if this node should be removed from the set of join
-     * points, where a 'join point' is a node with multiple incoming edges in
-     * the control flow graph.
+    /** This will be called for all nodes with multiple incoming edges, and
+     * should return 'false' if the node should be considered a join point, and
+     * 'true' if if should not be considered one. Nodes with only one incoming
+     * edge are never join points.
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
     ControlFlowVisitor &flow_clone() override;
