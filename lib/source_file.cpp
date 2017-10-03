@@ -68,6 +68,7 @@ InputSources::InputSources() :
 
 /// prevent further changes
 void InputSources::seal() {
+    LOG4(toDebugString());
     if (sealed)
         BUG("InputSources already sealed");
     sealed = true;
@@ -156,11 +157,13 @@ void InputSources::mapLine(cstring file, unsigned originalSourceLineNo) {
 }
 
 SourceFileLine InputSources::getSourceLine(unsigned line) const {
-    auto it = line_file_map.upper_bound(line);
+    auto it = line_file_map.upper_bound(line+1);
     if (it == line_file_map.begin())
         // There must be always something mapped to line 0
         BUG("No source information for line %1%", line);
+    LOG3(line << " mapped to " << it->first << "," << it->second.toString());
     --it;
+    LOG3(line << " corrected to " << it->first << "," << it->second.toString());
     // For a source file such as
     // ----------
     // # 1 "x.p4"
