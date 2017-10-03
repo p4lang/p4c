@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "helpers.h"
+#include "JsonObjects.h"
 
 namespace BMV2 {
 

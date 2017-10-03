@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DEPRECATED_H_
 #define _FRONTENDS_P4_DEPRECATED_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
 namespace P4 {
