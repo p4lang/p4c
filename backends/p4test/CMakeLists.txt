@@ -53,10 +53,6 @@ set (P4TEST_SUITES
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
-  # Program checksum1-bmv2.p4 uses new verify_checksum and
-  # update_checksum extern functions that were added but then reverted
-  # until they can be deployed without breaking existing programs.
-  testdata/p4_16_samples/checksum1-bmv2.p4
   )
 p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}")
 
