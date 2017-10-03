@@ -363,8 +363,8 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
             ${DOXYGEN_EXECUTABLE} ${DOXYGEN_FILE}
     DEPENDS genIR
     COMMENT "Generating documentation")
-  install (FILES ${P4C_BINARY_DIR}/doxygen_out/html
-    RESOURCE DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
+  install (DIRECTORY ${P4C_BINARY_DIR}/doxygen-out/html/
+    DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
 # \TODO: packaging
