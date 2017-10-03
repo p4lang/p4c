@@ -21,7 +21,7 @@ parser prs(packet_in p, out Headers h, inout M meta, inout standard_metadata_t s
     }
 }
 
-control vc(in Headers hdr, inout M meta) {
+control vc(inout Headers hdr, inout M meta) {
     apply {
     }
 }

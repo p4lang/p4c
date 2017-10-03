@@ -48,7 +48,7 @@ control cEgress(inout H hdr, inout M meta, inout standard_metadata_t stdmeta) {
     }
 }
 
-control vc(in H hdr, inout M meta) {
+control vc(inout H hdr, inout M meta) {
     apply {
     }
 }

@@ -21,7 +21,7 @@ parser MyParser(packet_in packet, out my_headers_t hdr, inout my_metadata_t meta
     }
 }
 
-control MyVerifyChecksum(in my_headers_t hdr, inout my_metadata_t meta) {
+control MyVerifyChecksum(inout my_headers_t hdr, inout my_metadata_t meta) {
     apply {
     }
 }

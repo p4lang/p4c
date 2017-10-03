@@ -48,7 +48,7 @@ control cEgress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     apply {}
 }
 
-control vc(in Parsed_packet hdr, inout Metadata meta) {
+control vc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {}
 }
 

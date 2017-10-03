@@ -42,8 +42,6 @@ class SimpleSwitch {
     cstring convertHashAlgorithm(cstring algorithm);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, const IR::Node* node);
-    void generateUpdate(const IR::BlockStatement *block,
-                        Util::JsonArray* checksums, Util::JsonArray* calculations);
 
  public:
     void modelError(const char* format, const IR::Node* place) const;
@@ -54,13 +52,14 @@ class SimpleSwitch {
     void convertExternInstances(const IR::Declaration *c,
                                 const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
                                 BMV2::SharedActionSelectorCheck& selector_check);
-    void convertChecksumUpdate(const IR::P4Control* updateControl,
-                               Util::JsonArray* checksums, Util::JsonArray* calculations);
+    void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
+                         Util::JsonArray* calculations, bool verify);
 
     void setPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls,
                              std::map<cstring, cstring>* map);
     void setNonPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setUpdateChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
+    void setVerifyChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setDeparserControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
 
     const IR::P4Control* getIngress(const IR::ToplevelBlock* blk);

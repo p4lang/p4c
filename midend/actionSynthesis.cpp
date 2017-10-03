@@ -17,7 +17,6 @@ limitations under the License.
 #include "actionSynthesis.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace P4 {
 
@@ -107,12 +106,6 @@ bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
         auto mi = MethodInstance::resolve(mc, refMap, typeMap);
         if (!mi->is<ExternMethod>())
             return true;
-        auto em = mi->to<ExternMethod>();
-        // TODO: this is wrong, there is no way a mid-end pass can depend on
-        // v1model.
-        auto &v1model = P4V1::V1Model::instance;
-        if (em->originalExternType->name.name == v1model.ck16.name)
-            return false;
     }
     return true;
 }

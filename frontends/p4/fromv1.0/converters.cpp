@@ -970,6 +970,8 @@ class FixExtracts final : public Transform {
   do much better than this.
 */
 class AdjustLengths : public Transform {
+ public:
+    AdjustLengths() { setName("AdjustLengths"); }
     const IR::Node* postorder(IR::PathExpression* expression) override {
         auto anno = findContext<IR::Annotation>();
         if (anno == nullptr)

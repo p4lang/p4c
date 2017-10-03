@@ -54,14 +54,14 @@ control deparser(packet_out b, in parsed_packet_t hdr) {
     }
 }
 
-control verify_checksum(in parsed_packet_t hdr, inout my_meta_t my_meta) {
+control verify_c(inout parsed_packet_t hdr, inout my_meta_t my_meta) {
     apply {
     }
 }
 
-control compute_checksum(inout parsed_packet_t hdr, inout my_meta_t my_meta) {
+control compute_c(inout parsed_packet_t hdr, inout my_meta_t my_meta) {
     apply {
     }
 }
 
-V1Switch<parsed_packet_t, my_meta_t>(parse(), verify_checksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch<parsed_packet_t, my_meta_t>(parse(), verify_c(), ingress(), egress(), compute_c(), deparser()) main;

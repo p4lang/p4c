@@ -34,6 +34,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.mcast_grp = smeta_1.mcast_grp;
         smeta.resubmit_flag = smeta_1.resubmit_flag;
         smeta.egress_rid = smeta_1.egress_rid;
+        smeta.checksum_error = smeta_1.checksum_error;
     }
     @name("forward") table forward {
         key = {
@@ -58,7 +59,7 @@ control DeparserI(packet_out pk, in H hdr) {
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }

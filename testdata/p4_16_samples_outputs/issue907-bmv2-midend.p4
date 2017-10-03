@@ -45,7 +45,7 @@ control DP(packet_out b, in Headers p) {
     }
 }
 
-control Verify(in Headers hdrs, inout Metadata meta) {
+control Verify(inout Headers hdrs, inout Metadata meta) {
     apply {
     }
 }

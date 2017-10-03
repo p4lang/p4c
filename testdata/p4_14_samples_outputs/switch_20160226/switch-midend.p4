@@ -763,7 +763,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<4> tmp_8;
+    bit<4> tmp_0;
     @name(".parse_all_int_meta_value_heders") state parse_all_int_meta_value_heders {
         packet.extract<int_switch_id_header_t>(hdr.int_switch_id_header);
         packet.extract<int_ingress_port_id_header_t>(hdr.int_ingress_port_id_header);
@@ -1017,8 +1017,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
-        tmp_8 = packet.lookahead<bit<4>>();
-        transition select(tmp_8[3:0]) {
+        tmp_0 = packet.lookahead<bit<4>>();
+        transition select(tmp_0[3:0]) {
             4w0x4: parse_mpls_inner_ipv4;
             4w0x6: parse_mpls_inner_ipv6;
             default: parse_eompls;
@@ -5001,47 +5001,17 @@ struct tuple_8 {
     bit<32> field_45;
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
-    bool tmp_9;
-    bit<16> tmp_10;
-    bool tmp_12;
-    bit<16> tmp_13;
-    @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum;
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        if (hdr.inner_ipv4.ihl != 4w5) 
-            tmp_9 = false;
-        else {
-            tmp_10 = inner_ipv4_checksum.get<tuple_8>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
-            tmp_9 = hdr.inner_ipv4.hdrChecksum == tmp_10;
-        }
-        if (tmp_9) 
-            mark_to_drop();
-        if (hdr.ipv4.ihl != 4w5) 
-            tmp_12 = false;
-        else {
-            tmp_13 = ipv4_checksum.get<tuple_8>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-            tmp_12 = hdr.ipv4.hdrChecksum == tmp_13;
-        }
-        if (tmp_12) 
-            mark_to_drop();
+        verify_checksum<tuple_8, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_8, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_15;
-    bit<16> tmp_16;
-    @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_2;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     apply {
-        if (hdr.inner_ipv4.ihl == 4w5) {
-            tmp_15 = inner_ipv4_checksum_2.get<tuple_8>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
-            hdr.inner_ipv4.hdrChecksum = tmp_15;
-        }
-        if (hdr.ipv4.ihl == 4w5) {
-            tmp_16 = ipv4_checksum_2.get<tuple_8>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-            hdr.ipv4.hdrChecksum = tmp_16;
-        }
+        update_checksum<tuple_8, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_8, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
