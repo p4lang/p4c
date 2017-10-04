@@ -400,13 +400,22 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
     if (flow_join_points && flow_join_points->count(n)) {
         auto &status = flow_join_points->at(n);
+        // Decrement the number of upstream edges yet to be traversed.  If none
+        // remain, merge and return false to visit this node.
         if (!--status.second) {
             flow_merge(*status.first);
             return false;
         } else if (status.first) {
+            // If there are still unvisited upstream edges but this is not the
+            // first time this node has been reached, merge this visitor with
+            // the accumulator (status.first) and return true to defer visiting
+            // this node.
             status.first->flow_merge(*this);
             return true;
         } else {
+            // Otherwise, this is the first time this node has been visited.
+            // Clone this visitor and store it as the initial accumulator
+            // value.
             status.first = clone();
             return true; } }
     return false;

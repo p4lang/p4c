@@ -128,6 +128,10 @@ class Visitor {
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
     virtual void flow_dead() { }
+
+    /** Merge the given visitor into this visitor at a joint point in the
+     * control flow graph.  Should update @this and leave the other unchanged.
+     */
     virtual void flow_merge(Visitor &) { }
 
     virtual const char *name() const {
@@ -193,8 +197,31 @@ class Visitor {
     // flow_merge the visitor from all the parents before visiting the node and its
     // children.  This only works for Inspector (not Modifier/Transform) currently.
     bool joinFlows = false;
+
     virtual void init_join_flows(const IR::Node *) { assert(0); }
+
+    /** If @n is a join point in the control flow graph (i.e. has multiple incoming
+     * edges) and is not filtered out by `filter_join_point`, then:
+     *
+     *   - if this is the first time a visitor has visited @n, store a clone of the
+     *   visitor with this node and return true, deferring visiting this node until
+     *   all incoming edges have been visited.
+     *
+     *   - if this is NOT the first visitor, but also not the last, then merge this
+     *   visitor into the stored visitor clone, and return true.
+     *
+     *   - finally, if this is the is the final visitor, merge the stored, cloned
+     *   visitor---which has accumulated all previous visitors---with this one, and
+     *   return false.
+     *
+     * `join_flows(n)` is invoked in `apply_visitor(n, name)`, and @n is only
+     * visited if this method returns false.
+     *
+     * @return false if all upstream nodes from @n have been visited, and it's time
+     * to visit @n.
+     */
     virtual bool join_flows(const IR::Node *) { return false; }
+
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     virtual bool check_clone(const Visitor *) { return true; }
@@ -287,6 +314,12 @@ class ControlFlowVisitor : public virtual Visitor {
     virtual ControlFlowVisitor *clone() const = 0;
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
+
+    /** This will be called for all nodes with multiple incoming edges, and
+     * should return 'false' if the node should be considered a join point, and
+     * 'true' if if should not be considered one. Nodes with only one incoming
+     * edge are never join points.
+     */
     virtual bool filter_join_point(const IR::Node *) { return false; }
     ControlFlowVisitor &flow_clone() override;
 };
