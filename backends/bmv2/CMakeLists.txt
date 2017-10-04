@@ -106,10 +106,6 @@ set (XFAIL_TESTS
   testdata/p4_14_samples/issue60.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
-  # Program checksum1-bmv2.p4 uses new verify_checksum and
-  # update_checksum extern functions that were added but then reverted
-  # until they can be deployed without breaking existing programs.
-  testdata/p4_16_samples/checksum1-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
