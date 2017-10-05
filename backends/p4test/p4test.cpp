@@ -17,6 +17,7 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 
+#include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
 #include "ir/json_loader.h"
 #include "lib/log.h"
@@ -129,6 +130,9 @@ int main(int argc, char *const argv[]) {
             }
         }
     }
+
+    P4::serializeP4RuntimeIfRequired(program, options);
+
     if (Log::verbose())
         std::cerr << "Done." << std::endl;
     return ::errorCount() > 0;
