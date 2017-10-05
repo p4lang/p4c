@@ -30,6 +30,8 @@ namespace IR {
 class P4Program;
 }  // namespace IR
 
+class CompilerOptions;
+
 namespace P4 {
 
 /// P4Runtime serialization formats.
@@ -69,6 +71,18 @@ struct P4RuntimeAPI {
  * @return the generated P4Runtime API.
  */
 P4RuntimeAPI generateP4Runtime(const IR::P4Program* program);
+
+/**
+ * A convenience wrapper for P4::generateP4Runtime() which generates the
+ * P4RuntimeAPI structure for the provided program and serializes it according
+ * to the provided command-line options.
+ *
+ * @param program  The program to construct the control-plane API from. All
+ *                 frontend passes must have already run.
+ * @param options  The command-line options used to invoke the compiler.
+ */
+void serializeP4RuntimeIfRequired(const IR::P4Program* program,
+                                  const CompilerOptions& options);
 
 }  // namespace P4
 

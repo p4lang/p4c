@@ -30,6 +30,7 @@ limitations under the License.
 #include "p4/config/v1model.pb.h"
 #include "p4/p4runtime.pb.h"
 
+#include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -41,6 +42,8 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/uniqueNames.h"
 #include "ir/ir.h"
+#include "lib/log.h"
+#include "lib/nullstream.h"
 #include "lib/ordered_set.h"
 #include "midend/actionsInlining.h"
 #include "midend/dontcareArgs.h"
@@ -2177,6 +2180,35 @@ void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat
     }
     if (!success)
         ::error("Failed to serialize the P4Runtime static table entries to the output");
+}
+
+void serializeP4RuntimeIfRequired(const IR::P4Program* program,
+                                  const CompilerOptions& options) {
+    // The options parser in the frontend already prints a warning if
+    // '--p4runtime-entries-file' is used without '--p4runtime-file'.
+    if (options.p4RuntimeFile.isNullOrEmpty()) return;
+
+    if (Log::verbose())
+        std::cout << "Generating P4Runtime output" << std::endl;
+
+    auto p4Runtime = P4::generateP4Runtime(program);
+
+    std::ostream* out = openFile(options.p4RuntimeFile, false);
+    if (!out) {
+        ::error("Couldn't open P4Runtime API file: %1%", options.p4RuntimeFile);
+        return;
+    }
+    p4Runtime.serializeP4InfoTo(out, options.p4RuntimeFormat);
+
+    if (!options.p4RuntimeEntriesFile.isNullOrEmpty()) {
+        std::ostream* out = openFile(options.p4RuntimeEntriesFile, false);
+        if (!out) {
+            ::error("Couldn't open P4Runtime static entries file: %1%",
+                    options.p4RuntimeEntriesFile);
+            return;
+        }
+        p4Runtime.serializeEntriesTo(out, options.p4RuntimeFormat);
+    }
 }
 
 /** @} */  /* end group control_plane */
