@@ -371,6 +371,15 @@ class bitvec {
             if (word(i) != a.word(i)) return false;
         return true; }
     bool operator!=(const bitvec &a) const { return !(*this == a); }
+    bool operator<(const bitvec &a) const {
+        size_t i = std::max(size, a.size);
+        while (i--) {
+            if (word(i) < a.word(i)) return true;
+            if (word(i) > a.word(i)) return false; }
+        return false; }
+    bool operator>(const bitvec &a) const { return a < *this; }
+    bool operator>=(const bitvec &a) const { return !(*this < a); }
+    bool operator<=(const bitvec &a) const { return !(a < *this); }
     bool intersects(const bitvec &a) const {
         for (size_t i = 0; i < size && i < a.size; i++)
             if (word(i) & a.word(i)) return true;
