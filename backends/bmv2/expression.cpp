@@ -254,18 +254,35 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 result->emplace("type", "header");
                 result->emplace("value", nestedField);
             } else if (parentType->is<IR::Type_StructLike>() &&
-                       (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
-                        type->is<IR::Type_Error>())) {
+                       (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
+                        type->is<IR::Type_Boolean>())) {
                 auto field = parentType->to<IR::Type_StructLike>()->getField(
                     expression->member);
-                CHECK_NULL(field);
                 LOG3("looking up field " << field);
+                CHECK_NULL(field);
                 auto name = ::get(backend->scalarMetadataFields, field);
                 CHECK_NULL(name);
-                result->emplace("type", "field");
-                auto e = mkArrayField(result, "value");
-                e->append(scalarsName);
-                e->append(name);
+                if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() || leftValue) {
+                    result->emplace("type", "field");
+                    auto e = mkArrayField(result, "value");
+                    e->append(scalarsName);
+                    e->append(name);
+                } else if (type->is<IR::Type_Boolean>()) {
+                    // Boolean variables are stored as ints, so we have to insert a conversion when
+                    // reading such a variable
+                    result->emplace("type", "expression");
+                    auto e = new Util::JsonObject();
+                    result->emplace("value", e);
+                    e->emplace("op", "d2b");  // data to Boolean cast
+                    e->emplace("left", Util::JsonValue::null);
+                    auto r = new Util::JsonObject();
+                    e->emplace("right", r);
+
+                    r->emplace("type", "field");
+                    auto a = mkArrayField(r, "value");
+                    a->append(scalarsName);
+                    a->append(name);
+                }
             } else {
                 // This may be wrong, but the caller will handle it properly
                 // (e.g., this can be a method, such as packet.lookahead)
