@@ -556,12 +556,13 @@ functionPrototype
     ;
 
 methodPrototype
-    : functionPrototype ";" { $$ = $1; }
-    | ABSTRACT functionPrototype ";"    { $$ = $2; $$->setAbstract(); }  // experimental
-    | TYPE "(" parameterList ")" ";"  // constructor
-                                        { auto par = new IR::ParameterList(@3, *$3);
-                                          auto mt = new IR::Type_Method(@1, par);
-                                          $$ = new IR::Method(@1, IR::ID(@1, $1), mt); }
+    : optAnnotations functionPrototype ";" { $$ = $2; $2->annotations = $1; }
+    | optAnnotations ABSTRACT functionPrototype ";"    { $$ = $3; $$->setAbstract();
+                                                         $3->annotations = $1; }  // experimental
+    | optAnnotations TYPE "(" parameterList ")" ";"  // constructor
+                                        { auto par = new IR::ParameterList(@4, *$4);
+                                          auto mt = new IR::Type_Method(@2, par);
+                                          $$ = new IR::Method(@2, IR::ID(@2, $2), mt, $1); }
     ;
 
 /************************** TYPES ****************************/
