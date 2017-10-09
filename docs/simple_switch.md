@@ -73,6 +73,7 @@ header_type queueing_metadata_t {
         enq_qdepth : 16;
         deq_timedelta : 32;
         deq_qdepth : 16;
+        qid : 8;
     }
 }
 metadata queueing_metadata_t queueing_metadata;
@@ -85,6 +86,9 @@ enqueued.
 - `deq_timedelta`: the time, in microseconds, that the packet spent in the
 queue.
 - `deq_qdepth`: the depth of queue when the packet was dequeued.
+- `qid`: when there are multiple queues servicing each egress port (e.g. when
+priority queueing is enabled), each queue is assigned a fixed unique id, which
+is written to this field. Otherwise, this field is set to 0.
 
 ## Supported primitive actions
 

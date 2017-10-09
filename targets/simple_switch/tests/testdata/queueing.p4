@@ -30,6 +30,7 @@ header_type queueing_metadata_t {
         enq_qdepth : 24;
         deq_timedelta : 32;
         deq_qdepth : 24;
+        qid : 8;
     }
 }
 

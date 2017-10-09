@@ -1,4 +1,11 @@
 {
+    "__meta__": {
+        "version": [
+            2,
+            5
+        ],
+        "compiler": "https://github.com/p4lang/p4c-bm"
+    },
     "header_types": [
         {
             "name": "standard_metadata_t",
@@ -75,6 +82,10 @@
                 [
                     "deq_qdepth",
                     24
+                ],
+                [
+                    "qid",
+                    8
                 ]
             ],
             "length_exp": null,
@@ -139,12 +150,14 @@
                     ],
                     "transitions": [
                         {
+                            "type": "hexstr",
                             "value": "0x00000000",
                             "mask": null,
                             "next_state": "queueing_dummy"
                         },
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": null
                         }
@@ -167,7 +180,8 @@
                     "transition_key": [],
                     "transitions": [
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": null
                         }
@@ -176,6 +190,7 @@
             ]
         }
     ],
+    "parse_vsets": [],
     "deparsers": [
         {
             "name": "deparser",
@@ -353,10 +368,10 @@
                         "set_port": null,
                         "_drop": null
                     },
-                    "default_action": null,
                     "base_default_next": null
                 }
             ],
+            "action_profiles": [],
             "conditionals": []
         },
         {
@@ -380,10 +395,10 @@
                     "next_tables": {
                         "copy_queueing_data": null
                     },
-                    "default_action": null,
                     "base_default_next": null
                 }
             ],
+            "action_profiles": [],
             "conditionals": []
         }
     ],

@@ -103,6 +103,7 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   force_arith_field("queueing_metadata", "enq_qdepth");
   force_arith_field("queueing_metadata", "deq_timedelta");
   force_arith_field("queueing_metadata", "deq_qdepth");
+  force_arith_field("queueing_metadata", "qid");
 
   force_arith_field("intrinsic_metadata", "ingress_global_timestamp");
   force_arith_field("intrinsic_metadata", "lf_field_list");
@@ -283,6 +284,7 @@ SimpleSwitch::copy_ingress_pkt(
 
 void
 SimpleSwitch::check_queueing_metadata() {
+  // TODO(antonin): add qid in required fields
   bool enq_timestamp_e = field_exists("queueing_metadata", "enq_timestamp");
   bool enq_qdepth_e = field_exists("queueing_metadata", "enq_qdepth");
   bool deq_timedelta_e = field_exists("queueing_metadata", "deq_timedelta");
@@ -441,7 +443,12 @@ SimpleSwitch::egress_thread(size_t worker_id) {
   while (1) {
     std::unique_ptr<Packet> packet;
     size_t port;
+#ifdef SSWITCH_PRIORITY_QUEUEING_ON
+    size_t priority;
+    egress_buffers.pop_back(worker_id, &port, &priority, &packet);
+#else
     egress_buffers.pop_back(worker_id, &port, &packet);
+#endif
 
     Deparser *deparser = this->get_deparser("deparser");
     Pipeline *egress_mau = this->get_pipeline("egress");
@@ -455,6 +462,14 @@ SimpleSwitch::egress_thread(size_t worker_id) {
           get_ts().count() - enq_timestamp);
       phv->get_field("queueing_metadata.deq_qdepth").set(
           egress_buffers.size(port));
+      if (phv->has_field("queueing_metadata.qid")) {
+        auto &qid_f = phv->get_field("queueing_metadata.qid");
+#ifdef SSWITCH_PRIORITY_QUEUEING_ON
+        qid_f.set(SSWITCH_PRIORITY_QUEUEING_NB_QUEUES - 1 - priority);
+#else
+        qid_f.set(0);
+#endif
+      }
     }
 
     phv->get_field("standard_metadata.egress_port").set(port);
