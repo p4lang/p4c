@@ -304,6 +304,7 @@ bool ToP4::preorder(const IR::TypeParameters* t) {
 
 bool ToP4::preorder(const IR::Method* m) {
     dump(1);
+    visit(m->annotations);
     const Context* ctx = getContext();
     bool standaloneFunction = !ctx || !ctx->node->is<IR::Type_Extern>();
     // standalone function declaration: not in a Vector of methods
@@ -344,6 +345,7 @@ bool ToP4::preorder(const IR::Function* function) {
 
 bool ToP4::preorder(const IR::Type_Extern* t) {
     dump(2);
+    visit(t->annotations);
     builder.append("extern ");
     builder.append(t->name);
     visit(t->typeParameters);
