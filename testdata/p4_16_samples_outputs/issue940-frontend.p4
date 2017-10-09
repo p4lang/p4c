@@ -1,4 +1,4 @@
-extern Checksum16 {
+@deprecated("Please use verify_checksum/update_checksum instead.") extern Checksum16 {
     Checksum16();
 }
 
