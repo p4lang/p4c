@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "graphs.h"
-
 #include <boost/graph/graphviz.hpp>
 
 #include <iostream>
+
+#include "graphs.h"
 
 #include "lib/log.h"
 #include "lib/nullstream.h"
@@ -77,8 +77,8 @@ class ParserGraphs::GraphAttributeSetter {
         switch (type) {
           case VertexType::HEADER:
               return "ellipse";
-		  case VertexType::DEFAULT:
-			  return "doublecircle";
+          case VertexType::DEFAULT:
+              return "doublecircle";
           default:
               return "rectangle";
         }
@@ -90,8 +90,8 @@ class ParserGraphs::GraphAttributeSetter {
         switch (type) {
           case VertexType::STATEMENTS:
               return "dashed";
-		  case VertexType::DEFAULT:
-			  return "bold";
+          case VertexType::DEFAULT:
+              return "bold";
           default:
               return "solid";
         }
@@ -111,22 +111,22 @@ void ParserGraphs::writeGraphToFile(const pGraph &g, const cstring &name) {
 }
 
 cstring ParserGraphs::stringRepr(mpz_class value, unsigned bytes) {
-	cstring sign = "";
-	const char* r;
-	cstring filler = "";
-	if (value < 0) {
-		value =- value;
-		r = mpz_get_str(nullptr, 16, value.get_mpz_t());
-		sign = "-";
-	} else {
-		r = mpz_get_str(nullptr, 16, value.get_mpz_t());
-	}
-	if (bytes > 0) {
-		int digits = bytes * 2 - strlen(r);
-		BUG_CHECK(digits >= 0, "Cannot represent %1% on %2% bytes", value, bytes);
-		filler = std::string(digits, '0');
-	}
-	return sign + "0x" + filler + r;
+    cstring sign = "";
+    const char* r;
+    cstring filler = "";
+    if (value < 0) {
+        value =- value;
+        r = mpz_get_str(nullptr, 16, value.get_mpz_t());
+        sign = "-";
+    } else {
+        r = mpz_get_str(nullptr, 16, value.get_mpz_t());
+    }
+    if (bytes > 0) {
+        int digits = bytes * 2 - strlen(r);
+        BUG_CHECK(digits >= 0, "Cannot represent %1% on %2% bytes", value, bytes);
+        filler = std::string(digits, '0');
+    }
+    return sign + "0x" + filler + r;
 }
 
 void ParserGraphs::convertSimpleKey(const IR::Expression* keySet,
@@ -158,78 +158,77 @@ void ParserGraphs::convertSimpleKey(const IR::Expression* keySet,
 
 unsigned ParserGraphs::combine(const IR::Expression* keySet,
                                 const IR::ListExpression* select,
-								mpz_class& value, mpz_class& mask) {
-	value = 0;
-	mask = 0;
-	unsigned totalWidth = 0;
-	if (keySet->is<IR::DefaultExpression>()) {
-		return totalWidth;
-	} else if (keySet->is<IR::ListExpression>()) {
-		auto le = keySet->to<IR::ListExpression>();
-		BUG_CHECK(le->components.size() == select->components.size(),
-				"%1%: mismatched select", select);
-		unsigned index = 0;
+                                mpz_class& value, mpz_class& mask) {
+    value = 0;
+    mask = 0;
+    unsigned totalWidth = 0;
+    if (keySet->is<IR::DefaultExpression>()) {
+        return totalWidth;
+    } else if (keySet->is<IR::ListExpression>()) {
+        auto le = keySet->to<IR::ListExpression>();
+        BUG_CHECK(le->components.size() == select->components.size(),
+                "%1%: mismatched select", select);
+        unsigned index = 0;
 
-		bool noMask = true;
-		for (auto it = select->components.begin();
-				it != select->components.end(); ++it) {
-			auto e = *it;
-			auto keyElement = le->components.at(index);
+        bool noMask = true;
+        for (auto it = select->components.begin();
+                it != select->components.end(); ++it) {
+            auto e = *it;
+            auto keyElement = le->components.at(index);
 
-			auto type = typeMap->getType(e, true);
-			int width = type->width_bits();
-			BUG_CHECK(width > 0, "%1%: unknown width", e);
+            auto type = typeMap->getType(e, true);
+            int width = type->width_bits();
+            BUG_CHECK(width > 0, "%1%: unknown width", e);
 
-			mpz_class key_value, mask_value;
-			convertSimpleKey(keyElement, key_value, mask_value);
-			unsigned w = 8 * ROUNDUP(width, 8);
-			totalWidth += ROUNDUP(width, 8);
-			value = Util::shift_left(value, w) + key_value;
-			if (mask_value != -1) {
-				mask = Util::shift_left(mask, w) + mask_value;
-				noMask = false;
-			}
-			LOG3("Shifting " << " into key " << key_value << " &&& " << mask_value <<
-					" result is " << value << " &&& " << mask);
-			index++;
-		}
+            mpz_class key_value, mask_value;
+            convertSimpleKey(keyElement, key_value, mask_value);
+            unsigned w = 8 * ROUNDUP(width, 8);
+            totalWidth += ROUNDUP(width, 8);
+            value = Util::shift_left(value, w) + key_value;
+            if (mask_value != -1) {
+                mask = Util::shift_left(mask, w) + mask_value;
+                noMask = false;
+            }
+            LOG3("Shifting " << " into key " << key_value << " &&& " << mask_value <<
+                    " result is " << value << " &&& " << mask);
+            index++;
+        }
 
-		if (noMask)
-			mask = -1;
-		return totalWidth;
-	} else {
-		BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
-		convertSimpleKey(keySet, value, mask);
-		auto type = typeMap->getType(select->components.at(0), true);
-		return ROUNDUP(type->width_bits(), 8);
-	}
+        if (noMask)
+            mask = -1;
+        return totalWidth;
+    } else {
+        BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
+        convertSimpleKey(keySet, value, mask);
+        auto type = typeMap->getType(select->components.at(0), true);
+        return ROUNDUP(type->width_bits(), 8);
+    }
 }
 
 bool ParserGraphs::preorder(const IR::PackageBlock *block) {
-	for (auto it : block->constantValue) {
-		if (it.second->is<IR::ParserBlock>()) {
-			auto name = it.second->to<IR::ParserBlock>()->container->name;
-			pGraph g_;
-			g = &g_;
-			instanceName = boost::none;
-			boost::get_property(g_, boost::graph_name) = name;
-			begin_v = add_vertex("_BEGIN_", VertexType::PARSER);
-			end_v = add_vertex("_END_", VertexType::PARSER);
-			accept_v = add_vertex("accept", VertexType::DEFAULT);
-			parents = {{begin_v, new EdgeUnconditional()}};
+    for (auto it : block->constantValue) {
+        if (it.second->is<IR::ParserBlock>()) {
+            auto name = it.second->to<IR::ParserBlock>()->container->name;
+            pGraph g_;
+            g = &g_;
+            instanceName = boost::none;
+            boost::get_property(g_, boost::graph_name) = name;
+            begin_v = add_vertex("_BEGIN_", VertexType::PARSER);
+            end_v = add_vertex("_END_", VertexType::PARSER);
+            accept_v = add_vertex("accept", VertexType::DEFAULT);
+            parents = {{begin_v, new EdgeUnconditional()}};
 
-			visit(it.second->getNode());
+            visit(it.second->getNode());
 
-			for (auto parent : defParents)
-				add_edge(parent.first, accept_v, parent.second->label());
-			add_edge(accept_v, end_v, (new EdgeUnconditional())->label());
-			BUG_CHECK(g_.is_root(), "Invalid graph");
-			GraphAttributeSetter()(g_);
-			writeGraphToFile(g_, name);
-
-		}
-	}
-	return false;
+            for (auto parent : defParents)
+                add_edge(parent.first, accept_v, parent.second->label());
+            add_edge(accept_v, end_v, (new EdgeUnconditional())->label());
+            BUG_CHECK(g_.is_root(), "Invalid graph");
+            GraphAttributeSetter()(g_);
+            writeGraphToFile(g_, name);
+        }
+    }
+    return false;
 }
 
 bool ParserGraphs::preorder(const IR::ParserBlock *block) {
@@ -238,58 +237,58 @@ bool ParserGraphs::preorder(const IR::ParserBlock *block) {
 }
 
 bool ParserGraphs::preorder(const IR::P4Parser *pars) {
-	for (auto state : pars->states) {
-		if(state->name == IR::ParserState::start) {
-			visit(state);
-			break;
-		}
-	}
-	return false;
+    for (auto state : pars->states) {
+        if (state->name == IR::ParserState::start) {
+            visit(state);
+            break;
+        }
+    }
+    return false;
 }
 
 bool ParserGraphs::preorder(const IR::ParserState *state) {
-	std::stringstream sstream;
+    std::stringstream sstream;
 
-	if (state->selectExpression != nullptr) {
-		auto v = add_and_connect_vertex(state->name, VertexType::HEADER);
-		parents.clear();
+    if (state->selectExpression != nullptr) {
+        auto v = add_and_connect_vertex(state->name, VertexType::HEADER);
+        parents.clear();
 
-		if (state->selectExpression->is<IR::PathExpression>()) {
-			parents = {{v, new EdgeSwitch(new IR::DefaultExpression())}};
-			auto stpath = state->selectExpression->to<IR::PathExpression>();
-			auto decl = refMap->getDeclaration(stpath->path, true);
-			auto nstate = decl->to<IR::ParserState>();
-			if (nstate->name == IR::ParserState::accept) {
-				defParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
-				return false;
-			}
-			visit(decl->to<IR::ParserState>());
-		} else if (state->selectExpression->is<IR::SelectExpression>()) {
-			auto se = state->selectExpression->to<IR::SelectExpression>();
-			for (auto sc : se->selectCases) {
-				auto key = sc->keyset;
-				auto pexpr = sc->state;
-				key->dbprint(sstream);
-				mpz_class value, mask;
-				unsigned bytes = combine(sc->keyset, se->select, value, mask);
-				parents = {{v, new EdgeSelect(stringRepr(value, bytes))}};
-				auto decl = refMap->getDeclaration(pexpr->path, true);
-				auto nstate = decl->to<IR::ParserState>();
-				if (nstate->name == IR::ParserState::accept) {
-					defParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
-					continue;
-				}
-				visit(nstate);
-			}
-		} else {
-			LOG1("unexpected selectExpression");
-		}
+        if (state->selectExpression->is<IR::PathExpression>()) {
+            parents = {{v, new EdgeSwitch(new IR::DefaultExpression())}};
+            auto stpath = state->selectExpression->to<IR::PathExpression>();
+            auto decl = refMap->getDeclaration(stpath->path, true);
+            auto nstate = decl->to<IR::ParserState>();
+            if (nstate->name == IR::ParserState::accept) {
+                defParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                return false;
+            }
+            visit(decl->to<IR::ParserState>());
+        } else if (state->selectExpression->is<IR::SelectExpression>()) {
+            auto se = state->selectExpression->to<IR::SelectExpression>();
+            for (auto sc : se->selectCases) {
+                auto key = sc->keyset;
+                auto pexpr = sc->state;
+                key->dbprint(sstream);
+                mpz_class value, mask;
+                unsigned bytes = combine(sc->keyset, se->select, value, mask);
+                parents = {{v, new EdgeSelect(stringRepr(value, bytes))}};
+                auto decl = refMap->getDeclaration(pexpr->path, true);
+                auto nstate = decl->to<IR::ParserState>();
+                if (nstate->name == IR::ParserState::accept) {
+                    defParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                    continue;
+                }
+                visit(nstate);
+            }
+        } else {
+            LOG1("unexpected selectExpression");
+        }
 
-	} else {
-		LOG1("default case");
-	}
+    } else {
+        LOG1("default case");
+    }
 
-	return false;
+    return false;
 }
 
 }  // namespace graphs

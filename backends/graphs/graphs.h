@@ -155,8 +155,8 @@ class ParserGraphs : public Inspector {
     enum class VertexType {
         HEADER,
         PARSER,
-		DEFAULT,
-		STATEMENTS
+        DEFAULT,
+        STATEMENTS
     };
     struct Vertex {
         cstring name;
@@ -202,12 +202,12 @@ class ParserGraphs : public Inspector {
 
     void writeGraphToFile(const Graph &g, const cstring &name);
 
-	cstring stringRepr(mpz_class value, unsigned bytes);
-	void convertSimpleKey(const IR::Expression* keySet,
-						mpz_class& value, mpz_class& mask);
-	unsigned combine(const IR::Expression* keySet,
-					const IR::ListExpression* select,
-					mpz_class& value, mpz_class& mask);
+    cstring stringRepr(mpz_class value, unsigned bytes);
+    void convertSimpleKey(const IR::Expression* keySet,
+                        mpz_class& value, mpz_class& mask);
+    unsigned combine(const IR::Expression* keySet,
+                    const IR::ListExpression* select,
+                    mpz_class& value, mpz_class& mask);
 
  private:
     P4::ReferenceMap *refMap; P4::TypeMap *typeMap;

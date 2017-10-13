@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "graphs.h"
-
 #include <boost/graph/graphviz.hpp>
 
 #include <iostream>
+
+#include "graphs.h"
 
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
