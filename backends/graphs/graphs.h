@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_GRAPHS_CONTROLS_H_
-#define _BACKENDS_GRAPHS_CONTROLS_H_
+#ifndef _BACKENDS_GRAPHS_GRAPHS_H_
+#define _BACKENDS_GRAPHS_GRAPHS_H_
 
 #include "config.h"
 
@@ -223,4 +223,4 @@ class ParserGraphs : public Inspector {
 
 }  // namespace graphs
 
-#endif  // _BACKENDS_GRAPHS_CONTROLS_H_
+#endif  // _BACKENDS_GRAPHS_GRAPHS_H_
