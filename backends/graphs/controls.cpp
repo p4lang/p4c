@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "controls.h"
+#include "graphs.h"
 
 #include <boost/graph/graphviz.hpp>
 
@@ -65,6 +65,18 @@ class EdgeSwitch : public EdgeTypeIface {
 
  private:
     const IR::Expression *labelExpr;
+};
+
+class EdgeSelect : public EdgeTypeIface {
+ public:
+    explicit EdgeSelect(const cstring labelExpr)
+        : labelExpr(labelExpr) { }
+    cstring label() const override {
+        return labelExpr;
+    };
+
+ private:
+    const cstring labelExpr;
 };
 
 using Graph = ControlGraphs::Graph;

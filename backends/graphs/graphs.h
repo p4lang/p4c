@@ -149,6 +149,78 @@ class ControlGraphs : public Inspector {
     boost::optional<cstring> instanceName{};
 };
 
+
+class ParserGraphs : public Inspector {
+ public:
+    enum class VertexType {
+        HEADER,
+        PARSER,
+		DEFAULT,
+		STATEMENTS
+    };
+    struct Vertex {
+        cstring name;
+        VertexType type;
+    };
+    class GraphAttributeSetter;
+    // The boost graph support for graphviz subgraphs is not very intuitive. In
+    // particular the write_graphviz code assumes the existence of a lot of
+    // properties. See
+    // https://stackoverflow.com/questions/29312444/how-to-write-graphviz-subgraphs-with-boostwrite-graphviz
+    // for more information.
+    using GraphvizAttributes = std::map<cstring, cstring>;
+    using vertexProperties =
+        boost::property<boost::vertex_attribute_t, GraphvizAttributes,
+        Vertex>;
+    using edgeProperties =
+        boost::property<boost::edge_attribute_t, GraphvizAttributes,
+        boost::property<boost::edge_name_t, cstring,
+        boost::property<boost::edge_index_t, int> > >;
+    using graphProperties =
+        boost::property<boost::graph_name_t, cstring,
+        boost::property<boost::graph_graph_attribute_t, GraphvizAttributes,
+        boost::property<boost::graph_vertex_attribute_t, GraphvizAttributes,
+        boost::property<boost::graph_edge_attribute_t, GraphvizAttributes> > > >;
+    using Graph_ = boost::adjacency_list<boost::setS, boost::vecS, boost::directedS,
+                                         vertexProperties, edgeProperties,
+                                         graphProperties>;
+    using Graph = boost::subgraph<Graph_>;
+    using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
+
+    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface *> >;
+
+    ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
+
+    vertex_t add_vertex(const cstring &name, VertexType type);
+    vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
+    void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
+
+    bool preorder(const IR::PackageBlock *block) override;
+    bool preorder(const IR::ParserBlock *block) override;
+    bool preorder(const IR::P4Parser *pars) override;
+    bool preorder(const IR::ParserState *state) override;
+
+    void writeGraphToFile(const Graph &g, const cstring &name);
+
+	cstring stringRepr(mpz_class value, unsigned bytes);
+	void convertSimpleKey(const IR::Expression* keySet,
+						mpz_class& value, mpz_class& mask);
+	unsigned combine(const IR::Expression* keySet,
+					const IR::ListExpression* select,
+					mpz_class& value, mpz_class& mask);
+
+ private:
+    P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
+    const cstring graphsDir;
+    Graph *g{nullptr};
+    vertex_t begin_v{};
+    vertex_t end_v{};
+    vertex_t accept_v{};
+    Parents parents{};
+    Parents defParents{};
+    boost::optional<cstring> instanceName{};
+};
+
 }  // namespace graphs
 
 #endif  // _BACKENDS_GRAPHS_CONTROLS_H_

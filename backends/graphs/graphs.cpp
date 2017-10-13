@@ -26,7 +26,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
 
-#include "controls.h"
+#include "graphs.h"
 
 namespace graphs {
 
@@ -65,6 +65,7 @@ class Options : public CompilerOptions {
                        "(default is current working directory)\n");
      }
 };
+
 
 }  // namespace graphs
 
@@ -116,6 +117,10 @@ int main(int argc, char *const argv[]) {
     LOG1("Generating control graphs");
     graphs::ControlGraphs cgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
     top->getMain()->apply(cgen);
+
+    LOG1("Generating parser graphs");
+    graphs::ParserGraphs pgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
+    top->getMain()->apply(pgen);
 
     return ::errorCount() > 0;
 }
