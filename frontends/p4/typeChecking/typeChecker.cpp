@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2017 Cavium Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1218,7 +1218,7 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t)
-            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
+            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() || t->is<IR::Type_Struct>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1234,7 +1234,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                           varbit, field);
                 return type;
             }
-        }
+        } else if (ftype->is<IR::Type_Struct>()) {
+	    for (auto nfield : ftype->to<IR::Type_Struct>()->fields) {
+	        auto ntype = getType(nfield);
+		if (ntype == nullptr)
+		   return type;
+		if (!onlyBitsOrBitStructs(ntype)) {
+		    typeError("struct %1% in header %2% contains non-fixed width bitfields or structs",
+			      field, type->toString());
+		   return type;
+		}
+	    }
+	}
     }
     return type;
 }
@@ -2461,6 +2472,22 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
     } else if (auto tpl = type->to<IR::Type_Tuple>()) {
         for (auto f : tpl->components) {
             if (hasVarbitsOrUnions(f))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
+    // called for a canonical type
+    if (type->is<IR::Type_Bits>()) {
+        return true;
+    } else if (auto ht = type->to<IR::Type_Struct>()) {
+        for (auto f : ht->fields) {
+            auto ftype = typeMap->getType(f);
+            if (ftype == nullptr)
+                continue;
+            if (onlyBitsOrBitStructs(ftype))
                 return true;
         }
     }

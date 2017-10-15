@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2017 Cavium Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -126,6 +126,7 @@ class TypeInference : public Transform {
 
     // various helpers
     bool hasVarbitsOrUnions(const IR::Type* type) const;
+    bool onlyBitsOrBitStructs(const IR::Type* type) const;    
     void checkCorelibMethods(const ExternMethod* em) const;
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
