@@ -35,71 +35,6 @@ ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
     visitDagOnce = false;
 }
 
-vertex_t ParserGraphs::add_vertex(const cstring &name, VertexType type) {
-    auto v = boost::add_vertex(*g);
-    boost::put(&Vertex::name, *g, v, name);
-    boost::put(&Vertex::type, *g, v, type);
-    return g->local_to_global(v);
-}
-
-void ParserGraphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &name) {
-    auto ep = boost::add_edge(from, to, g->root());
-    boost::put(boost::edge_name, g->root(), ep.first, name);
-}
-
-vertex_t ParserGraphs::add_and_connect_vertex(const cstring &name, VertexType type) {
-    auto v = add_vertex(name, type);
-    for (auto parent : parents)
-        add_edge(parent.first, v, parent.second->label());
-    return v;
-}
-
-class ParserGraphs::GraphAttributeSetter {
- public:
-  void operator()(pGraph &g) const {
-      auto vertices = boost::vertices(g);
-      for (auto vit = vertices.first; vit != vertices.second; ++vit) {
-          const auto &vinfo = g[*vit];
-          auto attrs = boost::get(boost::vertex_attribute, g);
-          attrs[*vit]["label"] = vinfo.name;
-          attrs[*vit]["style"] = vertexTypeGetStyle(vinfo.type);
-          attrs[*vit]["shape"] = vertexTypeGetShape(vinfo.type);
-      }
-      auto edges = boost::edges(g);
-      for (auto eit = edges.first; eit != edges.second; ++eit) {
-          auto attrs = boost::get(boost::edge_attribute, g);
-          attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
-      }
-  }
-
- private:
-    static cstring vertexTypeGetShape(VertexType type) {
-        switch (type) {
-          case VertexType::HEADER:
-              return "ellipse";
-          case VertexType::DEFAULT:
-              return "doublecircle";
-          default:
-              return "rectangle";
-        }
-        BUG("unreachable");
-        return "";
-    }
-
-    static cstring vertexTypeGetStyle(VertexType type) {
-        switch (type) {
-          case VertexType::STATEMENTS:
-              return "dashed";
-          case VertexType::DEFAULT:
-              return "bold";
-          default:
-              return "solid";
-        }
-        BUG("unreachable");
-        return "";
-    }
-};
-
 void ParserGraphs::writeGraphToFile(const pGraph &g, const cstring &name) {
     auto path = Util::PathName(graphsDir).join(name + ".dot");
     auto out = openFile(path.toString(), false);
@@ -211,18 +146,17 @@ bool ParserGraphs::preorder(const IR::PackageBlock *block) {
             auto name = it.second->to<IR::ParserBlock>()->container->name;
             pGraph g_;
             g = &g_;
-            instanceName = boost::none;
             boost::get_property(g_, boost::graph_name) = name;
-            begin_v = add_vertex("_BEGIN_", VertexType::PARSER);
-            end_v = add_vertex("_END_", VertexType::PARSER);
+            start_v = add_vertex("_START_", VertexType::PARSER);
+            exit_v = add_vertex("_EXIT_", VertexType::PARSER);
             accept_v = add_vertex("accept", VertexType::DEFAULT);
-            parents = {{begin_v, new EdgeUnconditional()}};
+            parents = {{start_v, new EdgeUnconditional()}};
 
             visit(it.second->getNode());
 
             for (auto parent : defParents)
                 add_edge(parent.first, accept_v, parent.second->label());
-            add_edge(accept_v, end_v, (new EdgeUnconditional())->label());
+            add_edge(accept_v, exit_v, (new EdgeUnconditional())->label());
             BUG_CHECK(g_.is_root(), "Invalid graph");
             GraphAttributeSetter()(g_);
             writeGraphToFile(g_, name);
@@ -248,9 +182,14 @@ bool ParserGraphs::preorder(const IR::P4Parser *pars) {
 
 bool ParserGraphs::preorder(const IR::ParserState *state) {
     std::stringstream sstream;
-
     if (state->selectExpression != nullptr) {
-        auto v = add_and_connect_vertex(state->name, VertexType::HEADER);
+        VertexType vertexType;
+        if (state->name == IR::ParserState::start) {
+            vertexType = VertexType::START;
+        } else {
+            vertexType = VertexType::HEADER;
+        }
+        auto v = add_and_connect_vertex(state->name, vertexType);
         parents.clear();
 
         if (state->selectExpression->is<IR::PathExpression>()) {
