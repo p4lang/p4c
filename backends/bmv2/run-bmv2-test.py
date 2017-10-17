@@ -109,6 +109,9 @@ def usage(options):
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
+    print("          -a option: pass this option to the compiler")
+    print("          -gdb: run compiler under gdb")
+    print("          --pp file: pass this option to the compiler")
     print("          -observation-log <file>: save packet output to <file>")
 
 def isError(p4filename):

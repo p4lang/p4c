@@ -410,7 +410,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     auto expr = explodeLabel(first, v.second, sizes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
-                } else if (auto first = v.first->to<IR::PathExpression>()) {
+                } else if (/*auto first = */v.first->to<IR::PathExpression>()) {
                     // XXX(hanw): handle parser_value_set
                     ::warning("parser_value_set is not yet implemented");
                 } else {
