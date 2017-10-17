@@ -204,7 +204,6 @@ class ProgramStructure {
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
     const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
-    const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
                  IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
@@ -240,6 +239,8 @@ class ProgramStructure {
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
+    const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName, 
+                                            const IR::Type *reg_elem = nullptr);
 
     const IR::V1Control* ingress;
     IR::ID ingressReference;

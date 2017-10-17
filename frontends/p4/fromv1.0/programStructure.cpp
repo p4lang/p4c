@@ -1631,20 +1631,19 @@ const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm
 }
 
 const IR::Declaration_Instance*
-ProgramStructure::convert(const IR::Register* reg, cstring newName) {
+ProgramStructure::convert(const IR::Register* reg, cstring newName, const IR::Type* regElementType) {
     LOG3("Synthesizing " << reg);
-    const IR::Type *regElementType = nullptr;
-    if (reg->width > 0) {
-        regElementType = IR::Type_Bits::get(reg->width);
-    } else if (reg->layout) {
-        cstring newName = ::get(registerLayoutType, reg->layout);
-        if (newName.isNullOrEmpty())
-            newName = reg->layout;
-        regElementType = new IR::Type_Name(new IR::Path(newName));
-    } else {
-        ::warning("%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
-        regElementType = IR::Type_Bits::get(defaultRegisterWidth);
-    }
+    if (!regElementType) {
+        if (reg->width > 0) {
+            regElementType = IR::Type_Bits::get(reg->width);
+        } else if (reg->layout) {
+            cstring newName = ::get(registerLayoutType, reg->layout);
+            if (newName.isNullOrEmpty())
+                newName = reg->layout;
+            regElementType = new IR::Type_Name(new IR::Path(newName));
+        } else {
+            ::warning("%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
+            regElementType = IR::Type_Bits::get(defaultRegisterWidth); } }
 
     IR::ID ext = v1model.registers.Id();
     auto typepath = new IR::Path(ext);
