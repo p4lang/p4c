@@ -1217,8 +1217,15 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
+    // See PR # 971 related to fixing p4lang/p4-spec#342
+    // This experemental code augments the return statement below
+    // to allow a struct in a P4 header.  Further, the struct
+    // MUST be a bit-vector struct as defined in Issue 342.
+    // The canonical form of the header is used to check if
+    // the struct in the header is a bit-vector struct.
     auto validator = [] (const IR::Type* t)
-            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() || t->is<IR::Type_Struct>(); };
+            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>()
+              || t->is<IR::Type_Struct>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1235,17 +1242,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                 return type;
             }
         } else if (ftype->is<IR::Type_Struct>()) {
-	    for (auto nfield : ftype->to<IR::Type_Struct>()->fields) {
-	        auto ntype = getType(nfield);
-		if (ntype == nullptr)
-		   return type;
-		if (!onlyBitsOrBitStructs(ntype)) {
-		    typeError("struct %1% in header %2% contains non-fixed width bitfields or structs",
-			      field, type->toString());
-		   return type;
-		}
-	    }
-	}
+          for (auto nfield : ftype->to<IR::Type_Struct>()->fields) {
+               auto ntype = getType(nfield);
+               if (ntype == nullptr)
+                   return type;
+               if (!onlyBitsOrBitStructs(ntype)) {
+                   typeError("struct %1% in header %2% contains non-fixed"
+                             " width bitfields or structs",
+                             field, type->toString());
+                   return type;
+               }
+          }
+        }
     }
     return type;
 }
