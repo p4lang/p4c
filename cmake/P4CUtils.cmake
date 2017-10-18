@@ -154,14 +154,14 @@ macro (p4c_add_make_check tag)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${__logDir}
     COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
             ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL  --tests-regex "${__tests_regex}" >> ${P4C_XFAIL_LOG}
-    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${__tests_regex}"
+    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} -L ${tag}
     COMMENT "Running tests for tag ${tag}")
   add_custom_target(recheck-${tag}
     # list the xfail tests
     COMMAND ${CMAKE_COMMAND} -E make_directory ${__logDir}
     COMMAND ${CMAKE_COMMAND} -E echo "XFAIL tests:" > ${P4C_XFAIL_LOG} &&
             ${CMAKE_CTEST_COMMAND} --show-only -L XFAIL --tests-regex "${__tests_regex}" >> ${P4C_XFAIL_LOG}
-    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} --tests-regex "${__tests_regex}" --rerun-failed
+    COMMAND ${CMAKE_CTEST_COMMAND} ${P4C_TEST_FLAGS} -L ${tag} --rerun-failed
     COMMENT "Re-running failed tests for tag ${tag}")
 endmacro(p4c_add_make_check)
 
