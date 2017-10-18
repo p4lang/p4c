@@ -42,7 +42,7 @@ RUN apt-get update && \
     pip install tenjin && \
     mkdir build && \
     cd build && \
-    cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3 -march=native' && \
+    cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3' && \
     make && \
     make install && \
     /usr/local/bin/ccache -p -s && \
