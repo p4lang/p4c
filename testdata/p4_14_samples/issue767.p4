@@ -5,7 +5,7 @@ parser start {
 action nop() { }
 
 table exact {
-    reads { standard_metadata.egress_port: exact; }
+    reads { standard_metadata.egress_spec: exact; }
     actions { nop; }
 }
 
