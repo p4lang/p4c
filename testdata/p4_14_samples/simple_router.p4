@@ -80,8 +80,8 @@ field_list_calculation ipv4_checksum {
 }
 
 calculated_field ipv4.hdrChecksum  {
-    verify ipv4_checksum;
-    update ipv4_checksum;
+    verify ipv4_checksum if (valid(ipv4));
+    update ipv4_checksum if (valid(ipv4));
 }
 
 parser parse_ipv4 {
@@ -116,6 +116,7 @@ table ipv4_lpm {
         set_nhop;
         _drop;
     }
+    default_action : _drop();
     size: 1024;
 }
 
@@ -149,15 +150,22 @@ table send_frame {
     size: 256;
 }
 
+table drop_all {
+  reads { }
+  actions { _drop; }
+  default_action : _drop();
+  size : 1;
+}
+
 control ingress {
     if(valid(ipv4) and ipv4.ttl > 0) {
         apply(ipv4_lpm);
         apply(forward);
+    } else {
+        apply(drop_all);
     }
 }
 
 control egress {
     apply(send_frame);
 }
-
-
