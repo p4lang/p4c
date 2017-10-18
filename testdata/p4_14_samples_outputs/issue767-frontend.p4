@@ -22,7 +22,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec") ;
         }
         default_action = NoAction();
     }
