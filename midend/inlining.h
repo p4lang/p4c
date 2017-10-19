@@ -57,7 +57,7 @@ class SymRenameMap {
     void setNewName(const IR::IDeclaration* decl, cstring name, cstring extName) {
         CHECK_NULL(decl);
         BUG_CHECK(!name.isNullOrEmpty() && !extName.isNullOrEmpty(), "Empty name");
-        LOG1("setNewName " << dbp(decl) << " to " << name);
+        LOG3("setNewName " << dbp(decl) << " to " << name);
         if (internalName.find(decl) != internalName.end())
             BUG("%1%: already renamed", decl);
         internalName.emplace(decl, name);
@@ -141,7 +141,7 @@ class InlineWorkList {
     void addInstantiation(const IR::IContainer* caller, const IR::IContainer* callee,
                           const IR::Declaration_Instance* instantiation) {
         CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation);
-        LOG1("Inline instantiation " << dbp(instantiation));
+        LOG3("Inline instantiation " << dbp(instantiation));
         auto inst = new CallInfo(caller, callee, instantiation);
         inlineMap[instantiation] = inst;
     }
@@ -149,7 +149,7 @@ class InlineWorkList {
     void addInvocation(const IR::Declaration_Instance* instance,
                        const IR::MethodCallStatement* statement) {
         CHECK_NULL(instance); CHECK_NULL(statement);
-        LOG1("Inline invocation " << dbp(instance) << " at " << dbp(statement));
+        LOG3("Inline invocation " << dbp(instance) << " at " << dbp(statement));
         auto info = inlineMap[instance];
         BUG_CHECK(info, "Could not locate instance %1% invoked by %2%", instance, statement);
         info->addInvocation(statement);
@@ -157,7 +157,7 @@ class InlineWorkList {
 
     void replace(const IR::IContainer* container, const IR::IContainer* replacement) {
         CHECK_NULL(container); CHECK_NULL(replacement);
-        LOG1("Replacing " << dbp(container) << " with " << dbp(replacement));
+        LOG3("Replacing " << dbp(container) << " with " << dbp(replacement));
         for (auto e : toInline) {
             if (e->callee == container)
                 e->callee = replacement;
@@ -187,7 +187,7 @@ class AbstractInliner : public Transform {
     }
 
     Visitor::profile_t init_apply(const IR::Node* node) {
-        LOG1("AbstractInliner " << toInline);
+        LOG3("AbstractInliner " << toInline);
         return Transform::init_apply(node);
     }
     virtual ~AbstractInliner() {}

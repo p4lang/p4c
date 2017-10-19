@@ -78,16 +78,25 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".set_dmac") action set_dmac(bit<48> dmac) {
-        hdr.ethernet.dstAddr = dmac;
-    }
     @name("._drop") action _drop() {
         mark_to_drop();
     }
+    @name(".set_dmac") action set_dmac(bit<48> dmac) {
+        hdr.ethernet.dstAddr = dmac;
+    }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
-        standard_metadata.egress_port = port;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+    }
+    @name(".drop_all") table drop_all {
+        actions = {
+            _drop;
+        }
+        key = {
+        }
+        size = 1;
+        default_action = _drop();
     }
     @name(".forward") table forward {
         actions = {
@@ -108,11 +117,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr: lpm;
         }
         size = 1024;
+        default_action = _drop();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
             ipv4_lpm.apply();
             forward.apply();
+        }
+        else {
+            drop_all.apply();
         }
     }
 }
@@ -126,13 +139,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

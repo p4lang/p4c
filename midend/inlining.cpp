@@ -420,7 +420,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
                 block->node);
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
         auto parent = getContext()->node->to<IR::ControlBlock>();
-        LOG3("Will inline " << block << "@" << block->node << " into " << parent);
+        LOG3("Will inline " << dbp(block) << "@" << dbp(block->node) << " into " << dbp(parent));
         auto instance = block->node->to<IR::Declaration_Instance>();
         auto callee = block->container;
         inlineList->addInstantiation(parent->container, callee, instance);
@@ -538,8 +538,11 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             // Substitute applyParameters which are not directionless
             // with fresh variable names or with the call arguments.
             for (auto param : callee->getApplyParameters()->parameters) {
-                if (param->direction == IR::Direction::None)
+                if (param->direction == IR::Direction::None) {
+                    auto initializer = mcd->substitution.lookup(param);
+                    substs->paramSubst.add(param, initializer);
                     continue;
+                }
                 if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
                     // Substitute argument directly
                     CHECK_NULL(mcd);
