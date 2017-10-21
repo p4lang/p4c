@@ -647,16 +647,9 @@ class RunBMV2(object):
 
             # Check for expected packets.
             if interface not in self.expected:
-                # This continue can falsely make a test succeed, if the
-                # interface type is not the one stored in expected. We need to
-                # be more careful on declaring success.
-                #
-                # One possible fix is to check for all expected and determine
-                # which file to look into, or, remove the ones we found from the
-                # self.expected list, and return success only if the list is
-                # empty. The latter is what is implemented below.
-                continue
-            expected = self.expected[interface]
+                expected = []
+            else:
+                expected = self.expected[interface]
             if len(expected) != len(packets):
                 reportError("Expected", len(expected), "packets on port", str(interface),
                             "got", len(packets))
@@ -668,7 +661,8 @@ class RunBMV2(object):
                     reportError("Packet", i, "on port", str(interface), "differs")
                     return FAILURE
             # remove successfully checked interfaces
-            del self.expected[interface]
+            if interface in self.expected:
+                del self.expected[interface]
         if len(self.expected) != 0:
             # didn't find all the expects we were expecting
             reportError("Expected packects on ports", self.expected.keys(), "not received")
