@@ -29,7 +29,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
             return statement;
         }
 
-        auto retval = new IR::IndexedVector<IR::StatOrDecl>();
+        auto retval = new IR::Vector<IR::StatOrDecl>();
         auto strct = ltype->to<IR::Type_StructLike>();
         if (statement->right->is<IR::ListExpression>()) {
             auto list = statement->right->to<IR::ListExpression>();
@@ -56,9 +56,9 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
             }
         }
-        return new IR::BlockStatement(statement->srcInfo, *retval);
+        return retval;
     } else if (ltype->is<IR::Type_Stack>()) {
-        auto retval = new IR::IndexedVector<IR::StatOrDecl>();
+        auto retval = new IR::Vector<IR::StatOrDecl>();
         auto stack = ltype->to<IR::Type_Stack>();
         for (unsigned i = 0; i < stack->getSize(); i++) {
             auto index = new IR::Constant(i);
@@ -70,7 +70,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
             auto left = new IR::ArrayIndex(statement->left, index->clone());
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
-        return new IR::BlockStatement(statement->srcInfo, *retval);
+        return retval;
     }
 
     return statement;
