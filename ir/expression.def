@@ -236,7 +236,7 @@ class Concat : Operation_Binary {
     Concat {
         if (left && right) {
             auto lt = left->type->to<IR::Type::Bits>();
-            auto rt = left->type->to<IR::Type::Bits>();
+            auto rt = right->type->to<IR::Type::Bits>();
             if (lt && rt)
                 type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
 }
