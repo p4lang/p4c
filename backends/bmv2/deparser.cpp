@@ -20,7 +20,7 @@ limitations under the License.
 namespace BMV2 {
 
 void ConvertDeparser::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
-                                                    Util::JsonArray* result) {
+                                          Util::JsonArray* result) {
     conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
         if (auto block = s->to<IR::BlockStatement>()) {
@@ -43,6 +43,8 @@ void ConvertDeparser::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body
                         auto arg = mc->arguments->at(0);
                         auto type = typeMap->getType(arg, true);
                         if (type->is<IR::Type_Stack>()) {
+                            // This branch is in fact never taken, because
+                            // arrays are expanded into elements.
                             int size = type->to<IR::Type_Stack>()->getSize();
                             for (int i=0; i < size; i++) {
                                 auto j = conv->convert(arg);
@@ -55,7 +57,8 @@ void ConvertDeparser::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body
                             }
                         } else if (type->is<IR::Type_Header>()) {
                             auto j = conv->convert(arg);
-                            result->append(j->to<Util::JsonObject>()->get("value"));
+                            auto val = j->to<Util::JsonObject>()->get("value");
+                            result->append(val);
                         } else {
                             ::error("%1%: emit only supports header and stack arguments, not %2%",
                                     arg, type);
