@@ -33,6 +33,7 @@ class ExtractArchInfo : public Inspector {
  public:
     explicit ExtractArchInfo(P4::TypeMap *typeMap)
         : typeMap(typeMap), portable_model(P4::PortableModel::instance) {
+        setName("ExtractArchInfo");
     }
  public:
     bool preorder(const IR::Type_Control *node) override;
