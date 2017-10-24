@@ -264,8 +264,17 @@ SwitchWContexts::init_from_options_parser(
       inFile = iface.second + "_in.pcap";
       outFile = iface.second + "_out.pcap";
     } else if (parser.pcap) {
-      inFile = iface.second + ".pcap";
-      outFile = inFile;
+      // using the same file creates 2 issues:
+      // 1. hard to distinguish direction (incoming vs outgoing)
+      // 2. in current BMI code we open 2 file descriptors for the same file
+      // which lead to file corruption.
+      // Issue 2 may be fixed by detecting that we are using the same file and
+      // using a single file descriptor (assuming that fwrite is thread-safe),
+      // but I believe there is calue in having 2 different files.
+      inFile = iface.second + "_in.pcap";
+      outFile = iface.second + "_out.pcap";
+      // inFile = iface.second + ".pcap";
+      // outFile = inFile;
     }
 
     PortExtras port_extras;
