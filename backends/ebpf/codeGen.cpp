@@ -261,9 +261,17 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
 
 bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
     builder->blockStart();
-    setVecSep("\n", "\n");
-    visit(s->components, "components");
-    doneVec();
+    bool first = true;
+    for (auto a : s->components) {
+        if (!first) {
+            builder->newline();
+            builder->emitIndent();
+        }
+        first = false;
+        visit(a);
+    }
+    if (!s->components.empty())
+        builder->newline();
     builder->blockEnd(false);
     return false;
 }
@@ -337,22 +345,6 @@ void CodeGenInspector::widthCheck(const IR::Node* node) const {
         BUG("%1%: Computations on %2% bits not yet supported", node, tb->size);
     // We could argue that this may not be supported ever
     ::error("%1%: Computations on %2% bits not supported", node, tb->size);
-}
-
-bool CodeGenInspector::preorder(const IR::IndexedVector<IR::StatOrDecl> *v) {
-    if (v == nullptr) return false;
-    bool first = true;
-    VecPrint sep = getSep();
-    for (auto a : *v) {
-        if (!first) {
-            builder->append(sep.separator); }
-        if (sep.separator.endsWith("\n")) {
-            builder->emitIndent(); }
-        first = false;
-        visit(a); }
-    if (!v->empty() && !sep.terminator.isNullOrEmpty()) {
-        builder->append(sep.terminator); }
-    return false;
 }
 
 }  // namespace EBPF

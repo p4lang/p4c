@@ -65,6 +65,8 @@ unsigned EBPFScalarType::alignment() const {
         return 2;
     else if (width <= 32)
         return 4;
+    else if (width <= 64)
+        return 8;
     else
         // compiled as u8*
         return 1;
@@ -79,13 +81,15 @@ void EBPFScalarType::emit(CodeBuilder* builder) {
         builder->appendFormat("%s16", prefix);
     else if (width <= 32)
         builder->appendFormat("%s32", prefix);
+    else if (width <= 64)
+        builder->appendFormat("%s64", prefix);
     else
         builder->appendFormat("u8*");
 }
 
 void
 EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
-    if (width <= 32) {
+    if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer)
             builder->append("*");
