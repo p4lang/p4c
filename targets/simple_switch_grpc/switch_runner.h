@@ -21,6 +21,8 @@
 #ifndef SIMPLE_SWITCH_GRPC_SWITCH_RUNNER_H_
 #define SIMPLE_SWITCH_GRPC_SWITCH_RUNNER_H_
 
+#include <bm/bm_sim/dev_mgr.h>
+
 #include <memory>
 #include <string>
 
@@ -39,6 +41,9 @@ class OptionsParser;
 }  // namespace bm
 
 namespace sswitch_grpc {
+
+class SysrepoSubscriber;
+class SysrepoTest;
 
 class SimpleSwitchGrpcRunner {
  public:
@@ -68,12 +73,19 @@ class SimpleSwitchGrpcRunner {
                          std::string dp_grpc_server_addr = "");
   ~SimpleSwitchGrpcRunner();
 
+  void port_status_cb(bm::DevMgrIface::port_t port,
+                      const bm::DevMgrIface::PortStatus port_status);
+
   std::unique_ptr<SimpleSwitch> simple_switch;
   std::string grpc_server_addr;
   int cpu_port;
   std::string dp_grpc_server_addr;
   int dp_grpc_server_port;
   std::unique_ptr<grpc::Server> dp_grpc_server;
+#ifdef WITH_SYSREPO
+  std::unique_ptr<SysrepoSubscriber> sysrepo_sub;
+  std::unique_ptr<SysrepoTest> sysrepo_test;
+#endif  // WITH_SYSREPO
 };
 
 }  // namespace sswitch_grpc

@@ -56,6 +56,16 @@ AS_IF([test "$PYTHON" != :], [
 ])
 AM_CONDITIONAL([HAVE_GRPC_PY_PLUGIN], [test "x$GRPC_PY_PLUGIN" != x])
 
+AC_ARG_WITH([sysrepo],
+    AS_HELP_STRING([--with-sysrepo],
+                   [Use sysrepo gNMI service implementation @<:@default=no@:>@]),
+    [with_sysrepo="$withval"], [with_sysrepo=no])
+AM_CONDITIONAL([WITH_SYSREPO], [test "$with_sysrepo" = yes])
+AM_COND_IF([WITH_SYSREPO], [
+    AC_CHECK_LIB([sysrepo], [sr_connect], [],
+                 [AC_MSG_ERROR([Missing libsysrepo])])
+])
+
 # Generate makefiles
 AC_CONFIG_FILES([Makefile
                  tests/Makefile])

@@ -8,6 +8,10 @@ AM_CPPFLAGS += \
 -I$(srcdir)/../../PI \
 -isystem$(srcdir)/../../third_party/spdlog
 
+if WITH_SYSREPO
+AM_CPPFLAGS += -DWITH_SYSREPO
+endif
+
 bin_PROGRAMS = simple_switch_grpc
 
 simple_switch_grpc_SOURCES = main.cpp
@@ -25,6 +29,10 @@ noinst_LTLIBRARIES = libsimple_switch_grpc.la
 
 libsimple_switch_grpc_la_SOURCES = \
 switch_runner.cpp switch_runner.h
+if WITH_SYSREPO
+libsimple_switch_grpc_la_SOURCES += \
+switch_sysrepo.h switch_sysrepo.cpp
+endif
 
 libsimple_switch_grpc_la_LIBADD = \
 $(builddir)/../simple_switch/libsimpleswitch.la \

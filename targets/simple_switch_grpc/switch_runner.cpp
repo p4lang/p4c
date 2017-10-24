@@ -45,6 +45,10 @@
 
 #include "switch_runner.h"
 
+#ifdef WITH_SYSREPO
+#include "switch_sysrepo.h"
+#endif  // WITH_SYSREPO
+
 namespace sswitch_grpc {
 
 namespace {
@@ -62,7 +66,7 @@ class DataplaneInterfaceServiceImpl
  public:
   explicit DataplaneInterfaceServiceImpl(bm::device_id_t device_id)
       : device_id(device_id) {
-    p_monitor = bm::PortMonitorIface::make_dummy();
+    p_monitor = bm::PortMonitorIface::make_passive(device_id);
   }
 
  private:
@@ -102,12 +106,12 @@ class DataplaneInterfaceServiceImpl
     _BM_UNUSED(iface_name);
     _BM_UNUSED(port_num);
     _BM_UNUSED(port_extras);
-    return ReturnCode::UNSUPPORTED;
+    return ReturnCode::SUCCESS;
   }
 
   ReturnCode port_remove_(port_t port_num) override {
     _BM_UNUSED(port_num);
-    return ReturnCode::UNSUPPORTED;
+    return ReturnCode::SUCCESS;
   }
 
   void transmit_fn_(int port_num, const char *buffer, int len) override {
@@ -161,7 +165,13 @@ SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(int max_port, bool enable_swap,
     : simple_switch(new SimpleSwitch(max_port, enable_swap)),
       grpc_server_addr(grpc_server_addr), cpu_port(cpu_port),
       dp_grpc_server_addr(dp_grpc_server_addr),
-      dp_grpc_server{nullptr} { }
+      dp_grpc_server(nullptr) {
+#ifdef WITH_SYSREPO
+      sysrepo_sub = std::unique_ptr<SysrepoSubscriber>(new SysrepoSubscriber());
+      sysrepo_test = std::unique_ptr<SysrepoTest>(
+          new SysrepoTest(simple_switch.get()));
+#endif  // WITH_SYSREPO
+}
 
 int
 SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
@@ -180,6 +190,12 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   int status = simple_switch->init_from_options_parser(
       parser, nullptr, std::move(my_dev_mgr));
   if (status != 0) return status;
+
+  using PortStatus = bm::DevMgrIface::PortStatus;
+  auto port_cb = std::bind(&SimpleSwitchGrpcRunner::port_status_cb, this,
+                           std::placeholders::_1, std::placeholders::_2);
+  simple_switch->register_status_cb(PortStatus::PORT_ADDED, port_cb);
+  simple_switch->register_status_cb(PortStatus::PORT_REMOVED, port_cb);
 
   // check if CPU port number is also used by --interface
   // TODO(antonin): ports added dynamically?
@@ -235,6 +251,12 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   DeviceMgr::init(256);
   PIGrpcServerRunAddr(grpc_server_addr.c_str());
 
+#ifdef WITH_SYSREPO
+  if (!sysrepo_sub->start()) return 1;
+  if (!sysrepo_test->connect()) return 1;
+  sysrepo_test->refresh_ports();
+#endif  // WITH_SYSREPO
+
   simple_switch->start_and_return();
 
   return 0;
@@ -253,6 +275,19 @@ SimpleSwitchGrpcRunner::shutdown() {
 
 SimpleSwitchGrpcRunner::~SimpleSwitchGrpcRunner() {
   PIGrpcServerCleanup();
+}
+
+void
+SimpleSwitchGrpcRunner::port_status_cb(
+    bm::DevMgrIface::port_t port, const bm::DevMgrIface::PortStatus status) {
+  _BM_UNUSED(port);
+  using PortStatus = bm::DevMgrIface::PortStatus;
+#ifdef WITH_SYSREPO
+  if (status == PortStatus::PORT_ADDED || status == PortStatus::PORT_REMOVED)
+    sysrepo_test->refresh_ports();
+#else
+  _BM_UNUSED(status);
+#endif  // WITH_SYSREPO
 }
 
 }  // namespace sswitch_grpc
