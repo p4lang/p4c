@@ -44,7 +44,7 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
         bit<8> n = 8w0b11111111;
         n[7:4] = 4w0;
         debug.write(1, n);
-        standard_meta.egress_port = 0;
+        standard_meta.egress_spec = 0;
     }
 }
 
