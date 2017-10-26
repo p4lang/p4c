@@ -162,7 +162,11 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     if (expression->left->is<IR::Member>()) {
         // This is a header part of the parameters
         auto mem = expression->left->to<IR::Member>();
-        elementAccess = mem->member.name;
+        auto parentType = backend->getTypeMap()->getType(mem->expr, true);
+        BUG_CHECK(parentType->is<IR::Type_StructLike>(), "%1%: expected a struct", parentType);
+        auto st = parentType->to<IR::Type_StructLike>();
+        auto field = st->getField(mem->member);
+        elementAccess = field->controlPlaneName();
     } else if (expression->left->is<IR::PathExpression>()) {
         // This is a temporary variable with type stack.
         auto path = expression->left->to<IR::PathExpression>();
