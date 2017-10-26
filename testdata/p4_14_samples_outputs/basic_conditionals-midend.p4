@@ -42,8 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        if (true) 
-            test1.apply();
+        test1.apply();
     }
 }
 
