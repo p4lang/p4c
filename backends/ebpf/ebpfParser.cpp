@@ -55,7 +55,10 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     builder->spc();
     builder->blockStart();
 
+    setVecSep("\n", "\n");
     visit(parserState->components, "components");
+    doneVec();
+
     if (parserState->selectExpression == nullptr) {
         builder->emitIndent();
         builder->append("goto ");
@@ -125,7 +128,7 @@ StateTranslationVisitor::compileExtractField(
     unsigned widthToExtract = dynamic_cast<IHasWidth*>(type)->widthInBits();
     auto program = state->parser->program;
 
-    if (widthToExtract <= 64) {
+    if (widthToExtract <= 32) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
         unsigned lastWordIndex = lastBitIndex / 8;
         unsigned wordsToRead = lastWordIndex + 1;
@@ -169,7 +172,7 @@ StateTranslationVisitor::compileExtractField(
         builder->append(")");
         builder->endOfStatement(true);
     } else {
-        // wide values; read all bytes one by one.
+        // bigger than 4 bytes; read all bytes one by one.
         unsigned shift;
         if (alignment == 0)
             shift = 0;
