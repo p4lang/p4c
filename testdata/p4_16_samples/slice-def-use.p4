@@ -80,7 +80,7 @@ control Ing(inout Headers headers,
         //debug.write(0, n);
         n[7:4] = 4w0;
         debug.write(1, n);
-        standard_meta.egress_port = 0;
+        standard_meta.egress_spec = 0;
     }
 }
 
