@@ -19,6 +19,7 @@ limitations under the License.
 #include <algorithm>
 #include "source_file.h"
 #include "exceptions.h"
+#include "lib/log.h"
 
 void IHasDbPrint::print() const { dbprint(std::cout); std::cout << std::endl; }
 
