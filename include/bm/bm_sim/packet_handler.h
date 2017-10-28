@@ -16,6 +16,8 @@
 #ifndef BM_BM_SIM_PACKET_HANDLER_H_
 #define BM_BM_SIM_PACKET_HANDLER_H_
 
+#include <functional>
+
 namespace bm {
 
 class PacketDispatcherIface {

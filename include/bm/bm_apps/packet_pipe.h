@@ -25,6 +25,7 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <functional>
 
 namespace bm_apps {
 

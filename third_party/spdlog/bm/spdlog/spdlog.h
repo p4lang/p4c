@@ -32,6 +32,8 @@
 #include "common.h"
 #include "logger.h"
 
+#include <functional>
+
 namespace spdlog
 {
 // Return an existing logger or nullptr if a logger with such name doesn't exist.
