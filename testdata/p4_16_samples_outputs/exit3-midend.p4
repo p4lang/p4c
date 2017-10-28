@@ -30,10 +30,7 @@ control ctrl(out bit<32> c) {
     }
     apply {
         tbl_act.apply();
-        if (true) 
-            t.apply();
-        else 
-            t.apply();
+        t.apply();
         if (!hasExited) 
             tbl_act_0.apply();
     }

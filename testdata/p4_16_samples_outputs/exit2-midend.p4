@@ -25,12 +25,6 @@ control ctrl(out bit<32> c) {
         }
         const default_action = e_0();
     }
-    @hidden table tbl_e_0 {
-        actions = {
-            e_2();
-        }
-        const default_action = e_2();
-    }
     @hidden table tbl_act_0 {
         actions = {
             act_0();
@@ -39,10 +33,7 @@ control ctrl(out bit<32> c) {
     }
     apply {
         tbl_act.apply();
-        if (true) 
-            tbl_e.apply();
-        else 
-            tbl_e_0.apply();
+        tbl_e.apply();
         if (!hasExited) 
             tbl_act_0.apply();
     }

@@ -743,4 +743,13 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     return result;
 }
 
+const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
+    if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
+        if (cond->value)
+            return ifstmt->ifTrue;
+        else
+            return ifstmt->ifFalse; }
+    return ifstmt;
+}
+
 }  // namespace P4
