@@ -150,9 +150,12 @@ PcapFileIn::current() const {
     }
   case State::Opened:
     pcap_fatal_error("Must call moveNext() before calling current()");
+    break;
   case State::AtEnd:
     pcap_fatal_error("Cannot read past end-of-file");
+    break;
   case State::Uninitialized:
+    /* fallthrough */
   default:
     pcap_fatal_error("Unexpected state");
   }
