@@ -20,6 +20,7 @@
 
 #include <bm/bm_sim/context.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <set>

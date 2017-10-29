@@ -21,6 +21,7 @@
 #include <bm/bm_sim/P4Objects.h>
 #include <bm/bm_sim/phv.h>
 
+#include <iostream>
 #include <istream>
 #include <ostream>
 #include <string>
@@ -626,6 +627,13 @@ struct P4Objects::InitState {
   std::unordered_map<std::string, HeaderUnionType *>
   header_union_stack_to_type_map{};
 };
+
+// NOLINTNEXTLINE(runtime/references)
+P4Objects::P4Objects(std::ostream &outstream, bool verbose_output)
+    : outstream(outstream), verbose_output(verbose_output) { }
+
+P4Objects::P4Objects()
+    : outstream(std::cout), verbose_output(false) { }
 
 void
 P4Objects::init_enums(const Json::Value &cfg_root) {

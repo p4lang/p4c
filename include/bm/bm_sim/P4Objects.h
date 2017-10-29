@@ -95,11 +95,9 @@ class P4Objects {
   enum class ExprType;  // forward declaration
 
  public:
-  // A reference works great here, but should I switch to a pointer?
   // NOLINTNEXTLINE(runtime/references)
-  explicit P4Objects(std::ostream &outstream = std::cout,
-                     bool verbose_output = false)
-      : outstream(outstream), verbose_output(verbose_output) { }
+  explicit P4Objects(std::ostream &outstream, bool verbose_output = false);
+  P4Objects();
 
   int init_objects(std::istream *is,
                    LookupStructureFactory *lookup_factory,

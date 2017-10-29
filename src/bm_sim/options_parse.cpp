@@ -385,4 +385,9 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
   }
 }
 
+void
+OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
+  parse(argc, argv, tp, std::cout);
+}
+
 }  // namespace bm

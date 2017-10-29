@@ -58,7 +58,9 @@ class OptionsParser {
  public:
   void parse(int argc, char *argv[], TargetParserIface *tp,
              // NOLINTNEXTLINE(runtime/references)
-             std::ostream &outstream = std::cout);
+             std::ostream &outstream);
+
+  void parse(int argc, char *argv[], TargetParserIface *tp);
 
   std::string config_file_path{};
   bool no_p4{false};
