@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_GRAPHS_CONTROLS_H_
-#define _BACKENDS_GRAPHS_CONTROLS_H_
+#ifndef _BACKENDS_GRAPHS_GRAPHS_H_
+#define _BACKENDS_GRAPHS_GRAPHS_H_
 
 #include "config.h"
 
@@ -53,20 +53,78 @@ class EdgeTypeIface {
     virtual cstring label() const = 0;
 };
 
-class ControlGraphs : public Inspector {
+class EdgeUnconditional : public EdgeTypeIface {
+ public:
+    EdgeUnconditional() = default;
+    cstring label() const override { return ""; };
+};
+
+class EdgeIf : public EdgeTypeIface {
+ public:
+    enum class Branch { TRUE, FALSE };
+    explicit EdgeIf(Branch branch) : branch(branch) { }
+    cstring label() const override {
+        switch (branch) {
+          case Branch::TRUE:
+              return "TRUE";
+          case Branch::FALSE:
+              return "FALSE";
+        }
+        BUG("unreachable");
+        return "";
+    };
+
+ private:
+    Branch branch;
+};
+
+class EdgeSwitch : public EdgeTypeIface {
+ public:
+    explicit EdgeSwitch(const IR::Expression *labelExpr)
+        : labelExpr(labelExpr) { }
+    cstring label() const override {
+        std::stringstream sstream;
+        labelExpr->dbprint(sstream);
+        return cstring(sstream);
+    };
+
+ private:
+    const IR::Expression *labelExpr;
+};
+
+class EdgeSelect : public EdgeTypeIface {
+ public:
+    explicit EdgeSelect(const cstring labelExpr)
+        : labelExpr(labelExpr) { }
+    cstring label() const override {
+        return labelExpr;
+    };
+
+ private:
+    const cstring labelExpr;
+};
+
+class Graphs : public Inspector {
  public:
     enum class VertexType {
+// For Control Blocks
         TABLE,
         CONDITION,
         SWITCH,
         STATEMENTS,
         CONTROL,
-        OTHER
+        OTHER,
+// For Parser Blocks
+        START,
+        HEADER,
+        PARSER,
+        DEFAULT
     };
     struct Vertex {
         cstring name;
         VertexType type;
     };
+
     class GraphAttributeSetter;
     // The boost graph support for graphviz subgraphs is not very intuitive. In
     // particular the write_graphviz code assumes the existence of a lot of
@@ -94,23 +152,6 @@ class ControlGraphs : public Inspector {
 
     using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface *> >;
 
-    class ControlStack {
-     public:
-        Graph *pushBack(Graph &currentSubgraph, const cstring &name);
-        Graph *popBack();
-
-        Graph *getSubgraph() const;
-
-        cstring getName(const cstring &name) const;
-
-        bool isEmpty() const;
-     private:
-        std::vector<cstring> names{};
-        std::vector<Graph *> subgraphs{};
-    };
-
-    ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
-
     // merge misc control statements (action calls, extern method calls,
     // assignments) into a single vertex to reduce graph complexity
     boost::optional<vertex_t> merge_other_statements_into_vertex();
@@ -118,6 +159,30 @@ class ControlGraphs : public Inspector {
     vertex_t add_vertex(const cstring &name, VertexType type);
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
+
+ protected:
+    Graph *g{nullptr};
+    vertex_t start_v{};
+    vertex_t exit_v{};
+    Parents parents{};
+    std::vector<const IR::Statement *> statementsStack{};
+};
+
+class ControlGraphs : public Graphs {
+ public:
+    class ControlStack {
+     public:
+        Graph *pushBack(Graph &currentSubgraph, const cstring &name);
+        Graph *popBack();
+        Graph *getSubgraph() const;
+        cstring getName(const cstring &name) const;
+        bool isEmpty() const;
+     private:
+        std::vector<cstring> names{};
+        std::vector<Graph *> subgraphs{};
+    };
+
+    ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
 
     bool preorder(const IR::PackageBlock *block) override;
     bool preorder(const IR::ControlBlock *block) override;
@@ -136,12 +201,7 @@ class ControlGraphs : public Inspector {
  private:
     P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
     const cstring graphsDir;
-    Graph *g{nullptr};
-    vertex_t start_v{};
-    vertex_t exit_v{};
-    Parents parents{};
     Parents return_parents{};
-    std::vector<const IR::Statement *> statementsStack{};
     // we keep a stack of subgraphs; every time we visit a control, we create a
     // new subgraph and push it to the stack; this new graph becomes the
     // "current graph" to which we add vertices (e.g. tables).
@@ -149,6 +209,31 @@ class ControlGraphs : public Inspector {
     boost::optional<cstring> instanceName{};
 };
 
+class ParserGraphs : public Graphs {
+ public:
+    ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
+
+    bool preorder(const IR::PackageBlock *block) override;
+    bool preorder(const IR::ParserBlock *block) override;
+    bool preorder(const IR::P4Parser *pars) override;
+    bool preorder(const IR::ParserState *state) override;
+
+    void writeGraphToFile(const Graph &g, const cstring &name);
+
+    cstring stringRepr(mpz_class value, unsigned bytes);
+    void convertSimpleKey(const IR::Expression* keySet,
+                        mpz_class& value, mpz_class& mask);
+    unsigned combine(const IR::Expression* keySet,
+                    const IR::ListExpression* select,
+                    mpz_class& value, mpz_class& mask);
+
+ private:
+    P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
+    const cstring graphsDir;
+    vertex_t accept_v{};
+    Parents defParents{};
+};
+
 }  // namespace graphs
 
-#endif  // _BACKENDS_GRAPHS_CONTROLS_H_
+#endif  // _BACKENDS_GRAPHS_GRAPHS_H_

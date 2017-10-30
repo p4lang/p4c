@@ -15,10 +15,12 @@
 set (GRAPHS_SRCS
   graphs.cpp
   controls.cpp
+  parser.cpp
+  p4c-graphs.cpp
   )
 
 set (GRAPHS_HDRS
-  controls.h
+  graphs.h
   )
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${GRAPHS_SRCS};${GRAPHS_HDRS}")

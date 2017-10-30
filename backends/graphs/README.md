@@ -1,7 +1,7 @@
 # Graphs Backend
 
 This backend produces visual representations of a P4 program as dot files. For
-now it only supports the generation of graphs for top-level control blocks.
+now it only supports the generation of graphs for top-level control and parser blocks.
 
 ## Dependencies
 
@@ -25,6 +25,12 @@ Here is the graph generated for the ingress control block of the
 test program:
 
 ![Flowlet switching ingress graph](resources/flowlet_switching-bmv2.ingress.png)
+
+Here is the graph generated for the parser block of the
+[flowlet_switching-bmv2.p4](../../testdata/p4_16_samples/flowlet_switching-bmv2.p4)
+test program:
+
+![Flowlet switching ingress graph](resources/flowlet_switching-bmv2.parser.png)
 
 For a more complex example, you can look at the control graph generated for the
 egress control of
