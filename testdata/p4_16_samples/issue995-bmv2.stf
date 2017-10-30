@@ -1,0 +1,65 @@
+# Goals for test cases:
+
+# (1) Include several cases where the current buggy version of the
+# compiler causes the wrong transition to occur.
+
+# (2) Include at least two cases that take each of the transitions in
+# the correct version of the code, one with all 0s in don't-care bit
+# positions of fields, the other with all 1s in don't-care bit
+# positions of fields.
+
+
+# Category (1) tests:
+
+# Confirmed: bug takes transition a2, fix takes a5
+packet 0 000000000456 0000022E0000 0000
+expect 0 000000000456 0000022E0000 0005
+
+# Confirmed: bug takes transition a3, fix takes a4
+packet 0 FFFFFFFFF456 FFFF012FFFFF 0000
+expect 0 FFFFFFFFF456 FFFF012FFFFF 0004
+
+# In the bug version, I believe it is impossible to take transition
+# a4, because with the bug, the value/mask of a4 matches only a subset
+# of packets matched by a3.
+
+# Category (2) tests:
+
+# transition a1
+# All bits are exact match in the src and dst, so cannot make two
+# different packets for this transition.
+packet 0 000000000456 0000012F0000 0000
+expect 0 000000000456 0000012F0000 0001
+
+# transition a2, as many 1 bits in fields as possible
+packet 0 000000000456 FFFF012FFFFF 0000
+expect 0 000000000456 FFFF012FFFFF 0002
+# We have to make at least one of the bits in the src non-0 to avoid
+# taking transition a1 in the correct code.
+packet 0 000000000456 8000012F0000 0000
+expect 0 000000000456 8000012F0000 0002
+
+# transition a3, as many 1 bits in fields as possible
+packet 0 FFFFFFFFF456 0000012F0000 0000
+expect 0 FFFFFFFFF456 0000012F0000 0003
+# transition a3, as many 0 bits in fields as possible
+# We have to make at least one of the bits in the dst non-0 to avoid
+# taking transition a1 in the correct code.
+packet 0 800000000456 0000012F0000 0000
+expect 0 800000000456 0000012F0000 0003
+
+# transition a4, as many 1 bits in fields as possible
+packet 0 FFFFFFFFF456 FFFF012FFFFF 0000
+expect 0 FFFFFFFFF456 FFFF012FFFFF 0004
+# transition a4, as many 0 bits in fields as possible
+# We have to make at least one of the bits in the src, and the dst,
+# non-0 to avoid taking transitions a1, a2, or a3 in the correct code.
+packet 0 040000000456 0200012F0000 0000
+expect 0 040000000456 0200012F0000 0004
+
+# transition a5, as many 1 bits in fields as possible
+packet 0 FFFFFFFFF456 FFFF012EFFFF 0000
+expect 0 FFFFFFFFF456 FFFF012EFFFF 0005
+# transition a5, as many 0 bits in fields as possible
+packet 0 000000000476 0000012F0000 0000
+expect 0 000000000476 0000012F0000 0005

@@ -238,9 +238,17 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
             totalWidth += ROUNDUP(width, 8);
             value = Util::shift_left(value, w) + key_value;
             if (mask_value != -1) {
-                mask = Util::shift_left(mask, w) + mask_value;
                 noMask = false;
+            } else {
+                // mask_value == -1 is a special value used to
+                // indicate an exact match on all bit positions.  When
+                // there is more than one keyElement, we must
+                // represent such an exact match with 'width' 1 bits,
+                // because it may be combined into a mask for other
+                // keyElements that have their own independent masks.
+                mask_value = Util::mask(width);
             }
+            mask = Util::shift_left(mask, w) + mask_value;
             LOG3("Shifting " << " into key " << key_value << " &&& " << mask_value <<
                  " result is " << value << " &&& " << mask);
             index++;
