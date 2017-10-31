@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <set>
 #include <vector>
+#include <deque>
 
 #include "lib/map.h"
 #include "lib/cstring.h"
@@ -115,6 +116,7 @@ class ProgramStructure {
     NamedObjectInfo<const IR::Type_Extern *>    extern_types;
     std::map<const IR::Type_Extern *, const IR::Type_Extern *>  extern_remap;
     NamedObjectInfo<const IR::Declaration_Instance *>  externs;
+    NamedObjectInfo<const IR::ParserValueSet*>  value_sets;
     std::vector<const IR::CalculatedField*>     calculated_fields;
     P4::CallGraph<cstring> calledActions;
     P4::CallGraph<cstring> calledControls;
@@ -198,7 +200,8 @@ class ProgramStructure {
     static const IR::Annotations*
     addGlobalNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
 
-    const IR::ParserState* convertParser(const IR::V1Parser* prs);
+    const IR::ParserState* convertParser(const IR::V1Parser* prs, IR::IndexedVector<IR::Declaration>*,
+                                         IR::IndexedVector<IR::ParserState>*);
     const IR::Statement* convertParserStatement(const IR::Expression* expr);
     const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
