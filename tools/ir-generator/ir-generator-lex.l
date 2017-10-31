@@ -7,6 +7,10 @@
 // shut up warnings about unused functions and variables
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnull-conversion"
+#endif
 
 
 static int              block_depth;
