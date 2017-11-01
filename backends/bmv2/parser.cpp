@@ -192,6 +192,9 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
     } else if (keySet->is<IR::BoolLiteral>()) {
         value = keySet->to<IR::BoolLiteral>()->value ? 1 : 0;
         mask = -1;
+    } else if (keySet->is<IR::DefaultExpression>()) {
+        value = 0;
+        mask = 0;
     } else {
         ::error("%1% must evaluate to a compile-time constant", keySet);
         value = 0;
