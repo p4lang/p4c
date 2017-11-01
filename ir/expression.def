@@ -336,6 +336,12 @@ class ConstructorCallExpression : Expression {
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
     inline Vector<Expression> components;
+    ListExpression {
+        if (type->is<Type::Unknown>()) {
+            Vector<Type> tuple;
+            for (auto e : components)
+                tuple.push_back(e->type);
+            type = new Type_Tuple(tuple); } }
     validate { components.check_null(); }
     void push_back(Expression e) { components.push_back(e); }
 }
