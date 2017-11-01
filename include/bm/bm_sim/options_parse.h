@@ -66,6 +66,7 @@ class OptionsParser {
   bool no_p4{false};
   InterfaceList ifaces{};
   bool pcap{false};
+  std::string pcap_dir{};
   int thrift_port{0};
   device_id_t device_id{};
   // if true read/write packets from files instead of interfaces

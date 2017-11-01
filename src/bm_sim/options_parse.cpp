@@ -23,6 +23,7 @@
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/P4Objects.h>
 
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <vector>
@@ -34,6 +35,8 @@
 #include <cassert>
 
 #include "version.h"
+
+namespace fs = boost::filesystem;
 
 namespace bm {
 
@@ -91,9 +94,12 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
        "<port-num>@<interface-name>: "
        "Attach network interface <interface-name> as port <port-num> at "
        "startup. Can appear multiple times")
-      ("pcap", "Generate pcap files for interfaces")
+      ("pcap", po::value<std::string>()->default_value("")->implicit_value("."),
+       "Generate pcap files for interfaces. "
+       "Argument is optional and is the directory where pcap files should be "
+       "written. If omitted, files will be written in current directory.")
       ("use-files", po::value<int>(), "Read/write packets from files "
-       "(interface X corresponds to two files X_in.pcap and X_out.pcap).  "
+       "(interface X corresponds to two files X_in.pcap and X_out.pcap). "
        "Argument is the time to wait (in seconds) before starting to process "
        "the packet files.")
 #ifdef BMNANOMSG_ON
@@ -327,8 +333,14 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
     }
   }
 
-  if (vm.count("pcap")) {
+  pcap_dir = vm["pcap"].as<std::string>();
+  if (!pcap_dir.empty()) {
     pcap = true;
+    if (!fs::is_directory(fs::path(pcap_dir))) {
+      outstream << "Directory '" << pcap_dir << "' specified with '--pcap' "
+                << "does not exist.\n";
+      exit(1);
+    }
   }
 
   if (vm.count("use-files")) {

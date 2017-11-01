@@ -36,4 +36,4 @@ $(top_builddir)/thrift_src/libruntimestubs.la
 endif
 
 libbmall_la_LIBADD += \
--lboost_system $(THRIFT_LIB) -lboost_program_options
+-lboost_system $(THRIFT_LIB) -lboost_program_options -lboost_filesystem

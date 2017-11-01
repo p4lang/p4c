@@ -18,6 +18,8 @@
  *
  */
 
+#include <boost/filesystem.hpp>
+
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/P4Objects.h>
@@ -35,6 +37,8 @@
 #include <streambuf>
 
 #include "md5.h"
+
+namespace fs = boost::filesystem;
 
 namespace bm {
 
@@ -271,8 +275,12 @@ SwitchWContexts::init_from_options_parser(
       // Issue 2 may be fixed by detecting that we are using the same file and
       // using a single file descriptor (assuming that fwrite is thread-safe),
       // but I believe there is calue in having 2 different files.
-      inFile = iface.second + "_in.pcap";
-      outFile = iface.second + "_out.pcap";
+      assert(!parser.pcap_dir.empty());
+      fs::path pcap_dir(parser.pcap_dir);
+      auto inFilePath = pcap_dir / fs::path(iface.second + "_in.pcap");
+      inFile = inFilePath.string();
+      auto outFilePath = pcap_dir / fs::path(iface.second + "_out.pcap");
+      outFile = outFilePath.string();
       // inFile = iface.second + ".pcap";
       // outFile = inFile;
     }
