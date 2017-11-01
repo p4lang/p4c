@@ -20,6 +20,12 @@ limitations under the License.
 
 const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
     safe_vector<std::pair<safe_vector<Visitor *>::iterator, const IR::Node *>> backup;
+    static indent_t log_indent(-1);
+    struct indent_nesting {
+        indent_t &indent;
+        explicit indent_nesting(indent_t &i) : indent(i) { ++indent; }
+        ~indent_nesting() { --indent; }
+    } nest_log_indent(log_indent);
 
     early_exit_flag = false;
     BUG_CHECK(running, "not calling apply properly");
@@ -31,9 +37,9 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
         try {
             try {
                 size_t maxmem;
-                LOG1(name() << " invoking " << v->name());
+                LOG1(log_indent << name() << " invoking " << v->name());
                 program = program->apply(**it);
-                LOG3("heap after " << v->name() << ": in use " <<
+                LOG3(log_indent << "heap after " << v->name() << ": in use " <<
                      n4(gc_mem_inuse(&maxmem)) << "B, max " << n4(maxmem) << "B");
                 int errors = ErrorReporter::instance.getErrorCount();
                 if (stop_on_error && errors > 0)
@@ -43,7 +49,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 throw Backtrack::trigger(trig_type);
             }
         } catch (Backtrack::trigger &trig) {
-            LOG1("caught backtrack trigger " << trig);
+            LOG1(log_indent << "caught backtrack trigger " << trig);
             while (!backup.empty()) {
                 if (backup.back().first == it) {
                     backup.pop_back();
@@ -53,9 +59,9 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 program = backup.back().second;
                 if (b->backtrack(trig))
                     break;
-                LOG1("pass " << b->name() << " can't handle it"); }
+                LOG1(log_indent << "pass " << b->name() << " can't handle it"); }
             if (backup.empty()) {
-                LOG1("rethrow trigger");
+                LOG1(log_indent << "rethrow trigger");
                 throw trig; }
             continue; }
         runDebugHooks(v->name(), program);

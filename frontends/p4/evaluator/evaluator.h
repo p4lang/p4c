@@ -67,6 +67,9 @@ class Evaluator final : public Inspector, public IHasBlock {
     { setValue(expression, expression); return false; }
     bool preorder(const IR::BoolLiteral* expression) override
     { setValue(expression, expression); return false; }
+    bool preorder(const IR::ListLiteral* expression) override
+    { setValue(expression, expression); return false; }
+    bool preorder(const IR::ListExpression* expression) override;
     bool preorder(const IR::Declaration_ID* expression) override
     { setValue(expression, expression); return false; }
 
