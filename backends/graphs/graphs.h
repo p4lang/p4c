@@ -160,6 +160,75 @@ class Graphs : public Inspector {
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
 
+    class GraphAttributeSetter {
+    public:
+        void operator()(Graph &g) const {
+            auto vertices = boost::vertices(g);
+            for (auto vit = vertices.first; vit != vertices.second; ++vit) {
+                const auto &vinfo = g[*vit];
+                auto attrs = boost::get(boost::vertex_attribute, g);
+                attrs[*vit]["label"] = vinfo.name;
+                attrs[*vit]["style"] = vertexTypeGetStyle(vinfo.type);
+                attrs[*vit]["shape"] = vertexTypeGetShape(vinfo.type);
+                attrs[*vit]["margin"] = vertexTypeGetMargin(vinfo.type);
+            }
+            auto edges = boost::edges(g);
+            for (auto eit = edges.first; eit != edges.second; ++eit) {
+                auto attrs = boost::get(boost::edge_attribute, g);
+                attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
+            }
+        }
+
+    private:
+        static cstring vertexTypeGetShape(VertexType type) {
+            switch (type) {
+            case VertexType::TABLE:
+                return "ellipse";
+            case VertexType::HEADER:
+                return "box";
+            case VertexType::START:
+                return "circle";
+            case VertexType::DEFAULT:
+                return "doublecircle";
+            default:
+                return "rectangle";
+            }
+            BUG("unreachable");
+            return "";
+        }
+
+        static cstring vertexTypeGetStyle(VertexType type) {
+            switch (type) {
+            case VertexType::CONTROL:
+                return "dashed";
+            case VertexType::HEADER:
+                return "solid";
+            case VertexType::START:
+                return "solid";
+            case VertexType::DEFAULT:
+                return "solid";
+            default:
+                return "solid";
+            }
+            BUG("unreachable");
+            return "";
+        }
+
+        static cstring vertexTypeGetMargin(VertexType type) {
+            switch (type) {
+            case VertexType::HEADER:
+                return "0.05,0";
+            case VertexType::START:
+                return "0,0";
+            case VertexType::DEFAULT:
+                return "0,0";
+            default:
+                return "";
+            }
+        }
+    };
+
+
  protected:
     Graph *g{nullptr};
     vertex_t start_v{};
