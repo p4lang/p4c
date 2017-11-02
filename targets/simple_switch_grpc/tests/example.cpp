@@ -81,11 +81,11 @@ test() {
 
   {
     p4::SetForwardingPipelineConfigRequest request;
+    request.set_device_id(dev_id);
     request.set_action(
         p4::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
     set_election_id(request.mutable_election_id());
-    auto config = request.add_configs();
-    config->set_device_id(dev_id);
+    auto config = request.mutable_config();
     config->set_allocated_p4info(&p4info);
     p4::tmp::P4DeviceConfig device_config;
     std::ifstream istream(test_json);
