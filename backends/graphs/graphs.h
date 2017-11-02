@@ -125,7 +125,6 @@ class Graphs : public Inspector {
         VertexType type;
     };
 
-    class GraphAttributeSetter;
     // The boost graph support for graphviz subgraphs is not very intuitive. In
     // particular the write_graphviz code assumes the existence of a lot of
     // properties. See
@@ -161,7 +160,7 @@ class Graphs : public Inspector {
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
 
     class GraphAttributeSetter {
-    public:
+     public:
         void operator()(Graph &g) const {
             auto vertices = boost::vertices(g);
             for (auto vit = vertices.first; vit != vertices.second; ++vit) {
@@ -179,7 +178,7 @@ class Graphs : public Inspector {
             }
         }
 
-    private:
+     private:
         static cstring vertexTypeGetShape(VertexType type) {
             switch (type) {
             case VertexType::TABLE:
@@ -226,8 +225,7 @@ class Graphs : public Inspector {
                 return "";
             }
         }
-    };
-
+    };  // end class GraphAttributeSetter
 
  protected:
     Graph *g{nullptr};
