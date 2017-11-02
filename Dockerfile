@@ -33,6 +33,7 @@ ENV BM_DEPS automake \
             libtool
 ENV BM_RUNTIME_DEPS libboost-program-options1.58.0 \
                     libboost-system1.58.0 \
+                    libboost-filesystem1.58.0 \
                     libboost-thread1.58.0 \
                     libgmp10 libjudydebian1 \
                     libpcap0.8 \
