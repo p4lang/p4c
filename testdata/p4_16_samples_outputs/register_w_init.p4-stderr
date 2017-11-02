@@ -1,0 +1,4 @@
+register_w_init.p4(29): warning: reg: unused instance
+register_w_init<bit<32>, foo>(32w16384, { 1, 1, 0 }) reg;
+                                                     ^^^
+warning: Program does not contain a `main' module
