@@ -135,7 +135,7 @@ def main():
                         action="store_true", default=False)
     parser.add_argument("-s", dest="skip_compiler",
                         help="Only run the assembler step",
-                        action"store_true", default=False)
+                        action="store_true", default=False)
     parser.add_argument("-x", dest="language",
                         choices = ["p4-14", "p4-16"],
                         help="Treat subsequent input files as having type language.",
