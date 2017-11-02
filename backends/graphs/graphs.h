@@ -298,7 +298,9 @@ class ParserGraphs : public Graphs {
     P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
     const cstring graphsDir;
     vertex_t accept_v{};
-    Parents defParents{};
+    vertex_t reject_v{};
+    Parents acceptParents{};
+    Parents rejectParents{};
 };
 
 }  // namespace graphs
