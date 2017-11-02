@@ -149,19 +149,26 @@ bool ParserGraphs::preorder(const IR::PackageBlock *block) {
             pGraph g_;
             g = &g_;
             boost::get_property(g_, boost::graph_name) = name;
-            start_v = add_vertex("_START_", VertexType::PARSER);
-            exit_v = add_vertex("_EXIT_", VertexType::PARSER);
             accept_v = add_vertex("accept", VertexType::DEFAULT);
-            parents = {{start_v, new EdgeUnconditional()}};
-
             visit(it.second->getNode());
 
-            for (auto parent : defParents)
+            for (auto parent : acceptParents)
                 add_edge(parent.first, accept_v, parent.second->label());
-            add_edge(accept_v, exit_v, (new EdgeUnconditional())->label());
+
+            // Generate reject node only when it's necessary,
+            // e.g. explicitly transitions to reject exist.
+            if (rejectParents.size() > 0) {
+                reject_v = add_vertex("reject", VertexType::DEFAULT);
+                for (auto parent : rejectParents) {
+                    add_edge(parent.first, reject_v, parent.second->label());
+                }
+            }
+
             BUG_CHECK(g_.is_root(), "Invalid graph");
             GraphAttributeSetter()(g_);
             writeGraphToFile(g_, name);
+            acceptParents.clear();
+            rejectParents.clear();
         }
     }
     return false;
@@ -185,22 +192,23 @@ bool ParserGraphs::preorder(const IR::P4Parser *pars) {
 bool ParserGraphs::preorder(const IR::ParserState *state) {
     std::stringstream sstream;
     if (state->selectExpression != nullptr) {
-        VertexType vertexType;
+        vertex_t v;
         if (state->name == IR::ParserState::start) {
-            vertexType = VertexType::START;
+            // Start node is the root at top, does not need to connect to anyone.
+            v = add_vertex(state->name, VertexType::START);
         } else {
-            vertexType = VertexType::HEADER;
+            v = add_and_connect_vertex(state->name, VertexType::HEADER);
         }
-        auto v = add_and_connect_vertex(state->name, vertexType);
-        parents.clear();
-
         if (state->selectExpression->is<IR::PathExpression>()) {
             parents = {{v, new EdgeSwitch(new IR::DefaultExpression())}};
             auto stpath = state->selectExpression->to<IR::PathExpression>();
             auto decl = refMap->getDeclaration(stpath->path, true);
             auto nstate = decl->to<IR::ParserState>();
             if (nstate->name == IR::ParserState::accept) {
-                defParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                acceptParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                return false;
+            } else if (nstate->name == IR::ParserState::reject) {
+                rejectParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
                 return false;
             }
             visit(decl->to<IR::ParserState>());
@@ -215,11 +223,20 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
                 parents = {{v, new EdgeSelect(stringRepr(value, bytes))}};
                 auto decl = refMap->getDeclaration(pexpr->path, true);
                 auto nstate = decl->to<IR::ParserState>();
-                if (nstate->name == IR::ParserState::accept) {
-                    defParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
-                    continue;
+
+                EdgeTypeIface* edge = nullptr;
+                if (key->is<IR::DefaultExpression>()) {
+                    edge = new EdgeSwitch(new IR::DefaultExpression());
+                } else {
+                    edge = new EdgeSelect(stringRepr(value, bytes));
                 }
-                visit(nstate);
+                if (nstate->name == IR::ParserState::accept) {
+                    acceptParents.emplace_back(v, edge);
+                } else if (nstate->name == IR::ParserState::reject) {
+                    rejectParents.emplace_back(v, edge);
+                } else {
+                    visit(nstate);
+                }
             }
         } else {
             LOG1("unexpected selectExpression");
