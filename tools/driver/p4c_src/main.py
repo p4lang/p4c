@@ -134,7 +134,7 @@ def main():
                         help="Only run the preprocess and compilation steps",
                         action="store_true", default=False)
     parser.add_argument("-s", dest="skip_compiler",
-                        help="Only run the assembler step",
+                        help="Only run the assembler and linker steps",
                         action="store_true", default=False)
     parser.add_argument("-x", dest="language",
                         choices = ["p4-14", "p4-16"],
