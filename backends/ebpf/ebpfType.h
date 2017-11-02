@@ -89,7 +89,7 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() override { return bytesRequired() * 8; }
     // True if this width is small enough to store in a machine scalar
     static bool generatesScalar(unsigned width)
-    { return width <= 32; }
+    { return width <= 64; }
 };
 
 // This should not always implement IHasWidth, but it may...
