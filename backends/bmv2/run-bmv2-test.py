@@ -208,9 +208,13 @@ def process_file(options, argv):
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
+
     if result != SUCCESS:
         print("Error compiling")
         print("".join(open(stderr).readlines()))
+        # If the compiler crashed fail the test
+        if 'Compiler Bug' in open(stderr).readlines():
+            return FAILURE
 
     expected_error = isError(options.p4filename)
     if expected_error:

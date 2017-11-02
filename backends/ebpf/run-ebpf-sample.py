@@ -149,9 +149,13 @@ def process_file(options, argv):
     args.extend(argv)
 
     result = run_timeout(options, args, timeout, stderr)
+
     if result != SUCCESS:
         print("Error compiling")
         print("".join(open(stderr).readlines()))
+        # If the compiler crashed fail the test
+        if 'Compiler Bug' in open(stderr).readlines():
+            return FAILURE
 
     expected_error = isError(options.p4filename)
     if expected_error:
