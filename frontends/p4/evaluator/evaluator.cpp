@@ -267,6 +267,19 @@ bool Evaluator::preorder(const IR::Property* prop) {
     return false;
 }
 
+bool Evaluator::preorder(const IR::ListExpression *list) {
+    LOG2("Evaluating " << list);
+    visit(list->components);
+    IR::Vector<IR::Expression> comp;
+    for (auto e : list->components) {
+        if (auto value = getValue(e))
+            comp.push_back(value->to<IR::Expression>());
+        else
+            return false; }
+    setValue(list, new IR::ListCompileTimeValue(std::move(comp)));
+    return false;
+}
+
 //////////////////////////////////////
 
 EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap) {

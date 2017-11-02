@@ -336,10 +336,17 @@ class ConstructorCallExpression : Expression {
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
     inline Vector<Expression> components;
-    validate {
-        components.check_null();
-    }
+    validate { components.check_null(); }
     void push_back(Expression e) { components.push_back(e); }
+}
+
+/// A ListExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class ListCompileTimeValue : ListExpression, CompileTimeValue {
+    validate {
+        for (auto e : components)
+            BUG_CHECK(e->is<CompileTimeValue>(), "%1%: not a compile-time value", e); }
+#nodbprint
 }
 
 /** @} *//* end group irdefs */
