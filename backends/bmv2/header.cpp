@@ -260,10 +260,6 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
                 json->add_header(metadata_type, v->name);
             else
                 json->add_metadata(metadata_type, v->name);
-            // only create header type
-            if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
-                continue;  // already seen
-            visitedHeaders.emplace(st->getName());
             addHeaderType(st);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto type = typeMap->getTypeType(stack->elementType, true);
