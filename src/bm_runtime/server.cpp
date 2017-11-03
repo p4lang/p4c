@@ -38,8 +38,9 @@ namespace thrift_provider = p4::thrift;
 namespace thrift_provider = apache::thrift;
 #endif
 
-#include <thread>
+#include <iostream>
 #include <mutex>
+#include <thread>
 
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/simple_pre.h>
