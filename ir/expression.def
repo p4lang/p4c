@@ -336,10 +336,22 @@ class ConstructorCallExpression : Expression {
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
     inline Vector<Expression> components;
-    validate {
-        components.check_null();
-    }
+    ListExpression {
+        if (type->is<Type::Unknown>()) {
+            Vector<Type> tup;
+            for (auto e : components)
+                tup.push_back(e->type);
+            type = new Type_Tuple(tup); } }
+    validate { components.check_null(); }
     void push_back(Expression e) { components.push_back(e); }
+}
+
+/// A ListExpression where all the components are compile-time values
+class ListLiteral : ListExpression, CompileTimeValue {
+    validate {
+        for (auto e : components)
+            BUG_CHECK(e->is<CompileTimeValue>(), "%1%: not a compile-time value", e); }
+#nodbprint
 }
 
 /** @} *//* end group irdefs */

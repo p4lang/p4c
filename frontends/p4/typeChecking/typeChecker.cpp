@@ -38,6 +38,11 @@ class ConstantTypeSubstitution : public Transform {
     { CHECK_NULL(subst); CHECK_NULL(typeMap); setName("ConstantTypeSubstitution"); }
     // This is needed to handle newly created expressions because
     // their children have changed.
+    // FIXME -- unfortunately this may also be wrong since the change in the
+    // FIXME -- child might change the type of this expression, which means
+    // FIXME -- blindly copying to old type puts the wrong type into the typeMap
+    // FIXME -- we really need to rerun inferencing for the sub-expression at
+    // FIXME -- this point.
     const IR::Node* postorder(IR::Expression* expression) override {
         auto type = typeMap->getType(getOriginal(), true);
         if (typeMap->isCompileTimeConstant(getOriginal<IR::Expression>()))
@@ -781,7 +786,11 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         ConstantTypeSubstitution cts(tvs, typeMap);
         auto newArg = cts.convert(arg);
         result->push_back(newArg);
-        setType(newArg, paramType);
+        // FIXME -- ConstantTypeSubstitution will have already put a type in the typeMap
+        // FIXME -- for newArg, which might be wrong, so setting it correctly here will
+        // FIXME -- hit the BUG_CHECK in typeMap.cpp:70.  So we don't set it and hope it
+        // FIXME -- gets reset properly next time we run typeInference.
+        // setType(newArg, paramType);
         changes = true;
     }
     if (changes)
