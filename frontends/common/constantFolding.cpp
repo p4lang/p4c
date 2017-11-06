@@ -56,6 +56,15 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
             return e;
         if (!typesKnown && cst->is<IR::ListExpression>())
             return e;
+        if (cst->is<IR::Constant>()) {
+            // We clone the constant.  This is necessary because the same
+            // the type associated with the constant may participate in
+            // type unification, and thus we want to have different type
+            // objects for different constant instances.
+            auto cc = cst->to<IR::Constant>();
+            const IR::Type* type = cc->type->clone();
+            return new IR::Constant(cc->srcInfo, type, cc->value, cc->base);
+        }
         return cst;
     }
     return e;

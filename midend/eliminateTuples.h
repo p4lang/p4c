@@ -81,6 +81,8 @@ class DoReplaceTuples final : public Transform {
     { return insertReplacements(method); }
     const IR::Node* postorder(IR::Type_Extern* ext) override
     { return insertReplacements(ext); }
+    const IR::Node* postorder(IR::Declaration_Instance* decl) override
+    { return insertReplacements(decl); }
 };
 
 class EliminateTuples final : public PassManager {

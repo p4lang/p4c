@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "typeUnification.h"
 #include "typeConstraints.h"
-#include "frontends/p4/substitution.h"
+#include "typeSubstitution.h"
 
 namespace P4 {
 
@@ -72,29 +72,24 @@ class TypeConstraints final {
     std::set<const IR::ITypeVar*> unifiableTypeVariables;
     std::vector<IConstraint*> constraints;
     TypeUnification *unification;
+    const TypeVariableSubstitution* definedVariables;
 
  public:
-    TypeConstraints() : unification(new TypeUnification(this)) {}
+    TypeVariableSubstitutionVisitor replaceVariables;
 
+    explicit TypeConstraints(const TypeVariableSubstitution* definedVariables) :
+            unification(new TypeUnification(this)), definedVariables(definedVariables),
+            replaceVariables(definedVariables) {}
+
+    // Mark this variable as being free.
     void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable)
     { unifiableTypeVariables.insert(typeVariable); }
 
-    // True if type is a type variable that can be unified.
-    bool isUnifiableTypeVariable(const IR::Type* type) {
-        auto tv = type->to<IR::ITypeVar>();
-        if (tv == nullptr)
-            return false;
-        if (tv->is<IR::Type_InfInt>())
-            // These are always unifiable
-            return true;
-        return unifiableTypeVariables.count(tv) > 0;
-    }
-
-    void addEqualityConstraint(const IR::Type* left, const IR::Type* right) {
-        auto c = new EqualityConstraint(left, right);
-        LOG1(c);
-        constraints.push_back(c);
-    }
+    /// True if type is a type variable that can be unified.
+    /// A variable is unifiable if it is marked so and it not already
+    /// part of definedVariables.
+    bool isUnifiableTypeVariable(const IR::Type* type);
+    void addEqualityConstraint(const IR::Type* left, const IR::Type* right);
 
     /*
      * Solve the specified constraint.
@@ -114,21 +109,7 @@ class TypeConstraints final {
 
     bool solve(const IR::Node* root, EqualityConstraint *constraint,
                TypeVariableSubstitution *subst, bool reportErrors);
-
-    TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors) {
-        LOG1("Solving constraints:\n" << *this);
-
-        auto tvs = new TypeVariableSubstitution();
-        while (!constraints.empty()) {
-            auto last = constraints.back();
-            constraints.pop_back();
-            bool success = solve(root, last, tvs, reportErrors);
-            if (!success)
-                return nullptr;
-        }
-        LOG1("Constraint solution:\n" << tvs);
-        return tvs;
-    }
+    TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors);
     void dbprint(std::ostream& out) const;
 };
 }  // namespace P4

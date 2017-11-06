@@ -51,8 +51,7 @@ class TypeUnification final {
                      bool reportErrors);
 
  public:
-    explicit TypeUnification(TypeConstraints* constraints)
-            : constraints(constraints) {}
+    explicit TypeUnification(TypeConstraints* constraints) : constraints(constraints) {}
     /**
      * Return false if unification fails right away.
      * Generates a set of type constraints.

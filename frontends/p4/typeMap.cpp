@@ -65,7 +65,7 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
     auto it = typeMap.find(element);
     if (it != typeMap.end()) {
         const IR::Type* existingType = it->second;
-        if (!TypeMap::equivalent(existingType, type))
+        if (!TypeMap::implicitlyConvertibleTo(type, existingType))
             BUG("Changing type of %1% in type map from %2% to %3%",
                 dbp(element), dbp(existingType), dbp(type));
         return;
@@ -255,6 +255,29 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     // The following are not expected to be compared for equivalence:
     // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
 }
+
+bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) {
+    if (TypeMap::equivalent(from, to))
+        return true;
+    // We allow implicit casts from tuples to structs
+    if (from->is<IR::Type_StructLike>()) {
+        if (to->is<IR::Type_Tuple>()) {
+            auto sl = from->to<IR::Type_StructLike>();
+            auto rt = to->to<IR::Type_Tuple>();
+            if (sl->fields.size() != rt->components.size())
+                return false;
+            for (size_t i = 0; i < rt->components.size(); i++) {
+                auto fl = sl->fields.at(i);
+                auto r = rt->components.at(i);
+                if (!TypeMap::implicitlyConvertibleTo(fl->type, r))
+                    return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 
 // Used for tuples and stacks only
 const IR::Type* TypeMap::getCanonical(const IR::Type* type) {

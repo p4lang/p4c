@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_SUBSTITUTIONVISITOR_H_
-#define _P4_SUBSTITUTIONVISITOR_H_
+#ifndef _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
+#define _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
 
 #include "ir/ir.h"
-#include "substitution.h"
+#include "typeSubstitution.h"
 
 namespace P4 {
 
@@ -42,7 +42,7 @@ class TypeVariableSubstitutionVisitor : public Transform {
  protected:
     const TypeVariableSubstitution* bindings;
     bool  replace;  // If true variables that map to variables are just replaced
-                    // in the ParameterList of the replaced object; else they
+                    // in the TypeParameterList of the replaced object; else they
                     // are removed.
     const IR::Node* replacement(IR::ITypeVar* typeVariable);
  public:
@@ -68,4 +68,4 @@ class TypeNameSubstitutionVisitor : public Transform {
 };
 
 }  // namespace P4
-#endif /* _P4_SUBSTITUTIONVISITOR_H_ */
+#endif /* _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_ */

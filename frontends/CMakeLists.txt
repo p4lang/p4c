@@ -25,6 +25,8 @@ set (P4_FRONTEND_SRCS
   p4/typeChecking/typeConstraints.cpp
   p4/typeChecking/typeUnification.cpp
   p4/typeChecking/syntacticEquivalence.cpp
+  p4/typeChecking/typeSubstitution.cpp
+  p4/typeChecking/typeSubstitutionVisitor.cpp
   p4/strengthReduction.cpp
   p4/unusedDeclarations.cpp
   p4/evaluator/evaluator.cpp
@@ -37,8 +39,6 @@ set (P4_FRONTEND_SRCS
   p4/parserCallGraph.cpp
   p4/tableApply.cpp
   p4/simplify.cpp
-  p4/substitution.cpp
-  p4/substitutionVisitor.cpp
   p4/fromv1.0/programStructure.cpp
   p4/fromv1.0/converters.cpp
   p4/typeMap.cpp
@@ -83,11 +83,11 @@ set (P4_FRONTEND_HDRS
   p4/simplifyParsers.h
   p4/specialize.h
   p4/strengthReduction.h
-  p4/substitution.h
-  p4/substitutionVisitor.h
   p4/symbol_table.h
   p4/tableApply.h
   p4/toP4/toP4.h
+  p4/typeChecking/typeSubstitution.h
+  p4/typeChecking/typeSubstitutionVisitor.h
   p4/typeChecking/bindVariables.h
   p4/typeChecking/syntacticEquivalence.h
   p4/typeChecking/typeChecker.h

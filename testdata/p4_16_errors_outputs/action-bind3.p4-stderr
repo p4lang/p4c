@@ -13,9 +13,3 @@ action-bind3.p4(22): error: a: parameter d must be bound
 action-bind3.p4(17)
     action a(inout bit<32> b, bit<32> d) {
                                       ^
-action-bind3.p4(22): error: Action for ExpressionValue has some unbound arguments
-        default_action = a(0);
-                         ^^^^
-action-bind3.p4(22): error: a: not enough arguments
-        default_action = a(0);
-                         ^^^^
