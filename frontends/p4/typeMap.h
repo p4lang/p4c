@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/programMap.h"
-#include "frontends/p4/substitution.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
 
 namespace P4 {
 /**
@@ -80,6 +80,7 @@ class TypeMap final : public ProgramMap {
     void addSubstitutions(const TypeVariableSubstitution* tvs);
     const IR::Type* getSubstitution(const IR::Type_Var* var)
     { return allTypeVariables.lookup(var); }
+    const TypeVariableSubstitution* getSubstitutions() const { return &allTypeVariables; }
 
     /// Check deep structural equivalence; defined between canonical types only.
     static bool equivalent(const IR::Type* left, const IR::Type* right);

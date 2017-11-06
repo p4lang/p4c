@@ -162,7 +162,7 @@ class Type_InfInt : Type, ITypeVar {
  public:
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
     int getDeclId() const override { return declid; }
-    dbprint { out << "int"; }
+    dbprint { out << "int/" << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
     const Type* getP4Type() const override { return nullptr; }

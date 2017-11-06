@@ -1,0 +1,22 @@
+extern R<T> {
+    R(T init);
+}
+
+struct foo {
+    bit<8> field1;
+}
+
+control c();
+package top(c _c);
+struct tuple_0 {
+    bit<8> field;
+}
+
+control c1() {
+    @name("reg0") R<tuple_0>({ 8w1 }) reg0;
+    @name("reg1") R<foo>({ 8w1 }) reg1;
+    apply {
+    }
+}
+
+top(c1()) main;

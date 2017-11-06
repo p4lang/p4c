@@ -14,14 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "substitution.h"
-#include "substitutionVisitor.h"
-#include "typeMap.h"
+#include "typeSubstitution.h"
+#include "typeSubstitutionVisitor.h"
+#include "frontends/p4/typeMap.h"
+#include "typeConstraints.h"
 
 namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
                                        const IR::ITypeVar* var, const IR::Type* substitution) {
-    LOG3("Adding " << dbp(var) << "->" << dbp(substitution) << " to substitution");
+    LOG3("Adding " << var << "->" << dbp(substitution) << "=" <<
+         substitution << " to substitution");
     if (substitution->is<IR::Type_Dontcare>())
         return true;
 
@@ -56,14 +58,15 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
 
     TypeVariableSubstitutionVisitor visitor(tvs);
     for (auto bound : binding) {
-        if (bound.first == var)
-            BUG("Variable %1% already bound", var->toString());
         const IR::Type* type = bound.second;
         const IR::Node* newType = type->apply(visitor);
         if (newType == nullptr)
             return false;
+        if (newType == type)
+            continue;
 
-        binding.emplace(bound.first, newType->to<IR::Type>());
+        LOG3("Refining subsitution for " << bound.first->getNode() << " to " << newType);
+        bound.second = newType->to<IR::Type>();
     }
 
     success = setBinding(var, substitution);
@@ -75,23 +78,12 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
 void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* other) {
     CHECK_NULL(other);
     for (auto v : other->binding) {
-        auto find = binding.find(v.first);
-        // If we are mapping a type variable to another one, first look-up the value
-        // of the second one.
         const IR::Type* subst = v.second;
-        if (subst->is<IR::ITypeVar>()) {
-            auto substValue = binding.find(subst->to<IR::ITypeVar>());
-            if (substValue != binding.end())
-                // I think that this does not need to be in a loop...
-                subst = substValue->second;
-        }
-        // Check if we already have a value for the first type variable;
-        // if yes, the current binding must be the same with the new one.
-        if (find != binding.end()) {
-            if (!TypeMap::equivalent(find->second, subst))
-                BUG("Changing binding for %1% from %2% to %3%",
-                    v.first, find->second, subst);
-        }
+        auto it = binding.find(v.first);
+        if (it != binding.end())
+            BUG("Changing binding for %1% from %2% to %3%",
+                v.first, it->second, subst);
+        LOG3("Setting substitution for " << v.first->getNode() << " to " << subst);
         binding[v.first] = subst;
     }
 }

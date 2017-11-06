@@ -22,8 +22,8 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "lib/exceptions.h"
 #include "lib/cstring.h"
-#include "frontends/p4/substitution.h"
-#include "frontends/p4/substitutionVisitor.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "typeConstraints.h"
 #include "typeUnification.h"
 #include "frontends/p4/methodInstance.h"
@@ -118,6 +118,7 @@ class TypeInference : public Transform {
                                     const IR::Type* caseType);
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
+    void addSubstitutions(const TypeVariableSubstitution* tvs);
 
     /** Converts each type to a canonical representation. */
     const IR::Type* canonicalize(const IR::Type* type);

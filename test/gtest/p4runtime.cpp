@@ -376,6 +376,9 @@ TEST(P4Runtime, P4_16_MatchFields) {
     }
 }
 
+#if 0
+// Disabling this test because it does not work without installation
+// see issue https://github.com/p4lang/p4c/issues/924
 TEST(P4Runtime, P4_14_MatchFields) {
     using MatchField = ::p4::config::MatchField;
 
@@ -465,6 +468,7 @@ TEST(P4Runtime, P4_14_MatchFields) {
         EXPECT_EQ(expected[i].matchType, igTable->match_fields(i).match_type());
     }
 }
+#endif
 
 TEST(P4Runtime, Digests) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(

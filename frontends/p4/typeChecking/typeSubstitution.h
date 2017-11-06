@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_SUBSTITUTION_H_
-#define _P4_SUBSTITUTION_H_
+#ifndef _TYPECHECKING_TYPESUBSTITUTION_H_
+#define _TYPECHECKING_TYPESUBSTITUTION_H_
 
 #include <map>
 #include <sstream>
@@ -64,7 +64,7 @@ class TypeSubstitution : public IHasDbPrint {
         for (auto it : binding) {
             if (!first)
                 out << std::endl;
-            out << dbp(it.first) << " -> " << dbp(it.second);
+            out << it.first << " -> " << dbp(it.second);
             first = false;
         }
     }
@@ -81,8 +81,8 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
                      const IR::Vector<IR::Type>* args);
     bool compose(const IR::Node* errorLocation,
                  const IR::ITypeVar* var, const IR::Type* substitution);
-    // Simple composition: do not expect that variables from other
-    // appear in the RHS of variables from this.
+    // In this variant of compose all variables in 'other' that are
+    // assigned to are disjoint from all variables already in 'this'.
     void simpleCompose(const TypeVariableSubstitution* other);
 };
 
@@ -90,4 +90,4 @@ class TypeNameSubstitution final : public TypeSubstitution<const IR::Type_Name*>
 
 }  // namespace P4
 
-#endif /* _P4_SUBSTITUTION_H_ */
+#endif /* _TYPECHECKING_TYPESUBSTITUTION_H_ */

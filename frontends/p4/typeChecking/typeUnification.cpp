@@ -211,6 +211,11 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying " << dest->toString() << " to " << src->toString());
 
+    if (src->is<IR::ITypeVar>())
+        src = src->apply(constraints->replaceVariables)->to<IR::Type>();
+    if (dest->is<IR::ITypeVar>())
+        dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
+
     if (TypeMap::equivalent(dest, src))
         return true;
 
