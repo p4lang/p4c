@@ -33,6 +33,12 @@ namespace BMV2 {
 
 class Backend;
 
+/**
+   Inserts casts and narrowing operations to implement correctly the semantics of
+   P4-16 arithmetic on top of unbounded precision arithmetic.  For example,
+   in P4-16 adding two 32-bit values should produce a 32-bit value, but using
+   unbounded arithmetic, as in BMv2, it could produce a 33-bit value.
+ */
 class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
  public:
@@ -41,6 +47,7 @@ class ArithmeticFixup : public Transform {
     const IR::Node* postorder(IR::Expression* expression) override;
     const IR::Node* postorder(IR::Operation_Binary* expression) override;
     const IR::Node* postorder(IR::Neg* expression) override;
+    const IR::Node* postorder(IR::Cmpl* expression) override;
     const IR::Node* postorder(IR::Cast* expression) override;
     explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); }
