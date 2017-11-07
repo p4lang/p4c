@@ -33,9 +33,9 @@ namespace P4 {
  * validity is actually implemented on some backends, which can simplify later
  * passes.
  *
- * XXX(seth): *There are known problems with this approach.* We're working on a
- * better way to handle this. For now, you are advised against using this in new
- * backends.
+ * WARNING: This pass should be used carefully; it breaks invariants
+ * about the IR that are assumed by other passes.  It should only be
+ * used very late in the compilation tool-chain, if at all.
  *
  * In most situations, `foo.isValid()` is rewritten to `foo.$valid$ == 1`.
  * However, when `foo.isValid()` is a table key element (and isn't part of a

@@ -44,7 +44,6 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
-#include "midend/synthesizeValidField.h"
 #include "midend/removeSelectBooleans.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
@@ -100,9 +99,11 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
-        new P4::SynthesizeValidField(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
-        new P4::SimplifyKey(&refMap, &typeMap, new P4::NonMaskLeftValue(&typeMap)),
+        new P4::SimplifyKey(&refMap, &typeMap,
+                            new P4::OrPolicy(
+                                new P4::IsValid(&refMap, &typeMap),
+                                new P4::IsMask())),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets

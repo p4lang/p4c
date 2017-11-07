@@ -114,20 +114,26 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
     } else if (instance->is<P4::BuiltInMethod>()) {
         auto bim = instance->to<P4::BuiltInMethod>();
         if (bim->name == IR::Type_Header::isValid) {
-            // This should be applied to a header union; isValid() calls on
-            // headers should've been removed by SynthesizeValidField.
             auto type = backend->getTypeMap()->getType(bim->appliedTo, true);
-            BUG_CHECK(type->is<IR::Type_HeaderUnion>(),
-                      "Expected isValid() to be eliminated in %1%", expression);
-
             auto result = new Util::JsonObject();
-            result->emplace("type", "expression");
-            auto e = new Util::JsonObject();
-            result->emplace("value", e);
-            e->emplace("op", "valid_union");
-            e->emplace("left", Util::JsonValue::null);
             auto l = get(bim->appliedTo);
-            e->emplace("right", l);
+            if (type->is<IR::Type_HeaderUnion>()) {
+                result->emplace("type", "expression");
+                auto e = new Util::JsonObject();
+                result->emplace("value", e);
+                e->emplace("op", "valid_union");
+                e->emplace("left", Util::JsonValue::null);
+                e->emplace("right", l);
+            } else {
+                // Treat this as appliedTo.$valid$
+                result->emplace("type", "field");
+                auto e = mkArrayField(result, "value");
+                if (l->is<Util::JsonObject>())
+                    e->append(l->to<Util::JsonObject>()->get("value"));
+                else
+                    e->append(l);
+                e->append(V1ModelProperties::validField);
+            }
             map.emplace(expression, result);
             return;
         }

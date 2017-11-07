@@ -44,6 +44,9 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
             if (matchType == backend->getCoreLibrary().exactMatch.name) {
                 if (k->is<IR::Constant>())
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                else if (k->is<IR::BoolLiteral>())
+                    // booleans are converted to ints
+                    key->emplace("key", stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                 else
                     ::error("%1% invalid exact key expression", k);
             } else if (matchType == backend->getCoreLibrary().ternaryMatch.name) {

@@ -29,27 +29,26 @@ class HasTableApply : public Inspector {
 };
 }  // namespace
 
-bool NonLeftValueOrIsValid::isTooComplex(const IR::Expression* expression) const {
-    if (!NonLeftValue::isTooComplex(expression)) return false;
+bool IsValid::isSimple(const IR::Expression* expression) {
     if (!expression->is<IR::MethodCallExpression>())
-        return true;
+        return false;
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
     if (!mi->is<BuiltInMethod>())
-        return true;
+        return false;
     auto bi = mi->to<BuiltInMethod>();
     if (bi->name.name == IR::Type_Header::isValid) {
         // isValid() is simple when applied to headers, but complicated when applied to unions.
         auto baseType = typeMap->getType(bi->appliedTo, true);
         if (baseType->is<IR::Type_HeaderUnion>())
-            return true;
-        return false;
+            return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
-    bool doSimplify = policy->isTooComplex(element->expression);
-    if (!doSimplify)
+    bool simple = policy->isSimple(element->expression);
+    if (simple)
         return element;
 
     auto table = findOrigCtxt<IR::P4Table>();
@@ -75,6 +74,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     auto path = new IR::PathExpression(tmp);
     // This preserves annotations on the key
     element->expression = path;
+    LOG2("Created new key expression " << element);
     return element;
 }
 

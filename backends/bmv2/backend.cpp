@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
 #include "midend/removeLeftSlices.h"
+#include "midend/synthesizeValidField.h"
 #include "lower.h"
 #include "header.h"
 #include "parser.h"
@@ -113,6 +114,9 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
         new ExtractArchInfo(typeMap),
+#if 0
+        new P4::SynthesizeValidField(refMap, typeMap),
+#endif
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });
