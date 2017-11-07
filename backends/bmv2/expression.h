@@ -72,7 +72,6 @@ class ExpressionConverter : public Inspector {
     Util::IJson* fixLocal(Util::IJson* json);
 
     // doFixup = true -> insert masking operations for proper arithmetic implementation
-    // see below for wrap
     Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
                          bool wrap = true, bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);
