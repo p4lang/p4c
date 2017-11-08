@@ -861,13 +861,15 @@ const IR::Statement* ProgramStructure::sliceAssign(
             ::error("%1%: Negative mask not supported", mask);
             return nullptr;
         }
-        auto range = Util::findOnes(cst->value);
-        if (cst->value == range.value) {
-            auto h = new IR::Constant(range.highIndex);
-            auto l = new IR::Constant(range.lowIndex);
-            left = new IR::Slice(left->srcInfo, left, h, l);
-            right = new IR::Slice(right->srcInfo, right, h, l);
-            return assign(srcInfo, left, right, nullptr);
+        if (cst->value != 0) {
+            auto range = Util::findOnes(cst->value);
+            if (cst->value == range.value) {
+                auto h = new IR::Constant(range.highIndex);
+                auto l = new IR::Constant(range.lowIndex);
+                left = new IR::Slice(left->srcInfo, left, h, l);
+                right = new IR::Slice(right->srcInfo, right, h, l);
+                return assign(srcInfo, left, right, nullptr);
+            }
         }
         // else value is too complex for a slice
     }
