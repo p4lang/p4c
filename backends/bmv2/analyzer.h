@@ -24,7 +24,8 @@ limitations under the License.
 
 namespace BMV2 {
 
-// This CFG is only good for BMV2, which only cares about some Nodes in the program
+/// This CFG models the BMV2 notion of control-flow graph.
+/// In BMv2 there are only 2 types of nodes: If and Table.
 class CFG final : public IHasDbPrint {
  public:
     class Edge;
@@ -161,13 +162,19 @@ class CFG final : public IHasDbPrint {
     void dbprint(std::ostream& out) const;
     void computeSuccessors()
     { for (auto n : allNodes) n->computeSuccessors(); }
-    // Graphs that require cycles are not implementable on BMv2.
-    // These can arise if a table is invoked multiple times.
-    bool checkForCycles() const;
+    /// BMv2 is very restricted in the kinds of graphs it supports.
+    /// Thie method checks whether a CFG is implementable.
+    bool checkImplementable() const;
 
  private:
     bool dfs(Node* node, std::set<Node*> &visited,
              std::set<const IR::P4Table*> &stack) const;
+    /// This is a set of table nodes that all represent the same
+    /// table.  Check whether they could logically be merged into
+    /// a single table node from a control-flow point of view.
+    /// This requires their successor edgesets to be "compatible" with
+    /// each other.  This is a constraint specific to BMv2.
+    bool checkMergeable(std::set<TableNode*> nodes) const;
 };
 
 // Represents global information about a P4-16 program.

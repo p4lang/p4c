@@ -82,7 +82,8 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
     if (node->is<TableNode>()) {
         table = node->to<TableNode>()->table;
         if (stack.find(table) != stack.end()) {
-            ::error("Program cannot be implemented since it requires a cycle containing %1%",
+            ::error("Program cannot be implemented on this target since there it contains"
+                    "a path from table %1% back to itself",
                     table);
             return false;
         }
@@ -101,13 +102,95 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
     return true;
 }
 
-bool CFG::checkForCycles() const {
+// We check whether a table always jumps to the same destination,
+// even if it appears multiple times in the CFG.
+bool CFG::checkMergeable(std::set<TableNode*> nodes) const {
+    EdgeType edgeType;  // for the first edge seen
+    // for each label a successor
+    std::map<cstring, CFG::Node*> perLabelSuccessors;
+    bool firstEdge = true;
+
+    for (auto tn : nodes) {
+        for (auto e : tn->successors.edges) {
+            cstring label;
+
+            // We check the edge type; it could be that one instance
+            // of a table jumps unconditionally, the other jumps on
+            // hit/miss.
+            EdgeType currentEdge;
+            if (e->isBool()) {
+                label = e->getBool() ? "$true": "$false";
+                currentEdge = EdgeType::True;
+            } else if (e->isUnconditional()) {
+                label = "";
+                currentEdge = EdgeType::Unconditional;
+            } else {
+                label = e->label;
+                currentEdge = EdgeType::Label;
+            }
+
+            bool illegal = false;
+
+            if (firstEdge) {
+                firstEdge = false;
+                edgeType = currentEdge;
+            } else {
+                if (currentEdge != edgeType)
+                    illegal = true;
+            }
+            auto dest = e->endpoint;
+
+            auto succ = ::get(perLabelSuccessors, label);
+            if (succ != nullptr) {
+                // Both dest and succ must point to the same destination...
+                if (auto stn = succ->to<TableNode>()) {
+                    if (auto dtn = dest->to<TableNode>()) {
+                        // ... they must be either the same table...
+                        if (stn->table != dtn->table)
+                            illegal = true;
+                    } else {
+                        illegal = true;
+                    }
+                } else if (succ->is<IfNode>() || succ->is<DummyNode>()) {
+                    /// ... or the same statement.
+                    if (succ != dest)
+                        illegal = true;
+                }
+            } else {
+                perLabelSuccessors.emplace(label, dest);
+            }
+
+            if (illegal) {
+                ::error("Program is not supported by this target, because "
+                        "table %1% has multiple successors", tn->table);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool CFG::checkImplementable() const {
     std::set<Node*> visited;
     std::set<const IR::P4Table*> stack;
     for (auto n : allNodes) {
         bool success = dfs(n, visited, stack);
         if (!success) return false;
     }
+
+    std::map<const IR::P4Table*, std::set<TableNode*>> tableNodes;
+    for (auto n : allNodes) {
+        if (auto tn = n->to<TableNode>())
+            tableNodes[tn->table].emplace(tn);
+    }
+    for (auto it : tableNodes) {
+        if (it.second.size() == 1)
+            continue;
+        bool success = checkMergeable(it.second);
+        if (!success)
+            return false;
+    }
+
     return true;
 }
 
@@ -261,12 +344,13 @@ void CFG::build(const IR::P4Control* cc,
     CFGBuilder builder(this, refMap, typeMap);
     auto startValue = new CFG::EdgeSet(new CFG::Edge(entryPoint));
     auto last = builder.run(cc->body, startValue);
-    LOG1("Before exit " << last);
+    LOG2("Before exit " << last);
     if (last != nullptr) {
         // nullptr can happen when there is an error
         exitPoint->addPredecessors(last);
         computeSuccessors();
     }
+    LOG2("CFG" << this);
 }
 
 void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
