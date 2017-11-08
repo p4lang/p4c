@@ -284,7 +284,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 CHECK_NULL(field);
                 auto name = ::get(backend->scalarMetadataFields, field);
                 CHECK_NULL(name);
-                if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() || leftValue) {
+                if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
+                    leftValue || simpleExpressionsOnly) {
                     result->emplace("type", "field");
                     auto e = mkArrayField(result, "value");
                     e->append(scalarsName);
@@ -511,7 +512,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
             result->emplace("type", "header");
             result->emplace("value", var->name);
         } else if (type->is<IR::Type_Bits>() ||
-                   (type->is<IR::Type_Boolean>() && leftValue)) {
+                   (type->is<IR::Type_Boolean>() && (leftValue || simpleExpressionsOnly))) {
             // no conversion d2b when writing (leftValue is true) to a boolean
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");
