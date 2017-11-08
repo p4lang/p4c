@@ -45,7 +45,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.dstAddr: ternary @name("ethernet.dstAddr") ;
         }
         size = 6100;
-        @name(".cnt") counters = direct_counter(CounterType.packets);
+        counters = cnt;
         default_action = NoAction_0();
     }
     apply {

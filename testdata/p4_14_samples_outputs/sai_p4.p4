@@ -285,7 +285,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
         }
-        @name(".port_counters") counters = direct_counter(CounterType.packets);
+        counters = port_counters;
     }
     @name(".route") table route {
         actions = {
