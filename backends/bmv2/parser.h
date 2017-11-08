@@ -42,7 +42,7 @@ class ParserConverter : public Inspector {
  protected:
     void convertSimpleKey(const IR::Expression* keySet, mpz_class& value, mpz_class& mask) const;
     unsigned combine(const IR::Expression* keySet, const IR::ListExpression* select,
-                     mpz_class& value, mpz_class& mask) const;
+                     mpz_class& value, mpz_class& mask, bool& is_vset, cstring& vset_name) const;
     Util::IJson* stateName(IR::ID state);
     Util::IJson* toJson(const IR::P4Parser* cont);
     Util::IJson* toJson(const IR::ParserState* state);

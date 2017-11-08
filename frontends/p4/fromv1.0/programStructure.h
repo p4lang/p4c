@@ -200,8 +200,7 @@ class ProgramStructure {
     static const IR::Annotations*
     addGlobalNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
 
-    const IR::ParserState* convertParser(const IR::V1Parser* prs, IR::IndexedVector<IR::Declaration>*,
-                                         IR::IndexedVector<IR::ParserState>*);
+    const IR::ParserState* convertParser(const IR::V1Parser*, IR::IndexedVector<IR::Declaration>*);
     const IR::Statement* convertParserStatement(const IR::Expression* expr);
     const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);

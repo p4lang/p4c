@@ -204,9 +204,8 @@ extern void truncate(in bit<32> length);
 // Parser value set
 // The parser value set implements a run-time updatable values that is used to
 // determine parser transition
-extern value_set<D> {
+extern value_set {
     value_set(bit<8> size);
-    bool is_member(in D data);
 }
 
 // The name 'standard_metadata' is reserved

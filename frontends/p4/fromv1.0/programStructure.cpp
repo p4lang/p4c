@@ -397,9 +397,7 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
  * @returns          The P4-16 parser state corresponding to the P4-14 parser
  */
 const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser,
-                                                       IR::IndexedVector<IR::Declaration>* stateful,
-                                                       IR::IndexedVector<IR::ParserState>* states ) {
-    dump(parser);
+                                                       IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -435,9 +433,6 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             for (auto v : c->values) {
                 auto first = v.first->to<IR::PathExpression>();
                 if (!first) continue;
-                if (first->path->name == "default") continue;
-                dump(v.first);
-                dump(v.second);
                 pvs.push_back(std::make_pair(first, c->action));
                 auto value_set = value_sets.get(first->path->name);
                 if (!value_set) {
@@ -445,54 +440,12 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto typeArg = new IR::Vector<IR::Type>();
-                for (auto l : list->components) {
-                    typeArg->push_back(l->type);
-                }
-                auto type = new IR::Type_Specialized(new IR::Type_Name("value_set"), typeArg);
-
+                auto type = new IR::Type_Name("value_set");
                 auto arg = new IR::Constant(4, 10);
-                auto decl = new IR::Declaration_Instance(value_set->name, value_set->annotations, type,
+                auto decl = new IR::Declaration_Instance(value_set->name,
+                                                         value_set->annotations, type,
                                                          new IR::Vector<IR::Expression>(arg));
                 stateful->push_back(decl);
-            }
-            /*
-             * generate the dispatch parser state for a parser value set, in the format of
-             *
-             * state dispatch_$pvs$ {
-             *    transition select($pvs$.is_member($hdr$)) {
-             *       true: $parse_pvs$;
-             *       default: $accept$;
-             *    }
-             * }
-             *
-             * A few variables in the template depend on the actual program.
-             * $pvs$:          The name of the parser value set instance.
-             * $hdr$:          The header fields that the pvs matches on.
-             * $parse_pvs$:    The parser state if the pvs match is true.
-             * $accept$:       The next parse state if the pvs match is false, it could be another
-             *                 dispatch state for the subsequent pvs, or the accept label to return
-             *                 to the original parser control flow.
-             */
-            for (auto it = pvs.begin(); it != pvs.end(); it++) {
-                auto pvs_name = it->first->path->name;
-                cstring pvsName = "dispatch_" + pvs_name;  // must be unique name
-                auto comp_ = new IR::IndexedVector<IR::StatOrDecl>();
-                auto trueCase = new IR::SelectCase(new IR::BoolLiteral(true),
-                                                   new IR::PathExpression(it->second));
-                auto falseCase = new IR::SelectCase(new IR::DefaultExpression(),
-                     (it != pvs.end() ? new IR::PathExpression(pvs_name) :
-                        new IR::PathExpression("accept")));
-                auto cases = new IR::Vector<IR::SelectCase>({ trueCase, falseCase });
-                auto vec = new IR::Vector<IR::Expression>();
-                vec->push_back(new IR::MethodCallExpression(
-                        new IR::Member(new IR::PathExpression(pvs_name), "is_member"),
-                        new IR::Vector<IR::Type>(), &list->components));
-                auto sel_ = new IR::SelectExpression(
-                    new IR::ListExpression(*vec), std::move(*cases));
-                auto state = new IR::ParserState(pvsName, *comp_, sel_);
-                states->push_back(state);
-                pvs.pop_front();
             }
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
@@ -500,7 +453,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
                 } else if (auto first = v.first->to<IR::PathExpression>()) {
-                    WARNING("pvs is not supported");
+                    auto sc = new IR::SelectCase(c->srcInfo, first, deststate);
+                    cases.push_back(sc);
                 } else {
                     ::error("Expected constant or parser value set in %1%", v.first);
                 }
@@ -554,7 +508,7 @@ void ProgramStructure::createParser() {
     IR::IndexedVector<IR::Declaration> stateful;
     IR::IndexedVector<IR::ParserState> states;
     for (auto p : parserStates) {
-        auto ps = convertParser(p.first, &stateful, &states);
+        auto ps = convertParser(p.first, &stateful);
         if (ps == nullptr)
             return;
         states.push_back(ps);

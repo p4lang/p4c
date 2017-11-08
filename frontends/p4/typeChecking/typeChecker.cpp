@@ -2749,6 +2749,11 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
     if (caseType->is<IR::Type_Dontcare>())
         return selectCase;
 
+    // The caseType may be an extern, we use the type of the selectType
+    if (caseType->is<IR::Type_Extern>()) {
+        return selectCase;
+    }
+
     const IR::Type* useSelType = selectType;
     if (!caseType->is<IR::Type_Tuple>()) {
         if (selectType->components.size() != 1) {
