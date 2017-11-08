@@ -175,13 +175,6 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
     }
 
     for (auto f : st->fields) {
-#if 0
-        if (f->name == V1ModelProperties::validField) {
-            // The valid bit is automatically added by BMV2. Skip it so that we
-            // don't confuse BMV2 or end up generating unnecessary padding.
-            continue;
-        }
-#endif
         auto ftype = typeMap->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
