@@ -389,11 +389,9 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
 }
 
 /**
- * convert a P4-14 parser to P4-16 parser state. If the P4-14 parser is converted to more than
- * one parser state in P4-16, the extra parser states are saved to the argument 'states'.
+ * convert a P4-14 parser to P4-16 parser state.
  * @param parser     The P4-14 parser IR node to be converted
  * @param stateful   If any declaration is created during the conversion, save to 'stateful'
- * @param states     If more than one parser state is created, save to 'states'
  * @returns          The P4-16 parser state corresponding to the P4-14 parser
  */
 const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser,
