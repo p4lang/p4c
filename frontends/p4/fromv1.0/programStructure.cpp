@@ -420,20 +420,16 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
         IR::Vector<IR::SelectCase> cases;
-        std::deque<std::pair<const IR::PathExpression*, const IR::ID>> pvs;
         for (auto c : *parser->cases) {
             IR::ID state = c->action;
             auto deststate = getState(state);
             if (deststate == nullptr)
                 return nullptr;
 
-            /*
-             * discover all parser value_sets in the current parser state.
-             */
+            // discover all parser value_sets in the current parser state.
             for (auto v : c->values) {
                 auto first = v.first->to<IR::PathExpression>();
                 if (!first) continue;
-                pvs.push_back(std::make_pair(first, c->action));
                 auto value_set = value_sets.get(first->path->name);
                 if (!value_set) {
                     ::error("Unable to find declaration for parser_value_set %s", first->path->name);
@@ -441,7 +437,14 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 }
 
                 auto type = new IR::Type_Name("value_set");
-                auto arg = new IR::Constant(4, 10);
+                unsigned vset_size = 4;  // default value_set size is 4.
+                if (auto size = value_set->getAnnotation("parser_value_set_size")) {
+                    if (size->expr.size() != 1 || !size->expr[0]->is<IR::Constant>())
+                        ::error("%s: parser_value_set_size must be a constant", size);
+                    else
+                        vset_size = size->expr[0]->to<IR::Constant>()->asInt();
+                }
+                auto arg = new IR::Constant(vset_size, 10);
                 auto decl = new IR::Declaration_Instance(value_set->name,
                                                          value_set->annotations, type,
                                                          new IR::Vector<IR::Expression>(arg));
