@@ -130,6 +130,8 @@ class DoSimplifyKey : public Transform {
     { return doStatement(statement, statement->condition); }
     const IR::Node* postorder(IR::SwitchStatement* statement) override
     { return doStatement(statement, statement->expression); }
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override
+    { return doStatement(statement, statement->right); }
     const IR::Node* postorder(IR::KeyElement* element) override;
     const IR::Node* postorder(IR::P4Table* table) override;
 };
