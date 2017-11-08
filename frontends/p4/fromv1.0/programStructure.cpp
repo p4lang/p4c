@@ -794,16 +794,12 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
 
     if (!ctr.isNullOrEmpty()) {
         auto counter = counters.get(ctr);
-        auto kindarg = counterType(counter);
-        auto type = new IR::Type_Name(new IR::Path(v1model.directCounter.Id()));
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(kindarg);
-        auto constructor = new IR::ConstructorCallExpression(type, args);
-        auto propvalue = new IR::ExpressionValue(constructor);
-        auto annos = addGlobalNameAnnotation(ctr);
+        cstring name = counters.get(counter);
+        auto path = new IR::PathExpression(name);
+        auto propvalue = new IR::ExpressionValue(path);
         auto prop = new IR::Property(
             IR::ID(v1model.tableAttributes.counters.Id()),
-            annos, propvalue, false);
+            IR::Annotations::empty, propvalue, false);
         props->push_back(prop);
     }
 

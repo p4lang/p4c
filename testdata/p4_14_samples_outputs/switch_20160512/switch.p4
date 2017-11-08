@@ -2248,7 +2248,7 @@ control process_egress_bd_stats(inout headers hdr, inout metadata meta, inout st
             meta.l2_metadata.lkp_pkt_type: exact;
         }
         size = 1024;
-        @name(".egress_bd_stats") counters = direct_counter(CounterType.packets_and_bytes);
+        counters = egress_bd_stats;
     }
     apply {
         egress_bd_stats_0.apply();
@@ -4176,7 +4176,7 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
             meta.ingress_metadata.sflow_take_sample: ternary;
             meta.sflow_metadata.sflow_session_id   : exact;
         }
-        @name(".sflow_ingress_session_pkt_counter") counters = direct_counter(CounterType.packets);
+        counters = sflow_ingress_session_pkt_counter;
     }
     @name(".sflow_ingress") table sflow_ingress {
         actions = {
@@ -4945,7 +4945,7 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv4_metadata.lkp_ipv4_da: exact;
         }
         size = 1024;
-        @name(".ipv4_multicast_route_s_g_stats") counters = direct_counter(CounterType.packets);
+        counters = ipv4_multicast_route_s_g_stats;
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_0() {
         ipv4_multicast_route_star_g_stats.count();
@@ -4976,7 +4976,7 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv4_metadata.lkp_ipv4_da: exact;
         }
         size = 1024;
-        @name(".ipv4_multicast_route_star_g_stats") counters = direct_counter(CounterType.packets);
+        counters = ipv4_multicast_route_star_g_stats;
     }
     apply {
         if ((meta.ingress_metadata.bypass_lookups & 16w0x1) == 16w0) {
@@ -5078,7 +5078,7 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv6_metadata.lkp_ipv6_da: exact;
         }
         size = 1024;
-        @name(".ipv6_multicast_route_s_g_stats") counters = direct_counter(CounterType.packets);
+        counters = ipv6_multicast_route_s_g_stats;
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_1() {
         ipv6_multicast_route_star_g_stats.count();
@@ -5109,7 +5109,7 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv6_metadata.lkp_ipv6_da: exact;
         }
         size = 1024;
-        @name(".ipv6_multicast_route_star_g_stats") counters = direct_counter(CounterType.packets);
+        counters = ipv6_multicast_route_star_g_stats;
     }
     apply {
         if ((meta.ingress_metadata.bypass_lookups & 16w0x1) == 16w0) {
@@ -5271,7 +5271,7 @@ control process_meter_action(inout headers hdr, inout metadata meta, inout stand
             meta.meter_metadata.meter_index: exact;
         }
         size = 1024;
-        @name(".meter_stats") counters = direct_counter(CounterType.packets);
+        counters = meter_stats;
     }
     apply {
         if ((meta.ingress_metadata.bypass_lookups & 16w0x10) == 16w0) {
@@ -5328,7 +5328,7 @@ control process_storm_control_stats(inout headers hdr, inout metadata meta, inou
             standard_metadata.ingress_port : exact;
         }
         size = 1024;
-        @name(".storm_control_stats") counters = direct_counter(CounterType.packets);
+        counters = storm_control_stats;
     }
     apply {
         storm_control_stats_0.apply();
