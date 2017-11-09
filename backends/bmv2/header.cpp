@@ -220,10 +220,13 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
         field->append(false);
     }
 
-    if (!varbitFound)
+    unsigned max_length_bytes = (max_length + padding) / 8;
+    if (!varbitFound) {
         // ignore
         max_length = 0;
-    json->add_header_type(name, fields, max_length);
+        max_length_bytes = 0;
+    }
+    json->add_header_type(name, fields, max_length_bytes);
 
     LOG1("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {
