@@ -35,12 +35,19 @@ limitations under the License.
 class P4TestOptions : public CompilerOptions {
  public:
     bool parseOnly = false;
+    bool validateOnly = false;
     P4TestOptions() {
         registerOption("--parse-only", nullptr,
                        [this](const char*) {
                            parseOnly = true;
                            return true; },
                        "only parse the P4 input, without any further processing", true);
+        registerOption("--validate", nullptr,
+                       [this](const char*) {
+                           validateOnly = true;
+                           return true;
+                       },
+                       "Validate the P4 input, running just the front-end", true);
      }
 };
 
@@ -85,7 +92,7 @@ int main(int argc, char *const argv[]) {
         }
         log_dump(program, "Initial program");
         if (program != nullptr && ::errorCount() == 0) {
-            if (!options.parseOnly) {
+            if (!options.parseOnly && !options.validateOnly) {
                 P4Test::MidEnd midEnd(options);
                 midEnd.addDebugHook(hook);
 #if 0
