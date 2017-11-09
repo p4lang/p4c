@@ -29,6 +29,7 @@ namespace BMV2 {
 class CFG final : public IHasDbPrint {
  public:
     class Edge;
+    class Node;
 
     class EdgeSet final {
      public:
@@ -43,6 +44,15 @@ class CFG final : public IHasDbPrint {
         void dbprint(std::ostream& out) const;
         void emplace(CFG::Edge* edge) { edges.emplace(edge); }
         size_t size() const { return edges.size(); }
+        /// Checks whether the two edge sets represent the same set of
+        /// nodes.  Importantly, two TableNodes are equivalent if they
+        /// refer to the same table (pointer equality is not enough).
+        bool checkSame(const EdgeSet& other) const;
+        /// Check if this destination appears in this edgeset.
+        /// Importantly, a TableNode is a destination if it points to
+        /// the same table as an existin destination (pointer equality
+        /// is not enough).
+        bool isDestination(const CFG::Node* destination) const;
     };
 
     class Node {

@@ -102,69 +102,49 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
     return true;
 }
 
+bool CFG::EdgeSet::isDestination(const CFG::Node* node) const {
+    for (auto e : edges) {
+        auto dest = e->endpoint;
+        if (dest == node) return true;
+        auto td = dest->to<TableNode>();
+        auto tn = node->to<TableNode>();
+        if (td != nullptr && tn != nullptr &&
+            td->table == tn->table)
+            return true;
+    }
+
+    return false;
+}
+
+bool CFG::EdgeSet::checkSame(const CFG::EdgeSet& other) const {
+    if (size() != other.size())
+        return false;
+    // This algorithm is quadratic, but we expect these graphs to be very small
+    for (auto e : edges) {
+        if (!other.isDestination(e->endpoint))
+            return false;
+    }
+    for (auto e : other.edges) {
+        if (!isDestination(e->endpoint))
+            return false;
+    }
+    return true;
+}
+
 // We check whether a table always jumps to the same destination,
 // even if it appears multiple times in the CFG.
 bool CFG::checkMergeable(std::set<TableNode*> nodes) const {
-    EdgeType edgeType;  // for the first edge seen
-    // for each label a successor
-    std::map<cstring, CFG::Node*> perLabelSuccessors;
-    bool firstEdge = true;
-
+    TableNode* first = nullptr;
     for (auto tn : nodes) {
-        for (auto e : tn->successors.edges) {
-            cstring label;
-
-            // We check the edge type; it could be that one instance
-            // of a table jumps unconditionally, the other jumps on
-            // hit/miss.
-            EdgeType currentEdge;
-            if (e->isBool()) {
-                label = e->getBool() ? "$true": "$false";
-                currentEdge = EdgeType::True;
-            } else if (e->isUnconditional()) {
-                label = "";
-                currentEdge = EdgeType::Unconditional;
-            } else {
-                label = e->label;
-                currentEdge = EdgeType::Label;
-            }
-
-            bool illegal = false;
-
-            if (firstEdge) {
-                firstEdge = false;
-                edgeType = currentEdge;
-            } else {
-                if (currentEdge != edgeType)
-                    illegal = true;
-            }
-            auto dest = e->endpoint;
-
-            auto succ = ::get(perLabelSuccessors, label);
-            if (succ != nullptr) {
-                // Both dest and succ must point to the same destination...
-                if (auto stn = succ->to<TableNode>()) {
-                    if (auto dtn = dest->to<TableNode>()) {
-                        // ... they must be either the same table...
-                        if (stn->table != dtn->table)
-                            illegal = true;
-                    } else {
-                        illegal = true;
-                    }
-                } else if (succ->is<IfNode>() || succ->is<DummyNode>()) {
-                    /// ... or the same statement.
-                    if (succ != dest)
-                        illegal = true;
-                }
-            } else {
-                perLabelSuccessors.emplace(label, dest);
-            }
-
-            if (illegal) {
-                ::error("Program is not supported by this target, because "
-                        "table %1% has multiple successors", tn->table);
-                return false;
-            }
+        if (first == nullptr) {
+            first = tn;
+            continue;
+        }
+        bool same = first->successors.checkSame(tn->successors);
+        if (!same) {
+            ::error("Program is not supported by this target, because "
+                    "table %1% has multiple successors", tn->table);
+            return false;
         }
     }
     return true;
