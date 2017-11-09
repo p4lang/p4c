@@ -22,6 +22,7 @@ limitations under the License.
 #include "typeUnification.h"
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
+#include "typeSubstitutionVisitor.h"
 
 namespace P4 {
 
