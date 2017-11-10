@@ -105,10 +105,6 @@ set (XFAIL_TESTS
   testdata/p4_14_samples/counter2.p4
   testdata/p4_14_samples/counter3.p4
   testdata/p4_14_samples/counter4.p4
-  testdata/p4_14_samples/gateway1.p4
-  testdata/p4_14_samples/gateway2.p4
-  testdata/p4_14_samples/gateway3.p4
-  testdata/p4_14_samples/gateway4.p4
   testdata/p4_14_samples/07-MultiProtocol.p4
 
   # This test defines two lpm keys for a table.
