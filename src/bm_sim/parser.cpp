@@ -972,6 +972,8 @@ Parser::parse(Packet *pkt) const {
   const ParseState *next_state = init_state;
   size_t bytes_parsed = 0;
   while (next_state) {
+    BMLOG_DEBUG_PKT(*pkt, "Parser '{}' entering state '{}'",
+                    get_name(), next_state->get_name());
     try {
       next_state = (*next_state)(pkt, data, &bytes_parsed);
     } catch (const parser_exception &e) {
