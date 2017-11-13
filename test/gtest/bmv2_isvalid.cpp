@@ -366,7 +366,10 @@ TEST(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SynthesizeValidField(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
-        new P4::SimplifyKey(&refMap, &typeMap, new P4::NonMaskLeftValue(&typeMap)),
+        new P4::SimplifyKey(&refMap, &typeMap,
+                            new P4::OrPolicy(
+                                new P4::IsValid(&refMap, &typeMap),
+                                new P4::IsMask()))
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);

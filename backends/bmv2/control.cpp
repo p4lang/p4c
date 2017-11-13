@@ -44,6 +44,9 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
             if (matchType == backend->getCoreLibrary().exactMatch.name) {
                 if (k->is<IR::Constant>())
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                else if (k->is<IR::BoolLiteral>())
+                    // booleans are converted to ints
+                    key->emplace("key", stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                 else
                     ::error("%1% invalid exact key expression", k);
             } else if (matchType == backend->getCoreLibrary().ternaryMatch.name) {
@@ -330,14 +333,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             auto keyelement = new Util::JsonObject();
             keyelement->emplace("match_type", match_type);
 
-            // XXX(seth): Boolean variables are stored as data, so we normally
-            // cast them back to bool via the 'd2b' primitive when they're used
-            // in expressions. We don't want to do that when we match against
-            // them, though; they're already in the form we want. That's what
-            // convertLeftValue() does. The name is a bit misleading in this
-            // context.
-            auto jk = conv->convertLeftValue(expr);
-
+            auto jk = conv->convert(expr);
             keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
             if (mask != 0)
                 keyelement->emplace("mask", stringRepr(mask, (expr->type->width_bits() + 7) / 8));

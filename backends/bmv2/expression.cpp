@@ -114,20 +114,38 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
     } else if (instance->is<P4::BuiltInMethod>()) {
         auto bim = instance->to<P4::BuiltInMethod>();
         if (bim->name == IR::Type_Header::isValid) {
-            // This should be applied to a header union; isValid() calls on
-            // headers should've been removed by SynthesizeValidField.
             auto type = backend->getTypeMap()->getType(bim->appliedTo, true);
-            BUG_CHECK(type->is<IR::Type_HeaderUnion>(),
-                      "Expected isValid() to be eliminated in %1%", expression);
-
             auto result = new Util::JsonObject();
-            result->emplace("type", "expression");
-            auto e = new Util::JsonObject();
-            result->emplace("value", e);
-            e->emplace("op", "valid_union");
-            e->emplace("left", Util::JsonValue::null);
             auto l = get(bim->appliedTo);
-            e->emplace("right", l);
+            if (type->is<IR::Type_HeaderUnion>()) {
+                result->emplace("type", "expression");
+                auto e = new Util::JsonObject();
+                result->emplace("value", e);
+                e->emplace("op", "valid_union");
+                e->emplace("left", Util::JsonValue::null);
+                e->emplace("right", l);
+            } else {
+                // Treat this as appliedTo.$valid$
+                result->emplace("type", "field");
+                auto e = mkArrayField(result, "value");
+                if (l->is<Util::JsonObject>())
+                    e->append(l->to<Util::JsonObject>()->get("value"));
+                else
+                    e->append(l);
+                e->append(V1ModelProperties::validField);
+                if (!simpleExpressionsOnly) {
+                    // This is set when converting table keys;
+                    // for table keys we don't need the casts.
+                    auto cast = new Util::JsonObject();
+                    auto value = new Util::JsonObject();
+                    cast->emplace("type", "expression");
+                    cast->emplace("value", value);
+                    value->emplace("op", "d2b");  // data to Boolean cast
+                    value->emplace("left", Util::JsonValue::null);
+                    value->emplace("right", result);
+                    result = cast;
+                }
+            }
             map.emplace(expression, result);
             return;
         }
@@ -266,7 +284,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 CHECK_NULL(field);
                 auto name = ::get(backend->scalarMetadataFields, field);
                 CHECK_NULL(name);
-                if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() || leftValue) {
+                if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
+                    leftValue || simpleExpressionsOnly) {
                     result->emplace("type", "field");
                     auto e = mkArrayField(result, "value");
                     e->append(scalarsName);
@@ -493,7 +512,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
             result->emplace("type", "header");
             result->emplace("value", var->name);
         } else if (type->is<IR::Type_Bits>() ||
-                   (type->is<IR::Type_Boolean>() && leftValue)) {
+                   (type->is<IR::Type_Boolean>() && (leftValue || simpleExpressionsOnly))) {
             // no conversion d2b when writing (leftValue is true) to a boolean
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");

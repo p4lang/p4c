@@ -24,55 +24,83 @@ limitations under the License.
 namespace P4 {
 
 /**
- * Policy used to decide whether a key expression is too complex.
+ * Policy used to decide whether a key expression is simple enough
+ * to be implemented directly.
  */
-class KeyIsComplex {
+class KeyIsSimple {
  public:
-    virtual ~KeyIsComplex() {}
-    virtual bool isTooComplex(const IR::Expression* expression) const = 0;
+    virtual ~KeyIsSimple() {}
+    virtual bool isSimple(const IR::Expression* expression) = 0;
 };
 
 /**
- * Policy that treats a key as complex if it's not an lvalue.
+ * Policy that treats a key as simple if it contains just
+ * PathExpression, member and ArrayIndex operations.
  */
-class NonLeftValue : public KeyIsComplex {
+class IsLikeLeftValue : public KeyIsSimple, public Inspector {
  protected:
-    TypeMap*      typeMap;
+    TypeMap* typeMap;
+    bool     simple = true;
  public:
-    explicit NonLeftValue(TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); }
-    bool isTooComplex(const IR::Expression* expression) const {
-        return !typeMap->isLeftValue(expression);
+    IsLikeLeftValue()
+    { setName("IsLikeLeftValue"); }
+
+    void postorder(const IR::Expression*) override {
+        // all other expressions are complicated
+        simple = false;
+    }
+    void postorder(const IR::Member*) override {}
+    void postorder(const IR::PathExpression*) override {}
+    void postorder(const IR::ArrayIndex*) override {}
+
+    bool isSimple(const IR::Expression* expression) {
+        (void)expression->apply(*this);
+        return simple;
     }
 };
 
 /**
- * Policy that treats a key as complex if it's not either (1) an lvalue, or (2)
- * a call to isValid().
+ * Policy that treats a key as simple if it a call to isValid().
  */
-class NonLeftValueOrIsValid : public NonLeftValue {
+class IsValid : public KeyIsSimple {
     ReferenceMap* refMap;
+    TypeMap* typeMap;
  public:
-    NonLeftValueOrIsValid(ReferenceMap* refMap, TypeMap* typeMap)
-        : NonLeftValue(typeMap), refMap(refMap)
-    { CHECK_NULL(refMap); }
-    bool isTooComplex(const IR::Expression* expression) const;
+    IsValid(ReferenceMap* refMap, TypeMap* typeMap)
+            : refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    bool isSimple(const IR::Expression* expression);
 };
 
 /**
- * Policy that treats a key as complex if it's not either (1) a simple lvalue,
- * or (2) a mask applied to a simple lvalue.
+ * Policy that treats a key as simple if it is a mask applied to an lvalue
+ * or just an lvalue.
  */
-class NonMaskLeftValue : public NonLeftValue {
+class IsMask : public IsLikeLeftValue {
  public:
-    using NonLeftValue::NonLeftValue;
-    bool isTooComplex(const IR::Expression* expression) const {
+    bool isSimple(const IR::Expression* expression) {
         if (auto mask = expression->to<IR::BAnd>()) {
             if (mask->right->is<IR::Constant>())
                 expression = mask->left;
             else if (mask->left->is<IR::Constant>())
                 expression = mask->right; }
-        return NonLeftValue::isTooComplex(expression); }
+        return IsLikeLeftValue::isSimple(expression); }
+};
+
+/**
+    A KeyIsSimple policy formed by combining two
+    other policies with a logical 'or'.
+*/
+class OrPolicy : public KeyIsSimple {
+    KeyIsSimple* left;
+    KeyIsSimple* right;
+
+ public:
+    OrPolicy(KeyIsSimple* left, KeyIsSimple* right): left(left), right(right)
+    { CHECK_NULL(left); CHECK_NULL(right); }
+    bool isSimple(const IR::Expression* expression) {
+        return left->isSimple(expression) || right->isSimple(expression);
+    }
 };
 
 class TableInsertions {
@@ -112,12 +140,12 @@ class TableInsertions {
  * @post all complex table key expressions are replaced with a simpler expression.
  */
 class DoSimplifyKey : public Transform {
-    ReferenceMap*       refMap;
-    TypeMap*            typeMap;
-    const KeyIsComplex* policy;
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    KeyIsSimple*  policy;
     std::map<const IR::P4Table*, TableInsertions*> toInsert;
  public:
-    DoSimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, const KeyIsComplex* policy) :
+    DoSimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* policy) :
             refMap(refMap), typeMap(typeMap), policy(policy)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(policy); setName("DoSimplifyKey"); }
     const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
@@ -142,7 +170,7 @@ class DoSimplifyKey : public Transform {
  */
 class SimplifyKey : public PassManager {
  public:
-    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, const KeyIsComplex* policy) {
+    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* policy) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifyKey(refMap, typeMap, policy));
         setName("SimplifyKey");

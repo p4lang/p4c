@@ -39,6 +39,7 @@ class AddValidField final : public Modifier {
             {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})});
         auto field = new IR::StructField("$valid$", annotations, IR::Type::Bits::get(1));
         header->fields.push_back(field);
+        LOG2("Added field to " << header);
         return true;
     }
 };
@@ -82,6 +83,7 @@ RewriteIsValidCalls::postorder(IR::MethodCallExpression* expr) {
     // In other contexts, rewrite isValid() into a comparison with a constant.
     // This maintains a boolean type for the overall expression.
     auto constant = new IR::Constant(IR::Type::Bits::get(1), 1);
+    LOG2("Rewrote " << expr);
     return new IR::Equ(expr->srcInfo, member, constant);
 }
 
@@ -128,6 +130,7 @@ class RewriteIsValidTableEntries final : public Transform {
                 newKey->components[index] =
                     new IR::Constant(IR::Type::Bits::get(1), asBit);
             }
+            LOG2("Rewrote " << e);
             e->keys = newKey;
             return e;
         });
