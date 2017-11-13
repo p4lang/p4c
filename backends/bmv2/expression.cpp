@@ -58,12 +58,21 @@ const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
         return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
+
 const IR::Node* ArithmeticFixup::postorder(IR::Neg* expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (type->is<IR::Type_Bits>())
         return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
+
+const IR::Node* ArithmeticFixup::postorder(IR::Cmpl* expression) {
+    auto type = typeMap->getType(getOriginal(), true);
+    if (type->is<IR::Type_Bits>())
+        return fix(expression, type->to<IR::Type_Bits>());
+    return updateType(expression);
+}
+
 const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (type->is<IR::Type_Bits>())
