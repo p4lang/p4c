@@ -82,7 +82,8 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
     if (node->is<TableNode>()) {
         table = node->to<TableNode>()->table;
         if (stack.find(table) != stack.end()) {
-            ::error("Program cannot be implemented since it requires a cycle containing %1%",
+            ::error("Program cannot be implemented on this target since there it contains"
+                    "a path from table %1% back to itself",
                     table);
             return false;
         }
@@ -101,13 +102,75 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
     return true;
 }
 
-bool CFG::checkForCycles() const {
+bool CFG::EdgeSet::isDestination(const CFG::Node* node) const {
+    for (auto e : edges) {
+        auto dest = e->endpoint;
+        if (dest == node) return true;
+        auto td = dest->to<TableNode>();
+        auto tn = node->to<TableNode>();
+        if (td != nullptr && tn != nullptr &&
+            td->table == tn->table)
+            return true;
+    }
+
+    return false;
+}
+
+bool CFG::EdgeSet::checkSame(const CFG::EdgeSet& other) const {
+    if (size() != other.size())
+        return false;
+    // This algorithm is quadratic, but we expect these graphs to be very small
+    for (auto e : edges) {
+        if (!other.isDestination(e->endpoint))
+            return false;
+    }
+    for (auto e : other.edges) {
+        if (!isDestination(e->endpoint))
+            return false;
+    }
+    return true;
+}
+
+// We check whether a table always jumps to the same destination,
+// even if it appears multiple times in the CFG.
+bool CFG::checkMergeable(std::set<TableNode*> nodes) const {
+    TableNode* first = nullptr;
+    for (auto tn : nodes) {
+        if (first == nullptr) {
+            first = tn;
+            continue;
+        }
+        bool same = first->successors.checkSame(tn->successors);
+        if (!same) {
+            ::error("Program is not supported by this target, because "
+                    "table %1% has multiple successors", tn->table);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CFG::checkImplementable() const {
     std::set<Node*> visited;
     std::set<const IR::P4Table*> stack;
     for (auto n : allNodes) {
         bool success = dfs(n, visited, stack);
         if (!success) return false;
     }
+
+    std::map<const IR::P4Table*, std::set<TableNode*>> tableNodes;
+    for (auto n : allNodes) {
+        if (auto tn = n->to<TableNode>())
+            tableNodes[tn->table].emplace(tn);
+    }
+    for (auto it : tableNodes) {
+        if (it.second.size() == 1)
+            continue;
+        bool success = checkMergeable(it.second);
+        if (!success)
+            return false;
+    }
+
     return true;
 }
 
@@ -261,12 +324,13 @@ void CFG::build(const IR::P4Control* cc,
     CFGBuilder builder(this, refMap, typeMap);
     auto startValue = new CFG::EdgeSet(new CFG::Edge(entryPoint));
     auto last = builder.run(cc->body, startValue);
-    LOG1("Before exit " << last);
+    LOG2("Before exit " << last);
     if (last != nullptr) {
         // nullptr can happen when there is an error
         exitPoint->addPredecessors(last);
         computeSuccessors();
     }
+    LOG2("CFG" << this);
 }
 
 void DiscoverStructure::postorder(const IR::ParameterList* paramList) {

@@ -663,7 +663,9 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
 
     auto cfg = new CFG();
     cfg->build(cont, refMap, typeMap);
-    cfg->checkForCycles();
+    bool success = cfg->checkImplementable();
+    if (!success)
+        return false;
 
     if (cfg->entryPoint->successors.size() == 0) {
         result->emplace("init_table", Util::JsonValue::null);
