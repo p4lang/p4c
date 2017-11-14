@@ -41,13 +41,13 @@ class P4TestOptions : public CompilerOptions {
                        [this](const char*) {
                            parseOnly = true;
                            return true; },
-                       "only parse the P4 input, without any further processing", true);
+                       "only parse the P4 input, without any further processing");
         registerOption("--validate", nullptr,
                        [this](const char*) {
                            validateOnly = true;
                            return true;
                        },
-                       "Validate the P4 input, running just the front-end", true);
+                       "Validate the P4 input, running just the front-end");
      }
 };
 
