@@ -27,8 +27,8 @@ Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
     return result;
 }
 
-ConvertHeaders::ConvertHeaders(Backend* backend, cstring scalarsName)
-        : backend(backend), scalarsName(scalarsName), refMap(backend->getRefMap()),
+ConvertHeaders::ConvertHeaders(Backend* backend, cstring scalarsName, BMV2Options& options)
+        : backend(backend), scalarsName(scalarsName), options(options), refMap(backend->getRefMap()),
           typeMap(backend->getTypeMap()), json(backend->json) {
     setName("ConvertHeaders");
     CHECK_NULL(backend->json);
@@ -223,19 +223,21 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
     }
     json->add_header_type(name, fields, max_length_bytes);
 
-    LOG1("... creating aliases for metadata fields " << st);
-    for (auto f : st->fields) {
-        if (auto name_annotation = f->getAnnotation("alias")) {
-            auto container = new Util::JsonArray();
-            auto alias = new Util::JsonArray();
-            auto target_name = name_annotation->expr.front()->to<IR::StringLiteral>()->value;
-            LOG2("field alias " << target_name);
-            container->append(target_name);  // name on target
-            // break down the alias into meta . field
-            alias->append(name);      // metadata name
-            alias->append(f->name);   // field name
-            container->append(alias);
-            json->field_aliases->append(container);
+    if (options.langVersion == BMV2::BMV2Options::FrontendVersion::P4_16) {
+        LOG1("... creating aliases for metadata fields " << st);
+        for (auto f : st->fields) {
+            if (auto name_annotation = f->getAnnotation("alias")) {
+                auto container = new Util::JsonArray();
+                auto alias = new Util::JsonArray();
+                auto target_name = name_annotation->expr.front()->to<IR::StringLiteral>()->value;
+                LOG2("field alias " << target_name);
+                container->append(target_name);  // name on target
+                // break down the alias into meta . field
+                alias->append(name);      // metadata name
+                alias->append(f->name);   // field name
+                container->append(alias);
+                json->field_aliases->append(container);
+            }
         }
     }
 }

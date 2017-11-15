@@ -175,7 +175,7 @@ void Backend::convert(BMV2Options& options) {
 
     // if (psa) tlb->apply(new ConvertExterns());
     PassManager codegen_passes = {
-        new ConvertHeaders(this, scalarsName),
+        new ConvertHeaders(this, scalarsName, options),
         new ConvertExterns(this),  // only run when target == PSA
         new ConvertParser(this),
         new ConvertActions(this),

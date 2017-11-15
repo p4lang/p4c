@@ -32,6 +32,7 @@ class Backend;
 class ConvertHeaders : public Inspector {
     Backend*             backend;
     cstring              scalarsName;
+    BMV2Options&         options;
     cstring              scalarsTypeName;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
@@ -58,7 +59,7 @@ class ConvertHeaders : public Inspector {
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Parameter* param) override;
 
-    ConvertHeaders(Backend* backend, cstring scalarsName);
+    ConvertHeaders(Backend* backend, cstring scalarsName, BMV2Options& options);
 };
 
 }  // namespace BMV2
