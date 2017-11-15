@@ -28,8 +28,8 @@ Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
 }
 
 ConvertHeaders::ConvertHeaders(Backend* backend, cstring scalarsName, BMV2Options& options)
-        : backend(backend), scalarsName(scalarsName), options(options), refMap(backend->getRefMap()),
-          typeMap(backend->getTypeMap()), json(backend->json) {
+        : backend(backend), scalarsName(scalarsName), options(options),
+          refMap(backend->getRefMap()), typeMap(backend->getTypeMap()), json(backend->json) {
     setName("ConvertHeaders");
     CHECK_NULL(backend->json);
 }
