@@ -504,12 +504,22 @@ def parse_match_key(table, key_fields):
             param = BmMatchParam(type = param_type,
                                  exact = BmMatchParamExact(key))
         elif param_type == BmMatchParamType.LPM:
-            prefix, length = field.split("/")
+            try:
+                prefix, length = field.split("/")
+            except ValueError:
+                raise UIn_MatchKeyError(
+                    "Invalid LPM value {}, use '/' to separate prefix "
+                    "and length".format(field))
             key = bytes_to_string(parse_param_(prefix, bw))
             param = BmMatchParam(type = param_type,
                                  lpm = BmMatchParamLPM(key, int(length)))
         elif param_type == BmMatchParamType.TERNARY:
-            key, mask = field.split("&&&")
+            try:
+                key, mask = field.split("&&&")
+            except ValueError:
+                raise UIn_MatchKeyError(
+                    "Invalid ternary value {}, use '&&&' to separate key and "
+                    "mask".format(field))
             key = bytes_to_string(parse_param_(key, bw))
             mask = bytes_to_string(parse_param_(mask, bw))
             if len(mask) != len(key):
@@ -523,7 +533,12 @@ def parse_match_key(table, key_fields):
             param = BmMatchParam(type = param_type,
                                  valid = BmMatchParamValid(key))
         elif param_type == BmMatchParamType.RANGE:
-            start, end = field.split("->")
+            try:
+                start, end = field.split("->")
+            except ValueError:
+                raise UIn_MatchKeyError(
+                    "Invalid range value {}, use '->' to separate range start "
+                    "and range end".format(field))
             start = bytes_to_string(parse_param_(start, bw))
             end = bytes_to_string(parse_param_(end, bw))
             if len(start) != len(end):
