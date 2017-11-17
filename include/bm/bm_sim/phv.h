@@ -37,7 +37,6 @@
 #include "fields.h"
 #include "headers.h"
 #include "header_unions.h"
-// #include "header_stacks.h"
 #include "stacks.h"
 #include "named_p4object.h"
 #include "expressions.h"
@@ -230,14 +229,7 @@ class PHV {
   //!   - is marked as metadata iff the corresponding \p src header is metadata
   //!   - receives the same field values as the corresponding \p src header iff
   //! it is a valid packet header or a metadata header
-  void copy_headers(const PHV &src) {
-    for (size_t h = 0; h < headers.size(); h++) {
-      headers[h].valid = src.headers[h].valid;
-      headers[h].metadata = src.headers[h].metadata;
-      if (headers[h].valid || headers[h].metadata)
-        headers[h].copy_fields(src.headers[h]);
-    }
-  }
+  void copy_headers(const PHV &src);
 
   void set_packet_id(const uint64_t id1, const uint64_t id2) {
     packet_id = {id1, id2};

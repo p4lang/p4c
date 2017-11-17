@@ -78,6 +78,26 @@ PHV::set_written_to(bool written_to_value) {
 }
 
 void
+PHV::copy_headers(const PHV &src) {
+  for (size_t h = 0; h < headers.size(); h++) {
+    headers[h].valid = src.headers[h].valid;
+    headers[h].metadata = src.headers[h].metadata;
+    if (headers[h].valid || headers[h].metadata)
+      headers[h].copy_fields(src.headers[h]);
+  }
+  for (size_t hs = 0; hs < header_stacks.size(); hs++) {
+    header_stacks[hs].next = src.header_stacks[hs].next;
+  }
+  for (size_t hu = 0; hu < header_unions.size(); hu++) {
+    header_unions[hu].valid = src.header_unions[hu].valid;
+    header_unions[hu].valid_header_idx = src.header_unions[hu].valid_header_idx;
+  }
+  for (size_t hus = 0; hus < header_union_stacks.size(); hus++) {
+    header_union_stacks[hus].next = src.header_union_stacks[hus].next;
+  }
+}
+
+void
 PHV::push_back_header(const std::string &header_name,
                       header_id_t header_index,
                       const HeaderType &header_type,

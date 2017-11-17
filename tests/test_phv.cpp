@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <cassert>
 
@@ -87,6 +88,50 @@ TEST_F(PHVTest, CopyHeaders) {
 
   ASSERT_EQ(f16, f16_2);
   ASSERT_EQ(f48, f48_2);
+}
+
+TEST_F(PHVTest, CopyHeadersWithStack) {
+  header_stack_id_t testHeaderStack(0);
+  phv.reset(nullptr);
+  const std::vector<header_id_t> headers = {testHeader1, testHeader2};
+  phv_factory.push_back_header_stack("test_stack", testHeaderStack,
+                                     testHeaderType, headers);
+  phv = phv_factory.create();
+  std::unique_ptr<PHV> phv_2 = phv_factory.create();
+
+  auto &stack = phv->get_header_stack(testHeaderStack);
+  ASSERT_EQ(1u, stack.push_back());
+  ASSERT_TRUE(phv->get_header(testHeader1).is_valid());
+
+  ASSERT_FALSE(phv_2->get_header(testHeader1).is_valid());
+
+  phv_2->copy_headers(*phv);
+
+  const auto &stack_2 = phv_2->get_header_stack(testHeaderStack);
+  ASSERT_EQ(stack_2.get_count(), stack.get_count());
+  ASSERT_TRUE(phv_2->get_header(testHeader1).is_valid());
+}
+
+TEST_F(PHVTest, CopyHeadersWithUnion) {
+  header_union_id_t testHeaderUnion(0);
+  phv.reset(nullptr);
+  const std::vector<header_id_t> headers = {testHeader1, testHeader2};
+  phv_factory.push_back_header_union("test_union", testHeaderUnion, headers);
+  phv = phv_factory.create();
+  std::unique_ptr<PHV> phv_2 = phv_factory.create();
+
+  auto &header_union = phv->get_header_union(testHeaderUnion);
+  auto &hdr = phv->get_header(testHeader2);
+  EXPECT_FALSE(header_union.is_valid());
+  hdr.mark_valid();
+  EXPECT_EQ(&hdr, header_union.get_valid_header());
+
+  phv_2->copy_headers(*phv);
+
+  auto &header_union_2 = phv_2->get_header_union(testHeaderUnion);
+  auto &hdr_2 = phv_2->get_header(testHeader2);
+  EXPECT_TRUE(header_union_2.is_valid());
+  EXPECT_EQ(&hdr_2, header_union_2.get_valid_header());
 }
 
 // we are testing that the $valid$ hidden field is properly added internally by
