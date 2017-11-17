@@ -59,7 +59,7 @@ The code contains four sample backends:
 5.  You're ready to go! You should be able to compile a P4-16 program for BMV2
     using:
     ```
-    p4c -b bmv2-v1model-p4org program.p4 -o program.bmv2.json
+    p4c -b bmv2-ss-p4org program.p4 -o program.bmv2.json
     ```
 
 If you plan to contribute to p4c, you'll find more useful information
