@@ -388,7 +388,6 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     ::error("%1%: Unexpected type %2% for property", ctrs, type);
                     return result;
                 }
-                result->emplace("with_counters", true);
                 auto jctr = new Util::JsonObject();
                 cstring ctrname = ctrs->controlPlaneName("counter");
                 jctr->emplace("name", ctrname);
@@ -412,7 +411,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 auto it = backend->getDirectCounterMap().find(ctrname);
                 LOG3("Looking up " << ctrname);
                 if (it != backend->getDirectCounterMap().end()) {
-                   ::error("%1%: Direct cannot be attached to multiple tables %2% and %3%",
+                   ::error("%1%: Direct counters cannot be attached to multiple tables %2% and %3%",
                            decl, it->second, table);
                    return result;
                 }
@@ -421,6 +420,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 ::error("%1%: expected a counter", ctrs);
             }
         }
+        result->emplace("with_counters", true);
     } else {
         result->emplace("with_counters", false);
     }
