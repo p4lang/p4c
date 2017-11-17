@@ -439,6 +439,10 @@ class RunBMV2(object):
             else:
                 # parsing table key
                 word, cmd = nextWord(cmd)
+                if cmd.find("=") >= 0:
+                    # This command retrieves a handle for the key
+                    # This feature is currently not supported, so we just ignore the handle part
+                    cmd = cmd.split("=")[0]
                 if word.find("(") >= 0:
                     # found action
                     actionName, arg = nextWord(word, "(")
