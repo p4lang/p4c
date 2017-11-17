@@ -30,6 +30,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction") action NoAction_3() {
     }
+    @name("._drop") action _drop_0() {
+        mark_to_drop();
+    }
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
@@ -41,6 +44,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop_0() {
     }
     @name(".noop") action noop_2() {
+    }
+    @name(".set_default_behavior_drop") table set_default_behavior_drop {
+        actions = {
+            _drop_0();
+        }
+        default_action = _drop_0();
     }
     @name(".test1") table test1 {
         actions = {
@@ -65,6 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
+        set_default_behavior_drop.apply();
         if (hdr.data.b2 == hdr.data.b3 || hdr.data.b4 == 8w10) 
             if (hdr.data.b1 == hdr.data.b2 && hdr.data.b4 == 8w10) 
                 test1.apply();
