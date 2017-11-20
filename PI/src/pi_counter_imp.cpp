@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
 #include <PI/p4info.h>
@@ -80,12 +81,11 @@ pi_status_t _pi_counter_read(pi_session_handle_t session_handle,
                              pi_dev_tgt_t dev_tgt, pi_p4_id_t counter_id,
                              size_t index, int flags,
                              pi_counter_data_t *counter_data) {
-  (void)session_handle;
-  (void)flags;
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(flags);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string c_name(pi_p4info_counter_name_from_id(p4info, counter_id));
 
   uint64_t bytes, packets;
@@ -101,11 +101,10 @@ pi_status_t _pi_counter_write(pi_session_handle_t session_handle,
                               pi_dev_tgt_t dev_tgt, pi_p4_id_t counter_id,
                               size_t index,
                               const pi_counter_data_t *counter_data) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string c_name(pi_p4info_counter_name_from_id(p4info, counter_id));
 
   // very poor man solution: bmv2 does not (yet) let us set only one of bytes /
@@ -132,12 +131,11 @@ pi_status_t _pi_counter_read_direct(pi_session_handle_t session_handle,
                                     pi_dev_tgt_t dev_tgt, pi_p4_id_t counter_id,
                                     pi_entry_handle_t entry_handle, int flags,
                                     pi_counter_data_t *counter_data) {
-  (void)session_handle;
-  (void)flags;
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(flags);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string t_name = get_direct_t_name(p4info, counter_id);
 
   uint64_t bytes, packets;
@@ -154,11 +152,10 @@ pi_status_t _pi_counter_write_direct(pi_session_handle_t session_handle,
                                      pi_p4_id_t counter_id,
                                      pi_entry_handle_t entry_handle,
                                      const pi_counter_data_t *counter_data) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string t_name = get_direct_t_name(p4info, counter_id);
 
   // very poor man solution: bmv2 does not (yet) let us set only one of bytes /
@@ -185,7 +182,7 @@ pi_status_t _pi_counter_write_direct(pi_session_handle_t session_handle,
 pi_status_t _pi_counter_hw_sync(pi_session_handle_t session_handle,
                                 pi_dev_tgt_t dev_tgt, pi_p4_id_t counter_id,
                                 PICounterHwSyncCb cb, void *cb_cookie) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
   if (!cb) return PI_STATUS_SUCCESS;
   std::thread cb_thread(cb, dev_tgt.dev_id, counter_id, cb_cookie);
   cb_thread.detach();

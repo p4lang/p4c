@@ -42,11 +42,10 @@ pi_status_t _pi_act_prof_mbr_create(pi_session_handle_t session_handle,
                                     pi_p4_id_t act_prof_id,
                                     const pi_action_data_t *action_data,
                                     pi_indirect_handle_t *mbr_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   auto adata = pibmv2::build_action_data(action_data, p4info);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
   std::string a_name(pi_p4info_action_name_from_id(p4info,
@@ -65,11 +64,10 @@ pi_status_t _pi_act_prof_mbr_delete(pi_session_handle_t session_handle,
                                     pi_dev_id_t dev_id,
                                     pi_p4_id_t act_prof_id,
                                     pi_indirect_handle_t mbr_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
 
   auto error_code = pibmv2::switch_->mt_act_prof_delete_member(
@@ -84,11 +82,10 @@ pi_status_t _pi_act_prof_mbr_modify(pi_session_handle_t session_handle,
                                     pi_p4_id_t act_prof_id,
                                     pi_indirect_handle_t mbr_handle,
                                     const pi_action_data_t *action_data) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
 
   auto adata = pibmv2::build_action_data(action_data, p4info);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
@@ -107,12 +104,11 @@ pi_status_t _pi_act_prof_grp_create(pi_session_handle_t session_handle,
                                     pi_p4_id_t act_prof_id,
                                     size_t max_size,
                                     pi_indirect_handle_t *grp_handle) {
-  (void) session_handle;
-  (void) max_size;  // no bound needed / supported in bmv2
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(max_size);  // no bound needed / supported in bmv2
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
 
   grp_hdl_t h;
@@ -129,11 +125,10 @@ pi_status_t _pi_act_prof_grp_delete(pi_session_handle_t session_handle,
                                     pi_dev_id_t dev_id,
                                     pi_p4_id_t act_prof_id,
                                     pi_indirect_handle_t grp_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
 
   grp_handle = pibmv2::IndirectHMgr::clear_grp_h(grp_handle);
@@ -149,11 +144,10 @@ pi_status_t _pi_act_prof_grp_add_mbr(pi_session_handle_t session_handle,
                                      pi_p4_id_t act_prof_id,
                                      pi_indirect_handle_t grp_handle,
                                      pi_indirect_handle_t mbr_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
 
   grp_handle = pibmv2::IndirectHMgr::clear_grp_h(grp_handle);
@@ -169,11 +163,10 @@ pi_status_t _pi_act_prof_grp_remove_mbr(pi_session_handle_t session_handle,
                                         pi_p4_id_t act_prof_id,
                                         pi_indirect_handle_t grp_handle,
                                         pi_indirect_handle_t mbr_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
 
   grp_handle = pibmv2::IndirectHMgr::clear_grp_h(grp_handle);
@@ -188,11 +181,10 @@ pi_status_t _pi_act_prof_entries_fetch(pi_session_handle_t session_handle,
                                        pi_dev_id_t dev_id,
                                        pi_p4_id_t act_prof_id,
                                        pi_act_prof_fetch_res_t *res) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
   std::string ap_name(pi_p4info_act_prof_name_from_id(p4info, act_prof_id));
 
   const auto members = pibmv2::switch_->mt_act_prof_get_members(0, ap_name);
@@ -248,7 +240,7 @@ pi_status_t _pi_act_prof_entries_fetch(pi_session_handle_t session_handle,
 
 pi_status_t _pi_act_prof_entries_fetch_done(pi_session_handle_t session_handle,
                                             pi_act_prof_fetch_res_t *res) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
   delete[] res->entries_members;
   delete[] res->entries_groups;

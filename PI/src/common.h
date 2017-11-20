@@ -40,24 +40,12 @@ class SwitchWContexts;
 
 namespace pibmv2 {
 
-typedef struct {
-  int assigned;
-  const pi_p4info_t *p4info;
-} device_info_t;
-
-extern device_info_t device_info_state;
-
 extern bm::SwitchWContexts *switch_;
 
 extern int cpu_port;
 
-static inline device_info_t *get_device_info(size_t dev_id) {
-  (void) dev_id;
-  return &device_info_state;
-}
-
-static inline device_info_t *get_device_info() {
-  return &device_info_state;
+static inline const pi_p4info_t *get_device_info(size_t dev_id) {
+  return pi_get_device_p4info(dev_id);
 }
 
 static inline pi_status_t convert_error_code(bm::MatchErrorCode error_code) {

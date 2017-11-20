@@ -30,27 +30,19 @@
 #include <cstring>  // for memset
 #include "common.h"
 
-namespace pibmv2 {
-
-device_info_t device_info_state;
-
-}  // namespace pibmv2
-
 extern "C" {
 
 pi_status_t _pi_init(void *extra) {
-  (void) extra;
-  memset(&pibmv2::device_info_state, 0, sizeof(pibmv2::device_info_state));
+  _BM_UNUSED(extra);
   return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_assign_device(pi_dev_id_t dev_id, const pi_p4info_t *p4info,
                               pi_assign_extra_t *extra) {
-  (void) extra;
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(!d_info->assigned);
-  d_info->p4info = p4info;
-  d_info->assigned = 1;
+  _BM_UNUSED(dev_id);
+  _BM_UNUSED(p4info);
+  _BM_UNUSED(extra);
+  // TODO(antonin): check that device id is correct
   return PI_STATUS_SUCCESS;
 }
 
@@ -58,20 +50,17 @@ pi_status_t _pi_update_device_start(pi_dev_id_t dev_id,
                                     const pi_p4info_t *p4info,
                                     const char *device_data,
                                     size_t device_data_size) {
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
+  _BM_UNUSED(dev_id);
+  _BM_UNUSED(p4info);
   auto error_code = pibmv2::switch_->load_new_config(
       std::string(device_data, device_data_size));
   if (error_code != bm::RuntimeInterface::ErrorCode::SUCCESS)
     return PI_STATUS_TARGET_ERROR;
-  d_info->p4info = p4info;
   return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_update_device_end(pi_dev_id_t dev_id) {
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  _BM_UNUSED(d_info);
-  assert(d_info->assigned);
+  _BM_UNUSED(dev_id);
   auto error_code = pibmv2::switch_->swap_configs();
   if (error_code != bm::RuntimeInterface::ErrorCode::SUCCESS)
     return PI_STATUS_TARGET_ERROR;
@@ -79,9 +68,7 @@ pi_status_t _pi_update_device_end(pi_dev_id_t dev_id) {
 }
 
 pi_status_t _pi_remove_device(pi_dev_id_t dev_id) {
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_id);
-  assert(d_info->assigned);
-  d_info->assigned = 0;
+  _BM_UNUSED(dev_id);
   return PI_STATUS_SUCCESS;
 }
 
@@ -91,29 +78,30 @@ pi_status_t _pi_destroy() {
 
 // bmv2 does not support transaction and has no use for the session_handle
 pi_status_t _pi_session_init(pi_session_handle_t *session_handle) {
-  *session_handle = 0;
+  static pi_session_handle_t sess = 0;
+  *session_handle = sess++;
   return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_session_cleanup(pi_session_handle_t session_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
   return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_batch_begin(pi_session_handle_t session_handle) {
-  (void) session_handle;
+  _BM_UNUSED(session_handle);
   return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_batch_end(pi_session_handle_t session_handle, bool hw_sync) {
-  (void) session_handle;
-  (void) hw_sync;
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(hw_sync);
   return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_packetout_send(pi_dev_id_t dev_id, const char *pkt,
                                size_t size) {
-  (void) dev_id;
+  _BM_UNUSED(dev_id);
   pibmv2::switch_->receive(pibmv2::cpu_port, pkt, static_cast<int>(size));
   return PI_STATUS_SUCCESS;
 }

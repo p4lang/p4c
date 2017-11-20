@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
 #include <PI/p4info.h>
@@ -80,11 +81,10 @@ pi_status_t _pi_meter_read(pi_session_handle_t session_handle,
                            pi_p4_id_t meter_id,
                            size_t index,
                            pi_meter_spec_t *meter_spec) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string m_name(pi_p4info_meter_name_from_id(p4info, meter_id));
 
   std::vector<bm::Meter::rate_config_t> rates;
@@ -102,11 +102,10 @@ pi_status_t _pi_meter_set(pi_session_handle_t session_handle,
                           pi_p4_id_t meter_id,
                           size_t index,
                           const pi_meter_spec_t *meter_spec) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string m_name(pi_p4info_meter_name_from_id(p4info, meter_id));
 
   auto rates = pibmv2::convert_from_meter_spec(meter_spec);
@@ -120,11 +119,10 @@ pi_status_t _pi_meter_read_direct(pi_session_handle_t session_handle,
                                   pi_dev_tgt_t dev_tgt, pi_p4_id_t meter_id,
                                   pi_entry_handle_t entry_handle,
                                   pi_meter_spec_t *meter_spec) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string t_name = get_direct_t_name(p4info, meter_id);
 
   std::vector<bm::Meter::rate_config_t> rates;
@@ -141,11 +139,10 @@ pi_status_t _pi_meter_set_direct(pi_session_handle_t session_handle,
                                  pi_dev_tgt_t dev_tgt, pi_p4_id_t meter_id,
                                  pi_entry_handle_t entry_handle,
                                  const pi_meter_spec_t *meter_spec) {
-  (void)session_handle;
+  _BM_UNUSED(session_handle);
 
-  pibmv2::device_info_t *d_info = pibmv2::get_device_info(dev_tgt.dev_id);
-  assert(d_info->assigned);
-  const pi_p4info_t *p4info = d_info->p4info;
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
   std::string t_name = get_direct_t_name(p4info, meter_id);
 
   auto rates = pibmv2::convert_from_meter_spec(meter_spec);
