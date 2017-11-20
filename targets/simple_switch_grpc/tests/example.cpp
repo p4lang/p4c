@@ -49,7 +49,7 @@ constexpr char test_proto_txt[] = TESTDATADIR "/simple_router.proto.txt";
 
 int
 test() {
-  int dev_id = 0;
+  int dev_id = 99;
 
   auto channel = grpc::CreateChannel(
       "localhost:50051", grpc::InsecureChannelCredentials());

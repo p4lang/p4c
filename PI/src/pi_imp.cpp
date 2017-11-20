@@ -39,10 +39,14 @@ pi_status_t _pi_init(void *extra) {
 
 pi_status_t _pi_assign_device(pi_dev_id_t dev_id, const pi_p4info_t *p4info,
                               pi_assign_extra_t *extra) {
-  _BM_UNUSED(dev_id);
   _BM_UNUSED(p4info);
   _BM_UNUSED(extra);
-  // TODO(antonin): check that device id is correct
+  // check that the device id is correct, i.e. matches the one used when
+  // starting the bmv2 process (--device-id command-line parameter)
+  if (pibmv2::switch_->get_device_id() != dev_id) {
+    // TODO(antonin): define better error code
+    return PI_STATUS_DEV_OUT_OF_RANGE;
+  }
   return PI_STATUS_SUCCESS;
 }
 
