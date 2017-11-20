@@ -1629,10 +1629,14 @@ const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm
 }
 
 const IR::Declaration_Instance*
-ProgramStructure::convert(const IR::Register* reg, cstring newName) {
+ProgramStructure::convert(const IR::Register* reg, cstring newName,
+                          const IR::Type *regElementType) {
     LOG3("Synthesizing " << reg);
-    const IR::Type *regElementType = nullptr;
-    if (reg->width > 0) {
+    if (regElementType) {
+        if (auto str = regElementType->to<IR::Type_StructLike>())
+            regElementType = new IR::Type_Name(new IR::Path(str->name));
+        // use provided type
+    } else if (reg->width > 0) {
         regElementType = IR::Type_Bits::get(reg->width);
     } else if (reg->layout) {
         cstring newName = ::get(registerLayoutType, reg->layout);
@@ -1831,7 +1835,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     for (auto c : externsToDo) {
         auto ext = externs.get(c);
-        ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext));
+        ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext), &stateful);
         stateful.push_back(ext);
     }
 

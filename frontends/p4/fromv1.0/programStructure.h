@@ -204,7 +204,6 @@ class ProgramStructure {
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
     const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
-    const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
                  IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
@@ -232,6 +231,8 @@ class ProgramStructure {
                                           const IR::Expression* right, const IR::Type* type);
     const IR::Expression* convertFieldList(const IR::Expression* expression);
     const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
+    const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
+                                            const IR::Type *elementType = nullptr);
     const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
     const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
     const IR::Expression* paramReference(const IR::Parameter* param);
