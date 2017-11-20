@@ -89,7 +89,7 @@ class ExternConverter {
     virtual const IR::Type_Extern *convertExternType(ProgramStructure *,
                 const IR::Type_Extern *, cstring);
     virtual const IR::Declaration_Instance *convertExternInstance(ProgramStructure *,
-                const IR::Declaration_Instance *, cstring);
+                const IR::Declaration_Instance *, cstring, IR::IndexedVector<IR::Declaration> *);
     virtual const IR::Statement *convertExternCall(ProgramStructure *,
                 const IR::Declaration_Instance *, const IR::Primitive *);
     ExternConverter() {}
@@ -104,8 +104,9 @@ class ExternConverter {
                 const IR::Type_Extern *e, cstring name) {
         return get(e)->convertExternType(s, e, name); }
     static const IR::Declaration_Instance *cvtExternInstance(ProgramStructure *s,
-                const IR::Declaration_Instance *di, cstring name) {
-        return get(di)->convertExternInstance(s, di, name); }
+                const IR::Declaration_Instance *di, cstring name,
+                IR::IndexedVector<IR::Declaration> *scope) {
+        return get(di)->convertExternInstance(s, di, name, scope); }
     static const IR::Statement *cvtExternCall(ProgramStructure *s,
                 const IR::Declaration_Instance *di, const IR::Primitive *p) {
         return get(di)->convertExternCall(s, di, p); }
