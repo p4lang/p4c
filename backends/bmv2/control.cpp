@@ -398,7 +398,8 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 // jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
                 bool direct = te->name == BMV2::TableImplementation::directCounterName;
                 jctr->emplace("is_direct", direct);
-                jctr->emplace("binding", name);
+                // The JSON does not use the control-plane name, but the raw table name
+                jctr->emplace("binding", table->name);
                 backend->counters->append(jctr);
             } else if (expr->is<IR::PathExpression>()) {
                 auto pe = expr->to<IR::PathExpression>();

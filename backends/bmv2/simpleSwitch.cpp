@@ -493,7 +493,8 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             jctr->emplace("id", nextId("counter_arrays"));
             // TODO(jafingerhut) - add line/col here?
             jctr->emplace("is_direct", true);
-            jctr->emplace("binding", it->second->externalName());
+                // The JSON does not use the control-plane name, but the raw table name
+            jctr->emplace("binding", it->second->name);
             backend->counters->append(jctr);
         }
     } else if (eb->type->name == v1model.directMeter.name) {
@@ -524,7 +525,8 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             modelError("%1%: unexpected meter type", mkind->getNode());
         jmtr->emplace("type", type);
         jmtr->emplace("size", info->tableSize);
-        cstring tblname = info->table->controlPlaneName();
+        // The JSON does not use the control-plane name, but the raw table name
+        cstring tblname = info->table->name;
         jmtr->emplace("binding", tblname);
         auto result = conv->convert(info->destinationField);
         jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
