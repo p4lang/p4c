@@ -160,6 +160,7 @@ class Graphs : public Inspector {
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
     vertex_t add_and_connect_unique_vertex(const cstring &name, VertexType type);
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
+    void add_unique_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
 
     class GraphAttributeSetter {
      public:

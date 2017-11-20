@@ -47,6 +47,15 @@ void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &n
     boost::put(boost::edge_name, g->root(), ep.first, name);
 }
 
+void Graphs::add_unique_edge(const vertex_t &from, const vertex_t &to, const cstring &name) {
+    auto outEdges = boost::out_edges(from, *g);
+    for (auto oe = outEdges.first; oe != outEdges.second; ++oe) {
+        cstring ename = boost::get(boost::edge_name, *g, *oe);
+        if (ename == name) return;
+    }
+    add_edge(from, to, name);
+}
+
 boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
     if (statementsStack.empty()) return boost::none;
     std::stringstream sstream;

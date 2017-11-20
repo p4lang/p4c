@@ -153,14 +153,14 @@ bool ParserGraphs::preorder(const IR::PackageBlock *block) {
             visit(it.second->getNode());
 
             for (auto parent : acceptParents)
-                add_edge(parent.first, accept_v, parent.second->label());
+                add_unique_edge(parent.first, accept_v, parent.second->label());
 
             // Generate reject node only when it's necessary,
             // e.g. explicitly transitions to reject exist.
             if (rejectParents.size() > 0) {
                 reject_v = add_vertex("reject", VertexType::DEFAULT);
                 for (auto parent : rejectParents) {
-                    add_edge(parent.first, reject_v, parent.second->label());
+                    add_unique_edge(parent.first, reject_v, parent.second->label());
                 }
             }
 
