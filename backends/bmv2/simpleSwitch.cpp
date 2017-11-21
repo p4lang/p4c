@@ -493,7 +493,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             jctr->emplace("id", nextId("counter_arrays"));
             // TODO(jafingerhut) - add line/col here?
             jctr->emplace("is_direct", true);
-            jctr->emplace("binding", it->second->externalName());
+            jctr->emplace("binding", it->second->controlPlaneName());
             backend->counters->append(jctr);
         }
     } else if (eb->type->name == v1model.directMeter.name) {
