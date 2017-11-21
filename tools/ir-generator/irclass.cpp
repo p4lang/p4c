@@ -45,7 +45,7 @@ IrNamespace *IrNamespace::get(IrNamespace *parent, cstring name) {
 void IrNamespace::add_class(IrClass *cl) {
     IrNamespace *ns = cl->containedIn ? cl->containedIn : &global;
     if (ns->classes[cl->name])
-        throw Util::CompilationError("%1%: Duplicate class name", cl);
+        throw Util::CompilationError("%1%: Duplicate class name", cl->name);
     else
         ns->classes[cl->name] = cl;
 }
