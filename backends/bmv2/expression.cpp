@@ -142,7 +142,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
                 else
                     e->append(l);
                 e->append(V1ModelProperties::validField);
-                if (!simpleExpressionsOnly) {
+                if (!simpleExpressionsOnly && !leftValue) {
                     // This is set when converting table keys;
                     // for table keys we don't need the casts.
                     auto cast = new Util::JsonObject();
@@ -300,8 +300,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(scalarsName);
                     e->append(name);
                 } else if (type->is<IR::Type_Boolean>()) {
-                    // Boolean variables are stored as ints, so we have to insert a conversion when
-                    // reading such a variable
+                    // Boolean variables are stored as ints, so we
+                    // have to insert a conversion when reading such a
+                    // variable
                     result->emplace("type", "expression");
                     auto e = new Util::JsonObject();
                     result->emplace("value", e);
@@ -380,6 +381,16 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 } else {
                     e->append(l);
                     e->append(fieldName);
+                }
+                if (!simpleExpressionsOnly && !leftValue && type->is<IR::Type_Boolean>()) {
+                    auto cast = new Util::JsonObject();
+                    auto value = new Util::JsonObject();
+                    cast->emplace("type", "expression");
+                    cast->emplace("value", value);
+                    value->emplace("op", "d2b");  // data to Boolean cast
+                    value->emplace("left", Util::JsonValue::null);
+                    value->emplace("right", result);
+                    result = cast;
                 }
             }
         }

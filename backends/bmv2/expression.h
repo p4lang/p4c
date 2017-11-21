@@ -70,15 +70,26 @@ class ExpressionConverter : public Inspector {
     ExpressionConverter(Backend *backend, cstring scalarsName) :
             backend(backend), corelib(P4::P4CoreLibrary::instance),
             scalarsName(scalarsName), leftValue(false), simpleExpressionsOnly(false) {}
-    bool simpleExpressionsOnly;  // if set we fail to convert complex expressions
+    /// If this is 'true' we fail to convert complex expressions.
+    /// This is used for table key expressions, for example.
+    bool simpleExpressionsOnly;
 
-    // Non-null if the expression refers to a parameter from the enclosing control
+    /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
     void binary(const IR::Operation_Binary* expression);
     Util::IJson* get(const IR::Expression* expression) const;
     Util::IJson* fixLocal(Util::IJson* json);
 
-    // doFixup = true -> insert masking operations for proper arithmetic implementation
+    /**
+     * Convert an expression into JSON
+     * @param e   expression to convert
+     * @param doFixup  Insert masking operations for operands to ensure that the result
+     *                 matches the specification.  BMv2 does arithmetic using unbounded
+     *                 precision, but the spec requires fixed precision, specified by the types.
+     * @param wrap     Wrap the result into an additiona JSON expression block.
+     *                 See the BMv2 JSON spec.
+     * @param convertBool  Wrap the result into a cast from boolean to data (b2d JSON).
+     */
     Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
                          bool wrap = true, bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);

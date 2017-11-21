@@ -1,0 +1,9 @@
+# This packet has a crc16 hash value of 0x8208, which should cause the
+# 'else' branch of 'if (meta.mystruct1.hash_drop)' to be executed.
+packet 0 0000 0000 0000 0000 0000 0000 0800 4500 0014 0001 0000 4000 4cce 0c0c 0c0c 1402 0202
+expect 0 8208 0000 c001 0000 0000 0000 0800 4500 0014 0001 0000 4000 4cce 0c0c 0c0c 1402 0202
+
+# This packet has a crc16 hash value of 0x64bf, which should cause the
+# 'then' branch of 'if (meta.mystruct1.hash_drop)' to be executed.
+packet 0 0000 0000 0000 0000 0000 0000 0800 4500 0014 0001 0000 4006 59de 0a01 0101 1402 0202
+expect 0 64bf 0100 dead 0000 0000 0000 0800 4500 0014 0001 0000 4006 59de 0a01 0101 1402 0202
