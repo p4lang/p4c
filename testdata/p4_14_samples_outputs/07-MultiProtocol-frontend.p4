@@ -167,11 +167,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop_0() {
     }
-    @name(".drop") action drop_0() {
+    @name("._drop") action _drop_0() {
         meta.ing_metadata.drop = 1w1;
     }
     @name(".set_egress_port") action set_egress_port_0(bit<9> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
+    }
+    @name(".discard") action discard_0() {
+        mark_to_drop();
     }
     @name(".send_packet") action send_packet_0() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
@@ -193,7 +196,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".icmp_check") table icmp_check_0 {
         actions = {
             nop_0();
-            drop_0();
+            _drop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -236,7 +239,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_egress") table set_egress_0 {
         actions = {
-            nop_0();
+            discard_0();
             send_packet_0();
             @defaultonly NoAction();
         }
@@ -248,7 +251,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".tcp_check") table tcp_check_0 {
         actions = {
             nop_0();
-            drop_0();
+            _drop_0();
             @defaultonly NoAction();
         }
         key = {
@@ -259,7 +262,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".udp_check") table udp_check_0 {
         actions = {
             nop_0();
-            drop_0();
+            _drop_0();
             @defaultonly NoAction();
         }
         key = {
