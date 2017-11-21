@@ -153,14 +153,14 @@ bool ParserGraphs::preorder(const IR::PackageBlock *block) {
             visit(it.second->getNode());
 
             for (auto parent : acceptParents)
-                add_unique_edge(parent.first, accept_v, parent.second->label());
+                add_edge(parent.first, accept_v, parent.second->label());
 
             // Generate reject node only when it's necessary,
             // e.g. explicitly transitions to reject exist.
             if (rejectParents.size() > 0) {
                 reject_v = add_vertex("reject", VertexType::DEFAULT);
                 for (auto parent : rejectParents) {
-                    add_unique_edge(parent.first, reject_v, parent.second->label());
+                    add_edge(parent.first, reject_v, parent.second->label());
                 }
             }
 
@@ -198,6 +198,8 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
             v = add_vertex(state->name, VertexType::START);
         } else {
             v = add_and_connect_unique_vertex(state->name, VertexType::HEADER);
+            if (((*g)[v]).visited == true)
+                return false;
         }
         if (state->selectExpression->is<IR::PathExpression>()) {
             parents = {{v, new EdgeSwitch(new IR::DefaultExpression())}};
@@ -206,9 +208,11 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
             auto nstate = decl->to<IR::ParserState>();
             if (nstate->name == IR::ParserState::accept) {
                 acceptParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                ((*g)[v]).visited = true;
                 return false;
             } else if (nstate->name == IR::ParserState::reject) {
                 rejectParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                ((*g)[v]).visited = true;
                 return false;
             }
             visit(decl->to<IR::ParserState>());
@@ -242,6 +246,7 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
             LOG1("unexpected selectExpression");
         }
 
+        ((*g)[v]).visited = true;
     } else {
         LOG1("default case");
     }

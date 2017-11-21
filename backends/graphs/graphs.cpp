@@ -29,6 +29,7 @@ Graphs::vertex_t Graphs::add_vertex(const cstring &name, VertexType type) {
     auto v = boost::add_vertex(*g);
     boost::put(&Vertex::name, *g, v, name);
     boost::put(&Vertex::type, *g, v, type);
+    boost::put(&Vertex::visited, *g, v, false);
     return g->local_to_global(v);
 }
 

@@ -123,6 +123,7 @@ class Graphs : public Inspector {
     struct Vertex {
         cstring name;
         VertexType type;
+        bool visited;
     };
 
     // The boost graph support for graphviz subgraphs is not very intuitive. In
