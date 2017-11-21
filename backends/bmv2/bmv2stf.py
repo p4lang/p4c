@@ -345,7 +345,8 @@ class RunBMV2(object):
         self.folder = folder
         self.pcapPrefix = "pcap"
         self.interfaces = {}
-        self.expected = {}
+        self.expected = {}  # for each interface number of packets expected
+        self.expectedAny = []  # interface on which any number of packets is fine
         self.packetDelay = 0
         self.options = options
         self.json = None
@@ -400,6 +401,8 @@ class RunBMV2(object):
             data = ''.join(data.split())
             if data != '':
                 self.expected.setdefault(interface, []).append(data)
+            else:
+                self.expectedAny.append(interface)
         else:
             if self.options.verbose:
                 print("ignoring stf command:", first, cmd)
@@ -650,6 +653,10 @@ class RunBMV2(object):
                 observationLog.close()
 
             # Check for expected packets.
+            if interface in self.expectedAny:
+                if interface in self.expected:
+                    reportError("Interface " + interface + " has both expected with packets and without")
+                continue
             if interface not in self.expected:
                 expected = []
             else:
