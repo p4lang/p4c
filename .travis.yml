@@ -11,9 +11,9 @@ services:
 
 matrix:
   include:
-    - env: CXX=g++ CC=gcc
-    - env: CXX=g++-6 CC=gcc-6 GCOV=gcov-6
-    - env: CXX=clang++-3.8 CC=clang-3.8
+    - env: CXX=g++ CC=gcc sswitch_grpc=yes
+    - env: CXX=g++-6 CC=gcc-6 GCOV=gcov-6 sswitch_grpc=no
+    - env: CXX=clang++-3.8 CC=clang-3.8 sswitch_grpc=no
 
 addons:
   apt:
@@ -21,9 +21,10 @@ addons:
       - ubuntu-toolchain-r-test
 
 install:
-  - docker build -t bm --build-arg IMAGE_TYPE=test --build-arg CC=$CC --build-arg CXX=$CXX --build-arg GCOV=$GCOV .
+  - docker build -t bm --build-arg IMAGE_TYPE=test --build-arg CC=$CC --build-arg CXX=$CXX --build-arg GCOV=$GCOV --build-arg sswitch_grpc=$sswitch_grpc .
 
 script:
   - ci_env=`bash <(curl -s https://codecov.io/env)`
   - docker run $ci_env --env GCOV -w /behavioral-model bm /bin/bash -c "make check -j2 && ./travis/codecov.sh"
+  - if [ "$sswitch_grpc" = "yes" ]; then docker run -w /behavioral-model/targets/simple_switch_grpc bm make check -j2; fi
   - bash tools/check_style.sh
