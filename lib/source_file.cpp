@@ -172,9 +172,10 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // ----------
     // The first line indicates that line 2 is the first line in x.p4
     // line=2, it->first=1, it->second.sourceLine=1
-    // So we have to subtract one to get the real line number
-    BUG_CHECK(line - it->first + it->second.sourceLine > 0, "invalid source line");
-    return SourceFileLine(it->second.fileName, line - it->first + it->second.sourceLine - 1);
+    // So we have to subtract one to get the real line number.
+    const auto nominalLine = line - it->first + it->second.sourceLine;
+    const auto realLine = nominalLine > 0 ? nominalLine - 1 : 0;
+    return SourceFileLine(it->second.fileName, realLine);
 }
 
 unsigned InputSources::getCurrentLineNumber() const {
