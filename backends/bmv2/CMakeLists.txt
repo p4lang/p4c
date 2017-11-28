@@ -108,6 +108,9 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
   testdata/p4_16_samples/issue986-bmv2.p4
+  # These tests use a table key with type 'error'
+  testdata/p4_16_samples/issue1062-bmv2.p4
+  testdata/p4_16_samples/issue1062-1-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)

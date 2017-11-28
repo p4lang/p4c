@@ -847,7 +847,7 @@ keyElementList
 keyElement
     : expression ":" name optAnnotations ";"
                                          { auto expr = new IR::PathExpression(*$3);
-                                           $$ = new IR::KeyElement(@3, $4, $1, expr); }
+                                           $$ = new IR::KeyElement(@1, $4, $1, expr); }
     ;
 
 actionList
