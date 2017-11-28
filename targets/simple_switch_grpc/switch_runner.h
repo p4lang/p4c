@@ -57,6 +57,9 @@ class SimpleSwitchGrpcRunner {
   int init_and_start(const bm::OptionsParser &parser);
   void wait();
   void shutdown();
+  int get_dp_grpc_server_port() {
+    return dp_grpc_server_port;
+  }
 
  private:
   SimpleSwitchGrpcRunner(int max_port = 512, bool enable_swap = false,
@@ -69,6 +72,7 @@ class SimpleSwitchGrpcRunner {
   std::string grpc_server_addr;
   int cpu_port;
   std::string dp_grpc_server_addr;
+  int dp_grpc_server_port;
   std::unique_ptr<grpc::Server> dp_grpc_server;
 };
 
