@@ -53,7 +53,7 @@ class IsLikeLeftValue : public KeyIsSimple, public Inspector {
     void postorder(const IR::PathExpression*) override {}
     void postorder(const IR::ArrayIndex*) override {}
 
-    bool isSimple(const IR::Expression* expression) {
+    bool isSimple(const IR::Expression* expression) override {
         (void)expression->apply(*this);
         return simple;
     }
