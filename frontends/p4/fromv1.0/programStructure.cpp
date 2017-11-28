@@ -196,9 +196,13 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
             name = f->to<IR::PathExpression>()->path->name;
         else if (f->is<IR::Member>())
             name = f->to<IR::Member>()->member;
+        else if (f->is<IR::ConcreteHeaderRef>())
+            name = f->to<IR::ConcreteHeaderRef>()->ref->name;
+        else
+            BUG("%1%: unexpected field list member", f);
         name = cstring::make_unique(fieldNames, name, '_');
         fieldNames.emplace(name);
-        auto type = f->type;
+        auto type = f->type->getP4Type();
         CHECK_NULL(type);
         BUG_CHECK(!type->is<IR::Type_Unknown>(), "%1%: Unknown field list member type", f);
         auto sf = new IR::StructField(f->srcInfo, name, type);
