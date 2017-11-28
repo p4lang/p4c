@@ -100,13 +100,6 @@ set (BMV2_TEST_SUITES
   )
 
 set (XFAIL_TESTS
-  # The following tests are broken because of issue #961
-  testdata/p4_14_samples/counter1.p4
-  testdata/p4_14_samples/counter2.p4
-  testdata/p4_14_samples/counter3.p4
-  testdata/p4_14_samples/counter4.p4
-  testdata/p4_14_samples/07-MultiProtocol.p4
-
   # This test defines two lpm keys for a table.
   # Even though the P4 spec allows it, it doesn't really make sense in a switch
   # so we allow it to fail on BMv2.

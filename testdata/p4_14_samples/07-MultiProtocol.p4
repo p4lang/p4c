@@ -166,8 +166,11 @@ metadata ingress_metadata_t ing_metadata;
 
 action nop() {
 }
-action drop() {
+action _drop() {
     modify_field(ing_metadata.drop, 1);
+}
+action discard() {
+    drop();
 }
 
 action set_egress_port(egress_port) {
@@ -243,7 +246,7 @@ table tcp_check {
     }
     actions {
         nop;
-        drop;
+        _drop;
     }
 }
 table udp_check {
@@ -252,7 +255,7 @@ table udp_check {
     }
     actions {
         nop;
-        drop;
+        _drop;
     }
 }
 table icmp_check {
@@ -261,7 +264,7 @@ table icmp_check {
     }
     actions {
         nop;
-        drop;
+        _drop;
     }
 }
 
@@ -274,7 +277,7 @@ table set_egress {
         ing_metadata.drop : exact;
     }
     actions {
-        nop;
+        discard;
         send_packet;
     }
 }

@@ -5,10 +5,10 @@ add ethertype_match etherType:0x8100 mpls_packet()
 add ethertype_match etherType:0x9100 mim_packet()
 
 add set_egress drop:0 send_packet()
-add set_egress drop:1 nop()
+add set_egress drop:1 discard()
 
 add ipv4_match dstAddr:0xa000002 set_egress_port(egress_port:3)
-add udp_check dstPort:0xaa drop()
+add udp_check dstPort:0xaa _drop()
 
 
 #        | ethernet header            | | IPv4 header                                  | | UDP header      | | payload ...
