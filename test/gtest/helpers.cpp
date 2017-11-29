@@ -106,8 +106,8 @@ FrontendTestCase::create(const std::string& source,
         std::cerr << "Couldn't parse test case source" << std::endl;
         return boost::none;
     }
-    if (::ErrorReporter::instance.getDiagnosticCount() > 0) {
-        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
+    if (::diagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::diagnosticCount()
                   << " errors while parsing test case" << std::endl;
         return boost::none;
     }
@@ -119,8 +119,8 @@ FrontendTestCase::create(const std::string& source,
         std::cerr << "Frontend failed" << std::endl;
         return boost::none;
     }
-    if (::ErrorReporter::instance.getDiagnosticCount() > 0) {
-        std::cerr << "Encountered " << ::ErrorReporter::instance.getDiagnosticCount()
+    if (::errorCount() > 0) {
+        std::cerr << "Encountered " << ::errorCount()
                   << " errors while executing frontend" << std::endl;
         return boost::none;
     }

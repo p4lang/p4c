@@ -42,6 +42,8 @@ class BMV2Options : public CompilerOptions {
      }
 };
 
+using BMV2Context = P4CContextWithOptions<BMV2Options>;
+
 }  // namespace BMV2
 
 #endif  /* _BACKENDS_BMV2_OPTIONS_H_ */

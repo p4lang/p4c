@@ -51,6 +51,8 @@ class P4TestOptions : public CompilerOptions {
      }
 };
 
+using P4TestContext = P4CContextWithOptions<P4TestOptions>;
+
 static void log_dump(const IR::Node *node, const char *head) {
     if (node && LOGGING(1)) {
         if (head)
@@ -67,7 +69,8 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    P4TestOptions options;
+    AutoCompileContext autoP4TestContext(new P4TestContext);
+    auto& options = P4TestContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 

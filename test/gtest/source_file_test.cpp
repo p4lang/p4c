@@ -28,7 +28,8 @@ TEST(UtilSourceFile, SourcePosition) {
     SourcePosition position(3, 3);
     EXPECT_EQ("3:3", position.toString());
 
-    cstring str = ErrorReporter::instance.format_message("%1% - %2%", position, position);
+    auto& context = BaseCompileContext::get();
+    cstring str = context.errorReporter().format_message("%1% - %2%", position, position);
     EXPECT_EQ("3:3 - 3:3\n", str);
 
     SourcePosition next(3, 4);

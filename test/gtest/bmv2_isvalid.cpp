@@ -31,9 +31,11 @@ limitations under the License.
 
 namespace BMV2 {
 
+class BMV2_SynthesizeValidField : public ::Test::P4CTest { };
+
 // Verify that SynthesizeValidField adds a header validity bit field only to
 // header types (and not header unions or structs).
-TEST(BMV2_SynthesizeValidField, ValidField) {
+TEST_F(BMV2_SynthesizeValidField, ValidField) {
     auto source = P4_SOURCE(P4Headers::CORE, R"(
         header H1 { bit<8> field; }
         header_union U1 { H1 h1; }
@@ -43,7 +45,7 @@ TEST(BMV2_SynthesizeValidField, ValidField) {
     auto program =
       P4::parseP4String(source, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
@@ -53,7 +55,7 @@ TEST(BMV2_SynthesizeValidField, ValidField) {
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     forAllMatching<IR::Type_Header>(program, [](const IR::Type_Header* h) {
         EXPECT_TRUE(h->getField(V1ModelProperties::validField) != nullptr);
@@ -69,7 +71,7 @@ TEST(BMV2_SynthesizeValidField, ValidField) {
 // Verify that SynthesizeValidField converts 'isValid()' calls on headers to
 // references to the valid bit, but leaves 'isValid()' calls on header unions
 // untouched.
-TEST(BMV2_SynthesizeValidField, Expressions) {
+TEST_F(BMV2_SynthesizeValidField, Expressions) {
     auto source = P4_SOURCE(P4Headers::CORE, R"(
         header H1 { bit<8> field; }
         header H2 { bit<3> field; }
@@ -91,7 +93,7 @@ TEST(BMV2_SynthesizeValidField, Expressions) {
     auto program =
       P4::parseP4String(source, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
@@ -102,7 +104,7 @@ TEST(BMV2_SynthesizeValidField, Expressions) {
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     auto countValidFieldRefs = [&](const IR::Node* node) {
         unsigned count = 0;
@@ -143,12 +145,12 @@ TEST(BMV2_SynthesizeValidField, Expressions) {
 
     program = program->apply(P4::TypeChecking(&refMap, &typeMap));
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 }
 
 // Verify that SynthesizeValidField converts matches against 'isValid()' on
 // headers (but not header unions) to matches against their valid bit.
-TEST(BMV2_SynthesizeValidField, MatchKeys) {
+TEST_F(BMV2_SynthesizeValidField, MatchKeys) {
     auto source = P4_SOURCE(P4Headers::CORE, R"(
         header H1 { bit<8> field; }
         header H2 { bit<3> field; }
@@ -177,7 +179,7 @@ TEST(BMV2_SynthesizeValidField, MatchKeys) {
     auto program =
       P4::parseP4String(source, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
@@ -188,7 +190,7 @@ TEST(BMV2_SynthesizeValidField, MatchKeys) {
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     auto expectValidField = [&](const IR::Node* node) {
         ASSERT_TRUE(node->is<IR::Member>());
@@ -226,7 +228,7 @@ TEST(BMV2_SynthesizeValidField, MatchKeys) {
 
     program = program->apply(P4::TypeChecking(&refMap, &typeMap));
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     auto expectType = [&](const IR::Node* node, const IR::Type* type) {
         auto nodeType = typeMap.getType(node, true);
@@ -250,7 +252,7 @@ TEST(BMV2_SynthesizeValidField, MatchKeys) {
 // match keys, which changes their type from bool to bit<1>, that it also
 // rewrites the keys of const table entries so that the program is still
 // correctly typed.
-TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
+TEST_F(BMV2_SynthesizeValidField, ConstTableEntries) {
     auto source = P4_SOURCE(P4Headers::CORE, R"(
         header H1 { bit<8> field; }
         header H2 { bit<3> field; }
@@ -279,7 +281,7 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
     auto program =
       P4::parseP4String(source, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
@@ -290,7 +292,7 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     forAllMatching<IR::EntriesList>(program, [&](const IR::EntriesList* el) {
         ASSERT_EQ(2u, el->size());
@@ -320,7 +322,7 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
 
     program = program->apply(P4::TypeChecking(&refMap, &typeMap));
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 }
 
 // Verify that the combination of SynthesizeValidField (which should remove the
@@ -328,7 +330,7 @@ TEST(BMV2_SynthesizeValidField, ConstTableEntries) {
 // remove the header union from of 'isValid()' from match keys, given the
 // appropriate policy) results in a program with no 'isValid()' calls in match
 // keys.
-TEST(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
+TEST_F(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
     auto source = P4_SOURCE(P4Headers::CORE, R"(
         header H1 { bit<8> field; }
         header H2 { bit<3> field; }
@@ -357,7 +359,7 @@ TEST(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
     auto program =
       P4::parseP4String(source, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
@@ -373,7 +375,7 @@ TEST(BMV2_SynthesizeValidField, SimplifiedKeysHaveNoIsValid) {
     };
     program = program->apply(passes);
     ASSERT_TRUE(program != nullptr);
-    ASSERT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    ASSERT_EQ(0u, ::diagnosticCount());
 
     forAllMatching<IR::KeyElement>(program, [&](const IR::KeyElement* elem) {
         EXPECT_TRUE(!elem->expression->is<IR::MethodCallExpression>());

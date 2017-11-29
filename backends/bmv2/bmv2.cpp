@@ -35,7 +35,8 @@ limitations under the License.
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    BMV2::BMV2Options options;
+    AutoCompileContext autoBMV2Context(new BMV2::BMV2Context);
+    auto& options = BMV2::BMV2Context::get().options();
     options.langVersion = BMV2::BMV2Options::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 

@@ -65,13 +65,16 @@ class Options : public CompilerOptions {
      }
 };
 
+using GraphsContext = P4CContextWithOptions<Options>;
+
 }  // namespace graphs
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    graphs::Options options;
+    AutoCompileContext autoGraphsContext(new ::graphs::GraphsContext);
+    auto& options = ::graphs::GraphsContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 

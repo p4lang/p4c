@@ -23,6 +23,7 @@ limitations under the License.
 #include <boost/format.hpp>
 #include <type_traits>
 
+#include "lib/compile_context.h"
 #include "lib/source_file.h"
 #include "lib/stringify.h"
 
@@ -355,25 +356,21 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 // %1%, %2%, etc (starting at 1, not at 0).
 // Some compatibility for printf-style arguments is also supported.
 class ErrorReporter final {
- public:
-    static ErrorReporter instance;
-
  private:
     std::ostream* outputstream;
     bool          warningsAreErrors = false;
 
-    ErrorReporter()
-        : errorCount(0),
-          warningCount(0)
-    { outputstream = &std::cerr; }
-
- private:
     void emit_message(cstring message) {
         *outputstream << message;
         outputstream->flush();
     }
 
  public:
+    ErrorReporter()
+        : errorCount(0),
+          warningCount(0)
+    { outputstream = &std::cerr; }
+
     // error message for a bug
     template <typename... T>
     std::string bug_message(const char* format, T... args) {
@@ -424,15 +421,9 @@ class ErrorReporter final {
     }
 
     /// @return the number of diagnostics (warnings and errors) encountered
-    /// since the last time clear() was called.
+    /// in the current CompileContext.
     unsigned getDiagnosticCount() const {
         return errorCount + warningCount;
-    }
-
-    // Resets this ErrorReporter to its initial state.
-    void clear() {
-      errorCount = 0;
-      warningCount = 0;
     }
 
     void setOutputStream(std::ostream* stream)
@@ -481,22 +472,24 @@ class ErrorReporter final {
 // Some compatibility for printf-style arguments is also supported.
 template <typename... T>
 inline void error(const char* format, T... args) {
-    ErrorReporter::instance.error(format, args...);
+    BaseCompileContext::get().errorReporter().error(format, args...);
 }
 
-inline unsigned errorCount() { return ErrorReporter::instance.getErrorCount(); }
+inline unsigned errorCount() {
+    return BaseCompileContext::get().errorReporter().getErrorCount();
+}
+
+inline unsigned diagnosticCount() {
+    return BaseCompileContext::get().errorReporter().getDiagnosticCount();
+}
 
 #define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
 
 template <typename... T>
 inline void warning(const char* format, T... args) {
-    ErrorReporter::instance.warning(format, args...);
+    BaseCompileContext::get().errorReporter().warning(format, args...);
 }
 
 #define WARN_CHECK(e, ...) do { if (!(e)) ::warning(__VA_ARGS__); } while (0)
-
-inline void clearErrorReporter() {
-    ErrorReporter::instance.clear();
-}
 
 #endif /* P4C_LIB_ERROR_H_ */

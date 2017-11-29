@@ -58,8 +58,9 @@ parseV1Program(Input& stream, const char* sourceFile, unsigned sourceLine,
 }
 
 const IR::P4Program* parseP4File(CompilerOptions& options) {
-    clearProgramState();
-
+    BUG_CHECK(&options == &P4CContext::get().options(),
+              "Parsing using options that don't match the current "
+              "compiler context");
     FILE* in = nullptr;
     if (options.doNotPreprocess) {
         in = fopen(options.file, "r");
@@ -89,8 +90,6 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
 const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
                                    const std::string& input,
                                    CompilerOptions::FrontendVersion version) {
-    clearProgramState();
-
     std::istringstream stream(input);
     auto result = version == CompilerOptions::FrontendVersion::P4_14
                 ? parseV1Program(stream, sourceFile, sourceLine)
@@ -107,10 +106,6 @@ const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
 const IR::P4Program* parseP4String(const std::string& input,
                                    CompilerOptions::FrontendVersion version) {
     return parseP4String("(string)", 1, input, version);
-}
-
-void clearProgramState() {
-    clearErrorReporter();
 }
 
 }  // namespace P4

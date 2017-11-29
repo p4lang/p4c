@@ -15,11 +15,16 @@ limitations under the License.
 */
 
 #include "gtest/gtest.h"
+#include "helpers.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/source_file.h"
 
-TEST(IR, Transform) {
+namespace Test {
+
+class P4C_IR : public P4CTest { };
+
+TEST_F(P4C_IR, Transform) {
     struct TestTrans : public Transform {
         explicit TestTrans(IR::Constant* c) : c(c) { }
 
@@ -37,3 +42,5 @@ TEST(IR, Transform) {
     auto* n = e->apply(TestTrans(c));
     EXPECT_EQ(e, n);
 }
+
+}  // namespace Test

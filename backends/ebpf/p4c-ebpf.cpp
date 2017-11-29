@@ -62,7 +62,8 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    EbpfOptions options;
+    AutoCompileContext autoEbpfContext(new EbpfContext);
+    auto& options = EbpfContext::get().options();
     options.compilerVersion = "0.0.1";
 
     if (options.process(argc, argv) != nullptr)
