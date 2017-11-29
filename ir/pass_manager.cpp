@@ -41,8 +41,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 program = program->apply(**it);
                 LOG3(log_indent << "heap after " << v->name() << ": in use " <<
                      n4(gc_mem_inuse(&maxmem)) << "B, max " << n4(maxmem) << "B");
-                auto& context = BaseCompileContext::get();
-                int errors = context.errorReporter().getErrorCount();
+                int errors = ::errorCount();
                 if (stop_on_error && errors > 0)
                     program = nullptr;
                 if (program == nullptr) break;
@@ -106,8 +105,7 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
         auto newprogram = PassManager::apply_visitor(program, name);
         if (program == newprogram || newprogram == nullptr)
             done = true;
-        auto& context = BaseCompileContext::get();
-        int errors = context.errorReporter().getErrorCount();
+        int errors = ::errorCount();
         if (stop_on_error && errors > 0)
             return nullptr;
         iterations++;
