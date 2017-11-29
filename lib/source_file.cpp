@@ -38,9 +38,10 @@ cstring SourcePosition::toString() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-SourceInfo::SourceInfo(SourcePosition start, SourcePosition end) :
-        start(start),
-        end(end) {
+SourceInfo::SourceInfo(const InputSources* sources, SourcePosition start,
+                       SourcePosition end)
+        : sources(sources), start(start), end(end) {
+    BUG_CHECK(sources != nullptr, "Invalid InputSources in SourceInfo");
     if (!start.isValid() || !end.isValid())
         BUG("Invalid source position in SourceInfo %1%-%2%",
                           start.toString(), end.toString());
@@ -55,16 +56,9 @@ cstring SourceInfo::toDebugString() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-InputSources* InputSources::instance = new InputSources();
-
-InputSources::InputSources() :
-        sealed(false) {
+InputSources::InputSources() : sealed(false) {
     mapLine(nullptr, 1);  // the first line read will be line 1 of stdin
     contents.push_back("");
-}
-
-/* static */ void InputSources::reset() {
-    instance = new InputSources;
 }
 
 /// prevent further changes
@@ -189,7 +183,7 @@ SourcePosition InputSources::getCurrentPosition() const {
 }
 
 cstring InputSources::getSourceFragment(const SourcePosition &position) const {
-    SourceInfo info(position, position);
+    SourceInfo info(this, position, position);
     return getSourceFragment(info);
 }
 
@@ -268,23 +262,23 @@ cstring InputSources::toDebugString() const {
 ///////////////////////////////////////////////////
 
 cstring SourceInfo::toSourceFragment() const {
-    return InputSources::instance->getSourceFragment(*this);
+    return sources->getSourceFragment(*this);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {
-    return InputSources::instance->getBriefSourceFragment(*this);
+    return sources->getBriefSourceFragment(*this);
 }
 
 cstring SourceInfo::toPositionString() const {
     if (!isValid())
         return "";
-    SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
+    SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     return position.toString();
 }
 
 cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
                                          unsigned *outColumnNumber) const {
-    SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
+    SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     if (outLineNumber != nullptr) {
         *outLineNumber = position.sourceLine;
     }
@@ -295,7 +289,12 @@ cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
 }
 
 SourceFileLine SourceInfo::toPosition() const {
-    return InputSources::instance->getSourceLine(start.getLineNumber());
+    return sources->getSourceLine(start.getLineNumber());
+}
+
+cstring SourceInfo::getSourceFile() const {
+    auto sourceLine = sources->getSourceLine(start.getLineNumber());
+    return sourceLine.fileName;
 }
 
 ////////////////////////////////////////////////////////

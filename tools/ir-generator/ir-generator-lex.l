@@ -1,8 +1,8 @@
 %{
-#define YY_USER_ACTION                                                                          \
-    { auto tmp = Util::InputSources::instance->getCurrentPosition();                            \
-      Util::InputSources::instance->appendText(yytext);                                         \
-      yylloc = Util::SourceInfo(tmp, Util::InputSources::instance->getCurrentPosition()); }
+#define YY_USER_ACTION                                                          \
+    { auto tmp = sources->getCurrentPosition();                                 \
+      sources->appendText(yytext);                                              \
+      yylloc = Util::SourceInfo(sources, tmp, sources->getCurrentPosition()); }
 
 // shut up warnings about unused functions and variables
 #pragma GCC diagnostic ignored "-Wunused-function"

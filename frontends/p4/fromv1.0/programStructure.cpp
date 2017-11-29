@@ -501,7 +501,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
     options.file = path.toString();
     if (FILE* file = options.preprocess()) {
         if (!::errorCount()) {
-            auto code = P4::P4ParserDriver::parse(options.file, file);
+            auto code = P4::P4ParserDriver::parse(file, options.file);
             if (code && !::errorCount())
                 for (auto decl : code->declarations)
                     declarations->push_back(decl); }

@@ -75,15 +75,17 @@ TEST(UtilSourceFile, InputSources) {
 }
 
 TEST(UtilSourceFile, SourceInfo) {
+    Util::InputSources sources;
+
     SourcePosition t1_s(1, 1);
     SourcePosition t1_e(1, 5);
 
-    SourceInfo t1 = SourceInfo(t1_s, t1_e);
+    SourceInfo t1 = SourceInfo(&sources, t1_s, t1_e);
 
     SourcePosition t2_s(1, 8);
     SourcePosition t2_e(2, 2);
 
-    SourceInfo t2 = SourceInfo(t2_s, t2_e);
+    SourceInfo t2 = SourceInfo(&sources, t2_s, t2_e);
 
     SourceInfo span = t1 + t2;
     cstring str = span.toDebugString();

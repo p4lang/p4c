@@ -43,7 +43,8 @@ const IR::P4Program* parseP4File(CompilerOptions& options);
 
 /**
  * Parse P4 source from the string @input, interpreting it as having language
- * version @version. The source is not preprocessed before being parsed. If the
+ * version @version. The source is not preprocessed before being parsed; the
+ * initial source location is derived from @sourceFile and @sourceLine. If the
  * language version is not P4-16, then the program is converted to P4-16 before
  * being returned.
  *
@@ -55,6 +56,9 @@ const IR::P4Program* parseP4File(CompilerOptions& options);
  * @return a P4-16 IR tree representing the contents of the given string, or
  * null on failure. If failure occurs, an error will also be reported.
  */
+const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
+                                   const std::string& input,
+                                   CompilerOptions::FrontendVersion version);
 const IR::P4Program* parseP4String(const std::string& input,
                                    CompilerOptions::FrontendVersion version);
 

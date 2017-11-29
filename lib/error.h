@@ -435,17 +435,6 @@ class ErrorReporter final {
       warningCount = 0;
     }
 
-    // Special error functions to be called from the parser only.
-    // In the parser the IR objects don't yet have position information.
-    // Use printf-format style arguments.
-    // Use current position in the input file for error location.
-    void parser_error(const char *fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-        parser_error(fmt, args);
-        va_end(args);
-    }
-
     void setOutputStream(std::ostream* stream)
     { outputstream = stream; }
 
@@ -460,20 +449,26 @@ class ErrorReporter final {
 
     /**
      * Reports an error specified by @fmt and @args at the current position in
-     * the input file. This is necessary for the IR generator's C-based Bison
-     * parser, which doesn't have location information available.
+     * the input represented by @sources. This is necessary for the IR
+     * generator's C-based Bison parser, which doesn't have location information
+     * available.
      */
-    void parser_error(const char* fmt, va_list args) {
+    void parser_error(const Util::InputSources* sources, const char *fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+
         errorCount++;
 
-        Util::SourcePosition position = Util::InputSources::instance->getCurrentPosition();
+        Util::SourcePosition position = sources->getCurrentPosition();
         position--;
         Util::SourceFileLine fileError =
-                Util::InputSources::instance->getSourceLine(position.getLineNumber());
+                sources->getSourceLine(position.getLineNumber());
         cstring msg = Util::vprintf_format(fmt, args);
         *outputstream << fileError.toString() << ":" << msg << std::endl;
-        cstring sourceFragment = Util::InputSources::instance->getSourceFragment(position);
+        cstring sourceFragment = sources->getSourceFragment(position);
         emit_message(sourceFragment);
+
+        va_end(args);
     }
 
  private:
