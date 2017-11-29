@@ -40,7 +40,7 @@ limitations under the License.
 #define YYLTYPE Util::SourceInfo
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
-                 : Util::SourceInfo(YYRHSLOC(Rhs, 0).getEnd()))
+                 : Util::SourceInfo(sources, YYRHSLOC(Rhs, 0).getEnd()))
 
 static void yyerror(const char *fmt, ...);
 static std::vector<IrElement*> global;
@@ -49,6 +49,7 @@ static CommentBlock *currCommentBlock = nullptr;
 namespace {  // anonymous namespace
 static int yylex();
 
+static Util::InputSources *sources = new Util::InputSources;
 static IrNamespace *current_namespace = LookupScope().resolve(0);
 
 %}
@@ -380,13 +381,14 @@ name: IDENTIFIER
 
 void yyerror(const char *fmt, ...) {
     if (!strcmp(fmt, "syntax error, unexpected IDENTIFIER")) {
-        ErrorReporter::instance.parser_error("syntax error, unexpected IDENTIFIER \"%s\"",
+        ErrorReporter::instance.parser_error(sources,
+                                             "syntax error, unexpected IDENTIFIER \"%s\"",
                                              yylval.str.c_str());
         return;
     }
     va_list args;
     va_start(args, fmt);
-    ErrorReporter::instance.parser_error(fmt, args);
+    ErrorReporter::instance.parser_error(sources, fmt, args);
     va_end(args);
 }
 
@@ -402,7 +404,7 @@ IrDefinitions *parse(char** files, int count) {
 
     for (int i = 0; i < count; i++) {
         if (FILE *fp = fopen(files[i], "r")) {
-            Util::InputSources::instance->mapLine(files[i], 1);
+            sources->mapLine(files[i], 1);
             yyrestart(fp);
             BEGIN(NORMAL);
             errors |= yyparse();

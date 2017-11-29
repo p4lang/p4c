@@ -38,6 +38,8 @@ class AbstractParserDriver {
     virtual ~AbstractParserDriver() = 0;
 
  protected:
+    AbstractParserDriver();
+
     ////////////////////////////////////////////////////////////////////////////
     // Callbacks.
     ////////////////////////////////////////////////////////////////////////////
@@ -64,6 +66,9 @@ class AbstractParserDriver {
     // Shared state manipulated directly by the lexer and parser.
     ////////////////////////////////////////////////////////////////////////////
 
+    /// The input sources that comprise the P4 program we're parsing.
+    Util::InputSources* sources;
+
     /// The location of the most recent token.
     Util::SourceInfo yylloc;
 
@@ -84,13 +89,20 @@ class P4ParserDriver final : public AbstractParserDriver {
     /**
      * Parse a P4-16 program.
      *
-     * @param name  The name of the program; usually the source filename. This
-     *              is only used for logging.
      * @param in    The input source to read the program from.
+     * @param sourceFile  The logical source filename. This doesn't have to be a
+     *                    real filename, though it normally will be. This is
+     *                    used for logging and to set the initial source
+     *                    location.
+     * @param sourceLine  The logical source line number. For programs parsed
+     *                    from a file, this will normally be 1. This is used to
+     *                    set the initial source location.
      * @returns a P4Program object if parsing was successful, or null otherwise.
      */
-    static const IR::P4Program* parse(const char* name, std::istream& in);
-    static const IR::P4Program* parse(const char* name, FILE* in);
+    static const IR::P4Program* parse(std::istream& in, const char* sourceFile,
+                                      unsigned sourceLine = 1);
+    static const IR::P4Program* parse(FILE* in, const char* sourceFile,
+                                      unsigned sourceLine = 1);
 
  protected:
     friend class P4::P4Lexer;
@@ -150,13 +162,20 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     /**
      * Parse a P4-14 program.
      *
-     * @param name  The name of the program; usually the source filename. This
-     *              is only used for logging.
      * @param in    The input source to read the program from.
+     * @param sourceFile  The logical source filename. This doesn't have to be a
+     *                    real filename, though it normally will be. This is
+     *                    used for logging and to set the initial source
+     *                    location.
+     * @param sourceLine  The logical source line number. For programs parsed
+     *                    from a file, this will normally be 1. This is used to
+     *                    set the initial source location.
      * @returns a V1Program object if parsing was successful, or null otherwise.
      */
-    static const IR::V1Program* parse(const char* name, std::istream& in);
-    static const IR::V1Program* parse(const char* name, FILE* in);
+    static const IR::V1Program* parse(std::istream& in, const char* sourceFile,
+                                      unsigned sourceLine = 1);
+    static const IR::V1Program* parse(FILE* in, const char* sourceFile,
+                                      unsigned sourceLine = 1);
 
  protected:
     friend class V1::V1Lexer;

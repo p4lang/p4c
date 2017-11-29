@@ -66,28 +66,32 @@ struct AutoStdioInputStream {
 
 namespace P4 {
 
+AbstractParserDriver::AbstractParserDriver()
+    : sources(new Util::InputSources) { }
+
 AbstractParserDriver::~AbstractParserDriver() { }
 
 void AbstractParserDriver::onReadToken(const char* text) {
-    auto posBeforeToken = Util::InputSources::instance->getCurrentPosition();
-    Util::InputSources::instance->appendText(text);
-    auto posAfterToken = Util::InputSources::instance->getCurrentPosition();
-    yylloc = Util::SourceInfo(posBeforeToken, posAfterToken);
+    auto posBeforeToken = sources->getCurrentPosition();
+    sources->appendText(text);
+    auto posAfterToken = sources->getCurrentPosition();
+    yylloc = Util::SourceInfo(sources, posBeforeToken, posAfterToken);
 }
 
 void AbstractParserDriver::onReadLineNumber(const char* text) {
     char* last;
     errno = 0;
     lineDirectiveLine = strtol(text, &last, 10);
-    if (errno != 0 ||
-        // we have not parsed the complete string
-        strlen(last) != 0)
-        ErrorReporter::instance.parser_error("Error parsing line number %s", text);
+    const bool consumedEntireToken = strlen(last) == 0;
+    if (errno != 0 || !consumedEntireToken)
+        ErrorReporter::instance.parser_error(sources,
+                                             "Error parsing line number %s",
+                                             text);
 }
 
 void AbstractParserDriver::onReadFileName(const char* text) {
     lineDirectiveFile = cstring(text);
-    Util::InputSources::instance->mapLine(lineDirectiveFile, lineDirectiveLine);
+    sources->mapLine(lineDirectiveFile, lineDirectiveLine);
 }
 
 void AbstractParserDriver::onReadIdentifier(cstring id) {
@@ -113,9 +117,10 @@ P4ParserDriver::P4ParserDriver()
 { }
 
 /* static */ const IR::P4Program*
-P4ParserDriver::parse(const char* name, std::istream& in) {
+P4ParserDriver::parse(std::istream& in, const char* sourceFile,
+                      unsigned sourceLine /* = 1 */) {
     if (Log::verbose())
-        std::cout << "Parsing P4-16 program " << name << std::endl;
+        std::cout << "Parsing P4-16 program " << sourceFile << std::endl;
 
     // Create and configure the parser and lexer.
     P4ParserDriver driver;
@@ -128,6 +133,9 @@ P4ParserDriver::parse(const char* name, std::istream& in) {
     driver.structure->setDebug(parser.debug_level() != 0);
 #endif
 
+    // Provide an initial source location.
+    driver.sources->mapLine(sourceFile, sourceLine);
+
     // Parse.
     if (parser.parse() != 0) return nullptr;
     driver.structure->endParse();
@@ -135,13 +143,14 @@ P4ParserDriver::parse(const char* name, std::istream& in) {
 }
 
 /* static */ const IR::P4Program*
-P4ParserDriver::parse(const char* name, FILE* in) {
+P4ParserDriver::parse(FILE* in, const char* sourceFile,
+                      unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
-    return parse(name, inputStream.get());
+    return parse(inputStream.get(), sourceFile, sourceLine);
 }
 
 /* static */ void P4ParserDriver::checkShift(const Util::SourceInfo& l,
-                                                 const Util::SourceInfo& r) {
+                                             const Util::SourceInfo& r) {
     if (!l.isValid() || !r.isValid())
         BUG("Source position not available!");
     const Util::SourcePosition& f = l.getStart();
@@ -169,9 +178,10 @@ V1ParserDriver::V1ParserDriver()
 { }
 
 /* static */ const IR::V1Program*
-V1ParserDriver::parse(const char* name, std::istream& in) {
+V1ParserDriver::parse(std::istream& in, const char* sourceFile,
+                      unsigned sourceLine /* = 1 */) {
     if (Log::verbose())
-        std::cout << "Parsing P4-14 program " << name << std::endl;
+        std::cout << "Parsing P4-14 program " << sourceFile << std::endl;
 
     // Create and configure the parser and lexer.
     V1ParserDriver driver;
@@ -183,10 +193,8 @@ V1ParserDriver::parse(const char* name, std::istream& in) {
         parser.set_debug_level(atoi(p));
 #endif
 
-    // Reset our location. This is necessary because before any P4-14 code gets
-    // parsed, P4V1::Converter::loadModel() has already parsed `v1model.p4`
-    // (which is a P4-16 file) and moved our location.
-    Util::InputSources::instance->mapLine(name, 1);
+    // Provide an initial source location.
+    driver.sources->mapLine(sourceFile, sourceLine);
 
     // Parse.
     if (parser.parse() != 0) return nullptr;
@@ -194,9 +202,10 @@ V1ParserDriver::parse(const char* name, std::istream& in) {
 }
 
 /* static */ const IR::V1Program*
-V1ParserDriver::parse(const char* name, FILE* in) {
+V1ParserDriver::parse(FILE* in, const char* sourceFile,
+                      unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
-    return parse(name, inputStream.get());
+    return parse(inputStream.get(), sourceFile, sourceLine);
 }
 
 IR::Constant* V1ParserDriver::constantFold(IR::Expression* expr) {

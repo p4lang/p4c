@@ -51,9 +51,7 @@ namespace EBPF {
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum* type) const override {
         if (type->srcInfo.isValid()) {
-            unsigned line = type->srcInfo.getStart().getLineNumber();
-            auto sfl = Util::InputSources::instance->getSourceLine(line);
-            cstring sourceFile = sfl.fileName;
+            auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith("_model.p4"))
                 // Don't convert any of the standard enums
                 return false;

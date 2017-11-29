@@ -64,9 +64,7 @@ Use 32-bit values for all enums.
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum* type) const override {
         if (type->srcInfo.isValid()) {
-            unsigned line = type->srcInfo.getStart().getLineNumber();
-            auto sfl = Util::InputSources::instance->getSourceLine(line);
-            cstring sourceFile = sfl.fileName;
+            auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith(P4V1::V1Model::instance.file.name))
                 // Don't convert any of the standard enums
                 return false;

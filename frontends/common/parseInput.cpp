@@ -31,7 +31,7 @@ namespace P4 {
 
 template <typename Input>
 static const IR::P4Program*
-parseV1Program(const char* name, Input& stream,
+parseV1Program(Input& stream, const char* sourceFile, unsigned sourceLine,
                boost::optional<DebugHook> debugHook = boost::none) {
     // We load the model before parsing the input file, so that the SourceInfo
     // in the model comes first.
@@ -40,7 +40,8 @@ parseV1Program(const char* name, Input& stream,
     converter.loadModel();
 
     // Parse.
-    const IR::Node* v1 = V1::V1ParserDriver::parse(name, stream);
+    const IR::Node* v1 = V1::V1ParserDriver::parse(stream, sourceFile,
+                                                   sourceLine);
     if (::errorCount() > 0 || v1 == nullptr)
         return nullptr;
 
@@ -73,9 +74,27 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     }
 
     auto result = options.isv1()
-                ? parseV1Program(options.file, in, options.getDebugHook())
-                : P4ParserDriver::parse(options.file, in);
+                ? parseV1Program(in, options.file, 1, options.getDebugHook())
+                : P4ParserDriver::parse(in, options.file);
     options.closeInput(in);
+
+    if (::errorCount() > 0) {
+        ::error("%1% errors encountered, aborting compilation", ::errorCount());
+        return nullptr;
+    }
+    BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
+    return result;
+}
+
+const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
+                                   const std::string& input,
+                                   CompilerOptions::FrontendVersion version) {
+    clearProgramState();
+
+    std::istringstream stream(input);
+    auto result = version == CompilerOptions::FrontendVersion::P4_14
+                ? parseV1Program(stream, sourceFile, sourceLine)
+                : P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
     if (::errorCount() > 0) {
         ::error("%1% errors encountered, aborting compilation", ::errorCount());
@@ -87,23 +106,10 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
 
 const IR::P4Program* parseP4String(const std::string& input,
                                    CompilerOptions::FrontendVersion version) {
-    clearProgramState();
-
-    std::istringstream stream(input);
-    auto result = version == CompilerOptions::FrontendVersion::P4_14
-                ? parseV1Program("(string)", stream)
-                : P4ParserDriver::parse("(string)", stream);
-
-    if (::errorCount() > 0) {
-        ::error("%1% errors encountered, aborting compilation", ::errorCount());
-        return nullptr;
-    }
-    BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
-    return result;
+    return parseP4String("(string)", 1, input, version);
 }
 
 void clearProgramState() {
-    Util::InputSources::reset();
     clearErrorReporter();
 }
 

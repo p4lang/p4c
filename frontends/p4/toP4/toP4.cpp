@@ -42,9 +42,7 @@ bool ToP4::isSystemFile(cstring file) {
 
 cstring ToP4::ifSystemFile(const IR::Node* node) {
     if (!node->srcInfo.isValid()) return nullptr;
-    unsigned line = node->srcInfo.getStart().getLineNumber();
-    auto sfl = Util::InputSources::instance->getSourceLine(line);
-    cstring sourceFile = sfl.fileName;
+    auto sourceFile = node->srcInfo.getSourceFile();
     if (isSystemFile(sourceFile))
         return sourceFile;
     return nullptr;
