@@ -20,6 +20,8 @@ limitations under the License.
 #include <typeinfo>
 #include <vector>
 
+#include "lib/error_reporter.h"
+
 /// An interface for objects which represent compiler settings and state for a
 /// translation unit. The compilation context might include things like compiler
 /// options which apply to the translation unit or errors and warnings generated
@@ -72,8 +74,6 @@ struct AutoCompileContext {
     ~AutoCompileContext();
 };
 
-class ErrorReporter;
-
 /// A base compilation context which provides members needed by code in
 /// `libp4ctoolkit`. Compilation context types should normally inherit from
 /// BaseCompileContext.
@@ -92,7 +92,7 @@ class BaseCompileContext : public ICompileContext {
 
  private:
     /// Error and warning tracking facilities for this compilation context.
-    ErrorReporter* errorReporterInstance;
+    ErrorReporter errorReporterInstance;
 };
 
 #endif /* P4C_LIB_COMPILE_CONTEXT_H_ */

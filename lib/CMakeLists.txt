@@ -42,6 +42,7 @@ set (LIBP4CTOOLKIT_HDRS
 	cstring.h
 	enumerator.h
 	error.h
+	error_reporter.h
 	exceptions.h
 	gc.h
 	gmputil.h

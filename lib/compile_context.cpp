@@ -59,16 +59,15 @@ AutoCompileContext::~AutoCompileContext() {
     CompileContextStack::pop();
 }
 
-BaseCompileContext::BaseCompileContext()
-    : errorReporterInstance(new ErrorReporter) { }
+BaseCompileContext::BaseCompileContext() { }
 
 BaseCompileContext::BaseCompileContext(const BaseCompileContext& other)
-    : errorReporterInstance(new ErrorReporter(*other.errorReporterInstance)) { }
+    : errorReporterInstance(other.errorReporterInstance) { }
 
 /* static */ BaseCompileContext& BaseCompileContext::get() {
     return CompileContextStack::top<BaseCompileContext>();
 }
 
 ErrorReporter& BaseCompileContext::errorReporter() {
-    return *errorReporterInstance;
+    return errorReporterInstance;
 }
