@@ -464,10 +464,6 @@ class AttributeRef : Expression {
     dbprint { out << attrib->name; }
 }
 
-#emit
-class CompilerOptions;
-#end
-
 class V1Program {
     inline NameMap<Node, std::multimap>         scope;
 

@@ -78,7 +78,9 @@ const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
 
 }  // namespace
 
-TEST(P4Runtime, IdAssignment) {
+class P4Runtime : public P4CTest { };
+
+TEST_F(P4Runtime, IdAssignment) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         struct Headers { }
         struct Metadata { }
@@ -149,7 +151,7 @@ TEST(P4Runtime, IdAssignment) {
 
     // We expect exactly one error:
     //   error: @id 4321 is assigned to multiple declarations
-    EXPECT_EQ(1u, ::ErrorReporter::instance.getDiagnosticCount());
+    EXPECT_EQ(1u, ::diagnosticCount());
 
     {
         // Check that 'igTable' ended up in the P4Info output.
@@ -224,7 +226,7 @@ struct ExpectedMatchField {
 
 }  // namespace
 
-TEST(P4Runtime, P4_16_MatchFields) {
+TEST_F(P4Runtime, P4_16_MatchFields) {
     using MatchField = ::p4::config::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
@@ -320,7 +322,7 @@ TEST(P4Runtime, P4_16_MatchFields) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    EXPECT_EQ(0u, ::diagnosticCount());
 
     auto* igTable = findTable(*test, "igTable");
     ASSERT_TRUE(igTable != nullptr);
@@ -379,7 +381,7 @@ TEST(P4Runtime, P4_16_MatchFields) {
 #if 0
 // Disabling this test because it does not work without installation
 // see issue https://github.com/p4lang/p4c/issues/924
-TEST(P4Runtime, P4_14_MatchFields) {
+TEST_F(P4Runtime, P4_14_MatchFields) {
     using MatchField = ::p4::config::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::NONE, R"(
@@ -433,7 +435,7 @@ TEST(P4Runtime, P4_14_MatchFields) {
     )"), CompilerOptions::FrontendVersion::P4_14);
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    EXPECT_EQ(0u, ::diagnosticCount());
 
     auto* igTable = findTable(*test, "igTable");
     ASSERT_TRUE(igTable != nullptr);
@@ -470,7 +472,7 @@ TEST(P4Runtime, P4_14_MatchFields) {
 }
 #endif
 
-TEST(P4Runtime, Digests) {
+TEST_F(P4Runtime, Digests) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<16> headerFieldA; bit<8> headerFieldB; }
         struct Headers { Header h; }
@@ -507,7 +509,7 @@ TEST(P4Runtime, Digests) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    EXPECT_EQ(0u, ::diagnosticCount());
 
     auto* digestExtern = findExtern(*test, "digest");
     ASSERT_TRUE(digestExtern != nullptr);
@@ -586,7 +588,7 @@ TEST(P4Runtime, Digests) {
     }
 }
 
-TEST(P4Runtime, StaticTableEntries) {
+TEST_F(P4Runtime, StaticTableEntries) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<8> hfA; bit<16> hfB; }
         struct Headers { Header h; }
@@ -624,7 +626,7 @@ TEST(P4Runtime, StaticTableEntries) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::ErrorReporter::instance.getDiagnosticCount());
+    EXPECT_EQ(0u, ::diagnosticCount());
 
     auto table = findTable(*test, "t_exact_ternary");
     ASSERT_TRUE(table != nullptr);

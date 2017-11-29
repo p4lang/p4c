@@ -85,7 +85,19 @@ class P4CTestEnvironment {
     std::string _v1Model;
 };
 
+using GTestContext = P4CContextWithOptions<CompilerOptions>;
+
 namespace Test {
+
+/// A test fixture base class that automatically creates a new compilation
+/// context for the test to run in.
+class P4CTest : public ::testing::Test {
+ public:
+    P4CTest() : autoGTestContext(new GTestContext(GTestContext::get())) { }
+
+ private:
+    AutoCompileContext autoGTestContext;
+};
 
 struct FrontendTestCase {
     /// Create a test case that only requires the frontend to run.

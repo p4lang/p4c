@@ -380,15 +380,16 @@ name: IDENTIFIER
 }  // end anonymous namespace
 
 void yyerror(const char *fmt, ...) {
+    auto& context = BaseCompileContext::get();
     if (!strcmp(fmt, "syntax error, unexpected IDENTIFIER")) {
-        ErrorReporter::instance.parser_error(sources,
+        context.errorReporter().parser_error(sources,
                                              "syntax error, unexpected IDENTIFIER \"%s\"",
                                              yylval.str.c_str());
         return;
     }
     va_list args;
     va_start(args, fmt);
-    ErrorReporter::instance.parser_error(sources, fmt, args);
+    context.errorReporter().parser_error(sources, fmt, args);
     va_end(args);
 }
 

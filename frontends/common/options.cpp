@@ -30,6 +30,10 @@ limitations under the License.
 const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
+/* static */ P4CContext& P4CContext::get() {
+    return CompileContextStack::top<P4CContext>();
+}
+
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
 CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
@@ -119,7 +123,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    "Write output to outfile");
     registerOption("--Werror", nullptr,
                     [](const char*) {
-                        ErrorReporter::instance.setWarningsAreErrors();
+                        BaseCompileContext::get().errorReporter().setWarningsAreErrors();
                         return true;
                     },
                     "Treat all warnings as errors");

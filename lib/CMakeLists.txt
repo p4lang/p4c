@@ -14,9 +14,9 @@
 
 set (LIBP4CTOOLKIT_SRCS
 	bitvec.cpp
+	compile_context.cpp
 	crash.cpp
 	cstring.cpp
-	error.cpp
 	gc.cpp
 	gmputil.cpp
 	hex.cpp
@@ -37,6 +37,7 @@ set (LIBP4CTOOLKIT_HDRS
 	bitops.h
 	bitrange.h
 	bitvec.h
+	compile_context.h
 	crash.h
 	cstring.h
 	enumerator.h

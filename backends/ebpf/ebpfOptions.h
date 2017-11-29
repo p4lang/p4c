@@ -27,4 +27,6 @@ class EbpfOptions : public CompilerOptions {
     }
 };
 
+using EbpfContext = P4CContextWithOptions<EbpfOptions>;
+
 #endif /* _BACKENDS_EBPF_EBPFOPTIONS_H_ */

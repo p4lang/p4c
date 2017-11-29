@@ -22,13 +22,14 @@ limitations under the License.
 namespace Util {
 
 TEST(Util, Format) {
-    cstring message = ErrorReporter::instance.format_message("%1%", 5u);
+    auto& context = BaseCompileContext::get();
+    cstring message = context.errorReporter().format_message("%1%", 5u);
     EXPECT_EQ("5\n", message);
 
-    message = ErrorReporter::instance.format_message("Number=%1%", 5);
+    message = context.errorReporter().format_message("Number=%1%", 5);
     EXPECT_EQ("Number=5\n", message);
 
-    message = ErrorReporter::instance.format_message("Double=%1% String=%2%", 2.3, "short");
+    message = context.errorReporter().format_message("Double=%1% String=%2%", 2.3, "short");
     EXPECT_EQ("Double=2.3 String=short\n", message);
 
     struct NiceFormat {
@@ -43,15 +44,15 @@ TEST(Util, Format) {
     };
 
     NiceFormat nf{1, 2, 3};
-    message = ErrorReporter::instance.format_message("Nice=%1%", nf);
+    message = context.errorReporter().format_message("Nice=%1%", nf);
     EXPECT_EQ("Nice=(1,2,3)\n", message);
 
     cstring x = "x";
     cstring y = "y";
-    message = ErrorReporter::instance.format_message("%1% %2%", x, y);
+    message = context.errorReporter().format_message("%1% %2%", x, y);
     EXPECT_EQ("x y\n", message);
 
-    message = ErrorReporter::instance.format_message("%1% %2%", x, 5);
+    message = context.errorReporter().format_message("%1% %2%", x, 5);
     EXPECT_EQ("x 5\n", message);
 
     message = Util::printf_format("Number=%d, String=%s", 5, "short");

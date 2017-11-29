@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
 #include "ir/ir.h"  // for DebugHook definition
@@ -107,6 +108,38 @@ class CompilerOptions : public Util::Options {
     // Get a debug hook function suitable for insertion
     // in the pass managers that are executed.
     DebugHook getDebugHook() const;
+};
+
+
+/// A compilation context which exposes compiler options.
+class P4CContext : public BaseCompileContext {
+ public:
+    /// @return the current compilation context, which must inherit from
+    /// P4CContext.
+    static P4CContext& get();
+
+    /// @return the compiler options for this compilation context.
+    virtual CompilerOptions& options() = 0;
+};
+
+/// A utility template which can be used to easily make subclasses of P4CContext
+/// which expose a particular subclass of CompilerOptions. This is provided as a
+/// convenience since this is all many backends need.
+template <typename OptionsType>
+class P4CContextWithOptions final : public P4CContext {
+ public:
+    /// @return the current compilation context, which must be of type
+    /// P4CContextWithOptions<OptionsType>.
+    static P4CContextWithOptions& get() {
+        return CompileContextStack::top<P4CContextWithOptions>();
+    }
+
+    /// @return the compiler options for this compilation context.
+    OptionsType& options() override { return optionsInstance; }
+
+ private:
+    /// Compiler options for this compilation context.
+    OptionsType optionsInstance;
 };
 
 #endif /* FRONTENDS_COMMON_OPTIONS_H_ */
