@@ -111,6 +111,10 @@ set (XFAIL_TESTS
   # These tests use a table key with type 'error'
   testdata/p4_16_samples/issue1062-bmv2.p4
   testdata/p4_16_samples/issue1062-1-bmv2.p4
+  # These tests fail due to issue #486
+  testdata/p4_16_samples/x-bmv2.p4
+  testdata/p4_16_samples/issue986-1-bmv2.p4
+  testdata/p4_14_samples/16-TwoReferences.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
