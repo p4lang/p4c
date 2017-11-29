@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include <unordered_map>
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
@@ -118,8 +119,38 @@ class P4CContext : public BaseCompileContext {
     /// P4CContext.
     static P4CContext& get();
 
+    P4CContext();
+
     /// @return the compiler options for this compilation context.
     virtual CompilerOptions& options() = 0;
+
+    /// @return the default diagnostic action for calls to `::warning()`.
+    DiagnosticAction getDefaultWarningDiagnosticAction() final;
+
+    /// @return the default diagnostic action for calls to `::warning()`.
+    void setDefaultWarningDiagnosticAction(DiagnosticAction action);
+
+    /// @return the action to take for the given diagnostic, falling back to the
+    /// default action if it wasn't overridden via the command line or a pragma.
+    DiagnosticAction
+    getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) final;
+
+    /// Set the action to take for the given diagnostic.
+    void setDiagnosticAction(cstring diagnostic, DiagnosticAction action);
+
+ protected:
+    /// @return true if the given diagnostic is known to be valid. This is
+    /// intended to help the user find misspelled diagnostics and the like; it
+    /// doesn't affect functionality.
+    virtual bool isRecognizedDiagnostic(cstring diagnostic);
+
+ private:
+    /// The default diagnostic action for calls to `::warning()`.
+    DiagnosticAction defaultWarningDiagnosticAction;
+
+    /// A mapping from diagnostic names (as passed to the DIAGNOSE* macros) to
+    /// actions that should be taken when those diagnostics are triggered.
+    std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
 };
 
 /// A utility template which can be used to easily make subclasses of P4CContext

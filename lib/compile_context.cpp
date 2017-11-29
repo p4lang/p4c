@@ -71,3 +71,17 @@ BaseCompileContext::BaseCompileContext(const BaseCompileContext& other)
 ErrorReporter& BaseCompileContext::errorReporter() {
     return errorReporterInstance;
 }
+
+DiagnosticAction BaseCompileContext::getDefaultWarningDiagnosticAction() {
+    return DiagnosticAction::Warn;
+}
+
+DiagnosticAction BaseCompileContext::getDefaultErrorDiagnosticAction() {
+    return DiagnosticAction::Error;
+}
+
+DiagnosticAction
+BaseCompileContext::getDiagnosticAction(cstring /* diagnostic */,
+                                        DiagnosticAction defaultAction) {
+    return defaultAction;
+}
