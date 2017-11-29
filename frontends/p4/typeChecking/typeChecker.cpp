@@ -2420,6 +2420,9 @@ TypeInference::actionCall(bool inActionList,
             auto arg = *it;
             auto paramType = getType(p);
             auto argType = getType(arg);
+            if (paramType == nullptr || argType == nullptr)
+                // type checking failed before
+                return actionCall;
             constraints.addEqualityConstraint(paramType, argType);
             if (p->direction == IR::Direction::None) {
                 if (inActionList) {

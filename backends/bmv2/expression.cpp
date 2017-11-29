@@ -516,7 +516,15 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     if (auto param = decl->to<IR::Parameter>()) {
         if (backend->getStructure().nonActionParameters.find(param) !=
             backend->getStructure().nonActionParameters.end()) {
-            map.emplace(expression, new Util::JsonValue(param->name.name));
+            auto type = backend->getTypeMap()->getType(param, true);
+            if (type->is<IR::Type_StructLike>()) {
+                auto result = new Util::JsonObject();
+                result->emplace("type", "header");
+                result->emplace("value", param->name.name);
+                map.emplace(expression, result);
+            } else {
+                map.emplace(expression, new Util::JsonValue(param->name.name));
+            }
             return;
         }
         auto result = new Util::JsonObject();
