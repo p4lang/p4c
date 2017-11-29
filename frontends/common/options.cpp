@@ -166,7 +166,7 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
     output[0] = '\0';  // Default to the empty string, indicating failure.
 
     char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
+    if (!getcwd(cwd, sizeof(cwd))) return;
     const size_t cwdLen = strlen(cwd);
     if (cwdLen == 0) return;
     const char* separator = cwd[cwdLen - 1] == '/' ? "" : "/";
