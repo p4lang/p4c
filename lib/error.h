@@ -19,6 +19,8 @@ limitations under the License.
 #ifndef P4C_LIB_ERROR_H_
 #define P4C_LIB_ERROR_H_
 
+#include "lib/compile_context.h"
+#include "lib/cstring.h"
 #include "lib/error_reporter.h"
 
 /// @return the number of errors encountered so far in the current compilation
@@ -40,7 +42,9 @@ inline unsigned diagnosticCount() {
 /// Report an error with the given message.
 template <typename... T>
 inline void error(const char* format, T... args) {
-    BaseCompileContext::get().errorReporter().error(format, args...);
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultErrorDiagnosticAction();
+    context.errorReporter().diagnoseUnnamed(action, format, args...);
 }
 
 #define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
@@ -48,9 +52,39 @@ inline void error(const char* format, T... args) {
 /// Report a warning with the given message.
 template <typename... T>
 inline void warning(const char* format, T... args) {
-    BaseCompileContext::get().errorReporter().warning(format, args...);
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultWarningDiagnosticAction();
+    context.errorReporter().diagnoseUnnamed(action, format, args...);
 }
 
 #define WARN_CHECK(e, ...) do { if (!(e)) ::warning(__VA_ARGS__); } while (0)
+
+/**
+ * Trigger a diagnostic message.
+ *
+ * @param defaultAction  The action (warn, error, etc.) to take if no action
+ *                       was specified for this diagnostic on the command line
+ *                       or via a pragma.
+ * @param diagnosticName  A human-readable name for the diagnostic. This should
+ *                        generally use only lower-case letters and underscores
+ *                        so the diagnostic name is a valid P4 identifier.
+ * @param format  A format for the diagnostic message, using the same style as
+ *                '::warning' or '::error'.
+ */
+template <typename... T>
+inline void diagnose(DiagnosticAction defaultAction, const char* diagnosticName,
+                     const char* format, T... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDiagnosticAction(diagnosticName, defaultAction);
+    context.errorReporter().diagnose(action, diagnosticName, format, args...);
+}
+
+/// Trigger a diagnostic message which is treated as a warning by default.
+#define DIAGNOSE_WARN(DIAGNOSTIC_NAME, ...) \
+    do { ::diagnose(DiagnosticAction::Warn, DIAGNOSTIC_NAME, __VA_ARGS__); } while (0)
+
+/// Trigger a diagnostic message which is treated as an error by default.
+#define DIAGNOSE_ERROR(DIAGNOSTIC_NAME, ...) \
+    do { ::diagnose(DiagnosticAction::Error, DIAGNOSTIC_NAME, __VA_ARGS__); } while (0)
 
 #endif /* P4C_LIB_ERROR_H_ */

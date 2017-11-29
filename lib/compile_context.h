@@ -20,6 +20,7 @@ limitations under the License.
 #include <typeinfo>
 #include <vector>
 
+#include "lib/cstring.h"
 #include "lib/error_reporter.h"
 
 /// An interface for objects which represent compiler settings and state for a
@@ -89,6 +90,17 @@ class BaseCompileContext : public ICompileContext {
 
     /// @return the error reporter for this compilation context.
     ErrorReporter& errorReporter();
+
+    /// @return the default diagnostic action for calls to `::warning()`.
+    virtual DiagnosticAction getDefaultWarningDiagnosticAction();
+
+    /// @return the default diagnostic action for calls to `::error()`.
+    virtual DiagnosticAction getDefaultErrorDiagnosticAction();
+
+    /// @return the diagnostic action to use for @diagnosticName, or
+    /// @defaultAction if no diagnostic action was found.
+    virtual DiagnosticAction
+    getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction);
 
  private:
     /// Error and warning tracking facilities for this compilation context.

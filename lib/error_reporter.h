@@ -21,6 +21,7 @@ limitations under the License.
 #include <boost/format.hpp>
 #include <type_traits>
 
+#include "lib/cstring.h"
 #include "lib/source_file.h"
 #include "lib/stringify.h"
 
@@ -346,8 +347,14 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 
 /***********************************************************************************/
 
+/// An action to take when a diagnostic message is triggered.
+enum class DiagnosticAction {
+    Ignore,  /// Take no action and continue compilation.
+    Warn,    /// Print a warning and continue compilation.
+    Error    /// Print an error and signal that compilation should be aborted.
+};
+
 // Keeps track of compilation errors.
-// Singleton pattern.
 // Errors are specified using the error() and warning() methods,
 // that use boost::format format strings, i.e.,
 // %1%, %2%, etc (starting at 1, not at 0).
@@ -355,7 +362,6 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 class ErrorReporter final {
  private:
     std::ostream* outputstream;
-    bool          warningsAreErrors = false;
 
     void emit_message(cstring message) {
         *outputstream << message;
@@ -376,9 +382,6 @@ class ErrorReporter final {
         return message;
     }
 
-    void setWarningsAreErrors()
-    { warningsAreErrors = true; }
-
     template <typename... T>
     std::string format_message(const char* format, T... args) {
         boost::format fmt(format);
@@ -387,22 +390,39 @@ class ErrorReporter final {
     }
 
     template <typename... T>
-    void error(const char* format, T... args) {
-        errorCount++;
+    void diagnose(DiagnosticAction action, const char* diagnosticName,
+                  const char* format, T... args) {
+        if (action == DiagnosticAction::Ignore) return;
+
+        std::string prefix;
+        if (action == DiagnosticAction::Warn) {
+            warningCount++;
+            prefix.append("[--Wwarn=");
+            prefix.append(diagnosticName);
+            prefix.append("] warning: ");
+        } else if (action == DiagnosticAction::Error) {
+            errorCount++;
+            prefix.append("[--Werror=");
+            prefix.append(diagnosticName);
+            prefix.append("] error: ");
+        }
+
         boost::format fmt(format);
-        std::string message = ::error_helper(fmt, "error: ", "", "", args...);
+        std::string message = ::error_helper(fmt, prefix, "", "", args...);
         emit_message(message);
     }
 
     template <typename... T>
-    void warning(const char* format, T... args) {
+    void diagnoseUnnamed(DiagnosticAction action, const char* format, T... args) {
         const char* msg;
-        if (warningsAreErrors) {
+        if (action == DiagnosticAction::Error) {
             msg = "error: ";
             errorCount++;
-        } else {
+        } else if (action == DiagnosticAction::Warn) {
             msg = "warning: ";
             warningCount++;
+        } else {
+            return;
         }
         boost::format fmt(format);
         std::string message = ::error_helper(fmt, msg, "", "", args...);

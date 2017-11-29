@@ -18,6 +18,7 @@ limitations under the License.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <unordered_set>
 
 #include "options.h"
 #include "lib/log.h"
@@ -29,10 +30,6 @@ limitations under the License.
 
 const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
-
-/* static */ P4CContext& P4CContext::get() {
-    return CompileContextStack::top<P4CContext>();
-}
 
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
@@ -121,12 +118,31 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
-    registerOption("--Werror", nullptr,
+    registerOption("--Wwarnings-as-errors", nullptr,
                     [](const char*) {
-                        BaseCompileContext::get().errorReporter().setWarningsAreErrors();
+                        auto action = DiagnosticAction::Error;
+                        P4CContext::get().setDefaultWarningDiagnosticAction(action);
                         return true;
                     },
                     "Treat all warnings as errors");
+    registerOption("--Wdisable", "diagnostic",
+        [this](const char *diagnostic) {
+            P4CContext::get().setDiagnosticAction(diagnostic,
+                                                  DiagnosticAction::Ignore);
+            return true;
+        }, "Disable a compiler diagnostic");
+    registerOption("--Wwarn", "diagnostic",
+        [this](const char *diagnostic) {
+            P4CContext::get().setDiagnosticAction(diagnostic,
+                                                  DiagnosticAction::Warn);
+            return true;
+        }, "Report a warning for a compiler diagnostic");
+    registerOption("--Werror", "diagnostic",
+        [this](const char *diagnostic) {
+            P4CContext::get().setDiagnosticAction(diagnostic,
+                                                  DiagnosticAction::Error);
+            return true;
+        }, "Report an error for a compiler diagnostic");
     registerOption("-T", "loglevel",
                    [](const char* arg) { Log::addDebugSpec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
@@ -331,4 +347,56 @@ DebugHook CompilerOptions::getDebugHook() const {
     using namespace std::placeholders;
     auto dp = std::bind(&CompilerOptions::dumpPass, this, _1, _2, _3, _4);
     return dp;
+}
+
+/* static */ P4CContext& P4CContext::get() {
+    return CompileContextStack::top<P4CContext>();
+}
+
+P4CContext::P4CContext()
+    : defaultWarningDiagnosticAction(DiagnosticAction::Warn) { }
+
+DiagnosticAction P4CContext::getDefaultWarningDiagnosticAction() {
+    return defaultWarningDiagnosticAction;
+}
+
+void P4CContext::setDefaultWarningDiagnosticAction(DiagnosticAction action) {
+    defaultWarningDiagnosticAction = action;
+}
+
+DiagnosticAction P4CContext::getDiagnosticAction(cstring diagnostic,
+                                                 DiagnosticAction defaultAction) {
+    auto it = diagnosticActions.find(diagnostic);
+    if (it != diagnosticActions.end()) return it->second;
+    switch (defaultAction) {
+        case DiagnosticAction::Ignore: return defaultAction;
+        case DiagnosticAction::Warn: return getDefaultWarningDiagnosticAction();
+        case DiagnosticAction::Error: return getDefaultErrorDiagnosticAction();
+    }
+    BUG("Invalid default DiagnosticAction");
+}
+
+void P4CContext::setDiagnosticAction(cstring diagnostic, DiagnosticAction action) {
+    if (!isRecognizedDiagnostic(diagnostic))
+        DIAGNOSE_WARN("unknown_diagnostic",
+                      "Unrecognized diagnostic: %1%", diagnostic);
+
+    switch (action) {
+        case DiagnosticAction::Ignore:
+            LOG1("Ignoring diagnostic: " << diagnostic); break;
+        case DiagnosticAction::Warn:
+            LOG1("Reporting warning for diagnostic: " << diagnostic); break;
+        case DiagnosticAction::Error:
+            LOG1("Reporting error for diagnostic: " << diagnostic); break;
+    }
+
+    diagnosticActions[diagnostic] = action;
+}
+
+bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
+    static const std::unordered_set<cstring> recognizedDiagnostics = {
+        "unknown_diagnostic"
+    };
+
+    return recognizedDiagnostics.count(diagnostic);
 }
