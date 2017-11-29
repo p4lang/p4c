@@ -1775,8 +1775,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
                 return nullptr;
             }
             if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end()) {
-                auto counter = counters.get(c.second);
-                auto extcounter = convertDirectCounter(counter, c.second);
+                auto extcounter = convertDirectCounter(c.first, c.second);
                 if (extcounter != nullptr) {
                     stateful.push_back(extcounter);
                     directCounters.emplace(c.first->table.name, c.first->name);
