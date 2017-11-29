@@ -337,6 +337,7 @@ class ConstructorCallExpression : Expression {
 class ListExpression : Expression {
     inline Vector<Expression> components;
     ListExpression {
+        validate();
         if (type->is<Type::Unknown>()) {
             Vector<Type> tuple;
             for (auto e : components)
@@ -348,10 +349,11 @@ class ListExpression : Expression {
 
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
-class ListCompileTimeValue : ListExpression, CompileTimeValue {
+class ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
     validate {
-        for (auto e : components)
-            BUG_CHECK(e->is<CompileTimeValue>(), "%1%: not a compile-time value", e); }
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
 #nodbprint
 }
 

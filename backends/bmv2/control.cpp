@@ -48,7 +48,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     // booleans are converted to ints
                     key->emplace("key", stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                 else
-                    ::error("%1% invalid exact key expression", k);
+                    ::error("%1% unsupported exact key expression", k);
             } else if (matchType == backend->getCoreLibrary().ternaryMatch.name) {
                 if (k->is<IR::Mask>()) {
                     auto km = k->to<IR::Mask>();
@@ -61,7 +61,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     key->emplace("key", stringRepr(0, k8));
                     key->emplace("mask", stringRepr(0, k8));
                 } else {
-                    ::error("%1% invalid ternary key expression", k);
+                    ::error("%1% unsupported ternary key expression", k);
                 }
             } else if (matchType == backend->getCoreLibrary().lpmMatch.name) {
                 if (k->is<IR::Mask>()) {
@@ -82,7 +82,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     key->emplace("key", stringRepr(0, k8));
                     key->emplace("prefix_length", 0);
                 } else {
-                    ::error("%1% invalid LPM key expression", k);
+                    ::error("%1% unsupported LPM key expression", k);
                 }
             } else if (matchType == "range") {
                 if (k->is<IR::Range>()) {
@@ -96,7 +96,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     ::error("%1% invalid range key expression", k);
                 }
             } else {
-                ::error("unkown key type '%1%' for key %2%", matchType, k);
+                ::error("unkown key match type '%1%' for key %2%", matchType, k);
             }
             matchKeys->append(key);
             keyIndex++;
@@ -290,9 +290,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
 
     if (key != nullptr) {
         for (auto ke : key->keyElements) {
+            auto expr = ke->expression;
+            auto ket = typeMap->getType(expr, true);
+            if (!ket->is<IR::Type_Bits>() && !ket->is<IR::Type_Boolean>())
+                ::error("%1%: Unsupported key type %2%", expr, ket);
+
             auto match_type = getKeyMatchType(ke);
             if (match_type == BMV2::MatchImplementation::selectorMatchTypeName)
-                    continue;
+                continue;
             // Decreasing order of precedence (bmv2 specification):
             // 0) more than one LPM field is an error
             // 1) if there is at least one RANGE field, then the table is RANGE
@@ -312,7 +317,6 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 ::error("%1%, Multiple LPM keys in table", table);
             }
 
-            auto expr = ke->expression;
             mpz_class mask;
             if (auto mexp = expr->to<IR::BAnd>()) {
                 if (mexp->right->is<IR::Constant>()) {
@@ -336,7 +340,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             auto jk = conv->convert(expr);
             keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
             if (mask != 0)
-                keyelement->emplace("mask", stringRepr(mask, (expr->type->width_bits() + 7) / 8));
+                keyelement->emplace("mask", stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
             else
                 keyelement->emplace("mask", Util::JsonValue::null);
             tkey->append(keyelement);
