@@ -24,9 +24,9 @@ limitations under the License.
 namespace BMV2 {
 
 class JsonObjects {
- protected:
-    Util::JsonObject* find_object_by_name(Util::JsonArray* array,
-                                          const cstring& name);
+ public:
+    static Util::JsonObject* find_object_by_name(Util::JsonArray* array,
+                                                 const cstring& name);
 
  public:
     void add_program_info(const cstring& name);

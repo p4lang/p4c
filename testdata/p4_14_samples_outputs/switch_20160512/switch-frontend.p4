@@ -1204,6 +1204,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
+@name(".bd_action_profile") action_profile(32w1024) bd_action_profile;
+@name(".ecmp_action_profile") @mode("fair") action_selector(HashAlgorithm.identity, 32w1024, 32w10) ecmp_action_profile;
+@name(".fabric_lag_action_profile") @mode("fair") action_selector(HashAlgorithm.identity, 32w1024, 32w8) fabric_lag_action_profile;
+@name(".lag_action_profile") @mode("fair") action_selector(HashAlgorithm.identity, 32w1024, 32w8) lag_action_profile;
 control process_replication(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop_4() {
     }
@@ -3289,7 +3293,7 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
             hdr.vlan_tag_[1].vid         : exact @name("vlan_tag_[1].vid") ;
         }
         size = 4096;
-        @name(".bd_action_profile") implementation = action_profile(32w1024);
+        implementation = bd_action_profile;
         default_action = NoAction();
     }
     apply {
@@ -5482,7 +5486,7 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
             meta.hash_metadata.hash1      : selector @name("hash_metadata.hash1") ;
         }
         size = 1024;
-        @name(".ecmp_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
+        implementation = ecmp_action_profile;
         default_action = NoAction();
     }
     @name(".nexthop") table nexthop_0 {
@@ -5552,7 +5556,7 @@ control process_lag(inout headers hdr, inout metadata meta, inout standard_metad
             meta.hash_metadata.hash2            : selector @name("hash_metadata.hash2") ;
         }
         size = 1024;
-        @name(".lag_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
+        implementation = lag_action_profile;
         default_action = NoAction();
     }
     apply {
@@ -5612,7 +5616,7 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
             meta.fabric_metadata.dst_device: exact @name("fabric_metadata.dst_device") ;
             meta.hash_metadata.hash2       : selector @name("hash_metadata.hash2") ;
         }
-        @name(".fabric_lag_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
+        implementation = fabric_lag_action_profile;
         default_action = NoAction();
     }
     apply {

@@ -92,6 +92,8 @@ class ExternConverter {
                 const IR::Declaration_Instance *, cstring, IR::IndexedVector<IR::Declaration> *);
     virtual const IR::Statement *convertExternCall(ProgramStructure *,
                 const IR::Declaration_Instance *, const IR::Primitive *);
+    virtual bool convertAsGlobal(ProgramStructure *, const IR::Declaration_Instance *) {
+        return false; }
     ExternConverter() {}
     /// register a converter for a p4_14 extern_type
     /// @type: extern_type that the converter works on
@@ -110,6 +112,8 @@ class ExternConverter {
     static const IR::Statement *cvtExternCall(ProgramStructure *s,
                 const IR::Declaration_Instance *di, const IR::Primitive *p) {
         return get(di)->convertExternCall(s, di, p); }
+    static bool cvtAsGlobal(ProgramStructure *s, const IR::Declaration_Instance *di) {
+        return get(di)->convertAsGlobal(s, di); }
 };
 
 class PrimitiveConverter {

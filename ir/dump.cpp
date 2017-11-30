@@ -60,9 +60,14 @@ void dump(std::ostream &out, const IR::Node *n, unsigned maxdepth) {
 void dump(std::ostream &out, const IR::Node *n) { dump(out, n, ~0U); }
 void dump(const IR::Node *n, unsigned maxdepth) { dump(std::cout, n, maxdepth); }
 void dump(const IR::Node *n) { dump(n, ~0U); }
+void dump(const IR::INode *n, unsigned maxdepth) { dump(std::cout, n->getNode(), maxdepth); }
+void dump(const IR::INode *n) { dump(n, ~0U); }
 void dump_notype(const IR::Node *n, unsigned maxdepth) {
     n->apply(IRDumper(std::cout, maxdepth, "type")); }
 void dump_notype(const IR::Node *n) { dump_notype(n, ~0U); }
+void dump_notype(const IR::INode *n, unsigned maxdepth) {
+    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type")); }
+void dump_notype(const IR::INode *n) { dump_notype(n, ~0U); }
 
 void dump(uintptr_t p, unsigned maxdepth) {
     dump(reinterpret_cast<const IR::Node *>(p), maxdepth); }

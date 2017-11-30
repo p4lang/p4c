@@ -204,6 +204,8 @@ class ProgramStructure {
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
     const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
+    const IR::Declaration_Instance* convertActionProfile(const IR::ActionProfile *,
+                                                         cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
                  IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);

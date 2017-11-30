@@ -162,7 +162,8 @@ bool
 ControlConverter::handleTableImplementation(const IR::Property* implementation,
                                             const IR::Key* key,
                                             Util::JsonObject* table,
-                                            Util::JsonArray* action_profiles) {
+                                            Util::JsonArray* action_profiles,
+                                            BMV2::SharedActionSelectorCheck& selector_check) {
     if (implementation == nullptr) {
         table->emplace("type", "simple");
         return true;
@@ -265,6 +266,11 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
             return false;
         }
         isSimpleTable = false;
+        auto eb = backend->getToplevelBlock()->getValue(decl->getNode());
+        if (eb) {
+            BUG_CHECK(eb->is<IR::ExternBlock>(), "Not an extern block?");
+            backend->getSimpleSwitch()->convertExternInstances(decl->to<IR::Declaration>(),
+                        eb->to<IR::ExternBlock>(), action_profiles, selector_check); }
     } else {
         ::error("%1%: unexpected value for property", propv);
         return false;
@@ -275,7 +281,8 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
 
 Util::IJson*
 ControlConverter::convertTable(const CFG::TableNode* node,
-                               Util::JsonArray* action_profiles) {
+                               Util::JsonArray* action_profiles,
+                               BMV2::SharedActionSelectorCheck& selector_check) {
     auto table = node->table;
     LOG3("Processing " << dbp(table));
     auto result = new Util::JsonObject();
@@ -350,7 +357,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     conv->simpleExpressionsOnly = false;
 
     auto impl = table->properties->getProperty(BMV2::TableAttributes::implementationName);
-    bool simple = handleTableImplementation(impl, key, result, action_profiles);
+    bool simple = handleTableImplementation(impl, key, result, action_profiles, selector_check);
 
     unsigned size = 0;
     auto sz = table->properties->getProperty(BMV2::TableAttributes::sizeName);
@@ -689,7 +696,7 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
     // Tables are created prior to the other local declarations
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
-            auto j = convertTable(node->to<CFG::TableNode>(), action_profiles);
+            auto j = convertTable(node->to<CFG::TableNode>(), action_profiles, selector_check);
             if (::errorCount() > 0)
                 return false;
             tables->append(j);

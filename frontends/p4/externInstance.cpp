@@ -73,7 +73,7 @@ ExternInstance::resolve(const IR::PathExpression* path,
 
     if (!type->is<IR::Type_Extern>()) return boost::none;
 
-    return ExternInstance{instance->externalName(), path,
+    return ExternInstance{instance->controlPlaneName(), path,
                           type->to<IR::Type_Extern>(),
                           instance->arguments,
                           instance->to<IR::IAnnotated>()};
