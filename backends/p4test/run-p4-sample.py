@@ -83,7 +83,14 @@ def run_timeout(options, args, timeout, stderr):
             # copy stderr to the specified file, stripping file path prefixes
             # from the start of lines
             outfile = open(stderr, "w")
-            local.filter = Popen(['sed', '-e', 's|^[\S*/]\S*/||'], stdin=PIPE, stdout=outfile)
+            # This regex is ridiculously verbose; it's written this way to avoid
+            # features that are not supported on both GNU and BSD (i.e., macOS)
+            # sed. BSD sed's character class support is not great; for some
+            # reason, even some character classes that the man page claims are
+            # available don't seem to actually work.
+            local.filter = Popen(['sed', '-E',
+                r's|^[-[:alnum:][:space:]_/]*/([-[:alnum:][:space:]_]+\.p4\([[:digit:]]+\))|\1|'],
+                stdin=PIPE, stdout=outfile)
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
