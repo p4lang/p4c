@@ -395,6 +395,8 @@ void P4CContext::setDiagnosticAction(cstring diagnostic, DiagnosticAction action
 
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
+        "uninitialized_out_param",
+        "uninitialized_use",
         "unknown_diagnostic"
     };
 

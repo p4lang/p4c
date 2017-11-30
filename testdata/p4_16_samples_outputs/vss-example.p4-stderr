@@ -1,3 +1,3 @@
-vss-example.p4(159): warning: nextHop may be uninitialized
+vss-example.p4(159): [--Wwarn=uninitialized_use] warning: nextHop may be uninitialized
           key = { nextHop : exact; }
                   ^^^^^^^
