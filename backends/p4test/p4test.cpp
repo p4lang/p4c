@@ -135,7 +135,8 @@ int main(int argc, char *const argv[]) {
                     std::ofstream t1("t1.json"), t2("t2.json");
                     t1 << ss1.str() << std::flush;
                     t2 << ss2.str() << std::flush;
-                    system("json_diff t1.json t2.json");
+                    auto rv = system("json_diff t1.json t2.json");
+                    if (rv != 0) ::warning("json_diff failed with code %1%", rv);
                 }
             }
         }
