@@ -23,6 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/options.h"
 #include "codeGen.h"
 
 namespace EBPF {
