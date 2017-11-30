@@ -142,6 +142,8 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
         operand == 0) {
         return IR::Type::Bits::get(32);
     }
+    if ((name == "execute") && operand == 2)
+        return IR::Type::Bits::get(32);
     return IR::Type::Unknown::get();
 }
 
