@@ -181,6 +181,8 @@ void CompilerOptions::setInputFile() {
     }
 }
 
+namespace {
+
 template <size_t N>
 static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
     output[0] = '\0';  // Default to the empty string, indicating failure.
@@ -196,10 +198,19 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
     snprintf(output, N, "%s%s%s", cwd, separator, relPath);
 }
 
+bool setIncludePathIfExists(const char*& includePathOut,
+                            const char* possiblePath) {
+    struct stat st;
+    if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode))) return false;
+    includePathOut = strdup(possiblePath);
+    return true;
+}
+
+}  // namespace
+
 std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[]) {
     char buffer[PATH_MAX];
     int len;
-    struct stat st;
     /* find the path of the executable.  We use a number of techniques that may fail
      * or work on different systems, and take the first working one we find.  Fall
      * back to not overriding the compiled-in installation path */
@@ -222,11 +233,16 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
         ++p;
         exe_name = p;
         snprintf(p, buffer + sizeof(buffer) - p, "p4include");
-        if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
-            p4includePath = strdup(buffer);
+        if (!setIncludePathIfExists(p4includePath, buffer)) {
+            snprintf(p, buffer + sizeof(buffer) - p, "../p4include");
+            setIncludePathIfExists(p4includePath, buffer);
+        }
         snprintf(p, buffer + sizeof(buffer) - p, "p4_14include");
-        if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
-            p4_14includePath = strdup(buffer); }
+        if (!setIncludePathIfExists(p4_14includePath, buffer)) {
+            snprintf(p, buffer + sizeof(buffer) - p, "../p4_14include");
+            setIncludePathIfExists(p4_14includePath, buffer);
+        }
+    }
 
     auto remainingOptions = Util::Options::process(argc, argv);
     validateOptions();
