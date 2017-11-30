@@ -26,6 +26,7 @@ limitations under the License.
 #include "lib/gc.h"
 #include "lib/crash.h"
 #include "lib/nullstream.h"
+#include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
@@ -83,6 +84,9 @@ int main(int argc, char *const argv[]) {
     auto hook = options.getDebugHook();
 
     if (program != nullptr && ::errorCount() == 0) {
+        P4::P4COptionPragmaParser optionsPragmaParser;
+        program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+
         if (!options.parseOnly) {
             try {
                 P4::FrontEnd fe;

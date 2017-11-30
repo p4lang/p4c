@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "control-plane/p4RuntimeSerializer.h"
+#include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "lib/error.h"
@@ -53,6 +54,9 @@ int main(int argc, char *const argv[]) {
     if (program == nullptr || ::errorCount() > 0)
         return 1;
     try {
+        P4::P4COptionPragmaParser optionsPragmaParser;
+        program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+
         P4::FrontEnd frontend;
         frontend.addDebugHook(hook);
         program = frontend.run(options, program);

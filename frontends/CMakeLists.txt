@@ -106,15 +106,17 @@ set (P4_FRONTEND_HDRS
 
 
 set (COMMON_FRONTEND_SRCS
-  common/options.cpp
+  common/applyOptionsPragmas.cpp
   common/constantFolding.cpp
+  common/constantParsing.cpp
+  common/options.cpp
+  common/parseInput.cpp
   common/resolveReferences/referenceMap.cpp
   common/resolveReferences/resolveReferences.cpp
-  common/parseInput.cpp
-  common/constantParsing.cpp
   )
 
 set (COMMON_FRONTEND_HDRS
+  common/applyOptionsPragmas.h
   common/constantFolding.h
   common/constantParsing.h
   common/model.h
