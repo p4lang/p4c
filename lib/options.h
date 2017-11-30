@@ -66,9 +66,16 @@ class Options {
     explicit Options(cstring message) : binaryName(nullptr), message(message) {}
 
  public:
-    // Process options; return list of remaining options.
-    // Returns 'nullptr' if an error is signalled
-    std::vector<const char*>* process(int argc, char* const argv[]);
+    /**
+     * Process options; return list of remaining options.
+     *
+     * If subclasses override this method, they should call the superclass
+     * implementation.
+     *
+     * @return 'nullptr' if an error is signaled.
+     */
+    virtual std::vector<const char*>* process(int argc, char* const argv[]);
+
     void usage();
 };
 

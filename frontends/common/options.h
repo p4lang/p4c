@@ -48,7 +48,7 @@ class CompilerOptions : public Util::Options {
 
  public:
     CompilerOptions();
-    std::vector<const char*>* process(int argc, char* const argv[]);
+    std::vector<const char*>* process(int argc, char* const argv[]) override;
 
     enum class FrontendVersion {
         P4_14,
