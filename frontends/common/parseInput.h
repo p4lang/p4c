@@ -17,8 +17,7 @@ limitations under the License.
 #ifndef _FRONTENDS_COMMON_PARSEINPUT_H_
 #define _FRONTENDS_COMMON_PARSEINPUT_H_
 
-#include "options.h"
-#include "frontends/p4/fromv1.0/converters.h"
+#include "frontends/common/options.h"
 
 namespace IR {
 class P4Program;

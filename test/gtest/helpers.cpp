@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "helpers.h"
 
+#include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 
@@ -109,6 +110,14 @@ FrontendTestCase::create(const std::string& source,
     if (::diagnosticCount() > 0) {
         std::cerr << "Encountered " << ::diagnosticCount()
                   << " errors while parsing test case" << std::endl;
+        return boost::none;
+    }
+
+    P4::P4COptionPragmaParser optionsPragmaParser;
+    program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+    if (::errorCount() > 0) {
+        std::cerr << "Encountered " << ::errorCount()
+                  << " errors while collecting options pragmas" << std::endl;
         return boost::none;
     }
 
