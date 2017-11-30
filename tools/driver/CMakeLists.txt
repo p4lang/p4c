@@ -23,6 +23,7 @@ execute_process(COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c)
 
 set (P4C_DRIVER_SRCS
   p4c_src/main.py
+  p4c_src/driver.py
   p4c_src/util.py
   p4c_src/config.py
   p4c_src/__init__.py

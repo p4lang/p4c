@@ -22,19 +22,12 @@ p4c - P4 Compiler Driver
 from __future__ import absolute_import
 import argparse
 import glob
-import itertools
 import os
-import subprocess
-import shlex
 import sys
 import re
 
-import p4c_src.util as util
 import p4c_src.config as config
 import p4c_src
-
-commands = {}
-
 
 p4c_version = p4c_src.__version__
 
@@ -176,136 +169,96 @@ def main():
         parser.error('No input specified.')
 
     backend = None
-    for triplet, _ in cfg.steps.iteritems():
-        regex = triplet.replace('*', '[a-zA-Z0-9*]*')
+    for target in cfg.target:
+        regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
         pattern = re.compile(regex)
         if (pattern.match(opts.backend)):
-            backend = triplet
+            backend = target
             break
     if backend == None:
         print "Unknown backend:", opts.backend
         sys.exit(1)
 
-    commands['preprocessor'] = []
-    commands['compiler'] = []
-    commands['assembler'] = []
-    commands['linker'] = []
-
     for option in opts.preprocessor_options:
-        commands["preprocessor"] += shlex.split(option)
+        backend.add_command_option('preprocessor', option)
 
     for option in opts.compiler_options:
-        commands["compiler"] += shlex.split(option)
+        backend.add_command_option('compiler', option)
 
     if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
         for option in opts.log_levels:
-            commands["compiler"].append("-T{}".format(option))
+            backend.add_command_option('compiler', "-T{}".format(option))
         if opts.passes:
-            commands["compiler"].append("--top4 {}".format(",".join(opts.passes)))
+            backend.add_command_option('compiler', "--top4 {}".format(",".join(opts.passes)))
         if opts.debug:
-            commands["assembler"].append("-vvv")
-            commands["compiler"].append("-vvv")
+            backend.add_command_option('assembler', "-vvv")
+            backend.add_command_option('compiler', "-vvv")
         if opts.dump_dir:
-            commands["compiler"].append("--dump {}".format(opts.dump_dir))
+            backend.add_command_option('compiler', "--dump {}".format(opts.dump_dir))
         if opts.json:
-            commands["compiler"].append("--toJSON {}".format(opts.json))
+            backend.add_command_option('compiler', "--toJSON {}".format(opts.json))
         if opts.pretty_print:
-            commands["compiler"].append("--pp {}".format(opts.pretty_print))
+            backend.add_command_option('compiler', "--pp {}".format(opts.pretty_print))
 
     if opts.debug_info:
-        commands["assembler"].append("-g")
-        commands["compiler"].append("-g")
-        commands["linker"].append("-g")
+        backend.add_command_option('assembler', "-g")
+        backend.add_command_option('compiler', "-g")
+        backend.add_command_option('linker', "-g")
 
     for option in opts.assembler_options:
-        commands["assembler"] += shlex.split(option)
+        backend.add_command_option('assembler', option)
 
     for option in opts.linker_options:
-        commands["linker"] += shlex.split(option)
-
-    # set output directory
-    if not os.path.exists(opts.output_directory):
-        os.makedirs(opts.output_directory)
-
-    commands['preprocessor'].insert(0, cfg.get_preprocessor(backend))
-    commands['compiler'].insert(0, cfg.get_compiler(backend))
-    commands['assembler'].insert(0, cfg.get_assembler(backend))
-    commands['linker'].insert(0, cfg.get_linker(backend))
+        backend.add_command_option('linker', option)
 
     # handle mode flags
-    step_enable = [False, False, False, False]
     if opts.run_preprocessor_only:
-        step_enable = [True, False, False, False]
+        backend.enable_commands(['preprocessor'])
     elif opts.skip_preprocessor:
-        step_enable = [False, True, True, True]
+        backend.disable_commands(['preprocessor'])
     elif opts.run_till_assembler:
-        step_enable = [True, True, False, False]
+        backend.enable_commands(['preprocessor', 'compiler'])
     elif opts.run_all:
-        step_enable = [True, True, True, True]
+        # this is the default, each backend driver is supposed to enable all
+        # its commands and the order in which they execute
+        pass
+
 
     # append to the list of defines
     for d in opts.preprocessor_defines:
-        commands['preprocessor'].append("-D"+d)
-        commands['compiler'].append("-D"+d)
+        backend.add_command_option('preprocessor', "-D"+d)
+        backend.add_command_option('compiler', "-D"+d)
 
     # default search path
     if opts.language == 'p4-16':
-        commands['preprocessor'].append("-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
-        commands['compiler'].append("-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
+        backend.add_command_option('preprocessor',
+                                   "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
+        backend.add_command_option('compiler',
+                                   "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
     else:
-        commands['preprocessor'].append("-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
-        commands['compiler'].append("-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
+        backend.add_command_option('preprocessor',
+                                   "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
+        backend.add_command_option('compiler',
+                                   "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
 
     # append search path
     for path in opts.search_path:
-        commands['preprocessor'].append("-I")
-        commands['preprocessor'].append(path)
-        commands['compiler'].append("-I")
-        commands['compiler'].append(path)
+        backend.add_command_option('preprocessor', "-I")
+        backend.add_command_option('preprocessor', path)
+        backend.add_command_option('compiler', "-I")
+        backend.add_command_option('compiler', path)
 
     # set p4 version
     if opts.language == 'p4-16':
-        commands['compiler'].append("--p4v=16")
+        backend.add_command_option('compiler', "--p4v=16")
     else:
-        commands['compiler'].append("--p4v=14")
+        backend.add_command_option('compiler', "--p4v=14")
 
     # P4Runtime options
     if opts.p4runtime_file:
-        commands['compiler'].append("--p4runtime-file {}".format(opts.p4runtime_file))
-        commands['compiler'].append("--p4runtime-format {}".format(opts.p4runtime_format))
+        backend.add_command_option('compiler',
+                                   "--p4runtime-file {}".format(opts.p4runtime_file))
+        backend.add_command_option('compiler',
+                                   "--p4runtime-format {}".format(opts.p4runtime_format))
 
-    for idx, step in enumerate(cfg.steps[backend]):
-
-        cmd = []
-        for c in commands[step]:
-            cmd = cmd + shlex.split(c)
-        options = cfg.options[backend][step]
-        for option in options:
-            cmd = cmd + shlex.split(option)
-        # check if cmd in PATH unless absolute path
-        if cmd[0].find('/') != 0 and (util.find_bin(cmd[0]) == None):
-            print "{}: command not found".format(cmd[0])
-            sys.exit(1)
-        # only dry-run
-        if opts.dry_run:
-            print "{}: {}".format(step, " ".join(cmd))
-            continue
-        # skip if not required
-        if not step_enable[idx]:
-            continue
-        # run command
-        try:
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        except:
-            import traceback
-            print "error invoking {}".format(" ".join(cmd))
-            print traceback.format_exc()
-            sys.exit(1)
-
-        if opts.debug:
-            print 'running {}'.format(' '.join(cmd))
-        out, err = p.communicate() # now wait
-        if len(out) > 0:
-            print out
-        if p.returncode != 0:
-            sys.exit(p.returncode)
+    backend.run(opts)
