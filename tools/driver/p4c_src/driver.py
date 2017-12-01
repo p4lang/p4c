@@ -17,7 +17,7 @@ import sys
 
 import p4c_src.util as util
 
-class Driver:
+class BackendDriver:
     """A class that has a list of passes that need to be run.
     Each backend instantiates this class and configures the commands
     that wants to be run.
@@ -77,31 +77,32 @@ class Driver:
             if c in self._commandsEnabled:
                 self._commandsEnabled.remove(c)
 
-    def runCmd(self, cmd, opts):
+    def runCmd(self, step, cmd, opts):
         """
         Run a command, capture its output and print it
         Also exit with the command error code if failed
         """
         # only dry-run
         if opts.dry_run:
-            print " ".join(cmd)
-            return
+            print '{}:\n{}'.format(step, ' '.join(cmd))
+            return 0
 
         args = shlex.split(" ".join(cmd))
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
+                                 stderr=subprocess.PIPE)
         except:
             import traceback
             print >> sys.stderr, "error invoking {}".format(" ".join(cmd))
             print >> sys.stderr, traceback.format_exc()
-            sys.exit(1)
+            return 1
 
         if opts.debug: print 'running {}'.format(' '.join(cmd))
         out, err = p.communicate() # now wait
         if len(out) > 0: print out
-        if p.returncode != 0:
-            sys.exit(p.returncode)
+        if len(err) > 0: print >> sys.stderr, err
+        return p.returncode
+
 
     def preRun(self, cmd_name, opts):
         """
@@ -111,7 +112,9 @@ class Driver:
             return # nothing to do
 
         cmd = self._preCmds[cmd_name]
-        self.runCmd(cmd, opts)
+        rc = self.runCmd(cmd_name, cmd, opts)
+        if rc != 0:
+            sys.exit(rc)
 
     def postRun(self, cmd_name, opts):
         """
@@ -121,7 +124,9 @@ class Driver:
             return # nothing to do
 
         cmd = self._postCmds[cmd_name]
-        self.runCmd(cmd, opts)
+        rc = self.runCmd(cmd_name, cmd, opts)
+        if rc != 0:
+            sys.exit(rc)
 
     def run(self, opts):
         """
@@ -142,7 +147,12 @@ class Driver:
             if cmd[0].find('/') != 0 and (util.find_bin(cmd[0]) == None):
                 print >> sys.stderr, "{}: command not found".format(cmd[0])
                 sys.exit(1)
-            self.runCmd(cmd, opts)
 
-            # run the cleanup
+            rc = self.runCmd(c, cmd, opts)
+
+            # run the cleanup whether the command succeeded or failed
             self.postRun(c, opts)
+
+            # if the main command failed, exit with its error code
+            if rc != 0:
+                sys.exit(rc)

@@ -46,3 +46,39 @@ def find_bin(exe):
                     found_path = os.path.join(pp, ff)
     return found_path
 
+def find_file(directory, filename, binary=True):
+    """
+    Searches up the directory hierarchy for filename with prefix directory
+    starting from the current working directory.
+    If directory is an absolute path, just check for the file.
+    If binary == true, then check permissions that the file is executable
+    """
+    def check_file(f):
+        if os.path.isfile(f):
+            if binary:
+                if os.access(f, os.X_OK): return True
+            else:
+                return True
+        return False
+
+    executable = ""
+    if directory.startswith('/'):
+        executable = os.path.normpath(os.path.join(directory, filename))
+        if check_file(executable): return executable
+
+    # find the file up the hierarchy
+    dir	= os.path.abspath(os.getcwd())
+    if os.path.basename(filename) != filename:
+        directory = os.path.join(directory, os.path.dirname(filename))
+        filename = os.path.basename(filename)
+    while dir != "/":
+        path_to_file = os.path.join(dir, directory)
+        if os.path.isdir(path_to_file):
+	    files = os.listdir(path_to_file)
+            if filename in files:
+                executable = os.path.join(path_to_file, filename)
+                if check_file(executable): return executable
+
+	dir = os.path.dirname(dir)
+    print 'File', filename, 'Not found'
+    sys.exit(1)
