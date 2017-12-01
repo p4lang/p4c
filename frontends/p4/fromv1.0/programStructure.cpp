@@ -282,8 +282,14 @@ const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* para
 const IR::AssignmentStatement* ProgramStructure::assign(
     Util::SourceInfo srcInfo, const IR::Expression* left,
     const IR::Expression* right, const IR::Type* type) {
-    if (type != nullptr && type != right->type)
-        right = new IR::Cast(type, right);
+    if (type != nullptr && type != right->type) {
+        auto t1 = right->type->to<IR::Type::Bits>();
+        auto t2 = type->to<IR::Type::Bits>();
+        if (t1 && t2 && t1->size != t2->size && t1->isSigned != t2->isSigned) {
+            /* P4_16 does not allow changing both size and signedness with a single cast,
+             * so we need two, changing size first, then signedness */
+            right = new IR::Cast(IR::Type::Bits::get(t2->size, t1->isSigned), right); }
+        right = new IR::Cast(type, right); }
     return new IR::AssignmentStatement(srcInfo, left, right);
 }
 
