@@ -120,31 +120,45 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
-    registerOption("--Wwarnings-as-errors", nullptr,
-                    [](const char*) {
-                        auto action = DiagnosticAction::Error;
-                        P4CContext::get().setDefaultWarningDiagnosticAction(action);
-                        return true;
-                    },
-                    "Treat all warnings as errors");
     registerOption("--Wdisable", "diagnostic",
         [this](const char *diagnostic) {
-            P4CContext::get().setDiagnosticAction(diagnostic,
-                                                  DiagnosticAction::Ignore);
+            if (diagnostic) {
+                P4CContext::get().setDiagnosticAction(diagnostic,
+                                                      DiagnosticAction::Ignore);
+            } else {
+                auto action = DiagnosticAction::Ignore;
+                P4CContext::get().setDefaultWarningDiagnosticAction(action);
+            }
             return true;
-        }, "Disable a compiler diagnostic");
+        }, "Disable a compiler diagnostic, or disable all warnings if no "
+           "diagnostic is specified.",
+        OptionFlags::OptionalArgument);
     registerOption("--Wwarn", "diagnostic",
         [this](const char *diagnostic) {
-            P4CContext::get().setDiagnosticAction(diagnostic,
-                                                  DiagnosticAction::Warn);
+            if (diagnostic) {
+                P4CContext::get().setDiagnosticAction(diagnostic,
+                                                      DiagnosticAction::Warn);
+            } else {
+                auto action = DiagnosticAction::Warn;
+                P4CContext::get().setDefaultWarningDiagnosticAction(action);
+            }
             return true;
-        }, "Report a warning for a compiler diagnostic");
+        }, "Report a warning for a compiler diagnostic, or treat all warnings "
+           "as warnings (the default) if no diagnostic is specified.",
+        OptionFlags::OptionalArgument);
     registerOption("--Werror", "diagnostic",
         [this](const char *diagnostic) {
-            P4CContext::get().setDiagnosticAction(diagnostic,
-                                                  DiagnosticAction::Error);
+            if (diagnostic) {
+                P4CContext::get().setDiagnosticAction(diagnostic,
+                                                      DiagnosticAction::Error);
+            } else {
+                auto action = DiagnosticAction::Error;
+                P4CContext::get().setDefaultWarningDiagnosticAction(action);
+            }
             return true;
-        }, "Report an error for a compiler diagnostic");
+        }, "Report an error for a compiler diagnostic, or treat all warnings as "
+           "errors if no diagnostic is specified.",
+        OptionFlags::OptionalArgument);
     registerOption("-T", "loglevel",
                    [](const char* arg) { Log::addDebugSpec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
