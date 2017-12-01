@@ -64,12 +64,14 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_14;
                        return true; },
-                    "[Deprecated] Specify language version to compile", true);
+                    "[Deprecated] Specify language version to compile",
+                    OptionFlags::Hide);
     registerOption("--p4-16", nullptr,
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_16;
                        return true; },
-                    "[Deprecated] Specify language version to compile", true);
+                    "[Deprecated] Specify language version to compile",
+                    OptionFlags::Hide);
     registerOption("--p4v", "{14|16}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
