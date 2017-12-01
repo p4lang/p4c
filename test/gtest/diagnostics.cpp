@@ -16,8 +16,11 @@ limitations under the License.
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/optional.hpp>
+#include <vector>
+
 #include "gtest/gtest.h"
 
+#include "frontends/common/applyOptionsPragmas.h"
 #include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
@@ -151,11 +154,116 @@ TEST_F(Diagnostics, NestedCompileContexts) {
     // Run a test with no diagnostic pragma for `uninitialized_out_param`. It
     // should default to triggering a warning; the diagnostic actions configured
     // by the previous tests should be gone.
-    auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-    )"));
+    auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, ::diagnosticCount());
     EXPECT_EQ(0u, ::errorCount());
+}
+
+TEST_F(Diagnostics, CompilerOptions) {
+    using CommandLineOptions = IOptionPragmaParser::CommandLineOptions;
+
+    auto parseWithCompilerOptions = [](const CommandLineOptions& args)
+                                        -> boost::optional<FrontendTestCase> {
+        auto& options = GTestContext::get().options();
+        options.process(args.size(), const_cast<char* const*>(args.data()));
+        return createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
+    };
+
+    // Check that `--Wdisable`, `--Wwarn`, and `--Werror`, when used with no
+    // arguments, change the default behavior for warnings.
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({ "(test)", "--Wdisable" });
+        EXPECT_TRUE(test);
+        EXPECT_EQ(0u, ::diagnosticCount());
+    }
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({ "(test)", "--Wwarn" });
+        EXPECT_TRUE(test);
+        EXPECT_EQ(1u, ::diagnosticCount());
+        EXPECT_EQ(0u, ::errorCount());
+    }
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({ "(test)", "--Werror" });
+        EXPECT_FALSE(test);
+        EXPECT_EQ(1u, ::diagnosticCount());
+        EXPECT_EQ(1u, ::errorCount());
+    }
+
+    // Check that `--Wdisable`, `--Wwarn`, and `--Werror`, when used with an
+    // argument, change the behavior only for a specific diagnostic.
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({
+            "(test)", "--Wdisable=uninitialized_out_param"
+        });
+        EXPECT_TRUE(test);
+        EXPECT_EQ(0u, ::diagnosticCount());
+    }
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({
+            "(test)", "--Wdisable=unknown_diagnostic"
+        });
+        EXPECT_TRUE(test);
+        EXPECT_EQ(1u, ::diagnosticCount());
+        EXPECT_EQ(0u, ::errorCount());
+    }
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({
+            "(test)", "--Wwarn=uninitialized_out_param"
+        });
+        EXPECT_TRUE(test);
+        EXPECT_EQ(1u, ::diagnosticCount());
+        EXPECT_EQ(0u, ::errorCount());
+    }
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({
+            "(test)", "--Werror=uninitialized_out_param"
+        });
+        EXPECT_FALSE(test);
+        EXPECT_EQ(1u, ::diagnosticCount());
+        EXPECT_EQ(1u, ::errorCount());
+    }
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({
+            "(test)", "--Werror=unknown_diagnostic"
+        });
+        EXPECT_TRUE(test);
+        EXPECT_EQ(1u, ::diagnosticCount());
+        EXPECT_EQ(0u, ::errorCount());
+    }
+
+    // Check that e.g. `--Wdisable foo` is treated as two arguments, rather than
+    // behaving the same as `--Wdisable=foo`.
+
+    {
+        AutoCompileContext autoContext(new GTestContext);
+        auto test = parseWithCompilerOptions({
+            "(test)", "--Wdisable", "unknown_diagnostic"
+        });
+        EXPECT_TRUE(test);
+
+        // We expect all warnings to be disabled. If `unknown_diagnostic` was
+        // treated as an argument to `--Wdisable`, then
+        // `uninitialized_out_param` would still be enabled and a warning would
+        // fire.
+        EXPECT_EQ(0u, ::diagnosticCount());
+    }
 }
 
 }  // namespace Test
