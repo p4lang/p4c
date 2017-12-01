@@ -78,6 +78,8 @@ class SimpleSwitch : public Switch {
   // by default, swapping is off
   explicit SimpleSwitch(int max_port = 256, bool enable_swap = false);
 
+  ~SimpleSwitch();
+
   int receive_(int port_num, const char *buffer, int len) override;
 
   void start_and_return_() override;
@@ -159,6 +161,7 @@ class SimpleSwitch : public Switch {
 
  private:
   int max_port;
+  std::vector<std::thread> threads_;
   Queue<std::unique_ptr<Packet> > input_buffer;
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
   bm::QueueingLogicPriRL<std::unique_ptr<Packet>, EgressThreadMapper>
