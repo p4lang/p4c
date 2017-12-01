@@ -18,7 +18,7 @@ limitations under the License.
 
 void Util::Options::registerOption(const char* option, const char* argName,
                                    OptionProcessor processor, const char* description,
-                                   bool hide) {
+                                   OptionFlags flags /* = OptionFlags::Default */) {
     if (option == nullptr || processor == nullptr || description == nullptr)
         throw std::logic_error("Null argument to registerOption");
     if (strlen(option) <= 1)
@@ -30,7 +30,7 @@ void Util::Options::registerOption(const char* option, const char* argName,
     o->argName = argName;
     o->processor = processor;
     o->description = description;
-    o->hide = hide;
+    o->flags = flags;
     auto opt = get(options, option);
     if (opt != nullptr)
         throw std::logic_error(std::string("Option already registered: ") + option);
@@ -65,12 +65,16 @@ std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
             if (option == nullptr) {
                 ::error("Unknown option %1%", opt);
                 usage();
-                return nullptr; } }
+                return nullptr; }
+            if ((option->flags & OptionFlags::OptionalArgument) &&
+                    (!arg || strlen(arg) == 0))
+                arg = nullptr; }
 
         if (option == nullptr) {
             remainingOptions.push_back(opt);
         } else {
-            if (option->argName != nullptr && arg == nullptr) {
+            if (option->argName != nullptr && arg == nullptr &&
+                    !(option->flags & OptionFlags::OptionalArgument)) {
                 if (i == argc - 1) {
                     ::error("Option %1% is missing required argument %2%",
                             opt, option->argName);
@@ -102,12 +106,17 @@ void Util::Options::usage() {
     for (auto o : optionOrder) {
         auto option = get(options, o);
         size_t len = strlen(o);
-        if (option->hide)
+        if (option->flags & OptionFlags::Hide)
             continue;
         *outStream << option->option;
         if (option->argName != nullptr) {
-            *outStream << " " << option->argName;
-            len += 1 + strlen(option->argName);
+            if (option->flags & OptionFlags::OptionalArgument) {
+                *outStream << "[=" << option->argName << "]";
+                len += 3 + strlen(option->argName);
+            } else {
+                *outStream << " " << option->argName;
+                len += 1 + strlen(option->argName);
+            }
         }
         std::string line;
         std::stringstream ss(option->description);

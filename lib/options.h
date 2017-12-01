@@ -32,6 +32,21 @@ namespace Util {
 // Command-line options processing
 class Options {
  public:
+    enum OptionFlags {
+        /// The default option flags.
+        Default = 0,
+
+        /// Hide this option from --help message.
+        Hide = 1 << 0,
+
+        /// If this option requires an argument, it may be omitted. Options with
+        /// this flag set can only accept their argument with the syntax
+        /// `--foo=bar`; `--foo bar` will be treated as if the argument to
+        /// `--foo` were omitted. If the argument is omitted, null will be
+        /// passed to the OptionProcessor.
+        OptionalArgument = 1 << 1,
+    };
+
     // return true if processing is successful
     typedef std::function<bool(const char* optarg)> OptionProcessor;
 
@@ -41,7 +56,7 @@ class Options {
         const char* argName;  // nullptr if argument is not required
         const char* description;
         OptionProcessor processor;
-        bool hide;  // is true to hide option from help message
+        OptionFlags flags;
     };
     const char* binaryName;
     cstring message;
@@ -61,7 +76,7 @@ class Options {
                                               // nullptr if no argument expected
                         OptionProcessor processor,  // function to execute when option matches
                         const char* description,  // option help message
-                        bool hide = false);  // hide option from --help message
+                        OptionFlags flags = OptionFlags::Default);  // additional flags
 
     explicit Options(cstring message) : binaryName(nullptr), message(message) {}
 
