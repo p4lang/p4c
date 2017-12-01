@@ -45,3 +45,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress1(), egress(), computeChecksum(), DeparserImpl()) main;
+

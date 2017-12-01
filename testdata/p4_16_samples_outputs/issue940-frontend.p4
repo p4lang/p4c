@@ -3,3 +3,4 @@
 }
 
 Checksum16() instance;
+

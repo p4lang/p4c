@@ -11,6 +11,7 @@ extern ActionSelector {
 }
 
 BoolRegister() r;
+
 control MyC1() {
     ActionSelector(r) action_selector;
     apply {
@@ -18,3 +19,4 @@ control MyC1() {
 }
 
 S(MyC1()) main;
+

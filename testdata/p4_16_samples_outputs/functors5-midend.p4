@@ -12,3 +12,4 @@ parser p2_0(out bit<2> w) {
 }
 
 m(p2_0()) main;
+

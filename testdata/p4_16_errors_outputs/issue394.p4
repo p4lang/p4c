@@ -12,3 +12,4 @@ control X(out bool b) {
 control Z(out bool a);
 package top(Z z);
 top(X()) main;
+

@@ -25,3 +25,4 @@ parser Parser2_0() {
 }
 
 Package(Parser1_0(), Parser2_0()) main;
+

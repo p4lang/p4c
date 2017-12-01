@@ -25,3 +25,4 @@ control ingress(inout hdr h) {
 control c(inout hdr h);
 package top(c _c);
 top(ingress()) main;
+

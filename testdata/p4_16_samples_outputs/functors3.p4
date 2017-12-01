@@ -20,3 +20,4 @@ const bit<1> bv = 1w0;
 parser simple(out bit<1> z);
 package m(simple n);
 m(p(bv, 1w1)) main;
+
