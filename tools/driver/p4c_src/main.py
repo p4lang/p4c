@@ -29,6 +29,7 @@ import re
 import p4c_src.config as config
 import p4c_src
 
+# \TODO: let the backends set their versions ...
 p4c_version = p4c_src.__version__
 
 def set_version(ver):
@@ -40,9 +41,10 @@ def get_version():
 
 
 def display_supported_targets(cfg):
-    print "Supported targets in \"target-arch-vendor\" triplet:"
+    ret = "Supported targets in \"target-arch-vendor\" triplet:\n"
     for target in cfg.target:
-        print target
+        ret += target + "\n"
+    return ret
 
 def add_developer_options(parser):
     parser.add_argument("-T", dest="log_levels",
@@ -61,7 +63,7 @@ def add_developer_options(parser):
                         help="Pretty-print the program in the specified file.")
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(conflict_handler='resolve')
     parser.add_argument("-V", "--version", dest="show_version",
                         help="show version and exit",
                         action="store_true", default=False)
@@ -136,38 +138,34 @@ def main():
 
     parser.add_argument("source_file", nargs='?', help="Files to compile", default=None)
 
-    # many more options
-    opts = parser.parse_args()
-    source = opts.source_file
-
-    if opts.show_version:
-        print("p4c %s" % (get_version()))
-        sys.exit(0)
-
-    # load supported configuration
+    # load supported configuration.
+    # We load these before we parse options, so that backends can register
+    # proprietary options
     cfg_files = glob.glob("{}/*.cfg".format(os.environ['P4C_CFG_PATH']))
     cfg = config.Config(config_prefix = "p4c")
     for cf in cfg_files:
-        if opts.debug:
-            print 'loading config {}'.format(cf)
-        cfg.load_from_config(cf, opts.output_directory, opts.source_file)
+        cfg.load_from_config(cf, parser)
+
+    # parse the arguments
+    opts = parser.parse_args()
+
+    # deal with early exits
+    if opts.show_version:
+        parser.exit(0, "p4c %s" % (get_version()))
 
     if opts.show_target_help:
-        display_supported_targets(cfg)
-        sys.exit(0)
+        parser.exit(0, display_supported_targets(cfg))
 
-    # target-arch-vendor, e.g.
-    # bmv2-ss-p4org
-    # ebpf-psa-p4org
-    triplet = opts.backend.split('-')
-    if (len(triplet) != 3):
-        print "Invalid target-arch-vendor triplet."
-        display_supported_targets(cfg)
-        sys.exit(1)
-
-    if not source:
+    if not opts.source_file:
         parser.error('No input specified.')
 
+    # check that the triplet value is correct
+    triplet = opts.backend.split('-')
+    if (len(triplet) != 3):
+        parser.error("Invalid target-arch-vendor triplet: {}\n{}".\
+                     format(triplet, display_supported_targets(cfg)))
+
+    # find the backend
     backend = None
     for target in cfg.target:
         regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
@@ -176,89 +174,9 @@ def main():
             backend = target
             break
     if backend == None:
-        print "Unknown backend:", opts.backend
-        sys.exit(1)
+        parser.error("Unknown backend: {}".format(str(opts.backend)))
 
-    for option in opts.preprocessor_options:
-        backend.add_command_option('preprocessor', option)
-
-    for option in opts.compiler_options:
-        backend.add_command_option('compiler', option)
-
-    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
-        for option in opts.log_levels:
-            backend.add_command_option('compiler', "-T{}".format(option))
-        if opts.passes:
-            backend.add_command_option('compiler', "--top4 {}".format(",".join(opts.passes)))
-        if opts.debug:
-            backend.add_command_option('assembler', "-vvv")
-            backend.add_command_option('compiler', "-vvv")
-        if opts.dump_dir:
-            backend.add_command_option('compiler', "--dump {}".format(opts.dump_dir))
-        if opts.json:
-            backend.add_command_option('compiler', "--toJSON {}".format(opts.json))
-        if opts.pretty_print:
-            backend.add_command_option('compiler', "--pp {}".format(opts.pretty_print))
-
-    if opts.debug_info:
-        backend.add_command_option('assembler', "-g")
-        backend.add_command_option('compiler', "-g")
-        backend.add_command_option('linker', "-g")
-
-    for option in opts.assembler_options:
-        backend.add_command_option('assembler', option)
-
-    for option in opts.linker_options:
-        backend.add_command_option('linker', option)
-
-    # handle mode flags
-    if opts.run_preprocessor_only:
-        backend.enable_commands(['preprocessor'])
-    elif opts.skip_preprocessor:
-        backend.disable_commands(['preprocessor'])
-    elif opts.run_till_assembler:
-        backend.enable_commands(['preprocessor', 'compiler'])
-    elif opts.run_all:
-        # this is the default, each backend driver is supposed to enable all
-        # its commands and the order in which they execute
-        pass
-
-
-    # append to the list of defines
-    for d in opts.preprocessor_defines:
-        backend.add_command_option('preprocessor', "-D"+d)
-        backend.add_command_option('compiler', "-D"+d)
-
-    # default search path
-    if opts.language == 'p4-16':
-        backend.add_command_option('preprocessor',
-                                   "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
-        backend.add_command_option('compiler',
-                                   "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
-    else:
-        backend.add_command_option('preprocessor',
-                                   "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
-        backend.add_command_option('compiler',
-                                   "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
-
-    # append search path
-    for path in opts.search_path:
-        backend.add_command_option('preprocessor', "-I")
-        backend.add_command_option('preprocessor', path)
-        backend.add_command_option('compiler', "-I")
-        backend.add_command_option('compiler', path)
-
-    # set p4 version
-    if opts.language == 'p4-16':
-        backend.add_command_option('compiler', "--p4v=16")
-    else:
-        backend.add_command_option('compiler', "--p4v=14")
-
-    # P4Runtime options
-    if opts.p4runtime_file:
-        backend.add_command_option('compiler',
-                                   "--p4runtime-file {}".format(opts.p4runtime_file))
-        backend.add_command_option('compiler',
-                                   "--p4runtime-format {}".format(opts.p4runtime_format))
-
-    backend.run(opts)
+    # set all configuration and command line options for backend
+    backend.process_command_line_options(opts)
+    # run all commands
+    backend.run()

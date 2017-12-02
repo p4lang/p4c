@@ -20,24 +20,20 @@ class Config(object):
     """
     Config - Configuration data for a 'p4c' tool chain.
 
-    The common configuration data include compiler/assembler name,
-    compiler/assembler installation path.
+    The common configuration includes the argument parser and the path to the
+    backend configuration file.
+
     """
 
     def __init__(self, config_prefix):
         self.config_prefix = config_prefix or 'p4c'
         self.target = []
 
-    def load_from_config(self, path, output_dir, source_file):
+    def load_from_config(self, path, argParser):
         cfg_globals = dict(globals())
         cfg_globals['config'] = self
         cfg_globals['__file__'] = path
-        cfg_globals['output_dir'] = output_dir
-        cfg_globals['source_fullname'] = source_file
-        if source_file is None:
-            cfg_globals['source_basename'] = None
-        else:
-            cfg_globals['source_basename'] = os.path.splitext(os.path.basename(source_file))[0]
+        cfg_globals['argParser'] = argParser
 
         data = None
         f = open(path)
