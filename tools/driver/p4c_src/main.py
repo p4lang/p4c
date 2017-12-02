@@ -133,6 +133,9 @@ def main():
     parser.add_argument("-S", dest="run_till_assembler",
                         help="Only run the preprocess and compilation steps",
                         action="store_true", default=False)
+    parser.add_argument("-s", dest="skip_compiler",
+                        help="Only run the assembler and linker steps",
+                        action="store_true", default=False)
     parser.add_argument("-x", dest="language",
                         choices = ["p4-14", "p4-16"],
                         help="Treat subsequent input files as having type language.",
@@ -238,6 +241,8 @@ def main():
         step_enable = [True, False, False, False]
     elif opts.skip_preprocessor:
         step_enable = [False, True, True, True]
+    elif opts.skip_compiler:
+        step_enable = [False, False, True, True]
     elif opts.run_till_assembler:
         step_enable = [True, True, False, False]
     elif opts.run_all:
