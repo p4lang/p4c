@@ -113,7 +113,7 @@ typedef const IR::Type ConstType;
 // produce null pointers, so we need to have two printers: one for non-pointer
 // types, and another with null checking for pointer types.
 %printer { yyoutput << $$; } <BBoxType> <CaseValue> <cstring> <HeaderType>
-                             <int> <IR::Direction> <UnparsedConstant>
+                             <int> <IR::Direction> <IR::ID> <UnparsedConstant>
 %printer {
     auto val = $$;
     if (val != nullptr) {
@@ -190,7 +190,7 @@ typedef const IR::Type ConstType;
 %precedence ELSE
 
 %type<int>                          opt_field_modifiers attributes attrib
-%type<cstring>                      name
+%type<IR::ID>                       name
 %type<IR::ActionFunction*>          action_function_body action_statement_list
 %type<IR::ActionProfile*>           action_profile_body
 %type<IR::ActionSelector*>          action_selector_body
@@ -817,7 +817,7 @@ blackbox_body: /* epsilon */ {
     | blackbox_body error { $$ = $1; }
 ;
 
-blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute(@-1, $<cstring>-1); }
+blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute($<IR::ID>-1); }
     | blackbox_attribute TYPE ":" type ";" { ($$=$1)->type = $4; }
     | blackbox_attribute EXPRESSION_LOCAL_VARIABLES "{" opt_locals_list "}"
         { ($$=$1)->locals = $4; }
@@ -982,77 +982,77 @@ expression_list:
 
 opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list { $$ = $1; }
 
-name: IDENTIFIER { $$ = $1; }
-    | ACTION { $$ = $1; }
-    | ACTIONS { $$ = $1; }
-    | ACTION_PROFILE { $$ = $1; }
-    | ACTION_SELECTOR { $$ = $1; }
-    | ALGORITHM { $$ = $1; }
-    | ATTRIBUTE { $$ = $1; }
-    | ATTRIBUTES { $$ = $1; }
-    | BIT { $$ = $1; }
-    | BLACKBOX { $$ = $1; }
-    | BLACKBOX_TYPE { $$ = $1; }
-    | BLOCK { $$ = $1; }
-    | BOOL { $$ = $1; }
-    | CALCULATED_FIELD { $$ = $1; }
-    | CONTROL { $$ = $1; }
-    | COUNTER { $$ = $1; }
-    | DEFAULT_ACTION { $$ = $1; }
-    | DIRECT { $$ = $1; }
-    | DROP { $$ = $1; }
-    | DYNAMIC_ACTION_SELECTION { $$ = $1; }
-    | EXPRESSION { $$ = $1; }
-    | EXPRESSION_LOCAL_VARIABLES { $$ = $1; }
-    | EXTRACT { $$ = $1; }
-    | FIELD_LIST { $$ = $1; }
-    | FIELD_LIST_CALCULATION { $$ = $1; }
-    | FIELDS { $$ = $1; }
-    | HEADER { $$ = $1; }
-    | HEADER_TYPE { $$ = $1; }
-    | IMPLEMENTATION { $$ = $1; }
-    | IN { $$ = $1; }
-    | INPUT { $$ = $1; }
-    | INSTANCE_COUNT { $$ = $1; }
-    | INT { $$ = $1; }
-    | LAYOUT { $$ = $1; }
-    | LENGTH { $$ = $1; }
-    | MASK { $$ = $1; }
-    | MAX_LENGTH { $$ = $1; }
-    | MAX_SIZE { $$ = $1; }
-    | MAX_WIDTH { $$ = $1; }
-    | METADATA { $$ = $1; }
-    | METER { $$ = $1; }
-    | METHOD { $$ = $1; }
-    | MIN_SIZE { $$ = $1; }
-    | MIN_WIDTH { $$ = $1; }
-    | OPTIONAL { $$ = $1; }
-    | OUT { $$ = $1; }
-    | OUTPUT_WIDTH { $$ = $1; }
-    | PARSER { $$ = $1; }
-    | PARSER_VALUE_SET { $$ = $1; }
-    | PARSER_EXCEPTION { $$ = $1; }
-    | PRE_COLOR { $$ = $1; }
-    | PRIMITIVE_ACTION { $$ = $1; }
-    | READS { $$ = $1; }
-    | REGISTER { $$ = $1; }
-    | RESULT { $$ = $1; }
-    | RETURN { $$ = $1; }
-    | SATURATING { $$ = $1; }
-    | SELECTION_KEY { $$ = $1; }
-    | SELECTION_MODE { $$ = $1; }
-    | SELECTION_TYPE { $$ = $1; }
-    | SET_METADATA { $$ = $1; }
-    | SIGNED { $$ = $1; }
-    | SIZE { $$ = $1; }
-    | STATIC { $$ = $1; }
-    | STRING { $$ = $1; }
-    | TABLE { $$ = $1; }
-    | TYPE { $$ = $1; }
-    | UPDATE { $$ = $1; }
-    | VERIFY { $$ = $1; }
-    | WIDTH { $$ = $1; }
-    | WRITES { $$ = $1; }
+name: IDENTIFIER { $$ = IR::ID(@1, $1); }
+    | ACTION { $$ = IR::ID(@1, $1); }
+    | ACTIONS { $$ = IR::ID(@1, $1); }
+    | ACTION_PROFILE { $$ = IR::ID(@1, $1); }
+    | ACTION_SELECTOR { $$ = IR::ID(@1, $1); }
+    | ALGORITHM { $$ = IR::ID(@1, $1); }
+    | ATTRIBUTE { $$ = IR::ID(@1, $1); }
+    | ATTRIBUTES { $$ = IR::ID(@1, $1); }
+    | BIT { $$ = IR::ID(@1, $1); }
+    | BLACKBOX { $$ = IR::ID(@1, $1); }
+    | BLACKBOX_TYPE { $$ = IR::ID(@1, $1); }
+    | BLOCK { $$ = IR::ID(@1, $1); }
+    | BOOL { $$ = IR::ID(@1, $1); }
+    | CALCULATED_FIELD { $$ = IR::ID(@1, $1); }
+    | CONTROL { $$ = IR::ID(@1, $1); }
+    | COUNTER { $$ = IR::ID(@1, $1); }
+    | DEFAULT_ACTION { $$ = IR::ID(@1, $1); }
+    | DIRECT { $$ = IR::ID(@1, $1); }
+    | DROP { $$ = IR::ID(@1, $1); }
+    | DYNAMIC_ACTION_SELECTION { $$ = IR::ID(@1, $1); }
+    | EXPRESSION { $$ = IR::ID(@1, $1); }
+    | EXPRESSION_LOCAL_VARIABLES { $$ = IR::ID(@1, $1); }
+    | EXTRACT { $$ = IR::ID(@1, $1); }
+    | FIELD_LIST { $$ = IR::ID(@1, $1); }
+    | FIELD_LIST_CALCULATION { $$ = IR::ID(@1, $1); }
+    | FIELDS { $$ = IR::ID(@1, $1); }
+    | HEADER { $$ = IR::ID(@1, $1); }
+    | HEADER_TYPE { $$ = IR::ID(@1, $1); }
+    | IMPLEMENTATION { $$ = IR::ID(@1, $1); }
+    | IN { $$ = IR::ID(@1, $1); }
+    | INPUT { $$ = IR::ID(@1, $1); }
+    | INSTANCE_COUNT { $$ = IR::ID(@1, $1); }
+    | INT { $$ = IR::ID(@1, $1); }
+    | LAYOUT { $$ = IR::ID(@1, $1); }
+    | LENGTH { $$ = IR::ID(@1, $1); }
+    | MASK { $$ = IR::ID(@1, $1); }
+    | MAX_LENGTH { $$ = IR::ID(@1, $1); }
+    | MAX_SIZE { $$ = IR::ID(@1, $1); }
+    | MAX_WIDTH { $$ = IR::ID(@1, $1); }
+    | METADATA { $$ = IR::ID(@1, $1); }
+    | METER { $$ = IR::ID(@1, $1); }
+    | METHOD { $$ = IR::ID(@1, $1); }
+    | MIN_SIZE { $$ = IR::ID(@1, $1); }
+    | MIN_WIDTH { $$ = IR::ID(@1, $1); }
+    | OPTIONAL { $$ = IR::ID(@1, $1); }
+    | OUT { $$ = IR::ID(@1, $1); }
+    | OUTPUT_WIDTH { $$ = IR::ID(@1, $1); }
+    | PARSER { $$ = IR::ID(@1, $1); }
+    | PARSER_VALUE_SET { $$ = IR::ID(@1, $1); }
+    | PARSER_EXCEPTION { $$ = IR::ID(@1, $1); }
+    | PRE_COLOR { $$ = IR::ID(@1, $1); }
+    | PRIMITIVE_ACTION { $$ = IR::ID(@1, $1); }
+    | READS { $$ = IR::ID(@1, $1); }
+    | REGISTER { $$ = IR::ID(@1, $1); }
+    | RESULT { $$ = IR::ID(@1, $1); }
+    | RETURN { $$ = IR::ID(@1, $1); }
+    | SATURATING { $$ = IR::ID(@1, $1); }
+    | SELECTION_KEY { $$ = IR::ID(@1, $1); }
+    | SELECTION_MODE { $$ = IR::ID(@1, $1); }
+    | SELECTION_TYPE { $$ = IR::ID(@1, $1); }
+    | SET_METADATA { $$ = IR::ID(@1, $1); }
+    | SIGNED { $$ = IR::ID(@1, $1); }
+    | SIZE { $$ = IR::ID(@1, $1); }
+    | STATIC { $$ = IR::ID(@1, $1); }
+    | STRING { $$ = IR::ID(@1, $1); }
+    | TABLE { $$ = IR::ID(@1, $1); }
+    | TYPE { $$ = IR::ID(@1, $1); }
+    | UPDATE { $$ = IR::ID(@1, $1); }
+    | VERIFY { $$ = IR::ID(@1, $1); }
+    | WIDTH { $$ = IR::ID(@1, $1); }
+    | WRITES { $$ = IR::ID(@1, $1); }
     ;
 
 %%

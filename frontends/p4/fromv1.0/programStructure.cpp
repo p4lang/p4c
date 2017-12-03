@@ -1906,10 +1906,9 @@ void ProgramStructure::createControls() {
         return;
     }
 
-    for (auto ap : action_profiles) {
-        auto action_profile = convertActionProfile(ap.first, ap.second);
-        declarations->push_back(action_profile);
-    }
+    for (auto ap : action_profiles)
+        if (auto action_profile = convertActionProfile(ap.first, ap.second))
+            declarations->push_back(action_profile);
 
     for (auto ext : externs) {
         if (ExternConverter::cvtAsGlobal(this, ext.first)) {
@@ -1919,7 +1918,8 @@ void ProgramStructure::createControls() {
             auto e = ExternConverter::cvtExternInstance(this, ext.first, ext.second, &tmpscope);
             for (auto d : tmpscope)
                 declarations->push_back(d);
-            declarations->push_back(e);
+            if (e)
+                declarations->push_back(e);
         }
     }
 

@@ -56,7 +56,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->path->name))
                     return new IR::AttributeRef(ref->srcInfo, attr->type,
                                                 bbox->name, bbox_type, attr);
-            } else if (global) {
+            } else if (global && !bbox->type->is<IR::Type_Name>()) {
                 BUG("extern type is not extern_type?"); } }
         return ref; }
 
@@ -120,6 +120,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         if (auto di = findContext<IR::Declaration_Instance>()) {
             auto ext = di->type->to<IR::Type_Extern>();
             if (!ext && !global) return prop;
+            if (!ext && di->type->is<IR::Type_Name>()) return prop;
             BUG_CHECK(ext, "%s is not an extern", di);
             if (auto attr = ext->attributes[prop->name]) {
                 if (attr->type->is<IR::Type::String>())
