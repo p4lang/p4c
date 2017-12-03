@@ -10,3 +10,4 @@ control caller() {
 control none();
 package top(none n);
 top(caller()) main;
+

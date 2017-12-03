@@ -282,8 +282,14 @@ const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* para
 const IR::AssignmentStatement* ProgramStructure::assign(
     Util::SourceInfo srcInfo, const IR::Expression* left,
     const IR::Expression* right, const IR::Type* type) {
-    if (type != nullptr && type != right->type)
-        right = new IR::Cast(type, right);
+    if (type != nullptr && type != right->type) {
+        auto t1 = right->type->to<IR::Type::Bits>();
+        auto t2 = type->to<IR::Type::Bits>();
+        if (t1 && t2 && t1->size != t2->size && t1->isSigned != t2->isSigned) {
+            /* P4_16 does not allow changing both size and signedness with a single cast,
+             * so we need two, changing size first, then signedness */
+            right = new IR::Cast(IR::Type::Bits::get(t2->size, t1->isSigned), right); }
+        right = new IR::Cast(type, right); }
     return new IR::AssignmentStatement(srcInfo, left, right);
 }
 
@@ -644,6 +650,37 @@ void ProgramStructure::createDeparser() {
     declarations->push_back(deparser);
 }
 
+const IR::Declaration_Instance*
+ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, cstring newName) {
+    auto *action_selector = action_selectors.get(action_profile->selector.name);
+    if (!action_profile->selector.name.isNullOrEmpty() && !action_selector)
+        ::error("Cannot locate action selector %1%", action_profile->selector);
+    const IR::Type *type = nullptr;
+    auto args = new IR::Vector<IR::Expression>();
+    auto annos = addGlobalNameAnnotation(action_profile->name);
+    if (action_selector) {
+        type = new IR::Type_Name(new IR::Path(v1model.action_selector.Id()));
+        auto flc = field_list_calculations.get(action_selector->key.name);
+        auto algorithm = convertHashAlgorithm(flc->algorithm);
+        if (algorithm == nullptr)
+            return nullptr;
+        args->push_back(algorithm);
+        auto size = new IR::Constant(v1model.action_selector.sizeType, action_profile->size);
+        args->push_back(size);
+        auto width = new IR::Constant(v1model.action_selector.widthType, flc->output_width);
+        args->push_back(width);
+        if (action_selector->mode)
+            annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
+        if (action_selector->type)
+            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->type));
+    } else {
+        type = new IR::Type_Name(new IR::Path(v1model.action_profile.Id()));
+        auto size = new IR::Constant(v1model.action_profile.sizeType, action_profile->size);
+        args->push_back(size); }
+    auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
+    return decl;
+}
+
 const IR::P4Table*
 ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                                IR::IndexedVector<IR::Declaration> &stateful,
@@ -653,17 +690,9 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     auto actionList = new IR::ActionList({});
 
     cstring profile = table->action_profile.name;
-    const IR::ActionProfile* action_profile = nullptr;
-    const IR::ActionSelector* action_selector = nullptr;
-    if (!profile.isNullOrEmpty()) {
-        action_profile = action_profiles.get(profile);
-        if (!action_profile->selector.name.isNullOrEmpty()) {
-            action_selector = action_selectors.get(action_profile->selector.name);
-            if (action_selector == nullptr)
-                ::error("Cannot locate action selector %1%", action_profile->selector);
-        }
-    }
-
+    auto *action_profile = action_profiles.get(profile);
+    auto *action_selector = action_profile ? action_selectors.get(action_profile->selector.name)
+                                           : nullptr;
     auto mtr = get(directMeters, table->name);
     auto ctr = get(directCounters, table->name);
     const std::vector<IR::ID> &actionsToDo =
@@ -759,42 +788,13 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         props->push_back(prop);
     }
 
-    if (action_selector != nullptr) {
-        auto type = new IR::Type_Name(new IR::Path(v1model.action_selector.Id()));
-        auto args = new IR::Vector<IR::Expression>();
-        auto flc = field_list_calculations.get(action_selector->key.name);
-        auto algorithm = convertHashAlgorithm(flc->algorithm);
-        if (algorithm == nullptr)
-            return nullptr;
-        args->push_back(algorithm);
-        auto size = new IR::Constant(v1model.action_selector.sizeType, action_profile->size);
-        args->push_back(size);
-        auto width = new IR::Constant(v1model.action_selector.widthType, flc->output_width);
-        args->push_back(width);
-        auto constructor = new IR::ConstructorCallExpression(type, args);
-        auto propvalue = new IR::ExpressionValue(constructor);
-        auto annos = addGlobalNameAnnotation(action_profile->name);
-        if (action_selector->mode)
-            annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
-        if (action_selector->type)
-            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->type));
+    if (action_profile != nullptr) {
+        auto sel = new IR::PathExpression(action_profiles.get(action_profile));
+        auto propvalue = new IR::ExpressionValue(sel);
         auto prop = new IR::Property(
             IR::ID(v1model.tableAttributes.tableImplementation.Id()),
-            annos, propvalue, false);
-        props->push_back(prop);
-    } else if (action_profile != nullptr) {
-        auto size = new IR::Constant(v1model.action_profile.sizeType, action_profile->size);
-        auto type = new IR::Type_Name(new IR::Path(v1model.action_profile.Id()));
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(size);
-        auto constructor = new IR::ConstructorCallExpression(type, args);
-        auto propvalue = new IR::ExpressionValue(constructor);
-        auto annos = addGlobalNameAnnotation(action_profile->name);
-        auto prop = new IR::Property(
-            IR::ID(v1model.tableAttributes.tableImplementation.Id()),
-            annos, propvalue, false);
-        props->push_back(prop);
-    }
+            propvalue, false);
+        props->push_back(prop); }
 
     if (!ctr.isNullOrEmpty()) {
         auto counter = counters.get(ctr);
@@ -1838,8 +1838,10 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     for (auto c : externsToDo) {
         auto ext = externs.get(c);
-        ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext), &stateful);
-        stateful.push_back(ext);
+        if (!ExternConverter::cvtAsGlobal(this, ext)) {
+            ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext), &stateful);
+            stateful.push_back(ext);
+        }
     }
 
     for (auto a : actionsToDo) {
@@ -1902,6 +1904,23 @@ void ProgramStructure::createControls() {
         // TODO: give a better error message
         ::error("Program contains recursive control blocks");
         return;
+    }
+
+    for (auto ap : action_profiles)
+        if (auto action_profile = convertActionProfile(ap.first, ap.second))
+            declarations->push_back(action_profile);
+
+    for (auto ext : externs) {
+        if (ExternConverter::cvtAsGlobal(this, ext.first)) {
+            // FIXME -- 'declarations' is a vector Nodes instead of Declarations.  Should
+            // FIXME -- fix the IR to use a NameMap for scopes anyways.
+            IR::IndexedVector<IR::Declaration> tmpscope;
+            auto e = ExternConverter::cvtExternInstance(this, ext.first, ext.second, &tmpscope);
+            for (auto d : tmpscope)
+                declarations->push_back(d);
+            if (e)
+                declarations->push_back(e);
+        }
     }
 
     for (auto c : controlsToDo) {

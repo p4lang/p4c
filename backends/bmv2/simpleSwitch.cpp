@@ -531,6 +531,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         backend->meter_arrays->append(jmtr);
     } else if (eb->type->name == v1model.action_profile.name ||
             eb->type->name == v1model.action_selector.name) {
+        // Might call this multiple times if the selector/profile is used more than
+        // once in a pipeline, so only add it to the action_profiles once
+        if (BMV2::JsonObjects::find_object_by_name(action_profiles, name))
+            return;
         auto action_profile = new Util::JsonObject();
         action_profile->emplace("name", name);
         action_profile->emplace("id", nextId("action_profiles"));

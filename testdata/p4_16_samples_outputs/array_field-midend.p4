@@ -25,3 +25,4 @@ control my(out H[2] s) {
 }
 
 top(my()) main;
+

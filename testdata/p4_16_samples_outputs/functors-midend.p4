@@ -9,3 +9,4 @@ parser p_0() {
 }
 
 m(p_0()) main;
+

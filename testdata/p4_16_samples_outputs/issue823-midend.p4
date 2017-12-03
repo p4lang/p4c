@@ -25,3 +25,4 @@ control MyC1() {
 }
 
 S<headers_t>(MyP1(), MyC1()) main;
+

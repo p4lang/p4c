@@ -25,10 +25,14 @@ void dump(std::ostream &out, const IR::Node *n);
 void dump(std::ostream &out, const IR::Node *n, unsigned maxdepth);
 void dump(const IR::Node *n);
 void dump(const IR::Node *n, unsigned maxdepth);
+void dump(const IR::INode *n);
+void dump(const IR::INode *n, unsigned maxdepth);
 void dump(uintptr_t p);
 void dump(uintptr_t p, unsigned maxdepth);
 void dump_notype(const IR::Node *n);
 void dump_notype(const IR::Node *n, unsigned maxdepth);
+void dump_notype(const IR::INode *n);
+void dump_notype(const IR::INode *n, unsigned maxdepth);
 void dump_notype(uintptr_t p);
 void dump_notype(uintptr_t p, unsigned maxdepth);
 

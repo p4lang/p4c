@@ -41,12 +41,14 @@ class ControlConverter : public Inspector {
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
-                              Util::JsonArray* action_profiles);
+                              Util::JsonArray* action_profiles,
+                              BMV2::SharedActionSelectorCheck& selector_check);
     void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
     cstring getKeyMatchType(const IR::KeyElement *ke);
     /// Return 'true' if the table is 'simple'
     bool handleTableImplementation(const IR::Property* implementation, const IR::Key* key,
-                                   Util::JsonObject* table, Util::JsonArray* action_profiles);
+                                   Util::JsonObject* table, Util::JsonArray* action_profiles,
+                                   BMV2::SharedActionSelectorCheck& selector_check);
     Util::IJson* convertIf(const CFG::IfNode* node, cstring prefix);
     Util::IJson* convertControl(const IR::ControlBlock* block, cstring name,
                                 Util::JsonArray *counters, Util::JsonArray* meters,

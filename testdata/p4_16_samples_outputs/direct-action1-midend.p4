@@ -27,3 +27,4 @@ control c(inout bit<16> y) {
 control proto(inout bit<16> y);
 package top(proto _p);
 top(c()) main;
+

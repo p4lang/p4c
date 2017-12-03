@@ -22,3 +22,4 @@ control c() {
 control e();
 package top(e _e);
 top(c()) main;
+

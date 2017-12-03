@@ -41,3 +41,4 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
 }
 
 top<H, Metadata>(ingress()) main;
+

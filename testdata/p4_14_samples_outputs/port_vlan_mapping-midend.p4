@@ -724,6 +724,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
+@name(".outer_bd_action_profile") action_profile(32w256) outer_bd_action_profile;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
@@ -852,7 +854,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].vid         : exact @name("vlan_tag_[1].vid") ;
         }
         size = 32768;
-        @name(".outer_bd_action_profile") implementation = action_profile(32w256);
+        implementation = outer_bd_action_profile;
         default_action = NoAction_0();
     }
     apply {
@@ -936,3 +938,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

@@ -15,3 +15,4 @@ parser p() {
 parser simple();
 package top(simple e);
 top(p()) main;
+

@@ -24,11 +24,10 @@ limitations under the License.
 namespace BMV2 {
 
 class JsonObjects {
- protected:
-    Util::JsonObject* find_object_by_name(Util::JsonArray* array,
-                                          const cstring& name);
-
  public:
+    static Util::JsonObject* find_object_by_name(Util::JsonArray* array,
+                                                 const cstring& name);
+
     void add_program_info(const cstring& name);
     void add_meta_info();
     unsigned add_header_type(const cstring& name, Util::JsonArray*& fields, unsigned max_length);
@@ -62,7 +61,6 @@ class JsonObjects {
     std::map<unsigned, Util::JsonObject*> map_parser;
     std::map<unsigned, Util::JsonObject*> map_parser_state;
 
- public:
     Util::JsonObject* toplevel;
     Util::JsonObject* meta;
     Util::JsonArray* actions;

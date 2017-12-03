@@ -13,3 +13,4 @@ control q() {
 
 package m(noargs n);
 m(q()) main;
+

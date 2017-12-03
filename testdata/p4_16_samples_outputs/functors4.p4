@@ -18,3 +18,4 @@ parser p(out bit<1> z) {
 parser simple(out bit<1> z);
 package m(simple n);
 m(p()) main;
+

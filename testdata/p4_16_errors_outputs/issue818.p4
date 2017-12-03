@@ -15,6 +15,7 @@ extern WrapControl {
 }
 
 BoolReg() r;
+
 parser Loop()(WrapControl c1, WrapControl c2) {
     state start {
         r.flip();
@@ -45,3 +46,4 @@ control MyC2() {
 }
 
 S(Loop(WrapControl(MyC1()), WrapControl(MyC2()))) main;
+

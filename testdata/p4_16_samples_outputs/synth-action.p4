@@ -14,3 +14,4 @@ control c(inout bit<32> x) {
 control n(inout bit<32> x);
 package top(n _n);
 top(c()) main;
+

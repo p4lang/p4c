@@ -115,3 +115,5 @@ action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, d
 sai_p4.p4(305)
 table port {
 ^
+warning: .next_hop_group: unused instance
+warning: .vlan: unused instance
