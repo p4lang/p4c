@@ -85,6 +85,8 @@ p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
 include (CheckIncludeFile)
 check_include_file (execinfo.h HAVE_EXECINFO_H)
 check_include_file (ucontext.h HAVE_UCONTEXT_H)
+include (CheckIncludeFileCXX)
+check_include_file_cxx (cxxabi.h HAVE_CXXABI_H)
 
 # check functions
 

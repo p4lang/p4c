@@ -53,7 +53,7 @@ class Visitor {
     };
     virtual ~Visitor() = default;
 
-    const char* internalName = nullptr;
+    mutable cstring internalName;
 
     // init_apply is called (once) when apply is called on an IR tree
     // it expects to allocate a profile record which will be destroyed
@@ -134,10 +134,11 @@ class Visitor {
      */
     virtual void flow_merge(Visitor &) { }
 
+    static cstring demangle(const char *);
     virtual const char *name() const {
-        if (internalName != nullptr)
-            return internalName;
-        return typeid(*this).name();
+        if (!internalName)
+            internalName = demangle(typeid(*this).name());
+        return internalName.c_str();
     }
     void setName(const char* name) { internalName = name; }
     void print_context() const;  // for debugging; can be called from debugger
