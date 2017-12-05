@@ -43,7 +43,7 @@ def get_version():
 def display_supported_targets(cfg):
     ret = "Supported targets in \"target-arch-vendor\" triplet:\n"
     for target in cfg.target:
-        ret += target + "\n"
+        ret += str(target) + "\n"
     return ret
 
 def add_developer_options(parser):
@@ -151,10 +151,12 @@ def main():
 
     # deal with early exits
     if opts.show_version:
-        parser.exit(0, "p4c %s" % (get_version()))
+        print "p4c", get_version()
+        sys.exit(0)
 
     if opts.show_target_help:
-        parser.exit(0, display_supported_targets(cfg))
+        print display_supported_targets(cfg)
+        sys.exit(0)
 
     if not opts.source_file:
         parser.error('No input specified.')
