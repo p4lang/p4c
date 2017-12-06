@@ -1,4 +1,4 @@
-FROM p4lang/pi:latest
+FROM p4lang/behavioral-model:latest
 MAINTAINER Seth Fowler <seth.fowler@barefootnetworks.com>
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
