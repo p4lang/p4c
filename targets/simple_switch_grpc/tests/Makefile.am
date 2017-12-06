@@ -25,7 +25,8 @@ common_source = utils.h utils.cpp base_test.h base_test.cpp
 example_SOURCES = example.cpp utils.h utils.cpp
 test_gtest_SOURCES = \
 $(common_source) main.cpp \
-test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp
+test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp \
+test_grpc_counter.cpp 
 
 LDADD = \
 $(top_builddir)/libsimple_switch_grpc.la \
