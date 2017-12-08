@@ -74,6 +74,28 @@ ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
     visitDagOnce = false;
 }
 
+void ControlGraphs::writeGraphToFile(P4::ParserCallGraph* pg, const cstring& name) {
+    auto path = Util::PathName(graphsDir).join(name + ".dot");
+    auto out = openFile(path.toString(), false);
+    if (out == nullptr) {
+        ::error("Failed to open file %1%", path.toString());
+        return;
+    }
+
+    *out << "digraph " << pg->getName() << "{" << std::endl;
+    for (auto state : pg->nodes) {
+        *out << state->name << " [shape=rectangle]" << std::endl;
+    }
+
+    for (auto state: pg->nodes) {
+        std::set<const IR::ParserState*> calles;
+        auto callees = pg->getCallees(state);
+        for (auto callee: *callees)
+            *out << state->name << " -> " << callee->name << std::endl;
+    }
+    *out << "}" << std::endl;
+}
+
 void ControlGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
     auto path = Util::PathName(graphsDir).join(name + ".dot");
     auto out = openFile(path.toString(), false);
@@ -107,6 +129,14 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
             controlStack.popBack();
             GraphAttributeSetter()(g_);
             writeGraphToFile(g_, name);
+        } else if (it.second->is<IR::ParserBlock>()) {
+            auto name = it.second->to<IR::ParserBlock>()->container->name;
+            LOG1("Generating graph for parser " << name);
+            auto parser = it.second->getNode();
+            P4::ParserCallGraph transitions(name);
+            P4::ComputeParserCG pcg(refMap, &transitions);
+            (void)parser->apply(pcg);
+            writeGraphToFile(&transitions, name);
         }
     }
     return false;

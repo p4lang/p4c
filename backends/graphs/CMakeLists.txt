@@ -15,7 +15,6 @@
 set (GRAPHS_SRCS
   graphs.cpp
   controls.cpp
-  parser.cpp
   p4c-graphs.cpp
   )
 

@@ -280,16 +280,13 @@ FILE* CompilerOptions::preprocess() {
         in = stdin;
     } else {
 #ifdef __clang__
-        /* FIXME -- while clang has a 'cpp' executable, its broken and doesn't work right, so
-         * we need to run clang -E instead.  This should be managed by autoconf (figure out how
-         * to portably run the c preprocessor) */
         std::string cmd("cc -E -x c -Wno-comment");
 #else
         std::string cmd("cpp");
 #endif
         // the p4c driver sets environment variables for include
         // paths.  check the environment and add these to the command
-        // line for the preporicessor
+        // line for the preprocessor
         char * driverP4IncludePath =
           isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
         cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options

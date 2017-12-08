@@ -43,12 +43,14 @@ class CallGraph {
     // Use an ordered map to make this deterministic
     ordered_map<T, std::vector<T>*> out_edges;  // map caller to list of callees
     ordered_map<T, std::vector<T>*> in_edges;
-    ordered_set<T> nodes;    // all nodes; do not modify this directly
 
  public:
+    ordered_set<T> nodes;    // all nodes; do not modify this directly
     typedef typename ordered_map<T, std::vector<T>*>::const_iterator const_iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
+
+    const cstring& getName() const { return name; }
 
     // Graph construction.
 

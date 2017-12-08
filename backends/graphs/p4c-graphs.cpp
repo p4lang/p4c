@@ -123,9 +123,5 @@ int main(int argc, char *const argv[]) {
     graphs::ControlGraphs cgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
     top->getMain()->apply(cgen);
 
-    LOG1("Generating parser graphs");
-    graphs::ParserGraphs pgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
-    top->getMain()->apply(pgen);
-
     return ::errorCount() > 0;
 }
