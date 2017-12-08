@@ -195,9 +195,9 @@ PcapFilesReader::scan() {
     }
 
     int earliest_index = -1;
-    const struct timeval *earliest_time;
+    const struct timeval *earliest_time = nullptr;
 
-    for (unsigned i=0; i < files.size(); i++) {
+    for (unsigned int i = 0; i < files.size(); i++) {
       auto file = files.at(i).get();
       if (file->atEOF()) continue;
 
@@ -214,7 +214,7 @@ PcapFilesReader::scan() {
       }
     }
 
-    assert(earliest_index >= 0);
+    assert(earliest_index >= 0 && earliest_time != nullptr);
     struct timeval delay;
 
     BMLOG_DEBUG("Pcap reader: first packet to send {}",
