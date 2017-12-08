@@ -67,7 +67,7 @@ class SimpleSwitchGrpcRunner {
   }
   // TODO(dushyantarora): Remove this API once P4Runtime supports configuring
   // mirroring sessions
-  int mirroring_mapping_add(int mirror_id, int egress_port);
+  void mirroring_mapping_add(int mirror_id, int egress_port);
 
  private:
   SimpleSwitchGrpcRunner(int max_port = 512, bool enable_swap = false,

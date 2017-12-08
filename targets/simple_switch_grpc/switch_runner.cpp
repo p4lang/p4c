@@ -273,7 +273,7 @@ SimpleSwitchGrpcRunner::shutdown() {
   PIGrpcServerShutdown();
 }
 
-int
+void
 SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id, int egress_port) {
   simple_switch->mirroring_mapping_add(mirror_id, egress_port);
 }
