@@ -83,7 +83,7 @@ use them, but YMMV.
 
 - GNU Bison and Flex for the parser and lexical analyzer generators.
 
-- Google Protocol Buffers 3.0 for control plane API generation
+- Google Protocol Buffers 3.0 or higher for control plane API generation
 
 - GNU multiple precision library GMP
 
@@ -110,13 +110,23 @@ Most dependencies can be installed using `apt-get install`:
 For documentation building:
 `sudo apt-get install -y doxygen graphviz texlive-full`
 
-An exception is Google Protocol Buffers; `p4c` depends on version 3.0, which is not available until Ubuntu 16.10. For earlier releases of Ubuntu, you'll need to install from source. You can find instructions [here](https://github.com/google/protobuf/blob/master/src/README.md). Check out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you build.
+An exception is Google Protocol Buffers; `p4c` depends on version 3.0 or higher,
+which is not available until Ubuntu 16.10. For earlier releases of Ubuntu,
+you'll need to install from source. You can find instructions
+[here](https://github.com/google/protobuf/blob/master/src/README.md). **We
+recommend that you use version
+[3.2.0](https://github.com/google/protobuf/releases/tag/v3.2.0)**. Earlier
+versions in the 3 series may not be supported by other p4lang projects, such as
+[p4lang/PI](https://github.com/p4lang/PI). More recent versions may work as
+well, but all our CI testing is done with version 3.2.0. After cloning protobuf
+and before you build, check-out version 3.2.0:
 
-`git checkout v3.0.2`
+`git checkout v3.2.0`
 
-Please note that while newer versions should work for `p4c` itself, you may run
-into trouble with some extensions unless you install version 3.0, so you may
-want to install from source even on newer releases of Ubuntu.
+Please note that while all protobuf versions newer than 3.0 should work for
+`p4c` itself, you may run into trouble with some extensions and other p4lang
+projects unless you install version 3.2.0, so you may want to install from
+source even on newer releases of Ubuntu.
 
 ## macOS dependencies
 
