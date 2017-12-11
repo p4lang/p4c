@@ -12,7 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import os
+import sys
+
+# get the directory the python program is running from
+def get_script_dir(follow_symlinks=True):
+    if getattr(sys, 'frozen', False): # py2exe, PyInstaller, cx_Freeze
+        path = os.path.abspath(sys.executable)
+    else:
+        path = inspect.getabsfile(get_script_dir)
+    if follow_symlinks:
+        path = os.path.realpath(path)
+    return os.path.dirname(path)
 
 # recursive find, good for developer
 def rec_find_bin(cwd, exe):
@@ -67,7 +79,7 @@ def find_file(directory, filename, binary=True):
         if check_file(executable): return executable
 
     # find the file up the hierarchy
-    dir	= os.path.abspath(os.getcwd())
+    dir	= os.path.abspath(get_script_dir())
     if os.path.basename(filename) != filename:
         directory = os.path.join(directory, os.path.dirname(filename))
         filename = os.path.basename(filename)
