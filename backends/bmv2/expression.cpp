@@ -656,10 +656,10 @@ Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
 }
 
 Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression* e) {
-  withConstantWidths = true;
-  auto result = convert(e);
-  withConstantWidths = false;
-  return result;
+    withConstantWidths = true;
+    auto result = convert(e);
+    withConstantWidths = false;
+    return result;
 }
 
 }  // namespace BMV2

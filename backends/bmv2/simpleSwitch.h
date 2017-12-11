@@ -41,7 +41,7 @@ class SimpleSwitch {
                         cstring listName, Util::JsonArray* field_lists);
     cstring convertHashAlgorithm(cstring algorithm);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
-                              Util::JsonArray* calculations, const IR::Node* node);
+                              Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
 
  public:
     void modelError(const char* format, const IR::Node* place) const;
