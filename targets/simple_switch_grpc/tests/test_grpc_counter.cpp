@@ -66,7 +66,6 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
     auto entity = update->mutable_entity();
     auto table_entry = entity->mutable_table_entry();
     table_entry->set_table_id(t_id);
-    table_entry->set_priority(100);
     auto match = table_entry->add_match();
     match->set_field_id(mf_id);
     auto exact = match->mutable_exact();
@@ -114,7 +113,6 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
     direct_counter_entry->set_counter_id(dc_id);
     auto table_entry = direct_counter_entry->mutable_table_entry();
     table_entry->set_table_id(t_id);
-    table_entry->set_priority(100);
     auto match = table_entry->add_match();
     match->set_field_id(mf_id);
     auto exact = match->mutable_exact();
