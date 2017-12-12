@@ -179,6 +179,12 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   if (!dp_grpc_server_addr.empty()) {
     auto service = new DataplaneInterfaceServiceImpl(parser.device_id);
     grpc::ServerBuilder builder;
+    builder.SetSyncServerOption(
+      grpc::ServerBuilder::SyncServerOption::NUM_CQS, 1);
+    builder.SetSyncServerOption(
+      grpc::ServerBuilder::SyncServerOption::MIN_POLLERS, 1);
+    builder.SetSyncServerOption(
+      grpc::ServerBuilder::SyncServerOption::MAX_POLLERS, 1);
     builder.AddListeningPort(dp_grpc_server_addr,
                              grpc::InsecureServerCredentials(),
                              &dp_grpc_server_port);
