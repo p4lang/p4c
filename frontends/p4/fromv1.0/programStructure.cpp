@@ -487,6 +487,9 @@ void ProgramStructure::createParser() {
     auto result = new IR::P4Parser(v1model.parser.Id(), type, stateful, states);
     declarations->push_back(result);
     conversionContext.clear();
+
+    if (ingressReference.name.isNullOrEmpty())
+        ::error("No transition from a parser to ingress pipeline found");
 }
 
 void ProgramStructure::include(cstring filename, cstring ppoptions) {
