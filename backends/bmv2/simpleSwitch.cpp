@@ -284,7 +284,8 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             return;
         }
         auto fields = mc->arguments->at(3);
-        auto calcName = createCalculation(ei->name, fields, backend->json->calculations, nullptr);
+        auto calcName = createCalculation(ei->name, fields, backend->json->calculations,
+                                          false, nullptr);
         calculation->emplace("type", "calculation");
         calculation->emplace("value", calcName);
         parameters->append(calculation);
@@ -585,8 +586,8 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
 
 cstring
 SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
-                                Util::JsonArray* calculations,
-                                const IR::Node* node = nullptr) {
+                                Util::JsonArray* calculations, bool withPayload,
+                                const IR::Node* sourcePositionNode = nullptr) {
     auto typeMap = backend->getTypeMap();
     auto refMap = backend->getRefMap();
     auto conv = backend->getExpressionConverter();
@@ -594,7 +595,8 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
     calc->emplace("id", nextId("calculations"));
-    if (node != nullptr) calc->emplace_non_null("source_info", node->sourceInfoJsonObj());
+    if (sourcePositionNode != nullptr)
+        calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
     calc->emplace("algo", algo);
     if (!fields->is<IR::ListExpression>()) {
         // expand it into a list
@@ -614,6 +616,14 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
         typeMap->setType(fields, type);
     }
     auto jright = conv->convertWithConstantWidths(fields);
+    if (withPayload) {
+        auto array = jright->to<Util::JsonArray>();
+        BUG_CHECK(array, "expected a JSON array");
+        auto payload = new Util::JsonObject();
+        payload->emplace("type", "payload");
+        payload->emplace("value", (Util::IJson*)nullptr);
+        array->append(payload);
+    }
     calc->emplace("input", jright);
     calculations->append(calc);
     return calcName;
@@ -624,7 +634,6 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
                               Util::JsonArray* calculations, bool verify) {
     if (errorCount() > 0)
         return;
-    cstring functionName = verify ? v1model.verify_checksum.name : v1model.update_checksum.name;
     auto typeMap = backend->getTypeMap();
     auto refMap = backend->getRefMap();
     auto conv = backend->getExpressionConverter();
@@ -635,7 +644,12 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
         } else if (auto mc = stat->to<IR::MethodCallStatement>()) {
             auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
             if (auto em = mi->to<P4::ExternFunction>()) {
-                if (em->method->name.name == functionName) {
+                cstring functionName = em->method->name.name;
+                if ((verify && (functionName == v1model.verify_checksum.name ||
+                                functionName == v1model.verify_checksum_with_payload.name)) ||
+                    (!verify && (functionName == v1model.update_checksum.name ||
+                                 functionName == v1model.update_checksum_with_payload.name))) {
+                    bool usePayload = functionName.endsWith("_with_payload");
                     if (mi->expr->arguments->size() != 4) {
                         modelError("%1%: Expected 4 arguments", mc);
                         return;
@@ -648,7 +662,7 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
                         return;
                     }
                     cstring calcName = createCalculation(ei->name, mi->expr->arguments->at(1),
-                                                         calculations, mc);
+                                                         calculations, usePayload, mc);
                     cksum->emplace("name", refMap->newName("cksum_"));
                     cksum->emplace("id", nextId("checksums"));
                     // TODO(jafingerhut) - add line/col here?
@@ -661,7 +675,10 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
                 }
             }
         }
-        ::error("%1%: Only calls to %2% allowed", stat, functionName);
+        ::error("%1%: Only calls to %2% or %3% allowed", stat,
+                verify ? v1model.verify_checksum.name : v1model.update_checksum.name,
+                verify ? v1model.verify_checksum_with_payload.name :
+                v1model.update_checksum_with_payload.name);
     }
 }
 

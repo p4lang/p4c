@@ -259,7 +259,10 @@ class V1Model : public ::Model::Model {
             digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
             recirculate("recirculate"), verify_checksum("verify_checksum"),
-            update_checksum("update_checksum"), directMeter(), directCounter()
+            update_checksum("update_checksum"),
+            verify_checksum_with_payload("verify_checksum_with_payload"),
+            update_checksum_with_payload("update_checksum_with_payload"),
+            directMeter(), directCounter()
     {}
 
  public:
@@ -295,6 +298,8 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       recirculate;
     ::Model::Elem       verify_checksum;
     ::Model::Elem       update_checksum;
+    ::Model::Elem       verify_checksum_with_payload;
+    ::Model::Elem       update_checksum_with_payload;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 

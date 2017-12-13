@@ -2008,6 +2008,7 @@ const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculat
             return nullptr;
         }
         result->fields.insert(result->fields.end(), fl->fields.begin(), fl->fields.end());
+        result->payload = result->payload || fl->payload;
         /* FIXME -- do something with fl->annotations? */
     }
     return result;
@@ -2046,7 +2047,9 @@ void ProgramStructure::createChecksumVerifications() {
             auto fl = getFieldLists(flc);
             if (fl == nullptr) continue;
             auto le = conv.convert(fl);
-            auto method = new IR::PathExpression(v1model.verify_checksum.Id());
+            IR::ID methodName = fl->payload ? v1model.verify_checksum_with_payload.Id() :
+                                v1model.verify_checksum.Id();
+            auto method = new IR::PathExpression(methodName);
             auto args = new IR::Vector<IR::Expression>();
             const IR::Expression* condition;
             if (uov.cond != nullptr)
@@ -2102,7 +2105,9 @@ void ProgramStructure::createChecksumUpdates() {
             if (fl == nullptr) continue;
             auto le = conv.convert(fl);
 
-            auto method = new IR::PathExpression(v1model.update_checksum.Id());
+            IR::ID methodName = fl->payload ? v1model.update_checksum_with_payload.Id() :
+                                v1model.update_checksum.Id();
+            auto method = new IR::PathExpression(methodName);
             auto args = new IR::Vector<IR::Expression>();
             const IR::Expression* condition;
             if (uov.cond != nullptr)
@@ -2174,7 +2179,9 @@ void ProgramStructure::populateOutputNames() {
         "selector",
         // v1model externs
         "verify_checksum",
+        "verify_checksum_with_payload",
         "update_checksum",
+        "update_checksum_with_payload",
         "CounterType",
         "MeterType",
         "HashAlgorithm",

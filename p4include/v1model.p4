@@ -165,6 +165,35 @@ Computes the checksum of the supplied data.
 */
 extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
+/**
+Verifies the checksum of the supplied data including the payload.
+The payload is defined as "all bytes of the packet which were not parsed by the parser".
+If this method detects that a checksum of the data is not correct it
+sets the standard_metadata checksum_error bit.
+@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+                  The total dynamic length of the fields is a multiple of the output size.
+@param O          Checksum type; must be bit<X> type.
+@param condition  If 'false' the verification always succeeds.
+@param data       Data whose checksum is verified.
+@param checksum   Expected checksum of the data; note that is must be a left-value.
+@param algo       Algorithm to use for checksum (not all algorithms may be supported).
+                  Must be a compile-time constant.
+*/
+extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+/**
+Computes the checksum of the supplied data including the payload.
+The payload is defined as "all bytes of the packet which were not parsed by the parser".
+@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+                  The total dynamic length of the fields is a multiple of the output size.
+@param O          Output type; must be bit<X> type.
+@param condition  If 'false' the checksum is not changed
+@param data       Data whose checksum is computed.
+@param checksum   Checksum of the data.
+@param algo       Algorithm to use for checksum (not all algorithms may be supported).
+                  Must be a compile-time constant.
+*/
+extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+
 extern void resubmit<T>(in T data);
 extern void recirculate<T>(in T data);
 extern void clone(in CloneType type, in bit<32> session);
