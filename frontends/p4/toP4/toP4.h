@@ -65,9 +65,6 @@ class ToP4 : public Inspector {
         return vectorSeparator.back();
     }
 
-    void setListTerm(const char* start, const char* end) {
-        listTerminators.push_back(ListPrint(start, end));
-    }
     void doneList() {
         BUG_CHECK(!listTerminators.empty(), "Empty listTerminators");
         listTerminators.pop_back();
@@ -112,6 +109,9 @@ class ToP4 : public Inspector {
 
     using Inspector::preorder;
 
+    void setListTerm(const char* start, const char* end) {
+        listTerminators.push_back(ListPrint(start, end));
+    }
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* node) override;
 
