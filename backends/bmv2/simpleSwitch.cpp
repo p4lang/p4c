@@ -670,6 +670,8 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
                     cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
                     cksum->emplace("type", "generic");
                     cksum->emplace("calculation", calcName);
+                    auto ifcond = conv->convert(mi->expr->arguments->at(0), true, false);
+                    cksum->emplace("if_cond", ifcond);
                     checksums->append(cksum);
                     continue;
                 }
