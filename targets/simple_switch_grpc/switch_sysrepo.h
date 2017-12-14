@@ -47,8 +47,9 @@ class SysrepoSubscriber {
   sr_conn_ctx_t *connection{NULL};
   sr_session_ctx_t *session{NULL};
   sr_subscription_ctx_t *subscription{NULL};
-  const char *module_name{"openconfig-interfaces"};
-  const char *app_name{"subscriber"};
+  static constexpr const char *const app_name = "subscriber";
+  static constexpr const char *const module_names[] =
+      {"openconfig-interfaces", "openconfig-platform"};
 };
 
 class SysrepoTest {
@@ -66,8 +67,7 @@ class SysrepoTest {
   sr_conn_ctx_t *connection{NULL};
   sr_session_ctx_t *session{NULL};
   sr_subscription_ctx_t *subscription{NULL};
-  const char *module_name{"openconfig-interfaces"};
-  const char *app_name{"test"};
+  static constexpr const char *const app_name = "test";
 };
 
 }  // namespace sswitch_grpc

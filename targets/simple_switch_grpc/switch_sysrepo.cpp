@@ -50,6 +50,9 @@ int module_change_cb(sr_session_ctx_t *session, const char *module_name,
 
 }  // namespace
 
+constexpr const char *const SysrepoSubscriber::app_name;
+constexpr const char *const SysrepoSubscriber::module_names[];
+
 bool
 SysrepoSubscriber::start() {
   int rc = SR_ERR_OK;
@@ -69,13 +72,22 @@ SysrepoSubscriber::start() {
   //   Logger::get()->error("Error by sr_copy_config: {}", sr_strerror(rc));
   //   return false;
   // }
-  rc = sr_module_change_subscribe(
-      session, module_name, module_change_cb, static_cast<void *>(this),
-      0, SR_SUBSCR_DEFAULT, &subscription);
-  if (rc != SR_ERR_OK) {
-    Logger::get()->error("Error by sr_module_change_subscribe: {}",
-                         sr_strerror(rc));
-    return false;
+  for (const auto &module_name : module_names) {
+    // SR_SUBSCR_CTX_REUSE:
+    // This option enables the application to re-use an already existing
+    // subscription context previously returned from any sr_*_subscribe call
+    // instead of requesting the creation of a new one. In that case a single
+    // sr_unsubscribe call unsubscribes from all subscriptions filed within the
+    // context.
+    rc = sr_module_change_subscribe(
+        session, module_name, module_change_cb, static_cast<void *>(this),
+        0, SR_SUBSCR_CTX_REUSE, &subscription);
+    if (rc != SR_ERR_OK) {
+      Logger::get()->error("Error by sr_module_change_subscribe for '{}': {}",
+                           module_name, sr_strerror(rc));
+      return false;
+    }
+    Logger::get()->info("Successfully subscribed to '{}'", module_name);
   }
   Logger::get()->info("Successfully started YANG config subscriber");
   return true;
@@ -107,6 +119,8 @@ int data_provider_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
 }
 
 }  // namespace
+
+constexpr const char *const SysrepoTest::app_name;
 
 SysrepoTest::SysrepoTest(const bm::DevMgr *dev_mgr)
     : dev_mgr(dev_mgr) { }
