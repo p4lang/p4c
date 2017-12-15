@@ -202,7 +202,7 @@ the above example), just provide the appropriate `simple_switch` binary to
   makes no such assumption and can be used to represent many switch
   architectures. Three different -although similar- such architectures can be
   found in the targets/ directory. If you are a networking company interested in
-  programming your device (parser, macth-action pipeline, deparser) with P4, you
+  programming your device (parser, match-action pipeline, deparser) with P4, you
   can use bmv2 to reproduce the behavior of your device.
 
 ### How do program my own target / switch architecture using bmv2 ?
