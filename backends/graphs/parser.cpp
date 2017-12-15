@@ -28,7 +28,7 @@ limitations under the License.
 
 namespace graphs {
 
-using pGraph = ParserGraphs::Graph;
+using Graph = ParserGraphs::Graph;
 using vertex_t = ParserGraphs::vertex_t;
 
 ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
@@ -37,7 +37,7 @@ ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
     visitDagOnce = false;
 }
 
-void ParserGraphs::writeGraphToFile(const pGraph &g, const cstring &name) {
+void ParserGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
     auto path = Util::PathName(graphsDir).join(name + ".dot");
     auto out = openFile(path.toString(), false);
     if (out == nullptr) {
@@ -146,7 +146,7 @@ bool ParserGraphs::preorder(const IR::PackageBlock *block) {
     for (auto it : block->constantValue) {
         if (it.second->is<IR::ParserBlock>()) {
             auto name = it.second->to<IR::ParserBlock>()->container->name;
-            pGraph g_;
+            Graph g_;
             g = &g_;
             boost::get_property(g_, boost::graph_name) = name;
             accept_v = add_vertex("accept", VertexType::DEFAULT);
@@ -197,7 +197,9 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
             // Start node is the root at top, does not need to connect to anyone.
             v = add_vertex(state->name, VertexType::START);
         } else {
-            v = add_and_connect_vertex(state->name, VertexType::HEADER);
+            v = add_and_connect_unique_vertex(state->name, VertexType::HEADER);
+            if (((*g)[v]).visited == true)
+                return false;
         }
         if (state->selectExpression->is<IR::PathExpression>()) {
             parents = {{v, new EdgeSwitch(new IR::DefaultExpression())}};
@@ -206,9 +208,11 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
             auto nstate = decl->to<IR::ParserState>();
             if (nstate->name == IR::ParserState::accept) {
                 acceptParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                ((*g)[v]).visited = true;
                 return false;
             } else if (nstate->name == IR::ParserState::reject) {
                 rejectParents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
+                ((*g)[v]).visited = true;
                 return false;
             }
             visit(decl->to<IR::ParserState>());
@@ -242,6 +246,7 @@ bool ParserGraphs::preorder(const IR::ParserState *state) {
             LOG1("unexpected selectExpression");
         }
 
+        ((*g)[v]).visited = true;
     } else {
         LOG1("default case");
     }

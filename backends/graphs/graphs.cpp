@@ -29,12 +29,32 @@ Graphs::vertex_t Graphs::add_vertex(const cstring &name, VertexType type) {
     auto v = boost::add_vertex(*g);
     boost::put(&Vertex::name, *g, v, name);
     boost::put(&Vertex::type, *g, v, type);
+    boost::put(&Vertex::visited, *g, v, false);
     return g->local_to_global(v);
+}
+
+Graphs::vertex_t Graphs::add_unique_vertex(const cstring &name, VertexType type) {
+    Graph ug = *g;
+    auto vertices = boost::vertices(*g);
+    for (auto vit = vertices.first; vit != vertices.second; ++vit) {
+        const auto &vinfo = ug[*vit];
+        if (vinfo.name == name) return *vit;
+    }
+    return add_vertex(name, type);
 }
 
 void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &name) {
     auto ep = boost::add_edge(from, to, g->root());
     boost::put(boost::edge_name, g->root(), ep.first, name);
+}
+
+void Graphs::add_unique_edge(const vertex_t &from, const vertex_t &to, const cstring &name) {
+    auto outEdges = boost::out_edges(from, *g);
+    for (auto oe = outEdges.first; oe != outEdges.second; ++oe) {
+        cstring ename = boost::get(boost::edge_name, *g, *oe);
+        if (ename == name) return;
+    }
+    add_edge(from, to, name);
 }
 
 boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
@@ -62,6 +82,14 @@ boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
 Graphs::vertex_t Graphs::add_and_connect_vertex(const cstring &name, VertexType type) {
     merge_other_statements_into_vertex();
     auto v = add_vertex(name, type);
+    for (auto parent : parents)
+        add_edge(parent.first, v, parent.second->label());
+    return v;
+}
+
+Graphs::vertex_t Graphs::add_and_connect_unique_vertex(const cstring &name, VertexType type) {
+    merge_other_statements_into_vertex();
+    auto v = add_unique_vertex(name, type);
     for (auto parent : parents)
         add_edge(parent.first, v, parent.second->label());
     return v;
