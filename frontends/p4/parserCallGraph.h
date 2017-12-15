@@ -32,7 +32,7 @@ class ComputeParserCG : public Inspector {
     ParserCallGraph* transitions;
 
  public:
-    ComputeParserCG(const ReferenceMap* refMap, ParserCallGraph* transitions) :
+    ComputeParserCG(const ReferenceMap* refMap, /* out */ParserCallGraph* transitions) :
             refMap(refMap), transitions(transitions) {
         CHECK_NULL(refMap); CHECK_NULL(transitions);
         setName("ComputeParserCG");

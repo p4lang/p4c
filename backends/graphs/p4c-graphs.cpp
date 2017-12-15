@@ -27,6 +27,8 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 
 #include "graphs.h"
+#include "controls.h"
+#include "parsers.h"
 
 namespace graphs {
 
@@ -118,14 +120,13 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    LOG1("Generating graphs under " << options.graphsDir);
-    LOG1("Generating control graphs");
+    LOG2("Generating graphs under " << options.graphsDir);
+    LOG2("Generating control graphs");
     graphs::ControlGraphs cgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
     top->getMain()->apply(cgen);
-
-    LOG1("Generating parser graphs");
-    graphs::ParserGraphs pgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
-    top->getMain()->apply(pgen);
+    LOG2("Generating parser graphs");
+    graphs::ParserGraphs pgg(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
+    program->apply(pgg);
 
     return ::errorCount() > 0;
 }

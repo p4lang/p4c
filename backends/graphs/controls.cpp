@@ -25,6 +25,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
+#include "controls.h"
 
 namespace graphs {
 

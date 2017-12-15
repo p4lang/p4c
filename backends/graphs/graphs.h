@@ -37,6 +37,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "frontends/p4/parserCallGraph.h"
 
 namespace P4 {
 
@@ -92,33 +93,15 @@ class EdgeSwitch : public EdgeTypeIface {
     const IR::Expression *labelExpr;
 };
 
-class EdgeSelect : public EdgeTypeIface {
- public:
-    explicit EdgeSelect(const cstring labelExpr)
-        : labelExpr(labelExpr) { }
-    cstring label() const override {
-        return labelExpr;
-    };
-
- private:
-    const cstring labelExpr;
-};
-
 class Graphs : public Inspector {
  public:
     enum class VertexType {
-// For Control Blocks
         TABLE,
         CONDITION,
         SWITCH,
         STATEMENTS,
         CONTROL,
-        OTHER,
-// For Parser Blocks
-        START,
-        HEADER,
-        PARSER,
-        DEFAULT
+        OTHER
     };
     struct Vertex {
         cstring name;
@@ -183,12 +166,6 @@ class Graphs : public Inspector {
             switch (type) {
             case VertexType::TABLE:
                 return "ellipse";
-            case VertexType::HEADER:
-                return "box";
-            case VertexType::START:
-                return "circle";
-            case VertexType::DEFAULT:
-                return "doublecircle";
             default:
                 return "rectangle";
             }
@@ -200,12 +177,6 @@ class Graphs : public Inspector {
             switch (type) {
             case VertexType::CONTROL:
                 return "dashed";
-            case VertexType::HEADER:
-                return "solid";
-            case VertexType::START:
-                return "solid";
-            case VertexType::DEFAULT:
-                return "solid";
             default:
                 return "solid";
             }
@@ -215,12 +186,6 @@ class Graphs : public Inspector {
 
         static cstring vertexTypeGetMargin(VertexType type) {
             switch (type) {
-            case VertexType::HEADER:
-                return "0.05,0";
-            case VertexType::START:
-                return "0,0";
-            case VertexType::DEFAULT:
-                return "0,0";
             default:
                 return "";
             }
@@ -233,74 +198,6 @@ class Graphs : public Inspector {
     vertex_t exit_v{};
     Parents parents{};
     std::vector<const IR::Statement *> statementsStack{};
-};
-
-class ControlGraphs : public Graphs {
- public:
-    class ControlStack {
-     public:
-        Graph *pushBack(Graph &currentSubgraph, const cstring &name);
-        Graph *popBack();
-        Graph *getSubgraph() const;
-        cstring getName(const cstring &name) const;
-        bool isEmpty() const;
-     private:
-        std::vector<cstring> names{};
-        std::vector<Graph *> subgraphs{};
-    };
-
-    ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
-
-    bool preorder(const IR::PackageBlock *block) override;
-    bool preorder(const IR::ControlBlock *block) override;
-    bool preorder(const IR::P4Control *cont) override;
-    bool preorder(const IR::BlockStatement *statement) override;
-    bool preorder(const IR::IfStatement *statement) override;
-    bool preorder(const IR::SwitchStatement *statement) override;
-    bool preorder(const IR::MethodCallStatement *statement) override;
-    bool preorder(const IR::AssignmentStatement *statement) override;
-    bool preorder(const IR::ReturnStatement *) override;
-    bool preorder(const IR::ExitStatement *) override;
-    bool preorder(const IR::P4Table *table) override;
-
-    void writeGraphToFile(const Graph &g, const cstring &name);
-
- private:
-    P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
-    const cstring graphsDir;
-    Parents return_parents{};
-    // we keep a stack of subgraphs; every time we visit a control, we create a
-    // new subgraph and push it to the stack; this new graph becomes the
-    // "current graph" to which we add vertices (e.g. tables).
-    ControlStack controlStack{};
-    boost::optional<cstring> instanceName{};
-};
-
-class ParserGraphs : public Graphs {
- public:
-    ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
-
-    bool preorder(const IR::PackageBlock *block) override;
-    bool preorder(const IR::ParserBlock *block) override;
-    bool preorder(const IR::P4Parser *pars) override;
-    bool preorder(const IR::ParserState *state) override;
-
-    void writeGraphToFile(const Graph &g, const cstring &name);
-
-    cstring stringRepr(mpz_class value, unsigned bytes);
-    void convertSimpleKey(const IR::Expression* keySet,
-                        mpz_class& value, mpz_class& mask);
-    unsigned combine(const IR::Expression* keySet,
-                    const IR::ListExpression* select,
-                    mpz_class& value, mpz_class& mask);
-
- private:
-    P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
-    const cstring graphsDir;
-    vertex_t accept_v{};
-    vertex_t reject_v{};
-    Parents acceptParents{};
-    Parents rejectParents{};
 };
 
 }  // namespace graphs
