@@ -21,6 +21,7 @@ limitations under the License.
 #include "errorcode.h"
 #include "expression.h"
 #include "extern.h"
+#include "globals.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/methodInstance.h"
@@ -188,6 +189,8 @@ void Backend::convert(BMV2Options& options) {
     auto main = toplevel->getMain();
     if (main == nullptr)
         return;
+
+    (void)toplevel->apply(ConvertGlobals(this));
     main->apply(codegen_passes);
 }
 
