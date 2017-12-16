@@ -50,18 +50,6 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
           ${CMAKE_COMMAND} -E copy_if_different \$$f ${P4C_BINARY_DIR}/p4c_src \;
           done
   COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c
-  # hack to make the tests work. If the p4include directory is
-  # provided with -I to the compiler the output files include the
-  # contents of the includes. If the compiler finds them in the
-  # current directory, it leaves the #include directive in the output,
-  # and this is how the current sample outputs are stored.
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}/p4include
-  # hack to link the generated executables at the top level directory
-  # because the test run scripts expect them there. This should go
-  # away when removing automake and runscripts can be adjusted.
-  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/bmv2/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
-  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/p4test/p4test ${P4C_BINARY_DIR}/p4test
-  # COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/backends/ebpf/p4c-ebpf ${P4C_BINARY_DIR}/p4c-ebpf
   DEPENDS ${P4C_DRIVER_SRCS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Copying p4c driver"
