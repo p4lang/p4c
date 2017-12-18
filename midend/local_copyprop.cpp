@@ -228,11 +228,13 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
         return nullptr; }
     if (auto var = ::getref(available, name)) {
         if (var->val) {
-            LOG3("  propagating value for " << name << ": " << var->val);
-            return var->val;
+            if (policy(getChildContext(), var->val)) {
+                LOG3("  propagating value for " << name << ": " << var->val);
+                return var->val; }
+            LOG3("  policy rejects propagation of " << name << ": " << var->val);
         } else {
-            LOG4("  using " << name << " with no propagated value");
-            var->live = true; } }
+            LOG4("  using " << name << " with no propagated value"); }
+        var->live = true; }
     forOverlapAvail(name, [name](VarInfo *var) {
         LOG4("  using part of " << name);
         var->live = true; });
@@ -541,15 +543,19 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
         forOverlapAvail(key, [key, tbl, this](VarInfo *var) {
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
-                    (!tbl->key_remap.count(key) || *tbl->key_remap.at(key) != *var->val)) {
+                    (!tbl->key_remap.count(key) || !equiv(tbl->key_remap.at(key), var->val))) {
                     /* FIXME -- need deep expr comparison here, not shallow */
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(key);
                     var->live = true;
-                } else {
+                } else if (policy(getChildContext(), var->val)) {
                     LOG3("  will propagate value into table key " << key << ": " << var->val);
                     tbl->key_remap.emplace(key, var->val);
-                    need_key_rewrite = true; }
+                    need_key_rewrite = true;
+                } else {
+                    LOG3("  policy prevents propagation of value into table key " <<
+                         key << ": " << var->val);
+                    var->live = true; }
             } else {
                 tbl->key_remap.erase(key);
                 LOG4("  table using " << key << " with " <<

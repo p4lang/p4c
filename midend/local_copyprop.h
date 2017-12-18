@@ -38,6 +38,16 @@ Requires that all declaration names be globally unique
 
 Requires that all variable declarations are at the top-level control scope
 (obtained using MoveDeclarations).
+
+@param policy
+
+This predicate function will be called for any expression that could be copy-propagated
+to determine if it should be.  It will only be called for expressions that are legal to
+propagate (so no side effects, or dependencies that would change the meaning), so the
+policy should only evaluate the potential cost of propagating, as propagated expressions
+may be evaluated mulitple times.  The default policy just returns true -- always propagate
+if legal to do so.
+
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
     bool                        working = false;
@@ -61,6 +71,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     TableInfo                           *inferForTable = nullptr;
     FuncInfo                            *inferForFunc = nullptr;
     bool                                need_key_rewrite = false;
+    std::function<bool(const Context *, const IR::Expression *)> policy;
+
     DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
     bool name_overlap(cstring, cstring);
@@ -95,17 +107,21 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation() : tables(*new std::map<cstring, TableInfo>),
-                               actions(*new std::map<cstring, FuncInfo>),
-                               methods(*new std::map<cstring, FuncInfo>)
+    explicit DoLocalCopyPropagation(
+        std::function<bool(const Context *, const IR::Expression *)> policy)
+    : tables(*new std::map<cstring, TableInfo>), actions(*new std::map<cstring, FuncInfo>),
+      methods(*new std::map<cstring, FuncInfo>), policy(policy)
     { setName("DoLocalCopyPropagation"); }
 };
 
 class LocalCopyPropagation : public PassManager {
  public:
-    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap) {
+    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap,
+        std::function<bool(const Context *, const IR::Expression *)> policy =
+            [](const Context *, const IR::Expression *) -> bool { return true; }
+    ) {
         passes.push_back(new TypeChecking(refMap, typeMap, true));
-        passes.push_back(new DoLocalCopyPropagation);
+        passes.push_back(new DoLocalCopyPropagation(policy));
         setName("LocalCopyPropagation");
     }
 };
