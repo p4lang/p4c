@@ -156,6 +156,7 @@ class Visitor {
                   ctxt->original, typeid(T).name());
         return ctxt->original->to<T>();
     }
+    const Context *getChildContext() const { return ctxt; }
     const Context *getContext() const { return ctxt->parent; }
     template <class T>
     const T* getParent() const {
