@@ -1207,34 +1207,30 @@ CONVERT_PRIMITIVE(modify_field_from_rng) {
     BUG_CHECK(primitive->operands.size() == 2 || primitive->operands.size() == 3,
               "Expected 2 or 3 operands for %1%", primitive);
     auto field = conv.convert(primitive->operands.at(0));
+    auto dest = field;
     auto logRange = conv.convert(primitive->operands.at(1));
     const IR::Expression* mask = nullptr;
-    if (primitive->operands.size() == 3)
+    auto block = new IR::BlockStatement;
+    if (primitive->operands.size() == 3) {
         mask = conv.convert(primitive->operands.at(2));
-
-    cstring tmpvar = structure->makeUniqueName("tmp");
-    auto decl = new IR::Declaration_Variable(tmpvar, structure->v1model.random.resultType);
+        cstring tmpvar = structure->makeUniqueName("tmp");
+        auto decl = new IR::Declaration_Variable(tmpvar, field->type);
+        block->push_back(decl);
+        dest = new IR::PathExpression(field->type, new IR::Path(tmpvar)); }
     auto args = new IR::Vector<IR::Expression>();
-    args->push_back(new IR::PathExpression(tmpvar));
+    args->push_back(dest);
     args->push_back(new IR::Constant(primitive->operands.at(1)->srcInfo,
-                                     structure->v1model.random.resultType, 0));
+                                     field->type, 0));
     auto one = new IR::Constant(primitive->operands.at(1)->srcInfo, 1);
-    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                 structure->v1model.random.resultType,
+    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo, field->type,
                                  new IR::Sub(new IR::Shl(one, logRange), one)));
     auto random = new IR::PathExpression(structure->v1model.random.Id());
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
     auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
-    auto block = new IR::BlockStatement;
-    const IR::Statement* assgn;
-    if (mask != nullptr)
-        assgn = structure->sliceAssign(primitive->srcInfo, field,
-                             new IR::PathExpression(IR::ID(tmpvar)), mask);
-    else
-        assgn = new IR::AssignmentStatement(field, new IR::PathExpression(tmpvar));
-    block->push_back(decl);
     block->push_back(call);
-    block->push_back(assgn);
+    if (mask != nullptr) {
+        auto assgn = structure->sliceAssign(primitive->srcInfo, field, dest->clone(), mask);
+        block->push_back(assgn); }
     return block;
 }
 
@@ -1244,14 +1240,12 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform) {
     auto field = conv.convert(primitive->operands.at(0));
     auto lo = conv.convert(primitive->operands.at(1));
     auto hi = conv.convert(primitive->operands.at(2));
-    auto args = new IR::Vector<IR::Expression>();
-    args->push_back(field);
-    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                 structure->v1model.random.resultType, lo));
-    args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                 structure->v1model.random.resultType, hi));
+    if (lo->type != field->type)
+        lo = new IR::Cast(primitive->operands.at(1)->srcInfo, field->type, lo);
+    if (hi->type != field->type)
+        hi = new IR::Cast(primitive->operands.at(2)->srcInfo, field->type, hi);
     auto random = new IR::PathExpression(structure->v1model.random.Id());
-    auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, args);
+    auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, { field, lo, hi });
     auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
     return call;
 }
