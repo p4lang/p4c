@@ -1589,7 +1589,9 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         int field_offset = get_field_offset(header_id, field_name);
         const auto mtype = match_name_to_match_type(
             cfg_f["match_type"].asString());
-        const std::string name = header_name + "." + field_name;
+        const std::string name = cfg_f.isMember("name") ?
+          cfg_f["name"].asString() :
+          std::string(header_name + "." + field_name);
         if ((!cfg_f.isMember("mask")) || cfg_f["mask"].isNull()) {
           key_builder.push_back_field(header_id, field_offset,
                                       get_field_bits(header_id, field_offset),
@@ -1624,7 +1626,9 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           const Json::Value &cfg_key_field = cfg_key_entry["target"];
           const string header_name = cfg_key_field.asString();
           header_id_t header_id = get_header_id(header_name);
-          key_builder.push_back_valid_header(header_id, header_name);
+          const std::string name = cfg_key_entry.isMember("name") ?
+              cfg_key_entry["name"].asString() : header_name;
+          key_builder.push_back_valid_header(header_id, name);
         } else {
           add_f(cfg_key_entry);
         }

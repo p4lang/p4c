@@ -556,7 +556,8 @@ class JsonBuilder {
   // single action
   void add_table(const std::string &name, const std::string &match_type,
                  const std::string &hdr_name, const std::string &f_name,
-                 const std::string &action_name) {
+                 const std::string &action_name,
+                 const std::string &user_f_name = "") {
     auto &pipelines = json["pipelines"];
     Json::Value pipeline(Json::objectValue);
     pipeline["name"] = "pipe";
@@ -577,6 +578,7 @@ class JsonBuilder {
     target.append(hdr_name);
     target.append(f_name);
     match_field["target"] = target;
+    if (!user_f_name.empty()) match_field["name"] = user_f_name;
     match_key.append(match_field);
     table["key"] = match_key;
 
@@ -879,6 +881,36 @@ TEST(P4Objects, ImmutableEntriesBadJson) {
         "Invalid number of arguments for action 'a': expected 0 but got 1\n");
     check(builder, expected_error_msg);
   }
+}
+
+TEST(P4Objects, UserProvidedMatchFieldName) {
+  LookupStructureFactory factory;
+  JsonBuilder builder;
+  builder.add_header_type("hdr_t");
+  builder.add_header("hdr", "hdr_t");
+  builder.add_action("a");
+  builder.add_table("t", "exact", "hdr", "f8", "a", "MyName.MyH.MyF");
+  std::map<std::string, std::string> entry_attrs = {
+    {"match_type", "exact"},
+    {"key", "0x01"}
+  };
+  builder.add_entry_to_table("t", 0 /* action_id */, {entry_attrs});
+  std::stringstream is(builder.to_string());
+  P4Objects objects;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+
+  auto table_ = objects.get_abstract_match_table("t");
+  auto table = dynamic_cast<MatchTable *>(table_);
+  ASSERT_NE(nullptr, table);
+  const auto entries = table->get_entries();
+  ASSERT_EQ(1u, entries.size());
+  auto entry_string = table->dump_entry_string(entries.at(0).handle);
+  auto expected_string = R"entry(Dumping entry 0
+Match key:
+* MyName.MyH.MyF      : EXACT     01
+Action entry: a - 
+)entry";
+  EXPECT_EQ(entry_string, expected_string);
 }
 
 TEST(P4Objects, ParserShift) {
