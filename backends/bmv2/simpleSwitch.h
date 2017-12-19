@@ -58,13 +58,15 @@ class SimpleSwitch {
     void setPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls,
                              std::map<cstring, cstring>* map);
     void setNonPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
-    void setUpdateChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
+    void setComputeChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setVerifyChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setDeparserControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
 
     const IR::P4Control* getIngress(const IR::ToplevelBlock* blk);
     const IR::P4Control* getEgress(const IR::ToplevelBlock* blk);
     const IR::P4Parser*  getParser(const IR::ToplevelBlock* blk);
+    const IR::P4Control* getCompute(const IR::ToplevelBlock* blk);
+    const IR::P4Control* getVerify(const IR::ToplevelBlock* blk);
 
     explicit SimpleSwitch(BMV2::Backend* backend) :
         backend(backend), v1model(V1Model::instance)

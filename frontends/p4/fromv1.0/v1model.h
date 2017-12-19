@@ -216,12 +216,12 @@ struct Cloner_Model : public ::Model::Extern_Model {
 struct Switch_Model : public ::Model::Elem {
     Switch_Model() : Model::Elem("V1Switch"),
                      parser("p"), verify("vr"), ingress("ig"),
-                     egress("eg"), update("ck"), deparser("dep") {}
+                     egress("eg"), compute("ck"), deparser("dep") {}
     ::Model::Elem parser;  // names of the package arguments
     ::Model::Elem verify;
     ::Model::Elem ingress;
     ::Model::Elem egress;
-    ::Model::Elem update;
+    ::Model::Elem compute;
     ::Model::Elem deparser;
 };
 
@@ -253,7 +253,7 @@ class V1Model : public ::Model::Model {
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
             action_selector(), clone(), resubmit("resubmit"),
             tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
-            verify("verifyChecksum", headersType), update("computeChecksum", headersType),
+            verify("verifyChecksum", headersType), compute("computeChecksum", headersType),
             digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
             recirculate("recirculate"), verify_checksum("verify_checksum"),
@@ -287,7 +287,7 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       rangeMatchType;
     ::Model::Elem       selectorMatchType;
     VerifyUpdate_Model  verify;
-    VerifyUpdate_Model  update;
+    VerifyUpdate_Model  compute;
     DigestReceiver_Model digest_receiver;
     Hash_Model          hash;
     Algorithm_Model     algorithm;

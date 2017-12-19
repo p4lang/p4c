@@ -752,46 +752,61 @@ SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
     if (errorCount() != 0)
         return;
     auto main = toplevel->getMain();
-    auto verify = main->findParameterValue(v1model.sw.verify.name);
-    auto update = main->findParameterValue(v1model.sw.update.name);
+    auto verify = getVerify(toplevel);
+    auto compute = getCompute(toplevel);
     auto deparser = main->findParameterValue(v1model.sw.deparser.name);
-    if (verify == nullptr || update == nullptr || deparser == nullptr ||
-        !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
+    if (verify == nullptr || compute == nullptr || deparser == nullptr ||
         !deparser->is<IR::ControlBlock>()) {
         modelError("%1%: main package  match the expected model", main);
         return;
     }
-    controls->emplace(verify->to<IR::ControlBlock>()->container->name);
-    controls->emplace(update->to<IR::ControlBlock>()->container->name);
+    controls->emplace(verify->name);
+    controls->emplace(compute->name);
     controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
 }
 
-void
-SimpleSwitch::setUpdateChecksumControls(const IR::ToplevelBlock* toplevel,
-                                        std::set<cstring>* controls) {
+const IR::P4Control*
+SimpleSwitch::getCompute(const IR::ToplevelBlock* toplevel) {
     if (errorCount() != 0)
-        return;
+        return nullptr;
     auto main = toplevel->getMain();
-    auto update = main->findParameterValue(v1model.sw.update.name);
+    auto update = main->findParameterValue(v1model.sw.compute.name);
     if (update == nullptr || !update->is<IR::ControlBlock>()) {
         modelError("%1%: main package does not match the expected model", main);
-        return;
+        return nullptr;
     }
-    controls->emplace(update->to<IR::ControlBlock>()->container->name);
+    return update->to<IR::ControlBlock>()->container;
+}
+
+const IR::P4Control*
+SimpleSwitch::getVerify(const IR::ToplevelBlock* toplevel) {
+    if (errorCount() != 0)
+        return nullptr;
+    auto main = toplevel->getMain();
+    auto verify = main->findParameterValue(v1model.sw.verify.name);
+    if (verify == nullptr || !verify->is<IR::ControlBlock>()) {
+        modelError("%1%: main package does not match the expected model", main);
+        return nullptr;
+    }
+    return verify->to<IR::ControlBlock>()->container;
+}
+
+void
+SimpleSwitch::setComputeChecksumControls(const IR::ToplevelBlock* toplevel,
+                                         std::set<cstring>* controls) {
+    auto ctrl = getCompute(toplevel);
+    if (ctrl == nullptr)
+        return;
+    controls->emplace(ctrl->name);
 }
 
 void
 SimpleSwitch::setVerifyChecksumControls(const IR::ToplevelBlock* toplevel,
                                         std::set<cstring>* controls) {
-    if (errorCount() != 0)
+    auto ctrl = getVerify(toplevel);
+    if (ctrl == nullptr)
         return;
-    auto main = toplevel->getMain();
-    auto update = main->findParameterValue(v1model.sw.verify.name);
-    if (update == nullptr || !update->is<IR::ControlBlock>()) {
-        modelError("%1%: main package does not match the expected model", main);
-        return;
-    }
-    controls->emplace(update->to<IR::ControlBlock>()->container->name);
+    controls->emplace(ctrl->name);
 }
 
 void

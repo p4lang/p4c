@@ -2099,7 +2099,7 @@ void ProgramStructure::createChecksumUpdates() {
     auto params = new IR::ParameterList;
     auto headpath = new IR::Path(v1model.headersType.Id());
     auto headtype = new IR::Type_Name(headpath);
-    auto headers = new IR::Parameter(v1model.update.headersParam.Id(),
+    auto headers = new IR::Parameter(v1model.compute.headersParam.Id(),
                                      IR::Direction::InOut, headtype);
     params->push_back(headers);
     conversionContext.header = paramReference(headers);
@@ -2113,7 +2113,7 @@ void ProgramStructure::createChecksumUpdates() {
 
     conversionContext.standardMetadata = nullptr;
 
-    auto type = new IR::Type_Control(v1model.update.Id(), params);
+    auto type = new IR::Type_Control(v1model.compute.Id(), params);
     auto body = new IR::BlockStatement;
     for (auto cf : calculated_fields) {
         LOG3("Conveting " << cf);
@@ -2147,7 +2147,7 @@ void ProgramStructure::createChecksumUpdates() {
         }
     }
     updateChecksums = new IR::P4Control(
-        v1model.update.Id(), type, IR::IndexedVector<IR::Declaration>(), body);
+        v1model.compute.Id(), type, IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(updateChecksums);
     conversionContext.clear();
 }
