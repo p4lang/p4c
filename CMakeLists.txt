@@ -305,6 +305,7 @@ add_custom_target(cpplint-quiet
 add_test(NAME cpplint
   COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
   WORKING_DIRECTORY ${P4C_SOURCE_DIR})
+set_tests_properties(cpplint PROPERTIES LABELS cpplint)
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
