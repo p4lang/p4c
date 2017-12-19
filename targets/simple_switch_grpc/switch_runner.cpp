@@ -96,6 +96,8 @@ class DataplaneInterfaceServiceImpl
       if (!pkt_handler) continue;
       pkt_handler(request.port(), packet.data(), packet.size(), pkt_cookie);
     }
+    auto &runner = sswitch_grpc::SimpleSwitchGrpcRunner::get_instance();
+    runner.block_until_all_packets_processed();
     Lock lock(mutex);
     active = false;
     return Status::OK;
@@ -282,6 +284,11 @@ SimpleSwitchGrpcRunner::shutdown() {
 void
 SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id, int egress_port) {
   simple_switch->mirroring_mapping_add(mirror_id, egress_port);
+}
+
+void
+SimpleSwitchGrpcRunner::block_until_all_packets_processed() {
+  simple_switch->block_until_no_more_packets();
 }
 
 SimpleSwitchGrpcRunner::~SimpleSwitchGrpcRunner() {

@@ -425,17 +425,29 @@ SwitchWContexts::swap_requested() {
   return false;
 }
 
+void
+SwitchWContexts::block_until_no_more_packets() {
+  boost::unique_lock<boost::shared_mutex> lock(process_packet_mutex);
+  for (cxt_id_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
+    // Wait until no more packets exist for this context
+    while (phv_source->phvs_in_use(cxt_id) > 0) {
+      std::this_thread::yield();
+    }
+  }
+}
+
 int
 SwitchWContexts::do_swap() {
   int rc = 1;
   if (!enable_swap || !swap_requested()) return rc;
-  boost::unique_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
+  boost::unique_lock<boost::shared_mutex> lock(process_packet_mutex);
   for (cxt_id_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
     auto &cxt = contexts[cxt_id];
     if (!cxt.swap_requested()) continue;
-    // TODO(antonin): we spin until no more packets exist for this context, is
-    // there a better way of doing this?
-    while (phv_source->phvs_in_use(cxt_id) > 0) { }
+    // Wait until no more packets exist for this context
+    while (phv_source->phvs_in_use(cxt_id) > 0) {
+      std::this_thread::yield();
+    }
     int swap_done = cxt.do_swap();
     if (swap_done == 0)
       phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
@@ -498,7 +510,7 @@ SwitchWContexts::new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
                                 packet_id_t id, int ingress_length,
                                 // NOLINTNEXTLINE(whitespace/operators)
                                 PacketBuffer &&buffer) {
-  boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
+  boost::shared_lock<boost::shared_mutex> lock(process_packet_mutex);
   return std::unique_ptr<Packet>(new Packet(
       cxt_id, ingress_port, id, 0u, ingress_length, std::move(buffer),
       phv_source.get()));
@@ -508,7 +520,7 @@ Packet
 SwitchWContexts::new_packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
                             // NOLINTNEXTLINE(whitespace/operators)
                             int ingress_length, PacketBuffer &&buffer) {
-  boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
+  boost::shared_lock<boost::shared_mutex> lock(process_packet_mutex);
   return Packet(cxt_id, ingress_port, id, 0u, ingress_length,
                 std::move(buffer), phv_source.get());
 }

@@ -62,8 +62,8 @@ TEST_F(SimpleSwitchGrpcTest_GrpcDataplane, SendAndReceive) {
   request.set_device_id(device_id);
   request.set_port(9);
   request.set_packet(std::string(10, '\xab'));
-  ClientContext context;
-  auto stream = dataplane_stub->PacketStream(&context);
+  ClientContext context1;
+  auto stream = dataplane_stub->PacketStream(&context1);
   stream->Write(request);
   p4::bm::PacketStreamResponse response;
   stream->Read(&response);
@@ -72,6 +72,17 @@ TEST_F(SimpleSwitchGrpcTest_GrpcDataplane, SendAndReceive) {
   EXPECT_EQ(request.packet(), response.packet());
   stream->WritesDone();
   auto status = stream->Finish();
+  EXPECT_TRUE(status.ok());
+
+  ClientContext context2;
+  stream = dataplane_stub->PacketStream(&context2);
+  stream->Write(request);
+  stream->WritesDone();
+  stream->Read(&response);
+  EXPECT_EQ(request.device_id(), response.device_id());
+  EXPECT_EQ(request.port(), response.port());
+  EXPECT_EQ(request.packet(), response.packet());
+  status = stream->Finish();
   EXPECT_TRUE(status.ok());
 }
 

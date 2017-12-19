@@ -270,6 +270,11 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! be using. See switch.h documentation for more information.
   int do_swap();
 
+  //! Utility function which prevents new Packet instances from being
+  //! created and blocks until all existing Packet instances have been
+  //! destroyed in all contexts
+  void block_until_no_more_packets();
+
   //! Construct and return a Packet instance for the given \p cxt_id.
   std::unique_ptr<Packet> new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
                                          packet_id_t id, int ingress_length,
@@ -895,7 +900,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::string notifications_addr{};
   std::shared_ptr<TransportIface> notifications_transport{nullptr};
 
-  mutable boost::shared_mutex ongoing_swap_mutex{};
+  mutable boost::shared_mutex process_packet_mutex{};
 
   std::string current_config{"{}"};  // empty JSON config
   bool config_loaded{false};
