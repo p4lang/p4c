@@ -104,7 +104,7 @@ extern action_profile {
 }
 
 // Get a random number in the range lo..hi
-extern void random(out bit<32> result, in bit<32> lo, in bit<32> hi);
+extern void random<T>(out T result, in T lo, in T hi);
 // If the type T is a named struct, the name is used
 // to generate the control-plane API.
 extern void digest<T>(in bit<32> receiver, in T data);
