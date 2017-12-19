@@ -24,3 +24,6 @@
 
 /* Define to 1 if you have the ucontext.h header */
 #cmakedefine HAVE_UCONTEXT_H 1
+
+/* Define to 1 if you have the cxxabi.h header */
+#cmakedefine HAVE_CXXABI_H 1
