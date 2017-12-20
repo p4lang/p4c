@@ -10,9 +10,6 @@ struct M {
 typedef bit<32> IPAddr;
 const IPAddr MyIP = 0xffffffff;
 
-// if the 2 lines above are replaced by this one, program compiles
-// const bit<32> MyIP = 0xffffffff;
-
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start { transition accept; }
 }
@@ -29,7 +26,6 @@ control myc(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         actions = { set_eg; }
         const entries = {
-            // if one entry instead of 2, program compiles
             (32w1, MyIP) : set_eg(9w1);
             (32w2, MyIP) : set_eg(9w2);
         }
