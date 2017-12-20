@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "lib/log.h"
 #include "typeChecker.h"
 #include "typeUnification.h"
 #include "typeSubstitution.h"
@@ -126,17 +127,19 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
 
 void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode)) {
-        ToP4 top4(&std::cout, true, nullptr);
-        std::cout << "Initial program" << std::endl;
-        initialNode->apply(top4);
-        std::cout << "============\nFinal program" << std::endl;
-        ToP4 top41(&std::cout, true, nullptr);
-        node->apply(top41);
+        if (::Log::verbose()) {
+            ToP4 top4(&std::cout, true, nullptr);
+            std::cout << "Initial program" << std::endl;
+            initialNode->apply(top4);
+            std::cout << "============\nFinal program" << std::endl;
+            ToP4 top41(&std::cout, true, nullptr);
+            node->apply(top41);
+        }
         BUG("typechecker mutated program");
     }
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
-        LOG4("Typemap: " << std::endl << typeMap);
+        LOG3("Typemap: " << std::endl << typeMap);
 }
 
 bool TypeInference::done() const {
@@ -1037,7 +1040,7 @@ const IR::Node* TypeInference::postorder(IR::P4Parser* parser) {
 
 const IR::Node* TypeInference::postorder(IR::Type_InfInt* type) {
     if (done()) return type;
-    auto tt = new IR::Type_Type(type);
+    auto tt = new IR::Type_Type(getOriginal<IR::Type>());
     setType(getOriginal(), tt);
     return type;
 }
@@ -1424,7 +1427,6 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
  * Used to typecheck pre-defined entries.
  */
 const IR::Node* TypeInference::postorder(IR::Key* key) {
-    LOG1("TypeInference: visiting " << dbp(key));
     // compute the type and store it in typeMap
     auto keyTuple = new IR::Type_Tuple;
     for (auto ke : key->keyElements) {
@@ -1438,7 +1440,6 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
     LOG2("Setting key type to " << dbp(keyTuple));
     setType(key, keyTuple);
     // installing also for the original because we cannot tell which one will survive in the ir
-    // \TODO: figure out the rules of survivorship
     LOG2("Setting key type to " << dbp(getOriginal()));
     setType(getOriginal(), keyTuple);
     return key;
@@ -1448,7 +1449,6 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
  *  typecheck a table initializer entry list
  */
 const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
-    LOG1("TypeInference: visiting: " << el);
     if (done()) return el;
     auto table = findContext<IR::P4Table>();
     BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
@@ -1487,7 +1487,6 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
  *
  */
 const IR::Node* TypeInference::postorder(IR::Entry* entry) {
-    LOG1("TypeInference: visiting: " << entry);
     if (done()) return entry;
     auto table = findContext<IR::P4Table>();
     if (table == nullptr)
@@ -1858,7 +1857,6 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
 
 // Handle .. and &&&
 const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
-    LOG1("TypeInference::typeSet visiting " << expression);
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);

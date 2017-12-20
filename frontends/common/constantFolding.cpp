@@ -51,8 +51,6 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
     if (auto dc = decl->to<IR::Declaration_Constant>()) {
         auto cst = get(constants, dc);
         if (cst == nullptr)
-            cst = getConstant(dc->initializer);
-        if (cst == nullptr)
             return e;
         if (!typesKnown && cst->is<IR::ListExpression>())
             return e;
@@ -62,7 +60,15 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
             // type unification, and thus we want to have different type
             // objects for different constant instances.
             auto cc = cst->to<IR::Constant>();
-            const IR::Type* type = cc->type->clone();
+            const IR::Type* type;
+            if (cc->type->is<IR::Type_Bits>()) {
+                type = cc->type->clone();
+            } else if (cc->type->is<IR::Type_InfInt>()) {
+                // You can't just clone a InfInt value, because
+                // you get the same declid.  We want a new declid.
+                auto ii = cc->type->to<IR::Type_InfInt>();
+                type = new IR::Type_InfInt(ii->srcInfo);
+            }
             return new IR::Constant(cc->srcInfo, type, cc->value, cc->base);
         }
         return cst;
@@ -89,6 +95,9 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
                     (cst->type->is<IR::Type_Bits>() &&
                      !(*d->type->to<IR::Type_Bits>() == *cst->type->to<IR::Type_Bits>())))
                     init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
+            } else {
+                // Don't fold this yet, we can't evaluate the cast.
+                return d;
             }
         }
         if (init != d->initializer)
