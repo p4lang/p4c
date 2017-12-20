@@ -209,7 +209,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                             bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG3("Unifying " << dest->toString() << " to " << src->toString());
+    LOG3("Unifying " << dest << " to " << src);
 
     if (src->is<IR::ITypeVar>())
         src = src->apply(constraints->replaceVariables)->to<IR::Type>();

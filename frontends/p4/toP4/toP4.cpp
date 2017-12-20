@@ -1199,7 +1199,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
     builder.append("{");
     builder.newline();
     builder.increaseIndent();
-    preorder(&l->entries);
+    visit(&l->entries);
     builder.decreaseIndent();
     builder.emitIndent();
     builder.append("}");
@@ -1208,6 +1208,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
 }
 
 bool ToP4::preorder(const IR::Entry *e) {
+    dump(2);
     builder.emitIndent();
     if (e->keys->components.size() == 1)
         setListTerm("", "");
