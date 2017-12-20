@@ -31,7 +31,8 @@ class P4Program;
 enum class P4Headers {
     NONE,    // No headers.
     CORE,    // Just core.p4.
-    V1MODEL  // Both core.p4 and v1model.p4.
+    V1MODEL,  // Both core.p4 and v1model.p4.
+    PSA      // Both core.p4 and psa.p4
 };
 
 namespace detail {
@@ -78,11 +79,15 @@ class P4CTestEnvironment {
     /// @return a string containing the "v1model.p4" P4 standard header.
     const std::string& v1Model() const { return _v1Model; }
 
+    /// @return a string containing the "psa.p4" P4 standard header.
+    const std::string& psaP4() const { return _psaP4; }
+
  private:
     P4CTestEnvironment();
 
     std::string _coreP4;
     std::string _v1Model;
+    std::string _psaP4;
 };
 
 using GTestContext = P4CContextWithOptions<CompilerOptions>;
