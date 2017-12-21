@@ -4,13 +4,13 @@
 control empty();
 package top(empty e);
 control Ing() {
-    bool b_0;
-    bit<32> a_0;
+    bool b;
+    bit<32> a;
     @name("cond") action cond_0() {
-        b_0 = true;
+        b = true;
     }
     apply {
-        a_0 = 32w2;
+        a = 32w2;
         cond_0();
     }
 }

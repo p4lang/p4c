@@ -52,7 +52,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("drop") action drop_0() {
         pass = false;
     }
-    @name("t") table t_0 {
+    @name("t") table t {
         key = {
             headers.ipv4.srcAddr    : exact @name("headers.ipv4.srcAddr") ;
             headers.ipv4.dstAddr    : exact @name("headers.ipv4.dstAddr") ;
@@ -67,7 +67,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         default_action = drop_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 

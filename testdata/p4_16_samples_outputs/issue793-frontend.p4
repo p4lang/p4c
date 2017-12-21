@@ -13,21 +13,23 @@ struct my_packet {
 }
 
 control c(in my_packet hdr) {
+    @name("NoAction") action NoAction_0() {
+    }
     @name("nop") action nop_0() {
     }
-    @name("t") table t_0 {
+    @name("t") table t {
         actions = {
             nop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.db: exact @name("hdr.data.db") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         if (hdr.data.da == 32w1) 
-            t_0.apply();
+            t.apply();
     }
 }
 

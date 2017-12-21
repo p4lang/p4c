@@ -10,13 +10,13 @@ struct S {
 
 extern void f<D>(in D data);
 control c(inout bit<1> r) {
-    S s;
-    bit<1> tmp_0;
+    S s_0;
+    bit<1> tmp;
     apply {
-        s = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
-        f<tuple<T, T>>(s.f1);
-        tmp_0 = s.f2.f & s.z;
-        r = tmp_0;
+        s_0 = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
+        f<tuple<T, T>>(s_0.f1);
+        tmp = s_0.f2.f & s_0.z;
+        r = tmp;
     }
 }
 

@@ -6,9 +6,9 @@ struct S {
 control proto();
 package top(proto _p);
 control c() {
-    tuple<bit<32>, bool> x_0;
+    tuple<bit<32>, bool> x;
     apply {
-        x_0 = { 32w10, false };
+        x = { 32w10, false };
     }
 }
 

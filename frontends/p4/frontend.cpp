@@ -27,13 +27,19 @@ limitations under the License.
 #include "frontends/p4/typeChecking/bindVariables.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 // Passes
+#include "actionsInlining.h"
 #include "createBuiltins.h"
 #include "deprecated.h"
 #include "directCalls.h"
+#include "dontcareArgs.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
+#include "inlining.h"
+#include "localizeActions.h"
+#include "moveConstructors.h"
 #include "moveDeclarations.h"
 #include "parserControlFlow.h"
+#include "removeReturns.h"
 #include "resetHeaders.h"
 #include "setHeaders.h"
 #include "sideEffects.h"
@@ -109,6 +115,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     TypeMap       typeMap;
     refMap.setIsV1(isv1);
 
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+
     PassManager passes = {
         new PrettyPrint(options),
         // Simple checks on parsed program
@@ -151,6 +159,18 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap),
         new RemoveParserControlFlow(&refMap, &typeMap),
+        new P4::RemoveReturns(&refMap),
+        new P4::RemoveDontcareArgs(&refMap, &typeMap),
+        new P4::MoveConstructors(&refMap),
+        new P4::RemoveAllUnusedDeclarations(&refMap),
+        new P4::ClearTypeMap(&typeMap),
+        evaluator,
+        new P4::Inline(&refMap, &typeMap, evaluator),
+        new P4::InlineActions(&refMap, &typeMap),
+        new P4::LocalizeAllActions(&refMap),
+        new P4::UniqueNames(&refMap),  // needed again after inlining
+        new P4::UniqueParameters(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         new FrontEndLast(),
     };
 

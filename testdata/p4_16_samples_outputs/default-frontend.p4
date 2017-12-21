@@ -5,18 +5,18 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    bool b_0;
+    bool b;
     state start {
-        b_0 = true;
+        b = true;
         p.extract<Header>(h);
-        transition select(h.data, b_0) {
+        transition select(h.data, b) {
             (default, true): next;
             (default, default): reject;
         }
     }
     state next {
         p.extract<Header>(h);
-        transition select(h.data, b_0) {
+        transition select(h.data, b) {
             (default, true): accept;
             (default, default): reject;
             default: reject;

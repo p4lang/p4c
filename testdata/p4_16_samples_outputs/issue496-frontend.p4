@@ -23,22 +23,8 @@ control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
     }
 }
 
-control D() {
-    apply {
-    }
-}
-
-control C()(D d) {
-    apply {
-        d.apply();
-    }
-}
-
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    @name("d") D() d_0;
-    @name("c") C(d_0) c_0;
     apply {
-        c_0.apply();
     }
 }
 

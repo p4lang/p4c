@@ -4,18 +4,27 @@ header Header {
     bit<32> data;
 }
 
-parser p0(packet_in p, out Header h) {
-    state start {
-        p.extract<Header>(h);
-        transition accept;
-    }
-}
-
 parser p1(packet_in p, out Header[2] h) {
-    @name("p0inst") p0() p0inst_0;
+    Header h_1;
     state start {
-        p0inst_0.apply(p, h[0]);
-        p0inst_0.apply(p, h[1]);
+        h_1.setInvalid();
+        transition p0_start;
+    }
+    state p0_start {
+        p.extract<Header>(h_1);
+        transition start_0;
+    }
+    state start_0 {
+        h[0] = h_1;
+        h_1.setInvalid();
+        transition p0_start_0;
+    }
+    state p0_start_0 {
+        p.extract<Header>(h_1);
+        transition start_1;
+    }
+    state start_1 {
+        h[1] = h_1;
         transition accept;
     }
 }

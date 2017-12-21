@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_INLINING_H_
-#define _MIDEND_INLINING_H_
+#ifndef _FRONTENDS_P4_INLINING_H_
+#define _FRONTENDS_P4_INLINING_H_
 
 #include "lib/ordered_map.h"
 #include "ir/ir.h"
@@ -290,4 +290,4 @@ class Inline : public PassRepeated {
 
 }  // namespace P4
 
-#endif /* _MIDEND_INLINING_H_ */
+#endif /* _FRONTENDS_P4_INLINING_H_ */

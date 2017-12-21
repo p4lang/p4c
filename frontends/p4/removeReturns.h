@@ -14,14 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVERETURNS_H_
-#define _MIDEND_REMOVERETURNS_H_
+#ifndef _FRONTENDS_P4_REMOVERETURNS_H_
+#define _FRONTENDS_P4_REMOVERETURNS_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
+
+/**
+This inspector detects whether an IR tree contains
+'return' or 'exit' statements.
+It sets a boolean flag for each of them.
+
+It treats exceptionally Functions - it claims that
+returns do not exist in Functions.
+*/
+class HasExits : public Inspector {
+ public:
+    bool hasExits;
+    bool hasReturns;
+    HasExits() : hasExits(false), hasReturns(false) { setName("HasExits"); }
+
+    bool preorder(const IR::Function*) override
+    { return false; }
+    void postorder(const IR::ExitStatement*) override
+    { hasExits = true; }
+    void postorder(const IR::ReturnStatement*) override
+    { hasReturns = true; }
+};
 
 /**
 This visitor replaces 'returns' by ifs:
@@ -77,39 +99,6 @@ class DoRemoveReturns : public Transform {
     { prune(); return parser; }
 };
 
-/**
-This visitor removes "exit" calls.  It is significantly more involved than return removal,
-since an exit in an action causes the calling control to terminate.
-This pass assumes that each statement in a control block can
-exit only once -- so it should be run after a pass that enforces this,
-e.g., SideEffectOrdering.
-(E.g., it does not handle:
-if (t1.apply().hit && t2.apply().hit) { ... }
-It also assumes that there are no global actions and that action calls have been inlined.
-*/
-class DoRemoveExits : public DoRemoveReturns {
-    TypeMap* typeMap;
-    // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
-    std::set<const IR::Node*> callsExit;  // actions, tables
-    void callExit(const IR::Node* node);
- public:
-    DoRemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
-            DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap)
-    { visitDagOnce = false; CHECK_NULL(typeMap); setName("DoRemoveExits"); }
-
-    const IR::Node* preorder(IR::ExitStatement* action) override;
-    const IR::Node* preorder(IR::P4Table* table) override;
-
-    const IR::Node* preorder(IR::BlockStatement* statement) override;
-    const IR::Node* preorder(IR::IfStatement* statement) override;
-    const IR::Node* preorder(IR::SwitchStatement* statement) override;
-    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
-
-    const IR::Node* preorder(IR::P4Action* action) override;
-    const IR::Node* preorder(IR::P4Control* control) override;
-};
-
 class RemoveReturns : public PassManager {
  public:
     explicit RemoveReturns(ReferenceMap* refMap) {
@@ -119,15 +108,6 @@ class RemoveReturns : public PassManager {
     }
 };
 
-class RemoveExits : public PassManager {
- public:
-    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoRemoveExits(refMap, typeMap));
-        setName("RemoveExits");
-    }
-};
-
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVERETURNS_H_ */
+#endif /* _FRONTENDS_P4_REMOVERETURNS_H_ */
