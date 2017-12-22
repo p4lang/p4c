@@ -1034,7 +1034,7 @@ class RemoveAnnotatedFields : public Transform {
                     fields->push_back(f);
                 }
             }
-            return new IR::Type_Struct(node->srcInfo, node->name, *fields);
+            return new IR::Type_Struct(node->srcInfo, node->name, node->annotations, *fields);
         }
         return node;
     }
