@@ -53,8 +53,7 @@ parser IngressParserImpl(packet_in buffer,
                          inout metadata user_meta,
                          in psa_ingress_parser_input_metadata_t istd,
                          in empty_t resubmit_meta,
-                         in empty_t recirculate_meta,
-                         out psa_parser_output_metadata_t ostd)
+                         in empty_t recirculate_meta)
 {
     CommonParser() p;
 
@@ -70,8 +69,7 @@ parser EgressParserImpl(packet_in buffer,
                         in psa_egress_parser_input_metadata_t istd,
                         in empty_t normal_meta,
                         in empty_t clone_i2e_meta,
-                        in empty_t clone_e2e_meta,
-                        out psa_parser_output_metadata_t ostd)
+                        in empty_t clone_e2e_meta)
 {
     CommonParser() p;
 
@@ -124,7 +122,8 @@ control EgressDeparserImpl(packet_out buffer,
                            out empty_t recirculate_meta,
                            inout headers hdr,
                            in metadata meta,
-                           in psa_egress_output_metadata_t istd)
+                           in psa_egress_output_metadata_t istd,
+                           in psa_egress_deparser_input_metadata_t edstd)
 {
     CommonDeparserImpl() cp;
     apply {
@@ -140,4 +139,4 @@ EgressPipeline(EgressParserImpl(),
                egress(),
                EgressDeparserImpl()) ep;
 
-PSA_SWITCH(ip, ep) main;
+PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
