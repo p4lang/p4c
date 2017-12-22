@@ -22,7 +22,7 @@ struct headers {
     ethernet_t ethernet;
 }
 
-parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta, out psa_parser_output_metadata_t ostd) {
+parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
     ethernet_t parsed_hdr_2_ethernet;
     fwd_metadata_t user_meta_2_fwd_metadata;
     state start {
@@ -33,7 +33,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
     }
 }
 
-parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta, out psa_parser_output_metadata_t ostd) {
+parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta) {
     ethernet_t parsed_hdr_3_ethernet;
     fwd_metadata_t user_meta_3_fwd_metadata;
     state start {
@@ -69,7 +69,7 @@ control IngressDeparserImpl(packet_out buffer, out empty_t clone_i2e_meta, out e
     }
 }
 
-control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out empty_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd) {
+control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out empty_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     @hidden action act_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
