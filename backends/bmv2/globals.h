@@ -18,6 +18,7 @@ limitations under the License.
 #define _BACKENDS_BMV2_GLOBALS_H_
 
 #include "ir/ir.h"
+#include "backend.h"
 
 namespace BMV2 {
 
