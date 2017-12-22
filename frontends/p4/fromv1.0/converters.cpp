@@ -1020,6 +1020,26 @@ class DetectDuplicates: public Inspector {
     }
 };
 
+// The fields in standard_metadata in v1model.p4 should only be used if
+// the source program is written in P4-16. Therefore we remove those
+// fields from the translated P4-14 program.
+class RemoveAnnotatedFields : public Transform {
+ public:
+    RemoveAnnotatedFields() { setName("RemoveAnnotatedFields"); }
+    const IR::Node* postorder(IR::Type_Struct* node) override {
+        if (node->name == "standard_metadata_t") {
+            auto fields = new IR::IndexedVector<IR::StructField>();
+            for (auto f : node->fields) {
+                if (!f->getAnnotation("alias")) {
+                    fields->push_back(f);
+                }
+            }
+            return new IR::Type_Struct(node->srcInfo, node->name, node->annotations, *fields);
+        }
+        return node;
+    }
+};
+
 }  // namespace
 
 
@@ -1041,6 +1061,7 @@ Converter::Converter() {
     passes.emplace_back(new ComputeCallGraph(&structure));
     passes.emplace_back(new Rewriter(&structure));
     passes.emplace_back(new FixExtracts(&structure));
+    passes.emplace_back(new RemoveAnnotatedFields);
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {
