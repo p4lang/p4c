@@ -155,7 +155,7 @@ TEST_F(P4Runtime, IdAssignment) {
 
     {
         // Check that 'igTable' ended up in the P4Info output.
-        auto* igTable = findTable(*test, "igTable");
+        auto* igTable = findTable(*test, "ingress.igTable");
         ASSERT_TRUE(igTable != nullptr);
 
         // Check that the id indicates the correct resource type.
@@ -164,27 +164,27 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the rest of the id matches the hash value that we expect.
         // (If we were to ever change the hash algorithm we use when mapping P4
         // names to P4Runtime ids, we'd need to change this test.)
-        EXPECT_EQ(0x00002C0Eu, igTable->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(16119u, igTable->preamble().id() & 0x00ffffff);
     }
 
     {
         // Check that 'igTableWithName' ended up in the P4Info output under that
         // name, which is determined by its @name annotation, and *not* under
         // 'igTableWithoutName'.
-        EXPECT_TRUE(findTable(*test, "igTableWithoutName") == nullptr);
-        auto* igTableWithName = findTable(*test, "igTableWithName");
+        EXPECT_TRUE(findTable(*test, "ingress.igTableWithoutName") == nullptr);
+        auto* igTableWithName = findTable(*test, "ingress.igTableWithName");
         ASSERT_TRUE(igTableWithName != nullptr);
 
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
         EXPECT_EQ(unsigned(PI_TABLE_ID), igTableWithName->preamble().id() >> 24);
-        EXPECT_EQ(0x0000FFEFu, igTableWithName->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(59806u, igTableWithName->preamble().id() & 0x00ffffff);
     }
 
     {
         // Check that 'igTableWithId' ended up in the P4Info output, and that
         // its id matches the one set by its @id annotation.
-        auto* igTableWithId = findTable(*test, "igTableWithId");
+        auto* igTableWithId = findTable(*test, "ingress.igTableWithId");
         ASSERT_TRUE(igTableWithId != nullptr);
         EXPECT_EQ(1234u, igTableWithId->preamble().id());
     }
@@ -193,8 +193,8 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that 'igTableWithNameAndId' ended up in the P4Info output under
         // that name, and that its id matches the one set by its @id annotation
         // - in other words, that @id takes precedence over @name.
-        EXPECT_TRUE(findTable(*test, "igTableWithoutNameAndId") == nullptr);
-        auto* igTableWithNameAndId = findTable(*test, "igTableWithNameAndId");
+        EXPECT_TRUE(findTable(*test, "ingress.igTableWithoutNameAndId") == nullptr);
+        auto* igTableWithNameAndId = findTable(*test, "ingress.igTableWithNameAndId");
         ASSERT_TRUE(igTableWithNameAndId != nullptr);
         EXPECT_EQ(5678u, igTableWithNameAndId->preamble().id());
     }
@@ -202,9 +202,9 @@ TEST_F(P4Runtime, IdAssignment) {
     {
         // Check that the two tables with conflicting ids are both present, and
         // that they didn't end up with the same id in the P4Info output.
-        auto* conflictingTableA = findTable(*test, "conflictingTableA");
+        auto* conflictingTableA = findTable(*test, "ingress.conflictingTableA");
         ASSERT_TRUE(conflictingTableA != nullptr);
-        auto* conflictingTableB = findTable(*test, "conflictingTableB");
+        auto* conflictingTableB = findTable(*test, "ingress.conflictingTableB");
         ASSERT_TRUE(conflictingTableB != nullptr);
         EXPECT_TRUE(conflictingTableA->preamble().id() == 4321 ||
                     conflictingTableB->preamble().id() == 4321);
@@ -324,7 +324,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
     ASSERT_TRUE(test);
     EXPECT_EQ(0u, ::diagnosticCount());
 
-    auto* igTable = findTable(*test, "igTable");
+    auto* igTable = findTable(*test, "ingress.igTable");
     ASSERT_TRUE(igTable != nullptr);
     EXPECT_EQ(38, igTable->match_fields_size());
 
@@ -624,9 +624,9 @@ TEST_F(P4Runtime, StaticTableEntries) {
     ASSERT_TRUE(test);
     EXPECT_EQ(0u, ::diagnosticCount());
 
-    auto table = findTable(*test, "t_exact_ternary");
+    auto table = findTable(*test, "ingress.t_exact_ternary");
     ASSERT_TRUE(table != nullptr);
-    auto action = findAction(*test, "a_with_control_params");
+    auto action = findAction(*test, "ingress.a_with_control_params");
     ASSERT_TRUE(action != nullptr);
     unsigned int hfAId = 1;
     unsigned int hfBId = 2;
