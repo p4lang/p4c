@@ -33,8 +33,9 @@ On Ubuntu 14.04, the following packages are required:
 - g++
 - libssl-dev
 
-You also need to install [thrift](https://github.com/apache/thrift) and
-[nanomsg](http://download.nanomsg.org/nanomsg-0.5-beta.tar.gz) from source. Feel
+You also need to install [thrift
+0.9.2](https://github.com/apache/thrift/releases/tag/0.9.2) and [nanomsg
+1.0.0](https://github.com/nanomsg/nanomsg/releases/tag/1.0.0) from source. Feel
 free to use the install scripts under travis/.
 
 To use the CLI, you will need to install the
