@@ -299,8 +299,8 @@ void
 SimpleSwitchGrpcRunner::port_status_cb(
     bm::DevMgrIface::port_t port, const bm::DevMgrIface::PortStatus status) {
   _BM_UNUSED(port);
-  using PortStatus = bm::DevMgrIface::PortStatus;
 #ifdef WITH_SYSREPO
+  using PortStatus = bm::DevMgrIface::PortStatus;
   if (status == PortStatus::PORT_ADDED || status == PortStatus::PORT_REMOVED)
     sysrepo_test->refresh_ports();
 #else

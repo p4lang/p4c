@@ -30,8 +30,17 @@ AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_SIZE_T
 
+AC_ARG_ENABLE([Werror],
+    AS_HELP_STRING([--enable-Werror], [Make all compiler warnings fatal]),
+    [enable_Werror="$enableval"], [enable_Werror=no])
+
 AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS"])
-AC_SUBST([AM_CFLAGS], ["$PTHREAD_CFLAGS -Wall -Werror -Wextra"])
+AC_SUBST([AM_CFLAGS], ["$PTHREAD_CFLAGS"])
+# Using ax_append_compile_flags requires copying 4 macro definitions from the
+# autoconf archive to m4/
+MY_CXXFLAGS="-Wall -Wextra"
+AS_IF([test "$enable_Werror" = "yes"], [MY_CXXFLAGS="$MY_CXXFLAGS -Werror"])
+AC_SUBST([AM_CXXFLAGS], ["$MY_CXXFLAGS $PTHREAD_CFLAGS"])
 
 PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 3.0.0])
 AC_SUBST([PROTOBUF_CFLAGS])

@@ -48,8 +48,8 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
     ./autogen.sh && \
-    if [ "$GCOV" != "" ]; then ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage; fi && \
-    if [ "$GCOV" = "" ]; then ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger; fi && \
+    if [ "$GCOV" != "" ]; then ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-coverage --enable-Werror; fi && \
+    if [ "$GCOV" = "" ]; then ./configure --with-pdfixed --with-pi --with-stress-tests --enable-debugger --enable-Werror; fi && \
     make && \
     make install-strip && \
     (test "$sswitch_grpc" = "yes" && \
