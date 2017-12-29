@@ -404,7 +404,11 @@ field_list_calculation_body: /* epsilon */
     | field_list_calculation_body ALGORITHM ":" name ";"
       { if ($1->algorithm)
             ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
-        ($$=$1)->algorithm = IR::ID(@4, $4); }
+        ($$=$1)->algorithm = new IR::NameList(@4, IR::ID(@4, $4)); }
+    | field_list_calculation_body ALGORITHM "{" action_list "}"
+      { if ($1->algorithm)
+            ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
+        ($$=$1)->algorithm = $4; }
     | field_list_calculation_body OUTPUT_WIDTH ":" const_expression ";"
       { if ($1->output_width)
             ::error("%s: multiple 'output_width' in field_list_calculation", @2);
@@ -459,9 +463,9 @@ parser_statement_list: /* epsilon */
       { $$ = new IR::V1Parser(driver.takePragmasAsAnnotations()); }
     | parser_statement_list EXTRACT "(" header_ref ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
-    | parser_statement_list SET_METADATA "(" field_ref "," expression ")" ";"
+    | parser_statement_list SET_METADATA "(" expression "," expression ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@7, $2, $4, $6)); }
-    | parser_statement_list field_ref "=" expression ";"
+    | parser_statement_list expression "=" expression ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@3, "set_metadata", $2, $4)); }
     | parser_statement_list RETURN name ";"
       { ($$=$1)->default_return = IR::ID(@3, $3); }

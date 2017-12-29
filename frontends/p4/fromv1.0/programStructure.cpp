@@ -664,7 +664,7 @@ ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, 
     if (action_selector) {
         type = new IR::Type_Name(new IR::Path(v1model.action_selector.Id()));
         auto flc = field_list_calculations.get(action_selector->key.name);
-        auto algorithm = convertHashAlgorithm(flc->algorithm);
+        auto algorithm = convertHashAlgorithms(flc->algorithm);
         if (algorithm == nullptr)
             return nullptr;
         args->push_back(algorithm);
@@ -848,6 +848,22 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(IR::ID algorithm) {
     auto pe = new IR::TypeNameExpression(v1model.algorithm.Id());
     auto mem = new IR::Member(pe, result);
     return mem;
+}
+
+const IR::Expression* ProgramStructure::convertHashAlgorithms(const IR::NameList *algorithm) {
+    if (!algorithm || algorithm->names.empty()) return nullptr;
+    if (algorithm->names.size() > 1) {
+#if 1
+        ::warning("%s: Mulitple algorithms in a field list not supported in P4_16 -- using "
+                  "only the first", algorithm->names[0].srcInfo);
+#else
+        auto rv = new IR::ListExpression({});
+        for (auto &alg : algorithm->names)
+            rv->push_back(convertHashAlgorithm(alg));
+        return rv;
+#endif
+    }
+    return convertHashAlgorithm(algorithm->names[0]);
 }
 
 static bool sameBitsType(const IR::Type* left, const IR::Type* right) {
@@ -1360,7 +1376,7 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
         return nullptr;
     auto list = conv.convert(fl);
 
-    auto algorithm = structure->convertHashAlgorithm(flc->algorithm);
+    auto algorithm = structure->convertHashAlgorithms(flc->algorithm);
     args->push_back(dest);
     args->push_back(algorithm);
     args->push_back(new IR::Cast(ttype, base));
@@ -2053,7 +2069,7 @@ void ProgramStructure::createChecksumVerifications() {
                 condition = conv.convert(uov.cond);
             else
                 condition = new IR::BoolLiteral(true);
-            auto algo = convertHashAlgorithm(flc->algorithm);
+            auto algo = convertHashAlgorithms(flc->algorithm);
             args->push_back(condition);
             args->push_back(le);
             args->push_back(dest);
@@ -2111,7 +2127,7 @@ void ProgramStructure::createChecksumUpdates() {
                 condition = conv.convert(uov.cond);
             else
                 condition = new IR::BoolLiteral(true);
-            auto algo = convertHashAlgorithm(flc->algorithm);
+            auto algo = convertHashAlgorithms(flc->algorithm);
 
             args->push_back(condition);
             args->push_back(le);

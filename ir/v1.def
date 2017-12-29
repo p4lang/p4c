@@ -226,7 +226,7 @@ class FieldListCalculation {
     optional ID          name;
     NullOK NameList      input = nullptr;
     NullOK FieldList     input_fields = nullptr;
-    ID                   algorithm = {};
+    NullOK NameList      algorithm = nullptr;
     int                  output_width = 0;
     optional Annotations annotations = Annotations::empty;
 }
@@ -340,6 +340,7 @@ class PrimitiveAction {}
 class NameList {
     safe_vector<ID>  names = {};
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
+    NameList(Util::SourceInfo si, ID n) { names.emplace_back(si, n); }
     dump_fields { out << "names=" << names; }
 }
 

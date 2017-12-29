@@ -89,7 +89,7 @@ def run_timeout(options, args, timeout, stderr):
             # reason, even some character classes that the man page claims are
             # available don't seem to actually work.
             local.filter = Popen(['sed', '-E',
-                r's|^[-[:alnum:][:space:]_/]*/([-[:alnum:][:space:]_]+\.p4[:(][[:digit:]]+)|\1|'],
+                r's|^[-[:alnum:][:space:]_/]*/([-[:alnum:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'],
                 stdin=PIPE, stdout=outfile)
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)

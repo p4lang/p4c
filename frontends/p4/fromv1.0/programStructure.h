@@ -233,6 +233,7 @@ class ProgramStructure {
                                           const IR::Expression* right, const IR::Type* type);
     const IR::Expression* convertFieldList(const IR::Expression* expression);
     const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
+    const IR::Expression* convertHashAlgorithms(const IR::NameList *algorithm);
     const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
                                             const IR::Type *elementType = nullptr);
     const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
