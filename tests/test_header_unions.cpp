@@ -28,8 +28,7 @@
 
 using namespace bm;
 
-// Google Test fixture for header union tests
-class HeaderUnionTest : public ::testing::Test {
+class HeaderUnionBaseTest : public ::testing::Test {
  protected:
   PHVFactory phv_factory;
   std::unique_ptr<PHV> phv;
@@ -41,12 +40,14 @@ class HeaderUnionTest : public ::testing::Test {
   header_union_id_t testHeaderUnion0{0};
   header_union_id_t testHeaderUnion1{1};
 
-  HeaderUnionTest()
-      : testHeaderType0("test0_t", 0), testHeaderType1("test1_t", 1) {
-    testHeaderType0.push_back_field("f16", 16);
-    testHeaderType0.push_back_field("f48", 48);
-    testHeaderType1.push_back_field("f32", 32);
+  HeaderUnionBaseTest()
+      : testHeaderType0("test0_t", 0), testHeaderType1("test1_t", 1) { }
 
+  // A little ugly: the subclass needs to push the fields to the header types
+  // before PHVFactory::push_back_header is called. Subclasses can call this
+  // method at the end of their constrcutor after pushing the fields to the
+  // header types.
+  void set_up_phv_factory() {
     phv_factory.push_back_header("test00", testHeader00, testHeaderType0);
     phv_factory.push_back_header("test01", testHeader01, testHeaderType1);
     phv_factory.push_back_header("test10", testHeader10, testHeaderType0);
@@ -63,8 +64,19 @@ class HeaderUnionTest : public ::testing::Test {
   virtual void SetUp() {
     phv = phv_factory.create();
   }
+};
 
-  // virtual void TearDown() {}
+
+class HeaderUnionTest : public HeaderUnionBaseTest {
+ protected:
+  HeaderUnionTest()
+      : HeaderUnionBaseTest() {
+    testHeaderType0.push_back_field("f16", 16);
+    testHeaderType0.push_back_field("f48", 48);
+    testHeaderType1.push_back_field("f32", 32);
+
+    set_up_phv_factory();
+  }
 };
 
 TEST_F(HeaderUnionTest, Validity) {
@@ -190,6 +202,61 @@ TEST_F(HeaderUnionTest, AssignUnion) {
   EXPECT_FALSE(header01.cmp(header11));
 }
 
+// Special case where one of the headers in the union has a VL field
+class HeaderUnionVLTest : public HeaderUnionBaseTest {
+ protected:
+  HeaderUnionVLTest()
+      : HeaderUnionBaseTest() {
+    testHeaderType0.push_back_field("f16", 16);
+    testHeaderType0.push_back_field("f48", 48);
+    testHeaderType1.push_back_VL_field("fVL", 4, nullptr);
+    testHeaderType1.push_back_field("f32", 32);
+
+    set_up_phv_factory();
+  }
+};
+
+TEST_F(HeaderUnionVLTest, AssignUnion) {
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive(
+      "assign_union");
+  ASSERT_NE(nullptr, primitive);
+  auto assign_union = dynamic_cast<core::assign_union *>(primitive.get());
+  ASSERT_NE(nullptr, assign_union);
+
+  auto &header_union0 = phv->get_header_union(testHeaderUnion0);
+  auto &header00 = phv->get_header(testHeader00);
+  auto &header01 = phv->get_header(testHeader01);
+  auto &header_union1 = phv->get_header_union(testHeaderUnion1);
+  auto &header10 = phv->get_header(testHeader10);
+  auto &header11 = phv->get_header(testHeader11);
+  auto &f01_VL = header01.get_field(0);
+  auto &f11_VL = header11.get_field(0);
+  std::string data00(8, '\xab');
+  std::string data01("\xcd\xab");
+  unsigned int VL_v(0xcdab);
+  data01.append(4, '\xef');
+  header00.extract(data00.data(), *phv);
+  EXPECT_TRUE(header00.is_valid());
+  // extracting to h01 makes h00 invalid because both headers are in a union
+  header01.extract_VL(data01.data(), 16);  // 2-byte VL field
+  EXPECT_FALSE(header00.is_valid());
+  EXPECT_TRUE(header01.is_valid());
+  EXPECT_EQ(VL_v, f01_VL.get<decltype(VL_v)>());
+
+  (*assign_union)(header_union1, header_union0);
+  EXPECT_FALSE(header10.is_valid());
+  EXPECT_TRUE(header11.is_valid());
+  EXPECT_FALSE(header10.cmp(header00));
+  EXPECT_TRUE(header11.cmp(header01));
+  EXPECT_EQ(VL_v, f11_VL.get<decltype(VL_v)>());
+
+  header10.mark_valid();
+  (*assign_union)(header_union0, header_union1);
+  EXPECT_TRUE(header00.is_valid());
+  EXPECT_FALSE(header01.is_valid());
+  EXPECT_TRUE(header00.cmp(header10));
+  EXPECT_FALSE(header01.cmp(header11));
+}
 
 // most of the stack code is common for header stacks and union stacks (see
 // Stack<T>), so we do not have a lot of unit tests specific to union stacks.
