@@ -302,6 +302,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return exists->to<IR::Type_Type>()->type;
         return exists;
     }
+    if (auto tt = type->to<IR::Type_Type>())
+        type = tt->type;
 
     if (type->is<IR::Type_SpecializedCanonical>() ||
         type->is<IR::Type_InfInt>() ||
