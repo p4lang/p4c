@@ -14,7 +14,8 @@ endif  # COND_NANOMSG
 
 if COND_THRIFT
 nobase_include_HEADERS += \
-bm/bm_runtime/bm_runtime.h
+bm/bm_runtime/bm_runtime.h \
+bm/thrift/stdcxx.h
 endif
 
 nobase_include_HEADERS += \

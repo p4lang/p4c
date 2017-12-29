@@ -45,6 +45,7 @@ namespace thrift_provider = apache::thrift;
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/simple_pre.h>
 #include <bm/bm_sim/simple_pre_lag.h>
+#include <bm/thrift/stdcxx.h>
 #include <bm/Standard.h>
 #include <bm/SimplePre.h>
 #include <bm/SimplePreLAG.h>
@@ -54,11 +55,11 @@ using namespace ::thrift_provider::protocol;
 using namespace ::thrift_provider::transport;
 using namespace ::thrift_provider::server;
 
-using boost::shared_ptr;
-
 using ::bm_runtime::standard::StandardProcessor;
 using ::bm_runtime::simple_pre::SimplePreProcessor;
 using ::bm_runtime::simple_pre_lag::SimplePreLAGProcessor;
+
+using ::stdcxx::shared_ptr;
 
 namespace bm_runtime {
 

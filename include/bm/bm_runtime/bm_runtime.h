@@ -12,10 +12,13 @@ namespace thrift_provider = apache::thrift;
 #endif
 
 #include <bm/bm_sim/switch.h>
+#include <bm/thrift/stdcxx.h>
 
 using namespace thrift_provider;
 using namespace thrift_provider::transport;
 using namespace thrift_provider::protocol;
+
+using ::stdcxx::shared_ptr;
 
 namespace bm_runtime {
 
@@ -23,7 +26,7 @@ extern TMultiplexedProcessor *processor_;
 
 template <typename Iface, typename Processor>
 int add_service(const std::string &service_name,
-                boost::shared_ptr<Iface> handler) {
+                shared_ptr<Iface> handler) {
   processor_->registerProcessor(service_name,
 				shared_ptr<TProcessor>(new Processor(handler)));
   return 0;

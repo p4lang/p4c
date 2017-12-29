@@ -151,6 +151,9 @@ AS_IF([test "$want_thrift" = yes], [
     ])
     AS_IF([test x"$THRIFT" = x], [AC_MSG_ERROR([cannot find thrift])])
     MY_CPPFLAGS="$MY_CPPFLAGS -DBMTHRIFT_ON"
+    AC_CHECK_HEADER([thrift/stdcxx.h], [
+        MY_CPPFLAGS="$MY_CPPFLAGS -DHAVE_THRIFT_STDCXX_H"
+    ], [])
 ])
 
 AS_IF([test "$want_pi" = yes], [

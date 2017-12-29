@@ -35,6 +35,7 @@ namespace thrift_provider = apache::thrift;
 #endif
 
 #include <bm/bm_apps/learn.h>
+#include <bm/thrift/stdcxx.h>
 #include <bm/Standard.h>
 #include <bm/SimplePre.h>
 
@@ -97,6 +98,7 @@ LearnListener::ack_buffer(cxt_id_t cxt_id, list_id_t list_id,
 
 void
 LearnListener::start() {
+  using ::stdcxx::shared_ptr;
   using thrift_provider::protocol::TProtocol;
   using thrift_provider::protocol::TBinaryProtocol;
   using thrift_provider::protocol::TMultiplexedProtocol;
@@ -104,11 +106,11 @@ LearnListener::start() {
   using thrift_provider::transport::TTransport;
   using thrift_provider::transport::TBufferedTransport;
 
-  boost::shared_ptr<TTransport> tsocket(new TSocket(thrift_addr, thrift_port));
-  boost::shared_ptr<TTransport> transport(new TBufferedTransport(tsocket));
-  boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+  shared_ptr<TTransport> tsocket(new TSocket(thrift_addr, thrift_port));
+  shared_ptr<TTransport> transport(new TBufferedTransport(tsocket));
+  shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
-  boost::shared_ptr<TMultiplexedProtocol> standard_protocol(
+  shared_ptr<TMultiplexedProtocol> standard_protocol(
       new TMultiplexedProtocol(protocol, "standard"));
 
   bm_client = boost::shared_ptr<runtime::StandardClient>(
