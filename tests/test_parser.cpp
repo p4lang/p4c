@@ -2107,3 +2107,141 @@ TEST_F(HeaderUnionStackE2ETest, OptionsE2eBos) {
   std::string data("\x0b\x00\x77\x0a\x01", 5);
   parse_and_deparse(data);
 }
+
+
+// test extraction to header stack including a VL field
+class HeaderStackVLTest : public ParserTestGeneric {
+ protected:
+  ParseState parse_state;
+  HeaderType headerType;
+  header_id_t header0{0}, header1{1}, header2{2};
+  header_stack_id_t headerStack{0};
+
+  static constexpr size_t max_header_bytes = 4;
+
+  HeaderStackVLTest()
+      : parse_state("parse_state", 0),
+        headerType("test_t", 0) {
+    headerType.push_back_VL_field("fVL", max_header_bytes, nullptr);
+    phv_factory.push_back_header("test_0", header0, headerType);
+    phv_factory.push_back_header("test_1", header1, headerType);
+    phv_factory.push_back_header("test_2", header2, headerType);
+    phv_factory.push_back_header_stack(
+        "test_stack", headerStack, headerType, {header0, header1, header2});
+  }
+
+  Packet get_pkt(const ByteContainer &data) {
+    assert(data.size() <= 128);
+    return Packet::make_new(data.size(),
+                            PacketBuffer(128, data.data(), data.size()),
+                            phv_source.get());
+  }
+
+  ArithExpression make_expr(size_t nbits) {
+    ArithExpression expr;
+    expr.push_back_load_const(Data(nbits));
+    expr.build();
+    return expr;
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+    parser.set_init_state(&parse_state);
+  }
+};
+
+constexpr size_t HeaderStackVLTest::max_header_bytes;
+
+TEST_F(HeaderStackVLTest, ExtractVL) {
+  parse_state.add_extract_to_stack_VL(
+      headerStack, make_expr(16), max_header_bytes);
+  parse_state.add_extract_to_stack_VL(
+      headerStack, make_expr(24), max_header_bytes);
+
+  ByteContainer v0("0x1234"), v1("0x567890");
+  ByteContainer data;
+  data.append(v0).append(v1).append("0xaaaaaaaaaa");
+  auto pkt = get_pkt(data);
+  parse_and_check_no_error(&pkt);
+
+  auto *phv = pkt.get_phv();
+  auto &hdr0 = phv->get_header(header0);
+  auto &hdr1 = phv->get_header(header1);
+  auto &hdr2 = phv->get_header(header2);
+  EXPECT_TRUE(hdr0.is_valid());
+  EXPECT_TRUE(hdr1.is_valid());
+  EXPECT_FALSE(hdr2.is_valid());
+  EXPECT_EQ(hdr0.get_field(0).get_bytes(), v0);
+  EXPECT_EQ(hdr1.get_field(0).get_bytes(), v1);
+}
+
+// test extraction to header union stack including a VL field
+class HeaderUnionStackVLTest : public ParserTestGeneric {
+ protected:
+  ParseState parse_state;
+  HeaderType headerType0, headerType1;
+  header_id_t header00{0}, header01{1}, header10{2}, header11{3};
+  header_union_id_t headerUnion0{0}, headerUnion1{1};
+  header_union_stack_id_t headerUnionStack{0};
+
+  static constexpr size_t max_header_bytes = 4;
+
+  HeaderUnionStackVLTest()
+      : parse_state("parse_state", 0),
+        headerType0("test_0_t", 0), headerType1("test_1_t", 1) {
+    headerType0.push_back_field("f", 32);
+    headerType1.push_back_VL_field("fVL", max_header_bytes, nullptr);
+    phv_factory.push_back_header("test_00", header00, headerType0);
+    phv_factory.push_back_header("test_01", header01, headerType1);
+    phv_factory.push_back_header("test_10", header10, headerType0);
+    phv_factory.push_back_header("test_11", header11, headerType1);
+    phv_factory.push_back_header_union(
+        "test_union_0", headerUnion0, {header00, header01});
+    phv_factory.push_back_header_union(
+        "test_union_1", headerUnion1, {header10, header11});
+    phv_factory.push_back_header_union_stack(
+        "test_union_stack", headerUnionStack, {headerUnion0, headerUnion1});
+  }
+
+  Packet get_pkt(const ByteContainer &data) {
+    assert(data.size() <= 128);
+    return Packet::make_new(data.size(),
+                            PacketBuffer(128, data.data(), data.size()),
+                            phv_source.get());
+  }
+
+  ArithExpression make_expr(size_t nbits) {
+    ArithExpression expr;
+    expr.push_back_load_const(Data(nbits));
+    expr.build();
+    return expr;
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+    parser.set_init_state(&parse_state);
+  }
+};
+
+constexpr size_t HeaderUnionStackVLTest::max_header_bytes;
+
+TEST_F(HeaderUnionStackVLTest, ExtractVL) {
+  parse_state.add_extract_to_union_stack_VL(
+      headerUnionStack, 1  /* offset of VL header in union */,
+      make_expr(24), max_header_bytes);
+
+  ByteContainer v01("0x567890");
+  ByteContainer data;
+  data.append(v01).append("0xaaaaaaaaaa");
+  auto pkt = get_pkt(data);
+  parse_and_check_no_error(&pkt);
+
+  auto *phv = pkt.get_phv();
+  auto &header_union0 = phv->get_header_union(headerUnion0);
+  auto &header_union1 = phv->get_header_union(headerUnion1);
+  auto &hdr01 = phv->get_header(header01);
+  EXPECT_TRUE(hdr01.is_valid());
+  EXPECT_EQ(&hdr01, header_union0.get_valid_header());
+  EXPECT_EQ(nullptr, header_union1.get_valid_header());
+  EXPECT_EQ(hdr01.get_field(0).get_bytes(), v01);
+}

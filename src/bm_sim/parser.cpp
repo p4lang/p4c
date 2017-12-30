@@ -240,26 +240,59 @@ void check_enough_data_for_extract(const Packet &pkt, size_t bytes_parsed,
     throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
 }
 
+void extract_fixed(Header *hdr,
+                   Packet *pkt, const char *data, size_t *bytes_parsed) {
+  auto phv = pkt->get_phv();
+  BMELOG(parser_extract, *pkt, hdr->get_id());
+  check_enough_data_for_extract(*pkt, *bytes_parsed, *hdr);
+  hdr->extract(data, *phv);
+  *bytes_parsed += hdr->get_nbytes_packet();
+}
+
+void extract_VL(Header *hdr,
+                const ArithExpression &VL_expr, size_t max_header_bytes,
+                Packet *pkt, const char *data, size_t *bytes_parsed) {
+  static thread_local Data computed_nbits;
+  auto phv = pkt->get_phv();
+  BMELOG(parser_extract, *pkt, hdr->get_id());
+
+  VL_expr.eval(*phv, &computed_nbits);
+  auto nbits = computed_nbits.get<int>();
+  // TODO(antonin): temporary limitation?
+  assert(nbits % 8 == 0 && "VL field bitwidth needs to be a multiple of 8");
+  // get_nbytes_packet counts the VL field in the header as 0 bits
+  auto bytes_to_extract = static_cast<size_t>(
+      hdr->get_nbytes_packet() + nbits / 8);
+  if (pkt->get_ingress_length() - *bytes_parsed < bytes_to_extract)
+    throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
+
+  if (max_header_bytes != 0 && max_header_bytes < bytes_to_extract)
+    throw parser_exception_core(ErrorCodeMap::Core::HeaderTooShort);
+
+  hdr->extract_VL(data, nbits);
+  // get_nbytes_packet now returns a value that includes the VL field bitwidth
+  *bytes_parsed += hdr->get_nbytes_packet();
+}
+
 }  // namespace
 
 struct ParserOpExtract : ParserOp {
   header_id_t header;
 
   explicit ParserOpExtract(header_id_t header)
-    : header(header) {}
+    : header(header) { }
 
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
     auto phv = pkt->get_phv();
     auto &hdr = phv->get_header(header);
-    BMELOG(parser_extract, *pkt, header);
     BMLOG_DEBUG_PKT(*pkt, "Extracting header '{}'", hdr.get_name());
-    check_enough_data_for_extract(*pkt, *bytes_parsed, hdr);
-    hdr.extract(data, *phv);
-    *bytes_parsed += hdr.get_nbytes_packet();
+    extract_fixed(&hdr, pkt, data, bytes_parsed);
   }
 };
 
+// TODO(antonin): this could be merged with ParserOpExtract as we did for the
+// stack extracts below.
 struct ParserOpExtractVL : ParserOp {
   header_id_t header;
   ArithExpression field_length_expr;
@@ -275,39 +308,29 @@ struct ParserOpExtractVL : ParserOp {
                   size_t *bytes_parsed) const override {
     auto phv = pkt->get_phv();
     auto &hdr = phv->get_header(header);
-    assert(hdr.is_VL_header());
-
-    static thread_local Data computed_nbits;
-    field_length_expr.eval(*phv, &computed_nbits);
-
-    BMELOG(parser_extract, *pkt, header);
     BMLOG_DEBUG_PKT(*pkt, "Extracting variable-sized header '{}'",
                     hdr.get_name());
-    auto nbits = computed_nbits.get<int>();
-    // TODO(antonin): temporary limitation?
-    assert(nbits % 8 == 0 && "VL field bitwidth needs to be a multiple of 8");
-    // get_nbytes_packet counts the VL field in the header as 0 bits
-    auto bytes_to_extract = static_cast<size_t>(
-        hdr.get_nbytes_packet() + nbits / 8);
-    if (pkt->get_ingress_length() - *bytes_parsed < bytes_to_extract)
-      throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
-
-    if (max_header_bytes != 0 && max_header_bytes < bytes_to_extract)
-      throw parser_exception_core(ErrorCodeMap::Core::HeaderTooShort);
-
-    hdr.extract_VL(data, nbits);
-    // get_nbytes_packet now returns a value that includes the VL field bitwidth
-    *bytes_parsed += hdr.get_nbytes_packet();
+    extract_VL(&hdr, field_length_expr, max_header_bytes,
+               pkt, data, bytes_parsed);
   }
 };
 
 // push back a header on a tag stack
-// TODO(antonin): probably room for improvement here
 struct ParserOpExtractStack : ParserOp {
   header_stack_id_t header_stack;
+  ArithExpression field_length_expr;
+  // varbit<0> is not allowed in P4_16; we therefore use max_header_bytes > 0
+  // as a signal that extract_VL was used.
+  size_t max_header_bytes;
 
   explicit ParserOpExtractStack(header_stack_id_t header_stack)
-      : header_stack(header_stack) { }
+      : header_stack(header_stack), max_header_bytes(0) { }
+
+  ParserOpExtractStack(header_stack_id_t header_stack,
+                       const ArithExpression &field_length_expr,
+                       size_t max_header_bytes)
+      : header_stack(header_stack), field_length_expr(field_length_expr),
+        max_header_bytes(max_header_bytes) { }
 
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
@@ -316,24 +339,40 @@ struct ParserOpExtractStack : ParserOp {
     if (stack.is_full())
       throw parser_exception_core(ErrorCodeMap::Core::StackOutOfBounds);
     auto &next_hdr = stack.get_next();
-    BMELOG(parser_extract, *pkt, next_hdr.get_id());
     BMLOG_DEBUG_PKT(*pkt, "Extracting to header stack {}, next header is {}",
                     header_stack, next_hdr.get_id());
-    check_enough_data_for_extract(*pkt, *bytes_parsed, next_hdr);
-    next_hdr.extract(data, *phv);
-    *bytes_parsed += next_hdr.get_nbytes_packet();
-    // should I have a HeaderStack::extract() method instead?
+    if (max_header_bytes == 0) {
+      extract_fixed(&next_hdr, pkt, data, bytes_parsed);
+    } else {
+      extract_VL(&next_hdr, field_length_expr, max_header_bytes,
+                 pkt, data, bytes_parsed);
+    }
     stack.push_back();
   }
 };
 
+// TODO(antonin): reuse some code from ParserOpExtractStack using the stack
+// common interface?
 struct ParserOpExtractUnionStack : ParserOp {
   header_union_stack_id_t header_union_stack;
   size_t header_offset;
+  ArithExpression field_length_expr;
+  // varbit<0> is not allowed in P4_16; we therefore use max_header_bytes > 0
+  // as a signal that extract_VL was used.
+  size_t max_header_bytes;
 
   explicit ParserOpExtractUnionStack(header_union_stack_id_t header_union_stack,
                                      size_t header_offset)
-      : header_union_stack(header_union_stack), header_offset(header_offset) { }
+      : header_union_stack(header_union_stack), header_offset(header_offset),
+        max_header_bytes(0) { }
+
+  ParserOpExtractUnionStack(header_union_stack_id_t header_union_stack,
+                            size_t header_offset,
+                            const ArithExpression &field_length_expr,
+                            size_t max_header_bytes)
+      : header_union_stack(header_union_stack), header_offset(header_offset),
+        field_length_expr(field_length_expr),
+        max_header_bytes(max_header_bytes) { }
 
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
@@ -343,13 +382,15 @@ struct ParserOpExtractUnionStack : ParserOp {
       throw parser_exception_core(ErrorCodeMap::Core::StackOutOfBounds);
     auto &next_union = union_stack.get_next();
     auto &next_hdr = next_union.at(header_offset);
-    BMELOG(parser_extract, *pkt, next_hdr.get_id());
     BMLOG_DEBUG_PKT(*pkt,
                     "Extracting to header union stack {}, next header is {}",
                     header_union_stack, next_hdr.get_id());
-    check_enough_data_for_extract(*pkt, *bytes_parsed, next_hdr);
-    next_hdr.extract(data, *phv);
-    *bytes_parsed += next_hdr.get_nbytes_packet();
+    if (max_header_bytes == 0) {
+      extract_fixed(&next_hdr, pkt, data, bytes_parsed);
+    } else {
+      extract_VL(&next_hdr, field_length_expr, max_header_bytes,
+                 pkt, data, bytes_parsed);
+    }
     union_stack.push_back();
   }
 };
@@ -746,8 +787,8 @@ void
 ParseState::add_extract_VL(header_id_t header,
                            const ArithExpression &field_length_expr,
                            size_t max_header_bytes) {
-  parser_ops.emplace_back(
-      new ParserOpExtractVL(header, field_length_expr, max_header_bytes));
+  parser_ops.emplace_back(new ParserOpExtractVL(
+      header, field_length_expr, max_header_bytes));
 }
 
 void
@@ -756,10 +797,26 @@ ParseState::add_extract_to_stack(header_stack_id_t header_stack) {
 }
 
 void
+ParseState::add_extract_to_stack_VL(header_stack_id_t header_stack,
+                                    const ArithExpression &field_length_expr,
+                                    size_t max_header_bytes) {
+  parser_ops.emplace_back(new ParserOpExtractStack(
+      header_stack, field_length_expr, max_header_bytes));
+}
+
+void
 ParseState::add_extract_to_union_stack(
     header_union_stack_id_t header_union_stack, size_t header_offset) {
   parser_ops.emplace_back(new ParserOpExtractUnionStack(
       header_union_stack, header_offset));
+}
+
+void
+ParseState::add_extract_to_union_stack_VL(
+    header_union_stack_id_t header_union_stack, size_t header_offset,
+    const ArithExpression &field_length_expr, size_t max_header_bytes) {
+  parser_ops.emplace_back(new ParserOpExtractUnionStack(
+      header_union_stack, header_offset, field_length_expr, max_header_bytes));
 }
 
 void

@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.15*.
+The version described in this document is *2.16*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -322,9 +322,9 @@ In the `parser_ops` array, the format of the `parameters` array depends on the
   - `extract_VL`: introduced for P4_16, where the expression to dynamically
   compute the length of a variable-length field is an argument to the extract
   built-in rather than a property of the header. For this operation, we require
-  2 parameters, the first one of type `regular` and the second one of type
-  `expression` (to compute the length in bits of the variable-length field in
-  the header).
+  2 parameters. The first one follows the same rules as `extract`'s first and
+  only parameter. The second one must be of type `expression` (to compute the
+  length in bits of the variable-length field in the header).
   - `set`: takes exactly 2 parameters; the first one needs to be of type `field`
   with the appropriate value. The second one can be of type `field`, `hexstr`,
   `lookahead` or `expression`, with the appropriate value (see

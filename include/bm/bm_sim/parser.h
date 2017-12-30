@@ -230,8 +230,15 @@ class ParseState : public NamedP4Object {
                       const ArithExpression &field_length_expr,
                       size_t max_header_bytes);
   void add_extract_to_stack(header_stack_id_t header_stack);
+  void add_extract_to_stack_VL(header_stack_id_t header_stack,
+                               const ArithExpression &field_length_expr,
+                               size_t max_header_bytes);
   void add_extract_to_union_stack(header_union_stack_id_t header_union_stack,
                                   size_t header_offset);
+  void add_extract_to_union_stack_VL(header_union_stack_id_t header_union_stack,
+                                     size_t header_offset,
+                                     const ArithExpression &field_length_expr,
+                                     size_t max_header_bytes);
 
   void add_set_from_field(header_id_t dst_header, int dst_offset,
                           header_id_t src_header, int src_offset);

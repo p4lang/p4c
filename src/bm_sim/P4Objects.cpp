@@ -990,27 +990,47 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
       for (const auto &cfg_parser_op : cfg_parser_ops) {
         const string op_type = cfg_parser_op["op"].asString();
         const Json::Value &cfg_parameters = cfg_parser_op["parameters"];
-        if (op_type == "extract") {
-          check_json_tuple_size(cfg_parser_op, "parameters", 1);
-          const Json::Value &cfg_extract = cfg_parameters[0];
-          const string extract_type = cfg_extract["type"].asString();
+
+        if (op_type == "extract" || op_type == "extract_VL") {
+          if (op_type == "extract")
+            check_json_tuple_size(cfg_parser_op, "parameters", 1);
+          else
+            check_json_tuple_size(cfg_parser_op, "parameters", 2);
+
+          const auto &cfg_extract = cfg_parameters[0];
+          const auto extract_type = cfg_extract["type"].asString();
+          const HeaderType *header_type = nullptr;
+
+          ArithExpression VL_expr;
+          if (op_type == "extract_VL") {
+            const auto &cfg_VL_expr = cfg_parameters[1];
+            assert(cfg_VL_expr["type"].asString() == "expression");
+            build_expression(cfg_VL_expr["value"], &VL_expr);
+            VL_expr.build();
+          }
+
           if (extract_type == "regular") {
             const string extract_header = cfg_extract["value"].asString();
             header_id_t header_id = get_header_id(extract_header);
-            const auto &header_type = phv_factory.get_header_type(header_id);
-            if (header_type.is_VL_header() && !header_type.has_VL_expr()) {
-              throw json_exception(
-                  EFormat() << "Cannot use 'extract' parser op with a VL header"
-                            << " for which no length expression was provided,"
-                            << " use 'extract_VL' instead",
-                  cfg_parser_op);
+            header_type = &phv_factory.get_header_type(header_id);
+            if (op_type == "extract") {
+              parse_state->add_extract(header_id);
+            } else {
+              parse_state->add_extract_VL(
+                  header_id, VL_expr, header_type->get_VL_max_header_bytes());
             }
-            parse_state->add_extract(header_id);
           } else if (extract_type == "stack") {
             const string extract_header = cfg_extract["value"].asString();
             header_stack_id_t header_stack_id =
-              get_header_stack_id(extract_header);
-            parse_state->add_extract_to_stack(header_stack_id);
+                get_header_stack_id(extract_header);
+            header_type = header_stack_to_type_map[extract_header];
+            if (op_type == "extract") {
+              parse_state->add_extract_to_stack(header_stack_id);
+            } else {
+              parse_state->add_extract_to_stack_VL(
+                  header_stack_id, VL_expr,
+                  header_type->get_VL_max_header_bytes());
+            }
           } else if (extract_type == "union_stack") {
             const auto &cfg_union_stack = cfg_extract["value"];
             check_json_tuple_size(cfg_extract, "value", 2);
@@ -1021,27 +1041,35 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
                 extract_union_stack);
             auto header_offset = union_type->get_header_offset(
                 cfg_union_stack[1].asString());
-            parse_state->add_extract_to_union_stack(
-                header_union_stack_id, header_offset);
+            header_type = union_type->get_header_type(
+                cfg_union_stack[1].asString());
+            if (op_type == "extract") {
+              parse_state->add_extract_to_union_stack(
+                  header_union_stack_id, header_offset);
+            } else {
+              parse_state->add_extract_to_union_stack_VL(
+                  header_union_stack_id, header_offset,
+                  VL_expr, header_type->get_VL_max_header_bytes());
+            }
           } else {
             throw json_exception(
                 EFormat() << "Extract type '" << extract_type
                           << "' not supported",
                 cfg_parser_op);
           }
-        } else if (op_type == "extract_VL") {
-          check_json_tuple_size(cfg_parser_op, "parameters", 2);
-          const Json::Value &cfg_extract = cfg_parameters[0];
-          const Json::Value &cfg_VL_expr = cfg_parameters[1];
-          assert(cfg_extract["type"].asString() == "regular");
-          assert(cfg_VL_expr["type"].asString() == "expression");
-          auto header_id = get_header_id(cfg_extract["value"].asString());
-          const auto &header_type = phv_factory.get_header_type(header_id);
-          ArithExpression VL_expr;
-          build_expression(cfg_VL_expr["value"], &VL_expr);
-          VL_expr.build();
-          parse_state->add_extract_VL(header_id, VL_expr,
-                                      header_type.get_VL_max_header_bytes());
+
+          // We perform this check after adding the extract operation to the
+          // parser state only for the sake of code clarity. It does not matter
+          // much as the JSON processing will stop as soon as a json_exception
+          // is thrown.
+          if (op_type == "extract" && header_type->is_VL_header() &&
+              !header_type->has_VL_expr()) {
+            throw json_exception(
+                EFormat() << "Cannot use 'extract' parser op with a VL header"
+                          << " for which no length expression was provided,"
+                          << " use 'extract_VL' instead",
+                cfg_parser_op);
+          }
         } else if (op_type == "set") {
           check_json_tuple_size(cfg_parser_op, "parameters", 2);
           const Json::Value &cfg_dest = cfg_parameters[0];
