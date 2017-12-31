@@ -101,15 +101,18 @@ TEST_F(PHVTest, CopyHeadersWithStack) {
 
   auto &stack = phv->get_header_stack(testHeaderStack);
   ASSERT_EQ(1u, stack.push_back());
-  ASSERT_TRUE(phv->get_header(testHeader1).is_valid());
-
-  ASSERT_FALSE(phv_2->get_header(testHeader1).is_valid());
+  // needs to work for both legacy stacks and P4_16 stacks, so we explicitly
+  // mark the header valid
+  phv->get_header(testHeader1).mark_valid();
+  EXPECT_TRUE(phv->get_header(testHeader1).is_valid());
+  EXPECT_FALSE(phv_2->get_header(testHeader1).is_valid());
+  EXPECT_EQ(stack.get_count(), 1u);
 
   phv_2->copy_headers(*phv);
 
   const auto &stack_2 = phv_2->get_header_stack(testHeaderStack);
-  ASSERT_EQ(stack_2.get_count(), stack.get_count());
-  ASSERT_TRUE(phv_2->get_header(testHeader1).is_valid());
+  EXPECT_EQ(stack_2.get_count(), stack.get_count());
+  EXPECT_TRUE(phv_2->get_header(testHeader1).is_valid());
 }
 
 TEST_F(PHVTest, CopyHeadersWithUnion) {

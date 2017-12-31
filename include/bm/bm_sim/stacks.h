@@ -47,13 +47,13 @@ class StackIface {
   virtual ~StackIface() { }
 
   //! Removes the first element of the stack. Returns the number of elements
-  //! removed, which is `0` if the stack is empty and `1` otherwise. The second
-  //! element of the stack becomes the first element, and so on...
+  //! removed. The second element of the stack becomes the first element, and so
+  //! on...
   virtual size_t pop_front() = 0;
 
   //! Removes the first \p num element of the stack. Returns the number of
-  //! elements removed, which is `0` if the stack is empty. Calling this
-  //! function is more efficient than calling pop_front() multiple times.
+  //! elements removed. Calling this function is more efficient than calling
+  //! pop_front() multiple times.
   virtual size_t pop_front(size_t num) = 0;
 
   //! Pushes an element to the front of the stack. If the stack is already full,
@@ -88,12 +88,16 @@ class StackIface {
   virtual void reset() = 0;
 };
 
+// We use CRTP for Stack class to implement either legacy behavior or strict
+// P4_16 behavior by providing different implementations of push_front and
+// pop_front.
+
 //! Stack is used to represent header and union stacks in P4. The Stack class
 //! itself does not store any union / header / field data itself, but stores
 //! references to the HeaderUnion / Header instances which constitute the stack,
 //! as well as the stack internal state (e.g. number of valid headers in the
 //! stack).
-template <typename T>
+template <typename T, typename ShiftImpl>
 class Stack : public StackIface, public NamedP4Object {
  public:
   friend class PHV;
@@ -125,7 +129,7 @@ class Stack : public StackIface, public NamedP4Object {
   T &at(size_t idx);
   const T &at(size_t idx) const;
 
- private:
+ protected:
   using TRef = std::reference_wrapper<T>;
 
   // To be called by PHV class
@@ -138,6 +142,48 @@ class Stack : public StackIface, public NamedP4Object {
   size_t next{0};
 };
 
+namespace detail {
+
+// Implements legacy behavior for stacks. push_front and pop_front only shift
+// the portion of the stack up to the next index. Pushed elements are marked as
+// valid.
+template <typename T>
+class StackLegacy : public Stack<T, StackLegacy<T> > {
+ public:
+  StackLegacy(const std::string &name, p4object_id_t id);
+
+  size_t pop_front();
+  size_t pop_front(size_t num);
+
+  size_t push_front();
+  size_t push_front(size_t num);
+};
+
+// Implements strict P4_16 behavior for stacks. push_front and pop_front shift
+// the entire stack. Pushed elements are marked as invalid.
+template <typename T>
+class StackP4_16 : public Stack<T, StackP4_16<T> > {
+ public:
+  StackP4_16(const std::string &name, p4object_id_t id);
+
+  size_t pop_front();
+  size_t pop_front(size_t num);
+
+  size_t push_front();
+  size_t push_front(size_t num);
+};
+
+#ifdef BM_WP4_16_STACKS
+template <typename T>
+// using MyStack = StackP4_16<T>;
+using MyStack = StackP4_16<T>;
+#else
+template <typename T>
+using MyStack = StackLegacy<T>;
+#endif  // BM_WP4_16_STACKS
+
+}  // namespace detail
+
 using header_stack_id_t = p4object_id_t;
 using header_union_stack_id_t = p4object_id_t;
 
@@ -149,7 +195,7 @@ using header_union_stack_id_t = p4object_id_t;
 //!    // ...
 //! };
 //! @endcode
-using HeaderStack = Stack<Header>;
+using HeaderStack = detail::MyStack<Header>;
 //! Convenience alias for stacks of header unions
 //! A HeaderUnionStack reference can be used in an action primitive. For
 //! example:
@@ -160,7 +206,9 @@ using HeaderStack = Stack<Header>;
 //!    // ...
 //! };
 //! @endcode
-using HeaderUnionStack = Stack<HeaderUnion>;
+using HeaderUnionStack = detail::MyStack<HeaderUnion>;
+
+#undef _P4_16_STACKS
 
 }  // namespace bm
 

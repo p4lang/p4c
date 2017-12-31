@@ -27,155 +27,257 @@
 
 namespace bm {
 
+namespace detail {
+
+// legacy implementation of push_front and pop_front
+
 template <typename T>
-Stack<T>::Stack(const std::string &name, p4object_id_t id)
-    : StackIface(), NamedP4Object(name, id) { }
+StackLegacy<T>::StackLegacy(const std::string &name, p4object_id_t id)
+    : Stack<T, StackLegacy<T> >(name, id) { }
 
 template <typename T>
 size_t
-Stack<T>::pop_front() {
-  if (next == 0) return 0u;
-  next--;
-  for (size_t i = 0; i < next; i++) {
-    elements[i].get().swap_values(&elements[i + 1].get());
+StackLegacy<T>::pop_front() {
+  if (this->next == 0) return 0u;
+  this->next--;
+  for (size_t i = 0; i < this->next; i++) {
+    this->elements[i].get().swap_values(&this->elements[i + 1].get());
   }
-  elements[next].get().mark_invalid();
+  this->elements[this->next].get().mark_invalid();
   return 1u;
 }
 
 template <typename T>
 size_t
-Stack<T>::pop_front(size_t num) {
+StackLegacy<T>::pop_front(size_t num) {
   if (num == 0) return 0;
-  size_t popped = std::min(next, num);
-  next -= popped;
-  for (size_t i = 0; i < next; i++) {
-    elements[i].get().swap_values(&elements[i + num].get());
+  size_t popped = std::min(this->next, num);
+  this->next -= popped;
+  for (size_t i = 0; i < this->next; i++) {
+    this->elements[i].get().swap_values(&this->elements[i + num].get());
   }
-  for (size_t i = next; i < next + popped; i++) {
-    elements[i].get().mark_invalid();
+  for (size_t i = this->next; i < this->next + popped; i++) {
+    this->elements[i].get().mark_invalid();
   }
   return popped;
 }
 
 template <typename T>
 size_t
-Stack<T>::push_front() {
-  if (next < elements.size()) next++;
-  for (size_t i = next - 1; i > 0; i--) {
-    elements[i].get().swap_values(&elements[i - 1].get());
+StackLegacy<T>::push_front() {
+  if (this->next < this->elements.size()) this->next++;
+  for (size_t i = this->next - 1; i > 0; i--) {
+    this->elements[i].get().swap_values(&this->elements[i - 1].get());
   }
-  // TODO(antonin): do I want to reset the element as well?
-  // this may be complicated given the design
-  elements[0].get().mark_valid();
+  this->elements[0].get().mark_valid();
   return 1u;
 }
 
 template <typename T>
 size_t
-Stack<T>::push_front(size_t num) {
+StackLegacy<T>::push_front(size_t num) {
   if (num == 0) return 0;
-  next = std::min(elements.size(), next + num);
-  for (size_t i = next - 1; i > num - 1; i--) {
-    elements[i].get().swap_values(&elements[i - num].get());
+  this->next = std::min(this->elements.size(), this->next + num);
+  for (size_t i = this->next - 1; i > num - 1; i--) {
+    this->elements[i].get().swap_values(&this->elements[i - num].get());
   }
-  size_t pushed = std::min(elements.size(), num);
+  size_t pushed = std::min(this->elements.size(), num);
   for (size_t i = 0; i < pushed; i++) {
-    elements[i].get().mark_valid();
+    this->elements[i].get().mark_valid();
   }
   return pushed;
 }
 
+// P4_16-conformant implementation of push_front and pop_front
+
+template <typename T>
+StackP4_16<T>::StackP4_16(const std::string &name, p4object_id_t id)
+    : Stack<T, StackP4_16<T> >(name, id) { }
+
 template <typename T>
 size_t
-Stack<T>::pop_back() {
+StackP4_16<T>::pop_front() {
+  if (this->next > 0) this->next--;
+  auto size = this->elements.size();
+  for (size_t i = 0; i < size - 1; i++) {
+    this->elements[i].get().swap_values(&this->elements[i + 1].get());
+  }
+  this->elements[size - 1].get().mark_invalid();
+  return 1u;
+}
+
+template <typename T>
+size_t
+StackP4_16<T>::pop_front(size_t num) {
+  if (num == 0) return 0;
+  auto size = this->elements.size();
+  this->next -= std::min(this->next, num);
+  size_t i = 0;
+  for (; i < size - num; i++) {
+    this->elements[i].get().swap_values(&this->elements[i + num].get());
+  }
+  for (; i < size; i++) {
+    this->elements[i].get().mark_invalid();
+  }
+  return std::min(num, size);
+}
+
+template <typename T>
+size_t
+StackP4_16<T>::push_front() {
+  auto size = this->elements.size();
+  if (this->next < size) this->next++;
+  for (size_t i = size - 1; i > 0; i--) {
+    this->elements[i].get().swap_values(&this->elements[i - 1].get());
+  }
+  this->elements[0].get().mark_invalid();
+  return 1u;
+}
+
+template <typename T>
+size_t
+StackP4_16<T>::push_front(size_t num) {
+  if (num == 0) return 0;
+  auto size = this->elements.size();
+  this->next = std::min(size, this->next + num);
+  for (size_t i = size - 1; i > num - 1; i--) {
+    this->elements[i].get().swap_values(&this->elements[i - num].get());
+  }
+  size_t pushed = std::min(size, num);
+  for (size_t i = 0; i < pushed; i++) {
+    this->elements[i].get().mark_invalid();
+  }
+  return pushed;
+}
+
+// explicit instantiation
+template class StackLegacy<Header>;
+template class StackLegacy<HeaderUnion>;
+template class StackP4_16<Header>;
+template class StackP4_16<HeaderUnion>;
+
+}  // namespace detail
+
+template <typename T, typename ShiftImpl>
+Stack<T, ShiftImpl>::Stack(const std::string &name, p4object_id_t id)
+    : StackIface(), NamedP4Object(name, id) { }
+
+template <typename T, typename ShiftImpl>
+size_t
+Stack<T, ShiftImpl>::pop_front() {
+  return static_cast<ShiftImpl *>(this)->pop_front();
+}
+
+template <typename T, typename ShiftImpl>
+size_t
+Stack<T, ShiftImpl>::pop_front(size_t num) {
+  return static_cast<ShiftImpl *>(this)->pop_front(num);
+}
+
+template <typename T, typename ShiftImpl>
+size_t
+Stack<T, ShiftImpl>::push_front() {
+  return static_cast<ShiftImpl *>(this)->push_front();
+}
+
+template <typename T, typename ShiftImpl>
+size_t
+Stack<T, ShiftImpl>::push_front(size_t num) {
+  return static_cast<ShiftImpl *>(this)->push_front(num);
+}
+
+template <typename T, typename ShiftImpl>
+size_t
+Stack<T, ShiftImpl>::pop_back() {
   if (next == 0) return 0u;
   next--;
   elements[next].get().mark_invalid();
   return 1u;
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 size_t
-Stack<T>::push_back() {
+Stack<T, ShiftImpl>::push_back() {
   if (next == elements.size()) return 0u;
   elements[next].get().mark_valid();
   next++;
   return 1u;
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 size_t
-Stack<T>::get_depth() const {
+Stack<T, ShiftImpl>::get_depth() const {
   return elements.size();
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 size_t
-Stack<T>::get_count() const {
+Stack<T, ShiftImpl>::get_count() const {
   return next;
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 bool
-Stack<T>::is_full() const {
+Stack<T, ShiftImpl>::is_full() const {
   return (next >= elements.size());
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 void
-Stack<T>::reset() {
+Stack<T, ShiftImpl>::reset() {
   next = 0;
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 T &
-Stack<T>::get_last() {
+Stack<T, ShiftImpl>::get_last() {
   assert(next > 0 && "stack empty");
   return elements[next - 1];
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 const T &
-Stack<T>::get_last() const {
+Stack<T, ShiftImpl>::get_last() const {
   assert(next > 0 && "stack empty");
   return elements[next - 1];
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 T &
-Stack<T>::get_next() {
+Stack<T, ShiftImpl>::get_next() {
   assert(next < elements.size() && "stack full");
   return elements[next];
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 const T &
-Stack<T>::get_next() const {
+Stack<T, ShiftImpl>::get_next() const {
   assert(next < elements.size() && "stack full");
   return elements[next];
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 T &
-Stack<T>::at(size_t idx) {
+Stack<T, ShiftImpl>::at(size_t idx) {
   return elements.at(idx);
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 const T &
-Stack<T>::at(size_t idx) const {
+Stack<T, ShiftImpl>::at(size_t idx) const {
   return elements.at(idx);
 }
 
-template <typename T>
+template <typename T, typename ShiftImpl>
 void
-Stack<T>::set_next_element(T &e) {  // NOLINT(runtime/references)
+Stack<T, ShiftImpl>::set_next_element(T &e) {  // NOLINT(runtime/references)
   elements.emplace_back(e);
 }
 
 // explicit instantiation
-template class Stack<Header>;
-template class Stack<HeaderUnion>;
+template class Stack<Header, detail::StackLegacy<Header> >;
+template class Stack<Header, detail::StackP4_16<Header> >;
+template class Stack<HeaderUnion, detail::StackLegacy<HeaderUnion> >;
+template class Stack<HeaderUnion, detail::StackP4_16<HeaderUnion> >;
 
 }  // namespace bm

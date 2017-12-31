@@ -112,6 +112,14 @@ AC_ARG_ENABLE([Werror],
     AS_HELP_STRING([--enable-Werror], [Make all compiler warnings fatal]),
     [enable_Werror="$enableval"], [enable_Werror=no])
 
+AC_ARG_ENABLE([WP4-16-stacks],
+    AS_HELP_STRING([--enable-WP4-16-stacks],
+                   [Implement stacks strictly as per the P4_16 specification instead of legacy behavior]),
+    [enable_WP4_16_stacks="$enableval"], [enable_WP4_16_stacks=no])
+
+AS_IF([test "$enable_WP4_16_stacks" = "yes"],
+      [MY_CPPFLAGS="$MY_CPPFLAGS -DBM_WP4_16_STACKS"])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
