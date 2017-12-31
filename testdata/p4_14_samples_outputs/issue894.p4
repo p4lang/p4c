@@ -104,9 +104,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+@name(".heavy_hitter_counter1") register<bit<16>>(32w16) heavy_hitter_counter1;
+
+@name(".heavy_hitter_counter2") register<bit<16>>(32w16) heavy_hitter_counter2;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".heavy_hitter_counter1") register<bit<16>>(32w16) heavy_hitter_counter1;
-    @name(".heavy_hitter_counter2") register<bit<16>>(32w16) heavy_hitter_counter2;
     @name("._drop") action _drop() {
         mark_to_drop();
     }
