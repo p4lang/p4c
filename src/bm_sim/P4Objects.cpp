@@ -313,14 +313,14 @@ P4Objects::build_expression(const Json::Value &json_expression,
       *expr_type = get_opcode_type(opcode);
     }
   } else if (type == "header") {
-    auto header_id = get_header_id(json_value.asString());
+    auto header_id = get_header_id_cfg(json_value.asString());
     expr->push_back_load_header(header_id);
     *expr_type = ExprType::HEADER;
 
     enable_arith(header_id);
   } else if (type == "field") {
     const auto header_name = json_value[0].asString();
-    auto header_id = get_header_id(header_name);
+    auto header_id = get_header_id_cfg(header_name);
     const auto field_name = json_value[1].asString();
     int field_offset = get_field_offset(header_id, field_name);
     expr->push_back_load_field(header_id, field_offset);
@@ -346,22 +346,22 @@ P4Objects::build_expression(const Json::Value &json_expression,
       const auto idx = hexstr_to_int<unsigned int>(
           json_index["value"].asString());
       expr->push_back_load_register_ref(
-          get_register_array(register_array_name), idx);
+          get_register_array_cfg(register_array_name), idx);
     } else {
       build_expression(json_index, expr);
       expr->push_back_load_register_gen(
-          get_register_array(register_array_name));
+          get_register_array_cfg(register_array_name));
     }
     *expr_type = ExprType::DATA;
   } else if (type == "header_stack") {
-    auto header_stack_id = get_header_stack_id(json_value.asString());
+    auto header_stack_id = get_header_stack_id_cfg(json_value.asString());
     expr->push_back_load_header_stack(header_stack_id);
     *expr_type = ExprType::HEADER_STACK;
 
     phv_factory.enable_all_stack_field_arith(header_stack_id);
   } else if (type == "stack_field") {
     const auto header_stack_name = json_value[0].asString();
-    auto header_stack_id = get_header_stack_id(header_stack_name);
+    auto header_stack_id = get_header_stack_id_cfg(header_stack_name);
     auto *header_type = header_stack_to_type_map[header_stack_name];
     const auto field_name = json_value[1].asString();
     int field_offset = header_type->get_field_offset(field_name);
@@ -370,11 +370,11 @@ P4Objects::build_expression(const Json::Value &json_expression,
 
     phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
   } else if (type == "header_union") {
-    auto header_union_id = get_header_union_id(json_value.asString());
+    auto header_union_id = get_header_union_id_cfg(json_value.asString());
     expr->push_back_load_header_union(header_union_id);
     *expr_type = ExprType::UNION;
   } else if (type == "header_union_stack") {
-    auto header_union_stack_id = get_header_union_stack_id(
+    auto header_union_stack_id = get_header_union_stack_id_cfg(
         json_value.asString());
     expr->push_back_load_header_union_stack(header_union_stack_id);
     *expr_type = ExprType::UNION_STACK;
@@ -436,14 +436,14 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
       action_fn->parameter_push_back_action_data(action_data_offset);
     } else if (type == "header") {
       const auto header_name = cfg_parameter["value"].asString();
-      auto header_id = get_header_id(header_name);
+      auto header_id = get_header_id_cfg(header_name);
       action_fn->parameter_push_back_header(header_id);
 
       enable_arith(header_id);
     } else if (type == "field") {
       const auto &cfg_value_field = cfg_parameter["value"];
       const auto header_name = cfg_value_field[0].asString();
-      auto header_id = get_header_id(header_name);
+      auto header_id = get_header_id_cfg(header_name);
       const auto field_name = cfg_value_field[1].asString();
       auto field_offset = get_field_offset(header_id, field_name);
       action_fn->parameter_push_back_field(header_id, field_offset);
@@ -451,23 +451,23 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
       enable_arith(header_id, field_offset);
     } else if (type == "calculation") {
       const auto name = cfg_parameter["value"].asString();
-      auto calculation = get_named_calculation(name);
+      auto calculation = get_named_calculation_cfg(name);
       action_fn->parameter_push_back_calculation(calculation);
     } else if (type == "meter_array") {
       const auto name = cfg_parameter["value"].asString();
-      auto meter = get_meter_array(name);
+      auto meter = get_meter_array_cfg(name);
       action_fn->parameter_push_back_meter_array(meter);
     } else if (type == "counter_array") {
       const auto name = cfg_parameter["value"].asString();
-      auto counter = get_counter_array(name);
+      auto counter = get_counter_array_cfg(name);
       action_fn->parameter_push_back_counter_array(counter);
     } else if (type == "register_array") {
       const auto name = cfg_parameter["value"].asString();
-      auto register_array = get_register_array(name);
+      auto register_array = get_register_array_cfg(name);
       action_fn->parameter_push_back_register_array(register_array);
     } else if (type == "header_stack") {
       const auto header_stack_name = cfg_parameter["value"].asString();
-      auto header_stack_id = get_header_stack_id(header_stack_name);
+      auto header_stack_id = get_header_stack_id_cfg(header_stack_name);
       action_fn->parameter_push_back_header_stack(header_stack_id);
     } else if (type == "expression") {
       // TODO(Antonin): should this make the field case (and other) obsolete
@@ -488,25 +488,25 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
         const auto idx = hexstr_to_int<unsigned int>(
             json_index["value"].asString());
         action_fn->parameter_push_back_register_ref(
-            get_register_array(register_array_name), idx);
+            get_register_array_cfg(register_array_name), idx);
       } else {
         auto idx_expr = new ArithExpression();
         build_expression(json_index, idx_expr);
         idx_expr->build();
         action_fn->parameter_push_back_register_gen(
-            get_register_array(register_array_name),
+            get_register_array_cfg(register_array_name),
             std::unique_ptr<ArithExpression>(idx_expr));
       }
     } else if (type == "extern") {
       const auto name = cfg_parameter["value"].asString();
-      auto extern_instance = get_extern_instance(name);
+      auto extern_instance = get_extern_instance_cfg(name);
       action_fn->parameter_push_back_extern_instance(extern_instance);
     } else if (type == "string") {
       action_fn->parameter_push_back_string(cfg_parameter["value"].asString());
     } else if (type == "stack_field") {
       const auto &cfg_value = cfg_parameter["value"];
       const auto header_stack_name = cfg_value[0].asString();
-      auto header_stack_id = get_header_stack_id(header_stack_name);
+      auto header_stack_id = get_header_stack_id_cfg(header_stack_name);
       auto *header_type = header_stack_to_type_map[header_stack_name];
       const auto field_name = cfg_value[1].asString();
       auto field_offset = header_type->get_field_offset(field_name);
@@ -650,6 +650,19 @@ void add_new_object(std::unordered_map<std::string, T> *map,
   map->emplace(name, std::move(obj));
 }
 
+template <typename T>
+const T &get_object(const std::unordered_map<std::string, T> &map,
+                    const std::string &type_name,
+                    const std::string &name) {
+  auto it = map.find(name);
+  if (it == map.end()) {
+    throw json_exception(
+        EFormat() << "Invalid reference to object of type '" << type_name
+                  << "' with name '" << name << "'");
+  }
+  return it->second;
+}
+
 }  // namespace
 
 struct P4Objects::InitState {
@@ -745,7 +758,7 @@ P4Objects::init_headers(const Json::Value &cfg_root) {
     dup_id_checker.add(header_id);
     bool metadata = cfg_header["metadata"].asBool();
 
-    HeaderType *header_type = get_header_type(header_type_name);
+    HeaderType *header_type = get_header_type_cfg(header_type_name);
     header_to_type_map[header_name] = header_type;
 
     phv_factory.push_back_header(header_name, header_id,
@@ -766,7 +779,7 @@ P4Objects::init_header_stacks(const Json::Value &cfg_root) {
     header_stack_id_t header_stack_id = cfg_header_stack["id"].asInt();
     dup_id_checker.add(header_stack_id);
 
-    HeaderType *header_stack_type = get_header_type(header_type_name);
+    HeaderType *header_stack_type = get_header_type_cfg(header_type_name);
     header_stack_to_type_map[header_stack_name] = header_stack_type;
 
     std::vector<header_id_t> header_ids;
@@ -798,7 +811,7 @@ P4Objects::init_header_unions(const Json::Value &cfg_root,
     for (const auto &cfg_header : cfg_header_union_type["headers"]) {
       auto name = cfg_header[0].asString();
       auto type_name = cfg_header[1].asString();
-      header_union_type->push_back(name, get_header_type(type_name));
+      header_union_type->push_back(name, get_header_type_cfg(type_name));
     }
     header_union_types_map.emplace(header_union_type_name,
                                    std::move(header_union_type));
@@ -1011,7 +1024,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
 
           if (extract_type == "regular") {
             const string extract_header = cfg_extract["value"].asString();
-            header_id_t header_id = get_header_id(extract_header);
+            header_id_t header_id = get_header_id_cfg(extract_header);
             header_type = &phv_factory.get_header_type(header_id);
             if (op_type == "extract") {
               parse_state->add_extract(header_id);
@@ -1022,7 +1035,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           } else if (extract_type == "stack") {
             const string extract_header = cfg_extract["value"].asString();
             header_stack_id_t header_stack_id =
-                get_header_stack_id(extract_header);
+                get_header_stack_id_cfg(extract_header);
             header_type = header_stack_to_type_map[extract_header];
             if (op_type == "extract") {
               parse_state->add_extract_to_stack(header_stack_id);
@@ -1035,7 +1048,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
             const auto &cfg_union_stack = cfg_extract["value"];
             check_json_tuple_size(cfg_extract, "value", 2);
             auto extract_union_stack = cfg_union_stack[0].asString();
-            auto header_union_stack_id = get_header_union_stack_id(
+            auto header_union_stack_id = get_header_union_stack_id_cfg(
                 extract_union_stack);
             auto *union_type = header_union_stack_to_type_map.at(
                 extract_union_stack);
@@ -1169,7 +1182,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
         } else if (type == "stack_field") {
           const string header_stack_name = cfg_value[0].asString();
           header_stack_id_t header_stack_id =
-            get_header_stack_id(header_stack_name);
+            get_header_stack_id_cfg(header_stack_name);
           HeaderType *header_type = header_stack_to_type_map[header_stack_name];
           const string field_name = cfg_value[1].asString();
           int field_offset = header_type->get_field_offset(field_name);
@@ -1178,7 +1191,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
                                             bitwidth);
         } else if (type == "union_stack_field") {
           auto union_stack_name = cfg_value[0].asString();
-          auto header_union_stack_id = get_header_union_stack_id(
+          auto header_union_stack_id = get_header_union_stack_id_cfg(
               union_stack_name);
           auto *union_type = header_union_stack_to_type_map.at(
               union_stack_name);
@@ -1258,7 +1271,7 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           }
         } else if (type == "parse_vset") {
           const string vset_name = cfg_transition["value"].asString();
-          ParseVSet *vset = get_parse_vset(vset_name);
+          ParseVSet *vset = get_parse_vset_cfg(vset_name);
           const auto &cfg_mask = cfg_transition["mask"];
           if (cfg_mask.isNull()) {
             parse_state->add_switch_case_vset(vset, next_state);
@@ -1292,7 +1305,7 @@ P4Objects::init_deparsers(const Json::Value &cfg_root) {
     const Json::Value &cfg_ordered_headers = cfg_deparser["order"];
     for (const auto &cfg_header : cfg_ordered_headers) {
       const string header_name = cfg_header.asString();
-      deparser->push_back_header(get_header_id(header_name));
+      deparser->push_back_header(get_header_id_cfg(header_name));
     }
 
     add_deparser(deparser_name, unique_ptr<Deparser>(deparser));
@@ -1322,7 +1335,8 @@ P4Objects::init_calculations(const Json::Value &cfg_root) {
         builder.push_back_constant(ByteContainer(cfg_field["value"].asString()),
                                    cfg_field["bitwidth"].asInt());
       } else if (type == "header") {
-        header_id_t header_id = get_header_id(cfg_field["value"].asString());
+        header_id_t header_id = get_header_id_cfg(
+            cfg_field["value"].asString());
         builder.push_back_header(header_id);
       } else if (type == "payload") {
         builder.append_payload();
@@ -1392,7 +1406,7 @@ P4Objects::init_meter_arrays(const Json::Value &cfg_root,
     if (is_direct) {
       const Json::Value &cfg_target_field = cfg_meter_array["result_target"];
       const string header_name = cfg_target_field[0].asString();
-      header_id_t header_id = get_header_id(header_name);
+      header_id_t header_id = get_header_id_cfg(header_name);
       const string field_name = cfg_target_field[1].asString();
       int field_offset = get_field_offset(header_id, field_name);
 
@@ -1612,7 +1626,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           const Json::Value &cfg_f) {
         const Json::Value &cfg_key_field = cfg_f["target"];
         const string header_name = cfg_key_field[0].asString();
-        header_id_t header_id = get_header_id(header_name);
+        header_id_t header_id = get_header_id_cfg(header_name);
         const string field_name = cfg_key_field[1].asString();
         int field_offset = get_field_offset(header_id, field_name);
         const auto mtype = match_name_to_match_type(
@@ -1653,7 +1667,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         if (match_type == "valid") {
           const Json::Value &cfg_key_field = cfg_key_entry["target"];
           const string header_name = cfg_key_field.asString();
-          header_id_t header_id = get_header_id(header_name);
+          header_id_t header_id = get_header_id_cfg(header_name);
           const std::string name = cfg_key_entry.isMember("name") ?
               cfg_key_entry["name"].asString() : header_name;
           key_builder.push_back_valid_header(header_id, name);
@@ -1697,7 +1711,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
             table->get_match_table());
         ActionProfile *action_profile = nullptr;
         if (cfg_table.isMember("action_profile")) {
-          action_profile = get_action_profile(
+          action_profile = get_action_profile_cfg(
               cfg_table["action_profile"].asString());
         } else if (cfg_table.isMember("act_prof_name")) {
           const auto name = cfg_table["act_prof_name"].asString();
@@ -1791,7 +1805,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           -> const ControlFlowNode *{
         if (cfg_next_node.isNull())
           return nullptr;
-        return get_control_node(cfg_next_node.asString());
+        return get_control_node_cfg(cfg_next_node.asString());
       };
 
       std::string act_prof_name("");
@@ -1941,11 +1955,11 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
       const auto &cfg_false_next = cfg_conditional["false_next"];
 
       if (!cfg_true_next.isNull()) {
-        auto next_node = get_control_node(cfg_true_next.asString());
+        auto next_node = get_control_node_cfg(cfg_true_next.asString());
         conditional->set_next_node_if_true(next_node);
       }
       if (!cfg_false_next.isNull()) {
-        auto next_node = get_control_node(cfg_false_next.asString());
+        auto next_node = get_control_node_cfg(cfg_false_next.asString());
         conditional->set_next_node_if_false(next_node);
       }
     }
@@ -1958,7 +1972,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
       const auto &cfg_next_node = cfg_control_action["next_node"];
       if (!cfg_next_node.isNull()) {
         auto next_node_name = cfg_next_node.asString();
-        auto next_node = get_control_node(next_node_name);
+        auto next_node = get_control_node_cfg(next_node_name);
         control_action->set_next_node(next_node);
       }
     }
@@ -1966,7 +1980,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
     ControlFlowNode *first_node = nullptr;
     if (!cfg_pipeline["init_table"].isNull()) {
       const string first_node_name = cfg_pipeline["init_table"].asString();
-      first_node = get_control_node(first_node_name);
+      first_node = get_control_node_cfg(first_node_name);
     }
 
     Pipeline *pipeline = new Pipeline(pipeline_name, pipeline_id, first_node);
@@ -1986,7 +2000,7 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
 
     const Json::Value &cfg_cksum_field = cfg_checksum["target"];
     const string header_name = cfg_cksum_field[0].asString();
-    header_id_t header_id = get_header_id(header_name);
+    header_id_t header_id = get_header_id_cfg(header_name);
     const string field_name = cfg_cksum_field[1].asString();
     int field_offset = get_field_offset(header_id, field_name);
     enable_arith(header_id, field_offset);
@@ -1998,7 +2012,8 @@ P4Objects::init_checksums(const Json::Value &cfg_root) {
     } else {
       assert(checksum_type == "generic");
       const string calculation_name = cfg_checksum["calculation"].asString();
-      NamedCalculation *calculation = get_named_calculation(calculation_name);
+      NamedCalculation *calculation = get_named_calculation_cfg(
+          calculation_name);
       checksum = new CalcBasedChecksum(checksum_name, checksum_id,
                                        header_id, field_offset, calculation);
     }
@@ -2059,7 +2074,7 @@ P4Objects::init_learn_lists(const Json::Value &cfg_root) {
 
       const Json::Value &cfg_value_field = cfg_learn_element["value"];
       const string header_name = cfg_value_field[0].asString();
-      header_id_t header_id = get_header_id(header_name);
+      header_id_t header_id = get_header_id_cfg(header_name);
       const string field_name = cfg_value_field[1].asString();
       int field_offset = get_field_offset(header_id, field_name);
       learn_engine->list_push_back_field(list_id, header_id, field_offset);
@@ -2088,7 +2103,7 @@ P4Objects::init_field_lists(const Json::Value &cfg_root) {
       if (type == "field") {
         const Json::Value &cfg_value_field = cfg_element["value"];
         const string header_name = cfg_value_field[0].asString();
-        header_id_t header_id = get_header_id(header_name);
+        header_id_t header_id = get_header_id_cfg(header_name);
         const string field_name = cfg_value_field[1].asString();
         int field_offset = get_field_offset(header_id, field_name);
         field_list->push_back_field(header_id, field_offset);
@@ -2230,7 +2245,7 @@ P4Objects::init_objects(std::istream *is,
   for (const auto &h : arith_objects.headers) {
     if (!header_exists(h)) continue;
     // safe to call because we just checked for the header existence
-    const header_id_t header_id = get_header_id(h);
+    const header_id_t header_id = get_header_id_cfg(h);
     enable_arith(header_id);
   }
 
@@ -2359,7 +2374,7 @@ P4Objects::field_info(const string &header_name,
   auto it = field_aliases.find(header_name + "." + field_name);
   if (it != field_aliases.end())
     return field_info(std::get<0>(it->second), std::get<1>(it->second));
-  header_id_t header_id = get_header_id(header_name);
+  header_id_t header_id = get_header_id_cfg(header_name);
   return std::make_tuple(header_id, get_field_offset(header_id, field_name));
 }
 
@@ -2428,7 +2443,7 @@ P4Objects::process_cfg_selector(const Json::Value &cfg_selector) const {
 
     const auto &cfg_value_field = cfg_element["value"];
     const auto header_name = cfg_value_field[0].asString();
-    const auto header_id = get_header_id(header_name);
+    const auto header_id = get_header_id_cfg(header_name);
     const auto field_name = cfg_value_field[1].asString();
     auto field_offset = get_field_offset(header_id, field_name);
     builder.push_back_field(header_id, field_offset);
@@ -2610,8 +2625,8 @@ P4Objects::add_header_type(const std::string &name,
 }
 
 HeaderType *
-P4Objects::get_header_type(const std::string &name) {
-  return header_types_map.at(name).get();
+P4Objects::get_header_type_cfg(const std::string &name) {
+  return get_object(header_types_map, "header type", name).get();
 }
 
 void
@@ -2628,38 +2643,34 @@ P4Objects::add_header_stack_id(const std::string &name,
 void
 P4Objects::add_header_union_id(const std::string &name,
                                header_union_id_t header_union_id) {
-  header_union_ids_map[name] = header_union_id;
+  add_new_object(&header_union_ids_map, "header union", name, header_union_id);
 }
 
 void
 P4Objects::add_header_union_stack_id(
     const std::string &name, header_union_stack_id_t header_union_stack_id) {
-  header_union_stack_ids_map[name] = header_union_stack_id;
+  add_new_object(&header_union_stack_ids_map, "header union stack", name,
+                 header_union_stack_id);
 }
 
 header_id_t
-P4Objects::get_header_id(const std::string &name) const {
-  auto it = header_ids_map.find(name);
-  if (it == header_ids_map.end()) {
-    throw json_exception(
-        EFormat() << "No header instance '" << name << "' was defined");
-  }
-  return it->second;
+P4Objects::get_header_id_cfg(const std::string &name) const {
+  return get_object(header_ids_map, "header", name);
 }
 
 header_stack_id_t
-P4Objects::get_header_stack_id(const std::string &name) const {
-  return header_stack_ids_map.at(name);
+P4Objects::get_header_stack_id_cfg(const std::string &name) const {
+  return get_object(header_stack_ids_map, "header stack", name);
 }
 
 header_union_id_t
-P4Objects::get_header_union_id(const std::string &name) const {
-  return header_union_ids_map.at(name);
+P4Objects::get_header_union_id_cfg(const std::string &name) const {
+  return get_object(header_union_ids_map, "header union", name);
 }
 
 header_union_stack_id_t
-P4Objects::get_header_union_stack_id(const std::string &name) const {
-  return header_union_stack_ids_map.at(name);
+P4Objects::get_header_union_stack_id_cfg(const std::string &name) const {
+  return get_object(header_union_stack_ids_map, "header union stack", name);
 }
 
 void
@@ -2699,6 +2710,11 @@ P4Objects::add_parse_vset(const std::string &name,
   add_new_object(&parse_vsets, "parser vset", name, std::move(parse_vset));
 }
 
+ParseVSet *
+P4Objects::get_parse_vset_cfg(const std::string &name) const {
+  return get_object(parse_vsets, "parser vset", name).get();
+}
+
 void
 P4Objects::add_deparser(const std::string &name,
                         std::unique_ptr<Deparser> deparser) {
@@ -2721,6 +2737,11 @@ P4Objects::add_action_profile(const std::string &name,
                  std::move(action_profile));
 }
 
+ActionProfile *
+P4Objects::get_action_profile_cfg(const std::string &name) const {
+  return get_object(action_profiles_map, "action profile", name).get();
+}
+
 void
 P4Objects::add_conditional(const std::string &name,
                            std::unique_ptr<Conditional> conditional) {
@@ -2741,6 +2762,11 @@ P4Objects::add_control_node(const std::string &name, ControlFlowNode *node) {
   add_new_object(&control_nodes_map, "control node", name, node);
 }
 
+ControlFlowNode *
+P4Objects::get_control_node_cfg(const std::string &name) const {
+  return get_object(control_nodes_map, "control node", name);
+}
+
 void
 P4Objects::add_pipeline(const std::string &name,
                         std::unique_ptr<Pipeline> pipeline) {
@@ -2753,10 +2779,20 @@ P4Objects::add_meter_array(const std::string &name,
   add_new_object(&meter_arrays, "meter", name, std::move(meter_array));
 }
 
+MeterArray *
+P4Objects::get_meter_array_cfg(const std::string &name) const {
+  return get_object(meter_arrays, "meter", name).get();
+}
+
 void
 P4Objects::add_counter_array(const std::string &name,
                              std::unique_ptr<CounterArray> counter_array) {
   add_new_object(&counter_arrays, "counter", name, std::move(counter_array));
+}
+
+CounterArray *
+P4Objects::get_counter_array_cfg(const std::string &name) const {
+  return get_object(counter_arrays, "counter", name).get();
 }
 
 void
@@ -2765,10 +2801,20 @@ P4Objects::add_register_array(const std::string &name,
   add_new_object(&register_arrays, "register", name, std::move(register_array));
 }
 
+RegisterArray *
+P4Objects::get_register_array_cfg(const std::string &name) const {
+  return get_object(register_arrays, "register", name).get();
+}
+
 void
 P4Objects::add_named_calculation(
     const std::string &name, std::unique_ptr<NamedCalculation> calculation) {
   add_new_object(&calculations, "calculation", name, std::move(calculation));
+}
+
+NamedCalculation *
+P4Objects::get_named_calculation_cfg(const std::string &name) const {
+  return get_object(calculations, "calculation", name).get();
 }
 
 void
@@ -2781,6 +2827,11 @@ void
 P4Objects::add_extern_instance(const std::string &name,
                                std::unique_ptr<ExternType> extern_instance) {
   add_new_object(&extern_instances, "extern", name, std::move(extern_instance));
+}
+
+ExternType *
+P4Objects::get_extern_instance_cfg(const std::string &name) const {
+  return get_object(extern_instances, "extern", name).get();
 }
 
 }  // namespace bm

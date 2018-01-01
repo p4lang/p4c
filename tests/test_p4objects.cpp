@@ -1075,3 +1075,17 @@ TEST(P4Objects, DupId) {
   ASSERT_NE(0, objects.init_objects(&is, &factory));
   EXPECT_EQ(expected_error_msg, os.str());
 }
+
+TEST(P4Objects, InvalidReference) {
+  LookupStructureFactory factory;
+  JsonBuilder builder;
+  // builder.add_header_type("hdr_t");
+  builder.add_header("hdr", "hdr_t");
+  std::stringstream is(builder.to_string());
+  std::stringstream os;
+  P4Objects objects(os);
+  std::string expected_error_msg(
+      "Invalid reference to object of type 'header type' with name 'hdr_t'\n");
+  ASSERT_NE(0, objects.init_objects(&is, &factory));
+  EXPECT_EQ(expected_error_msg, os.str());
+}

@@ -267,10 +267,13 @@ class P4Objects {
   static std::string get_json_version_string();
 
  private:
+  // The get_*_cfg are used during json parsing: they will throw a
+  // json_exception if the name cannot be resolved, which will lead to an error
+  // message being displayed to the user.
   void add_header_type(const std::string &name,
                        std::unique_ptr<HeaderType> header_type);
 
-  HeaderType *get_header_type(const std::string &name);
+  HeaderType *get_header_type_cfg(const std::string &name);
 
   void add_header_id(const std::string &name, header_id_t header_id);
 
@@ -283,13 +286,13 @@ class P4Objects {
   void add_header_union_stack_id(const std::string &name,
                                  header_union_stack_id_t header_union_stack_id);
 
-  header_id_t get_header_id(const std::string &name) const;
+  header_id_t get_header_id_cfg(const std::string &name) const;
 
-  header_stack_id_t get_header_stack_id(const std::string &name) const;
+  header_stack_id_t get_header_stack_id_cfg(const std::string &name) const;
 
-  header_union_id_t get_header_union_id(const std::string &name) const;
+  header_union_id_t get_header_union_id_cfg(const std::string &name) const;
 
-  header_union_stack_id_t get_header_union_stack_id(
+  header_union_stack_id_t get_header_union_stack_id_cfg(
       const std::string &name) const;
 
   void add_action(p4object_id_t id, std::unique_ptr<ActionFn> action);
@@ -306,6 +309,8 @@ class P4Objects {
   void add_parse_vset(const std::string &name,
                       std::unique_ptr<ParseVSet> parse_vset);
 
+  ParseVSet *get_parse_vset_cfg(const std::string &name) const;
+
   void add_deparser(const std::string &name,
                     std::unique_ptr<Deparser> deparser);
 
@@ -315,6 +320,8 @@ class P4Objects {
   void add_action_profile(const std::string &name,
                           std::unique_ptr<ActionProfile> action_profile);
 
+  ActionProfile *get_action_profile_cfg(const std::string &name) const;
+
   void add_conditional(const std::string &name,
                        std::unique_ptr<Conditional> conditional);
 
@@ -323,26 +330,38 @@ class P4Objects {
 
   void add_control_node(const std::string &name, ControlFlowNode *node);
 
+  ControlFlowNode *get_control_node_cfg(const std::string &name) const;
+
   void add_pipeline(const std::string &name,
                     std::unique_ptr<Pipeline> pipeline);
 
   void add_meter_array(const std::string &name,
                        std::unique_ptr<MeterArray> meter_array);
 
+  MeterArray *get_meter_array_cfg(const std::string &name) const;
+
   void add_counter_array(const std::string &name,
                          std::unique_ptr<CounterArray> counter_array);
+
+  CounterArray *get_counter_array_cfg(const std::string &name) const;
 
   void add_register_array(const std::string &name,
                           std::unique_ptr<RegisterArray> register_array);
 
+  RegisterArray *get_register_array_cfg(const std::string &name) const;
+
   void add_named_calculation(const std::string &name,
                              std::unique_ptr<NamedCalculation> calculation);
+
+  NamedCalculation *get_named_calculation_cfg(const std::string &name) const;
 
   void add_field_list(const p4object_id_t field_list_id,
                       std::unique_ptr<FieldList> field_list);
 
   void add_extern_instance(const std::string &name,
                            std::unique_ptr<ExternType> extern_instance);
+
+  ExternType *get_extern_instance_cfg(const std::string &name) const;
 
   struct InitState;
   void init_enums(const Json::Value &root);
