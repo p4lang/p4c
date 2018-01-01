@@ -14,6 +14,12 @@ if [[ -z `which brew` ]]; then
     sudo chown ${USER}:admin /usr/local/tests
 fi
 
+# check for pip
+if [[ -z `which pip` ]]; then
+    (>&2 echo 'Please install pip by "curl -O https://bootstrap.pypa.io/get-pip.py | sudo python3 get-pip.py"')
+    exit 1
+fi
+
 # check for clang version
 cxx_full_version=`clang++ --version | grep version`
 cxx_version=`echo $cxx_full_version | cut -f 4 -d " "`
@@ -25,9 +31,11 @@ if [[ $cxx_version < "8.0.0" ]]; then
     exit 1
 fi
 
+brew update
+
 # install basic tools
 brew install automake autoconf bison boost clang-format cmake coreutils \
-     doxygen homebrew/versions/gcc5 gmp libevent openssl pkg-config wget
+     doxygen gcc@5 gmp libevent openssl pkg-config wget
 # bison needs a bit more nudging
 brew link --overwrite --force bison
 
@@ -45,7 +53,7 @@ brew install python
 brew install nanomsg
 
 # # scapy
-brew install homebrew/python/scapy
+pip install scapy
 
 # nnpy
 /usr/local/bin/pip install pycparser
