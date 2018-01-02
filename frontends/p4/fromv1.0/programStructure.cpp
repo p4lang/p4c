@@ -1846,7 +1846,9 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     for (auto c : registersToDo) {
         auto reg = registers.get(c);
         auto r = convert(reg, registers.get(reg));
-        stateful.push_back(r);
+        if (!declarations->getDeclaration(r->name)) {
+            declarations->push_back(r);
+        }
     }
 
     for (auto c : externsToDo) {

@@ -114,9 +114,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+@name(".flowlet_id") register<bit<16>>(32w8192) flowlet_id;
+
+@name(".flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".flowlet_id") register<bit<16>>(32w8192) flowlet_id;
-    @name(".flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime;
     @name("._drop") action _drop() {
         mark_to_drop();
     }
