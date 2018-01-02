@@ -139,7 +139,7 @@ namespace {
 void test_two_comp_mod(int src, unsigned int width, int expected) {
   Data dst;
   dst.two_comp_mod(Data(src), Data(width));
-  ASSERT_EQ(expected, dst.get_int());
+  EXPECT_EQ(expected, dst.get_int());
 }
 
 }  // namespace

@@ -315,7 +315,8 @@ class Data {
 
   //! NC
   void two_comp_mod(const Data &src, const Data &width) {
-    static Bignum one(1);
+    // used to implement (int<?>) casts in P4_16
+    static const Bignum one(1);
     unsigned int uwidth = width.get_uint();
     Bignum mask = (one << uwidth) - 1;
     Bignum max = (one << (uwidth - 1)) - 1;
@@ -327,6 +328,7 @@ class Data {
     } else {
       value = src.value;
     }
+    export_bytes();
   }
 
   //! NC
