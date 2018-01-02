@@ -1838,8 +1838,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     for (auto c : externsToDo) {
         auto ext = externs.get(c);
         if (!ExternConverter::cvtAsGlobal(this, ext)) {
-            ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext),
-                                                     &stateful, declarations);
+            ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext), &stateful);
             stateful.push_back(ext);
         }
     }
@@ -1914,9 +1913,8 @@ void ProgramStructure::createControls() {
         if (ExternConverter::cvtAsGlobal(this, ext.first)) {
             // FIXME -- 'declarations' is a vector Nodes instead of Declarations.  Should
             // FIXME -- fix the IR to use a NameMap for scopes anyways.
-            IR::IndexedVector<IR::Node> tmpscope;
-            auto e = ExternConverter::cvtExternInstance(this, ext.first, ext.second,
-                                                        nullptr, &tmpscope);
+            IR::IndexedVector<IR::Declaration> tmpscope;
+            auto e = ExternConverter::cvtExternInstance(this, ext.first, ext.second, &tmpscope);
             for (auto d : tmpscope)
                 declarations->push_back(d);
             if (e)

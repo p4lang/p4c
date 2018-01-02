@@ -440,7 +440,7 @@ const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *stru
 
 const IR::Declaration_Instance *ExternConverter::convertExternInstance(ProgramStructure *structure,
             const IR::Declaration_Instance *ext, cstring name,
-            IR::IndexedVector<IR::Declaration> *, IR::IndexedVector<IR::Node> *) {
+            IR::IndexedVector<IR::Declaration> *) {
     auto *rv = ext->clone();
     auto *et = rv->type->to<IR::Type_Extern>();
     BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
@@ -1041,6 +1041,8 @@ class RemoveAnnotatedFields : public Transform {
 };
 
 }  // namespace
+
+
 
 ///////////////////////////////////////////////////////////////
 
