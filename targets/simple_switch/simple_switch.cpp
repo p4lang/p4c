@@ -282,17 +282,16 @@ SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
 }
 
 // used for ingress cloning, resubmit
-std::unique_ptr<Packet>
-SimpleSwitch::copy_ingress_pkt(
+void
+SimpleSwitch::copy_field_list_and_set_type(
     const std::unique_ptr<Packet> &packet,
+    const std::unique_ptr<Packet> &packet_copy,
     PktInstanceType copy_type, p4object_id_t field_list_id) {
-  std::unique_ptr<Packet> packet_copy = packet->clone_no_phv_ptr();
   PHV *phv_copy = packet_copy->get_phv();
   phv_copy->reset_metadata();
   FieldList *field_list = this->get_field_list(field_list_id);
   field_list->copy_fields_between_phvs(phv_copy, packet->get_phv());
   phv_copy->get_field("standard_metadata.instance_type").set(copy_type);
-  return packet_copy;
 }
 
 void
@@ -378,12 +377,14 @@ SimpleSwitch::ingress_thread() {
             packet->save_buffer_state();
         packet->restore_buffer_state(packet_in_state);
         p4object_id_t field_list_id = clone_spec >> 16;
-        auto packet_copy = copy_ingress_pkt(
-            packet, PKT_INSTANCE_TYPE_INGRESS_CLONE, field_list_id);
+        std::unique_ptr<Packet> packet_copy = packet->clone_no_phv_ptr();
         // we need to parse again
         // the alternative would be to pay the (huge) price of PHV copy for
         // every ingress packet
         parser->parse(packet_copy.get());
+        copy_field_list_and_set_type(packet, packet_copy,
+                                     PKT_INSTANCE_TYPE_INGRESS_CLONE,
+                                     field_list_id);
         enqueue(egress_port, std::move(packet_copy));
         packet->restore_buffer_state(packet_out_state);
       }
@@ -406,8 +407,10 @@ SimpleSwitch::ingress_thread() {
         f_resubmit.set(0);
         // TODO(antonin): a copy is not needed here, but I don't yet have an
         // optimized way of doing this
-        auto packet_copy = copy_ingress_pkt(
-            packet, PKT_INSTANCE_TYPE_RESUBMIT, field_list_id);
+        std::unique_ptr<Packet> packet_copy = packet->clone_no_phv_ptr();
+        copy_field_list_and_set_type(packet, packet_copy,
+                                     PKT_INSTANCE_TYPE_RESUBMIT,
+                                     field_list_id);
         input_buffer.push_front(std::move(packet_copy));
         continue;
       }

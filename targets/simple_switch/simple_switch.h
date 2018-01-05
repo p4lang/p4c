@@ -153,8 +153,9 @@ class SimpleSwitch : public Switch {
   // TODO(antonin): switch to pass by value?
   void enqueue(int egress_port, std::unique_ptr<Packet> &&pkt);
 
-  std::unique_ptr<Packet> copy_ingress_pkt(
+  void copy_field_list_and_set_type(
       const std::unique_ptr<Packet> &pkt,
+      const std::unique_ptr<Packet> &pkt_copy,
       PktInstanceType copy_type, p4object_id_t field_list_id);
 
   void check_queueing_metadata();
