@@ -119,6 +119,6 @@ AM_CPPFLAGS += -Icpp_out -Igrpc_out \
 
 nodist_libbm_grpc_dataplane_la_SOURCES = $(proto_cpp_files) $(proto_grpc_files)
 # no warnings or Werror for auto-generated sources
-nodist_libbm_grpc_dataplane_la_CXXFLAGS =
+libbm_grpc_dataplane_la_CXXFLAGS =
 
 CLEANFILES = $(BUILT_SOURCES) proto_files.ts

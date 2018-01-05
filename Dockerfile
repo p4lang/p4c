@@ -55,7 +55,7 @@ RUN apt-get update && \
     (test "$sswitch_grpc" = "yes" && \
       cd targets/simple_switch_grpc/ && \
       ./autogen.sh && \
-      ./configure && \
+      ./configure --enable-Werror && \
       make && \
       make install-strip && \
       cd -) || \
