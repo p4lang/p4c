@@ -64,8 +64,15 @@ void CFG::dbprint(std::ostream& out, CFG::Node* node, std::set<CFG::Node*> &done
     done.emplace(node);
 }
 
+void CFG::Node::addPredecessors(const EdgeSet* set) {
+    LOG2("Add to predecessors of " << name << ":" << set);
+    if (set != nullptr)
+        predecessors.mergeWith(set);
+}
+
+
 void CFG::dbprint(std::ostream& out) const {
-    out << "CFG for " << container;
+    out << "CFG for " << dbp(container);
     std::set<CFG::Node*> done;
     for (auto n : allNodes)
         dbprint(out, n, done);
@@ -175,44 +182,25 @@ bool CFG::checkImplementable() const {
 }
 
 namespace {
-// This visitor "converts" IR::Node* into EdgeSets
-// Since we cannot return EdgeSets, we place them in the 'after' map.
 class CFGBuilder : public Inspector {
     CFG*                    cfg;
-    const CFG::EdgeSet*     current;  // predecessors of current node
-    std::map<const IR::Statement*, const CFG::EdgeSet*> after;  // successors of each statement
+    /// predecessors of current CFG node
+    const CFG::EdgeSet*     live;
     P4::ReferenceMap*       refMap;
     P4::TypeMap*            typeMap;
 
-    void setAfter(const IR::Statement* statement, const CFG::EdgeSet* value) {
-        LOG1("After " << statement << " " << value);
-        CHECK_NULL(statement);
-        if (value == nullptr)
-            // This can happen when an error is signaled
-            return;
-        after.emplace(statement, value);
-        current = value;
-    }
-
-    const CFG::EdgeSet* get(const IR::Statement* statement)
-    { return ::get(after, statement); }
-    bool preorder(const IR::Statement* statement) override {
-        ::error("%1%: not supported in control block on this architecture", statement);
+    bool preorder(const IR::ReturnStatement*) override {
+        cfg->exitPoint->addPredecessors(live);
+        live = new CFG::EdgeSet();
         return false;
     }
-    bool preorder(const IR::ReturnStatement* statement) override {
-        cfg->exitPoint->addPredecessors(current);
-        setAfter(statement, new CFG::EdgeSet());  // empty successor set
+    bool preorder(const IR::ExitStatement*) override {
+        cfg->exitPoint->addPredecessors(live);
+        live = new CFG::EdgeSet();
         return false;
     }
-    bool preorder(const IR::ExitStatement* statement) override {
-        cfg->exitPoint->addPredecessors(current);
-        setAfter(statement, new CFG::EdgeSet());  // empty successor set
-        return false;
-    }
-    bool preorder(const IR::EmptyStatement* statement) override {
-        // unchanged 'current'
-        setAfter(statement, current);
+    bool preorder(const IR::EmptyStatement*) override {
+        // unchanged 'live'
         return false;
     }
     bool preorder(const IR::MethodCallStatement* statement) override {
@@ -226,12 +214,12 @@ class CFGBuilder : public Inspector {
         }
         auto tc = am->object->to<IR::P4Table>();
         auto node = cfg->makeNode(tc, statement->methodCall);
-        node->addPredecessors(current);
-        setAfter(statement, new CFG::EdgeSet(new CFG::Edge(node)));
+        node->addPredecessors(live);
+        live = new CFG::EdgeSet(new CFG::Edge(node));
         return false;
     }
     bool preorder(const IR::IfStatement* statement) override {
-        // We only allow expressions of the form t.apply().hit currently.
+        // We only allow expressions of the form t.apply().hit lively.
         // If the expression is more complex it should have been
         // simplified by prior passes.
         auto tc = P4::TableApplySolver::isHit(statement->condition, refMap, typeMap);
@@ -243,25 +231,25 @@ class CFGBuilder : public Inspector {
             node = cfg->makeNode(statement);
         }
 
-        node->addPredecessors(current);
+        node->addPredecessors(live);
         // If branch
-        current = new CFG::EdgeSet(new CFG::Edge(node, true));
+        live = new CFG::EdgeSet(new CFG::Edge(node, true));
         visit(statement->ifTrue);
-        auto ifTrue = get(statement->ifTrue);
-        if (ifTrue == nullptr)
+        auto afterTrue = live;
+        if (afterTrue == nullptr)
+            // error
             return false;
-        auto result = new CFG::EdgeSet(ifTrue);
+        auto result = new CFG::EdgeSet(afterTrue);
         // Else branch
         if (statement->ifFalse != nullptr) {
-            current = new CFG::EdgeSet(new CFG::Edge(node, false));
+            live = new CFG::EdgeSet(new CFG::Edge(node, false));
             visit(statement->ifFalse);
-            auto ifFalse = get(statement->ifFalse);
-            result->mergeWith(ifFalse);
+            result->mergeWith(live);
         } else {
             // no else branch
             result->mergeWith(new CFG::EdgeSet(new CFG::Edge(node, false)));
         }
-        setAfter(statement, result);
+        live = result;
         return false;
     }
     bool preorder(const IR::BlockStatement* statement) override {
@@ -269,9 +257,8 @@ class CFGBuilder : public Inspector {
             auto stat = s->to<IR::Statement>();
             if (stat == nullptr) continue;
             visit(stat);
-            current = get(stat);
         }
-        setAfter(statement, current);
+        // live is unchanged
         return false;
     }
     bool preorder(const IR::SwitchStatement* statement) override {
@@ -279,7 +266,7 @@ class CFGBuilder : public Inspector {
         BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
                   statement->expression);
         auto node = cfg->makeNode(tc, statement->expression);
-        node->addPredecessors(current);
+        node->addPredecessors(live);
         auto result = new CFG::EdgeSet(new CFG::Edge(node));  // In case no label matches
         auto labels = new CFG::EdgeSet();
         for (auto sw : statement->cases) {
@@ -293,24 +280,24 @@ class CFGBuilder : public Inspector {
             }
             labels->mergeWith(new CFG::EdgeSet(new CFG::Edge(node, label)));
             if (sw->statement != nullptr) {
-                current = labels;
+                live = labels;
                 visit(sw->statement);
                 labels = new CFG::EdgeSet();
             }  // else we accumulate edges
-            result->mergeWith(current);
+            result->mergeWith(live);
         }
-        setAfter(statement, result);
+        live = result;
         return false;
     }
 
  public:
     CFGBuilder(CFG* cfg, P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
-            cfg(cfg), current(nullptr), refMap(refMap), typeMap(typeMap) {}
-    const CFG::EdgeSet* run(const IR::Statement* startNode, const CFG::EdgeSet* predecessors) {
-        CHECK_NULL(startNode); CHECK_NULL(predecessors);
-        current = predecessors;
-        startNode->apply(*this);
-        return current;
+            cfg(cfg), live(nullptr), refMap(refMap), typeMap(typeMap) {}
+    const CFG::EdgeSet* run(const IR::Statement* body, const CFG::EdgeSet* predecessors) {
+        CHECK_NULL(body); CHECK_NULL(predecessors);
+        live = predecessors;
+        body->apply(*this);
+        return live;
     }
 };
 }  // end anonymous namespace
@@ -330,7 +317,7 @@ void CFG::build(const IR::P4Control* cc,
         exitPoint->addPredecessors(last);
         computeSuccessors();
     }
-    LOG2("CFG" << this);
+    LOG2(this);
 }
 
 void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
@@ -345,7 +332,7 @@ void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
 }
 
 void DiscoverStructure::postorder(const IR::P4Action* action) {
-    LOG1("discovery action " << action);
+    LOG2("discovered action " << action);
     auto control = findContext<IR::P4Control>();
     structure->actions.emplace(action, control);
 }
