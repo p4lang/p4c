@@ -53,12 +53,6 @@ set (P4TEST_SUITES
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
-  # This test fails now.  Partially this is because of issue #1128,
-  # but even if #1128 is not fixed, updating p4lang/behavioral-model
-  # to use the new P4_16 header stack operation implementations by
-  # default, as is planned with release 1.11, should enable the test
-  # to pass.
-  testdata/p4_16_samples/header-stack-ops-bmv2.p4
   )
 p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}")
 

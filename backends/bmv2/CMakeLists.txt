@@ -117,6 +117,12 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/x-bmv2.p4
   testdata/p4_16_samples/issue986-1-bmv2.p4
   testdata/p4_14_samples/16-TwoReferences.p4
+  # This test fails now.  Partially this is because of issue #1128,
+  # but even if #1128 is not fixed, updating p4lang/behavioral-model
+  # to use the new P4_16 header stack operation implementations by
+  # default, as is planned with release 1.11, should enable the test
+  # to pass.
+  testdata/p4_16_samples/header-stack-ops-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
