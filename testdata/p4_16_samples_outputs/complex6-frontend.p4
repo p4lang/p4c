@@ -1,16 +1,16 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp;
-    bool tmp_0;
-    bit<32> tmp_1;
-    bool tmp_2;
+    bit<32> tmp_3;
+    bool tmp_4;
+    bit<32> tmp_5;
+    bool tmp_6;
     apply {
-        tmp_1 = f(32w2);
-        tmp_2 = tmp_1 > 32w0;
-        if (tmp_2) {
-            tmp = f(32w2);
-            tmp_0 = tmp < 32w2;
-            if (tmp_0) 
+        tmp_5 = f(32w2);
+        tmp_6 = tmp_5 > 32w0;
+        if (tmp_6) {
+            tmp_3 = f(32w2);
+            tmp_4 = tmp_3 < 32w2;
+            if (tmp_4) 
                 r = 32w1;
             else 
                 r = 32w3;

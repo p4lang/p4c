@@ -51,7 +51,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     @name("a_with_control_params") action a_with_control_params_0(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("t_range") table t_range_0 {
+    @name("t_range") table t_range {
         key = {
             h.h.r: range @name("h.h.r") ;
         }
@@ -71,7 +71,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     }
     apply {
-        t_range_0.apply();
+        t_range.apply();
     }
 }
 

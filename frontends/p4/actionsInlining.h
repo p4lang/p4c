@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_ACTIONSINLINING_H_
-#define _MIDEND_ACTIONSINLINING_H_
+#ifndef _FRONTENDS_P4_ACTIONSINLINING_H_
+#define _FRONTENDS_P4_ACTIONSINLINING_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -172,4 +172,4 @@ class InlineActions : public Transform {
 
 }  // namespace P4_14
 
-#endif /* _MIDEND_ACTIONSINLINING_H_ */
+#endif /* _FRONTENDS_P4_ACTIONSINLINING_H_ */

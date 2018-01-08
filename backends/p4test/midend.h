@@ -20,8 +20,6 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "midend/actionsInlining.h"
-#include "midend/inlining.h"
 
 namespace P4Test {
 

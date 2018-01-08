@@ -22,25 +22,40 @@ struct headers {
     ethernet_t ethernet;
 }
 
-parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata user_meta) {
-    state start {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
-        transition accept;
-    }
-}
-
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
-    @name("p") CommonParser() p_0;
+    headers parsed_hdr_2;
+    metadata user_meta_2;
     state start {
-        p_0.apply(buffer, parsed_hdr, user_meta);
+        parsed_hdr_2.ethernet.setInvalid();
+        user_meta_2 = user_meta;
+        transition CommonParser_start;
+    }
+    state CommonParser_start {
+        buffer.extract<ethernet_t>(parsed_hdr_2.ethernet);
+        transition start_0;
+    }
+    state start_0 {
+        parsed_hdr = parsed_hdr_2;
+        user_meta = user_meta_2;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta) {
-    @name("p") CommonParser() p_1;
+    headers parsed_hdr_3;
+    metadata user_meta_3;
     state start {
-        p_1.apply(buffer, parsed_hdr, user_meta);
+        parsed_hdr_3.ethernet.setInvalid();
+        user_meta_3 = user_meta;
+        transition CommonParser_start_0;
+    }
+    state CommonParser_start_0 {
+        buffer.extract<ethernet_t>(parsed_hdr_3.ethernet);
+        transition start_1;
+    }
+    state start_1 {
+        parsed_hdr = parsed_hdr_3;
+        user_meta = user_meta_3;
         transition accept;
     }
 }
@@ -55,23 +70,15 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
     }
 }
 
-control CommonDeparserImpl(packet_out packet, inout headers hdr) {
-    apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-    }
-}
-
 control IngressDeparserImpl(packet_out buffer, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @name("cp") CommonDeparserImpl() cp_0;
     apply {
-        cp_0.apply(buffer, hdr);
+        buffer.emit<ethernet_t>(hdr.ethernet);
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out empty_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @name("cp") CommonDeparserImpl() cp_1;
     apply {
-        cp_1.apply(buffer, hdr);
+        buffer.emit<ethernet_t>(hdr.ethernet);
     }
 }
 

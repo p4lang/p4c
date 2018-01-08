@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_DONTCAREARGS_H_
-#define _MIDEND_DONTCAREARGS_H_
+#ifndef _FRONTENDS_P4_DONTCAREARGS_H_
+#define _FRONTENDS_P4_DONTCAREARGS_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -54,4 +54,4 @@ class RemoveDontcareArgs : public PassManager {
 
 }  // namespace P4
 
-#endif  /* _MIDEND_DONTCAREARGS_H_ */
+#endif  /* _FRONTENDS_P4_DONTCAREARGS_H_ */

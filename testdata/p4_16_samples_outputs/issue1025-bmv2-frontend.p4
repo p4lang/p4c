@@ -58,9 +58,9 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
-    bit<9> tmp_0;
-    bit<32> tmp_1;
+    IPv4_up_to_ihl_only_h tmp_2;
+    bit<9> tmp_3;
+    bit<32> tmp_4;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -69,10 +69,10 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        tmp = pkt.lookahead<IPv4_up_to_ihl_only_h>();
-        tmp_0 = (bit<9>)tmp.ihl << 3;
-        tmp_1 = (bit<32>)tmp_0;
-        pkt.extract<ipv4_t>(hdr.ipv4, tmp_1);
+        tmp_2 = pkt.lookahead<IPv4_up_to_ihl_only_h>();
+        tmp_3 = (bit<9>)tmp_2.ihl << 3;
+        tmp_4 = (bit<32>)tmp_3;
+        pkt.extract<ipv4_t>(hdr.ipv4, tmp_4);
         transition select(hdr.ipv4.protocol) {
             8w6: parse_tcp;
             default: accept;
@@ -85,14 +85,14 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    bit<1> eth_valid_0;
-    bit<1> ipv4_valid_0;
-    bit<1> tcp_valid_0;
+    bit<1> eth_valid;
+    bit<1> ipv4_valid;
+    bit<1> tcp_valid;
     apply {
-        eth_valid_0 = (bit<1>)hdr.ethernet.isValid();
-        ipv4_valid_0 = (bit<1>)hdr.ipv4.isValid();
-        tcp_valid_0 = (bit<1>)hdr.tcp.isValid();
-        hdr.ethernet.dstAddr = 31w0 ++ eth_valid_0 ++ 7w0 ++ ipv4_valid_0 ++ 7w0 ++ tcp_valid_0;
+        eth_valid = (bit<1>)hdr.ethernet.isValid();
+        ipv4_valid = (bit<1>)hdr.ipv4.isValid();
+        tcp_valid = (bit<1>)hdr.tcp.isValid();
+        hdr.ethernet.dstAddr = 31w0 ++ eth_valid ++ 7w0 ++ ipv4_valid ++ 7w0 ++ tcp_valid;
     }
 }
 

@@ -11,16 +11,16 @@ BFD_Offload(16w32768) bfd_session_liveness_tracker = {
         this.setTx(index, 8w0);
     }
     bool on_tx(in bit<16> index) {
-        bit<8> tmp;
-        bit<8> tmp_0;
-        bit<8> c_0;
-        tmp = this.getTx(index);
-        tmp_0 = tmp + 8w1;
-        c_0 = tmp_0;
-        if (c_0 >= 8w4) 
+        bit<8> tmp_1;
+        bit<8> tmp_2;
+        bit<8> c;
+        tmp_1 = this.getTx(index);
+        tmp_2 = tmp_1 + 8w1;
+        c = tmp_2;
+        if (c >= 8w4) 
             return true;
         else {
-            this.setTx(index, c_0);
+            this.setTx(index, c);
             return false;
         }
     }

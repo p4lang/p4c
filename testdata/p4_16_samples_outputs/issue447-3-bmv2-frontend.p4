@@ -19,11 +19,11 @@ struct Metadata {
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    bit<32> size_0;
+    bit<32> size_1;
     state start {
         pkt.extract<S>(hdr.s1);
-        size_0 = hdr.s1.size;
-        pkt.extract<H>(hdr.h, size_0);
+        size_1 = hdr.s1.size;
+        pkt.extract<H>(hdr.h, size_1);
         pkt.extract<S>(hdr.s2);
         transition accept;
     }

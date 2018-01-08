@@ -5,14 +5,6 @@ header hdr {
     bit<32> f;
 }
 
-control compute(inout hdr h) {
-    hdr[1] tmp_0;
-    apply {
-        tmp_0[0].f = h.f + 32w1;
-        h.f = tmp_0[0].f;
-    }
-}
-
 struct Headers {
     hdr h;
 }
@@ -49,9 +41,10 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("c") compute() c_0;
+    hdr[1] c_tmp_0;
     apply {
-        c_0.apply(h.h);
+        c_tmp_0[0].f = h.h.f + 32w1;
+        h.h.f = c_tmp_0[0].f;
         sm.egress_spec = 9w0;
     }
 }

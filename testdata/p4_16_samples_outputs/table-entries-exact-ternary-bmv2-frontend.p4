@@ -51,7 +51,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     @name("a_with_control_params") action a_with_control_params_0(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("t_exact_ternary") table t_exact_ternary_0 {
+    @name("t_exact_ternary") table t_exact_ternary {
         key = {
             h.h.e: exact @name("h.h.e") ;
             h.h.t: ternary @name("h.h.t") ;
@@ -74,7 +74,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
     }
     apply {
-        t_exact_ternary_0.apply();
+        t_exact_ternary.apply();
     }
 }
 

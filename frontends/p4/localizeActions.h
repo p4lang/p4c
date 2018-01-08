@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_LOCALIZEACTIONS_H_
-#define _MIDEND_LOCALIZEACTIONS_H_
+#ifndef _FRONTENDS_P4_LOCALIZEACTIONS_H_
+#define _FRONTENDS_P4_LOCALIZEACTIONS_H_
 
 #include "lib/ordered_set.h"
 #include "ir/ir.h"
@@ -147,6 +147,10 @@ class TagGlobalActions : public Transform {
     { prune(); return control; }
 };
 
+/**
+Creates copies of actions;
+after this pass each action appears in a single table.
+*/
 class LocalizeAllActions : public PassManager {
     GlobalActionReplacements globalReplacements;
     ActionReplacement        localReplacements;
@@ -168,4 +172,4 @@ class LocalizeAllActions : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_LOCALIZEACTIONS_H_ */
+#endif /* _FRONTENDS_P4_LOCALIZEACTIONS_H_ */

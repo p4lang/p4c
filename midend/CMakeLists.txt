@@ -13,38 +13,32 @@
 # limitations under the License.
 
 set (MIDEND_SRCS
-  actionsInlining.cpp
   actionSynthesis.cpp
-  copyStructures.cpp
   convertEnums.cpp
+  copyStructures.cpp
   eliminateTuples.cpp
-  nestedStructs.cpp
-  inlining.cpp
+  expandEmit.cpp
+  expandLookahead.cpp
   interpreter.cpp
   local_copyprop.cpp
-  localizeActions.cpp
-  moveConstructors.cpp
-  predication.cpp
+  nestedStructs.cpp
+  noMatch.cpp
   parserUnroll.cpp
-  removeParameters.cpp
-  removeReturns.cpp
-  removeUnusedParameters.cpp
+  predication.cpp
+  removeExits.cpp
   removeLeftSlices.cpp
+  removeParameters.cpp
+  removeSelectBooleans.cpp
+  removeUnusedParameters.cpp
   simplifyKey.cpp
   simplifySelectCases.cpp
   simplifySelectList.cpp
   synthesizeValidField.cpp
-  removeSelectBooleans.cpp
-  validateProperties.cpp
-  expandLookahead.cpp
-  noMatch.cpp
   tableHit.cpp
-  expandEmit.cpp
-  dontcareArgs.cpp
+  validateProperties.cpp
   )
 
 set (MIDEND_HDRS
-  actionsInlining.h
   actionSynthesis.h
   compileTimeOps.h
   convertEnums.h
@@ -54,19 +48,16 @@ set (MIDEND_HDRS
   expandLookahead.h
   expr_uses.h
   has_side_effects.h
-  inlining.h
   interpreter.h
   local_copyprop.h
-  localizeActions.h
   midEndLast.h
-  moveConstructors.h
-  noMatch.h
-  predication.h
   nestedStructs.h
+  noMatch.h
   parserUnroll.h
+  predication.h
+  removeExits.h
   removeLeftSlices.h
   removeParameters.h
-  removeReturns.h
   removeSelectBooleans.h
   removeUnusedParameters.h
   simplifyKey.h
@@ -75,7 +66,6 @@ set (MIDEND_HDRS
   synthesizeValidField.h
   tableHit.h
   validateProperties.h
-  dontcareArgs.h
   )
 
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")

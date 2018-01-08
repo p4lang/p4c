@@ -64,7 +64,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
     @name("foo") action foo_0() {
         meta.b = meta.b + 4w5;
     }
-    @name("guh") table guh_0 {
+    @name("guh") table guh {
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
@@ -74,7 +74,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         default_action = foo_0();
     }
     apply {
-        guh_0.apply();
+        guh.apply();
     }
 }
 

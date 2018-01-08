@@ -83,26 +83,28 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_0() {
+    }
     @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name(".send_frame") table send_frame_0 {
+    @name(".send_frame") table send_frame {
         actions = {
             rewrite_mac_0();
             _drop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        send_frame_0.apply();
+        send_frame.apply();
     }
 }
 
@@ -111,7 +113,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".heavy_hitter_counter2") register<bit<16>>(32w16) heavy_hitter_counter2;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("NoAction") action NoAction_1() {
+    }
+    @name("NoAction") action NoAction_7() {
+    }
+    @name("NoAction") action NoAction_8() {
+    }
+    @name("NoAction") action NoAction_9() {
+    }
     @name("._drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_5() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_6() {
         mark_to_drop();
     }
     @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
@@ -132,53 +148,53 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.custom_metadata.count_val2 = meta.custom_metadata.count_val2 + 16w1;
         heavy_hitter_counter2.write((bit<32>)meta.custom_metadata.hash_val2, meta.custom_metadata.count_val2);
     }
-    @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table_0 {
+    @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table {
         actions = {
             _drop_1();
-            @defaultonly NoAction();
+            @defaultonly NoAction_1();
         }
         size = 1;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
-    @name(".forward") table forward_0 {
+    @name(".forward") table forward {
         actions = {
             set_dmac_0();
-            _drop_1();
-            @defaultonly NoAction();
+            _drop_5();
+            @defaultonly NoAction_7();
         }
         key = {
             meta.custom_metadata.nhop_ipv4: exact @name("custom_metadata.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction();
+        default_action = NoAction_7();
     }
-    @name(".ipv4_lpm") table ipv4_lpm_0 {
+    @name(".ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop_0();
-            _drop_1();
-            @defaultonly NoAction();
+            _drop_6();
+            @defaultonly NoAction_8();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
         size = 1024;
-        default_action = NoAction();
+        default_action = NoAction_8();
     }
-    @name(".set_heavy_hitter_count_table") table set_heavy_hitter_count_table_0 {
+    @name(".set_heavy_hitter_count_table") table set_heavy_hitter_count_table {
         actions = {
             set_heavy_hitter_count_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_9();
         }
         size = 1;
-        default_action = NoAction();
+        default_action = NoAction_9();
     }
     apply {
-        set_heavy_hitter_count_table_0.apply();
+        set_heavy_hitter_count_table.apply();
         if (meta.custom_metadata.count_val1 > 16w100 && meta.custom_metadata.count_val2 > 16w100) 
-            drop_heavy_hitter_table_0.apply();
+            drop_heavy_hitter_table.apply();
         else {
-            ipv4_lpm_0.apply();
-            forward_0.apply();
+            ipv4_lpm.apply();
+            forward.apply();
         }
     }
 }

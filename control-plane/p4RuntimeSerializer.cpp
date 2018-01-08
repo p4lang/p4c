@@ -45,14 +45,8 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "lib/ordered_set.h"
-#include "midend/actionsInlining.h"
-#include "midend/dontcareArgs.h"
 #include "midend/eliminateTuples.h"
-#include "midend/inlining.h"
-#include "midend/localizeActions.h"
-#include "midend/moveConstructors.h"
 #include "midend/removeParameters.h"
-#include "midend/removeReturns.h"
 #include "midend/synthesizeValidField.h"
 #include "PI/pi_base.h"
 
@@ -2109,17 +2103,6 @@ P4RuntimeAPI generateP4Runtime(const IR::P4Program* program) {
     P4::TypeMap typeMap;
     auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager p4RuntimeFixups = {
-        // These are prerequisites of LocalizeAllActions.
-        evaluator,
-        new P4::Inline(&refMap, &typeMap, evaluator),
-        new P4::InlineActions(&refMap, &typeMap),
-        // We currently can't handle global actions; they need to be associated
-        // with a table.
-        new P4::LocalizeAllActions(&refMap),
-        // We need to run these to avoid issues with duplicate or illegal names.
-        // (This is likely mostly or entirely due to the inlining passes above.)
-        new P4::UniqueNames(&refMap),
-        new P4::UniqueParameters(&refMap, &typeMap),
         // We can only handle a very restricted class of action parameters - the
         // types need to be bit<> or int<> - so we fail without this pass.
         new P4::RemoveActionParameters(&refMap, &typeMap),
