@@ -21,31 +21,36 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     }
 }
 
-control cDoOneOp(inout headers hdr, in bit<8> op) {
+control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
+    headers tmp_3;
+    bit<8> tmp_4;
+    headers tmp_5;
+    bit<8> tmp_6;
+    headers hdr_1;
+    bit<8> op;
     apply {
+        tmp_3 = hdr;
+        tmp_4 = hdr.h1.op1;
+        hdr_1 = tmp_3;
+        op = tmp_4;
         if (op == 8w0x0) 
             ;
         else 
             if (op[7:4] == 4w1) 
-                hdr.h1.out1 = 8w4;
-    }
-}
-
-control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    headers tmp;
-    bit<8> tmp_0;
-    headers tmp_1;
-    bit<8> tmp_2;
-    @name("do_one_op") cDoOneOp() do_one_op_0;
-    apply {
-        tmp = hdr;
-        tmp_0 = hdr.h1.op1;
-        do_one_op_0.apply(tmp, tmp_0);
-        hdr = tmp;
-        tmp_1 = hdr;
-        tmp_2 = hdr.h1.op2;
-        do_one_op_0.apply(tmp_1, tmp_2);
-        hdr = tmp_1;
+                hdr_1.h1.out1 = 8w4;
+        tmp_3 = hdr_1;
+        hdr = tmp_3;
+        tmp_5 = hdr;
+        tmp_6 = hdr.h1.op2;
+        hdr_1 = tmp_5;
+        op = tmp_6;
+        if (op == 8w0x0) 
+            ;
+        else 
+            if (op[7:4] == 4w1) 
+                hdr_1.h1.out1 = 8w4;
+        tmp_5 = hdr_1;
+        hdr = tmp_5;
     }
 }
 
