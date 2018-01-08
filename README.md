@@ -42,7 +42,7 @@ The code contains four sample backends:
     ```
     mkdir build
     cd build
-    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=ON (default off)] [-DENABLE_P4RUNTIME_TO_PD=OFF (default on)]
+    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=ON (default off)] [-DENABLE_P4RUNTIME_TO_PD=OFF (default on)] [-DENABLE_PROTOBUF_STATIC=OFF (default on)]
     make -j4
     make -j4 check
     ```
