@@ -48,6 +48,16 @@ struct assign_union
   void operator ()(HeaderUnion &dst, const HeaderUnion &src);
 };
 
+struct assign_header_stack
+    : public ActionPrimitive<HeaderStack &, const HeaderStack &> {
+  void operator ()(HeaderStack &dst, const HeaderStack &src);
+};
+
+struct assign_union_stack
+    : public ActionPrimitive<HeaderUnionStack &, const HeaderUnionStack &> {
+  void operator ()(HeaderUnionStack &dst, const HeaderUnionStack &src);
+};
+
 struct push : public ActionPrimitive<StackIface &, const Data &> {
   void operator ()(StackIface &stack, const Data &num);
 };

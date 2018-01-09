@@ -32,6 +32,10 @@ REGISTER_PRIMITIVE(assign_header);
 
 REGISTER_PRIMITIVE(assign_union);
 
+REGISTER_PRIMITIVE(assign_header_stack);
+
+REGISTER_PRIMITIVE(assign_union_stack);
+
 REGISTER_PRIMITIVE(push);
 
 REGISTER_PRIMITIVE(pop);
@@ -58,6 +62,23 @@ assign_union::operator ()(HeaderUnion &dst, const HeaderUnion &src) {
   // naive implementation which iterates over all headers in the union
   for (size_t i = 0; i < dst.get_num_headers(); i++)
     assign_header()(dst.at(i), src.at(i));
+}
+
+void
+assign_header_stack::operator ()(HeaderStack &dst, const HeaderStack &src) {
+  assert(dst.get_depth() == src.get_depth());
+  dst.next = src.next;
+  for (size_t i = 0; i < dst.get_depth(); i++)
+    assign_header()(dst.at(i), src.at(i));
+}
+
+void
+assign_union_stack::operator ()(HeaderUnionStack &dst,
+                                const HeaderUnionStack &src) {
+  assert(dst.get_depth() == src.get_depth());
+  dst.next = src.next;
+  for (size_t i = 0; i < dst.get_depth(); i++)
+    assign_union()(dst.at(i), src.at(i));
 }
 
 void

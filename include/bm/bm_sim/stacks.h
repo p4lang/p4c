@@ -88,6 +88,16 @@ class StackIface {
   virtual void reset() = 0;
 };
 
+// Forward declarations for core action primitives which need to have access to
+// the stack's internal state (i.e. "next"). These are declared as friends in
+// the Stack class definition.
+namespace core {
+
+struct assign_header_stack;
+struct assign_union_stack;
+
+}  // namespace core
+
 // We use CRTP for Stack class to implement either legacy behavior or strict
 // P4_16 behavior by providing different implementations of push_front and
 // pop_front.
@@ -95,12 +105,16 @@ class StackIface {
 //! Stack is used to represent header and union stacks in P4. The Stack class
 //! itself does not store any union / header / field data itself, but stores
 //! references to the HeaderUnion / Header instances which constitute the stack,
-//! as well as the stack internal state (e.g. number of valid headers in the
+//! as well as the stack's internal state (e.g. number of valid headers in the
 //! stack).
 template <typename T, typename ShiftImpl>
 class Stack : public StackIface, public NamedP4Object {
  public:
   friend class PHV;
+  // These core action primitives are friends as they need to have access to the
+  // stack's internal state.
+  friend struct core::assign_header_stack;
+  friend struct core::assign_union_stack;
 
   Stack(const std::string &name, p4object_id_t id);
 

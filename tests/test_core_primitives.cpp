@@ -34,7 +34,7 @@ class AssignPrimitivesTest : public ::testing::Test {
 
   HeaderType testHeaderType1, testHeaderType2;
   header_id_t testHeader10{0}, testHeader11{1};
-  header_id_t testHeader20{2}, testHeader21{2};
+  header_id_t testHeader20{2}, testHeader21{3};
 
   AssignPrimitivesTest()
       : testHeaderType1("test1_t", 0),
@@ -127,3 +127,55 @@ TEST_F(AssignPrimitivesTest, AssignHeader) {
 }
 
 // assign_union is tested in test_header_unions
+
+class AssignPrimitivesStackTest : public AssignPrimitivesTest {
+ protected:
+  header_id_t testHeader12{4}, testHeader13{5};
+  header_stack_id_t testHeaderStack1{0}, testHeaderStack2{1};
+
+  AssignPrimitivesStackTest() {
+    phv_factory.push_back_header("test12", testHeader12, testHeaderType1);
+    phv_factory.push_back_header("test13", testHeader13, testHeaderType1);
+    phv_factory.push_back_header_stack(
+        "testS1", testHeaderStack1, testHeaderType1,
+        {testHeader10, testHeader11});
+    phv_factory.push_back_header_stack(
+        "testS2", testHeaderStack2, testHeaderType1,
+        {testHeader12, testHeader13});
+  }
+};
+
+TEST_F(AssignPrimitivesStackTest, AssignHeaderStack) {
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive(
+      "assign_header_stack");
+  ASSERT_NE(nullptr, primitive);
+  auto assign_header_stack = dynamic_cast<core::assign_header_stack *>(
+      primitive.get());
+  ASSERT_NE(nullptr, assign_header_stack);
+
+  auto &stack1 = phv->get_header_stack(testHeaderStack1);
+  auto &stack2 = phv->get_header_stack(testHeaderStack2);
+  auto &hdr10 = phv->get_header(testHeader10);
+  auto &hdr11 = phv->get_header(testHeader11);
+  auto &hdr12 = phv->get_header(testHeader12);
+  auto &hdr13 = phv->get_header(testHeader13);
+
+  stack1.push_back();
+  const std::string data("\xaa\xbb");
+  // we need to append 16 bits for second field of the header (non VL field)
+  std::string data_ = data + std::string("\x11\x11");
+  hdr10.extract_VL(data_.data(), data.size() * 8);
+  stack1.push_back();
+  hdr11.mark_invalid();
+  EXPECT_EQ(stack1.get_depth(), 2);  // next must be 2
+
+  (*assign_header_stack)(stack2, stack1);
+  EXPECT_TRUE(hdr12.is_valid());
+  EXPECT_TRUE(hdr12.cmp(hdr10));
+  EXPECT_FALSE(hdr13.is_valid());
+  EXPECT_EQ(stack2.get_depth(), stack1.get_depth());  // "next" comparison
+}
+
+// no test for assign_union_stack for now: the action primitive is very similar
+// to assign_header_stack and the test would need to be quite verbose (8 header
+// instances, 4 unions, 2 union stacks)...
