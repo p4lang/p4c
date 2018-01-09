@@ -23,7 +23,7 @@ header h_t {
     bit<1> f;
 }
 struct H { h_t[1] stack; }
-struct M { }
+struct M {}
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta) {
     state start {
