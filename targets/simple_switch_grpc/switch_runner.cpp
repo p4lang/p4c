@@ -169,9 +169,8 @@ SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(int max_port, bool enable_swap,
       dp_grpc_server_addr(dp_grpc_server_addr),
       dp_grpc_server(nullptr) {
 #ifdef WITH_SYSREPO
-      sysrepo_sub = std::unique_ptr<SysrepoSubscriber>(new SysrepoSubscriber());
-      sysrepo_test = std::unique_ptr<SysrepoTest>(
-          new SysrepoTest(simple_switch.get()));
+      sysrepo_driver = std::unique_ptr<SysrepoDriver>(new SysrepoDriver(
+          simple_switch->get_device_id(), simple_switch.get()));
 #endif  // WITH_SYSREPO
 }
 
@@ -195,21 +194,41 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
     my_dev_mgr.reset(service);
   }
 
+  // Even when using gNMI to manage ports, it is convenient to be able to use
+  // the --interface / -i command-line option. However we have to "intercept"
+  // the options before the call to DevMgr::port_add, otherwise we would try to
+  // add the ports twice (once when calling Switch::init_from_options_parser and
+  // once when we are notified by sysrepo of the YANG datastore change).
+  // We therefore save the interface list provided on the command-line and we
+  // call SysrepoDriver::add_iface at the end of this method after we start the
+  // sysrepo subscriber.
+  const bm::OptionsParser *parser_ptr;
+#ifdef WITH_SYSREPO
+  auto new_parser = parser;
+  auto &interfaces = new_parser.ifaces;
+  auto saved_interfaces = interfaces;
+  interfaces.clear();
+  parser_ptr = &new_parser;
+#else
+  parser_ptr = &parser;
+#endif  // WITH_SYSREPO
+
   int status = simple_switch->init_from_options_parser(
-      parser, nullptr, std::move(my_dev_mgr));
+      *parser_ptr, nullptr, std::move(my_dev_mgr));
   if (status != 0) return status;
 
-  using PortStatus = bm::DevMgrIface::PortStatus;
-  auto port_cb = std::bind(&SimpleSwitchGrpcRunner::port_status_cb, this,
-                           std::placeholders::_1, std::placeholders::_2);
-  simple_switch->register_status_cb(PortStatus::PORT_ADDED, port_cb);
-  simple_switch->register_status_cb(PortStatus::PORT_REMOVED, port_cb);
+  // PortMonitor saves the CB by reference so we cannot use this code; it seems
+  // that at this stage we do not need the CB any way.
+  // using PortStatus = bm::DevMgrIface::PortStatus;
+  // auto port_cb = std::bind(&SimpleSwitchGrpcRunner::port_status_cb, this,
+  //                          std::placeholders::_1, std::placeholders::_2);
+  // simple_switch->register_status_cb(PortStatus::PORT_ADDED, port_cb);
+  // simple_switch->register_status_cb(PortStatus::PORT_REMOVED, port_cb);
 
   // check if CPU port number is also used by --interface
   // TODO(antonin): ports added dynamically?
   if (cpu_port >= 0) {
-    auto port_info = simple_switch->get_port_info();
-    if (port_info.find(cpu_port) != port_info.end()) {
+    if (parser.ifaces.find(cpu_port) != parser.ifaces.end()) {
       bm::Logger::get()->error("Cpu port {} is used as a data port", cpu_port);
       return 1;
     }
@@ -260,9 +279,9 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   PIGrpcServerRunAddr(grpc_server_addr.c_str());
 
 #ifdef WITH_SYSREPO
-  if (!sysrepo_sub->start()) return 1;
-  if (!sysrepo_test->connect()) return 1;
-  sysrepo_test->refresh_ports();
+  if (!sysrepo_driver->start()) return 1;
+  for (const auto &p : saved_interfaces)
+    sysrepo_driver->add_iface(p.first, p.second);
 #endif  // WITH_SYSREPO
 
   simple_switch->start_and_return();
@@ -299,13 +318,7 @@ void
 SimpleSwitchGrpcRunner::port_status_cb(
     bm::DevMgrIface::port_t port, const bm::DevMgrIface::PortStatus status) {
   _BM_UNUSED(port);
-#ifdef WITH_SYSREPO
-  using PortStatus = bm::DevMgrIface::PortStatus;
-  if (status == PortStatus::PORT_ADDED || status == PortStatus::PORT_REMOVED)
-    sysrepo_test->refresh_ports();
-#else
   _BM_UNUSED(status);
-#endif  // WITH_SYSREPO
 }
 
 }  // namespace sswitch_grpc

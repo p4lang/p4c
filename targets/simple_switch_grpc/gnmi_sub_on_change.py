@@ -21,7 +21,10 @@ from time import sleep
 import grpc
 from gnmi import gnmi_pb2
 import google.protobuf.text_format
-import struct
+import signal
+import sys
+import threading
+import Queue
 
 parser = argparse.ArgumentParser(description='Mininet demo')
 parser.add_argument('--grpc-addr', help='P4Runtime gRPC server address',
@@ -33,28 +36,52 @@ def main():
     channel = grpc.insecure_channel(args.grpc_addr)
     stub = gnmi_pb2.gNMIStub(channel)
 
+    stream_out_q = Queue.Queue()
+    stream_in_q = Queue.Queue()
+
     def req_iterator():
         while True:
-            req = gnmi_pb2.SubscribeRequest()
-            subList = req.subscribe
-            subList.mode = gnmi_pb2.SubscriptionList.ONCE
-            sub = subList.subscription.add()
-            path = sub.path
-            for name in ["interfaces", "interface", "..."]:
-                e = path.elem.add()
-                e.name = name
+            req = stream_out_q.get()
+            if req is None:
+                break
             print "***************************"
             print "REQUEST"
             print req
             print "***************************"
             yield req
-            return
 
-    for response in stub.Subscribe(req_iterator()):
-        print "***************************"
-        print "RESPONSE"
-        print response
-        print "***************************"
+    def stream_recv(stream):
+        for response in stream:
+            print "***************************"
+            print "RESPONSE"
+            print response
+            print "***************************"
+            stream_in_q.put(response)
+
+    stream = stub.Subscribe(req_iterator())
+    stream_recv_thread = threading.Thread(
+        target=stream_recv, args=(stream,))
+    stream_recv_thread.start()
+
+    req = gnmi_pb2.SubscribeRequest()
+    subList = req.subscribe
+    subList.mode = gnmi_pb2.SubscriptionList.STREAM
+    subList.updates_only = True
+    sub = subList.subscription.add()
+    sub.mode = gnmi_pb2.ON_CHANGE
+    path = sub.path
+    for name in ["interfaces", "interface", "..."]:
+        e = path.elem.add()
+        e.name = name
+
+    stream_out_q.put(req)
+
+    try:
+        while True:
+            sleep(1)
+    except KeyboardInterrupt:
+        stream_out_q.put(None)
+        stream_recv_thread.join()
 
 if __name__ == '__main__':
     main()

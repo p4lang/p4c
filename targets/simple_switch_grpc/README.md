@@ -21,3 +21,58 @@ configure simple_switch_grpc with `--with-sysrepo` and build it again.
 This directory includes a Python script, [gnmi_sub_once.py](gnmi_sub_once.py),
 which you can run to issue a gNMI ONCE subscription request to the P4 Runtime
 gRPC server running in the simple_switch_grpc process.
+
+### OpenConfig support
+
+These are the [OpenConfig YANG models](https://github.com/openconfig/public) we
+are trying to support. For each model you will see a list of YANG leaves with
+the level of support. "Yes" means support has been added, with "(stub)"
+indicating that setting the leaf value has no effect on bmv2
+forwarding. "Planned" means we are planning to add some form of support
+soon. "No" means there is no immediate plan to support the node.
+
+#### openconfig-interfaces (`interfaces/interface`)
+
+| Node | Support |
+| ---- | ------- |
+| `config/name` | Yes |
+| `config/type` | Yes (`iana-if-type:ethernetCsmacd` only) |
+| `config/mtu` | Yes (stub) |
+| `config/description` | Yes |
+| `config/enabled` | Yes |
+| `state/name` | Yes |
+| `state/type` | Yes |
+| `state/mtu` | Yes (stub) |
+| `state/description` | Yes |
+| `state/enabled` | Yes |
+| `state/ifindex` | Yes |
+| `state/admin-status` | Yes |
+| `state/oper-status` | Yes |
+| `state/last-change` | No |
+| `state/counters` | Planned |
+| `subinterfaces` | No |
+
+#### openconfig-if-ethernet (`ethernet`)
+
+This model augments `interfaces/interface`.
+
+| Node | Support |
+| ---- | ------- |
+| `config/mac-address` | Yes (stub) |
+| `config/auto-negotiate` | Yes (stub) |
+| `config/duplex-mode` | Yes (stub) |
+| `config/port-speed` | Yes (stub) |
+| `config/enable-flow-control` | Yes (stub) |
+| `state/mac-address` | Yes (stub) |
+| `state/auto-negotiate` | Yes (stub) |
+| `state/duplex-mode` | Yes (stub) |
+| `state/port-speed` | Yes (stub) |
+| `state/enable-flow-control` | Yes (stub) |
+| `state/hw-mac-address` | Yes (stub) |
+| `state/negotiated-duplex-mode` | Yes (stub) |
+| `state/negotiated-port-speed` | Yes (stub) |
+| `state/counters` | Planned |
+
+#### openconfig-platform
+
+TBD

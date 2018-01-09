@@ -21,6 +21,8 @@
 #ifndef BM_BM_SIM_DEVICE_ID_H_
 #define BM_BM_SIM_DEVICE_ID_H_
 
+#include <cstdint>
+
 namespace bm {
 
 // s_* for serialized value format (e.g. notifications)

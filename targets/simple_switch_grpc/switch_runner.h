@@ -42,8 +42,7 @@ class OptionsParser;
 
 namespace sswitch_grpc {
 
-class SysrepoSubscriber;
-class SysrepoTest;
+class SysrepoDriver;
 
 class SimpleSwitchGrpcRunner {
  public:
@@ -87,8 +86,7 @@ class SimpleSwitchGrpcRunner {
   int dp_grpc_server_port;
   std::unique_ptr<grpc::Server> dp_grpc_server;
 #ifdef WITH_SYSREPO
-  std::unique_ptr<SysrepoSubscriber> sysrepo_sub;
-  std::unique_ptr<SysrepoTest> sysrepo_test;
+  std::unique_ptr<SysrepoDriver> sysrepo_driver;
 #endif  // WITH_SYSREPO
 };
 

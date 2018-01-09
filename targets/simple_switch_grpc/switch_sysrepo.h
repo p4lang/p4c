@@ -21,14 +21,10 @@
 #ifndef SIMPLE_SWITCH_GRPC_SWITCH_SYSREPO_H_
 #define SIMPLE_SWITCH_GRPC_SWITCH_SYSREPO_H_
 
-#include <set>
-#include <string>
+#include <bm/bm_sim/device_id.h>
 
-extern "C" {
-#include "sysrepo.h"
-#include "sysrepo/values.h"
-#include "sysrepo/xpath.h"
-}
+#include <memory>
+#include <string>
 
 namespace bm {
 
@@ -38,36 +34,26 @@ class DevMgr;
 
 namespace sswitch_grpc {
 
-class SysrepoSubscriber {
+class PortStateMap;
+class SysrepoSubscriber;
+class SysrepoStateProvider;
+
+class SysrepoDriver {
  public:
-  ~SysrepoSubscriber();
+  SysrepoDriver(bm::device_id_t device_id, bm::DevMgr *dev_mgr);
+  ~SysrepoDriver();
+
   bool start();
 
- private:
-  sr_conn_ctx_t *connection{NULL};
-  sr_session_ctx_t *session{NULL};
-  sr_subscription_ctx_t *subscription{NULL};
-  static constexpr const char *const app_name = "subscriber";
-  static constexpr const char *const module_names[] =
-      {"openconfig-interfaces", "openconfig-platform"};
-};
-
-class SysrepoTest {
- public:
-  explicit SysrepoTest(const bm::DevMgr *dev_mgr);
-  ~SysrepoTest();
-  bool connect();
-  void refresh_ports();
-  void provide_oper_state(sr_val_t **values, size_t *values_cnt);
+  // Used to add interfaces provided on the command-line with --interface / -i
+  void add_iface(int port, const std::string &name);
 
  private:
-  void add_iface(const std::string &name);
-
+  const bm::device_id_t my_device_id;
   const bm::DevMgr *dev_mgr;  // non-owning pointer
-  sr_conn_ctx_t *connection{NULL};
-  sr_session_ctx_t *session{NULL};
-  sr_subscription_ctx_t *subscription{NULL};
-  static constexpr const char *const app_name = "test";
+  std::unique_ptr<PortStateMap> port_state_map;
+  std::unique_ptr<SysrepoSubscriber> sysrepo_subscriber;
+  std::unique_ptr<SysrepoStateProvider> sysrepo_state_provider;
 };
 
 }  // namespace sswitch_grpc

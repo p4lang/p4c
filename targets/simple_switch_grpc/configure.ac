@@ -50,6 +50,9 @@ PKG_CHECK_MODULES([GRPC], [grpc++ >= 1.3.0 grpc >= 3.0.0])
 AC_SUBST([GRPC_CFLAGS])
 AC_SUBST([GRPC_LIBS])
 
+AC_CHECK_HEADER([boost/optional.hpp], [],
+                [AC_MSG_ERROR([Boost optional header not found])])
+
 AC_PATH_PROG([PROTOC], [protoc], [])
 AS_IF([test "x$PROTOC" = x], [AC_MSG_ERROR([protoc not found])])
 

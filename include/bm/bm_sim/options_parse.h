@@ -49,6 +49,8 @@ class InterfaceList {
   const_iterator begin() const { return ifaces.begin(); }
   iterator end() { return ifaces.end(); }
   const_iterator end() const { return ifaces.end(); }
+  iterator find(int port) { return ifaces.find(port); }
+  const_iterator find(int port) const { return ifaces.find(port); }
 
  private:
   std::map<int, std::string> ifaces{};
