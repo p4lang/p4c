@@ -154,8 +154,8 @@ class SimpleSwitch : public Switch {
   void enqueue(int egress_port, std::unique_ptr<Packet> &&pkt);
 
   void copy_field_list_and_set_type(
-      const std::unique_ptr<Packet> &pkt,
-      const std::unique_ptr<Packet> &pkt_copy,
+      const std::unique_ptr<Packet> &packet,
+      const std::unique_ptr<Packet> &packet_copy,
       PktInstanceType copy_type, p4object_id_t field_list_id);
 
   void check_queueing_metadata();

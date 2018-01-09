@@ -119,7 +119,7 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
 
 int
 SimpleSwitch::receive_(int port_num, const char *buffer, int len) {
-  static int pkt_id = 0;
+  static packet_id_t pkt_id = 0;
 
   // this is a good place to call this, because blocking this thread will not
   // block the processing of existing packet instances, which is a requirement

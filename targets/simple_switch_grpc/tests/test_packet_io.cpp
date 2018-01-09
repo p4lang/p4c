@@ -21,6 +21,7 @@
 #include <grpc++/grpc++.h>
 
 #include <p4/p4runtime.grpc.pb.h>
+#include <PI/proto/pi_server.h>
 
 #include <gtest/gtest.h>
 
@@ -64,6 +65,8 @@ TEST_F(SimpleSwitchGrpcTest_PacketIO, SendAndReceiveCPUPacket) {
   election_id->set_low(0);
   stream->Write(request);
 
+  EXPECT_EQ(PIGrpcServerGetPacketOutCount(device_id), 0u);
+  EXPECT_EQ(PIGrpcServerGetPacketInCount(device_id), 0u);
   auto packet_out = request.mutable_packet();
   packet_out->set_payload(payload);
   stream->Write(request);
@@ -79,6 +82,8 @@ TEST_F(SimpleSwitchGrpcTest_PacketIO, SendAndReceiveCPUPacket) {
     }
   }
   EXPECT_EQ(packet_count, 1);
+  EXPECT_EQ(PIGrpcServerGetPacketOutCount(device_id), 1u);
+  EXPECT_EQ(PIGrpcServerGetPacketInCount(device_id), 1u);
 
   stream->WritesDone();
   auto status = stream->Finish();
