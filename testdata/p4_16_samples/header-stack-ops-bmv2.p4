@@ -86,20 +86,9 @@ control cDoOneOp(inout headers hdr,
                  in bit<8> op)
 {
     apply {
-/*
-        // I want op == 0 to be a no-op, but having an explicit 'if'
-        // like this commented-out code causes p4c-bm2-ss as of
-        // 2018-Jan-05 to give a compiler error.  See issue #1127 with
-        // a smaller code example that gives the same error.  Work
-        // around it for now by simply not having this code, which has
-        // the same behavior as long as no other 'if' conditions below
-        // are true when op is 0.
-
         if (op == 0x00) {
             // nop
-        } else
-*/
-        if (op[7:4] == 1) {
+        } else if (op[7:4] == 1) {
             // push_front
             if (op[3:0] == 1) {
                 hdr.h2.push_front(1);
