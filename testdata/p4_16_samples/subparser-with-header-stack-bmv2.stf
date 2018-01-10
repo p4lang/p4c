@@ -9,6 +9,7 @@ packet 0  01 00 00 00 ff 02   02 de ad 02   02 be ef 03   03 be
 # This is what output packet _should_ be.  Both h2 headers in the
 # input packet should be extracted, the first in the sub-parser, the
 # second in the top level parser.  The first should go into h2[0], the
+# second into h2[1].
 
 expect 0  01 00 00 00 03 02   02 de ad 02   02 be ef 03   03 be
 
