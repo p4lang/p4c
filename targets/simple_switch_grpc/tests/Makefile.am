@@ -11,6 +11,10 @@ AM_CPPFLAGS += \
 -I$(top_builddir)/cpp_out -I$(top_builddir)/grpc_out \
 -DTESTDATADIR=\"$(abs_srcdir)/testdata\"
 
+if WITH_SYSREPO
+AM_CPPFLAGS += -DWITH_SYSREPO
+endif
+
 # I am putting all the tests in the same binary (test_gtest) to use a single
 # switch instance (this way there is no need to worry about allocating
 # non-conflicting port-numbers and device ids). The drawback is that the tests
@@ -26,7 +30,10 @@ example_SOURCES = example.cpp utils.h utils.cpp
 test_gtest_SOURCES = \
 $(common_source) main.cpp \
 test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp \
-test_grpc_counter.cpp 
+test_grpc_counter.cpp
+if WITH_SYSREPO
+test_gtest_SOURCES += test_gnmi.cpp
+endif
 
 LDADD = \
 $(top_builddir)/libsimple_switch_grpc.la \
