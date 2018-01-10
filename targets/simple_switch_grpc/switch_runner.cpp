@@ -40,6 +40,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 
 #include "simple_switch.h"
 
@@ -72,6 +73,8 @@ class DataplaneInterfaceServiceImpl
  private:
   using Lock = std::lock_guard<std::mutex>;
 
+  using Empty = google::protobuf::Empty;
+
   Status PacketStream(ServerContext *context,
                       ServerReaderWriter *stream) override {
     {
@@ -100,6 +103,23 @@ class DataplaneInterfaceServiceImpl
     runner.block_until_all_packets_processed();
     Lock lock(mutex);
     active = false;
+    return Status::OK;
+  }
+
+  Status SetPortOperStatus(ServerContext *context,
+                           const p4::bm::SetPortOperStatusRequest *request,
+                           Empty *response) override {
+    (void) context;
+    (void) response;
+    Lock lock(mutex);
+    if (request->device_id() != device_id)
+      return Status(StatusCode::INVALID_ARGUMENT, "Invalid device id");
+    if (request->oper_status() == p4::bm::PortOperStatus::OPER_STATUS_DOWN)
+      ports_oper_status[request->port()] = false;
+    else if (request->oper_status() == p4::bm::PortOperStatus::OPER_STATUS_UP)
+      ports_oper_status[request->port()] = true;
+    else
+      return Status(StatusCode::INVALID_ARGUMENT, "Invalid oper status");
     return Status::OK;
   }
 
@@ -138,8 +158,9 @@ class DataplaneInterfaceServiceImpl
   }
 
   bool port_is_up_(port_t port) const override {
-    _BM_UNUSED(port);
-    return true;
+    Lock lock(mutex);
+    auto status_it = ports_oper_status.find(port);
+    return (status_it == ports_oper_status.end()) ? true : status_it->second;
   }
 
   std::map<port_t, PortInfo> get_port_info_() const override {
@@ -149,13 +170,14 @@ class DataplaneInterfaceServiceImpl
   bm::device_id_t device_id;
   // protects the shared state (active) and prevents concurrent Write calls by
   // different threads
-  std::mutex mutex{};
+  mutable std::mutex mutex{};
   bool started{false};
   bool active{false};
   ServerContext *context{nullptr};
   ServerReaderWriter *stream{nullptr};
   PacketHandler pkt_handler{};
   void *pkt_cookie{nullptr};
+  std::unordered_map<port_t, bool> ports_oper_status{};
 };
 
 }  // namespace

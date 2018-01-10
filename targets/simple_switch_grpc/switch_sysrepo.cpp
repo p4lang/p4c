@@ -662,9 +662,6 @@ SysrepoStateProvider::provide_oper_state_interface(
   int port;
   parse_iface_name(iface_str, nullptr, &port, nullptr);
 
-  const auto port_info_map = dev_mgr->get_port_info();
-  auto port_info_it = port_info_map.find(port);
-
   auto lock = port_state_map->lock();
   auto &port_state = (*port_state_map)[iface_str];
   if (!port_state.valid) return;
@@ -729,7 +726,7 @@ SysrepoStateProvider::provide_oper_state_interface(
   {
     std::string path = prefix + "/oper-status";
     sr_val_set_xpath(v, path.c_str());
-    if (port_info_it != port_info_map.end() && port_info_it->second.is_up)
+    if (dev_mgr->port_is_up(port))
       sr_val_set_str_data(v, SR_ENUM_T, "UP");
     else
       sr_val_set_str_data(v, SR_ENUM_T, "DOWN");

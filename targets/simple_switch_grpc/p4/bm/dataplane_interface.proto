@@ -16,11 +16,20 @@ syntax = "proto3";
 
 // This package and its contents are a work-in-progress.
 
+import "google/protobuf/empty.proto";
+
 package p4.bm;
 
 service DataplaneInterface {
   rpc PacketStream(stream PacketStreamRequest)
       returns (stream PacketStreamResponse) {
+  }
+
+  // A one-way RPC to set the operational status of a given port (by default all
+  // ports are valid and "UP"). This is useful in the context of testing, to
+  // simulate port-up / port-down events.
+  rpc SetPortOperStatus(SetPortOperStatusRequest)
+      returns (google.protobuf.Empty) {
   }
 }
 
@@ -34,4 +43,15 @@ message PacketStreamResponse {
   uint64 device_id = 1;
   uint32 port = 2;
   bytes packet = 3;
+}
+
+enum PortOperStatus {
+  OPER_STATUS_DOWN = 0;
+  OPER_STATUS_UP = 1;
+}
+
+message SetPortOperStatusRequest {
+  uint64 device_id = 1;
+  uint32 port = 2;
+  PortOperStatus oper_status = 3;
 }
