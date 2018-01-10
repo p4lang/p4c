@@ -167,12 +167,7 @@ SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(int max_port, bool enable_swap,
     : simple_switch(new SimpleSwitch(max_port, enable_swap)),
       grpc_server_addr(grpc_server_addr), cpu_port(cpu_port),
       dp_grpc_server_addr(dp_grpc_server_addr),
-      dp_grpc_server(nullptr) {
-#ifdef WITH_SYSREPO
-      sysrepo_driver = std::unique_ptr<SysrepoDriver>(new SysrepoDriver(
-          simple_switch->get_device_id(), simple_switch.get()));
-#endif  // WITH_SYSREPO
-}
+      dp_grpc_server(nullptr) { }
 
 int
 SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
@@ -193,6 +188,11 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
     dp_grpc_server = builder.BuildAndStart();
     my_dev_mgr.reset(service);
   }
+
+#ifdef WITH_SYSREPO
+      sysrepo_driver = std::unique_ptr<SysrepoDriver>(new SysrepoDriver(
+          parser.device_id, simple_switch.get()));
+#endif  // WITH_SYSREPO
 
   // Even when using gNMI to manage ports, it is convenient to be able to use
   // the --interface / -i command-line option. However we have to "intercept"
