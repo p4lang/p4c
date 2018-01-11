@@ -43,7 +43,8 @@ class SimpleSwitchGrpcEnv : public ::testing::Environment {
         SimpleSwitchGrpcBaseTest::cpu_port,
         SimpleSwitchGrpcBaseTest::dp_grpc_server_addr);
     bm::OptionsParser parser;
-    const char *argv[] = {"test", "--device-id", "3", start_json};
+    const char *argv[] = {"test", "--device-id", "3", "--thrift-port",
+                          "45459", start_json};
     auto argc = static_cast<int>(sizeof(argv) / sizeof(char *));
     parser.parse(argc, const_cast<char **>(argv), nullptr);
     ASSERT_EQ(0, runner.init_and_start(parser));

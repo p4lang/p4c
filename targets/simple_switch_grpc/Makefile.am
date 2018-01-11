@@ -12,6 +12,10 @@ if WITH_SYSREPO
 AM_CPPFLAGS += -DWITH_SYSREPO
 endif
 
+if WITH_THRIFT
+AM_CPPFLAGS += -DWITH_THRIFT
+endif
+
 bin_PROGRAMS = simple_switch_grpc
 
 simple_switch_grpc_SOURCES = main.cpp
@@ -41,6 +45,12 @@ libbm_grpc_dataplane.la \
 -lpifeproto -lpigrpcserver -lpi \
 $(GRPC_LIBS) $(PROTOBUF_LIBS)
 
+if WITH_THRIFT
+libsimple_switch_grpc_la_LIBADD += \
+$(builddir)/../../src/bm_runtime/libbmruntime.la \
+$(builddir)/../../thrift_src/libruntimestubs.la \
+$(builddir)/../simple_switch/libsimpleswitch_thrift.la
+endif
 
 # dataplane_interface.proto
 

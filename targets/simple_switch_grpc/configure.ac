@@ -78,6 +78,12 @@ AM_COND_IF([WITH_SYSREPO], [
                  [AC_MSG_ERROR([Missing libsysrepo])])
 ])
 
+AC_ARG_WITH([thrift],
+    AS_HELP_STRING([--with-thrift],
+                   [Enable runtime Thrift server @<:@default=no@:>@]),
+    [with_thrift="$withval"], [with_thrift=no])
+AM_CONDITIONAL([WITH_THRIFT], [test "$with_thrift" = yes])
+
 # Generate makefiles
 AC_CONFIG_FILES([Makefile
                  tests/Makefile])
@@ -85,3 +91,8 @@ AC_CONFIG_FILES([Makefile
 AC_CONFIG_FILES([tests/example.run], [chmod +x tests/example.run])
 
 AC_OUTPUT
+
+AS_ECHO("")
+AS_ECHO("Features recap ......................")
+AS_ECHO("With Sysrepo .................. : $with_sysrepo")
+AS_ECHO("With Thrift ................... : $with_thrift")

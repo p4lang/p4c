@@ -50,6 +50,15 @@
 #include "switch_sysrepo.h"
 #endif  // WITH_SYSREPO
 
+#ifdef WITH_THRIFT
+#include <bm/SimpleSwitch.h>
+#include <bm/bm_runtime/bm_runtime.h>
+
+namespace sswitch_runtime {
+    shared_ptr<SimpleSwitchIf> get_handler(SimpleSwitch *sw);
+}  // namespace sswitch_runtime
+#endif  // WITH_THRIFT
+
 namespace sswitch_grpc {
 
 using pi::fe::proto::DeviceMgr;
@@ -306,6 +315,15 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   for (const auto &p : saved_interfaces)
     sysrepo_driver->add_iface(p.first, p.second);
 #endif  // WITH_SYSREPO
+
+#ifdef WITH_THRIFT
+  int thrift_port = simple_switch->get_runtime_port();
+  bm_runtime::start_server(simple_switch.get(), thrift_port);
+  using ::sswitch_runtime::SimpleSwitchIf;
+  using ::sswitch_runtime::SimpleSwitchProcessor;
+  bm_runtime::add_service<SimpleSwitchIf, SimpleSwitchProcessor>(
+          "simple_switch", sswitch_runtime::get_handler(simple_switch.get()));
+#endif  // WITH_THRIFT
 
   simple_switch->start_and_return();
 

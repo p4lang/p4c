@@ -1,8 +1,8 @@
 # SimpleSwitchGrpc
 
 This is an alternative version of the simple_switch target, which does not use
-the Thrift runtime server for table programming. Instead it starts a gRPC server
-which implements
+the Thrift runtime server for table programming (unless required, see below).
+Instead it starts a gRPC server which implements
 [p4untime.proto](https://github.com/p4lang/PI/blob/master/proto/p4/p4runtime.proto).
 
 To compile, make sure you build the bmv2 code first, then run `./autogen.sh`,
@@ -76,3 +76,22 @@ This model augments `interfaces/interface`.
 #### openconfig-platform
 
 TBD
+
+## Enabling the Thrift server
+
+**Experimental feature, use at your own risk!**
+
+Enabling the Thrift runtime server (as in `simple_switch`) along the gRPC one,
+can be useful to execute the BMv2 debugger and CLI, which otherwise would not
+work on this target.
+
+The Thrift server can be enabled by passing the `--with-thrift` argument to
+`configure`.
+
+**Warning:** because the capabilities of the Thrift server overlap with those of
+the gRPC/P4 Runtime one (e.g. a table management API is exposed by both), there
+could be inconsistency issues when using both servers to write state to the
+switch. For example, if one tries to insert a table entry using Thrift, the same
+cannot be read using P4 Runtime. In general, to avoid such issues, we suggest to
+use the Thrift server only to read state, or to write state that is not managed
+by P4 Runtime.
