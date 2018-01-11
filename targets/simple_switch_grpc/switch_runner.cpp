@@ -52,6 +52,8 @@
 
 namespace sswitch_grpc {
 
+using pi::fe::proto::DeviceMgr;
+
 namespace {
 
 using grpc::ServerContext;
@@ -296,7 +298,6 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
     };
     LoggerConfig::set_writer(std::make_shared<P4RuntimeLogger>());
   }
-  using pi::fe::proto::DeviceMgr;
   DeviceMgr::init(256);
   PIGrpcServerRunAddr(grpc_server_addr.c_str());
 
@@ -334,6 +335,7 @@ SimpleSwitchGrpcRunner::block_until_all_packets_processed() {
 
 SimpleSwitchGrpcRunner::~SimpleSwitchGrpcRunner() {
   PIGrpcServerCleanup();
+  DeviceMgr::destroy();
 }
 
 void
