@@ -19,25 +19,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".x") action x_0() {
-    }
-    @name(".t") table t_0 {
-        actions = {
-            x_0();
-            @defaultonly NoAction();
-        }
-        default_action = NoAction();
-    }
-    apply {
-        t_0.apply();
-    }
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".c") c() c_1;
+    @name("NoAction") action NoAction_0() {
+    }
+    @name(".x") action _x() {
+    }
+    @name(".t") table _t_0 {
+        actions = {
+            _x();
+            @defaultonly NoAction_0();
+        }
+        default_action = NoAction_0();
+    }
     apply {
-        c_1.apply(hdr, meta, standard_metadata);
+        _t_0.apply();
     }
 }
 
