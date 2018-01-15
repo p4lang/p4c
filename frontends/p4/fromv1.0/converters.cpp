@@ -709,7 +709,7 @@ class ComputeTableCallGraph : public Inspector {
  public:
     explicit ComputeTableCallGraph(ProgramStructure *structure) : structure(structure) {
         CHECK_NULL(structure);
-        setName("ComputeCallGraph");
+        setName("ComputeTableCallGraph");
     }
 
     void postorder(const IR::Apply *apply) override {
@@ -718,7 +718,7 @@ class ComputeTableCallGraph : public Inspector {
         if (tbl == nullptr)
             ::error("Could not find table %1%", apply->name);
         auto parent = findContext<IR::V1Control>();
-        BUG_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
+        ERROR_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
 
         auto ctrl = get(structure->tableMapping, tbl);
 
