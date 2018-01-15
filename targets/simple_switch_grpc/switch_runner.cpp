@@ -200,7 +200,9 @@ SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(int max_port, bool enable_swap,
     : simple_switch(new SimpleSwitch(max_port, enable_swap)),
       grpc_server_addr(grpc_server_addr), cpu_port(cpu_port),
       dp_grpc_server_addr(dp_grpc_server_addr),
-      dp_grpc_server(nullptr) { }
+      dp_grpc_server(nullptr) {
+  DeviceMgr::init(256);
+}
 
 int
 SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
@@ -307,7 +309,6 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
     };
     LoggerConfig::set_writer(std::make_shared<P4RuntimeLogger>());
   }
-  DeviceMgr::init(256);
   PIGrpcServerRunAddr(grpc_server_addr.c_str());
 
 #ifdef WITH_SYSREPO
