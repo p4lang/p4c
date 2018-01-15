@@ -1940,6 +1940,12 @@ void ProgramStructure::createControls() {
 
     for (auto c : controlsToDo) {
         auto ct = controls.get(c);
+        /// do not convert control block if it is not invoked
+        /// by other control block and it is not ingress or egress.
+        if (!calledControls.isCallee(c) &&
+            ct != controls.get(v1model.ingress.name) &&
+            ct != controls.get(v1model.egress.name))
+            continue;
         auto ctrl = convertControl(ct, controls.get(ct));
         if (ctrl == nullptr)
             return;

@@ -5,9 +5,9 @@ header_type exact {
 }
 header exact heartlands;
 parser start {
-  return ingress1;
+  return ingress;
 }
 action add_heartlands() {
   add_header(heartlands);
 }
-control ingress1 { }
+control ingress { }
