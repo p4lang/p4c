@@ -15,6 +15,10 @@ if WITH_SYSREPO
 AM_CPPFLAGS += -DWITH_SYSREPO
 endif
 
+if WITH_THRIFT
+AM_CPPFLAGS += -DWITH_THRIFT
+endif
+
 # I am putting all the tests in the same binary (test_gtest) to use a single
 # switch instance (this way there is no need to worry about allocating
 # non-conflicting port-numbers and device ids). The drawback is that the tests

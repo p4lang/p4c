@@ -22,6 +22,8 @@
 
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "base_test.h"
 #include "switch_runner.h"
 
@@ -43,10 +45,14 @@ class SimpleSwitchGrpcEnv : public ::testing::Environment {
         SimpleSwitchGrpcBaseTest::cpu_port,
         SimpleSwitchGrpcBaseTest::dp_grpc_server_addr);
     bm::OptionsParser parser;
-    const char *argv[] = {"test", "--device-id", "3", "--thrift-port",
-                          "45459", start_json};
-    auto argc = static_cast<int>(sizeof(argv) / sizeof(char *));
-    parser.parse(argc, const_cast<char **>(argv), nullptr);
+    std::vector<const char *> argv = {"test", "--device-id", "3"};
+#ifdef WITH_THRIFT
+    argv.push_back("--thrift-port");
+    argv.push_back("45459");
+#endif  // WITH_THRIFT
+    argv.push_back(start_json);
+    auto argc = static_cast<int>(argv.size());
+    parser.parse(argc, const_cast<char **>(argv.data()), nullptr);
     ASSERT_EQ(0, runner.init_and_start(parser));
   }
 
