@@ -26,11 +26,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         auto type = typeMap->getType(assign->left, true);
-        cstring operation;
-        if (type->is<IR::Type_StructLike>())
-            operation = "assign_header";
-        else
-            operation = "set";
+        cstring operation = Backend::jsonAssignment(type);
         result->emplace("op", operation);
         auto l = conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
