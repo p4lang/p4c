@@ -41,7 +41,7 @@ namespace P4 {
   *    - Should this pass be merged with constant folding?
   *    - Should we store constant values in the IR instead of computing them explicitly?
   */
-class StrengthReduction final : public Transform {
+class DoStrengthReduction final : public Transform {
     /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression* expr) const;
     /// @returns `true` if @p expr is the constant `0`.
@@ -55,7 +55,7 @@ class StrengthReduction final : public Transform {
     int isPowerOf2(const IR::Expression* expr) const;
 
  public:
-    StrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
+    DoStrengthReduction() { visitDagOnce = true; setName("DoStrengthReduction"); }
 
     using Transform::postorder;
 
@@ -74,6 +74,16 @@ class StrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Div* expr) override;
     const IR::Node* postorder(IR::Mod* expr) override;
     const IR::Node* postorder(IR::Slice* expr) override;
+};
+
+class StrengthReduction : public PassManager {
+ public:
+    StrengthReduction(bool skipStrengthReduction = false) {
+        if (!skipStrengthReduction) {
+            passes.push_back(new DoStrengthReduction());
+        }
+        setName("StrengthReduction");
+    }
 };
 
 }  // namespace P4

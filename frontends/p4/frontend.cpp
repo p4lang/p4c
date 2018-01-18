@@ -106,7 +106,8 @@ class FrontEndDump : public PassManager {
 
 // TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
-                                   bool skipSideEffectOrdering) {
+                                   bool skipSideEffectOrdering,
+                                   bool skipStrengthReduction) {
     if (program == nullptr)
         return nullptr;
 
@@ -140,6 +141,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ClearTypeMap(&typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
+        new StrengthReduction(skipStrengthReduction),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new FrontEndDump(),  // used for testing the program at this point
