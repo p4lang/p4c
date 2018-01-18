@@ -114,7 +114,7 @@ test() {
   auto match = table_entry->add_match();
   match->set_field_id(mf_id);
   auto lpm = match->mutable_lpm();
-  lpm->set_value(std::string("\x0a\x00\x00\x01", 4));  // 10.0.0.1
+  lpm->set_value(std::string("\x0a\x00\x00\x00", 4));  // 10.0.0.0/16
   lpm->set_prefix_len(16);
   auto table_action = table_entry->mutable_action();
   auto action = table_action->mutable_action();
