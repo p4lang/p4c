@@ -33,6 +33,9 @@ soon. "No" means there is no immediate plan to support the node.
 
 #### openconfig-interfaces (`interfaces/interface`)
 
+For simple_switch_grpc, we require that the interface name follow this pattern:
+`<device_id>-<port_num>@<interface>`.
+
 | Node | Support |
 | ---- | ------- |
 | `config/name` | Yes |
