@@ -190,8 +190,8 @@ void Backend::convert(BMV2Options& options) {
     if (main == nullptr)
         return;
 
-    (void)toplevel->apply(ConvertGlobals(this));
     main->apply(codegen_passes);
+    (void)toplevel->apply(ConvertGlobals(this));
 }
 
 bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
