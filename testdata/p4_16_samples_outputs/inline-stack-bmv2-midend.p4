@@ -30,18 +30,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @hidden action act() {
-        hdr.stack[0] = hdr.stack[0];
-        hdr.stack[0] = hdr.stack[0];
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     apply {
-        tbl_act.apply();
     }
 }
 
