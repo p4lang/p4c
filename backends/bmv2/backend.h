@@ -128,7 +128,7 @@ class Backend : public PassManager {
      * Returns the correct operation for performing an assignment in
      * the BMv2 JSON language depending on the type of data assigned.
      */
-    static cstring jsonAssignment(const IR::Type* type);
+    static cstring jsonAssignment(const IR::Type* type, bool inParser);
 };
 
 }  // namespace BMV2

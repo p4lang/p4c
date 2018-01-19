@@ -43,7 +43,7 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             r = assign->right;
 
             auto type = typeMap->getType(l, true);
-            cstring operation = Backend::jsonAssignment(type);
+            cstring operation = Backend::jsonAssignment(type, false);
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
