@@ -161,7 +161,7 @@ TEST_F(Diagnostics, NestedCompileContexts) {
 }
 
 TEST_F(Diagnostics, CompilerOptions) {
-    using CommandLineOptions = IOptionPragmaParser::CommandLineOptions;
+    using CommandLineOptions = P4::IOptionPragmaParser::CommandLineOptions;
 
     auto parseWithCompilerOptions = [](const CommandLineOptions& args)
                                         -> boost::optional<FrontendTestCase> {
