@@ -110,7 +110,6 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
     read_request.set_device_id(device_id);
     auto read_entity = read_request.add_entities();
     auto direct_counter_entry = read_entity->mutable_direct_counter_entry();
-    direct_counter_entry->set_counter_id(dc_id);
     auto table_entry = direct_counter_entry->mutable_table_entry();
     table_entry->set_table_id(t_id);
     auto match = table_entry->add_match();
