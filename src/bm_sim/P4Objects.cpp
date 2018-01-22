@@ -469,6 +469,8 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
       const auto header_stack_name = cfg_parameter["value"].asString();
       auto header_stack_id = get_header_stack_id_cfg(header_stack_name);
       action_fn->parameter_push_back_header_stack(header_stack_id);
+
+      phv_factory.enable_all_stack_field_arith(header_stack_id);
     } else if (type == "expression") {
       // TODO(Antonin): should this make the field case (and other) obsolete
       // maybe if we can optimize this case

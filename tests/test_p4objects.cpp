@@ -323,6 +323,10 @@ TEST(P4Objects, ParseVset) {
 
 extern bool WITH_VALGRIND;  // defined in main.cpp
 
+// We are being more conservative in how we enable arithmetic on header stack
+// fields now, since the introduction of the assign_stack core primitive. This
+// test therefore had to be changed, as arith is enabled on all stack fields.
+// TODO(antonin): remove old code from test
 TEST(P4Objects, HeaderStackArith) {
   std::unique_ptr<PHV> phv;
 
@@ -347,13 +351,14 @@ TEST(P4Objects, HeaderStackArith) {
   ASSERT_NO_THROW(h1_f1.get_int());
   ASSERT_NO_THROW(h0_f1.get_int());
 
-  (void) h0_f2; (void) h1_f2;
-#ifndef NDEBUG
-  if (!WITH_VALGRIND) {
-    ASSERT_DEATH(h0_f2.get_int(), "Assertion .*failed");
-    ASSERT_DEATH(h1_f2.get_int(), "Assertion .*failed");
-  }
-#endif
+// #ifndef NDEBUG
+  //   if (!WITH_VALGRIND) {
+  //     ASSERT_DEATH(h0_f2.get_int(), "Assertion .*failed");
+  //     ASSERT_DEATH(h1_f2.get_int(), "Assertion .*failed");
+  //   }
+// #endif
+  ASSERT_NO_THROW(h0_f2.get_int());
+  ASSERT_NO_THROW(h1_f2.get_int());
 }
 
 TEST(P4Objects, Errors) {
