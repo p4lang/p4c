@@ -4,7 +4,7 @@ extern E {
 }
 
 control c() {
-    @name("e") E() e;
+    @name("c.e") E() e;
     apply {
         e.setValue(32w10);
     }

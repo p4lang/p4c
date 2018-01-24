@@ -20,9 +20,9 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     bit<32> input_traffic_bytes_tmp;
     bit<32> sum_rtt_Tr_tmp;
     bit<32> num_pkts_with_rtt_tmp;
-    @name("input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes;
-    @name("sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr;
-    @name("num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt;
+    @name("ingress.input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes;
+    @name("ingress.sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr;
+    @name("ingress.num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt;
     apply {
         @atomic {
             input_traffic_bytes.read(32w0, input_traffic_bytes_tmp);

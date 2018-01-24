@@ -13,7 +13,7 @@ extern ActionSelector {
 BoolRegister() r;
 
 control MyC1() {
-    @name("action_selector") ActionSelector(r) action_selector;
+    @name("MyC1.action_selector") ActionSelector(r) action_selector;
     apply {
     }
 }

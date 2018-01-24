@@ -48,7 +48,6 @@ limitations under the License.
 #include "midend/eliminateTuples.h"
 #include "midend/removeParameters.h"
 #include "midend/synthesizeValidField.h"
-#include "midend/hierarchicalNames.h"
 #include "PI/pi_base.h"
 
 #include "p4RuntimeSerializer.h"
@@ -2107,7 +2106,6 @@ P4RuntimeAPI generateP4Runtime(const IR::P4Program* program) {
         // We can only handle a very restricted class of action parameters - the
         // types need to be bit<> or int<> - so we fail without this pass.
         new P4::RemoveActionParameters(&refMap, &typeMap),
-        new P4::HierarchicalNames(),
         // We need a $valid$ field preinserted before we generate P4Runtime.
         new P4::SynthesizeValidField(&refMap, &typeMap),
         // We currently can't handle tuples.

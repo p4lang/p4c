@@ -44,7 +44,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     h_t h_1;
     bit<16> tmp_0;
-    @name("checksum") Checksum16() checksum;
+    @name("MyComputeChecksum.checksum") Checksum16() checksum;
     apply {
         h_1.setValid();
         h_1.src = hdr.h.src;

@@ -14,26 +14,20 @@
 
 set (MIDEND_SRCS
   actionSynthesis.cpp
-  actionsInlining.cpp
   convertEnums.cpp
   copyStructures.cpp
-  dontcareArgs.cpp
   eliminateTuples.cpp
   expandEmit.cpp
   expandLookahead.cpp
-  hierarchicalNames.cpp
-  inlining.cpp
   interpreter.cpp
   local_copyprop.cpp
-  localizeActions.cpp
-  moveConstructors.cpp
   nestedStructs.cpp
   noMatch.cpp
   parserUnroll.cpp
   predication.cpp
+  removeExits.cpp
   removeLeftSlices.cpp
   removeParameters.cpp
-  removeReturns.cpp
   removeSelectBooleans.cpp
   removeUnusedParameters.cpp
   simplifyKey.cpp
@@ -46,22 +40,17 @@ set (MIDEND_SRCS
 
 set (MIDEND_HDRS
   actionSynthesis.h
-  actionsInlining.h
   compileTimeOps.h
   convertEnums.h
   copyStructures.h
-  dontcareArgs.h
   eliminateTuples.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h
   has_side_effects.h
-  hierarchicalNames.h
-  inlining.h
   interpreter.h
   local_copyprop.h
   midEndLast.h
-  moveConstructors.h
   nestedStructs.h
   noMatch.h
   parserUnroll.h

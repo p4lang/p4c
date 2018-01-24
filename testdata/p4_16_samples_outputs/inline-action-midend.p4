@@ -1,9 +1,9 @@
 control p(inout bit<1> bt) {
-    @name("b") action b_0() {
+    @name("p.b") action b_0() {
         bt = bt | 1w1;
         bt = bt | 1w1;
     }
-    @name("t") table t {
+    @name("p.t") table t {
         actions = {
             b_0();
         }

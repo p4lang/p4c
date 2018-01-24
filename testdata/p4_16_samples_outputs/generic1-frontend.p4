@@ -9,7 +9,7 @@ control caller() {
     bit<5> cinst_b_0;
     bit<32> cinst_tmp_1;
     bit<5> cinst_tmp_2;
-    @name("cinst.x") Generic<bit<8>>(8w9) cinst_x_0;
+    @name("caller.cinst.x") Generic<bit<8>>(8w9) cinst_x_0;
     apply {
         cinst_tmp_1 = cinst_x_0.get<bit<32>>();
         cinst_tmp_2 = cinst_x_0.get1<bit<5>, bit<10>>(10w0, 5w0);

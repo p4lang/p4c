@@ -34,6 +34,7 @@ limitations under the License.
 #include "dontcareArgs.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
+#include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
 #include "moveConstructors.h"
@@ -171,6 +172,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new P4::UniqueNames(&refMap),  // needed again after inlining
         new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::HierarchicalNames(),
         new FrontEndLast(),
     };
 

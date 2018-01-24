@@ -30,7 +30,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     Key inKey;
     Key defaultKey;
     Value val_2;
-    @name("test") action test_0() {
+    @name("Eg.test") action test_0() {
         inKey.field1 = 32w1;
         defaultKey.field1 = 32w0;
         val_2.field1 = (inKey == defaultKey ? 32w0 : val_2.field1);

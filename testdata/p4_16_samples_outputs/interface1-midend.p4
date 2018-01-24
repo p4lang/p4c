@@ -9,8 +9,8 @@ extern Y {
 }
 
 parser p() {
-    @name("x") X<int<32>>() x;
-    @name("y") Y() y;
+    @name("p.x") X<int<32>>() x;
+    @name("p.y") Y() y;
     state start {
         transition accept;
     }

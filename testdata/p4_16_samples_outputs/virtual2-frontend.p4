@@ -10,8 +10,8 @@ extern State {
 }
 
 control c(inout bit<16> p) {
-    @name("cntr") Virtual() cntr = {
-        @name("state") State(16s1024) state_1;
+    @name("c.cntr") Virtual() cntr = {
+        @name("c.state") State(16s1024) state_1;
         bit<16> f(in bit<16> ix) {
             bit<16> tmp_0;
             tmp_0 = state_1.get(ix);

@@ -113,7 +113,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
                 if (main->getConstructorParameters()->size() != 6)
                     return root;
                 auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
-                auto update = main->getParameterValue(P4V1::V1Model::instance.sw.update.name);
+                auto update = main->getParameterValue(
+                    P4V1::V1Model::instance.sw.compute.name);
                 auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
                 if (verify == nullptr || update == nullptr || deparser == nullptr ||
                     !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||

@@ -1,6 +1,6 @@
 control c(inout bit<16> y) {
     bit<32> x;
-    @name("a") action a_0(bit<32> arg) {
+    @name("c.a") action a_0(bit<32> arg) {
         y = (bit<16>)arg;
     }
     apply {

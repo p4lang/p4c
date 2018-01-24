@@ -33,7 +33,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     Value val_1;
     bool done;
     bool ok;
-    @name("test") action test_0() {
+    @name("Eg.test") action test_0() {
         inKey = { 32w1 };
         defaultKey = { 32w0 };
         same = inKey == defaultKey;

@@ -20,9 +20,9 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @name("a") action a_0() {
+    @name("EgressI.a") action a_0() {
     }
-    @name("t") table t {
+    @name("EgressI.t") table t {
         key = {
         }
         actions = {

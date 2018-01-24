@@ -30,7 +30,6 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
 #include "midend/removeLeftSlices.h"
-#include "midend/hierarchicalNames.h"
 #include "lower.h"
 #include "header.h"
 #include "parser.h"
@@ -237,7 +236,6 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
-        new P4::HierarchicalNames(),
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
         new ExtractArchInfo(typeMap),

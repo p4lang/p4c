@@ -9,7 +9,7 @@ struct struct_t {
 control ctrl(inout struct_t input, out bit<8> output) {
     bit<8> tmp0;
     bit<8> tmp1;
-    @name("act") action act_0() {
+    @name("ctrl.act") action act_0() {
         tmp0 = input.stack[0].field;
         input.stack.pop_front(1);
         tmp1 = tmp0;

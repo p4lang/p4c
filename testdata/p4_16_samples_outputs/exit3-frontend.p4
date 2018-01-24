@@ -1,9 +1,9 @@
 control ctrl(out bit<32> c) {
     bit<32> a;
-    @name("e") action e_0() {
+    @name("ctrl.e") action e_0() {
         exit;
     }
-    @name("t") table t {
+    @name("ctrl.t") table t {
         actions = {
             e_0();
         }

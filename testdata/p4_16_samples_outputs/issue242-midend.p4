@@ -74,9 +74,9 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bit<32> inc;
     bit<32> tmp_1;
     bit<32> tmp_2;
-    @name("debug") register<bit<32>>(32w100) debug;
-    @name("reg") register<bit<32>>(32w1) reg;
-    @name("test") action test_0() {
+    @name("Eg.debug") register<bit<32>>(32w100) debug;
+    @name("Eg.reg") register<bit<32>>(32w1) reg;
+    @name("Eg.test") action test_0() {
         val.field1 = 32w0;
         tmp_1 = tmp_1;
         tmp_1 = 32w0;
