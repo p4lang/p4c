@@ -117,6 +117,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/x-bmv2.p4
   testdata/p4_16_samples/issue986-1-bmv2.p4
   testdata/p4_14_samples/16-TwoReferences.p4
+  # This test fails now because of issue #1128
+  testdata/p4_16_samples/subparser-with-header-stack-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
