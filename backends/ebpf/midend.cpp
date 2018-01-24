@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "midend.h"
 #include "midend/actionSynthesis.h"
+#include "midend/complexComparison.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
@@ -81,6 +82,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),

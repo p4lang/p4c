@@ -27,8 +27,6 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Key inKey;
-    Key defaultKey;
     Value val_2;
     @name("Eg.test") action test_0() {
         inKey.field1 = 32w1;
@@ -63,4 +61,3 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
-

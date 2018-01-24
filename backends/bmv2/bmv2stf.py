@@ -652,6 +652,7 @@ class RunBMV2(object):
             if expected[i] == "*":
                 continue;
             if expected[i] != received[i]:
+                reportError("Received packet ", received)
                 reportError("Packet different at position", i, ": expected", expected[i], ", received", received[i])
                 reportError("Full received packed is ", received)
                 return FAILURE
