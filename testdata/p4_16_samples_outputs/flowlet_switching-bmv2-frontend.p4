@@ -119,15 +119,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_1() {
+    @name("ingress.NoAction") action NoAction_1() {
     }
-    @name("egress.NoAction") action NoAction_8() {
+    @name("ingress.NoAction") action NoAction_8() {
     }
-    @name("egress.NoAction") action NoAction_9() {
+    @name("ingress.NoAction") action NoAction_9() {
     }
-    @name("egress.NoAction") action NoAction_10() {
+    @name("ingress.NoAction") action NoAction_10() {
     }
-    @name("egress.NoAction") action NoAction_11() {
+    @name("ingress.NoAction") action NoAction_11() {
     }
     @name("ingress.flowlet_id") register<bit<16>>(32w8192) flowlet_id_1;
     @name("ingress.flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_1;

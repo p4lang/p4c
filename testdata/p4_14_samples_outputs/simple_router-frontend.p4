@@ -82,7 +82,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_1() {
+    @name("ingress.NoAction") action NoAction_1() {
     }
     @name("._drop") action _drop_1() {
         mark_to_drop();

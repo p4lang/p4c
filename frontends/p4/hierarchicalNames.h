@@ -59,7 +59,7 @@ class HierarchicalNames : public Transform {
  public:
     cstring getName(const IR::IDeclaration* decl);
 
-    HierarchicalNames() { setName("HierarchicalNames"); }
+    HierarchicalNames() { setName("HierarchicalNames"); visitDagOnce = false; }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { stack.push_back(getName(parser)); return parser; }
     const IR::Node* postorder(IR::P4Parser* parser) override

@@ -140,15 +140,15 @@ struct tuple_1 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_1() {
+    @name("ingress.NoAction") action NoAction_1() {
     }
-    @name("egress.NoAction") action NoAction_8() {
+    @name("ingress.NoAction") action NoAction_8() {
     }
-    @name("egress.NoAction") action NoAction_9() {
+    @name("ingress.NoAction") action NoAction_9() {
     }
-    @name("egress.NoAction") action NoAction_10() {
+    @name("ingress.NoAction") action NoAction_10() {
     }
-    @name("egress.NoAction") action NoAction_11() {
+    @name("ingress.NoAction") action NoAction_11() {
     }
     @name("._drop") action _drop_1() {
         mark_to_drop();

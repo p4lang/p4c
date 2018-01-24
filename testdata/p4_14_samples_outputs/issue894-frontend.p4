@@ -113,13 +113,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".heavy_hitter_counter2") register<bit<16>>(32w16) heavy_hitter_counter2;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_1() {
+    @name("ingress.NoAction") action NoAction_1() {
     }
-    @name("egress.NoAction") action NoAction_7() {
+    @name("ingress.NoAction") action NoAction_7() {
     }
-    @name("egress.NoAction") action NoAction_8() {
+    @name("ingress.NoAction") action NoAction_8() {
     }
-    @name("egress.NoAction") action NoAction_9() {
+    @name("ingress.NoAction") action NoAction_9() {
     }
     @name("._drop") action _drop_1() {
         mark_to_drop();

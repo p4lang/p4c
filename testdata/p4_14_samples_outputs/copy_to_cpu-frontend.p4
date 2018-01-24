@@ -79,7 +79,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_1() {
+    @name("ingress.NoAction") action NoAction_1() {
     }
     @name(".do_copy_to_cpu") action do_copy_to_cpu_0() {
         clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { standard_metadata });

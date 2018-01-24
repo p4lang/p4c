@@ -92,13 +92,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_10() {
+    @name("ingress.NoAction") action NoAction_10() {
     }
-    @name("egress.NoAction") action NoAction_11() {
+    @name("ingress.NoAction") action NoAction_11() {
     }
-    @name("egress.NoAction") action NoAction_12() {
+    @name("ingress.NoAction") action NoAction_12() {
     }
-    @name("egress.NoAction") action NoAction_13() {
+    @name("ingress.NoAction") action NoAction_13() {
     }
     @name(".setb1") action setb1_1(bit<32> val) {
         hdr.data.b1 = val;

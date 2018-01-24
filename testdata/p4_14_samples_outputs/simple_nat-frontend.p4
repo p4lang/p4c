@@ -172,13 +172,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_8() {
+    @name("ingress.NoAction") action NoAction_8() {
     }
-    @name("egress.NoAction") action NoAction_9() {
+    @name("ingress.NoAction") action NoAction_9() {
     }
-    @name("egress.NoAction") action NoAction_10() {
+    @name("ingress.NoAction") action NoAction_10() {
     }
-    @name("egress.NoAction") action NoAction_11() {
+    @name("ingress.NoAction") action NoAction_11() {
     }
     @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
