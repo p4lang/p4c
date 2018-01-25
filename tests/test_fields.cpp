@@ -268,3 +268,19 @@ TEST_F(SaturatingFieldTest, Signed) {
   f.sub(f, Data(1));
   EXPECT_EQ(min, f.get<int>());
 }
+
+
+// This test was added for this issue:
+// https://github.com/p4lang/behavioral-model/issues/538.
+// Field::extract_VL used to compute the mask with "mask = (1 << nbits); mask -=
+// 1;", which meant the mask was -1 (and not the desired 0xffff...) when nbits
+// was >= 32.
+TEST(FieldTest, ExportBytesVLLarge) {
+  Field f(0  /* nbits */, nullptr  /* parent hdr */, true,
+          false  /* is_signed */, false, true  /* VL */, false);
+  std::string data(32, '\xab');  // 32 bytes
+  int computed_nbits = 24 * 8;  // 24 bytes
+  f.extract_VL(data.data(), 0  /* hdr_offset */, computed_nbits);
+  f.export_bytes();
+  EXPECT_NE(0u, f.get<uint64_t>());
+}

@@ -22,7 +22,6 @@
 #include <bm/bm_sim/headers.h>
 
 #include <algorithm>  // for std::swap
-
 #include "extract.h"
 
 namespace bm {
@@ -81,7 +80,7 @@ int
 Field::extract_VL(const char *data, int hdr_offset, int computed_nbits) {
   nbits = computed_nbits;
   nbytes = (nbits + 7) / 8;
-  mask = (1 << nbits); mask -= 1;
+  mask = 1; mask <<= nbits; mask -= 1;
   bytes.resize(nbytes);
   if (is_signed) {
     assert(nbits > 1);
