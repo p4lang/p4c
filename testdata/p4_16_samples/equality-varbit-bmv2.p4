@@ -6,16 +6,10 @@ header H {
     varbit<32> v;
 }
 
-header Same {
-    bit<8> same;
-}
-
 struct metadata {}
 
 struct headers {
     H h;
-    H[2] a;
-    Same same;
 }
 
 parser p(packet_in b,
@@ -24,8 +18,6 @@ parser p(packet_in b,
          inout standard_metadata_t stdmeta) {
     state start {
         b.extract(hdr.h, 32);
-        b.extract(hdr.a.next, 32);
-        b.extract(hdr.a.next, 32);
         transition accept;
     }
 }
@@ -34,25 +26,11 @@ control ingress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t stdmeta) {
     apply {
-        hdr.same.setValid();
-        hdr.same.same = 0;
         stdmeta.egress_spec = 0;
+        H h = hdr.h;
 
-        if (hdr.h.s == hdr.a[0].s) {
-            hdr.same.same = hdr.same.same | 1;
-        }
-        if (hdr.h.v == hdr.a[0].v) {
-            hdr.same.same = hdr.same.same | 2;
-        }
-        if (hdr.h == hdr.a[0]) {
-            hdr.same.same = hdr.same.same | 4;
-        }
-
-        H[2] tmp;
-        tmp[0] = hdr.h;
-        tmp[1] = hdr.a[0];
-        if (tmp == hdr.a) {
-            hdr.same.same = hdr.same.same | 8;
+        if (hdr.h.v == h.v) {
+            stdmeta.egress_spec = 1;
         }
     }
 }
