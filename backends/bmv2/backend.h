@@ -123,6 +123,12 @@ class Backend : public PassManager {
     const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
     /// True if this parameter represents the standard_metadata input.
     bool isStandardMetadataParameter(const IR::Parameter* param);
+
+    /**
+     * Returns the correct operation for performing an assignment in
+     * the BMv2 JSON language depending on the type of data assigned.
+     */
+    static cstring jsonAssignment(const IR::Type* type, bool inParser);
 };
 
 }  // namespace BMV2

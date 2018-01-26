@@ -620,6 +620,7 @@ class RunBMV2(object):
                 continue;
             if expected[i] != received[i]:
                 reportError("Packet different at position", i, ": expected", expected[i], ", received", received[i])
+                reportError("Full received packed is ", received)
                 return FAILURE
         return SUCCESS
     def showLog(self):

@@ -79,6 +79,28 @@ class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
     }
 };
 
+cstring Backend::jsonAssignment(const IR::Type* type, bool inParser) {
+    if (!inParser && type->is<IR::Type_Varbits>())
+        return "assign_VL";
+    if (type->is<IR::Type_HeaderUnion>())
+        return "assign_union";
+    if (type->is<IR::Type_Header>())
+        return "assign_header";
+    if (auto ts = type->to<IR::Type_Stack>()) {
+        auto et = ts->elementType;
+        if (et->is<IR::Type_HeaderUnion>())
+            return "assign_union_stack";
+        else
+            return "assign_header_stack";
+    }
+    if (inParser)
+        // Unfortunately set can do some things that assign cannot,
+        // e.g., handle lookahead on the RHS.
+        return "set";
+    else
+        return "assign";
+}
+
 void
 Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);

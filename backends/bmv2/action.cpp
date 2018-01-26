@@ -42,16 +42,8 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
             l = assign->left;
             r = assign->right;
 
-            cstring operation;
             auto type = typeMap->getType(l, true);
-            if (type->is<IR::Type_Varbits>())
-                operation = "assign_VL";
-            else if (type->is<IR::Type_HeaderUnion>())
-                operation = "assign_union";
-            else if (type->is<IR::Type_StructLike>())
-                operation = "assign_header";
-            else
-                operation = "assign";
+            cstring operation = Backend::jsonAssignment(type, false);
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
