@@ -33,17 +33,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.same.setValid();
         hdr.same.same = 0;
         stdmeta.egress_spec = 0;
-        H[2] tmp;
-        tmp = hdr.a;
-        if (tmp[0].s == hdr.a[0].s) {
+        if (hdr.h.s == hdr.a[0].s) {
             hdr.same.same = hdr.same.same | 1;
         }
-        if (tmp[0].v == hdr.a[0].v) {
+        if (hdr.h.v == hdr.a[0].v) {
             hdr.same.same = hdr.same.same | 2;
         }
-        if (tmp[0] == hdr.a[0]) {
+        if (hdr.h == hdr.a[0]) {
             hdr.same.same = hdr.same.same | 4;
         }
+        H[2] tmp;
+        tmp[0] = hdr.h;
+        tmp[1] = hdr.a[0];
         if (tmp == hdr.a) {
             hdr.same.same = hdr.same.same | 8;
         }

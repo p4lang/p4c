@@ -37,7 +37,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.same.setValid();
         hdr.same.same = 8w0;
         stdmeta.egress_spec = 9w0;
-        tmp = hdr.a;
     }
     @hidden action act_1() {
         hdr.same.same = hdr.same.same | 8w2;
@@ -47,6 +46,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @hidden action act_3() {
         hdr.same.same = hdr.same.same | 8w8;
+    }
+    @hidden action act_4() {
+        tmp[0] = hdr.h;
+        tmp[1] = hdr.a[0];
     }
     @hidden table tbl_act {
         actions = {
@@ -74,20 +77,27 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @hidden table tbl_act_3 {
         actions = {
+            act_4();
+        }
+        const default_action = act_4();
+    }
+    @hidden table tbl_act_4 {
+        actions = {
             act_3();
         }
         const default_action = act_3();
     }
     apply {
         tbl_act.apply();
-        if (tmp[0].s == hdr.a[0].s) 
+        if (hdr.h.s == hdr.a[0].s) 
             tbl_act_0.apply();
-        if (tmp[0].v == hdr.a[0].v) 
+        if (hdr.h.v == hdr.a[0].v) 
             tbl_act_1.apply();
-        if (!tmp[0].isValid() && !hdr.a[0].isValid() || tmp[0].isValid() && hdr.a[0].isValid() && tmp[0].s == hdr.a[0].s && tmp[0].v == hdr.a[0].v) 
+        if (hdr.h == hdr.a[0]) 
             tbl_act_2.apply();
-        if ((!tmp[0].isValid() && !hdr.a[0].isValid() || tmp[0].isValid() && hdr.a[0].isValid() && tmp[0].s == hdr.a[0].s && tmp[0].v == hdr.a[0].v) && (!tmp[1].isValid() && !hdr.a[1].isValid() || tmp[1].isValid() && hdr.a[1].isValid() && tmp[1].s == hdr.a[1].s && tmp[1].v == hdr.a[1].v)) 
-            tbl_act_3.apply();
+        tbl_act_3.apply();
+        if (tmp == hdr.a) 
+            tbl_act_4.apply();
     }
 }
 
