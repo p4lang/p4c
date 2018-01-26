@@ -1160,65 +1160,65 @@ struct tuple_1 {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("egress.NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
-    @name("egress.NoAction") action NoAction_86() {
+    @name(".NoAction") action NoAction_86() {
     }
-    @name("egress.NoAction") action NoAction_87() {
+    @name(".NoAction") action NoAction_87() {
     }
-    @name("egress.NoAction") action NoAction_88() {
+    @name(".NoAction") action NoAction_88() {
     }
-    @name("egress.NoAction") action NoAction_89() {
+    @name(".NoAction") action NoAction_89() {
     }
-    @name("egress.NoAction") action NoAction_90() {
+    @name(".NoAction") action NoAction_90() {
     }
-    @name("egress.NoAction") action NoAction_91() {
+    @name(".NoAction") action NoAction_91() {
     }
-    @name("egress.NoAction") action NoAction_92() {
+    @name(".NoAction") action NoAction_92() {
     }
-    @name("egress.NoAction") action NoAction_93() {
+    @name(".NoAction") action NoAction_93() {
     }
-    @name("egress.NoAction") action NoAction_94() {
+    @name(".NoAction") action NoAction_94() {
     }
-    @name("egress.NoAction") action NoAction_95() {
+    @name(".NoAction") action NoAction_95() {
     }
-    @name("egress.NoAction") action NoAction_96() {
+    @name(".NoAction") action NoAction_96() {
     }
-    @name("egress.NoAction") action NoAction_97() {
+    @name(".NoAction") action NoAction_97() {
     }
-    @name("egress.NoAction") action NoAction_98() {
+    @name(".NoAction") action NoAction_98() {
     }
-    @name("egress.NoAction") action NoAction_99() {
+    @name(".NoAction") action NoAction_99() {
     }
-    @name("egress.NoAction") action NoAction_100() {
+    @name(".NoAction") action NoAction_100() {
     }
-    @name("egress.NoAction") action NoAction_101() {
+    @name(".NoAction") action NoAction_101() {
     }
-    @name("egress.NoAction") action NoAction_102() {
+    @name(".NoAction") action NoAction_102() {
     }
-    @name("egress.NoAction") action NoAction_103() {
+    @name(".NoAction") action NoAction_103() {
     }
-    @name("egress.NoAction") action NoAction_104() {
+    @name(".NoAction") action NoAction_104() {
     }
-    @name("egress.NoAction") action NoAction_105() {
+    @name(".NoAction") action NoAction_105() {
     }
-    @name("egress.NoAction") action NoAction_106() {
+    @name(".NoAction") action NoAction_106() {
     }
-    @name("egress.NoAction") action NoAction_107() {
+    @name(".NoAction") action NoAction_107() {
     }
-    @name("egress.NoAction") action NoAction_108() {
+    @name(".NoAction") action NoAction_108() {
     }
-    @name("egress.NoAction") action NoAction_109() {
+    @name(".NoAction") action NoAction_109() {
     }
-    @name("egress.NoAction") action NoAction_110() {
+    @name(".NoAction") action NoAction_110() {
     }
-    @name("egress.NoAction") action NoAction_111() {
+    @name(".NoAction") action NoAction_111() {
     }
-    @name("egress.NoAction") action NoAction_112() {
+    @name(".NoAction") action NoAction_112() {
     }
-    @name("egress.NoAction") action NoAction_113() {
+    @name(".NoAction") action NoAction_113() {
     }
     @name(".egress_port_type_normal") action egress_port_type_normal_0() {
         meta.egress_metadata.port_type = 2w0;
@@ -2971,113 +2971,113 @@ struct tuple_7 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress.NoAction") action NoAction_114() {
+    @name(".NoAction") action NoAction_114() {
     }
-    @name("ingress.NoAction") action NoAction_115() {
+    @name(".NoAction") action NoAction_115() {
     }
-    @name("ingress.NoAction") action NoAction_116() {
+    @name(".NoAction") action NoAction_116() {
     }
-    @name("ingress.NoAction") action NoAction_117() {
+    @name(".NoAction") action NoAction_117() {
     }
-    @name("ingress.NoAction") action NoAction_118() {
+    @name(".NoAction") action NoAction_118() {
     }
-    @name("ingress.NoAction") action NoAction_119() {
+    @name(".NoAction") action NoAction_119() {
     }
-    @name("ingress.NoAction") action NoAction_120() {
+    @name(".NoAction") action NoAction_120() {
     }
-    @name("ingress.NoAction") action NoAction_121() {
+    @name(".NoAction") action NoAction_121() {
     }
-    @name("ingress.NoAction") action NoAction_122() {
+    @name(".NoAction") action NoAction_122() {
     }
-    @name("ingress.NoAction") action NoAction_123() {
+    @name(".NoAction") action NoAction_123() {
     }
-    @name("ingress.NoAction") action NoAction_124() {
+    @name(".NoAction") action NoAction_124() {
     }
-    @name("ingress.NoAction") action NoAction_125() {
+    @name(".NoAction") action NoAction_125() {
     }
-    @name("ingress.NoAction") action NoAction_126() {
+    @name(".NoAction") action NoAction_126() {
     }
-    @name("ingress.NoAction") action NoAction_127() {
+    @name(".NoAction") action NoAction_127() {
     }
-    @name("ingress.NoAction") action NoAction_128() {
+    @name(".NoAction") action NoAction_128() {
     }
-    @name("ingress.NoAction") action NoAction_129() {
+    @name(".NoAction") action NoAction_129() {
     }
-    @name("ingress.NoAction") action NoAction_130() {
+    @name(".NoAction") action NoAction_130() {
     }
-    @name("ingress.NoAction") action NoAction_131() {
+    @name(".NoAction") action NoAction_131() {
     }
-    @name("ingress.NoAction") action NoAction_132() {
+    @name(".NoAction") action NoAction_132() {
     }
-    @name("ingress.NoAction") action NoAction_133() {
+    @name(".NoAction") action NoAction_133() {
     }
-    @name("ingress.NoAction") action NoAction_134() {
+    @name(".NoAction") action NoAction_134() {
     }
-    @name("ingress.NoAction") action NoAction_135() {
+    @name(".NoAction") action NoAction_135() {
     }
-    @name("ingress.NoAction") action NoAction_136() {
+    @name(".NoAction") action NoAction_136() {
     }
-    @name("ingress.NoAction") action NoAction_137() {
+    @name(".NoAction") action NoAction_137() {
     }
-    @name("ingress.NoAction") action NoAction_138() {
+    @name(".NoAction") action NoAction_138() {
     }
-    @name("ingress.NoAction") action NoAction_139() {
+    @name(".NoAction") action NoAction_139() {
     }
-    @name("ingress.NoAction") action NoAction_140() {
+    @name(".NoAction") action NoAction_140() {
     }
-    @name("ingress.NoAction") action NoAction_141() {
+    @name(".NoAction") action NoAction_141() {
     }
-    @name("ingress.NoAction") action NoAction_142() {
+    @name(".NoAction") action NoAction_142() {
     }
-    @name("ingress.NoAction") action NoAction_143() {
+    @name(".NoAction") action NoAction_143() {
     }
-    @name("ingress.NoAction") action NoAction_144() {
+    @name(".NoAction") action NoAction_144() {
     }
-    @name("ingress.NoAction") action NoAction_145() {
+    @name(".NoAction") action NoAction_145() {
     }
-    @name("ingress.NoAction") action NoAction_146() {
+    @name(".NoAction") action NoAction_146() {
     }
-    @name("ingress.NoAction") action NoAction_147() {
+    @name(".NoAction") action NoAction_147() {
     }
-    @name("ingress.NoAction") action NoAction_148() {
+    @name(".NoAction") action NoAction_148() {
     }
-    @name("ingress.NoAction") action NoAction_149() {
+    @name(".NoAction") action NoAction_149() {
     }
-    @name("ingress.NoAction") action NoAction_150() {
+    @name(".NoAction") action NoAction_150() {
     }
-    @name("ingress.NoAction") action NoAction_151() {
+    @name(".NoAction") action NoAction_151() {
     }
-    @name("ingress.NoAction") action NoAction_152() {
+    @name(".NoAction") action NoAction_152() {
     }
-    @name("ingress.NoAction") action NoAction_153() {
+    @name(".NoAction") action NoAction_153() {
     }
-    @name("ingress.NoAction") action NoAction_154() {
+    @name(".NoAction") action NoAction_154() {
     }
-    @name("ingress.NoAction") action NoAction_155() {
+    @name(".NoAction") action NoAction_155() {
     }
-    @name("ingress.NoAction") action NoAction_156() {
+    @name(".NoAction") action NoAction_156() {
     }
-    @name("ingress.NoAction") action NoAction_157() {
+    @name(".NoAction") action NoAction_157() {
     }
-    @name("ingress.NoAction") action NoAction_158() {
+    @name(".NoAction") action NoAction_158() {
     }
-    @name("ingress.NoAction") action NoAction_159() {
+    @name(".NoAction") action NoAction_159() {
     }
-    @name("ingress.NoAction") action NoAction_160() {
+    @name(".NoAction") action NoAction_160() {
     }
-    @name("ingress.NoAction") action NoAction_161() {
+    @name(".NoAction") action NoAction_161() {
     }
-    @name("ingress.NoAction") action NoAction_162() {
+    @name(".NoAction") action NoAction_162() {
     }
-    @name("ingress.NoAction") action NoAction_163() {
+    @name(".NoAction") action NoAction_163() {
     }
-    @name("ingress.NoAction") action NoAction_164() {
+    @name(".NoAction") action NoAction_164() {
     }
-    @name("ingress.NoAction") action NoAction_165() {
+    @name(".NoAction") action NoAction_165() {
     }
-    @name("ingress.NoAction") action NoAction_166() {
+    @name(".NoAction") action NoAction_166() {
     }
-    @name("ingress.NoAction") action NoAction_167() {
+    @name(".NoAction") action NoAction_167() {
     }
     @name(".rmac_hit") action rmac_hit_0() {
         meta.l3_metadata.rmac_hit = 1w1;

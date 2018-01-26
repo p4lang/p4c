@@ -31,7 +31,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @name("cIngress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("cIngress.foo") action foo_0(bit<16> bar) {
         bool hasReturned_1 = false;

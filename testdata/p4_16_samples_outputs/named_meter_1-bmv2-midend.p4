@@ -48,9 +48,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name("namedmeter") direct_meter<bit<32>>(MeterType.packets) my_meter;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name("ingress._drop") action _drop_0() {
         mark_to_drop();

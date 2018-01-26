@@ -18,7 +18,7 @@ struct Headers {
 }
 
 control c(in Headers h) {
-    @name("c.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("c.a") action a_0() {
     }

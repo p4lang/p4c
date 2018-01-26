@@ -37,7 +37,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     bit<16> tmp_1;
     bit<32> x1_1;

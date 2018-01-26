@@ -323,7 +323,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("egress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("egress.process_clone_h0") action process_clone_h0_0() {
         user_meta.fwd_metadata.outport = (bit<32>)user_meta.clone_0.data;
@@ -375,7 +375,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_clone") action do_clone_0(PortId_t port) {
         ostd.clone = true;

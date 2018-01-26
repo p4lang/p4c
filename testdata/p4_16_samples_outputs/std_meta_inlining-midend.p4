@@ -22,7 +22,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
     @name(".send_to_cpu") action send_to_cpu() {
         standard_metadata.egress_spec = 9w64;
     }
-    @name("ingress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.t0") table t0 {
         key = {

@@ -93,7 +93,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("egress.rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -119,15 +119,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress.NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.NoAction") action NoAction_8() {
+    @name(".NoAction") action NoAction_8() {
     }
-    @name("ingress.NoAction") action NoAction_9() {
+    @name(".NoAction") action NoAction_9() {
     }
-    @name("ingress.NoAction") action NoAction_10() {
+    @name(".NoAction") action NoAction_10() {
     }
-    @name("ingress.NoAction") action NoAction_11() {
+    @name(".NoAction") action NoAction_11() {
     }
     @name("ingress.flowlet_id") register<bit<16>>(32w8192) flowlet_id_1;
     @name("ingress.flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_1;

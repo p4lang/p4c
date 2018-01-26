@@ -52,7 +52,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @name("cIngress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("cIngress.hash_drop_decision") action hash_drop_decision_0() {
         hash<bit<16>, bit<16>, tuple<bit<32>, bit<32>, bit<8>>, bit<32>>(meta.mystruct1.hash1, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol }, 32w0xffff);

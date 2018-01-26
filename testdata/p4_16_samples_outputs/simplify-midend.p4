@@ -4,9 +4,9 @@ control c(out bool x) {
     bool tmp_2;
     bool tmp_3;
     bool tmp_4;
-    @name("c.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("c.NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name("c.t1") table t1 {
         key = {

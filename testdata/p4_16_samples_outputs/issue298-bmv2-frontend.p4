@@ -107,7 +107,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("egress.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("egress._drop") action _drop_0() {
         mark_to_drop();

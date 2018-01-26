@@ -79,7 +79,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("TopPipe.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     IPv4Address nextHop;
     @name("TopPipe.Drop_action") action Drop_action_0() {

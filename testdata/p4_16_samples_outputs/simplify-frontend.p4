@@ -1,9 +1,9 @@
 #include <core.p4>
 
 control c(out bool x) {
-    @name("c.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("c.NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     bool tmp_2;
     bool tmp_3;

@@ -86,7 +86,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     IPv4Address nextHop;
     bool hasReturned_0;
-    @name("TopPipe.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("TopPipe.Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;

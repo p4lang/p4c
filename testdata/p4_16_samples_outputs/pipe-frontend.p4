@@ -35,7 +35,7 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    @name("Q_pipe.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     TArg1 p1_tArg1_0;
     TArg2 p1_aArg2_0;

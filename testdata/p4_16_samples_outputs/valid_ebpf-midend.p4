@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("pipe.counters") CounterArray(32w10, true) counters;
     @name("pipe.invalidate") action invalidate_0() {
