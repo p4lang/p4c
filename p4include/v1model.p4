@@ -218,11 +218,12 @@ extern value_set<D> {
 parser Parser<H, M>(packet_in b,
                     out H parsedHdr,
                     inout M meta,
-inout standard_metadata_t standard_metadata);
+                    inout standard_metadata_t standard_metadata);
 
 /* The only legal statements in the implementation of the
 VerifyChecksum control are: block statements, calls to the
-verify_checksum method, and return statements. */
+verify_checksum and verify_checksum_with_payload methods,
+and return statements. */
 control VerifyChecksum<H, M>(inout H hdr,
                              inout M meta);
 @pipeline
@@ -236,7 +237,8 @@ control Egress<H, M>(inout H hdr,
 
 /* The only legal statements in the implementation of the
 ComputeChecksum control are: block statements, calls to the
-update_checksum method, and return statements. */
+update_checksum and update_checksum_with_payload methods,
+and return statements. */
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
 @deparser

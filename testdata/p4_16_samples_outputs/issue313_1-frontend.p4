@@ -9,7 +9,7 @@ struct struct_t {
 control ctrl(inout struct_t input, out header_h output) {
     header_h tmp0;
     header_h tmp1;
-    @name("act") action act_0() {
+    @name("ctrl.act") action act_0() {
         tmp0 = input.stack[0];
         input.stack.pop_front(1);
         tmp1 = tmp0;

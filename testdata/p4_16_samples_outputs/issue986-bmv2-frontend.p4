@@ -35,9 +35,9 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("t1") table t1 {
+    @name("ingress.t1") table t1 {
         actions = {
             NoAction_0();
         }

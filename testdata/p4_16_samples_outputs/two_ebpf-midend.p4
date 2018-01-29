@@ -47,12 +47,12 @@ control pipe(inout Headers_t headers, out bool pass) {
     IPv4Address address;
     bool pass_1;
     bool hasReturned_0;
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("c1.Reject") action c1_Reject() {
+    @name("pipe.c1.Reject") action c1_Reject() {
         pass_1 = false;
     }
-    @name("c1.Check_ip") table c1_Check_ip_0 {
+    @name("pipe.c1.Check_ip") table c1_Check_ip_0 {
         key = {
             address: exact @name("address") ;
         }

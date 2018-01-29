@@ -1,9 +1,9 @@
 control ctrl(out bit<32> c) {
     bit<32> a;
-    @name("e") action e_0() {
+    @name("ctrl.e") action e_0() {
         exit;
     }
-    @name("e") action e_2() {
+    @name("ctrl.e") action e_2() {
         exit;
     }
     apply {

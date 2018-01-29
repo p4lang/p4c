@@ -190,6 +190,9 @@ class Annotation {
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
+
+    /// Useful helper: extracts name value from a name annotation
+    static cstring getName(const IR::Annotation* annotation);
 }
 
 /// There can be several annotations with the same "name", so this is a vector.

@@ -45,13 +45,13 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("a") action a_0() {
+    @name("ingress.a") action a_0() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("t_lpm") table t_lpm {
+    @name("ingress.t_lpm") table t_lpm {
         key = {
             h.h.l: lpm @name("h.h.l") ;
         }

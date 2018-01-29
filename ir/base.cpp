@@ -18,22 +18,28 @@ limitations under the License.
 
 namespace IR {
 
+cstring Annotation::getName(const IR::Annotation* annotation) {
+    BUG_CHECK(annotation->name == IR::Annotation::nameAnnotation,
+              "%1%: Only works on name annotations", annotation);
+    if (annotation->expr.size() != 1) {
+        ::error("%1% should contain a string", annotation);
+        return "";
+    }
+    auto str = annotation->expr[0]->to<IR::StringLiteral>();
+    if (str == nullptr) {
+        ::error("%1% should contain a string", annotation);
+        return "";
+    }
+    return str->value;
+}
+
 cstring IDeclaration::externalName(cstring replace /* = cstring() */) const {
     if (!is<IAnnotated>())
         return getName().toString();
 
     auto anno = getAnnotation(IR::Annotation::nameAnnotation);
-    if (anno != nullptr) {
-        if (anno->expr.size() != 1) {
-            ::error("%1% should contain a string", anno);
-        } else {
-            auto str = anno->expr[0]->to<IR::StringLiteral>();
-            if (str == nullptr)
-                ::error("%1% should contain a string", anno);
-            else
-                return str->value;
-        }
-    }
+    if (anno != nullptr)
+        return Annotation::getName(anno);
     if (replace)
         return replace;
     return getName().name;

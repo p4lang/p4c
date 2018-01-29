@@ -85,9 +85,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name(".do_setup") action do_setup_0(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;

@@ -26,6 +26,7 @@ set (P4_FRONTEND_SRCS
   p4/fromv1.0/converters.cpp
   p4/fromv1.0/programStructure.cpp
   p4/frontend.cpp
+  p4/hierarchicalNames.cpp
   p4/inlining.cpp
   p4/localizeActions.cpp
   p4/methodInstance.cpp
@@ -80,6 +81,7 @@ set (P4_FRONTEND_HDRS
   p4/fromv1.0/programStructure.h
   p4/fromv1.0/v1model.h
   p4/frontend.h
+  p4/hierarchicalNames.h
   p4/inlining.h
   p4/localizeActions.h
   p4/methodInstance.h

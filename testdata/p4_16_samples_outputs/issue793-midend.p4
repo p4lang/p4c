@@ -13,11 +13,11 @@ struct my_packet {
 }
 
 control c(in my_packet hdr) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("nop") action nop_0() {
+    @name("c.nop") action nop_0() {
     }
-    @name("t") table t {
+    @name("c.t") table t {
         actions = {
             nop_0();
             @defaultonly NoAction_0();

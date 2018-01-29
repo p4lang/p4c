@@ -4,7 +4,7 @@ extern E {
 }
 
 control c() {
-    @name("e") E() e;
+    @name("c.e") E() e;
     @hidden action act() {
         e.setValue(32w10);
     }

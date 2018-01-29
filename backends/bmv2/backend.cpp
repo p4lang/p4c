@@ -101,6 +101,85 @@ cstring Backend::jsonAssignment(const IR::Type* type, bool inParser) {
         return "assign";
 }
 
+/**
+This pass adds @name annotations to all fields of the user metadata
+structure so that they do not clash with fields of the headers
+structure.  This is necessary because both of them become global
+objects in the output json.
+*/
+class RenameUserMetadata : public Transform {
+    P4::ReferenceMap* refMap;
+    const IR::Type_Struct* userMetaType;
+    // Used as a prefix for the fields of the userMetadata structure
+    // and also as a name for the userMetadata type clone.
+    cstring namePrefix;
+
+ public:
+    RenameUserMetadata(P4::ReferenceMap* refMap,
+        const IR::Type_Struct* userMetaType, cstring namePrefix):
+            refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix)
+    { setName("RenameUserMetadata"); CHECK_NULL(refMap); }
+
+    const IR::Node* postorder(IR::Type_Struct* type) override {
+        // Clone the user metadata type.  We want this type to be used
+        // only for parameters.  For any other variables we will used
+        // the clone we create.
+        if (userMetaType != getOriginal())
+            return type;
+
+        auto vec = new IR::IndexedVector<IR::Node>();
+        LOG2("Creating clone" << getOriginal());
+        auto clone = type->clone();
+        clone->name = namePrefix;
+        vec->push_back(clone);
+
+        // Rename all fields
+        IR::IndexedVector<IR::StructField> fields;
+        for (auto f : type->fields) {
+            auto anno = f->getAnnotation(IR::Annotation::nameAnnotation);
+            cstring suffix = "";
+            if (anno != nullptr)
+                suffix = IR::Annotation::getName(anno);
+            if (suffix.startsWith(".")) {
+                // We can't change the name of this field.
+                // Hopefully the user knows what they are doing.
+                fields.push_back(f->clone());
+                continue;
+            }
+
+            if (!suffix.isNullOrEmpty())
+                suffix = cstring(".") + suffix;
+            else
+                suffix = cstring(".") + f->name;
+            cstring newName = namePrefix + suffix;
+            auto stringLit = new IR::StringLiteral(newName);
+            LOG2("Renaming " << f << " to " << newName);
+            auto annos = f->annotations->addOrReplace(
+                IR::Annotation::nameAnnotation, stringLit);
+            auto field = new IR::StructField(f->srcInfo, f->name, annos, f->type);
+            fields.push_back(field);
+        }
+
+        auto annotated = new IR::Type_Struct(
+            type->srcInfo, type->name, type->annotations, std::move(fields));
+        vec->push_back(annotated);
+        return vec;
+    }
+
+    const IR::Node* preorder(IR::Type_Name* type) override {
+        // Find any reference to the user metadata type that is used
+        // (but not for parameters or the package instantiation)
+        // and replace it with the cloned type.
+        if (!findContext<IR::Declaration_Variable>())
+            return type;
+        auto decl = refMap->getDeclaration(type->path);
+        if (decl == userMetaType)
+            type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
+        LOG2("Replacing reference with " << type);
+        return type;
+    }
+};
+
 void
 Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
@@ -111,18 +190,42 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     if (options.arch != Target::UNKNOWN)
         target = options.arch;
 
+    /// Declaration which introduces the user metadata.
+    /// We expect this to be a struct type.
+    const IR::Type_Struct* userMetaType = nullptr;
+    cstring userMetaName = refMap->newName("userMetadata");
     if (target == Target::SIMPLE) {
         simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
         simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
-        simpleSwitch->setUpdateChecksumControls(tlb, &update_checksum_controls);
+        simpleSwitch->setComputeChecksumControls(tlb, &compute_checksum_controls);
         simpleSwitch->setVerifyChecksumControls(tlb, &verify_checksum_controls);
         simpleSwitch->setDeparserControls(tlb, &deparser_controls);
+
+        // Find the user metadata declaration
+        auto parser = simpleSwitch->getParser(tlb);
+        auto params = parser->getApplyParameters();
+        BUG_CHECK(params->size() == 4, "%1%: expected 4 parameters", parser);
+        auto metaParam = params->parameters.at(2);
+        auto paramType = metaParam->type;
+        if (!paramType->is<IR::Type_Name>()) {
+            ::error("%1%: expected the user metadata type to be a struct", paramType);
+            return;
+        }
+        auto decl = refMap->getDeclaration(paramType->to<IR::Type_Name>()->path);
+        if (!decl->is<IR::Type_Struct>()) {
+            ::error("%1%: expected the user metadata type to be a struct", paramType);
+            return;
+        }
+        userMetaType = decl->to<IR::Type_Struct>();
+        LOG2("User metadata type is " << userMetaType);
     } else if (target == Target::PORTABLE) {
         P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
     }
 
     // These passes are logically bmv2-specific
     addPasses({
+        new RenameUserMetadata(refMap, userMetaType, userMetaName),
+        new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
@@ -243,6 +346,59 @@ bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
             return false;
         }
         if (params->parameters.at(2) == param)
+            return true;
+
+        return false;
+    } else {
+        P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
+    }
+}
+
+bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
+    if (target == Target::SIMPLE) {
+        auto parser = simpleSwitch->getParser(getToplevelBlock());
+        auto params = parser->getApplyParameters();
+        if (params->size() != 4) {
+            simpleSwitch->modelError("%1%: Expected 4 parameters for parser", parser);
+            return false;
+        }
+        if (params->parameters.at(2) == param)
+            return true;
+
+        auto ingress = simpleSwitch->getIngress(getToplevelBlock());
+        params = ingress->getApplyParameters();
+        if (params->size() != 3) {
+            simpleSwitch->modelError("%1%: Expected 3 parameters for ingress", ingress);
+            return false;
+        }
+        if (params->parameters.at(1) == param)
+            return true;
+
+        auto egress = simpleSwitch->getEgress(getToplevelBlock());
+        params = egress->getApplyParameters();
+        if (params->size() != 3) {
+            simpleSwitch->modelError("%1%: Expected 3 parameters for egress", egress);
+            return false;
+        }
+        if (params->parameters.at(1) == param)
+            return true;
+
+        auto update = simpleSwitch->getCompute(getToplevelBlock());
+        params = update->getApplyParameters();
+        if (params->size() != 2) {
+            simpleSwitch->modelError("%1%: Expected 2 parameters for ComputeChecksum", update);
+            return false;
+        }
+        if (params->parameters.at(1) == param)
+            return true;
+
+        auto verify = simpleSwitch->getVerify(getToplevelBlock());
+        params = verify->getApplyParameters();
+        if (params->size() != 2) {
+            simpleSwitch->modelError("%1%: Expected 2 parameters for VerifyChecksum", update);
+            return false;
+        }
+        if (params->parameters.at(1) == param)
             return true;
 
         return false;

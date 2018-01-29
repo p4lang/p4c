@@ -84,7 +84,7 @@ class Backend : public PassManager {
 
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
-    std::set<cstring>                update_checksum_controls;
+    std::set<cstring>                compute_checksum_controls;
     std::set<cstring>                verify_checksum_controls;
     std::set<cstring>                deparser_controls;
 
@@ -129,6 +129,8 @@ class Backend : public PassManager {
      * the BMv2 JSON language depending on the type of data assigned.
      */
     static cstring jsonAssignment(const IR::Type* type, bool inParser);
+    /// True if this parameter represents the user_metadata input.
+    bool isUserMetadataParameter(const IR::Parameter* param);
 };
 
 }  // namespace BMV2

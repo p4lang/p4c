@@ -36,7 +36,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.egress_rid = smeta_1.egress_rid;
         smeta.checksum_error = smeta_1.checksum_error;
     }
-    @name("forward") table forward {
+    @name("IngressI.forward") table forward {
         key = {
         }
         actions = {

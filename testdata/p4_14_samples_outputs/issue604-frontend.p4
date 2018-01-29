@@ -24,9 +24,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("my_extern_inst") extern_test() my_extern_inst;
+    @name("ingress.my_extern_inst") extern_test() my_extern_inst;
     @name(".a") action a_0() {
         my_extern_inst.my_extern_method();
     }

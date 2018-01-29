@@ -15,17 +15,17 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
-    @name("drop") action drop_0() {
+    @name("IngressI.drop") action drop_0() {
         smeta.drop = 1w1;
     }
-    @name("drop") action drop_3() {
+    @name("IngressI.drop") action drop_3() {
         smeta.drop = 1w1;
     }
-    @name("indirect") table indirect {
+    @name("IngressI.indirect") table indirect {
         key = {
         }
         actions = {
@@ -35,7 +35,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = NoAction_0();
         @name("ap") implementation = action_profile(32w128);
     }
-    @name("indirect_ws") table indirect_ws {
+    @name("IngressI.indirect_ws") table indirect_ws {
         key = {
             meta.hash1: selector @name("meta.hash1") ;
         }

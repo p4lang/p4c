@@ -6,7 +6,7 @@ package top(empty e);
 control Ing() {
     bool b;
     bit<32> a;
-    @name("cond") action cond_0() {
+    @name("Ing.cond") action cond_0() {
         b = true;
     }
     apply {

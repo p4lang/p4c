@@ -11,7 +11,7 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
     bit<8> tmp1;
     header_h tmp2;
     header_h tmp3;
-    @name("act") action act_0() {
+    @name("ctrl.act") action act_0() {
         tmp0 = input.hdr.field;
         input.hdr.setValid();
         tmp1 = tmp0;

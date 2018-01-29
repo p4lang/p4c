@@ -44,14 +44,14 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("counters") CounterArray(32w10, true) counters;
-    @name("invalidate") action invalidate_0() {
+    @name("pipe.counters") CounterArray(32w10, true) counters;
+    @name("pipe.invalidate") action invalidate_0() {
         headers.ipv4.setInvalid();
         headers.ethernet.setInvalid();
     }
-    @name("t") table t {
+    @name("pipe.t") table t {
         actions = {
             invalidate_0();
             @defaultonly NoAction_0();

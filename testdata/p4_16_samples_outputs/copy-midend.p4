@@ -3,7 +3,7 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    @name("a") action a_0() {
+    @name("c.a") action a_0() {
         b = 32w0;
     }
     @hidden table tbl_a {

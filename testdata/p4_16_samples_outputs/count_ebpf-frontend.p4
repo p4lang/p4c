@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("counters") CounterArray(32w10, true) counters;
+    @name("pipe.counters") CounterArray(32w10, true) counters;
     apply {
         if (headers.ipv4.isValid()) {
             counters.increment(headers.ipv4.dstAddr);

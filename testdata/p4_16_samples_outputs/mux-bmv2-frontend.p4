@@ -22,7 +22,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bit<32> _sub;
     bit<64> res;
     bit<32> tmp_0;
-    @name("update") action update_0(in bool p_1, inout bit<64> val) {
+    @name("Eg.update") action update_0(in bool p_1, inout bit<64> val) {
         _sub = val[31:0];
         if (p_1) 
             tmp_0 = _sub;

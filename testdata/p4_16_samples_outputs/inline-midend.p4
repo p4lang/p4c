@@ -1,6 +1,6 @@
 control p(out bit<1> y) {
     bit<1> x_3;
-    @name("b") action b_0() {
+    @name("p.b") action b_0() {
         y = x_3 & x_3 & (x_3 & x_3) & (x_3 & x_3 & (x_3 & x_3));
     }
     @hidden action act() {

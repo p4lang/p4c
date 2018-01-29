@@ -1,8 +1,8 @@
 control c(inout bit<32> x) {
-    @name("a") action a_0() {
+    @name("c.a") action a_0() {
         x = 32w10;
     }
-    @name("t") table t {
+    @name("c.t") table t {
         actions = {
             a_0();
         }

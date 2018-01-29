@@ -27,11 +27,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_4() {
+    @name(".NoAction") action NoAction_4() {
     }
-    @name("NoAction") action NoAction_5() {
+    @name(".NoAction") action NoAction_5() {
     }
     bool tmp_0;
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {

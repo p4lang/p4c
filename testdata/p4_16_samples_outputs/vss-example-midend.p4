@@ -57,7 +57,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     bit<16> tmp_3;
     bool tmp_4;
     bool tmp_5;
-    @name("ck") Ck16() ck;
+    @name("TopParser.ck") Ck16() ck;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -86,26 +86,26 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     IPv4Address nextHop;
     bool hasReturned_0;
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("Drop_action") action Drop_action_0() {
+    @name("TopPipe.Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Drop_action") action Drop_action_4() {
+    @name("TopPipe.Drop_action") action Drop_action_4() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Drop_action") action Drop_action_5() {
+    @name("TopPipe.Drop_action") action Drop_action_5() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Drop_action") action Drop_action_6() {
+    @name("TopPipe.Drop_action") action Drop_action_6() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
+    @name("TopPipe.Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
         nextHop = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
     }
-    @name("ipv4_match") table ipv4_match {
+    @name("TopPipe.ipv4_match") table ipv4_match {
         key = {
             headers.ip.dstAddr: lpm @name("headers.ip.dstAddr") ;
         }
@@ -116,10 +116,10 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 1024;
         default_action = Drop_action_0();
     }
-    @name("Send_to_cpu") action Send_to_cpu_0() {
+    @name("TopPipe.Send_to_cpu") action Send_to_cpu_0() {
         outCtrl.outputPort = 4w0xe;
     }
-    @name("check_ttl") table check_ttl {
+    @name("TopPipe.check_ttl") table check_ttl {
         key = {
             headers.ip.ttl: exact @name("headers.ip.ttl") ;
         }
@@ -129,10 +129,10 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         const default_action = NoAction_0();
     }
-    @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
+    @name("TopPipe.Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    @name("dmac") table dmac_1 {
+    @name("TopPipe.dmac") table dmac_1 {
         key = {
             nextHop: exact @name("nextHop") ;
         }
@@ -143,10 +143,10 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 1024;
         default_action = Drop_action_4();
     }
-    @name("Set_smac") action Set_smac_0(EthernetAddress smac) {
+    @name("TopPipe.Set_smac") action Set_smac_0(EthernetAddress smac) {
         headers.ethernet.srcAddr = smac;
     }
-    @name("smac") table smac_1 {
+    @name("TopPipe.smac") table smac_1 {
         key = {
             outCtrl.outputPort: exact @name("outCtrl.outputPort") ;
         }
@@ -236,7 +236,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     bit<16> tmp_6;
-    @name("ck") Ck16() ck_2;
+    @name("TopDeparser.ck") Ck16() ck_2;
     @hidden action act_4() {
         ck_2.clear();
         p.ip.hdrChecksum = 16w0;

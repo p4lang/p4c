@@ -47,7 +47,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name(".copy_queueing_data") action copy_queueing_data_0() {
         hdr.queueing_hdr.setValid();
@@ -69,7 +69,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
     @name(".set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;

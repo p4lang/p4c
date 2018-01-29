@@ -2,7 +2,7 @@
 
 control Ing(out bit<32> a) {
     bool b;
-    @name("cond") action cond_0() {
+    @name("Ing.cond") action cond_0() {
         a = (b ? 32w5 : a);
         a = (!b ? 32w10 : a);
     }

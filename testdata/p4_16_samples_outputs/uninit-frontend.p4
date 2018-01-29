@@ -51,16 +51,16 @@ control c(out bit<32> v) {
     bit<32> setByAction;
     bit<32> e;
     bool touched;
-    @name("a1") action a1_0() {
+    @name("c.a1") action a1_0() {
         setByAction = 32w1;
     }
-    @name("a1") action a1_2() {
+    @name("c.a1") action a1_2() {
         setByAction = 32w1;
     }
-    @name("a2") action a2_0() {
+    @name("c.a2") action a2_0() {
         setByAction = 32w1;
     }
-    @name("t") table t {
+    @name("c.t") table t {
         actions = {
             a1_0();
             a2_0();

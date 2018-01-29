@@ -41,7 +41,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     int<32> tmp_6;
     int<32> tmp_7;
     int<32> tmp_8;
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name(".action_0") action action_14() {
         hdr.pkt.field_a_32 = ~((bit<32>)hdr.pkt.field_b_32 | hdr.pkt.field_c_32);

@@ -42,12 +42,12 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("c.a") action c_a() {
+    @name("ingress.c.a") action c_a() {
         h.h.b = h.h.a;
     }
-    @name("c.t") table c_t_0 {
+    @name("ingress.c.t") table c_t_0 {
         key = {
             h.h.a + 32w1: exact @name("e") ;
         }

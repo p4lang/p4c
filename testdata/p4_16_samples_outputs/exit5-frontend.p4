@@ -1,10 +1,10 @@
 control ctrl() {
-    @name("e") action e_0() {
+    @name("ctrl.e") action e_0() {
         exit;
     }
-    @name("f") action f_0() {
+    @name("ctrl.f") action f_0() {
     }
-    @name("t") table t {
+    @name("ctrl.t") table t {
         actions = {
             e_0();
             f_0();

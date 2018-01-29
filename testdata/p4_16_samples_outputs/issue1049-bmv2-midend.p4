@@ -58,13 +58,13 @@ struct tuple_0 {
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("hash_drop_decision") action hash_drop_decision_0() {
+    @name("cIngress.hash_drop_decision") action hash_drop_decision_0() {
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.mystruct1.hash1, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol }, 32w0xffff);
         meta.mystruct1.hash_drop = meta.mystruct1.hash1 < 16w0x8000;
     }
-    @name("guh") table guh {
+    @name("cIngress.guh") table guh {
         key = {
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
@@ -73,7 +73,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         default_action = hash_drop_decision_0();
     }
-    @name("debug_table") table debug_table {
+    @name("cIngress.debug_table") table debug_table {
         key = {
             meta.mystruct1.hash1    : exact @name("meta.mystruct1.hash1") ;
             meta.mystruct1.hash_drop: exact @name("meta.mystruct1.hash_drop") ;

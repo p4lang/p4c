@@ -1,18 +1,18 @@
 control c() {
-    @name("a") action a_0() {
+    @name("c.a") action a_0() {
     }
-    @name("a") action a_2() {
+    @name("c.a") action a_2() {
     }
-    @name("b") action b_0() {
+    @name("c.b") action b_0() {
     }
-    @name("t1") table t1 {
+    @name("c.t1") table t1 {
         actions = {
             a_0();
             b_0();
         }
         default_action = a_0();
     }
-    @name("t2") table t2 {
+    @name("c.t2") table t2 {
         actions = {
             a_2();
         }

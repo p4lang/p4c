@@ -727,7 +727,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".outer_bd_action_profile") action_profile(32w256) outer_bd_action_profile;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name(".set_bd") action set_bd_0(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
