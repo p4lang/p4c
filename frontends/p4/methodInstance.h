@@ -152,8 +152,8 @@ These methods are:
 - header.setInvalid(),
 - header.isValid(),
 - union.isValid(),
-- stack.push(int),
-- stack.pop(int)
+- stack.push_front(int),
+- stack.pop_front(int)
 */
 class BuiltInMethod final : public MethodInstance {
     friend class MethodInstance;
