@@ -387,6 +387,40 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return rv;
 }
 
+using ValueList = std::vector<std::pair<const IR::Constant *, const IR::Constant *>>;
+
+static const IR::Expression*
+explodeLabel(const ValueList& value_or_masked, const std::vector<int> &sizes) {
+    if (value_or_masked.size() == 1) {
+        auto value = value_or_masked.at(0).first;
+        auto mask = value_or_masked.at(0).second;
+        if (mask->value == 0)
+            return new IR::DefaultExpression(value->srcInfo);
+    }
+    auto rv = new IR::ListExpression({});
+    for (auto it = sizes.rbegin(); it != sizes.rend(); ++it) {
+
+        auto idx = std::distance(begin(sizes), it.base()) - 1;
+        auto value = value_or_masked.at(idx).first;
+        auto mask = value_or_masked.at(idx).second;
+        mpz_class v = value->value;
+        mpz_class m = mask->value;
+        bool useMask = m != -1;
+
+        int s = *it;
+        auto bits = Util::ripBits(v, s);
+        auto type = IR::Type_Bits::get(s);
+        const IR::Expression* expr = new IR::Constant(value->srcInfo, type, bits, value->base);
+        if (useMask) {
+            auto maskbits = Util::ripBits(m, s);
+            auto maskcst = new IR::Constant(mask->srcInfo, type, maskbits, mask->base);
+            expr = new IR::Mask(mask->srcInfo, expr, maskcst);
+        }
+        rv->components.insert(rv->components.begin(), expr);
+    }
+    return rv;
+}
+
 const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser) {
     ExpressionConverter conv(this);
 
@@ -410,22 +444,40 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
         IR::Vector<IR::SelectCase> cases;
+        LOG3(" asfsdf " << parser->select->size());
         for (auto c : *parser->cases) {
             IR::ID state = c->action;
             auto deststate = getState(state);
             if (deststate == nullptr)
                 return nullptr;
+            ValueList value_list;
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
-                    auto expr = explodeLabel(first, v.second, sizes);
-                    auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
-                    cases.push_back(sc);
+                    /// if select expression has one fields, e.g.
+                    /// select(latest.etherType) {
+                    ///    0x8100, 0x9100, 0x9200, 0x9300 : parse_vlan;
+                    /// }
+                    if (parser->select->size() == 1) {
+                        auto expr = explodeLabel(first, v.second, sizes);
+                        auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
+                        cases.push_back(sc);
+                    } else {
+                    /// if select expression on multiple fields, e.g.
+                    /// select(latest.etherType, latest.dstAddr) {
+                    ///    0x8100, 0x1234567890ab : parse_custom;
+                    /// }
+                        value_list.push_back(std::make_pair(first, v.second));
+                    }
                 } else if (/*auto first = */v.first->to<IR::PathExpression>()) {
-                    // XXX(hanw): handle parser_value_set
                     ::warning("parser_value_set is not yet implemented");
                 } else {
                     ::error("Expected constant or parser value set in %1%", v.first);
                 }
+            }
+            if (parser->select->size() > 1) {
+                auto expr = explodeLabel(value_list, sizes);
+                auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
+                cases.push_back(sc);
             }
         }
         select = new IR::SelectExpression(parser->select->srcInfo, list, std::move(cases));
