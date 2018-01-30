@@ -93,10 +93,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             tbl_act_0.apply();
         if (hdr.h.v == hdr.a[0].v) 
             tbl_act_1.apply();
-        if (hdr.h == hdr.a[0]) 
+        if (!hdr.h.isValid() && !hdr.a[0].isValid() || hdr.h.isValid() && hdr.a[0].isValid() && hdr.h.s == hdr.a[0].s && hdr.h.v == hdr.a[0].v) 
             tbl_act_2.apply();
         tbl_act_3.apply();
-        if (tmp == hdr.a) 
+        if ((!tmp[0].isValid() && !hdr.a[0].isValid() || tmp[0].isValid() && hdr.a[0].isValid() && tmp[0].s == hdr.a[0].s && tmp[0].v == hdr.a[0].v) && (!tmp[1].isValid() && !hdr.a[1].isValid() || tmp[1].isValid() && hdr.a[1].isValid() && tmp[1].s == hdr.a[1].s && tmp[1].v == hdr.a[1].v)) 
             tbl_act_4.apply();
     }
 }
