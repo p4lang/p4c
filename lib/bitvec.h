@@ -217,6 +217,8 @@ class bitvec {
         return false; }
     void clrrange(size_t idx, size_t sz) {
         if (sz == 0) return;
+        if (size < sz/bits_per_unit)  // To avoid sz + idx overflow
+            sz = size * bits_per_unit;
         if (idx >= size * bits_per_unit) return;
         if (size == 1) {
             if (idx + sz < bits_per_unit)

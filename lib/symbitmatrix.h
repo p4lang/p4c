@@ -70,9 +70,8 @@ class SymBitMatrix : private bitvec {
         friend class SymBitMatrix;
         using rowref<SymBitMatrix>::rowref;
         void operator|=(bitvec a) const {
-            for (auto col = a[row]; ++col != a.end();)
-                self(row, *col) = 1;
-            a.clrrange(row+1, ~0); self |= a << (row*row+row)/2; }
+            for (size_t v : a) {
+                self(row, v) = 1; } }
         nonconst_bitref operator[](unsigned col) const { return self(row, col); }
     };
     class const_rowref : public rowref<const SymBitMatrix> {
