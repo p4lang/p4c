@@ -1181,11 +1181,33 @@ CONVERT_PRIMITIVE(mark_for_drop) {
 CONVERT_PRIMITIVE(push) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
+    auto op1 = primitive->operands.at(1);
     auto hdr = conv.convert(primitive->operands.at(0));
-    auto count = conv.convert(primitive->operands.at(1));
+    auto count = conv.convert(op1);
+    if (!count->is<IR::Constant>()) {
+        ::error("%1%: Only push with a constant value is supported", op1);
+        return new IR::EmptyStatement(primitive->srcInfo);
+    }
+    auto cst = count->to<IR::Constant>();
+    auto number = cst->asInt();
+    if (number < 0) {
+        ::error("%1%: push requires a positive amount", op1);
+        return new IR::EmptyStatement(primitive->srcInfo);
+    }
+    if (number > 0xFFFF) {
+        ::error("%1%: push amount is too large", op1);
+        return new IR::EmptyStatement(primitive->srcInfo);
+    }
+    IR::IndexedVector<IR::StatOrDecl> block;
     auto methodName = IR::Type_Stack::push_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
-    return new IR::MethodCallStatement(primitive->srcInfo, method, { count });
+    block.push_back(new IR::MethodCallStatement(primitive->srcInfo, method, { count }));
+    for (int i = 0; i < number; i++) {
+        auto elemi = new IR::ArrayIndex(primitive->srcInfo, hdr, new IR::Constant(i));
+        auto setValid = new IR::Member(elemi, IR::ID(IR::Type_Header::setValid));
+        block.push_back(new IR::MethodCallStatement(primitive->srcInfo, setValid, {}));
+    }
+    return new IR::BlockStatement(primitive->srcInfo, std::move(block));
 }
 CONVERT_PRIMITIVE(pop) {
     ExpressionConverter conv(structure);

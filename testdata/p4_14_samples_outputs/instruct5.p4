@@ -49,13 +49,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop() {
     }
     @name(".push1") action push1(bit<24> x1) {
-        hdr.extra.push_front(1);
+        {
+            hdr.extra.push_front(1);
+            hdr.extra[0].setValid();
+        }
         hdr.extra[0].x1 = x1;
         hdr.extra[0].more = hdr.data.more;
         hdr.data.more = 8w1;
     }
     @name(".push2") action push2(bit<24> x1, bit<24> x2) {
-        hdr.extra.push_front(2);
+        {
+            hdr.extra.push_front(2);
+            hdr.extra[0].setValid();
+            hdr.extra[1].setValid();
+        }
         hdr.extra[0].x1 = x1;
         hdr.extra[0].more = 8w1;
         hdr.extra[1].x1 = x2;

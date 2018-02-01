@@ -2642,28 +2642,40 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".mpls_ethernet_push1_rewrite") action _mpls_ethernet_push1_rewrite() {
         hdr.inner_ethernet = hdr.ethernet;
         hdr.mpls.push_front(1);
+        hdr.mpls[0].setValid();
         hdr.ethernet.etherType = 16w0x8847;
     }
     @name(".mpls_ip_push1_rewrite") action _mpls_ip_push1_rewrite() {
         hdr.mpls.push_front(1);
+        hdr.mpls[0].setValid();
         hdr.ethernet.etherType = 16w0x8847;
     }
     @name(".mpls_ethernet_push2_rewrite") action _mpls_ethernet_push2_rewrite() {
         hdr.inner_ethernet = hdr.ethernet;
         hdr.mpls.push_front(2);
+        hdr.mpls[0].setValid();
+        hdr.mpls[1].setValid();
         hdr.ethernet.etherType = 16w0x8847;
     }
     @name(".mpls_ip_push2_rewrite") action _mpls_ip_push2_rewrite() {
         hdr.mpls.push_front(2);
+        hdr.mpls[0].setValid();
+        hdr.mpls[1].setValid();
         hdr.ethernet.etherType = 16w0x8847;
     }
     @name(".mpls_ethernet_push3_rewrite") action _mpls_ethernet_push3_rewrite() {
         hdr.inner_ethernet = hdr.ethernet;
         hdr.mpls.push_front(3);
+        hdr.mpls[0].setValid();
+        hdr.mpls[1].setValid();
+        hdr.mpls[2].setValid();
         hdr.ethernet.etherType = 16w0x8847;
     }
     @name(".mpls_ip_push3_rewrite") action _mpls_ip_push3_rewrite() {
         hdr.mpls.push_front(3);
+        hdr.mpls[0].setValid();
+        hdr.mpls[1].setValid();
+        hdr.mpls[2].setValid();
         hdr.ethernet.etherType = 16w0x8847;
     }
     @name(".fabric_rewrite") action _fabric_rewrite(bit<14> tunnel_index) {
