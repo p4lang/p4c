@@ -46,8 +46,9 @@ message PacketStreamResponse {
 }
 
 enum PortOperStatus {
-  OPER_STATUS_DOWN = 0;
-  OPER_STATUS_UP = 1;
+  OPER_STATUS_UNKNOWN = 0;
+  OPER_STATUS_DOWN = 1;
+  OPER_STATUS_UP = 2;
 }
 
 message SetPortOperStatusRequest {
