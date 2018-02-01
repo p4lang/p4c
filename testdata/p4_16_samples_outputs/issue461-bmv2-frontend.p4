@@ -54,22 +54,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".my_drop") action my_drop() {
         mark_to_drop();
     }
-    @name("ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats;
-    @name("set_l2ptr") action set_l2ptr_0(bit<32> l2ptr) {
+    @name("ingress.ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats;
+    @name("ingress.set_l2ptr") action set_l2ptr_0(bit<32> l2ptr) {
         ipv4_da_lpm_stats.count();
         meta.fwd_metadata.l2ptr = l2ptr;
     }
-    @name("drop_with_count") action drop_with_count_0() {
+    @name("ingress.drop_with_count") action drop_with_count_0() {
         ipv4_da_lpm_stats.count();
         mark_to_drop();
     }
-    @name("set_bd_dmac_intf") action set_bd_dmac_intf_0(bit<24> bd, bit<48> dmac, bit<9> intf) {
+    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf_0(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("ipv4_da_lpm") table ipv4_da_lpm {
+    @name("ingress.ipv4_da_lpm") table ipv4_da_lpm {
         actions = {
             set_l2ptr_0();
             drop_with_count_0();
@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = drop_with_count_0();
         counters = ipv4_da_lpm_stats;
     }
-    @name("mac_da") table mac_da {
+    @name("ingress.mac_da") table mac_da {
         actions = {
             set_bd_dmac_intf_0();
             my_drop();
@@ -100,10 +100,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".my_drop") action my_drop_0() {
         mark_to_drop();
     }
-    @name("rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("send_frame") table send_frame {
+    @name("egress.send_frame") table send_frame {
         actions = {
             rewrite_mac_0();
             my_drop_0();

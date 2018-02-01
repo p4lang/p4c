@@ -7,7 +7,7 @@ extern Fake {
 
 parser P() {
     bit<32> x;
-    @name("fake") Fake() fake;
+    @name("P.fake") Fake() fake;
     state start {
         x = 32w0;
         fake.call(x);
@@ -16,7 +16,7 @@ parser P() {
 }
 
 control C() {
-    @name("fake") Fake() fake_2;
+    @name("C.fake") Fake() fake_2;
     @hidden action act() {
         fake_2.call(32w1);
     }

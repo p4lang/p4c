@@ -20,22 +20,22 @@ set (BMV2_SRCS bmv2.cpp)
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SRCS}")
 
 set (BMV2_BACKEND_SRCS
-  analyzer.cpp
+  JsonObjects.cpp
   action.cpp
+  analyzer.cpp
   backend.cpp
   control.cpp
   deparser.cpp
   errorcode.cpp
   expression.cpp
   extern.cpp
+  extractArchInfo.cpp
   globals.cpp
   header.cpp
   helpers.cpp
-  extractArchInfo.cpp
-  JsonObjects.cpp
   lower.cpp
-  midend.cpp
   metermap.cpp
+  midend.cpp
   parser.cpp
   portableSwitch.cpp
   sharedActionSelectorCheck.cpp
@@ -43,22 +43,22 @@ set (BMV2_BACKEND_SRCS
   )
 
 set (BMV2_BACKEND_HDRS
-  analyzer.h
+  JsonObjects.h
   action.h
+  analyzer.h
   backend.h
   control.h
   deparser.h
   errorcode.h
   expression.h
   extern.h
+  extractArchInfo.h
   globals.h
   header.h
   helpers.h
-  extractArchInfo.h
-  JsonObjects.h
   lower.h
-  midend.h
   metermap.h
+  midend.h
   options.h
   parser.h
   portableSwitch.h
@@ -113,10 +113,6 @@ set (XFAIL_TESTS
   # These tests use a table key with type 'error'
   testdata/p4_16_samples/issue1062-bmv2.p4
   testdata/p4_16_samples/issue1062-1-bmv2.p4
-  # These tests fail due to issue #486
-  testdata/p4_16_samples/x-bmv2.p4
-  testdata/p4_16_samples/issue986-1-bmv2.p4
-  testdata/p4_14_samples/16-TwoReferences.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)

@@ -4,7 +4,7 @@
 control empty();
 package top(empty e);
 control Ing() {
-    @name("cond") action cond_0() {
+    @name("Ing.cond") action cond_0() {
     }
     @hidden table tbl_cond {
         actions = {

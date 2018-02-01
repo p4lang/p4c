@@ -41,9 +41,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
     @name(".meter1") meter(32w1024, MeterType.bytes) meter1;

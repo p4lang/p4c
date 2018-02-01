@@ -31,9 +31,9 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("foo") action foo_0(bit<16> bar) {
+    @name("cIngress.foo") action foo_0(bit<16> bar) {
         bool hasReturned_1 = false;
         if (bar == 16w0xf00d) {
             hdr.ethernet.srcAddr = 48w0xdeadbeeff00d;
@@ -42,7 +42,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         if (!hasReturned_1) 
             hdr.ethernet.srcAddr = 48w0x215241100ff2;
     }
-    @name("tbl1") table tbl1 {
+    @name("cIngress.tbl1") table tbl1 {
         key = {
         }
         actions = {

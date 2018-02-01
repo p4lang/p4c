@@ -16,12 +16,12 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("myc.set_eg") action myc_set_eg(bit<9> eg) {
+    @name("IngressI.myc.set_eg") action myc_set_eg(bit<9> eg) {
         smeta.egress_spec = eg;
     }
-    @name("myc.myt") table myc_myt_0 {
+    @name("IngressI.myc.myt") table myc_myt_0 {
         key = {
             meta.f1: exact @name("meta.f1") ;
             meta.f2: exact @name("meta.f2") ;

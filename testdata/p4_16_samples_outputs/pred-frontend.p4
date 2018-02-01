@@ -5,7 +5,7 @@ control empty();
 package top(empty e);
 control Ing() {
     bool b;
-    @name("cond") action cond_0() {
+    @name("Ing.cond") action cond_0() {
         b = true;
     }
     apply {

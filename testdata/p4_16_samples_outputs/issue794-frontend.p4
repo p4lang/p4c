@@ -9,7 +9,7 @@ extern Random2 {
 }
 
 parser caller() {
-    @name("rand1") Random2() rand1;
+    @name("caller.rand1") Random2() rand1;
     state start {
         transition callee_start;
     }
@@ -23,7 +23,7 @@ parser caller() {
 }
 
 control ingress() {
-    @name("rand1") Random2() rand1_2;
+    @name("ingress.rand1") Random2() rand1_2;
     apply {
         rand1_2.read();
     }

@@ -17,7 +17,7 @@ extern E {
 
 control c(inout S s) {
     bit<32> tmp_0;
-    @name("e") E() e;
+    @name("c.e") E() e;
     apply {
         if (s.h.isValid()) 
             s.h.data3 = 32w0;

@@ -48,42 +48,42 @@ control update(inout packet_t h, inout Meta m) {
 }
 
 control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
-    @name("setb1") action setb1_0(bit<9> port, bit<8> val) {
+    @name("ingress.setb1") action setb1_0(bit<9> port, bit<8> val) {
         hdrs.data.b1 = val;
         meta.egress_spec = port;
     }
-    @name("noop") action noop_0() {
+    @name("ingress.noop") action noop_0() {
     }
-    @name("noop") action noop_5() {
+    @name("ingress.noop") action noop_5() {
     }
-    @name("noop") action noop_6() {
+    @name("ingress.noop") action noop_6() {
     }
-    @name("noop") action noop_7() {
+    @name("ingress.noop") action noop_7() {
     }
-    @name("noop") action noop_8() {
+    @name("ingress.noop") action noop_8() {
     }
-    @name("setbyte") action setbyte_0(bit<8> val) {
+    @name("ingress.setbyte") action setbyte_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("setbyte") action setbyte_4(bit<8> val) {
+    @name("ingress.setbyte") action setbyte_4(bit<8> val) {
         hdrs.data.b2 = val;
     }
-    @name("setbyte") action setbyte_5(bit<8> val) {
+    @name("ingress.setbyte") action setbyte_5(bit<8> val) {
         hdrs.extra[1].b1 = val;
     }
-    @name("setbyte") action setbyte_6(bit<8> val) {
+    @name("ingress.setbyte") action setbyte_6(bit<8> val) {
         hdrs.extra[2].b2 = val;
     }
-    @name("act1") action act1_0(bit<8> val) {
+    @name("ingress.act1") action act1_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("act2") action act2_0(bit<8> val) {
+    @name("ingress.act2") action act2_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("act3") action act3_0(bit<8> val) {
+    @name("ingress.act3") action act3_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("test1") table test1 {
+    @name("ingress.test1") table test1 {
         key = {
             hdrs.data.f1: ternary @name("hdrs.data.f1") ;
         }
@@ -93,7 +93,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop_0();
     }
-    @name("ex1") table ex1 {
+    @name("ingress.ex1") table ex1 {
         key = {
             hdrs.extra[0].h: ternary @name("hdrs.extra[0].h") ;
         }
@@ -106,7 +106,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop_5();
     }
-    @name("tbl1") table tbl1 {
+    @name("ingress.tbl1") table tbl1 {
         key = {
             hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
@@ -116,7 +116,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop_6();
     }
-    @name("tbl2") table tbl2 {
+    @name("ingress.tbl2") table tbl2 {
         key = {
             hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
@@ -126,7 +126,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
         }
         default_action = noop_7();
     }
-    @name("tbl3") table tbl3 {
+    @name("ingress.tbl3") table tbl3 {
         key = {
             hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }

@@ -46,10 +46,10 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("set_error_idx") action set_error_idx_0(bit<8> idx) {
+    @name("ingress.set_error_idx") action set_error_idx_0(bit<8> idx) {
         h.h.e = idx;
     }
-    @name("t_exact") table t_exact {
+    @name("ingress.t_exact") table t_exact {
         key = {
             m.my_err: exact @name("m.my_err") ;
         }

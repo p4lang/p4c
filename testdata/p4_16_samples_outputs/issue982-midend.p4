@@ -349,15 +349,15 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("process_clone_h0") action process_clone_h0_0() {
+    @name("egress.process_clone_h0") action process_clone_h0_0() {
         user_meta.fwd_metadata.outport = (bit<32>)user_meta.clone_0.data;
     }
-    @name("process_clone_h1") action process_clone_h1_0() {
+    @name("egress.process_clone_h1") action process_clone_h1_0() {
         user_meta.fwd_metadata.outport = user_meta.clone_1.data;
     }
-    @name("t") table t {
+    @name("egress.t") table t {
         key = {
             user_meta.custom_clone_id: exact @name("user_meta.custom_clone_id") ;
         }
@@ -409,14 +409,14 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
-    @name("do_clone") action do_clone_0(PortId_t port) {
+    @name("ingress.do_clone") action do_clone_0(PortId_t port) {
         ostd.clone = true;
         ostd.clone_port = port;
         user_meta.custom_clone_id = 3w1;
     }
-    @name("t") table t_2 {
+    @name("ingress.t") table t_2 {
         key = {
             user_meta.fwd_metadata.outport: exact @name("user_meta.fwd_metadata.outport") ;
         }

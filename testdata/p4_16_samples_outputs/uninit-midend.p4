@@ -53,13 +53,13 @@ parser p1(packet_in p, out Header h) {
 
 control c(out bit<32> v) {
     bit<32> e;
-    @name("a1") action a1_0() {
+    @name("c.a1") action a1_0() {
     }
-    @name("a1") action a1_2() {
+    @name("c.a1") action a1_2() {
     }
-    @name("a2") action a2_0() {
+    @name("c.a2") action a2_0() {
     }
-    @name("t") table t {
+    @name("c.t") table t {
         actions = {
             a1_0();
             a2_0();

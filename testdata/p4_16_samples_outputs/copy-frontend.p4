@@ -5,7 +5,7 @@ struct S {
 control c(inout bit<32> b) {
     S s1;
     S s2;
-    @name("a") action a_0() {
+    @name("c.a") action a_0() {
         s2 = { 32w0 };
         s1 = s2;
         s2 = s1;

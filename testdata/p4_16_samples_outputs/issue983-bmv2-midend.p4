@@ -37,9 +37,9 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("debug_table_cksum1") table debug_table_cksum1 {
+    @name("ingress.debug_table_cksum1") table debug_table_cksum1 {
         key = {
             hdr.ethernet.srcAddr            : exact @name("hdr.ethernet.srcAddr") ;
             hdr.ethernet.dstAddr            : exact @name("hdr.ethernet.dstAddr") ;

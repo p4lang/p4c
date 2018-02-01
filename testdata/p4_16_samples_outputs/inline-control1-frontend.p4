@@ -6,7 +6,7 @@ extern Y {
 control d(out bit<32> x) {
     bit<32> y;
     bit<32> x_1;
-    @name("cinst.inst") Y(32w16) cinst_inst_0;
+    @name("d.cinst.inst") Y(32w16) cinst_inst_0;
     bit<32> cinst_tmp_0;
     apply {
         cinst_tmp_0 = cinst_inst_0.get();

@@ -2,7 +2,7 @@ control p(out bit<1> y) {
     bit<1> x;
     bit<1> z;
     bit<1> x_3;
-    @name("b") action b_0(in bit<1> x_0, out bit<1> y_1) {
+    @name("p.b") action b_0(in bit<1> x_0, out bit<1> y_1) {
         {
             bit<1> x0_0 = x_0;
             bit<1> y0_0;

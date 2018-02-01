@@ -4,7 +4,7 @@ extern lpf<I> {
 }
 
 control c() {
-    @name("lpf_0") lpf<bit<32>>(32w32) lpf_0;
+    @name("c.lpf_0") lpf<bit<32>>(32w32) lpf_0;
     @hidden action act() {
         lpf_0.execute<bit<8>>(8w0, 32w0);
     }

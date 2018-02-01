@@ -165,9 +165,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
     @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_0;

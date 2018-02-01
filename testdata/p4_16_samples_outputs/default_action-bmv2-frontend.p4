@@ -42,10 +42,10 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("c.add") action c_add(bit<32> data) {
+    @name("ingress.c.add") action c_add(bit<32> data) {
         h.h.b = h.h.a + data;
     }
-    @name("c.t") table c_t_0 {
+    @name("ingress.c.t") table c_t_0 {
         actions = {
             c_add();
         }
