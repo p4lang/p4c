@@ -664,7 +664,6 @@ structTypeDeclaration
         "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, *$6); }
     ;
 
-// experimental
 headerUnionDeclaration
     : optAnnotations
         HEADER_UNION name { driver.structure->declareType(*$3); }

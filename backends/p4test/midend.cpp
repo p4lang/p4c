@@ -29,6 +29,7 @@ limitations under the License.
 #include "midend.h"
 #include "midend/actionSynthesis.h"
 #include "midend/compileTimeOps.h"
+#include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
 #include "midend/expandEmit.h"
@@ -88,6 +89,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),

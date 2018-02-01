@@ -14,6 +14,7 @@
 
 set (MIDEND_SRCS
   actionSynthesis.cpp
+  complexComparison.cpp
   convertEnums.cpp
   copyStructures.cpp
   eliminateTuples.cpp
@@ -41,6 +42,7 @@ set (MIDEND_SRCS
 set (MIDEND_HDRS
   actionSynthesis.h
   compileTimeOps.h
+  complexComparison.h
   convertEnums.h
   copyStructures.h
   eliminateTuples.h

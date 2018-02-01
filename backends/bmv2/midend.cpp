@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
+#include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
@@ -93,6 +94,7 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),

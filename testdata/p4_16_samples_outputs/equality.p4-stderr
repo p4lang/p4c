@@ -1,0 +1,24 @@
+equality.p4(22): [--Wwarn=uninitialized_use] warning: a may be uninitialized
+        if (a == b) {
+            ^
+equality.p4(22): [--Wwarn=uninitialized_use] warning: b may be uninitialized
+        if (a == b) {
+                 ^
+equality.p4(24): [--Wwarn=uninitialized_use] warning: h1 may not be completely initialized
+        } else if (h1 == h2) {
+                   ^^
+equality.p4(24): [--Wwarn=uninitialized_use] warning: h2 may not be completely initialized
+        } else if (h1 == h2) {
+                         ^^
+equality.p4(26): [--Wwarn=uninitialized_use] warning: s1 may not be completely initialized
+        } else if (s1 == s2) {
+                   ^^
+equality.p4(26): [--Wwarn=uninitialized_use] warning: s2 may not be completely initialized
+        } else if (s1 == s2) {
+                         ^^
+equality.p4(28): [--Wwarn=uninitialized_use] warning: a1 may not be completely initialized
+        } else if (a1 == a2) {
+                   ^^
+equality.p4(28): [--Wwarn=uninitialized_use] warning: a2 may not be completely initialized
+        } else if (a1 == a2) {
+                         ^^
