@@ -56,6 +56,7 @@ limitations under the License.
 #include "unusedDeclarations.h"
 #include "uselessCasts.h"
 #include "validateParsedProgram.h"
+#include "checkConstants.h"
 
 namespace P4 {
 
@@ -142,6 +143,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
+        new CheckConstants(&refMap, &typeMap),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new FrontEndDump(),  // used for testing the program at this point
@@ -160,19 +162,19 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap),
         new RemoveParserControlFlow(&refMap, &typeMap),
-        new P4::RemoveReturns(&refMap),
-        new P4::RemoveDontcareArgs(&refMap, &typeMap),
-        new P4::MoveConstructors(&refMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-        new P4::ClearTypeMap(&typeMap),
+        new RemoveReturns(&refMap),
+        new RemoveDontcareArgs(&refMap, &typeMap),
+        new MoveConstructors(&refMap),
+        new RemoveAllUnusedDeclarations(&refMap),
+        new ClearTypeMap(&typeMap),
         evaluator,
-        new P4::Inline(&refMap, &typeMap, evaluator),
-        new P4::InlineActions(&refMap, &typeMap),
-        new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),  // needed again after inlining
-        new P4::UniqueParameters(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::HierarchicalNames(),
+        new Inline(&refMap, &typeMap, evaluator),
+        new InlineActions(&refMap, &typeMap),
+        new LocalizeAllActions(&refMap),
+        new UniqueNames(&refMap),  // needed again after inlining
+        new UniqueParameters(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new HierarchicalNames(),
         new FrontEndLast(),
     };
 
