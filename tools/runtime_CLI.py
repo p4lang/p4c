@@ -22,6 +22,7 @@
 
 import argparse
 import cmd
+from collections import Counter
 import os
 import sys
 import struct
@@ -59,6 +60,8 @@ def enum(type_name, *sequential, **named):
 PreType = enum('PreType', 'None', 'SimplePre', 'SimplePreLAG')
 MeterType = enum('MeterType', 'packets', 'bytes')
 TableType = enum('TableType', 'simple', 'indirect', 'indirect_ws')
+ResType = enum('ResType', 'table', 'action_prof', 'action', 'meter_array',
+               'counter_array', 'register_array')
 
 def bytes_to_string(byte_array):
     form = 'B' * len(byte_array)
@@ -104,6 +107,9 @@ COUNTER_ARRAYS = {}
 REGISTER_ARRAYS = {}
 CUSTOM_CRC_CALCS = {}
 
+# maps (object type, unique suffix) to object
+SUFFIX_LOOKUP_MAP = {}
+
 class MatchType:
     EXACT = 0
     LPM = 1
@@ -144,6 +150,13 @@ class Table:
             "None" if not self.action_prof else self.action_prof.name)
         return "{0:30} [{1}, mk={2}]".format(self.name, ap_str, self.key_str())
 
+    def get_action(self, action_name):
+        key = ResType.action, action_name
+        action = SUFFIX_LOOKUP_MAP.get(key, None)
+        if action is None or action.name not in self.actions:
+            return None
+        return action
+
 class ActionProf:
     def __init__(self, name, id_):
         self.name = name
@@ -156,6 +169,13 @@ class ActionProf:
 
     def action_prof_str(self):
         return "{0:30} [{1}]".format(self.name, self.with_selection)
+
+    def get_action(self, action_name):
+        key = ResType.action, action_name
+        action = SUFFIX_LOOKUP_MAP.get(key, None)
+        if action is None or action.name not in self.actions:
+            return None
+        return action
 
 class Action:
     def __init__(self, name, id_):
@@ -223,6 +243,8 @@ def reset_config():
     COUNTER_ARRAYS.clear()
     REGISTER_ARRAYS.clear()
     CUSTOM_CRC_CALCS.clear()
+
+    SUFFIX_LOOKUP_MAP.clear()
 
 def load_json_str(json_str):
     def get_header_type(header_name, j_headers):
@@ -325,6 +347,29 @@ def load_json_str(json_str):
             CUSTOM_CRC_CALCS[calc_name] = 16
         elif j_calc["algo"] == "crc32_custom":
             CUSTOM_CRC_CALCS[calc_name] = 32
+
+    # Builds a dictionary mapping (object type, unique suffix) to the object
+    # (Table, Action, etc...). In P4_16 the object name is the fully-qualified
+    # name, which can be quite long, which is why we accept unique suffixes as
+    # valid identifiers.
+    # Auto-complete does not support suffixes, only the fully-qualified names,
+    # but that can be changed in the future if needed.
+    suffix_count = Counter()
+    for res_type, res_dict in [
+            (ResType.table, TABLES), (ResType.action_prof, ACTION_PROFS),
+            (ResType.action, ACTIONS), (ResType.meter_array, METER_ARRAYS),
+            (ResType.counter_array, COUNTER_ARRAYS),
+            (ResType.register_array, REGISTER_ARRAYS)]:
+        for name, res in res_dict.items():
+            suffix = None
+            for s in reversed(name.split('.')):
+                suffix = s if suffix is None else s + '.' + suffix
+                key = (res_type, suffix)
+                SUFFIX_LOOKUP_MAP[key] = res
+                suffix_count[key] += 1
+    for key, c in suffix_count.items():
+        if c > 1:
+            del SUFFIX_LOOKUP_MAP[key]
 
 class UIn_Error(Exception):
     def __init__(self, info=""):
@@ -666,7 +711,7 @@ def deprecated_act_prof(substitute, with_selection=False,
             args = line.split()
             obj.at_least_n_args(args, 1)
             table_name = args[0]
-            table = obj.get_res("table", table_name, TABLES)
+            table = obj.get_res("table", table_name, ResType.table)
             if with_selection:
                 obj.check_indirect_ws(table)
             else:
@@ -756,10 +801,11 @@ class RuntimeAPI(cmd.Cmd):
         output = os.popen(line).read()
         print output
 
-    def get_res(self, type_name, name, array):
-        if name not in array:
+    def get_res(self, type_name, name, res_type):
+        key = res_type, name
+        if key not in SUFFIX_LOOKUP_MAP:
             raise UIn_ResourceError(type_name, name)
-        return array[name]
+        return SUFFIX_LOOKUP_MAP[key]
 
     def at_least_n_args(self, args, n):
         if len(args) < n:
@@ -803,7 +849,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
         for action_name in sorted(table.actions):
             print ACTIONS[action_name].action_str()
 
@@ -816,7 +862,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
         print table.table_str()
         print "*" * 80
         for action_name in sorted(table.actions):
@@ -884,12 +930,12 @@ class RuntimeAPI(cmd.Cmd):
 
         table_name, action_name = args[0], args[1]
 
-        table = self.get_res("table", table_name, TABLES)
-        if action_name not in table.actions:
+        table = self.get_res("table", table_name, ResType.table)
+        action = table.get_action(action_name)
+        if action is None:
             raise UIn_Error(
                 "Table %s has no action %s" % (table_name, action_name)
             )
-        action = ACTIONS[action_name]
         if len(args[2:]) != action.num_params():
             raise UIn_Error(
                 "Action %s needs %d parameters" % (action_name, action.num_params())
@@ -899,7 +945,7 @@ class RuntimeAPI(cmd.Cmd):
 
         self.print_set_default(table_name, action_name, runtime_data)
 
-        self.client.bm_mt_set_default_action(0, table_name, action_name, runtime_data)
+        self.client.bm_mt_set_default_action(0, table.name, action.name, runtime_data)
 
     def complete_table_set_default(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
@@ -932,9 +978,9 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
-        print self.client.bm_mt_get_num_entries(0, table_name)
+        print self.client.bm_mt_get_num_entries(0, table.name)
 
     def complete_table_num_entries(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -947,9 +993,9 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
-        self.client.bm_mt_clear_entries(0, table_name, False)
+        self.client.bm_mt_clear_entries(0, table.name, False)
 
     def complete_table_clear(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -962,8 +1008,9 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 3)
 
         table_name, action_name = args[0], args[1]
-        table = self.get_res("table", table_name, TABLES)
-        if action_name not in table.actions:
+        table = self.get_res("table", table_name, ResType.table)
+        action = table.get_action(action_name)
+        if action is None:
             raise UIn_Error(
                 "Table %s has no action %s" % (table_name, action_name)
             )
@@ -977,9 +1024,6 @@ class RuntimeAPI(cmd.Cmd):
                 )
         else:
             priority = 0
-
-        # guaranteed to exist
-        action = ACTIONS[action_name]
 
         for idx, input_ in enumerate(args[2:]):
             if input_ == "=>": break
@@ -1001,7 +1045,7 @@ class RuntimeAPI(cmd.Cmd):
         self.print_table_add(match_key, action_name, runtime_data)
 
         entry_handle = self.client.bm_mt_add_entry(
-            0, table_name, match_key, action_name, runtime_data,
+            0, table.name, match_key, action.name, runtime_data,
             BmAddEntryOptions(priority = priority)
         )
 
@@ -1017,7 +1061,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 3)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
         if not table.support_timeout:
             raise UIn_Error(
                 "Table {} does not support entry timeouts".format(table_name))
@@ -1034,7 +1078,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Setting a", timeout_ms, "ms timeout for entry", entry_handle
 
-        self.client.bm_mt_set_entry_ttl(0, table_name, entry_handle, timeout_ms)
+        self.client.bm_mt_set_entry_ttl(0, table.name, entry_handle, timeout_ms)
 
     def complete_table_set_timeout(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1047,14 +1091,12 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 3)
 
         table_name, action_name = args[0], args[1]
-        table = self.get_res("table", table_name, TABLES)
-        if action_name not in table.actions:
+        table = self.get_res("table", table_name, ResType.table)
+        action = table.get_action(action_name)
+        if action is None:
             raise UIn_Error(
                 "Table %s has no action %s" % (table_name, action_name)
             )
-
-        # guaranteed to exist
-        action = ACTIONS[action_name]
 
         try:
             entry_handle = int(args[2])
@@ -1070,7 +1112,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Modifying entry", entry_handle, "for", MatchType.to_str(table.match_type), "match table", table_name
 
         entry_handle = self.client.bm_mt_modify_entry(
-            0, table_name, entry_handle, action_name, runtime_data
+            0, table.name, entry_handle, action.name, runtime_data
         )
 
     def complete_table_modify(self, text, line, start_index, end_index):
@@ -1084,7 +1126,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
         try:
             entry_handle = int(args[1])
@@ -1093,7 +1135,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Deleting entry", entry_handle, "from", table_name
 
-        self.client.bm_mt_delete_entry(0, table_name, entry_handle)
+        self.client.bm_mt_delete_entry(0, table.name, entry_handle)
 
     def complete_table_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1121,18 +1163,19 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 2)
 
         act_prof_name, action_name = args[0], args[1]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
-        if action_name not in act_prof.actions:
+        action = act_prof.get_action(action_name)
+        if action is None:
             raise UIn_Error("Action profile '{}' has no action '{}'".format(
                 act_prof_name, action_name))
-        action = ACTIONS[action_name]
 
         action_params = args[2:]
         runtime_data = self.parse_runtime_data(action, action_params)
 
         mbr_handle = self.client.bm_mt_act_prof_add_member(
-            0, act_prof_name, action_name, runtime_data)
+            0, act_prof.name, action.name, runtime_data)
 
         print "Member has been created with handle", mbr_handle
 
@@ -1155,14 +1198,15 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         act_prof_name, action_name = args[0], args[1]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         try:
             mbr_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for member handle")
 
-        self.client.bm_mt_act_prof_delete_member(0, act_prof_name, mbr_handle)
+        self.client.bm_mt_act_prof_delete_member(0, act_prof.name, mbr_handle)
 
     def complete_act_prof_delete_member(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
@@ -1183,12 +1227,13 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 3)
 
         act_prof_name, action_name = args[0], args[1]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
-        if action_name not in act_prof.actions:
+        action = act_prof.get_action(action_name)
+        if action is None:
             raise UIn_Error("Action profile '{}' has no action '{}'".format(
                 act_prof_name, action_name))
-        action = ACTIONS[action_name]
 
         try:
             mbr_handle = int(args[2])
@@ -1202,7 +1247,7 @@ class RuntimeAPI(cmd.Cmd):
         runtime_data = self.parse_runtime_data(action, action_params)
 
         mbr_handle = self.client.bm_mt_act_prof_modify_member(
-            0, act_prof_name, mbr_handle, action_name, runtime_data)
+            0, act_prof.name, mbr_handle, action.name, runtime_data)
 
     def complete_act_prof_modify_member(self, text, line, start_index, end_index):
         return self._complete_act_prof_and_action(text, line)
@@ -1221,7 +1266,7 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 2)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
         if ws:
             self.check_indirect_ws(table)
@@ -1253,9 +1298,9 @@ class RuntimeAPI(cmd.Cmd):
 
         match_key = parse_match_key(table, match_key)
 
-        print "Adding entry to indirect match table", table_name
+        print "Adding entry to indirect match table", table.name
 
-        return table_name, match_key, handle, BmAddEntryOptions(priority = priority)
+        return table.name, match_key, handle, BmAddEntryOptions(priority = priority)
 
     @handle_bad_input
     def do_table_indirect_add(self, line):
@@ -1295,7 +1340,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
         self.check_indirect(table)
 
         try:
@@ -1305,7 +1350,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Deleting entry", entry_handle, "from", table_name
 
-        self.client.bm_mt_indirect_delete_entry(0, table_name, entry_handle)
+        self.client.bm_mt_indirect_delete_entry(0, table.name, entry_handle)
 
     def complete_table_indirect_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1316,7 +1361,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
         if ws:
             self.check_indirect_ws(table)
@@ -1328,7 +1373,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for handle")
 
-        return table_name, handle
+        return table.name, handle
 
     @handle_bad_input
     def do_table_indirect_set_default(self, line):
@@ -1360,11 +1405,12 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
 
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         self.check_act_prof_ws(act_prof)
 
-        grp_handle = self.client.bm_mt_act_prof_create_group(0, act_prof_name)
+        grp_handle = self.client.bm_mt_act_prof_create_group(0, act_prof.name)
 
         print "Group has been created with handle", grp_handle
 
@@ -1387,7 +1433,8 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         self.check_act_prof_ws(act_prof)
 
@@ -1396,7 +1443,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_act_prof_delete_group(0, act_prof_name, grp_handle)
+        self.client.bm_mt_act_prof_delete_group(0, act_prof.name, grp_handle)
 
     def complete_act_prof_delete_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
@@ -1417,7 +1464,8 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 3)
 
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         self.check_act_prof_ws(act_prof)
 
@@ -1432,7 +1480,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         self.client.bm_mt_act_prof_add_member_to_group(
-            0, act_prof_name, mbr_handle, grp_handle)
+            0, act_prof.name, mbr_handle, grp_handle)
 
     def complete_act_prof_add_member_to_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
@@ -1453,7 +1501,8 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 3)
 
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         self.check_act_prof_ws(act_prof)
 
@@ -1468,7 +1517,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         self.client.bm_mt_act_prof_remove_member_from_group(
-            0, act_prof_name, mbr_handle, grp_handle)
+            0, act_prof.name, mbr_handle, grp_handle)
 
     def complete_act_prof_remove_member_from_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
@@ -1716,7 +1765,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.at_least_n_args(args, 1)
         meter_name = args[0]
-        meter = self.get_res("meter", meter_name, METER_ARRAYS)
+        meter = self.get_res("meter", meter_name, ResType.meter_array)
         rates = args[1:]
         if len(rates) != meter.rate_count:
             raise UIn_Error(
@@ -1732,7 +1781,7 @@ class RuntimeAPI(cmd.Cmd):
                 new_rates.append(BmMeterRateConfig(r, b))
             except:
                 raise UIn_Error("Error while parsing rates")
-        self.client.bm_meter_array_set_rates(0, meter_name, new_rates)
+        self.client.bm_meter_array_set_rates(0, meter.name, new_rates)
 
     def complete_meter_array_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
@@ -1743,7 +1792,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.at_least_n_args(args, 2)
         meter_name = args[0]
-        meter = self.get_res("meter", meter_name, METER_ARRAYS)
+        meter = self.get_res("meter", meter_name, ResType.meter_array)
         try:
             index = int(args[1])
         except:
@@ -1767,7 +1816,7 @@ class RuntimeAPI(cmd.Cmd):
             table_name = meter.binding
             self.client.bm_mt_set_meter_rates(0, table_name, index, new_rates)
         else:
-            self.client.bm_meter_set_rates(0, meter_name, index, new_rates)
+            self.client.bm_meter_set_rates(0, meter.name, index, new_rates)
 
     def complete_meter_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
@@ -1778,7 +1827,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 2)
         meter_name = args[0]
-        meter = self.get_res("meter", meter_name, METER_ARRAYS)
+        meter = self.get_res("meter", meter_name, ResType.meter_array)
         try:
             index = int(args[1])
         except:
@@ -1788,7 +1837,7 @@ class RuntimeAPI(cmd.Cmd):
             table_name = meter.binding
             rates = self.client.bm_mt_get_meter_rates(0, table_name, index)
         else:
-            rates = self.client.bm_meter_get_rates(0, meter_name, index)
+            rates = self.client.bm_meter_get_rates(0, meter.name, index)
         if len(rates) != meter.rate_count:
             print "WARNING: expected", meter.rate_count, "rates",
             print "but only received", len(rates)
@@ -1808,7 +1857,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 2)
         counter_name = args[0]
-        counter = self.get_res("counter", counter_name, COUNTER_ARRAYS)
+        counter = self.get_res("counter", counter_name, ResType.counter_array)
         index = args[1]
         try:
             index = int(index)
@@ -1820,7 +1869,7 @@ class RuntimeAPI(cmd.Cmd):
             # index = index & 0xffffffff
             value = self.client.bm_mt_read_counter(0, table_name, index)
         else:
-            value = self.client.bm_counter_read(0, counter_name, index)
+            value = self.client.bm_counter_read(0, counter.name, index)
         print "%s[%d]= " % (counter_name, index), value
 
     def complete_counter_read(self, text, line, start_index, end_index):
@@ -1832,13 +1881,13 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         counter_name = args[0]
-        counter = self.get_res("counter", counter_name, COUNTER_ARRAYS)
+        counter = self.get_res("counter", counter_name, ResType.counter_array)
         if counter.is_direct:
             table_name = counter.binding
             print "this is the direct counter for table", table_name
             value = self.client.bm_mt_reset_counters(0, table_name)
         else:
-            value = self.client.bm_counter_reset_all(0, counter_name)
+            value = self.client.bm_counter_reset_all(0, counter.name)
 
     def complete_counter_reset(self, text, line, start_index, end_index):
         return self._complete_counters(text)
@@ -1852,7 +1901,8 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.at_least_n_args(args, 1)
         register_name = args[0]
-        register = self.get_res("register", register_name, REGISTER_ARRAYS)
+        register = self.get_res("register", register_name,
+                                ResType.register_array)
         if len(args) > 1:
             self.exactly_n_args(args, 2)
             index = args[1]
@@ -1860,11 +1910,11 @@ class RuntimeAPI(cmd.Cmd):
                 index = int(index)
             except:
                 raise UIn_Error("Bad format for index")
-            value = self.client.bm_register_read(0, register_name, index)
+            value = self.client.bm_register_read(0, register.name, index)
             print "{}[{}]=".format(register_name, index), value
         else:
             sys.stderr.write("register index omitted, reading entire array\n")
-            entries = self.client.bm_register_read_all(0, register_name)
+            entries = self.client.bm_register_read_all(0, register.name)
             print "{}=".format(register_name), ", ".join(
                 [str(e) for e in entries])
 
@@ -1877,7 +1927,8 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 3)
         register_name = args[0]
-        register = self.get_res("register", register_name, REGISTER_ARRAYS)
+        register = self.get_res("register", register_name,
+                                ResType.register_array)
         index = args[1]
         try:
             index = int(index)
@@ -1888,7 +1939,7 @@ class RuntimeAPI(cmd.Cmd):
             value = int(value)
         except:
             raise UIn_Error("Bad format for value, must be an integer")
-        self.client.bm_register_write(0, register_name, index, value)
+        self.client.bm_register_write(0, register.name, index, value)
 
     def complete_register_write(self, text, line, start_index, end_index):
         return self._complete_registers(text)
@@ -1899,7 +1950,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         register_name = args[0]
-        self.client.bm_register_reset(0, register_name)
+        self.client.bm_register_reset(0, register.name)
 
     def complete_register_reset(self, text, line, start_index, end_index):
         return self._complete_registers(text)
@@ -1987,14 +2038,14 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
         table_name = args[0]
 
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
         try:
             entry_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for entry handle")
 
-        entry = self.client.bm_mt_get_entry(0, table_name, entry_handle)
+        entry = self.client.bm_mt_get_entry(0, table.name, entry_handle)
         self.dump_one_entry(table, entry)
 
     def complete_table_dump_entry(self, text, line, start_index, end_index):
@@ -2007,7 +2058,8 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         try:
             mbr_handle = int(args[1])
@@ -2015,7 +2067,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for member handle")
 
         member = self.client.bm_mt_act_prof_get_member(
-            0, act_prof_name, mbr_handle)
+            0, act_prof.name, mbr_handle)
         self.dump_one_member(member)
 
     def complete_act_prof_dump_member(self, text, line, start_index, end_index):
@@ -2040,7 +2092,8 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 2)
 
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
 
         try:
             grp_handle = int(args[1])
@@ -2048,7 +2101,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         group = self.client.bm_mt_act_prof_get_group(
-            0, act_prof_name, grp_handle)
+            0, act_prof.name, grp_handle)
         self.dump_one_group(group)
 
     def complete_act_prof_dump_group(self, text, line, start_index, end_index):
@@ -2065,12 +2118,12 @@ class RuntimeAPI(cmd.Cmd):
 
     def _dump_act_prof(self, act_prof):
         act_prof_name = act_prof.name
-        members = self.client.bm_mt_act_prof_get_members(0, act_prof_name)
+        members = self.client.bm_mt_act_prof_get_members(0, act_prof.name)
         print "=========="
         print "MEMBERS"
         self.dump_members(members)
         if act_prof.with_selection:
-            groups = self.client.bm_mt_act_prof_get_groups(0, act_prof_name)
+            groups = self.client.bm_mt_act_prof_get_groups(0, act_prof.name)
             print "=========="
             print "GROUPS"
             self.dump_groups(groups)
@@ -2081,7 +2134,8 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        act_prof = self.get_res("action profile", act_prof_name,
+                                ResType.action_prof)
         self._dump_act_prof(act_prof)
 
     def complete_act_prof_dump(self, text, line, start_index, end_index):
@@ -2093,8 +2147,8 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
-        entries = self.client.bm_mt_get_entries(0, table_name)
+        table = self.get_res("table", table_name, ResType.table)
+        entries = self.client.bm_mt_get_entries(0, table.name)
 
         print "=========="
         print "TABLE ENTRIES"
@@ -2109,7 +2163,7 @@ class RuntimeAPI(cmd.Cmd):
             self._dump_act_prof(table.action_prof)
 
         # default entry
-        default_entry = self.client.bm_mt_get_default_entry(0, table_name)
+        default_entry = self.client.bm_mt_get_default_entry(0, table.name)
         print "=========="
         print "Dumping default entry"
         self.dump_action_entry(default_entry)
@@ -2126,7 +2180,7 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 1)
         table_name = args[0]
 
-        table = self.get_res("table", table_name, TABLES)
+        table = self.get_res("table", table_name, ResType.table)
 
         if table.match_type in {MatchType.TERNARY, MatchType.RANGE}:
             try:
@@ -2146,7 +2200,7 @@ class RuntimeAPI(cmd.Cmd):
         match_key = parse_match_key(table, match_key)
 
         entry = self.client.bm_mt_get_entry_from_key(
-            0, table_name, match_key, BmAddEntryOptions(priority = priority))
+            0, table.name, match_key, BmAddEntryOptions(priority = priority))
         self.dump_one_entry(table, entry)
 
     def complete_table_dump_entry_from_key(self, text, line, start_index, end_index):
