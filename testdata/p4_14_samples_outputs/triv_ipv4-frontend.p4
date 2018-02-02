@@ -54,26 +54,28 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".do_drop") action do_drop_0() {
     }
     @name(".route_ipv4") action route_ipv4_0(bit<9> egress_spec) {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         standard_metadata.egress_spec = egress_spec;
     }
-    @name(".routing") table routing_0 {
+    @name(".routing") table routing {
         actions = {
             do_drop_0();
             route_ipv4_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
         size = 2048;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        routing_0.apply();
+        routing.apply();
     }
 }
 

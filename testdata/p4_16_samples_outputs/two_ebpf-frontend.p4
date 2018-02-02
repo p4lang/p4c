@@ -43,35 +43,39 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-control Check(in IPv4Address address, out bool pass) {
-    @name("Reject") action Reject_0() {
-        pass = false;
+control pipe(inout Headers_t headers, out bool pass) {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("Check_ip") table Check_ip_0 {
+    IPv4Address address;
+    bool pass_1;
+    @name("pipe.c1.Reject") action c1_Reject() {
+        pass_1 = false;
+    }
+    @name("pipe.c1.Check_ip") table c1_Check_ip_0 {
         key = {
             address: exact @name("address") ;
         }
         actions = {
-            Reject_0();
-            NoAction();
+            c1_Reject();
+            NoAction_0();
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction();
+        const default_action = NoAction_0();
     }
     apply {
-        Check_ip_0.apply();
-    }
-}
-
-control pipe(inout Headers_t headers, out bool pass) {
-    @name("c1") Check() c1_0;
-    apply {
+        bool hasReturned_0 = false;
         if (!headers.ipv4.isValid()) {
             pass = false;
-            return;
+            hasReturned_0 = true;
         }
-        c1_0.apply(headers.ipv4.srcAddr, pass);
-        c1_0.apply(headers.ipv4.dstAddr, pass);
+        if (!hasReturned_0) {
+            address = headers.ipv4.srcAddr;
+            c1_Check_ip_0.apply();
+            pass = pass_1;
+            address = headers.ipv4.dstAddr;
+            c1_Check_ip_0.apply();
+            pass = pass_1;
+        }
     }
 }
 

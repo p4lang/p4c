@@ -257,6 +257,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_7() {
+    }
+    @name(".NoAction") action NoAction_8() {
+    }
+    @name(".NoAction") action NoAction_9() {
+    }
+    @name(".NoAction") action NoAction_10() {
+    }
+    @name(".NoAction") action NoAction_11() {
+    }
     @name(".a1") action a1_0() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
@@ -460,17 +472,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".a4_1") action a4() {
     }
-    @name(".t1") table t1_0 {
+    @name(".t1") table t1 {
         actions = {
             a1_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".t2_1") table t2 {
+    @name(".t2_1") table t2_1 {
         actions = {
             a2();
-            @defaultonly NoAction();
+            @defaultonly NoAction_7();
         }
         key = {
             meta.m.field_8_01: exact @name("m.field_8_01") ;
@@ -538,12 +550,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_8_63: exact @name("m.field_8_63") ;
             meta.m.field_8_64: exact @name("m.field_8_64") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_7();
     }
-    @name(".t2_2") table t2_0 {
+    @name(".t2_2") table t2_2 {
         actions = {
             a2_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_8();
         }
         key = {
             meta.m.field_32_01: exact @name("m.field_32_01") ;
@@ -563,12 +575,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_15: exact @name("m.field_32_15") ;
             meta.m.field_32_16: exact @name("m.field_32_16") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_8();
     }
-    @name(".t2_3") table t2_4 {
+    @name(".t2_3") table t2_3 {
         actions = {
             a2_4();
-            @defaultonly NoAction();
+            @defaultonly NoAction_9();
         }
         key = {
             meta.m.field_32_17: ternary @name("m.field_32_17") ;
@@ -588,12 +600,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_31: ternary @name("m.field_32_31") ;
             meta.m.field_32_32: ternary @name("m.field_32_32") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_9();
     }
-    @name(".t3_1") table t3 {
+    @name(".t3_1") table t3_0 {
         actions = {
             a3();
-            @defaultonly NoAction();
+            @defaultonly NoAction_10();
         }
         key = {
             meta.m.field_32_33: exact @name("m.field_32_33") ;
@@ -616,12 +628,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_50: exact @name("m.field_32_50") ;
             meta.m.field_32_51: exact @name("m.field_32_51") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_10();
     }
-    @name(".t4_1") table t4 {
+    @name(".t4_1") table t4_0 {
         actions = {
             a4();
-            @defaultonly NoAction();
+            @defaultonly NoAction_11();
         }
         key = {
             meta.m.field_16_01: exact @name("m.field_16_01") ;
@@ -651,15 +663,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_16_25: exact @name("m.field_16_25") ;
             meta.m.field_16_26: exact @name("m.field_16_26") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_11();
     }
     apply {
-        t1_0.apply();
-        t2.apply();
-        t2_0.apply();
-        t2_4.apply();
-        t3.apply();
-        t4.apply();
+        t1.apply();
+        t2_1.apply();
+        t2_2.apply();
+        t2_3.apply();
+        t3_0.apply();
+        t4_0.apply();
     }
 }
 

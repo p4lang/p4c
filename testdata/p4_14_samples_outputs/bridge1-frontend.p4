@@ -34,48 +34,54 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".copyb1") action copyb1_0() {
         hdr.data.b1 = meta.meta.val;
     }
-    @name(".output") table output_0 {
+    @name(".output") table output {
         actions = {
             copyb1_0();
         }
         default_action = copyb1_0();
     }
     apply {
-        output_0.apply();
+        output.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_3() {
+    }
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
         meta.meta.val = val;
         standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop_0() {
     }
-    @name(".test1") table test1_0 {
+    @name(".noop") action noop_2() {
+    }
+    @name(".test1") table test1 {
         actions = {
             setb1_0();
             noop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.f1: exact @name("data.f1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".test2") table test2_0 {
+    @name(".test2") table test2 {
         actions = {
-            noop_0();
-            @defaultonly NoAction();
+            noop_2();
+            @defaultonly NoAction_3();
         }
         key = {
             meta.meta.val: exact @name("meta.val") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_3();
     }
     apply {
-        test1_0.apply();
-        test2_0.apply();
+        test1.apply();
+        test2.apply();
     }
 }
 

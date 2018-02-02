@@ -28,22 +28,24 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".set_egress_port") action set_egress_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name(".t1") table t1_0 {
+    @name(".t1") table t1 {
         actions = {
             set_egress_port_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.ethernet.dstAddr: lpm @name("ethernet.dstAddr") ;
             hdr.ethernet.srcAddr: lpm @name("ethernet.srcAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        t1_0.apply();
+        t1.apply();
     }
 }
 

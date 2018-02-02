@@ -8,11 +8,11 @@ extern e<T> {
 parser simple(out bit<2> a);
 package m(simple n);
 parser p1_0(out bit<2> a) {
-    bit<2> tmp;
-    @name("ei") e<bit<2>>() ei_0;
+    bit<2> tmp_0;
+    @name("p1_0.ei") e<bit<2>>() ei;
     state start {
-        tmp = ei_0.get();
-        a = tmp;
+        tmp_0 = ei.get();
+        a = tmp_0;
         transition accept;
     }
 }

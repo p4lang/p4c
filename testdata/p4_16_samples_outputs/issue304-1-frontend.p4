@@ -4,27 +4,28 @@ extern X {
     abstract void a(inout bit<32> arg);
 }
 
-control c(inout bit<32> y) {
-    @name("x") X() x_0 = {
+control t(inout bit<32> b) {
+    @name("t.c1.x") X() c1_x_0 = {
         void a(inout bit<32> arg) {
-            bit<32> tmp;
-            bit<32> tmp_0;
-            tmp = this.b();
-            tmp_0 = arg + tmp;
-            arg = tmp_0;
+            bit<32> c1_tmp_1;
+            bit<32> c1_tmp_2;
+            c1_tmp_1 = this.b();
+            c1_tmp_2 = arg + c1_tmp_1;
+            arg = c1_tmp_2;
+        }
+    };
+    @name("t.c2.x") X() c2_x_0 = {
+        void a(inout bit<32> arg) {
+            bit<32> c2_tmp_1;
+            bit<32> c2_tmp_2;
+            c2_tmp_1 = this.b();
+            c2_tmp_2 = arg + c2_tmp_1;
+            arg = c2_tmp_2;
         }
     };
     apply {
-        x_0.a(y);
-    }
-}
-
-control t(inout bit<32> b) {
-    @name("c1") c() c1_0;
-    @name("c2") c() c2_0;
-    apply {
-        c1_0.apply(b);
-        c2_0.apply(b);
+        c1_x_0.a(b);
+        c2_x_0.a(b);
     }
 }
 

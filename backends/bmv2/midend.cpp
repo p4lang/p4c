@@ -28,18 +28,15 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "midend/actionsInlining.h"
 #include "midend/actionSynthesis.h"
+#include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
 #include "midend/local_copyprop.h"
-#include "midend/localizeActions.h"
-#include "midend/moveConstructors.h"
 #include "midend/nestedStructs.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeParameters.h"
-#include "midend/removeReturns.h"
 #include "midend/removeUnusedParameters.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
@@ -52,7 +49,6 @@ limitations under the License.
 #include "midend/expandEmit.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
-#include "midend/dontcareArgs.h"
 
 namespace BMV2 {
 
@@ -82,21 +78,9 @@ MidEnd::MidEnd(BMV2Options& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     addPasses({
+        new P4::RemoveActionParameters(&refMap, &typeMap),
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
-        new P4::RemoveReturns(&refMap),
-        new P4::RemoveDontcareArgs(&refMap, &typeMap),
-        new P4::MoveConstructors(&refMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-        new P4::ClearTypeMap(&typeMap),
-        evaluator,
-        new P4::Inline(&refMap, &typeMap, evaluator),
-        new P4::InlineActions(&refMap, &typeMap),
-        new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),  // needed again after inlining
-        new P4::UniqueParameters(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::OrPolicy(
@@ -110,6 +94,7 @@ MidEnd::MidEnd(BMV2Options& options) {
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),

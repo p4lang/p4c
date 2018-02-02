@@ -15,7 +15,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as_0;
+    @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as;
     apply {
     }
 }

@@ -1,0 +1,3 @@
+subparser-with-header-stack-bmv2.p4(84): [--Wwarn=uninitialized_use] warning: hdr may not be completely initialized
+        subp.apply(pkt, hdr, my_next_hdr_type);
+                        ^^^

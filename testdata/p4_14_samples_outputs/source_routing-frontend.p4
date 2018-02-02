@@ -21,7 +21,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<64> tmp;
+    bit<64> tmp_0;
     @name(".parse_head") state parse_head {
         packet.extract<easyroute_head_t>(hdr.easyroute_head);
         transition select(hdr.easyroute_head.num_valid) {
@@ -34,8 +34,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".start") state start {
-        tmp = packet.lookahead<bit<64>>();
-        transition select(tmp[63:0]) {
+        tmp_0 = packet.lookahead<bit<64>>();
+        transition select(tmp_0[63:0]) {
             64w0: parse_head;
             default: accept;
         }
@@ -48,6 +48,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
@@ -56,20 +58,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
         hdr.easyroute_port.setInvalid();
     }
-    @name(".route_pkt") table route_pkt_0 {
+    @name(".route_pkt") table route_pkt {
         actions = {
             _drop_0();
             route_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.easyroute_port.isValid(): exact @name("easyroute_port.$valid$") ;
         }
         size = 1;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        route_pkt_0.apply();
+        route_pkt.apply();
     }
 }
 

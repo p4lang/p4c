@@ -24,19 +24,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("my_extern_inst") extern_test() my_extern_inst_0;
-    @name(".a") action a_0() {
-        my_extern_inst_0.my_extern_method();
+    @name(".NoAction") action NoAction_0() {
     }
-    @name(".t") table t_0 {
+    @name("ingress.my_extern_inst") extern_test() my_extern_inst;
+    @name(".a") action a_0() {
+        my_extern_inst.my_extern_method();
+    }
+    @name(".t") table t {
         actions = {
             a_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 

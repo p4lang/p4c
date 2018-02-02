@@ -50,10 +50,10 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("set_port") action set_port_0() {
+    @name("ingress.set_port") action set_port_0() {
         sm.egress_spec = (bit<9>)m.v;
     }
-    @name("t") table t {
+    @name("ingress.t") table t {
         actions = {
             set_port_0();
         }

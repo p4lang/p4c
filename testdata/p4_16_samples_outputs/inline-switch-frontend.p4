@@ -1,33 +1,29 @@
-control c(out bit<32> x) {
-    @name("a1") action a1_0() {
-    }
-    @name("a2") action a2_0() {
-    }
-    @name("t") table t_0 {
-        actions = {
-            a1_0();
-            a2_0();
-        }
-        default_action = a1_0();
-    }
-    apply {
-        switch (t_0.apply().action_run) {
-            a1_0: 
-            a2_0: {
-                return;
-            }
-            default: {
-                return;
-            }
-        }
-
-    }
-}
-
 control d(out bit<32> x) {
-    @name("cinst") c() cinst_0;
+    @name("d.cinst.a1") action cinst_a1() {
+    }
+    @name("d.cinst.a2") action cinst_a2() {
+    }
+    @name("d.cinst.t") table cinst_t_0 {
+        actions = {
+            cinst_a1();
+            cinst_a2();
+        }
+        default_action = cinst_a1();
+    }
     apply {
-        cinst_0.apply(x);
+        {
+            bool cinst_hasReturned_0 = false;
+            switch (cinst_t_0.apply().action_run) {
+                cinst_a1: 
+                cinst_a2: {
+                    cinst_hasReturned_0 = true;
+                }
+                default: {
+                    cinst_hasReturned_0 = true;
+                }
+            }
+
+        }
     }
 }
 

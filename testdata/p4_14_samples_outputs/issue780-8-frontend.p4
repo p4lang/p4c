@@ -21,21 +21,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".nop") action nop_0() {
     }
-    @name(".exact") table exact_1 {
+    @name(".exact") table exact_0 {
         actions = {
             nop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.h.f: ternary @name("h.f") ;
         }
         size = 256;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        exact_1.apply();
+        exact_0.apply();
     }
 }
 

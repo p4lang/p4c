@@ -37,15 +37,15 @@ struct Packet_data {
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     TArg1 p1_tArg1_0;
     TArg2 p1_aArg2_0;
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("p1.thost.B_action") action p1_thost_B_action(BParamType bData) {
+    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action(BParamType bData) {
         p1_tArg1_0.field1 = bData;
     }
-    @name("p1.thost.C_action") action p1_thost_C_action(bit<9> cData) {
+    @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action(bit<9> cData) {
         p1_tArg1_0.field1 = cData;
     }
-    @name("p1.thost.T") table p1_thost_T_0 {
+    @name("Q_pipe.p1.thost.T") table p1_thost_T_0 {
         key = {
             p1_tArg1_0.field1: ternary @name("tArg1.field1") ;
             p1_aArg2_0.field2: exact @name("aArg2.field2") ;
@@ -57,10 +57,10 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         size = 32w5;
         const default_action = p1_thost_C_action(9w5);
     }
-    @name("p1.Drop") action p1_Drop() {
+    @name("Q_pipe.p1.Drop") action p1_Drop() {
         qArg1.drop = true;
     }
-    @name("p1.Tinner") table p1_Tinner_0 {
+    @name("Q_pipe.p1.Tinner") table p1_Tinner_0 {
         key = {
             qArg1.field1: ternary @name("pArg1.field1") ;
         }

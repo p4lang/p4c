@@ -37,10 +37,12 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_0;
-    bit<32> x1_0;
-    bit<16> x2_0;
-    @name("debug_table_cksum1") table debug_table_cksum1_0 {
+    @name(".NoAction") action NoAction_0() {
+    }
+    bit<16> tmp_1;
+    bit<32> x1_1;
+    bit<16> x2_1;
+    @name("ingress.debug_table_cksum1") table debug_table_cksum1 {
         key = {
             hdr.ethernet.srcAddr            : exact @name("hdr.ethernet.srcAddr") ;
             hdr.ethernet.dstAddr            : exact @name("hdr.ethernet.dstAddr") ;
@@ -57,17 +59,17 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
             user_meta.fwd_meta.x4           : exact @name("user_meta.fwd_meta.x4") ;
         }
         actions = {
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        tmp_0 = ~hdr.ethernet.etherType;
-        x1_0 = (bit<32>)tmp_0;
-        x2_0 = x1_0[31:16] + x1_0[15:0];
-        user_meta.fwd_meta.tmp = tmp_0;
-        user_meta.fwd_meta.x1 = x1_0;
-        user_meta.fwd_meta.x2 = x2_0;
+        tmp_1 = ~hdr.ethernet.etherType;
+        x1_1 = (bit<32>)tmp_1;
+        x2_1 = x1_1[31:16] + x1_1[15:0];
+        user_meta.fwd_meta.tmp = tmp_1;
+        user_meta.fwd_meta.x1 = x1_1;
+        user_meta.fwd_meta.x2 = x2_1;
         user_meta.fwd_meta.x3 = (bit<32>)~hdr.ethernet.etherType;
         user_meta.fwd_meta.x4 = ~(bit<32>)hdr.ethernet.etherType;
         user_meta.fwd_meta.exp_etherType = 16w0x800;
@@ -86,7 +88,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
             hdr.ethernet.dstAddr[23:16] = 8w1;
         if (user_meta.fwd_meta.x4 != user_meta.fwd_meta.exp_x4) 
             hdr.ethernet.dstAddr[15:8] = 8w1;
-        debug_table_cksum1_0.apply();
+        debug_table_cksum1.apply();
     }
 }
 

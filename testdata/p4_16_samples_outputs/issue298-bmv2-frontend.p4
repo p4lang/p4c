@@ -107,31 +107,33 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_drop") action _drop_0() {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name("egress._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("drop_tbl") table drop_tbl_0 {
+    @name("egress.drop_tbl") table drop_tbl {
         key = {
             meta.local_metadata.set_drop: exact @name("meta.ingress_metadata.set_drop") ;
         }
         actions = {
             _drop_0();
-            NoAction();
+            NoAction_0();
         }
         size = 2;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        drop_tbl_0.apply();
+        drop_tbl.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("registerRound") register<bit<16>>(32w65536) registerRound_0;
-    @name("read_round") action read_round_0() {
-        registerRound_0.read(meta.local_metadata.round, hdr.myhdr.inst);
+    @name("ingress.registerRound") register<bit<16>>(32w65536) registerRound;
+    @name("ingress.read_round") action read_round_0() {
+        registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
-    @name("round_tbl") table round_tbl_0 {
+    @name("ingress.round_tbl") table round_tbl {
         key = {
         }
         actions = {
@@ -143,7 +145,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (hdr.ipv4.isValid()) 
             if (hdr.myhdr.isValid()) 
-                round_tbl_0.apply();
+                round_tbl.apply();
     }
 }
 

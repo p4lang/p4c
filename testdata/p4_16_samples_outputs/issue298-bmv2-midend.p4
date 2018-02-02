@@ -126,12 +126,12 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("_drop") action _drop_0() {
+    @name("egress._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("drop_tbl") table drop_tbl {
+    @name("egress.drop_tbl") table drop_tbl {
         key = {
             meta.local_metadata.set_drop: exact @name("meta.ingress_metadata.set_drop") ;
         }
@@ -148,11 +148,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("registerRound") register<bit<16>>(32w65536) registerRound;
-    @name("read_round") action read_round_0() {
+    @name("ingress.registerRound") register<bit<16>>(32w65536) registerRound;
+    @name("ingress.read_round") action read_round_0() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
-    @name("round_tbl") table round_tbl {
+    @name("ingress.round_tbl") table round_tbl {
         key = {
         }
         actions = {

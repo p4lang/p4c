@@ -15,12 +15,8 @@ limitations under the License.
 */
 
 #include "midend.h"
-#include "midend/actionsInlining.h"
-#include "midend/inlining.h"
-#include "midend/removeReturns.h"
-#include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
-#include "midend/localizeActions.h"
+#include "midend/complexComparison.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
@@ -32,6 +28,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/midEndLast.h"
 #include "midend/removeLeftSlices.h"
+#include "midend/removeExits.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeMap.h"
@@ -70,34 +67,8 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
-    PassManager simplify = {
-        new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
-        new P4::RemoveReturns(&refMap),
-        new P4::MoveConstructors(&refMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-        new P4::ClearTypeMap(&typeMap),
-        evaluator,
-    };
-
-    simplify.setName("Simplify");
-    simplify.addDebugHooks(hooks);
-    program = program->apply(simplify);
-    if (::errorCount() > 0)
-        return nullptr;
-    auto toplevel = evaluator->getToplevelBlock();
-    if (toplevel->getMain() == nullptr)
-        // nothing further to do
-        return nullptr;
-
-    P4::InlineWorkList toInline;
-    P4::ActionsInlineList actionsToInline;
-
     PassManager midEnd = {
-        new P4::Inline(&refMap, &typeMap, evaluator),
-        new P4::InlineActions(&refMap, &typeMap),
-        new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),  // needed again after inlining
-        new P4::UniqueParameters(&refMap, &typeMap),
+        new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
         new P4::ClearTypeMap(&typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
@@ -111,6 +82,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),

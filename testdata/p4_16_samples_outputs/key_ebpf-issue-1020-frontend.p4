@@ -44,16 +44,16 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool tmp;
-    @name("invalidate") action invalidate_0() {
+    bool tmp_0;
+    @name("pipe.invalidate") action invalidate_0() {
         headers.ipv4.setInvalid();
         headers.ethernet.setInvalid();
         pass = true;
     }
-    @name("drop") action drop_0() {
+    @name("pipe.drop") action drop_0() {
         pass = false;
     }
-    @name("t") table t_0 {
+    @name("pipe.t") table t {
         key = {
             headers.ipv4.srcAddr + 32w1: exact @name(" headers.ipv4.srcAddr") ;
             headers.ipv4.dstAddr + 32w1: exact @name("headers.ipv4.dstAddr") ;
@@ -68,7 +68,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         default_action = drop_0();
     }
     apply {
-        tmp = t_0.apply().hit;
+        tmp_0 = t.apply().hit;
     }
 }
 

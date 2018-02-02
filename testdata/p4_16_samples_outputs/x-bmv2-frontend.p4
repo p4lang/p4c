@@ -29,15 +29,8 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout std_meta_t std_
     }
 }
 
-control ctrl(inout M meta) {
-    apply {
-    }
-}
-
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @name("do_ctrl") ctrl() do_ctrl_0;
     apply {
-        do_ctrl_0.apply(meta);
     }
 }
 

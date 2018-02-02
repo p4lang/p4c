@@ -6,21 +6,6 @@ header hdr {
     bit<32> b;
 }
 
-control compute(inout hdr h) {
-    @name("add") action add_0(bit<32> data) {
-        h.b = h.a + data;
-    }
-    @name("t") table t_0 {
-        actions = {
-            add_0();
-        }
-        const default_action = add_0(32w10);
-    }
-    apply {
-        t_0.apply();
-    }
-}
-
 struct Headers {
     hdr h;
 }
@@ -57,9 +42,17 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("c") compute() c_0;
+    @name("ingress.c.add") action c_add(bit<32> data) {
+        h.h.b = h.h.a + data;
+    }
+    @name("ingress.c.t") table c_t_0 {
+        actions = {
+            c_add();
+        }
+        const default_action = c_add(32w10);
+    }
     apply {
-        c_0.apply(h.h);
+        c_t_0.apply();
         sm.egress_spec = 9w0;
     }
 }

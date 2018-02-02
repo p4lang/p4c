@@ -13,20 +13,20 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     }
 }
 
-action drop(out standard_metadata_t smeta_0) {
-    smeta_0.drop = 1w1;
-}
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("forward") table forward_0 {
+    @name(".drop") action drop_0(out standard_metadata_t smeta_1) {
+        smeta_1.drop = 1w1;
+    }
+    @name("IngressI.forward") table forward {
         key = {
         }
         actions = {
-            drop(smeta);
+            drop_0(smeta);
         }
-        const default_action = drop(smeta);
+        const default_action = drop_0(smeta);
     }
     apply {
-        forward_0.apply();
+        forward.apply();
     }
 }
 

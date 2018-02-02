@@ -343,6 +343,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
 
             auto keyelement = new Util::JsonObject();
             keyelement->emplace("match_type", match_type);
+            if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
+                BUG_CHECK(na->expr.size() == 1, "%1%: expected 1 name", na);
+                auto name = na->expr[0]->to<IR::StringLiteral>();
+                BUG_CHECK(name != nullptr, "%1%: expected a string", na);
+                // This is a BMv2 JSON extension: specify a
+                // control-plane name for this key
+                keyelement->emplace("name", name->value);
+            }
 
             auto jk = conv->convert(expr);
             keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
@@ -693,10 +701,19 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
     SharedActionSelectorCheck selector_check(refMap, typeMap);
     block->apply(selector_check);
 
+    std::set<const IR::P4Table*> done;
+
     // Tables are created prior to the other local declarations
     for (auto node : cfg->allNodes) {
-        if (node->is<CFG::TableNode>()) {
-            auto j = convertTable(node->to<CFG::TableNode>(), action_profiles, selector_check);
+        auto tn = node->to<CFG::TableNode>();
+        if (tn != nullptr) {
+            if (done.find(tn->table) != done.end())
+                // The same table may appear in multiple nodes in the CFG.
+                // We emit it only once.  Other checks should ensure that
+                // the CFG is implementable.
+                continue;
+            done.emplace(tn->table);
+            auto j = convertTable(tn, action_profiles, selector_check);
             if (::errorCount() > 0)
                 return false;
             tables->append(j);
@@ -746,8 +763,8 @@ bool ChecksumConverter::preorder(const IR::PackageBlock *block) {
 }
 
 bool ChecksumConverter::preorder(const IR::ControlBlock* block) {
-    auto it = backend->update_checksum_controls.find(block->container->name);
-    if (it != backend->update_checksum_controls.end()) {
+    auto it = backend->compute_checksum_controls.find(block->container->name);
+    if (it != backend->compute_checksum_controls.end()) {
         if (backend->target == Target::SIMPLE) {
             P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
             ss->convertChecksum(block->container->body, backend->json->checksums,

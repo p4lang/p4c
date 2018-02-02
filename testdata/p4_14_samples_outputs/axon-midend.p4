@@ -82,9 +82,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
@@ -98,6 +98,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_fwdHop.pop_front(1);
         hdr.axon_head.revHopCount = hdr.axon_head.revHopCount + 8w1;
         hdr.axon_revHop.push_front(1);
+        hdr.axon_revHop[0].setValid();
         hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
     @name(".drop_pkt") table drop_pkt {

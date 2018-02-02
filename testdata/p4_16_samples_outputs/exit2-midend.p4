@@ -1,9 +1,9 @@
 control ctrl(out bit<32> c) {
     bool hasExited;
-    @name("e") action e_0() {
+    @name("ctrl.e") action e_0() {
         hasExited = true;
     }
-    @name("e") action e_2() {
+    @name("ctrl.e") action e_2() {
         hasExited = true;
     }
     @hidden action act() {

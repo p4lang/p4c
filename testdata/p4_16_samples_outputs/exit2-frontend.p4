@@ -1,15 +1,18 @@
 control ctrl(out bit<32> c) {
-    bit<32> a_0;
-    @name("e") action e_0() {
+    bit<32> a;
+    @name("ctrl.e") action e_0() {
+        exit;
+    }
+    @name("ctrl.e") action e_2() {
         exit;
     }
     apply {
-        a_0 = 32w0;
+        a = 32w0;
         c = 32w2;
-        if (a_0 == 32w0) 
+        if (a == 32w0) 
             e_0();
         else 
-            e_0();
+            e_2();
         c = 32w5;
     }
 }

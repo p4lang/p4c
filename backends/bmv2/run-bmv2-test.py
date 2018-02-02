@@ -315,7 +315,12 @@ def main(argv):
             dirname = os.path.dirname(options.p4filename)
             options.observationLog = os.path.join(dirname, '%s.p4.obs' % base)
 
-    result = process_file(options, argv)
+    try:
+        result = process_file(options, argv)
+    except Exception as e:
+        print("Exception ", e)
+        sys.exit(FAILURE)
+
     if result != SUCCESS:
         reportError("Test failed")
     sys.exit(result)

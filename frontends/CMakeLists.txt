@@ -13,55 +13,68 @@
 # limitations under the License.
 
 set (P4_FRONTEND_SRCS
-  p4/frontend.cpp
+  p4/actionsInlining.cpp
+  p4/callGraph.cpp
+  p4/checkConstants.cpp
   p4/createBuiltins.cpp
   p4/def_use.cpp
-  p4/validateParsedProgram.cpp
-  p4/symbol_table.cpp
-  p4/toP4/toP4.cpp
-  p4/callGraph.cpp
-  p4/typeChecking/typeChecker.cpp
-  p4/typeChecking/bindVariables.cpp
-  p4/typeChecking/typeConstraints.cpp
-  p4/typeChecking/typeUnification.cpp
-  p4/typeChecking/syntacticEquivalence.cpp
-  p4/typeChecking/typeSubstitution.cpp
-  p4/typeChecking/typeSubstitutionVisitor.cpp
-  p4/strengthReduction.cpp
-  p4/unusedDeclarations.cpp
+  p4/deprecated.cpp
+  p4/directCalls.cpp
+  p4/dontcareArgs.cpp
   p4/evaluator/evaluator.cpp
   p4/evaluator/substituteParameters.cpp
-  p4/parserControlFlow.cpp
-  p4/reservedWords.cpp
-  p4/modelInstances.cpp
   p4/externInstance.cpp
-  p4/methodInstance.cpp
-  p4/parserCallGraph.cpp
-  p4/tableApply.cpp
-  p4/simplify.cpp
-  p4/fromv1.0/programStructure.cpp
   p4/fromv1.0/converters.cpp
-  p4/typeMap.cpp
-  p4/simplifyDefUse.cpp
-  p4/sideEffects.cpp
-  p4/simplifyParsers.cpp
-  p4/uniqueNames.cpp
-  p4/resetHeaders.cpp
+  p4/fromv1.0/programStructure.cpp
+  p4/frontend.cpp
+  p4/hierarchicalNames.cpp
+  p4/inlining.cpp
+  p4/localizeActions.cpp
+  p4/methodInstance.cpp
+  p4/modelInstances.cpp
+  p4/moveConstructors.cpp
   p4/moveDeclarations.cpp
-  p4/tableKeyNames.cpp
-  p4/specialize.cpp
-  p4/uselessCasts.cpp
-  p4/directCalls.cpp
+  p4/parserCallGraph.cpp
+  p4/parserControlFlow.cpp
+  p4/removeReturns.cpp
+  p4/reservedWords.cpp
+  p4/resetHeaders.cpp
   p4/setHeaders.cpp
-  p4/deprecated.cpp
+  p4/sideEffects.cpp
+  p4/simplify.cpp
+  p4/simplifyDefUse.cpp
+  p4/simplifyParsers.cpp
+  p4/specialize.cpp
+  p4/strengthReduction.cpp
+  p4/symbol_table.cpp
+  p4/tableApply.cpp
+  p4/tableKeyNames.cpp
+  p4/toP4/toP4.cpp
+  p4/typeChecking/bindVariables.cpp
+  p4/typeChecking/syntacticEquivalence.cpp
+  p4/typeChecking/typeChecker.cpp
+  p4/typeChecking/typeConstraints.cpp
+  p4/typeChecking/typeSubstitution.cpp
+  p4/typeChecking/typeSubstitutionVisitor.cpp
+  p4/typeChecking/typeUnification.cpp
+  p4/typeMap.cpp
+  p4/uniqueNames.cpp
+  p4/unusedDeclarations.cpp
+  p4/uselessCasts.cpp
+  p4/validateParsedProgram.cpp
   )
 
 set (P4_FRONTEND_HDRS
+  p4/actionsInlining.h
   p4/callGraph.h
+  p4/checkConstants.h
   p4/cloner.h
   p4/coreLibrary.h
   p4/createBuiltins.h
   p4/def_use.h
+  p4/deprecated.h
+  p4/directCalls.h
+  p4/dontcareArgs.h
   p4/enumInstance.h
   p4/evaluator/evaluator.h
   p4/evaluator/substituteParameters.h
@@ -70,13 +83,19 @@ set (P4_FRONTEND_HDRS
   p4/fromv1.0/programStructure.h
   p4/fromv1.0/v1model.h
   p4/frontend.h
+  p4/hierarchicalNames.h
+  p4/inlining.h
+  p4/localizeActions.h
   p4/methodInstance.h
+  p4/moveConstructors.h
   p4/moveDeclarations.h
   p4/parameterSubstitution.h
   p4/parserCallGraph.h
   p4/parserControlFlow.h
+  p4/removeReturns.h
   p4/reservedWords.h
   p4/resetHeaders.h
+  p4/setHeaders.h
   p4/sideEffects.h
   p4/simplify.h
   p4/simplifyDefUse.h
@@ -85,23 +104,20 @@ set (P4_FRONTEND_HDRS
   p4/strengthReduction.h
   p4/symbol_table.h
   p4/tableApply.h
+  p4/tableKeyNames.h
   p4/toP4/toP4.h
-  p4/typeChecking/typeSubstitution.h
-  p4/typeChecking/typeSubstitutionVisitor.h
   p4/typeChecking/bindVariables.h
   p4/typeChecking/syntacticEquivalence.h
   p4/typeChecking/typeChecker.h
   p4/typeChecking/typeConstraints.h
+  p4/typeChecking/typeSubstitution.h
+  p4/typeChecking/typeSubstitutionVisitor.h
   p4/typeChecking/typeUnification.h
   p4/typeMap.h
   p4/uniqueNames.h
   p4/unusedDeclarations.h
-  p4/tableKeyNames.h
-  p4/validateParsedProgram.h
   p4/uselessCasts.h
-  p4/directCalls.h
-  p4/setHeaders.h
-  p4/deprecated.h
+  p4/validateParsedProgram.h
   )
 
 

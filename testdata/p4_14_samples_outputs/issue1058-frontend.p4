@@ -44,18 +44,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".test_action") action test_action_0() {
         digest<test1_digest>(32w0x666, { hdr.ethernet.dstAddr, standard_metadata });
     }
-    @name(".tbl0") table tbl0_0 {
+    @name(".tbl0") table tbl0 {
         actions = {
             test_action_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        tbl0_0.apply();
+        tbl0.apply();
     }
 }
 

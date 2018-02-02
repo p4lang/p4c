@@ -56,30 +56,30 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Value val_0;
-    bool _pred_0;
-    bit<32> inc_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
-    @name("debug") register<bit<32>>(32w100) debug_0;
-    @name("reg") register<bit<32>>(32w1) reg_0;
-    @name("test") action test_0() {
-        val_0 = { 32w0 };
-        _pred_0 = val_0.field1 != 32w0;
-        if (_pred_0) 
-            tmp = 32w1;
+    Value val;
+    bool _pred;
+    bit<32> inc;
+    bit<32> tmp_1;
+    bit<32> tmp_2;
+    @name("Eg.debug") register<bit<32>>(32w100) debug;
+    @name("Eg.reg") register<bit<32>>(32w1) reg;
+    @name("Eg.test") action test_0() {
+        val = { 32w0 };
+        _pred = val.field1 != 32w0;
+        if (_pred) 
+            tmp_1 = 32w1;
         else 
-            tmp = 32w0;
-        inc_0 = tmp;
-        if (_pred_0) 
-            tmp_0 = 32w1;
+            tmp_1 = 32w0;
+        inc = tmp_1;
+        if (_pred) 
+            tmp_2 = 32w1;
         else 
-            tmp_0 = 32w0;
-        debug_0.write(32w0, tmp_0);
-        debug_0.write(32w1, inc_0);
-        val_0.field1 = 32w1;
-        debug_0.write(32w2, inc_0);
-        reg_0.write(32w0, val_0.field1);
+            tmp_2 = 32w0;
+        debug.write(32w0, tmp_2);
+        debug.write(32w1, inc);
+        val.field1 = 32w1;
+        debug.write(32w2, inc);
+        reg.write(32w0, val.field1);
     }
     apply {
         test_0();

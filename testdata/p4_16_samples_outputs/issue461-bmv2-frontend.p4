@@ -36,9 +36,6 @@ struct headers {
     ipv4_t     ipv4;
 }
 
-action my_drop() {
-    mark_to_drop();
-}
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
@@ -54,22 +51,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats_0;
-    @name("set_l2ptr") action set_l2ptr_0(bit<32> l2ptr) {
-        ipv4_da_lpm_stats_0.count();
-        meta.fwd_metadata.l2ptr = l2ptr;
-    }
-    @name("drop_with_count") action drop_with_count_0() {
-        ipv4_da_lpm_stats_0.count();
+    @name(".my_drop") action my_drop() {
         mark_to_drop();
     }
-    @name("set_bd_dmac_intf") action set_bd_dmac_intf_0(bit<24> bd, bit<48> dmac, bit<9> intf) {
+    @name("ingress.ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats;
+    @name("ingress.set_l2ptr") action set_l2ptr_0(bit<32> l2ptr) {
+        ipv4_da_lpm_stats.count();
+        meta.fwd_metadata.l2ptr = l2ptr;
+    }
+    @name("ingress.drop_with_count") action drop_with_count_0() {
+        ipv4_da_lpm_stats.count();
+        mark_to_drop();
+    }
+    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf_0(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("ipv4_da_lpm") table ipv4_da_lpm_0 {
+    @name("ingress.ipv4_da_lpm") table ipv4_da_lpm {
         actions = {
             set_l2ptr_0();
             drop_with_count_0();
@@ -78,9 +78,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         default_action = drop_with_count_0();
-        counters = ipv4_da_lpm_stats_0;
+        counters = ipv4_da_lpm_stats;
     }
-    @name("mac_da") table mac_da_0 {
+    @name("ingress.mac_da") table mac_da {
         actions = {
             set_bd_dmac_intf_0();
             my_drop();
@@ -91,27 +91,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = my_drop();
     }
     apply {
-        ipv4_da_lpm_0.apply();
-        mac_da_0.apply();
+        ipv4_da_lpm.apply();
+        mac_da.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name(".my_drop") action my_drop_0() {
+        mark_to_drop();
+    }
+    @name("egress.rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("send_frame") table send_frame_0 {
+    @name("egress.send_frame") table send_frame {
         actions = {
             rewrite_mac_0();
-            my_drop();
+            my_drop_0();
         }
         key = {
             meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
         }
-        default_action = my_drop();
+        default_action = my_drop_0();
     }
     apply {
-        send_frame_0.apply();
+        send_frame.apply();
     }
 }
 

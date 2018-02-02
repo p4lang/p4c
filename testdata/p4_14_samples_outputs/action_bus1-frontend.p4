@@ -60,6 +60,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_9() {
+    }
+    @name(".NoAction") action NoAction_10() {
+    }
+    @name(".NoAction") action NoAction_11() {
+    }
+    @name(".NoAction") action NoAction_12() {
+    }
+    @name(".NoAction") action NoAction_13() {
+    }
+    @name(".NoAction") action NoAction_14() {
+    }
+    @name(".NoAction") action NoAction_15() {
+    }
     @name(".set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;
         hdr.data.f1_2 = v2;
@@ -68,6 +84,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f1_5 = v5;
     }
     @name(".noop") action noop_0() {
+    }
+    @name(".noop") action noop_8() {
+    }
+    @name(".noop") action noop_9() {
+    }
+    @name(".noop") action noop_10() {
+    }
+    @name(".noop") action noop_11() {
+    }
+    @name(".noop") action noop_12() {
+    }
+    @name(".noop") action noop_13() {
+    }
+    @name(".noop") action noop_14() {
     }
     @name(".set2") action set2_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f2_1 = v1;
@@ -118,103 +148,103 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f8_4 = v4;
         hdr.data.f8_5 = v5;
     }
-    @name(".tbl1") table tbl1_0 {
+    @name(".tbl1") table tbl1 {
         actions = {
             set1_0();
             noop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.f1_1: exact @name("data.f1_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".tbl2") table tbl2_0 {
+    @name(".tbl2") table tbl2 {
         actions = {
             set2_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_8();
+            @defaultonly NoAction_9();
         }
         key = {
             hdr.data.f2_1: exact @name("data.f2_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_9();
     }
-    @name(".tbl3") table tbl3_0 {
+    @name(".tbl3") table tbl3 {
         actions = {
             set3_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_9();
+            @defaultonly NoAction_10();
         }
         key = {
             hdr.data.f3_1: exact @name("data.f3_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_10();
     }
-    @name(".tbl4") table tbl4_0 {
+    @name(".tbl4") table tbl4 {
         actions = {
             set4_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_10();
+            @defaultonly NoAction_11();
         }
         key = {
             hdr.data.f4_1: exact @name("data.f4_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_11();
     }
-    @name(".tbl5") table tbl5_0 {
+    @name(".tbl5") table tbl5 {
         actions = {
             set5_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_11();
+            @defaultonly NoAction_12();
         }
         key = {
             hdr.data.f5_1: exact @name("data.f5_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_12();
     }
-    @name(".tbl6") table tbl6_0 {
+    @name(".tbl6") table tbl6 {
         actions = {
             set6_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_12();
+            @defaultonly NoAction_13();
         }
         key = {
             hdr.data.f6_1: exact @name("data.f6_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_13();
     }
-    @name(".tbl7") table tbl7_0 {
+    @name(".tbl7") table tbl7 {
         actions = {
             set7_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_13();
+            @defaultonly NoAction_14();
         }
         key = {
             hdr.data.f7_1: exact @name("data.f7_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_14();
     }
-    @name(".tbl8") table tbl8_0 {
+    @name(".tbl8") table tbl8 {
         actions = {
             set8_0();
-            noop_0();
-            @defaultonly NoAction();
+            noop_14();
+            @defaultonly NoAction_15();
         }
         key = {
             hdr.data.f8_1: exact @name("data.f8_1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_15();
     }
     apply {
-        tbl1_0.apply();
-        tbl2_0.apply();
-        tbl3_0.apply();
-        tbl4_0.apply();
-        tbl5_0.apply();
-        tbl6_0.apply();
-        tbl7_0.apply();
-        tbl8_0.apply();
+        tbl1.apply();
+        tbl2.apply();
+        tbl3.apply();
+        tbl4.apply();
+        tbl5.apply();
+        tbl6.apply();
+        tbl7.apply();
+        tbl8.apply();
     }
 }
 

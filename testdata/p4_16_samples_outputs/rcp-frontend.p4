@@ -17,24 +17,24 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    bit<32> input_traffic_bytes_tmp_0;
-    bit<32> sum_rtt_Tr_tmp_0;
-    bit<32> num_pkts_with_rtt_tmp_0;
-    @name("input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes_0;
-    @name("sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr_0;
-    @name("num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt_0;
+    bit<32> input_traffic_bytes_tmp;
+    bit<32> sum_rtt_Tr_tmp;
+    bit<32> num_pkts_with_rtt_tmp;
+    @name("ingress.input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes;
+    @name("ingress.sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr;
+    @name("ingress.num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt;
     apply {
         @atomic {
-            input_traffic_bytes_0.read(32w0, input_traffic_bytes_tmp_0);
-            input_traffic_bytes_tmp_0 = input_traffic_bytes_tmp_0 + metadata.pkt_len;
-            input_traffic_bytes_0.write(input_traffic_bytes_tmp_0, 32w0);
+            input_traffic_bytes.read(32w0, input_traffic_bytes_tmp);
+            input_traffic_bytes_tmp = input_traffic_bytes_tmp + metadata.pkt_len;
+            input_traffic_bytes.write(input_traffic_bytes_tmp, 32w0);
             if (pkt_hdr.rtt < 32w2500) {
-                sum_rtt_Tr_0.read(32w0, sum_rtt_Tr_tmp_0);
-                sum_rtt_Tr_tmp_0 = sum_rtt_Tr_tmp_0 + pkt_hdr.rtt;
-                sum_rtt_Tr_0.write(sum_rtt_Tr_tmp_0, 32w0);
-                num_pkts_with_rtt_0.read(32w0, num_pkts_with_rtt_tmp_0);
-                num_pkts_with_rtt_tmp_0 = num_pkts_with_rtt_tmp_0 + 32w1;
-                num_pkts_with_rtt_0.write(num_pkts_with_rtt_tmp_0, 32w0);
+                sum_rtt_Tr.read(32w0, sum_rtt_Tr_tmp);
+                sum_rtt_Tr_tmp = sum_rtt_Tr_tmp + pkt_hdr.rtt;
+                sum_rtt_Tr.write(sum_rtt_Tr_tmp, 32w0);
+                num_pkts_with_rtt.read(32w0, num_pkts_with_rtt_tmp);
+                num_pkts_with_rtt_tmp = num_pkts_with_rtt_tmp + 32w1;
+                num_pkts_with_rtt.write(num_pkts_with_rtt_tmp, 32w0);
             }
         }
     }

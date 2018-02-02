@@ -27,26 +27,28 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name("._nop") action _nop_0() {
     }
     @name("._truncate") action _truncate_0(bit<32> new_length, bit<9> port) {
         standard_metadata.egress_spec = port;
         truncate(new_length);
     }
-    @name(".t_ingress") table t_ingress_0 {
+    @name(".t_ingress") table t_ingress {
         actions = {
             _nop_0();
             _truncate_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.hdrA.f1: exact @name("hdrA.f1") ;
         }
         size = 128;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        t_ingress_0.apply();
+        t_ingress.apply();
     }
 }
 

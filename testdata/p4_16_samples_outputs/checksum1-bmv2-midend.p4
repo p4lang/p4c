@@ -101,12 +101,12 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @name("foo") action foo_0() {
+    @name("cIngress.foo") action foo_0() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
-    @name("guh") table guh {
+    @name("cIngress.guh") table guh {
         key = {
             hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
         }

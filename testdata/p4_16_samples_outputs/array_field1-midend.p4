@@ -11,7 +11,7 @@ control my(out H[2] s) {
     bit<32> tmp_15;
     bit<1> tmp_16;
     bit<1> tmp_17;
-    @name("act") action act_0() {
+    @name("my.act") action act_0() {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;
         tmp_12 = 32w0;
@@ -23,7 +23,7 @@ control my(out H[2] s) {
         f(tmp_16, 1w1);
         s[tmp_15].z = tmp_16;
     }
-    @name("tbl_act") table tbl_act {
+    @name("my.tbl_act") table tbl_act {
         actions = {
             act_0();
         }

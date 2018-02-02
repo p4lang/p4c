@@ -59,9 +59,9 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("a") action a_0() {
+    @name("ingress.a") action a_0() {
     }
-    @name("t") table t_0 {
+    @name("ingress.t") table t {
         key = {
             h.u.isValid(): exact @name("h.u.$valid$") ;
         }
@@ -71,7 +71,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = a_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 

@@ -1,15 +1,15 @@
 #include <core.p4>
 
 control Ing(out bit<32> a) {
-    bool b_0;
-    @name("cond") action cond_0() {
-        if (b_0) 
+    bool b;
+    @name("Ing.cond") action cond_0() {
+        if (b) 
             a = 32w5;
         else 
             a = 32w10;
     }
     apply {
-        b_0 = true;
+        b = true;
         cond_0();
     }
 }

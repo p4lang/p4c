@@ -18,20 +18,22 @@ struct Headers {
 }
 
 control c(in Headers h) {
-    @name("a") action a_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("t") table t_0 {
+    @name("c.a") action a_0() {
+    }
+    @name("c.t") table t {
         key = {
             h.u.h1.x: exact @name("h.u.h1.x") ;
         }
         actions = {
             a_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 

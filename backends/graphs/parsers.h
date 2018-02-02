@@ -20,6 +20,8 @@
 
 #include "ir/ir.h"
 #include "lib/cstring.h"
+#include "lib/nullstream.h"
+#include "lib/path.h"
 #include "lib/safe_vector.h"
 
 namespace graphs {

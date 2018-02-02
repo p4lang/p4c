@@ -19,9 +19,6 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/options.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "midend/actionsInlining.h"
-#include "midend/inlining.h"
 #include "midend/convertEnums.h"
 #include "helpers.h"
 #include "options.h"
@@ -29,9 +26,6 @@ limitations under the License.
 namespace BMV2 {
 
 class MidEnd : public PassManager {
-    P4::InlineWorkList controlsToInline;
-    P4::ActionsInlineList actionsToInline;
-
  public:
     // These will be accurate when the mid-end completes evaluation
     P4::ReferenceMap    refMap;

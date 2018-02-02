@@ -35,19 +35,21 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("t1") table t1_0 {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name("ingress.t1") table t1 {
         actions = {
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         if (m.b == 1w0) {
-            t1_0.apply();
+            t1.apply();
             sm.egress_spec = 9w1;
         }
         else {
-            t1_0.apply();
+            t1.apply();
             sm.egress_spec = 9w2;
         }
     }

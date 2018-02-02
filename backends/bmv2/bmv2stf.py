@@ -460,18 +460,44 @@ class RunBMV2(object):
             # Priorities in BMV2 seem to be reversed with respect to the stf file
             # Hopefully 10000 is large enough
             prio = str(10000 - int(prio))
-        command = "table_add " + tableName + " " + actionName + " " + str(key) + " => " + str(actionArgs)
+        command = "table_add " + table.name + " " + action.name + " " + str(key) + " => " + str(actionArgs)
         if table.match_type == "ternary":
             command += " " + prio
         return command
     def actionByName(self, table, actionName):
-        id = table.actions[actionName]
-        action = self.actions[id]
-        return action
+        for name, id in table.actions.items():
+            action = self.actions[id]
+            if action.name == actionName:
+                return action
+        # Try again with suffixes
+        candidate = None
+        for name, id in table.actions.items():
+            action = self.actions[id]
+            if action.name.endswith(actionName):
+                if candidate is None:
+                    candidate = action
+                else:
+                    raise Exception("Ambiguous action name " + actionName + " in " + table.name)
+        if candidate is not None:
+            return candidate
+
+        raise Exception("No action", actionName, "in table", table)
     def tableByName(self, tableName):
+        originalName = tableName
         for t in self.tables:
             if t.name == tableName:
                 return t
+        # If we can't find that try to match the tableName with a table suffix
+        candidate = None
+        for t in self.tables:
+            if t.name.endswith(tableName):
+                if candidate == None:
+                    candidate = t
+                else:
+                    raise Exception("Table name " + tableName + " is ambiguous between " +
+                                    candidate.name + " and " + t.name)
+        if candidate is not None:
+            return candidate
         raise Exception("Could not find table " + tableName)
     def interfaceArgs(self):
         # return list of interface names suitable for bmv2
@@ -575,20 +601,27 @@ class RunBMV2(object):
             runcli = [FindExe("behavioral-model", "simple_switch_CLI"), "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
-            cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
-            self.cli_stdin = cli.stdin
-            with open(self.stffile) as i:
-                for line in i:
-                    line, comment = nextWord(line, "#")
-                    self.do_command(line)
-            cli.stdin.close()
-            for interface, fp in self.interfaces.iteritems():
-                fp.close()
-            # Give time to the model to execute
-            time.sleep(2)
-            cli.terminate()
-            sw.terminate()
-            sw.wait()
+
+            try:
+                cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
+                self.cli_stdin = cli.stdin
+                with open(self.stffile) as i:
+                    for line in i:
+                        line, comment = nextWord(line, "#")
+                        self.do_command(line)
+                cli.stdin.close()
+                for interface, fp in self.interfaces.iteritems():
+                    fp.close()
+                # Give time to the model to execute
+                time.sleep(2)
+                cli.terminate()
+                sw.terminate()
+                sw.wait()
+            except Exception as e:
+                cli.terminate()
+                sw.terminate()
+                sw.wait()
+                raise e
             # This only works on Unix: negative returncode is
             # minus the signal number that killed the process.
             if sw.returncode != 0 and sw.returncode != -15:  # 15 is SIGTERM
@@ -619,7 +652,9 @@ class RunBMV2(object):
             if expected[i] == "*":
                 continue;
             if expected[i] != received[i]:
+                reportError("Received packet ", received)
                 reportError("Packet different at position", i, ": expected", expected[i], ", received", received[i])
+                reportError("Full received packed is ", received)
                 return FAILURE
         return SUCCESS
     def showLog(self):

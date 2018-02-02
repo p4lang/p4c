@@ -8,33 +8,24 @@ extern Random2 {
     bit<10> read();
 }
 
-parser callee(Random2 rand) {
-    state start {
-        rand.read();
-        transition accept;
-    }
-}
-
 parser caller() {
-    @name("rand1") Random2() rand1_0;
-    @name("ca") callee() ca_0;
+    @name("caller.rand1") Random2() rand1;
     state start {
-        ca_0.apply(rand1_0);
-        transition accept;
+        transition callee_start;
     }
-}
-
-control foo2(Random2 rand) {
-    apply {
-        rand.read();
+    state callee_start {
+        rand1.read();
+        transition start_0;
+    }
+    state start_0 {
+        transition accept;
     }
 }
 
 control ingress() {
-    @name("rand1") Random2() rand1_1;
-    @name("foo2_inst") foo2() foo2_inst_0;
+    @name("ingress.rand1") Random2() rand1_2;
     apply {
-        foo2_inst_0.apply(rand1_1);
+        rand1_2.read();
     }
 }
 

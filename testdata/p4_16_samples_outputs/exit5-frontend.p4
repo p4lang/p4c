@@ -1,10 +1,10 @@
 control ctrl() {
-    @name("e") action e_0() {
+    @name("ctrl.e") action e_0() {
         exit;
     }
-    @name("f") action f_0() {
+    @name("ctrl.f") action f_0() {
     }
-    @name("t") table t_0 {
+    @name("ctrl.t") table t {
         actions = {
             e_0();
             f_0();
@@ -12,12 +12,12 @@ control ctrl() {
         default_action = e_0();
     }
     apply {
-        switch (t_0.apply().action_run) {
+        switch (t.apply().action_run) {
             e_0: {
-                t_0.apply();
+                t.apply();
             }
             f_0: {
-                t_0.apply();
+                t.apply();
             }
         }
 

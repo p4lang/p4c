@@ -150,12 +150,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name(".format_options_security") action format_options_security_0() {
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_option_EOL.push_front(1);
+        hdr.ipv4_option_EOL[0].setValid();
         hdr.ipv4_base.ihl = 4w8;
     }
     @name(".format_options_timestamp") action format_options_timestamp_0() {
@@ -167,6 +168,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ipv4_option_NOP.pop_front(3);
         hdr.ipv4_option_EOL.pop_front(3);
         hdr.ipv4_option_NOP.push_front(1);
+        hdr.ipv4_option_NOP[0].setValid();
         hdr.ipv4_option_NOP[0].value = 8w0x1;
         hdr.ipv4_base.ihl = (bit<4>)(8w8 + (hdr.ipv4_option_timestamp.len >> 2));
     }

@@ -4,13 +4,13 @@ header H {
 }
 
 control c(inout bit<32> r) {
-    H[2] h_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
+    H[2] h;
+    bit<32> tmp_1;
+    bit<32> tmp_2;
     apply {
-        tmp = f(32w2);
-        tmp_0 = tmp;
-        h_0[tmp_0].setValid();
+        tmp_1 = f(32w2);
+        tmp_2 = tmp_1;
+        h[tmp_2].setValid();
     }
 }
 

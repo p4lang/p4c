@@ -150,52 +150,68 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_4() {
+    }
+    @name(".NoAction") action NoAction_5() {
+    }
     @name(".nop") action nop_0() {
+    }
+    @name(".nop") action nop_3() {
+    }
+    @name(".nop") action nop_4() {
     }
     @name(".set_egress_port") action set_egress_port_0(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name(".ipv4_match") table ipv4_match_0 {
+    @name(".set_egress_port") action set_egress_port_3(bit<8> egress_port) {
+        meta.ing_metadata.egress_port = egress_port;
+    }
+    @name(".set_egress_port") action set_egress_port_4(bit<8> egress_port) {
+        meta.ing_metadata.egress_port = egress_port;
+    }
+    @name(".ipv4_match") table ipv4_match {
         actions = {
             nop_0();
             set_egress_port_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.ipv4.srcAddr: exact @name("ipv4.srcAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".ipv6_match") table ipv6_match_0 {
+    @name(".ipv6_match") table ipv6_match {
         actions = {
-            nop_0();
-            set_egress_port_0();
-            @defaultonly NoAction();
+            nop_3();
+            set_egress_port_3();
+            @defaultonly NoAction_4();
         }
         key = {
             hdr.ipv6.srcAddr: exact @name("ipv6.srcAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_4();
     }
-    @name(".l2_match") table l2_match_0 {
+    @name(".l2_match") table l2_match {
         actions = {
-            nop_0();
-            set_egress_port_0();
-            @defaultonly NoAction();
+            nop_4();
+            set_egress_port_4();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_5();
     }
     apply {
         if (hdr.ethernet.etherType == 16w0x800) 
-            ipv4_match_0.apply();
+            ipv4_match.apply();
         else 
             if (hdr.ethernet.etherType == 16w0x86dd) 
-                ipv6_match_0.apply();
+                ipv6_match.apply();
             else 
-                l2_match_0.apply();
+                l2_match.apply();
     }
 }
 

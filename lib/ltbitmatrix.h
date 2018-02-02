@@ -57,7 +57,10 @@ class LTBitMatrix : private bitvec {
      public:
         friend class LTBitMatrix;
         using rowref<LTBitMatrix>::rowref;
-        void operator|=(bitvec a) const { a.clrrange(row+1, ~0); self |= a << (row*row+row)/2; }
+        void operator|=(bitvec a) const {
+            for (size_t v : a) {
+                if (v > row) break;
+                self(row, v) = 1; } }
         nonconst_bitref operator[](unsigned col) const { return self(row, col); }
     };
     class const_rowref : public rowref<const LTBitMatrix> {

@@ -53,8 +53,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<24> tmp;
-    bit<4> tmp_0;
+    bit<24> tmp_1;
+    bit<4> tmp_2;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -74,8 +74,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls") state parse_mpls {
-        tmp = packet.lookahead<bit<24>>();
-        transition select(tmp[0:0]) {
+        tmp_1 = packet.lookahead<bit<24>>();
+        transition select(tmp_1[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -83,8 +83,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
-        tmp_0 = packet.lookahead<bit<4>>();
-        transition select(tmp_0[3:0]) {
+        tmp_2 = packet.lookahead<bit<4>>();
+        transition select(tmp_2[3:0]) {
             4w0x4: parse_ipv4;
             default: accept;
         }
@@ -111,20 +111,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".do_noop") action do_noop_0() {
     }
-    @name(".do_nothing") table do_nothing_0 {
+    @name(".do_nothing") table do_nothing {
         actions = {
             do_noop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        do_nothing_0.apply();
+        do_nothing.apply();
     }
 }
 

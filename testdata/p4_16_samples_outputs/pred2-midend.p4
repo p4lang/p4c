@@ -5,9 +5,9 @@ control empty();
 package top(empty e);
 control Ing() {
     bool tmp_0;
-    @name("cond") action cond() {
+    @name("Ing.cond") action cond() {
     }
-    @name("tbl_cond") table tbl_cond {
+    @name("Ing.tbl_cond") table tbl_cond {
         actions = {
             cond();
         }

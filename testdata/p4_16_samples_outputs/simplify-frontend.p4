@@ -1,37 +1,41 @@
 #include <core.p4>
 
 control c(out bool x) {
-    bool tmp;
-    bool tmp_0;
-    bool tmp_1;
-    @name("t1") table t1_0 {
-        key = {
-            x: exact @name("x") ;
-        }
-        actions = {
-            NoAction();
-        }
-        default_action = NoAction();
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("t2") table t2_0 {
+    @name(".NoAction") action NoAction_3() {
+    }
+    bool tmp_2;
+    bool tmp_3;
+    bool tmp_4;
+    @name("c.t1") table t1 {
         key = {
             x: exact @name("x") ;
         }
         actions = {
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
+    }
+    @name("c.t2") table t2 {
+        key = {
+            x: exact @name("x") ;
+        }
+        actions = {
+            NoAction_3();
+        }
+        default_action = NoAction_3();
     }
     apply {
         x = true;
-        tmp = t1_0.apply().hit;
-        if (!tmp) 
-            tmp_0 = false;
+        tmp_2 = t1.apply().hit;
+        if (!tmp_2) 
+            tmp_3 = false;
         else {
-            tmp_1 = t2_0.apply().hit;
-            tmp_0 = tmp_1;
+            tmp_4 = t2.apply().hit;
+            tmp_3 = tmp_4;
         }
-        if (tmp_0) 
+        if (tmp_3) 
             x = false;
     }
 }

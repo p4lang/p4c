@@ -30,12 +30,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".sel_profile") @mode("fair") action_selector(HashAlgorithm.crc16, 32w16384, 32w14) sel_profile;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".noop") action noop_0() {
     }
-    @name(".test1") table test1_0 {
+    @name(".test1") table test1 {
         actions = {
             noop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.b1: exact @name("data.b1") ;
@@ -46,10 +48,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
         implementation = sel_profile;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        test1_0.apply();
+        test1.apply();
     }
 }
 

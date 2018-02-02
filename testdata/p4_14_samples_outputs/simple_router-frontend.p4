@@ -56,31 +56,41 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name(".send_frame") table send_frame_0 {
+    @name(".send_frame") table send_frame {
         actions = {
             rewrite_mac_0();
             _drop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        send_frame_0.apply();
+        send_frame.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_1() {
+    }
     @name("._drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_5() {
+        mark_to_drop();
+    }
+    @name("._drop") action _drop_6() {
         mark_to_drop();
     }
     @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
@@ -91,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name(".drop_all") table drop_all_0 {
+    @name(".drop_all") table drop_all {
         actions = {
             _drop_1();
         }
@@ -100,36 +110,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = _drop_1();
     }
-    @name(".forward") table forward_0 {
+    @name(".forward") table forward {
         actions = {
             set_dmac_0();
-            _drop_1();
-            @defaultonly NoAction();
+            _drop_5();
+            @defaultonly NoAction_1();
         }
         key = {
             meta.routing_metadata.nhop_ipv4: exact @name("routing_metadata.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
-    @name(".ipv4_lpm") table ipv4_lpm_0 {
+    @name(".ipv4_lpm") table ipv4_lpm {
         actions = {
             set_nhop_0();
-            _drop_1();
+            _drop_6();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
         size = 1024;
-        default_action = _drop_1();
+        default_action = _drop_6();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
-            ipv4_lpm_0.apply();
-            forward_0.apply();
+            ipv4_lpm.apply();
+            forward.apply();
         }
         else 
-            drop_all_0.apply();
+            drop_all.apply();
     }
 }
 

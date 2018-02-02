@@ -27,14 +27,10 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Key inKey;
-    Key defaultKey;
     Value val_2;
-    @name("test") action test_0() {
-        inKey.field1 = 32w1;
-        defaultKey.field1 = 32w0;
-        val_2.field1 = (inKey == defaultKey ? 32w0 : val_2.field1);
-        val_2.field1 = (inKey == defaultKey ? 32w8 : val_2.field1);
+    @name("Eg.test") action test_0() {
+        val_2.field1 = val_2.field1;
+        val_2.field1 = val_2.field1;
     }
     @hidden table tbl_test {
         actions = {

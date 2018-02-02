@@ -474,8 +474,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<24> tmp;
-    bit<4> tmp_0;
+    bit<24> tmp_1;
+    bit<4> tmp_2;
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -641,8 +641,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls") state parse_mpls {
-        tmp = packet.lookahead<bit<24>>();
-        transition select(tmp[0:0]) {
+        tmp_1 = packet.lookahead<bit<24>>();
+        transition select(tmp_1[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -650,8 +650,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
-        tmp_0 = packet.lookahead<bit<4>>();
-        transition select(tmp_0[3:0]) {
+        tmp_2 = packet.lookahead<bit<4>>();
+        transition select(tmp_2[3:0]) {
             4w0x4: parse_inner_ipv4;
             4w0x6: parse_inner_ipv6;
             default: parse_eompls;
@@ -727,6 +727,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".outer_bd_action_profile") action_profile(32w256) outer_bd_action_profile;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".set_bd") action set_bd_0(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.ipv4_unicast_enabled = ipv4_unicast_enabled;
@@ -835,14 +837,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name(".port_vlan_mapping") table port_vlan_mapping_0 {
+    @name(".port_vlan_mapping") table port_vlan_mapping {
         actions = {
             set_bd_0();
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags_0();
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags_0();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags_0();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             meta.ingress_metadata.ifindex: exact @name("ingress_metadata.ifindex") ;
@@ -853,10 +855,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 32768;
         implementation = outer_bd_action_profile;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        port_vlan_mapping_0.apply();
+        port_vlan_mapping.apply();
     }
 }
 

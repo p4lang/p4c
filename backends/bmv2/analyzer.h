@@ -31,7 +31,7 @@ class CFG final : public IHasDbPrint {
     class Edge;
     class Node;
 
-    class EdgeSet final {
+    class EdgeSet final : public IHasDbPrint {
      public:
         ordered_set<CFG::Edge*> edges;
 
@@ -55,7 +55,7 @@ class CFG final : public IHasDbPrint {
         bool isDestination(const CFG::Node* destination) const;
     };
 
-    class Node {
+    class Node : public IHasDbPrint {
      protected:
         friend class CFG;
 
@@ -71,8 +71,7 @@ class CFG final : public IHasDbPrint {
         EdgeSet        successors;
 
         void dbprint(std::ostream& out) const;
-        void addPredecessors(const EdgeSet* set) { if (set != nullptr)
-                predecessors.mergeWith(set); }
+        void addPredecessors(const EdgeSet* set);
         template<typename T> bool is() const { return to<T>() != nullptr; }
         template<typename T> T* to() { return dynamic_cast<T*>(this); }
         template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
@@ -111,12 +110,18 @@ class CFG final : public IHasDbPrint {
     };
 
  public:
+    /**
+     * A CFG Edge; can be an in-edge or out-edge.
+     */
     class Edge final {
      protected:
         EdgeType type;
         Edge(Node* node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
      public:
+        /**
+         * The destination node of the edge.  The source node is not known by the edge
+         */
         Node*    endpoint;
         cstring  label;  // only present if type == Label
 

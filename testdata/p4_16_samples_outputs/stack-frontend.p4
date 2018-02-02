@@ -4,29 +4,29 @@ header h {
 }
 
 parser p() {
-    h[4] stack_0;
-    h b_0;
+    h[4] stack;
+    h b;
     state start {
-        stack_0[0].setInvalid();
-        stack_0[1].setInvalid();
-        stack_0[2].setInvalid();
-        stack_0[3].setInvalid();
-        stack_0[3].setValid();
-        b_0 = stack_0.last;
-        stack_0[2] = b_0;
+        stack[0].setInvalid();
+        stack[1].setInvalid();
+        stack[2].setInvalid();
+        stack[3].setInvalid();
+        stack[3].setValid();
+        b = stack.last;
+        stack[2] = b;
         transition accept;
     }
 }
 
 control c() {
-    h[4] stack_1;
-    h b_1;
+    h[4] stack_2;
+    h b_2;
     apply {
-        stack_1[3].setValid();
-        b_1 = stack_1[3];
-        stack_1[2] = b_1;
-        stack_1.push_front(2);
-        stack_1.pop_front(2);
+        stack_2[3].setValid();
+        b_2 = stack_2[3];
+        stack_2[2] = b_2;
+        stack_2.push_front(2);
+        stack_2.pop_front(2);
     }
 }
 

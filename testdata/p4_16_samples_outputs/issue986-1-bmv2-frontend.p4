@@ -35,24 +35,28 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("t1") table t1_0 {
-        actions = {
-            NoAction();
-        }
-        default_action = NoAction();
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("t2") table t2_0 {
+    @name(".NoAction") action NoAction_3() {
+    }
+    @name("ingress.t1") table t1 {
         actions = {
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
+    }
+    @name("ingress.t2") table t2 {
+        actions = {
+            NoAction_3();
+        }
+        default_action = NoAction_3();
     }
     apply {
         if (m.b == 1w0) 
-            t1_0.apply();
+            t1.apply();
         else 
-            t1_0.apply();
-        t2_0.apply();
+            t1.apply();
+        t2.apply();
     }
 }
 

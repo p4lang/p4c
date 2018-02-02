@@ -4,9 +4,9 @@
 control empty();
 package top(empty e);
 control Ing() {
-    bool b_0;
-    @name("cond") action cond_0() {
-        b_0 = true;
+    bool b;
+    @name("Ing.cond") action cond_0() {
+        b = true;
     }
     apply {
         cond_0();

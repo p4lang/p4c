@@ -1,6 +1,6 @@
 control p() {
     bit<1> x_1;
-    @name("b") action b_0() {
+    @name("p.b") action b_0() {
     }
     @hidden action act() {
         x_1 = 1w0;

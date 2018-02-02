@@ -15,35 +15,42 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("drop") action drop_0() {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_3() {
+    }
+    @name("IngressI.drop") action drop_0() {
         smeta.drop = 1w1;
     }
-    @name("as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as_0;
-    @name("indirect_ws") table indirect_ws_0 {
-        key = {
-            meta.hash1: selector @name("meta.hash1") ;
-        }
-        actions = {
-            drop_0();
-            NoAction();
-        }
-        const default_action = NoAction();
-        @name("ap_ws") implementation = as_0;
+    @name("IngressI.drop") action drop_3() {
+        smeta.drop = 1w1;
     }
-    @name("indirect_ws_1") table indirect_ws_2 {
+    @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as;
+    @name("IngressI.indirect_ws") table indirect_ws {
         key = {
             meta.hash1: selector @name("meta.hash1") ;
         }
         actions = {
             drop_0();
-            NoAction();
+            NoAction_0();
         }
-        const default_action = NoAction();
-        @name("ap_ws") implementation = as_0;
+        const default_action = NoAction_0();
+        @name("ap_ws") implementation = as;
+    }
+    @name("IngressI.indirect_ws_1") table indirect_ws_1 {
+        key = {
+            meta.hash1: selector @name("meta.hash1") ;
+        }
+        actions = {
+            drop_3();
+            NoAction_3();
+        }
+        const default_action = NoAction_3();
+        @name("ap_ws") implementation = as;
     }
     apply {
-        indirect_ws_0.apply();
-        indirect_ws_2.apply();
+        indirect_ws.apply();
+        indirect_ws_1.apply();
     }
 }
 

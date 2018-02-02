@@ -19,7 +19,7 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     S s;
-    @name("r") register<S>(32w100) r;
+    @name("Ing.r") register<S>(32w100) r;
     @hidden action act() {
         s.f = 32w0;
         r.write(32w0, s);

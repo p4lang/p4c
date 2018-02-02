@@ -16,14 +16,14 @@ extern E {
 }
 
 control c(inout S s) {
-    bit<32> tmp;
-    @name("e") E() e_0;
+    bit<32> tmp_0;
+    @name("c.e") E() e;
     apply {
         if (s.h.isValid()) 
             s.h.data3 = 32w0;
         if (s.h.data2 == 32w0) {
-            tmp = e_0.get<bit<32>>(s.h.data2);
-            s.h.data1 = tmp;
+            tmp_0 = e.get<bit<32>>(s.h.data2);
+            s.h.data1 = tmp_0;
         }
     }
 }

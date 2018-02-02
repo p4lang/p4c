@@ -32,21 +32,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".ethernet") direct_counter(CounterType.packets) ethernet_0;
-    @name(".ethernet") action ethernet_2() {
-        ethernet_0.count();
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".ethernet") direct_counter(CounterType.packets) ethernet_2;
+    @name(".ethernet") action ethernet_3() {
+        ethernet_2.count();
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name(".ethernet") table ethernet_5 {
+    @name(".ethernet") table ethernet_4 {
         actions = {
-            ethernet_2();
-            @defaultonly NoAction();
+            ethernet_3();
+            @defaultonly NoAction_0();
         }
-        counters = ethernet_0;
-        default_action = NoAction();
+        counters = ethernet_2;
+        default_action = NoAction_0();
     }
     apply {
-        ethernet_5.apply();
+        ethernet_4.apply();
     }
 }
 

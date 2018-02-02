@@ -46,31 +46,33 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter_0;
-    @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter_0;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter;
+    @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
     @name(".m_action") action m_action(bit<32> idx) {
-        my_direct_counter_0.count();
-        my_indirect_counter_0.count(idx);
+        my_direct_counter.count();
+        my_indirect_counter.count(idx);
         mark_to_drop();
     }
     @name("._nop") action _nop() {
-        my_direct_counter_0.count();
+        my_direct_counter.count();
     }
-    @name(".m_table") table m_table_0 {
+    @name(".m_table") table m_table {
         actions = {
             m_action();
             _nop();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         size = 16384;
-        counters = my_direct_counter_0;
-        default_action = NoAction();
+        counters = my_direct_counter;
+        default_action = NoAction_0();
     }
     apply {
-        m_table_0.apply();
+        m_table.apply();
     }
 }
 

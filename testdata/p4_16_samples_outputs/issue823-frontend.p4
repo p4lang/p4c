@@ -11,17 +11,14 @@ struct headers_t {
     data_h data;
 }
 
-parser MyP2(packet_in pkt, out headers_t hdr) {
-    state start {
-        transition reject;
-    }
-}
-
 parser MyP1(packet_in pkt, out headers_t hdr) {
-    @name("subp") MyP2() subp_0;
+    headers_t hdr_1;
     state start {
-        subp_0.apply(pkt, hdr);
-        transition accept;
+        hdr_1.data.setInvalid();
+        transition MyP2_start;
+    }
+    state MyP2_start {
+        transition reject;
     }
 }
 

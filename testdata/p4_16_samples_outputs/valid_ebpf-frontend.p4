@@ -44,26 +44,28 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("counters") CounterArray(32w10, true) counters_0;
-    @name("invalidate") action invalidate_0() {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name("pipe.counters") CounterArray(32w10, true) counters;
+    @name("pipe.invalidate") action invalidate_0() {
         headers.ipv4.setInvalid();
         headers.ethernet.setInvalid();
     }
-    @name("t") table t_0 {
+    @name("pipe.t") table t {
         actions = {
             invalidate_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         implementation = array_table(32w1);
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         if (headers.ipv4.isValid()) {
-            counters_0.increment(headers.ipv4.dstAddr);
+            counters.increment(headers.ipv4.dstAddr);
             pass = true;
         }
         else {
-            t_0.apply();
+            t.apply();
             pass = false;
         }
     }

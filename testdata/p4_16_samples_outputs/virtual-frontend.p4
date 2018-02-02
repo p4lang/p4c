@@ -4,15 +4,15 @@ extern Virtual {
 }
 
 control c(inout bit<16> p) {
-    bit<16> tmp;
-    @name("cntr") Virtual() cntr_0 = {
+    bit<16> tmp_0;
+    @name("c.cntr") Virtual() cntr = {
         bit<16> f(in bit<16> ix) {
             return ix + 16w1;
         }
     };
     apply {
-        tmp = cntr_0.f(16w6);
-        p = tmp;
+        tmp_0 = cntr.f(16w6);
+        p = tmp_0;
     }
 }
 

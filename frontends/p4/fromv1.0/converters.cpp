@@ -590,23 +590,7 @@ class ComputeCallGraph : public Inspector {
  public:
     explicit ComputeCallGraph(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("ComputeCallGraph"); }
-    void postorder(const IR::Apply* apply) override {
-        LOG3("Scanning " << apply->name);
-        auto tbl = structure->tables.get(apply->name.name);
-        if (tbl == nullptr)
-            ::error("Could not find table %1%", apply->name);
-        auto parent = findContext<IR::V1Control>();
-        BUG_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
-        auto ctrl = get(structure->tableMapping, tbl);
-        if (ctrl != nullptr && ctrl != parent) {
-            auto previous = get(structure->tableInvocation, tbl);
-            ::error("Table %1% invoked from two different controls: %2% and %3%",
-                    tbl, apply, previous);
-        }
-        LOG3("Invoking " << tbl << " in " << parent->name);
-        structure->tableMapping.emplace(tbl, parent);
-        structure->tableInvocation.emplace(tbl, apply);
-    }
+
     void postorder(const IR::V1Parser* parser) override {
         LOG3("Scanning parser " << parser->name);
         structure->parsers.add(parser->name);
@@ -713,6 +697,45 @@ class ComputeCallGraph : public Inspector {
             structure->calledRegisters.calls(caller, reg->name.name);
         else if (auto ext = gref->obj->to<IR::Declaration_Instance>())
             structure->calledExterns.calls(caller, ext->name.name);
+    }
+};
+
+/// Table call graph should be built after the control call graph is built.
+/// In the case that the program contains an unused control block, the
+/// table invocation in the unused control block should not be considered.
+class ComputeTableCallGraph : public Inspector {
+    ProgramStructure *structure;
+
+ public:
+    explicit ComputeTableCallGraph(ProgramStructure *structure) : structure(structure) {
+        CHECK_NULL(structure);
+        setName("ComputeTableCallGraph");
+    }
+
+    void postorder(const IR::Apply *apply) override {
+        LOG3("Scanning " << apply->name);
+        auto tbl = structure->tables.get(apply->name.name);
+        if (tbl == nullptr)
+            ::error("Could not find table %1%", apply->name);
+        auto parent = findContext<IR::V1Control>();
+        ERROR_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
+
+        auto ctrl = get(structure->tableMapping, tbl);
+
+        // skip control block that is unused.
+        if (!structure->calledControls.isCallee(parent->name) &&
+            parent->name != P4V1::V1Model::instance.ingress.name &&
+            parent->name != P4V1::V1Model::instance.egress.name )
+            return;
+
+        if (ctrl != nullptr && ctrl != parent) {
+            auto previous = get(structure->tableInvocation, tbl);
+            ::error("Table %1% invoked from two different controls: %2% and %3%",
+                    tbl, apply, previous);
+        }
+        LOG3("Invoking " << tbl << " in " << parent->name);
+        structure->tableMapping.emplace(tbl, parent);
+        structure->tableInvocation.emplace(tbl, apply);
     }
 };
 
@@ -1059,6 +1082,7 @@ Converter::Converter() {
     // Convert
     passes.emplace_back(new DiscoverStructure(&structure));
     passes.emplace_back(new ComputeCallGraph(&structure));
+    passes.emplace_back(new ComputeTableCallGraph(&structure));
     passes.emplace_back(new Rewriter(&structure));
     passes.emplace_back(new FixExtracts(&structure));
     passes.emplace_back(new RemoveAnnotatedFields);

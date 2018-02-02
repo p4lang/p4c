@@ -19,33 +19,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".x") action x_0() {
+control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name(".t") table t_0 {
+    @name(".x") action _x_0() {
+    }
+    @name(".t") table _t {
         actions = {
-            x_0();
-            @defaultonly NoAction();
+            _x_0();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         if (meta.m.b == 1w1) 
-            t_0.apply();
-    }
-}
-
-control d(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".c") c() c_1;
-    apply {
-        c_1.apply(hdr, meta, standard_metadata);
-    }
-}
-
-control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".d") d() d_1;
-    apply {
-        d_1.apply(hdr, meta, standard_metadata);
+            _t.apply();
     }
 }
 

@@ -24,20 +24,20 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 register<bit<8>>(32w256) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> x_0;
+    bit<8> x;
     apply {
-        r.read(x_0, (bit<32>)h.myhdr.reg_idx_to_update);
+        r.read(x, (bit<32>)h.myhdr.reg_idx_to_update);
         r.write((bit<32>)h.myhdr.reg_idx_to_update, 8w0x2a);
     }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> tmp_0;
+    bit<8> tmp;
     apply {
-        r.read(tmp_0, (bit<32>)h.myhdr.reg_idx_to_update);
-        tmp_0 = tmp_0 + h.myhdr.value_to_add;
-        r.write((bit<32>)h.myhdr.reg_idx_to_update, tmp_0);
-        h.myhdr.debug_last_reg_value_written = tmp_0;
+        r.read(tmp, (bit<32>)h.myhdr.reg_idx_to_update);
+        tmp = tmp + h.myhdr.value_to_add;
+        r.write((bit<32>)h.myhdr.reg_idx_to_update, tmp);
+        h.myhdr.debug_last_reg_value_written = tmp;
     }
 }
 

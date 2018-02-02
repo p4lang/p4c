@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_MOVECONSTRUCTORS_H_
-#define _MIDEND_MOVECONSTRUCTORS_H_
+#ifndef _FRONTENDS_P4_MOVECONSTRUCTORS_H_
+#define _FRONTENDS_P4_MOVECONSTRUCTORS_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 
@@ -56,4 +56,4 @@ class MoveConstructors : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_MOVECONSTRUCTORS_H_ */
+#endif /* _FRONTENDS_P4_MOVECONSTRUCTORS_H_ */

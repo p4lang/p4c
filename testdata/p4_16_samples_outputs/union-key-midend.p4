@@ -18,11 +18,11 @@ struct Headers {
 }
 
 control c(in Headers h) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("a") action a_0() {
+    @name("c.a") action a_0() {
     }
-    @name("t") table t {
+    @name("c.t") table t {
         key = {
             h.u.h1.x: exact @name("h.u.h1.x") ;
         }

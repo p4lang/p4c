@@ -27,52 +27,70 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bool tmp;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_4() {
+    }
+    @name(".NoAction") action NoAction_5() {
+    }
+    bool tmp_0;
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
+        hdr.data.b1 = val;
+        standard_metadata.egress_spec = port;
+    }
+    @name(".setb1") action setb1_3(bit<8> val, bit<9> port) {
+        hdr.data.b1 = val;
+        standard_metadata.egress_spec = port;
+    }
+    @name(".setb1") action setb1_4(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop_0() {
     }
-    @name(".test1") table test1_0 {
+    @name(".noop") action noop_3() {
+    }
+    @name(".noop") action noop_4() {
+    }
+    @name(".test1") table test1 {
         actions = {
             setb1_0();
             noop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.data.f1: ternary @name("data.f1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".test2") table test2_0 {
+    @name(".test2") table test2 {
         actions = {
-            setb1_0();
-            noop_0();
-            @defaultonly NoAction();
+            setb1_3();
+            noop_3();
+            @defaultonly NoAction_4();
         }
         key = {
             hdr.data.f2: ternary @name("data.f2") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_4();
     }
-    @name(".test3") table test3_0 {
+    @name(".test3") table test3 {
         actions = {
-            setb1_0();
-            noop_0();
-            @defaultonly NoAction();
+            setb1_4();
+            noop_4();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.data.f3: ternary @name("data.f3") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_5();
     }
     apply {
-        tmp = test1_0.apply().hit;
-        if (tmp) 
-            test2_0.apply();
+        tmp_0 = test1.apply().hit;
+        if (tmp_0) 
+            test2.apply();
         else 
-            test3_0.apply();
+            test3.apply();
     }
 }
 

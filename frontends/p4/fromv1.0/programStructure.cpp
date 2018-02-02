@@ -1181,11 +1181,33 @@ CONVERT_PRIMITIVE(mark_for_drop) {
 CONVERT_PRIMITIVE(push) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
+    auto op1 = primitive->operands.at(1);
     auto hdr = conv.convert(primitive->operands.at(0));
-    auto count = conv.convert(primitive->operands.at(1));
+    auto count = conv.convert(op1);
+    if (!count->is<IR::Constant>()) {
+        ::error("%1%: Only push with a constant value is supported", op1);
+        return new IR::EmptyStatement(primitive->srcInfo);
+    }
+    auto cst = count->to<IR::Constant>();
+    auto number = cst->asInt();
+    if (number < 0) {
+        ::error("%1%: push requires a positive amount", op1);
+        return new IR::EmptyStatement(primitive->srcInfo);
+    }
+    if (number > 0xFFFF) {
+        ::error("%1%: push amount is too large", op1);
+        return new IR::EmptyStatement(primitive->srcInfo);
+    }
+    IR::IndexedVector<IR::StatOrDecl> block;
     auto methodName = IR::Type_Stack::push_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
-    return new IR::MethodCallStatement(primitive->srcInfo, method, { count });
+    block.push_back(new IR::MethodCallStatement(primitive->srcInfo, method, { count }));
+    for (int i = 0; i < number; i++) {
+        auto elemi = new IR::ArrayIndex(primitive->srcInfo, hdr, new IR::Constant(i));
+        auto setValid = new IR::Member(elemi, IR::ID(IR::Type_Header::setValid));
+        block.push_back(new IR::MethodCallStatement(primitive->srcInfo, setValid, {}));
+    }
+    return new IR::BlockStatement(primitive->srcInfo, std::move(block));
 }
 CONVERT_PRIMITIVE(pop) {
     ExpressionConverter conv(structure);
@@ -1940,6 +1962,12 @@ void ProgramStructure::createControls() {
 
     for (auto c : controlsToDo) {
         auto ct = controls.get(c);
+        /// do not convert control block if it is not invoked
+        /// by other control block and it is not ingress or egress.
+        if (!calledControls.isCallee(c) &&
+            ct != controls.get(v1model.ingress.name) &&
+            ct != controls.get(v1model.egress.name))
+            continue;
         auto ctrl = convertControl(ct, controls.get(ct));
         if (ctrl == nullptr)
             return;
@@ -2093,7 +2121,7 @@ void ProgramStructure::createChecksumUpdates() {
     auto params = new IR::ParameterList;
     auto headpath = new IR::Path(v1model.headersType.Id());
     auto headtype = new IR::Type_Name(headpath);
-    auto headers = new IR::Parameter(v1model.update.headersParam.Id(),
+    auto headers = new IR::Parameter(v1model.compute.headersParam.Id(),
                                      IR::Direction::InOut, headtype);
     params->push_back(headers);
     conversionContext.header = paramReference(headers);
@@ -2107,7 +2135,7 @@ void ProgramStructure::createChecksumUpdates() {
 
     conversionContext.standardMetadata = nullptr;
 
-    auto type = new IR::Type_Control(v1model.update.Id(), params);
+    auto type = new IR::Type_Control(v1model.compute.Id(), params);
     auto body = new IR::BlockStatement;
     for (auto cf : calculated_fields) {
         LOG3("Conveting " << cf);
@@ -2141,7 +2169,7 @@ void ProgramStructure::createChecksumUpdates() {
         }
     }
     updateChecksums = new IR::P4Control(
-        v1model.update.Id(), type, IR::IndexedVector<IR::Declaration>(), body);
+        v1model.compute.Id(), type, IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(updateChecksums);
     conversionContext.clear();
 }

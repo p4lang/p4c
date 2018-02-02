@@ -139,7 +139,25 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".port_counters") direct_counter(CounterType.packets) port_counters_0;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_10() {
+    }
+    @name(".NoAction") action NoAction_11() {
+    }
+    @name(".NoAction") action NoAction_12() {
+    }
+    @name(".NoAction") action NoAction_13() {
+    }
+    @name(".NoAction") action NoAction_14() {
+    }
+    @name(".NoAction") action NoAction_15() {
+    }
+    @name(".NoAction") action NoAction_16() {
+    }
+    @name(".NoAction") action NoAction_17() {
+    }
+    @name(".port_counters") direct_counter(CounterType.packets) port_counters;
     @name(".fdb_set") action fdb_set_0(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -160,12 +178,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_next_hop") action set_next_hop_0(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
         meta.ingress_metadata.router_intf = router_interface_id;
     }
-    @name(".copy_to_cpu") action copy_to_cpu_0() {
-        meta.ingress_metadata.copy_to_cpu = 1w1;
-    }
     @name(".route_set_trap") action route_set_trap_0(bit<3> trap_priority) {
         meta.ingress_metadata.pri = trap_priority;
-        copy_to_cpu_0();
+        meta.ingress_metadata.copy_to_cpu = 1w1;
     }
     @name(".route_set_nexthop") action route_set_nexthop_0(bit<16> next_hop_id) {
         meta.ingress_metadata.nhop = next_hop_id;
@@ -207,54 +222,54 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;
     }
-    @name(".fdb") table fdb_0 {
+    @name(".fdb") table fdb {
         actions = {
             fdb_set_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             meta.ingress_metadata.vlan_id: exact @name("ingress_metadata.vlan_id") ;
             hdr.eth.dstAddr              : exact @name("eth.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".learn_notify") table learn_notify_0 {
+    @name(".learn_notify") table learn_notify {
         actions = {
             nop_0();
             generate_learn_notify_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_10();
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact @name("intrinsic_metadata.ingress_port") ;
             meta.ingress_metadata.vlan_id       : exact @name("ingress_metadata.vlan_id") ;
             hdr.eth.srcAddr                     : exact @name("eth.srcAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_10();
     }
-    @name(".neighbor") table neighbor_0 {
+    @name(".neighbor") table neighbor {
         actions = {
             set_dmac_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_11();
         }
         key = {
             meta.ingress_metadata.vrf        : exact @name("ingress_metadata.vrf") ;
             meta.ingress_metadata.ip_dest    : exact @name("ingress_metadata.ip_dest") ;
             meta.ingress_metadata.router_intf: exact @name("ingress_metadata.router_intf") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_11();
     }
-    @name(".next_hop") table next_hop_0 {
+    @name(".next_hop") table next_hop {
         actions = {
             set_next_hop_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_12();
         }
         key = {
             meta.ingress_metadata.nhop: exact @name("ingress_metadata.nhop") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_12();
     }
     @name(".set_in_port") action set_in_port(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
-        port_counters_0.count();
+        port_counters.count();
         meta.ingress_metadata.port_lag = port;
         meta.ingress_metadata.mac_limit = max_learned_address;
         meta.ingress_metadata.port_type = type_;
@@ -271,75 +286,75 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.vlan_id = default_vlan;
     }
-    @name(".port") table port_0 {
+    @name(".port") table port_1 {
         actions = {
             set_in_port();
-            @defaultonly NoAction();
+            @defaultonly NoAction_13();
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact @name("intrinsic_metadata.ingress_port") ;
         }
-        counters = port_counters_0;
-        default_action = NoAction();
+        counters = port_counters;
+        default_action = NoAction_13();
     }
-    @name(".route") table route_0 {
+    @name(".route") table route {
         actions = {
             route_set_trap_0();
             route_set_nexthop_0();
             route_set_nexthop_group_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_14();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf") ;
             hdr.ipv4.dstAddr         : lpm @name("ipv4.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_14();
     }
-    @name(".router_interface") table router_interface_0 {
+    @name(".router_interface") table router_interface {
         actions = {
             set_router_interface_0();
             router_interface_miss_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_15();
         }
         key = {
             hdr.eth.dstAddr: exact @name("eth.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_15();
     }
-    @name(".switch") table switch_1 {
+    @name(".switch") table switch_0 {
         actions = {
             set_switch_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_16();
         }
-        default_action = NoAction();
+        default_action = NoAction_16();
     }
-    @name(".virtual_router") table virtual_router_0 {
+    @name(".virtual_router") table virtual_router {
         actions = {
             set_router_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_17();
         }
         key = {
             meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_17();
     }
     apply {
-        switch_1.apply();
-        port_0.apply();
+        switch_0.apply();
+        port_1.apply();
         if (meta.ingress_metadata.oper_status == 2w1) {
-            router_interface_0.apply();
+            router_interface.apply();
             if (meta.ingress_metadata.learning != 2w0) 
-                learn_notify_0.apply();
+                learn_notify.apply();
             if (meta.ingress_metadata.router_mac == 1w0) 
-                fdb_0.apply();
+                fdb.apply();
             else {
-                virtual_router_0.apply();
+                virtual_router.apply();
                 if (hdr.ipv4.isValid() && meta.ingress_metadata.v4_enable != 1w0) 
-                    route_0.apply();
-                next_hop_0.apply();
+                    route.apply();
+                next_hop.apply();
             }
             if (meta.ingress_metadata.routed != 1w0) 
-                neighbor_0.apply();
+                neighbor.apply();
         }
     }
 }

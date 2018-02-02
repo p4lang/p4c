@@ -20,9 +20,9 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @name("a") action a_0() {
+    @name("EgressI.a") action a_0() {
     }
-    @name("t") table t_0 {
+    @name("EgressI.t") table t {
         key = {
         }
         actions = {
@@ -30,14 +30,13 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         }
         default_action = a_0();
     }
-    @name("do") IngressI() do_0;
     apply {
-        switch (t_0.apply().action_run) {
+        bool hasReturned_0 = false;
+        switch (t.apply().action_run) {
             a_0: {
-                return;
+                hasReturned_0 = true;
             }
             default: {
-                do_0.apply(hdr, meta, std_meta);
             }
         }
 

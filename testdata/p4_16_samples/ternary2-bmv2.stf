@@ -1,6 +1,6 @@
 
-add test1 0 data.f1:0x****0101 setb1(val:0x7f, port:2)
-add test1 503 data.f1:0x****0202 setb1(val:7, port:3)
+add test1 0 data.f1:0x****0101 ingress.setb1(val:0x7f, port:2)
+add test1 503 data.f1:0x****0202 ingress.setb1(val:7, port:3)
 
 #          f1       f2      h1  b1 b2  h   b1 b2
 expect 2 00000101 ******** **** 7f 66

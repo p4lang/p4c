@@ -48,6 +48,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name("._nop") action _nop_0() {
     }
     @name("._recirculate") action _recirculate_0() {
@@ -56,27 +58,33 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name(".t_egress") table t_egress_0 {
+    @name(".t_egress") table t_egress {
         actions = {
             _nop_0();
             _recirculate_0();
             _clone_e2e_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
             standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        t_egress_0.apply();
+        t_egress.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_1() {
+    }
+    @name(".NoAction") action NoAction_5() {
+    }
     @name("._nop") action _nop_1() {
+    }
+    @name("._nop") action _nop_4() {
     }
     @name("._set_port") action _set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
@@ -91,37 +99,37 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name(".t_ingress_1") table t_ingress {
+    @name(".t_ingress_1") table t_ingress_1 {
         actions = {
             _nop_1();
             _set_port_0();
             _multicast_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.hdrA.f1  : exact @name("hdrA.f1") ;
             meta.metaA.f1: exact @name("metaA.f1") ;
         }
         size = 128;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
-    @name(".t_ingress_2") table t_ingress_0 {
+    @name(".t_ingress_2") table t_ingress_2 {
         actions = {
-            _nop_1();
+            _nop_4();
             _resubmit_0();
             _clone_i2e_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
             standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
-        default_action = NoAction();
+        default_action = NoAction_5();
     }
     apply {
-        t_ingress.apply();
-        t_ingress_0.apply();
+        t_ingress_1.apply();
+        t_ingress_2.apply();
     }
 }
 

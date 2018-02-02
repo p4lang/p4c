@@ -31,19 +31,21 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @name("foo") action foo_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("tbl1") table tbl1_0 {
+    @name("cIngress.foo") action foo_0() {
+    }
+    @name("cIngress.tbl1") table tbl1 {
         key = {
         }
         actions = {
             foo_0();
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        tbl1_0.apply();
+        tbl1.apply();
     }
 }
 

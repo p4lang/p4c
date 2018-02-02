@@ -183,44 +183,49 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".cnt1") counter(32w32, CounterType.packets) cnt1_0;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_3() {
+    }
+    @name(".cnt1") counter(32w32, CounterType.packets) cnt1;
     @name(".drop_pkt") action drop_pkt_0() {
         mark_to_drop();
     }
-    @name(".hop") action hop_0(inout bit<8> ttl_0, bit<9> egress_spec_0) {
-        ttl_0 = ttl_0 + 8w255;
-        standard_metadata.egress_spec[8:0] = egress_spec_0[8:0];
-    }
     @name(".hop_ipv4") action hop_ipv4_0(bit<9> egress_spec) {
-        hop_0(hdr.ipv4.ttl, egress_spec);
+        {
+            bit<8> ttl_0 = hdr.ipv4.ttl;
+            ttl_0 = ttl_0 + 8w255;
+            standard_metadata.egress_spec[8:0] = egress_spec[8:0];
+            hdr.ipv4.ttl = ttl_0;
+        }
     }
     @name(".act") action act_0() {
-        cnt1_0.count(32w10);
+        cnt1.count(32w10);
     }
-    @name(".ipv4_routing") table ipv4_routing_0 {
+    @name(".ipv4_routing") table ipv4_routing {
         actions = {
             drop_pkt_0();
             hop_ipv4_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".table_2") table table_0 {
+    @name(".table_2") table table_1 {
         actions = {
             act_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_3();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_3();
     }
     apply {
-        ipv4_routing_0.apply();
-        table_0.apply();
+        ipv4_routing.apply();
+        table_1.apply();
     }
 }
 

@@ -14,43 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "frontends/common/constantFolding.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/p4/uniqueNames.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "midend.h"
-#include "midend/actionsInlining.h"
-#include "midend/inlining.h"
-#include "midend/compileTimeOps.h"
-#include "midend/removeReturns.h"
-#include "midend/removeParameters.h"
-#include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
-#include "midend/localizeActions.h"
+#include "midend/compileTimeOps.h"
+#include "midend/complexComparison.h"
+#include "midend/copyStructures.h"
+#include "midend/eliminateTuples.h"
+#include "midend/expandEmit.h"
+#include "midend/expandLookahead.h"
 #include "midend/local_copyprop.h"
-#include "midend/simplifyKey.h"
+#include "midend/midEndLast.h"
+#include "midend/nestedStructs.h"
+#include "midend/noMatch.h"
 #include "midend/parserUnroll.h"
+#include "midend/predication.h"
+#include "midend/removeExits.h"
+#include "midend/removeParameters.h"
+#include "midend/removeSelectBooleans.h"
+#include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
-#include "midend/removeSelectBooleans.h"
-#include "midend/eliminateTuples.h"
-#include "midend/nestedStructs.h"
-#include "midend/copyStructures.h"
-#include "midend/predication.h"
-#include "midend/noMatch.h"
 #include "midend/tableHit.h"
-#include "midend/expandLookahead.h"
-#include "midend/expandEmit.h"
-#include "midend/midEndLast.h"
-#include "midend/dontcareArgs.h"
-#include "frontends/p4/simplifyParsers.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/toP4/toP4.h"
-#include "frontends/p4/simplify.h"
-#include "frontends/p4/unusedDeclarations.h"
-#include "frontends/p4/moveDeclarations.h"
-#include "frontends/common/constantFolding.h"
-#include "frontends/p4/strengthReduction.h"
-#include "frontends/p4/uniqueNames.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace P4Test {
 
@@ -79,43 +75,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: lower errors to integers
     // TODO: handle bit-slices as out arguments
     addPasses({
-        new P4::RemoveReturns(&refMap),
-        new P4::RemoveDontcareArgs(&refMap, &typeMap),
-        new P4::MoveConstructors(&refMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-        new P4::ClearTypeMap(&typeMap),
-        evaluator,
-        new VisitFunctor([v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
-            auto toplevel = evaluator->getToplevelBlock();
-            auto main = toplevel->getMain();
-            if (main == nullptr)
-                // nothing further to do
-                return nullptr;
-            // Special handling when compiling for v1model.p4
-            if (main->type->name == P4V1::V1Model::instance.sw.name) {
-                if (main->getConstructorParameters()->size() != 6)
-                    return root;
-                auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
-                auto update = main->getParameterValue(P4V1::V1Model::instance.sw.update.name);
-                auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
-                if (verify == nullptr || update == nullptr || deparser == nullptr ||
-                    !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
-                    !deparser->is<IR::ControlBlock>()) {
-                    return root;
-                }
-                v1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
-                v1controls->emplace(update->to<IR::ControlBlock>()->container->name);
-                v1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
-            }
-            return root; }),
-        new P4::Inline(&refMap, &typeMap, evaluator),
-        new P4::InlineActions(&refMap, &typeMap),
-        // Parser loop unrolling: TODO
-        // new P4::ParsersUnroll(true, &refMap, &typeMap),
-        new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),
-        new P4::UniqueParameters(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::OrPolicy(
@@ -130,6 +89,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),
@@ -143,6 +103,31 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
+        evaluator,
+        new VisitFunctor([v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
+            auto toplevel = evaluator->getToplevelBlock();
+            auto main = toplevel->getMain();
+            if (main == nullptr)
+                // nothing further to do
+                return nullptr;
+            // Special handling when compiling for v1model.p4
+            if (main->type->name == P4V1::V1Model::instance.sw.name) {
+                if (main->getConstructorParameters()->size() != 6)
+                    return root;
+                auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
+                auto update = main->getParameterValue(
+                    P4V1::V1Model::instance.sw.compute.name);
+                auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
+                if (verify == nullptr || update == nullptr || deparser == nullptr ||
+                    !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
+                    !deparser->is<IR::ControlBlock>()) {
+                    return root;
+                }
+                v1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
+                v1controls->emplace(update->to<IR::ControlBlock>()->container->name);
+                v1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
+            }
+            return root; }),
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,

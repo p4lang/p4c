@@ -27,13 +27,20 @@ limitations under the License.
 #include "frontends/p4/typeChecking/bindVariables.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 // Passes
+#include "actionsInlining.h"
 #include "createBuiltins.h"
 #include "deprecated.h"
 #include "directCalls.h"
+#include "dontcareArgs.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
+#include "hierarchicalNames.h"
+#include "inlining.h"
+#include "localizeActions.h"
+#include "moveConstructors.h"
 #include "moveDeclarations.h"
 #include "parserControlFlow.h"
+#include "removeReturns.h"
 #include "resetHeaders.h"
 #include "setHeaders.h"
 #include "sideEffects.h"
@@ -49,6 +56,7 @@ limitations under the License.
 #include "unusedDeclarations.h"
 #include "uselessCasts.h"
 #include "validateParsedProgram.h"
+#include "checkConstants.h"
 
 namespace P4 {
 
@@ -109,6 +117,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     TypeMap       typeMap;
     refMap.setIsV1(isv1);
 
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+
     PassManager passes = {
         new PrettyPrint(options),
         // Simple checks on parsed program
@@ -133,6 +143,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
+        new CheckConstants(&refMap, &typeMap),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new FrontEndDump(),  // used for testing the program at this point
@@ -151,6 +162,19 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap),
         new RemoveParserControlFlow(&refMap, &typeMap),
+        new RemoveReturns(&refMap),
+        new RemoveDontcareArgs(&refMap, &typeMap),
+        new MoveConstructors(&refMap),
+        new RemoveAllUnusedDeclarations(&refMap),
+        new ClearTypeMap(&typeMap),
+        evaluator,
+        new Inline(&refMap, &typeMap, evaluator),
+        new InlineActions(&refMap, &typeMap),
+        new LocalizeAllActions(&refMap),
+        new UniqueNames(&refMap),  // needed again after inlining
+        new UniqueParameters(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new HierarchicalNames(),
         new FrontEndLast(),
     };
 

@@ -4,9 +4,9 @@ extern lpf<I> {
 }
 
 control c() {
-    @name("lpf_0") lpf<bit<32>>(32w32) lpf_1;
+    @name("c.lpf_0") lpf<bit<32>>(32w32) lpf_0;
     apply {
-        lpf_1.execute<bit<8>>(8w0, 32w0);
+        lpf_0.execute<bit<8>>(8w0, 32w0);
     }
 }
 

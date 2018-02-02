@@ -13,8 +13,8 @@ struct tuple_0 {
 }
 
 control c1() {
-    @name("reg0") R<tuple_0>({ 8w1 }) reg0;
-    @name("reg1") R<foo>({ 8w1 }) reg1;
+    @name("c1.reg0") R<tuple_0>({ 8w1 }) reg0;
+    @name("c1.reg1") R<foo>({ 8w1 }) reg1;
     apply {
     }
 }

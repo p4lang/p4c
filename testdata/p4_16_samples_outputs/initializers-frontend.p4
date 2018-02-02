@@ -6,23 +6,23 @@ extern Fake {
 }
 
 parser P() {
-    bit<32> x_0;
-    @name("fake") Fake() fake_0;
+    bit<32> x;
+    @name("P.fake") Fake() fake;
     state start {
-        x_0 = 32w0;
-        fake_0.call(x_0);
+        x = 32w0;
+        fake.call(x);
         transition accept;
     }
 }
 
 control C() {
-    bit<32> x_1;
-    bit<32> y_0;
-    @name("fake") Fake() fake_1;
+    bit<32> x_2;
+    bit<32> y;
+    @name("C.fake") Fake() fake_2;
     apply {
-        x_1 = 32w0;
-        y_0 = x_1 + 32w1;
-        fake_1.call(y_0);
+        x_2 = 32w0;
+        y = x_2 + 32w1;
+        fake_2.call(y);
     }
 }
 

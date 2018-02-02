@@ -5,9 +5,9 @@ header Header {
 }
 
 parser p1(packet_in p, out Header h) {
-    bit<1> x_0;
+    bit<1> x;
     state start {
-        transition select(x_0) {
+        transition select(x) {
             1w0: chain1;
             1w1: chain2;
         }

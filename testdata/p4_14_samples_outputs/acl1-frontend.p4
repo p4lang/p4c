@@ -165,10 +165,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats_1;
-    @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_3;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_3() {
+    }
+    @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
+    @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_0;
     @name(".drop_stats_update") action drop_stats_update_0() {
-        drop_stats_3.count((bit<32>)meta.ingress_metadata.drop_reason);
+        drop_stats_0.count((bit<32>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action nop_0() {
     }
@@ -176,26 +180,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.fabric_metadata.reason_code = reason_code;
     }
     @name(".redirect_to_cpu") action redirect_to_cpu_0(bit<16> reason_code) {
-        copy_to_cpu_0(reason_code);
+        meta.fabric_metadata.reason_code = reason_code;
     }
     @name(".drop_packet") action drop_packet_0() {
     }
     @name(".drop_packet_with_reason") action drop_packet_with_reason_0(bit<32> drop_reason) {
-        drop_stats_1.count(drop_reason);
+        drop_stats.count(drop_reason);
     }
     @name(".negative_mirror") action negative_mirror_0(bit<8> session_id) {
     }
     @name(".congestion_mirror_set") action congestion_mirror_set_0() {
     }
-    @name(".drop_stats") table drop_stats_4 {
+    @name(".drop_stats") table drop_stats_2 {
         actions = {
             drop_stats_update_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
         size = 256;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name(".system_acl") table system_acl_0 {
+    @name(".system_acl") table system_acl {
         actions = {
             nop_0();
             redirect_to_cpu_0();
@@ -204,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason_0();
             negative_mirror_0();
             congestion_mirror_set_0();
-            @defaultonly NoAction();
+            @defaultonly NoAction_3();
         }
         key = {
             meta.acl_metadata.if_label               : ternary @name("acl_metadata.if_label") ;
@@ -236,12 +240,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.enable_dod         : ternary @name("ingress_metadata.enable_dod") ;
         }
         size = 512;
-        default_action = NoAction();
+        default_action = NoAction_3();
     }
     apply {
-        system_acl_0.apply();
+        system_acl.apply();
         if (meta.ingress_metadata.drop_flag == 1w1) 
-            drop_stats_4.apply();
+            drop_stats_2.apply();
     }
 }
 

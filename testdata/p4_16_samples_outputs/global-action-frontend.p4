@@ -1,14 +1,14 @@
-action Global() {
-}
 control c() {
-    @name("t") table t_0 {
+    @name(".Global") action Global() {
+    }
+    @name("c.t") table t {
         actions = {
             Global();
         }
         default_action = Global();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 
