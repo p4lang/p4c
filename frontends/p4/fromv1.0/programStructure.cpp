@@ -388,6 +388,19 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return rv;
 }
 
+static const IR::Type*
+explodeType(const std::vector<int> &sizes) {
+    auto rv = new IR::Vector<IR::Type>();
+    for (auto it = sizes.begin(); it != sizes.end(); ++it) {
+        int s = *it;
+        auto type = IR::Type_Bits::get(s);
+        rv->push_back(type);
+    }
+    if (rv->size() == 1)
+        return rv->at(0);
+    return new IR::Type_Tuple(*rv);
+}
+
 /**
  * convert a P4-14 parser to P4-16 parser state.
  * @param parser     The P4-14 parser IR node to be converted
@@ -395,7 +408,7 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
  * @returns          The P4-16 parser state corresponding to the P4-14 parser
  */
 const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser,
-                                                       IR::IndexedVector<IR::Declaration>* stateful) {
+                                    IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -430,22 +443,14 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 if (!first) continue;
                 auto value_set = value_sets.get(first->path->name);
                 if (!value_set) {
-                    ::error("Unable to find declaration for parser_value_set %s", first->path->name);
+                    ::error("Unable to find declaration for parser_value_set %s",
+                            first->path->name);
                     return nullptr;
                 }
 
-                auto type = new IR::Type_Name("value_set");
-                unsigned vset_size = 4;  // default value_set size is 4.
-                if (auto size = value_set->getAnnotation("parser_value_set_size")) {
-                    if (size->expr.size() != 1 || !size->expr[0]->is<IR::Constant>())
-                        ::error("%s: parser_value_set_size must be a constant", size);
-                    else
-                        vset_size = size->expr[0]->to<IR::Constant>()->asInt();
-                }
-                auto arg = new IR::Constant(vset_size, 10);
-                auto decl = new IR::Declaration_Instance(value_set->name,
-                                                         value_set->annotations, type,
-                                                         new IR::Vector<IR::Expression>(arg));
+                auto type = new IR::Type_ValueSet(explodeType(sizes));
+                auto decl = new IR::Declaration_Variable(value_set->name,
+                                                         value_set->annotations, type);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {

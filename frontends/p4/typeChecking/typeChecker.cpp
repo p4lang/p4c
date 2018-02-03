@@ -330,7 +330,16 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return nullptr;
         if (et == set->elementType)
             return type;
-        const IR::Type* canon = new IR::Type_Set(type->srcInfo, et);
+        const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
+        return canon;
+    } else if (type->is<IR::Type_ValueSet>()) {
+        auto set = type->to<IR::Type_ValueSet>();
+        auto et = canonicalize(set->elementType);
+        if (et == nullptr)
+            return nullptr;
+        if (et == set->elementType)
+            return type;
+        const IR::Type *canon = new IR::Type_ValueSet(type->srcInfo, et);
         return canon;
     } else if (type->is<IR::Type_Stack>()) {
         auto stack = type->to<IR::Type_Stack>();
@@ -362,7 +371,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                 return nullptr;
             fields->push_back(t1);
         }
-        const IR::Type* canon;
+        const IR::Type *canon;
         if (anyChange || anySet)
             canon = new IR::Type_Tuple(type->srcInfo, *fields);
         else
@@ -1140,6 +1149,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
+    (void)setTypeType(type);
+    return type;
+}
+
+const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
     (void)setTypeType(type);
     return type;
 }
@@ -2748,9 +2762,8 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
     // The caseType may be a simple type, and then we have to unwrap the selectType
     if (caseType->is<IR::Type_Dontcare>())
         return selectCase;
-
-    // The caseType may be an extern, we use the type of the selectType
-    if (caseType->is<IR::Type_Extern>()) {
+    // The caseType may be an value set, we use the type of the selectType
+    if (caseType->is<IR::Type_ValueSet>()) {
         return selectCase;
     }
 
