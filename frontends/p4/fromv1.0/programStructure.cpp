@@ -408,7 +408,7 @@ explodeType(const std::vector<int> &sizes) {
  * @returns          The P4-16 parser state corresponding to the P4-14 parser
  */
 const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser,
-                                                       IR::IndexedVector<IR::Declaration>* stateful) {
+                                    IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -443,7 +443,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 if (!first) continue;
                 auto value_set = value_sets.get(first->path->name);
                 if (!value_set) {
-                    ::error("Unable to find declaration for parser_value_set %s", first->path->name);
+                    ::error("Unable to find declaration for parser_value_set %s",
+                            first->path->name);
                     return nullptr;
                 }
 
