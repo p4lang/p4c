@@ -433,19 +433,11 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     ::error("Unable to find declaration for parser_value_set %s", first->path->name);
                     return nullptr;
                 }
+                dump(value_set);
 
-                auto type = new IR::Type_Name("value_set");
-                unsigned vset_size = 4;  // default value_set size is 4.
-                if (auto size = value_set->getAnnotation("parser_value_set_size")) {
-                    if (size->expr.size() != 1 || !size->expr[0]->is<IR::Constant>())
-                        ::error("%s: parser_value_set_size must be a constant", size);
-                    else
-                        vset_size = size->expr[0]->to<IR::Constant>()->asInt();
-                }
-                auto arg = new IR::Constant(vset_size, 10);
-                auto decl = new IR::Declaration_Instance(value_set->name,
-                                                         value_set->annotations, type,
-                                                         new IR::Vector<IR::Expression>(arg));
+                auto type = new IR::Type_ValueSet(parser->select->
+                auto decl = new IR::Declaration_Variable(value_set->name,
+                                                         value_set->annotations, type);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {
