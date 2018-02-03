@@ -282,6 +282,14 @@ class Type_Tuple : Type {
     const Type* getP4Type() const override;
 }
 
+/// The type of a parser value set
+class Type_ValueSet : Type {
+    Type elementType;
+    dbprint{ out << "value_set<" << elementType << ">"; }
+    toString{ return cstring("value_set<") + elementType->toString() + ">"; }
+    const Type* getP4Type() const override;
+}
+
 /// The type of an architectural block.
 /// Abstract base for Type_Control, Type_Parser and Type_Package
 abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {

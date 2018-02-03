@@ -265,6 +265,16 @@ bool ToP4::preorder(const IR::Type_Tuple* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Type_ValueSet* t) {
+    dump(3);
+    builder.append("value_set<");
+    auto p4type = t->elementType->getP4Type();
+    CHECK_NULL(p4type);
+    visit(p4type);
+    builder.append(">");
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Enum* t) {
     dump(1);
     builder.append("enum ");
