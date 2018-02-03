@@ -388,6 +388,19 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return rv;
 }
 
+static const IR::Type*
+explodeType(const std::vector<int> &sizes) {
+    auto rv = new IR::Vector<IR::Type>();
+    for (auto it = sizes.begin(); it != sizes.end(); ++it) {
+        int s = *it;
+        auto type = IR::Type_Bits::get(s);
+        rv->push_back(type);
+    }
+    if (rv->size() == 1)
+        return rv->at(0);
+    return new IR::Type_Tuple(*rv);
+}
+
 /**
  * convert a P4-14 parser to P4-16 parser state.
  * @param parser     The P4-14 parser IR node to be converted
@@ -433,9 +446,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     ::error("Unable to find declaration for parser_value_set %s", first->path->name);
                     return nullptr;
                 }
-                dump(value_set);
 
-                auto type = new IR::Type_ValueSet(parser->select->
+                auto type = new IR::Type_ValueSet(explodeType(sizes));
                 auto decl = new IR::Declaration_Variable(value_set->name,
                                                          value_set->annotations, type);
                 stateful->push_back(decl);
