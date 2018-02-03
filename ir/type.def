@@ -288,6 +288,17 @@ class Type_ValueSet : Type {
     dbprint{ out << "value_set<" << elementType << ">"; }
     toString{ return cstring("value_set<") + elementType->toString() + ">"; }
     const Type* getP4Type() const override;
+    int width_bits() const override {
+        int rv = 0;
+        if (auto tuple = elementType->to<IR::Type_Tuple>()) {
+            for (auto f : tuple->components) {
+                rv += f->width_bits();
+            }
+            return rv;
+        } else {
+            return elementType->width_bits();
+        }
+    }
 }
 
 /// The type of an architectural block.

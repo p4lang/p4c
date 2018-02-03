@@ -366,12 +366,12 @@ JsonObjects::add_parser_transition_key(const unsigned state_id, Util::IJson* new
 }
 
 void
-JsonObjects::add_parse_vset(const cstring& name) {
+JsonObjects::add_parse_vset(const cstring& name, const unsigned size) {
     auto parse_vset = new Util::JsonObject();
     unsigned id = BMV2::nextId("parse_vsets");
     parse_vset->emplace("name", name);
     parse_vset->emplace("id", id);
-    parse_vset->emplace("compressed_bitwidth", 0);
+    parse_vset->emplace("compressed_bitwidth", size);
     parse_vsets->append(parse_vset);
 }
 

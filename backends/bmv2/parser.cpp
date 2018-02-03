@@ -292,6 +292,7 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
         cstring vset_name;
         unsigned bytes = combine(sc->keyset, se->select, value, mask, is_vset, vset_name);
         if (is_vset) {
+            trans->emplace("type", "parse_vset");
             trans->emplace("value", vset_name);
             trans->emplace("mask", mask);
             trans->emplace("next_state", stateName(sc->state->path->name));
@@ -301,6 +302,7 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
                 trans->emplace("mask", Util::JsonValue::null);
                 trans->emplace("next_state", stateName(sc->state->path->name));
             } else {
+                trans->emplace("type", "hexstr");
                 trans->emplace("value", stringRepr(value, bytes));
                 if (mask == -1)
                     trans->emplace("mask", Util::JsonValue::null);
@@ -345,12 +347,17 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
     auto parser_id = json->add_parser("parser");
 
     for (auto s : parser->parserLocals) {
-        if (auto inst = s->to<IR::Declaration_Instance>()) {
-            if (auto typeName = inst->type->to<IR::Type_Name>()) {
-                if (typeName->path->name == "value_set") {
-                    json->add_parse_vset(s->name);
-                    continue;
+        if (auto inst = s->to<IR::Declaration_Variable>()) {
+            if (auto value_set = inst->type->to<IR::Type_ValueSet>()) {
+                unsigned size = 0;
+                if (value_set->elementType->is<IR::Type_Name>()) {
+                    auto type = typeMap->getTypeType(value_set->elementType, true);
+                    size = type->width_bits();
+                } else {
+                    size = value_set->elementType->width_bits();
                 }
+                json->add_parse_vset(s->name, size);
+                continue;
             }
             ::error("%1%: not supported on parsers on this target", s);
             return false;
