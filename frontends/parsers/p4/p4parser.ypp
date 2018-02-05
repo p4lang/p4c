@@ -224,11 +224,11 @@ typedef const IR::Type ConstType;
 %nonassoc COLON
 %left OR
 %left AND
+%left EQ NE
+%left L_ANGLE R_ANGLE LE GE
 %left BIT_OR
 %left BIT_XOR
 %left BIT_AND
-%left EQ NE
-%left L_ANGLE R_ANGLE LE GE
 %left SHL
 %left PP PLUS MINUS
 %left MUL DIV MOD
