@@ -49,6 +49,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/opeq_test.cpp
   gtest/path_test.cpp
   gtest/p4runtime.cpp
+  gtest/portable_switch.cpp
   gtest/source_file_test.cpp
   gtest/transforms.cpp
   )
