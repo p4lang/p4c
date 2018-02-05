@@ -160,7 +160,7 @@ class SimpleSwitchGrpcTest_gNMI : public SimpleSwitchGrpcBaseTest {
     req.set_port(port);
     req.set_oper_status(oper_status);
     ClientContext context;
-    google::protobuf::Empty rep;
+    p4::bm::SetPortOperStatusResponse rep;
     return dataplane_stub->SetPortOperStatus(&context, req, &rep);
   }
 

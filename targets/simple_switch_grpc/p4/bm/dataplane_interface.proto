@@ -16,8 +16,6 @@ syntax = "proto3";
 
 // This package and its contents are a work-in-progress.
 
-import "google/protobuf/empty.proto";
-
 package p4.bm;
 
 service DataplaneInterface {
@@ -29,7 +27,7 @@ service DataplaneInterface {
   // ports are valid and "UP"). This is useful in the context of testing, to
   // simulate port-up / port-down events.
   rpc SetPortOperStatus(SetPortOperStatusRequest)
-      returns (google.protobuf.Empty) {
+      returns (SetPortOperStatusResponse) {
   }
 }
 
@@ -56,3 +54,5 @@ message SetPortOperStatusRequest {
   uint32 port = 2;
   PortOperStatus oper_status = 3;
 }
+
+message SetPortOperStatusResponse { }

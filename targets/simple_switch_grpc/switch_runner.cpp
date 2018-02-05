@@ -84,8 +84,6 @@ class DataplaneInterfaceServiceImpl
  private:
   using Lock = std::lock_guard<std::mutex>;
 
-  using Empty = google::protobuf::Empty;
-
   Status PacketStream(ServerContext *context,
                       ServerReaderWriter *stream) override {
     {
@@ -117,9 +115,10 @@ class DataplaneInterfaceServiceImpl
     return Status::OK;
   }
 
-  Status SetPortOperStatus(ServerContext *context,
-                           const p4::bm::SetPortOperStatusRequest *request,
-                           Empty *response) override {
+  Status SetPortOperStatus(
+      ServerContext *context,
+      const p4::bm::SetPortOperStatusRequest *request,
+      p4::bm::SetPortOperStatusResponse *response) override {
     (void) context;
     (void) response;
     Lock lock(mutex);
