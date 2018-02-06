@@ -35,6 +35,11 @@ class EBPFObject {
         return dynamic_cast<const T*>(this); }
     template<typename T> T* to() {
         return dynamic_cast<T*>(this); }
+
+    static cstring externalName(const IR::IDeclaration* declaration) {
+        cstring name = declaration->externalName();
+        return name.replace('.', '_');
+    }
 };
 
 }  // namespace EBPF

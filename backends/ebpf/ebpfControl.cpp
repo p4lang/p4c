@@ -240,7 +240,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
 
     if (declType->name.name == EBPFModel::instance.counterArray.name) {
         builder->blockStart();
-        cstring name = decl->externalName();
+        cstring name = EBPFObject::externalName(decl);
         auto counterMap = control->getCounter(name);
         counterMap->emitMethodInvocation(builder, method);
         builder->blockEnd(true);
@@ -415,7 +415,7 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
             auto decl = control->program->refMap->getDeclaration(pe->path, true);
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action", pe);
             auto act = decl->to<IR::P4Action>();
-            cstring name = act->externalName();
+            cstring name = EBPFObject::externalName(act);
             builder->append(name);
         }
         builder->append(":");
@@ -451,7 +451,7 @@ void EBPFControl::scanConstants() {
             auto node = ctrblk->node;
             if (node->is<IR::Declaration_Instance>()) {
                 auto di = node->to<IR::Declaration_Instance>();
-                cstring name = di->externalName();
+                cstring name = EBPFObject::externalName(di);
                 auto ctr = new EBPFCounterTable(program, ctrblk, name, codeGen);
                 counters.emplace(name, ctr);
             }
