@@ -43,7 +43,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
             if (isParam) {
                 builder->append(valueName);
                 builder->append("->u.");
-                cstring name = action->externalName();
+                cstring name = EBPFObject::externalName(action);
                 builder->append(name);
                 builder->append(".");
             }
@@ -64,7 +64,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
                      CodeGenInspector* codeGen) :
-        EBPFTableBase(program, table->container->externalName(), codeGen), table(table) {
+        EBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = program->refMap->newName(base);
 
@@ -156,7 +156,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = action->externalName();
+        cstring name = EBPFObject::externalName(action);
         builder->emitIndent();
         builder->append(name);
         builder->append(",");
@@ -182,7 +182,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = action->externalName();
+        cstring name = EBPFObject::externalName(action);
         emitActionArguments(builder, action, name);
     }
 
@@ -254,7 +254,7 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
             return;
         }
 
-        cstring name = table->container->externalName();
+        cstring name = EBPFObject::externalName(table->container);
         builder->target->emitTableDecl(builder, name, isHash,
                                        cstring("struct ") + keyTypeName,
                                        cstring("struct ") + valueTypeName, size);
@@ -302,7 +302,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
-        cstring name = action->externalName();
+        cstring name = EBPFObject::externalName(action);
         builder->appendFormat("case %s: ", name);
         builder->newline();
         builder->emitIndent();
@@ -336,7 +336,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     BUG_CHECK(mcd.instance->is<P4::ActionCall>(), "%1%: expected an action call", mce);
     auto ac = mcd.instance->to<P4::ActionCall>();
     auto action = ac->action;
-    cstring name = action->externalName();
+    cstring name = EBPFObject::externalName(action);
     cstring fd = "tableFileDescriptor";
     cstring table = defaultActionMapName;
     cstring value = "value";
