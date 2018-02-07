@@ -357,10 +357,10 @@ SimpleSwitchGrpcRunner::~SimpleSwitchGrpcRunner() {
 }
 
 void
-SimpleSwitchGrpcRunner::port_status_cb(
-    bm::DevMgrIface::port_t port, const bm::DevMgrIface::PortStatus status) {
+SimpleSwitchGrpcRunner::port_status_cb(bm::DevMgrIface::port_t port,
+    const bm::DevMgrIface::PortStatus port_status) {
   _BM_UNUSED(port);
-  _BM_UNUSED(status);
+  _BM_UNUSED(port_status);
 }
 
 }  // namespace sswitch_grpc
