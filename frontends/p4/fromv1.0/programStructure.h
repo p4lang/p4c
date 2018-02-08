@@ -19,7 +19,6 @@ limitations under the License.
 
 #include <set>
 #include <vector>
-#include <deque>
 
 #include "lib/map.h"
 #include "lib/cstring.h"

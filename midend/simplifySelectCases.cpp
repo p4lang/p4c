@@ -46,7 +46,7 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) cons
     // we allow value_set name to be used in place of select case;
     if (expr->is<IR::PathExpression>()) {
         auto type = typeMap->getType(expr);
-        if (type->is<IR::Type_ValueSet>()) {
+        if (type->is<IR::Type_Set>()) {
             return;
         }
     }
