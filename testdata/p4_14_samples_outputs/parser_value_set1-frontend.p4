@@ -35,17 +35,23 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @parser_value_set_size(4) value_set<tuple<bit<16>, bit<48>>> pvs0;
+    value_set<bit<16>> pvs0;
+    value_set<bit<16>> pvs1;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr) {
-            (16w0x0, 48w0x800): parse_inner_ethernet;
-            pvs0: parse_inner_ethernet;
+        transition select(hdr.ethernet.etherType) {
+            pvs0: accept;
+            16w0x800: parse_ipv4;
+            pvs1: parse_inner_ethernet;
             default: accept;
         }
     }
     @name(".parse_inner_ethernet") state parse_inner_ethernet {
         packet.extract<ethernet_t>(hdr.inner_ethernet);
+        transition accept;
+    }
+    @name(".parse_ipv4") state parse_ipv4 {
+        packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
     @name(".start") state start {
@@ -83,6 +89,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ethernet_t>(hdr.inner_ethernet);
+        packet.emit<ipv4_t>(hdr.ipv4);
     }
 }
 

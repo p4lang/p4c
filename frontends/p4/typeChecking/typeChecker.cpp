@@ -328,6 +328,9 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto et = canonicalize(set->elementType);
         if (et == nullptr)
             return nullptr;
+        if (et->is<IR::Type_Stack>() || et->is<IR::Type_Set>() ||
+            et->is<IR::Type_HeaderUnion>())
+            ::error("%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType)
             return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
@@ -1145,9 +1148,22 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
-    auto tt = new IR::Type_Set(type->elementType);
-    (void)setTypeType(tt);
-    return tt;
+    // This is a specialized version of setTypeType
+    auto canon = canonicalize(type->elementType);
+    if (canon != nullptr) {
+        // Learn the new type
+        if (canon != type->elementType) {
+            TypeInference tc(refMap, typeMap, true);
+            unsigned e = ::errorCount();
+            (void)canon->apply(tc);
+            if (::errorCount() > e)
+                return nullptr;
+        }
+        auto tt = new IR::Type_Type(new IR::Type_Set(canon));
+        setType(getOriginal(), tt);
+        setType(type, tt);
+    }
+    return type;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {
