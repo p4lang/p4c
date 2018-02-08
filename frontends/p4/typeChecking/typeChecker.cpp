@@ -330,7 +330,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return nullptr;
         if (et == set->elementType)
             return type;
-        const IR::Type* canon = new IR::Type_Set(type->srcInfo, et);
+        const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
     } else if (type->is<IR::Type_Stack>()) {
         auto stack = type->to<IR::Type_Stack>();
@@ -362,7 +362,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                 return nullptr;
             fields->push_back(t1);
         }
-        const IR::Type* canon;
+        const IR::Type *canon;
         if (anyChange || anySet)
             canon = new IR::Type_Tuple(type->srcInfo, *fields);
         else
@@ -1142,6 +1142,12 @@ const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     (void)setTypeType(type);
     return type;
+}
+
+const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
+    auto tt = new IR::Type_Set(type->elementType);
+    (void)setTypeType(tt);
+    return tt;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {

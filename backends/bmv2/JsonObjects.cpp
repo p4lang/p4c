@@ -36,6 +36,7 @@ JsonObjects::JsonObjects() {
     errors = insert_array_field(toplevel, "errors");
     enums = insert_array_field(toplevel, "enums");
     parsers = insert_array_field(toplevel, "parsers");
+    parse_vsets = insert_array_field(toplevel, "parse_vsets");
     deparsers = insert_array_field(toplevel, "deparsers");
     meter_arrays = insert_array_field(toplevel, "meter_arrays");
     counters = insert_array_field(toplevel, "counter_arrays");
@@ -362,6 +363,16 @@ JsonObjects::add_parser_transition_key(const unsigned state_id, Util::IJson* new
            keys->append(k);
        }
     }
+}
+
+void
+JsonObjects::add_parse_vset(const cstring& name, const unsigned size) {
+    auto parse_vset = new Util::JsonObject();
+    unsigned id = BMV2::nextId("parse_vsets");
+    parse_vset->emplace("name", name);
+    parse_vset->emplace("id", id);
+    parse_vset->emplace("compressed_bitwidth", size);
+    parse_vsets->append(parse_vset);
 }
 
 unsigned
