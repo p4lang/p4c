@@ -550,12 +550,8 @@ bool ToP4::preorder(const IR::Declaration_Variable* v) {
     dump(1);
     visit(v->annotations);
     auto type = v->type->getP4Type();
-    if (type) {
-        CHECK_NULL(type);
-        visit(type);
-    } else {
-        builder.append("<null>");
-    }
+    CHECK_NULL(type);
+    visit(type);
     builder.spc();
     builder.append(v->name);
     if (v->initializer != nullptr) {
