@@ -253,8 +253,8 @@ class CalculatedField {
 }
 
 class ParserValueSet {
-    optional ID                 name;
-    Annotations                 annotations;
+    ID                          name;
+    optional Annotations        annotations = Annotations::empty;
     dbprint { out << node_type_name() << " " << name; }
     toString { return node_type_name() + " " + name; }
 }
