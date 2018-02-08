@@ -105,6 +105,7 @@ using Parser = P4::P4Parser;
 "tuple"         { BEGIN(NORMAL); return Parser::make_TUPLE(driver.yylloc); }
 "typedef"       { BEGIN(NORMAL); return Parser::make_TYPEDEF(driver.yylloc); }
 "varbit"        { BEGIN(NORMAL); return Parser::make_VARBIT(driver.yylloc); }
+"value_set"     { BEGIN(NORMAL); return Parser::make_VALUESET(driver.yylloc); }
 "void"          { BEGIN(NORMAL); return Parser::make_VOID(driver.yylloc); }
 "_"             { BEGIN(NORMAL); return Parser::make_DONTCARE(driver.yylloc); }
 [A-Za-z_][A-Za-z0-9_]* {

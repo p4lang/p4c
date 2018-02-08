@@ -41,6 +41,7 @@ ProgramStructure::ProgramStructure() :
         actions(&allNames), counters(&allNames), registers(&allNames), meters(&allNames),
         action_profiles(nullptr), field_lists(nullptr), field_list_calculations(&allNames),
         action_selectors(nullptr), extern_types(&allNames), externs(&allNames),
+        value_sets(&allNames),
         calledActions("actions"), calledControls("controls"), calledCounters("counters"),
         calledMeters("meters"), calledRegisters("registers"), calledExterns("externs"),
         parsers("parsers"), parserPacketIn(nullptr), parserHeadersOut(nullptr),
@@ -387,7 +388,27 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return rv;
 }
 
-const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser) {
+static const IR::Type*
+explodeType(const std::vector<int> &sizes) {
+    auto rv = new IR::Vector<IR::Type>();
+    for (auto it = sizes.begin(); it != sizes.end(); ++it) {
+        int s = *it;
+        auto type = IR::Type_Bits::get(s);
+        rv->push_back(type);
+    }
+    if (rv->size() == 1)
+        return rv->at(0);
+    return new IR::Type_Tuple(*rv);
+}
+
+/**
+ * convert a P4-14 parser to P4-16 parser state.
+ * @param parser     The P4-14 parser IR node to be converted
+ * @param stateful   If any declaration is created during the conversion, save to 'stateful'
+ * @returns          The P4-16 parser state corresponding to the P4-14 parser
+ */
+const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser,
+                                    IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -415,14 +436,31 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             auto deststate = getState(state);
             if (deststate == nullptr)
                 return nullptr;
+
+            // discover all parser value_sets in the current parser state.
+            for (auto v : c->values) {
+                auto first = v.first->to<IR::PathExpression>();
+                if (!first) continue;
+                auto value_set = value_sets.get(first->path->name);
+                if (!value_set) {
+                    ::error("Unable to find declaration for parser_value_set %s",
+                            first->path->name);
+                    return nullptr;
+                }
+
+                auto type = new IR::Type_ValueSet(explodeType(sizes));
+                auto decl = new IR::Declaration_Variable(value_set->name,
+                                                         value_set->annotations, type);
+                stateful->push_back(decl);
+            }
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
                     auto expr = explodeLabel(first, v.second, sizes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
-                } else if (/*auto first = */v.first->to<IR::PathExpression>()) {
-                    // XXX(hanw): handle parser_value_set
-                    ::warning("parser_value_set is not yet implemented");
+                } else if (auto first = v.first->to<IR::PathExpression>()) {
+                    auto sc = new IR::SelectCase(c->srcInfo, first, deststate);
+                    cases.push_back(sc);
                 } else {
                     ::error("Expected constant or parser value set in %1%", v.first);
                 }
@@ -476,7 +514,7 @@ void ProgramStructure::createParser() {
     IR::IndexedVector<IR::Declaration> stateful;
     IR::IndexedVector<IR::ParserState> states;
     for (auto p : parserStates) {
-        auto ps = convertParser(p.first);
+        auto ps = convertParser(p.first, &stateful);
         if (ps == nullptr)
             return;
         states.push_back(ps);

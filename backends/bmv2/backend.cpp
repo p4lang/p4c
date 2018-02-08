@@ -260,6 +260,7 @@ void Backend::convert(BMV2Options& options) {
     jsonTop.emplace("errors", json->errors);
     jsonTop.emplace("enums", json->enums);
     jsonTop.emplace("parsers", json->parsers);
+    jsonTop.emplace("parse_vsets", json->parse_vsets);
     jsonTop.emplace("deparsers", json->deparsers);
     meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
     counters = mkArrayField(&jsonTop, "counter_arrays");

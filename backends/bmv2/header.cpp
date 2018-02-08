@@ -299,6 +299,8 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
         } else if (type->is<IR::Type_Error>()) {
             addHeaderField(scalarsTypeName, v->name.name, errorWidth, 0);
             scalars_width += errorWidth;
+        } else if (type->is<IR::Type_Set>()) {
+            continue;  // ignore: this is probably a value_set
         } else {
             P4C_UNIMPLEMENTED("%1%: type not yet handled on this target", type);
         }

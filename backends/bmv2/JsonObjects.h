@@ -47,6 +47,7 @@ class JsonObjects {
     void add_parser_transition(const unsigned id, Util::IJson* transition);
     void add_parser_op(const unsigned id, Util::IJson* op);
     void add_parser_transition_key(const unsigned id, Util::IJson* key);
+    void add_parse_vset(const cstring& name, const unsigned size);
     unsigned add_action(const cstring& name, Util::JsonArray*& params, Util::JsonArray*& body);
     void add_pipeline();
     void add_extern_attribute(const cstring& name, const cstring& type,
@@ -83,6 +84,7 @@ class JsonObjects {
     Util::JsonArray* learn_lists;
     Util::JsonArray* meter_arrays;
     Util::JsonArray* parsers;
+    Util::JsonArray* parse_vsets;
     Util::JsonArray* pipelines;
     Util::JsonArray* register_arrays;
     Util::JsonArray* force_arith;

@@ -582,6 +582,8 @@ class DiscoverStructure : public Inspector {
     { structure->extern_types.emplace(ext); checkReserved(ext, ext->name); }
     void postorder(const IR::Declaration_Instance *ext) override
     { structure->externs.emplace(ext); checkReserved(ext, ext->name); }
+    void postorder(const IR::ParserValueSet* pvs) override
+    { structure->value_sets.emplace(pvs); checkReserved(pvs, pvs->name); }
 };
 
 class ComputeCallGraph : public Inspector {
