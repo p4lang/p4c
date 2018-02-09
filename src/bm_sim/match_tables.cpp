@@ -815,8 +815,10 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr) {
     if (!action_profile->is_valid_mbr(mbr)) {
       rc = MatchErrorCode::INVALID_MBR_HANDLE;
     } else {
+      if (default_set) action_profile->ref_count_decrease(default_index);
       default_index = IndirectIndex::make_mbr_index(mbr);
       default_set = true;
+      action_profile->ref_count_increase(default_index);
     }
   }
 
@@ -834,6 +836,8 @@ MatchErrorCode
 MatchTableIndirect::reset_default_entry() {
   {
     auto lock = lock_write();
+    auto lock_impl = lock_impl_write();
+    if (default_set) action_profile->ref_count_decrease(default_index);
     default_set = false;
   }
 
@@ -1065,7 +1069,10 @@ MatchTableIndirectWS::set_default_group(grp_hdl_t grp) {
     if (!action_profile->is_valid_grp(grp)) {
       rc = MatchErrorCode::INVALID_GRP_HANDLE;
     } else {
+      if (default_set) action_profile->ref_count_decrease(default_index);
       default_index = IndirectIndex::make_grp_index(grp);
+      default_set = true;
+      action_profile->ref_count_increase(default_index);
       default_set = true;
     }
   }

@@ -1167,6 +1167,41 @@ TEST_F(TableIndirect, DeleteMember) {
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
 }
 
+TEST_F(TableIndirect, DefaultMember) {
+  MatchErrorCode rc;
+  mbr_hdl_t mbr;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  auto pkt = get_pkt(64);
+
+  rc = add_member(0xaba, &mbr);
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  rc = table->set_default_member(mbr);
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  // the lookups are here to ensure that no memory errors happen (when running
+  // the tests under valgrind
+  lookup(pkt, &hit, &lookup_handle);
+  EXPECT_FALSE(hit);
+
+  rc = action_profile.delete_member(mbr);
+  EXPECT_EQ(rc, MatchErrorCode::MBR_STILL_USED);
+
+  lookup(pkt, &hit, &lookup_handle);
+  EXPECT_FALSE(hit);
+
+  rc = table->reset_default_entry();
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  rc = action_profile.delete_member(mbr);
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  lookup(pkt, &hit, &lookup_handle);
+  EXPECT_FALSE(hit);
+}
+
 TEST_F(TableIndirect, ModifyEntry) {
   MatchErrorCode rc;
   mbr_hdl_t mbr_1, mbr_2;
@@ -1795,6 +1830,47 @@ TEST_F(TableIndirectWS, GetEntries) {
   ASSERT_EQ(-1, e2.priority);
   ASSERT_EQ(0u, e2.timeout_ms);
   ASSERT_EQ(0u, e2.time_since_hit_ms);
+}
+
+TEST_F(TableIndirectWS, DefaultGroup) {
+  MatchErrorCode rc;
+  grp_hdl_t grp;
+  mbr_hdl_t mbr;
+  unsigned int data = 666u;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  auto pkt = get_pkt(64);
+
+  rc = action_profile.create_group(&grp);
+  EXPECT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = add_member(data, &mbr);
+  EXPECT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = action_profile.add_member_to_group(mbr, grp);
+  EXPECT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->set_default_group(grp);
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  // the lookups are here to ensure that no memory errors happen (when running
+  // the tests under valgrind
+  lookup(pkt, &hit, &lookup_handle);
+  EXPECT_FALSE(hit);
+
+  rc = action_profile.delete_group(grp);
+  EXPECT_EQ(rc, MatchErrorCode::GRP_STILL_USED);
+
+  lookup(pkt, &hit, &lookup_handle);
+  EXPECT_FALSE(hit);
+
+  rc = table->reset_default_entry();
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  rc = action_profile.delete_group(grp);
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  lookup(pkt, &hit, &lookup_handle);
+  EXPECT_FALSE(hit);
 }
 
 TEST_F(TableIndirectWS, CustomGroupSelection) {
