@@ -1873,6 +1873,27 @@ TEST_F(TableIndirectWS, DefaultGroup) {
   EXPECT_FALSE(hit);
 }
 
+// It can be quite complicated to prevent the control-plane from referencing
+// empty groups (is it even desirable?). We must at least make sure that we do
+// not crash. In the current implementation, I believe the table apply is a
+// no-op.
+TEST_F(TableIndirectWS, EmptyGroup) {
+  MatchErrorCode rc;
+  grp_hdl_t grp;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  auto pkt = get_pkt(64);
+
+  rc = action_profile.create_group(&grp);
+  EXPECT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->set_default_group(grp);
+  EXPECT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  lookup(pkt, &hit, &lookup_handle);
+}
+
 TEST_F(TableIndirectWS, CustomGroupSelection) {
   using GroupSelectionIface = ActionProfile::GroupSelectionIface;
   using hash_t = ActionProfile::hash_t;

@@ -463,6 +463,7 @@ class MatchTableIndirect : public MatchTableAbstract {
   std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit;
   ActionProfile *action_profile{nullptr};
   bool default_set{false};
+  ActionEntry empty_action{};  // for lookups yielding empty groups
 };
 
 class MatchTableIndirectWS : public MatchTableIndirect {

@@ -698,6 +698,12 @@ MatchTableIndirect::lookup(const Packet &pkt,
   }
 
   const IndirectIndex &index = (*hit) ? *res.value : default_index;
+  if (index.is_grp() && action_profile->group_is_empty(index.get_grp())) {
+    BMLOG_ERROR_PKT(
+        pkt, "Lookup in table '{}' yielded empty group", get_name());
+    return empty_action;
+  }
+
   const auto &entry = action_profile->lookup(pkt, index);
   // Unfortunately this has to be done at this stage and cannot be done when
   // inserting a member because for 2 match tables sharing the same action
