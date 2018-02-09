@@ -9,9 +9,9 @@ expect 3 00000202 ******** **** 07 66
 packet 2 00000202 00000303 0404 55 66 7777 88 00
 wait
 
-add ex1 100 extra$0.h:0x25** act1(val:0x25)
+add ex1 100 extra_0_.h:0x25** act1(val:0x25)
 add tbl1 100 data.f2:0x0202**** setbyte(val:0x26)
-add ex1 110 extra$0.h:0x2525 act2(val:0x27)
+add ex1 110 extra_0_.h:0x2525 act2(val:0x27)
 add tbl2 100 data.f2:0x0202**** setbyte(val:0x28)
 
 #          f1       f2      h1  b1 b2  h   b1 b2 payload
