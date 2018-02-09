@@ -353,6 +353,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
+  mt_reset_default_entry(cxt_id_t cxt_id,
+                         const std::string &table_name) override {
+    return contexts.at(cxt_id).mt_reset_default_entry(table_name);
+  }
+
+  MatchErrorCode
   mt_delete_entry(cxt_id_t cxt_id,
                   const std::string &table_name,
                   entry_handle_t handle) override {
@@ -506,6 +512,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                                  const std::string &table_name,
                                  mbr_hdl_t mbr) override {
     return contexts.at(cxt_id).mt_indirect_set_default_member(table_name, mbr);
+  }
+
+  MatchErrorCode
+  mt_indirect_reset_default_entry(cxt_id_t cxt_id,
+                                  const std::string &table_name) override {
+    return contexts.at(cxt_id).mt_indirect_reset_default_entry(table_name);
   }
 
   MatchErrorCode

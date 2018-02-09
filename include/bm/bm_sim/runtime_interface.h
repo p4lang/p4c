@@ -79,6 +79,10 @@ class RuntimeInterface {
                         ActionData action_data) = 0;
 
   virtual MatchErrorCode
+  mt_reset_default_entry(cxt_id_t cxt_id,
+                         const std::string &table_name) = 0;
+
+  virtual MatchErrorCode
   mt_delete_entry(cxt_id_t cxt_id,
                   const std::string &table_name,
                   entry_handle_t handle) = 0;
@@ -186,6 +190,10 @@ class RuntimeInterface {
   mt_indirect_set_default_member(cxt_id_t cxt_id,
                                  const std::string &table_name,
                                  mbr_hdl_t mbr) = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_reset_default_entry(cxt_id_t cxt_id,
+                                  const std::string &table_name) = 0;
 
   virtual MatchErrorCode
   mt_indirect_ws_add_entry(cxt_id_t cxt_id,

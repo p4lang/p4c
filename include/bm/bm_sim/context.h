@@ -185,6 +185,9 @@ class Context final {
                         ActionData action_data);
 
   MatchErrorCode
+  mt_reset_default_entry(const std::string &table_name);
+
+  MatchErrorCode
   mt_delete_entry(const std::string &table_name,
                   entry_handle_t handle);
 
@@ -268,6 +271,9 @@ class Context final {
   MatchErrorCode
   mt_indirect_set_default_member(const std::string &table_name,
                                  mbr_hdl_t mbr);
+
+  MatchErrorCode
+  mt_indirect_reset_default_entry(const std::string &table_name);
 
   MatchErrorCode
   mt_indirect_ws_add_entry(const std::string &table_name,

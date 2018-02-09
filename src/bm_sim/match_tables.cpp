@@ -95,10 +95,11 @@ const ControlFlowNode *
 MatchTableAbstract::apply_action(Packet *pkt) {
   entry_handle_t handle;
   bool hit;
+  const ControlFlowNode *next_node;
 
   ReadLock lock = lock_read();
 
-  const ActionEntry &action_entry = lookup(*pkt, &hit, &handle);
+  const ActionEntry &action_entry = lookup(*pkt, &hit, &handle, &next_node);
 
   // TODO(antonin): I hate this part, which requires this class to know that the
   // lower 24 bits of the handle are used as an index. Is is expected that few
@@ -135,13 +136,31 @@ MatchTableAbstract::apply_action(Packet *pkt) {
 
   action_entry.action_fn(pkt);
 
-  return hit ? action_entry.next_node : next_node_miss;
+  return next_node;
 }
 
 void
-MatchTableAbstract::reset_state() {
+MatchTableAbstract::reset_state(bool reset_default_entry) {
   WriteLock lock = lock_write();
-  reset_state_();
+  reset_state_(reset_default_entry);
+}
+
+void
+MatchTableAbstract::set_default_default_entry(const ActionFn *action_fn,
+                                              ActionData action_data,
+                                              bool is_const) {
+  assert(action_data.size() == action_fn->get_num_params());
+  ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
+
+  const auto *next_node = get_next_node_default(action_fn->get_id());
+
+  default_default_entry = ActionEntry(std::move(action_fn_entry), next_node);
+  const_default_entry = is_const;
+
+  set_default_default_entry_();
+
+  BMLOG_DEBUG("Set default default entry for table '{}': {}",
+              get_name(), default_default_entry);
 }
 
 void
@@ -184,7 +203,8 @@ void
 MatchTableAbstract::set_next_node_miss(const ControlFlowNode *next_node) {
   has_next_node_miss = true;
   next_node_miss = next_node;
-  next_node_miss_default = next_node;
+  default_default_entry.next_node = next_node;
+  set_default_default_entry_();
 }
 
 void
@@ -192,7 +212,8 @@ MatchTableAbstract::set_next_node_miss_default(
     const ControlFlowNode *next_node) {
   if (has_next_node_miss) return;
   next_node_miss = next_node;
-  next_node_miss_default = next_node;
+  default_default_entry.next_node = next_node;
+  set_default_default_entry_();
 }
 
 void
@@ -335,11 +356,14 @@ MatchTable::MatchTable(
       match_unit(std::move(match_unit)) { }
 
 const ActionEntry &
-MatchTable::lookup(const Packet &pkt, bool *hit, entry_handle_t *handle) {
+MatchTable::lookup(const Packet &pkt, bool *hit, entry_handle_t *handle,
+                   const ControlFlowNode **next_node) {
   MatchUnitAbstract<ActionEntry>::MatchUnitLookup res = match_unit->lookup(pkt);
   *hit = res.found();
   *handle = res.handle;
-  return (*hit) ? (*res.value) : default_entry;
+  const auto &entry = (*hit) ? (*res.value) : default_entry;
+  *next_node = entry.next_node;
+  return entry;
 }
 
 MatchErrorCode
@@ -448,7 +472,6 @@ MatchTable::set_default_action(const ActionFn *action_fn,
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
 
   const ControlFlowNode *next_node = get_next_node_default(action_fn->get_id());
-  next_node_miss = next_node;
 
   {
     WriteLock lock = lock_write();
@@ -457,6 +480,19 @@ MatchTable::set_default_action(const ActionFn *action_fn,
 
   BMLOG_DEBUG("Set default entry for table '{}': {}",
               get_name(), default_entry);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTable::reset_default_entry() {
+  {
+    WriteLock lock = lock_write();
+    default_entry = default_default_entry;
+  }
+
+  BMLOG_DEBUG("Reset default entry for table '{}' to: {}",
+              get_name(), default_default_entry);
 
   return MatchErrorCode::SUCCESS;
 }
@@ -559,9 +595,15 @@ MatchTable::dump_entry_(std::ostream *out, entry_handle_t handle) const {
 }
 
 void
-MatchTable::reset_state_() {
-  // reset default_entry ?
+MatchTable::reset_state_(bool reset_default_entry) {
+  if (reset_default_entry)
+    default_entry = default_default_entry;
   match_unit->reset_state();
+}
+
+void
+MatchTable::set_default_default_entry_() {
+  default_entry = default_default_entry;
 }
 
 void
@@ -569,16 +611,6 @@ MatchTable::set_const_default_action_fn(
     const ActionFn *const_default_action_fn) {
   assert(!const_default_action);
   const_default_action = const_default_action_fn;
-}
-
-void
-MatchTable::set_default_entry(const ActionFn *action_fn,
-                              ActionData action_data, bool is_const) {
-  assert(!const_default_entry);
-  auto rc = set_default_action(action_fn, std::move(action_data));
-  _BM_UNUSED(rc);
-  assert(rc == MatchErrorCode::SUCCESS);
-  const_default_entry = is_const;
 }
 
 void
@@ -650,24 +682,28 @@ MatchTableIndirect::get_action_profile() const {
 
 const ActionEntry &
 MatchTableIndirect::lookup(const Packet &pkt,
-                           bool *hit, entry_handle_t *handle) {
+                           bool *hit, entry_handle_t *handle,
+                           const ControlFlowNode **next_node) {
   MatchUnitAbstract<IndirectIndex>::MatchUnitLookup res =
     match_unit->lookup(pkt);
   *hit = res.found();
   *handle = res.handle;
 
-  // could avoid the if statement, by reserving an empty action in
-  // action_entries and making sure default_index points to it, but it seems
-  // more error-prone and probably not worth the trouble
-  if (!(*hit) && !default_set) return empty_action;
+  // default_default_entry will be an empty (no-op) action unless otherwise
+  // specified in the P4 / JSON
+  if (!(*hit) && !default_set) {
+    *next_node = default_default_entry.next_node;
+    return default_default_entry;
+  }
 
   const IndirectIndex &index = (*hit) ? *res.value : default_index;
-  auto &entry = action_profile->lookup(pkt, index);
-  // TODO(antonin): unfortunately this has to be done at this stage and cannot
-  // be done when inserting a member because for 2 match tables sharing the same
-  // action profile (and therefore the same members), the next node mapping can
-  // vary
-  entry.next_node = get_next_node(entry.action_fn.get_action_id());
+  const auto &entry = action_profile->lookup(pkt, index);
+  // Unfortunately this has to be done at this stage and cannot be done when
+  // inserting a member because for 2 match tables sharing the same action
+  // profile (and therefore the same members), the next node mapping can vary
+  *next_node = (*hit) ?
+      get_next_node(entry.action_fn.get_action_id()) :
+      get_next_node_default(entry.action_fn.get_action_id());
   return entry;
 }
 
@@ -763,6 +799,9 @@ MatchTableIndirect::modify_entry(entry_handle_t handle, mbr_hdl_t mbr) {
 
 MatchErrorCode
 MatchTableIndirect::set_default_member(mbr_hdl_t mbr) {
+  if (const_default_entry)
+    return MatchErrorCode::DEFAULT_ENTRY_IS_CONST;
+
   MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
   {
@@ -784,6 +823,19 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr) {
   }
 
   return rc;
+}
+
+MatchErrorCode
+MatchTableIndirect::reset_default_entry() {
+  {
+    WriteLock lock = lock_write();
+    default_set = false;
+  }
+
+  BMLOG_DEBUG("Reset default entry for table '{}' to: {}",
+              get_name(), default_default_entry);
+
+  return MatchErrorCode::SUCCESS;
 }
 
 MatchErrorCode
@@ -858,9 +910,14 @@ MatchTableIndirect::dump_entry_(std::ostream *out,
 }
 
 void
-MatchTableIndirect::reset_state_() {
+MatchTableIndirect::reset_state_(bool reset_default_entry) {
+  if (reset_default_entry)
+    default_set = false;
   match_unit->reset_state();
 }
+
+void
+MatchTableIndirect::set_default_default_entry_() { }
 
 void
 MatchTableIndirect::serialize_(std::ostream *out) const {
@@ -902,8 +959,9 @@ MatchTableIndirectWS::create(const std::string &match_type,
 
 const ActionEntry &
 MatchTableIndirectWS::lookup(const Packet &pkt, bool *hit,
-                             entry_handle_t *handle) {
-  return MatchTableIndirect::lookup(pkt, hit, handle);
+                             entry_handle_t *handle,
+                             const ControlFlowNode **next_node) {
+  return MatchTableIndirect::lookup(pkt, hit, handle, next_node);
 }
 
 MatchErrorCode
@@ -978,6 +1036,9 @@ MatchTableIndirectWS::modify_entry_ws(entry_handle_t handle, grp_hdl_t grp) {
 
 MatchErrorCode
 MatchTableIndirectWS::set_default_group(grp_hdl_t grp) {
+  if (const_default_entry)
+    return MatchErrorCode::DEFAULT_ENTRY_IS_CONST;
+
   MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
   {
@@ -1073,11 +1134,6 @@ MatchErrorCode
 MatchTableIndirectWS::dump_entry_(std::ostream *out,
                                   entry_handle_t handle) const {
   return MatchTableIndirect::dump_entry_(out, handle);
-}
-
-void
-MatchTableIndirectWS::reset_state_() {
-  MatchTableIndirect::reset_state_();
 }
 
 void

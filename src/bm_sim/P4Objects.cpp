@@ -1861,16 +1861,6 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
       // it may call MatchTable::set_default_action.
       if (cfg_table.isMember("default_entry")) {
         const auto table_type = cfg_table["type"].asString();
-        if (table_type != "simple") {
-          throw json_exception(
-              EFormat() << "Table '" << table_name << "' does not have type "
-                        << "'simple' and therefore cannot specify a "
-                        << "'default_entry' attribute",
-              cfg_table);
-        }
-
-        auto simple_table = dynamic_cast<MatchTable *>(table);
-        assert(simple_table);
 
         const auto &cfg_default_entry = cfg_table["default_entry"];
         const p4object_id_t action_id = cfg_default_entry["action_id"].asInt();
@@ -1879,7 +1869,17 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         const Json::Value false_value(false);
         const bool is_action_const =
             cfg_default_entry.get("action_const", false_value).asBool();
-        if (is_action_const) simple_table->set_const_default_action_fn(action);
+        if (table_type != "simple" && is_action_const) {
+          throw json_exception(
+              EFormat() << "Table '" << table_name << "' does not have type "
+                        << "'simple' and therefore setting 'action_const' to "
+                        << "true is meaningless",
+              cfg_table);
+        } else if (is_action_const) {
+          auto simple_table = dynamic_cast<MatchTable *>(table);
+          assert(simple_table);
+          simple_table->set_const_default_action_fn(action);
+        }
 
         if (cfg_default_entry.isMember("action_data")) {
           auto adata = parse_action_data(action,
@@ -1888,8 +1888,8 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           const bool is_action_entry_const =
               cfg_default_entry.get("action_entry_const", false_value).asBool();
 
-          simple_table->set_default_entry(action, std::move(adata),
-                                          is_action_entry_const);
+          table->set_default_default_entry(action, std::move(adata),
+                                           is_action_entry_const);
         }
       }
 

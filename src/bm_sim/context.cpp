@@ -51,9 +51,7 @@ Context::mt_clear_entries(const std::string &table_name,
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  // TODO(antonin)
-  if (reset_default_entry) return MatchErrorCode::ERROR;
-  abstract_table->reset_state();
+  abstract_table->reset_state(reset_default_entry);
   return MatchErrorCode::SUCCESS;
 }
 
@@ -87,6 +85,16 @@ Context::mt_set_default_action(const std::string &table_name,
   const ActionFn *action = p4objects_rt->get_action_rt(table_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return table->set_default_action(action, std::move(action_data));
+}
+
+MatchErrorCode
+Context::mt_reset_default_entry(const std::string &table_name) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto abstract_table = p4objects_rt->get_abstract_match_table_rt(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  auto table = dynamic_cast<MatchTable *>(abstract_table);
+  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
+  return table->reset_default_entry();
 }
 
 MatchErrorCode
@@ -296,6 +304,16 @@ Context::mt_indirect_set_default_member(const std::string &table_name,
   if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
     return rc;
   return table->set_default_member(mbr);
+}
+
+MatchErrorCode
+Context::mt_indirect_reset_default_entry(const std::string &table_name) {
+  MatchErrorCode rc;
+  MatchTableIndirect *table;
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
+    return rc;
+  return table->reset_default_entry();
 }
 
 MatchErrorCode

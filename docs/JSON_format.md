@@ -546,7 +546,7 @@ attributes for these objects are:
     - `action_id`: the id of the default action
     - `action_const`: an optional boolean value which is `true` iff the control
     plane is not allowed to change the default action function. Default value is
-    `false`.
+    `false`. It can only be set to `true` for `simple` tables.
     - `action_data`: an optional JSON array where each entry is the hexstring
     value for an action argument. The size of the array needs to match the
     number of parameters expected by the action function with id `action_id`.

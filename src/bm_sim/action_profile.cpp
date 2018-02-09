@@ -164,8 +164,8 @@ ActionProfile::ActionProfile(const std::string &name, p4object_id_t id,
     : NamedP4Object(name, id),
       with_selection(with_selection) { }
 
-ActionEntry &
-ActionProfile::lookup(const Packet &pkt, const IndirectIndex &index) {
+const ActionEntry &
+ActionProfile::lookup(const Packet &pkt, const IndirectIndex &index) const {
   assert(index.is_mbr() || with_selection);
 
   mbr_hdl_t mbr;

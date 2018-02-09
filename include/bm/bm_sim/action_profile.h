@@ -111,7 +111,8 @@ class ActionProfile : public NamedP4Object {
 
   ActionProfile(const std::string &name, p4object_id_t id, bool with_selection);
 
-  ActionEntry &lookup(const Packet &pkt, const IndirectIndex &index);
+  const ActionEntry &lookup(const Packet &pkt,
+                            const IndirectIndex &index) const;
 
   bool has_selection() const;
 

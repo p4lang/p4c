@@ -950,6 +950,22 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_set_default(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
 
+    @handle_bad_input
+    def do_table_reset_default(self, line):
+        "Reset default entry for a match table: table_reset_default <table name>"
+        args = line.split()
+
+        self.exactly_n_args(args, 1)
+
+        table_name = args[0]
+
+        table = self.get_res("table", table_name, ResType.table)
+
+        self.client.bm_mt_reset_default_entry(0, table.name)
+
+    def complete_table_reset_default(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
     def parse_runtime_data(self, action, action_params):
         if len(action_params) != action.num_params():
             raise UIn_Error(
@@ -1395,6 +1411,22 @@ class RuntimeAPI(cmd.Cmd):
         self.client.bm_mt_indirect_ws_set_default_group(0, table_name, handle)
 
     def complete_table_indirect_set_default_with_group(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_reset_default(self, line):
+        "Reset default entry for indirect match table: table_indirect_reset_default <table name>"
+        args = line.split()
+
+        self.exactly_n_args(args, 1)
+
+        table_name = args[0]
+
+        table = self.get_res("table", table_name, ResType.table)
+
+        self.client.bm_mt_indirect_reset_default_entry(0, table.name)
+
+    def complete_table_indirect_reset_default(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
     @handle_bad_input

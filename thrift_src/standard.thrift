@@ -309,7 +309,7 @@ service Standard {
   void bm_mt_clear_entries(
     1:i32 cxt_id,
     2:string table_name,
-    3:bool reset_default_entry  // TODO(antonin): not implemented yet
+    3:bool reset_default_entry
   ) throws (1:InvalidTableOperation ouch),
 
   // direct tables
@@ -328,6 +328,11 @@ service Standard {
     2:string table_name,
     3:string action_name,
     4:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_reset_default_entry(
+    1:i32 cxt_id,
+    2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_delete_entry(
@@ -455,6 +460,11 @@ service Standard {
     1:i32 cxt_id,
     2:string table_name,
     3:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_reset_default_entry(
+    1:i32 cxt_id,
+    2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect tables with selector

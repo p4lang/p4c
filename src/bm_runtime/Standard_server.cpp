@@ -251,6 +251,16 @@ public:
     }
   }
 
+  void bm_mt_reset_default_entry(const int32_t cxt_id, const std::string& table_name) {
+    Logger::get()->trace("bm_mt_reset_default_entry");
+    auto error_code = switch_->mt_reset_default_entry(cxt_id, table_name);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
   void bm_mt_delete_entry(const int32_t cxt_id, const std::string& table_name, const BmEntryHandle entry_handle) {
     Logger::get()->trace("bm_table_delete_entry");
     MatchErrorCode error_code = switch_->mt_delete_entry(
@@ -432,6 +442,17 @@ public:
     Logger::get()->trace("bm_mt_indirect_set_default_member");
     MatchErrorCode error_code = switch_->mt_indirect_set_default_member(
         cxt_id, table_name, mbr_handle);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  void bm_mt_indirect_reset_default_entry(const int32_t cxt_id, const std::string& table_name) {
+    Logger::get()->trace("bm_mt_indirect_reset_default_entry");
+    auto error_code = switch_->mt_indirect_reset_default_entry(
+        cxt_id, table_name);
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(error_code);

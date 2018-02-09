@@ -46,8 +46,8 @@ struct ActionEntry {
     return out;
   }
 
-  ActionEntry(const ActionEntry &other) = delete;
-  ActionEntry &operator=(const ActionEntry &other) = delete;
+  ActionEntry(const ActionEntry &other) = default;
+  ActionEntry &operator=(const ActionEntry &other) = default;
 
   ActionEntry(ActionEntry &&other) /*noexcept*/ = default;
   ActionEntry &operator=(ActionEntry &&other) /*noexcept*/ = default;
