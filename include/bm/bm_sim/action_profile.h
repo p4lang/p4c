@@ -37,6 +37,9 @@
 namespace bm {
 
 class ActionProfile : public NamedP4Object {
+  friend class MatchTableIndirect;
+  friend class MatchTableIndirectWS;
+
  public:
   using mbr_hdl_t = uint32_t;
   using grp_hdl_t = uint32_t;
@@ -111,9 +114,6 @@ class ActionProfile : public NamedP4Object {
 
   ActionProfile(const std::string &name, p4object_id_t id, bool with_selection);
 
-  const ActionEntry &lookup(const Packet &pkt,
-                            const IndirectIndex &index) const;
-
   bool has_selection() const;
 
   void set_hash(std::unique_ptr<Calculation> h) {
@@ -153,40 +153,15 @@ class ActionProfile : public NamedP4Object {
 
   std::vector<Group> get_groups() const;
 
-  size_t get_num_members() const {
-    return num_members;
-  }
-
-  size_t get_num_groups() const {
-    return num_groups;
-  }
+  size_t get_num_members() const;
+  size_t get_num_groups() const;
 
   MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
-
-  bool is_valid_mbr(mbr_hdl_t mbr) const {
-    return mbr_handles.valid_handle(mbr);
-  }
-
-  bool is_valid_grp(grp_hdl_t grp) const {
-    return grp_handles.valid_handle(grp);
-  }
-
-  bool group_is_empty(grp_hdl_t grp) const;
 
   void reset_state();
 
   void serialize(std::ostream *out) const;
   void deserialize(std::istream *in, const P4Objects &objs);
-
-  // this method is called by MatchTableIndirect and assumes that the provided
-  // index is correct
-  // TODO(antonin): make this private and add MatchTableIndirect as a friend? or
-  // check the provided index and return a MatchErrorCode value?
-  void dump_entry(std::ostream *out, const IndirectIndex &index) const;
-
-  void ref_count_increase(const IndirectIndex &index);
-
-  void ref_count_decrease(const IndirectIndex &index);
 
  private:
   using ReadLock = boost::shared_lock<boost::shared_mutex>;
@@ -291,8 +266,31 @@ class ActionProfile : public NamedP4Object {
 
   void entries_insert(mbr_hdl_t mbr, ActionEntry &&entry);
 
+  // lock can be acquired by MatchTableIndirect
   ReadLock lock_read() const { return ReadLock(t_mutex); }
   WriteLock lock_write() const { return WriteLock(t_mutex); }
+
+  // this method is called by MatchTableIndirect and assumes that the provided
+  // index is correct
+  void dump_entry(std::ostream *out, const IndirectIndex &index) const;
+
+  // called by MatchTableIndirect for reference counting (a member cannot be
+  // deleted if match entries are pointing to it)
+  void ref_count_increase(const IndirectIndex &index);
+  void ref_count_decrease(const IndirectIndex &index);
+
+  bool is_valid_mbr(mbr_hdl_t mbr) const {
+    return mbr_handles.valid_handle(mbr);
+  }
+
+  bool is_valid_grp(grp_hdl_t grp) const {
+    return grp_handles.valid_handle(grp);
+  }
+
+  bool group_is_empty(grp_hdl_t grp) const;
+
+  const ActionEntry &lookup(const Packet &pkt,
+                            const IndirectIndex &index) const;
 
  private:
   mutable boost::shared_mutex t_mutex{};

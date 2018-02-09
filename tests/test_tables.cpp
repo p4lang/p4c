@@ -22,6 +22,7 @@
 
 #include <bm/bm_sim/tables.h>
 
+#include <atomic>
 #include <memory>
 #include <random>
 #include <thread>
@@ -1403,6 +1404,50 @@ TEST_F(TableIndirect, GetEntries) {
     ASSERT_EQ(1u, m.action_data.size());
     ASSERT_EQ(datas[i], m.action_data.action_data[0].get<unsigned int>());
   }
+}
+
+extern bool WITH_VALGRIND;  // defined in main.cpp
+
+// This test was added after it was found out that lookups in action profile
+// were not even lock-protected...
+TEST_F(TableIndirect, ActionProfileRace) {
+  std::string key("\x0a\xba");
+  unsigned int data = 666u;
+  mbr_hdl_t mbr;
+  entry_handle_t handle;
+
+  auto pkt = get_pkt(64);
+  auto &f = pkt.get_phv()->get_field(testHeader1, 0);
+  f.set("0xaba");
+
+  {
+    auto rc = add_member(data, &mbr);
+    ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+    rc = add_entry(key, mbr, &handle);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  }
+
+  auto add_member_loop = [this, &data](size_t iters) {
+    for (size_t i = 0; i < iters; i++) {
+      mbr_hdl_t mbr;
+      auto rc = add_member(data, &mbr);
+      ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+    }
+  };
+
+  std::atomic<bool> stop{false};
+  auto lookup_loop = [this, &pkt, &stop]() {
+    while (!stop) {
+      table->apply_action(&pkt);
+    }
+  };
+
+  const size_t iterations = WITH_VALGRIND ? 500u : 10000u;
+  std::thread t1(lookup_loop);
+  std::thread t2(add_member_loop, iterations);
+  t2.join();
+  stop = true;
+  t1.join();
 }
 
 

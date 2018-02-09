@@ -449,7 +449,7 @@ ActionProfile::get_member(mbr_hdl_t mbr, Member *member) const {
 std::vector<ActionProfile::Member>
 ActionProfile::get_members() const {
   ReadLock lock = lock_read();
-  std::vector<Member> members(get_num_members());
+  std::vector<Member> members(num_members);
   size_t idx = 0;
   for (const auto h : mbr_handles) {
     MatchErrorCode rc = get_member_(h, &members[idx++]);
@@ -480,7 +480,7 @@ ActionProfile::get_group(grp_hdl_t grp, Group *group) const {
 std::vector<ActionProfile::Group>
 ActionProfile::get_groups() const {
   ReadLock lock = lock_read();
-  std::vector<Group> groups(get_num_groups());
+  std::vector<Group> groups(num_groups);
   size_t idx = 0;
   for (const auto h : grp_handles) {
     MatchErrorCode rc = get_group_(h, &groups[idx++]);
@@ -502,6 +502,18 @@ ActionProfile::get_num_members_in_group(grp_hdl_t grp, size_t *nb) const {
   return MatchErrorCode::SUCCESS;
 }
 
+size_t
+ActionProfile::get_num_members() const {
+  ReadLock lock = lock_read();
+  return num_members;
+}
+
+size_t
+ActionProfile::get_num_groups() const {
+  ReadLock lock = lock_read();
+  return num_groups;
+}
+
 void
 ActionProfile::set_group_selector(GroupSelectionIface *selector) {
   WriteLock lock = lock_write();
@@ -515,6 +527,7 @@ ActionProfile::group_is_empty(grp_hdl_t grp) const {
 
 void
 ActionProfile::reset_state() {
+  WriteLock lock = lock_write();
   index_ref_count = IndirectIndexRefCount();
   mbr_handles.clear();
   action_entries.clear();
@@ -526,6 +539,7 @@ ActionProfile::reset_state() {
 
 void
 ActionProfile::serialize(std::ostream *out) const {
+  ReadLock lock = lock_read();
   (*out) << action_entries.size() << "\n";
   (*out) << num_members << "\n";
   for (const auto h : mbr_handles) {
@@ -542,6 +556,7 @@ ActionProfile::serialize(std::ostream *out) const {
 
 void
 ActionProfile::deserialize(std::istream *in, const P4Objects &objs) {
+  ReadLock lock = lock_read();
   size_t action_entries_size; (*in) >> action_entries_size;
   action_entries.resize(action_entries_size);
   (*in) >> num_members;

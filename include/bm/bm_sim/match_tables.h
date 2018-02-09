@@ -124,12 +124,16 @@ class MatchTableAbstract : public NamedP4Object {
 
   MatchErrorCode dump_entry(std::ostream *out,
                             entry_handle_t handle) const {
-    ReadLock lock = lock_read();
+    auto lock = lock_read();
+    // TODO(antonin): this seems too conservative: we know that indirect indices
+    // have to remain valid while a match entry is pointing to it.
+    auto lock_impl = lock_impl_read();
     return dump_entry_(out, handle);
   }
 
   std::string dump_entry_string(entry_handle_t handle) const {
-    ReadLock lock = lock_read();
+    auto lock = lock_read();
+    auto lock_impl = lock_impl_read();
     return dump_entry_string_(handle);
   }
 
@@ -247,6 +251,25 @@ class MatchTableAbstract : public NamedP4Object {
   // implementation. For a direct match table, the default default entry is
   // copied to the default entry.
   virtual void set_default_default_entry_() = 0;
+
+  // TODO(antonin): I realized that since the action profile refactor from 2017
+  // - to enable action profile sharing -, there were race conditions all over
+  // the place as the action profile itself was no longer protected by the mutex
+  // of its parent table (there is no single parent table any more). The most
+  // obvious issue was when calling apply_action(). Because of the complexity of
+  // the ActionEntry structure, lookup() returns it by reference. However, the
+  // action profile mutex was not held during the duration of apply_action. This
+  // means that modifications to the action profile ActionEntry vector (such as
+  // adding new members, potentially leading to memory reallocation) could read
+  // to the reference being "invalidated". This was actually very easy to
+  // trigger in a unit test with 2 competing threads, one calling apply_action
+  // repeatedly on a packet and one creating a multitude of members.
+  // As a temporary solution I have added these virtual methods to acquire the
+  // "implementation" mutex (in this case of an indirect table, the action
+  // profile's lock). I could think of several alternatives but nothing I
+  // liked.
+  virtual ReadLock lock_impl_read() const { return ReadLock(); }
+  virtual WriteLock lock_impl_write() const { return WriteLock(); }
 
   // the internal version does not acquire the lock
   std::string dump_entry_string_(entry_handle_t handle) const;
@@ -431,6 +454,9 @@ class MatchTableIndirect : public MatchTableAbstract {
   void set_default_default_entry_() override;
 
   MatchErrorCode get_entry_(entry_handle_t handle, Entry *entry) const;
+
+  ReadLock lock_impl_read() const override;
+  WriteLock lock_impl_write() const override;
 
  protected:
   IndirectIndex default_index{};
