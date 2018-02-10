@@ -639,6 +639,34 @@ pi_status_t _pi_table_default_action_set(pi_session_handle_t session_handle,
   return PI_STATUS_SUCCESS;
 }
 
+pi_status_t _pi_table_default_action_reset(pi_session_handle_t session_handle,
+                                           pi_dev_tgt_t dev_tgt,
+                                           pi_p4_id_t table_id) {
+  _BM_UNUSED(session_handle);
+
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
+  std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
+
+  bm::MatchErrorCode error_code = bm::MatchErrorCode::SUCCESS;
+  switch (pibmv2::switch_->mt_get_type(0, t_name)) {
+    case bm::MatchTableType::NONE:
+      error_code = bm::MatchErrorCode::INVALID_TABLE_NAME;
+      break;
+    case bm::MatchTableType::SIMPLE:
+      error_code = pibmv2::switch_->mt_reset_default_entry(0, t_name);
+      break;
+    case bm::MatchTableType::INDIRECT:
+    case bm::MatchTableType::INDIRECT_WS:
+      error_code = pibmv2::switch_->mt_indirect_reset_default_entry(0, t_name);
+      break;
+  }
+
+  if (error_code != bm::MatchErrorCode::SUCCESS)
+    return pibmv2::convert_error_code(error_code);
+  return PI_STATUS_SUCCESS;
+}
+
 pi_status_t _pi_table_default_action_get(pi_session_handle_t session_handle,
                                          pi_dev_id_t dev_id,
                                          pi_p4_id_t table_id,
