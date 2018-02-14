@@ -53,6 +53,7 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
           --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
           --python_out ${CMAKE_CURRENT_BINARY_DIR}
           ${P4RUNTIME_PROTO}
+  DEPENDS ${P4RUNTIME_PROTO}
   COMMENT "Generating protobuf files"
   )
 
