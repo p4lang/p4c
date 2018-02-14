@@ -626,6 +626,7 @@ TEST_F(P4Runtime, StaticTableEntries) {
 
     auto table = findTable(*test, "ingress.t_exact_ternary");
     ASSERT_TRUE(table != nullptr);
+    EXPECT_TRUE(table->is_const_table());
     auto action = findAction(*test, "ingress.a_with_control_params");
     ASSERT_TRUE(action != nullptr);
     unsigned int hfAId = 1;
@@ -675,6 +676,56 @@ TEST_F(P4Runtime, StaticTableEntries) {
                 std::string("\x00\x03", 2));
     check_entry(updates.Get(3), "\x04", std::string("\x00\x00", 2),
                 std::string("\x00\x00", 2), std::string("\x00\x04", 2));
+}
+
+TEST_F(P4Runtime, IsConstTable) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<8> hfA; }
+        struct Headers { Header h; }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action a() { sm.egress_spec = 0; }
+            action a_with_control_params(bit<9> x) { sm.egress_spec = x; }
+
+            table t_const {
+                key = { h.h.hfA : exact; }
+                actions = { a; a_with_control_params; }
+                default_action = a;
+                const entries = {
+                    (0x01) : a_with_control_params(1);
+                }
+            }
+            table t_non_const {
+                key = { h.h.hfA : exact; }
+                actions = { a; a_with_control_params; }
+                default_action = a;
+            }
+            apply { t_const.apply(); t_non_const.apply(); }
+        }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+    auto table_const = findTable(*test, "ingress.t_const");
+    ASSERT_TRUE(table_const != nullptr);
+    EXPECT_TRUE(table_const->is_const_table());
+    auto table_non_const = findTable(*test, "ingress.t_non_const");
+    ASSERT_TRUE(table_non_const != nullptr);
+    EXPECT_FALSE(table_non_const->is_const_table());
 }
 
 }  // namespace Test

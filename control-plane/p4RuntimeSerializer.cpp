@@ -1126,7 +1126,8 @@ class P4RuntimeAnalyzer {
                   const boost::optional<DefaultAction>& defaultAction,
                   const std::vector<ActionRef>& actions,
                   const std::vector<MatchField>& matchFields,
-                  bool supportsTimeout) {
+                  bool supportsTimeout,
+                  bool isConstTable) {
         if (isHidden(tableDeclaration)) return;
 
         auto name = tableDeclaration->controlPlaneName();
@@ -1188,6 +1189,10 @@ class P4RuntimeAnalyzer {
 
         if (supportsTimeout) {
             table->set_with_entry_timeout(true);
+        }
+
+        if (isConstTable) {
+            table->set_is_const_table(true);
         }
     }
 
@@ -1647,6 +1652,20 @@ static bool getSupportsTimeout(const IR::P4Table* table) {
     return expr->to<IR::BoolLiteral>()->value;
 }
 
+/// @return true if @table has a 'entries' property. The property must be const
+/// as per the current P4_16 specification. The frontend already enforces that
+/// check but we perform the check again here in case the constraint is relaxed
+/// in the specification in the future.
+static bool getConstTable(const IR::P4Table* table) {
+    BUG_CHECK(table != nullptr, "Failed precondition for getConstTable");
+    auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
+    if (ep == nullptr) return false;
+    BUG_CHECK(ep->value->is<IR::EntriesList>(), "Invalid 'entries' property");
+    if (!ep->isConstant)
+        ::error("%1%: P4Runtime only supports constant table initializers", ep);
+    return true;
+}
+
 static std::vector<ActionRef>
 getActionRefs(const IR::P4Table* table, ReferenceMap* refMap) {
     std::vector<ActionRef> actions;
@@ -1698,9 +1717,11 @@ static void analyzeTable(P4RuntimeAnalyzer& analyzer,
 
     bool supportsTimeout = getSupportsTimeout(table);
 
+    bool isConstTable = getConstTable(table);
+
     analyzer.addTable(table, tableSize, implementation, directCounter,
                       directMeter, defaultAction, actions, matchFields,
-                      supportsTimeout);
+                      supportsTimeout, isConstTable);
 }
 
 /// Visit evaluated blocks under the provided top-level block. Guarantees that
