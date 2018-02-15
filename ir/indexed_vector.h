@@ -136,6 +136,21 @@ class IndexedVector : public Vector<T> {
     bool operator==(const Vector<T> &a) const override { return a == *this; }
     bool operator==(const IndexedVector &a) const override {
         return Vector<T>::operator==(static_cast<const Vector<T>&>(a)); }
+    /* DANGER -- if you get an error on one of the above lines
+     *       operator== ... marked ‘override’, but does not override
+     * that mean you're trying to create an instantiation of IR::IndexedVector
+     * that does not appear anywhere in any .def file, which won't work.
+     * To make double-dispatch comparisons work, the IR generator must know
+     * about ALL instantiations of IR class templates, which it does by scanning
+     * all the .def files for instantiations.  This could in theory be fixed by
+     * having the IR generator scan all C++ header and source files for
+     * instantiations, but that is currently not done.
+     *
+     * To avoid this problem, you need to have your code ONLY use instantiations
+     * of IR::IndexedVector that appear somewhere in a .def file -- you can usually
+     * make it work by using an instantiation with an (abstract) base class rather
+     * than a concrete class, as most of those appear in .def files. */
+
     cstring node_type_name() const override {
         return "IndexedVector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {
