@@ -37,6 +37,16 @@ class Pattern {
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
         Match(const T *&m) : m(m) {}
     };
+    class Const : public Base {
+        mpz_class       value;
+     public:
+        bool match(const IR::Node *n) override {
+            if (auto k = n->to<IR::Constant>())
+                return k->value == value;
+            return false; }
+        Const(mpz_class v) : value(v) {}
+        Const(int v) : value(v) {}
+    };
     template<class T> class Unary : public Base {
         Base *expr;
      public:
@@ -62,6 +72,8 @@ class Pattern {
 
  public:
     template <class T> Pattern(const T*&m) : pattern(new Match<T>(m)) {}
+    Pattern(mpz_class v) : pattern(new Const(v)) {}     // NOLINT(runtime/explicit)
+    Pattern(int v) : pattern(new Const(v)) {}           // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
     Pattern operator~() const { return Pattern(new Unary<IR::Cmpl>(pattern)); }
     Pattern operator!() const { return Pattern(new Unary<IR::LNot>(pattern)); }
@@ -104,5 +116,24 @@ class Pattern {
 
     bool match(const IR::Node *n) { return pattern->match(n); }
 };
+
+inline Pattern operator*(int v, const Pattern &a) { return Pattern(v) * a; }
+inline Pattern operator/(int v, const Pattern &a) { return Pattern(v) / a; }
+inline Pattern operator%(int v, const Pattern &a) { return Pattern(v) % a; }
+inline Pattern operator+(int v, const Pattern &a) { return Pattern(v) + a; }
+inline Pattern operator-(int v, const Pattern &a) { return Pattern(v) - a; }
+inline Pattern operator<<(int v, const Pattern &a) { return Pattern(v) << a; }
+inline Pattern operator>>(int v, const Pattern &a) { return Pattern(v) >> a; }
+inline Pattern operator==(int v, const Pattern &a) { return Pattern(v) == a; }
+inline Pattern operator!=(int v, const Pattern &a) { return Pattern(v) != a; }
+inline Pattern operator<(int v, const Pattern &a) { return Pattern(v) < a; }
+inline Pattern operator<=(int v, const Pattern &a) { return Pattern(v) <= a; }
+inline Pattern operator>(int v, const Pattern &a) { return Pattern(v) > a; }
+inline Pattern operator>=(int v, const Pattern &a) { return Pattern(v) >= a; }
+inline Pattern operator&(int v, const Pattern &a) { return Pattern(v) & a; }
+inline Pattern operator|(int v, const Pattern &a) { return Pattern(v) | a; }
+inline Pattern operator^(int v, const Pattern &a) { return Pattern(v) ^ a; }
+inline Pattern operator&&(int v, const Pattern &a) { return Pattern(v) && a; }
+inline Pattern operator||(int v, const Pattern &a) { return Pattern(v) || a; }
 
 #endif /* IR_PATTERN_H_ */
