@@ -22,55 +22,14 @@ namespace P4 {
  *
  * @todo: Extend the optimization to handle multiple combinations of masks
  */
-class SimplifyBitwise : public PassManager {
-    ordered_set<const IR::AssignmentStatement *> changeable;
+class SimplifyBitwise : public Transform {
+    IR::Vector<IR::StatOrDecl> *slice_statements;
+    const IR::AssignmentStatement *changing_as;
 
-    class Scan : public Inspector {
-        SimplifyBitwise &self;
-        mpz_class total_mask = 0;
-        bool can_be_changed = false;
-
-        using Inspector::preorder;
-        using Inspector::postorder;
-
-        bool preorder(const IR::Operation *op) override;
-        bool preorder(const IR::Member *) override { return false; }
-        bool preorder(const IR::Slice *) override { return false; }
-        bool preorder(const IR::ArrayIndex *) override { return false; }
-        bool preorder(const IR::Cast *) override { return false; }
-        bool preorder(const IR::AssignmentStatement *as) override;
-        bool preorder(const IR::BOr *bor) override;
-        bool preorder(const IR::BAnd *band) override;
-        bool preorder(const IR::Constant *cst) override;
-        void postorder(const IR::AssignmentStatement *as) override;
-
-     public:
-        explicit Scan(SimplifyBitwise &s) : self(s) { setName("SimplifyBitwise::Scan"); }
-    };
-
-    class Update : public Transform {
-        SimplifyBitwise &self;
-        IR::Vector<IR::StatOrDecl> *slice_statements;
-        const IR::AssignmentStatement *changing_as;
-        mpz_class total_mask = 0;
-
-     public:
-        using Transform::preorder;
-        using Transform::postorder;
-
-        const IR::Node *preorder(IR::AssignmentStatement *as) override;
-        const IR::Node *preorder(IR::BAnd *band) override;
-        const IR::Node *postorder(IR::AssignmentStatement *as) override;
-
-        explicit Update(SimplifyBitwise &s) : self(s) { setName("SimplifyBitwise::Update"); }
-    };
-
+    void assignSlices(const IR::Expression *expr, mpz_class mask);
 
  public:
-    SimplifyBitwise() {
-        setName("SimplifyBitwise");
-        addPasses({ new Scan(*this), new Update(*this) });
-    }
+    const IR::Node *preorder(IR::AssignmentStatement *as) override;
 };
 
 }  // namespace P4
