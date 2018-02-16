@@ -320,6 +320,14 @@ bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Express
     if (al && ar) {
         return equiv(al->left, ar->left) && equiv(al->right, ar->right);
     }
+    auto tl = left->to<IR::Operation_Ternary>();
+    auto tr = right->to<IR::Operation_Ternary>();
+    if (tl && tr) {
+        bool check = equiv(tl->e0, tr->e0) && equiv(tl->e1, tr->e1) && equiv(tl->e2, tr->e2) &&
+        typeid(*tl) == typeid(*tr);
+        return check;
+    }
+
     // Compare binary operations (array indices)
     auto bl = left->to<IR::Operation_Binary>();
     auto br = right->to<IR::Operation_Binary>();
@@ -340,6 +348,15 @@ bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Express
         return equiv(ul->expr, ur->expr) &&
         typeid(*ul) == typeid(*ur);
     }
+
+    // Compare value and base of the constants, but do not include the type
+    auto cl = left->to<IR::Constant>();
+    auto cr = right->to<IR::Constant>();
+    if (cl && cr) {
+        return cl->base == cr->base && cl->value == cr->value &&
+        typeid(*cl) == typeid(*cr);
+    }
+
     // Compare literals (strings, booleans and integers)
     if (*left == *right)
       return true;
