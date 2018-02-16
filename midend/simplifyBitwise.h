@@ -34,6 +34,10 @@ class SimplifyBitwise : public PassManager {
         using Inspector::postorder;
 
         bool preorder(const IR::Operation *op) override;
+        bool preorder(const IR::Member *) override { return false; }
+        bool preorder(const IR::Slice *) override { return false; }
+        bool preorder(const IR::ArrayIndex *) override { return false; }
+        bool preorder(const IR::Cast *) override { return false; }
         bool preorder(const IR::AssignmentStatement *as) override;
         bool preorder(const IR::BOr *bor) override;
         bool preorder(const IR::BAnd *band) override;

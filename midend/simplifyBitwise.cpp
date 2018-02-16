@@ -2,7 +2,8 @@
 
 namespace P4 {
 
-bool SimplifyBitwise::Scan::preorder(const IR::Operation *) {
+bool SimplifyBitwise::Scan::preorder(const IR::Operation *op) {
+    LOG1("Are we here? " << op);
     can_be_changed = false;
     return false;
 }
@@ -10,20 +11,26 @@ bool SimplifyBitwise::Scan::preorder(const IR::Operation *) {
 bool SimplifyBitwise::Scan::preorder(const IR::AssignmentStatement *as) {
     if (!as->right->is<IR::BOr>())
         return false;
+    auto action = findContext<IR::P4Action>();
+    if (action)
+        LOG1("Action name " << action->name.name);
     can_be_changed = true;
     total_mask = 0;
     return true;
 }
 
 bool SimplifyBitwise::Scan::preorder(const IR::BOr *bor) {
+    LOG1("Bor");
     if (!findContext<IR::AssignmentStatement>())
         can_be_changed = false;
     if (!(bor->left->is<IR::BAnd>() && bor->right->is<IR::BAnd>()))
         can_be_changed = false;
+    LOG1("Tests " << bor->left->is<IR::BAnd>() << " " << bor->right->is<IR::BAnd>());
     return can_be_changed;
 }
 
 bool SimplifyBitwise::Scan::preorder(const IR::BAnd *band) {
+    LOG1("Band");
     if (!findContext<IR::BOr>())
         can_be_changed = false;
     if (!band->left->is<IR::Constant>() && !band->right->is<IR::Constant>())
@@ -34,6 +41,7 @@ bool SimplifyBitwise::Scan::preorder(const IR::BAnd *band) {
 }
 
 bool SimplifyBitwise::Scan::preorder(const IR::Constant *constant) {
+    LOG1("Constant");
     if (!findContext<IR::BAnd>()) {
         can_be_changed = false;
         return false;
