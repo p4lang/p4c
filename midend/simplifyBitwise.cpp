@@ -2,11 +2,16 @@
 
 namespace P4 {
 
+bool SimplifyBitwise::Scan::preorder(const IR::Operation *) {
+    can_be_changed = false;
+    return false;
+}
+
 bool SimplifyBitwise::Scan::preorder(const IR::AssignmentStatement *as) {
     if (!as->right->is<IR::BOr>())
         return false;
     can_be_changed = true;
-    mpz_init(total_mask.get_mpz_t());
+    total_mask = 0;
     return true;
 }
 
@@ -34,13 +39,10 @@ bool SimplifyBitwise::Scan::preorder(const IR::Constant *constant) {
         return false;
     }
     // Ensure that there are no collisions within the bitmask
-    mpz_class mask;
-    mpz_init(mask.get_mpz_t());
-    mpz_class zero;
-    mpz_init(zero.get_mpz_t());
-    mpz_and(mask.get_mpz_t(), total_mask.get_mpz_t(), constant->value.get_mpz_t());
-    if (mpz_cmp(mask.get_mpz_t(), zero.get_mpz_t()) == 0) {
-        mpz_ior(total_mask.get_mpz_t(), mask.get_mpz_t(), total_mask.get_mpz_t());
+    mpz_class mask = 0;
+    mask = total_mask & constant->value;
+    if (mask == 0) {
+        total_mask |= constant->value;
     } else {
         can_be_changed = false;
     }
@@ -59,6 +61,7 @@ const IR::Node *SimplifyBitwise::Update::preorder(IR::AssignmentStatement *as) {
     } else {
         slice_statements = new IR::Vector<IR::StatOrDecl>();
         changing_as = as;
+        total_mask = 0;
     }
     return as;
 }
@@ -74,10 +77,11 @@ const IR::Node *SimplifyBitwise::Update::preorder(IR::BAnd *band) {
         rvalue = band->left;
     }
     BUG_CHECK(constant, "%s: No singular mask field in & compilation: %s", band->srcInfo, band);
-    mp_bitcnt_t zero_pos = 0;
-    mp_bitcnt_t one_pos = mpz_scan1(constant->value.get_mpz_t(), zero_pos);
+    mp_bitcnt_t one_pos = mpz_scan1(constant->value.get_mpz_t(), 0);
+
+    // Calculate the slices for this particular mask
     while (static_cast<int>(one_pos) >= 0) {
-        zero_pos = mpz_scan0(constant->value.get_mpz_t(), one_pos);
+        mp_bitcnt_t zero_pos = mpz_scan0(constant->value.get_mpz_t(), one_pos);
         auto left_slice = new IR::Slice(changing_as->left, static_cast<int>(zero_pos - 1),
                                         static_cast<int>(one_pos));
         auto right_slice = new IR::Slice(rvalue, static_cast<int>(zero_pos - 1),
@@ -86,10 +90,28 @@ const IR::Node *SimplifyBitwise::Update::preorder(IR::BAnd *band) {
         slice_statements->push_back(new_as);
         one_pos = mpz_scan1(constant->value.get_mpz_t(), zero_pos);
     }
+    total_mask |= constant->value;
     return band;
 }
 
 const IR::Node *SimplifyBitwise::Update::postorder(IR::AssignmentStatement *as) {
+    mpz_class parameter_mask = 1;
+    parameter_mask << (as->left->type->width_bits());
+    mpz_class zero_mask = parameter_mask & ~total_mask;
+    mp_bitcnt_t one_pos = mpz_scan1(zero_mask.get_mpz_t(), 0);
+
+    // Calculate the slices for the holes in the entirety of that mask
+    while (static_cast<int>(one_pos) >= 0) {
+        mp_bitcnt_t zero_pos = mpz_scan0(zero_mask.get_mpz_t(), one_pos);
+        int width = static_cast<int>(one_pos - zero_pos);
+        auto left_slice = new IR::Slice(changing_as->left, static_cast<int>(zero_pos - 1),
+                                        static_cast<int>(one_pos));
+        auto rvalue = new IR::Constant(new IR::Type::Bits(width, false), 0);
+        auto new_as = new IR::AssignmentStatement(changing_as->srcInfo, left_slice, rvalue);
+        slice_statements->push_back(new_as);
+        one_pos = mpz_scan1(zero_mask.get_mpz_t(), zero_pos);
+    }
+
     BUG_CHECK(!slice_statements->empty(), "%s: Must have created separate assignment statements "
               "for this statement: %s", as->srcInfo, as);
     return slice_statements;

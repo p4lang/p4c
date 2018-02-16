@@ -27,12 +27,13 @@ class SimplifyBitwise : public PassManager {
 
     class Scan : public Inspector {
         SimplifyBitwise &self;
-        mpz_class total_mask;
+        mpz_class total_mask = 0;
         bool can_be_changed = false;
 
         using Inspector::preorder;
         using Inspector::postorder;
 
+        bool preorder(const IR::Operation *op) override;
         bool preorder(const IR::AssignmentStatement *as) override;
         bool preorder(const IR::BOr *bor) override;
         bool preorder(const IR::BAnd *band) override;
@@ -47,6 +48,7 @@ class SimplifyBitwise : public PassManager {
         SimplifyBitwise &self;
         IR::Vector<IR::StatOrDecl> *slice_statements;
         const IR::AssignmentStatement *changing_as;
+        mpz_class total_mask = 0;
 
      public:
         using Transform::preorder;
