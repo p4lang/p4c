@@ -31,6 +31,7 @@ set (MIDEND_SRCS
   removeParameters.cpp
   removeSelectBooleans.cpp
   removeUnusedParameters.cpp
+  simplifyBitwise.cpp
   simplifyKey.cpp
   simplifySelectCases.cpp
   simplifySelectList.cpp
@@ -62,6 +63,7 @@ set (MIDEND_HDRS
   removeParameters.h
   removeSelectBooleans.h
   removeUnusedParameters.h
+  simplifyBitwise.h
   simplifyKey.h
   simplifySelectCases.h
   simplifySelectList.h
