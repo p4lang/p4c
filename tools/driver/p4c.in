@@ -40,7 +40,7 @@ else:
 
 sys.path.insert(1, artifacts_dir)
 
-if "P4C_BUILD_TYPE" in os.environ:
+if "P4C_BUILD_TYPE" not in os.environ:
     os.environ['P4C_BUILD_TYPE'] = build_type
 
 os.environ['P4C_BIN_DIR'] = install_dir
