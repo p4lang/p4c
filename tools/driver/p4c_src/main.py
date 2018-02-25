@@ -128,7 +128,7 @@ def main():
     parser.add_argument("-S", dest="run_till_assembler",
                         help="Only run the preprocess and compilation steps",
                         action="store_true", default=False)
-    parser.add_argument("-x", dest="language",
+    parser.add_argument("--std", "-x", dest="language",
                         choices = ["p4-14", "p4-16"],
                         help="Treat subsequent input files as having type language.",
                         action="store", default="p4-16")
