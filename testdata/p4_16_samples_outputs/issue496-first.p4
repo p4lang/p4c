@@ -23,12 +23,13 @@ control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
     }
 }
 
+control E();
 control D() {
     apply {
     }
 }
 
-control C()(D d) {
+control C()(E d) {
     apply {
         d.apply();
     }
