@@ -1064,12 +1064,16 @@ class P4RuntimeAnalyzer {
             addAnnotations(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
-            if (!paramType->is<IR::Type_Bits>()) {
-                ::error("Action parameter %1% has a type which is not bit<> or int<>",
+            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()) {
+                ::error("Action parameter %1% has a type which is not bit<> or int<> or bool",
                         actionParam);
                 continue;
             }
-            param->set_bitwidth(paramType->width_bits());
+            if (paramType->is<IR::Type_Boolean>()) {
+                param->set_bitwidth(1);
+            } else {
+                param->set_bitwidth(paramType->width_bits());
+            }
         }
     }
 
