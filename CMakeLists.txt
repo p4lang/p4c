@@ -38,9 +38,14 @@ OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
+  # Allow the version to be set from outside
   set (P4C_VERSION $ENV{P4C_VERSION})
 else()
-  set (P4C_VERSION "0.1")
+  execute_process (COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE P4C_GIT_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc)
+  set (P4C_VERSION "0.5 (SHA: ${P4C_GIT_SHA})")
 endif()
 include(P4CUtils)
 include(UnifiedBuild)
