@@ -374,6 +374,20 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
     }
 }
 
+std::tuple<cstring, cstring, cstring> CompilerOptions::parseTarget() {
+    std::vector<std::string> splits;
+    std::string target_str(target.c_str());
+    boost::split(splits, target_str, [](char c){return c == '-';});
+    if (splits.size() != 3)
+        BUG("Invalid target %s", target);
+
+    auto device = splits[0];
+    auto arch   = splits[1];
+    auto vendor = splits[2];
+
+    return {device, arch, vendor};
+}
+
 DebugHook CompilerOptions::getDebugHook() const {
     using namespace std::placeholders;
     auto dp = std::bind(&CompilerOptions::dumpPass, this, _1, _2, _3, _4);

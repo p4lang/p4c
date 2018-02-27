@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <fstream>
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
 #include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
@@ -79,6 +80,16 @@ int main(int argc, char *const argv[]) {
         options.setInputFile();
     if (::errorCount() > 0)
         return 1;
+
+    cstring device, arch, vendor;
+    std::tie(device, arch, vendor) = options.parseTarget();
+
+    options.preprocessor_options += " -D__TARGET_FRONTEND__";
+    if (arch == "ss") {
+        options.preprocessor_options += " -D__ARCH_V1MODEL__";
+    } else if (arch == "psa") {
+        options.preprocessor_options += " -D__ARCH_PSA__";
+    }
 
     auto program = P4::parseP4File(options);
     auto hook = options.getDebugHook();
