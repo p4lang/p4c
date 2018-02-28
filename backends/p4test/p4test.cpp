@@ -16,7 +16,6 @@ limitations under the License.
 
 #include <fstream>
 #include <iostream>
-#include <boost/algorithm/string.hpp>
 
 #include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"

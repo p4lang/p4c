@@ -19,8 +19,8 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
-#include <unordered_map>
 #include <boost/algorithm/string.hpp>
+#include <unordered_map>
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
