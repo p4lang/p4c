@@ -44,7 +44,7 @@ void compile(EbpfOptions& options) {
         cstring device, arch, vendor;
         std::tie(device, arch, vendor) = options.parseTarget();
 
-        options.preprocessor_options += " -D__TARGET_FRONTEND__";
+        options.preprocessor_options += " -D__TARGET_EBPF__";
         if (arch == "ss") {
             options.preprocessor_options += " -D__ARCH_V1MODEL__";
         } else if (arch == "psa") {
