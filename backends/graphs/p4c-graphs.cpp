@@ -88,13 +88,15 @@ int main(int argc, char *const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    cstring device, arch, vendor;
-    std::tie(device, arch, vendor) = options.parseTarget();
-    options.preprocessor_options += " -D__TARGET_GRAPH__";
-    if (arch == "ss") {
-        options.preprocessor_options += " -D__ARCH_V1MODEL__";
-    } else if (arch == "psa") {
-        options.preprocessor_options += " -D__ARCH_PSA__";
+    if (options.target != nullptr) {
+        cstring device, arch, vendor;
+        std::tie(device, arch, vendor) = options.parseTarget();
+        options.preprocessor_options += " -D__TARGET_GRAPH__";
+        if (arch == "ss") {
+            options.preprocessor_options += " -D__ARCH_V1MODEL__";
+        } else if (arch == "psa") {
+            options.preprocessor_options += " -D__ARCH_PSA__";
+        }
     }
 
     auto program = P4::parseP4File(options);

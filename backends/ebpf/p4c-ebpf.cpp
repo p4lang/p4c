@@ -39,14 +39,17 @@ void compile(EbpfOptions& options) {
         ::error("This compiler only handles P4-16");
         return;
     }
-    cstring device, arch, vendor;
-    std::tie(device, arch, vendor) = options.parseTarget();
 
-    options.preprocessor_options += " -D__TARGET_FRONTEND__";
-    if (arch == "ss") {
-        options.preprocessor_options += " -D__ARCH_V1MODEL__";
-    } else if (arch == "psa") {
-        options.preprocessor_options += " -D__ARCH_PSA__";
+    if (options.target != nullptr) {
+        cstring device, arch, vendor;
+        std::tie(device, arch, vendor) = options.parseTarget();
+
+        options.preprocessor_options += " -D__TARGET_FRONTEND__";
+        if (arch == "ss") {
+            options.preprocessor_options += " -D__ARCH_V1MODEL__";
+        } else if (arch == "psa") {
+            options.preprocessor_options += " -D__ARCH_PSA__";
+        }
     }
 
     auto program = P4::parseP4File(options);

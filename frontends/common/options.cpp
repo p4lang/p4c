@@ -385,7 +385,7 @@ std::tuple<cstring, cstring, cstring> CompilerOptions::parseTarget() {
     auto arch   = splits[1];
     auto vendor = splits[2];
 
-    return {device, arch, vendor};
+    return std::make_tuple(device, arch, vendor);
 }
 
 DebugHook CompilerOptions::getDebugHook() const {
