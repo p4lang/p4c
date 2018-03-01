@@ -42,17 +42,13 @@ install (PROGRAMS ${P4C_BINARY_DIR}/p4c
 install (DIRECTORY p4c_src
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
   FILES_MATCHING PATTERN "*.py")
-install (FILES ${P4C_TARGETS_CFGS}
+install (FILES ${P4C_TARGET_CFGS}
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
-
-# p4cdir=$(pkgdatadir)/p4c_src
 
 set (P4C_DRIVER_DST)
 foreach (__f IN LISTS P4C_DRIVER_SRCS P4C_TARGET_CFGS)
   list (APPEND P4C_DRIVER_DST "${P4C_BINARY_DIR}/${__f}")
 endforeach(__f)
-
-message ("targets: ${P4C_DRIVER_DST}")
 
 add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4c_src &&
