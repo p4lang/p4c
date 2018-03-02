@@ -401,8 +401,11 @@ void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
         !am->applyObject->is<IR::Type_Parser>())
         return;
     auto instantiation = am->object->to<IR::Declaration_Instance>();
-    BUG_CHECK(instantiation != nullptr, "%1% expected an instance declaration", am->object);
-    inlineList->addInvocation(instantiation, statement);
+    if (instantiation != nullptr)
+        inlineList->addInvocation(instantiation, statement);
+    else
+        BUG_CHECK(am->object->is<IR::Parameter>(),
+                  "%1% expected a constructor parameter", am->object);
 }
 
 void DiscoverInlining::visit_all(const IR::Block* block) {
