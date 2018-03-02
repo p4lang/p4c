@@ -257,6 +257,11 @@ void Backend::convert(BMV2Options& options) {
     jsonTop.emplace("header_unions", json->header_unions);
     jsonTop.emplace("header_union_stacks", json->header_union_stacks);
     field_lists = mkArrayField(&jsonTop, "field_lists");
+    // field list and learn list ids in bmv2 are not consistent with ids for
+    // other objects: they need to start at 1 (not 0) since the id is also used
+    // as a "flag" to indicate that a certain simple_switch primitive has been
+    // called (e.g. resubmit or generate_digest)
+    BMV2::nextId("field_lists");
     jsonTop.emplace("errors", json->errors);
     jsonTop.emplace("enums", json->enums);
     jsonTop.emplace("parsers", json->parsers);
