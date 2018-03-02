@@ -513,7 +513,10 @@ case_value:
 /*************************/
 
 parser_exception_declaration:
-      PARSER_EXCEPTION name "{" parser_statement_list "}"
+      PARSER_EXCEPTION name "{" parser_statement_list "}" {
+          driver.clearPragmas();
+          ::warning("%1%: parser exception is not translated to P4-16", $1);
+      }
     | PARSER_EXCEPTION name "{" parser_statement_list error END
 ;
 

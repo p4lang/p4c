@@ -546,6 +546,8 @@ class DiscoverStructure : public Inspector {
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
+    void postorder(const IR::ParserException* ex) override
+    { ::warning("%1%: parser exception is not translated to P4-16", ex); }
     void postorder(const IR::Metadata* md) override
     { structure->metadata.emplace(md); checkReserved(md, md->name, "metadata"); }
     void postorder(const IR::Header* hd) override
