@@ -1310,6 +1310,11 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
         return param;
     BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: unexpected type", paramType);
 
+    if (paramType->is<IR::P4Control>() || paramType->is<IR::P4Parser>()) {
+        typeError("%1%: parameter cannot have type %2%", param, paramType);
+        return param;
+    }
+
     // The parameter type cannot have free type variables
     if (paramType->is<IR::IMayBeGenericType>()) {
         auto gen = paramType->to<IR::IMayBeGenericType>();

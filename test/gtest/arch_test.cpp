@@ -190,11 +190,12 @@ TEST_F(P4CArchitecture, psa_control_in_control) {
         struct Metadata {
             bit<32> hdr;
         }
+        control E();
         control MyIngress(inout ParsedHeaders h, inout Metadata m) {
             apply {
             }
         }
-        control MyEgress(inout Metadata m) (MyIngress ig) {
+        control MyEgress(inout Metadata m)(E ig) {
             apply {}
         }
         //MyEgress(ig) eg;
