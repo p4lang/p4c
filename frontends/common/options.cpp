@@ -284,6 +284,7 @@ FILE* CompilerOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
+        const std::string arch = "-include arch.p4";
         // the p4c driver sets environment variables for include
         // paths.  check the environment and add these to the command
         // line for the preprocessor
@@ -291,7 +292,8 @@ FILE* CompilerOptions::preprocess() {
           isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
         cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options
             + (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "")
-            + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
+            + " -I" + (isv1() ? p4_14includePath : p4includePath)
+            + " " + (isv1() ? "" : arch) + " " + file;
 
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
@@ -370,6 +372,20 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             break;
         }
     }
+}
+
+std::tuple<cstring, cstring, cstring> CompilerOptions::parseTarget() {
+    std::vector<std::string> splits;
+    std::string target_str(target.c_str());
+    boost::split(splits, target_str, [](char c){return c == '-';});
+    if (splits.size() != 3)
+        BUG("Invalid target %s", target);
+
+    auto device = splits[0];
+    auto arch   = splits[1];
+    auto vendor = splits[2];
+
+    return std::make_tuple(device, arch, vendor);
 }
 
 DebugHook CompilerOptions::getDebugHook() const {

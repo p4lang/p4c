@@ -48,8 +48,17 @@ int main(int argc, char *const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    // BMV2 is required for compatibility with the previous compiler.
-    options.preprocessor_options += " -D__TARGET_BMV2__";
+    if (options.target != nullptr) {
+        cstring device, arch, vendor;
+        std::tie(device, arch, vendor) = options.parseTarget();
+        // BMV2 is required for compatibility with the previous compiler.
+        options.preprocessor_options += " -D__TARGET_BMV2__";
+        if (arch == "ss") {
+            options.preprocessor_options += " -D__ARCH_V1MODEL__";
+        } else if (arch == "psa") {
+            options.preprocessor_options += " -D__ARCH_PSA__";
+        }
+    }
     auto program = P4::parseP4File(options);
     if (program == nullptr || ::errorCount() > 0)
         return 1;

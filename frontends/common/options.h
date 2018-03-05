@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include <boost/algorithm/string.hpp>
 #include <unordered_map>
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
@@ -93,6 +94,9 @@ class CompilerOptions : public Util::Options {
 
     // Compiler target architecture
     cstring target = nullptr;
+    // parse target architecture to tuple(device, arch, vendor)
+    std::tuple<cstring, cstring, cstring> parseTarget();
+
     // substrings matched agains pass names
     std::vector<cstring> top4;
 
