@@ -34,14 +34,6 @@
 
 namespace {
 
-void convert_to_counter_data(pi_counter_data_t *to,
-                             uint64_t bytes, uint64_t packets) {
-  // with bmv2, both are always valid
-  to->valid = PI_COUNTER_UNIT_PACKETS | PI_COUNTER_UNIT_BYTES;
-  to->bytes = static_cast<pi_counter_value_t>(bytes);
-  to->packets = static_cast<pi_counter_value_t>(packets);
-}
-
 bool are_both_values_set(const pi_counter_data_t *counter_data) {
   return (counter_data->valid & PI_COUNTER_UNIT_BYTES) &&
       (counter_data->valid & PI_COUNTER_UNIT_PACKETS);
@@ -93,7 +85,7 @@ pi_status_t _pi_counter_read(pi_session_handle_t session_handle,
       0, c_name, index, &bytes, &packets);
   if (error_code != bm::Counter::CounterErrorCode::SUCCESS)
     return convert_error_code(error_code);
-  convert_to_counter_data(counter_data, bytes, packets);
+  pibmv2::convert_to_counter_data(counter_data, bytes, packets);
   return PI_STATUS_SUCCESS;
 }
 
@@ -143,7 +135,7 @@ pi_status_t _pi_counter_read_direct(pi_session_handle_t session_handle,
       0, t_name, entry_handle, &bytes, &packets);
   if (error_code != bm::MatchErrorCode::SUCCESS)
     return pibmv2::convert_error_code(error_code);
-  convert_to_counter_data(counter_data, bytes, packets);
+  pibmv2::convert_to_counter_data(counter_data, bytes, packets);
   return PI_STATUS_SUCCESS;
 }
 

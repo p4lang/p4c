@@ -34,32 +34,6 @@
 
 namespace {
 
-void
-convert_to_meter_spec(const pi_p4info_t *p4info, pi_p4_id_t m_id,
-                      pi_meter_spec_t *meter_spec,
-                      const std::vector<bm::Meter::rate_config_t> &rates) {
-  auto conv_packets = [](const bm::Meter::rate_config_t &rate,
-                         uint64_t *r, uint32_t *b) {
-    *r = static_cast<uint64_t>(rate.info_rate * 1000000.);
-    *b = rate.burst_size;
-  };
-  auto conv_bytes = [](const bm::Meter::rate_config_t &rate,
-                       uint64_t *r, uint32_t *b) {
-    *r = static_cast<uint64_t>(rate.info_rate * 1000000.);
-    *b = rate.burst_size;
-  };
-  meter_spec->meter_unit = static_cast<pi_meter_unit_t>(
-      pi_p4info_meter_get_unit(p4info, m_id));
-  meter_spec->meter_type = static_cast<pi_meter_type_t>(
-      pi_p4info_meter_get_type(p4info, m_id));
-  assert(meter_spec->meter_unit != PI_METER_UNIT_DEFAULT);
-  // choose appropriate conversion routine
-  auto conv = (meter_spec->meter_unit == PI_METER_UNIT_PACKETS) ?
-      conv_packets : conv_bytes;
-  conv(rates.at(0), &meter_spec->cir, &meter_spec->cburst);
-  conv(rates.at(1), &meter_spec->pir, &meter_spec->pburst);
-}
-
 std::string get_direct_t_name(const pi_p4info_t *p4info, pi_p4_id_t m_id) {
   pi_p4_id_t t_id = pi_p4info_meter_get_direct(p4info, m_id);
   // guaranteed by PI common code
@@ -92,7 +66,7 @@ pi_status_t _pi_meter_read(pi_session_handle_t session_handle,
   if (error_code != bm::Meter::MeterErrorCode::SUCCESS)
     return convert_error_code(error_code);
   if (rates.empty()) return PI_STATUS_METER_SPEC_NOT_SET;
-  convert_to_meter_spec(p4info, meter_id, meter_spec, rates);
+  pibmv2::convert_to_meter_spec(p4info, meter_id, meter_spec, rates);
 
   return PI_STATUS_SUCCESS;
 }
@@ -131,7 +105,7 @@ pi_status_t _pi_meter_read_direct(pi_session_handle_t session_handle,
   if (error_code != bm::MatchErrorCode::SUCCESS)
     return pibmv2::convert_error_code(error_code);
   if (rates.empty()) return PI_STATUS_METER_SPEC_NOT_SET;
-  convert_to_meter_spec(p4info, meter_id, meter_spec, rates);
+  pibmv2::convert_to_meter_spec(p4info, meter_id, meter_spec, rates);
   return PI_STATUS_SUCCESS;
 }
 

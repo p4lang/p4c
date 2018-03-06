@@ -55,16 +55,9 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
   auto t_id = get_table_id(p4info, "t_redirect");
   auto mf_id = get_mf_id(p4info, "t_redirect", "sm.packet_length");
   auto a_id = get_action_id(p4info, "port_redirect");
-  auto dc_id = get_direct_counter_id(p4info, "cntr");
 
-  auto write_one_entry = [t_id, mf_id, a_id, this]
-                         (const std::string &key_string) {
-    p4::WriteRequest write_request;
-    write_request.set_device_id(device_id);
-    auto update = write_request.add_updates();
-    update->set_type(p4::Update_Type_INSERT);
-    auto entity = update->mutable_entity();
-    auto table_entry = entity->mutable_table_entry();
+  auto make_table_entry = [&](const std::string &key_string,
+                              p4::TableEntry *table_entry) {
     table_entry->set_table_id(t_id);
     auto match = table_entry->add_match();
     match->set_field_id(mf_id);
@@ -73,6 +66,15 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
     action->set_action_id(a_id);
+  };
+
+  auto write_one_entry = [&](const std::string &key_string) {
+    p4::WriteRequest write_request;
+    write_request.set_device_id(device_id);
+    auto update = write_request.add_updates();
+    update->set_type(p4::Update_Type_INSERT);
+    auto entity = update->mutable_entity();
+    make_table_entry(key_string, entity->mutable_table_entry());
 
     p4::WriteResponse write_response;
     ClientContext context;
@@ -82,7 +84,7 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
   write_one_entry(std::string("\x00\x00\x00\x0a", 4));
   write_one_entry(std::string("\x00\x00\x00\x05", 4));
 
-  auto send_one_packet = [this](const std::string &payload) {
+  auto send_one_packet = [&](const std::string &payload) {
     p4::bm::PacketStreamRequest packet_request;
     packet_request.set_device_id(device_id);
     packet_request.set_port(1);
@@ -103,38 +105,54 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
   send_one_packet(std::string(10, '\xab'));
   send_one_packet(std::string(5, '\xab'));
 
-  auto read_one_counter = [dc_id, t_id, mf_id, a_id, this]
-                          (const std::string &key_string,
-                           int packet_count, int byte_count) {
+  auto read_one_counter = [&](const std::string &key_string,
+                              int packet_count, int byte_count) {
     p4::ReadRequest read_request;
     read_request.set_device_id(device_id);
     auto read_entity = read_request.add_entities();
     auto direct_counter_entry = read_entity->mutable_direct_counter_entry();
-    auto table_entry = direct_counter_entry->mutable_table_entry();
-    table_entry->set_table_id(t_id);
-    auto match = table_entry->add_match();
-    match->set_field_id(mf_id);
-    auto exact = match->mutable_exact();
-    exact->set_value(key_string);
+    make_table_entry(key_string, direct_counter_entry->mutable_table_entry());
 
     ClientContext context;
     std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
-    p4runtime_stub->Read(&context, read_request));
+        p4runtime_stub->Read(&context, read_request));
     p4::ReadResponse read_response;
     reader->Read(&read_response);
     auto status = reader->Finish();
     EXPECT_TRUE(status.ok());
     EXPECT_EQ(read_response.entities_size(), 1);
     EXPECT_TRUE(read_response.entities(0).has_direct_counter_entry());
-    EXPECT_EQ(
-      read_response.entities(0).direct_counter_entry().data().packet_count(),
-      packet_count);
-    EXPECT_EQ(
-      read_response.entities(0).direct_counter_entry().data().byte_count(),
-      byte_count);
+    auto &data = read_response.entities(0).direct_counter_entry().data();
+    EXPECT_EQ(data.packet_count(), packet_count);
+    EXPECT_EQ(data.byte_count(), byte_count);
   };
   read_one_counter(std::string("\x00\x00\x00\x0a", 4), 1, 10);
   read_one_counter(std::string("\x00\x00\x00\x05", 4), 1, 5);
+
+  auto read_one_counter_from_table_entry = [&](
+      const std::string &key_string, int packet_count, int byte_count) {
+    p4::ReadRequest read_request;
+    read_request.set_device_id(device_id);
+    auto read_entity = read_request.add_entities();
+    auto table_entry = read_entity->mutable_table_entry();
+    make_table_entry(key_string, table_entry);
+    table_entry->mutable_counter_data();  // makes sure that counter is read
+
+    ClientContext context;
+    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+        p4runtime_stub->Read(&context, read_request));
+    p4::ReadResponse read_response;
+    reader->Read(&read_response);
+    auto status = reader->Finish();
+    EXPECT_TRUE(status.ok());
+    EXPECT_EQ(read_response.entities_size(), 1);
+    EXPECT_TRUE(read_response.entities(0).has_table_entry());
+    auto &counter_data = read_response.entities(0).table_entry().counter_data();
+    EXPECT_EQ(counter_data.packet_count(), packet_count);
+    EXPECT_EQ(counter_data.byte_count(), byte_count);
+  };
+  read_one_counter_from_table_entry(std::string("\x00\x00\x00\x0a", 4), 1, 10);
+  read_one_counter_from_table_entry(std::string("\x00\x00\x00\x05", 4), 1, 5);
 }
 
 }  // namespace

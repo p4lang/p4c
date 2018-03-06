@@ -399,6 +399,16 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
   res->num_entries = entries.size();
   res->mkey_nbytes = pi_p4info_table_match_key_size(p4info, table_id);
 
+  size_t num_direct_resources;
+  auto *res_ids = pi_p4info_table_get_direct_resources(
+      p4info, table_id, &num_direct_resources);
+  // in bmv2, a table can have at most one direct counter and one direct meter
+  pi_p4_id_t counter_id = PI_INVALID_ID, meter_id = PI_INVALID_ID;
+  for (size_t i = 0; i < num_direct_resources; i++) {
+    if (pi_is_counter_id(res_ids[i])) counter_id = res_ids[i];
+    if (pi_is_meter_id(res_ids[i])) meter_id = res_ids[i];
+  }
+
   Buffer buffer;
   for (const auto &e : entries) {
     emit_entry_handle(buffer.extend(sizeof(s_pi_entry_handle_t)), e.handle);
@@ -432,6 +442,55 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
 
     // properties
     emit_uint32(buffer.extend(sizeof(uint32_t)), 0);
+
+    // direct resources
+    // the entry handle may not be valid any more by the time we query the
+    // direct resource configs, so we try to handle this case gracefully by not
+    // including the config in the buffer. A better solution may be to modify
+    // the bmv2 get_entries method to include the direct resource configs, but I
+    // am reluctant to change the interface at this stage.
+    {
+      bool valid_counter = false;
+      uint64_t bytes, packets;
+      if (counter_id != PI_INVALID_ID) {
+        auto error_code = pibmv2::switch_->mt_read_counters(
+            0, t_name, e.handle, &bytes, &packets);
+        valid_counter = (error_code == bm::MatchErrorCode::SUCCESS);
+      }
+      bool valid_meter = false;
+      std::vector<bm::Meter::rate_config_t> rates;
+      if (meter_id != PI_INVALID_ID) {
+        auto error_code = pibmv2::switch_->mt_get_meter_rates(
+            0, t_name, e.handle, &rates);
+        valid_meter = (error_code == bm::MatchErrorCode::SUCCESS);
+      }
+      size_t valid_direct = (valid_counter ? 1 : 0) + (valid_meter ? 1 : 0);
+      emit_uint32(buffer.extend(sizeof(uint32_t)), valid_direct);
+
+      if (valid_counter) {
+        PIDirectResMsgSizeFn msg_size_fn;
+        PIDirectResEmitFn emit_fn;
+        pi_direct_res_get_fns(
+            PI_COUNTER_ID, &msg_size_fn, &emit_fn, NULL, NULL);
+        emit_p4_id(buffer.extend(sizeof(s_pi_p4_id_t)), counter_id);
+        pi_counter_data_t counter_data;
+        pibmv2::convert_to_counter_data(&counter_data, bytes, packets);
+        auto msg_size = msg_size_fn(&counter_data);
+        emit_uint32(buffer.extend(sizeof(uint32_t)), msg_size);
+        emit_fn(buffer.extend(msg_size), &counter_data);
+      }
+      if (valid_meter) {
+        PIDirectResMsgSizeFn msg_size_fn;
+        PIDirectResEmitFn emit_fn;
+        pi_direct_res_get_fns(PI_METER_ID, &msg_size_fn, &emit_fn, NULL, NULL);
+        emit_p4_id(buffer.extend(sizeof(s_pi_p4_id_t)), meter_id);
+        pi_meter_spec_t meter_spec;
+        pibmv2::convert_to_meter_spec(p4info, meter_id, &meter_spec, rates);
+        auto msg_size = msg_size_fn(&meter_spec);
+        emit_uint32(buffer.extend(sizeof(uint32_t)), msg_size);
+        emit_fn(buffer.extend(msg_size), &meter_spec);
+      }
+    }
   }
 
   res->entries_size = buffer.size();

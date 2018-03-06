@@ -38,6 +38,14 @@ void convert_from_counter_data(const pi_counter_data_t *from,
     *packets = 0;
 }
 
+void convert_to_counter_data(pi_counter_data_t *to,
+                             uint64_t bytes, uint64_t packets) {
+  // with bmv2, both are always valid
+  to->valid = PI_COUNTER_UNIT_PACKETS | PI_COUNTER_UNIT_BYTES;
+  to->bytes = static_cast<pi_counter_value_t>(bytes);
+  to->packets = static_cast<pi_counter_value_t>(packets);
+}
+
 std::vector<bm::Meter::rate_config_t> convert_from_meter_spec(
     const pi_meter_spec_t *meter_spec) {
   std::vector<bm::Meter::rate_config_t> rates;
@@ -62,6 +70,32 @@ std::vector<bm::Meter::rate_config_t> convert_from_meter_spec(
   rates.push_back(conv(meter_spec->cir, meter_spec->cburst));
   rates.push_back(conv(meter_spec->pir, meter_spec->pburst));
   return rates;
+}
+
+void
+convert_to_meter_spec(const pi_p4info_t *p4info, pi_p4_id_t m_id,
+                      pi_meter_spec_t *meter_spec,
+                      const std::vector<bm::Meter::rate_config_t> &rates) {
+  auto conv_packets = [](const bm::Meter::rate_config_t &rate,
+                         uint64_t *r, uint32_t *b) {
+    *r = static_cast<uint64_t>(rate.info_rate * 1000000.);
+    *b = rate.burst_size;
+  };
+  auto conv_bytes = [](const bm::Meter::rate_config_t &rate,
+                       uint64_t *r, uint32_t *b) {
+    *r = static_cast<uint64_t>(rate.info_rate * 1000000.);
+    *b = rate.burst_size;
+  };
+  meter_spec->meter_unit = static_cast<pi_meter_unit_t>(
+      pi_p4info_meter_get_unit(p4info, m_id));
+  meter_spec->meter_type = static_cast<pi_meter_type_t>(
+      pi_p4info_meter_get_type(p4info, m_id));
+  assert(meter_spec->meter_unit != PI_METER_UNIT_DEFAULT);
+  // choose appropriate conversion routine
+  auto conv = (meter_spec->meter_unit == PI_METER_UNIT_PACKETS) ?
+      conv_packets : conv_bytes;
+  conv(rates.at(0), &meter_spec->cir, &meter_spec->cburst);
+  conv(rates.at(1), &meter_spec->pir, &meter_spec->pburst);
 }
 
 }  // namespace pibmv2
