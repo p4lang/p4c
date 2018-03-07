@@ -60,6 +60,7 @@ struct standard_metadata_t {
     @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
     /// Indicates that a verify_checksum() method has failed.
     bit<1>  checksum_error;
+    @alias("intrinsic_metadata.recirculate_flag") bit<32> recirculate_flag;
 }
 
 enum CounterType {
