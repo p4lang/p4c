@@ -1,0 +1,4 @@
+issue1093.p4(8):syntax error, unexpected END
+    if(0 == 1) { }
+                  ^
+error: 1 errors encountered, aborting compilation
