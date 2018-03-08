@@ -1345,6 +1345,8 @@ const IR::Node* TypeInference::postorder(IR::StringLiteral* expression) {
     if (done()) return expression;
     setType(getOriginal(), IR::Type_String::get());
     setType(expression, IR::Type_String::get());
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 
@@ -2627,6 +2629,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
         auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), nullptr));
         auto args = new IR::Vector<IR::ArgumentInfo>();
+        bool constArgs = true;
         for (auto arg : *expression->arguments) {
             auto argType = getType(arg);
             if (argType == nullptr)
@@ -2634,6 +2637,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
                                                 isCompileTimeConstant(arg), argType);
             args->push_back(argInfo);
+            constArgs &= isCompileTimeConstant(arg);
         }
         auto typeArgs = new IR::Vector<IR::Type>();
         for (auto ta : *expression->typeArguments) {
@@ -2682,7 +2686,9 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             returnType->is<IR::P4Parser>() ||
             returnType->is<IR::P4Control>() ||
             returnType->is<IR::Type_Package>() ||
-            returnType->is<IR::Type_Extern>()) {
+            (returnType->is<IR::Type_Extern>() && !constArgs)) {
+            // Expermental: methods with all constant arguments can return an extern
+            // instance as a factory method evaluated at compile time.
             typeError("%1%: illegal return type %2%", expression, returnType);
             return expression;
         }
@@ -2708,6 +2714,11 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             if (ef->method->name == IR::ParserState::verify)
                 if (!findContext<IR::P4Parser>())
                     typeError("%1%: may only be invoked in parsers", ef->expr);
+            if (constArgs) {
+                // extern functions with constant args are compile-time constants
+                setCompileTimeConstant(expression);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
         }
 
         if (mi->is<ExternMethod>())

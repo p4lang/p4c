@@ -1073,9 +1073,16 @@ class RemoveAnnotatedFields : public Transform {
 
 ///////////////////////////////////////////////////////////////
 
+static ProgramStructure *defaultCreateProgramStructure() {
+    return new ProgramStructure();
+}
+
+ProgramStructure *(*Converter::createProgramStructure)() = defaultCreateProgramStructure;
+
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
-    structure.populateOutputNames();
+    structure = createProgramStructure();
+    structure->populateOutputNames();
 
     // Discover types using P4-14 type-checker
     passes.emplace_back(new DetectDuplicates());
@@ -1084,11 +1091,11 @@ Converter::Converter() {
     passes.emplace_back(new AdjustLengths());
     passes.emplace_back(new TypeCheck());
     // Convert
-    passes.emplace_back(new DiscoverStructure(&structure));
-    passes.emplace_back(new ComputeCallGraph(&structure));
-    passes.emplace_back(new ComputeTableCallGraph(&structure));
-    passes.emplace_back(new Rewriter(&structure));
-    passes.emplace_back(new FixExtracts(&structure));
+    passes.emplace_back(new DiscoverStructure(structure));
+    passes.emplace_back(new ComputeCallGraph(structure));
+    passes.emplace_back(new ComputeTableCallGraph(structure));
+    passes.emplace_back(new Rewriter(structure));
+    passes.emplace_back(new FixExtracts(structure));
     passes.emplace_back(new RemoveAnnotatedFields);
 }
 

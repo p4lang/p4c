@@ -359,4 +359,14 @@ class ListCompileTimeValue : CompileTimeValue {
 #nodbprint
 }
 
+/// Experimental: an extern methond/function call with constant arguments to be
+/// evaluated at compile time
+class CompileTimeMethodCall : MethodCallExpression, CompileTimeValue {
+    CompileTimeMethodCall(MethodCallExpression e) : MethodCallExpression(*e) {}
+    validate {
+        for (auto v : *arguments)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
 /** @} *//* end group irdefs */
