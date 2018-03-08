@@ -36,6 +36,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.resubmit_flag = smeta_1.resubmit_flag;
         smeta.egress_rid = smeta_1.egress_rid;
         smeta.checksum_error = smeta_1.checksum_error;
+        smeta.recirculate_flag = smeta_1.recirculate_flag;
     }
     @name("IngressI.forward") table forward {
         key = {
