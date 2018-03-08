@@ -53,6 +53,7 @@ struct standard_metadata_t {
     @alias("queueing_metadata.deq_qdepth")    bit<19> deq_qdepth;
     // intrinsic metadata
     @alias("intrinsic_metadata.ingress_global_timestamp") bit<48> ingress_global_timestamp;
+    @alias("intrinsic_metadata.egress_global_timestamp") bit<48> egress_global_timestamp;
     @alias("intrinsic_metadata.lf_field_list") bit<32> lf_field_list;
     @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
     @alias("intrinsic_metadata.resubmit_flag") bit<32> resubmit_flag;
