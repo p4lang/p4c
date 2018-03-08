@@ -48,7 +48,12 @@ typedef struct bmi_port_mgr_s {
   void *cookie;
   bmi_packet_handler_t packet_handler;
   pthread_t select_thread;
-  pthread_mutex_t lock;
+  /* We use a RW mutex to protect port_mgr and port state. Send & receive will
+  acquire a read lock, while port_add and port_remove will acquire a write
+  lock. Using a single mutex for the port_mgr is much easier than having one for
+  each port, even though it means that adding / removing a port will block send
+  & receive for all ports. */
+  pthread_rwlock_t lock;
 } bmi_port_mgr_t;
 
 static inline int port_in_use(bmi_port_t *port) {
@@ -71,6 +76,7 @@ static void *run_select(void *data) {
   const char *pkt_data;
   int pkt_len;
   fd_set fds;
+  int max_fd;
 
   struct timeval timeout;
   while(1) {
@@ -78,42 +84,44 @@ static void *run_select(void *data) {
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000;
 
+    /* copy the FD set for select call */
+    pthread_rwlock_rdlock(&port_mgr->lock);
     fds = port_mgr->fds;
-    n = select(port_mgr->max_fd + 1, &fds, NULL, NULL, &timeout);
-    /* TODO: investigate this further */
+    max_fd = port_mgr->max_fd;
+    pthread_rwlock_unlock(&port_mgr->lock);
+
+    n = select(max_fd + 1, &fds, NULL, NULL, &timeout);
     assert(n >= 0 || errno == EINTR);
 
     /* the thread terminates */
-    if(port_mgr->max_fd == -1) return NULL;
+    if(max_fd == -1) return NULL;
 
     if(n <= 0) { // timeout or EINTR
       continue;
     }
 
-    pthread_mutex_lock(&port_mgr->lock);
+    pthread_rwlock_rdlock(&port_mgr->lock);
 
-    /* use Judy instead ? */
+    /* if we had a mutex for each port, there would potentially be a lot of
+    overhead to acquire / release the lock at each iteration - we would need to
+    hold the lock to call FD_ISSET... */
     for(i = 0; n && i < PORT_COUNT_MAX; i++) {
       port_info = get_port(port_mgr, i);
-      if(FD_ISSET(port_info->fd, &fds) && port_info->bmi) {
-        --n;
-        pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
-        if(pkt_len < 0) continue;
-        /* printf("Received pkt of len %d on port %d\n", pkt_len, i); */
-        if(port_mgr->packet_handler) {
-          port_mgr->packet_handler(i, pkt_data, pkt_len, port_mgr->cookie);
-        }
-      }
+      if(!FD_ISSET(port_info->fd, &fds)) continue;
+      --n;
+      if(!port_info->bmi) continue;
+      pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
+      if(pkt_len < 0 || !port_mgr->packet_handler) continue;
+      port_mgr->packet_handler(i, pkt_data, pkt_len, port_mgr->cookie);
     }
 
-    pthread_mutex_unlock(&port_mgr->lock);
+    pthread_rwlock_unlock(&port_mgr->lock);
   }
 
   return NULL;
 }
 
-int bmi_start_mgr(bmi_port_mgr_t* port_mgr)
-{
+int bmi_start_mgr(bmi_port_mgr_t* port_mgr) {
   return pthread_create(&port_mgr->select_thread, NULL, run_select, port_mgr);
 }
 
@@ -126,7 +134,7 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
 
   FD_ZERO(&port_mgr_->fds);
 
-  exitCode = pthread_mutex_init(&port_mgr_->lock, NULL);
+  exitCode = pthread_rwlock_init(&port_mgr_->lock, NULL);
   if (exitCode != 0)
       return exitCode;
 
@@ -137,8 +145,10 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
 int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
                            bmi_packet_handler_t packet_handler,
                            void *cookie) {
+  pthread_rwlock_wrlock(&port_mgr->lock);
   port_mgr->packet_handler = packet_handler;
   port_mgr->cookie = cookie;
+  pthread_rwlock_unlock(&port_mgr->lock);
   return 0;
 }
 
@@ -146,23 +156,26 @@ int bmi_port_send(bmi_port_mgr_t *port_mgr,
                   int port_num, const char *buffer, int len) {
   if(!port_num_valid(port_num)) return -1;
   bmi_port_t *port = get_port(port_mgr, port_num);
-  if(!port_in_use(port)) return -1;
+  pthread_rwlock_rdlock(&port_mgr->lock);
 
-  if(bmi_interface_send(port->bmi, buffer, len) != 0) return -1;
+  if(!port_in_use(port)) {
+    pthread_rwlock_unlock(&port_mgr->lock);
+    return -1;
+  }
 
-  return 0;
+  int exitCode = bmi_interface_send(port->bmi, buffer, len);
+
+  pthread_rwlock_unlock(&port_mgr->lock);
+  return exitCode;
 }
 
-int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
-			   const char *ifname, int port_num,
-			   const char *pcap_input_dump,
-			   const char* pcap_output_dump)
-{
-  if(!port_num_valid(port_num)) return -1;
-
+/* internal version of bmi_port_interface_add which doesn't acquire a lock */
+static int _bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
+                                   const char *ifname, int port_num,
+                                   const char *pcap_input_dump,
+                                   const char* pcap_output_dump) {
   bmi_port_t *port = get_port(port_mgr, port_num);
   if(port_in_use(port)) return -1;
-
   port->ifname = strdup(ifname);
 
   bmi_interface_t *bmi;
@@ -171,69 +184,92 @@ int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
   if(pcap_input_dump) bmi_interface_add_dumper(bmi, pcap_input_dump, 1);
   if(pcap_output_dump) bmi_interface_add_dumper(bmi, pcap_output_dump, 0);
 
-  pthread_mutex_lock(&port_mgr->lock);
-
   port->bmi = bmi;
 
   int fd = bmi_interface_get_fd(port->bmi);
   port->fd = fd;
 
   if(fd > port_mgr->max_fd) port_mgr->max_fd = fd;
-
   FD_SET(fd, &port_mgr->fds);
 
-  pthread_mutex_unlock(&port_mgr->lock);
+  return 0;
+}
+
+int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
+			   const char *ifname, int port_num,
+			   const char *pcap_input_dump,
+			   const char* pcap_output_dump) {
+  int exitCode;
+  if(!port_num_valid(port_num)) return -1;
+  bmi_port_t *port = get_port(port_mgr, port_num);
+  pthread_rwlock_wrlock(&port_mgr->lock);
+  exitCode = _bmi_port_interface_add(port_mgr, ifname, port_num,
+                                     pcap_input_dump,
+                                     pcap_output_dump);
+  pthread_rwlock_unlock(&port_mgr->lock);
+  return exitCode;
+}
+
+/* internal version of bmi_port_interface_remove which doesn't acquire a lock */
+static int _bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
+  bmi_port_t *port = get_port(port_mgr, port_num);
+  if(!port_in_use(port)) return -1;
+  free(port->ifname);
+
+  if(bmi_interface_destroy(port->bmi) != 0) return -1;
+
+  memset(port, 0, sizeof(bmi_port_t));
+
+  FD_CLR(port->fd, &port_mgr->fds);
 
   return 0;
 }
 
 int bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
+  int exitCode;
   if(!port_num_valid(port_num)) return -1;
-
   bmi_port_t *port = get_port(port_mgr, port_num);
-  if(!port_in_use(port)) return -1;
-
-  free(port->ifname);
-
-  pthread_mutex_lock(&port_mgr->lock);
-  if(bmi_interface_destroy(port->bmi) != 0) return -1;
-
-  FD_CLR(port->fd, &port_mgr->fds);
-
-  memset(port, 0, sizeof(bmi_port_t));
-
-  pthread_mutex_unlock(&port_mgr->lock);
-
-  return 0;
+  pthread_rwlock_wrlock(&port_mgr->lock);
+  exitCode = _bmi_port_interface_remove(port_mgr, port_num);
+  pthread_rwlock_unlock(&port_mgr->lock);
+  return exitCode;
 }
 
 int bmi_port_destroy_mgr(bmi_port_mgr_t *port_mgr) {
+  pthread_rwlock_wrlock(&port_mgr->lock);
   int i;
   for(i = 0; i < PORT_COUNT_MAX; i++) {
     bmi_port_t *port = get_port(port_mgr, i);
-    if(port_in_use(port)) bmi_port_interface_remove(port_mgr, i);
+    if(port_in_use(port)) _bmi_port_interface_remove(port_mgr, i);
   }
 
   port_mgr->max_fd = -1;  // used to signal the thread it needs to terminate
-
+  pthread_rwlock_unlock(&port_mgr->lock);
   pthread_join(port_mgr->select_thread, NULL);
 
-  pthread_mutex_destroy(&port_mgr->lock);
+  pthread_rwlock_destroy(&port_mgr->lock);
   free(port_mgr);
 
   return 0;
 }
 
-int bmi_port_interface_is_up(bmi_port_mgr_t* port_mgr, int port_num, bool *is_up) {
+int bmi_port_interface_is_up(bmi_port_mgr_t *port_mgr,
+                             int port_num,
+                             bool *is_up) {
   if (!port_num_valid(port_num)) return -1;
 
   bmi_port_t *port = get_port(port_mgr, port_num);
-  if (!port_in_use(port)) return -1;
 
   char c = 0;
-  char path[1024] = {0};
+  char path[1024];
 
-  sprintf(path, "/sys/class/net/%s/operstate", port->ifname);
+  pthread_rwlock_rdlock(&port_mgr->lock);
+  if (!port_in_use(port)) {
+    pthread_rwlock_unlock(&port_mgr->lock);
+    return -1;
+  }
+  snprintf(path, sizeof(path), "/sys/class/net/%s/operstate", port->ifname);
+  pthread_rwlock_unlock(&port_mgr->lock);
 
   int fd = open(path, O_RDONLY);
   if (-1 == fd) {
@@ -247,7 +283,7 @@ int bmi_port_interface_is_up(bmi_port_mgr_t* port_mgr, int port_num, bool *is_up
 
   }
   close(fd);
-  *is_up = (c == 'u')?true:false;
+  *is_up = (c == 'u');
   return 0;
 
 }
