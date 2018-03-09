@@ -1,4 +1,4 @@
-issue345.p4(19): error: h: Cannot unify type int with H
+issue345.p4(19): error: h: Cannot unify type H with int
         H h = 0;
         ^^^^^^^^
 issue345.p4(17)

@@ -192,6 +192,10 @@ TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
 
     TypeConstraints constraints(typeMap->getSubstitutions());
     constraints.addEqualityConstraint(destType, srcType);
+    if (auto itv = destType->to<IR::ITypeVar>())
+        constraints.addUnifiableTypeVariable(itv);
+    if (auto itv = srcType->to<IR::ITypeVar>())
+        constraints.addUnifiableTypeVariable(itv);
     auto tvs = constraints.solve(errorPosition, reportErrors);
     addSubstitutions(tvs);
     return tvs;
