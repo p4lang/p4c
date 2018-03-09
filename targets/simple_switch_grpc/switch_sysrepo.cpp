@@ -25,6 +25,7 @@
 
 #include <boost/optional.hpp>
 
+#include <chrono>
 #include <iostream>
 #include <iterator>  // for std::distance
 #include <mutex>
@@ -39,6 +40,8 @@ extern "C" {
 }
 
 namespace sswitch_grpc {
+
+using clock = std::chrono::high_resolution_clock;
 
 // This struct is used to store the information needed to provide operational
 // state to sysrepo. These YANG nodes are stubbed out in bmv2 so we don't have
@@ -58,6 +61,16 @@ struct PortState {
   boost::optional<std::string> duplex_mode;
   boost::optional<std::string> port_speed;
   bool enable_flow_control{false};
+  // We use this for a very naive implementation of carrier transitions and last
+  // change. Every time the StateProvider is invoked, we check if the new
+  // operational status is different from the old one, and if yes, we increment
+  // carrier_transitions. We rely on the fact that the StateProvider is invoked
+  // fairly often. An alternative implementation would be to register a status
+  // CB with DevMgr / PortMonitor.
+  size_t carrier_transitions{0u};
+  boost::optional<std::string> last_oper_status;
+  clock::time_point last_change_tp{clock::now()};
+  clock::time_point last_clear_tp{clock::now()};
 
   // called when an interface is deleted since we do not remove the PortState
   // struct object from the PortStateMap.
@@ -71,6 +84,10 @@ struct PortState {
     duplex_mode.reset();
     port_speed.reset();
     enable_flow_control = false;
+    carrier_transitions = 0;
+    last_oper_status.reset();
+    last_change_tp = clock::now();
+    last_clear_tp = clock::now();
   }
 };
 
@@ -178,10 +195,23 @@ class SysrepoStateProvider {
       const std::string &iface_name, sr_val_t **values, size_t *values_cnt);
 
  private:
+  template <typename ts_res>
+  static ts_res get_time_since_epoch(const clock::time_point &tp) {
+    using std::chrono::duration_cast;
+    return duration_cast<ts_res>(tp.time_since_epoch());
+  }
+
   const bm::DevMgr *dev_mgr;  // non-owning pointer
   PortStateMap *port_state_map;
   SysrepoSession session{};
   sr_subscription_ctx_t *subscription{nullptr};
+  // This is used for
+  // openconfig-interfaces/interfaces/interface/state/counters/last-clear. I
+  // could have used SimpleSwitch's clock, but I wanted this code to be
+  // completely independent of SimpleSwitch in case it has to be re-used for
+  // another (bmv2) target in the future. It doesn't exactly correspond to when
+  // the switch starts processing packets, but it is good enough.
+  clock::time_point start_tp;
   static constexpr const char *const app_name = "test";
 };
 
@@ -278,12 +308,18 @@ SysrepoSubscriber::change_name(
     return SR_ERR_UNSUPPORTED;
   }
   if (event != SR_EV_APPLY) return SR_ERR_OK;
+  int port;
+  parse_iface_name(iface_name, nullptr, &port, nullptr);
   auto lock = port_state_map->lock();
   auto &port_state = (*port_state_map)[iface_name];
-  if (oper == SR_OP_CREATED)
+  if (oper == SR_OP_CREATED) {
     port_state.valid = true;
-  else if (oper == SR_OP_DELETED)
+  } else if (oper == SR_OP_DELETED) {
     port_state.reset();
+    // For the BMI DevMgr, the stats are also cleared during port_add, so this
+    // may be redundant...
+    dev_mgr->clear_port_stats(port);
+  }
   return SR_ERR_OK;
 }
 
@@ -629,7 +665,8 @@ constexpr const char *const SysrepoStateProvider::app_name;
 
 SysrepoStateProvider::SysrepoStateProvider(const bm::DevMgr *dev_mgr,
                                            PortStateMap *port_state_map)
-    : dev_mgr(dev_mgr), port_state_map(port_state_map) { }
+    : dev_mgr(dev_mgr), port_state_map(port_state_map),
+      start_tp(clock::now()) { }
 
 bool
 SysrepoStateProvider::start() {
@@ -652,7 +689,8 @@ void
 SysrepoStateProvider::provide_oper_state_interface(
     const std::string &iface_str, sr_val_t **values, size_t *values_cnt) {
   // name, type, mtu, description, enabled, ifindex, admin-status, oper-status
-  int max_num_entries = 8;
+  int max_num_entries = 9;
+  max_num_entries += 12;  // counters
   int rc = SR_ERR_OK;
   sr_val_t *varray = nullptr;
   rc = sr_new_values(max_num_entries, &varray);
@@ -726,10 +764,124 @@ SysrepoStateProvider::provide_oper_state_interface(
   {
     std::string path = prefix + "/oper-status";
     sr_val_set_xpath(v, path.c_str());
-    if (dev_mgr->port_is_up(port))
-      sr_val_set_str_data(v, SR_ENUM_T, "UP");
-    else
-      sr_val_set_str_data(v, SR_ENUM_T, "DOWN");
+    std::string status = dev_mgr->port_is_up(port) ? "UP" : "DOWN";
+    // See comments for PortState declaration.
+    if (port_state.last_oper_status != boost::none &&
+        port_state.last_oper_status != status) {
+      port_state.carrier_transitions += 1;
+      port_state.last_change_tp = clock::now();
+    }
+    port_state.last_oper_status = status;
+    sr_val_set_str_data(v, SR_ENUM_T, status.c_str());
+    v++;
+  }
+  {
+    // "This timestamp indicates the time of the last state change of the
+    // interface (e.g., up-to-down transition). This corresponds to the
+    // ifLastChange object in the standard interface MIB. The value is the
+    // timestamp in nanoseconds relative to the Unix Epoch (Jan 1, 1970 00:00:00
+    // UTC)."
+    std::string path = prefix + "/last-change";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = get_time_since_epoch<std::chrono::nanoseconds>(
+        port_state.last_change_tp).count();
+    v++;
+  }
+  // COUNTERS
+  // These can potentially change must faster than the rest of the operational
+  // state. Currently the PI server code queries the operational state every
+  // 100ms. The client will probably want to have different subscriptions for
+  // counters and for the rest of the state.
+  // TODO(antonin): investigate if we can register a separate data provider for
+  // counters.
+  auto port_stats = dev_mgr->get_port_stats(port);
+  {
+    std::string path = prefix + "/counters/in-octets";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = port_stats.in_octets;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/in-unicast-pkts";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = port_stats.in_packets;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/in-discards";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = 0u;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/in-errors";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = 0u;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/in-unknown-protos";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = 0u;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/in-fcs-errors";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = 0u;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/out-octets";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = port_stats.out_octets;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/out-unicast-pkts";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = port_stats.out_packets;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/out-discards";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = 0u;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/out-errors";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = 0u;
+    v++;
+  }
+  {
+    std::string path = prefix + "/counters/carrier-transitions";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val = port_state.carrier_transitions;
+    v++;
+  }
+  {
+    // "Timestamp of the last time the interface counters were cleared. The
+    // value is the timestamp in nanoseconds relative to the Unix Epoch (Jan 1,
+    // 1970 00:00:00 UTC)."
+    std::string path = prefix + "/counters/last-clear";
+    sr_val_set_xpath(v, path.c_str());
+    v->type = SR_UINT64_T;
+    v->data.uint64_val =
+        get_time_since_epoch<std::chrono::nanoseconds>(start_tp).count();
     v++;
   }
 

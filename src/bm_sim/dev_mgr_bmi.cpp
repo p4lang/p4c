@@ -132,6 +132,20 @@ class BmiDevMgrImp : public DevMgrIface {
     return info;
   }
 
+  PortStats get_port_stats_(port_t port) const override {
+    bmi_port_stats_t port_stats;
+    bmi_port_get_stats(port_mgr, port, &port_stats);
+    return {port_stats.in_packets, port_stats.in_octets,
+          port_stats.out_packets, port_stats.out_octets};
+  }
+
+  PortStats clear_port_stats_(port_t port) override {
+    bmi_port_stats_t port_stats;
+    bmi_port_clear_stats(port_mgr, port, &port_stats);
+    return {port_stats.in_packets, port_stats.in_octets,
+          port_stats.out_packets, port_stats.out_octets};
+  }
+
  private:
   using Mutex = std::mutex;
   using Lock = std::lock_guard<std::mutex>;

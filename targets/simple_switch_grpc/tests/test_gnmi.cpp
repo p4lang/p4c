@@ -186,6 +186,33 @@ class SimpleSwitchGrpcTest_gNMI : public SimpleSwitchGrpcBaseTest {
     return std::to_string(device_id) + "-" + std::to_string(port) + "@" + name;
   }
 
+  const gnmi::Update *find_update(const gnmi::Notification &notification,
+                                  const std::string &iface_name,
+                                  const std::string &suffix) {
+    const auto &updates = notification.update();
+    std::string expected_xpath("/openconfig-interfaces:interfaces/interface");
+    expected_xpath.append("[name='").append(iface_name).append("']/")
+        .append(suffix);
+    for (const auto &update : updates) {
+      auto xpath = gNMI_path_to_XPath(notification.prefix(), update.path());
+      if (xpath == expected_xpath) return &update;
+    }
+    return nullptr;
+  }
+
+  template <typename T>
+  Status do_get(const std::string &iface_name,
+                const std::initializer_list<T> &elements,
+                gnmi::GetResponse *rep) {
+    gnmi::GetRequest req;
+    GNMIPathBuilder pb(req.add_path());
+    pb.append("interfaces").append("interface", {{"name", iface_name}});
+    for (const auto &e : elements) pb.append(e);
+    req.set_type(gnmi::GetRequest::ALL);
+    ClientContext context;
+    return gnmi_stub->Get(&context, req, rep);
+  }
+
   std::shared_ptr<grpc::Channel> dataplane_channel{nullptr};
   std::unique_ptr<p4::bm::DataplaneInterface::Stub> dataplane_stub{nullptr};
   std::shared_ptr<grpc::Channel> gnmi_channel{nullptr};
@@ -221,37 +248,97 @@ TEST_F(SimpleSwitchGrpcTest_gNMI, PortOperStatusUpdates) {
   EXPECT_TRUE(stream->Read(&rep));
   EXPECT_TRUE(rep.sync_response());
 
-  auto check_update = [&rep, &iface_name](const std::string &expected) {
+  auto check_status_update = [&](const std::string &expected) {
     ASSERT_EQ(rep.response_case(), gnmi::SubscribeResponse::kUpdate);
-    const auto &notification = rep.update();
-    const auto &updates = notification.update();
-    std::string expected_xpath("/openconfig-interfaces:interfaces/interface");
-    expected_xpath.append("[name='").append(iface_name).append("']/")
-        .append("state/oper-status");
-    for (const auto &update : updates) {
-      auto xpath = gNMI_path_to_XPath(notification.prefix(), update.path());
-      if (xpath == expected_xpath) {
-        EXPECT_EQ(update.val().string_val(), expected);
-        return;
-      }
-    }
+    auto *update = find_update(rep.update(), iface_name, "state/oper-status");
+    ASSERT_TRUE(update != nullptr);
+    EXPECT_EQ(update->val().string_val(), expected);
+  };
+
+  auto check_last_change_update = [&]() {
+    ASSERT_EQ(rep.response_case(), gnmi::SubscribeResponse::kUpdate);
+    auto *update = find_update(rep.update(), iface_name, "state/last-change");
+    ASSERT_TRUE(update != nullptr);
   };
 
   {
     EXPECT_TRUE(set_port_oper_status(port, p4::bm::OPER_STATUS_DOWN).ok());
     auto &f = ReadFuture(stream.get(), &rep);
     ASSERT_EQ(f.wait_for(timeout), std::future_status::ready);
-    check_update("DOWN");
+    check_status_update("DOWN");
+    check_last_change_update();
   }
 
   {
     EXPECT_TRUE(set_port_oper_status(port, p4::bm::OPER_STATUS_UP).ok());
     auto &f = ReadFuture(stream.get(), &rep);
     ASSERT_EQ(f.wait_for(timeout), std::future_status::ready);
-    check_update("UP");
+    check_status_update("UP");
+    check_last_change_update();
+  }
+
+  // check that carrier-transitions > 0
+  {
+    gnmi::GetResponse rep;
+    EXPECT_TRUE(do_get(
+        iface_name, {"state", "counters", "carrier-transitions"}, &rep).ok());
+    ASSERT_EQ(rep.notification_size(), 1);
+    auto *update = find_update(
+        rep.notification(0), iface_name, "state/counters/carrier-transitions");
+    ASSERT_TRUE(update != nullptr);
+    EXPECT_GT(update->val().uint_val(), 0);
   }
 
   EXPECT_TRUE(stream->WritesDone());
+  EXPECT_TRUE(stream->Finish().ok());
+}
+
+// Injects packets using the DataplaneInterface service and checks that the port
+// counters are incremented correctly.
+TEST_F(SimpleSwitchGrpcTest_gNMI, PortCounters) {
+  const int port = 1;
+  const std::string iface_name = make_iface_name(port, "eth1");
+  EXPECT_TRUE(create_iface(iface_name, true).ok());
+  EXPECT_TRUE(set_port_oper_status(port, p4::bm::OPER_STATUS_UP).ok());
+
+  auto check_counter = [&](const std::string &name, uint64_t expected) {
+    gnmi::GetResponse rep;
+    // c_str() call necessary to ensure template deduction succeeds
+    EXPECT_TRUE(do_get(
+        iface_name, {"state", "counters", name.c_str()}, &rep).ok());
+    ASSERT_EQ(rep.notification_size(), 1);
+    std::string suffix("state/counters/");
+    suffix.append(name);
+    auto *update = find_update(rep.notification(0), iface_name, suffix);
+    ASSERT_TRUE(update != nullptr);
+    EXPECT_EQ(update->val().uint_val(), expected);
+  };
+
+  ClientContext context;
+  auto stream = dataplane_stub->PacketStream(&context);
+
+  check_counter("in-unicast-pkts", 0);
+  check_counter("in-octets", 0);
+  check_counter("out-unicast-pkts", 0);
+  check_counter("out-octets", 0);
+
+  p4::bm::PacketStreamRequest request;
+  request.set_device_id(device_id);
+  request.set_port(port);
+  request.set_packet(std::string(10, '\xab'));
+  stream->Write(request);
+  check_counter("in-unicast-pkts", 1);
+  check_counter("in-octets", 10);
+
+  p4::bm::PacketStreamResponse response;
+  stream->Read(&response);
+  check_counter("out-unicast-pkts", 1);
+  check_counter("out-octets", 10);
+
+  EXPECT_TRUE(stream->WritesDone());
+  EXPECT_TRUE(stream->Finish().ok());
+
+  // TODO(antonin): test that stats are cleared when interface is deleted?
 }
 
 }  // namespace

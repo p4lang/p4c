@@ -11,6 +11,7 @@ libtestutils_la_LIBADD = $(top_builddir)/src/bm_sim/libbmsim.la
 
 AM_CPPFLAGS += \
 -I$(top_srcdir)/src/bm_sim \
+-I$(top_srcdir)/src/BMI \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -isystem $(top_srcdir)/third_party/jsoncpp/include \
 -DTESTDATADIR=\"$(abs_srcdir)/testdata\"

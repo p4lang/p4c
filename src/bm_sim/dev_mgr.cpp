@@ -156,6 +156,28 @@ DevMgrIface::get_port_info() const {
   return get_port_info_();
 }
 
+DevMgrIface::PortStats
+DevMgrIface::get_port_stats(port_t port) const {
+  return get_port_stats_(port);
+}
+
+DevMgrIface::PortStats
+DevMgrIface::get_port_stats_(port_t port) const {  // default implementation
+  UNUSED(port);
+  return {};  // value-initialized to 0s
+}
+
+DevMgrIface::PortStats
+DevMgrIface::clear_port_stats(port_t port) {
+  return clear_port_stats_(port);
+}
+
+DevMgrIface::PortStats
+DevMgrIface::clear_port_stats_(port_t port) {  // default implementation
+  UNUSED(port);
+  return {};  // value-initialized to 0s
+}
+
 PacketDispatcherIface::ReturnCode
 DevMgrIface::register_status_cb(const PortStatus &type,
                                 const PortStatusCb &port_cb) {
@@ -243,6 +265,18 @@ std::map<DevMgrIface::port_t, DevMgrIface::PortInfo>
 DevMgr::get_port_info() const {
   assert(pimp);
   return pimp->get_port_info();
+}
+
+DevMgrIface::PortStats
+DevMgr::get_port_stats(port_t port_num) const {
+  assert(pimp);
+  return pimp->get_port_stats(port_num);
+}
+
+DevMgrIface::PortStats
+DevMgr::clear_port_stats(port_t port_num) {
+  assert(pimp);
+  return pimp->clear_port_stats(port_num);
 }
 
 std::string

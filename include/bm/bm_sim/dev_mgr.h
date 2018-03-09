@@ -73,6 +73,18 @@ class DevMgrIface : public PacketDispatcherIface {
     PortExtras extra{};
   };
 
+  struct PortStats {
+    uint64_t in_packets;
+    uint64_t in_octets;
+    uint64_t out_packets;
+    uint64_t out_octets;
+
+    static PortStats make(uint64_t in_packets, uint64_t in_octets,
+                          uint64_t out_packets, uint64_t out_octets) {
+      return {in_packets, in_octets, out_packets, out_octets};
+    }
+  };
+
   virtual ~DevMgrIface();
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
@@ -99,6 +111,10 @@ class DevMgrIface : public PacketDispatcherIface {
 
   std::map<port_t, PortInfo> get_port_info() const;
 
+  PortStats get_port_stats(port_t port) const;
+  // clear and return stats (before clear)
+  PortStats clear_port_stats(port_t port);
+
  protected:
   std::unique_ptr<PortMonitorIface> p_monitor{nullptr};
 
@@ -118,6 +134,9 @@ class DevMgrIface : public PacketDispatcherIface {
   virtual bool port_is_up_(port_t port_num) const = 0;
 
   virtual std::map<port_t, PortInfo> get_port_info_() const = 0;
+
+  virtual PortStats get_port_stats_(port_t port) const;
+  virtual PortStats clear_port_stats_(port_t port);
 };
 
 // TODO(antonin): should DevMgr and DevMgrIface somehow inherit from a common
@@ -168,6 +187,9 @@ class DevMgr : public PacketDispatcherIface {
   bool port_is_up(port_t port_num) const;
 
   std::map<port_t, DevMgrIface::PortInfo> get_port_info() const;
+
+  DevMgrIface::PortStats get_port_stats(port_t port_num) const;
+  DevMgrIface::PortStats clear_port_stats(port_t port_num);
 
   //! Transmits a data packet out of port \p port_num
   void transmit_fn(int port_num, const char *buffer, int len);

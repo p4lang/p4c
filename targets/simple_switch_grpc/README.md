@@ -52,8 +52,16 @@ For simple_switch_grpc, we require that the interface name follow this pattern:
 | `state/admin-status` | Yes |
 | `state/oper-status` | Yes |
 | `state/last-change` | No |
-| `state/counters` | Planned |
+| `state/counters` | Yes |
 | `subinterfaces` | No |
+
+About `state/counters`:
+  * error counters (e.g. `in-discards`) are always set to 0.
+  * all packets sent and received are counted as `unicast-pkts`;
+  `broadcast-pkts` and `multicast-pkts` will therefore always be 0.
+  * `carrier-transitions` and `last-change` may not be very accurate as their
+  implementation is somewhat naive.
+  * counters are cleared when the interface is deleted.
 
 #### openconfig-if-ethernet (`ethernet`)
 

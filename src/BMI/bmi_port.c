@@ -37,6 +37,8 @@ typedef struct bmi_port_s {
   int port_num;
   char *ifname;
   int fd;
+  pthread_mutex_t stats_lock;
+  bmi_port_stats_t stats;
 } bmi_port_t;
 
 #define PORT_COUNT_MAX 512
@@ -113,6 +115,10 @@ static void *run_select(void *data) {
       pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
       if(pkt_len < 0 || !port_mgr->packet_handler) continue;
       port_mgr->packet_handler(i, pkt_data, pkt_len, port_mgr->cookie);
+      pthread_mutex_lock(&port_info->stats_lock);
+      port_info->stats.in_packets += 1;
+      port_info->stats.in_octets += pkt_len;
+      pthread_mutex_unlock(&port_info->stats_lock);
     }
 
     pthread_rwlock_unlock(&port_mgr->lock);
@@ -136,7 +142,15 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
 
   exitCode = pthread_rwlock_init(&port_mgr_->lock, NULL);
   if (exitCode != 0)
+    return exitCode;
+
+  int i;
+  for(i = 0; i < PORT_COUNT_MAX; i++) {
+    bmi_port_t *port_info = get_port(port_mgr_, i);
+    exitCode = pthread_mutex_init(&port_info->stats_lock, NULL);
+    if (exitCode != 0)
       return exitCode;
+  }
 
   *port_mgr = port_mgr_;
   return 0;
@@ -164,6 +178,12 @@ int bmi_port_send(bmi_port_mgr_t *port_mgr,
   }
 
   int exitCode = bmi_interface_send(port->bmi, buffer, len);
+  if (!exitCode) {
+    pthread_mutex_lock(&port->stats_lock);
+    port->stats.out_packets += 1;
+    port->stats.out_octets += len;
+    pthread_mutex_unlock(&port->stats_lock);
+  }
 
   pthread_rwlock_unlock(&port_mgr->lock);
   return exitCode;
@@ -185,6 +205,8 @@ static int _bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
   if(pcap_output_dump) bmi_interface_add_dumper(bmi, pcap_output_dump, 0);
 
   port->bmi = bmi;
+
+  memset(&port->stats, 0, sizeof(port->stats));
 
   int fd = bmi_interface_get_fd(port->bmi);
   port->fd = fd;
@@ -247,6 +269,11 @@ int bmi_port_destroy_mgr(bmi_port_mgr_t *port_mgr) {
   pthread_rwlock_unlock(&port_mgr->lock);
   pthread_join(port_mgr->select_thread, NULL);
 
+  for(i = 0; i < PORT_COUNT_MAX; i++) {
+    bmi_port_t *port = get_port(port_mgr, i);
+    pthread_mutex_destroy(&port->stats_lock);
+  }
+
   pthread_rwlock_destroy(&port_mgr->lock);
   free(port_mgr);
 
@@ -286,4 +313,50 @@ int bmi_port_interface_is_up(bmi_port_mgr_t *port_mgr,
   *is_up = (c == 'u');
   return 0;
 
+}
+
+int bmi_port_get_stats(bmi_port_mgr_t *port_mgr,
+                       int port_num,
+                       bmi_port_stats_t *port_stats) {
+  if (!port_num_valid(port_num)) return -1;
+
+  bmi_port_t *port = get_port(port_mgr, port_num);
+
+  pthread_rwlock_rdlock(&port_mgr->lock);
+  if (!port_in_use(port)) {
+    pthread_rwlock_unlock(&port_mgr->lock);
+    return -1;
+  }
+
+  pthread_mutex_lock(&port->stats_lock);
+  *port_stats = port->stats;
+  pthread_mutex_unlock(&port->stats_lock);
+
+  pthread_rwlock_unlock(&port_mgr->lock);
+
+  return 0;
+}
+
+int bmi_port_clear_stats(bmi_port_mgr_t *port_mgr,
+                       int port_num,
+                       bmi_port_stats_t *port_stats) {
+  if (!port_num_valid(port_num)) return -1;
+
+  bmi_port_t *port = get_port(port_mgr, port_num);
+
+  pthread_rwlock_rdlock(&port_mgr->lock);
+  if (!port_in_use(port)) {
+    pthread_rwlock_unlock(&port_mgr->lock);
+    return -1;
+  }
+
+  pthread_mutex_lock(&port->stats_lock);
+  if (port_stats != NULL)
+    *port_stats = port->stats;
+  memset(&port->stats, 0, sizeof(port->stats));
+  pthread_mutex_unlock(&port->stats_lock);
+
+  pthread_rwlock_unlock(&port_mgr->lock);
+
+  return 0;
 }

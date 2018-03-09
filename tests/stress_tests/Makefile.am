@@ -1,4 +1,5 @@
 AM_CPPFLAGS += \
+-I$(top_srcdir)/src/BMI \
 -isystem $(top_srcdir)/third_party \
 -DTESTDATADIR=\"$(abs_srcdir)/testdata\"
 LDADD = \

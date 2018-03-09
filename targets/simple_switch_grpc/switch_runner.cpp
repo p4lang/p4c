@@ -107,6 +107,12 @@ class DataplaneInterfaceServiceImpl
       if (packet.empty()) continue;
       if (!pkt_handler) continue;
       pkt_handler(request.port(), packet.data(), packet.size(), pkt_cookie);
+      Lock lock(mutex);
+      // PortStats is a POD struct; it will be value-initialized to 0s if the
+      // port key is not found in the map.
+      auto &stats = ports_stats[request.port()];
+      stats.in_packets += 1;
+      stats.in_octets += packet.size();
     }
     auto &runner = sswitch_grpc::SimpleSwitchGrpcRunner::get_instance();
     runner.block_until_all_packets_processed();
@@ -152,7 +158,12 @@ class DataplaneInterfaceServiceImpl
     response.set_port(port_num);
     response.set_packet(buffer, len);
     Lock lock(mutex);
-    if (active) stream->Write(response);
+    if (active) {
+      stream->Write(response);
+      auto &stats = ports_stats[port_num];
+      stats.out_packets += 1;
+      stats.out_octets += len;
+    }
   }
 
   void start_() override {
@@ -177,6 +188,27 @@ class DataplaneInterfaceServiceImpl
     return {};
   }
 
+  PortStats get_port_stats_(port_t port) const override {
+    Lock lock(mutex);
+    // does not compile since method is "const"
+    // return ports_stats[port];
+    auto it = ports_stats.find(port);
+    return (it == ports_stats.end()) ? PortStats() : it->second;
+  }
+
+  PortStats clear_port_stats_(port_t port) override {
+    PortStats stats{};  // value-initialized to 0
+    Lock lock(mutex);
+    // does not compile since method is "const"
+    // return ports_stats[port];
+    auto it = ports_stats.find(port);
+    if (it != ports_stats.end()) {
+      stats = it->second;
+      it->second = {};
+    }
+    return stats;
+  }
+
   bm::device_id_t device_id;
   // protects the shared state (active) and prevents concurrent Write calls by
   // different threads
@@ -188,6 +220,7 @@ class DataplaneInterfaceServiceImpl
   PacketHandler pkt_handler{};
   void *pkt_cookie{nullptr};
   std::unordered_map<port_t, bool> ports_oper_status{};
+  std::unordered_map<port_t, PortStats> ports_stats{};
 };
 
 }  // namespace

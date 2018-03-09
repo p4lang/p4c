@@ -20,44 +20,69 @@
 
 #include <stdbool.h>
 
-typedef void bmi_port_mgr_t;
+#include "BMI/bmi_port.h"
 
-int bmi_start_mgr(bmi_port_mgr_t* port_mgr) {
-  (void) port_mgr;
+// BMI stubs to avoid having to link with BMI and its deps for unit tests.
+
+#define UNUSED(x) (void)(x)
+
+int bmi_start_mgr(bmi_port_mgr_t *port_mgr) {
+  UNUSED(port_mgr);
   return 0;
 }
 
 int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
-  (void) port_mgr;
+  UNUSED(port_mgr);
   return 0;
 }
 
-int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr) {
-  (void) port_mgr;
+int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
+                           bmi_packet_handler_t packet_handler,
+                           void *cookie) {
+  UNUSED(port_mgr); UNUSED(packet_handler); UNUSED(cookie);
   return 0;
 }
 
-int bmi_port_send(bmi_port_mgr_t *port_mgr) {
-  (void) port_mgr;
+int bmi_port_send(bmi_port_mgr_t *port_mgr, int port_num,
+                  const char *buffer, int len) {
+  UNUSED(port_mgr); UNUSED(port_num); UNUSED(buffer); UNUSED(len);
   return 0;
 }
 
-int bmi_port_interface_add(bmi_port_mgr_t *port_mgr) {
-  (void) port_mgr;
+int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
+                           const char *ifname, int port_num,
+                           const char *pcap_input_dump,
+                           const char *pcap_output_dump) {
+  UNUSED(port_mgr); UNUSED(ifname); UNUSED(port_num);
+  UNUSED(pcap_input_dump); UNUSED(pcap_output_dump);
   return 0;
 }
 
 int bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
-  (void) port_mgr;
+
+  UNUSED(port_mgr); UNUSED(port_num);
   return 0;
 }
 
 int bmi_port_destroy_mgr(bmi_port_mgr_t *port_mgr) {
-  (void) port_mgr;
+  UNUSED(port_mgr);
   return 0;
 }
 
-int bmi_port_interface_is_up(bmi_port_mgr_t* port_mgr, int port_num, bool *is_up) {
-  (void) port_mgr;
+int bmi_port_interface_is_up(bmi_port_mgr_t *port_mgr,
+                             int port_num, bool *is_up) {
+  UNUSED(port_mgr); UNUSED(port_num); UNUSED(is_up);
+  return 0;
+}
+
+int bmi_port_get_stats(bmi_port_mgr_t *port_mgr,
+                       int port_num, bmi_port_stats_t *port_stats) {
+  UNUSED(port_mgr); UNUSED(port_num); UNUSED(port_stats);
+  return 0;
+}
+
+int bmi_port_clear_stats(bmi_port_mgr_t *port_mgr,
+                         int port_num, bmi_port_stats_t *port_stats) {
+  UNUSED(port_mgr); UNUSED(port_num); UNUSED(port_stats);
   return 0;
 }
