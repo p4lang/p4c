@@ -74,6 +74,10 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
                 type = mi->actualMethodType->returnType;
+            } else if (auto cce = mem->expr->to<IR::ConstructorCallExpression>()) {
+                auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
+                decl = cc->to<ExternConstructorCall>()->type;
+                type = typeMap->getTypeType(cce->constructedType, true);
             } else {
                 BUG("unexpected expression %1% resolving method instance", mem->expr); }
             if (type->is<IR::Type_SpecializedCanonical>())

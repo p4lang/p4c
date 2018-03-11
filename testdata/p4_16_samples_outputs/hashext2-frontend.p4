@@ -1,5 +1,6 @@
-extern hash_function<O, T> {
-    O hash(in T data);
+extern crc_poly<O> {
+    crc_poly(O poly);
+    O hash<T>(in T data);
 }
 
 header h1_t {

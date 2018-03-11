@@ -1,8 +1,8 @@
-extern hash_function<O> {
-    O hash<T>(in T data);
+extern hash_function<O, T> {
+    O hash(in T data);
 }
 
-extern hash_function<T> crc_poly<T>(T poly);
+extern hash_function<O, T> crc_poly<O, T>(O poly);
 header h1_t {
     bit<32> f1;
     bit<32> f2;
@@ -16,7 +16,7 @@ struct hdrs {
 
 control test(inout hdrs hdr) {
     apply {
-        hdr.crc = (crc_poly<bit<16>>(16w0x801a)).hash<h1_t>(hdr.h1);
+        hdr.crc = (crc_poly<bit<16>, h1_t>(16w0x801a)).hash(hdr.h1);
     }
 }
 

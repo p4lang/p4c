@@ -13,28 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <core.p4>
 
-extern hash_function<O, T> {
-    // FIXME -- needs to be a way to do this with T a type param of hash
-    // instead of hash_function
-    O hash(in T data);
+extern widget<T> { }
+
+extern widget<T> createWidget<T, U>(U a, T b);
+
+header hdr_t {
+    bit<16>     f1;
+    bit<16>     f2;
+    bit<16>     f3;
 }
 
-extern hash_function<O, T> crc_poly<O, T>(O poly);
+control c1<T>(inout hdr_t hdr)(widget<T> w) { apply {} }
 
-header h1_t {
-    bit<32>     f1;
-    bit<32>     f2;
-    bit<32>     f3;
-}
-
-struct hdrs {
-    h1_t        h1;
-    bit<16>     crc;
-}
-
-control test(inout hdrs hdr) {
+control c2(inout hdr_t hdr) {
+    c1<bit<16>>(createWidget(hdr.f1, hdr.f2)) c;  // factory args must be constants
     apply {
-        hdr.crc = crc_poly<bit<16>, h1_t>(16w0x801a).hash(hdr.h1);
+        c.apply(hdr);
     }
 }
