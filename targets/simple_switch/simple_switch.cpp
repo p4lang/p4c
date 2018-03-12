@@ -93,24 +93,9 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   add_required_field("standard_metadata", "clone_spec");
   add_required_field("standard_metadata", "egress_port");
 
-  force_arith_field("standard_metadata", "ingress_port");
-  force_arith_field("standard_metadata", "packet_length");
-  force_arith_field("standard_metadata", "instance_type");
-  force_arith_field("standard_metadata", "egress_spec");
-  force_arith_field("standard_metadata", "clone_spec");
-
-  force_arith_field("queueing_metadata", "enq_timestamp");
-  force_arith_field("queueing_metadata", "enq_qdepth");
-  force_arith_field("queueing_metadata", "deq_timedelta");
-  force_arith_field("queueing_metadata", "deq_qdepth");
-  force_arith_field("queueing_metadata", "qid");
-
-  force_arith_field("intrinsic_metadata", "ingress_global_timestamp");
-  force_arith_field("intrinsic_metadata", "lf_field_list");
-  force_arith_field("intrinsic_metadata", "mcast_grp");
-  force_arith_field("intrinsic_metadata", "resubmit_flag");
-  force_arith_field("intrinsic_metadata", "egress_rid");
-  force_arith_field("intrinsic_metadata", "recirculate_flag");
+  force_arith_header("standard_metadata");
+  force_arith_header("queueing_metadata");
+  force_arith_header("intrinsic_metadata");
 
   import_primitives();
 }
