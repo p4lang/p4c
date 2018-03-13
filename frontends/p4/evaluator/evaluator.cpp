@@ -247,6 +247,14 @@ bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     return false;
 }
 
+bool Evaluator::preorder(const IR::MethodCallExpression* expr) {
+    // Experimental: extern function or method call with constant arguments that
+    // returns an extern instance as a factory method
+    LOG2("Evaluating " << dbp(expr));
+    setValue(expr, new IR::CompileTimeMethodCall(expr));
+    return false;
+}
+
 bool Evaluator::preorder(const IR::P4Table* table) {
     LOG2("Evaluating " << dbp(table));
     auto block = new IR::TableBlock(table->srcInfo, table, table);

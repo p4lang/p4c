@@ -153,11 +153,12 @@ class PrimitiveConverter {
 
 // Is fed a P4-14 program and outputs an equivalent P4-16 program
 class Converter : public PassManager {
-    ProgramStructure structure;
+    ProgramStructure *structure;
 
  public:
+    static ProgramStructure *(*createProgramStructure)();
     Converter();
-    void loadModel() { structure.loadModel(); }
+    void loadModel() { structure->loadModel(); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };
 

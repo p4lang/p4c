@@ -1,4 +1,3 @@
-type-params_e.p4(18):syntax error, unexpected IDENTIFIER "D"
-package m(p<D
+type-params_e.p4(18): error: Could not find declaration for D
+package m(p<D> m);
             ^
-error: 1 errors encountered, aborting compilation

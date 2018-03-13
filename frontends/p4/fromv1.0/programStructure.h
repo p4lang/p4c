@@ -168,7 +168,7 @@ class ProgramStructure {
     IR::IndexedVector<IR::Node>* declarations;
 
  protected:
-    const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
+    virtual const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
     void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
 
     /**
@@ -199,31 +199,34 @@ class ProgramStructure {
     static const IR::Annotations*
     addGlobalNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
 
-    const IR::ParserState* convertParser(const IR::V1Parser*, IR::IndexedVector<IR::Declaration>*);
-    const IR::Statement* convertParserStatement(const IR::Expression* expr);
-    const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
-    const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
-    const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
-    const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
-    const IR::Declaration_Instance* convertActionProfile(const IR::ActionProfile *,
+    virtual const IR::ParserState*
+        convertParser(const IR::V1Parser*, IR::IndexedVector<IR::Declaration>*);
+    virtual const IR::Statement* convertParserStatement(const IR::Expression* expr);
+    virtual const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
+    virtual const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
+    virtual const IR::Declaration_Instance*
+        convertDirectCounter(const IR::Counter* m, cstring newName);
+    virtual const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
+    virtual const IR::Declaration_Instance* convertActionProfile(const IR::ActionProfile *,
                                                          cstring newName);
-    const IR::P4Table*
-    convertTable(const IR::V1Table* table, cstring newName,
-                 IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
-    const IR::P4Action* convertAction(const IR::ActionFunction* action, cstring newName,
-                                      const IR::Meter* meterToAccess, cstring counterToAccess);
+    virtual const IR::P4Table*
+        convertTable(const IR::V1Table* table, cstring newName,
+                     IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
+    virtual const IR::P4Action*
+        convertAction(const IR::ActionFunction* action, cstring newName,
+                      const IR::Meter* meterToAccess, cstring counterToAccess);
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
     const IR::Expression* counterType(const IR::CounterOrMeter* cm) const;
-    void createChecksumVerifications();
-    void createChecksumUpdates();
-    void createStructures();
-    cstring createType(const IR::Type_StructLike* type, bool header,
+    virtual void createChecksumVerifications();
+    virtual void createChecksumUpdates();
+    virtual void createStructures();
+    virtual cstring createType(const IR::Type_StructLike* type, bool header,
                        std::unordered_set<const IR::Type*> *converted);
-    void createParser();
-    void createControls();
-    void createDeparser();
-    void createMain();
+    virtual void createParser();
+    virtual void createControls();
+    virtual void createDeparser();
+    virtual void createMain();
 
  public:
     void include(cstring filename, cstring ppoptions = cstring());
@@ -232,14 +235,14 @@ class ProgramStructure {
     void populateOutputNames();
     const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                           const IR::Expression* right, const IR::Type* type);
-    const IR::Expression* convertFieldList(const IR::Expression* expression);
-    const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
-    const IR::Expression* convertHashAlgorithms(const IR::NameList *algorithm);
-    const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
-                                            const IR::Type *elementType = nullptr);
-    const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
-    const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
-    const IR::Expression* paramReference(const IR::Parameter* param);
+    virtual const IR::Expression* convertFieldList(const IR::Expression* expression);
+    virtual const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
+    virtual const IR::Expression* convertHashAlgorithms(const IR::NameList *algorithm);
+    virtual const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
+                                                    const IR::Type *elementType = nullptr);
+    virtual const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
+    virtual const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
+    virtual const IR::Expression* paramReference(const IR::Parameter* param);
     const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                      const IR::Expression* right, const IR::Expression* mask);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
