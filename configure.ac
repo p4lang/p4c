@@ -115,7 +115,7 @@ AC_ARG_ENABLE([Werror],
 AC_ARG_ENABLE([WP4-16-stacks],
     AS_HELP_STRING([--enable-WP4-16-stacks],
                    [Implement stacks strictly as per the P4_16 specification instead of legacy behavior]),
-    [enable_WP4_16_stacks="$enableval"], [enable_WP4_16_stacks=no])
+    [enable_WP4_16_stacks="$enableval"], [enable_WP4_16_stacks=yes])
 
 AS_IF([test "$enable_WP4_16_stacks" = "yes"],
       [MY_CPPFLAGS="$MY_CPPFLAGS -DBM_WP4_16_STACKS"])
