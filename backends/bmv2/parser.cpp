@@ -351,14 +351,9 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
             if (!inst->type->is<IR::Type_ValueSet>())
                 continue;
             auto value_set = inst->type->to<IR::Type_ValueSet>();
-            unsigned size = 0;
-            if (value_set->elementType->is<IR::Type_Name>()) {
-                auto type = typeMap->getTypeType(value_set->elementType, true);
-                size = type->width_bits();
-            } else {
-                size = value_set->elementType->width_bits();
-            }
-            json->add_parse_vset(s->name, size);
+            auto bitwidth = value_set->width_bits();
+            auto name = inst->controlPlaneName();
+            json->add_parse_vset(name, bitwidth);
         }
     }
 
