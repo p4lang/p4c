@@ -76,6 +76,19 @@ const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
     return &*desiredAction;
 }
 
+/// @return the P4Runtime representation of the value set with the given name,
+/// or null if none is found.
+const ::p4::config::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
+                                           const std::string& name) {
+    auto& vsets = analysis.p4Info->value_sets();
+    auto desiredVSet = std::find_if(vsets.begin(), vsets.end(),
+                                    [&](const ::p4::config::ValueSet& vset) {
+        return vset.preamble().name() == name;
+    });
+    if (desiredVSet == vsets.end()) return nullptr;
+    return &*desiredVSet;
+}
+
 }  // namespace
 
 class P4Runtime : public P4CTest { };
@@ -726,6 +739,40 @@ TEST_F(P4Runtime, IsConstTable) {
     auto table_non_const = findTable(*test, "ingress.t_non_const");
     ASSERT_TRUE(table_non_const != nullptr);
     EXPECT_FALSE(table_non_const->is_const_table());
+}
+
+TEST_F(P4Runtime, ValueSet) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<32> hfA; bit<16> hfB; }
+        struct Headers { Header h; }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            @size(16) value_set<tuple<bit<32>, bit<16>>> pvs;
+            state start {
+                p.extract(h.h);
+                transition select(h.h.hfA, h.h.hfB) {
+                    pvs: accept;
+                    default: reject; } } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+    auto vset = findValueSet(*test, "parse.pvs");
+    ASSERT_TRUE(vset != nullptr);
+    EXPECT_EQ(48, vset->bitwidth());
+    EXPECT_EQ(16, vset->size());
 }
 
 }  // namespace Test
