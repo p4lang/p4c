@@ -62,7 +62,7 @@ class SimpleSwitch : public Switch {
     force_arith_header("intrinsic_metadata");
   }
 
-  int receive_(int port_num, const char *buffer, int len) override {
+  int receive_(port_t port_num, const char *buffer, int len) override {
     static int pkt_id = 0;
 
     auto packet = new_packet_ptr(port_num, pkt_id++, len,

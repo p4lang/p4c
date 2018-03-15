@@ -35,11 +35,11 @@ namespace bm {
 
 class InterfaceList {
  public:
-  using iterator = std::map<int, std::string>::iterator;
-  using const_iterator = std::map<int, std::string>::const_iterator;
+  using iterator = std::map<uint32_t, std::string>::iterator;
+  using const_iterator = std::map<uint32_t, std::string>::const_iterator;
 
  public:
-  void add(int port, const std::string &iface) {
+  void add(uint32_t port, const std::string &iface) {
     ifaces[port] = iface;
   }
   bool empty() { return ifaces.empty(); }
@@ -49,11 +49,11 @@ class InterfaceList {
   const_iterator begin() const { return ifaces.begin(); }
   iterator end() { return ifaces.end(); }
   const_iterator end() const { return ifaces.end(); }
-  iterator find(int port) { return ifaces.find(port); }
-  const_iterator find(int port) const { return ifaces.find(port); }
+  iterator find(uint32_t port) { return ifaces.find(port); }
+  const_iterator find(uint32_t port) const { return ifaces.find(port); }
 
  private:
-  std::map<int, std::string> ifaces{};
+  std::map<uint32_t, std::string> ifaces{};
 };
 
 class OptionsParser {

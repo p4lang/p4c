@@ -76,17 +76,17 @@ class SimpleSwitch : public Switch {
 
  public:
   // by default, swapping is off
-  explicit SimpleSwitch(int max_port = 256, bool enable_swap = false);
+  explicit SimpleSwitch(port_t max_port = 256, bool enable_swap = false);
 
   ~SimpleSwitch();
 
-  int receive_(int port_num, const char *buffer, int len) override;
+  int receive_(port_t port_num, const char *buffer, int len) override;
 
   void start_and_return_() override;
 
   void reset_target_state_() override;
 
-  int mirroring_mapping_add(mirror_id_t mirror_id, int egress_port) {
+  int mirroring_mapping_add(mirror_id_t mirror_id, port_t egress_port) {
     mirroring_map[mirror_id] = egress_port;
     return 0;
   }
@@ -95,14 +95,14 @@ class SimpleSwitch : public Switch {
     return mirroring_map.erase(mirror_id);
   }
 
-  int mirroring_mapping_get(mirror_id_t mirror_id) const {
-    return get_mirroring_mapping(mirror_id);
+  bool mirroring_mapping_get(mirror_id_t mirror_id, port_t *port) const {
+    return get_mirroring_mapping(mirror_id, port);
   }
 
-  int set_egress_queue_depth(int port, const size_t depth_pkts);
+  int set_egress_queue_depth(port_t port, const size_t depth_pkts);
   int set_all_egress_queue_depths(const size_t depth_pkts);
 
-  int set_egress_queue_rate(int port, const uint64_t rate_pps);
+  int set_egress_queue_rate(port_t port, const uint64_t rate_pps);
   int set_all_egress_queue_rates(const uint64_t rate_pps);
 
   // returns the number of microseconds elapsed since the switch started
@@ -142,16 +142,19 @@ class SimpleSwitch : public Switch {
   void egress_thread(size_t worker_id);
   void transmit_thread();
 
-  int get_mirroring_mapping(mirror_id_t mirror_id) const {
+  bool get_mirroring_mapping(mirror_id_t mirror_id, port_t *port) const {
     const auto it = mirroring_map.find(mirror_id);
-    if (it == mirroring_map.end()) return -1;
-    return it->second;
+    if (it != mirroring_map.end()) {
+      *port = it->second;
+      return true;
+    }
+    return false;
   }
 
   ts_res get_ts() const;
 
   // TODO(antonin): switch to pass by value?
-  void enqueue(int egress_port, std::unique_ptr<Packet> &&pkt);
+  void enqueue(port_t egress_port, std::unique_ptr<Packet> &&pkt);
 
   void copy_field_list_and_set_type(
       const std::unique_ptr<Packet> &packet,
@@ -161,7 +164,7 @@ class SimpleSwitch : public Switch {
   void check_queueing_metadata();
 
  private:
-  int max_port;
+  port_t max_port;
   std::vector<std::thread> threads_;
   Queue<std::unique_ptr<Packet> > input_buffer;
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
@@ -174,7 +177,7 @@ class SimpleSwitch : public Switch {
   TransmitFn my_transmit_fn;
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;
-  std::unordered_map<mirror_id_t, int> mirroring_map;
+  std::unordered_map<mirror_id_t, port_t> mirroring_map;
   bool with_queueing_metadata{false};
 };
 

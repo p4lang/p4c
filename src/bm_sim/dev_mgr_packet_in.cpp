@@ -81,7 +81,7 @@ class PacketInDevMgrImp : public DevMgrIface {
     return ReturnCode::UNSUPPORTED;
   }
 
-  void transmit_fn_(int port_num, const char *buffer, int len) override;
+  void transmit_fn_(port_t port_num, const char *buffer, int len) override;
 
   void start_() override {
     if (started || stop_receive_thread)
@@ -204,7 +204,7 @@ class PacketInDevMgrImp : public DevMgrIface {
 };
 
 void
-PacketInDevMgrImp::transmit_fn_(int port_num,
+PacketInDevMgrImp::transmit_fn_(port_t port_num,
                                 const char *buffer, int len) {
   struct nn_msghdr msghdr;
   std::memset(&msghdr, 0, sizeof(msghdr));

@@ -37,7 +37,7 @@ class TransportIface;
 class PortMonitorIface {
  public:
   //! Representation of a port number
-  using port_t = unsigned int;
+  using port_t = uint32_t;
 
   //! Represents the status of a port
   enum class PortStatus { PORT_ADDED, PORT_REMOVED, PORT_UP, PORT_DOWN };

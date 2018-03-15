@@ -152,7 +152,7 @@ class DataplaneInterfaceServiceImpl
     return ReturnCode::SUCCESS;
   }
 
-  void transmit_fn_(int port_num, const char *buffer, int len) override {
+  void transmit_fn_(port_t port_num, const char *buffer, int len) override {
     p4::bm::PacketStreamResponse response;
     response.set_device_id(device_id);
     response.set_port(port_num);
@@ -225,9 +225,10 @@ class DataplaneInterfaceServiceImpl
 
 }  // namespace
 
-SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(int max_port, bool enable_swap,
+SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port,
+                                               bool enable_swap,
                                                std::string grpc_server_addr,
-                                               int cpu_port,
+                                               bm::DevMgrIface::port_t cpu_port,
                                                std::string dp_grpc_server_addr)
     : simple_switch(new SimpleSwitch(max_port, enable_swap)),
       grpc_server_addr(grpc_server_addr), cpu_port(cpu_port),
@@ -294,15 +295,16 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
 
   // check if CPU port number is also used by --interface
   // TODO(antonin): ports added dynamically?
-  if (cpu_port >= 0) {
+  if (cpu_port > 0) {
     if (parser.ifaces.find(cpu_port) != parser.ifaces.end()) {
       bm::Logger::get()->error("Cpu port {} is used as a data port", cpu_port);
       return 1;
     }
   }
 
-  if (cpu_port >= 0) {
-    auto transmit_fn = [this](int port_num, const char *buf, int len) {
+  if (cpu_port > 0) {
+    auto transmit_fn = [this](bm::DevMgrIface::port_t port_num,
+                              const char *buf, int len) {
       if (port_num == cpu_port) {
         BMLOG_DEBUG("Transmitting packet-in");
         auto status = pi_packetin_receive(
@@ -374,9 +376,10 @@ SimpleSwitchGrpcRunner::shutdown() {
   PIGrpcServerShutdown();
 }
 
-void
-SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id, int egress_port) {
-  simple_switch->mirroring_mapping_add(mirror_id, egress_port);
+int
+SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id,
+  bm::DevMgrIface::port_t egress_port) {
+  return simple_switch->mirroring_mapping_add(mirror_id, egress_port);
 }
 
 void

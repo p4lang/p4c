@@ -89,7 +89,7 @@ Packet::set_ingress_ts() {
     ingress_ts.time_since_epoch()).count();
 }
 
-Packet::Packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
+Packet::Packet(cxt_id_t cxt_id, port_t ingress_port, packet_id_t id,
                copy_id_t copy_id, int ingress_length, PacketBuffer &&buffer,
                PHVSourceIface *phv_source)
     : cxt_id(cxt_id), ingress_port(ingress_port), packet_id(id),
@@ -254,7 +254,7 @@ Packet::make_new(int ingress_length, PacketBuffer &&buffer,
 }
 
 Packet
-Packet::make_new(cxt_id_t cxt, int ingress_port, packet_id_t id,
+Packet::make_new(cxt_id_t cxt, port_t ingress_port, packet_id_t id,
                  copy_id_t copy_id, int ingress_length,
                  PacketBuffer &&buffer, PHVSourceIface *phv_source) {
   return Packet(cxt, ingress_port, id, copy_id, ingress_length,

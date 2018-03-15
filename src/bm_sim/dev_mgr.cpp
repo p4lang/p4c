@@ -76,7 +76,7 @@ class FilesDevMgrImp : public DevMgrIface {
     return ReturnCode::UNSUPPORTED;
   }
 
-  void transmit_fn_(int port_num, const char *buffer, int len) override {
+  void transmit_fn_(port_t port_num, const char *buffer, int len) override {
     writer.send_packet(port_num, buffer, len);
   }
 
@@ -223,7 +223,7 @@ DevMgr::port_add(const std::string &iface_name, port_t port_num,
 }
 
 void
-DevMgr::transmit_fn(int port_num, const char *buffer, int len) {
+DevMgr::transmit_fn(port_t port_num, const char *buffer, int len) {
   assert(pimp);
   if (dump_packet_data > 0) {
     Logger::get()->info("Sending packet of length {} on port {}: {}",

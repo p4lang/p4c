@@ -42,7 +42,7 @@ namespace pibmv2 {
 
 extern bm::SwitchWContexts *switch_;
 
-extern int cpu_port;
+extern uint32_t cpu_port;
 
 static inline const pi_p4info_t *get_device_info(size_t dev_id) {
   return pi_get_device_p4info(dev_id);

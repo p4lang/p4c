@@ -53,7 +53,7 @@ char char2digit(char c) {
 
 class SwitchTest : public Switch {
  public:
-  int receive_(int port_num, const char *buffer, int len) override {
+  int receive_(port_t port_num, const char *buffer, int len) override {
     (void) port_num; (void) buffer; (void) len;
     return 0;
   }
@@ -85,7 +85,7 @@ class MyDevMgr : public DevMgrIface {
   ReturnCode set_packet_handler_(const PacketHandler &, void *) override {
     return ReturnCode::SUCCESS;
   }
-  void transmit_fn_(int, const char *, int) override { }
+  void transmit_fn_(port_t, const char *, int) override { }
   void start_() override { }
 };
 

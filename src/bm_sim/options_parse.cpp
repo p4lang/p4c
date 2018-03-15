@@ -41,11 +41,11 @@ namespace fs = boost::filesystem;
 namespace bm {
 
 struct interface {
-  interface(const std::string &name, int port)
+  interface(const std::string &name, uint32_t port)
     : name(name), port(port) { }
 
   std::string name{};
-  int port{};
+  uint32_t port{};
 };
 
 void validate(boost::any& v,  // NOLINT(runtime/references)
@@ -64,7 +64,7 @@ void validate(boost::any& v,  // NOLINT(runtime/references)
   std::istringstream stream(s);
   std::string tok;
   std::getline(stream, tok, '@');
-  int port;
+  uint32_t port;
   try {
     port = std::stoi(tok, nullptr);
   }

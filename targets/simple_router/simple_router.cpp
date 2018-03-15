@@ -54,7 +54,7 @@ class SimpleSwitch : public Switch {
     add_required_field("standard_metadata", "egress_port");
   }
 
-  int receive_(int port_num, const char *buffer, int len) override {
+  int receive_(port_t port_num, const char *buffer, int len) override {
     static int pkt_id = 0;
 
     if (this->do_swap() == 0)  // a swap took place

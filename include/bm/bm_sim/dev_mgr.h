@@ -95,7 +95,7 @@ class DevMgrIface : public PacketDispatcherIface {
   // TODO(antonin): add this?
   // ReturnCode set_port_status(port_t port_num, PortStatus status);
 
-  void transmit_fn(int port_num, const char *buffer, int len) {
+  void transmit_fn(port_t port_num, const char *buffer, int len) {
     transmit_fn_(port_num, buffer, len);
   }
 
@@ -124,7 +124,7 @@ class DevMgrIface : public PacketDispatcherIface {
 
   virtual ReturnCode port_remove_(port_t port_num) = 0;
 
-  virtual void transmit_fn_(int port_num, const char *buffer, int len) = 0;
+  virtual void transmit_fn_(port_t port_num, const char *buffer, int len) = 0;
 
   virtual void start_() = 0;
 
@@ -192,7 +192,7 @@ class DevMgr : public PacketDispatcherIface {
   DevMgrIface::PortStats clear_port_stats(port_t port_num);
 
   //! Transmits a data packet out of port \p port_num
-  void transmit_fn(int port_num, const char *buffer, int len);
+  void transmit_fn(port_t port_num, const char *buffer, int len);
 
   ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie)
       override;

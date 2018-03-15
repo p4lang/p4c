@@ -89,7 +89,7 @@ class BmiDevMgrImp : public DevMgrIface {
     return ReturnCode::SUCCESS;
   }
 
-  void transmit_fn_(int port_num, const char *buffer, int len) override {
+  void transmit_fn_(port_t port_num, const char *buffer, int len) override {
     bmi_port_send(port_mgr, port_num, buffer, len);
   }
 

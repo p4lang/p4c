@@ -116,7 +116,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return &contexts.at(cxt_id);
   }
 
-  int receive(int port_num, const char *buffer, int len);
+  int receive(port_t port_num, const char *buffer, int len);
 
   //! Call this function when you are ready to process packets. This function
   //! will call start_and_return_() which you have to override in your switch
@@ -276,14 +276,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   void block_until_no_more_packets();
 
   //! Construct and return a Packet instance for the given \p cxt_id.
-  std::unique_ptr<Packet> new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
+  std::unique_ptr<Packet> new_packet_ptr(cxt_id_t cxt_id, port_t ingress_port,
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
                                          PacketBuffer &&buffer);
 
   //! @copydoc new_packet_ptr
-  Packet new_packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
+  Packet new_packet(cxt_id_t cxt_id, port_t ingress_port, packet_id_t id,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
                     int ingress_length, PacketBuffer &&buffer);
@@ -861,7 +861,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   //! Override in your switch implementation; it will be called every time a
   //! packet is received.
-  virtual int receive_(int port_num, const char *buffer, int len) = 0;
+  virtual int receive_(port_t port_num, const char *buffer, int len) = 0;
 
   //! Override in your switch implementation; do all your initialization in this
   //! function (e.g. start processing threads) and call start_and_return() when
@@ -944,7 +944,7 @@ class Switch : public SwitchWContexts {
   using SwitchWContexts::new_packet_ptr;
   //! Convenience wrapper around SwitchWContexts::new_packet_ptr() for a single
   //! context switch.
-  std::unique_ptr<Packet> new_packet_ptr(int ingress_port,
+  std::unique_ptr<Packet> new_packet_ptr(port_t ingress_port,
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
@@ -954,7 +954,7 @@ class Switch : public SwitchWContexts {
   using SwitchWContexts::new_packet;
   //! Convenience wrapper around SwitchWContexts::new_packet() for a single
   //! context switch.
-  Packet new_packet(int ingress_port, packet_id_t id, int ingress_length,
+  Packet new_packet(port_t ingress_port, packet_id_t id, int ingress_length,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
                     PacketBuffer &&buffer);

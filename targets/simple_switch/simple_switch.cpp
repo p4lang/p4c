@@ -65,7 +65,7 @@ REGISTER_HASH(bmv2_hash);
 extern int import_primitives();
 
 
-SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
+SimpleSwitch::SimpleSwitch(port_t max_port, bool enable_swap)
   : Switch(enable_swap),
     max_port(max_port),
     input_buffer(1024),
@@ -80,7 +80,7 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
     output_buffer(128),
     // cannot use std::bind because of a clang bug
     // https://stackoverflow.com/questions/32030141/is-this-incorrect-use-of-stdbind-or-a-compiler-bug
-    my_transmit_fn([this](int port_num, const char *buffer, int len) {
+    my_transmit_fn([this](port_t port_num, const char *buffer, int len) {
         this->transmit_fn(port_num, buffer, len); }),
     pre(new McSimplePreLAG()),
     start(clock::now()) {
@@ -103,7 +103,7 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
 #define PACKET_LENGTH_REG_IDX 0
 
 int
-SimpleSwitch::receive_(int port_num, const char *buffer, int len) {
+SimpleSwitch::receive_(port_t port_num, const char *buffer, int len) {
   static packet_id_t pkt_id = 0;
 
   // this is a good place to call this, because blocking this thread will not
@@ -177,28 +177,28 @@ SimpleSwitch::reset_target_state_() {
 }
 
 int
-SimpleSwitch::set_egress_queue_depth(int port, const size_t depth_pkts) {
+SimpleSwitch::set_egress_queue_depth(port_t port, const size_t depth_pkts) {
   egress_buffers.set_capacity(port, depth_pkts);
   return 0;
 }
 
 int
 SimpleSwitch::set_all_egress_queue_depths(const size_t depth_pkts) {
-  for (int i = 0; i < max_port; i++) {
+  for (uint32_t i = 0; i < max_port; i++) {
     set_egress_queue_depth(i, depth_pkts);
   }
   return 0;
 }
 
 int
-SimpleSwitch::set_egress_queue_rate(int port, const uint64_t rate_pps) {
+SimpleSwitch::set_egress_queue_rate(port_t port, const uint64_t rate_pps) {
   egress_buffers.set_rate(port, rate_pps);
   return 0;
 }
 
 int
 SimpleSwitch::set_all_egress_queue_rates(const uint64_t rate_pps) {
-  for (int i = 0; i < max_port; i++) {
+  for (uint32_t i = 0; i < max_port; i++) {
     set_egress_queue_rate(i, rate_pps);
   }
   return 0;
@@ -240,7 +240,7 @@ SimpleSwitch::get_ts() const {
 }
 
 void
-SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
+SimpleSwitch::enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet) {
     packet->set_egress_port(egress_port);
 
     PHV *phv = packet->get_phv();
@@ -350,14 +350,13 @@ SimpleSwitch::ingress_thread() {
       mgid = f_mgid.get_uint();
     }
 
-    int egress_port;
+    port_t egress_port;
 
     // INGRESS CLONING
     if (clone_spec) {
       BMLOG_DEBUG_PKT(*packet, "Cloning packet at ingress");
-      egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       f_clone_spec.set(0);
-      if (egress_port >= 0) {
+      if (get_mirroring_mapping(clone_spec & 0xFFFF, &egress_port)) {
         const Packet::buffer_state_t packet_out_state =
             packet->save_buffer_state();
         packet->restore_buffer_state(packet_in_state);
@@ -488,11 +487,11 @@ SimpleSwitch::egress_thread(size_t worker_id) {
     Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
     unsigned int clone_spec = f_clone_spec.get_uint();
 
+    port_t egress_port;
     // EGRESS CLONING
     if (clone_spec) {
       BMLOG_DEBUG_PKT(*packet, "Cloning packet at egress");
-      int egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
-      if (egress_port >= 0) {
+      if (get_mirroring_mapping(clone_spec & 0xFFFF, &egress_port)) {
         f_clone_spec.set(0);
         p4object_id_t field_list_id = clone_spec >> 16;
         std::unique_ptr<Packet> packet_copy =

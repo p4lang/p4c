@@ -108,7 +108,8 @@ class TestDevMgrImp : public DevMgrIface {
     return ReturnCode::SUCCESS;
   }
 
-  void transmit_fn_(int port_num, const char *buffer, int len) override {
+  void transmit_fn_(DevMgrIface::port_t port_num, const char *buffer, int len)
+  override {
     (void)port_num;
     (void)buffer;
     (void)len;

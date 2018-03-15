@@ -106,6 +106,7 @@ pi_status_t _pi_batch_end(pi_session_handle_t session_handle, bool hw_sync) {
 pi_status_t _pi_packetout_send(pi_dev_id_t dev_id, const char *pkt,
                                size_t size) {
   _BM_UNUSED(dev_id);
+  if (pibmv2::cpu_port == 0) return PI_STATUS_PACKETOUT_SEND_ERROR;
   pibmv2::switch_->receive(pibmv2::cpu_port, pkt, static_cast<int>(size));
   return PI_STATUS_SUCCESS;
 }

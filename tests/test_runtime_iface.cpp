@@ -33,7 +33,7 @@ namespace fs = boost::filesystem;
 
 class SwitchTest : public Switch {
  public:
-  int receive_(int port_num, const char *buffer, int len) override {
+  int receive_(port_t port_num, const char *buffer, int len) override {
     (void) port_num; (void) buffer; (void) len;
     return 0;
   }

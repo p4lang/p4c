@@ -141,6 +141,12 @@ TargetParserBasic::add_int_option(const std::string &name,
 }
 
 TargetParserBasic::ReturnCode
+TargetParserBasic::add_uint_option(const std::string &name,
+                                  const std::string &help_str) {
+  return var_store->add_option<unsigned>(name, help_str);
+}
+
+TargetParserBasic::ReturnCode
 TargetParserBasic::add_flag_option(const std::string &name,
                                    const std::string &help_str) {
   return var_store->add_option<bool>(name, help_str);
@@ -155,6 +161,11 @@ TargetParserBasic::get_string_option(const std::string &name,
 TargetParserBasic::ReturnCode
 TargetParserBasic::get_int_option(const std::string &name, int *v) const {
   return var_store->get_option<int>(name, v);
+}
+
+TargetParserBasic::ReturnCode
+TargetParserBasic::get_uint_option(const std::string &name, unsigned *v) const {
+  return var_store->get_option<unsigned>(name, v);
 }
 
 TargetParserBasic::ReturnCode

@@ -49,9 +49,9 @@ class SimpleSwitchGrpcRunner {
   // there is no real need for a singleton here, except for the fact that we use
   // PIGrpcServerRunAddr, ... which uses static state
   static SimpleSwitchGrpcRunner &get_instance(
-      int max_port = 512, bool enable_swap = false,
+      bm::DevMgrIface::port_t max_port = 512, bool enable_swap = false,
       std::string grpc_server_addr = "0.0.0.0:50051",
-      int cpu_port = -1,
+      bm::DevMgrIface::port_t cpu_port = 0,
       std::string dp_grpc_server_addr = "") {
     static SimpleSwitchGrpcRunner instance(
         max_port, enable_swap, grpc_server_addr, cpu_port, dp_grpc_server_addr);
@@ -66,13 +66,15 @@ class SimpleSwitchGrpcRunner {
   }
   // TODO(dushyantarora): Remove this API once P4Runtime supports configuring
   // mirroring sessions
-  void mirroring_mapping_add(int mirror_id, int egress_port);
+  int mirroring_mapping_add(int mirror_id,
+                            bm::DevMgrIface::port_t egress_port);
   void block_until_all_packets_processed();
 
  private:
-  SimpleSwitchGrpcRunner(int max_port = 512, bool enable_swap = false,
+  SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port = 512,
+                         bool enable_swap = false,
                          std::string grpc_server_addr = "0.0.0.0:50051",
-                         int cpu_port = -1,
+                         bm::DevMgrIface::port_t cpu_port = 0,
                          std::string dp_grpc_server_addr = "");
   ~SimpleSwitchGrpcRunner();
 
@@ -81,7 +83,7 @@ class SimpleSwitchGrpcRunner {
 
   std::unique_ptr<SimpleSwitch> simple_switch;
   std::string grpc_server_addr;
-  int cpu_port;
+  bm::DevMgrIface::port_t cpu_port;
   std::string dp_grpc_server_addr;
   int dp_grpc_server_port;
   std::unique_ptr<grpc::Server> dp_grpc_server;

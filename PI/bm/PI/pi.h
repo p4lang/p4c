@@ -21,13 +21,15 @@
 #ifndef BM_PI_PI_H_
 #define BM_PI_PI_H_
 
+#include <cstdint>
+
 namespace bm {
 
 class SwitchWContexts;  // forward declaration
 
 namespace pi {
 
-void register_switch(bm::SwitchWContexts *sw, int cpu_port = -1);
+void register_switch(bm::SwitchWContexts *sw, uint32_t cpu_port = 0);
 
 }  // namespace pi
 

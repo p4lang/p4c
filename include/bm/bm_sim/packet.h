@@ -49,6 +49,9 @@ using packet_id_t = uint64_t;
 //! Integral type used to distinguish between different clones of a packet
 using copy_id_t = uint64_t;
 
+//! Integral type used to identify a given port
+using port_t = uint32_t;
+
 class CopyIdGenerator {
  private:
   static constexpr size_t W = 4096;
@@ -318,22 +321,22 @@ class Packet final {
   // NOLINTNEXTLINE(whitespace/operators)
   static Packet make_new(int ingress_length, PacketBuffer &&buffer,
                          PHVSourceIface *phv_source);
-  static Packet make_new(cxt_id_t cxt, int ingress_port, packet_id_t id,
+  static Packet make_new(cxt_id_t cxt, port_t ingress_port, packet_id_t id,
                          copy_id_t copy_id, int ingress_length,
                          // cpplint false positive
                          // NOLINTNEXTLINE(whitespace/operators)
                          PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
  private:
-  Packet(cxt_id_t cxt, int ingress_port, packet_id_t id, copy_id_t copy_id,
+  Packet(cxt_id_t cxt, port_t ingress_port, packet_id_t id, copy_id_t copy_id,
          int ingress_length, PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
   void update_signature(uint64_t seed = 0);
   void set_ingress_ts();
 
   cxt_id_t cxt_id{0};
-  int ingress_port{-1};
-  int egress_port{-1};
+  port_t ingress_port{0};
+  port_t egress_port{0};
   packet_id_t packet_id{0};
   copy_id_t copy_id{0};
   int ingress_length{0};

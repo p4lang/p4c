@@ -34,9 +34,9 @@ main(int argc, char* argv[]) {
   simple_switch_parser.add_string_option(
       "grpc-server-addr",
       "bind gRPC server to given address [default is 0.0.0.0:50051]");
-  simple_switch_parser.add_int_option(
+  simple_switch_parser.add_uint_option(
       "cpu-port",
-      "set CPU port, will be used for packet-in / packet-out; "
+      "set non-zero CPU port, will be used for packet-in / packet-out; "
       "do not add an interface with this port number");
   simple_switch_parser.add_string_option(
       "dp-grpc-server-addr",
@@ -72,12 +72,12 @@ main(int argc, char* argv[]) {
       std::exit(1);
   }
 
-  int cpu_port = -1;
+  uint32_t cpu_port = 0xFFFFFFFF;
   {
-    auto rc = simple_switch_parser.get_int_option("cpu-port", &cpu_port);
+    auto rc = simple_switch_parser.get_uint_option("cpu-port", &cpu_port);
     if (rc == bm::TargetParserBasic::ReturnCode::OPTION_NOT_PROVIDED)
-      cpu_port = -1;
-    else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS || cpu_port < 0)
+      cpu_port = 0;
+    else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS || cpu_port == 0)
       std::exit(1);
   }
 

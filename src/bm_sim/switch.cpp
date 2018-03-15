@@ -62,7 +62,7 @@ SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
 LookupStructureFactory SwitchWContexts::default_lookup_factory {};
 
 int
-SwitchWContexts::receive(int port_num, const char *buffer, int len) {
+SwitchWContexts::receive(port_t port_num, const char *buffer, int len) {
   if (dump_packet_data > 0) {
     Logger::get()->info("Received packet of length {} on port {}: {}",
                         len, port_num, sample_packet_data(buffer, len));
@@ -506,7 +506,7 @@ SwitchWContexts::set_crc32_custom_parameters(
 }
 
 std::unique_ptr<Packet>
-SwitchWContexts::new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
+SwitchWContexts::new_packet_ptr(cxt_id_t cxt_id, port_t ingress_port,
                                 packet_id_t id, int ingress_length,
                                 // NOLINTNEXTLINE(whitespace/operators)
                                 PacketBuffer &&buffer) {
@@ -517,9 +517,10 @@ SwitchWContexts::new_packet_ptr(cxt_id_t cxt_id, int ingress_port,
 }
 
 Packet
-SwitchWContexts::new_packet(cxt_id_t cxt_id, int ingress_port, packet_id_t id,
+SwitchWContexts::new_packet(cxt_id_t cxt_id, port_t ingress_port,
+                            packet_id_t id, int ingress_length,
                             // NOLINTNEXTLINE(whitespace/operators)
-                            int ingress_length, PacketBuffer &&buffer) {
+                            PacketBuffer &&buffer) {
   boost::shared_lock<boost::shared_mutex> lock(process_packet_mutex);
   return Packet(cxt_id, ingress_port, id, 0u, ingress_length,
                 std::move(buffer), phv_source.get());
@@ -548,7 +549,7 @@ Switch::Switch(bool enable_swap)
     : SwitchWContexts(1u, enable_swap) { }
 
 std::unique_ptr<Packet>
-Switch::new_packet_ptr(int ingress_port,
+Switch::new_packet_ptr(port_t ingress_port,
                        packet_id_t id, int ingress_length,
                        // NOLINTNEXTLINE(whitespace/operators)
                        PacketBuffer &&buffer) {
@@ -557,7 +558,7 @@ Switch::new_packet_ptr(int ingress_port,
 }
 
 Packet
-Switch::new_packet(int ingress_port, packet_id_t id, int ingress_length,
+Switch::new_packet(port_t ingress_port, packet_id_t id, int ingress_length,
                    // NOLINTNEXTLINE(whitespace/operators)
                    PacketBuffer &&buffer) {
   return new_packet(0u, ingress_port, id, ingress_length, std::move(buffer));

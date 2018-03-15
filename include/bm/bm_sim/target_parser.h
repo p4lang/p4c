@@ -78,8 +78,8 @@ class TargetParserBasic final : public TargetParserIface {
   ~TargetParserBasic();
 
   //! See bm::TargetParserIface::parse. Make sure all possible options have been
-  //! registered using add_string_option(), add_int_option() or
-  //! add_flag_option().
+  //! registered using add_string_option(), add_int_option(), add_uint_option()
+  //! or add_flag_option().
   int parse(const std::vector<std::string> &more_options,
             std::ostream *errstream) override;
 
@@ -96,6 +96,11 @@ class TargetParserBasic final : public TargetParserIface {
   //! get_int_option() to retrieve the value.
   ReturnCode add_int_option(const std::string &name,
                             const std::string &help_str);
+  //! Add a command-line option `--<name>` with a value of type unsigned int,
+  //! along with a help string that will be displayed by help_msg(). You will
+  //! need to call get_uint_option() to retrieve the value.
+  ReturnCode add_uint_option(const std::string &name,
+                             const std::string &help_str);
   //! Add a command-line flag `--<name>`, along with a help string that will be
   //! displayed by help_msg().You will need to call get_flag_option() to
   //! determine presence / absence of the flag.
@@ -108,6 +113,9 @@ class TargetParserBasic final : public TargetParserIface {
   //! Retrieve the value of command-line option `--<name>`. The option needs to
   //! have been previously registered with add_int_option().
   ReturnCode get_int_option(const std::string &name, int *v) const;
+  //! Retrieve the value of command-line option `--<name>`. The option needs to
+  //! have been previously registered with add_uint_option().
+  ReturnCode get_uint_option(const std::string &name, unsigned int *v) const;
   //! Determine whether the command-line flag `--<name>` was present / absent on
   //! the command line.
   ReturnCode get_flag_option(const std::string &name, bool *v) const;
