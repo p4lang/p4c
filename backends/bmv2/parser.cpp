@@ -259,8 +259,10 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
             mask = -1;
         return totalWidth;
     } else if (keySet->is<IR::PathExpression>()) {
+        auto pe = keySet->to<IR::PathExpression>();
+        auto decl = refMap->getDeclaration(pe->path, true);
+        vset_name = decl->controlPlaneName();
         is_vset = true;
-        vset_name = keySet->to<IR::PathExpression>()->path->name;
         return totalWidth;
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);

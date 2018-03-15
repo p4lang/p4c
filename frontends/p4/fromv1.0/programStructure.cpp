@@ -449,8 +449,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 }
 
                 auto type = new IR::Type_ValueSet(explodeType(sizes));
-                auto decl = new IR::Declaration_Variable(value_set->name,
-                                                         value_set->annotations, type);
+                auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
+                auto decl = new IR::Declaration_Variable(value_set->name, annos, type);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {
