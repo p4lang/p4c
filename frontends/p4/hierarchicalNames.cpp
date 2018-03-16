@@ -33,7 +33,7 @@ const IR::Node* HierarchicalNames::postorder(IR::Annotation* annotation) {
     for (cstring s : stack)
         newName += s + ".";
     newName += name;
-    LOG2("Chaging " << name << " to " << newName);
+    LOG2("Changing " << name << " to " << newName);
     annotation = new IR::Annotation(annotation->name, { new IR::StringLiteral(newName) });
     return annotation;
 }

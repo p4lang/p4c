@@ -259,8 +259,10 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
             mask = -1;
         return totalWidth;
     } else if (keySet->is<IR::PathExpression>()) {
+        auto pe = keySet->to<IR::PathExpression>();
+        auto decl = refMap->getDeclaration(pe->path, true);
+        vset_name = decl->controlPlaneName();
         is_vset = true;
-        vset_name = keySet->to<IR::PathExpression>()->path->name;
         return totalWidth;
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
@@ -351,14 +353,9 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
             if (!inst->type->is<IR::Type_ValueSet>())
                 continue;
             auto value_set = inst->type->to<IR::Type_ValueSet>();
-            unsigned size = 0;
-            if (value_set->elementType->is<IR::Type_Name>()) {
-                auto type = typeMap->getTypeType(value_set->elementType, true);
-                size = type->width_bits();
-            } else {
-                size = value_set->elementType->width_bits();
-            }
-            json->add_parse_vset(s->name, size);
+            auto bitwidth = value_set->width_bits();
+            auto name = inst->controlPlaneName();
+            json->add_parse_vset(name, bitwidth);
         }
     }
 
