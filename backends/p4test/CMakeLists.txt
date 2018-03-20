@@ -53,6 +53,8 @@ set (P4TEST_SUITES
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
+  # This test uses an undefined extern
+  testdata/p4_16_samples/issue1193-bmv2.p4
   )
 p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}")
 

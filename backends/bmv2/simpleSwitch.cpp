@@ -205,6 +205,8 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             }
             // Do not generate any code for this operation
         }
+    } else {
+        error("Unknown extern type %1%", em->originalExternType->name);
     }
 }
 
