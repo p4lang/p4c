@@ -154,7 +154,7 @@ class SimpleSwitch : public Switch {
   ts_res get_ts() const;
 
   // TODO(antonin): switch to pass by value?
-  void enqueue(port_t egress_port, std::unique_ptr<Packet> &&pkt);
+  void enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet);
 
   void copy_field_list_and_set_type(
       const std::unique_ptr<Packet> &packet,

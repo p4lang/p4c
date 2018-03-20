@@ -328,8 +328,9 @@ class Packet final {
                          PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
  private:
-  Packet(cxt_id_t cxt, port_t ingress_port, packet_id_t id, copy_id_t copy_id,
-         int ingress_length, PacketBuffer &&buffer, PHVSourceIface *phv_source);
+  Packet(cxt_id_t cxt_id, port_t ingress_port, packet_id_t id,
+         copy_id_t copy_id, int ingress_length, PacketBuffer &&buffer,
+         PHVSourceIface *phv_source);
 
   void update_signature(uint64_t seed = 0);
   void set_ingress_ts();

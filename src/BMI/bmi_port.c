@@ -223,7 +223,6 @@ int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 			   const char* pcap_output_dump) {
   int exitCode;
   if(!port_num_valid(port_num)) return -1;
-  bmi_port_t *port = get_port(port_mgr, port_num);
   pthread_rwlock_wrlock(&port_mgr->lock);
   exitCode = _bmi_port_interface_add(port_mgr, ifname, port_num,
                                      pcap_input_dump,
@@ -250,7 +249,6 @@ static int _bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
 int bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
   int exitCode;
   if(!port_num_valid(port_num)) return -1;
-  bmi_port_t *port = get_port(port_mgr, port_num);
   pthread_rwlock_wrlock(&port_mgr->lock);
   exitCode = _bmi_port_interface_remove(port_mgr, port_num);
   pthread_rwlock_unlock(&port_mgr->lock);
