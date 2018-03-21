@@ -115,6 +115,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1062-1-bmv2.p4
   # This test uses an undefined extern
   testdata/p4_16_samples/issue1193-bmv2.p4
+  # This test also uses a custom extern and it used to just slip by!
+  testdata/p4_14_samples/issue604.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
