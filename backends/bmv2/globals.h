@@ -29,7 +29,7 @@ class ConvertGlobals : public Inspector {
     { CHECK_NULL(backend); setName("ConvertGlobals"); }
 
     bool preorder(const IR::ExternBlock* block) override;
-    bool preorder(const IR::ToplevelBlock *block) {
+    bool preorder(const IR::ToplevelBlock *block) override {
         /// Blocks are not in IR tree, use a custom visitor to traverse
         for (auto it : block->constantValue) {
             if (it.second->is<IR::Block>())
