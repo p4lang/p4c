@@ -177,7 +177,7 @@ SimpleSwitch::reset_target_state_() {
 }
 
 int
-SimpleSwitch::set_egress_queue_depth(port_t port, const size_t depth_pkts) {
+SimpleSwitch::set_egress_queue_depth(size_t port, const size_t depth_pkts) {
   egress_buffers.set_capacity(port, depth_pkts);
   return 0;
 }
@@ -191,7 +191,7 @@ SimpleSwitch::set_all_egress_queue_depths(const size_t depth_pkts) {
 }
 
 int
-SimpleSwitch::set_egress_queue_rate(port_t port, const uint64_t rate_pps) {
+SimpleSwitch::set_egress_queue_rate(size_t port, const uint64_t rate_pps) {
   egress_buffers.set_rate(port, rate_pps);
   return 0;
 }
@@ -241,6 +241,12 @@ SimpleSwitch::get_ts() const {
 
 void
 SimpleSwitch::enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet) {
+    if (egress_port >= max_port) {
+      bm::Logger::get()->error("Invalid egress port %u, dropping packet",
+                               egress_port);
+      return;
+    }
+
     packet->set_egress_port(egress_port);
 
     PHV *phv = packet->get_phv();
@@ -310,7 +316,7 @@ SimpleSwitch::ingress_thread() {
 
     phv = packet->get_phv();
 
-    int ingress_port = packet->get_ingress_port();
+    port_t ingress_port = packet->get_ingress_port();
     (void) ingress_port;
     BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
                     ingress_port);
@@ -330,7 +336,7 @@ SimpleSwitch::ingress_thread() {
     packet->reset_exit();
 
     Field &f_egress_spec = phv->get_field("standard_metadata.egress_spec");
-    int egress_spec = f_egress_spec.get_int();
+    port_t egress_spec = f_egress_spec.get_uint();
 
     Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
     unsigned int clone_spec = f_clone_spec.get_uint();
@@ -506,7 +512,7 @@ SimpleSwitch::egress_thread(size_t worker_id) {
     }
 
     // TODO(antonin): should not be done like this in egress pipeline
-    int egress_spec = f_egress_spec.get_int();
+    port_t egress_spec = f_egress_spec.get_uint();
     if (egress_spec == 511) {  // drop packet
       BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of egress");
       continue;

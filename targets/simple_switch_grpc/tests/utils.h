@@ -39,9 +39,6 @@ int get_mf_id(const p4::config::P4Info &p4info,
 int get_param_id(const p4::config::P4Info &p4info,
                  const std::string &a_name, const std::string &param_name);
 
-int get_direct_counter_id(const p4::config::P4Info &p4info,
-                          const std::string &direct_counter_name);
-
 p4::config::P4Info parse_p4info(const char *path);
 
 }  // namespace testing

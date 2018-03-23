@@ -49,15 +49,6 @@ int get_action_id(const p4::config::P4Info &p4info,
   return 0;
 }
 
-int get_direct_counter_id(const p4::config::P4Info &p4info,
-                          const std::string &direct_counter_name) {
-  for (const auto &direct_counters : p4info.direct_counters()) {
-    const auto &pre = direct_counters.preamble();
-    if (pre.name() == direct_counter_name) return pre.id();
-  }
-  return 0;
-}
-
 int get_mf_id(const p4::config::P4Info &p4info,
               const std::string &t_name, const std::string &mf_name) {
   for (const auto &table : p4info.tables()) {

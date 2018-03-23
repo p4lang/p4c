@@ -99,10 +99,10 @@ class SimpleSwitch : public Switch {
     return get_mirroring_mapping(mirror_id, port);
   }
 
-  int set_egress_queue_depth(port_t port, const size_t depth_pkts);
+  int set_egress_queue_depth(size_t port, const size_t depth_pkts);
   int set_all_egress_queue_depths(const size_t depth_pkts);
 
-  int set_egress_queue_rate(port_t port, const uint64_t rate_pps);
+  int set_egress_queue_rate(size_t port, const uint64_t rate_pps);
   int set_all_egress_queue_rates(const uint64_t rate_pps);
 
   // returns the number of microseconds elapsed since the switch started
