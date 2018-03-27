@@ -56,6 +56,7 @@ class ExpressionConverter : public Transform {
 };
 
 class StatementConverter : public ExpressionConverter {
+ protected:
     std::map<cstring, cstring> *renameMap;
  public:
     StatementConverter(ProgramStructure* structure, std::map<cstring, cstring> *renameMap)

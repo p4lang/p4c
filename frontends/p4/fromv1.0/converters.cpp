@@ -306,6 +306,7 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         args->push_back(structure->conversionContext.header->clone());
         args->push_back(structure->conversionContext.userMetadata->clone());
         args->push_back(structure->conversionContext.standardMetadata->clone());
+        /// XXX(hanw): 4 more arguments for ingress, 8 more for egress.
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;

@@ -29,6 +29,55 @@ limitations under the License.
 
 namespace P4V1 {
 
+namespace {
+// Must return a 'canonical' representation of each header.
+// If a header appears twice this must return the SAME expression.
+class HeaderRepresentation {
+private:
+    const IR::Expression *hdrsParam;  // reference to headers parameter in deparser
+    std::map<cstring, const IR::Expression *> header;
+    std::map<cstring, const IR::Expression *> fakeHeader;
+    std::map<const IR::Expression *, std::map<int, const IR::Expression *>> stackElement;
+
+public:
+    explicit HeaderRepresentation(const IR::Expression *hdrsParam) :
+        hdrsParam(hdrsParam) { CHECK_NULL(hdrsParam); }
+
+    const IR::Expression *getHeader(const IR::Expression *expression) {
+        CHECK_NULL(expression);
+        // expression is a reference to a header in an 'extract' statement
+        if (expression->is<IR::ConcreteHeaderRef>()) {
+            cstring name = expression->to<IR::ConcreteHeaderRef>()->ref->name;
+            if (header.find(name) == header.end())
+                header[name] = new IR::Member(hdrsParam, name);
+            return header[name];
+        } else if (expression->is<IR::HeaderStackItemRef>()) {
+            auto hsir = expression->to<IR::HeaderStackItemRef>();
+            auto hdr = getHeader(hsir->base_);
+            if (hsir->index_->is<IR::PathExpression>())
+                // This is most certainly 'next'.
+                return hdr;
+            BUG_CHECK(hsir->index_->is<IR::Constant>(), "%1%: expected a constant", hsir->index_);
+            int index = hsir->index_->to<IR::Constant>()->asInt();
+            if (stackElement.find(hdr) != stackElement.end()) {
+                if (stackElement[hdr].find(index) != stackElement[hdr].end())
+                    return stackElement[hdr][index];
+            }
+            auto ai = new IR::ArrayIndex(hdr, hsir->index_);
+            stackElement[hdr][index] = ai;
+            return ai;
+        }
+        BUG("%1%: Unexpected expression in 'extract'", expression);
+    }
+
+    const IR::Expression *getFakeHeader(cstring state) {
+        if (fakeHeader.find(state) == fakeHeader.end())
+            fakeHeader[state] = new IR::StringLiteral(state);
+        return fakeHeader[state];
+    }
+};
+}
+
 /// Information about the structure of a P4-14 program, used to convert it to a P4-16 program.
 class ProgramStructure {
     // In P4-14 one can have multiple objects with different types with the same name
@@ -207,8 +256,7 @@ class ProgramStructure {
     virtual const IR::Declaration_Instance*
         convertDirectCounter(const IR::Counter* m, cstring newName);
     virtual const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
-    virtual const IR::Declaration_Instance* convertActionProfile(const IR::ActionProfile *,
-                                                         cstring newName);
+    virtual const IR::Node* convertActionProfile(const IR::ActionProfile *, cstring newName);
     virtual const IR::P4Table*
         convertTable(const IR::V1Table* table, cstring newName,
                      IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
@@ -227,8 +275,11 @@ class ProgramStructure {
     virtual void createControls();
     virtual void createDeparser();
     virtual void createMain();
+    const IR::Expression* explodeLabel(const IR::Constant* value, const IR::Constant* mask,
+                                       const std::vector<int> &sizes);
+    const IR::Type* explodeType(const std::vector<int> &sizes);
 
- public:
+public:
     void include(cstring filename, cstring ppoptions = cstring());
     /// This inserts the names of the identifiers used in the output P4-16 programs
     /// into allNames, forcing P4-14 names that clash to be renamed.
@@ -259,10 +310,10 @@ class ProgramStructure {
     const IR::Expression* latest;
     const int defaultRegisterWidth = 32;
 
-    void loadModel();
-    void createExterns();
-    void createTypes();
-    const IR::P4Program* create(Util::SourceInfo info);
+    virtual void loadModel();
+    virtual void createExterns();
+    virtual void createTypes();
+    virtual const IR::P4Program* create(Util::SourceInfo info);
 };
 
 }  // namespace P4V1

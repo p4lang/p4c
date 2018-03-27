@@ -108,7 +108,7 @@ cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool heade
     converted->emplace(type);
     auto type_name = types.get(type);
     auto newType = type->apply(TypeConverter(this));
-    if (newType->name.name != type_name) {
+    if (newType->name.name != type_name || type->is<IR::Type_Header>() != header) {
         auto annos = addNameAnnotation(type->name.name, type->annotations);
         if (header) {
             newType = new IR::Type_Header(newType->srcInfo, type_name, annos, newType->fields);
@@ -360,8 +360,8 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
     }
 }
 
-static const IR::Expression*
-explodeLabel(const IR::Constant* value, const IR::Constant* mask,
+const IR::Expression*
+ProgramStructure::explodeLabel(const IR::Constant* value, const IR::Constant* mask,
              const std::vector<int> &sizes) {
     if (mask->value == 0)
         return new IR::DefaultExpression(value->srcInfo);
@@ -388,8 +388,8 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return rv;
 }
 
-static const IR::Type*
-explodeType(const std::vector<int> &sizes) {
+const IR::Type*
+ProgramStructure::explodeType(const std::vector<int> &sizes) {
     auto rv = new IR::Vector<IR::Type>();
     for (auto it = sizes.begin(); it != sizes.end(); ++it) {
         int s = *it;
@@ -560,53 +560,7 @@ void ProgramStructure::loadModel() {
     include("v1model.p4");
 }
 
-namespace {
-// Must return a 'canonical' representation of each header.
-// If a header appears twice this must return the SAME expression.
-class HeaderRepresentation {
- private:
-    const IR::Expression* hdrsParam;  // reference to headers parameter in deparser
-    std::map<cstring, const IR::Expression*> header;
-    std::map<cstring, const IR::Expression*> fakeHeader;
-    std::map<const IR::Expression*, std::map<int, const IR::Expression*>> stackElement;
 
- public:
-    explicit HeaderRepresentation(const IR::Expression* hdrsParam) :
-            hdrsParam(hdrsParam) { CHECK_NULL(hdrsParam); }
-
-    const IR::Expression* getHeader(const IR::Expression* expression) {
-        CHECK_NULL(expression);
-        // expression is a reference to a header in an 'extract' statement
-        if (expression->is<IR::ConcreteHeaderRef>()) {
-            cstring name = expression->to<IR::ConcreteHeaderRef>()->ref->name;
-            if (header.find(name) == header.end())
-                header[name] = new IR::Member(hdrsParam, name);
-            return header[name];
-        } else if (expression->is<IR::HeaderStackItemRef>()) {
-            auto hsir = expression->to<IR::HeaderStackItemRef>();
-            auto hdr = getHeader(hsir->base_);
-            if (hsir->index_->is<IR::PathExpression>())
-                // This is most certainly 'next'.
-                return hdr;
-            BUG_CHECK(hsir->index_->is<IR::Constant>(), "%1%: expected a constant", hsir->index_);
-            int index = hsir->index_->to<IR::Constant>()->asInt();
-            if (stackElement.find(hdr) != stackElement.end()) {
-                if (stackElement[hdr].find(index) != stackElement[hdr].end())
-                    return stackElement[hdr][index];
-            }
-            auto ai = new IR::ArrayIndex(hdr, hsir->index_);
-            stackElement[hdr][index] = ai;
-            return ai;
-        }
-        BUG("%1%: Unexpected expression in 'extract'", expression);
-    }
-    const IR::Expression* getFakeHeader(cstring state) {
-        if (fakeHeader.find(state) == fakeHeader.end())
-            fakeHeader[state] = new IR::StringLiteral(state);
-        return fakeHeader[state];
-    }
-};
-}  // namespace
 
 void ProgramStructure::createDeparser() {
     auto headpath = new IR::Path(v1model.headersType.Id());
@@ -691,7 +645,7 @@ void ProgramStructure::createDeparser() {
     declarations->push_back(deparser);
 }
 
-const IR::Declaration_Instance*
+const IR::Node*
 ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, cstring newName) {
     auto *action_selector = action_selectors.get(action_profile->selector.name);
     if (!action_profile->selector.name.isNullOrEmpty() && !action_selector)
