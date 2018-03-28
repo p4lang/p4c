@@ -44,6 +44,8 @@ namespace sswitch_grpc {
 
 class SysrepoDriver;
 
+class DataplaneInterfaceServiceImpl;
+
 class SimpleSwitchGrpcRunner {
  public:
   // there is no real need for a singleton here, except for the fact that we use
@@ -86,6 +88,7 @@ class SimpleSwitchGrpcRunner {
   bm::DevMgrIface::port_t cpu_port;
   std::string dp_grpc_server_addr;
   int dp_grpc_server_port;
+  DataplaneInterfaceServiceImpl *dp_service;
   std::unique_ptr<grpc::Server> dp_grpc_server;
 #ifdef WITH_SYSREPO
   std::unique_ptr<SysrepoDriver> sysrepo_driver;

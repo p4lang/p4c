@@ -69,7 +69,8 @@ class SimpleSwitch : public Switch {
  public:
   using mirror_id_t = int;
 
-  using TransmitFn = std::function<void(int, const char *, int)>;
+  using TransmitFn = std::function<void(port_t, packet_id_t,
+                                        const char *, int)>;
 
  private:
   using clock = std::chrono::high_resolution_clock;
@@ -111,10 +112,16 @@ class SimpleSwitch : public Switch {
   // returns the number of microseconds elasped since the clock's epoch
   uint64_t get_time_since_epoch_us() const;
 
+  // returns the packet id of most recently received packet. Not thread-safe.
+  static packet_id_t get_packet_id() {
+    return (packet_id-1);
+  }
+
   void set_transmit_fn(TransmitFn fn);
 
  private:
   static constexpr size_t nb_egress_threads = 4u;
+  static packet_id_t packet_id;
 
   enum PktInstanceType {
     PKT_INSTANCE_TYPE_NORMAL,

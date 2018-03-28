@@ -32,15 +32,20 @@ service DataplaneInterface {
 }
 
 message PacketStreamRequest {
-  uint64 device_id = 1;
-  uint32 port = 2;
-  bytes packet = 3;
+  // Non-zero id will be reflected in PacketStreamResponse::id.
+  // Client is responsible for making sure id is unique in order to correctly
+  // correlate PacketStreamResponse(s) to a PacketStreamRequest.
+  uint64 id = 1;
+  uint64 device_id = 2;
+  uint32 port = 3;
+  bytes packet = 4;
 }
 
 message PacketStreamResponse {
-  uint64 device_id = 1;
-  uint32 port = 2;
-  bytes packet = 3;
+  uint64 id = 1;
+  uint64 device_id = 2;
+  uint32 port = 3;
+  bytes packet = 4;
 }
 
 enum PortOperStatus {

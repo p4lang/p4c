@@ -64,6 +64,7 @@ REGISTER_HASH(bmv2_hash);
 
 extern int import_primitives();
 
+packet_id_t SimpleSwitch::packet_id = 0;
 
 SimpleSwitch::SimpleSwitch(port_t max_port, bool enable_swap)
   : Switch(enable_swap),
@@ -80,8 +81,11 @@ SimpleSwitch::SimpleSwitch(port_t max_port, bool enable_swap)
     output_buffer(128),
     // cannot use std::bind because of a clang bug
     // https://stackoverflow.com/questions/32030141/is-this-incorrect-use-of-stdbind-or-a-compiler-bug
-    my_transmit_fn([this](port_t port_num, const char *buffer, int len) {
-        this->transmit_fn(port_num, buffer, len); }),
+    my_transmit_fn([this](port_t port_num, packet_id_t pkt_id,
+                          const char *buffer, int len) {
+        _BM_UNUSED(pkt_id);
+        this->transmit_fn(port_num, buffer, len);
+    }),
     pre(new McSimplePreLAG()),
     start(clock::now()) {
   add_component<McSimplePreLAG>(pre);
@@ -104,8 +108,6 @@ SimpleSwitch::SimpleSwitch(port_t max_port, bool enable_swap)
 
 int
 SimpleSwitch::receive_(port_t port_num, const char *buffer, int len) {
-  static packet_id_t pkt_id = 0;
-
   // this is a good place to call this, because blocking this thread will not
   // block the processing of existing packet instances, which is a requirement
   if (do_swap() == 0) {
@@ -115,7 +117,7 @@ SimpleSwitch::receive_(port_t port_num, const char *buffer, int len) {
   // we limit the packet buffer to original size + 512 bytes, which means we
   // cannot add more than 512 bytes of header data to the packet, which should
   // be more than enough
-  auto packet = new_packet_ptr(port_num, pkt_id++, len,
+  auto packet = new_packet_ptr(port_num, packet_id++, len,
                                bm::PacketBuffer(len + 512, buffer, len));
 
   BMELOG(packet_in, *packet);
@@ -229,7 +231,7 @@ SimpleSwitch::transmit_thread() {
     BMELOG(packet_out, *packet);
     BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
                     packet->get_data_size(), packet->get_egress_port());
-    my_transmit_fn(packet->get_egress_port(),
+    my_transmit_fn(packet->get_egress_port(), packet->get_packet_id(),
                    packet->data(), packet->get_data_size());
   }
 }

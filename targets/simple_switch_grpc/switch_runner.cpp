@@ -63,8 +63,6 @@ namespace sswitch_grpc {
 
 using pi::fe::proto::DeviceMgr;
 
-namespace {
-
 using grpc::ServerContext;
 using grpc::Status;
 using grpc::StatusCode;
@@ -79,6 +77,24 @@ class DataplaneInterfaceServiceImpl
   explicit DataplaneInterfaceServiceImpl(bm::device_id_t device_id)
       : device_id(device_id) {
     p_monitor = bm::PortMonitorIface::make_passive(device_id);
+  }
+
+  void my_transmit_fn(port_t port_num, packet_id_t pkt_id, const char *buffer,
+                      int len) {
+    p4::bm::PacketStreamResponse response;
+    response.set_device_id(device_id);
+    response.set_port(port_num);
+    response.set_packet(buffer, len);
+    Lock lock(mutex);
+    if (packet_id_translation.find(pkt_id) != packet_id_translation.end()) {
+      response.set_id(packet_id_translation[pkt_id]);
+    }
+    if (active) {
+      stream->Write(response);
+      auto &stats = ports_stats[port_num];
+      stats.out_packets += 1;
+      stats.out_octets += len;
+    }
   }
 
  private:
@@ -108,13 +124,21 @@ class DataplaneInterfaceServiceImpl
       if (!pkt_handler) continue;
       {
         Lock lock(mutex);
+        pkt_handler(request.port(), packet.data(), packet.size(), pkt_cookie);
+        // Get the packet id of newly created packet and save it in
+        // packet_id_translation map. The map will be used to populate the id
+        // field of the transmitted packet.
+        if (request.id() != 0) {
+          // grpc service has a single thread. get_packet_id() will return the
+          // packet id of the newly received packet.
+          packet_id_translation[SimpleSwitch::get_packet_id()] = request.id();
+        }
         // PortStats is a POD struct; it will be value-initialized to 0s if the
         // port key is not found in the map.
         auto &stats = ports_stats[request.port()];
         stats.in_packets += 1;
         stats.in_octets += packet.size();
       }
-      pkt_handler(request.port(), packet.data(), packet.size(), pkt_cookie);
     }
     auto &runner = sswitch_grpc::SimpleSwitchGrpcRunner::get_instance();
     runner.block_until_all_packets_processed();
@@ -155,17 +179,7 @@ class DataplaneInterfaceServiceImpl
   }
 
   void transmit_fn_(port_t port_num, const char *buffer, int len) override {
-    p4::bm::PacketStreamResponse response;
-    response.set_device_id(device_id);
-    response.set_port(port_num);
-    response.set_packet(buffer, len);
-    Lock lock(mutex);
-    if (active) {
-      auto &stats = ports_stats[port_num];
-      stats.out_packets += 1;
-      stats.out_octets += len;
-      stream->Write(response);
-    }
+    my_transmit_fn(port_num, -1, buffer, len);
   }
 
   void start_() override {
@@ -223,9 +237,8 @@ class DataplaneInterfaceServiceImpl
   void *pkt_cookie{nullptr};
   std::unordered_map<port_t, bool> ports_oper_status{};
   std::unordered_map<port_t, PortStats> ports_stats{};
+  std::unordered_map<packet_id_t, uint64_t> packet_id_translation{};
 };
-
-}  // namespace
 
 SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port,
                                                bool enable_swap,
@@ -235,6 +248,7 @@ SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port,
     : simple_switch(new SimpleSwitch(max_port, enable_swap)),
       grpc_server_addr(grpc_server_addr), cpu_port(cpu_port),
       dp_grpc_server_addr(dp_grpc_server_addr),
+      dp_service(nullptr),
       dp_grpc_server(nullptr) {
   DeviceMgr::init(256);
 }
@@ -243,7 +257,7 @@ int
 SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   std::unique_ptr<bm::DevMgrIface> my_dev_mgr = nullptr;
   if (!dp_grpc_server_addr.empty()) {
-    auto service = new DataplaneInterfaceServiceImpl(parser.device_id);
+    dp_service = new DataplaneInterfaceServiceImpl(parser.device_id);
     grpc::ServerBuilder builder;
     builder.SetSyncServerOption(
       grpc::ServerBuilder::SyncServerOption::NUM_CQS, 1);
@@ -254,9 +268,9 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
     builder.AddListeningPort(dp_grpc_server_addr,
                              grpc::InsecureServerCredentials(),
                              &dp_grpc_server_port);
-    builder.RegisterService(service);
+    builder.RegisterService(dp_service);
     dp_grpc_server = builder.BuildAndStart();
-    my_dev_mgr.reset(service);
+    my_dev_mgr.reset(dp_service);
   }
 
 #ifdef WITH_SYSREPO
@@ -304,21 +318,19 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
     }
   }
 
-  if (cpu_port > 0) {
-    auto transmit_fn = [this](bm::DevMgrIface::port_t port_num,
-                              const char *buf, int len) {
-      if (port_num == cpu_port) {
-        BMLOG_DEBUG("Transmitting packet-in");
-        auto status = pi_packetin_receive(
-            simple_switch->get_device_id(), buf, static_cast<size_t>(len));
-        if (status != PI_STATUS_SUCCESS)
-          bm::Logger::get()->error("Error when transmitting packet-in");
-      } else {
-        simple_switch->transmit_fn(port_num, buf, len);
-      }
-    };
-    simple_switch->set_transmit_fn(transmit_fn);
-  }
+  auto transmit_fn = [this](bm::DevMgrIface::port_t port_num,
+                            packet_id_t pkt_id, const char *buf, int len) {
+    if (cpu_port > 0 && port_num == cpu_port) {
+      BMLOG_DEBUG("Transmitting packet-in");
+      auto status = pi_packetin_receive(simple_switch->get_device_id(),
+                                        buf, static_cast<size_t>(len));
+      if (status != PI_STATUS_SUCCESS)
+        bm::Logger::get()->error("Error when transmitting packet-in");
+    } else {
+      dp_service->my_transmit_fn(port_num, pkt_id, buf, len);
+    }
+  };
+  simple_switch->set_transmit_fn(transmit_fn);
 
   bm::pi::register_switch(simple_switch.get(), cpu_port);
 
