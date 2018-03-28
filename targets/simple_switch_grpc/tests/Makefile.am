@@ -34,7 +34,7 @@ example_SOURCES = example.cpp utils.h utils.cpp
 test_gtest_SOURCES = \
 $(common_source) main.cpp \
 test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp \
-test_grpc_counter.cpp
+test_counter.cpp test_meter.cpp
 if WITH_SYSREPO
 test_gtest_SOURCES += test_gnmi.cpp
 endif
@@ -50,4 +50,6 @@ EXTRA_DIST = \
 example.run.in \
 simple_router.json simple_router.proto.txt \
 packet_io.p4 packet_io.json packet_io.proto.txt \
-loopback.p4 loopback.json loopback.proto.txt
+loopback.p4 loopback.json loopback.proto.txt \
+counter.p4 counter.json counter.proto.txt \
+meter.p4 meter.json meter.proto.txt

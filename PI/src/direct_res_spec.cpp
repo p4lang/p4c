@@ -94,8 +94,15 @@ convert_to_meter_spec(const pi_p4info_t *p4info, pi_p4_id_t m_id,
   // choose appropriate conversion routine
   auto conv = (meter_spec->meter_unit == PI_METER_UNIT_PACKETS) ?
       conv_packets : conv_bytes;
-  conv(rates.at(0), &meter_spec->cir, &meter_spec->cburst);
-  conv(rates.at(1), &meter_spec->pir, &meter_spec->pburst);
+  if (rates.empty()) {  // default meter config
+    meter_spec->cir = static_cast<uint64_t>(-1);
+    meter_spec->cburst = static_cast<uint32_t>(-1);
+    meter_spec->pir = static_cast<uint64_t>(-1);
+    meter_spec->pburst = static_cast<uint32_t>(-1);
+  } else {
+    conv(rates.at(0), &meter_spec->cir, &meter_spec->cburst);
+    conv(rates.at(1), &meter_spec->pir, &meter_spec->pburst);
+  }
 }
 
 }  // namespace pibmv2

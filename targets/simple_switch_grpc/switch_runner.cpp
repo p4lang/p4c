@@ -106,13 +106,15 @@ class DataplaneInterfaceServiceImpl
       const auto &packet = request.packet();
       if (packet.empty()) continue;
       if (!pkt_handler) continue;
+      {
+        Lock lock(mutex);
+        // PortStats is a POD struct; it will be value-initialized to 0s if the
+        // port key is not found in the map.
+        auto &stats = ports_stats[request.port()];
+        stats.in_packets += 1;
+        stats.in_octets += packet.size();
+      }
       pkt_handler(request.port(), packet.data(), packet.size(), pkt_cookie);
-      Lock lock(mutex);
-      // PortStats is a POD struct; it will be value-initialized to 0s if the
-      // port key is not found in the map.
-      auto &stats = ports_stats[request.port()];
-      stats.in_packets += 1;
-      stats.in_octets += packet.size();
     }
     auto &runner = sswitch_grpc::SimpleSwitchGrpcRunner::get_instance();
     runner.block_until_all_packets_processed();
@@ -159,10 +161,10 @@ class DataplaneInterfaceServiceImpl
     response.set_packet(buffer, len);
     Lock lock(mutex);
     if (active) {
-      stream->Write(response);
       auto &stats = ports_stats[port_num];
       stats.out_packets += 1;
       stats.out_octets += len;
+      stream->Write(response);
     }
   }
 

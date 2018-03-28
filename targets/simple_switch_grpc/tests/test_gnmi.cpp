@@ -105,6 +105,8 @@ class SimpleSwitchGrpcTest_gNMI : public SimpleSwitchGrpcBaseTest {
 
   void SetUp() override {
     ASSERT_TRUE(cleanup_data_tree().ok());
+    SimpleSwitchGrpcBaseTest::SetUp();
+    update_json(loopback_json);
   }
 
   void TearDown() override {
@@ -327,11 +329,11 @@ TEST_F(SimpleSwitchGrpcTest_gNMI, PortCounters) {
   request.set_port(port);
   request.set_packet(std::string(10, '\xab'));
   stream->Write(request);
-  check_counter("in-unicast-pkts", 1);
-  check_counter("in-octets", 10);
-
   p4::bm::PacketStreamResponse response;
   stream->Read(&response);
+
+  check_counter("in-unicast-pkts", 1);
+  check_counter("in-octets", 10);
   check_counter("out-unicast-pkts", 1);
   check_counter("out-octets", 10);
 

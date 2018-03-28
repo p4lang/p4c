@@ -78,6 +78,7 @@ SimpleSwitchGrpcBaseTest::update_json(const char *json_path) {
   auto config = request.mutable_config();
   p4::tmp::P4DeviceConfig device_config;
   std::ifstream istream(json_path);
+  ASSERT_TRUE(istream.good());
   device_config.mutable_device_data()->assign(
       (std::istreambuf_iterator<char>(istream)),
        std::istreambuf_iterator<char>());
