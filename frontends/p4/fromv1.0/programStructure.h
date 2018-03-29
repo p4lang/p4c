@@ -83,6 +83,8 @@ class ProgramStructure {
         T get(cstring name) const { return ::get(nameToObject, name); }
         /// Get the new name
         cstring get(T object) const { return ::get(objectToNewName, object, object->name.name); }
+        /// Get the new name from the old name
+        cstring newname(cstring name) const { return get(get(name)); }
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }

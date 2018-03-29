@@ -755,12 +755,12 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         actionList->push_back(ale);
     }
     if (!table->default_action.name.isNullOrEmpty() &&
-        !actionList->getDeclaration(table->default_action)) {
+        !actionList->getDeclaration(actions.newname(table->default_action))) {
         actionList->push_back(
             new IR::ActionListElement(
                 new IR::Annotations(
                     {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
-                new IR::PathExpression(table->default_action))); }
+                new IR::PathExpression(actions.newname(table->default_action)))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
 
@@ -818,7 +818,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     }
 
     if (!table->default_action.name.isNullOrEmpty()) {
-        auto act = new IR::PathExpression(table->default_action);
+        auto act = new IR::PathExpression(actions.newname(table->default_action));
         auto args = table->default_action_args ?
                 table->default_action_args : new IR::Vector<IR::Expression>();
         auto methodCall = new IR::MethodCallExpression(act, args);
