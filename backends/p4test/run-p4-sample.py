@@ -137,7 +137,7 @@ def compare_files(options, produced, expected):
 def recompile_file(options, produced, mustBeIdentical):
     # Compile the generated file a second time
     secondFile = produced + "-x";
-    args = ["./p4test", "-I.", "--pp", secondFile, "--p4-16", produced] + \
+    args = ["./p4test", "-I.", "--pp", secondFile, "--std", "p4-16", produced] + \
             options.compilerOptions
     result = run_timeout(options, args, timeout, None)
     if result != SUCCESS:
@@ -216,7 +216,7 @@ def process_file(options, argv):
             "--testJson"] + options.compilerOptions
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--p4-14"]);
+        args.extend(["--std", "p4-14"]);
     args.extend(argv)
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()

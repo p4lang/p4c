@@ -41,7 +41,7 @@ def get_version():
 
 
 def display_supported_targets(cfg):
-    ret = "Supported targets in \"target-arch-vendor\" triplet:\n"
+    ret = "Supported targets in \"target, arch\" tuple:\n"
     for target in cfg.target:
         ret += str(target) + "\n"
     return ret
@@ -89,9 +89,12 @@ def main():
                         metavar="<arg>",
                         help="Pass <arg> to the linker",
                         action="append", default=[])
-    parser.add_argument("-b", "--target", dest="backend",
-                        help="specify target backend",
-                        action="store", default="bmv2-ss-p4org")
+    parser.add_argument("-b", "--target", dest="target",
+                        help="specify target device",
+                        action="store", default="bmv2")
+    parser.add_argument("-a", "--arch", dest="arch",
+                        help="specify target architecture",
+                        action="store", default="v1model")
     parser.add_argument("-c", dest="run_all",
                         help="Only run preprocess, compile, and assemble steps",
                         action="store_true", default=True)
@@ -149,6 +152,18 @@ def main():
     # parse the arguments
     opts = parser.parse_args()
 
+    user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
+    if user_defined_version != None:
+        opts.language = user_defined_version
+
+    user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
+    if user_defined_target != None:
+        opts.target = user_defined_target
+
+    user_defined_arch = os.environ.get('P4C_DEFAULT_ARCH')
+    if user_defined_arch != None:
+        opts.arch = user_defined_arch
+
     # deal with early exits
     if opts.show_version:
         print "p4c", get_version()
@@ -161,22 +176,22 @@ def main():
     if not opts.source_file:
         parser.error('No input specified.')
 
-    # check that the triplet value is correct
-    triplet = opts.backend.split('-')
-    if (len(triplet) != 3):
-        parser.error("Invalid target-arch-vendor triplet: {}\n{}".\
-                     format(triplet, display_supported_targets(cfg)))
+    # check that the tuple value is correct
+    backend = (opts.target, opts.arch)
+    if (len(backend) != 2):
+        parser.error("Invalid target and arch tuple: {}\n{}".\
+                     format(backend, display_supported_targets(cfg)))
 
     # find the backend
     backend = None
     for target in cfg.target:
         regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
         pattern = re.compile(regex)
-        if (pattern.match(opts.backend)):
+        if (pattern.match(opts.target + '-' + opts.arch)):
             backend = target
             break
     if backend == None:
-        parser.error("Unknown backend: {}".format(str(opts.backend)))
+        parser.error("Unknown backend: {}-{}".format(str(opts.target), str(opts.arch)))
 
     # set all configuration and command line options for backend
     backend.process_command_line_options(opts)

@@ -30,8 +30,10 @@ class BackendDriver:
 
     """
 
-    def __init__(self, backendName, argParser = None):
-        self._backend = backendName
+    def __init__(self, target, arch, argParser = None):
+        self._target = target
+        self._arch = arch
+        self._backend = target + '-' + arch
         self._commands = {}
         self._commandsEnabled = []
         self._preCmds = {}

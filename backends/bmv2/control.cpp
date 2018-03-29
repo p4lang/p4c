@@ -765,7 +765,7 @@ bool ChecksumConverter::preorder(const IR::PackageBlock *block) {
 bool ChecksumConverter::preorder(const IR::ControlBlock* block) {
     auto it = backend->compute_checksum_controls.find(block->container->name);
     if (it != backend->compute_checksum_controls.end()) {
-        if (backend->target == Target::SIMPLE) {
+        if (backend->target == Target::SIMPLE_SWITCH) {
             P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
             ss->convertChecksum(block->container->body, backend->json->checksums,
                                 backend->json->calculations, false);
@@ -773,7 +773,7 @@ bool ChecksumConverter::preorder(const IR::ControlBlock* block) {
     } else {
         it = backend->verify_checksum_controls.find(block->container->name);
         if (it != backend->verify_checksum_controls.end()) {
-            if (backend->target == Target::SIMPLE) {
+            if (backend->target == Target::SIMPLE_SWITCH) {
                 P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
                 ss->convertChecksum(block->container->body, backend->json->checksums,
                                     backend->json->calculations, true);

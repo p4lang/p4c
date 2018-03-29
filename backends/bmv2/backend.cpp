@@ -181,20 +181,29 @@ class RenameUserMetadata : public Transform {
 };
 
 void
-Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
+Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
     CHECK_NULL(tlb);
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     if (tlb->getMain() == nullptr)
         return;  // no main
 
-    if (options.arch != Target::UNKNOWN)
-        target = options.arch;
+    if (auto arch = getenv("P4C_DEFAULT_ARCH")) {
+        if (!strncmp(arch, "v1model", 7))
+            target = Target::SIMPLE_SWITCH;
+        else if (!strncmp(arch, "psa", 3))
+            target = Target::PORTABLE_SWITCH;
+    } else {
+        if (options.arch == "v1model")
+            target = Target::SIMPLE_SWITCH;
+        else if (options.arch == "psa")
+            target = Target::PORTABLE_SWITCH;
+    }
 
     /// Declaration which introduces the user metadata.
     /// We expect this to be a struct type.
     const IR::Type_Struct* userMetaType = nullptr;
     cstring userMetaName = refMap->newName("userMetadata");
-    if (target == Target::SIMPLE) {
+    if (target == Target::SIMPLE_SWITCH) {
         simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
         simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
         simpleSwitch->setComputeChecksumControls(tlb, &compute_checksum_controls);
@@ -218,7 +227,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         }
         userMetaType = decl->to<IR::Type_Struct>();
         LOG2("User metadata type is " << userMetaType);
-    } else if (target == Target::PORTABLE) {
+    } else if (target == Target::PORTABLE_SWITCH) {
         P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
     }
 
@@ -247,7 +256,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject
 /// that can be interpreted by the BMv2 simulator.
-void Backend::convert(BMV2Options& options) {
+void Backend::convert(CompilerOptions& options) {
     jsonTop.emplace("program", options.file);
     jsonTop.emplace("__meta__", json->meta);
     jsonTop.emplace("header_types", json->header_types);
@@ -326,7 +335,7 @@ void Backend::convert(BMV2Options& options) {
 }
 
 bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
-    if (target == Target::SIMPLE) {
+    if (target == Target::SIMPLE_SWITCH) {
         auto parser = simpleSwitch->getParser(getToplevelBlock());
         auto params = parser->getApplyParameters();
         if (params->size() != 4) {
@@ -361,7 +370,7 @@ bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
 }
 
 bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
-    if (target == Target::SIMPLE) {
+    if (target == Target::SIMPLE_SWITCH) {
         auto parser = simpleSwitch->getParser(getToplevelBlock());
         auto params = parser->getApplyParameters();
         if (params->size() != 4) {

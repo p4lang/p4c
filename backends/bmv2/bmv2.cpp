@@ -30,7 +30,6 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "backend.h"
 #include "midend.h"
-#include "options.h"
 #include "JsonObjects.h"
 
 int main(int argc, char *const argv[]) {
@@ -38,7 +37,7 @@ int main(int argc, char *const argv[]) {
 
     AutoCompileContext autoBMV2Context(new BMV2::BMV2Context);
     auto& options = BMV2::BMV2Context::get().options();
-    options.langVersion = BMV2::BMV2Options::FrontendVersion::P4_16;
+    options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 
     if (options.process(argc, argv) != nullptr)

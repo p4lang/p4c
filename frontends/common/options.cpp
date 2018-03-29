@@ -60,18 +60,6 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--nocpp", nullptr,
                    [this](const char*) { doNotPreprocess = true; return true; },
                    "Skip preprocess, assume input file is already preprocessed.");
-    registerOption("--p4-14", nullptr,
-                   [this](const char*) {
-                       langVersion = CompilerOptions::FrontendVersion::P4_14;
-                       return true; },
-                    "[Deprecated] Specify language version to compile",
-                    OptionFlags::Hide);
-    registerOption("--p4-16", nullptr,
-                   [this](const char*) {
-                       langVersion = CompilerOptions::FrontendVersion::P4_16;
-                       return true; },
-                    "[Deprecated] Specify language version to compile",
-                    OptionFlags::Hide);
     registerOption("--p4v", "{14|16}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
@@ -83,10 +71,26 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                            return false;
                        }
                        return true; },
-                    "Specify language version to compile");
+                    "[Deprecated] Specify language version to compile.",
+                    OptionFlags::Hide);
+    registerOption("--std", "{p4-14|p4-16}",
+                   [this](const char* arg) {
+                       if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_14;
+                       } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_16;
+                       } else {
+                           ::error("Illegal language version %1%", arg);
+                           return false;
+                       }
+                       return true; },
+                    "Specify language version to compile.");
     registerOption("--target", "target",
                    [this](const char* arg) { target = arg; return true; },
-                    "Compile for the specified target");
+                    "Compile for the specified target device.");
+    registerOption("--arch", "arch",
+                   [this](const char* arg) { arch = arg; return true; },
+                   "Compile for the specified architecture.");
     registerOption("--pp", "file",
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
                    "Pretty-print the program in the specified file.");

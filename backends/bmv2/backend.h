@@ -32,15 +32,18 @@ limitations under the License.
 #include "JsonObjects.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
-#include "options.h"
 #include "portableSwitch.h"
 #include "simpleSwitch.h"
 
 namespace BMV2 {
 
+enum class Target { UNKNOWN_SWITCH, PORTABLE_SWITCH, SIMPLE_SWITCH };
+using BMV2Context = P4CContextWithOptions<CompilerOptions>;
+
 class ExpressionConverter;
 
 class Backend : public PassManager {
+
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
     // TODO(hanw): current implementation uses refMap and typeMap from midend.
@@ -105,9 +108,9 @@ class Backend : public PassManager {
         model(P4::PortableModel::instance),
         simpleSwitch(new P4V1::SimpleSwitch(this)),
         json(new BMV2::JsonObjects()),
-        target(Target::SIMPLE) { refMap->setIsV1(isV1); setName("BackEnd"); }
-    void process(const IR::ToplevelBlock* block, BMV2Options& options);
-    void convert(BMV2Options& options);
+        target(Target::SIMPLE_SWITCH) { refMap->setIsV1(isV1); setName("BackEnd"); }
+    void process(const IR::ToplevelBlock* block, CompilerOptions& options);
+    void convert(CompilerOptions& options);
     void serialize(std::ostream& out) const
     { jsonTop.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }

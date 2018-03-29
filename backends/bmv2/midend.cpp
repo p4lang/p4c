@@ -71,7 +71,7 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     { return 32; }
 };
 
-MidEnd::MidEnd(BMV2Options& options) {
+MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.isv1();
     setName("MidEnd");
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
