@@ -216,7 +216,7 @@ def process_file(options, argv):
             "--testJson"] + options.compilerOptions
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--p4-14"]);
+        args.extend(["--p4v", "14"]);
     args.extend(argv)
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
