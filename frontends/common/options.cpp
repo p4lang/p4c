@@ -71,6 +71,19 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                            return false;
                        }
                        return true; },
+                    "[Deprecated] Specify language version to compile.",
+                    OptionFlags::Hide);
+    registerOption("--std", "{p4-14|p4-16}",
+                   [this](const char* arg) {
+                       if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_14;
+                       } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_16;
+                       } else {
+                           ::error("Illegal language version %1%", arg);
+                           return false;
+                       }
+                       return true; },
                     "Specify language version to compile.");
     registerOption("--target", "target",
                    [this](const char* arg) { target = arg; return true; },
