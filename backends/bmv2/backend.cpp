@@ -188,15 +188,15 @@ Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
         return;  // no main
 
     if (options.arch == "v1model")
-        target = Target::SIMPLE;
+        target = Target::SIMPLE_SWITCH;
     else if (options.arch == "psa")
-        target = Target::PORTABLE;
+        target = Target::PORTABLE_SWITCH;
 
     /// Declaration which introduces the user metadata.
     /// We expect this to be a struct type.
     const IR::Type_Struct* userMetaType = nullptr;
     cstring userMetaName = refMap->newName("userMetadata");
-    if (target == Target::SIMPLE) {
+    if (target == Target::SIMPLE_SWITCH) {
         simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
         simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
         simpleSwitch->setComputeChecksumControls(tlb, &compute_checksum_controls);
@@ -220,7 +220,7 @@ Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
         }
         userMetaType = decl->to<IR::Type_Struct>();
         LOG2("User metadata type is " << userMetaType);
-    } else if (target == Target::PORTABLE) {
+    } else if (target == Target::PORTABLE_SWITCH) {
         P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
     }
 
@@ -328,7 +328,7 @@ void Backend::convert(CompilerOptions& options) {
 }
 
 bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
-    if (target == Target::SIMPLE) {
+    if (target == Target::SIMPLE_SWITCH) {
         auto parser = simpleSwitch->getParser(getToplevelBlock());
         auto params = parser->getApplyParameters();
         if (params->size() != 4) {
@@ -363,7 +363,7 @@ bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
 }
 
 bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
-    if (target == Target::SIMPLE) {
+    if (target == Target::SIMPLE_SWITCH) {
         auto parser = simpleSwitch->getParser(getToplevelBlock());
         auto params = parser->getApplyParameters();
         if (params->size() != 4) {

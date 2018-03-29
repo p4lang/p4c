@@ -60,18 +60,6 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--nocpp", nullptr,
                    [this](const char*) { doNotPreprocess = true; return true; },
                    "Skip preprocess, assume input file is already preprocessed.");
-    registerOption("--p4-14", nullptr,
-                   [this](const char*) {
-                       langVersion = CompilerOptions::FrontendVersion::P4_14;
-                       return true; },
-                    "[Deprecated] Specify language version to compile.",
-                    OptionFlags::Hide);
-    registerOption("--p4-16", nullptr,
-                   [this](const char*) {
-                       langVersion = CompilerOptions::FrontendVersion::P4_16;
-                       return true; },
-                    "[Deprecated] Specify language version to compile.",
-                    OptionFlags::Hide);
     registerOption("--p4v", "{14|16}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
