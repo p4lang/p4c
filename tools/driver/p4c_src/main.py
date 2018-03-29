@@ -152,6 +152,18 @@ def main():
     # parse the arguments
     opts = parser.parse_args()
 
+    user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
+    if user_defined_version != None:
+        opts.language = user_defined_version
+
+    user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
+    if user_defined_target != None:
+        opts.target = user_defined_target
+
+    user_defined_arch = os.environ.get('P4C_DEFAULT_ARCH')
+    if user_defined_arch != None:
+        opts.arch = user_defined_arch
+
     # deal with early exits
     if opts.show_version:
         print "p4c", get_version()
