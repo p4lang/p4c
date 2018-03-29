@@ -164,7 +164,7 @@ typedef const IR::Type ConstType;
                             argument simpleKeysetExpression
                             transitionStatement switchLabel
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
-                            typeRef tupleType typeArg realTypeArg valueSetType
+                            typeRef tupleType typeArg realTypeArg valueSetType namedType
 %type<IR::Type_Name*>       typeName
 %type<IR::Parameter*>       parameter
 %type<OptionalConst>        optCONST
@@ -574,6 +574,11 @@ typeRef
     | headerStackType                  { $$ = $1; }
     | tupleType                        { $$ = $1; }
     | valueSetType                     { $$ = $1; }
+    ;
+
+namedType
+    : typeName                         { $$ = $1; }
+    | specializedType                  { $$ = $1; }
     ;
 
 prefixedType
@@ -1041,7 +1046,7 @@ expression
     // precedence weaker than casts.  There is no easy way to fix this in bison.
     | expression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
-    | typeRef "(" argumentList ")"
+    | namedType "(" argumentList ")"
         { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
     | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
     ;
