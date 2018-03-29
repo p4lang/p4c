@@ -187,10 +187,17 @@ Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
     if (tlb->getMain() == nullptr)
         return;  // no main
 
-    if (options.arch == "v1model")
-        target = Target::SIMPLE_SWITCH;
-    else if (options.arch == "psa")
-        target = Target::PORTABLE_SWITCH;
+    if (auto arch = getenv("P4C_DEFAULT_ARCH")) {
+        if (!strncmp(arch, "v1model", 7))
+            target = Target::SIMPLE_SWITCH;
+        else if (!strncmp(arch, "psa", 3))
+            target = Target::PORTABLE_SWITCH;
+    } else {
+        if (options.arch == "v1model")
+            target = Target::SIMPLE_SWITCH;
+        else if (options.arch == "psa")
+            target = Target::PORTABLE_SWITCH;
+    }
 
     /// Declaration which introduces the user metadata.
     /// We expect this to be a struct type.

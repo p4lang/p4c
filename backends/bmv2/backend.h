@@ -37,13 +37,14 @@ limitations under the License.
 
 namespace BMV2 {
 
+enum class Target { UNKNOWN_SWITCH, PORTABLE_SWITCH, SIMPLE_SWITCH };
+using BMV2Context = P4CContextWithOptions<CompilerOptions>;
+
 class ExpressionConverter;
 
 class Backend : public PassManager {
-    enum class Target { UNKNOWN_SWITCH, PORTABLE_SWITCH, SIMPLE_SWITCH };
 
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
-    using BMV2Context = P4CContextWithOptions<CompilerOptions>;
 
     // TODO(hanw): current implementation uses refMap and typeMap from midend.
     // Once all midend passes are refactored to avoid patching refMap, typeMap,
