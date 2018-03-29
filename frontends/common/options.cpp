@@ -64,13 +64,13 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_14;
                        return true; },
-                    "[Deprecated] Specify language version to compile",
+                    "[Deprecated] Specify language version to compile.",
                     OptionFlags::Hide);
     registerOption("--p4-16", nullptr,
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_16;
                        return true; },
-                    "[Deprecated] Specify language version to compile",
+                    "[Deprecated] Specify language version to compile.",
                     OptionFlags::Hide);
     registerOption("--p4v", "{14|16}",
                    [this](const char* arg) {
@@ -83,10 +83,13 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                            return false;
                        }
                        return true; },
-                    "Specify language version to compile");
+                    "Specify language version to compile.");
     registerOption("--target", "target",
                    [this](const char* arg) { target = arg; return true; },
-                    "Compile for the specified target");
+                    "Compile for the specified target device.");
+    registerOption("--arch", "arch",
+                   [this](const char* arg) { arch = arg; return true; },
+                   "Compile for the specified architecture.");
     registerOption("--pp", "file",
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
                    "Pretty-print the program in the specified file.");

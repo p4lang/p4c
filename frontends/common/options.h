@@ -91,8 +91,12 @@ class CompilerOptions : public Util::Options {
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
 
-    // Compiler target architecture
+    // Target
     cstring target = nullptr;
+
+    // Architecture
+    cstring arch = nullptr;
+
     // substrings matched agains pass names
     std::vector<cstring> top4;
 

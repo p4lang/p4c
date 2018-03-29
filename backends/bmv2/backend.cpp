@@ -181,14 +181,16 @@ class RenameUserMetadata : public Transform {
 };
 
 void
-Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
+Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
     CHECK_NULL(tlb);
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     if (tlb->getMain() == nullptr)
         return;  // no main
 
-    if (options.arch != Target::UNKNOWN)
-        target = options.arch;
+    if (options.arch == "v1model")
+        target = Target::SIMPLE;
+    else if (options.arch == "psa")
+        target = Target::PORTABLE;
 
     /// Declaration which introduces the user metadata.
     /// We expect this to be a struct type.
@@ -247,7 +249,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject
 /// that can be interpreted by the BMv2 simulator.
-void Backend::convert(BMV2Options& options) {
+void Backend::convert(CompilerOptions& options) {
     jsonTop.emplace("program", options.file);
     jsonTop.emplace("__meta__", json->meta);
     jsonTop.emplace("header_types", json->header_types);

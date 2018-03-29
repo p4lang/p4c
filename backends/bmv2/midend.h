@@ -21,7 +21,6 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "midend/convertEnums.h"
 #include "helpers.h"
-#include "options.h"
 
 namespace BMV2 {
 
@@ -33,7 +32,7 @@ class MidEnd : public PassManager {
     const IR::ToplevelBlock   *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
 
-    explicit MidEnd(BMV2Options& options);
+    explicit MidEnd(CompilerOptions& options);
     const IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }

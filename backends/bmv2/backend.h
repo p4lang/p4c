@@ -32,11 +32,13 @@ limitations under the License.
 #include "JsonObjects.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
-#include "options.h"
 #include "portableSwitch.h"
 #include "simpleSwitch.h"
 
 namespace BMV2 {
+
+enum class Target { UNKNOWN, PORTABLE, SIMPLE };
+using BMV2Context = P4CContextWithOptions<CompilerOptions>;
 
 class ExpressionConverter;
 
@@ -106,8 +108,8 @@ class Backend : public PassManager {
         simpleSwitch(new P4V1::SimpleSwitch(this)),
         json(new BMV2::JsonObjects()),
         target(Target::SIMPLE) { refMap->setIsV1(isV1); setName("BackEnd"); }
-    void process(const IR::ToplevelBlock* block, BMV2Options& options);
-    void convert(BMV2Options& options);
+    void process(const IR::ToplevelBlock* block, CompilerOptions& options);
+    void convert(CompilerOptions& options);
     void serialize(std::ostream& out) const
     { jsonTop.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
