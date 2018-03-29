@@ -137,7 +137,7 @@ def compare_files(options, produced, expected):
 def recompile_file(options, produced, mustBeIdentical):
     # Compile the generated file a second time
     secondFile = produced + "-x";
-    args = ["./p4test", "-I.", "--pp", secondFile, "--p4-16", produced] + \
+    args = ["./p4test", "-I.", "--pp", secondFile, "--p4v", "16", produced] + \
             options.compilerOptions
     result = run_timeout(options, args, timeout, None)
     if result != SUCCESS:
