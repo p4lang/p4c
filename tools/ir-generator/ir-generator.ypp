@@ -395,6 +395,8 @@ void yyerror(const char *fmt, ...) {
 
 IrDefinitions *parse(char** files, int count) {
     int errors = 0;
+    class IrgenCompileContext : public BaseCompileContext { } ctxt;
+    AutoCompileContext ctxt_ctl(&ctxt);
 #ifdef YYDEBUG
     if (const char *p = getenv("YYDEBUG"))
         yydebug = atoi(p);
