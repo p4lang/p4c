@@ -207,7 +207,7 @@ class ProgramStructure {
     virtual const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
     virtual const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
     virtual const IR::Declaration_Instance*
-        convertDirectCounter(const IR::Counter* m, cstring newName);
+        convertDirectCounter(const IR::Counter* c, cstring newName);
     virtual const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
     virtual const IR::Declaration_Instance* convertActionProfile(const IR::ActionProfile *,
                                                          cstring newName);
@@ -241,7 +241,7 @@ class ProgramStructure {
     virtual const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
     virtual const IR::Expression* convertHashAlgorithms(const IR::NameList *algorithm);
     virtual const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
-                                                    const IR::Type *elementType = nullptr);
+                                                    const IR::Type *regElementType = nullptr);
     virtual const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
     virtual const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
     virtual const IR::Expression* paramReference(const IR::Parameter* param);

@@ -60,7 +60,7 @@ class Evaluator final : public Inspector, public IHasBlock {
     bool preorder(const IR::P4Table* table) override;
     bool preorder(const IR::Declaration_Instance* inst) override;
     bool preorder(const IR::ConstructorCallExpression* inst) override;
-    bool preorder(const IR::MethodCallExpression* inst) override;
+    bool preorder(const IR::MethodCallExpression* expr) override;
     bool preorder(const IR::PathExpression* expression) override;
     bool preorder(const IR::Property* prop) override;
     bool preorder(const IR::Member* expression) override;
