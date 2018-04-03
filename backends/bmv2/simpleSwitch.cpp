@@ -242,6 +242,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         auto ei = P4::EnumInstance::resolve(cloneType, typeMap);
         if (ei == nullptr) {
             modelError("%1%: must be a constant on this target", cloneType);
+            return;
         } else {
             cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
                     "clone_egress_pkt_to_egress";
@@ -519,12 +520,14 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         }
         cstring name = mkind->to<IR::Declaration_ID>()->name;
         cstring type = "?";
-        if (name == v1model.meter.meterType.packets.name)
+        if (name == v1model.meter.meterType.packets.name) {
             type = "packets";
-        else if (name == v1model.meter.meterType.bytes.name)
+        } else if (name == v1model.meter.meterType.bytes.name) {
             type = "bytes";
-        else
+        } else {
             modelError("%1%: unexpected meter type", mkind->getNode());
+            return;
+        }
         jmtr->emplace("type", type);
         jmtr->emplace("size", info->tableSize);
         cstring tblname = info->table->controlPlaneName();
