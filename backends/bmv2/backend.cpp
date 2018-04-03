@@ -209,6 +209,8 @@ Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
         simpleSwitch->setComputeChecksumControls(tlb, &compute_checksum_controls);
         simpleSwitch->setVerifyChecksumControls(tlb, &verify_checksum_controls);
         simpleSwitch->setDeparserControls(tlb, &deparser_controls);
+        if (::errorCount() > 0)
+            return;
 
         // Find the user metadata declaration
         auto parser = simpleSwitch->getParser(tlb);
