@@ -151,7 +151,8 @@ class TypeInference : public Transform {
             checkExternConstructor(const IR::Node* errorPosition,
                                    const IR::Type_Extern* ext,
                                    const IR::Vector<IR::Expression> *arguments);
-    bool checkParameters(const IR::ParameterList* paramList, bool forbidModules = false) const;
+    bool checkParameters(const IR::ParameterList* paramList,
+                         bool forbidModules = false, bool forbidPackage = false) const;
     const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
     //////////////////////////////////////////////////////////////
