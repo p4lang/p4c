@@ -19,7 +19,6 @@ sudo apt-get install -y \
     pkg-config \
     g++ \
     libssl-dev \
-    mktemp \
     libffi-dev \
     python-dev \
     python-pip \
