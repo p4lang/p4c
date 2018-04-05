@@ -303,7 +303,7 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
                 if (boolLit->value != eqTest)
                     return boolLit;
             }
-            return new IR::BoolLiteral(e->srcInfo, true);
+            return new IR::BoolLiteral(e->srcInfo, eqTest);
         }
     }
 
