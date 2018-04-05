@@ -11,6 +11,8 @@ const bool w = true;
 const S s = { 32w10, 32w20 };
 const bool v = true;
 const bool o = false;
+const bool vnot = true;
+const bool onot = true;
 control c(out bool z);
 package top(c _c);
 control test(out bool zout) {

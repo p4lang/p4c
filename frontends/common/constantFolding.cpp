@@ -300,7 +300,7 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
                 auto boolLit = cmp->to<IR::BoolLiteral>();
                 if (boolLit == nullptr)
                     return e;
-                if (!boolLit->value)
+                if (boolLit->value != eqTest)
                     return boolLit;
             }
             return new IR::BoolLiteral(e->srcInfo, true);
