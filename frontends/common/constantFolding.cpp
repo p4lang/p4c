@@ -52,8 +52,12 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
         auto cst = get(constants, dc);
         if (cst == nullptr)
             return e;
-        if (!typesKnown && cst->is<IR::ListExpression>())
-            return e;
+        if (cst->is<IR::ListExpression>()) {
+            if (!typesKnown)
+                // We don't want to commit to this value before we do
+                // type checking; maybe it's wrong.
+                return e;
+        }
         if (cst->is<IR::Constant>()) {
             // We clone the constant.  This is necessary because the same
             // the type associated with the constant may participate in
@@ -274,6 +278,32 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
                       "%1%: different enum types in comparison", e);
             bool bresult = (le->name == re->name) == eqTest;
             return new IR::BoolLiteral(e->srcInfo, bresult);
+        }
+
+        auto llist = eleft->to<IR::ListExpression>();
+        auto rlist = eright->to<IR::ListExpression>();
+        if (llist != nullptr && rlist != nullptr) {
+            if (llist->components.size() != rlist->components.size()) {
+                ::error("%1%: comparing lists of different size", e);
+                return e;
+            }
+
+            for (size_t i = 0; i < llist->components.size(); i++) {
+                auto li = llist->components.at(i);
+                auto ri = rlist->components.at(i);
+                const IR::Operation_Binary* tmp;
+                if (eqTest)
+                    tmp = new IR::Equ(li, ri);
+                else
+                    tmp = new IR::Neq(li, ri);
+                auto cmp = compare(tmp);
+                auto boolLit = cmp->to<IR::BoolLiteral>();
+                if (boolLit == nullptr)
+                    return e;
+                if (boolLit->value != eqTest)
+                    return boolLit;
+            }
+            return new IR::BoolLiteral(e->srcInfo, eqTest);
         }
     }
 
