@@ -1389,11 +1389,45 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     if (equTest) {
         bool defined = false;
         if (TypeMap::equivalent(ltype, rtype) &&
-            (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>()))
+            (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
             defined = true;
-        else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
-                 TypeMap::equivalent(ltype, rtype))
+        } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
+                 TypeMap::equivalent(ltype, rtype)) {
             defined = true;
+        } else if (ltype->is<IR::Type_Tuple>() && rtype->is<IR::Type_Tuple>()) {
+            auto tvs = unify(expression, ltype, rtype, true);
+            if (tvs == nullptr)
+                // error already signalled
+                return expression;
+            if (!tvs->isIdentity()) {
+                ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+                expression->left = cts.convert(expression->left);
+                expression->right = cts.convert(expression->right);
+            }
+            defined = true;
+        } else {
+            // comparison between structs and list expressions is allowed
+            if ((ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_Tuple>()) ||
+                (ltype->is<IR::Type_Tuple>() && rtype->is<IR::Type_StructLike>())) {
+                if (!ltype->is<IR::Type_StructLike>()) {
+                    // swap
+                    auto type = ltype;
+                    ltype = rtype;
+                    rtype = type;
+                }
+
+                auto tvs = unify(expression, ltype, rtype, true);
+                if (tvs == nullptr)
+                    // error already signalled
+                    return expression;
+                if (!tvs->isIdentity()) {
+                    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+                    expression->left = cts.convert(expression->left);
+                    expression->right = cts.convert(expression->right);
+                }
+                defined = true;
+            }
+        }
 
         if (!defined) {
             typeError("%1%: not defined on %2% and %3%",

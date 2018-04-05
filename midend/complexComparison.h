@@ -34,7 +34,8 @@ class RemoveComplexComparisons : public Transform {
     /// Expands left == right into sub-field comparisons
     const IR::Expression* explode(
         Util::SourceInfo srcInfo,
-        const IR::Type* type, const IR::Expression* left, const IR::Expression* right);
+        const IR::Type* leftType, const IR::Expression* left,
+        const IR::Type* rightType, const IR::Expression* right);
 
  public:
     RemoveComplexComparisons(ReferenceMap* refMap, TypeMap* typeMap):
