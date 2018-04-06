@@ -1223,11 +1223,9 @@ class P4RuntimeAnalyzer {
         addAnnotations(profile->mutable_preamble(), actionProfile.annotations);
     }
 
-    void addValueSet(const IR::Declaration_Variable* inst) {
+    void addValueSet(const IR::P4ValueSet* inst) {
         // guaranteed by caller
         CHECK_NULL(inst);
-        BUG_CHECK(inst->type->is<IR::Type_ValueSet>(),
-                  "variable %1% is not of type value_set", inst);
 
         auto pvsType = inst->type->to<IR::Type_ValueSet>();
         auto bitwidth = static_cast<uint32_t>(pvsType->width_bits());
@@ -1235,23 +1233,16 @@ class P4RuntimeAnalyzer {
         auto name = inst->controlPlaneName();
 
         unsigned int size = 0;
-        auto sizeAnnotation = inst->getAnnotation("size");
-        if (sizeAnnotation) {
-            if (sizeAnnotation->expr.size() != 1) {
-                ::error("@size should be an integer for declaration %1%", inst);
-                return;
-            }
-            auto sizeConstant = sizeAnnotation->expr[0]->to<IR::Constant>();
-            if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
-                ::error("@size should be an integer for declaration %1%", inst);
-                return;
-            }
-            if (sizeConstant->value < 0) {
-                ::error("@size should be a positive integer for declaration %1%", inst);
-                return;
-            }
-            size = sizeConstant->value.get_ui();
+        auto sizeConstant = inst->expression->to<IR::Constant>();
+        if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
+            ::error("@size should be an integer for declaration %1%", inst);
+            return;
         }
+        if (sizeConstant->value < 0) {
+            ::error("@size should be a positive integer for declaration %1%", inst);
+            return;
+        }
+        size = sizeConstant->value.get_ui();
 
         auto vs = p4Info->add_value_sets();
         auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET, name);
@@ -1805,9 +1796,7 @@ static void analyzeParser(P4RuntimeAnalyzer& analyzer,
     CHECK_NULL(parser);
 
     for (auto s : parser->parserLocals) {
-        if (auto inst = s->to<IR::Declaration_Variable>()) {
-            if (!inst->type->is<IR::Type_ValueSet>())
-                continue;
+        if (auto inst = s->to<IR::P4ValueSet>()) {
             analyzer.addValueSet(inst);
         }
     }

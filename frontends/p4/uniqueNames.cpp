@@ -89,10 +89,6 @@ IR::ID* RenameSymbols::getName() const {
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
     auto name = getName();
     if (name != nullptr && *name != decl->name) {
-        if (decl->type->is<IR::Type_ValueSet>()) {
-            auto annos = addNameAnnotation(decl->name, decl->annotations);
-            decl->annotations = annos;
-        }
         decl->name = *name;
     }
     return decl;
@@ -147,6 +143,16 @@ const IR::Node* RenameSymbols::postorder(IR::P4Table* decl) {
 }
 
 const IR::Node* RenameSymbols::postorder(IR::P4Action* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::P4ValueSet* decl) {
     auto name = getName();
     if (name != nullptr && *name != decl->name) {
         auto annos = addNameAnnotation(decl->name, decl->annotations);

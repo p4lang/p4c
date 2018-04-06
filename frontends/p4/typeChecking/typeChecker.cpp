@@ -1166,6 +1166,18 @@ const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
     return type;
 }
 
+const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
+    if (done())
+        return decl;
+    auto type = getTypeType(decl->type);
+    if (type == nullptr)
+        return decl;
+    auto orig = getOriginal<IR::P4ValueSet>();
+    setType(decl, type);
+    setType(orig, type);
+    return decl;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {
     if (done()) return type;
     auto canon = setTypeType(type);

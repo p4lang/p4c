@@ -201,6 +201,11 @@ void IR::P4Table::dbprint(std::ostream &out) const {
     out << " }" << unindent;
 }
 
+void IR::P4ValueSet::dbprint(std::ostream &out) const {
+    out << "value_set " << name;
+    out << " " << annotations << "(" << expression << ")";
+}
+
 void IR::V1Control::dbprint(std::ostream &out) const {
     out << "control " << name << " {" << indent << code << unindent << " }";
 }

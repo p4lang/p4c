@@ -275,6 +275,14 @@ bool ToP4::preorder(const IR::Type_ValueSet* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::P4ValueSet* t) {
+    dump(1);
+    visit(t->type);
+    visit(t->expression);
+    builder.newline();
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Enum* t) {
     dump(1);
     builder.append("enum ");

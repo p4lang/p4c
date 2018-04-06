@@ -108,6 +108,7 @@ class RenameSymbols : public Transform {
     const IR::Node* postorder(IR::Declaration_Instance* decl) override;
     const IR::Node* postorder(IR::P4Table* decl) override;
     const IR::Node* postorder(IR::P4Action* decl) override;
+    const IR::Node* postorder(IR::P4ValueSet* decl) override;
     const IR::Node* postorder(IR::Parameter* param) override;
 };
 

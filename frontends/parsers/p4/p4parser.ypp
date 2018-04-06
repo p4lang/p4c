@@ -164,7 +164,7 @@ typedef const IR::Type ConstType;
                             argument simpleKeysetExpression
                             transitionStatement switchLabel
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
-                            typeRef tupleType typeArg realTypeArg valueSetType namedType
+                            typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
 %type<IR::Parameter*>       parameter
 %type<OptionalConst>        optCONST
@@ -195,7 +195,7 @@ typedef const IR::Type ConstType;
 %type<IR::Declaration*>     constantDeclaration actionDeclaration
                             variableDeclaration instantiation functionDeclaration
                             objDeclaration tableDeclaration controlLocalDeclaration
-                            parserLocalElement
+                            parserLocalElement valueSetDeclaration
 %type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
@@ -204,6 +204,7 @@ typedef const IR::Type ConstType;
 %type<IR::Node*>            declaration externDeclaration matchKindDeclaration
 %type<IR::Type_Parser*>     parserTypeDeclaration
 %type<IR::Type_Control*>    controlTypeDeclaration
+%type<IR::Type_ValueSet*>   valueSetType
 %type<IR::IndexedVector<IR::Declaration>*>  parserLocalElements controlLocalDeclarations
 %type<IR::StructField*>     structField
 %type<IR::IndexedVector<IR::StructField>*>  structFieldList
@@ -397,6 +398,7 @@ parserLocalElement
     : constantDeclaration             { $$ = $1; }
     | instantiation                   { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
+    | valueSetDeclaration             { $$ = $1; }
     ;
 
 parserTypeDeclaration
@@ -489,6 +491,12 @@ simpleKeysetExpression
     | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
+valueSetDeclaration
+    : optAnnotations
+        valueSetType "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@6, *$6, $1, $2, $4); }
+    ;
+
 /*************************** CONTROL ************************/
 
 controlDeclaration
@@ -573,7 +581,6 @@ typeRef
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
     | tupleType                        { $$ = $1; }
-    | valueSetType                     { $$ = $1; }
     ;
 
 namedType

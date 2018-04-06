@@ -210,6 +210,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_ActionEnum* type) override;
     const IR::Node* postorder(IR::P4Table* type) override;
     const IR::Node* postorder(IR::P4Action* type) override;
+    const IR::Node* postorder(IR::P4ValueSet* type) override;
     const IR::Node* postorder(IR::Key* key) override;
     const IR::Node* postorder(IR::Entry* e) override;
 
