@@ -1147,7 +1147,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     return type;
 }
 
-const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
+const IR::Node* TypeInference::postorder(IR::P4ValueSet* type) {
     // This is a specialized version of setTypeType
     auto canon = canonicalize(type->elementType);
     if (canon != nullptr) {
