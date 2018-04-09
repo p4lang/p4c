@@ -55,12 +55,14 @@ class ControlConverter : public Inspector {
                                 Util::JsonArray* registers);
 
  public:
+    const bool emitExterns;
+
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::ControlBlock* b) override;
 
-    explicit ControlConverter(Backend *backend) : backend(backend),
+    explicit ControlConverter(Backend *backend, const bool& emitExterns_) : backend(backend),
         refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-        conv(backend->getExpressionConverter()), json(backend->json)
+        conv(backend->getExpressionConverter()), json(backend->json), emitExterns(emitExterns_)
     { setName("Control"); }
 };
 
@@ -75,8 +77,8 @@ class ChecksumConverter : public Inspector {
 
 class ConvertControl final : public PassManager {
  public:
-    explicit ConvertControl(Backend *backend) {
-        passes.push_back(new ControlConverter(backend));
+    explicit ConvertControl(Backend *backend, const bool& emitExterns_) {
+        passes.push_back(new ControlConverter(backend, emitExterns_));
         passes.push_back(new ChecksumConverter(backend));
         setName("ConvertControl");
     }

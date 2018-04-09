@@ -100,6 +100,9 @@ class CompilerOptions : public Util::Options {
     // substrings matched agains pass names
     std::vector<cstring> top4;
 
+    // Externs generation
+    bool emitExterns = false;
+
     // Expect that the only remaining argument is the input file.
     void setInputFile();
 

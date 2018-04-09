@@ -37,9 +37,10 @@ class ConvertActions : public Inspector {
     void createActions();
     bool preorder(const IR::PackageBlock* package);
  public:
-    explicit ConvertActions(Backend *backend) : backend(backend),
+    const bool emitExterns;
+    explicit ConvertActions(Backend *backend, const bool& emitExterns_) : backend(backend),
     refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-    json(backend->json), conv(backend->getExpressionConverter())
+    json(backend->json), conv(backend->getExpressionConverter()), emitExterns(emitExterns_)
     { setName("ConvertActions"); }
 };
 

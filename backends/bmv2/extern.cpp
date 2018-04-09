@@ -75,9 +75,9 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
 
 /// Custom visitor to enable traversal on other blocks
 bool Extern::preorder(const IR::PackageBlock *block) {
-    if (backend->target != Target::PORTABLE_SWITCH)
+    if (backend->target != Target::PORTABLE_SWITCH && !emitExterns)
         return false;
-
+    std::cout << "je suis ici\n";
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>()) {
             visit(it.second->getNode());

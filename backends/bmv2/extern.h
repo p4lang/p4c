@@ -36,17 +36,19 @@ class Extern : public Inspector {
         addExternAttributes(const IR::Declaration_Instance* di, const IR::ExternBlock* block);
 
  public:
+    const bool emitExterns;
+
     bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Declaration_Instance* decl) override;
 
-    explicit Extern(Backend *backend) : backend(backend),
-        json(backend->json) { setName("Extern"); }
+    explicit Extern(Backend *backend, const bool& emitExterns_) : backend(backend),
+        json(backend->json), emitExterns(emitExterns_) { setName("Extern"); }
 };
 
 class ConvertExterns final : public PassManager {
  public:
-    explicit ConvertExterns(Backend *b) {
-       passes.push_back(new Extern(b));
+    explicit ConvertExterns(Backend *b, const bool& emitExterns_) {
+       passes.push_back(new Extern(b, emitExterns_));
        setName("ConvertExterns");
     }
 };

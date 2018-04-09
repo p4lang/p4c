@@ -29,7 +29,7 @@ bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
     auto action_profiles = new Util::JsonArray();
     backend->getSimpleSwitch()->convertExternInstances(
         block->node->to<IR::Declaration>(),
-        block->to<IR::ExternBlock>(), action_profiles, ssc);
+        block->to<IR::ExternBlock>(), action_profiles, ssc, false);
     return false;
 }
 

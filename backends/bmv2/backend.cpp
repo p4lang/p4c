@@ -319,10 +319,10 @@ void Backend::convert(CompilerOptions& options) {
     // if (psa) tlb->apply(new ConvertExterns());
     PassManager codegen_passes = {
         new ConvertHeaders(this, scalarsName),
-        new ConvertExterns(this),  // only run when target == PSA
+        new ConvertExterns(this, options.emitExterns),  // only run when target == PSA
         new ConvertParser(this),
-        new ConvertActions(this),
-        new ConvertControl(this),
+        new ConvertActions(this, options.emitExterns),
+        new ConvertControl(this, options.emitExterns),
         new ConvertDeparser(this),
     };
 
