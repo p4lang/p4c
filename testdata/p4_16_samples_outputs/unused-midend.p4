@@ -17,7 +17,7 @@ extern E {
 
 control c(inout S s) {
     bit<32> tmp_0;
-    @name("e") E() e;
+    @name("c.e") E() e;
     @hidden action act() {
         s.h.data3 = 32w0;
     }
@@ -49,3 +49,4 @@ control c(inout S s) {
 control cproto<T>(inout T v);
 package top(cproto<_> _c);
 top(c()) main;
+

@@ -55,7 +55,7 @@ class CompilerBug final : public P4CExceptionBase {
             : P4CExceptionBase(format, args...)
     { message = cstring(ANSI_RED) + "Compiler Bug" + ANSI_CLR + ":\n" + message; }
     template <typename... T>
-    CompilerBug(const char* file, int line, const char* format, T... args)
+    CompilerBug(int line, const char* file, const char* format, T... args)
             : P4CExceptionBase(format, args...)
     { message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
                 + ANSI_RED + "Compiler Bug" + ANSI_CLR + ": " + message; }
@@ -67,9 +67,9 @@ class CompilerUnimplemented final : public P4CExceptionBase {
     template <typename... T>
     CompilerUnimplemented(const char* format, T... args)
             : P4CExceptionBase(format, args...)
-    { message = cstring(ANSI_BLUE) +"Unimplemented compiler support"+ ANSI_CLR + ":\n" + message; }
+    { message = cstring(ANSI_BLUE) +"Not yet implemented"+ ANSI_CLR + ":\n" + message; }
     template <typename... T>
-    CompilerUnimplemented(const char* file, int line, const char* format, T... args)
+    CompilerUnimplemented(int line, const char* file, const char* format, T... args)
             : P4CExceptionBase(format, args...)
     { message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
                 ANSI_BLUE + "Unimplemented compiler support" + ANSI_CLR + ": " + message; }
@@ -86,10 +86,10 @@ class CompilationError : public P4CExceptionBase {
             : P4CExceptionBase(format, args...) {}
 };
 
-#define BUG(...) do { throw Util::CompilerBug(__FILE__, __LINE__, __VA_ARGS__); } while (0)
+#define BUG(...) do { throw Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); } while (0)
 #define BUG_CHECK(e, ...) do { if (!(e)) BUG(__VA_ARGS__); } while (0)
 #define P4C_UNIMPLEMENTED(...) do { \
-        throw Util::CompilerUnimplemented(__FILE__, __LINE__, __VA_ARGS__); \
+        throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 
 }  // namespace Util

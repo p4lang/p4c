@@ -1,0 +1,47 @@
+packet 0 cafeadffffff 000000000000 0000
+expect 0 cafeadffffff 000000000000 00a7
+
+packet 0 cafead000000 000000000000 0000
+expect 0 cafead000000 000000000000 00a7
+
+packet 0 cafeaeffffff 000000000000 0000
+expect 0 cafeaeffffff 000000000000 00a6
+
+packet 0 cafe51ffffff 000000000000 0000
+expect 0 cafe51ffffff 000000000000 00a6
+
+packet 0 ca7eadffffff 000000000000 0000
+expect 0 ca7eadffffff 000000000000 00a5
+
+packet 0 ca81adffffff 000000000000 0000
+expect 0 ca81adffffff 000000000000 00a5
+
+packet 0 cbfeadffffff 000000000000 0000
+expect 0 cbfeadffffff 000000000000 00a3
+
+packet 0 34feadffffff 000000000000 0000
+expect 0 34feadffffff 000000000000 00a3
+
+packet 0 cadea5ffffff 000000000000 0000
+expect 0 cadea5ffffff 000000000000 00a4
+
+packet 0 ca215affffff 000000000000 0000
+expect 0 ca215affffff 000000000000 00a4
+
+packet 0 c2fea3ffffff 000000000000 0000
+expect 0 c2fea3ffffff 000000000000 00a2
+
+packet 0 3dfe5cffffff 000000000000 0000
+expect 0 3dfe5cffffff 000000000000 00a2
+
+packet 0 c2faadffffff 000000000000 0000
+expect 0 c2faadffffff 000000000000 00a1
+
+packet 0 3d05adffffff 000000000000 0000
+expect 0 3d05adffffff 000000000000 00a1
+
+packet 0 daf6a9ffffff 000000000000 0000
+expect 0 daf6a9ffffff 000000000000 00a0
+
+packet 0 350956ffffff 000000000000 0000
+expect 0 350956ffffff 000000000000 00a0

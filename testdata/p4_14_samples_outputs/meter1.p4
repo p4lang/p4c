@@ -19,23 +19,23 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta") 
+    @name(".meta") 
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -46,47 +46,43 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
+    @name(".my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
     @name("._drop") action _drop() {
         mark_to_drop();
     }
     @name("._nop") action _nop() {
     }
     @name(".m_action") action m_action(bit<9> meter_idx) {
-        standard_metadata.egress_spec = (bit<9>)meter_idx;
-        standard_metadata.egress_spec = (bit<9>)9w1;
+        standard_metadata.egress_spec = meter_idx;
+        standard_metadata.egress_spec = 9w1;
     }
-    @name("m_filter") table m_filter {
+    @name(".m_filter") table m_filter {
         actions = {
             _drop;
             _nop;
-            @default_only NoAction;
         }
         key = {
             meta.meta.meter_tag: exact;
         }
         size = 16;
-        default_action = NoAction();
     }
     @name(".m_action") action m_action_0(bit<9> meter_idx) {
         my_meter.read(meta.meta.meter_tag);
-        standard_metadata.egress_spec = (bit<9>)meter_idx;
-        standard_metadata.egress_spec = (bit<9>)9w1;
+        standard_metadata.egress_spec = meter_idx;
+        standard_metadata.egress_spec = 9w1;
     }
     @name("._nop") action _nop_0() {
         my_meter.read(meta.meta.meter_tag);
     }
-    @name("m_table") table m_table {
+    @name(".m_table") table m_table {
         actions = {
             m_action_0;
             _nop_0;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
-        default_action = NoAction();
         meters = my_meter;
     }
     apply {
@@ -101,7 +97,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -112,3 +108,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

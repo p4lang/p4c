@@ -33,16 +33,16 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("vlan") 
+    @name(".vlan") 
     vlan_t     vlan;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
@@ -50,37 +50,36 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name("parse_vlan") state parse_vlan {
+    @name(".parse_vlan") state parse_vlan {
         packet.extract<vlan_t>(hdr.vlan);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name(".action_0") action action_2(bit<8> my_param0, bit<8> my_param1) {
         hdr.ipv4.protocol[7:3] = my_param0[7:3];
         hdr.ipv4.ttl = my_param1;
     }
     @name(".action_1") action action_3(bit<8> my_param2) {
-        hdr.ipv4.totalLen = hdr.ipv4.totalLen;
     }
-    @name("table_0") table table_0 {
+    @name(".table_0") table table_0 {
         actions = {
             action_2();
             action_3();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ipv4.srcAddr: exact @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.srcAddr: exact @name("ipv4.srcAddr") ;
         }
         max_size = 4096;
         default_action = NoAction_0();
@@ -103,7 +102,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -114,3 +113,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

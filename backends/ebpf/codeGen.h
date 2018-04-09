@@ -22,6 +22,12 @@ limitations under the License.
 #include "target.h"
 #include "frontends/p4/typeMap.h"
 
+namespace P4 {
+
+class ReferenceMap;
+
+}
+
 namespace EBPF {
 
 class CodeBuilder : public Util::SourceCodeBuilder {
@@ -66,9 +72,8 @@ class CodeGenInspector : public Inspector {
     { return notSupported(expression); }
     bool preorder(const IR::Mask* expression) override
     { return notSupported(expression); }
-    bool preorder(const IR::Slice* expression) override
+    bool preorder(const IR::Slice* expression) override  // should not happen
     { return notSupported(expression); }
-
     bool preorder(const IR::StringLiteral* expression) override;
     bool preorder(const IR::ListExpression* expression) override;
     bool preorder(const IR::PathExpression* expression) override;
@@ -85,8 +90,6 @@ class CodeGenInspector : public Inspector {
     bool comparison(const IR::Operation_Relation* comp);
     bool preorder(const IR::Equ* e) override { return comparison(e); }
     bool preorder(const IR::Neq* e) override { return comparison(e); }
-
-    bool preorder(const IR::IndexedVector<IR::StatOrDecl>* v) override;
     bool preorder(const IR::Path* path) override;
 
     bool preorder(const IR::Type_Typedef* type) override;
@@ -100,30 +103,6 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::IfStatement* s) override;
 
     void widthCheck(const IR::Node* node) const;
-
- protected:
-    struct VecPrint {
-        cstring separator;
-        cstring terminator;
-
-        VecPrint(const char* sep, const char* term) :
-                separator(sep), terminator(term) {}
-    };
-
-    // maintained as stack
-    std::vector<VecPrint> vectorSeparator;
-
-    void setVecSep(const char* sep, const char* term = nullptr) {
-        vectorSeparator.push_back(VecPrint(sep, term));
-    }
-    void doneVec() {
-        BUG_CHECK(!vectorSeparator.empty(), "Empty vectorSeparator");
-        vectorSeparator.pop_back();
-    }
-    VecPrint getSep() {
-        BUG_CHECK(!vectorSeparator.empty(), "Empty vectorSeparator");
-        return vectorSeparator.back();
-    }
 };
 
 }  // namespace EBPF

@@ -22,13 +22,13 @@
   C comments are ignored.
   C++ line comments can appear in some places and are emitted in the output.
 
-  #emit/#end     -> copy text literally to output header file
-  #emitimpl/#end -> copy text literally to output C++ file
-  #noXXX         -> do not emit the specified implementation for the XXX method
-                    e.g., #noconstructor, #nodbprint, #novisit_children
-  #apply         -> generate apply overload for visitors
-  method{ ... }  -> specifies an implementation for a default method
-                    method can be 'operator=='
+  #emit/#end      -> copy text literally to output header file
+  #emit_impl/#end -> copy text literally to output C++ file
+  #noXXX          -> do not emit the specified implementation for the XXX method
+                     e.g., #noconstructor, #nodbprint, #novisit_children
+  #apply          -> generate apply overload for visitors
+  method{ ... }   -> specifies an implementation for a default method
+                     method can be 'operator=='
 
   Some assignments are turned into methods returning constant values:
   stringOp     -> cstring getStringOp() const
@@ -96,6 +96,7 @@ class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
             return decl;
         return states.getDeclaration(name); }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
+    ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
     void checkDuplicates() const;
@@ -120,6 +121,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return controlLocals.getDeclarations(); }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
+    ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
     Type_Method getConstructorMethodType() const override;
     IDeclaration getDeclByName(cstring name) const override {
         return controlLocals.getDeclaration(name); }
@@ -289,6 +291,7 @@ class P4Table : Declaration, IAnnotated, IApply {
 
     Annotations getAnnotations() const override { return annotations; }
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return new ParameterList(); }
     ActionList getActionList() const {
         auto ap = properties->getProperty(TableProperties::actionsPropertyName);
         if (ap == nullptr)
@@ -421,7 +424,7 @@ class IfStatement : Statement {
     }
 }
 
-class BlockStatement : Statement, ISimpleNamespace {
+class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     optional Annotations                        annotations = Annotations::empty;
     optional inline IndexedVector<StatOrDecl>   components;
     IDeclaration getDeclByName(cstring name) const override {
@@ -429,10 +432,17 @@ class BlockStatement : Statement, ISimpleNamespace {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 class MethodCallStatement : Statement {
     MethodCallExpression methodCall;
+    MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
+    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
+    : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
+    MethodCallStatement(Util::SourceInfo si, Expression m,
+                        const std::initializer_list<Expression> &a)
+    : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
 }
 
 class SwitchCase {
@@ -457,7 +467,7 @@ class SwitchStatement : Statement {
     inline Vector<SwitchCase> cases;
     visit_children {
         v.visit(expression, "expression");
-        cases.parallel_visit_children(v); }
+        v.parallel_visit(cases, "cases"); }
 }
 
 class Function : Declaration {
@@ -508,7 +518,15 @@ abstract InstantiatedBlock : Block {
 
     virtual ParameterList getConstructorParameters() const = 0;
     void instantiate(std::vector<CompileTimeValue> *args);
+
+    /// @return the argument that the given parameter was instantiated with.
+    /// It's a fatal error if no such parameter exists.
     CompileTimeValue getParameterValue(cstring paramName) const;
+
+    /// @return the argument that the given parameter was instantiated with, or
+    /// null if no such parameter exists.
+    CompileTimeValue findParameterValue(cstring paramName) const;
+
     virtual void dbprint(std::ostream& out) const override;
 }
 
@@ -516,6 +534,7 @@ class ParserBlock : InstantiatedBlock {
     P4Parser container;
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
+    toString { return container->toString(); }
 #nodbprint
 }
 
@@ -523,12 +542,14 @@ class ControlBlock : InstantiatedBlock {
     P4Control container;
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
+    toString { return container->toString(); }
 #nodbprint
 }
 
 class PackageBlock : InstantiatedBlock {
     Type_Package type;
     ParameterList getConstructorParameters() const override { return type->constructorParams; }
+    toString { return type->toString(); }
 #nodbprint
 }
 
@@ -537,6 +558,7 @@ class ExternBlock : InstantiatedBlock {
     Method      constructor;  // used to instantiate this block
     ParameterList getConstructorParameters() const override {
         return constructor->type->parameters; }
+    toString { return type->toString(); }
 #nodbprint
 }
 

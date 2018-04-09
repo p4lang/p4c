@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ limitations under the License.
 #include "dbprint.h"
 #include "lib/enumerator.h"
 #include "lib/null.h"
+#include "lib/safe_vector.h"
+
+class JSONLoader;
 
 namespace IR {
 
@@ -49,7 +52,7 @@ class VectorBase : public Node {
 // User-level code should use regular std::vector
 template<class T>
 class Vector : public VectorBase {
-    vector<const T *>   vec;
+    safe_vector<const T *>   vec;
 
  public:
     typedef const T* value_type;
@@ -61,12 +64,12 @@ class Vector : public VectorBase {
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) {
         vec.emplace_back(std::move(a)); }
-    explicit Vector(const vector<const T *> &a) {
+    explicit Vector(const safe_vector<const T *> &a) {
         vec.insert(vec.end(), a.begin(), a.end()); }
     Vector(const std::initializer_list<const T *> &a) : vec(a) {}
     static Vector<T>* fromJSON(JSONLoader &json);
-    typedef typename vector<const T *>::iterator        iterator;
-    typedef typename vector<const T *>::const_iterator  const_iterator;
+    typedef typename safe_vector<const T *>::iterator        iterator;
+    typedef typename safe_vector<const T *>::const_iterator  const_iterator;
     iterator begin() { return vec.begin(); }
     const_iterator begin() const { return vec.begin(); }
     VectorBase::iterator VectorBase_begin() const override {
@@ -96,9 +99,27 @@ class Vector : public VectorBase {
         int index = i - vec.begin();
         vec.insert(i, b, e);
         return vec.begin() + index; }
+
     template<typename Container>
     iterator append(const Container &toAppend)
     { return insert(end(), toAppend.begin(), toAppend.end()); }
+
+    /**
+     * Appends the provided node or vector of nodes to the end of this Vector.
+     *
+     * @param item  A node to append; if this is a Vector, its contents will be
+     *              appended.
+     */
+    void pushBackOrAppend(const IR::Node* item) {
+        if (item == nullptr) return;
+        if (auto* itemAsVector = item->to<IR::Vector<T>>()) {
+            append(*itemAsVector);
+            return;
+        }
+        BUG_CHECK(item->is<T>(), "Unexpected vector element: %1%", item);
+        push_back(item->to<T>());
+    }
+
     iterator insert(iterator i, const T* v) {
         /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void
          * FIXME -- rather than an iterator.  So we recalculate it from an index */
@@ -129,9 +150,22 @@ class Vector : public VectorBase {
     IRNODE_SUBCLASS(Vector)
     IRNODE_DECLARE_APPLY_OVERLOAD(Vector)
     bool operator==(const Node &a) const override { return a == *this; }
-    // If you get an error about this method not being overridden
-    // you are probably using a Vector where you should be using an std::vector.
     bool operator==(const Vector &a) const override { return vec == a.vec; }
+    /* DANGER -- if you get an error on the above line
+     *       operator== ... marked ‘override’, but does not override
+     * that mean you're trying to create an instantiation of IR::Vector that
+     * does not appear anywhere in any .def file, which won't work.
+     * To make double-dispatch comparisons work, the IR generator must know
+     * about ALL instantiations of IR class templates, which it does by scanning
+     * all the .def files for instantiations.  This could in theory be fixed by
+     * having the IR generator scan all C++ header and source files for
+     * instantiations, but that is currently not done.
+     *
+     * To avoid this problem, you need to have your code ONLY use instantiations
+     * of IR::Vector that appear somewhere in a .def file -- you can usually make
+     * it work by using an instantiation with an (abstract) base class rather
+     * than a concrete class, as most of those appear in .def files. */
+
     cstring node_type_name() const override {
         return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {

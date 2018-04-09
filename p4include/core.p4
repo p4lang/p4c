@@ -19,44 +19,62 @@ limitations under the License.
 #ifndef _CORE_P4_
 #define _CORE_P4_
 
+/// Standard error codes.  New error codes can be declared by users.
 error {
-    NoError,           // no error
-    PacketTooShort,    // not enough bits in packet for extract
-    NoMatch,           // match expression has no matches
-    StackOutOfBounds,  // reference to invalid element of a header stack
-    OverwritingHeader, // one header is extracted twice
-    HeaderTooShort,    // extracting too many bits in a varbit field
-    ParserTimeout      // parser execution time limit exceeded
+    NoError,           /// No error.
+    PacketTooShort,    /// Not enough bits in packet for 'extract'.
+    NoMatch,           /// 'select' expression has no matches.
+    StackOutOfBounds,  /// Reference to invalid element of a header stack.
+    HeaderTooShort,    /// Extracting too many bits into a varbit field.
+    ParserTimeout      /// Parser execution time limit exceeded.
 }
 
 extern packet_in {
-    // T must be a fixed-size header type
+    /// Read a header from the packet into a fixed-sized header @hdr and advance the cursor.
+    /// May trigger error PacketTooShort or StackOutOfBounds.
+    /// @T must be a fixed-size header type
     void extract<T>(out T hdr);
-    // T must be a header containing exactly 1 varbit field
+    /// Read bits from the packet into a variable-sized header @variableSizeHeader
+    /// and advance the cursor.
+    /// @T must be a header containing exactly 1 varbit field.
+    /// May trigger errors PacketTooShort, StackOutOfBounds, or HeaderTooShort.
     void extract<T>(out T variableSizeHeader,
                     in bit<32> variableFieldSizeInBits);
-    // does not advance the cursor
+    /// Read bits from the packet without advancing the cursor.
+    /// @returns: the bits read from the packet.
+    /// T may be an arbitrary fixed-size type.
     T lookahead<T>();
-    // skip this many bits from packet
+    /// Advance the packet cursor by the specified number of bits.
     void advance(in bit<32> sizeInBits);
-    // packet length in bytes
+    /// @return packet length in bytes.  This method may be unavailable on
+    /// some target architectures.
     bit<32> length();
 }
 
 extern packet_out {
+    /// Write @hdr into the output packet, advancing cursor.
+    /// @T can be a header type, a header stack, a header_union, or a struct
+    /// containing fields with such types.
     void emit<T>(in T hdr);
-    void emit<T>(in bool condition, in T data);
 }
 
 // TODO: remove from this file, convert to built-in
+/// Check a predicate @check in the parser; if the predicate is true do nothing,
+/// otherwise set the parser error to @toSignal, and transition to the `reject` state.
 extern void verify(in bool check, in error toSignal);
 
-@name("NoAction")
+/// Built-in action that does nothing.
 action NoAction() {}
 
+/// Standard match kinds for table key fields.
+/// Some architectures may not support all these match kinds.
+/// Architectures can declare additional match kinds.
 match_kind {
+    /// Match bits exactly.
     exact,
+    /// Ternary match, using a mask.
     ternary,
+    /// Longest-prefix match.
     lpm
 }
 

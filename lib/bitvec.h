@@ -190,7 +190,8 @@ class bitvec {
             idx += sz;
             while (++i < idx/bits_per_unit) {
                 ptr[i] = ~(uintptr_t)0; }
-            ptr[i] |= (((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
+            if (i < size)
+                ptr[i] |= (((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
     void setraw(uintptr_t raw) {
         if (size == 1) {
             data = raw;
@@ -216,6 +217,8 @@ class bitvec {
         return false; }
     void clrrange(size_t idx, size_t sz) {
         if (sz == 0) return;
+        if (size < sz/bits_per_unit)  // To avoid sz + idx overflow
+            sz = size * bits_per_unit;
         if (idx >= size * bits_per_unit) return;
         if (size == 1) {
             if (idx + sz < bits_per_unit)
@@ -247,6 +250,22 @@ class bitvec {
             return rv & ~(~(uintptr_t)1 << (sz-1));
         } else {
             return (data >> idx) & ~(~(uintptr_t)1 << (sz-1)); }}
+    void putrange(size_t idx, size_t sz, uintptr_t v) {
+        assert(sz > 0 && sz <= bits_per_unit);
+        uintptr_t mask = ~(uintptr_t)0 >> (bits_per_unit - sz);
+        v &= mask;
+        if (idx+sz > size * bits_per_unit) expand(1 + (idx+sz-1)/bits_per_unit);
+        if (size == 1) {
+            data &= ~(mask << idx);
+            data |= v << idx;
+        } else {
+            unsigned shift = idx % bits_per_unit;
+            idx /= bits_per_unit;
+            ptr[idx] &= ~(mask >> shift);
+            ptr[idx] |= v >> shift;
+            if (shift != 0 && idx + 1 < size) {
+                ptr[idx + 1] &= ~(mask << (bits_per_unit - shift));
+                ptr[idx + 1] |= v << (bits_per_unit - shift); } } }
     bitvec getslice(size_t idx, size_t sz) const;
     nonconst_bitref operator[](int idx) { return nonconst_bitref(*this, idx); }
     bool operator[](int idx) const { return getbit(idx); }
@@ -354,6 +373,15 @@ class bitvec {
             if (word(i) != a.word(i)) return false;
         return true; }
     bool operator!=(const bitvec &a) const { return !(*this == a); }
+    bool operator<(const bitvec &a) const {
+        size_t i = std::max(size, a.size);
+        while (i--) {
+            if (word(i) < a.word(i)) return true;
+            if (word(i) > a.word(i)) return false; }
+        return false; }
+    bool operator>(const bitvec &a) const { return a < *this; }
+    bool operator>=(const bitvec &a) const { return !(*this < a); }
+    bool operator<=(const bitvec &a) const { return !(a < *this); }
     bool intersects(const bitvec &a) const {
         for (size_t i = 0; i < size && i < a.size; i++)
             if (word(i) & a.word(i)) return true;
@@ -378,6 +406,7 @@ class bitvec {
                 ++rv;
 #endif
         return rv; }
+    bool is_contiguous() const;
 
  private:
     void expand(size_t newsize) {

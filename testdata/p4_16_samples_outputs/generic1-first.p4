@@ -24,3 +24,4 @@ control caller() {
 control s();
 package p(s parg);
 p(caller()) main;
+

@@ -49,21 +49,21 @@ header ipv6_t {
 }
 
 struct metadata {
-    @name("egress_metadata") 
+    @name(".egress_metadata") 
     egress_metadata_t egress_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6") 
+    @name(".ipv6") 
     ipv6_t     ipv6;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
@@ -71,36 +71,36 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name("parse_ipv6") state parse_ipv6 {
+    @name(".parse_ipv6") state parse_ipv6 {
         packet.extract<ipv6_t>(hdr.ipv6);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name(".do_setup") action do_setup_0(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
     }
-    @name("setup") table setup {
+    @name(".setup") table setup {
         actions = {
             do_setup_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.isValid()") ;
+            hdr.ethernet.isValid(): exact @name("ethernet.$valid$") ;
         }
         default_action = NoAction_0();
     }
@@ -126,19 +126,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr[47:32] = 16w0x0;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("process_mac_rewrite.mac_rewrite") table process_mac_rewrite_mac_rewrite_0 {
+    @name(".mac_rewrite") table _mac_rewrite_0 {
         actions = {
             _nop();
             _rewrite_ipv4_unicast_mac();
             _rewrite_ipv4_multicast_mac();
             _rewrite_ipv6_unicast_mac();
             _rewrite_ipv6_multicast_mac();
-            @default_only NoAction_3();
+            @defaultonly NoAction_3();
         }
         key = {
-            meta.egress_metadata.smac_idx: exact @name("meta.egress_metadata.smac_idx") ;
-            hdr.ipv4.isValid()           : exact @name("hdr.ipv4.isValid()") ;
-            hdr.ipv6.isValid()           : exact @name("hdr.ipv6.isValid()") ;
+            meta.egress_metadata.smac_idx: exact @name("egress_metadata.smac_idx") ;
+            hdr.ipv4.isValid()           : exact @name("ipv4.$valid$") ;
+            hdr.ipv6.isValid()           : exact @name("ipv6.$valid$") ;
         }
         size = 512;
         default_action = NoAction_3();
@@ -146,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         setup.apply();
         if (meta.egress_metadata.routed == 1w1) 
-            process_mac_rewrite_mac_rewrite_0.apply();
+            _mac_rewrite_0.apply();
     }
 }
 
@@ -163,7 +163,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -174,3 +174,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

@@ -20,23 +20,23 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("mymeta") 
+    @name(".mymeta") 
     mymeta_t             mymeta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -52,9 +52,9 @@ struct tuple_0 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_3() {
     }
     @name("._nop") action _nop_0() {
     }
@@ -67,26 +67,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.mymeta.f1 = 8w1;
         resubmit<tuple_0>({ standard_metadata, meta.mymeta });
     }
-    @name("t_ingress_1") table t_ingress_1 {
+    @name(".t_ingress_1") table t_ingress_1 {
         actions = {
             _nop_0();
             set_port_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction_0();
     }
-    @name("t_ingress_2") table t_ingress_2 {
+    @name(".t_ingress_2") table t_ingress_2 {
         actions = {
             _nop_2();
             _resubmit_0();
-            @default_only NoAction_3();
+            @defaultonly NoAction_3();
         }
         key = {
-            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction_3();
@@ -103,7 +103,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -114,3 +114,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

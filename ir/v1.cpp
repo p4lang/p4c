@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <algorithm>
+
 #include "ir.h"
 #include "dbprint.h"
 #include "lib/gmputil.h"
@@ -88,13 +90,13 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "modify_field_rng_uniform", { 3, 3, 0x1, 0x5 } },
     { "modify_field_with_hash_based_offset",    { 4, 4, 0x1, 0x0 } },
     { "no_op",                  { 0, 0, 0x0, 0x0 } },
-    { "pop",                    { 2, 2, 0x1, 0x0 } },
-    { "push",                   { 2, 2, 0x1, 0x0 } },
+    { "pop",                    { 1, 2, 0x1, 0x0 } },
+    { "push",                   { 1, 2, 0x1, 0x0 } },
     { "recirculate",            { 1, 1, 0x0, 0x0 } },
     { "register_read",          { 3, 3, 0x1, 0x0 } },
     { "register_write",         { 3, 3, 0x0, 0x0 } },
     { "remove_header",          { 1, 1, 0x1, 0x0 } },
-    { "resubmit",               { 1, 1, 0x0, 0x0 } },
+    { "resubmit",               { 0, 1, 0x0, 0x0 } },
     { "sample_e2e",             { 2, 3, 0x0, 0x0 } },
     { "set_metadata",           { 2, 2, 0x1, 0x3 } },
     { "shift_left",             { 3, 3, 0x1, 0x3 } },
@@ -131,19 +133,17 @@ unsigned IR::Primitive::inferOperandTypes() const {
 const IR::Type *IR::Primitive::inferOperandType(int operand) const {
     if (name == "truncate")
         return IR::Type::Bits::get(32);
-    if ((name == "count" || name == "execute_meter") && operand == 1) {
-        if (auto obj = operands[0]->to<IR::GlobalRef>()) {
-            if (auto tbl = obj->obj->to<IR::Stateful>()) {
-                if (tbl->instance_count > 0) {
-                    int width = ceil_log2(tbl->instance_count);
-                    return IR::Type::Bits::get(width); } } } }
-    if (name.startsWith("execute_stateful") && operand == 1) {
-            return IR::Type::Bits::get(32); }
+    if ((name == "count" || name == "execute_meter") && operand == 1)
+        return IR::Type::Bits::get(32);
+    if (name.startsWith("execute_stateful") && operand == 1)
+        return IR::Type::Bits::get(32);
     if ((name == "clone_ingress_pkt_to_egress" || name == "clone_i2e" ||
          name == "clone_egress_pkt_to_egress" || name == "clone_e2e") &&
         operand == 0) {
         return IR::Type::Bits::get(32);
     }
+    if ((name == "execute") && operand == 2)
+        return IR::Type::Bits::get(32);
     return IR::Type::Unknown::get();
 }
 

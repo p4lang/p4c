@@ -1,9 +1,9 @@
 control ctrl(out bit<32> c) {
     bool hasExited;
-    @name("e") action e_0() {
+    @name("ctrl.e") action e_0() {
         hasExited = true;
     }
-    @name("t") table t {
+    @name("ctrl.t") table t {
         actions = {
             e_0();
         }
@@ -30,10 +30,7 @@ control ctrl(out bit<32> c) {
     }
     apply {
         tbl_act.apply();
-        if (true) 
-            t.apply();
-        else 
-            t.apply();
+        t.apply();
         if (!hasExited) 
             tbl_act_0.apply();
     }
@@ -42,3 +39,4 @@ control ctrl(out bit<32> c) {
 control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;
+

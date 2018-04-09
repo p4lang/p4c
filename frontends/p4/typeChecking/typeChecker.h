@@ -22,8 +22,8 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "lib/exceptions.h"
 #include "lib/cstring.h"
-#include "frontends/p4/substitution.h"
-#include "frontends/p4/substitutionVisitor.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "typeConstraints.h"
 #include "typeUnification.h"
 #include "frontends/p4/methodInstance.h"
@@ -82,13 +82,13 @@ class TypeInference : public Transform {
                   bool readOnly = false);
 
  protected:
-    const IR::Type* getType(const IR::Node* element, bool verbose = true) const;
+    const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
     void setLeftValue(const IR::Expression* expression)
     { typeMap->setLeftValue(expression); }
     bool isLeftValue(const IR::Expression* expression) const
-    { return typeMap->isLeftValue(expression); }
+    { return typeMap->isLeftValue(expression) || expression->is<IR::DefaultExpression>(); }
     void setCompileTimeConstant(const IR::Expression* expression)
     { typeMap->setCompileTimeConstant(expression); }
     bool isCompileTimeConstant(const IR::Expression* expression) const
@@ -96,11 +96,7 @@ class TypeInference : public Transform {
 
     template<typename... T>
     void typeError(const char* format, T... args) const {
-        if (readOnly)
-            // At this point we should no longer find new type errors
-            BUG(format, args...);
-        else
-            ::error(format, args...);
+        ::error(format, args...);
     }
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
@@ -122,6 +118,7 @@ class TypeInference : public Transform {
                                     const IR::Type* caseType);
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
+    void addSubstitutions(const TypeVariableSubstitution* tvs);
 
     /** Converts each type to a canonical representation. */
     const IR::Type* canonicalize(const IR::Type* type);
@@ -129,7 +126,7 @@ class TypeInference : public Transform {
     const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
-    bool hasVarbits(const IR::Type_Header* type) const;
+    bool hasVarbitsOrUnions(const IR::Type* type) const;
     void checkCorelibMethods(const ExternMethod* em) const;
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
@@ -143,9 +140,10 @@ class TypeInference : public Transform {
     const IR::Node* typeSet(const IR::Operation_Binary* op);
 
     const IR::Type* cloneWithFreshTypeVariables(const IR::IMayBeGenericType* type);
-    const IR::Type* containerInstantiation(const IR::Node* node,
-                                           const IR::Vector<IR::Expression>* args,
-                                           const IR::IContainer* container);
+    std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>
+    containerInstantiation(const IR::Node* node,
+                           const IR::Vector<IR::Expression>* args,
+                           const IR::IContainer* container);
     const IR::Expression* actionCall(
         bool inActionList,   // if true this "call" is in the action list of a table
         const IR::MethodCallExpression* actionCall);
@@ -200,12 +198,13 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Header* type) override;
     const IR::Node* postorder(IR::Type_Stack* type) override;
     const IR::Node* postorder(IR::Type_Struct* type) override;
-    const IR::Node* postorder(IR::Type_Union* type) override;
+    const IR::Node* postorder(IR::Type_HeaderUnion* type) override;
     const IR::Node* postorder(IR::Type_Typedef* type) override;
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::Type_SpecializedCanonical* type) override;
     const IR::Node* postorder(IR::Type_Tuple* type) override;
     const IR::Node* postorder(IR::Type_Set* type) override;
+    const IR::Node* postorder(IR::Type_ValueSet* type) override;
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
     const IR::Node* postorder(IR::Type_Package* type) override;
     const IR::Node* postorder(IR::Type_ActionEnum* type) override;

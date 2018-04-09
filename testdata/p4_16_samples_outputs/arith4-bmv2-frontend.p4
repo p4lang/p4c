@@ -21,7 +21,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m) {
+control vrfy(inout Headers h, inout Meta m) {
     apply {
     }
 }
@@ -43,19 +43,20 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("shift") action shift_0() {
+    @name("ingress.shift") action shift_0() {
         h.h.c = (bit<64>)(h.h.a >> h.h.b);
         sm.egress_spec = 9w0;
     }
-    @name("t") table t_0 {
+    @name("ingress.t") table t {
         actions = {
             shift_0();
         }
         const default_action = shift_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

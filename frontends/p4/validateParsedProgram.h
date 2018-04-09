@@ -31,12 +31,11 @@ namespace P4 {
 
    - integer constants have valid types
    - don't care _ is not used as a name for methods, fields, variables, instances
-   - unions have at least one field
    - width of bit<> types is positive
    - width of int<> types is larger than 1
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
-   - tables have an actions and a default_action properties
+   - tables have an actions property
    - instantiations appear at the top-level only
    - switch statements do not occur in actions
    - instantiations do not occur in actions
@@ -45,7 +44,6 @@ namespace P4 {
    - extern constructors have the same name as the enclosing extern
  */
 class ValidateParsedProgram final : public Inspector {
-    bool isv1;
     void container(const IR::IContainer* type);
     // Make sure that type, apply and constructor parameters are distinct
     void distinctParameters(
@@ -54,7 +52,7 @@ class ValidateParsedProgram final : public Inspector {
         const IR::ParameterList* constr);
 
  public:
-    explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
+    ValidateParsedProgram()
     { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;
@@ -62,7 +60,6 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::StructField* f) override;
     void postorder(const IR::ParserState* s) override;
     void postorder(const IR::P4Table* t) override;
-    void postorder(const IR::Type_Union* type) override;
     void postorder(const IR::Type_Bits* type) override;
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Variable* decl) override;
@@ -75,14 +72,14 @@ class ValidateParsedProgram final : public Inspector {
     { container(package); }
     void postorder(const IR::P4Control* control) override {
         container(control);
-        distinctParameters(control->type->typeParameters,
-                           control->type->applyParams,
-                           control->constructorParams); }
+        distinctParameters(control->getTypeParameters(),
+                           control->getApplyParameters(),
+                           control->getConstructorParameters()); }
     void postorder(const IR::P4Parser* parser) override {
         container(parser);
-        distinctParameters(parser->type->typeParameters,
-                           parser->type->applyParams,
-                           parser->constructorParams); }
+        distinctParameters(parser->getTypeParameters(),
+                           parser->getApplyParameters(),
+                           parser->getConstructorParameters()); }
 };
 
 }  // namespace P4

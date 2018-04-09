@@ -35,7 +35,7 @@ class HasUses {
         for (auto e : *points) {
             auto last = e.last();
             if (last != nullptr) {
-                LOG1("Found use for " << dbp(last) << " " <<
+                LOG3("Found use for " << dbp(last) << " " <<
                      (last->is<IR::Statement>() ? last : nullptr));
                 auto it = used.find(last);
                 if (it == used.end())
@@ -71,9 +71,6 @@ class FindUninitialized : public Inspector {
     HasUses*        hasUses;  // output
 
     const LocationSet* getReads(const IR::Expression* expression, bool nonNull = false) const {
-        if (expression->is<IR::Literal>() ||
-            expression->is<IR::TypeNameExpression>())
-            return LocationSet::empty;
         auto result = ::get(readLocations, expression);
         if (nonNull)
             BUG_CHECK(result != nullptr, "no locations known for %1%", dbp(expression));
@@ -81,7 +78,7 @@ class FindUninitialized : public Inspector {
     }
     // 'expression' is reading the 'loc' location set
     void reads(const IR::Expression* expression, const LocationSet* loc) {
-        LOG2(dbp(expression) << " reads " << loc);
+        LOG3(dbp(expression) << " reads " << loc);
         CHECK_NULL(expression);
         CHECK_NULL(loc);
         readLocations.emplace(expression, loc);
@@ -112,10 +109,10 @@ class FindUninitialized : public Inspector {
     // (return false from preorder)
 
     bool preorder(const IR::ParserState* state) override {
-        LOG1("FU Visiting " << dbp(state));
+        LOG3("FU Visiting " << dbp(state));
         context = ProgramPoint(state);
         currentPoint = ProgramPoint(state);  // point before the first statement
-        state->components.visit_children(*this);
+        visit(state->components, "components");
         if (state->selectExpression != nullptr)
             visit(state->selectExpression);
         context = ProgramPoint();
@@ -144,13 +141,15 @@ class FindUninitialized : public Inspector {
                 loc = storage->removeHeaders();
                 points = defs->get(loc);
                 if (points->containsBeforeStart())
-                    ::warning("out parameter %1% may be uninitialized when %2% terminates",
-                              p, block->getName());
+                    DIAGNOSE_WARN("uninitialized_out_param",
+                                  "out parameter %1% may be uninitialized when "
+                                  "%2% terminates", p, block->getName());
             }
         }
     }
 
     bool preorder(const IR::P4Control* control) override {
+        LOG3("FU Visiting " << dbp(control));
         currentPoint = ProgramPoint(control);
         for (auto d : control->controlLocals)
             if (d->is<IR::Declaration_Instance>())
@@ -162,9 +161,17 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    bool preorder(const IR::Function* func) override {
+        LOG3("FU Visiting " << dbp(func));
+        currentPoint = ProgramPoint(func);
+        visit(func->body);
+        checkOutParameters(func, func->type->parameters, getCurrentDefinitions());
+        return false;
+    }
+
     bool preorder(const IR::P4Parser* parser) override {
-        LOG1("FU Visiting " << dbp(parser));
-        parser->states.visit_children(*this);
+        LOG3("FU Visiting " << dbp(parser));
+        visit(parser->states, "states");
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->get(accept, true);
         if (!acceptdefs->empty())
@@ -174,7 +181,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::AssignmentStatement* statement) override {
-        LOG1("FU Visiting " << dbp(statement) << " " << statement);
+        LOG3("FU Visiting " << dbp(statement) << " " << statement);
         auto assign = statement->to<IR::AssignmentStatement>();
         lhs = true;
         visit(assign->left);
@@ -184,26 +191,26 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::ReturnStatement* statement) override {
-        LOG1("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << dbp(statement));
         if (statement->expression != nullptr)
             visit(statement->expression);
         return setCurrent(statement);
     }
 
     bool preorder(const IR::MethodCallStatement* statement) override {
-        LOG1("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << dbp(statement));
         visit(statement->methodCall);
         return setCurrent(statement);
     }
 
     bool preorder(const IR::BlockStatement* statement) override {
-        LOG1("FU Visiting " << dbp(statement));
-        statement->components.visit_children(*this);
+        LOG3("FU Visiting " << dbp(statement));
+        visit(statement->components, "components");
         return setCurrent(statement);
     }
 
     bool preorder(const IR::IfStatement* statement) override {
-        LOG1("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << dbp(statement));
         visit(statement->condition);
         auto saveCurrent = currentPoint;
         visit(statement->ifTrue);
@@ -215,12 +222,12 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::SwitchStatement* statement) override {
-        LOG1("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << dbp(statement));
         visit(statement->expression);
         auto saveCurrent = currentPoint;
         for (auto c : statement->cases) {
             if (c->statement != nullptr) {
-                LOG1("Visiting " << dbp(c));
+                LOG3("Visiting " << dbp(c));
                 currentPoint = saveCurrent;
                 visit(c);
             }
@@ -229,6 +236,16 @@ class FindUninitialized : public Inspector {
     }
 
     ////////////////// Expressions
+
+    bool preorder(const IR::Literal* expression) override {
+        reads(expression, LocationSet::empty);
+        return false;
+    }
+
+    bool preorder(const IR::TypeNameExpression* expression) override {
+        reads(expression, LocationSet::empty);
+        return false;
+    }
 
     // Check whether the expression the child of a Member or
     // ArrayIndex.  I.e., for and expression such as a.x within a
@@ -278,18 +295,18 @@ class FindUninitialized : public Inspector {
                 message = "%1% may be uninitialized";
             else
                 message = "%1% may not be completely initialized";
-            ::warning(message, expression);
+            DIAGNOSE_WARN("uninitialized_use", message, expression);
         }
         hasUses->add(points);
     }
 
     // For the following we compute the read set and save it.
     // We check the read set later.
-    void postorder(const IR::PathExpression* expression) override {
-        LOG1("FU Visiting " << dbp(expression));
+    bool preorder(const IR::PathExpression* expression) override {
+        LOG3("FU Visiting " << dbp(expression));
         if (lhs) {
             reads(expression, LocationSet::empty);
-            return;
+            return false;
         }
         auto decl = refMap->getDeclaration(expression->path, true);
         auto storage = definitions->storageMap->getStorage(decl);
@@ -300,10 +317,11 @@ class FindUninitialized : public Inspector {
             result = LocationSet::empty;
         reads(expression, result);
         registerUses(expression);
+        return false;
     }
 
     bool preorder(const IR::P4Action* action) override {
-        LOG1("FU Visiting " << dbp(action));
+        LOG3("FU Visiting " << dbp(action));
         currentPoint = ProgramPoint(context, action);
         visit(action->body);
         checkOutParameters(action, action->parameters, getCurrentDefinitions());
@@ -311,7 +329,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Table* table) override {
-        LOG1("FU Visiting " << dbp(table));
+        LOG3("FU Visiting " << dbp(table));
         auto savePoint = ProgramPoint(context, table);
         currentPoint = savePoint;
         auto key = table->getKey();
@@ -328,12 +346,12 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::MethodCallExpression* expression) override {
-        LOG1("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting " << dbp(expression));
         visit(expression->method);
         MethodCallDescription mcd(expression, refMap, typeMap);
         if (mcd.instance->is<BuiltInMethod>()) {
             auto bim = mcd.instance->to<BuiltInMethod>();
-            auto base = getReads(bim->appliedTo);
+            auto base = getReads(bim->appliedTo, true);
             cstring name = bim->name.name;
             if (name == IR::Type_Stack::push_front ||
                 name == IR::Type_Stack::pop_front) {
@@ -362,7 +380,7 @@ class FindUninitialized : public Inspector {
             }
         }
         if (callee != nullptr) {
-            LOG1("Analyzing " << dbp(callee));
+            LOG3("Analyzing " << dbp(callee));
             ProgramPoint pt(context, expression);
             FindUninitialized fu(this, pt);
             (void)callee->apply(fu);
@@ -385,17 +403,21 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    void postorder(const IR::Member* expression) override {
-        LOG1("FU Visiting " << dbp(expression));
-        auto type = typeMap->getType(expression, true);
-        if (type->is<IR::Type_Method>())
-            return;
-        if (expression->expr->is<IR::TypeNameExpression>())
+    bool preorder(const IR::Member* expression) override {
+        LOG3("FU Visiting " << dbp(expression));
+        visit(expression->expr);
+        if (expression->expr->is<IR::TypeNameExpression>()) {
             // this is a constant
-            return;
+            reads(expression, LocationSet::empty);
+            return false;
+        }
         if (TableApplySolver::isHit(expression, refMap, typeMap) ||
             TableApplySolver::isActionRun(expression, refMap, typeMap))
-            return;
+            return false;
+        auto type = typeMap->getType(expression, true);
+        if (type->is<IR::Type_Method>())
+            // dealt within the parent
+            return false;
 
         auto storage = getReads(expression->expr, true);
         auto basetype = typeMap->getType(expression->expr, true);
@@ -404,34 +426,35 @@ class FindUninitialized : public Inspector {
                 expression->member.name == IR::Type_Stack::last) {
                 reads(expression, storage);
                 registerUses(expression, false);
-                return;
+                return false;
             } else if (expression->member.name == IR::Type_Stack::lastIndex) {
                 auto index = storage->getArrayLastIndex();
                 reads(expression, index);
                 registerUses(expression, false);
-                return;
+                return false;
             }
         }
 
         auto fields = storage->getField(expression->member);
         reads(expression, fields);
         registerUses(expression);
+        return false;
     }
 
     bool preorder(const IR::Slice* expression) override {
-        LOG1("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting " << dbp(expression));
         bool save = lhs;
         lhs = false;  // slices on the LHS also read the data
         visit(expression->e0);
         auto storage = getReads(expression->e0, true);
         reads(expression, storage);   // true even in LHS
-        registerUses(expression->e0);
+        registerUses(expression);
         lhs = save;
         return false;
     }
 
     bool preorder(const IR::ArrayIndex* expression) override {
-        LOG1("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting " << dbp(expression));
         if (expression->right->is<IR::Constant>()) {
             if (lhs) {
                 reads(expression, LocationSet::empty);
@@ -458,9 +481,27 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    void postorder(const IR::Expression* expression) override {
-        LOG1("FU Visiting postorder " << dbp(expression));
+    bool preorder(const IR::Operation_Unary* expression) override {
+        BUG_CHECK(!lhs, "%1%: Unary operation on LHS?", expression);
+        visit(expression->expr);
+        // This expression in fact reads the result of the operation,
+        // which is a temporary storage location, which we do not model
+        // in the def-use analysis.
+        reads(expression, LocationSet::empty);
         registerUses(expression);
+        return false;
+    }
+
+    bool preorder(const IR::Operation_Binary* expression) override {
+        BUG_CHECK(!lhs, "%1%: Binary operation on LHS?", expression);
+        visit(expression->left);
+        visit(expression->right);
+        // This expression in fact reads the result of the operation,
+        // which is a temporary storage location, which we do not model
+        // in the def-use analysis.
+        reads(expression, LocationSet::empty);
+        registerUses(expression);
+        return false;
     }
 };
 
@@ -473,7 +514,7 @@ class RemoveUnused : public Transform {
     { CHECK_NULL(hasUses); setName("RemoveUnused"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
-            LOG1("Removing statement " << dbp(getOriginal()) << " " << statement);
+            LOG3("Removing statement " << dbp(getOriginal()) << " " << statement);
             SideEffects se(nullptr, nullptr);
             (void)statement->right->apply(se);
 

@@ -4,7 +4,7 @@ extern E {
 }
 
 control c() {
-    action a(in E e) {
+    action a(E e) {
         e.call();
     }
     E() einst;
@@ -16,3 +16,4 @@ control c() {
 control none();
 package top(none n);
 top(c()) main;
+

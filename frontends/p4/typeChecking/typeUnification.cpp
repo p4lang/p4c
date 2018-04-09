@@ -25,7 +25,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                                      bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying function " << dest << " with caller " << src);
+    LOG3("Unifying function " << dest << " with caller " << src);
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
@@ -33,10 +33,10 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         constraints->addEqualityConstraint(IR::Type_Void::get(), src->returnType);
     else
         constraints->addEqualityConstraint(dest->returnType, src->returnType);
+    constraints->addUnifiableTypeVariable(src->returnType);  // always a type variable
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
-    constraints->addUnifiableTypeVariable(src->returnType);  // always a type variable
 
     if (src->typeArguments->size() != 0) {
         if (dest->typeParameters->size() != src->typeArguments->size()) {
@@ -69,6 +69,11 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                 ::error("%1%: Not enough arguments for call", errorPosition);
             return false; }
         auto arg = *sit;
+        if (arg->type->is<IR::Type_Dontcare>() && dit->direction != IR::Direction::Out) {
+            if (reportErrors)
+                ::error("%1%: don't care argument only allowed for out parameters", arg->srcInfo);
+            return false;
+        }
         if ((dit->direction == IR::Direction::Out || dit->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
             if (optarg) continue;
@@ -99,12 +104,15 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     return true;
 }
 
+// skipReturnValues is needed because the return type of a package
+// is the package itself, so checking it gets into an infinite loop.
 bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                                      const IR::Type_MethodBase* dest,
                                      const IR::Type_MethodBase* src,
-                                     bool reportErrors) {
+                                     bool reportErrors,
+                                     bool skipReturnValues) {
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying functions " << dest << " to " << src);
+    LOG3("Unifying functions " << dest << " to " << src);
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
@@ -117,17 +125,18 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                     " %2% and %3%", errorPosition, dest, src);
         return false;
     }
-    if (src->returnType != nullptr)
+    if (!skipReturnValues && src->returnType != nullptr)
         constraints->addEqualityConstraint(dest->returnType, src->returnType);
-    if (dest->parameters->size() != src->parameters->size()) {
-        if (reportErrors)
-            ::error("%1%: Cannot unify functions with different number of arguments: %2% to %3%",
-                    errorPosition, src, dest);
-        return false;
-    }
 
     auto sit = src->parameters->parameters.begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
+        if (sit == src->parameters->parameters.end()) {
+            if (dit->getAnnotation("optional"))
+                continue;
+            if (reportErrors)
+                ::error("%1%: Cannot unify functions with different number of arguments: "
+                        "%2% to %3%", errorPosition, src, dest);
+            return false; }
         if ((*sit)->direction != dit->direction) {
             if (reportErrors)
                 ::error("%1%: Cannot unify parameter %2% with %3% "
@@ -138,7 +147,14 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         constraints->addEqualityConstraint(dit->type, (*sit)->type);
         ++sit;
     }
-
+    while (sit != src->parameters->parameters.end()) {
+        if ((*sit)->getAnnotation("optional")) {
+            ++sit;
+            continue; }
+        if (reportErrors)
+            ::error("%1%: Cannot unify functions with different number of arguments: "
+                    "%2% to %3%", errorPosition, src, dest);
+        return false; }
     return true;
 }
 
@@ -148,7 +164,7 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
                                   bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying blocks " << dest << " to " << src);
+    LOG3("Unifying blocks " << dest << " to " << src);
     if (typeid(*dest) != typeid(*src)) {
         if (reportErrors)
             ::error("%1%: Cannot unify %2% to %3%",
@@ -159,7 +175,24 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         constraints->addUnifiableTypeVariable(tv);
     for (auto tv : src->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
-    if (dest->is<IR::IApply>()) {
+    if (dest->is<IR::Type_Package>()) {
+        // Two packages unify if and only if they have the same name
+        // and if their corresponding parameters unify
+        auto destPackage = dest->to<IR::Type_Package>();
+        auto srcPackage = src->to<IR::Type_Package>();
+        if (destPackage->name != srcPackage->name) {
+            if (reportErrors)
+                ::error("%1%: Cannot unify %2% to %3%",
+                        errorPosition, src->toString(), dest->toString());
+            return false;
+        }
+        auto destConstructor = dest->to<IR::Type_Package>()->getConstructorMethodType();
+        auto srcConstructor = src->to<IR::Type_Package>()->getConstructorMethodType();
+        bool success = unifyFunctions(
+            errorPosition, destConstructor, srcConstructor, reportErrors, true);
+        return success;
+    } else if (dest->is<IR::IApply>()) {
+        // parsers, controls
         auto srcapply = src->to<IR::IApply>()->getApplyMethodType();
         auto destapply = dest->to<IR::IApply>()->getApplyMethodType();
         bool success = unifyFunctions(errorPosition, destapply, srcapply, reportErrors);
@@ -176,7 +209,12 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                             bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG1("Unifying " << dest->toString() << " to " << src->toString());
+    LOG3("Unifying " << dest << " to " << src);
+
+    if (src->is<IR::ITypeVar>())
+        src = src->apply(constraints->replaceVariables)->to<IR::Type>();
+    if (dest->is<IR::ITypeVar>())
+        dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
 
     if (TypeMap::equivalent(dest, src))
         return true;

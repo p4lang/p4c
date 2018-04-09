@@ -147,7 +147,8 @@ class ParameterList : ISimpleNamespace {
 class Type_Var : Type_Declaration, ITypeVar {
     cstring getVarName() const override { return getName(); }
     int getDeclId() const override { return declid; }
-    dbprint { out << name; }
+    dbprint { out << name << "/" << getDeclId(); }
+    toString { return getName(); }
 }
 
 /// Stands for the 'int' type: infinite precision constant
@@ -161,7 +162,7 @@ class Type_InfInt : Type, ITypeVar {
  public:
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
     int getDeclId() const override { return declid; }
-    dbprint { out << "int"; }
+    dbprint { out << "int/" << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
     const Type* getP4Type() const override { return nullptr; }
@@ -227,8 +228,9 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
         return fields.getDeclaration<StructField>(name); }
     int width_bits() const override {
         int rv = 0;
-        for (auto f : fields)
+        for (auto f : fields) {
             rv += f->type->width_bits();
+        }
         return rv; }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return fields.getDeclaration(name); }
@@ -242,10 +244,10 @@ class Type_Struct : Type_StructLike {
     toString{ return cstring("struct ") + externalName(); }
 }
 
-class Type_Union : Type_StructLike {
+class Type_HeaderUnion : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + externalName(); }
-    /// this makes some assumptions on padding
+    // this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields)
@@ -277,7 +279,26 @@ class Type_Tuple : Type {
     optional inline Vector<Type> components;
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     validate{ components.check_null(); }
-    const Type* getP4Type() const override { return this; }
+    const Type* getP4Type() const override;
+}
+
+/// The type of a parser value set
+class Type_ValueSet : Type {
+    Type elementType;
+    dbprint{ out << "value_set<" << elementType << ">"; }
+    toString{ return cstring("value_set<") + elementType->toString() + ">"; }
+    const Type* getP4Type() const override;
+    int width_bits() const override {
+        int rv = 0;
+        if (auto tuple = elementType->to<IR::Type_Tuple>()) {
+            for (auto f : tuple->components) {
+                rv += f->width_bits();
+            }
+            return rv;
+        } else {
+            return elementType->width_bits();
+        }
+    }
 }
 
 /// The type of an architectural block.
@@ -299,12 +320,14 @@ class Type_Package : Type_ArchBlock, IContainer {
 class Type_Parser : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return applyParams; }
     toString { return cstring("parser ") + externalName(); }
 }
 
 class Type_Control : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return applyParams; }
     toString { return cstring("control ") + externalName(); }
 }
 
@@ -315,6 +338,10 @@ class Type_Name : Type {
     toString{ return path->name; }
     dbprint{ out << path->toString(); }
     const Type* getP4Type() const override { return this; }
+    int width_bits() const override {
+        BUG("Type_Name is not a canonical type, use getTypeType()?");
+        return 0;
+    }
 }
 
 class Type_Stack : Type {
@@ -389,6 +416,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
 class Type_Table : Type, IApply {
     P4Table  table;
     Type_Method getApplyMethodType() const override;
+    ParameterList getApplyParameters() const override { return new ParameterList(); }
     /// names for the fields of the struct returned
     /// by applying a table
     static const ID hit;
@@ -463,24 +491,26 @@ class Type_Action : Type_MethodBase {
 #nodbprint
 }
 
-class Method : Declaration {
+class Method : Declaration, IAnnotated {
     Type_Method type;
     optional bool isAbstract = false;
     optional Annotations annotations = Annotations::empty;
     size_t maxParameterCount() const { return type->maxParameterCount(); }
     size_t minParameterCount() const { return type->minParameterCount(); }
     void setAbstract() { isAbstract = true; }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Type                 type;
+    int width_bits() const override { return type->width_bits(); }
     Annotations getAnnotations() const override { return annotations; }
 #nodbprint
 }
 
 /// An 'extern' black-box (not a function)
-class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
+class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnnotated {
     optional TypeParameters typeParameters = new TypeParameters;
     optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
     optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
@@ -492,6 +522,7 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     Method lookupMethod(cstring name, int argCount) const;
     validate{ methods.check_null(); }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 /** @} *//* end group irdefs */

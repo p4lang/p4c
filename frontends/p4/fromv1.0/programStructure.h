@@ -82,12 +82,15 @@ class ProgramStructure {
         /// Lookup using the original name
         T get(cstring name) const { return ::get(nameToObject, name); }
         /// Get the new name
-        cstring get(T object) const { return ::get(objectToNewName, object); }
+        cstring get(T object) const { return ::get(objectToNewName, object, object->name.name); }
+        /// Get the new name from the old name
+        cstring newname(cstring name) const { return get(get(name)); }
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }
     };
-    class FixupExtern;
+
+    std::set<cstring>   included_files;
 
  public:
     ProgramStructure();
@@ -112,7 +115,9 @@ class ProgramStructure {
     NamedObjectInfo<const IR::FieldListCalculation*> field_list_calculations;
     NamedObjectInfo<const IR::ActionSelector*>  action_selectors;
     NamedObjectInfo<const IR::Type_Extern *>    extern_types;
+    std::map<const IR::Type_Extern *, const IR::Type_Extern *>  extern_remap;
     NamedObjectInfo<const IR::Declaration_Instance *>  externs;
+    NamedObjectInfo<const IR::ParserValueSet*>  value_sets;
     std::vector<const IR::CalculatedField*>     calculated_fields;
     P4::CallGraph<cstring> calledActions;
     P4::CallGraph<cstring> calledControls;
@@ -135,6 +140,9 @@ class ProgramStructure {
     /// Type_Header.  We can't use the P4-14 type object itself as a
     /// key, because it keeps changing.
     std::map<cstring, const IR::Type*> finalHeaderType;
+    /// For registers whose layout is a header, this map contains the mapping
+    /// from the original layout type name to the final layout type name.
+    std::map<cstring, cstring> registerLayoutType;
 
     /// Maps each inserted extract statement to the type of the header
     /// type that is being extracted.  The extracts will need another
@@ -157,55 +165,88 @@ class ProgramStructure {
     const IR::Parameter* parserPacketIn;
     const IR::Parameter* parserHeadersOut;
 
+ public:
     // output is constructed here
     IR::IndexedVector<IR::Node>* declarations;
 
  protected:
-    void include(cstring filename);
-    const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
+    virtual const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
     void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
-    const IR::Annotations* addNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
-    const IR::ParserState* convertParser(const IR::V1Parser* prs);
-    const IR::Statement* convertParserStatement(const IR::Expression* expr);
-    const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
-    const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
-    const IR::Declaration_Instance* convertDirectCounter(const IR::Counter* m, cstring newName);
-    const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
-    const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
-    const IR::Declaration_Instance*
-    convertExtern(const IR::Declaration_Instance* ext, cstring newName);
-    const IR::P4Table*
-    convertTable(const IR::V1Table* table, cstring newName,
-                 IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
-    const IR::P4Action* convertAction(const IR::ActionFunction* action, cstring newName,
-                                      const IR::Meter* meterToAccess, cstring counterToAccess);
+
+    /**
+     * Extend the provided set of annotations with an '@name' annotation for the
+     * given name. This is used to preserve the original, P4-14 object names.
+     *
+     * In general, because P4-14 names do not have the hierarchical structure
+     * that P4-16 names do, you should use addGlobalNameAnnotation() rather than
+     * this method. The exception is type names; these are already global in
+     * P4-16, so there isn't much to be gained, and there is currently some code
+     * that doesn't handling "." prefixes in type names well.
+     *
+     * XXX(seth): For uniformity, we should probably fix the issues with "." in
+     * type names and get rid of this method.
+     *
+     * @param annos  The set of annotations to extend. If null, a new set of
+     *               annotations is created.
+     * @return the extended set of annotations.
+     */
+    static const IR::Annotations*
+    addNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
+
+    /**
+     * Like addNameAnnotation(), but prefixes a "." to make the name global. You
+     * should generally prefer this method; @see addNameAnnotation() for more
+     * discussion.
+     */
+    static const IR::Annotations*
+    addGlobalNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
+
+    virtual const IR::ParserState*
+        convertParser(const IR::V1Parser*, IR::IndexedVector<IR::Declaration>*);
+    virtual const IR::Statement* convertParserStatement(const IR::Expression* expr);
+    virtual const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
+    virtual const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
+    virtual const IR::Declaration_Instance*
+        convertDirectCounter(const IR::Counter* c, cstring newName);
+    virtual const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
+    virtual const IR::Declaration_Instance* convertActionProfile(const IR::ActionProfile *,
+                                                         cstring newName);
+    virtual const IR::P4Table*
+        convertTable(const IR::V1Table* table, cstring newName,
+                     IR::IndexedVector<IR::Declaration> &stateful, std::map<cstring, cstring> &);
+    virtual const IR::P4Action*
+        convertAction(const IR::ActionFunction* action, cstring newName,
+                      const IR::Meter* meterToAccess, cstring counterToAccess);
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
-    const IR::Declaration_Instance* checksumUnit(const IR::FieldListCalculation* flc);
-    const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
-    const IR::Expression* convertFieldList(const IR::Expression* expression);
-    const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
-    const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
-    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
-                                     const IR::Expression* right, const IR::Expression* mask);
     const IR::Expression* counterType(const IR::CounterOrMeter* cm) const;
-    cstring mapAlgorithm(IR::ID algorithm) const;
-    void createChecksumVerifications();
-    void createChecksumUpdates();
-    void createStructures();
-    void createExterns();
-    void createType(const IR::Type_StructLike* type, bool header,
-                    std::unordered_set<const IR::Type*> *converted);
-    void createTypes();
-    void createParser();
-    void createControls();
-    void createDeparser();
-    void createMain();
+    virtual void createChecksumVerifications();
+    virtual void createChecksumUpdates();
+    virtual void createStructures();
+    virtual cstring createType(const IR::Type_StructLike* type, bool header,
+                       std::unordered_set<const IR::Type*> *converted);
+    virtual void createParser();
+    virtual void createControls();
+    virtual void createDeparser();
+    virtual void createMain();
 
  public:
+    void include(cstring filename, cstring ppoptions = cstring());
+    /// This inserts the names of the identifiers used in the output P4-16 programs
+    /// into allNames, forcing P4-14 names that clash to be renamed.
+    void populateOutputNames();
     const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                           const IR::Expression* right, const IR::Type* type);
-    const IR::Expression* paramReference(const IR::Parameter* param);
+    virtual const IR::Expression* convertFieldList(const IR::Expression* expression);
+    virtual const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
+    virtual const IR::Expression* convertHashAlgorithms(const IR::NameList *algorithm);
+    virtual const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
+                                                    const IR::Type *regElementType = nullptr);
+    virtual const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
+    virtual const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
+    virtual const IR::Expression* paramReference(const IR::Parameter* param);
+    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
+                                     const IR::Expression* right, const IR::Expression* mask);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
@@ -221,6 +262,8 @@ class ProgramStructure {
     const int defaultRegisterWidth = 32;
 
     void loadModel();
+    void createExterns();
+    void createTypes();
     const IR::P4Program* create(Util::SourceInfo info);
 };
 

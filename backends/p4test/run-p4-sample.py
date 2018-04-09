@@ -16,8 +16,9 @@
 # Runs the compiler on a sample P4 V1.2 program
 
 from __future__ import print_function
-from subprocess import Popen
+from subprocess import Popen,PIPE
 from threading import Thread
+import errno
 import sys
 import re
 import os
@@ -75,12 +76,27 @@ def run_timeout(options, args, timeout, stderr):
     print(" ".join(args))
     local = Local()
     local.process = None
+    local.filter = None
     def target():
         procstderr = None
         if stderr is not None:
-            procstderr = open(stderr, "w")
+            # copy stderr to the specified file, stripping file path prefixes
+            # from the start of lines
+            outfile = open(stderr, "w")
+            # This regex is ridiculously verbose; it's written this way to avoid
+            # features that are not supported on both GNU and BSD (i.e., macOS)
+            # sed. BSD sed's character class support is not great; for some
+            # reason, even some character classes that the man page claims are
+            # available don't seem to actually work.
+            local.filter = Popen(['sed', '-E',
+                r's|^[-[:alnum:][:space:]_/]*/([-[:alnum:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'],
+                stdin=PIPE, stdout=outfile)
+            procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
+        if local.filter is not None:
+            local.filter.stdin.close()
+            local.filter.wait()
     thread = Thread(target=target)
     thread.start()
     thread.join(timeout)
@@ -109,10 +125,7 @@ def compare_files(options, produced, expected):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    # include paths are different
-    # also, error messages that contain core.p4 or v1model.p4 will have
-    # different paths
-    cmd = "diff -B -u -w -I \"#include\" -I \"core\.p4([0-9]\+)\" -I \"v1model.p4([0-9]\+)\" " + expected + " " + produced + " >&2"
+    cmd = ("diff -B -u -w " + expected + " " + produced + " >&2")
     if options.verbose:
         print(cmd)
     exitcode = subprocess.call(cmd, shell=True);
@@ -124,7 +137,7 @@ def compare_files(options, produced, expected):
 def recompile_file(options, produced, mustBeIdentical):
     # Compile the generated file a second time
     secondFile = produced + "-x";
-    args = ["./p4test", "-I.", "--pp", secondFile, "--p4-16", produced] + \
+    args = ["./p4test", "-I.", "--pp", secondFile, "--std", "p4-16", produced] + \
             options.compilerOptions
     result = run_timeout(options, args, timeout, None)
     if result != SUCCESS:
@@ -184,8 +197,16 @@ def process_file(options, argv):
     referenceOutputs = ",".join(rename.keys())
     stderr = tmpdir + "/" + basename + "-stderr"
 
-    if not os.path.exists("json_outputs"):
+    # Create the `json_outputs` directory if it doesn't already exist. There's a
+    # race here since multiple tests may run this code in parallel, so we can't
+    # check if it exists beforehand.
+    try:
         os.mkdir("./json_outputs")
+    except OSError as exc:
+        if exc.errno == errno.EEXIST:
+            pass
+        else:
+            raise
 
     jsonfile = "./json_outputs" + "/" + basename + ".json"
 
@@ -195,15 +216,19 @@ def process_file(options, argv):
             "--testJson"] + options.compilerOptions
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--p4-14"]);
+        args.extend(["--std", "p4-14"]);
     args.extend(argv)
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
+
     if result != SUCCESS:
         print("Error compiling")
         print("".join(open(stderr).readlines()))
+        # If the compiler crashed fail the test
+        if 'Compiler Bug' in open(stderr).readlines():
+            return FAILURE
 
     expected_error = isError(options.p4filename)
     if expected_error:

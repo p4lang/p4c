@@ -11,12 +11,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.ethernet);
         transition accept;
     }
@@ -24,21 +24,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
-        standard_metadata.egress_spec = (bit<9>)egress_spec;
-        hdr.ethernet.src_addr = (bit<48>)src_addr;
+        standard_metadata.egress_spec = egress_spec;
+        hdr.ethernet.src_addr = src_addr;
     }
     @name(".noop") action noop() {
     }
-    @name("routing") table routing {
+    @name(".routing") table routing {
         actions = {
             route_eth;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.dst_addr: lpm;
         }
-        default_action = NoAction();
     }
     apply {
         routing.apply();
@@ -56,7 +54,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -67,3 +65,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

@@ -5,10 +5,9 @@ control empty();
 package top(empty e);
 control Ing() {
     bool tmp_0;
-    @name("cond") action cond() {
-        tmp_0 = tmp_0;
+    @name("Ing.cond") action cond() {
     }
-    @name("tbl_cond") table tbl_cond {
+    @name("Ing.tbl_cond") table tbl_cond {
         actions = {
             cond();
         }
@@ -20,3 +19,4 @@ control Ing() {
 }
 
 top(Ing()) main;
+

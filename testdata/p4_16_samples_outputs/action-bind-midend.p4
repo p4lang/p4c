@@ -1,8 +1,8 @@
 control c(inout bit<32> x) {
-    @name("a") action a_0(bit<32> d) {
+    @name("c.a") action a_0(bit<32> d) {
         x = d;
     }
-    @name("t") table t {
+    @name("c.t") table t {
         actions = {
             a_0();
         }
@@ -16,3 +16,4 @@ control c(inout bit<32> x) {
 control proto(inout bit<32> x);
 package top(proto p);
 top(c()) main;
+

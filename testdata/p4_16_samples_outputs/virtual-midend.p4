@@ -5,7 +5,7 @@ extern Virtual {
 
 control c(inout bit<16> p) {
     bit<16> tmp_0;
-    @name("cntr") Virtual() cntr = {
+    @name("c.cntr") Virtual() cntr = {
         bit<16> f(in bit<16> ix) {
             return ix + 16w1;
         }
@@ -28,3 +28,4 @@ control c(inout bit<16> p) {
 control ctr(inout bit<16> x);
 package top(ctr ctrl);
 top(c()) main;
+

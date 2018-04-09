@@ -17,14 +17,22 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
+#include <boost/optional.hpp>
 #include <string>
+
+#include "frontends/common/options.h"
 #include "gtest/gtest.h"
+
+namespace IR {
+class P4Program;
+}  // namespace IR
 
 /// Specifies which standard headers should be included by a GTest.
 enum class P4Headers {
     NONE,    // No headers.
     CORE,    // Just core.p4.
-    V1MODEL  // Both core.p4 and v1model.p4.
+    V1MODEL,  // Both core.p4 and v1model.p4.
+    PSA      // Both core.p4 and psa.p4
 };
 
 namespace detail {
@@ -71,11 +79,42 @@ class P4CTestEnvironment {
     /// @return a string containing the "v1model.p4" P4 standard header.
     const std::string& v1Model() const { return _v1Model; }
 
+    /// @return a string containing the "psa.p4" P4 standard header.
+    const std::string& psaP4() const { return _psaP4; }
+
  private:
     P4CTestEnvironment();
 
     std::string _coreP4;
     std::string _v1Model;
+    std::string _psaP4;
 };
+
+using GTestContext = P4CContextWithOptions<CompilerOptions>;
+
+namespace Test {
+
+/// A test fixture base class that automatically creates a new compilation
+/// context for the test to run in.
+class P4CTest : public ::testing::Test {
+ public:
+    P4CTest() : autoGTestContext(new GTestContext(GTestContext::get())) { }
+
+ private:
+    AutoCompileContext autoGTestContext;
+};
+
+struct FrontendTestCase {
+    /// Create a test case that only requires the frontend to run.
+    static boost::optional<FrontendTestCase>
+    create(const std::string& source,
+           CompilerOptions::FrontendVersion langVersion
+              = CompilerOptions::FrontendVersion::P4_16);
+
+    /// The output of the frontend.
+    const IR::P4Program* program;
+};
+
+}  // namespace Test
 
 #endif /* TEST_GTEST_HELPERS_H_ */

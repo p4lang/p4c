@@ -22,7 +22,12 @@ limitations under the License.
 
 namespace P4 {
 
-// Checks to see if there are any unknown properties.
+/**
+ * Checks to see if there are any unknown properties.
+ *
+ * @pre none
+ * @post raise an error if there are invalid table properties in P4 program.
+ */
 class ValidateTableProperties : public Inspector {
     std::set<cstring> legalProperties;
  public:
@@ -36,7 +41,7 @@ class ValidateTableProperties : public Inspector {
             legalProperties.emplace(l);
     }
     void postorder(const IR::Property* property) override;
-    /* don't check properties in externs (Declaration_Instances) */
+    // don't check properties in externs (Declaration_Instances)
     bool preorder(const IR::Declaration_Instance *) override { return false; }
 };
 

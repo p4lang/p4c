@@ -4,7 +4,7 @@ extern E {
 }
 
 control c() {
-    @name("e") E() e;
+    @name("c.e") E() e;
     @hidden action act() {
         e.setValue(32w10);
     }
@@ -22,3 +22,4 @@ control c() {
 control proto();
 package top(proto p);
 top(c()) main;
+

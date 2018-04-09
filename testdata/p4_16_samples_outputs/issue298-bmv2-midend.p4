@@ -113,32 +113,25 @@ struct tuple_0 {
     bit<32> field_9;
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
-    bit<16> tmp_2;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum;
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        tmp_2 = ipv4_checksum.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        if (hdr.ipv4.hdrChecksum == tmp_2) 
-            mark_to_drop();
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_4;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     apply {
-        tmp_4 = ipv4_checksum_2.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        hdr.ipv4.hdrChecksum = tmp_4;
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("_drop") action _drop_0() {
+    @name("egress._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("drop_tbl") table drop_tbl {
+    @name("egress.drop_tbl") table drop_tbl {
         key = {
             meta.local_metadata.set_drop: exact @name("meta.ingress_metadata.set_drop") ;
         }
@@ -155,11 +148,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("registerRound") register<bit<16>>(32w65536) registerRound;
-    @name("read_round") action read_round_0() {
+    @name("ingress.registerRound") register<bit<16>>(32w65536) registerRound;
+    @name("ingress.read_round") action read_round_0() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
-    @name("round_tbl") table round_tbl {
+    @name("ingress.round_tbl") table round_tbl {
         key = {
         }
         actions = {
@@ -176,3 +169,4 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 V1Switch<headers, metadata>(TopParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), TopDeparser()) main;
+

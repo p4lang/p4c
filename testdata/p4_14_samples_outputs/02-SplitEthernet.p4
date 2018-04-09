@@ -17,28 +17,28 @@ struct metadata {
 }
 
 struct headers {
-    @name("len_or_type") 
+    @name(".len_or_type") 
     len_or_type_t len_or_type;
-    @name("mac_da") 
+    @name(".mac_da") 
     mac_da_t      mac_da;
-    @name("mac_sa") 
+    @name(".mac_sa") 
     mac_sa_t      mac_sa;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_len_or_type") state parse_len_or_type {
+    @name(".parse_len_or_type") state parse_len_or_type {
         packet.extract(hdr.len_or_type);
         transition accept;
     }
-    @name("parse_mac_da") state parse_mac_da {
+    @name(".parse_mac_da") state parse_mac_da {
         packet.extract(hdr.mac_da);
         transition parse_mac_sa;
     }
-    @name("parse_mac_sa") state parse_mac_sa {
+    @name(".parse_mac_sa") state parse_mac_sa {
         packet.extract(hdr.mac_sa);
         transition parse_len_or_type;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_mac_da;
     }
 }
@@ -46,15 +46,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t2") table t2 {
+    @name(".t2") table t2 {
         actions = {
             nop;
-            @default_only NoAction;
         }
         key = {
             hdr.mac_sa.mac: exact;
         }
-        default_action = NoAction();
     }
     apply {
         t2.apply();
@@ -64,16 +62,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             nop;
-            @default_only NoAction;
         }
         key = {
             hdr.mac_da.mac       : exact;
             hdr.len_or_type.value: exact;
         }
-        default_action = NoAction();
     }
     apply {
         t1.apply();
@@ -88,7 +84,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -99,3 +95,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

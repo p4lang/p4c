@@ -15,10 +15,17 @@ limitations under the License.
 */
 
 #include "gtest/gtest.h"
+
+#include "frontends/common/options.h"
 #include "helpers.h"
+#include "lib/log.h"
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
+    AutoCompileContext autoGTestContext(new GTestContext);
+
+    GTestContext::get().options().process(argc, argv);
+    if (diagnosticCount() > 0) return -1;
 
     // Initialize the global test environment.
     (void) P4CTestEnvironment::get();

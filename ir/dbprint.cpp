@@ -60,12 +60,12 @@ void IR::Annotation::dbprint(std::ostream& out) const {
 }
 
 void IR::Block::dbprint_recursive(std::ostream& out) const {
-    dbprint(out);
+    out << dbp(this);
     out << indent;
     for (auto it : constantValue) {
         if (it.second->is<IR::Block>() && it.first->is<IR::IDeclaration>()) {
             auto block = it.second->to<IR::Block>();
-            out << endl << it.first << " => ";
+            out << endl << dbp(it.first) << " => ";
             block->dbprint_recursive(out);
         }
     }

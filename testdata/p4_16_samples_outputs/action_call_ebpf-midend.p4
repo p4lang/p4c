@@ -12,7 +12,7 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     bool x;
-    @name("Reject") action Reject_0() {
+    @name("pipe.Reject") action Reject_0() {
         pass = x;
     }
     @hidden action act() {
@@ -37,3 +37,4 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
+

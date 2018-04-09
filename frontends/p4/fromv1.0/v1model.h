@@ -20,7 +20,9 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
+#include "lib/json.h"
 
 namespace P4V1 {
 
@@ -88,13 +90,6 @@ struct MeterType_Model : public ::Model::Enum_Model {
     ::Model::Elem bytes;
 };
 
-struct Checksum16_Model : public ::Model::Extern_Model {
-    Checksum16_Model() : Extern_Model("Checksum16"), get("get"),
-                         resultType(IR::Type_Bits::get(32)) {}
-    ::Model::Elem get;
-    const IR::Type* resultType;
-};
-
 struct ActionProfile_Model : public ::Model::Extern_Model {
     ActionProfile_Model() : Extern_Model("action_profile"),
                             sizeType(IR::Type_Bits::get(32)), sizeParam("size") {}
@@ -115,9 +110,7 @@ struct ActionSelector_Model : public ::Model::Extern_Model {
 
 struct Random_Model : public ::Model::Elem {
     Random_Model() : Elem("random"),
-                     resultType(IR::Type_Bits::get(32)),
                      modify_field_rng_uniform("modify_field_rng_uniform") {}
-    const IR::Type* resultType;
     ::Model::Elem   modify_field_rng_uniform;
 };
 
@@ -197,13 +190,15 @@ struct Algorithm_Model : public ::Model::Enum_Model {
     Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"),
                         crc32("crc32"), crc32_custom("crc32_custom"),
                         crc16("crc16"), crc16_custom("crc16_custom"),
-                        random("random"), identity("identity") {}
+                        random("random"), identity("identity"), csum16("csum16"), xor16("xor16") {}
     ::Model::Elem crc32;
     ::Model::Elem crc32_custom;
     ::Model::Elem crc16;
     ::Model::Elem crc16_custom;
     ::Model::Elem random;
     ::Model::Elem identity;
+    ::Model::Elem csum16;
+    ::Model::Elem xor16;
 };
 
 struct Hash_Model : public ::Model::Elem {
@@ -221,27 +216,28 @@ struct Cloner_Model : public ::Model::Extern_Model {
 struct Switch_Model : public ::Model::Elem {
     Switch_Model() : Model::Elem("V1Switch"),
                      parser("p"), verify("vr"), ingress("ig"),
-                     egress("eg"), update("ck"), deparser("dep") {}
+                     egress("eg"), compute("ck"), deparser("dep") {}
     ::Model::Elem parser;  // names of the package arguments
     ::Model::Elem verify;
     ::Model::Elem ingress;
     ::Model::Elem egress;
-    ::Model::Elem update;
+    ::Model::Elem compute;
     ::Model::Elem deparser;
 };
 
 struct TableAttributes_Model {
     TableAttributes_Model() : tableImplementation("implementation"),
-                              directCounter("counters"),
-                              directMeter("meters"), size("size"),
+                              counters("counters"),
+                              meters("meters"), size("size"),
                               supportTimeout("support_timeout") {}
     ::Model::Elem       tableImplementation;
-    ::Model::Elem       directCounter;
-    ::Model::Elem       directMeter;
+    ::Model::Elem       counters;
+    ::Model::Elem       meters;
     ::Model::Elem       size;
     ::Model::Elem       supportTimeout;
     const unsigned defaultTableSize = 1024;
 };
+
 
 class V1Model : public ::Model::Model {
  protected:
@@ -257,10 +253,14 @@ class V1Model : public ::Model::Model {
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
             action_selector(), clone(), resubmit("resubmit"),
             tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
-            verify("verifyChecksum", headersType), update("computeChecksum", headersType),
-            ck16(), digest_receiver(), hash(), algorithm(),
+            verify("verifyChecksum", headersType), compute("computeChecksum", headersType),
+            digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
-            recirculate("recirculate"), directMeter(), directCounter()
+            recirculate("recirculate"), verify_checksum("verify_checksum"),
+            update_checksum("update_checksum"),
+            verify_checksum_with_payload("verify_checksum_with_payload"),
+            update_checksum_with_payload("update_checksum_with_payload"),
+            directMeter(), directCounter()
     {}
 
  public:
@@ -287,14 +287,17 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       rangeMatchType;
     ::Model::Elem       selectorMatchType;
     VerifyUpdate_Model  verify;
-    VerifyUpdate_Model  update;
-    Checksum16_Model    ck16;
+    VerifyUpdate_Model  compute;
     DigestReceiver_Model digest_receiver;
     Hash_Model          hash;
     Algorithm_Model     algorithm;
     Register_Model      registers;
     ::Model::Elem       drop;
     ::Model::Elem       recirculate;
+    ::Model::Elem       verify_checksum;
+    ::Model::Elem       update_checksum;
+    ::Model::Elem       verify_checksum_with_payload;
+    ::Model::Elem       update_checksum_with_payload;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 

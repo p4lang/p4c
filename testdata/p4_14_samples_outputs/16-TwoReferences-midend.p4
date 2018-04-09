@@ -11,12 +11,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
@@ -28,17 +28,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_7() {
+    @name(".NoAction") action NoAction_7() {
     }
-    @name("NoAction") action NoAction_8() {
+    @name(".NoAction") action NoAction_8() {
     }
-    @name("NoAction") action NoAction_9() {
+    @name(".NoAction") action NoAction_9() {
     }
-    @name("NoAction") action NoAction_10() {
+    @name(".NoAction") action NoAction_10() {
     }
-    @name("NoAction") action NoAction_11() {
+    @name(".NoAction") action NoAction_11() {
     }
     @name(".do_b") action do_b_0() {
     }
@@ -56,50 +56,50 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop_8() {
     }
-    @name("A") table A {
+    @name(".A") table A {
         actions = {
             do_b_0();
             do_d_0();
             do_e_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         default_action = NoAction_0();
     }
-    @name("B") table B {
+    @name(".B") table B {
         actions = {
             nop_0();
-            @default_only NoAction_7();
+            @defaultonly NoAction_7();
         }
         default_action = NoAction_7();
     }
-    @name("C") table C {
+    @name(".C") table C {
         actions = {
             nop_5();
-            @default_only NoAction_8();
+            @defaultonly NoAction_8();
         }
         default_action = NoAction_8();
     }
-    @name("D") table D_1 {
+    @name(".D") table D_1 {
         actions = {
             nop_6();
-            @default_only NoAction_9();
+            @defaultonly NoAction_9();
         }
         default_action = NoAction_9();
     }
-    @name("E") table E {
+    @name(".E") table E {
         actions = {
             nop_7();
-            @default_only NoAction_10();
+            @defaultonly NoAction_10();
         }
         default_action = NoAction_10();
     }
-    @name("F") table F {
+    @name(".F") table F {
         actions = {
             nop_8();
-            @default_only NoAction_11();
+            @defaultonly NoAction_11();
         }
         default_action = NoAction_11();
     }
@@ -128,7 +128,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -139,3 +139,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

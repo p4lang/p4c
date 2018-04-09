@@ -20,25 +20,21 @@ limitations under the License.
 
 #include "dbprint.h"
 #include "lib/enumerator.h"
-#include "lib/null.h"
 #include "lib/error.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 #include "vector.h"
 #include "id.h"
+#include "declaration.h"
+
+class JSONLoader;
 
 namespace IR {
 
-// declaration interface: objects with names
-class IDeclaration : public virtual INode {
- public:
-    // name of the declared object
-    virtual ID getName() const = 0;
-    // User-visible name of the object, with optional replacement if no explicit @name
-    virtual cstring externalName(cstring replace = cstring()) const;
-    virtual ~IDeclaration() {}
-};
-
-// A Vector that also keeps an index of all IDeclaration objects.
-
+/**
+ * A Vector which holds objects which are instances of IDeclaration, and keeps
+ * an index so that they can be quickly looked up by name.
+ */
 template<class T>
 class IndexedVector : public Vector<T> {
     ordered_map<cstring, const IDeclaration*> declarations;
@@ -76,7 +72,7 @@ class IndexedVector : public Vector<T> {
     IndexedVector &operator=(IndexedVector &&) = default;
     explicit IndexedVector(const T *a) {
         push_back(std::move(a)); }
-    explicit IndexedVector(const vector<const T *> &a) {
+    explicit IndexedVector(const safe_vector<const T *> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
     explicit IndexedVector(const Vector<T> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
@@ -140,6 +136,21 @@ class IndexedVector : public Vector<T> {
     bool operator==(const Vector<T> &a) const override { return a == *this; }
     bool operator==(const IndexedVector &a) const override {
         return Vector<T>::operator==(static_cast<const Vector<T>&>(a)); }
+    /* DANGER -- if you get an error on one of the above lines
+     *       operator== ... marked ‘override’, but does not override
+     * that mean you're trying to create an instantiation of IR::IndexedVector
+     * that does not appear anywhere in any .def file, which won't work.
+     * To make double-dispatch comparisons work, the IR generator must know
+     * about ALL instantiations of IR class templates, which it does by scanning
+     * all the .def files for instantiations.  This could in theory be fixed by
+     * having the IR generator scan all C++ header and source files for
+     * instantiations, but that is currently not done.
+     *
+     * To avoid this problem, you need to have your code ONLY use instantiations
+     * of IR::IndexedVector that appear somewhere in a .def file -- you can usually
+     * make it work by using an instantiation with an (abstract) base class rather
+     * than a concrete class, as most of those appear in .def files. */
+
     cstring node_type_name() const override {
         return "IndexedVector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {

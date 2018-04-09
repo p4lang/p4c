@@ -20,7 +20,7 @@ limitations under the License.
 namespace P4 {
 
 std::vector<const IR::IDeclaration*>*
-ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOnly) const {
+ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK) const {
     static std::vector<const IR::IDeclaration*> empty;
 
     std::vector<const IR::INamespace*> toTry(stack);
@@ -55,7 +55,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (previousOnly) {
+            if (!forwardOK) {
                 std::function<bool(const IR::IDeclaration*)> locationFilter =
                         [name](const IR::IDeclaration* d) {
                     Util::SourceInfo nsi = name.srcInfo;
@@ -96,7 +96,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (previousOnly) {
+            if (!forwardOK) {
                 Util::SourceInfo nsi = name.srcInfo;
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
@@ -123,8 +123,8 @@ void ResolutionContext::done() {
 const IR::IDeclaration*
 ResolutionContext::resolveUnique(IR::ID name,
                                  P4::ResolutionType type,
-                                 bool previousOnly) const {
-    auto decls = resolve(name, type, previousOnly);
+                                 bool forwardOK) const {
+    auto decls = resolve(name, type, forwardOK);
     if (decls->empty()) {
         ::error("Could not find declaration for %1%", name);
         return nullptr;
@@ -140,8 +140,9 @@ ResolutionContext::resolveUnique(IR::ID name,
 
 const IR::Type *
 ResolutionContext::resolveType(const IR::Type *type) const {
+    /// @todo: why is `true` supplied for `forwardOK` here?
     if (auto tname = type->to<IR::Type_Name>())
-        return resolveUnique(tname->path->name, ResolutionType::Type, false)->to<IR::Type>();
+        return resolveUnique(tname->path->name, ResolutionType::Type, true)->to<IR::Type>();
     return type;
 }
 
@@ -162,8 +163,6 @@ void ResolutionContext::dbprint(std::ostream& out) const {
     }
     out << "----------" << std::endl;
 }
-
-/////////////////////////////////////////////////////
 
 ResolveReferences::ResolveReferences(ReferenceMap* refMap,
                                      bool checkShadow) :
@@ -203,9 +202,9 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
 
     BUG_CHECK(!resolveForward.empty(), "Empty resolveForward");
-    bool allowForward = resolveForward.back();
+    bool forwardOK = resolveForward.back();
 
-    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, !allowForward);
+    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, forwardOK);
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
         return;
@@ -221,7 +220,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
         if (node->is<IR::StructField>())
             continue;
 
-        auto prev = context->resolve(decl->getName(), ResolutionType::Any, !anyOrder);
+        auto prev = context->resolve(decl->getName(), ResolutionType::Any, anyOrder);
         if (prev->empty()) continue;
 
         for (auto p : *prev) {
@@ -252,9 +251,8 @@ void ResolveReferences::end_apply(const IR::Node* node) {
     refMap->updateMap(node);
 }
 
-/////////////////// visitor methods ////////////////////////
+// Visitor methods
 
-// visitor should be invoked here
 bool ResolveReferences::preorder(const IR::P4Program* program) {
     if (refMap->checkMap(program))
         return false;
@@ -292,34 +290,34 @@ bool ResolveReferences::preorder(const IR::Type_Name* type) {
 
 bool ResolveReferences::preorder(const IR::P4Control *c) {
     refMap->usedName(c->name.name);
-    addToContext(c->type->typeParameters);
-    addToContext(c->type->applyParams);
-    addToContext(c->constructorParams);
+    addToContext(c->getTypeParameters());
+    addToContext(c->getApplyParameters());
+    addToContext(c->getConstructorParameters());
     addToContext(c);  // add the locals
     return true;
 }
 
 void ResolveReferences::postorder(const IR::P4Control *c) {
     removeFromContext(c);
-    removeFromContext(c->constructorParams);
-    removeFromContext(c->type->applyParams);
-    removeFromContext(c->type->typeParameters);
+    removeFromContext(c->getConstructorParameters());
+    removeFromContext(c->getApplyParameters());
+    removeFromContext(c->getTypeParameters());
 }
 
 bool ResolveReferences::preorder(const IR::P4Parser *p) {
     refMap->usedName(p->name.name);
-    addToContext(p->type->typeParameters);
-    addToContext(p->type->applyParams);
-    addToContext(p->constructorParams);
+    addToContext(p->getTypeParameters());
+    addToContext(p->getApplyParameters());
+    addToContext(p->getConstructorParameters());
     addToContext(p);
     return true;
 }
 
 void ResolveReferences::postorder(const IR::P4Parser *p) {
     removeFromContext(p);
-    removeFromContext(p->constructorParams);
-    removeFromContext(p->type->applyParams);
-    removeFromContext(p->type->typeParameters);
+    removeFromContext(p->getConstructorParameters());
+    removeFromContext(p->getApplyParameters());
+    removeFromContext(p->getTypeParameters());
 }
 
 bool ResolveReferences::preorder(const IR::Function* function) {
@@ -425,36 +423,7 @@ void ResolveReferences::postorder(const IR::BlockStatement *b)
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
     refMap->usedName(decl->name.name);
-    if (auto ext = context->resolveType(decl->type)->to<IR::Type_Extern>())
-        addToContext(ext);
-    if (decl->initializer != nullptr)
-        addToContext(decl->initializer);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::Declaration_Instance *decl) {
-    if (decl->initializer != nullptr)
-        removeFromContext(decl->initializer);
-    if (auto ext = context->resolveType(decl->type)->to<IR::Type_Extern>())
-        removeFromContext(ext);
-}
-
-bool ResolveReferences::preorder(const IR::Property *prop) {
-    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
-                    resolveUnique(prop->name, ResolutionType::Any, false))) {
-        if (attr->locals)
-            addToContext(attr->locals);
-        if (attr->type->is<IR::Type::String>())
-            // Attribute is arbitray string -- need not match anything
-            return false; }
-    return true;
-}
-void ResolveReferences::postorder(const IR::Property *prop) {
-    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
-                    resolveUnique(prop->name, ResolutionType::Any, false))) {
-        if (attr->locals)
-            removeFromContext(attr->locals);
-    }
 }
 
 #undef PROCESS_NAMESPACE

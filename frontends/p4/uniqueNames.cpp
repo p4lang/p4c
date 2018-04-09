@@ -88,8 +88,13 @@ IR::ID* RenameSymbols::getName() const {
 
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
     auto name = getName();
-    if (name != nullptr && *name != decl->name)
+    if (name != nullptr && *name != decl->name) {
+        if (decl->type->is<IR::Type_ValueSet>()) {
+            auto annos = addNameAnnotation(decl->name, decl->annotations);
+            decl->annotations = annos;
+        }
         decl->name = *name;
+    }
     return decl;
 }
 

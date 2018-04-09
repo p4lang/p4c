@@ -24,18 +24,20 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
     if (statement->annotations->size() > 0)
         return statement;
     auto parent = getContext()->node;
-    auto statancestor = findContext<IR::Statement>();
+    CHECK_NULL(parent);
     if (parent->is<IR::SwitchCase>() ||
         parent->is<IR::P4Control>() ||
         parent->is<IR::Function>() ||
         parent->is<IR::P4Action>()) {
-        // Cannot remove block from switch or toplevel control block
+        // Cannot remove these blocks
         return statement;
     }
-    bool withinBlock = statancestor != nullptr && statancestor->is<IR::BlockStatement>();
-    bool withinAction = parent != nullptr && parent->is<IR::P4Action>();
-    bool withinParserState = parent != nullptr && parent->is<IR::ParserState>();
-    if (withinParserState || withinBlock || withinAction) {
+    bool inBlock = findContext<IR::Statement>() != nullptr;
+    bool inState = findContext<IR::ParserState>() != nullptr;
+    if (!(inBlock || inState))
+        return statement;
+
+    if (parent->is<IR::BlockStatement>() || parent->is<IR::ParserState>()) {
         // if there are no local declarations we can remove this block
         bool hasDeclarations = false;
         for (auto c : statement->components)
@@ -46,6 +48,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
         if (!hasDeclarations)
             return &statement->components;
     }
+
     if (statement->components.empty())
         return new IR::EmptyStatement(statement->srcInfo);
     if (statement->components.size() == 1) {
@@ -79,6 +82,9 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement) 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
     LOG1("Visiting " << dbp(getOriginal()));
     if (statement->cases.empty()) {
+        // The P4_16 spec prohibits expressions other than table application as
+        // switch conditions.  The parser should have rejected programs for
+        // which this is not the case.
         BUG_CHECK(statement->expression->is<IR::Member>(),
                   "%1%: expected a Member", statement->expression);
         auto expr = statement->expression->to<IR::Member>();

@@ -16,15 +16,19 @@ limitations under the License.
 
 #include "typecheck.h"
 
-// P4 v1.0 and v1.1 type checking algorithm
-// Initial type setting based on immediate context:
-// - replace named reference to ActionParams in the bodies of ActionFunctions with the
-//   actual ActionParam
-// - link header/metadata instances to the Type
-// - replace named references to global header or metadata instances with ConcreteHeaderRef
-//   expressions that link directly to them.
-// - set type for Member and HeaderStackItemRefs
+/// P4-14 (v1.0 and v1.1) type checking algorithm
+/// Initial type setting based on immediate context:
+/// - replace named reference to ActionParams in the bodies of ActionFunctions with the
+///   actual ActionParam
+/// - link header/metadata instances to the Type
+/// - replace named references to global header or metadata instances with ConcreteHeaderRef
+///   expressions that link directly to them.
+/// - set type for Member and HeaderStackItemRefs
 class TypeCheck::AssignInitialTypes : public Transform {
+ public:
+    AssignInitialTypes() { setName("AssignInitialTypes"); }
+
+ private:
     const IR::V1Program   *global = nullptr;
 
     template <typename NodeType, typename TypeType>
@@ -33,10 +37,9 @@ class TypeCheck::AssignInitialTypes : public Transform {
                   "Expected to be called on the visitor's current node");
         currentNode->type = type;
         if (type != getOriginal<NodeType>()->type)
-            LOG1("Set initial type " << type << " for expression " << currentNode);
-    }
-
+            LOG3("Set initial type " << type << " for expression " << currentNode); }
     const IR::Node *preorder(IR::V1Program *glob) override { global = glob; return glob; }
+
     const IR::Node *preorder(IR::PathExpression *ref) override {
         if (auto af = findContext<IR::ActionFunction>())
             if (auto arg = af->arg(ref->path->name))
@@ -53,9 +56,10 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->path->name))
                     return new IR::AttributeRef(ref->srcInfo, attr->type,
                                                 bbox->name, bbox_type, attr);
-            } else if (global) {
+            } else if (global && !bbox->type->is<IR::Type_Name>()) {
                 BUG("extern type is not extern_type?"); } }
         return ref; }
+
     const IR::Node *preorder(IR::Metadata *m) override {
         if (!global) return m;
         if (auto ht = global->get<IR::v1HeaderType>(m->type_name))
@@ -63,9 +67,11 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else
             error("%s: No header type %s defined", m->srcInfo, m->type_name);
         return m; }
+
     const IR::Node *preorder(IR::BoolLiteral* b) override {
         setType(b, IR::Type_Boolean::get());
         return b; }
+
     const IR::Node *preorder(IR::HeaderOrMetadata *hm) override {
         if (!global) return hm;
         if (auto ht = global->get<IR::v1HeaderType>(hm->type_name))
@@ -73,6 +79,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else
             error("%s: No header type %s defined", hm->srcInfo, hm->type_name);
         return hm; }
+
     const IR::Node *preorder(IR::ActionSelector *sel) override {
         if (!global) return sel;
         if (sel->key_fields != nullptr) return sel;
@@ -82,6 +89,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else
             error("%s: Key must coordinate to a field_list_calculation", sel->srcInfo);
         return sel; }
+
     const IR::Node *preorder(IR::FieldListCalculation *flc) override {
         if (!global) return flc;
         if (flc->input_fields != nullptr) return flc;
@@ -99,17 +107,36 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 fl->srcInfo += name.srcInfo; }
             flc->input_fields = fl; }
         return flc; }
+
+    template<typename T> void prop_update(IR::Property *prop, const char *tname) {
+        auto ev = prop->value->to<IR::ExpressionValue>();
+        auto pe = ev ? ev->expression->to<IR::PathExpression>() : nullptr;
+        if (auto t = pe ? global->get<T>(pe->path->name) : nullptr) {
+            prop->value = new IR::ExpressionValue(ev->srcInfo,
+                            new IR::GlobalRef(pe->srcInfo, t));
+        } else {
+            error("property %s must be a %s", prop, tname); } }
     const IR::Node *preorder(IR::Property *prop) override {
         if (auto di = findContext<IR::Declaration_Instance>()) {
             auto ext = di->type->to<IR::Type_Extern>();
             if (!ext && !global) return prop;
+            if (!ext && di->type->is<IR::Type_Name>()) return prop;
             BUG_CHECK(ext, "%s is not an extern", di);
             if (auto attr = ext->attributes[prop->name]) {
                 if (attr->type->is<IR::Type::String>())
                     prune();
+                else if (attr->type->is<IR::Type_AnyTable>())
+                    prop_update<IR::V1Table>(prop, "table");
+                else if (attr->type->is<IR::Type_Counter>())
+                    prop_update<IR::Counter>(prop, "counter");
+                else if (attr->type->is<IR::Type_Meter>())
+                    prop_update<IR::Meter>(prop, "meter");
+                else if (attr->type->is<IR::Type_Register>())
+                    prop_update<IR::Register>(prop, "register");
             } else {
                 error("No property name %s in extern %s", prop->name, ext->name); } }
         return prop; }
+
     const IR::Node *postorder(IR::PathExpression *ref) override {
         if (!global) return ref;
         IR::Node *new_node = ref;
@@ -138,6 +165,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
                     return ref; } }
             error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
         return new_node; }
+
     const IR::Node *postorder(IR::Type_Name *ref) override {
         if (!global) return ref;
         if (auto t = global->get<IR::Type>(ref->path->name)) {
@@ -146,6 +174,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
         } else {
             error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
         return ref; }
+
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             setType(ref, ht);
@@ -155,6 +184,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         visit(ref->type);
         return ref; }
+
     const IR::Node *postorder(IR::Member *ref) override {
         if (ref->member.toString()[0] == '$') {
             if (ref->member == "$valid")
@@ -167,6 +197,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 return ref; }
             error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
         return ref; }
+
     const IR::Node *postorder(IR::Expression *e) override {
         visit(e->type);
         return e; }
@@ -194,16 +225,39 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
     return a;
 }
 
-// bottom up type inferencing -- set the types of expression nodes based on operands
+static IR::Cast *makeP14Cast(const IR::Type *type, const IR::Expression *exp) {
+    auto t1 = type->to<IR::Type::Bits>(), t2 = exp->type->to<IR::Type::Bits>();
+    if (t1 && t2 && t1->size != t2->size && t1->isSigned != t2->isSigned) {
+        // P4_16 does not allow bit cast to different size AND signedness in one step,
+        // while P4_14 does, so we insert an extra intermediate cast
+        exp = new IR::Cast(IR::Type::Bits::get(t1->size, t2->isSigned), exp); }
+    return new IR::Cast(type, exp);
+}
+
+/// Bottom up type inferencing -- set the types of expression nodes based on operands.
 class TypeCheck::InferExpressionsBottomUp : public Modifier {
+ public:
+    InferExpressionsBottomUp() { setName("InferExpressionsBottomUp"); }
+
+ private:
     void setType(IR::Expression* currentNode, const IR::Type* type) {
         BUG_CHECK(currentNode == getCurrentNode<IR::Expression>(),
                   "Expected to be called on the visitor's current node");
         currentNode->type = type;
         if (type != getOriginal<IR::Expression>()->type)
-            LOG1("Inferred type " << type << " for expression " << currentNode);
+            LOG3("Inferred (up) type " << type << " for expression " << currentNode <<
+                 " [" << currentNode->id <<"]");
     }
+    bool checkBits(const IR::Node* node, const IR::Type* type) const {
+        if (type->is<IR::Type::Unknown>() || type->is<IR::Type::Bits>() ||
+            type->is<IR::Type_InfInt>())
+            return true;
+        ::error("%1%: not defined on operands of type %2%", node, type);
+        return false;
+    }
+
     void postorder(IR::Operation_Binary *op) override {
+        checkBits(op, op->left->type) && checkBits(op, op->right->type);
         if (op->left->type->is<IR::Type_InfInt>()) {
             setType(op, op->right->type);
         } else if (op->right->type->is<IR::Type_InfInt>()) {
@@ -214,17 +268,19 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
             auto *lt = op->left->type->to<IR::Type::Bits>();
             auto *rt = op->right->type->to<IR::Type::Bits>();
             if (lt && rt) {
-                if (lt->size < rt->size)
-                    op->left = new IR::Cast(rt, op->left);
-                else if (rt->size < lt->size)
-                    op->right = new IR::Cast(lt, op->right);
-                LOG1("Inserted cast in " << op);
+                if (lt->size < rt->size) {
+                    setType(op, rt);
+                    op->left = makeP14Cast(rt, op->left);
+                } else if (rt->size < lt->size) {
+                    setType(op, lt);
+                    op->right = makeP14Cast(lt, op->right); }
+                LOG3("Inserted cast in " << op);
             }
         }
     }
     void logic_operand(const IR::Expression *&op) {
         if (auto *bit = op->type->to<IR::Type::Bits>()) {
-            LOG1("Inserted bool conversion for " << op);
+            LOG3("Inserted bool conversion for " << op);
             op = new IR::Neq(IR::Type::Boolean::get(), op, new IR::Constant(bit, 0));
         } }
     void postorder(IR::LAnd *op) override {
@@ -245,15 +301,27 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
 static const IR::Type*
 inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) {
     const IR::Type *rv = IR::Type::Unknown::get();
+    if (!ctxt) return rv;
     if (auto parent = ctxt->node->to<IR::Expression>()) {
         if (auto p = parent->to<IR::Operation_Relation>()) {
-            if (ctxt->child_index == 0)
+            const IR::Type::Bits *t, *ct = nullptr;
+            if (ctxt->child_index == 0) {
                 rv = p->right->type;
-            else if (ctxt->child_index == 1)
+                ct = p->left->type->to<IR::Type::Bits>();
+            } else if (ctxt->child_index == 1) {
                 rv = p->left->type;
-            else
-                BUG("Unepxected child index");
+                ct = p->right->type->to<IR::Type::Bits>();
+            } else {
+                BUG("Unepxected child index"); }
+            if (ct && (t = rv->to<IR::Type::Bits>()) && ct->size > t->size)
+                // if both children have bit types, use the larger
+                rv = ct;
         } else if (parent->is<IR::Operation::Binary>()) {
+            if ((parent->is<IR::Shl>() || parent->is<IR::Shr>()) && ctxt->child_index == 1) {
+                // don't propagate into shift count -- maybe should infer log2 bits?
+            } else {
+                rv = parent->type; }
+        } else if (parent->is<IR::Neg>() || parent->is<IR::Cmpl>()) {
             rv = parent->type;
         } else if (!global) {
         } else if (auto prim = parent->to<IR::Primitive>()) {
@@ -273,19 +341,24 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
     return rv;
 }
 
-// top down type inferencing -- set the type of expression nodes based on their uses.
+/// Top down type inferencing -- set the type of expression nodes based on their uses.
 class TypeCheck::InferExpressionsTopDown : public Modifier {
+ public:
+    InferExpressionsTopDown() { setName("InferExpressionsTopDown"); }
+ private:
     const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
         return Modifier::init_apply(root); }
+    bool preorder(IR::ActionArg *) override { return false; }  // don't infer these yet
     bool preorder(IR::Expression *op) override {
         if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {
             auto *type = inferTypeFromContext(getContext(), global);
             if (type != IR::Type::Unknown::get() &&
                 type != getOriginal<IR::Expression>()->type) {
                 op->type = type;
-                LOG1("Inferred type " << type << " for expression " << op);
+                LOG3("Inferred (down) type " << type << " for expression " << op <<
+                     " [" << op->id <<"]");
             }
         }
         return true; }
@@ -319,7 +392,7 @@ class TypeCheck::InferActionArgsBottomUp : public Inspector {
             prim->typecheck(); } }
 
  public:
-    explicit InferActionArgsBottomUp(TypeCheck &s) : self(s) {}
+    explicit InferActionArgsBottomUp(TypeCheck &s) : self(s) { setName("InferActionArgsBottomUp"); }
 };
 
 class TypeCheck::InferActionArgsTopDown : public Inspector {
@@ -360,6 +433,7 @@ class TypeCheck::InferActionArgsTopDown : public Inspector {
         // action argument, we need to visit the action argument nodes every
         // time they appear in the IR tree.
         visitDagOnce = false;
+        setName("InferActionArgsTopDown");
     }
 };
 
@@ -389,14 +463,36 @@ class TypeCheck::AssignActionArgTypes : public Modifier {
         auto type = self.actionArgUseTypes[getOriginal()];
         if (type != getOriginal<IR::ActionArg>()->type) {
             arg->type = type;
-            LOG1("Inferred type " << arg->type << " for action argument " << arg);
+            LOG3("Inferred type " << arg->type << " for action argument " << arg <<
+                 " [" << arg->id <<"]");
         }
 
         return true;
     }
 
  public:
-    explicit AssignActionArgTypes(TypeCheck &s) : self(s) { }
+    explicit AssignActionArgTypes(TypeCheck &s) : self(s) { setName("AssignActionArgTypes"); }
+};
+
+class TypeCheck::MakeImplicitCastsExplicit : public Transform, P4WriteContext {
+    const IR::V1Program *global = nullptr;
+    profile_t init_apply(const IR::Node *root) override {
+        global = root->to<IR::V1Program>();
+        return Transform::init_apply(root); }
+    IR::Annotation *preorder(IR::Annotation *a) override { prune(); return a; }
+    IR::Expression *postorder(IR::Expression *op) override {
+        visitAgain();
+        if (isWrite()) return op;  // don't cast lvalues
+        auto *type = inferTypeFromContext(getContext(), global);
+        if (type != IR::Type::Unknown::get() && !type->is<IR::Type_InfInt>() && type != op->type) {
+                LOG3("Need cast " << op->type << " -> " << type << " on " << op);
+                const IR::Expression *e = getOriginal<IR::Expression>();
+                if (*op != *e) e = op;  // undo Transform clone if it wasn't needed
+                return makeP14Cast(type, e); }
+        return op; }
+
+ public:
+    MakeImplicitCastsExplicit() { setName("MakeImplicitCastsExplicit"); }
 };
 
 TypeCheck::TypeCheck() : PassManager({
@@ -407,7 +503,8 @@ TypeCheck::TypeCheck() : PassManager({
         new InferActionArgsBottomUp(*this),
         new InferActionArgsTopDown(*this),
         new AssignActionArgTypes(*this)
-    }))->setRepeats(100)   // avoid infinite loop if there's a bug
+    }))->setRepeats(100),  // avoid infinite loop if there's a bug
+    new MakeImplicitCastsExplicit
 }) { setStopOnError(true); setName("TypeCheck"); }
 
 const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {

@@ -54,12 +54,6 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
         ::error("%1%: Illegal field name", f->name);
 }
 
-/// Unions must have at least one field
-void ValidateParsedProgram::postorder(const IR::Type_Union* type) {
-    if (type->fields.size() == 0)
-        ::error("%1%: empty union", type);
-}
-
 /// Width of a bit<> type is at least 0
 /// Width of an int<> type is at least 1
 void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
@@ -91,10 +85,6 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     if (ac == nullptr)
         ::error("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::actionsPropertyName);
-    auto da = t->getDefaultAction();
-    if (!isv1 && da == nullptr)
-        ::warning("Table %1% does not have an `%2%' property",
-                t->name, IR::TableProperties::defaultActionPropertyName);
 }
 
 /// Checks that the names of the three parameter lists for some constructs

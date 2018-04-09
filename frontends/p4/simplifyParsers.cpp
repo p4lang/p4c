@@ -22,6 +22,13 @@ namespace {
 // All the classes in this namespace are invoked on each parser
 // independently.
 
+/** @brief Removes unreachable ParserState nodes.
+ *
+ * If the "accept" state is unreachable, a compiler warning is emitted but the
+ * state is not removed.
+ *
+ * Must be invoked on each parser independently.
+ */
 class RemoveUnreachableStates : public Transform {
     ParserCallGraph* transitions;
     std::set<const IR::ParserState*> reachable;
@@ -62,7 +69,16 @@ class RemoveUnreachableStates : public Transform {
     }
 };
 
-// This is only invoked on parsers
+/** @brief Collapses chains in the parse graph into a single node.
+ *
+ * Finds chains of parser states, eg. ```s -> s1 -> s2``` such that these are
+ * all the transitions between these states, and collapses them into a single
+ * state.  The "accept", "reject", and "start" states are not considered.
+ *
+ * Each new node has the same name as the head node of the chain it collapses.
+ *
+ * Must only be invoked on parsers.
+ */
 class CollapseChains : public Transform {
     ParserCallGraph* transitions;
     std::map<const IR::ParserState*, const IR::ParserState*> chain;
@@ -73,11 +89,12 @@ class CollapseChains : public Transform {
     { CHECK_NULL(transitions); setName("CollapseChains"); }
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
+        // pred[s2] = s1 if there is exactly one outgoing edge from s1, it goes
+        // to s2, and s2 has no other incoming edges.
         std::map<const IR::ParserState*, const IR::ParserState*> pred;
 
-        // Find chains s -> s1 -> s2
-        // such that these are all the transitions between these states.
-        // Collapse these into a single state.
+        // Find edges s1 -> s2 such that s1 has no other outgoing edges and s2
+        // has no other incoming edges.
         for (auto oe : *transitions) {
             auto node = oe.first;
             auto outedges = oe.second;
@@ -100,6 +117,7 @@ class CollapseChains : public Transform {
         if (chain.empty())
             return parser;
 
+        // Find the head of each chain.
         for (auto e : pred) {
             auto crt = e.first;
             while (pred.find(crt) != pred.end()) {
@@ -111,6 +129,8 @@ class CollapseChains : public Transform {
             chainStart.emplace(crt);
         }
 
+        // Collapse the states in each chain into a new state with the name and
+        // annotations of the chain's head state.
         auto states = new IR::IndexedVector<IR::ParserState>();
         for (auto s : parser->states) {
             if (pred.find(s) != pred.end())

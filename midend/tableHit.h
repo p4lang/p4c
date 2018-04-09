@@ -36,7 +36,7 @@ class DoTableHit : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
  public:
-    explicit DoTableHit(ReferenceMap* refMap, TypeMap* typeMap):
+    DoTableHit(ReferenceMap* refMap, TypeMap* typeMap):
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoTableHit"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;

@@ -50,7 +50,8 @@ class ordered_set {
     struct mapcmp : std::binary_function<const T *, const T *, bool> {
         COMP    comp;
         bool operator()(const T *a, const T *b) const { return comp(*a, *b); } };
-    typedef std::map<const T *, iterator, mapcmp, ALLOC>  map_type;
+    using map_alloc = typename ALLOC::template rebind<std::pair<const T * const, iterator>>::other;
+    typedef std::map<const T *, iterator, mapcmp, map_alloc>    map_type;
     map_type                            data_map;
     void init_data_map() {
         data_map.clear();

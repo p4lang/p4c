@@ -65,6 +65,8 @@ unsigned EBPFScalarType::alignment() const {
         return 2;
     else if (width <= 32)
         return 4;
+    else if (width <= 64)
+        return 8;
     else
         // compiled as u8*
         return 1;
@@ -79,13 +81,15 @@ void EBPFScalarType::emit(CodeBuilder* builder) {
         builder->appendFormat("%s16", prefix);
     else if (width <= 32)
         builder->appendFormat("%s32", prefix);
+    else if (width <= 64)
+        builder->appendFormat("%s64", prefix);
     else
         builder->appendFormat("u8*");
 }
 
 void
 EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
-    if (width <= 32) {
+    if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer)
             builder->append("*");
@@ -107,7 +111,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
         kind = "struct";
     else if (strct->is<IR::Type_Header>())
         kind = "struct";
-    else if (strct->is<IR::Type_Union>())
+    else if (strct->is<IR::Type_HeaderUnion>())
         kind = "union";
     else
         BUG("Unexpected struct type %1%", strct);
@@ -139,7 +143,7 @@ EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
 
 void EBPFStructType::emitInitializer(CodeBuilder* builder) {
     builder->blockStart();
-    if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
+    if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
         for (auto f : fields) {
             builder->emitIndent();
             builder->appendFormat(".%s = ", f->field->name.name);

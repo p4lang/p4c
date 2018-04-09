@@ -40,7 +40,7 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
         auto parser = clone->to<IR::P4Parser>();
         auto newtype = new IR::Type_Parser(name, parser->type->annotations,
                                            new IR::TypeParameters(),
-                                           parser->type->applyParams);
+                                           parser->getApplyParameters());
         declarations->append(parser->parserLocals);
         result = new IR::P4Parser(name, newtype, new IR::ParameterList(),
                                   *declarations, parser->states);
@@ -48,7 +48,7 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
         auto control = clone->to<IR::P4Control>();
         auto newtype = new IR::Type_Control(name, control->type->annotations,
                                             new IR::TypeParameters(),
-                                            control->type->applyParams);
+                                            control->getApplyParameters());
         declarations->append(control->controlLocals);
         result = new IR::P4Control(name, newtype, new IR::ParameterList(),
                                    *declarations, control->body);

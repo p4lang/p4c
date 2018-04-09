@@ -54,8 +54,8 @@ const IR::Expression* DoExpandLookahead::expand(
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
-        auto expression = new IR::Slice(base->clone(), *offset + size - 1, *offset);
-        *offset += size;
+        auto expression = new IR::Slice(base->clone(), *offset - 1, *offset - size);
+        *offset -= size;
         return expression;
     } else {
         ::error("%1%: unexpected type in lookahead argument", type);
@@ -104,7 +104,7 @@ const IR::Node* DoExpandLookahead::postorder(IR::AssignmentStatement* statement)
     auto lookupCall = new IR::AssignmentStatement(statement->srcInfo, pathe, mc);
     result->push_back(lookupCall);
 
-    unsigned offset = 0;
+    unsigned offset = width;
     expandSetValid(statement->left->clone(), typearg, &result->components);
     auto init = expand(pathe->clone(), typearg, &offset);
     if (init == nullptr)

@@ -1,0 +1,15 @@
+issue561-1.p4(29): error: u: Cannot unify Tuple(2) to header_union U
+        U u = { { 10 }, { 20 } }; // illegal to initialize unions
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-1.p4(29)
+        U u = { { 10 }, { 20 } }; // illegal to initialize unions
+              ^^^^^^^^^^^^^^^^^^
+issue561-1.p4(19)
+header_union U {
+             ^
+issue561-1.p4(19): error: Structure header_union U does not have a field setValid
+header_union U {
+             ^
+issue561-1.p4(30)
+        u.setValid(); // no such method
+          ^^^^^^^^

@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser p1(out bit<2> w)(bit<2> a) {
     state start {
         w = 2w2;
@@ -16,3 +18,4 @@ parser p2(out bit<2> w)(bit<2> a) {
 parser simple(out bit<2> w);
 package m(simple n);
 m(p2(2w1)) main;
+

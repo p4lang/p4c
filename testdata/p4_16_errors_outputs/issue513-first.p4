@@ -55,7 +55,7 @@ control cEgress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_me
     }
 }
 
-control vc(in Parsed_packet hdr, inout mystruct1 meta) {
+control vc(inout Parsed_packet hdr, inout mystruct1 meta) {
     apply {
     }
 }
@@ -66,3 +66,4 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
 }
 
 V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+

@@ -9,12 +9,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
@@ -30,18 +30,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop();
     }
     @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
-        standard_metadata.egress_spec = (bit<9>)egress_port;
+        standard_metadata.egress_spec = egress_port;
     }
-    @name("repeater") table repeater {
+    @name(".repeater") table repeater {
         actions = {
             my_drop;
             set_egress_port;
-            @default_only NoAction;
         }
         key = {
             standard_metadata.ingress_port: exact;
         }
-        default_action = NoAction();
     }
     apply {
         repeater.apply();
@@ -54,7 +52,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -65,3 +63,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

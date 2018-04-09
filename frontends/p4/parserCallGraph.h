@@ -25,12 +25,14 @@ namespace P4 {
 
 typedef CallGraph<const IR::ParserState*> ParserCallGraph;
 
+/** @brief Builds a CallGraph of ParserState nodes.
+  */
 class ComputeParserCG : public Inspector {
     const ReferenceMap* refMap;
     ParserCallGraph* transitions;
 
  public:
-    ComputeParserCG(const ReferenceMap* refMap, ParserCallGraph* transitions) :
+    ComputeParserCG(const ReferenceMap* refMap, /* out */ParserCallGraph* transitions) :
             refMap(refMap), transitions(transitions) {
         CHECK_NULL(refMap); CHECK_NULL(transitions);
         setName("ComputeParserCG");

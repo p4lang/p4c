@@ -17,3 +17,4 @@ control p(out bit<1> y) {
 control simple(out bit<1> y);
 package m(simple pipe);
 m(p()) main;
+

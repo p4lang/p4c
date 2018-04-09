@@ -13,3 +13,4 @@ control q(in bit<1> z) {
 control simple(in bit<1> z);
 package m(simple s);
 m(q()) main;
+

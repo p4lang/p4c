@@ -19,23 +19,23 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("meta") 
+    @name(".meta") 
     meta_t               meta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -46,30 +46,30 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter;
-    @name("my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
-    @name(".m_action") action m_action(bit<14> idx) {
+    @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter;
+    @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
+    @name(".m_action") action m_action(bit<32> idx) {
         my_direct_counter.count();
-        my_indirect_counter.count((bit<32>)idx);
+        my_indirect_counter.count(idx);
         mark_to_drop();
     }
     @name("._nop") action _nop() {
         my_direct_counter.count();
     }
-    @name("m_table") table m_table {
+    @name(".m_table") table m_table {
         actions = {
             m_action();
             _nop();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         size = 16384;
+        counters = my_direct_counter;
         default_action = NoAction_0();
-        @name("my_direct_counter") counters = direct_counter(CounterType.bytes);
     }
     apply {
         m_table.apply();
@@ -82,7 +82,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -93,3 +93,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

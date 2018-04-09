@@ -3,13 +3,15 @@
 namespace P4 {
 
 const IR::Node* DoInstantiateCalls::postorder(IR::P4Parser* parser) {
-    parser->parserLocals.append(insert);
+    insert.append(parser->parserLocals);
+    parser->parserLocals = insert;
     insert.clear();
     return parser;
 }
 
 const IR::Node* DoInstantiateCalls::postorder(IR::P4Control* control) {
-    control->controlLocals.append(insert);
+    insert.append(control->controlLocals);
+    control->controlLocals = insert;
     insert.clear();
     return control;
 }

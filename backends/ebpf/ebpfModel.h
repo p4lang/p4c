@@ -34,9 +34,9 @@ struct TableImpl_Model : public ::Model::Extern_Model {
 struct CounterArray_Model : public ::Model::Extern_Model {
     CounterArray_Model() : Extern_Model("CounterArray"),
                            increment("increment"),
-                           size("max_index"), sparse("sparse")  {}
+                           max_index("max_index"), sparse("sparse")  {}
     ::Model::Elem increment;
-    ::Model::Elem size;
+    ::Model::Elem max_index;
     ::Model::Elem sparse;
 };
 

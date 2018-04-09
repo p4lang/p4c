@@ -1,0 +1,7 @@
+issue583.p4(188): warning: -1: negative value with unsigned type
+    add_to_field(ttl, -1);
+                       ^
+issue583.p4(189): warning: 4294967295: value does not fit in 9 bits
+    modify_field(standard_metadata.egress_spec, egress_spec, 0xFFFFFFFF);
+                                                             ^^^^^^^^^^
+warning: The order of headers in deparser is not uniquely determined by parser!

@@ -16,12 +16,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
@@ -31,42 +31,42 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop() {
     }
     @name(".setb1") action setb1(bit<8> val) {
-        hdr.data.b1 = (bit<8>)val;
+        hdr.data.b1 = val;
     }
     @name(".setb2") action setb2(bit<8> val) {
-        hdr.data.b2 = (bit<8>)val;
+        hdr.data.b2 = val;
     }
     @name(".setb3") action setb3(bit<8> val) {
-        hdr.data.b3 = (bit<8>)val;
+        hdr.data.b3 = val;
     }
     @name(".setb4") action setb4(bit<8> val) {
-        hdr.data.b4 = (bit<8>)val;
+        hdr.data.b4 = val;
     }
     @name(".setb12") action setb12(bit<8> v1, bit<8> v2) {
-        hdr.data.b1 = (bit<8>)v1;
-        hdr.data.b2 = (bit<8>)v2;
+        hdr.data.b1 = v1;
+        hdr.data.b2 = v2;
     }
     @name(".setb13") action setb13(bit<8> v1, bit<8> v2) {
-        hdr.data.b1 = (bit<8>)v1;
-        hdr.data.b3 = (bit<8>)v2;
+        hdr.data.b1 = v1;
+        hdr.data.b3 = v2;
     }
     @name(".setb14") action setb14(bit<8> v1, bit<8> v2) {
-        hdr.data.b1 = (bit<8>)v1;
-        hdr.data.b4 = (bit<8>)v2;
+        hdr.data.b1 = v1;
+        hdr.data.b4 = v2;
     }
     @name(".setb23") action setb23(bit<8> v1, bit<8> v2) {
-        hdr.data.b2 = (bit<8>)v1;
-        hdr.data.b3 = (bit<8>)v2;
+        hdr.data.b2 = v1;
+        hdr.data.b3 = v2;
     }
     @name(".setb24") action setb24(bit<8> v1, bit<8> v2) {
-        hdr.data.b2 = (bit<8>)v1;
-        hdr.data.b4 = (bit<8>)v2;
+        hdr.data.b2 = v1;
+        hdr.data.b4 = v2;
     }
     @name(".setb34") action setb34(bit<8> v1, bit<8> v2) {
-        hdr.data.b3 = (bit<8>)v1;
-        hdr.data.b4 = (bit<8>)v2;
+        hdr.data.b3 = v1;
+        hdr.data.b4 = v2;
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             noop;
             setb1;
@@ -79,12 +79,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             setb23;
             setb24;
             setb34;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
     }
     apply {
         test1.apply();
@@ -102,7 +100,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -113,3 +111,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

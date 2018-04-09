@@ -1,0 +1,3 @@
+issue1001-bmv2.p4(20): [--Wwarn=uninitialized_use] warning: x may not be completely initialized
+        clone3<Meta>(CloneType.I2E, 32w64, x);
+                                           ^

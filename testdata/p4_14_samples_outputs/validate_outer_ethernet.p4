@@ -22,19 +22,19 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name(".ingress_metadata") 
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t    ethernet;
-    @name("vlan_tag_") 
+    @name(".vlan_tag_") 
     vlan_tag_t[2] vlan_tag_;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan;
@@ -44,7 +44,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_vlan") state parse_vlan {
+    @name(".parse_vlan") state parse_vlan {
         packet.extract(hdr.vlan_tag_.next);
         transition select(hdr.vlan_tag_.last.etherType) {
             16w0x8100: parse_vlan;
@@ -54,85 +54,85 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_valid_outer_unicast_packet_untagged") action set_valid_outer_unicast_packet_untagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w1;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w1;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_unicast_packet_single_tagged") action set_valid_outer_unicast_packet_single_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w1;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[0].etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w1;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
     }
     @name(".set_valid_outer_unicast_packet_double_tagged") action set_valid_outer_unicast_packet_double_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w1;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[1].etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w1;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
     }
     @name(".set_valid_outer_unicast_packet_qinq_tagged") action set_valid_outer_unicast_packet_qinq_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w1;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w1;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_multicast_packet_untagged") action set_valid_outer_multicast_packet_untagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w2;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w2;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_multicast_packet_single_tagged") action set_valid_outer_multicast_packet_single_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w2;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[0].etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w2;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
     }
     @name(".set_valid_outer_multicast_packet_double_tagged") action set_valid_outer_multicast_packet_double_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w2;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[1].etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w2;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
     }
     @name(".set_valid_outer_multicast_packet_qinq_tagged") action set_valid_outer_multicast_packet_qinq_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w2;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w2;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_broadcast_packet_untagged") action set_valid_outer_broadcast_packet_untagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w4;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w4;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_broadcast_packet_single_tagged") action set_valid_outer_broadcast_packet_single_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w4;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[0].etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w4;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
     }
     @name(".set_valid_outer_broadcast_packet_double_tagged") action set_valid_outer_broadcast_packet_double_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w4;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[1].etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w4;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
     }
     @name(".set_valid_outer_broadcast_packet_qinq_tagged") action set_valid_outer_broadcast_packet_qinq_tagged() {
-        meta.ingress_metadata.lkp_pkt_type = (bit<3>)3w4;
-        meta.ingress_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
-        meta.ingress_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
-        meta.ingress_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
+        meta.ingress_metadata.lkp_pkt_type = 3w4;
+        meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
+        meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
-    @name("validate_outer_ethernet") table validate_outer_ethernet {
+    @name(".validate_outer_ethernet") table validate_outer_ethernet {
         actions = {
             set_valid_outer_unicast_packet_untagged;
             set_valid_outer_unicast_packet_single_tagged;
@@ -146,7 +146,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_valid_outer_broadcast_packet_single_tagged;
             set_valid_outer_broadcast_packet_double_tagged;
             set_valid_outer_broadcast_packet_qinq_tagged;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.dstAddr      : ternary;
@@ -154,7 +153,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].isValid(): exact;
         }
         size = 64;
-        default_action = NoAction();
     }
     apply {
         validate_outer_ethernet.apply();
@@ -173,7 +171,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -184,3 +182,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

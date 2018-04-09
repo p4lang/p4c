@@ -19,6 +19,7 @@ limitations under the License.
 #include <algorithm>
 #include "source_file.h"
 #include "exceptions.h"
+#include "lib/log.h"
 
 void IHasDbPrint::print() const { dbprint(std::cout); std::cout << std::endl; }
 
@@ -37,9 +38,10 @@ cstring SourcePosition::toString() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-SourceInfo::SourceInfo(SourcePosition start, SourcePosition end) :
-        start(start),
-        end(end) {
+SourceInfo::SourceInfo(const InputSources* sources, SourcePosition start,
+                       SourcePosition end)
+        : sources(sources), start(start), end(end) {
+    BUG_CHECK(sources != nullptr, "Invalid InputSources in SourceInfo");
     if (!start.isValid() || !end.isValid())
         BUG("Invalid source position in SourceInfo %1%-%2%",
                           start.toString(), end.toString());
@@ -54,20 +56,14 @@ cstring SourceInfo::toDebugString() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-InputSources* InputSources::instance = new InputSources();
-
-InputSources::InputSources() :
-        sealed(false) {
-    mapLine(nullptr, 0);
+InputSources::InputSources() : sealed(false) {
+    mapLine(nullptr, 1);  // the first line read will be line 1 of stdin
     contents.push_back("");
-}
-
-/* static */ void InputSources::reset() {
-    instance = new InputSources;
 }
 
 /// prevent further changes
 void InputSources::seal() {
+    LOG4(toDebugString());
     if (sealed)
         BUG("InputSources already sealed");
     sealed = true;
@@ -156,11 +152,13 @@ void InputSources::mapLine(cstring file, unsigned originalSourceLineNo) {
 }
 
 SourceFileLine InputSources::getSourceLine(unsigned line) const {
-    auto it = line_file_map.upper_bound(line);
+    auto it = line_file_map.upper_bound(line+1);
     if (it == line_file_map.begin())
         // There must be always something mapped to line 0
         BUG("No source information for line %1%", line);
+    LOG3(line << " mapped to " << it->first << "," << it->second.toString());
     --it;
+    LOG3(line << " corrected to " << it->first << "," << it->second.toString());
     // For a source file such as
     // ----------
     // # 1 "x.p4"
@@ -168,8 +166,10 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // ----------
     // The first line indicates that line 2 is the first line in x.p4
     // line=2, it->first=1, it->second.sourceLine=1
-    // So we have to subtract one to get the real line number
-    return SourceFileLine(it->second.fileName, line - it->first + it->second.sourceLine - 1);
+    // So we have to subtract one to get the real line number.
+    const auto nominalLine = line - it->first + it->second.sourceLine;
+    const auto realLine = nominalLine > 0 ? nominalLine - 1 : 0;
+    return SourceFileLine(it->second.fileName, realLine);
 }
 
 unsigned InputSources::getCurrentLineNumber() const {
@@ -183,7 +183,7 @@ SourcePosition InputSources::getCurrentPosition() const {
 }
 
 cstring InputSources::getSourceFragment(const SourcePosition &position) const {
-    SourceInfo info(position, position);
+    SourceInfo info(this, position, position);
     return getSourceFragment(info);
 }
 
@@ -262,23 +262,23 @@ cstring InputSources::toDebugString() const {
 ///////////////////////////////////////////////////
 
 cstring SourceInfo::toSourceFragment() const {
-    return InputSources::instance->getSourceFragment(*this);
+    return sources->getSourceFragment(*this);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {
-    return InputSources::instance->getBriefSourceFragment(*this);
+    return sources->getBriefSourceFragment(*this);
 }
 
 cstring SourceInfo::toPositionString() const {
     if (!isValid())
         return "";
-    SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
+    SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     return position.toString();
 }
 
 cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
                                          unsigned *outColumnNumber) const {
-    SourceFileLine position = InputSources::instance->getSourceLine(start.getLineNumber());
+    SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     if (outLineNumber != nullptr) {
         *outLineNumber = position.sourceLine;
     }
@@ -289,7 +289,12 @@ cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber,
 }
 
 SourceFileLine SourceInfo::toPosition() const {
-    return InputSources::instance->getSourceLine(start.getLineNumber());
+    return sources->getSourceLine(start.getLineNumber());
+}
+
+cstring SourceInfo::getSourceFile() const {
+    auto sourceLine = sources->getSourceLine(start.getLineNumber());
+    return sourceLine.fileName;
 }
 
 ////////////////////////////////////////////////////////

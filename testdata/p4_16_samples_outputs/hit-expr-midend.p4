@@ -14,9 +14,9 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("t") table t {
+    @name("IngressI.t") table t {
         key = {
         }
         actions = {
@@ -39,7 +39,7 @@ control DeparserI(packet_out pk, in H hdr) {
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -50,3 +50,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

@@ -6,7 +6,7 @@ struct m_t {
 }
 
 struct metadata {
-    @name("m") 
+    @name(".m") 
     m_t m;
 }
 
@@ -14,8 +14,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
-        meta.m.f1 = (bit<32>)32w2;
+    @name(".start") state start {
+        meta.m.f1 = 32w2;
         transition accept;
     }
 }
@@ -27,14 +27,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".a1") action a1() {
-        meta.m.f1 = (bit<32>)32w1;
+        meta.m.f1 = 32w1;
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             a1;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     apply {
         t1.apply();
@@ -46,7 +44,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -57,3 +55,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

@@ -48,33 +48,33 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_9() {
+    @name(".NoAction") action NoAction_9() {
     }
-    @name("NoAction") action NoAction_10() {
+    @name(".NoAction") action NoAction_10() {
     }
-    @name("NoAction") action NoAction_11() {
+    @name(".NoAction") action NoAction_11() {
     }
-    @name("NoAction") action NoAction_12() {
+    @name(".NoAction") action NoAction_12() {
     }
-    @name("NoAction") action NoAction_13() {
+    @name(".NoAction") action NoAction_13() {
     }
-    @name("NoAction") action NoAction_14() {
+    @name(".NoAction") action NoAction_14() {
     }
-    @name("NoAction") action NoAction_15() {
+    @name(".NoAction") action NoAction_15() {
     }
     @name(".set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;
@@ -148,91 +148,91 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f8_4 = v4;
         hdr.data.f8_5 = v5;
     }
-    @name("tbl1") table tbl1 {
+    @name(".tbl1") table tbl1 {
         actions = {
             set1_0();
             noop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.f1_1: exact @name("hdr.data.f1_1") ;
+            hdr.data.f1_1: exact @name("data.f1_1") ;
         }
         default_action = NoAction_0();
     }
-    @name("tbl2") table tbl2 {
+    @name(".tbl2") table tbl2 {
         actions = {
             set2_0();
             noop_8();
-            @default_only NoAction_9();
+            @defaultonly NoAction_9();
         }
         key = {
-            hdr.data.f2_1: exact @name("hdr.data.f2_1") ;
+            hdr.data.f2_1: exact @name("data.f2_1") ;
         }
         default_action = NoAction_9();
     }
-    @name("tbl3") table tbl3 {
+    @name(".tbl3") table tbl3 {
         actions = {
             set3_0();
             noop_9();
-            @default_only NoAction_10();
+            @defaultonly NoAction_10();
         }
         key = {
-            hdr.data.f3_1: exact @name("hdr.data.f3_1") ;
+            hdr.data.f3_1: exact @name("data.f3_1") ;
         }
         default_action = NoAction_10();
     }
-    @name("tbl4") table tbl4 {
+    @name(".tbl4") table tbl4 {
         actions = {
             set4_0();
             noop_10();
-            @default_only NoAction_11();
+            @defaultonly NoAction_11();
         }
         key = {
-            hdr.data.f4_1: exact @name("hdr.data.f4_1") ;
+            hdr.data.f4_1: exact @name("data.f4_1") ;
         }
         default_action = NoAction_11();
     }
-    @name("tbl5") table tbl5 {
+    @name(".tbl5") table tbl5 {
         actions = {
             set5_0();
             noop_11();
-            @default_only NoAction_12();
+            @defaultonly NoAction_12();
         }
         key = {
-            hdr.data.f5_1: exact @name("hdr.data.f5_1") ;
+            hdr.data.f5_1: exact @name("data.f5_1") ;
         }
         default_action = NoAction_12();
     }
-    @name("tbl6") table tbl6 {
+    @name(".tbl6") table tbl6 {
         actions = {
             set6_0();
             noop_12();
-            @default_only NoAction_13();
+            @defaultonly NoAction_13();
         }
         key = {
-            hdr.data.f6_1: exact @name("hdr.data.f6_1") ;
+            hdr.data.f6_1: exact @name("data.f6_1") ;
         }
         default_action = NoAction_13();
     }
-    @name("tbl7") table tbl7 {
+    @name(".tbl7") table tbl7 {
         actions = {
             set7_0();
             noop_13();
-            @default_only NoAction_14();
+            @defaultonly NoAction_14();
         }
         key = {
-            hdr.data.f7_1: exact @name("hdr.data.f7_1") ;
+            hdr.data.f7_1: exact @name("data.f7_1") ;
         }
         default_action = NoAction_14();
     }
-    @name("tbl8") table tbl8 {
+    @name(".tbl8") table tbl8 {
         actions = {
             set8_0();
             noop_14();
-            @default_only NoAction_15();
+            @defaultonly NoAction_15();
         }
         key = {
-            hdr.data.f8_1: exact @name("hdr.data.f8_1") ;
+            hdr.data.f8_1: exact @name("data.f8_1") ;
         }
         default_action = NoAction_15();
     }
@@ -259,7 +259,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -270,3 +270,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

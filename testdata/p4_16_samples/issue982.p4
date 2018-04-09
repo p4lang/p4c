@@ -1,0 +1,434 @@
+/*
+Copyright 2013-present Barefoot Networks, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include <core.p4>
+
+header clone_0_t {
+    bit<16> data;
+}
+
+header clone_1_t {
+    bit<32> data;
+}
+
+header_union clone_union_t {
+    clone_0_t h0;
+    clone_1_t h1;
+}
+
+struct clone_metadata_t {
+    bit<3>        type;
+    clone_union_t data;
+}
+
+typedef clone_metadata_t CloneMetadata_t;
+
+typedef bit<10> PortId_t;
+typedef bit<10> MulticastGroup_t;
+typedef bit<3> ClassOfService_t;
+typedef bit<14> PacketLength_t;
+typedef bit<16> EgressInstance_t;
+typedef bit<48> Timestamp_t;
+typedef error ParserError_t;
+const PortId_t PORT_CPU = 255;
+enum InstanceType_t {
+    NORMAL,
+    CLONE,
+    RESUBMIT,
+    RECIRCULATE
+}
+
+struct psa_ingress_parser_input_metadata_t {
+    PortId_t       ingress_port;
+    InstanceType_t instance_type;
+}
+
+struct psa_egress_parser_input_metadata_t {
+    PortId_t        egress_port;
+    InstanceType_t  instance_type;
+    CloneMetadata_t clone_metadata;
+}
+
+struct psa_parser_output_metadata_t {
+    ParserError_t parser_error;
+}
+
+struct psa_ingress_deparser_output_metadata_t {
+    CloneMetadata_t clone_metadata;
+}
+
+struct psa_egress_deparser_output_metadata_t {
+    CloneMetadata_t clone_metadata;
+}
+
+struct psa_ingress_input_metadata_t {
+    PortId_t       ingress_port;
+    InstanceType_t instance_type;
+    Timestamp_t    ingress_timestamp;
+    ParserError_t  parser_error;
+}
+
+struct psa_ingress_output_metadata_t {
+    ClassOfService_t class_of_service;
+    bool             clone;
+    PortId_t         clone_port;
+    ClassOfService_t clone_class_of_service;
+    bool             drop;
+    bool             resubmit;
+    MulticastGroup_t multicast_group;
+    PortId_t         egress_port;
+    bool             truncate;
+    PacketLength_t   truncate_payload_bytes;
+}
+
+struct psa_egress_input_metadata_t {
+    ClassOfService_t class_of_service;
+    PortId_t         egress_port;
+    InstanceType_t   instance_type;
+    EgressInstance_t instance;
+    Timestamp_t      egress_timestamp;
+    ParserError_t    parser_error;
+}
+
+struct psa_egress_output_metadata_t {
+    bool             clone;
+    ClassOfService_t clone_class_of_service;
+    bool             drop;
+    bool             recirculate;
+    bool             truncate;
+    PacketLength_t   truncate_payload_bytes;
+}
+
+match_kind {
+    range,
+    selector
+}
+
+action send_to_port(inout psa_ingress_output_metadata_t meta, in PortId_t egress_port) {
+    meta.drop = false;
+    meta.multicast_group = 0;
+    meta.egress_port = egress_port;
+}
+action multicast(inout psa_ingress_output_metadata_t meta, in MulticastGroup_t multicast_group) {
+    meta.drop = false;
+    meta.multicast_group = multicast_group;
+}
+action ingress_drop(inout psa_ingress_output_metadata_t meta) {
+    meta.drop = true;
+}
+action ingress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes) {
+    meta.truncate = true;
+    meta.truncate_payload_bytes = payload_bytes;
+}
+action egress_drop(inout psa_egress_output_metadata_t meta) {
+    meta.drop = true;
+}
+action egress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes) {
+    meta.truncate = true;
+    meta.truncate_payload_bytes = payload_bytes;
+}
+extern PacketReplicationEngine {
+}
+
+extern BufferingQueueingEngine {
+}
+
+extern clone {
+    void emit<T>(in T hdr);
+}
+
+extern resubmit {
+    void emit<T>(in T hdr);
+}
+
+extern recirculate {
+    void emit<T>(in T hdr);
+}
+
+enum HashAlgorithm_t {
+    IDENTITY,
+    CRC32,
+    CRC32_CUSTOM,
+    CRC16,
+    CRC16_CUSTOM,
+    ONES_COMPLEMENT16,
+    TARGET_DEFAULT
+}
+
+extern Hash<O> {
+    Hash(HashAlgorithm_t algo);
+    O get_hash<D>(in D data);
+    O get_hash<T, D>(in T base, in D data, in T max);
+}
+
+extern Checksum<W> {
+    Checksum(HashAlgorithm_t hash);
+    void clear();
+    void update<T>(in T data);
+    W get();
+}
+
+extern InternetChecksum {
+    InternetChecksum();
+    void clear();
+    void update<T>(in T data);
+    void remove<T>(in T data);
+    bit<16> get();
+}
+
+enum CounterType_t {
+    PACKETS,
+    BYTES,
+    PACKETS_AND_BYTES
+}
+
+extern Counter<W, S> {
+    Counter(bit<32> n_counters, CounterType_t type);
+    void count(in S index);
+}
+
+extern DirectCounter<W> {
+    DirectCounter(CounterType_t type);
+    void count();
+}
+
+enum MeterType_t {
+    PACKETS,
+    BYTES
+}
+
+enum MeterColor_t {
+    RED,
+    GREEN,
+    YELLOW
+}
+
+extern Meter<S> {
+    Meter(bit<32> n_meters, MeterType_t type);
+    MeterColor_t execute(in S index, in MeterColor_t color);
+    MeterColor_t execute(in S index);
+}
+
+extern DirectMeter {
+    DirectMeter(MeterType_t type);
+    MeterColor_t execute(in MeterColor_t color);
+    MeterColor_t execute();
+}
+
+extern Register<T, S> {
+    Register(bit<32> size);
+    T read(in S index);
+    void write(in S index, in T value);
+}
+
+extern Random<T> {
+    Random(T min, T max);
+    T read();
+}
+
+extern ActionProfile {
+    ActionProfile(bit<32> size);
+}
+
+extern ActionSelector {
+    ActionSelector(HashAlgorithm_t algo, bit<32> size, bit<32> outputWidth);
+}
+
+extern Digest<T> {
+    Digest(PortId_t receiver);
+    void emit(in T data);
+}
+
+extern ValueSet<D> {
+    ValueSet(int<32> size);
+    bool is_member(in D data);
+}
+
+parser IngressParser<H, M>(packet_in buffer, out H parsed_hdr, inout M user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd);
+control Ingress<H, M>(inout H hdr, inout M user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd);
+parser EgressParser<H, M>(packet_in buffer, out H parsed_hdr, inout M user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd);
+control Egress<H, M>(inout H hdr, inout M user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd);
+control Deparser<H, M>(packet_out buffer, inout H hdr, in M user_meta);
+control IngressDeparser<H, M>(packet_out buffer, inout H hdr, in M user_meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd);
+control EgressDeparser<H, M>(packet_out buffer, inout H hdr, in M user_meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd);
+package PSA_Switch<IH, IM, EH, EM>(IngressParser<IH, IM> ip, Ingress<IH, IM> ig, IngressDeparser<IH, IM> id, EgressParser<EH, EM> ep, Egress<EH, EM> eg, EgressDeparser<EH, EM> ed);
+typedef bit<48> EthernetAddress;
+header ethernet_t {
+    EthernetAddress dstAddr;
+    EthernetAddress srcAddr;
+    bit<16>         etherType;
+}
+
+header ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
+struct fwd_metadata_t {
+    bit<32> outport;
+}
+
+struct metadata {
+    fwd_metadata_t fwd_metadata;
+    bit<3>         custom_clone_id;
+    clone_0_t      clone_0;
+    clone_1_t      clone_1;
+}
+
+struct headers {
+    ethernet_t ethernet;
+    ipv4_t     ipv4;
+}
+
+parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata user_meta) {
+    state start {
+        transition parse_ethernet;
+    }
+    state parse_ethernet {
+        buffer.extract(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
+            0x800: parse_ipv4;
+            default: accept;
+        }
+    }
+    state parse_ipv4 {
+        buffer.extract(parsed_hdr.ipv4);
+        transition accept;
+    }
+}
+
+parser CloneParser(in psa_egress_parser_input_metadata_t istd, inout metadata user_meta) {
+    state start {
+        transition select(istd.clone_metadata.type) {
+            0: parse_clone_header_0;
+            1: parse_clone_header_1;
+            default: reject;
+        }
+    }
+    state parse_clone_header_0 {
+        user_meta.custom_clone_id = istd.clone_metadata.type;
+        user_meta.clone_0 = istd.clone_metadata.data.h0;
+        transition accept;
+    }
+    state parse_clone_header_1 {
+        user_meta.custom_clone_id = istd.clone_metadata.type;
+        user_meta.clone_1 = istd.clone_metadata.data.h1;
+        transition accept;
+    }
+}
+
+parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+    CommonParser() p;
+    CloneParser() cp;
+    state start {
+        transition select(istd.instance_type) {
+            InstanceType_t.CLONE: parse_clone_header;
+            InstanceType_t.NORMAL: parse_ethernet;
+        }
+    }
+    state parse_ethernet {
+        p.apply(buffer, parsed_hdr, user_meta);
+        transition accept;
+    }
+    state parse_clone_header {
+        cp.apply(istd, user_meta);
+        transition parse_ethernet;
+    }
+}
+
+control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
+    action process_clone_h0() {
+        user_meta.fwd_metadata.outport = (bit<32>)user_meta.clone_0.data;
+    }
+    action process_clone_h1() {
+        user_meta.fwd_metadata.outport = user_meta.clone_1.data;
+    }
+    table t {
+        key = {
+            user_meta.custom_clone_id: exact;
+        }
+        actions = {
+            process_clone_h0;
+            process_clone_h1;
+            NoAction;
+        }
+        default_action = NoAction();
+    }
+    apply {
+        t.apply();
+    }
+}
+
+parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+    CommonParser() p;
+    state start {
+        p.apply(buffer, parsed_hdr, user_meta);
+        transition accept;
+    }
+}
+
+control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
+    action do_clone(PortId_t port) {
+        ostd.clone = true;
+        ostd.clone_port = port;
+        user_meta.custom_clone_id = 3w1;
+    }
+    table t {
+        key = {
+            user_meta.fwd_metadata.outport: exact;
+        }
+        actions = {
+            do_clone;
+            NoAction;
+        }
+        default_action = NoAction;
+    }
+    apply {
+        t.apply();
+    }
+}
+
+control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
+    apply {
+        clone_metadata_t clone_md;
+        clone_md.data.h1 = { 32w0 };
+        clone_md.type = 3w0;
+        if (meta.custom_clone_id == 3w1) {
+            ostd.clone_metadata = clone_md;
+        }
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
+    }
+}
+
+control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
+    apply {
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
+    }
+}
+
+PSA_Switch(IngressParserImpl(), ingress(), IngressDeparserImpl(), EgressParserImpl(), egress(), EgressDeparserImpl()) main;

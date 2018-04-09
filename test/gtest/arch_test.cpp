@@ -29,7 +29,11 @@ limitations under the License.
 
 using namespace P4;
 
-TEST(arch, packet_out) {
+namespace Test {
+
+class P4CArchitecture : public P4CTest { };
+
+TEST_F(P4CArchitecture, packet_out) {
     std::string program = P4_SOURCE(R"(
         // simplified core.p4
         extern packet_out {
@@ -62,7 +66,7 @@ TEST(arch, packet_out) {
 }
 
 // Potential bug
-TEST(arch, duplicatedDeclarationBug) {
+TEST_F(P4CArchitecture, duplicatedDeclarationBug) {
     std::string program = P4_SOURCE(R"(
         // simplified core.p4
         extern packet_out {
@@ -95,7 +99,7 @@ TEST(arch, duplicatedDeclarationBug) {
     ASSERT_TRUE(pgm == nullptr);
 }
 
-TEST(arch, instantiation) {
+TEST_F(P4CArchitecture, instantiation) {
     std::string program = P4_SOURCE(R"(
         // simplified core.p4
         extern packet_in {
@@ -128,10 +132,7 @@ TEST(arch, instantiation) {
                 b.emit(h);
             }
         }
-        MyParser() p;
-        MyIngress() ig;
-        MyDeparser() dp;
-        PSA(p, ig, dp) main;
+        PSA(MyParser(), MyIngress(), MyDeparser()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -145,7 +146,7 @@ TEST(arch, instantiation) {
     ASSERT_TRUE(pgm != nullptr);
 }
 
-TEST(arch, psa_package_with_body) {
+TEST_F(P4CArchitecture, psa_package_with_body) {
     std::string program = P4_SOURCE(R"(
         // simplified core.p4
         // simplified v1model.p4
@@ -162,8 +163,7 @@ TEST(arch, psa_package_with_body) {
             apply {
             }
         }
-        MyIngress(2) ig;
-        PSA(ig) main;
+        PSA(MyIngress(2)) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -176,7 +176,7 @@ TEST(arch, psa_package_with_body) {
     ASSERT_TRUE(pgm == nullptr);
 }
 
-TEST(arch, psa_control_in_control) {
+TEST_F(P4CArchitecture, psa_control_in_control) {
     std::string program = P4_SOURCE(R"(
         // simplified core.p4
         // simplified v1model.p4
@@ -190,16 +190,16 @@ TEST(arch, psa_control_in_control) {
         struct Metadata {
             bit<32> hdr;
         }
+        control E();
         control MyIngress(inout ParsedHeaders h, inout Metadata m) {
             apply {
             }
         }
-        control MyEgress(inout Metadata m) (MyIngress ig) {
+        control MyEgress(inout Metadata m)(E ig) {
             apply {}
         }
-        MyIngress() ig;
-        MyEgress(ig) eg;
-        PSA(ig) main;
+        //MyEgress(ig) eg;
+        PSA(MyIngress()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -212,7 +212,7 @@ TEST(arch, psa_control_in_control) {
     ASSERT_TRUE(pgm != nullptr);
 }
 
-TEST(arch, psa_clone_as_param_to_package) {
+TEST_F(P4CArchitecture, psa_clone_as_param_to_package) {
     std::string program = P4_SOURCE(R"(
         extern clone {
             clone();
@@ -237,7 +237,7 @@ TEST(arch, psa_clone_as_param_to_package) {
     ASSERT_TRUE(pgm != nullptr);
 }
 
-TEST(arch, psa_clone_as_param_to_control) {
+TEST_F(P4CArchitecture, psa_clone_as_param_to_control) {
     std::string program = P4_SOURCE(R"(
         extern clone<T> {
             // constructor
@@ -258,8 +258,7 @@ TEST(arch, psa_clone_as_param_to_control) {
         control MyIngress (inout ParsedHeaders p, inout Metadata m) (clone<bit<32>> c) {
             apply{}
         }
-        MyIngress(clone<bit<32>>()) ig;
-        PSA(ig) main;
+        PSA(MyIngress(clone<bit<32>>())) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -272,7 +271,7 @@ TEST(arch, psa_clone_as_param_to_control) {
     ASSERT_TRUE(pgm != nullptr);
 }
 
-TEST(arch, psa_clone_as_param_to_extern) {
+TEST_F(P4CArchitecture, psa_clone_as_param_to_extern) {
     std::string program = P4_SOURCE(R"(
         extern clone<T> {
             // constructor
@@ -301,8 +300,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
             apply{}
         }
         PRE<bit<32>>() pre;
-        MyIngress(pre) ig;
-        PSA(ig) main;
+        PSA(MyIngress(pre)) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -315,7 +313,7 @@ TEST(arch, psa_clone_as_param_to_extern) {
     ASSERT_TRUE(pgm != nullptr);
 }
 
-TEST(arch, clone_as_extern_method) {
+TEST_F(P4CArchitecture, clone_as_extern_method) {
     std::string program = P4_SOURCE(R"(
         extern void clone(in bit<32> sessions);
         extern void clone3<T>(in bit<32> sessions, in T data);
@@ -333,8 +331,7 @@ TEST(arch, clone_as_extern_method) {
                 // invoke clone3 triggers a compiler bug.
             }
         }
-        MyIngress() ig;
-        PSA(ig) main;
+        PSA(MyIngress()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
@@ -346,3 +343,5 @@ TEST(arch, clone_as_extern_method) {
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr);
 }
+
+}  // namespace Test

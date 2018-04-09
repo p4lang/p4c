@@ -20,7 +20,7 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
     }
 }
 
-control MyVerifyChecksum(in h hdr, inout m meta) {
+control MyVerifyChecksum(inout h hdr, inout m meta) {
     apply {
     }
 }
@@ -46,3 +46,4 @@ control MyDeparser(packet_out b, in h hdr) {
 }
 
 V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+

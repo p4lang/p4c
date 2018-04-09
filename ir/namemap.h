@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@ limitations under the License.
 
 #ifndef _IR_NAMEMAP_H_
 #define _IR_NAMEMAP_H_
+
+class JSONLoader;
 
 namespace IR {
 
@@ -62,6 +64,9 @@ class NameMap : public Node {
     const_iterator end() const { return symbols.end(); }
     iterator begin() { return symbols.begin(); }
     iterator end() { return symbols.end(); }
+    // For multimaps
+    std::pair<const_iterator, const_iterator> equal_range(cstring key) const
+    { return symbols.equal_range(key); }
     const_reverse_iterator rbegin() const { return symbols.rbegin(); }
     const_reverse_iterator rend() const { return symbols.rend(); }
     reverse_iterator rbegin() { return symbols.rbegin(); }

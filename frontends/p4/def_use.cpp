@@ -23,7 +23,7 @@ limitations under the License.
 
 namespace P4 {
 
-// name for header valid bit
+// internal name for header valid bit; used only locally
 const cstring StorageFactory::validFieldName = "$valid";
 const cstring StorageFactory::indexFieldName = "$lastIndex";
 const LocationSet* LocationSet::empty = new LocationSet();
@@ -46,8 +46,21 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type = typeMap->getTypeType(type, true);  // get the canonical version
         auto st = type->to<IR::Type_StructLike>();
         auto result = new StructLocation(type, name);
+
+        // For header unions we will model all of the valid fields
+        // for all components as a single shared field.  The
+        // reason is that updating one of may change all of the
+        // other ones.
+        StorageLocation* globalValid = nullptr;
+        if (type->is<IR::Type_HeaderUnion>())
+            globalValid = create(IR::Type_Boolean::get(), name + "." + validFieldName);
+
         for (auto f : st->fields) {
-            auto sl = create(f->type, name + "." + f->name);
+            cstring fieldName = name + "." + f->name;
+            auto sl = create(f->type, fieldName);
+            if (globalValid != nullptr)
+                dynamic_cast<StructLocation*>(sl)->replaceField(
+                    fieldName + "." + validFieldName, globalValid);
             result->addField(f->name, sl);
         }
         if (st->is<IR::Type_Header>()) {
@@ -161,7 +174,14 @@ const LocationSet* LocationSet::getField(cstring field) const {
     for (auto l : locations) {
         if (l->is<StructLocation>()) {
             auto strct = l->to<StructLocation>();
-            strct->addField(field, result);
+            if (field == StorageFactory::validFieldName && strct->isHeaderUnion()) {
+                // special handling for union.isValid()
+                for (auto f : strct->fields()) {
+                    f->to<StructLocation>()->addField(field, result);
+                }
+            } else {
+                strct->addField(field, result);
+            }
         } else {
             BUG_CHECK(l->is<ArrayLocation>(), "%1%: expected an ArrayLocation", l);
             auto array = l->to<ArrayLocation>();
@@ -583,7 +603,7 @@ bool ComputeWriteSet::preorder(const IR::SelectExpression* expression) {
 }
 
 bool ComputeWriteSet::preorder(const IR::ListExpression* expression) {
-    expression->components.visit_children(*this);
+    visit(expression->components, "components");
     auto l = LocationSet::empty;
     for (auto c : expression->components) {
         auto cl = get(c);
@@ -682,7 +702,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     LOG3("CWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
-    enterScope(parser->type->applyParams, &parser->parserLocals, startPoint);
+    enterScope(parser->getApplyParameters(), &parser->parserLocals, startPoint);
     for (auto l : parser->parserLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
@@ -727,7 +747,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     LOG3("CWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
-    enterScope(control->type->applyParams, &control->controlLocals, startPoint);
+    enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
     for (auto l : control->controlLocals) {
@@ -756,7 +776,7 @@ bool ComputeWriteSet::preorder(const IR::IfStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::BlockStatement* statement) {
-    statement->components.visit_children(*this);
+    visit(statement->components, "components");
     return setDefinitions(currentDefinitions);
 }
 

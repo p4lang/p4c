@@ -16,7 +16,7 @@ limitations under the License.
 
 // Use Bison's C++ mode.
 %skeleton "lalr1.cc" /* -*-C++-*- */
-%require "3.0.4"
+%require "3.0.0"
 
 // Set up names.
 %defines
@@ -38,7 +38,26 @@ limitations under the License.
 namespace P4 {
 class P4Lexer;
 class P4ParserDriver;
+
+// This is a workaround for an UndefinedBehaviorSanitizer issue triggered by
+// Bison's variant implementation. When variant::move() is used to move a value
+// from an initialized instance of variant to an uninitialized instance, it uses
+// placement new to initialize the uninitialized instance, then calls
+// variant::swap(), then destroys the moved-from instance. The problem is that
+// placement new does not perform any initialization for primitive types, and
+// for bool or enum types that can result in a value that isn't a valid element
+// of those types, which UndefinedBehaviorSanitizer doesn't like.
+struct OptionalConst {
+    OptionalConst() = default;
+    explicit OptionalConst(bool isConst) : isConst(isConst) { }
+    bool isConst = false;
+};
 }  // namespace P4
+
+inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) {
+    out << "OptionalConst(" << oc.isConst << ')';
+    return out;
+}
 
 // Bison uses the types you provide to %type to make constructors for the
 // variant type it uses under the hood, but its code generation is a little
@@ -74,9 +93,9 @@ typedef const IR::Type ConstType;
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/ir.h"
 
-#define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
-    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
-                 : Util::SourceInfo(YYRHSLOC(Rhs, 0).getEnd()))
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
+                 : Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd()))
 
 #undef yylex
 #define yylex lexer.yylex
@@ -129,7 +148,7 @@ typedef const IR::Type ConstType;
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA DEFAULT
             ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
             INT KEY SELECT MATCH_KIND OUT PACKAGE PARSER RETURN STATE STRUCT
-            SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VOID
+            SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -145,10 +164,10 @@ typedef const IR::Type ConstType;
                             argument simpleKeysetExpression
                             transitionStatement switchLabel
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
-                            typeRef tupleType typeArg
+                            typeRef tupleType typeArg realTypeArg valueSetType namedType
 %type<IR::Type_Name*>       typeName
 %type<IR::Parameter*>       parameter
-%type<bool>                 optCONST
+%type<OptionalConst>        optCONST
 %type<IR::Annotations*>     optAnnotations
 %type<IR::Vector<IR::Annotation>*>  annotations
 %type<IR::Annotation*>      annotation
@@ -170,7 +189,7 @@ typedef const IR::Type ConstType;
                                            parserStatements
 %type<IR::SwitchCase*>      switchCase
 %type<IR::Vector<IR::SwitchCase>*>  switchCases
-%type<IR::Vector<IR::Type>*>  typeArgumentList
+%type<IR::Vector<IR::Type>*>  typeArgumentList realTypeArgumentList
 %type<IR::ParserState*>     parserState
 %type<IR::IndexedVector<IR::ParserState>*>  parserStates
 %type<IR::Declaration*>     constantDeclaration actionDeclaration
@@ -205,11 +224,11 @@ typedef const IR::Type ConstType;
 %nonassoc COLON
 %left OR
 %left AND
+%left EQ NE
+%left L_ANGLE R_ANGLE LE GE
 %left BIT_OR
 %left BIT_XOR
 %left BIT_AND
-%left EQ NE
-%left L_ANGLE R_ANGLE LE GE
 %left SHL
 %left PP PLUS MINUS
 %left MUL DIV MOD
@@ -265,8 +284,8 @@ name
     ;
 
 optCONST
-    : /* empty */ { $$ = false; }
-    | CONST       { $$ = true; }
+    : /* empty */ { $$ = OptionalConst{false}; }
+    | CONST       { $$ = OptionalConst{true}; }
     ;
 
 optAnnotations
@@ -395,8 +414,10 @@ parserStates
     ;
 
 parserState
-    : optAnnotations STATE name "{" parserStatements transitionStatement "}"
-                                      { $$ = new IR::ParserState(@3, *$3, $1, *$5, $6); }
+    : optAnnotations STATE name { driver.structure->pushContainerType(*$3, false); }
+      "{" parserStatements transitionStatement "}"
+                                      { driver.structure->pop();
+                                        $$ = new IR::ParserState(@3, *$3, $1, *$6, $7); }
     ;
 
 parserStatements
@@ -512,6 +533,11 @@ externDeclaration
         "{" methodPrototypes "}" { driver.structure->pop();
                                    $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
     | optAnnotations EXTERN functionPrototype ";" { $$ = $3; $3->annotations = $1; }
+    | optAnnotations EXTERN name ";" {
+            // forward declaration;
+            driver.structure->pushContainerType(*$3, true);
+            driver.structure->pop();
+            $$ = nullptr; }
     ;
 
 methodPrototypes
@@ -530,12 +556,13 @@ functionPrototype
     ;
 
 methodPrototype
-    : functionPrototype ";" { $$ = $1; }
-    | ABSTRACT functionPrototype ";"    { $$ = $2; $$->setAbstract(); }  // experimental
-    | TYPE "(" parameterList ")" ";"  // constructor
-                                        { auto par = new IR::ParameterList(@3, *$3);
-                                          auto mt = new IR::Type_Method(@1, par);
-                                          $$ = new IR::Method(@1, IR::ID(@1, $1), mt); }
+    : optAnnotations functionPrototype ";" { $$ = $2; $2->annotations = $1; }
+    | optAnnotations ABSTRACT functionPrototype ";"    { $$ = $3; $$->setAbstract();
+                                                         $3->annotations = $1; }  // experimental
+    | optAnnotations TYPE "(" parameterList ")" ";"  // constructor
+                                        { auto par = new IR::ParameterList(@4, *$4);
+                                          auto mt = new IR::Type_Method(@2, par);
+                                          $$ = new IR::Method(@2, IR::ID(@2, $2), mt, $1); }
     ;
 
 /************************** TYPES ****************************/
@@ -546,6 +573,12 @@ typeRef
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
     | tupleType                        { $$ = $1; }
+    | valueSetType                     { $$ = $1; }
+    ;
+
+namedType
+    : typeName                         { $$ = $1; }
+    | specializedType                  { $$ = $1; }
     ;
 
 prefixedType
@@ -560,6 +593,13 @@ typeName
 
 tupleType
     : TUPLE "<" typeArgumentList ">"    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
+    ;
+
+// experimental
+valueSetType
+    : VALUESET "<" baseType ">"         { $$ = new IR::Type_ValueSet(@1, $3); }
+    | VALUESET "<" tupleType ">"        { $$ = new IR::Type_ValueSet(@1, $3); }
+    | VALUESET "<" typeName ">"         { $$ = new IR::Type_ValueSet(@1, $3); }
     ;
 
 headerStackType
@@ -602,12 +642,26 @@ typeParameterList
 
 typeArg
     : typeRef                     { $$ = $1; }
-    | "_"                         { $$ = IR::Type_Dontcare::get(); }
+    | nonTypeName                      { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
+        // This is necessary because template arguments may introduce the return type
+    | "_"                         { $$ = new IR::Type_Dontcare(@1); }
     ;
 
 typeArgumentList
     : typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
     | typeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
+    ;
+
+realTypeArg
+    : typeRef                     { $$ = $1; }
+    | "_"                         { $$ = new IR::Type_Dontcare(@1); }
+    ;
+
+// For use in contexts where the `<` might be a less-than rather than introducing a type
+// argument list -- we only allow the token after `<` to be a TYPE, not an ID
+realTypeArgumentList
+    : realTypeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
+    | realTypeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
     ;
 
 typeDeclaration
@@ -637,11 +691,10 @@ structTypeDeclaration
         "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, *$6); }
     ;
 
-// experimental
 headerUnionDeclaration
     : optAnnotations
         HEADER_UNION name { driver.structure->declareType(*$3); }
-        "{" structFieldList "}" { $$ = new IR::Type_Union(@3, *$3, $1, *$6); }
+        "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, *$6); }
     ;
 
 structFieldList
@@ -676,14 +729,10 @@ identifierList
     ;
 
 typedefDeclaration
-    : annotations TYPEDEF typeRef name   { driver.structure->declareType(*$4);
+    : optAnnotations TYPEDEF typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
-    | TYPEDEF typeRef name               { driver.structure->declareType(*$3);
-          $$ = new IR::Type_Typedef(@3, *$3, $2); }
-    | annotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+    | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
-    | TYPEDEF derivedTypeDeclaration name { driver.structure->declareType(*$3);
-                        $$ = new IR::Type_Typedef(@3, *$3, $2); }
     ;
 
 /*************************** STATEMENTS *************************/
@@ -809,11 +858,11 @@ tableProperty
     | optAnnotations optCONST ENTRIES "=" "{" entriesList "}"
         { auto l = new IR::EntriesList(@3, *$6);
           auto id = IR::ID(@3+@7, "entries");
-          $$ = new IR::Property(@3, id, $1, l, $2); }
+          $$ = new IR::Property(@3, id, $1, l, $2.isConst); }
     | optAnnotations optCONST IDENTIFIER "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
           auto id = IR::ID(@3, $3);
-          $$ = new IR::Property(@3, id, $1, v, $2); }
+          $$ = new IR::Property(@3, id, $1, v, $2.isConst); }
     ;
 
 keyElementList
@@ -824,12 +873,11 @@ keyElementList
 keyElement
     : expression ":" name optAnnotations ";"
                                          { auto expr = new IR::PathExpression(*$3);
-                                           $$ = new IR::KeyElement(@3, $4, $1, expr); }
+                                           $$ = new IR::KeyElement(@1, $4, $1, expr); }
     ;
 
 actionList
-    : actionRef ";"                      { $$ = new IR::IndexedVector<IR::ActionListElement>();
-                                           $$->push_back($1); }
+    : /* empty */                        { $$ = new IR::IndexedVector<IR::ActionListElement>(); }
     | actionList actionRef ";"           { $$ = $1; $$->push_back($2); }
     ;
 
@@ -925,10 +973,12 @@ nonEmptyArgList
 
 argument
     : expression                         { $$ = $1; }
+    | "_"                                { $$ = new IR::DefaultExpression(@1); }
     ;
 
 expressionList
-    : expression                         { $$ = new IR::Vector<IR::Expression>();
+    : /* empty */                        { $$ = new IR::Vector<IR::Expression>(); }
+    | expression                         { $$ = new IR::Vector<IR::Expression>();
                                            $$->push_back($1); }
     | expressionList "," expression      { $$ = $1; $$->push_back($3); }
     ;
@@ -990,13 +1040,13 @@ expression
     | expression "&&" expression         { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
     | expression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | expression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
-    | expression "<" typeArgumentList ">" "(" argumentList ")"
+    | expression "<" realTypeArgumentList ">" "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
     // FIXME: the previous rule has the wrong precedence, and parses with
     // precedence weaker than casts.  There is no easy way to fix this in bison.
     | expression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
-    | typeRef "(" argumentList ")"
+    | namedType "(" argumentList ")"
         { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
     | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
     ;

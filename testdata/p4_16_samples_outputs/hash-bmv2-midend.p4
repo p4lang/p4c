@@ -24,7 +24,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta)
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -39,12 +39,8 @@ struct tuple_0 {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    bit<16> tmp_1;
-    tuple_0 tmp_2;
-    @name("a") action a_0() {
-        tmp_2.field = meta.ipv4.lkp_ipv4_sa;
-        hash<bit<16>, bit<16>, tuple_0, bit<32>>(tmp_1, HashAlgorithm.crc16, 16w0, tmp_2, 32w65536);
-        meta.hash.hash = tmp_1;
+    @name("IngressI.a") action a_0() {
+        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.hash.hash, HashAlgorithm.crc16, 16w0, { meta.ipv4.lkp_ipv4_sa }, 32w65536);
     }
     @hidden table tbl_a {
         actions = {
@@ -68,3 +64,4 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

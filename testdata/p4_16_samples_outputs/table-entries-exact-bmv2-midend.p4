@@ -23,7 +23,7 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(in Header_t h, inout Meta_t m) {
+control vrfy(inout Header_t h, inout Meta_t m) {
     apply {
     }
 }
@@ -45,13 +45,13 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("a") action a_0() {
+    @name("ingress.a") action a_0() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("t_exact") table t_exact {
+    @name("ingress.t_exact") table t_exact {
         key = {
             h.h.e: exact @name("h.h.e") ;
         }
@@ -61,8 +61,10 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a_0();
         const entries = {
-            8w0x1 : a_with_control_params_0(9w1);
-            8w0x2 : a_with_control_params_0(9w2);
+                        8w0x1 : a_with_control_params_0(9w1);
+
+                        8w0x2 : a_with_control_params_0(9w2);
+
         }
 
     }
@@ -72,3 +74,4 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

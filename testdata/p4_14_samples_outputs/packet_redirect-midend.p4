@@ -27,21 +27,21 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("metaA") 
+    @name(".metaA") 
     metaA_t              metaA;
-    @name("metaB") 
+    @name(".metaB") 
     metaB_t              metaB;
 }
 
 struct headers {
-    @name("hdrA") 
+    @name(".hdrA") 
     hdrA_t hdrA;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<hdrA_t>(hdr.hdrA);
         transition accept;
     }
@@ -53,7 +53,7 @@ struct tuple_0 {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name("._nop") action _nop_0() {
     }
@@ -63,15 +63,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_egress") table t_egress {
+    @name(".t_egress") table t_egress {
         actions = {
             _nop_0();
             _recirculate_0();
             _clone_e2e_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
             standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
@@ -83,9 +83,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
-    @name("NoAction") action NoAction_5() {
+    @name(".NoAction") action NoAction_5() {
     }
     @name("._nop") action _nop_1() {
     }
@@ -104,29 +104,29 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_ingress_1") table t_ingress_1 {
+    @name(".t_ingress_1") table t_ingress_1 {
         actions = {
             _nop_1();
             _set_port_0();
             _multicast_0();
-            @default_only NoAction_1();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.hdrA.f1  : exact @name("hdr.hdrA.f1") ;
-            meta.metaA.f1: exact @name("meta.metaA.f1") ;
+            hdr.hdrA.f1  : exact @name("hdrA.f1") ;
+            meta.metaA.f1: exact @name("metaA.f1") ;
         }
         size = 128;
         default_action = NoAction_1();
     }
-    @name("t_ingress_2") table t_ingress_2 {
+    @name(".t_ingress_2") table t_ingress_2 {
         actions = {
             _nop_4();
             _resubmit_0();
             _clone_i2e_0();
-            @default_only NoAction_5();
+            @defaultonly NoAction_5();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
             standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
@@ -144,7 +144,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -155,3 +155,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

@@ -6,7 +6,7 @@ struct ht {
 }
 
 struct metadata {
-    @name("md") 
+    @name(".md") 
     ht md;
 }
 
@@ -14,25 +14,23 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".a") action a(inout bit<1> y0) {
-        y0 = (bit<1>)(y0 + 1w1);
+        y0 = y0 + 1w1;
     }
     @name(".b") action b() {
         a(meta.md.b);
         a(meta.md.b);
     }
-    @name("t") table t {
+    @name(".t") table t {
         actions = {
             b;
-            @default_only NoAction;
         }
-        default_action = NoAction();
     }
     apply {
         t.apply();
@@ -49,7 +47,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -60,3 +58,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

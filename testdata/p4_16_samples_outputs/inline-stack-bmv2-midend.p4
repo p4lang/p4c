@@ -19,7 +19,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta)
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -30,21 +30,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    h_t[1] hdr_1_stack;
-    @hidden action act() {
-        hdr_1_stack[0] = hdr.stack[0];
-        hdr.stack[0] = hdr_1_stack[0];
-        hdr_1_stack[0] = hdr.stack[0];
-        hdr.stack[0] = hdr_1_stack[0];
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     apply {
-        tbl_act.apply();
     }
 }
 
@@ -59,3 +45,4 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

@@ -80,7 +80,7 @@ control Ing(inout Headers headers,
         //debug.write(0, n);
         n[7:4] = 4w0;
         debug.write(1, n);
-        standard_meta.egress_port = 0;
+        standard_meta.egress_spec = 0;
     }
 }
 
@@ -101,7 +101,7 @@ control DP(packet_out b, in Headers p) {
 }
 
 // Fillers
-control Verify(in Headers hdrs, inout Metadata meta) {
+control Verify(inout Headers hdrs, inout Metadata meta) {
     apply {}
 }
 

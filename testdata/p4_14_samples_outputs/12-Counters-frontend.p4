@@ -11,12 +11,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
@@ -28,33 +28,40 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("c1") counter(32w1024, CounterType.packets) c1_0;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_3() {
+    }
+    @name(".c1") counter(32w1024, CounterType.packets) c1;
     @name(".count_c1_1") action count_c1() {
-        c1_0.count(32w1);
+        c1.count(32w1);
     }
-    @name("t1") table t1_0 {
+    @name(".count_c1_1") action count_c1_2() {
+        c1.count(32w1);
+    }
+    @name(".t1") table t1 {
         actions = {
             count_c1();
-            @default_only NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    @name("t2") table t2_0 {
+    @name(".t2") table t2 {
         actions = {
-            count_c1();
-            @default_only NoAction();
+            count_c1_2();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_3();
     }
     apply {
-        t1_0.apply();
-        t2_0.apply();
+        t1.apply();
+        t2.apply();
     }
 }
 
@@ -64,7 +71,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -75,3 +82,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

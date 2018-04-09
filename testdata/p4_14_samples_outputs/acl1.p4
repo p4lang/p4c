@@ -132,70 +132,68 @@ header data_t {
 }
 
 struct metadata {
-    @pa_solitary("ingress", "acl_metadata.if_label") @name("acl_metadata") 
+    @pa_solitary("ingress", "acl_metadata.if_label") @name(".acl_metadata") 
     acl_metadata_t      acl_metadata;
-    @name("fabric_metadata") 
+    @name(".fabric_metadata") 
     fabric_metadata_t   fabric_metadata;
-    @name("ingress_metadata") 
+    @name(".ingress_metadata") 
     ingress_metadata_t  ingress_metadata;
-    @name("ipv4_metadata") 
+    @name(".ipv4_metadata") 
     ipv4_metadata_t     ipv4_metadata;
-    @name("ipv6_metadata") 
+    @name(".ipv6_metadata") 
     ipv6_metadata_t     ipv6_metadata;
-    @name("l2_metadata") 
+    @name(".l2_metadata") 
     l2_metadata_t       l2_metadata;
-    @name("l3_metadata") 
+    @name(".l3_metadata") 
     l3_metadata_t       l3_metadata;
-    @name("security_metadata") 
+    @name(".security_metadata") 
     security_metadata_t security_metadata;
-    @name("tunnel_metadata") 
+    @name(".tunnel_metadata") 
     tunnel_metadata_t   tunnel_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("drop_stats") counter(32w256, CounterType.packets) drop_stats;
-    @name("drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
+    @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
+    @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
     @name(".drop_stats_update") action drop_stats_update() {
-        drop_stats_2.count((bit<32>)meta.ingress_metadata.drop_reason);
+        drop_stats_2.count((bit<32>)(bit<32>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action nop() {
     }
     @name(".copy_to_cpu") action copy_to_cpu(bit<16> reason_code) {
-        meta.fabric_metadata.reason_code = (bit<16>)reason_code;
+        meta.fabric_metadata.reason_code = reason_code;
     }
     @name(".redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
         copy_to_cpu(reason_code);
     }
     @name(".drop_packet") action drop_packet() {
     }
-    @name(".drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
+    @name(".drop_packet_with_reason") action drop_packet_with_reason(bit<32> drop_reason) {
         drop_stats.count((bit<32>)drop_reason);
     }
     @name(".negative_mirror") action negative_mirror(bit<8> session_id) {
     }
     @name(".congestion_mirror_set") action congestion_mirror_set() {
     }
-    @name("drop_stats") table drop_stats_0 {
+    @name(".drop_stats") table drop_stats_0 {
         actions = {
             drop_stats_update;
-            @default_only NoAction;
         }
         size = 256;
-        default_action = NoAction();
     }
-    @name("system_acl") table system_acl {
+    @name(".system_acl") table system_acl {
         actions = {
             nop;
             redirect_to_cpu;
@@ -204,7 +202,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason;
             negative_mirror;
             congestion_mirror_set;
-            @default_only NoAction;
         }
         key = {
             meta.acl_metadata.if_label               : ternary;
@@ -236,7 +233,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.enable_dod         : ternary;
         }
         size = 512;
-        default_action = NoAction();
     }
     apply {
         system_acl.apply();
@@ -257,7 +253,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -268,3 +264,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

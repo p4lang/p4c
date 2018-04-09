@@ -14,7 +14,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("aux.a") action aux_a() {
+    @name("IngressI.aux.a") action aux_a() {
     }
     @hidden table tbl_aux_a {
         actions = {
@@ -37,7 +37,7 @@ control DeparserI(packet_out pk, in H hdr) {
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -48,3 +48,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

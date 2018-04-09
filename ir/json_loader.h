@@ -18,16 +18,18 @@ limitations under the License.
 #define _IR_JSON_LOADER_H_
 
 #include <assert.h>
+#include <boost/optional.hpp>
 #include <gmpxx.h>
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <utility>
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
-#include "json_parser.h"
-
+#include "lib/safe_vector.h"
 #include "ir.h"
+#include "json_parser.h"
 
 class JSONLoader {
     template<typename T> class has_fromJSON {
@@ -73,7 +75,7 @@ class JSONLoader {
     }
 
     template<typename T>
-    void unpack_json(vector<T> &v) {
+    void unpack_json(safe_vector<T> &v) {
         T temp;
         for (auto e : *json->to<JsonVector>()) {
             load(e, temp);
@@ -145,6 +147,20 @@ class JSONLoader {
         load(::get(obj, "second"), v.second);
     }
 
+    template<typename T>
+    void unpack_json(boost::optional<T> &v) {
+        const JsonObject* obj = json->to<JsonObject>();
+        bool isValid = false;
+        load(::get(obj, "valid"), isValid);
+        if (!isValid) {
+            v = boost::none;
+            return;
+        }
+        T value;
+        load(::get(obj, "value"), value),
+        v = std::move(value);
+    }
+
     void unpack_json(bool &v) { v = *json->to<JsonBoolean>(); }
 
     template<typename T>
@@ -168,11 +184,28 @@ class JSONLoader {
             s->c_str() >> v; }
 
     template<typename T>
-    typename std::enable_if<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
+    typename std::enable_if<
+        has_fromJSON<T>::value &&
+        !std::is_base_of<IR::Node, T>::value &&
+        std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader&>()))>::value
+    >::type
     unpack_json(T *&v) { v = T::fromJSON(*this); }
+
     template<typename T>
-    typename std::enable_if<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
+    typename std::enable_if<
+        has_fromJSON<T>::value &&
+        !std::is_base_of<IR::Node, T>::value &&
+        std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader&>()))>::value
+    >::type
     unpack_json(T &v) { v = *(T::fromJSON(*this)); }
+
+    template<typename T>
+    typename std::enable_if<
+        has_fromJSON<T>::value &&
+        !std::is_base_of<IR::Node, T>::value &&
+        !std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader&>()))>::value
+    >::type
+    unpack_json(T &v) { v = T::fromJSON(*this); }
 
     template<typename T> typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type
     unpack_json(T &v) { v = *(get_node()->to<T>()); }
@@ -201,5 +234,34 @@ class JSONLoader {
         unpack_json(v);
         return *this; }
 };
+
+template<class T>
+IR::Vector<T>::Vector(JSONLoader &json) : VectorBase(json) {
+    json.load("vec", vec);
+}
+template<class T>
+IR::Vector<T>* IR::Vector<T>::fromJSON(JSONLoader &json) {
+    return new Vector<T>(json);
+}
+template<class T>
+IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
+    json.load("declarations", declarations);
+}
+template<class T>
+IR::IndexedVector<T>* IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
+    return new IndexedVector<T>(json);
+}
+template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
+         class COMP /*= std::less<cstring>*/,
+         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+IR::NameMap<T, MAP, COMP, ALLOC>::NameMap(JSONLoader &json) : Node(json) {
+    json.load("symbols", symbols);
+}
+template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
+         class COMP /*= std::less<cstring>*/,
+         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
+    return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
+}
 
 #endif /* _IR_JSON_LOADER_H_ */

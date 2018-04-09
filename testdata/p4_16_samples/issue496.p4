@@ -16,15 +16,17 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
   }
 }
 
-control MyVerifyChecksum(in my_packet hdr, inout my_metadata meta) {
+control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
   apply { }
 }
+
+control E();
 
 control D() {
   apply { }
 }
 
-control C()(D d) {
+control C()(E d) {
   apply {
     d.apply();
   }

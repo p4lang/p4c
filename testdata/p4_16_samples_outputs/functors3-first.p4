@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser p1(out bit<1> z1)(bit<1> b1) {
     state start {
         z1 = b1;
@@ -18,3 +20,4 @@ const bit<1> bv = 1w0;
 parser simple(out bit<1> z);
 package m(simple n);
 m(p(1w0, 1w1)) main;
+

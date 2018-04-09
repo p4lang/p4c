@@ -84,9 +84,9 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
         return type->to<IR::Type_Bits>()->size;
     if (type->is<IR::Type_Boolean>())
         return 1;
-    if (type->is<IR::Type_Union>()) {
+    if (type->is<IR::Type_HeaderUnion>()) {
         unsigned width = 0;
-        for (auto f : type->to<IR::Type_Union>()->fields)
+        for (auto f : type->to<IR::Type_HeaderUnion>()->fields)
             width = std::max(width, getWidth(f->type));
         return width;
     }

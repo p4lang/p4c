@@ -168,7 +168,62 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::GlobalRef *ref) {
-    return new IR::PathExpression(new IR::Path(ref->srcInfo, ref->toString()));
+    // FIXME -- this is broken when the GlobalRef refers to something that the converter
+    // FIXME -- has put into a different control.  In that case, ResolveReferences on this
+    // FIXME -- path will later fail as the declaration is not in scope.  We should at
+    // FIXME -- least detect that here and give a warning or other indication of the problem.
+    return new IR::PathExpression(ref->srcInfo,
+            new IR::Path(ref->srcInfo, IR::ID(ref->srcInfo, ref->toString())));
+}
+
+/// P4_16 is stricter on comparing booleans with ints
+/// Therefore we convert such expressions into simply the boolean test
+const IR::Node* ExpressionConverter::postorder(IR::Equ *equ) {
+    const IR::Expression *boolExpr = nullptr;
+    const IR::Expression *constExpr = nullptr;
+    if (equ->left->type->is<IR::Type_Boolean>() && equ->right->is<IR::Constant>()) {
+        boolExpr = equ->left;
+        constExpr = equ->right;
+    } else if (equ->right->type->is<IR::Type_Boolean>() && equ->left->is<IR::Constant>()) {
+        boolExpr = equ->right;
+        constExpr = equ->left;
+    }
+
+    // not a case we support
+    if (boolExpr == nullptr)
+        return equ;
+
+    auto val = constExpr->to<IR::Constant>()->asInt();
+    if (val == 1)
+        return boolExpr;  // == 1 return the boolean
+    else if (val == 0)
+        return new IR::LNot(equ->srcInfo, boolExpr);  // return the !boolean
+    else
+        return new IR::BoolLiteral(equ->srcInfo, false);  // everything else is false
+}
+
+/// And the Neq
+const IR::Node* ExpressionConverter::postorder(IR::Neq *neq) {
+    const IR::Expression *boolExpr = nullptr;
+    const IR::Expression *constExpr = nullptr;
+    if (neq->left->type->is<IR::Type_Boolean>() && neq->right->is<IR::Constant>()) {
+        boolExpr = neq->left;
+        constExpr = neq->right;
+    } else if (neq->right->type->is<IR::Type_Boolean>() && neq->left->is<IR::Constant>()) {
+        boolExpr = neq->right;
+        constExpr = neq->left;
+    }
+
+    if (boolExpr == nullptr)
+        return neq;
+
+    auto val = constExpr->to<IR::Constant>()->asInt();
+    if (val == 0)
+        return boolExpr;
+    else if (val == 1)
+        return new IR::LNot(neq->srcInfo, boolExpr);
+    else
+        return new IR::BoolLiteral(neq->srcInfo, true);  // everything else is true
 }
 
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
@@ -306,9 +361,20 @@ const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
 
 const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     if (!field->type->is<IR::Type_Varbits>()) return field;
-    if (auto type = findContext<IR::Type_StructLike>())
-        if (auto len = type->getAnnotation("length"))
-            field->annotations = field->annotations->add(len);
+    // given a struct with length and max_length, the
+    // varbit field size is max_length * 8 - struct_size
+    if (auto type = findContext<IR::Type_StructLike>()) {
+        if (auto len = type->getAnnotation("length")) {
+            if (len->expr.size() == 1) {
+                auto lenexpr = len->expr[0];
+                auto scale = new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(8));
+                auto fieldlen = new IR::Sub(
+                    scale->srcInfo, scale, new IR::Constant(type->width_bits()));
+                field->annotations = field->annotations->add(
+                    new IR::Annotation("length", { fieldlen }));
+            }
+        }
+    }
     return field;
 }
 
@@ -321,49 +387,205 @@ const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
 ///////////////////////////////////////////////////////////////
 
 namespace {
+class FixupExtern : public Modifier {
+    ProgramStructure            *structure;
+    cstring                     origname, extname;
+    IR::TypeParameters          *typeParams = nullptr;
+
+    bool preorder(IR::Type_Extern *type) override {
+        BUG_CHECK(!origname, "Nested extern");
+        origname = type->name;
+        return true; }
+    void postorder(IR::Type_Extern *type) override {
+        if (extname != type->name) {
+            type->annotations = type->annotations->addAnnotationIfNew(
+                IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name));
+            type->name = extname; }
+        // FIXME -- should create ctors based on attributes?  For now just create a
+        // FIXME -- 0-arg one if needed
+        if (!type->lookupMethod(type->name, 0)) {
+            type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
+                                                new IR::ParameterList()))); } }
+    void postorder(IR::Method *meth) override {
+        if (meth->name == origname) meth->name = extname; }
+    // Convert extern methods that take a field_list_calculation to take a type param instead
+    bool preorder(IR::Type_MethodBase *mtype) override {
+        BUG_CHECK(!typeParams, "recursion failure");
+        typeParams = mtype->typeParameters->clone();
+        return true; }
+    bool preorder(IR::Parameter *param) override {
+        BUG_CHECK(typeParams, "recursion failure");
+        if (param->type->is<IR::Type_FieldListCalculation>()) {
+            auto n = new IR::Type_Var(structure->makeUniqueName("FL"));
+            param->type = n;
+            typeParams->push_back(n); }
+        return false; }
+    void postorder(IR::Type_MethodBase *mtype) override {
+        BUG_CHECK(typeParams, "recursion failure");
+        if (*typeParams != *mtype->typeParameters)
+            mtype->typeParameters = typeParams;
+        typeParams = nullptr; }
+
+ public:
+    FixupExtern(ProgramStructure *s, cstring n) : structure(s), extname(n) {}
+};
+}  // end anon namespace
+
+const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *structure,
+            const IR::Type_Extern *ext, cstring name) {
+    if (!ext->attributes.empty())
+        warning("%s: P4_14 extern type not fully supported", ext);
+    return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
+}
+
+const IR::Declaration_Instance *ExternConverter::convertExternInstance(ProgramStructure *structure,
+            const IR::Declaration_Instance *ext, cstring name,
+            IR::IndexedVector<IR::Declaration> *) {
+    auto *rv = ext->clone();
+    auto *et = rv->type->to<IR::Type_Extern>();
+    BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
+    if (!ext->properties.empty())
+        warning("%s: P4_14 extern not fully supported", ext);
+    if (structure->extern_remap.count(et))
+        et = structure->extern_remap.at(et);
+    rv->name = name;
+    rv->type = new IR::Type_Name(new IR::Path(structure->extern_types.get(et)));
+    return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
+}
+
+const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *structure,
+            const IR::Declaration_Instance *ext, const IR::Primitive *prim) {
+    ExpressionConverter conv(structure);
+    auto extref = new IR::PathExpression(structure->externs.get(ext));
+    auto method = new IR::Member(prim->srcInfo, extref, prim->name);
+    auto args = new IR::Vector<IR::Expression>();
+    for (unsigned i = 1; i < prim->operands.size(); ++i)
+        args->push_back(conv.convert(prim->operands.at(i)));
+    auto mc = new IR::MethodCallExpression(prim->srcInfo, method, args);
+    return new IR::MethodCallStatement(prim->srcInfo, mc);
+}
+
+std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
+
+void ExternConverter::addConverter(cstring type, ExternConverter *cvt) {
+    static std::map<cstring, ExternConverter *> tbl;
+    cvtForType = &tbl;
+    tbl[type] = cvt;
+}
+
+ExternConverter *ExternConverter::get(cstring type) {
+    static ExternConverter default_cvt;
+    if (cvtForType && cvtForType->count(type))
+        return cvtForType->at(type);
+    return &default_cvt;
+}
+
+///////////////////////////////////////////////////////////////
+
+std::map<cstring, std::vector<PrimitiveConverter *>> *PrimitiveConverter::all_converters;
+
+PrimitiveConverter::PrimitiveConverter(cstring name, int prio) : prim_name(name), priority(prio) {
+    static std::map<cstring, std::vector<PrimitiveConverter *>> converters;
+    all_converters = &converters;
+    auto &vec = converters[name];
+    auto it = vec.begin();
+    while (it != vec.end() && (*it)->priority > prio) ++it;
+    if (it != vec.end() && (*it)->priority == prio)
+        BUG("duplicate primitive converter for %s at priority %d", name, prio);
+    vec.insert(it, this);
+}
+
+PrimitiveConverter::~PrimitiveConverter() {
+    auto &vec = all_converters->at(prim_name);
+    vec.erase(std::find(vec.begin(), vec.end(), this));
+}
+
+const IR::Statement *PrimitiveConverter::cvtPrimitive(ProgramStructure *structure,
+                                                      const IR::Primitive *primitive) {
+    if (all_converters->count(primitive->name))
+        for (auto cvt : all_converters->at(primitive->name))
+            if (auto *rv = cvt->convert(structure, primitive))
+                return rv;
+    return nullptr;
+}
+
+safe_vector<const IR::Expression *>
+PrimitiveConverter::convertArgs(ProgramStructure *structure, const IR::Primitive *prim) {
+    ExpressionConverter conv(structure);
+    safe_vector<const IR::Expression *> rv;
+    for (auto arg : prim->operands)
+        rv.push_back(conv.convert(arg));
+    return rv;
+}
+
+///////////////////////////////////////////////////////////////
+
+namespace {
 class DiscoverStructure : public Inspector {
     ProgramStructure* structure;
+
+    // These names can only be used for very specific purposes
+    std::map<cstring, cstring> reserved_names = {
+        { "standard_metadata_t", "type" },
+        { "standard_metadata", "metadata" },
+        { "egress", "control" }
+    };
+
+    void checkReserved(const IR::Node* node, cstring nodeName, cstring kind) const {
+        auto it = reserved_names.find(nodeName);
+        if (it == reserved_names.end())
+            return;
+        if (it->second != kind)
+            ::error("%1% cannot have this name; it can only be used for %2%", node, it->second);
+    }
+    void checkReserved(const IR::Node* node, cstring nodeName) const {
+        checkReserved(node, nodeName, nullptr);
+    }
 
  public:
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
+    void postorder(const IR::ParserException* ex) override
+    { ::warning("%1%: parser exception is not translated to P4-16", ex); }
     void postorder(const IR::Metadata* md) override
-    { structure->metadata.emplace(md); }
+    { structure->metadata.emplace(md); checkReserved(md, md->name, "metadata"); }
     void postorder(const IR::Header* hd) override
-    { structure->headers.emplace(hd); }
+    { structure->headers.emplace(hd); checkReserved(hd, hd->name); }
     void postorder(const IR::Type_StructLike *t) override
-    { structure->types.emplace(t); }
+    { structure->types.emplace(t); checkReserved(t, t->name, "type"); }
     void postorder(const IR::V1Control* control) override
-    { structure->controls.emplace(control); }
+    { structure->controls.emplace(control); checkReserved(control, control->name, "control"); }
     void postorder(const IR::V1Parser* parser) override
-    { structure->parserStates.emplace(parser); }
+    { structure->parserStates.emplace(parser); checkReserved(parser, parser->name); }
     void postorder(const IR::V1Table* table) override
-    { structure->tables.emplace(table); }
+    { structure->tables.emplace(table); checkReserved(table, table->name); }
     void postorder(const IR::ActionFunction* action) override
-    { structure->actions.emplace(action); }
+    { structure->actions.emplace(action); checkReserved(action, action->name); }
     void postorder(const IR::HeaderStack* stack) override
-    { structure->stacks.emplace(stack); }
+    { structure->stacks.emplace(stack); checkReserved(stack, stack->name); }
     void postorder(const IR::Counter* count) override
-    { structure->counters.emplace(count); }
+    { structure->counters.emplace(count); checkReserved(count, count->name); }
     void postorder(const IR::Register* reg) override
-    { structure->registers.emplace(reg); }
+    { structure->registers.emplace(reg); checkReserved(reg, reg->name); }
     void postorder(const IR::ActionProfile* ap) override
-    { structure->action_profiles.emplace(ap); }
+    { structure->action_profiles.emplace(ap); checkReserved(ap, ap->name); }
     void postorder(const IR::FieldList* fl) override
-    { structure->field_lists.emplace(fl); }
+    { structure->field_lists.emplace(fl); checkReserved(fl, fl->name); }
     void postorder(const IR::FieldListCalculation* flc) override
-    { structure->field_list_calculations.emplace(flc); }
+    { structure->field_list_calculations.emplace(flc); checkReserved(flc, flc->name); }
     void postorder(const IR::CalculatedField* cf) override
     { structure->calculated_fields.push_back(cf); }
     void postorder(const IR::Meter* m) override
-    { structure->meters.emplace(m); }
+    { structure->meters.emplace(m); checkReserved(m, m->name); }
     void postorder(const IR::ActionSelector* as) override
-    { structure->action_selectors.emplace(as); }
+    { structure->action_selectors.emplace(as); checkReserved(as, as->name); }
     void postorder(const IR::Type_Extern *ext) override
-    { structure->extern_types.emplace(ext); }
+    { structure->extern_types.emplace(ext); checkReserved(ext, ext->name); }
     void postorder(const IR::Declaration_Instance *ext) override
-    { structure->externs.emplace(ext); }
+    { structure->externs.emplace(ext); checkReserved(ext, ext->name); }
+    void postorder(const IR::ParserValueSet* pvs) override
+    { structure->value_sets.emplace(pvs); checkReserved(pvs, pvs->name); }
 };
 
 class ComputeCallGraph : public Inspector {
@@ -372,23 +594,7 @@ class ComputeCallGraph : public Inspector {
  public:
     explicit ComputeCallGraph(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("ComputeCallGraph"); }
-    void postorder(const IR::Apply* apply) override {
-        LOG3("Scanning " << apply->name);
-        auto tbl = structure->tables.get(apply->name.name);
-        if (tbl == nullptr)
-            ::error("Could not find table %1%", apply->name);
-        auto parent = findContext<IR::V1Control>();
-        BUG_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
-        auto ctrl = get(structure->tableMapping, tbl);
-        if (ctrl != nullptr && ctrl != parent) {
-            auto previous = get(structure->tableInvocation, tbl);
-            ::error("Table %1% invoked from two different controls: %2% and %3%",
-                    tbl, apply, previous);
-        }
-        LOG3("Invoking " << tbl << " in " << parent->name);
-        structure->tableMapping.emplace(tbl, parent);
-        structure->tableInvocation.emplace(tbl, apply);
-    }
+
     void postorder(const IR::V1Parser* parser) override {
         LOG3("Scanning parser " << parser->name);
         structure->parsers.add(parser->name);
@@ -495,6 +701,45 @@ class ComputeCallGraph : public Inspector {
             structure->calledRegisters.calls(caller, reg->name.name);
         else if (auto ext = gref->obj->to<IR::Declaration_Instance>())
             structure->calledExterns.calls(caller, ext->name.name);
+    }
+};
+
+/// Table call graph should be built after the control call graph is built.
+/// In the case that the program contains an unused control block, the
+/// table invocation in the unused control block should not be considered.
+class ComputeTableCallGraph : public Inspector {
+    ProgramStructure *structure;
+
+ public:
+    explicit ComputeTableCallGraph(ProgramStructure *structure) : structure(structure) {
+        CHECK_NULL(structure);
+        setName("ComputeTableCallGraph");
+    }
+
+    void postorder(const IR::Apply *apply) override {
+        LOG3("Scanning " << apply->name);
+        auto tbl = structure->tables.get(apply->name.name);
+        if (tbl == nullptr)
+            ::error("Could not find table %1%", apply->name);
+        auto parent = findContext<IR::V1Control>();
+        ERROR_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
+
+        auto ctrl = get(structure->tableMapping, tbl);
+
+        // skip control block that is unused.
+        if (!structure->calledControls.isCallee(parent->name) &&
+            parent->name != P4V1::V1Model::instance.ingress.name &&
+            parent->name != P4V1::V1Model::instance.egress.name )
+            return;
+
+        if (ctrl != nullptr && ctrl != parent) {
+            auto previous = get(structure->tableInvocation, tbl);
+            ::error("Table %1% invoked from two different controls: %2% and %3%",
+                    tbl, apply, previous);
+        }
+        LOG3("Invoking " << tbl << " in " << parent->name);
+        structure->tableMapping.emplace(tbl, parent);
+        structure->tableInvocation.emplace(tbl, apply);
     }
 };
 
@@ -712,22 +957,146 @@ class FixExtracts final : public Transform {
     }
 };
 
+/*
+  This class is used to adjust the expressions in a @length
+  annotation on a varbit field.  The P4-14 to P4-16 converter inserts
+  these annotations on the unique varbit field in a header; the
+  annotations are created from the header max_length and length
+  fields.  The length annotation contains an expression which is used
+  to compute the length of the varbit field.  The problem that we are
+  solving here is that expression semantics is different in P4-14 and
+  P4-16.  Consider the canonical case of an IPv4 header:
+
+  header_type ipv4_t {
+     fields {
+        version : 4;
+        ihl : 4;
+        // lots of other fields...
+        options: *;
+    }
+    length     : ihl*4;
+    max_length : 64;
+  }
+
+  This generates the following P4-16 structure:
+  struct ipv4_t {
+      bit<4> version;
+      bit<4> ihl;
+      @length((ihl*4) * 8 - 20)  // 20 is the size of the fixed part of the header
+      varbit<(64 - 20) * 8> options;
+  }
+
+  When such a header is used in an extract statement, the @length
+  annotation is used to compute the second argument of the extract
+  method.  The problem we are solving here is the fact that ihl is
+  only represented on 4 bits, so the evaluation ihl*4 will actually
+  overflow.  This is not a problem in P4-14, but it is a problem in
+  P4-16.  Unfortunately there is no easy way to guess how many bits
+  are required to evaluate this computation.  So what we do is to cast
+  all PathExpressions to 32-bits.  This is really just a heuristic,
+  but since the semantics of P4-14 expressions is unclear, we cannot
+  do much better than this.
+*/
+class AdjustLengths : public Transform {
+ public:
+    AdjustLengths() { setName("AdjustLengths"); }
+    const IR::Node* postorder(IR::PathExpression* expression) override {
+        auto anno = findContext<IR::Annotation>();
+        if (anno == nullptr)
+            return expression;
+        if (anno->name != "length")
+            return expression;
+
+        LOG3("Inserting cast in length annotation");
+        auto type = IR::Type_Bits::get(32);
+        auto cast = new IR::Cast(expression->srcInfo, type, expression);
+        return cast;
+    }
+};
+
+/// Detects whether there are two declarations in the P4-14 program
+/// with the same name and for the same kind of object.
+class DetectDuplicates: public Inspector {
+ public:
+    DetectDuplicates() { setName("DetectDuplicates"); }
+
+    bool preorder(const IR::V1Program* program) override {
+        auto &map = program->scope;
+        auto firstWithKey = map.begin();
+        while (firstWithKey != map.end()) {
+            auto key = firstWithKey->first;
+            auto range = map.equal_range(key);
+            for (auto s = range.first; s != range.second; s++) {
+                auto n = s;
+                for (n++; n != range.second; n++) {
+                    auto e1 = s->second;
+                    auto e2 = n->second;
+                    if (e1->node_type_name() == e2->node_type_name()) {
+                        if (e1->srcInfo.getStart().isValid())
+                            ::error("%1%: same name as %2%", e1, e2);
+                        else
+                            // This name is probably standard_metadata_t, a built-in declaration
+                            ::error("%1%: name %2% is reserved", e2, key);
+                    }
+                }
+            }
+            firstWithKey = range.second;
+        }
+        // prune; we're done; everything is top-level
+        return false;
+    }
+};
+
+// The fields in standard_metadata in v1model.p4 should only be used if
+// the source program is written in P4-16. Therefore we remove those
+// fields from the translated P4-14 program.
+class RemoveAnnotatedFields : public Transform {
+ public:
+    RemoveAnnotatedFields() { setName("RemoveAnnotatedFields"); }
+    const IR::Node* postorder(IR::Type_Struct* node) override {
+        if (node->name == "standard_metadata_t") {
+            auto fields = new IR::IndexedVector<IR::StructField>();
+            for (auto f : node->fields) {
+                if (!f->getAnnotation("alias")) {
+                    fields->push_back(f);
+                }
+            }
+            return new IR::Type_Struct(node->srcInfo, node->name, node->annotations, *fields);
+        }
+        return node;
+    }
+};
+
 }  // namespace
+
+
 
 ///////////////////////////////////////////////////////////////
 
+static ProgramStructure *defaultCreateProgramStructure() {
+    return new ProgramStructure();
+}
+
+ProgramStructure *(*Converter::createProgramStructure)() = defaultCreateProgramStructure;
+
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
+    structure = createProgramStructure();
+    structure->populateOutputNames();
 
-    // Discover types using P4 v1.1 type-checker
+    // Discover types using P4-14 type-checker
+    passes.emplace_back(new DetectDuplicates());
     passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
     passes.emplace_back(new CheckHeaderTypes());
+    passes.emplace_back(new AdjustLengths());
     passes.emplace_back(new TypeCheck());
     // Convert
-    passes.emplace_back(new DiscoverStructure(&structure));
-    passes.emplace_back(new ComputeCallGraph(&structure));
-    passes.emplace_back(new Rewriter(&structure));
-    passes.emplace_back(new FixExtracts(&structure));
+    passes.emplace_back(new DiscoverStructure(structure));
+    passes.emplace_back(new ComputeCallGraph(structure));
+    passes.emplace_back(new ComputeTableCallGraph(structure));
+    passes.emplace_back(new Rewriter(structure));
+    passes.emplace_back(new FixExtracts(structure));
+    passes.emplace_back(new RemoveAnnotatedFields);
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {

@@ -35,7 +35,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m) {
+control vrfy(inout Headers h, inout Meta m) {
     apply {
     }
 }
@@ -65,3 +65,4 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

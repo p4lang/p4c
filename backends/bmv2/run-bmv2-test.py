@@ -109,6 +109,9 @@ def usage(options):
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
+    print("          -a option: pass this option to the compiler")
+    print("          -gdb: run compiler under gdb")
+    print("          --pp file: pass this option to the compiler")
     print("          -observation-log <file>: save packet output to <file>")
 
 def isError(p4filename):
@@ -199,15 +202,19 @@ def process_file(options, argv):
         raise Exception("No such file " + options.p4filename)
     args = ["./p4c-bm2-ss", "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--p4v", "1.0"]);
+        args.extend(["--std", "p4-14"]);
     args.extend(argv)  # includes p4filename
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
+
     if result != SUCCESS:
         print("Error compiling")
         print("".join(open(stderr).readlines()))
+        # If the compiler crashed fail the test
+        if 'Compiler Bug' in open(stderr).readlines():
+            return FAILURE
 
     expected_error = isError(options.p4filename)
     if expected_error:
@@ -275,8 +282,9 @@ def main(argv):
             argv = argv[1:]
             options.compilerOptions.append(argv[0])
         else:
-            reportError("Uknown option ", argv[0])
+            reportError("Unknown option ", argv[0])
             usage(options)
+            sys.exit(FAILURE)
         argv = argv[1:]
 
     config = ConfigH("config.h")
@@ -307,7 +315,12 @@ def main(argv):
             dirname = os.path.dirname(options.p4filename)
             options.observationLog = os.path.join(dirname, '%s.p4.obs' % base)
 
-    result = process_file(options, argv)
+    try:
+        result = process_file(options, argv)
+    except Exception as e:
+        print("Exception ", e)
+        sys.exit(FAILURE)
+
     if result != SUCCESS:
         reportError("Test failed")
     sys.exit(result)

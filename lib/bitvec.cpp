@@ -60,7 +60,7 @@ bitvec &bitvec::operator>>=(size_t count) {
 }
 
 bitvec &bitvec::operator<<=(size_t count) {
-    size_t needsize = (max().index() + count + bits_per_unit - 1)/bits_per_unit;
+    size_t needsize = (max().index() + count + bits_per_unit)/bits_per_unit;
     if (needsize > size) expand(needsize);
     if (size == 1) {
         data <<= count;
@@ -78,6 +78,7 @@ bitvec &bitvec::operator<<=(size_t count) {
 }
 
 bitvec bitvec::getslice(size_t idx, size_t sz) const {
+    if (sz == 0) return bitvec();
     if (idx >= size * bits_per_unit) return bitvec();
     if (idx + sz > size * bits_per_unit)
         sz = size * bits_per_unit - idx;
@@ -136,4 +137,11 @@ unsigned bitvec::ffz(unsigned start) const {
     while (val & 1) { rv++; val >>= 1; }
 #endif
     return rv;
+}
+
+bool bitvec::is_contiguous() const {
+    // Empty bitvec is not contiguous
+    if (empty())
+        return false;
+    return max().index() - min().index() + 1 == popcount();
 }

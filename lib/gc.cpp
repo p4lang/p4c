@@ -17,6 +17,7 @@ limitations under the License.
 #include "config.h"
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
+#include <gc/gc_mark.h>
 #endif  /* HAVE_LIBGC */
 #include <new>
 #include "log.h"
@@ -51,15 +52,22 @@ void *operator new[](std::size_t size) {
 void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 
-extern "C" void (*GC_start_call_back)(void);
-extern "C" size_t GC_get_heap_size(void);
+#if HAVE_GC_PRINT_STATS
+/* GC_print_stats is not exported as an API symbol and cannot be used on some systems */
 extern "C" int GC_print_stats;
+#endif /* HAVE_GC_PRINT_STATS */
 
 static void gc_callback() {
-    size_t count;
-    LOG1("****** GC called ****** (heap size " << GC_get_heap_size() << ")");
-    LOG2("cstring cache size " << cstring::cache_size(count) << " (count=" << count << ")");
-    GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
+    if (Log::verbosity() >= 2) {
+        std::clog << "****** GC called ****** (heap size " << GC_get_heap_size() << ")";
+        size_t count;
+        std::clog << "cstring cache size " << cstring::cache_size(count)
+                  << " (count=" << count << ")";
+    }
+#if HAVE_GC_PRINT_STATS
+    // Maybe print GC statistics. Unfortunately they go directly to stderr!
+    GC_print_stats = Log::verbosity() >= 2 ? 1 : 0;
+#endif /* HAVE_GC_PRINT_STATS */
 }
 
 void silent(char *, GC_word) {}
@@ -67,8 +75,10 @@ void silent(char *, GC_word) {}
 
 void setup_gc_logging() {
 #if HAVE_LIBGC
+#if HAVE_GC_PRINT_STATS
     GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
-    GC_start_call_back = gc_callback;
+#endif /* HAVE_GC_PRINT_STATS */
+    GC_set_start_callback(gc_callback);
     GC_set_warn_proc(&silent);
 #endif  /* HAVE_LIBGC */
 }

@@ -17,28 +17,28 @@ struct metadata {
 }
 
 struct headers {
-    @name("len_or_type") 
+    @name(".len_or_type") 
     len_or_type_t len_or_type;
-    @name("mac_da") 
+    @name(".mac_da") 
     mac_da_t      mac_da;
-    @name("mac_sa") 
+    @name(".mac_sa") 
     mac_sa_t      mac_sa;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_len_or_type") state parse_len_or_type {
+    @name(".parse_len_or_type") state parse_len_or_type {
         packet.extract<len_or_type_t>(hdr.len_or_type);
         transition accept;
     }
-    @name("parse_mac_da") state parse_mac_da {
+    @name(".parse_mac_da") state parse_mac_da {
         packet.extract<mac_da_t>(hdr.mac_da);
         transition parse_mac_sa;
     }
-    @name("parse_mac_sa") state parse_mac_sa {
+    @name(".parse_mac_sa") state parse_mac_sa {
         packet.extract<mac_sa_t>(hdr.mac_sa);
         transition parse_len_or_type;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_mac_da;
     }
 }
@@ -46,13 +46,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t2") table t2 {
+    @name(".t2") table t2 {
         actions = {
             nop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.mac_sa.mac: exact @name("hdr.mac_sa.mac") ;
+            hdr.mac_sa.mac: exact @name("mac_sa.mac") ;
         }
         default_action = NoAction();
     }
@@ -64,14 +64,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             nop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.mac_da.mac       : exact @name("hdr.mac_da.mac") ;
-            hdr.len_or_type.value: exact @name("hdr.len_or_type.value") ;
+            hdr.mac_da.mac       : exact @name("mac_da.mac") ;
+            hdr.len_or_type.value: exact @name("len_or_type.value") ;
         }
         default_action = NoAction();
     }
@@ -88,7 +88,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -99,3 +99,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

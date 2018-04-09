@@ -27,21 +27,21 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
-    @name("metaA") 
+    @name(".metaA") 
     metaA_t              metaA;
-    @name("metaB") 
+    @name(".metaB") 
     metaB_t              metaB;
 }
 
 struct headers {
-    @name("hdrA") 
+    @name(".hdrA") 
     hdrA_t hdrA;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<hdrA_t>(hdr.hdrA);
         transition accept;
     }
@@ -56,15 +56,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_egress") table t_egress {
+    @name(".t_egress") table t_egress {
         actions = {
             _nop();
             _recirculate();
             _clone_e2e();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
             standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
@@ -91,29 +91,29 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name("t_ingress_1") table t_ingress_1 {
+    @name(".t_ingress_1") table t_ingress_1 {
         actions = {
             _nop();
             _set_port();
             _multicast();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1  : exact @name("hdr.hdrA.f1") ;
-            meta.metaA.f1: exact @name("meta.metaA.f1") ;
+            hdr.hdrA.f1  : exact @name("hdrA.f1") ;
+            meta.metaA.f1: exact @name("metaA.f1") ;
         }
         size = 128;
         default_action = NoAction();
     }
-    @name("t_ingress_2") table t_ingress_2 {
+    @name(".t_ingress_2") table t_ingress_2 {
         actions = {
             _nop();
             _resubmit();
             _clone_i2e();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
             standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
@@ -131,7 +131,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -142,3 +142,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

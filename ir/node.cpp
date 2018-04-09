@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "ir.h"
+#include "ir/json_loader.h"
 
 void IR::Node::traceVisit(const char* visitor) const
 { LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }
@@ -24,7 +25,7 @@ void IR::Node::traceCreation() const { LOG5("Created node " << id); }
 int IR::Node::currentId = 0;
 
 void IR::Node::toJSON(JSONGenerator &json) const {
-    json << json.indent << "\"Node_ID\" : " << id << ", " << std::endl
+    json << json.indent << "\"Node_ID\" : " << id << "," << std::endl
          << json.indent << "\"Node_Type\" : " << node_type_name();
 }
 
@@ -66,11 +67,25 @@ cstring IR::dbp(const IR::INode* node) {
     return str.str();
 }
 
+cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo& si,
+                                           unsigned *lineNumber,
+                                           unsigned *columnNumber) const {
+    if (!si.isValid()) {
+        return nullptr;
+    }
+    if (is<IR::AssignmentStatement>()) {
+        auto assign = to<IR::AssignmentStatement>();
+        si = (assign->left->srcInfo + si) + assign->right->srcInfo;
+    }
+    return si.toSourcePositionData(lineNumber, columnNumber);
+}
+
+// TODO: Find a way to eliminate the duplication below.
+
 Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
+    Util::SourceInfo si = srcInfo;
     unsigned lineNumber, columnNumber;
-    const IR::Expression *lhs, *rhs;
-    cstring fName = srcInfo.toSourcePositionData(&lineNumber,
-                                                 &columnNumber);
+    cstring fName = prepareSourceInfoForJSON(si, &lineNumber, &columnNumber);
     if (fName == nullptr) {
         // Do not add anything to the bmv2 JSON file for this, as this
         // is likely a statement synthesized by the compiler, and
@@ -78,28 +93,34 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
         // directly with anything in the user's P4 source code.
         return nullptr;
     }
-    bool isAssignment = is<IR::AssignmentStatement>();
-    if (isAssignment) {
-        auto assign = to<IR::AssignmentStatement>();
-        lhs = assign->left;
-        rhs = assign->right;
-        lhs->srcInfo.toSourcePositionData(&lineNumber, &columnNumber);
-    }
+
     auto json = new Util::JsonObject();
-    cstring sourceFrag = srcInfo.toBriefSourceFragment();
     json->emplace("filename", fName);
     json->emplace("line", lineNumber);
     json->emplace("column", columnNumber);
-    cstring fullSourceFrag;
-    if (isAssignment) {
-        cstring lhsFrag = lhs->srcInfo.toBriefSourceFragment();
-        cstring rhsFrag = rhs->srcInfo.toBriefSourceFragment();
-        fullSourceFrag = lhsFrag + " " + sourceFrag + " " + rhsFrag;
-    } else {
-        fullSourceFrag = sourceFrag;
-    }
-    json->emplace("source_fragment", fullSourceFrag);
+    json->emplace("source_fragment", si.toBriefSourceFragment());
     return json;
+}
+
+void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
+    Util::SourceInfo si = srcInfo;
+    unsigned lineNumber, columnNumber;
+    cstring fName = prepareSourceInfoForJSON(si, &lineNumber, &columnNumber);
+    if (fName == nullptr) {
+        // Same reasoning as above.
+        return;
+    }
+
+    json << "," << std::endl
+         << json.indent++ << "\"Source_Info\" : {" << std::endl;
+
+    json << json.indent << "\"filename\" : " << fName << "," << std::endl;
+    json << json.indent << "\"line\" : " << lineNumber << "," << std::endl;
+    json << json.indent << "\"column\" : " << columnNumber << "," << std::endl;
+    json << json.indent << "\"source_fragment\" : " <<
+            si.toBriefSourceFragment().escapeJson() << std::endl;
+
+    json << --json.indent << "}";
 }
 
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )

@@ -44,6 +44,7 @@ interface IApply {
     static const cstring applyMethodName;
     /// @returns the type signature of the apply method
     virtual const Type_Method* getApplyMethodType() const = 0;
+    virtual const ParameterList* getApplyParameters() const = 0;
 }
 
 /// base class for namespaces
@@ -189,6 +190,9 @@ class Annotation {
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
+
+    /// Useful helper: extracts name value from a name annotation
+    static cstring getName(const IR::Annotation* annotation);
 }
 
 /// There can be several annotations with the same "name", so this is a vector.

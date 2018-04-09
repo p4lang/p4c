@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,4 +76,15 @@ cstring cstring::replace(char c, char with) const {
         if (*p == c)
             *p = with;
     return cstring(dup);
+}
+
+cstring cstring::escapeJson() const {
+    std::string out;
+    for (size_t i = 0; i < size(); i++) {
+        char c = get(i);
+        if (c == '\\' || c == '"')
+            out += "\\";
+        out += c;
+    }
+    return cstring(out);
 }

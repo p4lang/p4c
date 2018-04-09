@@ -31,6 +31,15 @@ parser start {
     return ingress;
 }
 
+action _drop() { drop(); }
+
+table set_default_behavior_drop {
+    actions {
+        _drop;
+    }
+    default_action: _drop;
+}
+
 action noop() { }
 action setb1(val, port) {
     modify_field(data.b1, val);
@@ -57,6 +66,10 @@ table test2 {
 }
 
 control ingress {
+    // Unless some later action sets standard_metadata.egress_spec to
+    // the value corresponding to an output port, the packet will be
+    // dropped at the end of ingress.
+    apply(set_default_behavior_drop);
     if (data.b2 == data.b3 and data.b4 == 10) {
         apply(test1);
     } else {

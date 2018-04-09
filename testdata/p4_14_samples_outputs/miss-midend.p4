@@ -15,12 +15,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
@@ -28,11 +28,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bool tmp_0;
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_4() {
+    @name(".NoAction") action NoAction_4() {
     }
-    @name("NoAction") action NoAction_5() {
+    @name(".NoAction") action NoAction_5() {
     }
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
@@ -48,32 +48,32 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop_4() {
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             setb1_0();
             noop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.f1: ternary @name("hdr.data.f1") ;
+            hdr.data.f1: ternary @name("data.f1") ;
         }
         default_action = NoAction_0();
     }
-    @name("test3") table test3 {
+    @name(".test3") table test3 {
         actions = {
             setb1_2();
             noop_3();
-            @default_only NoAction_4();
+            @defaultonly NoAction_4();
         }
         key = {
-            hdr.data.f3: ternary @name("hdr.data.f3") ;
+            hdr.data.f3: ternary @name("data.f3") ;
         }
         default_action = NoAction_4();
     }
-    @name("test4") table test4 {
+    @name(".test4") table test4 {
         actions = {
             noop_4();
-            @default_only NoAction_5();
+            @defaultonly NoAction_5();
         }
         default_action = NoAction_5();
     }
@@ -119,7 +119,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -130,3 +130,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

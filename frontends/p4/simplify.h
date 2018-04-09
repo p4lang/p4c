@@ -24,6 +24,30 @@ limitations under the License.
 
 namespace P4 {
 
+/** @brief Replace complex control flow nodes with simpler ones where possible.
+ * 
+ * Simplify the IR in the following ways:
+ *
+ * 1. Remove empty statements from within parser states, actions, and block
+ * statements.
+ *
+ * 2. Replace if statements with empty bodies with an empty statement.
+ *
+ * 3. Remove fallthrough switch cases that are not followed by a case with a
+ * statement.
+ *
+ * 4. Replace switch statements that switch on a table application but have no
+ * cases with a table application expression.
+ *
+ * 5. If a block statement is within another block or a parser state, and (a)
+ * is empty, then replace it with an empty statement, or (b) does not contain
+ * declarations, then move its component statements to the enclosing block.
+ * 
+ * 6. If a block statement in an if statement branch only contains a single
+ * statement, replace the block with the statement it contains.
+ *
+ * @pre An up-to-date ReferenceMap and TypeMap.
+ */
 class DoSimplifyControlFlow : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
@@ -37,6 +61,8 @@ class DoSimplifyControlFlow : public Transform {
     const IR::Node* postorder(IR::SwitchStatement* statement) override;
 };
 
+/// Repeatedly simplify control flow until convergence, as some simplification
+/// steps enable further simplification.
 class SimplifyControlFlow : public PassRepeated {
  public:
     SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) {

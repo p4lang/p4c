@@ -1,0 +1,6 @@
+issue529-1.p4(28): error: h_t: casts are only supported to base types
+        h_t h2 = (h_t) h; // illegal cast
+                  ^^^
+issue529-1.p4(29): error: h_t: casts are only supported to base types
+        h_t h4 = (h_t) { h.f }; // illegal cast
+                  ^^^

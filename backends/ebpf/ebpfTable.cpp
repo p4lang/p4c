@@ -18,6 +18,7 @@ limitations under the License.
 #include "ebpfType.h"
 #include "ir/ir.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 
@@ -42,7 +43,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
             if (isParam) {
                 builder->append(valueName);
                 builder->append("->u.");
-                cstring name = action->externalName();
+                cstring name = EBPFObject::externalName(action);
                 builder->append(name);
                 builder->append(".");
             }
@@ -63,7 +64,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
                      CodeGenInspector* codeGen) :
-        EBPFTableBase(program, table->container->externalName(), codeGen), table(table) {
+        EBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = program->refMap->newName(base);
 
@@ -82,41 +83,43 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     CodeGenInspector commentGen(program->refMap, program->typeMap);
     commentGen.setBuilder(builder);
 
-    // Use this to order elements by size
-    std::map<size_t, const IR::KeyElement*> ordered;
-    unsigned fieldNumber = 0;
-    for (auto c : keyGenerator->keyElements) {
-        auto type = program->typeMap->getType(c->expression);
-        auto ebpfType = EBPFTypeFactory::instance->create(type);
-        cstring fieldName = cstring("field") + Util::toString(fieldNumber);
-        if (!ebpfType->is<IHasWidth>()) {
-            ::error("%1%: illegal type %2% for key field", c, type);
-            return;
+    if (keyGenerator != nullptr) {
+        // Use this to order elements by size
+        std::multimap<size_t, const IR::KeyElement*> ordered;
+        unsigned fieldNumber = 0;
+        for (auto c : keyGenerator->keyElements) {
+            auto type = program->typeMap->getType(c->expression);
+            auto ebpfType = EBPFTypeFactory::instance->create(type);
+            cstring fieldName = cstring("field") + Util::toString(fieldNumber);
+            if (!ebpfType->is<IHasWidth>()) {
+                ::error("%1%: illegal type %2% for key field", c, type);
+                return;
+            }
+            unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
+            ordered.emplace(width, c);
+            keyTypes.emplace(c, ebpfType);
+            keyFieldNames.emplace(c, fieldName);
+            fieldNumber++;
         }
-        unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
-        ordered.emplace(width, c);
-        keyTypes.emplace(c, ebpfType);
-        keyFieldNames.emplace(c, fieldName);
-        fieldNumber++;
-    }
 
-    // Emit key in decreasing order size - this way there will be no haps
-    for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
-        auto c = it->second;
+        // Emit key in decreasing order size - this way there will be no gaps
+        for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
+            auto c = it->second;
 
-        auto ebpfType = ::get(keyTypes, c);
-        builder->emitIndent();
-        cstring fieldName = ::get(keyFieldNames, c);
-        ebpfType->declare(builder, fieldName, false);
-        builder->append("; /* ");
-        c->expression->apply(commentGen);
-        builder->append(" */");
-        builder->newline();
+            auto ebpfType = ::get(keyTypes, c);
+            builder->emitIndent();
+            cstring fieldName = ::get(keyFieldNames, c);
+            ebpfType->declare(builder, fieldName, false);
+            builder->append("; /* ");
+            c->expression->apply(commentGen);
+            builder->append(" */");
+            builder->newline();
 
-        auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
-        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-        if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name)
-            ::error("Match of type %1% not supported", c->matchType);
+            auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
+            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name)
+                ::error("Match of type %1% not supported", c->matchType);
+        }
     }
 
     builder->blockEnd(false);
@@ -153,7 +156,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = action->externalName();
+        cstring name = EBPFObject::externalName(action);
         builder->emitIndent();
         builder->append(name);
         builder->append(",");
@@ -179,7 +182,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = action->externalName();
+        cstring name = EBPFObject::externalName(action);
         emitActionArguments(builder, action, name);
     }
 
@@ -196,70 +199,74 @@ void EBPFTable::emitTypes(CodeBuilder* builder) {
 }
 
 void EBPFTable::emitInstance(CodeBuilder* builder) {
-    auto impl = table->container->properties->getProperty(program->model.tableImplProperty.name);
-    if (impl == nullptr) {
-        ::error("Table %1% does not have an %2% property",
-                table->container, program->model.tableImplProperty.name);
-        return;
-    }
+    if (keyGenerator != nullptr) {
+        auto impl = table->container->properties->getProperty(
+            program->model.tableImplProperty.name);
+        if (impl == nullptr) {
+            ::error("Table %1% does not have an %2% property",
+                    table->container, program->model.tableImplProperty.name);
+            return;
+        }
 
-    // Some type checking...
-    if (!impl->value->is<IR::ExpressionValue>()) {
-        ::error("%1%: Expected property to be an `extern` block", impl);
-        return;
-    }
+        // Some type checking...
+        if (!impl->value->is<IR::ExpressionValue>()) {
+            ::error("%1%: Expected property to be an `extern` block", impl);
+            return;
+        }
 
-    auto expr = impl->value->to<IR::ExpressionValue>()->expression;
-    if (!expr->is<IR::ConstructorCallExpression>()) {
-        ::error("%1%: Expected property to be an `extern` block", impl);
-        return;
-    }
+        auto expr = impl->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::ConstructorCallExpression>()) {
+            ::error("%1%: Expected property to be an `extern` block", impl);
+            return;
+        }
 
-    auto block = table->getValue(expr);
-    if (block == nullptr || !block->is<IR::ExternBlock>()) {
-        ::error("%1%: Expected property to be an `extern` block", impl);
-        return;
-    }
+        auto block = table->getValue(expr);
+        if (block == nullptr || !block->is<IR::ExternBlock>()) {
+            ::error("%1%: Expected property to be an `extern` block", impl);
+            return;
+        }
 
-    bool isHash;
-    auto extBlock = block->to<IR::ExternBlock>();
-    if (extBlock->type->name.name == program->model.array_table.name) {
-        isHash = false;
-    } else if (extBlock->type->name.name == program->model.hash_table.name) {
-        isHash = true;
-    } else {
-        ::error("%1%: implementation must be one of %2% or %3%",
-                impl, program->model.array_table.name, program->model.hash_table.name);
-        return;
-    }
+        bool isHash;
+        auto extBlock = block->to<IR::ExternBlock>();
+        if (extBlock->type->name.name == program->model.array_table.name) {
+            isHash = false;
+        } else if (extBlock->type->name.name == program->model.hash_table.name) {
+            isHash = true;
+        } else {
+            ::error("%1%: implementation must be one of %2% or %3%",
+                    impl, program->model.array_table.name, program->model.hash_table.name);
+            return;
+        }
 
-    auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
-    if (sz == nullptr || !sz->is<IR::Constant>()) {
-        ::error("Expected an integer argument for %1%; is the model corrupted?", expr);
-        return;
-    }
-    auto cst = sz->to<IR::Constant>();
-    if (!cst->fitsInt()) {
-        ::error("%1%: size too large", cst);
-        return;
-    }
-    int size = cst->asInt();
-    if (size <= 0) {
-        ::error("%1%: negative size", cst);
-        return;
-    }
+        auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
+        if (sz == nullptr || !sz->is<IR::Constant>()) {
+            ::error("Expected an integer argument for %1%; is the model corrupted?", expr);
+            return;
+        }
+        auto cst = sz->to<IR::Constant>();
+        if (!cst->fitsInt()) {
+            ::error("%1%: size too large", cst);
+            return;
+        }
+        int size = cst->asInt();
+        if (size <= 0) {
+            ::error("%1%: negative size", cst);
+            return;
+        }
 
-    builder->emitIndent();
-    cstring name = table->container->externalName();
-    builder->target->emitTableDecl(builder, name, isHash,
-                                   cstring("struct ") + keyTypeName,
-                                   cstring("struct ") + valueTypeName, size);
+        cstring name = EBPFObject::externalName(table->container);
+        builder->target->emitTableDecl(builder, name, isHash,
+                                       cstring("struct ") + keyTypeName,
+                                       cstring("struct ") + valueTypeName, size);
+    }
     builder->target->emitTableDecl(builder, defaultActionMapName, false,
                                    program->arrayIndexType,
                                    cstring("struct ") + valueTypeName, 1);
 }
 
 void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
+    if (keyGenerator == nullptr)
+        return;
     for (auto c : keyGenerator->keyElements) {
         auto ebpfType = ::get(keyTypes, c);
         cstring fieldName = ::get(keyFieldNames, c);
@@ -295,7 +302,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
-        cstring name = action->externalName();
+        cstring name = EBPFObject::externalName(action);
         builder->appendFormat("case %s: ", name);
         builder->newline();
         builder->emitIndent();
@@ -329,7 +336,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     BUG_CHECK(mcd.instance->is<P4::ActionCall>(), "%1%: expected an action call", mce);
     auto ac = mcd.instance->to<P4::ActionCall>();
     auto action = ac->action;
-    cstring name = action->externalName();
+    cstring name = EBPFObject::externalName(action);
     cstring fd = "tableFileDescriptor";
     cstring table = defaultActionMapName;
     cstring value = "value";
@@ -383,10 +390,10 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block,
                                    cstring name, CodeGenInspector* codeGen) :
         EBPFTableBase(program, name, codeGen) {
-    auto sz = block->getParameterValue(program->model.counterArray.size.name);
+    auto sz = block->getParameterValue(program->model.counterArray.max_index.name);
     if (sz == nullptr || !sz->is<IR::Constant>()) {
         ::error("Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
-                program->model.counterArray.size, name);
+                program->model.counterArray.max_index, name);
         return;
     }
     auto cst = sz->to<IR::Constant>();

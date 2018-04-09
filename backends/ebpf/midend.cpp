@@ -15,12 +15,8 @@ limitations under the License.
 */
 
 #include "midend.h"
-#include "midend/actionsInlining.h"
-#include "midend/inlining.h"
-#include "midend/removeReturns.h"
-#include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
-#include "midend/localizeActions.h"
+#include "midend/complexComparison.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
@@ -31,6 +27,8 @@ limitations under the License.
 #include "midend/noMatch.h"
 #include "midend/convertEnums.h"
 #include "midend/midEndLast.h"
+#include "midend/removeLeftSlices.h"
+#include "midend/removeExits.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeMap.h"
@@ -43,15 +41,14 @@ limitations under the License.
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "lower.h"
 
 namespace EBPF {
 
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum* type) const override {
         if (type->srcInfo.isValid()) {
-            unsigned line = type->srcInfo.getStart().getLineNumber();
-            auto sfl = Util::InputSources::instance->getSourceLine(line);
-            cstring sourceFile = sfl.fileName;
+            auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith("_model.p4"))
                 // Don't convert any of the standard enums
                 return false;
@@ -70,51 +67,30 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
-    PassManager simplify = {
-        new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
-        new P4::RemoveReturns(&refMap),
-        new P4::MoveConstructors(&refMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap),
-        new P4::ClearTypeMap(&typeMap),
-        evaluator,
-    };
-
-    simplify.setName("Simplify");
-    simplify.addDebugHooks(hooks);
-    program = program->apply(simplify);
-    if (::errorCount() > 0)
-        return nullptr;
-    auto toplevel = evaluator->getToplevelBlock();
-    if (toplevel->getMain() == nullptr)
-        // nothing further to do
-        return nullptr;
-
-    P4::InlineWorkList toInline;
-    P4::ActionsInlineList actionsToInline;
-
     PassManager midEnd = {
-        new P4::Inline(&refMap, &typeMap, evaluator),
-        new P4::InlineActions(&refMap, &typeMap),
-        new P4::LocalizeAllActions(&refMap),
-        new P4::UniqueNames(&refMap),  // needed again after inlining
-        new P4::UniqueParameters(&refMap, &typeMap),
+        new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
         new P4::ClearTypeMap(&typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
-                            new P4::NonLeftValue(&refMap, &typeMap)),
+                            new P4::OrPolicy(
+                                new P4::IsValid(&refMap, &typeMap),
+                                new P4::IsLikeLeftValue())),
         new P4::RemoveExits(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ValidateTableProperties({"implementation"}),
+        new P4::RemoveLeftSlices(&refMap, &typeMap),
+        new EBPF::Lower(&refMap, &typeMap),
         evaluator,
         new P4::MidEndLast()
     };

@@ -1,0 +1,27 @@
+issue982.p4(343): [--Wwarn=uninitialized_out_param] warning: out parameter ostd may be uninitialized when EgressParserImpl terminates
+parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+                                                                                                                                                                         ^^^^
+issue982.p4(343)
+parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+       ^^^^^^^^^^^^^^^^
+issue982.p4(385): [--Wwarn=uninitialized_out_param] warning: out parameter ostd may be uninitialized when IngressParserImpl terminates
+parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+                                                                                                                                                                           ^^^^
+issue982.p4(385)
+parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+       ^^^^^^^^^^^^^^^^^
+issue982.p4(420): [--Wwarn=uninitialized_use] warning: clone_md may not be completely initialized
+            ostd.clone_metadata = clone_md;
+                                  ^^^^^^^^
+issue982.p4(414): [--Wwarn=uninitialized_out_param] warning: out parameter ostd may be uninitialized when IngressDeparserImpl terminates
+control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
+                                                                                                                                                                      ^^^^
+issue982.p4(414)
+control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
+        ^^^^^^^^^^^^^^^^^^^
+issue982.p4(427): [--Wwarn=uninitialized_out_param] warning: out parameter ostd may be uninitialized when EgressDeparserImpl terminates
+control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
+                                                                                                                                                                   ^^^^
+issue982.p4(427)
+control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
+        ^^^^^^^^^^^^^^^^^^

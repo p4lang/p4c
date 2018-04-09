@@ -17,7 +17,7 @@ limitations under the License.
 #include <core.p4>
 #include <v1model.p4>
 
-struct H { };
+struct H { bit<32> x; };
 struct M { };
 
 parser ParserI(packet_in b, out H parsedHdr, inout M meta,

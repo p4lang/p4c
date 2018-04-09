@@ -32,8 +32,8 @@ struct s0_t {
 };
 
 struct s1_t {
-  s1_t s01;
-  s1_t s02;
+  s0_t s01;
+  s0_t s02;
 };
 
 parser parse(packet_in pkt, out parsed_packet_t hdr,
@@ -62,3 +62,7 @@ controlc c() {
 ```
 
 - user-defined extern types / methods which are not defined in `v1model.p4`
+
+- stacks of headers containing varbit fields
+
+- stacks of header unions

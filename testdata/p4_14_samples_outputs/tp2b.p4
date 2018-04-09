@@ -16,12 +16,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
@@ -29,48 +29,42 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".setf1") action setf1(bit<32> val) {
-        hdr.data.f1 = (bit<32>)val;
+        hdr.data.f1 = val;
     }
     @name(".noop") action noop() {
     }
     @name(".setb1") action setb1(bit<32> val) {
-        hdr.data.b1 = (bit<32>)val;
+        hdr.data.b1 = val;
     }
     @name(".setb2") action setb2(bit<32> val) {
-        hdr.data.b2 = (bit<32>)val;
+        hdr.data.b2 = val;
     }
-    @name("E1") table E1 {
+    @name(".E1") table E1 {
         actions = {
             setf1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
-        default_action = NoAction();
     }
-    @name("EA") table EA {
+    @name(".EA") table EA {
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f3: ternary;
         }
-        default_action = NoAction();
     }
-    @name("EB") table EB {
+    @name(".EB") table EB {
         actions = {
             setb2;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f3: ternary;
         }
-        default_action = NoAction();
     }
     apply {
         E1.apply();
@@ -85,62 +79,54 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".setb1") action setb1(bit<32> val) {
-        hdr.data.b1 = (bit<32>)val;
+        hdr.data.b1 = val;
     }
     @name(".noop") action noop() {
     }
     @name(".setb3") action setb3(bit<32> val) {
-        hdr.data.b3 = (bit<32>)val;
+        hdr.data.b3 = val;
     }
     @name(".setb2") action setb2(bit<32> val) {
-        hdr.data.b2 = (bit<32>)val;
+        hdr.data.b2 = val;
     }
     @name(".setb4") action setb4(bit<32> val) {
-        hdr.data.b4 = (bit<32>)val;
+        hdr.data.b4 = val;
     }
-    @name("A1") table A1 {
+    @name(".A1") table A1 {
         actions = {
             setb1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: ternary;
         }
-        default_action = NoAction();
     }
-    @name("A2") table A2 {
+    @name(".A2") table A2 {
         actions = {
             setb3;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.b1: ternary;
         }
-        default_action = NoAction();
     }
-    @name("B1") table B1 {
+    @name(".B1") table B1 {
         actions = {
             setb2;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
-        default_action = NoAction();
     }
-    @name("B2") table B2 {
+    @name(".B2") table B2 {
         actions = {
             setb4;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.b2: ternary;
         }
-        default_action = NoAction();
     }
     apply {
         if (hdr.data.b1 == 32w0) {
@@ -158,7 +144,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -169,3 +155,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

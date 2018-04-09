@@ -20,6 +20,9 @@ using Parser = V1::V1Parser;
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnull-conversion"
+#endif
 
 %}
 
@@ -191,6 +194,8 @@ using Parser = V1::V1Parser;
                   return Parser::make_PARSE_ERROR(cstring(yytext), driver.yylloc); }
 "parser"        { BEGIN(driver.saveState);
                   return Parser::make_PARSER(cstring(yytext), driver.yylloc); }
+"parser_value_set" { BEGIN(driver.saveState);
+                     return Parser::make_PARSER_VALUE_SET(cstring(yytext), driver.yylloc); }
 "parser_exception" { BEGIN(driver.saveState);
                      return Parser::make_PARSER_EXCEPTION(cstring(yytext), driver.yylloc); }
 "payload"       { BEGIN(driver.saveState);

@@ -38,7 +38,7 @@ control DeparserI(packet_out pk, in H hdr) {
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -49,3 +49,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

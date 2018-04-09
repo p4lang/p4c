@@ -49,7 +49,10 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
             else
                 BUG("Could not find type for %1%", mem->expr);
         }
-        if (basetype->is<IR::Type_Header>()) {
+        if (basetype->is<IR::Type_HeaderUnion>()) {
+            if (mem->member == IR::Type_Header::isValid)
+                return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
+        } else if (basetype->is<IR::Type_Header>()) {
             if (mem->member == IR::Type_Header::setValid ||
                 mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
@@ -67,7 +70,16 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
             } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
                 type = typeMap->getType(decl->getNode());
-            }
+            } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
+                auto mi = resolve(mc, refMap, typeMap, useExpressionType);
+                decl = mi->object;
+                type = mi->actualMethodType->returnType;
+            } else if (auto cce = mem->expr->to<IR::ConstructorCallExpression>()) {
+                auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
+                decl = cc->to<ExternConstructorCall>()->type;
+                type = typeMap->getTypeType(cce->constructedType, true);
+            } else {
+                BUG("unexpected expression %1% resolving method instance", mem->expr); }
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);

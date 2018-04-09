@@ -4,19 +4,20 @@
 control empty();
 package top(empty e);
 control Ing() {
-    bool tmp;
-    @name("cond") action cond() {
-        tmp = tmp;
+    bool tmp_0;
+    @name("Ing.cond") action cond() {
+        tmp_0 = tmp_0;
     }
-    @name("tbl_cond") table tbl_cond_0 {
+    @name("Ing.tbl_cond") table tbl_cond {
         actions = {
             cond();
         }
         const default_action = cond();
     }
     apply {
-        tbl_cond_0.apply();
+        tbl_cond.apply();
     }
 }
 
 top(Ing()) main;
+

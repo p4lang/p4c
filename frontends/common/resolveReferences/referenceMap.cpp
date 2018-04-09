@@ -37,7 +37,7 @@ void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* 
     auto previous = get(pathToDeclaration, path);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%",
-                                path, previous, decl);
+            dbp(path), dbp(previous), dbp(decl->getNode()));
     pathToDeclaration.emplace(path, decl);
     usedName(path->name.name);
     used.insert(decl);

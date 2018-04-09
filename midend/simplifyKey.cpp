@@ -29,23 +29,26 @@ class HasTableApply : public Inspector {
 };
 }  // namespace
 
-bool NonLeftValue::isTooComplex(const IR::Expression* expression) const {
-    if (typeMap->isLeftValue(expression))
-        return false;
+bool IsValid::isSimple(const IR::Expression* expression) {
     if (!expression->is<IR::MethodCallExpression>())
-        return true;
+        return false;
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
     if (!mi->is<BuiltInMethod>())
-        return true;
-    auto bi = mi->to<BuiltInMethod>();
-    if (bi->name.name == IR::Type_Header::isValid)
         return false;
-    return true;
+    auto bi = mi->to<BuiltInMethod>();
+    if (bi->name.name == IR::Type_Header::isValid) {
+        // isValid() is simple when applied to headers, but complicated when applied to unions.
+        auto baseType = typeMap->getType(bi->appliedTo, true);
+        if (baseType->is<IR::Type_HeaderUnion>())
+            return false;
+        return true;
+    }
+    return false;
 }
 
 const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
-    bool doSimplify = policy->isTooComplex(element->expression);
-    if (!doSimplify)
+    bool simple = policy->isSimple(element->expression);
+    if (simple)
         return element;
 
     auto table = findOrigCtxt<IR::P4Table>();
@@ -71,6 +74,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     auto path = new IR::PathExpression(tmp);
     // This preserves annotations on the key
     element->expression = path;
+    LOG2("Created new key expression " << element);
     return element;
 }
 
@@ -87,7 +91,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
 }
 
 const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
-                                         const IR::Expression *expression) {
+                                           const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     (void)expression->apply(hta);
@@ -101,7 +105,8 @@ const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
     for (auto assign : insertions->statements)
         result->push_back(assign);
     result->push_back(statement);
-    return result;
+    auto block = new IR::BlockStatement(*result);
+    return block;
 }
 
 }  // namespace P4

@@ -88,6 +88,10 @@ class cstring {
     cstring(const std::string &a) { *this = a; }            // NOLINT(runtime/explicit)
     cstring &operator=(const char *);
     cstring &operator=(const std::string&);
+    /// @return a version of the string where all necessary characters
+    /// are properly escaped to make this into a json string (without
+    /// the enclosing quotes).
+    cstring escapeJson() const;
 
     template <typename Iter> cstring(Iter begin, Iter end) {
         *this = std::string(begin, end);

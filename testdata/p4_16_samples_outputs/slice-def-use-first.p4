@@ -44,7 +44,7 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
         bit<8> n = 8w0b11111111;
         n[7:4] = 4w0;
         debug.write(32w1, n);
-        standard_meta.egress_port = 9w0;
+        standard_meta.egress_spec = 9w0;
     }
 }
 
@@ -60,7 +60,7 @@ control DP(packet_out b, in Headers p) {
     }
 }
 
-control Verify(in Headers hdrs, inout Metadata meta) {
+control Verify(inout Headers hdrs, inout Metadata meta) {
     apply {
     }
 }
@@ -71,3 +71,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+

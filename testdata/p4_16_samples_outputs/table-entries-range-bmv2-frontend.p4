@@ -23,7 +23,7 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(in Header_t h, inout Meta_t m) {
+control vrfy(inout Header_t h, inout Meta_t m) {
     apply {
     }
 }
@@ -45,13 +45,13 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("a") action a_0() {
+    @name("ingress.a") action a_0() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("t_range") table t_range_0 {
+    @name("ingress.t_range") table t_range {
         key = {
             h.h.r: range @name("h.h.r") ;
         }
@@ -61,15 +61,19 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a_0();
         const entries = {
-            8w1 .. 8w8 : a_with_control_params_0(9w21);
-            8w6 .. 8w12 : a_with_control_params_0(9w22);
-            default : a_with_control_params_0(9w23);
+                        8w1 .. 8w8 : a_with_control_params_0(9w21);
+
+                        8w6 .. 8w12 : a_with_control_params_0(9w22);
+
+                        default : a_with_control_params_0(9w23);
+
         }
 
     }
     apply {
-        t_range_0.apply();
+        t_range.apply();
     }
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

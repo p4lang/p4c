@@ -22,7 +22,7 @@ namespace P4 {
 std::set<cstring> reservedWords = {
     "abstract",  // experimental
     "action", "actions", "apply", "bool", "bit", "const", "control", "default",
-    "else", "enum", "error", "exit", "extern", "false", "header", "header_union",  // experimental
+    "else", "enum", "error", "exit", "extern", "false", "header", "header_union",
     "if", "in", "inout", "int", "key", "match_kind", "out", "parser", "package",
     "return", "select", "set", "state", "struct", "switch", "table", "this",  // experimental
     "transition", "true", "tuple", "typedef", "varbit", "verify", "void", "_",

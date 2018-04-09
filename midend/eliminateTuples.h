@@ -64,6 +64,7 @@ class ReplacementMap {
 */
 class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;
+
  public:
     explicit DoReplaceTuples(ReplacementMap* replMap) : repl(replMap)
     { CHECK_NULL(repl); setName("DoReplaceTuples"); }
@@ -77,6 +78,16 @@ class DoReplaceTuples final : public Transform {
     { return insertReplacements(parser); }
     const IR::Node* postorder(IR::P4Control* control) override
     { return insertReplacements(control); }
+    const IR::Node* postorder(IR::Method* method) override
+    { return insertReplacements(method); }
+    const IR::Node* postorder(IR::Type_Extern* ext) override
+    { return insertReplacements(ext); }
+    const IR::Node* postorder(IR::Declaration_Instance* decl) override
+    { return insertReplacements(decl); }
+    const IR::Node* preorder(IR::Type_ValueSet* set) override
+    // Disable substitution of type parameters for value sets.
+    // We want to keep these as tuples.
+    { prune(); return set; }
 };
 
 class EliminateTuples final : public PassManager {

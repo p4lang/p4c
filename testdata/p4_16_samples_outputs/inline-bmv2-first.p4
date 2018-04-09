@@ -18,7 +18,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta)
     }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -31,7 +31,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 control aux(inout M meta, in H hdr) {
     table adjust_lkp_fields {
         key = {
-            hdr.ipv4.isValid(): exact @name("hdr.ipv4.isValid()") ;
+            hdr.ipv4.isValid(): exact @name("hdr.ipv4.$valid$") ;
         }
         actions = {
             NoAction();
@@ -61,3 +61,4 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

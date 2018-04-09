@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,4 +40,4 @@ const int<32> y = s.s1.t2;
 
 const int<32> w = .t.t1;
 
-const T t1 = (T)s.s1;
+const T t1 = s.s1;

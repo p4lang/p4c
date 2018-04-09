@@ -16,59 +16,57 @@ header data_t {
 }
 
 struct metadata {
-    @name("counter_metadata") 
+    @name(".counter_metadata") 
     counter_metadata_t counter_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
-    @name("count2") @min_width(32) counter(32w16384, CounterType.packets) count2;
+    @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
+    @name(".count2") @min_width(32) counter(32w16384, CounterType.packets) count2;
     @name(".set_index") action set_index(bit<16> index1, bit<16> index2, bit<9> port) {
-        meta.counter_metadata.counter_index_first = (bit<16>)index1;
-        meta.counter_metadata.counter_index_second = (bit<16>)index2;
-        standard_metadata.egress_spec = (bit<9>)port;
+        meta.counter_metadata.counter_index_first = index1;
+        meta.counter_metadata.counter_index_second = index2;
+        standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
-        count1.count((bit<32>)meta.counter_metadata.counter_index_first);
+        count1.count((bit<32>)(bit<32>)meta.counter_metadata.counter_index_first);
     }
     @name(".count_entries2") action count_entries2() {
-        count2.count((bit<32>)meta.counter_metadata.counter_index_second);
+        count2.count((bit<32>)(bit<32>)meta.counter_metadata.counter_index_second);
     }
-    @name("index_setter") table index_setter {
+    @name(".index_setter") table index_setter {
         actions = {
             set_index;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: exact;
             hdr.data.f2: exact;
         }
         size = 2048;
-        default_action = NoAction();
     }
-    @name("stats") table stats {
+    @name(".stats") table stats {
         actions = {
             count_entries;
         }
-        const default_action = count_entries();
+        default_action = count_entries();
     }
-    @name("stats2") table stats2 {
+    @name(".stats2") table stats2 {
         actions = {
             count_entries2;
         }
-        const default_action = count_entries2();
+        default_action = count_entries2();
     }
     apply {
         index_setter.apply();
@@ -88,7 +86,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -99,3 +97,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

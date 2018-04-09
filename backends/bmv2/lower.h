@@ -50,23 +50,18 @@ class LowerExpressions : public Transform {
 };
 
 /**
-This pass is a hack to work around current BMv2 limitations:
-checksum computations must be expressed in a restricted way, since
-the JSON code generator uses simple pattern-matching.
-
-The real solution to this problem is to have the BMv2 simulator use a
-real extern for computing and verifying checksums.  Then this hack
-would not be necessary anymore.
+Policy which selects the control blocks where remove
+complex expression is applied.
 */
-class FixupChecksum : public Transform {
-    const cstring* updateBlockName;
+class RemoveComplexExpressionsPolicy {
  public:
-    explicit FixupChecksum(const cstring* updateBlockName) :
-            updateBlockName(updateBlockName)
-    { setName("FixupChecksum"); }
-    const IR::Node* preorder(IR::P4Control* control) override;
+    virtual ~RemoveComplexExpressionsPolicy() {}
+    /**
+       If the policy returns true the control block is processed,
+       otherwise it is left unchanged.
+    */
+    virtual bool convert(const IR::P4Control* control) const = 0;
 };
-
 
 /**
 BMv2 does not support complex expressions for a select
@@ -76,19 +71,19 @@ Such expressions are lifted into a temporaries.
 class RemoveComplexExpressions : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    const cstring *ingressName;
-    const cstring *egressName;
+    RemoveComplexExpressionsPolicy* policy;
     IR::IndexedVector<IR::Declaration> newDecls;
     IR::IndexedVector<IR::StatOrDecl>  assignments;
 
     const IR::PathExpression* createTemporary(const IR::Expression* expression);
-    const IR::Vector<IR::Expression>* simplifyExpressions(const IR::Vector<IR::Expression>* vec);
+    const IR::Vector<IR::Expression>* simplifyExpressions(
+        const IR::Vector<IR::Expression>* vec, bool force = false);
 
  public:
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             const cstring* ingressName, const cstring* egressName):
-            refMap(refMap), typeMap(typeMap), ingressName(ingressName), egressName(egressName) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(ingressName); CHECK_NULL(egressName);
+                             RemoveComplexExpressionsPolicy* policy = nullptr) :
+            refMap(refMap), typeMap(typeMap), policy(policy) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("RemoveComplexExpressions"); }
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* preorder(IR::ParserState* state) override
@@ -106,7 +101,11 @@ class RemoveComplexExpressions : public Transform {
     }
     const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Control* control) override {
-        control->controlLocals.append(newDecls);
+        if (newDecls.size() != 0) {
+            // prepend declarations
+            newDecls.append(control->controlLocals);
+            control->controlLocals = newDecls;
+        }
         return control;
     }
     const IR::Node* postorder(IR::Statement* statement) override;

@@ -27,20 +27,22 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout my_meta_t my_metadata,
 
 extern s1_t choose_entry(in choices_t choices);
 control ingress(inout parsed_packet_t hdr, inout my_meta_t my_meta, inout standard_metadata_t standard_metadata) {
-    s1_t tmp;
-    @name("select_entry") action select_entry_0(choices_t choices) {
-        tmp = choose_entry(choices);
-        my_meta.entry = tmp;
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("t") table t_0 {
+    s1_t tmp_0;
+    @name("ingress.select_entry") action select_entry_0(choices_t choices) {
+        tmp_0 = choose_entry(choices);
+        my_meta.entry = tmp_0;
+    }
+    @name("ingress.t") table t {
         actions = {
             select_entry_0();
-            NoAction();
+            NoAction_0();
         }
-        const default_action = NoAction();
+        const default_action = NoAction_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 
@@ -54,14 +56,15 @@ control deparser(packet_out b, in parsed_packet_t hdr) {
     }
 }
 
-control verify_checksum(in parsed_packet_t hdr, inout my_meta_t my_meta) {
+control verify_c(inout parsed_packet_t hdr, inout my_meta_t my_meta) {
     apply {
     }
 }
 
-control compute_checksum(inout parsed_packet_t hdr, inout my_meta_t my_meta) {
+control compute_c(inout parsed_packet_t hdr, inout my_meta_t my_meta) {
     apply {
     }
 }
 
-V1Switch<parsed_packet_t, my_meta_t>(parse(), verify_checksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch<parsed_packet_t, my_meta_t>(parse(), verify_c(), ingress(), egress(), compute_c(), deparser()) main;
+

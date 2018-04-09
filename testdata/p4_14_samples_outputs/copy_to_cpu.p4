@@ -20,27 +20,27 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("cpu_header") 
+    @name(".cpu_header") 
     cpu_header_t cpu_header;
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t   ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_cpu_header") state parse_cpu_header {
+    @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract(hdr.cpu_header);
         transition parse_ethernet;
     }
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
@@ -54,20 +54,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
-        hdr.cpu_header.device = (bit<8>)8w0;
-        hdr.cpu_header.reason = (bit<8>)8w0xab;
+        hdr.cpu_header.device = 8w0;
+        hdr.cpu_header.reason = 8w0xab;
     }
-    @name("redirect") table redirect {
+    @name(".redirect") table redirect {
         actions = {
             _drop;
             do_cpu_encap;
-            @default_only NoAction;
         }
         key = {
             standard_metadata.instance_type: exact;
         }
         size = 16;
-        default_action = NoAction();
     }
     apply {
         redirect.apply();
@@ -78,13 +76,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
         clone3(CloneType.I2E, (bit<32>)32w250, { standard_metadata });
     }
-    @name("copy_to_cpu") table copy_to_cpu {
+    @name(".copy_to_cpu") table copy_to_cpu {
         actions = {
             do_copy_to_cpu;
-            @default_only NoAction;
         }
         size = 1;
-        default_action = NoAction();
     }
     apply {
         copy_to_cpu.apply();
@@ -98,7 +94,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -109,3 +105,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

@@ -22,7 +22,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bit<64> res;
     bit<32> tmp_0;
     bit<64> val;
-    @name("update") action update_0() {
+    @name("Eg.update") action update_0() {
         val = res;
         tmp_0 = res[31:0];
         tmp_0 = tmp_0;
@@ -55,7 +55,7 @@ control DP(packet_out b, in Headers p) {
     }
 }
 
-control Verify(in Headers hdrs, inout Metadata meta) {
+control Verify(inout Headers hdrs, inout Metadata meta) {
     apply {
     }
 }
@@ -66,3 +66,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+

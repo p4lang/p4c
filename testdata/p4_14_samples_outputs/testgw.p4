@@ -22,18 +22,18 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t     data;
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("data") state data {
+    @name(".data") state data {
         packet.extract(hdr.data);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.ethernet);
         transition data;
     }
@@ -46,49 +46,43 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
-        standard_metadata.egress_spec = (bit<9>)egress_spec;
-        hdr.ethernet.src_addr = (bit<48>)src_addr;
+        standard_metadata.egress_spec = egress_spec;
+        hdr.ethernet.src_addr = src_addr;
     }
     @name(".noop") action noop() {
     }
     @name(".setf2") action setf2(bit<32> val) {
-        hdr.data.f2 = (bit<32>)val;
+        hdr.data.f2 = val;
     }
     @name(".setf1") action setf1(bit<32> val) {
-        hdr.data.f1 = (bit<32>)val;
+        hdr.data.f1 = val;
     }
-    @name("routing") table routing {
+    @name(".routing") table routing {
         actions = {
             route_eth;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.dst_addr: lpm;
         }
-        default_action = NoAction();
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             setf2;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
     }
-    @name("test2") table test2 {
+    @name(".test2") table test2 {
         actions = {
             setf1;
             noop;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f2: exact;
         }
-        default_action = NoAction();
     }
     apply {
         routing.apply();
@@ -108,7 +102,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -119,3 +113,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

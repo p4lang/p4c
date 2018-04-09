@@ -31,6 +31,7 @@ class ToP4 : public Inspector {
     int expressionPrecedence;  // precedence of current IR::Operation
     bool isDeclaration;  // current type is a declaration
     bool showIR;  // if true dump IR as comments
+    bool withinArgument;  // if true we are within a method call argument
 
     struct VecPrint {
         cstring separator;
@@ -64,9 +65,6 @@ class ToP4 : public Inspector {
         return vectorSeparator.back();
     }
 
-    void setListTerm(const char* start, const char* end) {
-        listTerminators.push_back(ListPrint(start, end));
-    }
     void doneList() {
         BUG_CHECK(!listTerminators.empty(), "Empty listTerminators");
         listTerminators.pop_back();
@@ -94,6 +92,7 @@ class ToP4 : public Inspector {
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
             showIR(showIR),
+            withinArgument(false),
             builder(builder),
             outStream(nullptr),
             mainFile(mainFile)
@@ -102,6 +101,7 @@ class ToP4 : public Inspector {
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
             showIR(showIR),
+            withinArgument(false),
             builder(* new Util::SourceCodeBuilder()),
             outStream(outStream),
             mainFile(mainFile)
@@ -109,6 +109,9 @@ class ToP4 : public Inspector {
 
     using Inspector::preorder;
 
+    void setListTerm(const char* start, const char* end) {
+        listTerminators.push_back(ListPrint(start, end));
+    }
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* node) override;
 
@@ -126,7 +129,7 @@ class ToP4 : public Inspector {
     { return process(t, "struct"); }
     bool preorder(const IR::Type_Header* t) override
     { return process(t, "header"); }
-    bool preorder(const IR::Type_Union* t) override
+    bool preorder(const IR::Type_HeaderUnion* t) override
     { return process(t, "header_union"); }
     bool preorder(const IR::Type_Package* t) override;
     bool preorder(const IR::Type_Parser* t) override;
@@ -139,6 +142,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Extern* t) override;
     bool preorder(const IR::Type_Unknown* t) override;
     bool preorder(const IR::Type_Tuple* t) override;
+    bool preorder(const IR::Type_ValueSet* t) override;
 
     // declarations
     bool preorder(const IR::Declaration_Constant* cst) override;

@@ -78,6 +78,20 @@ static bool match(const char *pattern, const char *name) {
         if (pattern == pend) {
             if (!strcmp(name, ".cpp")) return true;
             return *name == 0; }
+        if (*pattern == '[') {
+            bool negate = false;
+            if (pattern[1] == '^') {
+                negate = true;
+                ++pattern; }
+            while ((*++pattern != *name || pattern[1] == '-') && *pattern != ']' && *pattern) {
+                if (pattern[1] == '-' && pattern[2] != ']') {
+                    if (*name >= pattern[0] && *name <= pattern[2]) break;
+                    pattern += 2; } }
+            if ((*pattern == ']' || !*pattern) ^ negate) return false;
+            while (*pattern && *pattern++ != ']') continue;
+            if (pattern > pend) pend = pattern + strcspn(pattern, ",:");
+            name++;
+            continue; }
         if (*pattern++ != '*') return false;
         if (pattern == pend) return true;
         while (*name && *name != *pattern) {
@@ -100,7 +114,9 @@ int uncachedFileLogLevel(const char* file) {
                 if (auto* level = strchr(pattern, ':'))
                     return atoi(level + 1); }
 
-    // If there's no matching spec, compute a default from the global verbosity level.
+    // If there's no matching spec, compute a default from the global verbosity level,
+    // except for THIS file
+    if (!strcmp(file, "log.cpp")) return 0;
     return verbosity > 0 ? verbosity - 1 : 0;
 }
 
@@ -176,6 +192,12 @@ void increaseVerbosity() {
 #ifdef MULTITHREAD
     static std::mutex lock;
     std::lock_guard<std::mutex> acquire(lock);
+#endif
+#ifdef CLOCK_MONOTONIC
+    if (!Detail::initTime) {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        Detail::initTime = ts.tv_sec*1000000000UL + ts.tv_nsec; }
 #endif
 
     Detail::verbosity++;

@@ -14,8 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <fstream>
+#include <sstream>
 #include <stdexcept>
+
 #include "helpers.h"
+
+#include "frontends/common/applyOptionsPragmas.h"
+#include "frontends/common/parseInput.h"
+#include "frontends/p4/frontend.h"
 
 namespace detail {
 
@@ -32,6 +39,10 @@ std::string makeP4Source(const char* file, unsigned line,
         case P4Headers::V1MODEL:
             source << P4CTestEnvironment::get()->coreP4();
             source << P4CTestEnvironment::get()->v1Model();
+            break;
+        case P4Headers::PSA:
+            source << P4CTestEnvironment::get()->coreP4();
+            source << P4CTestEnvironment::get()->psaP4();
             break;
     }
 
@@ -87,4 +98,48 @@ P4CTestEnvironment::P4CTestEnvironment() {
     // XXX(seth): We should find a more robust way to locate these headers.
     _coreP4 = readHeader("p4include/core.p4");
     _v1Model = readHeader("p4include/v1model.p4");
+    _psaP4 = readHeader("p4include/psa.p4");
 }
+
+namespace Test {
+
+/* static */ boost::optional<FrontendTestCase>
+FrontendTestCase::create(const std::string& source,
+                         CompilerOptions::FrontendVersion langVersion
+                            /* = CompilerOptions::FrontendVersion::P4_16 */) {
+    auto* program = P4::parseP4String(source, langVersion);
+    if (program == nullptr) {
+        std::cerr << "Couldn't parse test case source" << std::endl;
+        return boost::none;
+    }
+    if (::diagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::diagnosticCount()
+                  << " errors while parsing test case" << std::endl;
+        return boost::none;
+    }
+
+    P4::P4COptionPragmaParser optionsPragmaParser;
+    program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+    if (::errorCount() > 0) {
+        std::cerr << "Encountered " << ::errorCount()
+                  << " errors while collecting options pragmas" << std::endl;
+        return boost::none;
+    }
+
+    CompilerOptions options;
+    options.langVersion = langVersion;
+    program = P4::FrontEnd().run(options, program, true);
+    if (program == nullptr) {
+        std::cerr << "Frontend failed" << std::endl;
+        return boost::none;
+    }
+    if (::errorCount() > 0) {
+        std::cerr << "Encountered " << ::errorCount()
+                  << " errors while executing frontend" << std::endl;
+        return boost::none;
+    }
+
+    return FrontendTestCase{program};
+}
+
+}  // namespace Test

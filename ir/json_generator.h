@@ -18,16 +18,20 @@ limitations under the License.
 #define _IR_JSON_GENERATOR_H_
 
 #include <assert.h>
+#include <boost/optional.hpp>
 #include <gmpxx.h>
 #include <string>
+#include <unordered_set>
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
+#include "lib/safe_vector.h"
 
 #include "ir.h"
 class JSONGenerator {
     std::unordered_set<int> node_refs;
     std::ostream &out;
+    bool dumpSourceInfo;
 
     template<typename T>
     class has_toJSON {
@@ -43,10 +47,11 @@ class JSONGenerator {
  public:
     indent_t indent;
 
-    explicit JSONGenerator(std::ostream &out) : out(out) {}
+    explicit JSONGenerator(std::ostream &out, bool dumpSourceInfo = false) :
+        out(out), dumpSourceInfo(dumpSourceInfo) {}
 
     template<typename T>
-    void generate(const vector<T> &v) {
+    void generate(const safe_vector<T> &v) {
         out << "[";
         if (v.size() > 0) {
             out << std::endl << ++indent;
@@ -77,6 +82,19 @@ class JSONGenerator {
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
         generate(v.second);
+        out << std::endl << --indent << "}";
+    }
+
+    template<typename T>
+    void generate(const boost::optional<T> &v) {
+        if (!v) {
+            out << "{ \"valid\" : false }";
+            return;
+        }
+        out << "{" << std::endl << ++indent;
+        out << "\"valid\" : true," << std::endl;
+        out << "\"value\" : ";
+        generate(*v);
         out << std::endl << --indent << "}";
     }
 
@@ -140,7 +158,11 @@ class JSONGenerator {
             out << indent << "\"Node_ID\" : " << v.id;
         } else {
             node_refs.insert(v.id);
-            v.toJSON(*this); }
+            v.toJSON(*this);
+            if (dumpSourceInfo) {
+                v.sourceInfoToJSON(*this);
+            }
+        }
         out << std::endl << --indent << "}";
     }
 

@@ -134,7 +134,7 @@ class Constant : Literal {
     /// if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
     Constant(intmax_t v, unsigned base = 10) :
-            Literal(new Type_InfInt()), value(v), base(base) {}
+            Literal(new Type_InfInt()), value((long)v), base(base) {}
     Constant(mpz_class v, unsigned base = 10) :
             Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
@@ -219,6 +219,8 @@ class Slice : Operation_Ternary {
     Slice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
+    // make a slice, folding slices on slices and slices on constants automatically
+    static Expression make(Expression a, int hi, int lo);
 }
 
 class Member : Operation_Unary {
@@ -236,7 +238,7 @@ class Concat : Operation_Binary {
     Concat {
         if (left && right) {
             auto lt = left->type->to<IR::Type::Bits>();
-            auto rt = left->type->to<IR::Type::Bits>();
+            auto rt = right->type->to<IR::Type::Bits>();
             if (lt && rt)
                 type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
 }
@@ -307,7 +309,7 @@ class SelectExpression : Expression {
     inline Vector<SelectCase> selectCases;
     visit_children {
         v.visit(select, "select");
-        selectCases.parallel_visit_children(v); }
+        v.parallel_visit(selectCases, "selectCases"); }
 }
 
 class MethodCallExpression : Expression {
@@ -316,6 +318,11 @@ class MethodCallExpression : Expression {
     optional Vector<Expression> arguments = new Vector<Expression>;
     toString{ return method->toString(); }
     validate{ typeArguments->check_null(); arguments->check_null(); }
+    MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
+    : Expression(si), method(new PathExpression(m)), arguments(new Vector<Expression>(a)) {}
+    MethodCallExpression(Util::SourceInfo si, Expression m,
+                         const std::initializer_list<Expression> &a)
+    : Expression(si), method(m), arguments(new Vector<Expression>(a)) {}
 }
 
 class ConstructorCallExpression : Expression {
@@ -331,10 +338,35 @@ class ConstructorCallExpression : Expression {
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
     inline Vector<Expression> components;
-    validate {
-        components.check_null();
-    }
+    ListExpression {
+        validate();
+        if (type->is<Type::Unknown>()) {
+            Vector<Type> tuple;
+            for (auto e : components)
+                tuple.push_back(e->type);
+            type = new Type_Tuple(tuple); } }
+    validate { components.check_null(); }
     void push_back(Expression e) { components.push_back(e); }
+}
+
+/// A ListExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
+/// Experimental: an extern methond/function call with constant arguments to be
+/// evaluated at compile time
+class CompileTimeMethodCall : MethodCallExpression, CompileTimeValue {
+    CompileTimeMethodCall(MethodCallExpression e) : MethodCallExpression(*e) {}
+    validate {
+        for (auto v : *arguments)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
 }
 
 /** @} *//* end group irdefs */

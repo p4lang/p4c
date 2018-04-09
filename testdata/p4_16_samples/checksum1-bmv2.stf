@@ -1,0 +1,42 @@
+# The packets in the 'packet' lines below were created using the
+# Python Scapy library.
+#
+# First define these Python functions:
+#
+# def str_to_hex(s):
+#     return ''.join(map(lambda x: '%02x' % (ord(x)), s))
+#
+# import re
+# def hex_to_str(hex_s):
+#     tmp = re.sub('[ \t]', '', hex_s)
+#     return str(bytearray.fromhex(tmp))
+
+# The first packet was created with these Python statements:
+# pkt1=Ether() / IP(dst='10.1.0.1') / TCP(sport=5793, dport=80)
+# str_to_hex(str(pkt1))
+
+# The packet in the first 'expect' line was created by running the P4
+# program checksum1-bmv2.p4 using simple_switch, and sending in pkt1,
+# and using tcpdump to record the output packet.  It was verified
+# correct by hand, and using Wireshark to very that the IPv4 header
+# checksum is correct.
+
+# Any of these packets can be converted back into a Scapy packet
+# object with Python statements like this:
+
+# s1='525400123502080027018bbc0800 45000028000100003f0665bb0a00020f0a010005 16a2005000000000000000005002200062e10000'
+# pkt1=Ether(hex_to_str(s1))
+
+packet 0 525400123502080027018bbc0800 4500002800010000400664bf0a00020f0a010001 16a1005000000000000000005002200062e10000
+expect 0 525400123502080027018bbc0800 45000028000100003f0665bb0a00020f0a010005 16a2005000000000000000005002200062e10000
+
+# The second packet was created with these Python statements:
+# pkt2=Ether() / IP(dst='10.2.3.4', options=IPOption('\x83\x03\x10')) / TCP(sport=5501, dport=80)
+# str_to_hex(str(pkt2))
+
+# This tests that the P4 code for calculating a fresh IPv4 header
+# checksum also works with a varbit field 'options' in the ipv4_t
+# header type.
+
+packet 0 525400123502080027018bbc0800 4600002c000100004006cdb30a00020f0a02030483031000 157d005000000000000000005002200061010000
+expect 0 525400123502080027018bbc0800 4600002c000100003f06ceaf0a00020f0a02030883031000 157e005000000000000000005002200061010000

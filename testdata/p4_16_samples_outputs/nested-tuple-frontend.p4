@@ -10,14 +10,15 @@ struct S {
 
 extern void f<T>(in T data);
 control c(inout bit<1> r) {
-    S s_0;
+    S s;
     apply {
-        s_0 = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
-        f<tuple<T, T>>(s_0.f1);
-        r = s_0.f2.f & s_0.z;
+        s = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
+        f<tuple<T, T>>(s.f1);
+        r = s.f2.f & s.z;
     }
 }
 
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
+

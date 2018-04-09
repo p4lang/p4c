@@ -46,13 +46,13 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     bool tmp_0;
     bool hasReturned_0;
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("Reject") action Reject_0(IPv4Address add) {
+    @name("pipe.Reject") action Reject_0(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    @name("Check_src_ip") table Check_src_ip {
+    @name("pipe.Check_src_ip") table Check_src_ip {
         key = {
             headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
@@ -76,9 +76,6 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @hidden action act_2() {
         tmp_0 = false;
-    }
-    @hidden action act_3() {
-        pass = pass;
     }
     @hidden table tbl_act {
         actions = {
@@ -104,26 +101,18 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_2();
     }
-    @hidden table tbl_act_3 {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
-    }
     apply {
         tbl_act.apply();
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0) 
             if (Check_src_ip.apply().hit) 
                 tbl_act_1.apply();
             else 
                 tbl_act_2.apply();
-            if (tmp_0) 
-                tbl_act_3.apply();
-        }
     }
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
+

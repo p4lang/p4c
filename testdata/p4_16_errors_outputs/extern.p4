@@ -9,3 +9,4 @@ control c(in X x) {
 control proto(in X x);
 package top(proto _c);
 top(c()) main;
+

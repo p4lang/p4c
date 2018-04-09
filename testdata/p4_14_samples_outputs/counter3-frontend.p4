@@ -9,16 +9,16 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
@@ -29,25 +29,27 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("cnt") direct_counter(CounterType.bytes) cnt_0;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".cnt") direct_counter(CounterType.bytes) cnt;
     @name(".act") action act(bit<9> port) {
-        cnt_0.count();
+        cnt.count();
         standard_metadata.egress_spec = port;
     }
-    @name("tab1") table tab1_0 {
+    @name(".tab1") table tab1 {
         actions = {
             act();
-            @default_only NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         size = 128;
-        default_action = NoAction();
-        @name("cnt") counters = direct_counter(CounterType.bytes);
+        counters = cnt;
+        default_action = NoAction_0();
     }
     apply {
-        tab1_0.apply();
+        tab1.apply();
     }
 }
 
@@ -57,7 +59,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -68,3 +70,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

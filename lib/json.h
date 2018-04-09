@@ -21,6 +21,7 @@ limitations under the License.
 #include <vector>
 #include <stdexcept>
 
+#include "gtest/gtest_prod.h"
 #include "lib/gmputil.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
@@ -40,7 +41,8 @@ class IJson {
 };
 
 class JsonValue final : public IJson {
-    friend class Test::TestJson;
+    FRIEND_TEST(Util, Json);
+
  public:
     enum Kind {
         String,

@@ -4,12 +4,13 @@ extern E {
 }
 
 control c() {
-    @name("e") E() e_0;
+    @name("c.e") E() e;
     apply {
-        e_0.setValue(32w10);
+        e.setValue(32w10);
     }
 }
 
 control proto();
 package top(proto p);
 top(c()) main;
+

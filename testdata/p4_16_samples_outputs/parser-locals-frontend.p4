@@ -12,10 +12,10 @@ struct S {
 }
 
 parser p() {
-    S s_0;
+    S s;
     state start {
-        s_0.h1.setInvalid();
-        s_0.h2.setInvalid();
+        s.h1.setInvalid();
+        s.h2.setInvalid();
         transition accept;
     }
 }
@@ -23,3 +23,4 @@ parser p() {
 parser empty();
 package top(empty e);
 top(p()) main;
+

@@ -39,22 +39,22 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 }
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    bit<8> n_0;
-    @name("debug") register<bit<8>>(32w2) debug_0;
-    @name("act") action act_0() {
-        n_0 = 8w0b11111111;
-        n_0[7:4] = 4w0;
-        debug_0.write(32w1, n_0);
-        standard_meta.egress_port = 9w0;
+    bit<8> n;
+    @name("Ing.debug") register<bit<8>>(32w2) debug;
+    @name("Ing.act") action act_0() {
+        n = 8w0b11111111;
+        n[7:4] = 4w0;
+        debug.write(32w1, n);
+        standard_meta.egress_spec = 9w0;
     }
-    @name("tbl_act") table tbl_act_0 {
+    @name("Ing.tbl_act") table tbl_act {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_act.apply();
     }
 }
 
@@ -70,7 +70,7 @@ control DP(packet_out b, in Headers p) {
     }
 }
 
-control Verify(in Headers hdrs, inout Metadata meta) {
+control Verify(inout Headers hdrs, inout Metadata meta) {
     apply {
     }
 }
@@ -81,3 +81,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+

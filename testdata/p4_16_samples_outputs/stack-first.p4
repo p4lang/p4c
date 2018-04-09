@@ -1,3 +1,5 @@
+#include <core.p4>
+
 header h {
 }
 
@@ -22,7 +24,7 @@ control c() {
         stack[2] = b;
         stack.push_front(2);
         stack.pop_front(2);
-        bit<32> sz = 4;
+        bit<32> sz = 32w4;
     }
 }
 
@@ -30,3 +32,4 @@ parser Simple();
 control Simpler();
 package top(Simple par, Simpler ctr);
 top(p(), c()) main;
+

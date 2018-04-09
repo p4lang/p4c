@@ -39,17 +39,17 @@ void TypeMap::setLeftValue(const IR::Expression* expression) {
 
 void TypeMap::setCompileTimeConstant(const IR::Expression* expression) {
     constants.insert(expression);
-    LOG1("Constant value " << dbp(expression));
+    LOG3("Constant value " << dbp(expression));
 }
 
 bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     bool result = constants.find(expression) != constants.end();
-    LOG1(dbp(expression) << (result ? " constant" : " not constant"));
+    LOG3(dbp(expression) << (result ? " constant" : " not constant"));
     return result;
 }
 
 void TypeMap::clear() {
-    LOG1("Clearing typeMap");
+    LOG3("Clearing typeMap");
     typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
     program = nullptr;
 }
@@ -65,19 +65,19 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
     auto it = typeMap.find(element);
     if (it != typeMap.end()) {
         const IR::Type* existingType = it->second;
-        if (!TypeMap::equivalent(existingType, type))
+        if (!TypeMap::implicitlyConvertibleTo(type, existingType))
             BUG("Changing type of %1% in type map from %2% to %3%",
                 dbp(element), dbp(existingType), dbp(type));
         return;
     }
-    LOG1("setType " << dbp(element) << " => " << dbp(type));
+    LOG3("setType " << dbp(element) << " => " << dbp(type));
     typeMap.emplace(element, type);
 }
 
 const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     CHECK_NULL(element);
     auto result = get(typeMap, element);
-    LOG2("Looking up type for " << dbp(element) << " => " << dbp(result));
+    LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr) {
         BUG("Could not find type for %1%", dbp(element));
     }
@@ -96,7 +96,7 @@ const IR::Type* TypeMap::getTypeType(const IR::Node* element, bool notNull) cons
 void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
     if (tvs == nullptr || tvs->isIdentity())
         return;
-    LOG1("New type variables " << tvs);
+    LOG3("New type variables " << tvs);
     allTypeVariables.simpleCompose(tvs);
 }
 
@@ -255,6 +255,29 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     // The following are not expected to be compared for equivalence:
     // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
 }
+
+bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) {
+    if (TypeMap::equivalent(from, to))
+        return true;
+    // We allow implicit casts from tuples to structs
+    if (from->is<IR::Type_StructLike>()) {
+        if (to->is<IR::Type_Tuple>()) {
+            auto sl = from->to<IR::Type_StructLike>();
+            auto rt = to->to<IR::Type_Tuple>();
+            if (sl->fields.size() != rt->components.size())
+                return false;
+            for (size_t i = 0; i < rt->components.size(); i++) {
+                auto fl = sl->fields.at(i);
+                auto r = rt->components.at(i);
+                if (!TypeMap::implicitlyConvertibleTo(fl->type, r))
+                    return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 
 // Used for tuples and stacks only
 const IR::Type* TypeMap::getCanonical(const IR::Type* type) {

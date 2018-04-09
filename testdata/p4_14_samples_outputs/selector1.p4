@@ -16,28 +16,29 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
 }
 
+@name(".sel_profile") @mode("fair") action_selector(HashAlgorithm.crc16, 32w16384, 32w14) sel_profile;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".noop") action noop() {
     }
     @name(".setf1") action setf1(bit<32> val) {
-        hdr.data.f1 = (bit<32>)val;
+        hdr.data.f1 = val;
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             noop;
             setf1;
-            @default_only NoAction;
         }
         key = {
             hdr.data.b1: exact;
@@ -47,8 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f4: selector;
         }
         size = 1024;
-        default_action = NoAction();
-        @name("sel_profile") @mode("fair") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
+        implementation = sel_profile;
     }
     apply {
         test1.apply();
@@ -66,7 +66,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -77,3 +77,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

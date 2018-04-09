@@ -58,12 +58,16 @@ void IR::CaseEntry::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Low);
     for (auto &val : values) {
-        if (val.second->asLong() == -1)
-            out << sep << *val.first;
-        else if (val.second->asLong() == 0)
-            out << sep << "default";
-        else
-            out << sep << *val.first << " &&& " << *val.second;
+        if (val.first->is<IR::Constant>()) {
+            if (val.second->asLong() == -1)
+                out << sep << *val.first;
+            else if (val.second->asLong() == 0)
+                out << sep << "default";
+            else
+                out << sep << *val.first << " &&& " << *val.second;
+        } else if (val.first->is<IR::PathExpression>()) {
+            out << sep << *val.first->to<IR::PathExpression>();
+        }
         sep = ", "; }
     out << ':' << setprec(prec) << " " << action;
 }
@@ -204,6 +208,8 @@ void IR::P4Control::dbprint(std::ostream &out) const {
     out << "control " << name;
     if (type->typeParameters && !type->typeParameters->empty())
         out << type->typeParameters;
+    if (type->applyParams)
+        out << '(' << type->applyParams << ')';
     if (constructorParams)
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;

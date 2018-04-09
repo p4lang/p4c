@@ -1,6 +1,3 @@
-../testdata/p4_16_errors/missing_actions.p4(19): error: Table t does not have an `actions' property
-    table t {
-          ^
-../testdata/p4_16_errors/missing_actions.p4(19): warning: Table t does not have an `default_action' property
+missing_actions.p4(19): error: Table t does not have an `actions' property
     table t {
           ^

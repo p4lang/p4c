@@ -20,3 +20,4 @@ control my() {
 }
 
 top(my()) main;
+

@@ -30,7 +30,7 @@ control cEgress(inout H hdr, inout M meta, inout standard_metadata_t stdmeta) {
     }
 }
 
-control vc(in H hdr, inout M meta) {
+control vc(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -41,3 +41,4 @@ control uc(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+

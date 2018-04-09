@@ -16,12 +16,12 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.data);
         transition accept;
     }
@@ -31,30 +31,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop() {
     }
     @name(".setb1") action setb1(bit<8> val) {
-        hdr.data.b1 = (bit<8>)val;
+        hdr.data.b1 = val;
     }
     @name(".setb2") action setb2(bit<8> val) {
-        hdr.data.b2 = (bit<8>)val;
+        hdr.data.b2 = val;
     }
     @name(".setb3") action setb3(bit<8> val) {
-        hdr.data.b3 = (bit<8>)val;
+        hdr.data.b3 = val;
     }
     @name(".setb4") action setb4(bit<8> val) {
-        hdr.data.b4 = (bit<8>)val;
+        hdr.data.b4 = val;
     }
-    @name("test1") table test1 {
+    @name(".test1") table test1 {
         actions = {
             noop;
             setb1;
             setb2;
             setb3;
             setb4;
-            @default_only NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
     }
     apply {
         if (hdr.data.f2 != 32w0) {
@@ -74,7 +72,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -85,3 +83,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

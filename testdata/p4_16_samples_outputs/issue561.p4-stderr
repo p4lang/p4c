@@ -1,0 +1,9 @@
+issue561.p4(35): [--Wwarn=uninitialized_use] warning: u.h1.f may be uninitialized
+        x = u.h1.f + u.h2.g;
+            ^^^^^^
+issue561.p4(35): [--Wwarn=uninitialized_use] warning: u.h2.g may be uninitialized
+        x = u.h1.f + u.h2.g;
+                     ^^^^^^
+issue561.p4(45): [--Wwarn=uninitialized_use] warning: [].h2.g may be uninitialized
+        x = x + u2[1].h2.g + u2[0].h1.f;
+                ^^^^^^^^^^

@@ -19,18 +19,18 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t  data;
-    @name("data2") 
+    @name(".data2") 
     data2_t data2;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_data2") state parse_data2 {
+    @name(".parse_data2") state parse_data2 {
         packet.extract<data2_t>(hdr.data2);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition select(hdr.data.b1) {
             8w0x1: parse_data2;
@@ -40,38 +40,58 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".NoAction") action NoAction_3() {
+    }
+    @name("._drop") action _drop_0() {
+        mark_to_drop();
+    }
     @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
+        hdr.data.b1 = val;
+        standard_metadata.egress_spec = port;
+    }
+    @name(".setb1") action setb1_2(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop_0() {
     }
-    @name("test1") table test1_0 {
-        actions = {
-            setb1_0();
-            noop_0();
-            @default_only NoAction();
-        }
-        key = {
-            hdr.data.f1: exact @name("hdr.data.f1") ;
-        }
-        default_action = NoAction();
+    @name(".noop") action noop_2() {
     }
-    @name("test2") table test2_0 {
+    @name(".set_default_behavior_drop") table set_default_behavior_drop {
+        actions = {
+            _drop_0();
+        }
+        default_action = _drop_0();
+    }
+    @name(".test1") table test1 {
         actions = {
             setb1_0();
             noop_0();
-            @default_only NoAction();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.f2: exact @name("hdr.data.f2") ;
+            hdr.data.f1: exact @name("data.f1") ;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
+    }
+    @name(".test2") table test2 {
+        actions = {
+            setb1_2();
+            noop_2();
+            @defaultonly NoAction_3();
+        }
+        key = {
+            hdr.data.f2: exact @name("data.f2") ;
+        }
+        default_action = NoAction_3();
     }
     apply {
+        set_default_behavior_drop.apply();
         if (hdr.data2.isValid()) 
-            test1_0.apply();
-        test2_0.apply();
+            test1.apply();
+        test2.apply();
     }
 }
 
@@ -87,7 +107,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -98,3 +118,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

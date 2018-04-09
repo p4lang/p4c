@@ -23,11 +23,12 @@ limitations under the License.
 
 #include <vector>
 
+#include "gtest/gtest_prod.h"
 #include "cstring.h"
 #include "stringref.h"
 #include "map.h"
 
-namespace Test { class TestSourceFile; }
+namespace Test { class UtilSourceFile; }
 
 class IHasDbPrint {
  public:
@@ -123,6 +124,8 @@ class SourcePosition final {
     unsigned      columnNumber;
 };
 
+class InputSources;
+
 /**
 Information about the source position of a language element -
 a range of position within an InputSources.   Can only be
@@ -137,12 +140,14 @@ class SourceInfo final {
  public:
     /// Creates an "invalid" SourceInfo
     SourceInfo()
-            : start(SourcePosition()),
-              end(SourcePosition()) {}
-    /// Creates a SourceInfo for a 'point' in the source, or invalid
-    explicit SourceInfo(SourcePosition point) : start(point), end(point) {}
+        : sources(nullptr), start(SourcePosition()), end(SourcePosition()) {}
 
-    SourceInfo(SourcePosition start, SourcePosition end);
+    /// Creates a SourceInfo for a 'point' in the source, or invalid
+    SourceInfo(const InputSources* sources, SourcePosition point)
+        : sources(sources), start(point), end(point) {}
+
+    SourceInfo(const InputSources* sources, SourcePosition start,
+               SourcePosition end);
 
     SourceInfo(const SourceInfo& other) = default;
     ~SourceInfo() = default;
@@ -158,7 +163,7 @@ class SourceInfo final {
             return *this;
         SourcePosition s = start.min(rhs.start);
         SourcePosition e = end.max(rhs.end);
-        return SourceInfo(s, e);
+        return SourceInfo(sources, s, e);
     }
     SourceInfo &operator+=(const SourceInfo& rhs) {
         if (!isValid()) {
@@ -189,6 +194,8 @@ class SourceInfo final {
     { return this->start.isValid(); }
     explicit operator bool() const { return isValid(); }
 
+    cstring getSourceFile() const;
+
     const SourcePosition& getStart() const
     { return this->start; }
 
@@ -213,6 +220,7 @@ class SourceInfo final {
     { return !this->operator< (rhs); }
 
  private:
+    const InputSources* sources;
     SourcePosition start;
     SourcePosition end;
 };
@@ -248,9 +256,11 @@ struct SourceFileLine {
   This class implements a singleton pattern: there is a single instance of this class.
 */
 class InputSources final {
-    friend class Test::TestSourceFile;
+    FRIEND_TEST(UtilSourceFile, InputSources);
 
  public:
+    InputSources();
+
     cstring getLine(unsigned lineNumber) const;
     /// Original source line that produced the line with the specified number
     SourceFileLine getSourceLine(unsigned line) const;
@@ -281,14 +291,7 @@ class InputSources final {
 
     cstring toDebugString() const;
 
-    // Reset all source information, so that a new file can be parsed.
-    static void reset();
-
-    static InputSources* instance;
-
  private:
-    InputSources();
-
     /// Append this text to the last line; must not contain newlines
     void appendToLastLine(StringRef text);
     /// Append a newline and start a new line
@@ -298,6 +301,7 @@ class InputSources final {
     bool sealed;
 
     std::map<unsigned, SourceFileLine> line_file_map;
+
     /// Each line also stores the end-of-line character(s)
     std::vector<cstring> contents;
 };

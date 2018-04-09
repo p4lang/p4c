@@ -16,7 +16,7 @@ limitations under the License.
 
 // Use Bison's C++ mode.
 %skeleton "lalr1.cc" /* -*-C++-*- */
-%require "3.0.4"
+%require "3.0.0"
 
 // Set up names.
 %defines
@@ -60,7 +60,7 @@ inline std::ostream& operator<<(std::ostream& out, const V1::HeaderType& headerT
     return out;
 }
 
-typedef std::pair<const IR::Constant*, const IR::Constant*> CaseValue;
+typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
 
 inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
     out << "CaseValue(" << caseValue.first << ',' << caseValue.second << ')';
@@ -101,9 +101,9 @@ typedef const IR::Type ConstType;
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "ir/ir.h"
 
-#define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
-    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
-                 : Util::SourceInfo(YYRHSLOC(Rhs, 0).getEnd()))
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
+                 : Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd()))
 
 #undef yylex
 #define yylex lexer.yylex
@@ -113,7 +113,7 @@ typedef const IR::Type ConstType;
 // produce null pointers, so we need to have two printers: one for non-pointer
 // types, and another with null checking for pointer types.
 %printer { yyoutput << $$; } <BBoxType> <CaseValue> <cstring> <HeaderType>
-                             <int> <IR::Direction> <UnparsedConstant>
+                             <int> <IR::Direction> <IR::ID> <UnparsedConstant>
 %printer {
     auto val = $$;
     if (val != nullptr) {
@@ -166,7 +166,7 @@ typedef const IR::Type ConstType;
                 FIELDS HEADER HEADER_TYPE IF IMPLEMENTATION IN INPUT INSTANCE_COUNT
                 INT LATEST LAYOUT LENGTH MASK MAX_LENGTH MAX_SIZE MAX_WIDTH METADATA
                 METER METHOD MIN_SIZE MIN_WIDTH OPTIONAL OUT OUTPUT_WIDTH PARSE_ERROR
-                PARSER PARSER_EXCEPTION PAYLOAD PRAGMA PREFIX PRE_COLOR
+                PARSER PARSER_VALUE_SET PARSER_EXCEPTION PAYLOAD PRAGMA PREFIX PRE_COLOR
                 PRIMITIVE_ACTION READS REGISTER RESULT RETURN SATURATING SELECT
                 SELECTION_KEY SELECTION_MODE SELECTION_TYPE SET_METADATA SIGNED SIZE
                 STATIC STRING TABLE TRUE TYPE UPDATE VALID VERIFY WIDTH WRITES
@@ -177,18 +177,20 @@ typedef const IR::Type ConstType;
 %right ASSIGN
 %left OR
 %left AND
+%left EQ NE
+%left L_ANGLE R_ANGLE LE GE
 %left BIT_OR
 %left BIT_XOR
 %left BIT_AND
-%left EQ NE
-%left L_ANGLE R_ANGLE LE GE
 %left SHL SHR
 %left PLUS MINUS
 %left MUL DIV MOD
 %right PREFIX
+%precedence IF
+%precedence ELSE
 
 %type<int>                          opt_field_modifiers attributes attrib
-%type<cstring>                      name
+%type<IR::ID>                       name
 %type<IR::ActionFunction*>          action_function_body action_statement_list
 %type<IR::ActionProfile*>           action_profile_body
 %type<IR::ActionSelector*>          action_selector_body
@@ -209,7 +211,7 @@ typedef const IR::Type ConstType;
 %type<IR::Expression*>              expression header_ref header_or_field_ref
                                     field_or_masked_ref opt_condition pragma_operand
 %type<IR::Vector<IR::Expression>*>  expression_list opt_expression_list
-                                    control_statement_list opt_else
+                                    control_statement control_statement_list
                                     field_match_list expressions pragma_operands
 %type<IR::FieldList*>               field_list_entries
 %type<IR::FieldListCalculation*>    field_list_calculation_body
@@ -235,6 +237,7 @@ input: /* epsilon */
     | input field_list_declaration
     | input field_list_calculation_declaration
     | input calculated_field_declaration
+    | input value_set_declaration
     | input parser_function_declaration
     | input parser_exception_declaration
     | input counter_declaration
@@ -255,7 +258,7 @@ input: /* epsilon */
 ;
 
 /********************************/
-/* 5.1 Header Type Declarations */
+/* 2.1 Header Type Declarations */
 /********************************/
 
 header_type_declaration: HEADER_TYPE name "{" header_dec_body "}"
@@ -265,10 +268,13 @@ header_type_declaration: HEADER_TYPE name "{" header_dec_body "}"
                                 new IR::Annotations(*$4.annotations), *$4.fields),
             new IR::Type_Header(@1+@5, IR::ID(@2, $2),
                                 new IR::Annotations(*$4.annotations), *$4.fields))); }
+    | HEADER_TYPE name "{" header_dec_body error END
+          { driver.clearPragmas(); }
 ;
 
 header_dec_body: FIELDS "{" field_declarations "}" opt_length opt_max_length
       { $$ = $3; }
+    | FIELDS "{" field_declarations error END { $$ = $3; }
 ;
 
 field_declarations: /* epsilon */
@@ -335,7 +341,7 @@ type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
 ;
 
 /************************************/
-/* 5.2 Header and Metadata instance */
+/* 2.2 Header and Metadata instance */
 /************************************/
 
 header_instance:
@@ -365,7 +371,7 @@ metadata_field_init_list: /* empty */
     ;
 
 /*******************/
-/* 5.4 Field Lists */
+/* 2.4 Field Lists */
 /*******************/
 
 field_list_declaration:
@@ -384,12 +390,13 @@ field_list_entries:
     ;
 
 /***************************************************/
-/* 6  Checksums and Hash-based Selection Functions */
+/* 3  Checksums and Hash-based Selection Functions */
 /***************************************************/
 
 field_list_calculation_declaration:
       FIELD_LIST_CALCULATION name "{" field_list_calculation_body "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | FIELD_LIST_CALCULATION name "{" field_list_calculation_body error END
 ;
 
 field_list_calculation_body: /* epsilon */
@@ -401,7 +408,11 @@ field_list_calculation_body: /* epsilon */
     | field_list_calculation_body ALGORITHM ":" name ";"
       { if ($1->algorithm)
             ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
-        ($$=$1)->algorithm = IR::ID(@4, $4); }
+        ($$=$1)->algorithm = new IR::NameList(@4, IR::ID(@4, $4)); }
+    | field_list_calculation_body ALGORITHM "{" action_list "}"
+      { if ($1->algorithm)
+            ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
+        ($$=$1)->algorithm = $4; }
     | field_list_calculation_body OUTPUT_WIDTH ":" const_expression ";"
       { if ($1->output_width)
             ::error("%s: multiple 'output_width' in field_list_calculation", @2);
@@ -419,6 +430,7 @@ field_list_list: /* epsilon */
 calculated_field_declaration:
       CALCULATED_FIELD field_ref "{" update_verify_spec_list "}"
       { $4->field = $2; $4->srcInfo = @1 + @5; driver.global->add($2->toString(), $4); }
+    | CALCULATED_FIELD field_ref "{" update_verify_spec_list error END
 ;
 
 update_verify_spec_list: /* epsilon */
@@ -435,22 +447,31 @@ opt_condition: /* epsilon */ { $$ = nullptr; }
     | IF "(" expression ")" { $$ = $3; }
 ;
 
+/********************************/
+/* 4.3 Value Sets */
+/********************************/
+
+value_set_declaration:
+    PARSER_VALUE_SET name ";"
+    { driver.global->add($2, new IR::ParserValueSet(@1, IR::ID(@2, $2), driver.takePragmasAsAnnotations())); }
+
 /************************/
-/* 7.4 Parser Functions */
+/* 4.4 Parser Functions */
 /************************/
 
 parser_function_declaration:
       PARSER name "{" parser_statement_list "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | PARSER name "{" parser_statement_list error END
 ;
 
 parser_statement_list: /* epsilon */
       { $$ = new IR::V1Parser(driver.takePragmasAsAnnotations()); }
     | parser_statement_list EXTRACT "(" header_ref ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
-    | parser_statement_list SET_METADATA "(" field_ref "," expression ")" ";"
+    | parser_statement_list SET_METADATA "(" expression "," expression ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@7, $2, $4, $6)); }
-    | parser_statement_list field_ref "=" expression ";"
+    | parser_statement_list expression "=" expression ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@3, "set_metadata", $2, $4)); }
     | parser_statement_list RETURN name ";"
       { ($$=$1)->default_return = IR::ID(@3, $3); }
@@ -479,29 +500,33 @@ case_value_list:
     ;
 
 case_value:
-      const_expression
+      expression
       { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), new IR::Constant(-1)); }
-    | const_expression MASK const_expression
+    | expression MASK const_expression
       { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), $3 ? $3 : new IR::Constant(0)); }
     | DEFAULT
       { $$ = CaseValue(new IR::Constant(0), new IR::Constant(0)); }
     ;
 
 /*************************/
-/* 7.6 Parser Exceptions */
+/* 4.6 Parser Exceptions */
 /*************************/
 
 parser_exception_declaration:
-      PARSER_EXCEPTION name "{" parser_statement_list "}"
-        { driver.clearPragmas(); }
+      PARSER_EXCEPTION name "{" parser_statement_list "}" {
+          driver.clearPragmas();
+          ::warning("%1%: parser exception is not translated to P4-16", $1);
+      }
+    | PARSER_EXCEPTION name "{" parser_statement_list error END
 ;
 
 /*****************/
-/* 10.1 Counters */
+/* 7.1 Counters */
 /*****************/
 
 counter_declaration: COUNTER name "{" counter_spec_list "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | COUNTER name "{" counter_spec_list error END
 ;
 
 counter_spec_list:
@@ -530,12 +555,13 @@ counter_spec_list:
 ;
 
 /***************/
-/* 10.2 Meters */
+/* 7.2 Meters */
 /***************/
 
 meter_declaration : METER name "{" meter_spec_list "}"
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5;
         driver.global->add($2, $4); }
+    | METER name "{" meter_spec_list error END
 ;
 
 meter_spec_list:
@@ -564,13 +590,14 @@ meter_spec_list:
 ;
 
 /******************/
-/* 10.2 Registers */
+/* 7.3 Registers */
 /******************/
 
 register_declaration: REGISTER name "{" register_spec_list "}"
       { $4->name = IR::ID(@2, $2);
         $4->srcInfo = @1 + @5;
         driver.global->add($2, $4); }
+    | REGISTER name "{" register_spec_list error END
 ;
 
 register_spec_list:
@@ -601,7 +628,7 @@ register_spec_list:
 ;
 
 /**************************/
-/* 12.1 Primitive Actions */
+/* 9.1 Primitive Actions */
 /**************************/
 
 primitive_action_declaration:
@@ -619,7 +646,7 @@ opt_name_list: /* epsilon */ { $$ = nullptr; }
     ;
 
 /***************************/
-/* 12.2 Action Definitions */
+/* 9.2 Action Definitions */
 /***************************/
 
 action_function_declaration:
@@ -634,7 +661,7 @@ action_function_declaration:
 
 action_function_body:
       "{" action_statement_list "}"        { $$ = $2; }
-    | "{" action_statement_list error "}"  { $$ = $2; }
+    | "{" action_statement_list error END  { $$ = $2; }
 ;
 
 action_statement_list: /* epsilon */
@@ -647,10 +674,12 @@ action_statement_list: /* epsilon */
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2->member, $2->expr, $4)); }
     | action_statement_list error ";"
       { $$ = $1; }
+    | action_statement_list error
+      { $$ = $1; }
 ;
 
 /***************************/
-/* Action Profile Definitions */
+/* 10 Action Profile Definitions */
 /***************************/
 
 action_profile_declaration: ACTION_PROFILE name "{" action_profile_body "}"
@@ -679,18 +708,21 @@ action_selector_body: /* epsilon */
     ;
 
 /*************************/
-/* 13 Table Declarations */
+/* 11 Table Declarations */
 /*************************/
 
 table_declaration: TABLE name "{" table_body "}"
       { $4->name = IR::ID(@2, $2);
         $4->srcInfo = @1 + @5;
         driver.global->add($2, $4); }
+    | TABLE name "{" table_body error END
 ;
 
 table_body: /* epsilon */
       { $$ = new IR::V1Table(driver.takePragmasAsAnnotations()); }
     | table_body READS "{" field_match_list "}"
+      { ($$=$1)->reads = $4; }
+    | table_body READS "{" field_match_list error END
       { ($$=$1)->reads = $4; }
     | table_body ACTIONS "{" action_list "}"
       { ($$=$1)->actions = $4->names; $4 = nullptr; }
@@ -744,41 +776,43 @@ action_list: /* epsilon */ { $$ = new IR::NameList(); }
 ;
 
 /*****************************************/
-/* 14 Packet Processing and Control Flow */
+/* 12 Packet Processing and Control Flow */
 /*****************************************/
 
 control_function_declaration: CONTROL name "{" control_statement_list "}"
       { driver.global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4,
                                                  driver.takePragmasAsAnnotations())); }
+    | CONTROL name "{" control_statement_list error END
 ;
 
 control_statement_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>; }
-    | control_statement_list APPLY "(" name ")" ";"
-      { ($$=$1)->push_back(new IR::Apply(@2+@5, IR::ID(@4, $4))); }
-    | control_statement_list APPLY "(" name ")" "{" apply_case_list "}"
-      { $7->name = IR::ID(@4, $4); $7->srcInfo = @2+@5; ($$=$1)->push_back($7); }
-    | control_statement_list IF "(" expression ")" "{" control_statement_list "}" opt_else
-        { ($$=$1)->push_back(new IR::If(@2+@4, $4, $7, $9)); }
-    | control_statement_list name "(" ")" ";"
-      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $2)); }
+    | control_statement_list control_statement { ($$=$1)->append(*$2); }
     | control_statement_list error ";" { $$ = $1; }
     | control_statement_list error { $$ = $1; }
 ;
 
-opt_else: /* epsilon */ { $$ = nullptr; }
-    | ELSE "{" control_statement_list "}"
-      { $$ = $3; }
-    | ELSE IF "(" expression ")" "{" control_statement_list "}" opt_else
-      { $$ = new IR::Vector<IR::Expression>(new IR::If(@2+@5, $4, $7, $9)); }
+control_statement:
+      APPLY "(" name ")" ";"
+      { $$ = new IR::Vector<IR::Expression>(new IR::Apply(@1+@4, IR::ID(@3, $3))); }
+    | APPLY "(" name ")" "{" apply_case_list "}"
+      { $6->name = IR::ID(@3, $3); $6->srcInfo = @1+@4; $$ = new IR::Vector<IR::Expression>($6); }
+    | IF "(" expression ")" control_statement %prec IF
+      { $$ = new IR::Vector<IR::Expression>(new IR::If(@1+@3, $3, $5, nullptr)); }
+    | IF "(" expression ")" control_statement ELSE control_statement %prec IF
+      { $$ = new IR::Vector<IR::Expression>(new IR::If(@1+@3, $3, $5, $7)); }
+    | name "(" ")" ";"
+      { $$ = new IR::Vector<IR::Expression>(new IR::Primitive(@1+@3, $1)); }
+    | "{" control_statement_list "}"
+      { $$ = $2; }
 ;
 
 apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
-    | apply_case_list name_list "{" control_statement_list "}"
+    | apply_case_list name_list control_statement
         { for (auto name : $2->names)
-              $1->actions[name] = $4;
+              $1->actions[name] = $3;
           $$ = $1; }
-    | apply_case_list DEFAULT "{" control_statement_list "}"
-        { ($$=$1)->actions["default"] = $4; }
+    | apply_case_list DEFAULT control_statement
+        { ($$=$1)->actions["default"] = $3; }
 ;
 
 /************/
@@ -805,7 +839,7 @@ blackbox_body: /* epsilon */ {
     | blackbox_body error { $$ = $1; }
 ;
 
-blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute(@-1, $<cstring>-1); }
+blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute($<IR::ID>-1); }
     | blackbox_attribute TYPE ":" type ";" { ($$=$1)->type = $4; }
     | blackbox_attribute EXPRESSION_LOCAL_VARIABLES "{" opt_locals_list "}"
         { ($$=$1)->locals = $4; }
@@ -870,9 +904,9 @@ blackbox_config: /* epsilon */ { $$ = new IR::NameMap<IR::Property>; }
     | blackbox_config name ":" expressions ";"
           { const IR::PropertyValue *pv;
             if ($4->size() == 1)
-                pv = new IR::ExpressionValue($4->front());
+                pv = new IR::ExpressionValue(@4, $4->front());
             else
-                pv = new IR::ExpressionListValue(std::move(*$4));
+                pv = new IR::ExpressionListValue(@4, std::move(*$4));
             ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
     | blackbox_config name "{" expressions "}"
           { auto *pv = new IR::ExpressionListValue(std::move(*$4));
@@ -958,7 +992,6 @@ field_ref: header_ref "." name
          { $$ = new IR::Member(@1+@3, $1, IR::ID(@3, $3)); }
 ;
 
-
 const_expression: expression
         { if (!($$ = driver.constantFold(&*$1)))
                 ::error("%s: Non constant expression", @1); }
@@ -971,76 +1004,77 @@ expression_list:
 
 opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list { $$ = $1; }
 
-name: IDENTIFIER { $$ = $1; }
-    | ACTION { $$ = $1; }
-    | ACTIONS { $$ = $1; }
-    | ACTION_PROFILE { $$ = $1; }
-    | ACTION_SELECTOR { $$ = $1; }
-    | ALGORITHM { $$ = $1; }
-    | ATTRIBUTE { $$ = $1; }
-    | ATTRIBUTES { $$ = $1; }
-    | BIT { $$ = $1; }
-    | BLACKBOX { $$ = $1; }
-    | BLACKBOX_TYPE { $$ = $1; }
-    | BLOCK { $$ = $1; }
-    | BOOL { $$ = $1; }
-    | CALCULATED_FIELD { $$ = $1; }
-    | CONTROL { $$ = $1; }
-    | COUNTER { $$ = $1; }
-    | DEFAULT_ACTION { $$ = $1; }
-    | DIRECT { $$ = $1; }
-    | DROP { $$ = $1; }
-    | DYNAMIC_ACTION_SELECTION { $$ = $1; }
-    | EXPRESSION { $$ = $1; }
-    | EXPRESSION_LOCAL_VARIABLES { $$ = $1; }
-    | EXTRACT { $$ = $1; }
-    | FIELD_LIST { $$ = $1; }
-    | FIELD_LIST_CALCULATION { $$ = $1; }
-    | FIELDS { $$ = $1; }
-    | HEADER { $$ = $1; }
-    | HEADER_TYPE { $$ = $1; }
-    | IMPLEMENTATION { $$ = $1; }
-    | IN { $$ = $1; }
-    | INPUT { $$ = $1; }
-    | INSTANCE_COUNT { $$ = $1; }
-    | INT { $$ = $1; }
-    | LAYOUT { $$ = $1; }
-    | LENGTH { $$ = $1; }
-    | MASK { $$ = $1; }
-    | MAX_LENGTH { $$ = $1; }
-    | MAX_SIZE { $$ = $1; }
-    | MAX_WIDTH { $$ = $1; }
-    | METADATA { $$ = $1; }
-    | METER { $$ = $1; }
-    | METHOD { $$ = $1; }
-    | MIN_SIZE { $$ = $1; }
-    | MIN_WIDTH { $$ = $1; }
-    | OPTIONAL { $$ = $1; }
-    | OUT { $$ = $1; }
-    | OUTPUT_WIDTH { $$ = $1; }
-    | PARSER { $$ = $1; }
-    | PARSER_EXCEPTION { $$ = $1; }
-    | PRE_COLOR { $$ = $1; }
-    | PRIMITIVE_ACTION { $$ = $1; }
-    | READS { $$ = $1; }
-    | REGISTER { $$ = $1; }
-    | RESULT { $$ = $1; }
-    | RETURN { $$ = $1; }
-    | SATURATING { $$ = $1; }
-    | SELECTION_KEY { $$ = $1; }
-    | SELECTION_MODE { $$ = $1; }
-    | SELECTION_TYPE { $$ = $1; }
-    | SET_METADATA { $$ = $1; }
-    | SIGNED { $$ = $1; }
-    | SIZE { $$ = $1; }
-    | STATIC { $$ = $1; }
-    | STRING { $$ = $1; }
-    | TABLE { $$ = $1; }
-    | TYPE { $$ = $1; }
-    | UPDATE { $$ = $1; }
-    | VERIFY { $$ = $1; }
-    | WIDTH { $$ = $1; }
-    | WRITES { $$ = $1; }
+name: IDENTIFIER { $$ = IR::ID(@1, $1); }
+    | ACTION { $$ = IR::ID(@1, $1); }
+    | ACTIONS { $$ = IR::ID(@1, $1); }
+    | ACTION_PROFILE { $$ = IR::ID(@1, $1); }
+    | ACTION_SELECTOR { $$ = IR::ID(@1, $1); }
+    | ALGORITHM { $$ = IR::ID(@1, $1); }
+    | ATTRIBUTE { $$ = IR::ID(@1, $1); }
+    | ATTRIBUTES { $$ = IR::ID(@1, $1); }
+    | BIT { $$ = IR::ID(@1, $1); }
+    | BLACKBOX { $$ = IR::ID(@1, $1); }
+    | BLACKBOX_TYPE { $$ = IR::ID(@1, $1); }
+    | BLOCK { $$ = IR::ID(@1, $1); }
+    | BOOL { $$ = IR::ID(@1, $1); }
+    | CALCULATED_FIELD { $$ = IR::ID(@1, $1); }
+    | CONTROL { $$ = IR::ID(@1, $1); }
+    | COUNTER { $$ = IR::ID(@1, $1); }
+    | DEFAULT_ACTION { $$ = IR::ID(@1, $1); }
+    | DIRECT { $$ = IR::ID(@1, $1); }
+    | DROP { $$ = IR::ID(@1, $1); }
+    | DYNAMIC_ACTION_SELECTION { $$ = IR::ID(@1, $1); }
+    | EXPRESSION { $$ = IR::ID(@1, $1); }
+    | EXPRESSION_LOCAL_VARIABLES { $$ = IR::ID(@1, $1); }
+    | EXTRACT { $$ = IR::ID(@1, $1); }
+    | FIELD_LIST { $$ = IR::ID(@1, $1); }
+    | FIELD_LIST_CALCULATION { $$ = IR::ID(@1, $1); }
+    | FIELDS { $$ = IR::ID(@1, $1); }
+    | HEADER { $$ = IR::ID(@1, $1); }
+    | HEADER_TYPE { $$ = IR::ID(@1, $1); }
+    | IMPLEMENTATION { $$ = IR::ID(@1, $1); }
+    | IN { $$ = IR::ID(@1, $1); }
+    | INPUT { $$ = IR::ID(@1, $1); }
+    | INSTANCE_COUNT { $$ = IR::ID(@1, $1); }
+    | INT { $$ = IR::ID(@1, $1); }
+    | LAYOUT { $$ = IR::ID(@1, $1); }
+    | LENGTH { $$ = IR::ID(@1, $1); }
+    | MASK { $$ = IR::ID(@1, $1); }
+    | MAX_LENGTH { $$ = IR::ID(@1, $1); }
+    | MAX_SIZE { $$ = IR::ID(@1, $1); }
+    | MAX_WIDTH { $$ = IR::ID(@1, $1); }
+    | METADATA { $$ = IR::ID(@1, $1); }
+    | METER { $$ = IR::ID(@1, $1); }
+    | METHOD { $$ = IR::ID(@1, $1); }
+    | MIN_SIZE { $$ = IR::ID(@1, $1); }
+    | MIN_WIDTH { $$ = IR::ID(@1, $1); }
+    | OPTIONAL { $$ = IR::ID(@1, $1); }
+    | OUT { $$ = IR::ID(@1, $1); }
+    | OUTPUT_WIDTH { $$ = IR::ID(@1, $1); }
+    | PARSER { $$ = IR::ID(@1, $1); }
+    | PARSER_VALUE_SET { $$ = IR::ID(@1, $1); }
+    | PARSER_EXCEPTION { $$ = IR::ID(@1, $1); }
+    | PRE_COLOR { $$ = IR::ID(@1, $1); }
+    | PRIMITIVE_ACTION { $$ = IR::ID(@1, $1); }
+    | READS { $$ = IR::ID(@1, $1); }
+    | REGISTER { $$ = IR::ID(@1, $1); }
+    | RESULT { $$ = IR::ID(@1, $1); }
+    | RETURN { $$ = IR::ID(@1, $1); }
+    | SATURATING { $$ = IR::ID(@1, $1); }
+    | SELECTION_KEY { $$ = IR::ID(@1, $1); }
+    | SELECTION_MODE { $$ = IR::ID(@1, $1); }
+    | SELECTION_TYPE { $$ = IR::ID(@1, $1); }
+    | SET_METADATA { $$ = IR::ID(@1, $1); }
+    | SIGNED { $$ = IR::ID(@1, $1); }
+    | SIZE { $$ = IR::ID(@1, $1); }
+    | STATIC { $$ = IR::ID(@1, $1); }
+    | STRING { $$ = IR::ID(@1, $1); }
+    | TABLE { $$ = IR::ID(@1, $1); }
+    | TYPE { $$ = IR::ID(@1, $1); }
+    | UPDATE { $$ = IR::ID(@1, $1); }
+    | VERIFY { $$ = IR::ID(@1, $1); }
+    | WIDTH { $$ = IR::ID(@1, $1); }
+    | WRITES { $$ = IR::ID(@1, $1); }
     ;
 
 %%

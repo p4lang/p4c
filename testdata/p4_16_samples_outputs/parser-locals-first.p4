@@ -1,3 +1,5 @@
+#include <core.p4>
+
 header H {
     bit<32> a;
     bit<32> b;
@@ -20,3 +22,4 @@ parser p() {
 parser empty();
 package top(empty e);
 top(p()) main;
+

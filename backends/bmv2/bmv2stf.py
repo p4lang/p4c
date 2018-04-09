@@ -32,6 +32,7 @@ import signal
 import time
 import random
 import errno
+import socket
 from string import maketrans
 from collections import OrderedDict
 try:
@@ -199,6 +200,9 @@ class TableKeyInstance(object):
         elif key + '$' in self.key.fields:
             key = key + '$'
             found = True
+        elif key + '.$valid$' in self.key.fields:
+            key = key + '.$valid$'
+            found = True
         elif key.endswith(".valid"):
             alt = key[:-5] + "$valid$"
             if alt in self.key.fields:
@@ -341,7 +345,8 @@ class RunBMV2(object):
         self.folder = folder
         self.pcapPrefix = "pcap"
         self.interfaces = {}
-        self.expected = {}
+        self.expected = {}  # for each interface number of packets expected
+        self.expectedAny = []  # interface on which any number of packets is fine
         self.packetDelay = 0
         self.options = options
         self.json = None
@@ -396,6 +401,8 @@ class RunBMV2(object):
             data = ''.join(data.split())
             if data != '':
                 self.expected.setdefault(interface, []).append(data)
+            else:
+                self.expectedAny.append(interface)
         else:
             if self.options.verbose:
                 print("ignoring stf command:", first, cmd)
@@ -435,6 +442,10 @@ class RunBMV2(object):
             else:
                 # parsing table key
                 word, cmd = nextWord(cmd)
+                if cmd.find("=") >= 0:
+                    # This command retrieves a handle for the key
+                    # This feature is currently not supported, so we just ignore the handle part
+                    cmd = cmd.split("=")[0]
                 if word.find("(") >= 0:
                     # found action
                     actionName, arg = nextWord(word, "(")
@@ -449,18 +460,44 @@ class RunBMV2(object):
             # Priorities in BMV2 seem to be reversed with respect to the stf file
             # Hopefully 10000 is large enough
             prio = str(10000 - int(prio))
-        command = "table_add " + tableName + " " + actionName + " " + str(key) + " => " + str(actionArgs)
+        command = "table_add " + table.name + " " + action.name + " " + str(key) + " => " + str(actionArgs)
         if table.match_type == "ternary":
             command += " " + prio
         return command
     def actionByName(self, table, actionName):
-        id = table.actions[actionName]
-        action = self.actions[id]
-        return action
+        for name, id in table.actions.items():
+            action = self.actions[id]
+            if action.name == actionName:
+                return action
+        # Try again with suffixes
+        candidate = None
+        for name, id in table.actions.items():
+            action = self.actions[id]
+            if action.name.endswith(actionName):
+                if candidate is None:
+                    candidate = action
+                else:
+                    raise Exception("Ambiguous action name " + actionName + " in " + table.name)
+        if candidate is not None:
+            return candidate
+
+        raise Exception("No action", actionName, "in table", table)
     def tableByName(self, tableName):
+        originalName = tableName
         for t in self.tables:
             if t.name == tableName:
                 return t
+        # If we can't find that try to match the tableName with a table suffix
+        candidate = None
+        for t in self.tables:
+            if t.name.endswith(tableName):
+                if candidate == None:
+                    candidate = t
+                else:
+                    raise Exception("Table name " + tableName + " is ambiguous between " +
+                                    candidate.name + " and " + t.name)
+        if candidate is not None:
+            return candidate
         raise Exception("Could not find table " + tableName)
     def interfaceArgs(self):
         # return list of interface names suitable for bmv2
@@ -482,6 +519,19 @@ class RunBMV2(object):
                         ifname = self.interfaces[interface] = self.filename(interface, "in")
                         os.mkfifo(ifname)
         return SUCCESS
+    def check_switch_server_ready(self, proc, thriftPort):
+        """While the process is running, we check if the Thrift server has been
+        started. If the Thrift server is ready, we assume that the switch was
+        started successfully. This is only reliable if the Thrift server is
+        started at the end of the init process"""
+        while True:
+            if proc.poll() is not None:
+                return False
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(0.5)
+            result = sock.connect_ex(("localhost", thriftPort))
+            if result == 0:
+                return  True
     def run(self):
         if self.options.verbose:
             print("Running model")
@@ -494,7 +544,10 @@ class RunBMV2(object):
             return FAILURE
         thriftPort = str(9090 + rand)
         rv = SUCCESS
-
+        try:
+            os.remove("/tmp/bmv2-%d-notifications.ipc" % rand)
+        except OSError:
+            pass
         try:
             runswitch = [FindExe("behavioral-model", "simple_switch"),
                          "--log-file", self.switchLogFile, "--log-flush",
@@ -504,42 +557,71 @@ class RunBMV2(object):
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
 
+            def openInterface(ifname):
+                fp = self.interfaces[interface] = RawPcapWriter(ifname, linktype=0)
+                fp._write_header(None)
+
+            # Try to open input interfaces. Each time, we set a 2 second
+            # timeout. If the timeout expires we check if the bmv2 process is
+            # not running anymore. If it is, we check if we have exceeded the
+            # one minute timeout (exceeding this timeout is very unlikely and
+            # could mean the system is very slow for some reason). If one of the
+            # 2 conditions above is met, the test is considered a FAILURE.
+            start = time.time()
+            sw_timeout = 60
+            # open input interfaces
+            # DANGER -- it is critical that we open these fifos in the same
+            # order as bmv2, as otherwise we'll deadlock.  Would be nice if we
+            # could open nonblocking.
+            for interface in sorted(self.interfaces):
+                ifname = self.interfaces[interface]
+                while True:
+                    try:
+                        signal.alarm(2)
+                        openInterface(ifname)
+                        signal.alarm(0)
+                    except TimeoutException:
+                        if time.time() - start > sw_timeout:
+                            return FAILURE
+                        if sw.poll() is not None:
+                            return FAILURE
+                    else:
+                        break
+
+            # at this point we wait until the Thrift server is ready
+            # also useful if there are no interfaces
             try:
-                # open input interfaces
-                # DANGER -- it is critical that we open these fifos in the same order as bmv2,
-                # as otherwise we'll deadlock.  Would be nice if we could open nonblocking.
-                signal.alarm(2)
-                # if it takes more than 2 seconds to open, assume bmv2 crashed
-                for interface in sorted(self.interfaces):
-                    ifname = self.interfaces[interface]
-                    fp = self.interfaces[interface] = RawPcapWriter(ifname, linktype=0)
-                    fp._write_header(None)
+                signal.alarm(int(sw_timeout + start - time.time()))
+                self.check_switch_server_ready(sw, int(thriftPort))
                 signal.alarm(0)
             except TimeoutException:
                 return FAILURE
-
-            if len(self.interfaces) == 0:
-                # opening interfaces synchronizes with bmv2 startup, so only
-                # need to wait if there are none
-                time.sleep(0.5)
+            time.sleep(0.1)
 
             runcli = [FindExe("behavioral-model", "simple_switch_CLI"), "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
-            cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
-            self.cli_stdin = cli.stdin
-            with open(self.stffile) as i:
-                for line in i:
-                    line, comment = nextWord(line, "#")
-                    self.do_command(line)
-            cli.stdin.close()
-            for interface, fp in self.interfaces.iteritems():
-                fp.close()
-            # Give time to the model to execute
-            time.sleep(2)
-            cli.terminate()
-            sw.terminate()
-            sw.wait()
+
+            try:
+                cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
+                self.cli_stdin = cli.stdin
+                with open(self.stffile) as i:
+                    for line in i:
+                        line, comment = nextWord(line, "#")
+                        self.do_command(line)
+                cli.stdin.close()
+                for interface, fp in self.interfaces.iteritems():
+                    fp.close()
+                # Give time to the model to execute
+                time.sleep(2)
+                cli.terminate()
+                sw.terminate()
+                sw.wait()
+            except Exception as e:
+                cli.terminate()
+                sw.terminate()
+                sw.wait()
+                raise e
             # This only works on Unix: negative returncode is
             # minus the signal number that killed the process.
             if sw.returncode != 0 and sw.returncode != -15:  # 15 is SIGTERM
@@ -552,6 +634,10 @@ class RunBMV2(object):
                 reportError("CLI process failed with exit code", cli.returncode)
                 rv = FAILURE
         finally:
+            try:
+                os.remove("/tmp/bmv2-%d-notifications.ipc" % rand)
+            except OSError:
+                pass
             concurrent.release(rand)
         if self.options.verbose:
             print("Execution completed")
@@ -566,7 +652,9 @@ class RunBMV2(object):
             if expected[i] == "*":
                 continue;
             if expected[i] != received[i]:
+                reportError("Received packet ", received)
                 reportError("Packet different at position", i, ": expected", expected[i], ", received", received[i])
+                reportError("Full received packed is ", received)
                 return FAILURE
         return SUCCESS
     def showLog(self):
@@ -600,17 +688,14 @@ class RunBMV2(object):
                 observationLog.close()
 
             # Check for expected packets.
-            if interface not in self.expected:
-                # This continue can falsely make a test succeed, if the
-                # interface type is not the one stored in expected. We need to
-                # be more careful on declaring success.
-                #
-                # One possible fix is to check for all expected and determine
-                # which file to look into, or, remove the ones we found from the
-                # self.expected list, and return success only if the list is
-                # empty. The latter is what is implemented below.
+            if interface in self.expectedAny:
+                if interface in self.expected:
+                    reportError("Interface " + interface + " has both expected with packets and without")
                 continue
-            expected = self.expected[interface]
+            if interface not in self.expected:
+                expected = []
+            else:
+                expected = self.expected[interface]
             if len(expected) != len(packets):
                 reportError("Expected", len(expected), "packets on port", str(interface),
                             "got", len(packets))
@@ -622,7 +707,8 @@ class RunBMV2(object):
                     reportError("Packet", i, "on port", str(interface), "differs")
                     return FAILURE
             # remove successfully checked interfaces
-            del self.expected[interface]
+            if interface in self.expected:
+                del self.expected[interface]
         if len(self.expected) != 0:
             # didn't find all the expects we were expecting
             reportError("Expected packects on ports", self.expected.keys(), "not received")

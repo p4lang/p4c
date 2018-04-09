@@ -1,6 +1,6 @@
-../testdata/p4_16_samples/inline-switch.p4(17): warning: out parameter x may be uninitialized when c terminates
+inline-switch.p4(17): [--Wwarn=uninitialized_out_param] warning: out parameter x may be uninitialized when c terminates
 control c(out bit<32> x) {
                       ^
-../testdata/p4_16_samples/inline-switch.p4(17)
+inline-switch.p4(17)
 control c(out bit<32> x) {
         ^

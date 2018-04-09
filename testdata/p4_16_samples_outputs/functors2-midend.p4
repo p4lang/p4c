@@ -22,3 +22,4 @@ parser p2_0(out bit<2> z2) {
 }
 
 m(p2_0()) main;
+

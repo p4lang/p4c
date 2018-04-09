@@ -21,23 +21,23 @@ header queueing_metadata_t {
 }
 
 struct metadata {
-    @name("queueing_metadata") 
+    @name(".queueing_metadata") 
     queueing_metadata_t_0 queueing_metadata;
 }
 
 struct headers {
-    @name("hdr1") 
+    @name(".hdr1") 
     hdr1_t              hdr1;
-    @name("queueing_hdr") 
+    @name(".queueing_hdr") 
     queueing_metadata_t queueing_hdr;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("queueing_dummy") state queueing_dummy {
+    @name(".queueing_dummy") state queueing_dummy {
         packet.extract<queueing_metadata_t>(hdr.queueing_hdr);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<hdr1_t>(hdr.hdr1);
         transition select(standard_metadata.packet_length) {
             32w0: queueing_dummy;
@@ -54,10 +54,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
         hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
     }
-    @name("t_egress") table t_egress {
+    @name(".t_egress") table t_egress {
         actions = {
             copy_queueing_data();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         default_action = NoAction();
     }
@@ -73,14 +73,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name("t_ingress") table t_ingress {
+    @name(".t_ingress") table t_ingress {
         actions = {
             set_port();
             _drop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.hdr1.f1: exact @name("hdr.hdr1.f1") ;
+            hdr.hdr1.f1: exact @name("hdr1.f1") ;
         }
         size = 128;
         default_action = NoAction();
@@ -97,7 +97,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -108,3 +108,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

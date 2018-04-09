@@ -83,25 +83,25 @@ header vlan_t {
 }
 
 struct metadata {
-    @name("egress_metadata") 
+    @name(".egress_metadata") 
     egress_metadata_t            egress_metadata;
-    @name("ingress_metadata") 
+    @name(".ingress_metadata") 
     ingress_metadata_t           ingress_metadata;
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     ingress_intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("eth") 
+    @name(".eth") 
     ethernet_t eth;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("vlan") 
+    @name(".vlan") 
     vlan_t     vlan;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_eth") state parse_eth {
+    @name(".parse_eth") state parse_eth {
         packet.extract<ethernet_t>(hdr.eth);
         transition select(hdr.eth.ethType) {
             16w0x8100: parse_vlan;
@@ -109,18 +109,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name("parse_vlan") state parse_vlan {
+    @name(".parse_vlan") state parse_vlan {
         packet.extract<vlan_t>(hdr.vlan);
         transition accept;
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_eth;
     }
 }
+
+@name(".next_hop_group") action_selector(HashAlgorithm.crc16, 32w0, 32w16) next_hop_group;
+
+@name(".vlan") action_profile(32w0) vlan;
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
@@ -135,7 +139,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("port_counters") direct_counter(CounterType.packets) port_counters;
+    @name(".port_counters") direct_counter(CounterType.packets) port_counters;
     @name(".fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -220,49 +224,49 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;
     }
-    @name("fdb") table fdb {
+    @name(".fdb") table fdb {
         actions = {
             fdb_set();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vlan_id: exact @name("meta.ingress_metadata.vlan_id") ;
-            hdr.eth.dstAddr              : exact @name("hdr.eth.dstAddr") ;
+            meta.ingress_metadata.vlan_id: exact @name("ingress_metadata.vlan_id") ;
+            hdr.eth.dstAddr              : exact @name("eth.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("learn_notify") table learn_notify {
+    @name(".learn_notify") table learn_notify {
         actions = {
             nop();
             generate_learn_notify();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
-            meta.ingress_metadata.vlan_id       : exact @name("meta.ingress_metadata.vlan_id") ;
-            hdr.eth.srcAddr                     : exact @name("hdr.eth.srcAddr") ;
+            meta.intrinsic_metadata.ingress_port: exact @name("intrinsic_metadata.ingress_port") ;
+            meta.ingress_metadata.vlan_id       : exact @name("ingress_metadata.vlan_id") ;
+            hdr.eth.srcAddr                     : exact @name("eth.srcAddr") ;
         }
         default_action = NoAction();
     }
-    @name("neighbor") table neighbor {
+    @name(".neighbor") table neighbor {
         actions = {
             set_dmac();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf        : exact @name("meta.ingress_metadata.vrf") ;
-            meta.ingress_metadata.ip_dest    : exact @name("meta.ingress_metadata.ip_dest") ;
-            meta.ingress_metadata.router_intf: exact @name("meta.ingress_metadata.router_intf") ;
+            meta.ingress_metadata.vrf        : exact @name("ingress_metadata.vrf") ;
+            meta.ingress_metadata.ip_dest    : exact @name("ingress_metadata.ip_dest") ;
+            meta.ingress_metadata.router_intf: exact @name("ingress_metadata.router_intf") ;
         }
         default_action = NoAction();
     }
-    @name("next_hop") table next_hop {
+    @name(".next_hop") table next_hop {
         actions = {
             set_next_hop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.nhop: exact @name("meta.ingress_metadata.nhop") ;
+            meta.ingress_metadata.nhop: exact @name("ingress_metadata.nhop") ;
         }
         default_action = NoAction();
     }
@@ -284,55 +288,55 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.vlan_id = default_vlan;
     }
-    @name("port") table port {
+    @name(".port") table port {
         actions = {
             set_in_port_0();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.intrinsic_metadata.ingress_port: exact @name("meta.intrinsic_metadata.ingress_port") ;
+            meta.intrinsic_metadata.ingress_port: exact @name("intrinsic_metadata.ingress_port") ;
         }
+        counters = port_counters;
         default_action = NoAction();
-        @name("port_counters") counters = direct_counter(CounterType.packets);
     }
-    @name("route") table route {
+    @name(".route") table route {
         actions = {
             route_set_trap();
             route_set_nexthop();
             route_set_nexthop_group();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
-            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
+            meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("ipv4.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("router_interface") table router_interface {
+    @name(".router_interface") table router_interface {
         actions = {
             set_router_interface();
             router_interface_miss();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.eth.dstAddr: exact @name("hdr.eth.dstAddr") ;
+            hdr.eth.dstAddr: exact @name("eth.dstAddr") ;
         }
         default_action = NoAction();
     }
-    @name("switch") table switch_0 {
+    @name(".switch") table switch_0 {
         actions = {
             set_switch();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         default_action = NoAction();
     }
-    @name("virtual_router") table virtual_router {
+    @name(".virtual_router") table virtual_router {
         actions = {
             set_router();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf") ;
         }
         default_action = NoAction();
     }
@@ -365,20 +369,17 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
-    Checksum16() ipv4_checksum;
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.checksum == (ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
-            mark_to_drop();
+        verify_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.checksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    Checksum16() ipv4_checksum;
     apply {
-        if (hdr.ipv4.ihl == 4w5) 
-            hdr.ipv4.checksum = ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        update_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.checksum, HashAlgorithm.csum16);
     }
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

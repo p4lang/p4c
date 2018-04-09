@@ -23,7 +23,7 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(in Header_t h, inout Meta_t m) {
+control vrfy(inout Header_t h, inout Meta_t m) {
     apply {
     }
 }
@@ -53,7 +53,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_valid {
         key = {
-            h.h.isValid(): exact @name("h.h.isValid()") ;
+            h.h.isValid(): exact @name("h.h.$valid$") ;
             h.h.e        : exact @name("h.h.e") ;
         }
         actions = {
@@ -75,3 +75,4 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

@@ -1,12 +1,16 @@
 %{
-#define YY_USER_ACTION                                                                          \
-    { auto tmp = Util::InputSources::instance->getCurrentPosition();                            \
-      Util::InputSources::instance->appendText(yytext);                                         \
-      yylloc = Util::SourceInfo(tmp, Util::InputSources::instance->getCurrentPosition()); }
+#define YY_USER_ACTION                                                          \
+    { auto tmp = sources->getCurrentPosition();                                 \
+      sources->appendText(yytext);                                              \
+      yylloc = Util::SourceInfo(sources, tmp, sources->getCurrentPosition()); }
 
 // shut up warnings about unused functions and variables
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnull-conversion"
+#endif
 
 
 static int              block_depth;

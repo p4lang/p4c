@@ -5,7 +5,7 @@ extern Y {
 
 control d(out bit<32> x) {
     bit<32> cinst_tmp_0;
-    @name("cinst.inst") Y(32w16) cinst_inst_0;
+    @name("d.cinst.inst") Y(32w16) cinst_inst_0;
     @hidden action act() {
         cinst_tmp_0 = cinst_inst_0.get();
         x = cinst_tmp_0;
@@ -25,3 +25,4 @@ control d(out bit<32> x) {
 control dproto(out bit<32> x);
 package top(dproto _d);
 top(d()) main;
+

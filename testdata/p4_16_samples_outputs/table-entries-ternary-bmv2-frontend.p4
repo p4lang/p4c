@@ -23,7 +23,7 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(in Header_t h, inout Meta_t m) {
+control vrfy(inout Header_t h, inout Meta_t m) {
     apply {
     }
 }
@@ -45,13 +45,13 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("a") action a_0() {
+    @name("ingress.a") action a_0() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("t_ternary") table t_ternary_0 {
+    @name("ingress.t_ternary") table t_ternary {
         key = {
             h.h.t: ternary @name("h.h.t") ;
         }
@@ -61,16 +61,21 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a_0();
         const entries = {
-            16w0x1111 &&& 16w0xf : a_with_control_params_0(9w1);
-            16w0x1187 : a_with_control_params_0(9w2);
-            16w0x1111 &&& 16w0xf000 : a_with_control_params_0(9w3);
-            default : a_with_control_params_0(9w4);
+                        16w0x1111 &&& 16w0xf : a_with_control_params_0(9w1);
+
+                        16w0x1187 : a_with_control_params_0(9w2);
+
+                        16w0x1111 &&& 16w0xf000 : a_with_control_params_0(9w3);
+
+                        default : a_with_control_params_0(9w4);
+
         }
 
     }
     apply {
-        t_ternary_0.apply();
+        t_ternary.apply();
     }
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

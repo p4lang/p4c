@@ -18,17 +18,19 @@ limitations under the License.
 #define _FRONTENDS_P4_FROMV1_0_CONVERTERS_H_
 
 #include "ir/ir.h"
+#include "lib/safe_vector.h"
 #include "frontends/p4/coreLibrary.h"
 #include "programStructure.h"
 
 namespace P4V1 {
 
-// Converts expressions from v1.0 to v1.2
-// However, the type in each expression is still a v1.0 type.
+// Converts expressions from P4-14 to P4-16
+// However, the type in each expression is still a P4-14 type.
 class ExpressionConverter : public Transform {
  protected:
     ProgramStructure* structure;
     P4::P4CoreLibrary &p4lib;
+
  public:
     bool replaceNextWithLast;  // if true p[next] becomes p.last
     explicit ExpressionConverter(ProgramStructure* structure)
@@ -45,6 +47,8 @@ class ExpressionConverter : public Transform {
     const IR::Node* postorder(IR::ConcreteHeaderRef* nhr) override;
     const IR::Node* postorder(IR::HeaderStackItemRef* ref) override;
     const IR::Node* postorder(IR::GlobalRef *gr) override;
+    const IR::Node* postorder(IR::Equ *equ) override;
+    const IR::Node* postorder(IR::Neq *neq) override;
     const IR::Expression* convert(const IR::Node* node) {
         auto result = node->apply(*this);
         return result->to<IR::Expression>();
@@ -78,15 +82,87 @@ class TypeConverter : public ExpressionConverter {
     explicit TypeConverter(ProgramStructure* structure) : ExpressionConverter(structure) {}
 };
 
-// Is fed a P4 v1.0 program and outputs an equivalent P4 v1.2 program
-class Converter : public PassManager {
-    ProgramStructure structure;
+class ExternConverter {
+    static std::map<cstring, ExternConverter *> *cvtForType;
 
  public:
+    virtual const IR::Type_Extern *convertExternType(ProgramStructure *,
+                const IR::Type_Extern *, cstring);
+    virtual const IR::Declaration_Instance *convertExternInstance(ProgramStructure *,
+                const IR::Declaration_Instance *, cstring, IR::IndexedVector<IR::Declaration> *);
+    virtual const IR::Statement *convertExternCall(ProgramStructure *,
+                const IR::Declaration_Instance *, const IR::Primitive *);
+    virtual bool convertAsGlobal(ProgramStructure *, const IR::Declaration_Instance *) {
+        return false; }
+    ExternConverter() {}
+    /// register a converter for a p4_14 extern_type
+    /// @type: extern_type that the converter works on
+    static void addConverter(cstring type, ExternConverter *);
+    static ExternConverter *get(cstring type);
+    static ExternConverter *get(const IR::Type_Extern *type) { return get(type->name); }
+    static ExternConverter *get(const IR::Declaration_Instance *ext) {
+        return get(ext->type->to<IR::Type_Extern>()); }
+    static const IR::Type_Extern *cvtExternType(ProgramStructure *s,
+                const IR::Type_Extern *e, cstring name) {
+        return get(e)->convertExternType(s, e, name); }
+    static const IR::Declaration_Instance *cvtExternInstance(ProgramStructure *s,
+                const IR::Declaration_Instance *di, cstring name,
+                IR::IndexedVector<IR::Declaration> *scope) {
+        return get(di)->convertExternInstance(s, di, name, scope); }
+    static const IR::Statement *cvtExternCall(ProgramStructure *s,
+                const IR::Declaration_Instance *di, const IR::Primitive *p) {
+        return get(di)->convertExternCall(s, di, p); }
+    static bool cvtAsGlobal(ProgramStructure *s, const IR::Declaration_Instance *di) {
+        return get(di)->convertAsGlobal(s, di); }
+};
+
+class PrimitiveConverter {
+    static std::map<cstring, std::vector<PrimitiveConverter *>> *all_converters;
+    cstring     prim_name;
+    int         priority;
+
+ protected:
+    PrimitiveConverter(cstring name, int prio);
+    virtual ~PrimitiveConverter();
+
+    // helper functions
+    safe_vector<const IR::Expression *> convertArgs(ProgramStructure *, const IR::Primitive *);
+
+ public:
+    virtual const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) = 0;
+    static  const IR::Statement *cvtPrimitive(ProgramStructure *, const IR::Primitive *);
+};
+
+/** Macro for defining PrimitiveConverter subclass singleton instances.
+ * @name must be an identifier token -- the name of the primitive
+ * second (optional) argument must be an integer constant priority
+ * Multiple converters for the same primitive can be defined with different priorities
+ * the highest priority converter will be run first, and if it returns nullptr, the
+ * next highest will be run, etc.  The macro invocation is followed by the body of the
+ * converter function.
+ */
+#define CONVERT_PRIMITIVE(NAME, ...) \
+    class PrimitiveConverter_##NAME##_##__VA_ARGS__ : public PrimitiveConverter {               \
+        const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) override;       \
+        PrimitiveConverter_##NAME##_##__VA_ARGS__()                                             \
+        : PrimitiveConverter(#NAME, __VA_ARGS__ + 0) {}                                         \
+        static PrimitiveConverter_##NAME##_##__VA_ARGS__ singleton;                             \
+    } PrimitiveConverter_##NAME##_##__VA_ARGS__::singleton;                                     \
+    const IR::Statement *PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(                    \
+        ProgramStructure *structure, const IR::Primitive *primitive)
+
+// Is fed a P4-14 program and outputs an equivalent P4-16 program
+class Converter : public PassManager {
+    ProgramStructure *structure;
+
+ public:
+    static ProgramStructure *(*createProgramStructure)();
     Converter();
-    void loadModel() { structure.loadModel(); }
+    void loadModel() { structure->loadModel(); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };
+
+
 
 }  // namespace P4V1
 

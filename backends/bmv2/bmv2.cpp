@@ -19,21 +19,24 @@ limitations under the License.
 #include <iostream>
 
 #include "ir/ir.h"
-#include "lib/log.h"
+#include "control-plane/p4RuntimeSerializer.h"
+#include "frontends/common/applyOptionsPragmas.h"
+#include "frontends/common/parseInput.h"
+#include "frontends/p4/frontend.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
+#include "lib/log.h"
 #include "lib/nullstream.h"
-#include "control-plane/p4RuntimeSerializer.h"
-#include "frontends/common/parseInput.h"
-#include "frontends/p4/frontend.h"
+#include "backend.h"
 #include "midend.h"
-#include "jsonconverter.h"
+#include "JsonObjects.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    CompilerOptions options;
+    AutoCompileContext autoBMV2Context(new BMV2::BMV2Context);
+    auto& options = BMV2::BMV2Context::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = "0.0.5";
 
@@ -50,6 +53,9 @@ int main(int argc, char *const argv[]) {
     if (program == nullptr || ::errorCount() > 0)
         return 1;
     try {
+        P4::P4COptionPragmaParser optionsPragmaParser;
+        program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+
         P4::FrontEnd frontend;
         frontend.addDebugHook(hook);
         program = frontend.run(options, program);
@@ -65,18 +71,25 @@ int main(int argc, char *const argv[]) {
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
+        if (::errorCount() > 1 || toplevel == nullptr ||
+            toplevel->getMain() == nullptr)
+            return 1;
         if (options.dumpJsonFile)
             JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0 || toplevel == nullptr)
+    if (::errorCount() > 0)
         return 1;
 
-    BMV2::JsonConverter converter(options);
+    // backend depends on the modified refMap and typeMap from midEnd.
+    BMV2::Backend backend(options.isv1(), &midEnd.refMap,
+            &midEnd.typeMap, &midEnd.enumMap);
     try {
-        converter.convert(&midEnd.refMap, &midEnd.typeMap, toplevel, &midEnd.enumMap);
+        backend.addDebugHook(hook);
+        backend.process(toplevel, options);
+        backend.convert(options);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -87,19 +100,12 @@ int main(int argc, char *const argv[]) {
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.outputFile, false);
         if (out != nullptr) {
-            converter.serialize(*out);
+            backend.serialize(*out);
             out->flush();
         }
     }
 
-    // Generate a PI control plane API for this program if requested.
-    if (!options.p4RuntimeFile.isNullOrEmpty()) {
-        std::ostream* out = openFile(options.p4RuntimeFile, false);
-        if (out != nullptr) {
-            serializeP4Runtime(out, program, toplevel, &midEnd.refMap,
-                               &midEnd.typeMap, options.p4RuntimeFormat);
-        }
-    }
+    P4::serializeP4RuntimeIfRequired(program, options);
 
     return ::errorCount() > 0;
 }

@@ -5,16 +5,18 @@ extern X {
 }
 
 control t(inout bit<32> b) {
-    @name("c1.x") X() c1_x_0 = {
+    @name("t.c1.x") X() c1_x_0 = {
         void a(inout bit<32> arg) {
             bit<32> c1_tmp_1;
             c1_tmp_1 = this.b();
+            arg = arg + c1_tmp_1;
         }
     };
-    @name("c2.x") X() c2_x_0 = {
+    @name("t.c2.x") X() c2_x_0 = {
         void a(inout bit<32> arg) {
             bit<32> c2_tmp_1;
             c2_tmp_1 = this.b();
+            arg = arg + c2_tmp_1;
         }
     };
     @hidden action act() {
@@ -35,3 +37,4 @@ control t(inout bit<32> b) {
 control cs(inout bit<32> arg);
 package top(cs _ctrl);
 top(t()) main;
+

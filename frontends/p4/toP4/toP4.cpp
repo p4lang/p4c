@@ -17,7 +17,7 @@ limitations under the License.
 #include <sstream>
 #include <string>
 #include "toP4.h"
-#include "setup.h"
+#include "frontends/common/options.h"
 
 namespace P4 {
 
@@ -42,9 +42,7 @@ bool ToP4::isSystemFile(cstring file) {
 
 cstring ToP4::ifSystemFile(const IR::Node* node) {
     if (!node->srcInfo.isValid()) return nullptr;
-    unsigned line = node->srcInfo.getStart().getLineNumber();
-    auto sfl = Util::InputSources::instance->getSourceLine(line);
-    cstring sourceFile = sfl.fileName;
+    auto sourceFile = node->srcInfo.getSourceFile();
     if (isSystemFile(sourceFile))
         return sourceFile;
     return nullptr;
@@ -79,11 +77,16 @@ class DumpIR : public Inspector {
             node->Node::dbprint(str);
         }
     }
+
+    bool goDeeper(const IR::Node* node) const {
+        return node->is<IR::Expression>() || node->is<IR::Path>() || node->is<IR::Type>();
+    }
+
     bool preorder(const IR::Node* node) override {
         if (depth == 0)
             return false;
         display(node);
-        if (node->is<IR::Expression>() || node->is<IR::Path>())
+        if (goDeeper(node))
             // increase depth limit for expressions.
             depth++;
         else
@@ -92,7 +95,7 @@ class DumpIR : public Inspector {
         return true;
     }
     void postorder(const IR::Node* node) override {
-        if (node->is<IR::Expression>() || node->is<IR::Path>())
+        if (goDeeper(node))
             depth--;
         else
             depth++;
@@ -247,7 +250,7 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
 }
 
 bool ToP4::preorder(const IR::Type_Tuple* t) {
-    dump(1);
+    dump(3);
     builder.append("tuple<");
     bool first = true;
     for (auto a : t->components) {
@@ -258,6 +261,16 @@ bool ToP4::preorder(const IR::Type_Tuple* t) {
         CHECK_NULL(p4type);
         visit(p4type);
     }
+    builder.append(">");
+    return false;
+}
+
+bool ToP4::preorder(const IR::Type_ValueSet* t) {
+    dump(3);
+    builder.append("value_set<");
+    auto p4type = t->elementType->getP4Type();
+    CHECK_NULL(p4type);
+    visit(p4type);
     builder.append(">");
     return false;
 }
@@ -299,6 +312,7 @@ bool ToP4::preorder(const IR::TypeParameters* t) {
 
 bool ToP4::preorder(const IR::Method* m) {
     dump(1);
+    visit(m->annotations);
     const Context* ctx = getContext();
     bool standaloneFunction = !ctx || !ctx->node->is<IR::Type_Extern>();
     // standalone function declaration: not in a Vector of methods
@@ -339,11 +353,16 @@ bool ToP4::preorder(const IR::Function* function) {
 
 bool ToP4::preorder(const IR::Type_Extern* t) {
     dump(2);
+    visit(t->annotations);
     builder.append("extern ");
     builder.append(t->name);
     visit(t->typeParameters);
     builder.spc();
     builder.blockStart();
+
+    if (t->attributes.size() != 0)
+        ::warning("%1%: extern has attributes, which are not supported "
+                  "in P4-16, and thus are not emitted as P4-16", t);
 
     setVecSep(";\n", ";\n");
     bool decl = isDeclaration;
@@ -378,7 +397,7 @@ bool ToP4::preorder(const IR::Type_Package* package) {
 }
 
 bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
-    dump(1);
+    dump(2);
     builder.emitIndent();
     visit(t->annotations);
     builder.appendFormat("%s ", name);
@@ -400,7 +419,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
     }
 
     for (auto f : t->fields) {
-        dump(2, f, 1);
+        dump(4, f, 1);  // this will dump annotations
         if (f->annotations->size() > 0) {
             builder.emitIndent();
             visit(f->annotations);
@@ -523,7 +542,7 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
         builder.append(" = ");
         visit(i->initializer);
     }
-    builder.endOfStatement();
+    builder.endOfStatement(getParent<IR::P4Program>() != nullptr);
     return false;
 }
 
@@ -649,7 +668,11 @@ bool ToP4::preorder(const IR::Slice* slice) {
 }
 
 bool ToP4::preorder(const IR::DefaultExpression*) {
-    builder.append("default");
+    // Within a method call this is rendered as a don't care
+    if (withinArgument)
+        builder.append("_");
+    else
+        builder.append("default");
     return false;
 }
 
@@ -765,7 +788,9 @@ bool ToP4::preorder(const IR::MethodCallExpression* e) {
     builder.append("(");
     setVecSep(", ");
     expressionPrecedence = DBPrint::Prec_Low;
+    withinArgument = true;
     visit(e->arguments);
+    withinArgument = false;
     doneVec();
     builder.append(")");
     if (useParens)
@@ -1184,7 +1209,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
     builder.append("{");
     builder.newline();
     builder.increaseIndent();
-    preorder(&l->entries);
+    visit(&l->entries);
     builder.decreaseIndent();
     builder.emitIndent();
     builder.append("}");
@@ -1193,6 +1218,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
 }
 
 bool ToP4::preorder(const IR::Entry *e) {
+    dump(2);
     builder.emitIndent();
     if (e->keys->components.size() == 1)
         setListTerm("", "");

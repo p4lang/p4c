@@ -18,7 +18,7 @@ struct M {
     S s;
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
     }
 }
@@ -29,15 +29,8 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout std_meta_t std_
     }
 }
 
-control ctrl(inout M meta) {
-    apply {
-    }
-}
-
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @name("do_ctrl") ctrl() do_ctrl_0;
     apply {
-        do_ctrl_0.apply(meta);
     }
 }
 
@@ -57,3 +50,4 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+

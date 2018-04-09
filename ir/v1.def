@@ -164,7 +164,7 @@ class Apply : Expression {
         // HACK -- temp sort actions into program (source) order, so that condition names are
         // generated in the same order as p4-hlir
         typedef std::remove_reference<decltype(actions.at("any"))>::type action_t;
-        vector<action_t *> sort_actions;
+        safe_vector<action_t *> sort_actions;
         for (auto &p : Values(actions)) sort_actions.push_back(&p);
         std::sort(sort_actions.begin(), sort_actions.end(),
             [](action_t *a, action_t *b) {
@@ -226,7 +226,7 @@ class FieldListCalculation {
     optional ID          name;
     NullOK NameList      input = nullptr;
     NullOK FieldList     input_fields = nullptr;
-    ID                   algorithm = {};
+    NullOK NameList      algorithm = nullptr;
     int                  output_width = 0;
     optional Annotations annotations = Annotations::empty;
 }
@@ -241,26 +241,10 @@ class CalculatedField {
         //update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
         //: srcInfo(si), update(u), name(n), cond(c) {}
 
-        update_or_verify(bool u, ID n, const Expression *c)
-        : update(u), name(n), cond(c) {}
+        update_or_verify(bool u, ID n, const Expression *c) : update(u), name(n), cond(c) {}
         update_or_verify() {}
-        operator== { return update == a.update && name == a.name && cond == a.cond; }
-        toJSON {
-            json << json.indent << "\"update\" : " << update << "," << std::endl
-                 << json.indent << "\"name\" : " << name << "," << std::endl
-                 << json.indent << "\"cond\" : " << cond;
-        }
-        fromJSON {
-            bool update_temp = false;
-            ID name_temp;
-            const Expression *cond_temp = nullptr;
-            json.load("update", update_temp);
-            json.load("name", name_temp);
-            json.load("cond", cond_temp);
-            return new CalculatedField::update_or_verify(update_temp, name_temp, cond_temp);
-        }
     }
-    vector<update_or_verify>    specs = {};
+    safe_vector<update_or_verify> specs = {};
     Annotations                 annotations;
     visit_children {
         v.visit(field, "field");
@@ -268,9 +252,16 @@ class CalculatedField {
         v.visit(annotations, "annotations"); }
 }
 
+class ParserValueSet {
+    ID                          name;
+    optional Annotations        annotations = Annotations::empty;
+    dbprint { out << node_type_name() << " " << name; }
+    toString { return node_type_name() + " " + name; }
+}
+
 class CaseEntry {
-    vector<std::pair<Constant, Constant>>       values = {};
-    optional ID                                 action;
+    safe_vector<std::pair<Expression, Constant>>    values = {};
+    optional ID                                     action;
 }
 
 class V1Parser {
@@ -313,9 +304,10 @@ abstract Stateful : Attached {
 abstract CounterOrMeter : Stateful {
     CounterType   type = CounterType::NONE;
     void settype(cstring t) {
-        if (t == "packets") type = CounterType::PACKETS;
-        else if (t == "bytes") type = CounterType::BYTES;
-        else if (t == "packets_and_bytes") type = CounterType::BOTH;
+        if (strcasecmp(t.c_str(), "packets") == 0) type = CounterType::PACKETS;
+        else if (strcasecmp(t.c_str(), "bytes") == 0) type = CounterType::BYTES;
+        else if (strcasecmp(t.c_str(), "packets_and_bytes") == 0 ||
+                 strcasecmp(t.c_str(), "PacketAndBytes") == 0) type = CounterType::BOTH;
         else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
 }
 
@@ -346,8 +338,9 @@ class Register : Stateful {
 class PrimitiveAction {}
 
 class NameList {
-    vector<ID>  names = {};
+    safe_vector<ID>  names = {};
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
+    NameList(Util::SourceInfo si, ID n) { names.emplace_back(si, n); }
     dump_fields { out << "names=" << names; }
 }
 
@@ -365,7 +358,7 @@ class ActionArg : Expression {
 class ActionFunction {
     optional ID                 name;
     inline Vector<Primitive>    action = {};
-    vector<ActionArg>           args = {};
+    safe_vector<ActionArg>      args = {};
     optional Annotations        annotations = Annotations::empty;
 
     ActionArg arg(cstring n) const {
@@ -374,7 +367,7 @@ class ActionFunction {
                 return a;
         return nullptr; }
     visit_children {
-        action.visit_children(v);
+        v.visit(action, "action");
         // DANGER -- visiting action first so type inferencing will push types to
         // DANGER -- action args based on use.  This is immoral.
         for (auto &a : args) v.visit(a, "arg");
@@ -388,7 +381,7 @@ class ActionFunction {
 
 class ActionProfile : Attached {
     ID          selector = {};
-    vector<ID>  actions = {};
+    safe_vector<ID> actions = {};
     int         size = 0;
     const char *kind() const override { return "action_profile"; }
     bool indexed() const override { return true; }
@@ -402,15 +395,15 @@ class ActionSelector : Attached {
     const char *kind() const override { return "action_selector"; }
 }
 
-class V1Table {
+class V1Table : IInstance {
     optional ID                 name;
     NullOK Vector<Expression>   reads = 0;
-    vector<ID>                  reads_types = {};
+    safe_vector<ID>             reads_types = {};
     int                         min_size = 0;
     int                         max_size = 0;
     int                         size = 0;
     ID                          action_profile = {};
-    vector<ID>                  actions = {};
+    safe_vector<ID>             actions = {};
     ID                          default_action = {};
     NullOK Vector<Expression>   default_action_args = 0;
     inline TableProperties      properties = {};  // non-standard properties
@@ -418,6 +411,8 @@ class V1Table {
 
     void addProperty(Property prop) { properties.push_back(prop); }
     toString { return node_type_name() + " " + name; }
+    cstring Name() const override { return name; }
+    Type getType() const override { return Type_AnyTable::get(); }
 }
 
 class V1Control {
@@ -433,8 +428,8 @@ class V1Control {
 
 class AttribLocal : Expression, IDeclaration {
     ID  name;
-#nodbprint
     ID getName() const override { return name; }
+    dbprint { out << name; }
 }
 
 class AttribLocals : ISimpleNamespace {
@@ -449,7 +444,7 @@ class Attribute : Declaration {
     NullOK Type type = nullptr;
     NullOK AttribLocals locals = nullptr;
     bool optional = false;
-#nodbprint
+    dbprint { if (type) out << type << ' '; out << name; }
 }
 
 class GlobalRef : Expression {
@@ -469,10 +464,6 @@ class AttributeRef : Expression {
     toString { return attrib->name; }
     dbprint { out << attrib->name; }
 }
-
-#emit
-class CompilerOptions;
-#end
 
 class V1Program {
     inline NameMap<Node, std::multimap>         scope;

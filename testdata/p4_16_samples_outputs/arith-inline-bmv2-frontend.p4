@@ -7,21 +7,6 @@ header hdr {
     bit<64> c;
 }
 
-control compute(inout hdr h) {
-    @name("add") action add_0() {
-        h.c = (bit<64>)(h.a + h.b);
-    }
-    @name("t") table t_0 {
-        actions = {
-            add_0();
-        }
-        const default_action = add_0();
-    }
-    apply {
-        t_0.apply();
-    }
-}
-
 struct Headers {
     hdr h;
 }
@@ -36,7 +21,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m) {
+control vrfy(inout Headers h, inout Meta m) {
     apply {
     }
 }
@@ -58,11 +43,20 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("c") compute() c_0;
+    @name("ingress.c.add") action c_add() {
+        h.h.c = (bit<64>)(h.h.a + h.h.b);
+    }
+    @name("ingress.c.t") table c_t_0 {
+        actions = {
+            c_add();
+        }
+        const default_action = c_add();
+    }
     apply {
-        c_0.apply(h.h);
+        c_t_0.apply();
         sm.egress_spec = 9w0;
     }
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

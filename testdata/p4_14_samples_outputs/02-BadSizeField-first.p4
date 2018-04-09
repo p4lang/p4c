@@ -18,19 +18,19 @@ header vag_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name(".ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("vag") 
+    @name(".vag") 
     vag_t      vag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         packet.extract<vag_t>(hdr.vag);
         transition accept;
@@ -40,13 +40,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".nop") action nop() {
     }
-    @name("e_t1") table e_t1 {
+    @name(".e_t1") table e_t1 {
         actions = {
             nop();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         default_action = NoAction();
     }
@@ -61,14 +61,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("i_t1") table i_t1 {
+    @name(".i_t1") table i_t1 {
         actions = {
             nop();
             set_egress_port();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         default_action = NoAction();
     }
@@ -84,7 +84,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -95,3 +95,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

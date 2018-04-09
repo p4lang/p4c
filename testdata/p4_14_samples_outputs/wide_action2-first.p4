@@ -30,19 +30,19 @@ header data_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name(".ingress_metadata") 
     ingress_metadata_t   ingress_metadata;
-    @name("intrinsic_metadata") 
+    @name(".intrinsic_metadata") 
     intrinsic_metadata_t intrinsic_metadata;
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         meta.ingress_metadata.bd = hdr.data.f2;
         transition accept;
@@ -68,13 +68,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.intrinsic_metadata.exclusion_id1 = exclusion_id;
     }
-    @name("bd") table bd {
+    @name(".bd") table bd {
         actions = {
             set_bd_info();
-            @default_only NoAction();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
+            meta.ingress_metadata.bd: exact @name("ingress_metadata.bd") ;
         }
         size = 16384;
         default_action = NoAction();
@@ -95,7 +95,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -106,3 +106,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

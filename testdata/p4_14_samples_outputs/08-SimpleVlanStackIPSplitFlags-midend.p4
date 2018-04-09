@@ -35,16 +35,16 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t    ethernet;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t        ipv4;
-    @name("vlan_tag") 
+    @name(".vlan_tag") 
     vlan_tag_t[2] vlan_tag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_ethernet") state parse_ethernet {
+    @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
@@ -52,11 +52,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name("parse_vlan_tag") state parse_vlan_tag {
+    @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract<vlan_tag_t>(hdr.vlan_tag.next);
         transition select(hdr.vlan_tag.last.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
@@ -64,23 +64,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
     @name(".nop") action nop_0() {
     }
-    @name("t2") table t2 {
+    @name(".t2") table t2 {
         actions = {
             nop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         default_action = NoAction_0();
     }
@@ -90,17 +90,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_1() {
+    @name(".NoAction") action NoAction_1() {
     }
     @name(".nop") action nop_1() {
     }
-    @name("t1") table t1 {
+    @name(".t1") table t1 {
         actions = {
             nop_1();
-            @default_only NoAction_1();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         default_action = NoAction_1();
     }
@@ -112,12 +112,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vlan_tag_t[2]>(hdr.vlan_tag);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag[0]);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag[1]);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -128,3 +129,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

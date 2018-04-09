@@ -43,15 +43,15 @@ class TypeUnification final {
     bool unifyFunctions(const IR::Node* errorPosition,
                         const IR::Type_MethodBase* dest,
                         const IR::Type_MethodBase* src,
-                        bool reportErrors);
+                        bool reportErrors,
+                        bool skipReturnValues = false);
     bool unifyBlocks(const IR::Node* errorPosition,
                      const IR::Type_ArchBlock* dest,
                      const IR::Type_ArchBlock* src,
                      bool reportErrors);
 
  public:
-    explicit TypeUnification(TypeConstraints* constraints)
-            : constraints(constraints) {}
+    explicit TypeUnification(TypeConstraints* constraints) : constraints(constraints) {}
     /**
      * Return false if unification fails right away.
      * Generates a set of type constraints.

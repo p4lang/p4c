@@ -81,6 +81,11 @@ void increaseVerbosity();
 #define LOG8(X) LOGN(8, X)
 #define LOG9(X) LOGN(9, X)
 
+#define LOG_FEATURE(TAG, N, X) (::Log::fileLogLevelIsAtLeast(TAG, N)            \
+                      ? std::clog << ::Log::Detail::OutputLogPrefix(TAG, N)     \
+                                  << X << std::endl                             \
+                      : std::clog)
+
 #define ERROR(X) (std::clog << "ERROR: " << X << std::endl)
 #define WARNING(X) (::Log::verbose()                               \
                       ? std::clog << "WARNING: " << X << std::endl \

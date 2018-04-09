@@ -18,6 +18,8 @@ limitations under the License.
 #include "ebpfObject.h"
 #include "ebpfType.h"
 #include "frontends/p4/enumInstance.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace EBPF {
 
@@ -168,6 +170,24 @@ bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
 bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
     P4::MethodCallDescription mcd(expression, refMap, typeMap);
 
+    auto bim = mcd.instance->to<P4::BuiltInMethod>();
+    if (bim != nullptr) {
+        builder->emitIndent();
+        if (bim->name == IR::Type_Header::isValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid");
+            return false;
+        } else if (bim->name == IR::Type_Header::setValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = true");
+            return false;
+        } else if (bim->name == IR::Type_Header::setInvalid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = false");
+            return false;
+        }
+    }
+
     visit(expression->method);
     builder->append("(");
     bool first = true;
@@ -241,9 +261,17 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
 
 bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
     builder->blockStart();
-    setVecSep("\n", "\n");
-    s->components.visit_children(*this);
-    doneVec();
+    bool first = true;
+    for (auto a : s->components) {
+        if (!first) {
+            builder->newline();
+            builder->emitIndent();
+        }
+        first = false;
+        visit(a);
+    }
+    if (!s->components.empty())
+        builder->newline();
     builder->blockEnd(false);
     return false;
 }
@@ -317,22 +345,6 @@ void CodeGenInspector::widthCheck(const IR::Node* node) const {
         BUG("%1%: Computations on %2% bits not yet supported", node, tb->size);
     // We could argue that this may not be supported ever
     ::error("%1%: Computations on %2% bits not supported", node, tb->size);
-}
-
-bool CodeGenInspector::preorder(const IR::IndexedVector<IR::StatOrDecl> *v) {
-    if (v == nullptr) return false;
-    bool first = true;
-    VecPrint sep = getSep();
-    for (auto a : *v) {
-        if (!first) {
-            builder->append(sep.separator); }
-        if (sep.separator.endsWith("\n")) {
-            builder->emitIndent(); }
-        first = false;
-        visit(a); }
-    if (!v->empty() && !sep.terminator.isNullOrEmpty()) {
-        builder->append(sep.terminator); }
-    return false;
 }
 
 }  // namespace EBPF

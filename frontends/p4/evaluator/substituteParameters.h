@@ -20,7 +20,7 @@ limitations under the License.
 #define _EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/substitutionVisitor.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/parameterSubstitution.h"
 

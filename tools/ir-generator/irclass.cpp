@@ -45,7 +45,7 @@ IrNamespace *IrNamespace::get(IrNamespace *parent, cstring name) {
 void IrNamespace::add_class(IrClass *cl) {
     IrNamespace *ns = cl->containedIn ? cl->containedIn : &global;
     if (ns->classes[cl->name])
-        throw Util::CompilationError("%1%: Duplicate class name", cl);
+        throw Util::CompilationError("%1%: Duplicate class name", cl->name);
     else
         ns->classes[cl->name] = cl;
 }
@@ -81,7 +81,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#define " << macroname << "\n" << std::endl;
 
     impl << "#include \"ir/ir.h\"\n"
-         << "#include \"ir/visitor.h\"\n" << std::endl;
+         << "#include \"ir/visitor.h\"\n"
+         << "#include \"ir/json_loader.h\"\n" << std::endl;
 
     out << "#include <map>\n"
         << "#include <functional>\n" << std::endl
@@ -179,7 +180,7 @@ void IrMethod::generate_proto(std::ostream &out, bool fullname, bool defaults) c
         if (rtype->isResolved()) out << "const ";
         out << rtype->toString() << " ";
         if (rtype->isResolved()) out << "*"; }
-    if (fullname)
+    if (fullname && !isFriend)
         out << "IR::" << clss->containedIn << clss->name << "::";
     out << name << "(";
     const char *sep = "";
@@ -193,11 +194,12 @@ void IrMethod::generate_proto(std::ostream &out, bool fullname, bool defaults) c
 }
 
 void IrMethod::generate_hdr(std::ostream &out) const {
-    if (!inImpl)
+    if (srcInfo.isValid())
         out << LineDirective(srcInfo);
     out << IrClass::indent;
     if (isStatic) out << "static ";
     if (isVirtual) out << "virtual ";
+    if (isFriend) out << "friend ";
     generate_proto(out, false, isUser);
     if (isOverride) out << " override";
     if (inImpl || !body)
@@ -214,7 +216,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     } else if (name == "node_type_name") {
         out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype->toString()
             << " static_type_name() " << body << std::endl; }
-    if (!inImpl && srcInfo.isValid())
+    if (srcInfo.isValid())
         out << LineDirective();
 }
 
@@ -246,6 +248,12 @@ void IrApply::generate_impl(std::ostream &out) const {
 
 void IrClass::declare(std::ostream &out) const {
     out << "class " << name << ";" << std::endl;
+}
+
+std::string IrClass::fullName() const {
+    std::stringstream tmp;
+    tmp << "IR::" << containedIn << name;
+    return tmp.str();
 }
 
 static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope,
@@ -303,14 +311,8 @@ void IrClass::generate_hdr(std::ostream &out) const {
 }
 
 void IrClass::generate_impl(std::ostream &out) const {
-    if (kind != NodeKind::Nested) {
-        out << "namespace IR {" << std::endl;
-        enter_namespace(out, containedIn); }
     for (auto e : elements)
         e->generate_impl(out);
-    if (kind != NodeKind::Nested) {
-        exit_namespace(out, containedIn);
-        out << "}  // namespace IR" << std::endl; }
 }
 
 void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {

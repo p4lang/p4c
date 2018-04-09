@@ -51,7 +51,7 @@ parser parse_extra {
 
 action noop() { }
 action push1(x1) {
-    push(extra, 1);
+    push(extra);  // push with implicit size of 1
     extra[0].x1 = x1;
     extra[0].more = data.more;
     data.more = 1;

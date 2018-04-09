@@ -1,0 +1,5 @@
+# bit<16> A
+# In the output we need A = 1
+
+packet 0 ABAB
+expect 0 0001

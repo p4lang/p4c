@@ -22,13 +22,14 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
     auto ltype = typeMap->getType(statement->left, true);
     if (ltype->is<IR::Type_StructLike>()) {
         if (statement->right->is<IR::MethodCallExpression>()) {
-            ::error("%1%: functions or methods returning structures "
-                    "are not supported on this target",
-                    statement->right);
+            if (errorOnMethodCall)
+                ::error("%1%: functions or methods returning structures "
+                        "are not supported on this target",
+                        statement->right);
             return statement;
         }
 
-        auto retval = new IR::Vector<IR::StatOrDecl>();
+        auto retval = new IR::IndexedVector<IR::StatOrDecl>();
         auto strct = ltype->to<IR::Type_StructLike>();
         if (statement->right->is<IR::ListExpression>()) {
             auto list = statement->right->to<IR::ListExpression>();
@@ -55,21 +56,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
             }
         }
-        return retval;
-    } else if (ltype->is<IR::Type_Stack>()) {
-        auto retval = new IR::Vector<IR::StatOrDecl>();
-        auto stack = ltype->to<IR::Type_Stack>();
-        for (unsigned i = 0; i < stack->getSize(); i++) {
-            auto index = new IR::Constant(i);
-            BUG_CHECK(statement->right->is<IR::PathExpression>() ||
-                      statement->right->is<IR::Member>(),
-                      "%1%: Unexpected operation when eliminating struct copying",
-                      statement->right);
-            auto right = new IR::ArrayIndex(statement->right, index);
-            auto left = new IR::ArrayIndex(statement->left, index->clone());
-            retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
-        }
-        return retval;
+        return new IR::BlockStatement(statement->srcInfo, *retval);
     }
 
     return statement;

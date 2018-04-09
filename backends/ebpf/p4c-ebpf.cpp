@@ -28,6 +28,7 @@ limitations under the License.
 #include "midend.h"
 #include "ebpfOptions.h"
 #include "ebpfBackend.h"
+#include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 
@@ -41,6 +42,10 @@ void compile(EbpfOptions& options) {
     auto program = P4::parseP4File(options);
     if (::errorCount() > 0)
         return;
+
+    P4::P4COptionPragmaParser optionsPragmaParser;
+    program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+
     P4::FrontEnd frontend;
     frontend.addDebugHook(hook);
     program = frontend.run(options, program);
@@ -62,7 +67,8 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    EbpfOptions options;
+    AutoCompileContext autoEbpfContext(new EbpfContext);
+    auto& options = EbpfContext::get().options();
     options.compilerVersion = "0.0.1";
 
     if (options.process(argc, argv) != nullptr)

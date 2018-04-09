@@ -2,9 +2,9 @@
 #include <v1model.p4>
 
 parser p() {
-    bit<32> x_0;
+    bit<32> x;
     state start {
-        transition select(x_0) {
+        transition select(x) {
             32w0: reject;
         }
     }
@@ -13,3 +13,4 @@ parser p() {
 parser e();
 package top(e e);
 top(p()) main;
+

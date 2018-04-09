@@ -22,28 +22,55 @@ p4c - P4 Compiler Driver
 from __future__ import absolute_import
 import argparse
 import glob
-import itertools
 import os
-import subprocess
-import shlex
 import sys
 import re
 
-import p4c_src.util as util
 import p4c_src.config as config
 import p4c_src
 
-commands = {}
+# \TODO: let the backends set their versions ...
+p4c_version = p4c_src.__version__
+
+def set_version(ver):
+    global p4c_version
+    p4c_version = ver
+
+def get_version():
+    return p4c_version
+
+
+def display_supported_targets(cfg):
+    ret = "Supported targets in \"target, arch\" tuple:\n"
+    for target in cfg.target:
+        ret += str(target) + "\n"
+    return ret
+
+def add_developer_options(parser):
+    parser.add_argument("-T", dest="log_levels",
+                        action="append", default=[],
+                        help="[Compiler debugging] Adjust logging level per file (see below)")
+    parser.add_argument("--top4", dest="passes",
+                        action="append", default=[],
+                        help="[Compiler debugging] Dump the P4 representation after \
+                               passes whose name contains one of `passX' substrings. \
+                               When '-v' is used this will include the compiler IR.")
+    parser.add_argument("--dump", dest="dump_dir", default=None,
+                        help="[Compiler debugging] Folder where P4 programs are dumped.")
+    parser.add_argument("--toJson", dest="json", default=None,
+                        help="Dump IR to JSON in the specified file.")
+    parser.add_argument("--pp", dest="pretty_print", default=None,
+                        help="Pretty-print the program in the specified file.")
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(conflict_handler='resolve')
     parser.add_argument("-V", "--version", dest="show_version",
                         help="show version and exit",
                         action="store_true", default=False)
-    parser.add_argument("-v", dest="debug",
+    parser.add_argument("-v", "--debug", dest="debug",
                         help="verbose",
                         action="store_true", default=False)
-    parser.add_argument("-###", dest="dry_run",
+    parser.add_argument("-###", "--test-only", dest="dry_run",
                         help="print (but do not run) the commands",
                         action="store_true", default=False)
     parser.add_argument("-Xpreprocessor", dest="preprocessor_options",
@@ -62,164 +89,111 @@ def main():
                         metavar="<arg>",
                         help="Pass <arg> to the linker",
                         action="append", default=[])
-    parser.add_argument("-b", dest="backend",
-                        help="specify target backend",
-                        action="store", default="bmv2-*-p4org")
+    parser.add_argument("-b", "--target", dest="target",
+                        help="specify target device",
+                        action="store", default="bmv2")
+    parser.add_argument("-a", "--arch", dest="arch",
+                        help="specify target architecture",
+                        action="store", default="v1model")
+    parser.add_argument("-c", dest="run_all",
+                        help="Only run preprocess, compile, and assemble steps",
+                        action="store_true", default=True)
+    parser.add_argument("-D", dest="preprocessor_defines",
+                        help="define a macro to be used by the preprocessor",
+                        action="append", default=[])
     parser.add_argument("-E", dest="run_preprocessor_only",
                         help="Only run the preprocessor",
                         action="store_true", default=False)
     parser.add_argument("-e", dest="skip_preprocessor",
                         help="Skip the preprocessor",
                         action="store_true", default=False)
-    parser.add_argument("-S", dest="run_till_assembler",
-                        help="Only run the preprocess and compilation steps",
+    parser.add_argument("-g", dest="debug_info",
+                        help="Generate debug information",
                         action="store_true", default=False)
-    parser.add_argument("-c", dest="run_all",
-                        help="Only run preprocess, compile, and assemble steps",
-                        action="store_true", default=True)
-    parser.add_argument("-x", dest="language",
-                        choices = ["p4-14", "p4-16"],
-                        help="Treat subsequent input files as having type language.",
-                        action="store", default="p4-16")
     parser.add_argument("-I", dest="search_path",
                         help="Add directory to include search path",
                         action="append", default=[])
     parser.add_argument("-o", dest="output_directory",
                         help="Write output to the provided path",
                         action="store", metavar="PATH", default=".")
+    parser.add_argument("--p4runtime-file",
+                        help="Write a P4Runtime control plane API description "
+                        "to the specified file.",
+                        action="store", default=None)
+    parser.add_argument("--p4runtime-format",
+                        choices=["binary", "json", "text"],
+                        help="Choose output format for the P4Runtime API "
+                        "description (default is binary).",
+                        action="store", default="binary")
     parser.add_argument("--target-help", dest="show_target_help",
                         help="Display target specific command line options.",
                         action="store_true", default=False)
+    parser.add_argument("-S", dest="run_till_assembler",
+                        help="Only run the preprocess and compilation steps",
+                        action="store_true", default=False)
+    parser.add_argument("--std", "-x", dest="language",
+                        choices = ["p4-14", "p4-16"],
+                        help="Treat subsequent input files as having type language.",
+                        action="store", default="p4-16")
+
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        add_developer_options(parser)
 
     parser.add_argument("source_file", nargs='?', help="Files to compile", default=None)
 
-    # many more options
-    opts = parser.parse_args()
-    source = opts.source_file
-
-    if opts.show_version:
-        print("p4c %s" % (p4c_src.__version__))
-        sys.exit(0)
-
-    # target-arch-vendor, e.g.
-    # bmv2-*-p4org
-    # bmv2-ssa-p4org
-    # ebpf-psa-p4org
-    triplet = opts.backend.split('-')
-    if (len(triplet) != 3):
-        print "Invalid target-arch-vendor triplet."
-        sys.exit(1)
-
-    if not source:
-        parser.error('No input specified.')
-
-    # load supported configuration
+    # load supported configuration.
+    # We load these before we parse options, so that backends can register
+    # proprietary options
     cfg_files = glob.glob("{}/*.cfg".format(os.environ['P4C_CFG_PATH']))
     cfg = config.Config(config_prefix = "p4c")
     for cf in cfg_files:
-        if opts.debug:
-            print 'loading config {}'.format(cf)
-        cfg.load_from_config(cf, opts.output_directory, opts.source_file)
+        cfg.load_from_config(cf, parser)
 
-    if opts.show_target_help:
-        print "Supported backends in \"target-arch-vendor\" triplet:"
-        for target in cfg.target:
-            print target
+    # parse the arguments
+    opts = parser.parse_args()
+
+    user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
+    if user_defined_version != None:
+        opts.language = user_defined_version
+
+    user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
+    if user_defined_target != None:
+        opts.target = user_defined_target
+
+    user_defined_arch = os.environ.get('P4C_DEFAULT_ARCH')
+    if user_defined_arch != None:
+        opts.arch = user_defined_arch
+
+    # deal with early exits
+    if opts.show_version:
+        print "p4c", get_version()
         sys.exit(0)
 
+    if opts.show_target_help:
+        print display_supported_targets(cfg)
+        sys.exit(0)
+
+    if not opts.source_file:
+        parser.error('No input specified.')
+
+    # check that the tuple value is correct
+    backend = (opts.target, opts.arch)
+    if (len(backend) != 2):
+        parser.error("Invalid target and arch tuple: {}\n{}".\
+                     format(backend, display_supported_targets(cfg)))
+
+    # find the backend
     backend = None
-    for triplet, _ in cfg.steps.iteritems():
-        regex = triplet.replace('*', '[a-zA-Z0-9*]*')
+    for target in cfg.target:
+        regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
         pattern = re.compile(regex)
-        if (pattern.match(opts.backend)):
-            backend = triplet
+        if (pattern.match(opts.target + '-' + opts.arch)):
+            backend = target
             break
     if backend == None:
-        print "Unknown backend:", opts.backend
-        sys.exit(1)
+        parser.error("Unknown backend: {}-{}".format(str(opts.target), str(opts.arch)))
 
-    commands['preprocessor'] = []
-    commands['compiler'] = []
-    commands['assembler'] = []
-    commands['linker'] = []
-
-    for option in opts.preprocessor_options:
-        commands["preprocessor"] += shlex.split(option)
-
-    for option in opts.compiler_options:
-        commands["compiler"] += shlex.split(option)
-
-    for option in opts.assembler_options:
-        commands["assembler"] += shlex.split(option)
-
-    for option in opts.linker_options:
-        commands["linker"] += shlex.split(option)
-
-    # set output directory
-    if not os.path.exists(opts.output_directory):
-        os.makedirs(opts.output_directory)
-
-    commands['preprocessor'].insert(0, cfg.get_preprocessor(backend))
-    commands['compiler'].insert(0, cfg.get_compiler(backend))
-    commands['assembler'].insert(0, cfg.get_assembler(backend))
-    commands['linker'].insert(0, cfg.get_linker(backend))
-
-    # handle mode flags
-    step_enable = [False, False, False, False]
-    if opts.run_preprocessor_only:
-        step_enable = [True, False, False, False]
-    elif opts.skip_preprocessor:
-        step_enable = [False, True, True, True]
-    elif opts.run_till_assembler:
-        step_enable = [True, True, False, False]
-    elif opts.run_all:
-        step_enable = [True, True, True, True]
-
-    # default search path
-    if opts.language == 'p4-16':
-        commands['preprocessor'].append("-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
-        commands['compiler'].append("-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
-    else:
-        commands['preprocessor'].append("-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
-        commands['compiler'].append("-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
-
-    # append search path
-    for path in opts.search_path:
-        commands['preprocessor'].append("-I")
-        commands['preprocessor'].append(path)
-        commands['compiler'].append("-I")
-        commands['compiler'].append(path)
-
-    # set p4 version
-    if opts.language == 'p4-16':
-        commands['compiler'].append("--p4v=16")
-    else:
-        commands['compiler'].append("--p4v=14")
-
-    for idx, step in enumerate(cfg.steps[backend]):
-        cmd = []
-        for c in commands[step]:
-            cmd = cmd + shlex.split(c)
-        options = cfg.options[backend][step]
-        for option in options:
-            cmd = cmd + shlex.split(option)
-        # check if cmd in PATH
-        if (util.find_bin(cmd[0]) == None):
-            print "{}: command not found".format(cmd[0])
-            sys.exit(1)
-        # only dry-run
-        if opts.dry_run:
-            print "{}: {}".format(step, " ".join(cmd))
-            continue
-        # skip if not required
-        if not step_enable[idx]:
-            continue
-        # run command
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if opts.debug:
-            print 'running {}'.format(' '.join(cmd))
-        out, err = p.communicate() # now wait
-        if p.returncode != 0:
-            print "{}\n{}".format(out, err)
-            sys.exit(p.returncode)
-        print out
+    # set all configuration and command line options for backend
+    backend.process_command_line_options(opts)
+    # run all commands
+    backend.run()

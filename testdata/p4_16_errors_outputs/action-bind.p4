@@ -17,3 +17,4 @@ control c(inout bit<32> x) {
 control proto(inout bit<32> x);
 package top(proto p);
 top(c()) main;
+

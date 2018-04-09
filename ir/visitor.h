@@ -18,7 +18,7 @@ limitations under the License.
 #define _IR_VISITOR_H_
 
 #include <stdexcept>
-#include "std.h"
+#include <unordered_map>
 #include "lib/cstring.h"
 #include "ir/ir.h"
 #include "lib/exceptions.h"
@@ -53,7 +53,7 @@ class Visitor {
     };
     virtual ~Visitor() = default;
 
-    const char* internalName = nullptr;
+    mutable cstring internalName;
 
     // init_apply is called (once) when apply is called on an IR tree
     // it expects to allocate a profile record which will be destroyed
@@ -92,16 +92,53 @@ class Visitor {
     void visit(IR::CLASS *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
+    void visit(IR::Node &n, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        n.visit_children(*this); }
+    void visit(const IR::Node &n, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        n.visit_children(*this); }
+    void visit(IR::Node &n, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        n.visit_children(*this); }
+    void visit(const IR::Node &n, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        n.visit_children(*this); }
+    template<class T> void parallel_visit(IR::Vector<T> &v, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        v.parallel_visit_children(*this); }
+    template<class T> void parallel_visit(const IR::Vector<T> &v, const char *name = 0) {
+        if (name && ctxt) ctxt->child_name = name;
+        v.parallel_visit_children(*this); }
+    template<class T> void parallel_visit(IR::Vector<T> &v, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        v.parallel_visit_children(*this); }
+    template<class T> void parallel_visit(const IR::Vector<T> &v, const char *name, int cidx) {
+        if (ctxt) {
+            ctxt->child_name = name;
+            ctxt->child_index = cidx; }
+        v.parallel_visit_children(*this); }
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
     virtual void flow_dead() { }
+
+    /** Merge the given visitor into this visitor at a joint point in the
+     * control flow graph.  Should update @this and leave the other unchanged.
+     */
     virtual void flow_merge(Visitor &) { }
 
+    static cstring demangle(const char *);
     virtual const char *name() const {
-        if (internalName != nullptr)
-            return internalName;
-        return typeid(*this).name();
+        if (!internalName)
+            internalName = demangle(typeid(*this).name());
+        return internalName.c_str();
     }
     void setName(const char* name) { internalName = name; }
     void print_context() const;  // for debugging; can be called from debugger
@@ -119,6 +156,7 @@ class Visitor {
                   ctxt->original, typeid(T).name());
         return ctxt->original->to<T>();
     }
+    const Context *getChildContext() const { return ctxt; }
     const Context *getContext() const { return ctxt->parent; }
     template <class T>
     const T* getParent() const {
@@ -161,15 +199,43 @@ class Visitor {
     // flow_merge the visitor from all the parents before visiting the node and its
     // children.  This only works for Inspector (not Modifier/Transform) currently.
     bool joinFlows = false;
+
     virtual void init_join_flows(const IR::Node *) { assert(0); }
+
+    /** If @n is a join point in the control flow graph (i.e. has multiple incoming
+     * edges) and is not filtered out by `filter_join_point`, then:
+     *
+     *   - if this is the first time a visitor has visited @n, store a clone of the
+     *   visitor with this node and return true, deferring visiting this node until
+     *   all incoming edges have been visited.
+     *
+     *   - if this is NOT the first visitor, but also not the last, then merge this
+     *   visitor into the stored visitor clone, and return true.
+     *
+     *   - finally, if this is the is the final visitor, merge the stored, cloned
+     *   visitor---which has accumulated all previous visitors---with this one, and
+     *   return false.
+     *
+     * `join_flows(n)` is invoked in `apply_visitor(n, name)`, and @n is only
+     * visited if this method returns false.
+     *
+     * @return false if all upstream nodes from @n have been visited, and it's time
+     * to visit @n.
+     */
     virtual bool join_flows(const IR::Node *) { return false; }
+
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     virtual bool check_clone(const Visitor *) { return true; }
+    // This overrides visitDagOnce for a single node -- can only be called from
+    // preorder and postorder functions
+    void visitOnce() const { *visitCurrentOnce = true; }
+    void visitAgain() const { *visitCurrentOnce = false; }
 
  private:
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
+    bool *visitCurrentOnce = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;
@@ -196,7 +262,8 @@ class Modifier : public virtual Visitor {
 };
 
 class Inspector : public virtual Visitor {
-    typedef unordered_map<const IR::Node *, bool>       visited_t;
+    struct info_t { bool done, visitOnce; };
+    typedef std::unordered_map<const IR::Node *, info_t>       visited_t;
     visited_t   *visited = nullptr;
     bool check_clone(const Visitor *) override;
  public:
@@ -244,11 +311,17 @@ class Transform : public virtual Visitor {
 };
 
 class ControlFlowVisitor : public virtual Visitor {
-    map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
+    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
  protected:
     virtual ControlFlowVisitor *clone() const = 0;
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
+
+    /** This will be called for all nodes with multiple incoming edges, and
+     * should return 'false' if the node should be considered a join point, and
+     * 'true' if if should not be considered one. Nodes with only one incoming
+     * edge are never join points.
+     */
     virtual bool filter_join_point(const IR::Node *) { return false; }
     ControlFlowVisitor &flow_clone() override;
 };
@@ -276,5 +349,54 @@ class P4WriteContext : public virtual Visitor {
     // note that the context might (conservatively) return true for BOTH isWrite and isRead,
     // as it might be an 'inout' access or it might be unable to decide.
 };
+
+
+/**
+ * Invoke an inspector @function for every node of type @NodeType in the subtree
+ * rooted at @root. The behavior is the same as a postorder Inspector.
+ */
+template <typename NodeType, typename Func>
+void forAllMatching(const IR::Node* root, Func&& function) {
+    struct NodeVisitor : public Inspector {
+        explicit NodeVisitor(Func&& function) : function(function) { }
+        Func function;
+        void postorder(const NodeType* node) override { function(node); }
+    };
+    root->apply(NodeVisitor(std::forward<Func>(function)));
+}
+
+/**
+ * Invoke a modifier @function for every node of type @NodeType in the subtree
+ * rooted at @root. The behavior is the same as a postorder Modifier.
+ *
+ * @return the root of the new, modified version of the subtree.
+ */
+template <typename NodeType, typename RootType, typename Func>
+const RootType* modifyAllMatching(const RootType* root, Func&& function) {
+    struct NodeVisitor : public Modifier {
+        explicit NodeVisitor(Func&& function) : function(function) { }
+        Func function;
+        void postorder(NodeType* node) override { function(node); }
+    };
+    return root->apply(NodeVisitor(std::forward<Func>(function)));
+}
+
+/**
+ * Invoke a transform @function for every node of type @NodeType in the subtree
+ * rooted at @root. The behavior is the same as a postorder Transform.
+ *
+ * @return the root of the new, transformed version of the subtree.
+ */
+template <typename NodeType, typename Func>
+const IR::Node* transformAllMatching(const IR::Node* root, Func&& function) {
+    struct NodeVisitor : public Transform {
+        explicit NodeVisitor(Func&& function) : function(function) { }
+        Func function;
+        const IR::Node* postorder(NodeType* node) override {
+            return function(node);
+        }
+    };
+    return root->apply(NodeVisitor(std::forward<Func>(function)));
+}
 
 #endif /* _IR_VISITOR_H_ */

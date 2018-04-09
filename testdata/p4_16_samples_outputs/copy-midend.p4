@@ -3,13 +3,8 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    S s1;
-    S s2;
-    @name("a") action a_0() {
-        s2.x = 32w0;
-        s1.x = s2.x;
-        s2.x = s1.x;
-        b = s2.x;
+    @name("c.a") action a_0() {
+        b = 32w0;
     }
     @hidden table tbl_a {
         actions = {
@@ -25,3 +20,4 @@ control c(inout bit<32> b) {
 control proto(inout bit<32> _b);
 package top(proto _p);
 top(c()) main;
+

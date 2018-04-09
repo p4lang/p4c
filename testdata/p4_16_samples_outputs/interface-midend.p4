@@ -9,9 +9,9 @@ extern Crc16<T> {
 }
 
 control p() {
-    @name("crc0") Crc16<bit<32>>() crc0;
-    @name("crc1") Crc16<int<32>>(32s0) crc1;
-    @name("crc2") Crc16<int<32>>() crc2;
+    @name("p.crc0") Crc16<bit<32>>() crc0;
+    @name("p.crc1") Crc16<int<32>>(32s0) crc1;
+    @name("p.crc2") Crc16<int<32>>() crc2;
     apply {
     }
 }
@@ -19,3 +19,4 @@ control p() {
 control empty();
 package m(empty e);
 m(p()) main;
+

@@ -7,10 +7,10 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
     bool convert = policy->convert(type);
     if (!convert)
         return type;
-    unsigned count = type->members.size();
-    unsigned width = policy->enumSize(count);
+    unsigned long long count = type->members.size();
+    unsigned long long width = policy->enumSize(count);
     LOG1("Converting enum " << type->name << " to " << "bit<" << width << ">");
-    BUG_CHECK(count >= (1U << width),
+    BUG_CHECK(count <= (1ULL << width),
               "%1%: not enough bits to represent %2%", width, type);
     auto r = new EnumRepresentation(type->srcInfo, width);
     auto canontype = typeMap->getTypeType(getOriginal(), true);

@@ -26,6 +26,10 @@ limitations under the License.
 
 using namespace P4;
 
+namespace Test {
+
+namespace {
+
 class EnumOn32Bits : public ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum*) const override {
         return true;
@@ -35,8 +39,12 @@ class EnumOn32Bits : public ChooseEnumRepresentation {
     }
 };
 
+}  // namespace
+
+class P4CMidend : public P4CTest { };
+
 // test various way of using enum
-TEST(midend, convertEnums_pass) {
+TEST_F(P4CMidend, convertEnums_pass) {
     std::string program = P4_SOURCE(R"(
         enum E { A, B, C, D };
         const bool a = E.A == E.B;
@@ -58,7 +66,7 @@ TEST(midend, convertEnums_pass) {
     ASSERT_TRUE(pgm != nullptr);
 }
 
-TEST(midend, convertEnums_used_before_declare) {
+TEST_F(P4CMidend, convertEnums_used_before_declare) {
     std::string program = P4_SOURCE(R"(
         const bool a = E.A == E.B;
         enum E { A, B, C, D };
@@ -78,7 +86,7 @@ TEST(midend, convertEnums_used_before_declare) {
 }
 
 // use enumMap in convertEnums directly
-TEST(midend, getEnumMapping) {
+TEST_F(P4CMidend, getEnumMapping) {
     std::string program = P4_SOURCE(R"(
         enum E { A, B, C, D };
         const bool a = E.A == E.B;
@@ -99,3 +107,5 @@ TEST(midend, getEnumMapping) {
     enumMap = convertEnums->getEnumMapping();
     ASSERT_EQ(enumMap.size(), (unsigned long)1);
 }
+
+}  // namespace Test

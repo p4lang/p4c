@@ -24,12 +24,14 @@ limitations under the License.
 
 namespace BMV2 {
 
-// This CFG is only good for BMV2, which only cares about some Nodes in the program
+/// This CFG models the BMV2 notion of control-flow graph.
+/// In BMv2 there are only 2 types of nodes: If and Table.
 class CFG final : public IHasDbPrint {
  public:
     class Edge;
+    class Node;
 
-    class EdgeSet final {
+    class EdgeSet final : public IHasDbPrint {
      public:
         ordered_set<CFG::Edge*> edges;
 
@@ -42,9 +44,18 @@ class CFG final : public IHasDbPrint {
         void dbprint(std::ostream& out) const;
         void emplace(CFG::Edge* edge) { edges.emplace(edge); }
         size_t size() const { return edges.size(); }
+        /// Checks whether the two edge sets represent the same set of
+        /// nodes.  Importantly, two TableNodes are equivalent if they
+        /// refer to the same table (pointer equality is not enough).
+        bool checkSame(const EdgeSet& other) const;
+        /// Check if this destination appears in this edgeset.
+        /// Importantly, a TableNode is a destination if it points to
+        /// the same table as an existin destination (pointer equality
+        /// is not enough).
+        bool isDestination(const CFG::Node* destination) const;
     };
 
-    class Node {
+    class Node : public IHasDbPrint {
      protected:
         friend class CFG;
 
@@ -60,8 +71,7 @@ class CFG final : public IHasDbPrint {
         EdgeSet        successors;
 
         void dbprint(std::ostream& out) const;
-        void addPredecessors(const EdgeSet* set) { if (set != nullptr)
-                predecessors.mergeWith(set); }
+        void addPredecessors(const EdgeSet* set);
         template<typename T> bool is() const { return to<T>() != nullptr; }
         template<typename T> T* to() { return dynamic_cast<T*>(this); }
         template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
@@ -75,7 +85,7 @@ class CFG final : public IHasDbPrint {
         const IR::P4Table* table;
         const IR::Expression*      invocation;
         explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation)
-        : Node(table->externalName()), table(table), invocation(invocation)
+        : Node(table->controlPlaneName()), table(table), invocation(invocation)
         { CHECK_NULL(table); CHECK_NULL(invocation); }
     };
 
@@ -100,12 +110,18 @@ class CFG final : public IHasDbPrint {
     };
 
  public:
+    /**
+     * A CFG Edge; can be an in-edge or out-edge.
+     */
     class Edge final {
      protected:
         EdgeType type;
         Edge(Node* node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
      public:
+        /**
+         * The destination node of the edge.  The source node is not known by the edge
+         */
         Node*    endpoint;
         cstring  label;  // only present if type == Label
 
@@ -161,32 +177,51 @@ class CFG final : public IHasDbPrint {
     void dbprint(std::ostream& out) const;
     void computeSuccessors()
     { for (auto n : allNodes) n->computeSuccessors(); }
-    // Graphs that require cycles are not implementable on BMv2.
-    // These can arise if a table is invoked multiple times.
-    bool checkForCycles() const;
+    /// BMv2 is very restricted in the kinds of graphs it supports.
+    /// Thie method checks whether a CFG is implementable.
+    bool checkImplementable() const;
 
  private:
     bool dfs(Node* node, std::set<Node*> &visited,
              std::set<const IR::P4Table*> &stack) const;
+    /// This is a set of table nodes that all represent the same
+    /// table.  Check whether they could logically be merged into
+    /// a single table node from a control-flow point of view.
+    /// This requires their successor edgesets to be "compatible" with
+    /// each other.  This is a constraint specific to BMv2.
+    bool checkMergeable(std::set<TableNode*> nodes) const;
 };
 
-// Represents global information about a P4 v1.2 program
+// Represents global information about a P4-16 program.
 class ProgramParts {
  public:
-    // map action to parent
-    std::map<const IR::P4Action*, const IR::P4Control*> actions;
-    // Maps each Parameter of an action to its positional index.
-    // Needed to generate code for actions.
-    std::map<const IR::Parameter*, unsigned> index;
-    // Parameters of controls/parsers
-    std::set<const IR::Parameter*> nonActionParameters;
-    // for each action its json id
-    std::map<const IR::P4Action*, unsigned> ids;
-    // All local variables
+    /// Map action to parent control.
+    ordered_map<const IR::P4Action*, const IR::P4Control*> actions;
+    /// Maps each Parameter of an action to its positional index.
+    /// Needed to generate code for actions.
+    ordered_map<const IR::Parameter*, unsigned> index;
+    /// Parameters of controls/parsers
+    ordered_set<const IR::Parameter*> nonActionParameters;
+    /// For each action its json id.
+    ordered_map<const IR::P4Action*, unsigned> ids;
+    /// All local variables.
     std::vector<const IR::Declaration_Variable*> variables;
+    /// All the parsers.
+    std::vector<const IR::P4Parser *> parsers;
 
     ProgramParts() {}
     void analyze(const IR::ToplevelBlock* toplevel);
+};
+
+class DiscoverStructure : public Inspector {
+    ProgramParts*           structure;
+ public:
+    explicit DiscoverStructure(ProgramParts* structure) : structure(structure)
+    { setName("DiscoverStructure"); }
+    void postorder(const IR::ParameterList* paramList) override;
+    void postorder(const IR::P4Action* action) override;
+    void postorder(const IR::Declaration_Variable* decl) override;
+    void postorder(const IR::P4Parser *p) override { structure->parsers.push_back(p); }
 };
 
 }  // namespace BMV2

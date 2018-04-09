@@ -94,53 +94,46 @@ control TopDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
-    bit<16> tmp;
-    bool tmp_0;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        tmp = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tmp_0 = hdr.ipv4.hdrChecksum == tmp;
-        if (tmp_0) 
-            mark_to_drop();
+        verify_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_1;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
     apply {
-        tmp_1 = ipv4_checksum_1.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        hdr.ipv4.hdrChecksum = tmp_1;
+        update_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_drop") action _drop_0() {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name("egress._drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("drop_tbl") table drop_tbl_0 {
+    @name("egress.drop_tbl") table drop_tbl {
         key = {
             meta.local_metadata.set_drop: exact @name("meta.ingress_metadata.set_drop") ;
         }
         actions = {
             _drop_0();
-            NoAction();
+            NoAction_0();
         }
         size = 2;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
-        drop_tbl_0.apply();
+        drop_tbl.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("registerRound") register<bit<16>>(32w65536) registerRound_0;
-    @name("read_round") action read_round_0() {
-        registerRound_0.read(meta.local_metadata.round, hdr.myhdr.inst);
+    @name("ingress.registerRound") register<bit<16>>(32w65536) registerRound;
+    @name("ingress.read_round") action read_round_0() {
+        registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
-    @name("round_tbl") table round_tbl_0 {
+    @name("ingress.round_tbl") table round_tbl {
         key = {
         }
         actions = {
@@ -152,8 +145,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (hdr.ipv4.isValid()) 
             if (hdr.myhdr.isValid()) 
-                round_tbl_0.apply();
+                round_tbl.apply();
     }
 }
 
 V1Switch<headers, metadata>(TopParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), TopDeparser()) main;
+

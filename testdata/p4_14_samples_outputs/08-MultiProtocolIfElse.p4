@@ -72,33 +72,33 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name("ing_metadata") 
+    @name(".ing_metadata") 
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("icmp") 
+    @name(".icmp") 
     icmp_t     icmp;
-    @name("ipv4") 
+    @name(".ipv4") 
     ipv4_t     ipv4;
-    @name("ipv6") 
+    @name(".ipv6") 
     ipv6_t     ipv6;
-    @name("tcp") 
+    @name(".tcp") 
     tcp_t      tcp;
-    @name("udp") 
+    @name(".udp") 
     udp_t      udp;
-    @name("vlan_tag") 
+    @name(".vlan_tag") 
     vlan_tag_t vlan_tag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("parse_icmp") state parse_icmp {
+    @name(".parse_icmp") state parse_icmp {
         packet.extract(hdr.icmp);
         transition accept;
     }
-    @name("parse_ipv4") state parse_ipv4 {
+    @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
             (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x1 &&& 8w0xff): parse_icmp;
@@ -107,7 +107,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_ipv6") state parse_ipv6 {
+    @name(".parse_ipv6") state parse_ipv6 {
         packet.extract(hdr.ipv6);
         transition select(hdr.ipv6.nextHdr) {
             8w0x1: parse_icmp;
@@ -116,15 +116,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("parse_tcp") state parse_tcp {
+    @name(".parse_tcp") state parse_tcp {
         packet.extract(hdr.tcp);
         transition accept;
     }
-    @name("parse_udp") state parse_udp {
+    @name(".parse_udp") state parse_udp {
         packet.extract(hdr.udp);
         transition accept;
     }
-    @name("parse_vlan_tag") state parse_vlan_tag {
+    @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract(hdr.vlan_tag);
         transition select(hdr.vlan_tag.etherType) {
             16w0x800: parse_ipv4;
@@ -132,7 +132,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan_tag;
@@ -153,40 +153,34 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta.ing_metadata.egress_port = (bit<8>)egress_port;
+        meta.ing_metadata.egress_port = egress_port;
     }
-    @name("ipv4_match") table ipv4_match {
+    @name(".ipv4_match") table ipv4_match {
         actions = {
             nop;
             set_egress_port;
-            @default_only NoAction;
         }
         key = {
             hdr.ipv4.srcAddr: exact;
         }
-        default_action = NoAction();
     }
-    @name("ipv6_match") table ipv6_match {
+    @name(".ipv6_match") table ipv6_match {
         actions = {
             nop;
             set_egress_port;
-            @default_only NoAction;
         }
         key = {
             hdr.ipv6.srcAddr: exact;
         }
-        default_action = NoAction();
     }
-    @name("l2_match") table l2_match {
+    @name(".l2_match") table l2_match {
         actions = {
             nop;
             set_egress_port;
-            @default_only NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction();
     }
     apply {
         if (hdr.ethernet.etherType == 16w0x800) {
@@ -215,7 +209,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -226,3 +220,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

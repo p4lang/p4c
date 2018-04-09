@@ -56,12 +56,18 @@ mpz_class maskFromSlice(unsigned m, unsigned l) {
     return result;
 }
 
-// Find a consecutive scan of 1 bits
+/// Find a consecutive scan of 1 bits
 BitRange findOnes(const mpz_class &value) {
     BitRange result;
-    result.lowIndex = mpz_scan1(value.get_mpz_t(), 0);
-    result.highIndex = mpz_scan0(value.get_mpz_t(), result.lowIndex) - 1;
-    result.value = maskFromSlice(result.highIndex, result.lowIndex);
+    if (value != 0) {
+        result.lowIndex = mpz_scan1(value.get_mpz_t(), 0);
+        result.highIndex = mpz_scan0(value.get_mpz_t(), result.lowIndex) - 1;
+        result.value = maskFromSlice(result.highIndex, result.lowIndex);
+    } else {
+        result.lowIndex = -1;
+        result.highIndex = -1;
+        result.value = 0;
+    }
     return result;
 }
 

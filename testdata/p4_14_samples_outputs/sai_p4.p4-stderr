@@ -1,117 +1,119 @@
-../testdata/p4_14_samples/sai_p4.p4(432): warning: Could not infer type for type_, using bit<8>
+sai_p4.p4(432): warning: Could not infer type for type_, using bit<8>
 action set_next_hop(type_, ip, router_interface_id) {
                     ^^^^^
-../testdata/p4_14_samples/sai_p4.p4(432): warning: Could not infer type for ip, using bit<8>
+sai_p4.p4(432): warning: Could not infer type for ip, using bit<8>
 action set_next_hop(type_, ip, router_interface_id) {
                            ^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for admin_state, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for admin_state, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                     ^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for default_vlan_priority, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for default_vlan_priority, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                ^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for sflow, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for sflow, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                     ^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for flood_storm_control, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for flood_storm_control, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for broadcast_storm_control, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for broadcast_storm_control, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for multicast_storm_control, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for multicast_storm_control, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for fdb_learning_limit_violation, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for fdb_learning_limit_violation, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(405): warning: -1: negative value with unsigned type
+sai_p4.p4(405): warning: -1: negative value with unsigned type
     add_to_field(ipv4.ttl, -1);
                             ^
-../testdata/p4_14_samples/sai_p4.p4(412): warning: -1: negative value with unsigned type
+sai_p4.p4(412): warning: -1: negative value with unsigned type
     add_to_field(ipv4.ttl, -1);
                             ^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for max_virtual_routers, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for max_virtual_routers, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                          ^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for fdb_table_size, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for fdb_table_size, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                               ^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for on_link_route_supported, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for on_link_route_supported, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                               ^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for max_temp, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for max_temp, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                     ^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for switching_mode, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for switching_mode, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                               ^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for cpu_flood_enable, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for cpu_flood_enable, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                               ^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for ttl1_action, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for ttl1_action, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                 ^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for fdb_aging_time, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for fdb_aging_time, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                             ^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for fdb_unicast_miss_action, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for fdb_unicast_miss_action, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for fdb_broadcast_miss_action, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for fdb_broadcast_miss_action, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for fdb_multicast_miss_action, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for fdb_multicast_miss_action, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for ecmp_hash_seed, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for ecmp_hash_seed, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for ecmp_hash_type, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for ecmp_hash_type, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for ecmp_hash_fields, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for ecmp_hash_fields, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(265): warning: Could not infer type for ecmp_max_paths, using bit<8>
+sai_p4.p4(265): warning: Could not infer type for ecmp_max_paths, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                                                                                                                                                                                                                                                                                                                                              ^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(583): warning: Could not infer type for violation_ttl1_action, using bit<8>
+sai_p4.p4(583): warning: Could not infer type for violation_ttl1_action, using bit<8>
 action set_router(admin_v4_state, admin_v6_state, src_mac_address, violation_ttl1_action, violation_ip_options) {
                                                                    ^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(583): warning: Could not infer type for violation_ip_options, using bit<8>
+sai_p4.p4(583): warning: Could not infer type for violation_ip_options, using bit<8>
 action set_router(admin_v4_state, admin_v6_state, src_mac_address, violation_ttl1_action, violation_ip_options) {
                                                                                           ^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for admin_state, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for admin_state, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                     ^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for default_vlan_priority, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for default_vlan_priority, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                ^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for sflow, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for sflow, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                     ^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for flood_storm_control, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for flood_storm_control, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for broadcast_storm_control, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for broadcast_storm_control, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for multicast_storm_control, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for multicast_storm_control, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: Could not infer type for fdb_learning_limit_violation, using bit<8>
+sai_p4.p4(282): warning: Could not infer type for fdb_learning_limit_violation, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: port shadows port
+sai_p4.p4(282): warning: port shadows .port
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                    ^^^^
-../testdata/p4_14_samples/sai_p4.p4(305)
+sai_p4.p4(305)
 table port {
 ^
-../testdata/p4_14_samples/sai_p4.p4(282): warning: port shadows port
+sai_p4.p4(282): warning: port shadows .port
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                    ^^^^
-../testdata/p4_14_samples/sai_p4.p4(305)
+sai_p4.p4(305)
 table port {
 ^
+warning: .next_hop_group: unused instance
+warning: .vlan: unused instance

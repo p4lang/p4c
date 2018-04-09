@@ -35,12 +35,12 @@ IR::Block* Evaluator::currentBlock() const {
 }
 
 void Evaluator::pushBlock(IR::Block* block) {
-    LOG1("Set current block to " << block);
+    LOG2("Set current block to " << dbp(block));
     blockStack.push_back(block);
 }
 
 void Evaluator::popBlock(IR::Block* block) {
-    LOG1("Remove current block " << block);
+    LOG2("Remove current block " << dbp(block));
     BUG_CHECK(!blockStack.empty(), "Empty stack");
     BUG_CHECK(blockStack.back() == block, "%1%: incorrect block popped from stack: %2%",
               block, blockStack.back());
@@ -51,7 +51,7 @@ void Evaluator::setValue(const IR::Node* node, const IR::CompileTimeValue* const
     CHECK_NULL(node);
     CHECK_NULL(constant);
     auto block = currentBlock();
-    LOG2("Set " << node << " to " << constant << " in " << block);
+    LOG3("Set " << dbp(node) << " to " << dbp(constant) << " in " << dbp(block));
     block->setValue(node, constant);
 }
 
@@ -59,14 +59,19 @@ const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
     CHECK_NULL(node);
     auto block = currentBlock();
     auto result = block->getValue(node);
-    LOG2("Looked up " << node << " in " << block << " got " << result);
+    LOG3("Looked up " << dbp(node) << " in " << dbp(block) << " got " << dbp(result));
+    if (result == nullptr && block != toplevelBlock) {
+        // Try to lookup this value in the toplevel block:
+        // this is needed for global declarations.
+        result = toplevelBlock->getValue(node);
+    }
     return result;
 }
 
 ////////////////////////////// visitor methods ////////////////////////////////////
 
 bool Evaluator::preorder(const IR::P4Program* program) {
-    LOG1("Evaluating " << program);
+    LOG2("Evaluating " << dbp(program));
     toplevelBlock = new IR::ToplevelBlock(program->srcInfo, program);
 
     pushBlock(toplevelBlock);
@@ -79,12 +84,12 @@ bool Evaluator::preorder(const IR::P4Program* program) {
     popBlock(toplevelBlock);
     std::stringstream str;
     toplevelBlock->dbprint_recursive(str);
-    LOG1(str.str());
+    LOG2(str.str());
     return false;
 }
 
 bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
-    LOG1("Evaluating " << decl);
+    LOG2("Evaluating " << dbp(decl));
     visit(decl->initializer);
     auto value = getValue(decl);
     if (value != nullptr)
@@ -94,6 +99,7 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
 
 std::vector<const IR::CompileTimeValue*>*
 Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments, IR::Block* context) {
+    LOG2("Evaluating arguments in " << dbp(context));
     P4::DoConstantFolding cf(refMap, nullptr);
     auto values = new std::vector<const IR::CompileTimeValue*>();
     pushBlock(context);
@@ -121,7 +127,7 @@ Evaluator::processConstructor(
     const IR::Type* type,  // Type that appears in the program that is instantiated.
     const IR::Type* instanceType,  // Actual canonical type of generated instance.
     const IR::Vector<IR::Expression>* arguments) {  // Constructor arguments
-    LOG1("Evaluating constructor " << type);
+    LOG2("Evaluating constructor " << dbp(type));
     if (type->is<IR::Type_Specialized>())
         type = type->to<IR::Type_Specialized>()->baseType;
     const IR::IDeclaration* decl;
@@ -196,7 +202,7 @@ Evaluator::processConstructor(
 }
 
 bool Evaluator::preorder(const IR::Member* expression) {
-    LOG1("Evaluating " << expression);
+    LOG2("Evaluating " << dbp(expression));
     auto type = typeMap->getType(expression->expr, true);
     const IR::IDeclaration* decl = nullptr;
     if (type->is<IR::Type_Type>())
@@ -215,7 +221,7 @@ bool Evaluator::preorder(const IR::Member* expression) {
 }
 
 bool Evaluator::preorder(const IR::PathExpression* expression) {
-    LOG1("Evaluating " << expression);
+    LOG2("Evaluating " << dbp(expression));
     auto decl = refMap->getDeclaration(expression->path, true);
     auto val = getValue(decl->getNode());
     if (val != nullptr)
@@ -224,7 +230,7 @@ bool Evaluator::preorder(const IR::PathExpression* expression) {
 }
 
 bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
-    LOG1("Evaluating " << inst);
+    LOG2("Evaluating " << dbp(inst));
     auto type = typeMap->getType(inst, true);
     auto block = processConstructor(inst, inst->type, type, inst->arguments);
     if (block != nullptr)
@@ -233,7 +239,7 @@ bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
 }
 
 bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
-    LOG1("Evaluating " << expr);
+    LOG2("Evaluating " << dbp(expr));
     auto type = typeMap->getType(expr, true);
     auto block = processConstructor(expr, expr->constructedType, type, expr->arguments);
     if (block != nullptr)
@@ -241,8 +247,16 @@ bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     return false;
 }
 
+bool Evaluator::preorder(const IR::MethodCallExpression* expr) {
+    // Experimental: extern function or method call with constant arguments that
+    // returns an extern instance as a factory method
+    LOG2("Evaluating " << dbp(expr));
+    setValue(expr, new IR::CompileTimeMethodCall(expr));
+    return false;
+}
+
 bool Evaluator::preorder(const IR::P4Table* table) {
-    LOG1("Evaluating " << table);
+    LOG2("Evaluating " << dbp(table));
     auto block = new IR::TableBlock(table->srcInfo, table, table);
     if (block != nullptr)
         setValue(table, block);
@@ -253,11 +267,27 @@ bool Evaluator::preorder(const IR::P4Table* table) {
 }
 
 bool Evaluator::preorder(const IR::Property* prop) {
-    LOG1("Evaluating " << prop);
+    LOG2("Evaluating " << dbp(prop));
     visit(prop->value);
     auto value = getValue(prop->value);
     if (value != nullptr)
         setValue(prop, value);
+    return false;
+}
+
+bool Evaluator::preorder(const IR::ListExpression *list) {
+    LOG2("Evaluating " << list);
+    visit(list->components);
+    IR::Vector<IR::Node> comp;
+    for (auto e : list->components) {
+        if (auto value = getValue(e)) {
+            CHECK_NULL(value);
+            comp.push_back(value->getNode());
+        } else {
+            return false;
+        }
+    }
+    setValue(list, new IR::ListCompileTimeValue(std::move(comp)));
     return false;
 }
 

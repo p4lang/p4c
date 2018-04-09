@@ -20,3 +20,4 @@ control c(inout bit<1> r) {
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
+

@@ -74,15 +74,15 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bit<32> inc;
     bit<32> tmp_1;
     bit<32> tmp_2;
-    @name("debug") register<bit<32>>(32w100) debug;
-    @name("reg") register<bit<32>>(32w1) reg;
-    @name("test") action test_0() {
+    @name("Eg.debug") register<bit<32>>(32w100) debug;
+    @name("Eg.reg") register<bit<32>>(32w1) reg;
+    @name("Eg.test") action test_0() {
         val.field1 = 32w0;
-        tmp_1 = (val.field1 != 32w0 ? 32w1 : tmp_1);
-        tmp_1 = (!(val.field1 != 32w0) ? 32w0 : tmp_1);
+        tmp_1 = tmp_1;
+        tmp_1 = 32w0;
         inc = tmp_1;
-        tmp_2 = (val.field1 != 32w0 ? 32w1 : tmp_2);
-        tmp_2 = (!(val.field1 != 32w0) ? 32w0 : tmp_2);
+        tmp_2 = tmp_2;
+        tmp_2 = 32w0;
         debug.write(32w0, tmp_2);
         debug.write(32w1, inc);
         val.field1 = 32w1;
@@ -107,7 +107,7 @@ control DP(packet_out b, in Headers p) {
     }
 }
 
-control Verify(in Headers hdrs, inout Metadata meta) {
+control Verify(inout Headers hdrs, inout Metadata meta) {
     apply {
     }
 }
@@ -118,3 +118,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+

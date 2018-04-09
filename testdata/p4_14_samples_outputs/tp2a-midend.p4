@@ -16,25 +16,25 @@ struct metadata {
 }
 
 struct headers {
-    @name("data") 
+    @name(".data") 
     data_t data;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction") action NoAction_0() {
+    @name(".NoAction") action NoAction_0() {
     }
-    @name("NoAction") action NoAction_5() {
+    @name(".NoAction") action NoAction_5() {
     }
-    @name("NoAction") action NoAction_6() {
+    @name(".NoAction") action NoAction_6() {
     }
-    @name("NoAction") action NoAction_7() {
+    @name(".NoAction") action NoAction_7() {
     }
     @name(".setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
@@ -56,47 +56,47 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1 {
+    @name(".A1") table A1 {
         actions = {
             setb1_0();
             noop_0();
-            @default_only NoAction_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            hdr.data.f1: ternary @name("hdr.data.f1") ;
+            hdr.data.f1: ternary @name("data.f1") ;
         }
         default_action = NoAction_0();
     }
-    @name("A2") table A2 {
+    @name(".A2") table A2 {
         actions = {
             setb3_0();
             noop_4();
-            @default_only NoAction_5();
+            @defaultonly NoAction_5();
         }
         key = {
-            hdr.data.b1: ternary @name("hdr.data.b1") ;
+            hdr.data.b1: ternary @name("data.b1") ;
         }
         default_action = NoAction_5();
     }
-    @name("B1") table B1 {
+    @name(".B1") table B1 {
         actions = {
             setb2_0();
             noop_5();
-            @default_only NoAction_6();
+            @defaultonly NoAction_6();
         }
         key = {
-            hdr.data.f2: ternary @name("hdr.data.f2") ;
+            hdr.data.f2: ternary @name("data.f2") ;
         }
         default_action = NoAction_6();
     }
-    @name("B2") table B2 {
+    @name(".B2") table B2 {
         actions = {
             setb4_0();
             noop_6();
-            @default_only NoAction_7();
+            @defaultonly NoAction_7();
         }
         key = {
-            hdr.data.b2: ternary @name("hdr.data.b2") ;
+            hdr.data.b2: ternary @name("data.b2") ;
         }
         default_action = NoAction_7();
     }
@@ -121,7 +121,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -132,3 +132,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

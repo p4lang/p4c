@@ -15,14 +15,14 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name(".ethernet") 
     ethernet_t ethernet;
-    @name("h") 
+    @name(".h") 
     h_t        h;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("start") state start {
+    @name(".start") state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
@@ -34,18 +34,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".NoAction") action NoAction_0() {
+    }
     @name(".nop") action nop_0() {
     }
-    @name("t1") table t1_0 {
+    @name(".t1") table t1 {
         actions = {
             nop_0();
-            @default_only NoAction();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         if (hdr.h.f1 > 13w1) 
-            t1_0.apply();
+            t1.apply();
     }
 }
 
@@ -55,7 +57,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta) {
+control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }
@@ -66,3 +68,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

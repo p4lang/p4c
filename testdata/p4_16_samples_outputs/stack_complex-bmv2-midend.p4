@@ -26,7 +26,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m) {
+control vrfy(inout Headers h, inout Meta m) {
     apply {
     }
 }
@@ -43,15 +43,17 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr[3]>(h.hs);
+        b.emit<hdr>(h.hs[0]);
+        b.emit<hdr>(h.hs[1]);
+        b.emit<hdr>(h.hs[2]);
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("set_port") action set_port_0() {
+    @name("ingress.set_port") action set_port_0() {
         sm.egress_spec = (bit<9>)m.v;
     }
-    @name("t") table t {
+    @name("ingress.t") table t {
         actions = {
             set_port_0();
         }
@@ -63,3 +65,4 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+
