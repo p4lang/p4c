@@ -121,9 +121,6 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        }
                        return true; },
                    "Choose output format for the P4Runtime API description (default is binary).");
-    registerOption("--emit-externs", nullptr,
-                   [this](const char*) { emitExterns = true; return true; },
-                   "Force externs be emitted by the backend.");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");

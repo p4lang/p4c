@@ -208,8 +208,6 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
         }
     } else {
         if (emitExterns) {
-            ::warning("Found extern method %1%. Make sure that the BMv2 supports it",
-                       em->method->name);
             auto primitive = mkPrimitive("_" + em->originalExternType->name +
                                          "_" + em->method->name, result);
             auto parameters = mkParameters(primitive);
@@ -607,12 +605,8 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
 
         action_profiles->append(action_profile);
     } else {
-        if (emitExterns) {
-            ::warning("Found extern instance %1%. Make sure that the BMv2 supports it",
-                eb->type->name);
-        } else {
+        if (!emitExterns)
             error("Unknown extern instance %1%", eb->type->name);
-        }
     }
 }
 
