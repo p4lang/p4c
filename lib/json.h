@@ -18,8 +18,9 @@ limitations under the License.
 #define _LIB_JSON_H_
 
 #include <iostream>
-#include <vector>
 #include <stdexcept>
+#include <vector>
+#include <type_traits>
 
 #include "gtest/gtest_prod.h"
 #include "lib/gmputil.h"
@@ -52,25 +53,26 @@ class JsonValue final : public IJson {
         Null
     };
     JsonValue() : tag(Kind::Null) {}
-    JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}  // NOLINT
-    JsonValue(mpz_class v) : tag(Kind::Number), value(v) {}   // NOLINT
-    JsonValue(int v) : tag(Kind::Number), value(v) {}         // NOLINT
-    JsonValue(long v) : tag(Kind::Number), value(v) {}        // NOLINT
-    JsonValue(unsigned v) : tag(Kind::Number), value(v) {}    // NOLINT
+    JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}   // NOLINT
+    JsonValue(mpz_class v) : tag(Kind::Number), value(v) {}    // NOLINT
+    JsonValue(int v) : tag(Kind::Number), value(v) {}          // NOLINT
+    JsonValue(long v) : tag(Kind::Number), value(v) {}         // NOLINT
+    JsonValue(long long v);                                    // NOLINT
+    JsonValue(unsigned v) : tag(Kind::Number), value(v) {}     // NOLINT
     JsonValue(unsigned long v) : tag(Kind::Number), value(v) {}// NOLINT
-    JsonValue(double v) : tag(Kind::Number), value(v) {}      // NOLINT
-    JsonValue(float v) : tag(Kind::Number), value(v) {}       // NOLINT
-    JsonValue(cstring s) : tag(Kind::String), str(s) {}       // NOLINT
-    JsonValue(std::string s) : tag(Kind::String), str(s) {}   // NOLINT
-    JsonValue(const char* s) : tag(Kind::String), str(s) {}   // NOLINT
+    JsonValue(unsigned long long v);                           // NOLINT
+    JsonValue(double v) : tag(Kind::Number), value(v) {}       // NOLINT
+    JsonValue(float v) : tag(Kind::Number), value(v) {}        // NOLINT
+    JsonValue(cstring s) : tag(Kind::String), str(s) {}        // NOLINT
+    JsonValue(std::string s) : tag(Kind::String), str(s) {}    // NOLINT
+    JsonValue(const char* s) : tag(Kind::String), str(s) {}    // NOLINT
     void serialize(std::ostream& out) const;
 
-    bool operator==(const bool& b) const;
     bool operator==(const mpz_class& v) const;
-    bool operator==(const int& v) const;
-    bool operator==(const long& v) const;
-    bool operator==(const unsigned& v) const;
-    bool operator==(const unsigned long& v) const;
+    // is_integral is true for bool
+    template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    bool operator==(const T& v) const
+    { return (tag == Kind::Number) && (v == value); }
     bool operator==(const double& v) const;
     bool operator==(const float& v) const;
     bool operator==(const cstring& s) const;
@@ -96,6 +98,9 @@ class JsonValue final : public IJson {
             throw std::logic_error("Incorrect constructor called");
     }
 
+    static mpz_class makeValue(long long v);
+    static mpz_class makeValue(unsigned long long v);
+
     const Kind tag;
     const mpz_class value = 0;
     const cstring str = nullptr;
@@ -106,12 +111,9 @@ class JsonArray final : public IJson, public std::vector<IJson*> {
  public:
     void serialize(std::ostream& out) const;
     JsonArray* append(IJson* value);
-    JsonArray* append(bool b) { append(new JsonValue(b)); return this; }
     JsonArray* append(mpz_class v) { append(new JsonValue(v)); return this; }
-    JsonArray* append(int v) { append(new JsonValue(v)); return this; }
-    JsonArray* append(long v) { append(new JsonValue(v)); return this; }
-    JsonArray* append(unsigned v) { append(new JsonValue(v)); return this; }
-    JsonArray* append(unsigned long v) { append(new JsonValue(v)); return this; }
+    template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    JsonArray* append(T v) { append(new JsonValue(v)); return this; }
     JsonArray* append(double v) { append(new JsonValue(v)); return this; }
     JsonArray* append(float v) { append(new JsonValue(v)); return this; }
     JsonArray* append(cstring s) { append(new JsonValue(s)); return this; }
@@ -129,19 +131,10 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson*> {
     void serialize(std::ostream& out) const;
     JsonObject* emplace(cstring label, IJson* value);
     JsonObject* emplace_non_null(cstring label, IJson* value);
-    JsonObject* emplace(cstring label, bool b)
-    { emplace(label, new JsonValue(b)); return this; }
     JsonObject* emplace(cstring label, mpz_class v)
     { emplace(label, new JsonValue(v)); return this; }
-    JsonObject* emplace(cstring label, int v)
-    { emplace(label, new JsonValue(v)); return this; }
-    JsonObject* emplace(cstring label, long v)
-    { emplace(label, new JsonValue(v)); return this; }
-    JsonObject* emplace(cstring label, unsigned v)
-    { emplace(label, new JsonValue(v)); return this; }
-    JsonObject* emplace(cstring label, unsigned long v)
-    { emplace(label, new JsonValue(v)); return this; }
-    JsonObject* emplace(cstring label, double v)
+    template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    JsonObject* emplace(cstring label, T v)
     { emplace(label, new JsonValue(v)); return this; }
     JsonObject* emplace(cstring label, float v)
     { emplace(label, new JsonValue(v)); return this; }

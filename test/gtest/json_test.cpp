@@ -14,10 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <sstream>
+
 #include "gtest/gtest.h"
 #include "lib/json.h"
 
 namespace Util {
+
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+static std::string getNumStringRepr(T v) {
+    std::ostringstream sstream;
+    sstream << std::dec << v;
+    return sstream.str();
+}
 
 TEST(Util, Json) {
     IJson* value;
@@ -31,6 +40,15 @@ TEST(Util, Json) {
     EXPECT_EQ("\"5\"", value->toString());
     value = new JsonValue(5);
     EXPECT_EQ("5", value->toString());
+    value = new JsonValue(static_cast<unsigned long long>(123456789000ULL));
+    EXPECT_EQ("123456789000", value->toString());
+    value = new JsonValue(static_cast<long long>(123456789000LL));
+    EXPECT_EQ("123456789000", value->toString());
+    value = new JsonValue(static_cast<long long>(-123456789000LL));
+    EXPECT_EQ("-123456789000", value->toString());
+    auto smallestLongLong = static_cast<long long>(1LL << 63);
+    value = new JsonValue(smallestLongLong);
+    EXPECT_EQ(getNumStringRepr(smallestLongLong), value->toString());
 
     auto arr = new JsonArray();
     arr->append(5);
