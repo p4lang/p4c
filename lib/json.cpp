@@ -18,6 +18,7 @@ limitations under the License.
 #include <sstream>
 #include "json.h"
 #include "indent.h"
+#include "lib/gmputil.h"
 
 namespace Util {
 
@@ -28,6 +29,37 @@ cstring IJson::toString() const {
 }
 
 JsonValue* JsonValue::null = new JsonValue();
+
+mpz_class JsonValue::makeValue(long long v) {
+    if (v >= 0) {
+        return makeValue(static_cast<unsigned long long>(v));
+    } else {
+        // works for smallest long long value as well, because the bit
+        // representation for -(1 << 63) - as a long long - and for (1 << 63) -
+        // as an unsigned long long - is the same.
+        return -1 * makeValue(static_cast<unsigned long long>(-v));
+    }
+}
+
+mpz_class JsonValue::makeValue(unsigned long long v) {
+    mpz_class tmp;
+    mpz_import(tmp.get_mpz_t(), 1, 1, sizeof(v), 0, 0, &v);
+    return tmp;
+}
+
+// According to the GMP documentation
+// (https://gmplib.org/manual/C_002b_002b-Interface-Integers.html), mpz_class
+// cannot be constructed from a "long long". This means that on systems where
+// "long" != "long long", we cannot construct the "value" member directly from
+// parameter v. Instead, we use this suggested workaround:
+// https://stackoverflow.com/questions/6598265/convert-uint64-to-gmp-mpir-number
+// Because the "value" member is const, we use a helper (makeValue) to
+// initialize it.
+JsonValue::JsonValue(long long v)
+    : tag(Kind::Number), value(makeValue(v)) { }
+
+JsonValue::JsonValue(unsigned long long v)
+    : tag(Kind::Number), value(makeValue(v)) { }
 
 void JsonValue::serialize(std::ostream& out) const {
     switch (tag) {
@@ -49,17 +81,7 @@ void JsonValue::serialize(std::ostream& out) const {
     }
 }
 
-bool JsonValue::operator==(const bool& b) const
-{ return b ? tag == Kind::True : tag == Kind::False; }
 bool JsonValue::operator==(const mpz_class& v) const
-{ return tag == Kind::Number ? v == value : false; }
-bool JsonValue::operator==(const int& v) const
-{ return tag == Kind::Number ? v == value : false; }
-bool JsonValue::operator==(const long& v) const
-{ return tag == Kind::Number ? v == value : false; }
-bool JsonValue::operator==(const unsigned& v) const
-{ return tag == Kind::Number ? v == value : false; }
-bool JsonValue::operator==(const unsigned long& v) const
 { return tag == Kind::Number ? v == value : false; }
 bool JsonValue::operator==(const double& v) const
 { return tag == Kind::Number ? v == value : false; }
