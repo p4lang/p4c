@@ -949,7 +949,8 @@ TypeInference::containerInstantiation(
     CHECK_NULL(constructor);
     bool isPackage = container->is<IR::Type_Package>();
     auto params = constructor->parameters;
-    checkParameters(params, !forbidModules, !isPackage);  // only packages can have packages as parameters
+    checkParameters(params, !forbidModules, !isPackage);
+    // only packages can have packages as parameters
 
     // We build a type for the callExpression and unify it with the method expression
     // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
