@@ -890,12 +890,12 @@ blackbox_instantiation:
         { driver.global->add($3,
             new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
                                          new IR::Type_Name($2),
-                                         new IR::Vector<IR::Expression>)); }
+                                         new IR::Vector<IR::Argument>)); }
     | BLACKBOX name name "{" blackbox_config "}"
         { auto instance =
             new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
                                          new IR::Type_Name($2),
-                                         new IR::Vector<IR::Expression>);
+                                         new IR::Vector<IR::Argument>);
           instance->properties = std::move(*$5);
           driver.global->add($3, instance); }
 ;

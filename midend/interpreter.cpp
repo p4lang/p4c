@@ -836,7 +836,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
     auto mi = mcd.instance;
 
     for (auto arg : *expression->arguments) {
-        auto argValue = get(arg);
+        auto argValue = get(arg->expression);
         CHECK_NULL(argValue);
         if (argValue->is<SymbolicError>()) {
             set(expression, argValue);
@@ -861,7 +861,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             BUG_CHECK(base->is<SymbolicArray>(), "%1%: expected an array", base);
             auto array = base->to<SymbolicArray>();
             BUG_CHECK(expression->arguments->size() == 1, "%1%: not one argument?", expression);
-            auto amount = get(expression->arguments->at(0));
+            auto amount = get(expression->arguments->at(0)->expression);
             BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer", amount);
             auto ac = amount->to<SymbolicInteger>();
             if (ac->isUnknown()) {
@@ -896,7 +896,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 // is always valid.
                 auto arg0 = expression->arguments->at(0);
                 auto argType = typeMap->getType(arg0, true);
-                auto hdr = get(arg0);
+                auto hdr = get(arg0->expression);
                 bool fixed = factory->isFixedWidth(argType);
                 unsigned width = factory->getWidth(argType);
                 // For variable-sized objects width is the "minimum" width.
@@ -921,7 +921,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                         return;
                     }
                     auto arg1 = expression->arguments->at(1);
-                    auto sz = get(arg1);
+                    auto sz = get(arg1->expression);
                     if (sz->is<SymbolicInteger>()) {
                         auto szValue = sz->to<SymbolicInteger>();
                         if (szValue->isKnown())

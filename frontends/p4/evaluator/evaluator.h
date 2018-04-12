@@ -49,7 +49,7 @@ class Evaluator final : public Inspector, public IHasBlock {
     const IR::CompileTimeValue* getValue(const IR::Node* node) const;
 
     std::vector<const IR::CompileTimeValue*>*
-            evaluateArguments(const IR::Vector<IR::Expression>* arguments,
+            evaluateArguments(const IR::Vector<IR::Argument>* arguments,
                               IR::Block* context);
 
     profile_t init_apply(const IR::Node* node) override;
@@ -76,7 +76,7 @@ class Evaluator final : public Inspector, public IHasBlock {
 
     const IR::Block* processConstructor(const IR::Node* node,
                                         const IR::Type* type, const IR::Type* instanceType,
-                                        const IR::Vector<IR::Expression>* arguments);
+                                        const IR::Vector<IR::Argument>* arguments);
 };
 
 // A pass which "evaluates" the program

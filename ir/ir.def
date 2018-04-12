@@ -135,6 +135,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     toString { return cstring("control ") + externalName(); }
 }
 
+/// A P4-16 action
 class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     optional Annotations        annotations = Annotations::empty;
     ParameterList               parameters;
@@ -164,10 +165,10 @@ class Declaration_MatchKind : ISimpleNamespace {
     validate{ members.check_null(); }
 }
 
-// Table property value abstract base class
+/// Table property value abstract base class
 abstract PropertyValue { }
 
-// A property whose value is an expression
+/// A table property whose value is an expression
 class ExpressionValue : PropertyValue {
     Expression expression;
     dbprint { out << expression; }
@@ -368,7 +369,7 @@ class Declaration_Constant : Declaration, IAnnotated {
 class Declaration_Instance : Declaration, IAnnotated, IInstance {
     optional Annotations  annotations = Annotations::empty;
     Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern
-    Vector<Expression>    arguments;
+    Vector<Argument>      arguments;
     inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
     optional NullOK BlockStatement initializer = nullptr;
         // experimental only; contains just declarations, no code
@@ -445,10 +446,10 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
 class MethodCallStatement : Statement {
     MethodCallExpression methodCall;
     MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
-    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
+    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
     MethodCallStatement(Util::SourceInfo si, Expression m,
-                        const std::initializer_list<Expression> &a)
+                        const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
 }
 

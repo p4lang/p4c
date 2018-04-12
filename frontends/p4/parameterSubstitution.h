@@ -84,6 +84,34 @@ class ParameterSubstitution : public IHasDbPrint {
         }
     }
 
+    void populate(const IR::ParameterList* params,
+                  const IR::Vector<IR::Argument>* args) {
+        // Allow for binding only some parameters: used for actions
+        BUG_CHECK(params->size() >= args->size(),
+                  "Incompatible number of arguments for parameter list: %1% and %2%",
+                  params, args);
+
+        std::map<cstring, const IR::Parameter*> byName;
+        for (auto p : params->parameters)
+            byName.emplace(p->name, p);
+
+        auto pe = params->getEnumerator();
+        for (auto a : *args) {
+            if (a->name) {
+                auto p = ::get(byName, a->name);
+                if (p == nullptr) {
+                    ::error("No parameter named %1%", a->name);
+                    continue;
+                }
+                add(p, a->expression);
+            } else {
+                bool success = pe->moveNext();
+                BUG_CHECK(success, "Enumerator finished too soon");
+                add(pe->getCurrent(), a->expression);
+            }
+        }
+    }
+
     Util::Enumerator<const IR::Parameter*>* getParameters() const
     { return Util::Enumerator<const IR::Parameter*>::createEnumerator(parameters); }
 

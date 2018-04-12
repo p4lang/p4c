@@ -114,7 +114,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
         action->emplace("action_id", id);
         auto actionData = mkArrayField(action, "action_data");
         for (auto arg : *actionCall->arguments) {
-            actionData->append(stringRepr(arg->to<IR::Constant>()->value, 0));
+            actionData->append(stringRepr(arg->expression->to<IR::Constant>()->value, 0));
         }
         entry->emplace("action_entry", action);
 
@@ -199,7 +199,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
         // TBD what about the else if cases below?
 
         auto add_size = [&action_profile, &arguments](size_t arg_index) {
-            auto size_expr = arguments->at(arg_index);
+            auto size_expr = arguments->at(arg_index)->expression;
             int size;
             if (!size_expr->is<IR::Constant>()) {
                 ::error("%1% must be a constant", size_expr);
@@ -216,7 +216,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
             table->emplace("type", "indirect_ws");
             action_profile->emplace("selector", selector);
             add_size(1);
-            auto hash = arguments->at(0);
+            auto hash = arguments->at(0)->expression;
             auto ei = P4::EnumInstance::resolve(hash, typeMap);
             if (ei == nullptr) {
                 ::error("%1%: must be a constant on this target", hash);
@@ -594,7 +594,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         }
         auto expr = defact->value->to<IR::ExpressionValue>()->expression;
         const IR::P4Action* action = nullptr;
-        const IR::Vector<IR::Expression>* args = nullptr;
+        const IR::Vector<IR::Argument>* args = nullptr;
 
         if (expr->is<IR::PathExpression>()) {
             auto path = expr->to<IR::PathExpression>()->path;
@@ -618,9 +618,10 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         entry->emplace("action_const", defact->isConstant);
         auto fields = mkArrayField(entry, "action_data");
         if (args != nullptr) {
+            // TODO: use argument names
             for (auto a : *args) {
-                if (a->is<IR::Constant>()) {
-                    cstring repr = stringRepr(a->to<IR::Constant>()->value);
+                if (a->expression->is<IR::Constant>()) {
+                    cstring repr = stringRepr(a->expression->to<IR::Constant>()->value);
                     fields->append(repr);
                 } else {
                     ::error("%1%: argument must evaluate to a constant integer", a);

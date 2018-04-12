@@ -30,7 +30,7 @@ class StateTranslationVisitor : public CodeGenInspector {
 
     void compileExtractField(const IR::Expression* expr, cstring name,
                              unsigned alignment, EBPFType* type);
-    void compileExtract(const IR::Vector<IR::Expression>* args);
+    void compileExtract(const IR::Vector<IR::Argument>* args);
 
  public:
     explicit StateTranslationVisitor(const EBPFParserState* state) :
@@ -211,13 +211,13 @@ StateTranslationVisitor::compileExtractField(
 }
 
 void
-StateTranslationVisitor::compileExtract(const IR::Vector<IR::Expression>* args) {
+StateTranslationVisitor::compileExtract(const IR::Vector<IR::Argument>* args) {
     if (args->size() != 1) {
         ::error("Variable-sized header fields not yet supported %1%", args);
         return;
     }
 
-    auto expr = args->at(0);
+    auto expr = args->at(0)->expression;
     auto type = state->parser->typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {

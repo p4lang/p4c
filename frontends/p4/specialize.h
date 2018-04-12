@@ -33,7 +33,7 @@ struct SpecializationInfo {
     /// Values to substitute for type arguments.
     const IR::Vector<IR::Type>*        typeArguments;
     /// Values to substitute for constructor arguments.
-    IR::Vector<IR::Expression>*        constructorArguments;
+    IR::Vector<IR::Argument>*          constructorArguments;
     /// Declarations to insert in the list of locals.
     IR::IndexedVector<IR::Declaration>* declarations;
     /// Invocation which causes this specialization.
@@ -44,7 +44,7 @@ struct SpecializationInfo {
     SpecializationInfo(const IR::Node* invocation, const IR::IContainer* cont,
                        const IR::Node* insertion) :
             specialized(cont), typeArguments(nullptr),
-            constructorArguments(new IR::Vector<IR::Expression>()),
+            constructorArguments(new IR::Vector<IR::Argument>()),
             declarations(new IR::IndexedVector<IR::Declaration>()),
             invocation(invocation), insertBefore(insertion)
     { CHECK_NULL(cont); CHECK_NULL(invocation); CHECK_NULL(insertion); }
@@ -55,7 +55,7 @@ struct SpecializationInfo {
 class SpecializationMap {
     /// Maps invocation to specialization info.
     ordered_map<const IR::Node*, SpecializationInfo*> specializations;
-    const IR::Expression* convertArgument(const IR::Expression* arg, SpecializationInfo* info);
+    const IR::Argument* convertArgument(const IR::Argument* arg, SpecializationInfo* info);
 
  public:
     TypeMap*      typeMap;
@@ -134,7 +134,7 @@ class FindSpecializations : public Inspector {
  *
  * Note that this pass handles type substition for instantiating generic Parser
  * or Control types, which is an experimental feature.
- * 
+ *
  * For example:
  *
 ```

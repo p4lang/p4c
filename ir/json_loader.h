@@ -167,8 +167,8 @@ class JSONLoader {
     typename std::enable_if<std::is_integral<T>::value>::type
     unpack_json(T &v) { v = *json->to<JsonNumber>(); }
     void unpack_json(mpz_class &v) { v = json->to<JsonNumber>()->val; }
-    void unpack_json(cstring &v) { v = *json->to<std::string>(); }
-    void unpack_json(IR::ID &v) { v.name = *json->to<std::string>(); }
+    void unpack_json(cstring &v) { if (!json->is<JsonNull>()) v = *json->to<std::string>(); }
+    void unpack_json(IR::ID &v) { if (!json->is<JsonNull>()) v.name = *json->to<std::string>(); }
 
     void unpack_json(LTBitMatrix &m) {
         if (auto *s = json->to<std::string>())

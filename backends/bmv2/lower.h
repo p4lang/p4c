@@ -76,8 +76,11 @@ class RemoveComplexExpressions : public Transform {
     IR::IndexedVector<IR::StatOrDecl>  assignments;
 
     const IR::PathExpression* createTemporary(const IR::Expression* expression);
+    const IR::Expression* simplifyExpression(const IR::Expression* expression, bool force);
     const IR::Vector<IR::Expression>* simplifyExpressions(
         const IR::Vector<IR::Expression>* vec, bool force = false);
+    const IR::Vector<IR::Argument>* simplifyExpressions(
+        const IR::Vector<IR::Argument>* vec);
 
  public:
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
