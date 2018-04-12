@@ -241,12 +241,13 @@ const IR::ParameterList* TypeInference::canonicalizeParameters(const IR::Paramet
         return params;
 }
 
-bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool forbidModules) const {
+bool TypeInference::checkParameters(
+    const IR::ParameterList* paramList, bool forbidModules, bool forbidPackage) const {
     for (auto p : paramList->parameters) {
         auto type = getType(p);
         if (type == nullptr)
             return false;
-        if (type->is<IR::Type_Package>()) {
+        if (forbidPackage && type->is<IR::Type_Package>()) {
             typeError("%1%: parameter cannot be a package", p);
             return false;
         }
@@ -380,7 +381,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = tp->typeParameters;
         if (pl == nullptr || tps == nullptr)
             return nullptr;
-        if (!checkParameters(pl, true))
+        if (!checkParameters(pl, forbidModules, forbidPackages))
             return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Parser(tp->srcInfo, tp->name, tp->annotations, tps, pl);
@@ -391,7 +392,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = tp->typeParameters;
         if (pl == nullptr || tps == nullptr)
             return nullptr;
-        if (!checkParameters(pl, true))
+        if (!checkParameters(pl, forbidModules, forbidPackages))
             return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Control(tp->srcInfo, tp->name, tp->annotations, tps, pl);
@@ -604,7 +605,7 @@ const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     auto pl = canonicalizeParameters(action->parameters);
     if (pl == nullptr)
         return action;
-    if (!checkParameters(action->parameters, true))
+    if (!checkParameters(action->parameters, forbidModules, forbidPackages))
         return action;
     auto type = new IR::Type_Action(new IR::TypeParameters(), nullptr, pl);
 
@@ -946,6 +947,10 @@ TypeInference::containerInstantiation(
     constructor = cloneWithFreshTypeVariables(
         constructor->to<IR::IMayBeGenericType>())->to<IR::Type_Method>();
     CHECK_NULL(constructor);
+    bool isPackage = container->is<IR::Type_Package>();
+    auto params = constructor->parameters;
+    checkParameters(params, !forbidModules, !isPackage);
+    // only packages can have packages as parameters
 
     // We build a type for the callExpression and unify it with the method expression
     // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
