@@ -267,6 +267,7 @@ bool ToP4::preorder(const IR::Type_Tuple* t) {
 
 bool ToP4::preorder(const IR::P4ValueSet* t) {
     dump(1);
+    visit(t->annotations);
     builder.append("value_set<");
     auto p4type = t->elementType->getP4Type();
     CHECK_NULL(p4type);
@@ -275,7 +276,9 @@ bool ToP4::preorder(const IR::P4ValueSet* t) {
     builder.append("(");
     visit(t->size);
     builder.append(")");
-    builder.newline();
+    builder.spc();
+    builder.append(t->name);
+    builder.endOfStatement();
     return false;
 }
 

@@ -1147,36 +1147,24 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     return type;
 }
 
-#if 0
-const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
+const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
+    if (done())
+        return decl;
     // This is a specialized version of setTypeType
-    auto canon = canonicalize(type->elementType);
+    auto canon = canonicalize(decl->elementType);
     if (canon != nullptr) {
         // Learn the new type
-        if (canon != type->elementType) {
+        if (canon != decl->elementType) {
             TypeInference tc(refMap, typeMap, true);
             unsigned e = ::errorCount();
             (void)canon->apply(tc);
             if (::errorCount() > e)
                 return nullptr;
         }
-        auto tt = new IR::Type_Type(new IR::Type_Set(canon));
+        auto tt = new IR::Type_Set(canon);
         setType(getOriginal(), tt);
-        setType(type, tt);
+        setType(decl, tt);
     }
-    return type;
-}
-#endif
-
-const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
-    if (done())
-        return decl;
-    auto type = getTypeType(decl->elementType);
-    if (type == nullptr)
-        return decl;
-    auto orig = getOriginal<IR::P4ValueSet>();
-    setType(decl, type);
-    setType(orig, type);
     return decl;
 }
 
