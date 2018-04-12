@@ -1227,13 +1227,12 @@ class P4RuntimeAnalyzer {
         // guaranteed by caller
         CHECK_NULL(inst);
 
-        auto pvsType = inst->type->to<IR::Type_ValueSet>();
-        auto bitwidth = static_cast<uint32_t>(pvsType->width_bits());
+        auto bitwidth = static_cast<uint32_t>(inst->elementType->width_bits());
 
         auto name = inst->controlPlaneName();
 
         unsigned int size = 0;
-        auto sizeConstant = inst->expression->to<IR::Constant>();
+        auto sizeConstant = inst->size->to<IR::Constant>();
         if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
             ::error("@size should be an integer for declaration %1%", inst);
             return;
@@ -1593,9 +1592,7 @@ static void collectParserSymbols(P4RuntimeSymbolTable& symbols,
     CHECK_NULL(parser);
 
     for (auto s : parser->parserLocals) {
-        if (auto inst = s->to<IR::Declaration_Variable>()) {
-            if (!inst->type->is<IR::Type_ValueSet>())
-                continue;
+        if (auto inst = s->to<IR::P4ValueSet>()) {
             symbols.add(P4RuntimeSymbolType::VALUE_SET, inst);
         }
     }

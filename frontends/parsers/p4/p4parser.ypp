@@ -204,7 +204,6 @@ typedef const IR::Type ConstType;
 %type<IR::Node*>            declaration externDeclaration matchKindDeclaration
 %type<IR::Type_Parser*>     parserTypeDeclaration
 %type<IR::Type_Control*>    controlTypeDeclaration
-%type<IR::Type_ValueSet*>   valueSetType
 %type<IR::IndexedVector<IR::Declaration>*>  parserLocalElements controlLocalDeclarations
 %type<IR::StructField*>     structField
 %type<IR::IndexedVector<IR::StructField>*>  structFieldList
@@ -491,10 +490,17 @@ simpleKeysetExpression
     | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
+// experimental
 valueSetDeclaration
     : optAnnotations
-        valueSetType "(" argument ")" name ";"
-        { $$ = new IR::P4ValueSet(@6, *$6, $1, $2, $4); }
+        VALUESET "<" baseType ">" "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+    | optAnnotations
+        VALUESET "<" tupleType ">" "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+    | optAnnotations
+        VALUESET "<" typeName ">" "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     ;
 
 /*************************** CONTROL ************************/
@@ -600,13 +606,6 @@ typeName
 
 tupleType
     : TUPLE "<" typeArgumentList ">"    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
-    ;
-
-// experimental
-valueSetType
-    : VALUESET "<" baseType ">"         { $$ = new IR::Type_ValueSet(@1, $3); }
-    | VALUESET "<" tupleType ">"        { $$ = new IR::Type_ValueSet(@1, $3); }
-    | VALUESET "<" typeName ">"         { $$ = new IR::Type_ValueSet(@1, $3); }
     ;
 
 headerStackType

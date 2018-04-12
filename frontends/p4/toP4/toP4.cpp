@@ -265,20 +265,16 @@ bool ToP4::preorder(const IR::Type_Tuple* t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_ValueSet* t) {
-    dump(3);
+bool ToP4::preorder(const IR::P4ValueSet* t) {
+    dump(1);
     builder.append("value_set<");
     auto p4type = t->elementType->getP4Type();
     CHECK_NULL(p4type);
     visit(p4type);
     builder.append(">");
-    return false;
-}
-
-bool ToP4::preorder(const IR::P4ValueSet* t) {
-    dump(1);
-    visit(t->type);
-    visit(t->expression);
+    builder.append("(");
+    visit(t->size);
+    builder.append(")");
     builder.newline();
     return false;
 }

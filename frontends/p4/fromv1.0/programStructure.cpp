@@ -448,7 +448,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto type = new IR::Type_ValueSet(explodeType(sizes));
+                auto type = explodeType(sizes);
                 auto sizeAnnotation = value_set->getAnnotation("size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {

@@ -1147,6 +1147,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     return type;
 }
 
+#if 0
 const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
     // This is a specialized version of setTypeType
     auto canon = canonicalize(type->elementType);
@@ -1165,11 +1166,12 @@ const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
     }
     return type;
 }
+#endif
 
 const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
     if (done())
         return decl;
-    auto type = getTypeType(decl->type);
+    auto type = getTypeType(decl->elementType);
     if (type == nullptr)
         return decl;
     auto orig = getOriginal<IR::P4ValueSet>();
