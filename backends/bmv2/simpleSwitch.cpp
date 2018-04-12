@@ -214,7 +214,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             auto etr = new Util::JsonObject();
             etr->emplace("type", "extern");
-            etr->emplace("value", em->object);
+            etr->emplace("value", em->object->getName());
             parameters->append(etr);
             for (auto arg : *mc->arguments) {
                 auto args = conv->convert(arg);
