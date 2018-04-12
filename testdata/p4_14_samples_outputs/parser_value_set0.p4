@@ -18,8 +18,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".pvs0") value_set<bit<16>> pvs0;
-    @name(".pvs1") value_set<bit<16>> pvs1;
+    @name(".pvs0") value_set<bit<16>>(4) pvs0;
+    @name(".pvs1") value_set<bit<16>>(4) pvs1;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {

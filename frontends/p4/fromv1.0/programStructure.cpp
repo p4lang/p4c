@@ -465,7 +465,9 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     WARNING("parser_value_set has no @size annotation, default to @size(4).");
                     sizeConstant = new IR::Constant(4);
                 }
-                auto decl = new IR::P4ValueSet(value_set->name, type, sizeConstant);
+                auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
+                auto decl = new IR::P4ValueSet(value_set->name, annos, type, sizeConstant);
+                LOG1(decl);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {

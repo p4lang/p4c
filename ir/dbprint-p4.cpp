@@ -202,7 +202,7 @@ void IR::P4Table::dbprint(std::ostream &out) const {
 }
 
 void IR::P4ValueSet::dbprint(std::ostream &out) const {
-    out << "value_set " << name;
+    out << "value_set<" << elementType << "> " << name;
     out << " " << annotations << "(" << size << ")";
 }
 
