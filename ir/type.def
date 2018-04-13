@@ -280,25 +280,13 @@ class Type_Tuple : Type {
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     validate{ components.check_null(); }
     const Type* getP4Type() const override;
-}
-
-/// The type of a parser value set
-class Type_ValueSet : Type {
-    Type elementType;
-    dbprint{ out << "value_set<" << elementType << ">"; }
-    toString{ return cstring("value_set<") + elementType->toString() + ">"; }
-    const Type* getP4Type() const override;
     int width_bits() const override {
+        /// returning sum of the width of the tuple elements
         int rv = 0;
-        if (auto tuple = elementType->to<IR::Type_Tuple>()) {
-            for (auto f : tuple->components) {
-                rv += f->width_bits();
-            }
-            return rv;
-        } else {
-            return elementType->width_bits();
+        for (auto f : components) {
+            rv += f->width_bits();
         }
-    }
+        return rv; }
 }
 
 /// The type of an architectural block.

@@ -164,7 +164,4 @@ const Type* Type_SpecializedCanonical::getP4Type() const {
     return new IR::Type_Specialized(srcInfo, baseType->getP4Type()->to<IR::Type_Name>(), args);
 }
 
-const Type* Type_ValueSet::getP4Type() const {
-    return new IR::Type_ValueSet(srcInfo, elementType->getP4Type());
-}
 }  // namespace IR

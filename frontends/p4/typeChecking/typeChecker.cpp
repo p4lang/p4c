@@ -1152,23 +1152,25 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     return type;
 }
 
-const IR::Node* TypeInference::postorder(IR::Type_ValueSet* type) {
+const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
+    if (done())
+        return decl;
     // This is a specialized version of setTypeType
-    auto canon = canonicalize(type->elementType);
+    auto canon = canonicalize(decl->elementType);
     if (canon != nullptr) {
         // Learn the new type
-        if (canon != type->elementType) {
+        if (canon != decl->elementType) {
             TypeInference tc(refMap, typeMap, true);
             unsigned e = ::errorCount();
             (void)canon->apply(tc);
             if (::errorCount() > e)
                 return nullptr;
         }
-        auto tt = new IR::Type_Type(new IR::Type_Set(canon));
+        auto tt = new IR::Type_Set(canon);
         setType(getOriginal(), tt);
-        setType(type, tt);
+        setType(decl, tt);
     }
-    return type;
+    return decl;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {

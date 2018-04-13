@@ -142,7 +142,6 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Extern* t) override;
     bool preorder(const IR::Type_Unknown* t) override;
     bool preorder(const IR::Type_Tuple* t) override;
-    bool preorder(const IR::Type_ValueSet* t) override;
 
     // declarations
     bool preorder(const IR::Declaration_Constant* cst) override;
@@ -222,6 +221,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::EntriesList *l) override;
     bool preorder(const IR::Entry *e) override;
     bool preorder(const IR::P4Table* c) override;
+    bool preorder(const IR::P4ValueSet* c) override;
 
     // in case it is accidentally called on a V1Program
     bool preorder(const IR::V1Program*) override { return false; }

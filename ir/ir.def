@@ -335,6 +335,13 @@ class P4Table : Declaration, IAnnotated, IApply {
     }
 }
 
+class P4ValueSet : Declaration, IAnnotated {
+    optional Annotations        annotations = Annotations::empty;
+    Type                        elementType;
+    Expression                  size;
+    Annotations getAnnotations() const override { return annotations; }
+}
+
 class Declaration_Variable : Declaration, IAnnotated {
     optional Annotations        annotations = Annotations::empty;
     Type                        type;

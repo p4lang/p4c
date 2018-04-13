@@ -164,7 +164,7 @@ typedef const IR::Type ConstType;
                             argument simpleKeysetExpression
                             transitionStatement switchLabel
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
-                            typeRef tupleType typeArg realTypeArg valueSetType namedType
+                            typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
 %type<IR::Parameter*>       parameter
 %type<OptionalConst>        optCONST
@@ -195,7 +195,7 @@ typedef const IR::Type ConstType;
 %type<IR::Declaration*>     constantDeclaration actionDeclaration
                             variableDeclaration instantiation functionDeclaration
                             objDeclaration tableDeclaration controlLocalDeclaration
-                            parserLocalElement
+                            parserLocalElement valueSetDeclaration
 %type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
@@ -397,6 +397,7 @@ parserLocalElement
     : constantDeclaration             { $$ = $1; }
     | instantiation                   { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
+    | valueSetDeclaration             { $$ = $1; }
     ;
 
 parserTypeDeclaration
@@ -489,6 +490,19 @@ simpleKeysetExpression
     | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
+// experimental
+valueSetDeclaration
+    : optAnnotations
+        VALUESET "<" baseType ">" "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+    | optAnnotations
+        VALUESET "<" tupleType ">" "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+    | optAnnotations
+        VALUESET "<" typeName ">" "(" argument ")" name ";"
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+    ;
+
 /*************************** CONTROL ************************/
 
 controlDeclaration
@@ -573,7 +587,6 @@ typeRef
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
     | tupleType                        { $$ = $1; }
-    | valueSetType                     { $$ = $1; }
     ;
 
 namedType
@@ -593,13 +606,6 @@ typeName
 
 tupleType
     : TUPLE "<" typeArgumentList ">"    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
-    ;
-
-// experimental
-valueSetType
-    : VALUESET "<" baseType ">"         { $$ = new IR::Type_ValueSet(@1, $3); }
-    | VALUESET "<" tupleType ">"        { $$ = new IR::Type_ValueSet(@1, $3); }
-    | VALUESET "<" typeName ">"         { $$ = new IR::Type_ValueSet(@1, $3); }
     ;
 
 headerStackType

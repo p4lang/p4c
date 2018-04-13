@@ -84,7 +84,7 @@ class DoReplaceTuples final : public Transform {
     { return insertReplacements(ext); }
     const IR::Node* postorder(IR::Declaration_Instance* decl) override
     { return insertReplacements(decl); }
-    const IR::Node* preorder(IR::Type_ValueSet* set) override
+    const IR::Node* preorder(IR::P4ValueSet* set) override
     // Disable substitution of type parameters for value sets.
     // We want to keep these as tuples.
     { prune(); return set; }

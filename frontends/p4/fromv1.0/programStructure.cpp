@@ -448,9 +448,26 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto type = new IR::Type_ValueSet(explodeType(sizes));
+                auto type = explodeType(sizes);
+                auto sizeAnnotation = value_set->getAnnotation("size");
+                const IR::Constant* sizeConstant;
+                if (sizeAnnotation) {
+                    if (sizeAnnotation->expr.size() != 1) {
+                        ::error("@size should be an integer for declaration %1%", value_set);
+                        return nullptr;
+                    }
+                    sizeConstant = sizeAnnotation->expr[0]->to<IR::Constant>();
+                    if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
+                        ::error("@size should be an integer for declaration %1%", value_set);
+                        return nullptr;
+                    }
+                } else {
+                    WARNING("parser_value_set has no @size annotation, default to @size(4).");
+                    sizeConstant = new IR::Constant(4);
+                }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
-                auto decl = new IR::Declaration_Variable(value_set->name, annos, type);
+                auto decl = new IR::P4ValueSet(value_set->name, annos, type, sizeConstant);
+                LOG1(decl);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {
