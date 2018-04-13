@@ -613,7 +613,7 @@ class RunBMV2(object):
                 for interface, fp in self.interfaces.iteritems():
                     fp.close()
                 # Give time to the model to execute
-                time.sleep(1)
+                time.sleep(2)
                 cli.terminate()
                 sw.terminate()
                 sw.wait()
