@@ -91,6 +91,10 @@ void AbstractParserDriver::onReadLineNumber(const char* text) {
     }
 }
 
+void AbstractParserDriver::onReadComment(const char* text, bool lineComment) {
+    sources->addComment(yylloc, lineComment, text);
+}
+
 void AbstractParserDriver::onReadFileName(const char* text) {
     lineDirectiveFile = cstring(text);
     sources->mapLine(lineDirectiveFile, lineDirectiveLine);
