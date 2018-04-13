@@ -1228,7 +1228,6 @@ class P4RuntimeAnalyzer {
         CHECK_NULL(inst);
 
         auto bitwidth = static_cast<uint32_t>(inst->elementType->width_bits());
-
         auto name = inst->controlPlaneName();
 
         unsigned int size = 0;

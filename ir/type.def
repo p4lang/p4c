@@ -280,6 +280,13 @@ class Type_Tuple : Type {
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     validate{ components.check_null(); }
     const Type* getP4Type() const override;
+    int width_bits() const override {
+        /// returning sum of the width of the tuple elements
+        int rv = 0;
+        for (auto f : components) {
+            rv += f->width_bits();
+        }
+        return rv; }
 }
 
 /// The type of an architectural block.
