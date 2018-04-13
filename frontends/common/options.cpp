@@ -193,9 +193,11 @@ void CompilerOptions::setInputFile() {
         ::error("Only one input file must be specified: %s",
                 cstring::join(remainingOptions.begin(), remainingOptions.end(), ","));
         usage();
+        exit(1);
     } else if (remainingOptions.size() == 0) {
         ::error("No input files specified");
         usage();
+        exit(1);
     } else {
         file = remainingOptions.at(0);
     }
