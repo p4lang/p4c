@@ -23,8 +23,8 @@ Extern::addExternAttributes(const IR::Declaration_Instance*,  // TODO: Unused pa
                             const IR::ExternBlock* block) {
     auto attributes = new Util::JsonArray();
     for (auto p : *block->getConstructorParameters()) {
-        auto name = p->toString();
-        auto pVal = block->getParameterValue(p->toString());
+        auto name = p->name;
+        auto pVal = block->getParameterValue(name);
         if (pVal->is<IR::Constant>()) {
             auto cVal = pVal->to<IR::Constant>();
             if (p->type->is<IR::Type_Bits>()) {
@@ -35,7 +35,7 @@ Extern::addExternAttributes(const IR::Declaration_Instance*,  // TODO: Unused pa
             }
         } else if (pVal->is<IR::Declaration_ID>()) {
             auto declId = pVal->to<IR::Declaration_ID>();
-            json->add_extern_attribute(name, "string", declId->toString(), attributes);
+            json->add_extern_attribute(name, "string", declId->name, attributes);
         } else if (pVal->is<IR::Type_Enum>()) {
             json->add_extern_attribute(name, "string", pVal->toString(), attributes);
         } else {
