@@ -307,13 +307,10 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(new IR::Argument(
-            structure->conversionContext.header->srcInfo,
             structure->conversionContext.header->clone()));
         args->push_back(new IR::Argument(
-            structure->conversionContext.userMetadata->srcInfo,
             structure->conversionContext.userMetadata->clone()));
         args->push_back(new IR::Argument(
-            structure->conversionContext.standardMetadata->srcInfo,
             structure->conversionContext.standardMetadata->clone()));
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
@@ -470,7 +467,6 @@ const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *struct
     auto args = new IR::Vector<IR::Argument>();
     for (unsigned i = 1; i < prim->operands.size(); ++i)
         args->push_back(new IR::Argument(
-            prim->operands.at(i)->srcInfo,
             conv.convert(prim->operands.at(i))));
     auto mc = new IR::MethodCallExpression(prim->srcInfo, method, args);
     return new IR::MethodCallStatement(prim->srcInfo, mc);

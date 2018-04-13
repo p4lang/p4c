@@ -618,7 +618,7 @@ class DismantleExpression : public Transform {
         for (auto p : *desc.substitution.getParameters()) {
             auto arg = desc.substitution.lookup(p);
             if (p->direction == IR::Direction::None) {
-                args->push_back(new IR::Argument(arg->srcInfo, arg));
+                args->push_back(new IR::Argument(arg));
                 continue;
             }
 
@@ -661,7 +661,7 @@ class DismantleExpression : public Transform {
                 copyBack->push_back(assign);
                 LOG3("Will copy out value " << dbp(assign));
             }
-            args->push_back(new IR::Argument(argValue->srcInfo, argValue));
+            args->push_back(new IR::Argument(argValue));
         }
         leftValue = savelv;
         resultNotUsed = savenu;

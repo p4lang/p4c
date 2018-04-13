@@ -493,13 +493,13 @@ simpleKeysetExpression
 // experimental
 valueSetDeclaration
     : optAnnotations
-        VALUESET "<" baseType ">" "(" argument ")" name ";"
+        VALUESET "<" baseType ">" "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" tupleType ">" "(" argument ")" name ";"
+        VALUESET "<" tupleType ">" "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" typeName ">" "(" argument ")" name ";"
+        VALUESET "<" typeName ">" "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     ;
 

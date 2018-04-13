@@ -31,7 +31,7 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
             toAdd.push_back(decl);
             changes = true;
-            vec->push_back(new IR::Argument(new IR::PathExpression(IR::ID(name))));
+            vec->push_back(new IR::Argument(a->srcInfo, new IR::PathExpression(IR::ID(name))));
         } else {
             vec->push_back(new IR::Argument(a->srcInfo, a));
         }

@@ -260,6 +260,7 @@ class Argument {
     /// If an argument has no name the name.name is nullptr.
     optional ID name;
     Expression expression;
+    Argument { if (!srcInfo && expression) srcInfo = expression->srcInfo; }
     dbprint { out << (name.name.isNullOrEmpty() ? "" : name.name + " = ") << expression; }
     validate { CHECK_NULL(expression); }
     toString{
