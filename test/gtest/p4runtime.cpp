@@ -749,7 +749,7 @@ TEST_F(P4Runtime, ValueSet) {
 
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            @size(16) value_set<tuple<bit<32>, bit<16>>> pvs;
+            value_set<tuple<bit<32>, bit<16>>>(16) pvs;
             state start {
                 p.extract(h.h);
                 transition select(h.h.hfA, h.h.hfB) {
