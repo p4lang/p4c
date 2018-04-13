@@ -91,6 +91,8 @@ class FindSymbols : public Inspector {
     { doDecl(decl); }
     void postorder(const IR::P4Action* decl) override
     { if (!isTopLevel()) doDecl(decl); }
+    void postorder(const IR::P4ValueSet* decl) override
+    { if (!isTopLevel()) doDecl(decl); }
 };
 
 class RenameSymbols : public Transform {
