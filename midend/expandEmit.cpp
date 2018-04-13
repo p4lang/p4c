@@ -35,6 +35,15 @@ bool DoExpandEmit::expandArg(
             resultTypes->push_back(st->elementType);
         }
         return true;
+    } else if (auto tup = type->to<IR::Type_Tuple>()) {
+        auto le = arg->to<IR::ListExpression>();
+        BUG_CHECK(le != nullptr && le->size() == tup->size(), "%1%: not a list?", arg);
+        for (size_t i = 0; i < le->size(); i++) {
+            auto expr = le->components.at(i);
+            auto type = tup->components.at(i);
+            expandArg(type, expr, result, resultTypes);
+        }
+        return true;
     } else {
         BUG_CHECK(type->is<IR::Type_StructLike>(),
                   "%1%: expected a struct or header_union type", type);

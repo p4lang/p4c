@@ -346,6 +346,7 @@ class ListExpression : Expression {
                 tuple.push_back(e->type);
             type = new Type_Tuple(tuple); } }
     validate { components.check_null(); }
+    size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
 }
 

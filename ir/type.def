@@ -280,6 +280,7 @@ class Type_Tuple : Type {
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     validate{ components.check_null(); }
     const Type* getP4Type() const override;
+    size_t size() const { return components.size(); }
     int width_bits() const override {
         /// returning sum of the width of the tuple elements
         int rv = 0;
