@@ -2577,7 +2577,17 @@ void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* ty
         return;
     }
 
-    typeError("%1%: argument must be a header, stack or union, or a struct of such types",
+    if (type->is<IR::Type_Tuple>()) {
+        for (auto f : type->to<IR::Type_Tuple>()->components) {
+            auto ftype = typeMap->getType(f);
+            if (ftype == nullptr)
+                continue;
+            checkEmitType(emit, ftype);
+        }
+        return;
+    }
+
+    typeError("%1%: argument must be a header, stack or union, or a struct or tuple of such types",
             emit);
 }
 
