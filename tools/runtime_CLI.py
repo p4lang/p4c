@@ -1982,6 +1982,8 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         register_name = args[0]
+        register = self.get_res("register", register_name,
+                                ResType.register_array)
         self.client.bm_register_reset(0, register.name)
 
     def complete_register_reset(self, text, line, start_index, end_index):
