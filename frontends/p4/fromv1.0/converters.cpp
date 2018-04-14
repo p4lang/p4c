@@ -55,8 +55,11 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
     // The P4-14 front-end may have constants that overflow their declared type,
     // since the v1 type inference sets types to constants without any checks.
     // We fix this here.
-    return new IR::Constant(expression->srcInfo, expression->type,
-                            expression->value, expression->base);
+    if (expression->type->is<IR::Type::Boolean>())
+        return new IR::BoolLiteral(expression->srcInfo, expression->type, expression->value != 0);
+    else
+        return new IR::Constant(expression->srcInfo, expression->type,
+                                expression->value, expression->base);
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
