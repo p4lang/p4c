@@ -329,15 +329,16 @@ inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) 
                 if (size_t(ctxt->child_index) < af->args.size()) {
                     rv = af->args[ctxt->child_index]->type;
                 }
-            } else if (auto infer = prim->inferOperandTypes()) {
+            } else {
+                auto infer = prim->inferOperandTypes();
                 if ((infer >> (ctxt->child_index)) & 1) {
                     for (auto o : prim->operands) {
                         if ((infer & 1) && o->type != rv) {
                             rv = o->type;
                             break; }
-                        infer >>= 1; } }
-            } else if (auto infer = prim->inferOperandType(ctxt->child_index)) {
-                rv = infer; } } }
+                        infer >>= 1; }
+                } else if (auto infer = prim->inferOperandType(ctxt->child_index)) {
+                    rv = infer; } } } }
     return rv;
 }
 
