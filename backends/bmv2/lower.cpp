@@ -166,7 +166,7 @@ RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
     auto assign = new IR::AssignmentStatement(
         expression->srcInfo, new IR::PathExpression(name), expression);
     assignments.push_back(assign);
-    return new IR::PathExpression(expression->srcInfo, name);
+    return new IR::PathExpression(expression->srcInfo, new IR::Path(name));
 }
 
 const IR::Vector<IR::Argument>*
