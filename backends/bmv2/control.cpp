@@ -270,7 +270,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
         if (eb) {
             BUG_CHECK(eb->is<IR::ExternBlock>(), "Not an extern block?");
             backend->getSimpleSwitch()->convertExternInstances(decl->to<IR::Declaration>(),
-                        eb->to<IR::ExternBlock>(), action_profiles, selector_check); }
+                        eb->to<IR::ExternBlock>(), action_profiles, selector_check, emitExterns); }
     } else {
         ::error("%1%: unexpected value for property", propv);
         return false;
@@ -742,7 +742,7 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 backend->getSimpleSwitch()->convertExternInstances(c, eb, action_profiles,
-                                                                   selector_check);
+                                                                   selector_check, emitExterns);
                 continue;
             }
         }

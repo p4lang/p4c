@@ -46,12 +46,14 @@ class SimpleSwitch {
  public:
     void modelError(const char* format, const IR::Node* place) const;
     void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
-                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s);
+                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
+                              const bool& emitExterns);
     void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
                                 const IR::MethodCallExpression *mc, const IR::StatOrDecl* s);
     void convertExternInstances(const IR::Declaration *c,
                                 const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
-                                BMV2::SharedActionSelectorCheck& selector_check);
+                                BMV2::SharedActionSelectorCheck& selector_check,
+                                const bool& emitExterns);
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
                          Util::JsonArray* calculations, bool verify);
 

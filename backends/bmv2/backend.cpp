@@ -181,7 +181,7 @@ class RenameUserMetadata : public Transform {
 };
 
 void
-Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
+Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     if (tlb->getMain() == nullptr)
@@ -258,7 +258,7 @@ Backend::process(const IR::ToplevelBlock* tlb, CompilerOptions& options) {
 
 /// BMV2 Backend that takes the top level block and converts it to a JsonObject
 /// that can be interpreted by the BMv2 simulator.
-void Backend::convert(CompilerOptions& options) {
+void Backend::convert(BMV2Options& options) {
     jsonTop.emplace("program", options.file);
     jsonTop.emplace("__meta__", json->meta);
     jsonTop.emplace("header_types", json->header_types);
@@ -319,10 +319,10 @@ void Backend::convert(CompilerOptions& options) {
     // if (psa) tlb->apply(new ConvertExterns());
     PassManager codegen_passes = {
         new ConvertHeaders(this, scalarsName),
-        new ConvertExterns(this),  // only run when target == PSA
+        new ConvertExterns(this, options.emitExterns),  // only run when target == PSA
         new ConvertParser(this),
-        new ConvertActions(this),
-        new ConvertControl(this),
+        new ConvertActions(this, options.emitExterns),
+        new ConvertControl(this, options.emitExterns),
         new ConvertDeparser(this),
     };
 

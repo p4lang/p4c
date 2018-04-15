@@ -123,7 +123,8 @@ void
 SimpleSwitch::convertExternObjects(Util::JsonArray *result,
                                    const P4::ExternMethod *em,
                                    const IR::MethodCallExpression *mc,
-                                   const IR::StatOrDecl *s) {
+                                   const IR::StatOrDecl *s,
+                                   const bool& emitExterns) {
     auto conv = backend->getExpressionConverter();
     if (em->originalExternType->name == v1model.counter.name) {
         if (em->method->name == v1model.counter.increment.name) {
@@ -206,7 +207,23 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             // Do not generate any code for this operation
         }
     } else {
-        error("Unknown extern type %1%", em->originalExternType->name);
+        if (emitExterns) {
+            auto primitive = mkPrimitive("_" + em->originalExternType->name +
+                                         "_" + em->method->name, result);
+            auto parameters = mkParameters(primitive);
+            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+            auto etr = new Util::JsonObject();
+            etr->emplace("type", "extern");
+            etr->emplace("value", em->object->getName());
+            parameters->append(etr);
+            for (auto arg : *mc->arguments) {
+                auto args = conv->convert(arg);
+                parameters->append(args);
+            }
+        } else {
+            error("Unknown extern method %1% from type %2%",
+                em->method->name, em->originalExternType->name);
+        }
     }
 }
 
@@ -403,7 +420,8 @@ void
 SimpleSwitch::convertExternInstances(const IR::Declaration *c,
                                      const IR::ExternBlock* eb,
                                      Util::JsonArray* action_profiles,
-                                     BMV2::SharedActionSelectorCheck& selector_check) {
+                                     BMV2::SharedActionSelectorCheck& selector_check,
+                                     const bool& emitExterns) {
     CHECK_NULL(backend);
     auto conv = backend->getExpressionConverter();
     auto inst = c->to<IR::Declaration_Instance>();
@@ -586,6 +604,9 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         }
 
         action_profiles->append(action_profile);
+    } else {
+        if (!emitExterns)
+            error("Unknown extern instance %1%", eb->type->name);
     }
 }
 

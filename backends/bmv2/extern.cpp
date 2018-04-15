@@ -19,29 +19,28 @@ limitations under the License.
 namespace BMV2 {
 
 Util::JsonArray*
-Extern::addExternAttributes(const IR::Declaration_Instance* di,
+Extern::addExternAttributes(const IR::Declaration_Instance*,  // TODO: Unused param, may be removed
                             const IR::ExternBlock* block) {
     auto attributes = new Util::JsonArray();
-    auto paramIt = block->getConstructorParameters()->parameters.begin();
-    for (auto arg : *di->arguments) {
-        auto name = arg->toString();
-        if (arg->is<IR::Constant>()) {
-            auto cVal = arg->to<IR::Constant>();
-            if (arg->type->is<IR::Type_Bits>()) {
+    for (auto p : *block->getConstructorParameters()) {
+        auto name = p->name;
+        auto pVal = block->getParameterValue(name);
+        if (pVal->is<IR::Constant>()) {
+            auto cVal = pVal->to<IR::Constant>();
+            if (p->type->is<IR::Type_Bits>()) {
                 json->add_extern_attribute(name, "hexstr",
                                            stringRepr(cVal->value), attributes);
             } else {
                 BUG("%1%: unhandled constant constructor param", cVal->toString());
             }
-        } else if (arg->is<IR::Declaration_ID>()) {
-            auto declId = arg->to<IR::Declaration_ID>();
-            json->add_extern_attribute(name, "string", declId->toString(), attributes);
-        } else if (arg->type->is<IR::Type_Enum>()) {
-            json->add_extern_attribute(name, "string", arg->toString(), attributes);
+        } else if (pVal->is<IR::Declaration_ID>()) {
+            auto declId = pVal->to<IR::Declaration_ID>();
+            json->add_extern_attribute(name, "string", declId->name, attributes);
+        } else if (pVal->is<IR::Type_Enum>()) {
+            json->add_extern_attribute(name, "string", pVal->toString(), attributes);
         } else {
-            BUG("%1%: unknown constructor param type", arg->type);
+            BUG("%1%: unknown constructor param type", p->type);
         }
-        ++paramIt;
     }
     return attributes;
 }
@@ -75,7 +74,7 @@ bool Extern::preorder(const IR::Declaration_Instance* decl) {
 
 /// Custom visitor to enable traversal on other blocks
 bool Extern::preorder(const IR::PackageBlock *block) {
-    if (backend->target != Target::PORTABLE_SWITCH)
+    if (backend->target != Target::PORTABLE_SWITCH && !emitExterns)
         return false;
 
     for (auto it : block->constantValue) {
