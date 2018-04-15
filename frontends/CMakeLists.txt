@@ -185,9 +185,10 @@ macro(add_parser pname)
   # the file to stdout and redirect to the desired name
   # FLEX_TARGET (${pname}Lexer parsers/${pname}/${pname}lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
   set (FLEX_${pname}Lexer_OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
+  set (FLEX_${pname}_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/parsers/${pname}/${pname}lexer.ll)
   add_custom_command (OUTPUT ${FLEX_${pname}Lexer_OUTPUTS}
-    COMMAND ${FLEX_EXECUTABLE} -t ${CMAKE_CURRENT_SOURCE_DIR}/parsers/${pname}/${pname}lexer.ll > ${FLEX_${pname}Lexer_OUTPUTS}
-    DEPENDS ${BISON_${pname}Parser_OUTPUTS}
+    COMMAND ${FLEX_EXECUTABLE} -t ${FLEX_${pname}_INPUT} > ${FLEX_${pname}Lexer_OUTPUTS}
+    DEPENDS ${BISON_${pname}Parser_OUTPUTS} ${FLEX_${pname}_INPUT}
     COMMENT "Running Flex on parsers/${pname}")
 
   set (${pname}PARSER_GEN_SRCS
