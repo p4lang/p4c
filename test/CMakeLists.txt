@@ -37,6 +37,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp
   gtest/bitvec_test.cpp
   gtest/call_graph_test.cpp
+  gtest/cstring.cpp
   gtest/diagnostics.cpp
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
