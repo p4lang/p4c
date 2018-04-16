@@ -42,8 +42,7 @@ using Parser = P4::P4Parser;
 [\n]                  { BEGIN INITIAL; }
 "//".*                { driver.onReadComment(yytext+2, true); }
 "/*"                  { BEGIN COMMENT; }
-<COMMENT>"*/"         { BEGIN NORMAL; }
-<COMMENT>(.|\n)*      { driver.onReadComment(yytext, false); }
+<COMMENT>([^*]|[*][*]*[^/])*/"*/"  { driver.onReadComment(yytext, false); BEGIN NORMAL; }
 
 <INITIAL>"#line"      { BEGIN(LINE1); }
 <INITIAL>"# "         { BEGIN(LINE1); }
