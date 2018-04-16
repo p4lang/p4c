@@ -326,8 +326,12 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
                                         buf, static_cast<size_t>(len));
       if (status != PI_STATUS_SUCCESS)
         bm::Logger::get()->error("Error when transmitting packet-in");
-    } else {
+    } else if (dp_service != nullptr) {
+      // need pkt_id for gRPC dp service, so we have to call the my_transmit_fn
+      // directly
       dp_service->my_transmit_fn(port_num, pkt_id, buf, len);
+    } else {
+      simple_switch->transmit_fn(port_num, buf, len);
     }
   };
   simple_switch->set_transmit_fn(transmit_fn);
