@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,27 @@
 #include "common.h"
 
 namespace {
+
+class PriorityConverter {
+ public:
+  PriorityConverter() = delete;
+
+  static int pi_to_bm(int32_t from) {
+    assert(from >= 0);
+    return max_bm_pri - from;
+  }
+
+  static int32_t bm_to_pi(int from) {
+    assert(from >= 0);
+    return max_bm_pri - from;
+  }
+
+ private:
+  static_assert(
+      std::numeric_limits<int>::max() >= std::numeric_limits<int32_t>::max(),
+      "Invalid assumption for priority inversion");
+  static constexpr int max_bm_pri = std::numeric_limits<int>::max();
+};
 
 std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
                                          const pi_match_key_t *match_key,
@@ -84,7 +106,7 @@ std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
           mk_data += nbytes;
           key.emplace_back(bm::MatchKeyParam::Type::TERNARY, k, mask);
         }
-        *priority = match_key->priority;
+        *priority = PriorityConverter::pi_to_bm(match_key->priority);
         break;
       case PI_P4INFO_MATCH_TYPE_RANGE:
         {
@@ -94,7 +116,7 @@ std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
           mk_data += nbytes;
           key.emplace_back(bm::MatchKeyParam::Type::RANGE, start, end);
         }
-        *priority = match_key->priority;
+        *priority = PriorityConverter::pi_to_bm(match_key->priority);
         break;
       default:
         assert(0);
@@ -417,7 +439,8 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
     // problem for looking up entry state in the PI software. A better
     // solution would be to ignore this value in the PI based on the key match
     // type.
-    int priority = (e.priority == -1) ? 0 : e.priority;
+    int priority = (e.priority == -1) ?
+        0 : PriorityConverter::bm_to_pi(e.priority);
     emit_uint32(buffer.extend(sizeof(uint32_t)), priority);
     for (const auto &p : e.match_key) {
       switch (p.type) {

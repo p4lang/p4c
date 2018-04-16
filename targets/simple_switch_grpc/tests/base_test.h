@@ -64,7 +64,7 @@ class SimpleSwitchGrpcBaseTest : public ::testing::Test {
   // calls p4runtime_stub->Write, with the appropriate election_id
   grpc::Status Write(ClientContext *context,
                      p4::WriteRequest &request,
-                     p4::WriteResponse *response);
+                     p4::WriteResponse *response) const;
 
   std::shared_ptr<grpc::Channel> p4runtime_channel;
   std::unique_ptr<p4::P4Runtime::Stub> p4runtime_stub;

@@ -102,7 +102,7 @@ SimpleSwitchGrpcBaseTest::set_election_id(p4::Uint128 *election_id) const {
 grpc::Status
 SimpleSwitchGrpcBaseTest::Write(ClientContext *context,
                                 p4::WriteRequest &request,
-                                p4::WriteResponse *response) {
+                                p4::WriteResponse *response) const {
   set_election_id(request.mutable_election_id());
   return p4runtime_stub->Write(context, request, response);
 }
