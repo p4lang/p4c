@@ -40,25 +40,28 @@
 
 namespace {
 
-class PriorityConverter {
+// We check which of pi_priority_t (PI type) and int (bmv2 type) can fit the
+// largest unsigned integer. If it is priority_t, BM_MAX_PRIORITY is set to the
+// max value for an int. If it is int, BM_MAX_PRIORITY is set to the max value
+// for a priority_t. BM_MAX_PRIORITY is then used as a pivot to invert priority
+// values passed by PI.
+static constexpr pi_priority_t BM_MAX_PRIORITY =
+    (static_cast<uintmax_t>(std::numeric_limits<pi_priority_t>::max()) >=
+     static_cast<uintmax_t>(std::numeric_limits<int>::max())) ?
+    static_cast<pi_priority_t>(std::numeric_limits<int>::max()) :
+    std::numeric_limits<pi_priority_t>::max();
+
+class PriorityInverter {
  public:
-  PriorityConverter() = delete;
-
-  static int pi_to_bm(int32_t from) {
-    assert(from >= 0);
-    return max_bm_pri - from;
+  PriorityInverter() = delete;
+  static int pi_to_bm(pi_priority_t from) {
+    assert(from <= BM_MAX_PRIORITY);
+    return BM_MAX_PRIORITY - from;
   }
-
-  static int32_t bm_to_pi(int from) {
-    assert(from >= 0);
-    return max_bm_pri - from;
+  static pi_priority_t bm_to_pi(int from) {
+    assert(from >= 0 && static_cast<uintmax_t>(from) <= BM_MAX_PRIORITY);
+    return BM_MAX_PRIORITY - static_cast<pi_priority_t>(from);
   }
-
- private:
-  static_assert(
-      std::numeric_limits<int>::max() >= std::numeric_limits<int32_t>::max(),
-      "Invalid assumption for priority inversion");
-  static constexpr int max_bm_pri = std::numeric_limits<int>::max();
 };
 
 std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
@@ -106,7 +109,7 @@ std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
           mk_data += nbytes;
           key.emplace_back(bm::MatchKeyParam::Type::TERNARY, k, mask);
         }
-        *priority = PriorityConverter::pi_to_bm(match_key->priority);
+        *priority = PriorityInverter::pi_to_bm(match_key->priority);
         break;
       case PI_P4INFO_MATCH_TYPE_RANGE:
         {
@@ -116,7 +119,7 @@ std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
           mk_data += nbytes;
           key.emplace_back(bm::MatchKeyParam::Type::RANGE, start, end);
         }
-        *priority = PriorityConverter::pi_to_bm(match_key->priority);
+        *priority = PriorityInverter::pi_to_bm(match_key->priority);
         break;
       default:
         assert(0);
@@ -440,7 +443,7 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
     // solution would be to ignore this value in the PI based on the key match
     // type.
     int priority = (e.priority == -1) ?
-        0 : PriorityConverter::bm_to_pi(e.priority);
+        0 : PriorityInverter::bm_to_pi(e.priority);
     emit_uint32(buffer.extend(sizeof(uint32_t)), priority);
     for (const auto &p : e.match_key) {
       switch (p.type) {
@@ -648,6 +651,8 @@ pi_status_t _pi_table_entry_add(pi_session_handle_t session_handle,
   const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);
 
+  if (match_key->priority > BM_MAX_PRIORITY)
+    return PI_STATUS_UNSUPPORTED_ENTRY_PRIORITY;
   int priority;
   auto mkey = build_key(table_id, match_key, p4info, &priority);
 
@@ -808,6 +813,8 @@ pi_status_t _pi_table_entry_delete(pi_session_handle_t session_handle,
 pi_status_t _pi_table_entry_delete_wkey(pi_session_handle_t session_handle,
                                         pi_dev_id_t dev_id, pi_p4_id_t table_id,
                                         const pi_match_key_t *match_key) {
+  if (match_key->priority > BM_MAX_PRIORITY)
+    return PI_STATUS_UNSUPPORTED_ENTRY_PRIORITY;
   try {
     auto h = get_entry_handle_from_key(dev_id, table_id, match_key);
     return _pi_table_entry_delete(session_handle, dev_id, table_id, h);
@@ -851,6 +858,8 @@ pi_status_t _pi_table_entry_modify_wkey(pi_session_handle_t session_handle,
                                         pi_dev_id_t dev_id, pi_p4_id_t table_id,
                                         const pi_match_key_t *match_key,
                                         const pi_table_entry_t *table_entry) {
+  if (match_key->priority > BM_MAX_PRIORITY)
+    return PI_STATUS_UNSUPPORTED_ENTRY_PRIORITY;
   try {
     auto h = get_entry_handle_from_key(dev_id, table_id, match_key);
     return _pi_table_entry_modify(session_handle, dev_id, table_id, h,
