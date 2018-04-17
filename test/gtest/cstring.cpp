@@ -54,7 +54,10 @@ TEST(cstring, compare) {
     cstring c = "simple";
     cstring c1 = "";
 
-    EXPECT_TRUE(c == "simple");
+    // I will disable lint, because I want
+    // out specific overload to be used, and I have
+    // no idea what EXPECT_EQ does.
+    EXPECT_TRUE(c == "simple");  // NOLINT
     EXPECT_TRUE(c == c);
     EXPECT_FALSE(c == c1);
     EXPECT_EQ(c.size(), strlen("simple"));
@@ -63,22 +66,22 @@ TEST(cstring, compare) {
     std::stringstream str;
     str << s;
     c = str;
-    EXPECT_TRUE(c == "simple");
+    EXPECT_TRUE(c == "simple");  // NOLINT
     EXPECT_TRUE(c == c);
     EXPECT_FALSE(c == c1);
     EXPECT_EQ(c.size(), strlen("simple"));
-    EXPECT_FALSE(c != "simple");
-    EXPECT_FALSE(c == "other");
-    EXPECT_TRUE(c != "other");
+    EXPECT_FALSE(c != "simple");  // NOLINT
+    EXPECT_FALSE(c == "other");   // NOLINT
+    EXPECT_TRUE(c != "other");    // NOLINT
 
-    EXPECT_TRUE(c < "zombie");
-    EXPECT_FALSE(c < "awesome");
-    EXPECT_TRUE(c <= "zombie");
-    EXPECT_FALSE(c <= "awesome");
-    EXPECT_TRUE(c >= "awesome");
-    EXPECT_TRUE(c > "awesome");
-    EXPECT_FALSE(c >= "zombie");
-    EXPECT_FALSE(c > "zombie");
+    EXPECT_TRUE(c < "zombie");    // NOLINT
+    EXPECT_FALSE(c < "awesome");  // NOLINT
+    EXPECT_TRUE(c <= "zombie");   // NOLINT
+    EXPECT_FALSE(c <= "awesome"); // NOLINT
+    EXPECT_TRUE(c >= "awesome");  // NOLINT
+    EXPECT_TRUE(c > "awesome");   // NOLINT
+    EXPECT_FALSE(c >= "zombie");  // NOLINT
+    EXPECT_FALSE(c > "zombie");   // NOLINT
 
     const char* ptr = c.c_str();
     EXPECT_FALSE(strncmp(ptr, "simple", 7));
@@ -95,11 +98,11 @@ TEST(cstring, find) {
 
 TEST(cstring, substr) {
     cstring c = "simplest";
-    ASSERT_TRUE(c.substr(3) == "plest");
-    ASSERT_TRUE(c.substr(3, 2) == "pl");
-    ASSERT_TRUE(c.substr(10) == "");
-    ASSERT_TRUE(c.substr(3, 10) == "plest");
-    ASSERT_TRUE(c.exceptLast(2) == "simple");
+    ASSERT_TRUE(c.substr(3) == "plest");  // NOLINT
+    ASSERT_TRUE(c.substr(3, 2) == "pl");  // NOLINT
+    ASSERT_TRUE(c.substr(10) == "");      // NOLINT
+    ASSERT_TRUE(c.substr(3, 10) == "plest");  // NOLINT
+    ASSERT_TRUE(c.exceptLast(2) == "simple"); // NOLINT
 }
 
 }  // namespace Test
