@@ -65,6 +65,8 @@ control MyED(
     apply { }
 }
 
-PSA_SWITCH(
+PSA_Switch(
     IngressPipeline(MyIP(), MyIC(), MyID()),
-    EgressPipeline(MyEP(), MyEC(), MyED())) main;
+    PacketReplicationEngine(),
+    EgressPipeline(MyEP(), MyEC(), MyED()),
+    BufferingQueueingEngine()) main;
