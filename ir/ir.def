@@ -282,6 +282,7 @@ class TableProperties : ISimpleNamespace {
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
     static const cstring entriesPropertyName;
+    static const cstring sizePropertyName;
 #nodbprint
     validate{ properties.check_null(); properties.check_valid(); }
 }
@@ -322,8 +323,11 @@ class P4Table : Declaration, IAnnotated, IApply {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
                     return k; } }
-            error("%1% must be a constant expression", d); }
+            error("%1% must be a constant numeric expression", d); }
         return nullptr; }
+    Constant getSizeProperty() const {
+        return getConstantProperty(TableProperties::sizePropertyName);
+    }
     EntriesList getEntries() const {
         auto ep = properties->getProperty(TableProperties::entriesPropertyName);
         if (ep == nullptr)

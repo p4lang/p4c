@@ -24,6 +24,7 @@ namespace P4 {
 
 /// Makes sure that some methods that expect constant
 /// arguments have constant arguments (e.g., push_front).
+/// Checks that table sizes are constant integers.
 class DoCheckConstants : public Inspector {
     ReferenceMap*  refMap;
     TypeMap*       typeMap;
@@ -35,6 +36,7 @@ class DoCheckConstants : public Inspector {
     }
 
     void postorder(const IR::MethodCallExpression* expr) override;
+    void postorder(const IR::P4Table* table) override;
 };
 
 class CheckConstants : public PassManager {
