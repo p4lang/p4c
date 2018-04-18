@@ -38,13 +38,11 @@ using Parser = P4::P4Parser;
 
 %%
 
-[ \t\r]+          ;
-[\n]            { BEGIN INITIAL; }
-"//".*            ;
-"/*"            { BEGIN COMMENT; }
-<COMMENT>"*/"   { BEGIN NORMAL; }
-<COMMENT>.        ;
-<COMMENT>[\n]     ;
+[ \t\r]+              ;
+[\n]                  { BEGIN INITIAL; }
+"//".*                { driver.onReadComment(yytext+2, true); }
+"/*"                  { BEGIN COMMENT; }
+<COMMENT>([^*]|[*][*]*[^/])*"*/"  { driver.onReadComment(yytext, false); BEGIN NORMAL; }
 
 <INITIAL>"#line"      { BEGIN(LINE1); }
 <INITIAL>"# "         { BEGIN(LINE1); }

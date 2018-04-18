@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,6 +43,13 @@ class AbstractParserDriver {
     ////////////////////////////////////////////////////////////////////////////
     // Callbacks.
     ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Notify that the lexer has read a comment.
+     * @param text         The body of the comment, without the comment termination
+     * @param lineComment  If true this is a line comment starting with //
+     */
+    void onReadComment(const char* text, bool lineComment);
 
     /// Notify that the lexer read a token. @text is the matched source text.
     void onReadToken(const char* text);

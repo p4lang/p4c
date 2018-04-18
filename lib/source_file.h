@@ -245,6 +245,31 @@ struct SourceFileLine {
     cstring toString() const;
 };
 
+class Comment final : IHasDbPrint {
+ private:
+    SourceInfo srcInfo;
+    bool singleLine;
+    cstring body;
+
+ public:
+    Comment(SourceInfo srcInfo, bool singleLine, cstring body):
+            srcInfo(srcInfo), singleLine(singleLine), body(body) {}
+    cstring toString() const {
+        cstring result;
+        if (singleLine)
+            result = "//";
+        else
+            result = "/*";
+        result += body;
+        if (!singleLine)
+            result += "*/";
+        return result;
+    }
+    void dbprint(std::ostream& out) const {
+        out << toString();
+    }
+};
+
 /**
   Information about all the input sources that comprise a P4 program that is being compiled.
   The inputSources can be seen as a simple file produced by the preprocessor,
@@ -290,6 +315,7 @@ class InputSources final {
     cstring getBriefSourceFragment(const SourceInfo &position) const;
 
     cstring toDebugString() const;
+    void addComment(SourceInfo srcInfo, bool singleLine, cstring body);
 
  private:
     /// Append this text to the last line; must not contain newlines
@@ -304,6 +330,8 @@ class InputSources final {
 
     /// Each line also stores the end-of-line character(s)
     std::vector<cstring> contents;
+    /// The commends found in the file.
+    std::vector<Comment*> comments;
 };
 
 }  // namespace Util

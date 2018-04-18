@@ -61,6 +61,14 @@ InputSources::InputSources() : sealed(false) {
     contents.push_back("");
 }
 
+void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body) {
+    if (!singleLine)
+        // Drop the "*/"
+        body = body.exceptLast(2);
+    auto comment = new Comment(srcInfo, singleLine, body);
+    comments.push_back(comment);
+}
+
 /// prevent further changes
 void InputSources::seal() {
     LOG4(toDebugString());
