@@ -191,6 +191,8 @@ ExprType get_opcode_type(ExprOpcode opcode) {
     case ExprOpcode::BIT_XOR:
     case ExprOpcode::BIT_NEG:
     case ExprOpcode::TWO_COMP_MOD:
+    case ExprOpcode::USAT_CAST:
+    case ExprOpcode::SAT_CAST:
     case ExprOpcode::BOOL_TO_DATA:
     case ExprOpcode::LAST_STACK_INDEX:
     case ExprOpcode::SIZE_STACK:

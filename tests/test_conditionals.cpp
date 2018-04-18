@@ -400,6 +400,38 @@ TEST_F(ConditionalsTest, TwoCompMod) {
   ASSERT_TRUE(c.eval(*phv));
 }
 
+TEST_F(ConditionalsTest, USatCast) {
+  int v1 = -129;
+  int v2 = 8;
+  int res = 0;
+
+  Conditional c("ctest", 0);
+  c.push_back_load_const(Data(v1));
+  c.push_back_load_const(Data(v2));
+  c.push_back_op(ExprOpcode::USAT_CAST);
+  c.push_back_load_const(Data(res));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, SatCast) {
+  int v1 = -129;
+  int v2 = 8;
+  int res = -128;
+
+  Conditional c("ctest", 0);
+  c.push_back_load_const(Data(v1));
+  c.push_back_load_const(Data(v2));
+  c.push_back_op(ExprOpcode::SAT_CAST);
+  c.push_back_load_const(Data(res));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
 TEST_F(ConditionalsTest, BitNeg) {
   int v = 0xababa;
 

@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.17*.
+The version described in this document is *2.18*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -94,6 +94,8 @@ conversions are not supported.
 a width data value, produces a third data value which is the signed value of the
 source given a 2-complement representation with that width. For example,
 `two_comp_mod(257, 8) == 1` and `two_comp_mod(-129, 8) == 127`.
+  - saturating cast for signed integers (`op` is `sat_cast`).
+  - saturating cast for unsigned integers (`op` is `usat_cast`).
   - ternary operator (`op` is `?`): in addition to `left` and `right`, the JSON
 object has a fourth attribute, `cond` (condition), which is itself an
 expression. For example, in `(hA.f1 == 9) ? 3 : 4`, `cond` would be the JSON

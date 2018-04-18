@@ -134,28 +134,30 @@ TEST(Data, Divide) {
   test_divide(0, 3);
 }
 
-namespace {
+#define TEST_BINARY_OPERATOR(op, x, y, expected)     \
+  do {                                               \
+    Data dst;                                        \
+    dst.op(Data(x), Data(y));                        \
+    EXPECT_EQ(expected, dst.get_int());              \
+  } while (false)
 
-void test_two_comp_mod(int src, unsigned int width, int expected) {
-  Data dst;
-  dst.two_comp_mod(Data(src), Data(width));
-  EXPECT_EQ(expected, dst.get_int());
-}
-
-}  // namespace
+#define TEST_TWO_COMP_MOD(src, width, expected)                 \
+  TEST_BINARY_OPERATOR(two_comp_mod, src, width, expected)
 
 TEST(Data, TwoCompMod) {
-  test_two_comp_mod(3, 2, -1);
-  test_two_comp_mod(10, 8, 10);
-  test_two_comp_mod(-10, 8, -10);
-  test_two_comp_mod(256, 8, 0);
-  test_two_comp_mod(257, 8, 1);
-  test_two_comp_mod(128, 8, -128);
-  test_two_comp_mod(129, 8, -127);
-  test_two_comp_mod(127, 8, 127);
-  test_two_comp_mod(126, 8, 126);
-  test_two_comp_mod(-129, 8, 127);
+  TEST_TWO_COMP_MOD(3, 2, -1);
+  TEST_TWO_COMP_MOD(10, 8, 10);
+  TEST_TWO_COMP_MOD(-10, 8, -10);
+  TEST_TWO_COMP_MOD(256, 8, 0);
+  TEST_TWO_COMP_MOD(257, 8, 1);
+  TEST_TWO_COMP_MOD(128, 8, -128);
+  TEST_TWO_COMP_MOD(129, 8, -127);
+  TEST_TWO_COMP_MOD(127, 8, 127);
+  TEST_TWO_COMP_MOD(126, 8, 126);
+  TEST_TWO_COMP_MOD(-129, 8, 127);
 }
+
+#undef TEST_TWO_COMP_MOD
 
 TEST(Data, TwoCompModStress) {
   Data dst;
@@ -166,6 +168,30 @@ TEST(Data, TwoCompModStress) {
     ASSERT_EQ(-127, dst.get_int());
   }
 }
+
+#define TEST_USAT_CAST(src, width, expected)            \
+  TEST_BINARY_OPERATOR(usat_cast, src, width, expected)
+
+TEST(Data, UsatCast) {
+  TEST_USAT_CAST(129, 8, 129);
+  TEST_USAT_CAST(129, 7, 127);
+  TEST_USAT_CAST(-18, 8, 0);
+}
+
+#undef TEST_USAT_CAST
+
+#define TEST_SAT_CAST(src, width, expected)            \
+  TEST_BINARY_OPERATOR(sat_cast, src, width, expected)
+
+TEST(Data, SatCast) {
+  TEST_SAT_CAST(129, 9, 129);
+  TEST_SAT_CAST(129, 8, 127);
+  TEST_SAT_CAST(-129, 8, -128);
+}
+
+#undef TEST_SAT_CAST
+
+#undef TEST_BINARY_OPERATOR
 
 TEST(Data, TestEq) {
   int v = 99;

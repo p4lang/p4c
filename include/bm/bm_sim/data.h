@@ -313,9 +313,9 @@ class Data {
     export_bytes();
   }
 
-  //! NC
+  //! Two complement modulo operation. This is used to implement (int<width>)
+  //! casts in P4_16. For example, @code two_comp_mod(-129, 8) = 127 @encode.
   void two_comp_mod(const Data &src, const Data &width) {
-    // used to implement (int<?>) casts in P4_16
     static const Bignum one(1);
     unsigned int uwidth = width.get_uint();
     Bignum mask = (one << uwidth) - 1;
@@ -328,6 +328,39 @@ class Data {
     } else {
       value = src.value;
     }
+    export_bytes();
+  }
+
+  //! Saturating cast operation for unsigned types (i.e. bit<X> in P4_16). Used
+  //! to implement P4_16 saturating arithmetic operations (|+| and |-|) on
+  //! unsigned integers.
+  void usat_cast(const Data &src, const Data &width) {
+    static const Bignum one(1);
+    unsigned int uwidth = width.get_uint();
+    Bignum max = (one << uwidth) - 1;
+    if (src.value > max)
+      value = max;
+    else if (src.value < 0)
+      value = 0;
+    else
+      value = src.value;
+    export_bytes();
+  }
+
+  //! Saturating cast operation for signed types (i.e. int<X> in P4_16). Used to
+  //! implement P4_16 saturating arithmetic operations (|+| and |-|) on signed
+  //! integers.
+  void sat_cast(const Data &src, const Data &width) {
+    static const Bignum one(1);
+    unsigned int uwidth = width.get_uint();
+    Bignum max = (one << (uwidth - 1)) - 1;
+    Bignum min = -(one << (uwidth - 1));
+    if (src.value > max)
+      value = max;
+    else if (src.value < min)
+      value = min;
+    else
+      value = src.value;
     export_bytes();
   }
 
