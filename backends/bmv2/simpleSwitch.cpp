@@ -217,7 +217,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             etr->emplace("value", em->object->getName());
             parameters->append(etr);
             for (auto arg : *mc->arguments) {
-                auto args = conv->convert(arg);
+                auto args = conv->convert(arg->expression);
                 parameters->append(args);
             }
         } else {
