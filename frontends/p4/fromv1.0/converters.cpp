@@ -166,7 +166,8 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
         result->type = ref->base_->type;
         return result;
     }
-    BUG("Unexpected index %1%", ref->index_);
+
+    ::error("Illegal array index %1%: must be a constant, 'last', or 'next'.", ref);
     return ref;
 }
 
