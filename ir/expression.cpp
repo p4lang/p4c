@@ -18,12 +18,12 @@ limitations under the License.
 #include "dbprint.h"
 #include "lib/gmputil.h"
 
-const IR::Expression *IR::Slice::make(const IR::Expression *e, int lo, int hi) {
+const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
         auto rv = ((*k >> lo) & IR::Constant((1U << (hi-lo+1)) - 1)).clone();
         rv->type = IR::Type::Bits::get(hi-lo+1);
         return rv; }
-    if (auto src_width = e->type->width_bits()) {
+    if (auto src_width = (unsigned)e->type->width_bits()) {
         if (lo >= src_width)
             return new IR::Constant(IR::Type::Bits::get(hi-lo+1), 0);
         if (hi >= src_width)

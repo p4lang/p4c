@@ -43,12 +43,18 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
     auto exp = expression->left;
     auto cst = expression->right->to<IR::Constant>();
     mpz_class value = cst->value;
+    if (value == 0) {
+        ::warning("%1%: zero mask", expression->right);
+        return cst;
+    }
     auto range = Util::findOnes(value);
     if (range.lowIndex == 0 && range.highIndex >= exp->type->width_bits() - 1U)
         return exp;
     if (value != range.value)
         return new IR::BAnd(expression->srcInfo, exp, cst);
-    return new IR::Slice(exp, new IR::Constant(range.highIndex), new IR::Constant(range.lowIndex));
+    return new IR::Slice(exp,
+                         new IR::Constant(expression->srcInfo, range.highIndex),
+                         new IR::Constant(expression->srcInfo, range.lowIndex));
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {

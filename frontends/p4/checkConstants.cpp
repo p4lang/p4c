@@ -33,4 +33,9 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression* expression) {
     }
 }
 
+void DoCheckConstants::postorder(const IR::KeyElement* key) {
+    if (key->expression->is<IR::Literal>())
+        ::warning("%1%: Constant key field", key->expression);
+}
+
 }  // namespace P4

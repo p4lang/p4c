@@ -35,6 +35,7 @@ class DoCheckConstants : public Inspector {
     }
 
     void postorder(const IR::MethodCallExpression* expr) override;
+    void postorder(const IR::KeyElement* expr) override;
 };
 
 class CheckConstants : public PassManager {

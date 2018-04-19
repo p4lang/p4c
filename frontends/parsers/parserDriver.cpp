@@ -218,7 +218,7 @@ V1ParserDriver::parse(FILE* in, const char* sourceFile,
 IR::Constant* V1ParserDriver::constantFold(IR::Expression* expr) {
     IR::Node* node(expr);
     auto rv = node->apply(P4::DoConstantFolding(nullptr, nullptr))->to<IR::Constant>();
-    return rv ? new IR::Constant(rv->type, rv->value, rv->base) : nullptr;
+    return rv ? new IR::Constant(rv->srcInfo, rv->type, rv->value, rv->base) : nullptr;
 }
 
 IR::Vector<IR::Expression>
