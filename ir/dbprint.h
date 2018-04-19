@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ enum dbprint_flags {
     Prec_Prefix = 14,
     Prec_Mul = 13, Prec_Div = 13, Prec_Mod = 13,
     Prec_Add = 12, Prec_Sub = 12,
+    Prec_AddSat = 12, Prec_SubSat = 12,
     Prec_Shl = 11, Prec_Shr = 11,
     Prec_BAnd = 10,
     Prec_BXor = 9,

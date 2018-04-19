@@ -67,6 +67,14 @@ class Sub : Operation_Binary {
     stringOp = "-";
     precedence = DBPrint::Prec_Sub;
 }
+class AddSat : Operation_Binary {
+    stringOp = "|+|";
+    precedence = DBPrint::Prec_AddSat;
+}
+class SubSat : Operation_Binary {
+    stringOp = "|-|";
+    precedence = DBPrint::Prec_SubSat;
+}
 class Shl : Operation_Binary {
     stringOp = "<<";
     precedence = DBPrint::Prec_Shl;

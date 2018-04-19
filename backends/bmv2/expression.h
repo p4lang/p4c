@@ -77,6 +77,7 @@ class ExpressionConverter : public Inspector {
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
     void binary(const IR::Operation_Binary* expression);
+    void saturated_binary(const IR::Operation_Binary* expression);
     Util::IJson* get(const IR::Expression* expression) const;
     Util::IJson* fixLocal(Util::IJson* json);
 
