@@ -29,7 +29,6 @@ set (BMV2_BACKEND_SRCS
   errorcode.cpp
   expression.cpp
   extern.cpp
-  extractArchInfo.cpp
   globals.cpp
   header.cpp
   helpers.cpp
@@ -52,7 +51,6 @@ set (BMV2_BACKEND_HDRS
   errorcode.h
   expression.h
   extern.h
-  extractArchInfo.h
   globals.h
   header.h
   helpers.h

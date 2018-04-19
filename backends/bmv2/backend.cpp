@@ -34,7 +34,7 @@ limitations under the License.
 #include "header.h"
 #include "parser.h"
 #include "JsonObjects.h"
-#include "extractArchInfo.h"
+#include "portableSwitch.h"
 
 namespace BMV2 {
 
@@ -249,7 +249,6 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
-        new ExtractArchInfo(typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });
@@ -316,23 +315,36 @@ void Backend::convert(BMV2Options& options) {
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(this, scalarsName);
 
-    // if (psa) tlb->apply(new ConvertExterns());
-    PassManager codegen_passes = {
-        new ConvertHeaders(this, scalarsName),
-        new ConvertExterns(this, options.emitExterns),  // only run when target == PSA
-        new ConvertParser(this),
-        new ConvertActions(this, options.emitExterns),
-        new ConvertControl(this, options.emitExterns),
-        new ConvertDeparser(this),
-    };
+    if (options.arch == "v1model") {
+        // if (psa) tlb->apply(new ConvertExterns());
+        PassManager codegen_passes = {
+            new ConvertHeaders(this, scalarsName),
+            new ConvertExterns(this, options.emitExterns),  // only run when target == PSA
+            new ConvertParser(this),
+            new ConvertActions(this, options.emitExterns),
+            new ConvertControl(this, options.emitExterns),
+            new ConvertDeparser(this),
+        };
 
-    codegen_passes.setName("CodeGen");
-    CHECK_NULL(toplevel);
-    auto main = toplevel->getMain();
-    if (main == nullptr)
-        return;
+        codegen_passes.setName("CodeGen");
+        CHECK_NULL(toplevel);
+        auto main = toplevel->getMain();
+        if (main == nullptr)
+            return;
 
-    main->apply(codegen_passes);
+        main->apply(codegen_passes);
+    } else if (options.arch == "psa") {
+        P4::PsaProgramStructure structure;
+        auto inspectPsaProgram = new P4::InspectPsaProgram(&structure);
+        auto convertPsaProgram = new P4::ConvertPsaProgramToJson(&structure);
+        PassManager psa_codegen = {
+            inspectPsaProgram,
+            convertPsaProgram,
+        };
+        auto main = toplevel->getMain();
+        main->apply(psa_codegen);
+    }
+
     (void)toplevel->apply(ConvertGlobals(this));
 }
 

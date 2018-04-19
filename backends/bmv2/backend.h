@@ -56,7 +56,6 @@ class Backend : public PassManager {
     P4::P4CoreLibrary&               corelib;
     ProgramParts                     structure;
     Util::JsonObject                 jsonTop;
-    P4::PortableModel&               model;  // remove
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
@@ -104,7 +103,6 @@ class Backend : public PassManager {
             P4::ConvertEnums::EnumMapping* enumMap) :
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
         corelib(P4::P4CoreLibrary::instance),
-        model(P4::PortableModel::instance),
         simpleSwitch(new P4V1::SimpleSwitch(this)),
         json(new BMV2::JsonObjects()),
         target(Target::SIMPLE_SWITCH) { refMap->setIsV1(isV1); setName("BackEnd"); }
@@ -117,7 +115,6 @@ class Backend : public PassManager {
     ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
-    P4::PortableModel &   getModel()     { return model; }
     ProgramParts &        getStructure() { return structure; }
     P4::ReferenceMap*     getRefMap()    { return refMap; }
     P4::TypeMap*          getTypeMap()   { return typeMap; }

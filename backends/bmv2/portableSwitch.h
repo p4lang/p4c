@@ -30,76 +30,83 @@ limitations under the License.
 
 namespace P4 {
 
-using ::Model::Elem;
-using ::Model::Type_Model;
-using ::Model::Param_Model;
+class PsaProgramStructure {
+    BMV2::JsonObjects*   json;     // output json data structure
 
-// Block has a name and a collection of elements
-template<typename T>
-struct Block_Model : public Type_Model {
-    std::vector<T> elems;
-    explicit Block_Model(cstring name) :
-        ::Model::Type_Model(name) {}
+    ordered_map<cstring, IR::Type_Header> header_types;
+    ordered_map<cstring, IR::Type_Struct> metadata_types;
+    ordered_map<cstring, IR::Type_HeaderUnion> header_union_types;
+    ordered_map<cstring, IR::Declaration_Variable> headers;
+    ordered_map<cstring, IR::Declaration_Variable> header_stacks;
+    ordered_map<cstring, IR::Declaration_Variable> header_unions;
+    ordered_map<cstring, IR::Type_Error> errors;
+    ordered_map<cstring, IR::Type_Enum> enums;
+    ordered_map<cstring, IR::P4Parser> parsers;
+    ordered_map<cstring, IR::P4ValueSet> parse_vsets;
+    ordered_map<cstring, IR::P4Control> deparsers;
+    ordered_map<cstring, IR::Declaration_Instance> meter_arrays;
+    ordered_map<cstring, IR::Declaration_Instance> counter_arrays;
+    ordered_map<cstring, IR::Declaration_Instance> register_arrays;
+    ordered_map<cstring, IR::P4Action> actions;
+    ordered_map<cstring, IR::P4Control> pipelines;
+    // ordered_map<cstring, ???> calculations;  // P4-16 has no field list.
+    ordered_map<cstring, IR::Declaration_Instance> checksums;
+    // ordered_map<cstring, ??? > learn_lists;  // P4-16 has no field list;
+    ordered_map<cstring, IR::Declaration_Instance> extern_instances;
+    ordered_map<cstring, cstring> field_aliases;
+
+public:
+    PsaProgramStructure() {
+        json = new BMV2::JsonObjects();
+    }
+
+    const IR::P4Program* create(const IR::P4Program* program);
+    void createTypes();
+    void createHeaders();
+    void createParsers();
+    void createExterns();
+    void createActions();
+    void createControls();
+    void createDeparsers();
 };
 
-/// Enum_Model : Block_Model<Elem> : Type_Model
-struct Enum_Model : public Block_Model<Elem> {
-    ::Model::Type_Model type;
-    explicit Enum_Model(cstring name) :
-        Block_Model(name), type("Enum") {}
+class InspectPsaProgram : public Inspector {
+    PsaProgramStructure *structure;
+
+public:
+    explicit InspectPsaProgram(PsaProgramStructure *structure)
+        : structure(structure) {
+        CHECK_NULL(structure);
+        setName("GeneratePsaProgram");
+    }
+
+    void postorder(const IR::P4Parser *p) override;
+    void postorder(const IR::P4Control* c) override;
+    void postorder(const IR::Type_Header* h) override;
+    void postorder(const IR::Type_HeaderUnion* hu) override;
+    void postorder(const IR::Declaration_Variable* var) override;
+    void postorder(const IR::Declaration_Instance* di) override;
+    void postorder(const IR::P4Action* act) override;
+    void postorder(const IR::Type_Error* err) override;
 };
 
-/// Parser_Model : Block_Model<Param_Model> : Type_Model
-struct Parser_Model : public Block_Model<Param_Model> {
-    ::Model::Type_Model type;
-    explicit Parser_Model(cstring name) :
-        Block_Model<Param_Model>(name), type("Parser") {}
-};
+class ConvertPsaProgramToJson : public Inspector {
+    PsaProgramStructure *structure;
 
-/// Control_Model : Block_Model<Param_Model> : Type_Model
-struct Control_Model : public Block_Model<Param_Model> {
-    ::Model::Type_Model type;
-    explicit Control_Model(cstring name) :
-        Block_Model<Param_Model>(name), type("Control") {}
-};
+public:
+    explicit ConvertPsaProgramToJson(PsaProgramStructure *structure)
+        : structure(structure) {
+        CHECK_NULL(structure);
+        setName("GeneratePsaProgram");
+    }
 
-/// Method_Model : Block_Model<Param_Model> : Type_Model
-struct Method_Model : public Block_Model<Param_Model> {
-    ::Model::Type_Model type;
-    explicit Method_Model(cstring name) :
-        Block_Model<Param_Model>(name), type("Method") {}
-};
+    bool preorder(const IR::P4Program *program) override {
+        auto *rv = structure->create(program);
+        return false;
 
-/// Extern_Model : Block_Model<Method_Model> : Type_Model
-struct Extern_Model : public Block_Model<Method_Model> {
-    ::Model::Type_Model type;
-    explicit Extern_Model(cstring name) :
-        Block_Model<Method_Model>(name), type("Extern") {}
-};
-
-/// PortableModel : Model::Model
-class PortableModel : public ::Model::Model {
- public:
-    std::vector<Parser_Model*>  parsers;
-    std::vector<Control_Model*> controls;
-    std::vector<Extern_Model*>  externs;
-    std::vector<Type_Model*>    match_kinds;
-    bool find_match_kind(cstring kind_name);
-    bool find_extern(cstring extern_name);
-    static PortableModel instance;
-    PortableModel() : ::Model::Model("0.2") {}
+    }
 };
 
 }  // namespace P4
-
-std::ostream& operator<<(std::ostream &out, Model::Type_Model& m);
-std::ostream& operator<<(std::ostream &out, Model::Param_Model& p);
-std::ostream& operator<<(std::ostream &out, P4::PortableModel& e);
-std::ostream& operator<<(std::ostream &out, P4::Method_Model& p);
-std::ostream& operator<<(std::ostream &out, P4::Parser_Model* p);
-std::ostream& operator<<(std::ostream &out, P4::Control_Model* p);
-std::ostream& operator<<(std::ostream &out, P4::Extern_Model* p);
-
-// portableSwitch
 
 #endif  /* _BACKENDS_BMV2_PORTABLESWITCH_H_ */

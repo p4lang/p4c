@@ -19,78 +19,107 @@ limitations under the License.
 
 namespace P4 {
 
-PortableModel PortableModel::instance;
-
+const IR::P4Program* PsaProgramStructure::create(const IR::P4Program* program) {
+    createTypes();
+    createHeaders();
+    createExterns();
+    createParsers();
+    createActions();
+    createControls();
+    createDeparsers();
+    return program;
 }
 
-bool P4::PortableModel::find_match_kind(cstring kind_name) {
-    bool found = false;
-    for (auto m : instance.match_kinds) {
-        if (m->toString() == kind_name) {
-            found = true;
-            break;
-        }
-    }
-    return found;
+void PsaProgramStructure::createTypes() {
+    // add header_types to json
+    // e.g. use existing API in JsonObjects.h
+    // json->add_header_type();
+
+    // add header_union_types to json
+    // add errors to json
+    // add enums to json
 }
 
-bool P4::PortableModel::find_extern(cstring extern_name) {
-    bool found = false;
-    for (auto m : instance.externs) {
-        if (m->type.toString() == extern_name) {
-            found = true;
-            break;
-        }
-    }
-    return found;
+void PsaProgramStructure::createHeaders() {
+    // add headers to json
+    // add header_stacks to json
+    // add header_unions to json
 }
 
-std::ostream& operator<<(std::ostream &out, Model::Type_Model& m) {
-    out << "Type_Model(" << m.toString() << ")";
-    return out;
+void PsaProgramStructure::createParsers() {
+    // add parsers to json
 }
 
-std::ostream& operator<<(std::ostream &out, Model::Param_Model& p) {
-    out << "Param_Model(" << p.toString() << ") " << p.type;
-    return out;
+void PsaProgramStructure::createExterns() {
+    // add parse_vsets to json
+    // add meter_arrays to json
+    // add counter_arrays to json
+    // add register_arrays to json
+    // add checksums to json
+    // add learn_list to json
+    // add calculations to json
+    // add extern_instances to json
 }
 
-std::ostream& operator<<(std::ostream &out, P4::PortableModel& e) {
-    out << "PortableModel " << e.version << std::endl;
-    for (auto v : e.parsers)  out << v;
-    for (auto v : e.controls) out << v;
-    for (auto v : e.externs)  out << v;
-    return out;
+void PsaProgramStructure::createActions() {
+    // add actions to json
 }
 
-std::ostream& operator<<(std::ostream &out, P4::Method_Model& p) {
-    out << "Method_Model(" << p.toString() << ") " << p.type << std::endl;
-    for (auto e : p.elems) {
-        out << "    " << e << std::endl;
-    }
-    return out;
+void PsaProgramStructure::createControls() {
+    // add pipelines to json
 }
 
-std::ostream& operator<<(std::ostream &out, P4::Parser_Model* p) {
-    out << "Parser_Model(" << p->toString() << ") " << p->type << std::endl;
-    for (auto e : p->elems) {
-        out << "  " << e << std::endl;
-    }
-    return out;
+void PsaProgramStructure::createDeparsers() {
+    // add deparsers to json
 }
 
-std::ostream& operator<<(std::ostream &out, P4::Control_Model* p) {
-    out << "Control_Model(" << p->toString() << ") " << p->type << std::endl;
-    for (auto e : p->elems) {
-        out << "  " << e << std::endl;
-    }
-    return out;
+void InspectPsaProgram::postorder(const IR::P4Parser* p) {
+    // inspect IR::P4Parser
+    // populate structure->parsers
 }
 
-std::ostream& operator<<(std::ostream &out, P4::Extern_Model* p) {
-    out << "Extern_Model(" << p->toString() << ") " << p->type << std::endl;
-    for (auto e : p->elems) {
-        out << "  " << e << std::endl;
-    }
-    return out;
+void InspectPsaProgram::postorder(const IR::P4Control* c) {
+    // inspect IR::P4Control
+    // populate structure->pipelines or
+    //          structure->deparsers
 }
+
+void InspectPsaProgram::postorder(const IR::Type_Header* h) {
+    // inspect IR::Type_Header
+    // populate structure->header_types;
+}
+
+void InspectPsaProgram::postorder(const IR::Type_HeaderUnion* hu) {
+    // inspect IR::Type_HeaderUnion
+    // populate structure->header_union_types;
+}
+
+void InspectPsaProgram::postorder(const IR::Declaration_Variable* var) {
+    // inspect IR::Declaration_Variable
+    // populate structure->headers or
+    //          structure->header_stacks or
+    //          structure->header_unions
+    // based on the type of the variable
+}
+
+void InspectPsaProgram::postorder(const IR::Declaration_Instance* di) {
+    // inspect IR::Declaration_Instance,
+    // populate structure->meter_arrays or
+    //          structure->counter_arrays or
+    //          structure->register_arrays or
+    //          structure->extern_instances or
+    //          structure->checksums
+    // based on the type of the instance
+}
+
+void InspectPsaProgram::postorder(const IR::P4Action* act) {
+    // inspect IR::P4Action,
+    // populate structure->actions
+}
+
+void postorder(const IR::Type_Error* err) {
+    // inspect IR::Type_Error
+    // populate structure->errors.
+}
+
+}  // namespace P4
