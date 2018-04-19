@@ -147,8 +147,9 @@ abstract Operation : Expression {
     toString{ return getStringOp(); }
 }
 
-/// A Path is a vestige of a previous design.
-/// Today paths can only consist of a '.'
+/// Currently paths can be absolute (starting with a dot) or relative
+/// (just an identifier).  In a previous design paths could have
+/// multiple components.
 class Path {
     ID   name;
     optional bool absolute = false;
@@ -251,6 +252,23 @@ interface IAnnotated {
 interface IInstance {
     virtual cstring Name() const = 0;
     virtual Type getType() const = 0;
+}
+
+/// An argument to a function call (or constructor call)
+/// Arguments may have optional names
+class Argument {
+    /// If an argument has no name the name.name is nullptr.
+    optional ID name;
+    Expression expression;
+    Argument { if (!srcInfo && expression) srcInfo = expression->srcInfo; }
+    dbprint { out << (name.name.isNullOrEmpty() ? "" : name.name + " = ") << expression; }
+    validate { CHECK_NULL(expression); }
+    toString{
+        cstring result = "";
+        if (!name.name.isNullOrEmpty())
+            result = name.toString() + " = ";
+        return result + expression->toString();
+    }
 }
 
 /** @} *//* end group irdefs */

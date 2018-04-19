@@ -56,21 +56,21 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
     } else {
         BUG("%1%: unexpected type", specialized);
     }
-    LOG1("Created " << result);
+    LOG2("Created " << result);
     return result;
 }
 
-const IR::Expression* SpecializationMap::convertArgument(
-    const IR::Expression* arg, SpecializationInfo* spec) {
-    if (arg->is<IR::ConstructorCallExpression>()) {
-        auto cce = arg->to<IR::ConstructorCallExpression>();
+const IR::Argument* SpecializationMap::convertArgument(
+    const IR::Argument* arg, SpecializationInfo* spec) {
+    if (arg->expression->is<IR::ConstructorCallExpression>()) {
+        auto cce = arg->expression->to<IR::ConstructorCallExpression>();
         cstring nName = refMap->newName("inst");
         auto decl = new IR::Declaration_Instance(
             IR::ID(nName, nullptr),
             cce->constructedType, cce->arguments);
         spec->declarations->push_back(decl);
         auto path = new IR::PathExpression(IR::ID(nName, nullptr));
-        return path;
+        return new IR::Argument(arg->srcInfo, arg->name, path);
     } else {
         return arg;
     }
@@ -86,7 +86,7 @@ void SpecializationMap::addSpecialization(
     auto cc = ConstructorCall::resolve(invocation, refMap, typeMap);
     auto ccc = cc->to<ContainerConstructorCall>();
     CHECK_NULL(ccc);
-    spec->constructorArguments = new IR::Vector<IR::Expression>();
+    spec->constructorArguments = new IR::Vector<IR::Argument>();
     for (auto ca : *invocation->arguments) {
         auto arg = convertArgument(ca, spec);
         spec->constructorArguments->push_back(arg);
@@ -129,7 +129,7 @@ SpecializationMap::getSpecializations(const IR::Node* insertionPoint) const {
             if (result == nullptr)
                 result = new IR::Vector<IR::Node>();
             auto node = s.second->synthesize(refMap);
-            LOG1("Will insert " << node << " before " << insertionPoint);
+            LOG2("Will insert " << node << " before " << insertionPoint);
             result->push_back(node);
         }
     }
@@ -176,7 +176,7 @@ bool FindSpecializations::isSimpleConstant(const IR::Expression* expr) const {
     if (expr->is<IR::ConstructorCallExpression>()) {
         auto cce = expr->to<IR::ConstructorCallExpression>();
         for (auto e : *cce->arguments)
-            if (!isSimpleConstant(e))
+            if (!isSimpleConstant(e->expression))
                 return false;
         return true;
     }
@@ -210,7 +210,7 @@ void FindSpecializations::postorder(const IR::ConstructorCallExpression* express
     if (!cc->is<ContainerConstructorCall>())
         return;
     for (auto arg : *expression->arguments) {
-        if (!isSimpleConstant(arg))
+        if (!isSimpleConstant(arg->expression))
             return;
     }
 
@@ -235,7 +235,7 @@ void FindSpecializations::postorder(const IR::Declaration_Instance* decl) {
         type = ts->baseType;
     }
     for (auto arg : *decl->arguments) {
-        if (!isSimpleConstant(arg))
+        if (!isSimpleConstant(arg->expression))
             return;
     }
 
@@ -259,7 +259,7 @@ const IR::Node* Specialize::instantiate(const IR::Node* node) {
     auto specs = specMap->getSpecializations(getOriginal());
     if (specs == nullptr)
         return node;
-    LOG1(specs->size() << " instantiations before " << node);
+    LOG2(specs->size() << " instantiations before " << node);
     specs->push_back(node);
     return specs;
 }
@@ -269,8 +269,8 @@ const IR::Node* Specialize::postorder(IR::ConstructorCallExpression* expression)
     if (name.isNullOrEmpty())
         return expression;
     auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
-    auto result = new IR::ConstructorCallExpression(typeRef, new IR::Vector<IR::Expression>());
-    LOG1("Replaced " << expression << " with " << result);
+    auto result = new IR::ConstructorCallExpression(typeRef, new IR::Vector<IR::Argument>());
+    LOG2("Replaced " << expression << " with " << result);
     return result;
 }
 
@@ -281,9 +281,9 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
     if (!name.isNullOrEmpty()) {
         auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
         replacement = new IR::Declaration_Instance(
-            decl->name, decl->annotations, typeRef, new IR::Vector<IR::Expression>(),
-            decl->initializer);
-        LOG1("Replaced " << decl << " with " << replacement);
+            decl->name, decl->annotations, typeRef,
+            new IR::Vector<IR::Argument>(), decl->initializer);
+        LOG2("Replaced " << decl << " with " << replacement);
     }
 
     return instantiate(replacement);

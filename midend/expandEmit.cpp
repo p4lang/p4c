@@ -20,8 +20,8 @@ limitations under the License.
 namespace P4 {
 
 bool DoExpandEmit::expandArg(
-    const IR::Type* type, const IR::Expression* arg,
-    std::vector<const IR::Expression*> *result, std::vector<const IR::Type*> *resultTypes) {
+    const IR::Type* type, const IR::Argument* arg,
+    std::vector<const IR::Argument*> *result, std::vector<const IR::Type*> *resultTypes) {
     if (type->is<IR::Type_Header>()) {
         result->push_back(arg);
         resultTypes->push_back(type);
@@ -30,16 +30,17 @@ bool DoExpandEmit::expandArg(
         int size = st->getSize();
         for (int i = 0; i < size; i++) {
             auto index = new IR::Constant(i);
-            auto element = new IR::ArrayIndex(arg, index);
+            auto element = new IR::Argument(
+                arg->srcInfo, arg->name, new IR::ArrayIndex(arg->expression, index));
             result->push_back(element);
             resultTypes->push_back(st->elementType);
         }
         return true;
     } else if (auto tup = type->to<IR::Type_Tuple>()) {
-        auto le = arg->to<IR::ListExpression>();
+        auto le = arg->expression->to<IR::ListExpression>();
         BUG_CHECK(le != nullptr && le->size() == tup->size(), "%1%: not a list?", arg);
         for (size_t i = 0; i < le->size(); i++) {
-            auto expr = le->components.at(i);
+            auto expr = new IR::Argument(arg->srcInfo, arg->name, le->components.at(i));
             auto type = tup->components.at(i);
             expandArg(type, expr, result, resultTypes);
         }
@@ -49,7 +50,8 @@ bool DoExpandEmit::expandArg(
                   "%1%: expected a struct or header_union type", type);
         auto strct = type->to<IR::Type_StructLike>();
         for (auto f : strct->fields) {
-            auto expr = new IR::Member(arg, f->name);
+            auto expr = new IR::Argument(
+                arg->srcInfo, arg->name, new IR::Member(arg->expression, f->name));
             auto type = typeMap->getTypeType(f->type, true);
             expandArg(type, expr, result, resultTypes);
         }
@@ -69,7 +71,7 @@ const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
 
             auto arg0 = em->expr->arguments->at(0);
             auto type = typeMap->getType(arg0, true);
-            std::vector<const IR::Expression*> expansion;
+            std::vector<const IR::Argument*> expansion;
             std::vector<const IR::Type*> expansionTypes;
             if (expandArg(type, arg0, &expansion, &expansionTypes)) {
                 auto vec = new IR::IndexedVector<IR::StatOrDecl>();
@@ -77,7 +79,7 @@ const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
                 for (auto e : expansion) {
                     auto method = statement->methodCall->method->clone();
                     auto argType = *it;
-                    auto args = new IR::Vector<IR::Expression>();
+                    auto args = new IR::Vector<IR::Argument>();
                     args->push_back(e);
                     auto typeArgs = new IR::Vector<IR::Type>();
                     typeArgs->push_back(argType->getP4Type());

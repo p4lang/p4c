@@ -32,7 +32,7 @@ void CreateBuiltins::postorder(IR::ActionListElement* element) {
     if (element->expression->is<IR::PathExpression>())
         element->expression = new IR::MethodCallExpression(
             element->expression->srcInfo, element->expression,
-            new IR::Vector<IR::Type>(), new IR::Vector<IR::Expression>());
+            new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());
 }
 
 void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
@@ -44,7 +44,7 @@ void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
         expression->expression->is<IR::PathExpression>())
         expression->expression = new IR::MethodCallExpression(
             expression->expression->srcInfo, expression->expression,
-            new IR::Vector<IR::Type>(), new IR::Vector<IR::Expression>());
+            new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());
 }
 
 void CreateBuiltins::postorder(IR::ParserState* state) {
@@ -65,7 +65,7 @@ void CreateBuiltins::postorder(IR::ActionList* actions) {
             new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
             new IR::MethodCallExpression(
                 new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(actions->srcInfo)),
-                new IR::Vector<IR::Type>(), new IR::Vector<IR::Expression>())));
+                new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>())));
 }
 
 bool CreateBuiltins::preorder(IR::P4Table* table) {
@@ -79,7 +79,7 @@ void CreateBuiltins::postorder(IR::TableProperties* properties) {
     if (!addNoAction)
         return;
     auto act = new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(properties->srcInfo));
-    auto args = new IR::Vector<IR::Expression>();
+    auto args = new IR::Vector<IR::Argument>();
     auto methodCall = new IR::MethodCallExpression(act, args);
     auto prop = new IR::Property(
         IR::ID(IR::TableProperties::defaultActionPropertyName),

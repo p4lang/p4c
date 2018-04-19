@@ -47,7 +47,7 @@ void ConvertDeparser::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body
                             // arrays are expanded into elements.
                             int size = type->to<IR::Type_Stack>()->getSize();
                             for (int i=0; i < size; i++) {
-                                auto j = conv->convert(arg);
+                                auto j = conv->convert(arg->expression);
                                 auto e = j->to<Util::JsonObject>()->get("value");
                                 BUG_CHECK(e->is<Util::JsonValue>(),
                                           "%1%: Expected a Json value", e->toString());
@@ -56,7 +56,7 @@ void ConvertDeparser::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body
                                 result->append(ref);
                             }
                         } else if (type->is<IR::Type_Header>()) {
-                            auto j = conv->convert(arg);
+                            auto j = conv->convert(arg->expression);
                             auto val = j->to<Util::JsonObject>()->get("value");
                             result->append(val);
                         } else {

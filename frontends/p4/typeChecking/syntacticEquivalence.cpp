@@ -34,6 +34,16 @@ bool SameExpression::sameExpressions(const IR::Vector<IR::Expression>* left,
     return true;
 }
 
+bool SameExpression::sameExpressions(const IR::Vector<IR::Argument>* left,
+                                     const IR::Vector<IR::Argument>* right) const {
+    if (left->size() != right->size())
+        return false;
+    for (unsigned i = 0; i < left->size(); i++)
+        if (!sameExpression(left->at(i)->expression, right->at(i)->expression))
+            return false;
+    return true;
+}
+
 bool SameExpression::sameExpression(const IR::Expression* left, const IR::Expression* right) const {
     CHECK_NULL(left); CHECK_NULL(right);
     if (left->node_type_name() != right->node_type_name())

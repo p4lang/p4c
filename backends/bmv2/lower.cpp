@@ -163,9 +163,47 @@ RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
     auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);
-    auto assign = new IR::AssignmentStatement(new IR::PathExpression(name), expression);
+    auto assign = new IR::AssignmentStatement(
+        expression->srcInfo, new IR::PathExpression(name), expression);
     assignments.push_back(assign);
-    return new IR::PathExpression(name);
+    return new IR::PathExpression(expression->srcInfo, new IR::Path(name));
+}
+
+const IR::Vector<IR::Argument>*
+RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Argument>* args) {
+    bool changes = true;
+    auto result = new IR::Vector<IR::Argument>();
+    for (auto arg : *args) {
+        auto r = simplifyExpression(arg->expression, false);
+        if (r != arg->expression) {
+            changes = true;
+            result->push_back(new IR::Argument(arg->srcInfo, arg->name, r));
+        } else {
+            result->push_back(arg);
+        }
+    }
+    if (changes)
+        return result;
+    return args;
+}
+
+const IR::Expression*
+RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression, bool force) {
+    if (expression->is<IR::ListExpression>()) {
+        auto list = expression->to<IR::ListExpression>();
+        auto simpl = simplifyExpressions(&list->components);
+        if (simpl != &list->components)
+            return new IR::ListExpression(expression->srcInfo, *simpl);
+        return expression;
+    } else {
+        ComplexExpression ce;
+        (void)expression->apply(ce);
+        if (force || ce.isComplex) {
+            LOG3("Moved into temporary " << dbp(expression));
+            return createTemporary(expression);
+        }
+        return expression;
+    }
 }
 
 const IR::Vector<IR::Expression>*
@@ -178,28 +216,10 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
     bool changes = true;
     auto result = new IR::Vector<IR::Expression>();
     for (auto e : *vec) {
-        if (e->is<IR::ListExpression>()) {
-            auto list = e->to<IR::ListExpression>();
-            auto simpl = simplifyExpressions(&list->components);
-            if (simpl != &list->components) {
-                changes = true;
-                auto l = new IR::ListExpression(e->srcInfo, *simpl);
-                result->push_back(l);
-            } else {
-                result->push_back(e);
-            }
-        } else {
-            ComplexExpression ce;
-            (void)e->apply(ce);
-            if (force || ce.isComplex) {
-                changes = true;
-                LOG3("Moved into temporary " << dbp(e));
-                auto tmp = createTemporary(e);
-                result->push_back(tmp);
-            } else {
-                result->push_back(e);
-            }
-        }
+        auto r = simplifyExpression(e, force);
+        if (r != e)
+            changes = true;
+        result->push_back(r);
     }
     if (changes)
         return result;
@@ -247,17 +267,19 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
                 ::error("%1% expected 2 arguments", expression);
                 return expression;
             }
-            auto vec = new IR::Vector<IR::Expression>();
+            auto vec = new IR::Vector<IR::Argument>();
             // Digest has two arguments, we have to save the second one.
             // It should be a list expression.
             vec->push_back(expression->arguments->at(0));
-            auto arg1 = expression->arguments->at(1);
+            auto arg1 = expression->arguments->at(1)->expression;
             if (arg1->is<IR::ListExpression>()) {
                 auto list = simplifyExpressions(&arg1->to<IR::ListExpression>()->components, true);
                 arg1 = new IR::ListExpression(arg1->srcInfo, *list);
-                vec->push_back(arg1);
+                vec->push_back(new IR::Argument(arg1));
             } else {
-                auto tmp = createTemporary(expression->arguments->at(1));
+                auto tmp = new IR::Argument(
+                    expression->arguments->at(1)->srcInfo,
+                    createTemporary(expression->arguments->at(1)->expression));
                 vec->push_back(tmp);
             }
             expression->arguments = vec;

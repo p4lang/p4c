@@ -76,12 +76,12 @@ ConvertActions::convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::
                     prim = "remove_header";
                 } else if (builtin->name == IR::Type_Stack::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                    auto arg = conv->convert(mc->arguments->at(0));
+                    auto arg = conv->convert(mc->arguments->at(0)->expression);
                     prim = "push";
                     parameters->append(arg);
                 } else if (builtin->name == IR::Type_Stack::pop_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                    auto arg = conv->convert(mc->arguments->at(0));
+                    auto arg = conv->convert(mc->arguments->at(0)->expression);
                     prim = "pop";
                     parameters->append(arg);
                 } else {

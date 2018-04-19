@@ -69,6 +69,14 @@ class ConstantTypeSubstitution : public Transform {
         }
         return result;
     }
+    const IR::Vector<IR::Argument>* convert(const IR::Vector<IR::Argument>* vec) {
+        auto result = vec->apply(*this)->to<IR::Vector<IR::Argument>>();
+        if (result != vec) {
+            TypeInference learn(refMap, typeMap, true);
+            (void)result->apply(learn);
+        }
+        return result;
+    }
 };
 }  // namespace
 
@@ -744,10 +752,10 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
 }
 
 // Returns new arguments for constructor, which may have inserted casts
-const IR::Vector<IR::Expression> *
+const IR::Vector<IR::Argument> *
 TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                       const IR::Type_Extern* ext,
-                                      const IR::Vector<IR::Expression> *arguments) {
+                                      const IR::Vector<IR::Argument> *arguments) {
     auto tp = ext->getTypeParameters();
     if (!tp->empty()) {
         typeError("%1%: Type parameters must be supplied for constructor", errorPosition);
@@ -768,16 +776,16 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     CHECK_NULL(methodType);
 
     bool changes = false;
-    auto result = new IR::Vector<IR::Expression>();
+    auto result = new IR::Vector<IR::Argument>();
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
             BUG_CHECK(pi->getAnnotation("optional"), "Missing nonoptional arg %s", pi);
             break; }
         auto arg = arguments->at(i++);
-        if (!isCompileTimeConstant(arg))
+        if (!isCompileTimeConstant(arg->expression))
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
-        auto argType = getType(arg);
+        auto argType = getType(arg->expression);
         auto paramType = getType(pi);
         if (argType == nullptr || paramType == nullptr)
             return nullptr;
@@ -800,11 +808,11 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         }
 
         ConstantTypeSubstitution cts(tvs, refMap, typeMap);
-        auto newArg = cts.convert(arg);
+        auto newArg = cts.convert(arg->expression);
         if (::errorCount() > 0)
             return arguments;
 
-        result->push_back(newArg);
+        result->push_back(new IR::Argument(arg->srcInfo, arg->name, newArg));
         setType(newArg, paramType);
         changes = true;
     }
@@ -937,10 +945,10 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
 
 /// @returns: A pair containing the type returned by the constructor and the new arguments
 ///           (which may change due to insertion of casts).
-std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>
+std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>
 TypeInference::containerInstantiation(
     const IR::Node* node,  // can be Declaration_Instance or ConstructorCallExpression
-    const IR::Vector<IR::Expression>* constructorArguments,
+    const IR::Vector<IR::Argument>* constructorArguments,
     const IR::IContainer* container) {
     CHECK_NULL(node); CHECK_NULL(constructorArguments); CHECK_NULL(container);
     auto constructor = container->getConstructorMethodType();
@@ -955,12 +963,13 @@ TypeInference::containerInstantiation(
     // We build a type for the callExpression and unify it with the method expression
     // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
     auto args = new IR::Vector<IR::ArgumentInfo>();
-    for (auto arg : *constructorArguments) {
+    for (auto aarg : *constructorArguments) {
+        auto arg = aarg->expression;
         if (!isCompileTimeConstant(arg))
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         if (argType == nullptr)
-            return std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>(nullptr, nullptr);
+            return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType);
         args->push_back(argInfo);
     }
@@ -974,7 +983,7 @@ TypeInference::containerInstantiation(
     constraints.addEqualityConstraint(constructor, callType);
     auto tvs = constraints.solve(node, true);
     if (tvs == nullptr)
-        return std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>(nullptr, nullptr);
+        return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
     addSubstitutions(tvs);
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap);
@@ -982,7 +991,7 @@ TypeInference::containerInstantiation(
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
-    return std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>(returnType, newArgs);
+    return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(returnType, newArgs);
 }
 
 const IR::Node* TypeInference::preorder(IR::Function* function) {
@@ -996,6 +1005,16 @@ const IR::Node* TypeInference::preorder(IR::Function* function) {
     visit(function->body);
     prune();
     return function;
+}
+
+const IR::Node* TypeInference::postorder(IR::Argument* arg) {
+    if (done()) return arg;
+    auto type = getType(arg->expression);
+    if (type == nullptr)
+        return arg;
+    setType(getOriginal(), type);
+    setType(arg, type);
+    return arg;
 }
 
 const IR::Node* TypeInference::postorder(IR::Method* method) {
@@ -2487,7 +2506,7 @@ TypeInference::actionCall(bool inActionList,
             if ((p->direction != IR::Direction::None) || !inActionList)
                 typeError("%1%: parameter %2% must be bound", actionCall, p);
         } else {
-            auto arg = *it;
+            auto arg = (*it)->expression;
             auto paramType = getType(p);
             auto argType = getType(arg);
             if (paramType == nullptr || argType == nullptr)
@@ -2681,7 +2700,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), nullptr));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
-        for (auto arg : *expression->arguments) {
+        for (auto aarg : *expression->arguments) {
+            auto arg = aarg->expression;
             auto argType = getType(arg);
             if (argType == nullptr)
                 return expression;
@@ -3133,7 +3153,7 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
             for (unsigned i=0; i < actionListCall->arguments->size(); i++) {
                 auto aa = actionListCall->arguments->at(i);
                 auto da = default_call->arguments->at(i);
-                bool same = se.sameExpression(aa, da);
+                bool same = se.sameExpression(aa->expression, da->expression);
                 if (!same) {
                     typeError("%1%: argument does not match declaration in actions list: %2%",
                               da, aa);

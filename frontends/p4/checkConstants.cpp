@@ -26,7 +26,7 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression* expression) {
             bi->name == IR::Type_Stack::pop_front) {
             BUG_CHECK(expression->arguments->size() == 1,
                       "Expected 1 argument for %1%", expression);
-            auto arg0 = expression->arguments->at(0);
+            auto arg0 = expression->arguments->at(0)->expression;
             if (!arg0->is<IR::Constant>())
                 ::error("%1%: argument must be a constant", arg0);
         }

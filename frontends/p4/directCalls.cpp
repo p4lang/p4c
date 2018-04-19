@@ -38,7 +38,7 @@ const IR::Node* DoInstantiateCalls::postorder(IR::MethodCallExpression* expressi
                                   { new IR::StringLiteral(tn->typeName->path->toString()) }));
     auto inst = new IR::Declaration_Instance(
         expression->srcInfo, IR::ID(name), annos,
-        tn->typeName->clone(), new IR::Vector<IR::Expression>());
+        tn->typeName->clone(), new IR::Vector<IR::Argument>());
     insert.push_back(inst);
 
     auto path = new IR::PathExpression(expression->srcInfo,

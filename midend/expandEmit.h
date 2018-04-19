@@ -49,8 +49,8 @@ class DoExpandEmit : public Transform {
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoExpandEmit"); }
     // return true if the expansion produced something "new"
-    bool expandArg(const IR::Type* type, const IR::Expression* expression,
-                   std::vector<const IR::Expression*> *result,
+    bool expandArg(const IR::Type* type, const IR::Argument* argument,
+                   std::vector<const IR::Argument*> *result,
                    std::vector<const IR::Type*> *resultTypes);
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
 };

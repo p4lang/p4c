@@ -158,14 +158,14 @@ typedef const IR::Type ConstType;
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
 %type<IR::TypeParameters*>  optTypeParameters
-%type<IR::Expression*>      expression lvalue
-                            keysetExpression selectExpression
+%type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
-                            argument simpleKeysetExpression
-                            transitionStatement switchLabel
+                            simpleKeysetExpression transitionStatement switchLabel
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
+%type<IR::Argument*>        argument
+%type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
 %type<IR::Parameter*>       parameter
 %type<OptionalConst>        optCONST
 %type<IR::Annotations*>     optAnnotations
@@ -173,7 +173,7 @@ typedef const IR::Type ConstType;
 %type<IR::Annotation*>      annotation
 %type<IR::IndexedVector<IR::Parameter>*>  parameterList nonEmptyParameterList
                                           optConstructorParameters
-%type<IR::Vector<IR::Expression>*>        argumentList nonEmptyArgList expressionList
+%type<IR::Vector<IR::Expression>*>        expressionList
                                           simpleExpressionList tupleKeysetExpression
 %type<IR::IndexedVector<IR::Declaration_ID>*>  identifierList
 %type<IR::SelectCase*>      selectCase
@@ -493,13 +493,13 @@ simpleKeysetExpression
 // experimental
 valueSetDeclaration
     : optAnnotations
-        VALUESET "<" baseType ">" "(" argument ")" name ";"
+        VALUESET "<" baseType ">" "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" tupleType ">" "(" argument ")" name ";"
+        VALUESET "<" tupleType ">" "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" typeName ">" "(" argument ")" name ";"
+        VALUESET "<" typeName ">" "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     ;
 
@@ -967,19 +967,20 @@ functionDeclaration
     ;
 
 argumentList
-    : /* empty */                        { $$ = new IR::Vector<IR::Expression>(); }
+    : /* empty */                        { $$ = new IR::Vector<IR::Argument>(); }
     | nonEmptyArgList                    { $$ = $1; }
     ;
 
 nonEmptyArgList
-    : argument                           { $$ = new IR::Vector<IR::Expression>();
+    : argument                           { $$ = new IR::Vector<IR::Argument>();
                                            $$->push_back($1); }
     | nonEmptyArgList "," argument       { $$ = $1; $$->push_back($3); }
     ;
 
 argument
-    : expression                         { $$ = $1; }
-    | "_"                                { $$ = new IR::DefaultExpression(@1); }
+    : expression                         { $$ = new IR::Argument(@1, $1); }
+    | name "=" expression                { $$ = new IR::Argument(@1, *$1, $3); }
+    | "_"                                { $$ = new IR::Argument(@1, new IR::DefaultExpression(@1)); }
     ;
 
 expressionList

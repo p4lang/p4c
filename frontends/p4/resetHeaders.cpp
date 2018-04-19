@@ -32,7 +32,7 @@ void DoResetHeaders::generateResets(
         }
     } else if (type->is<IR::Type_Header>()) {
         auto method = new IR::Member(expr->srcInfo, expr, IR::Type_Header::setInvalid);
-        auto args = new IR::Vector<IR::Expression>();
+        auto args = new IR::Vector<IR::Argument>();
         auto mc = new IR::MethodCallExpression(expr->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
         resets->push_back(stat);

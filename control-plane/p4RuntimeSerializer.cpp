@@ -477,7 +477,7 @@ struct Counterlike {
             return boost::none;
         }
 
-        auto unitArgument = instance.arguments->at(0);
+        auto unitArgument = instance.arguments->at(0)->expression;
         if (unitArgument == nullptr) {
             ::error("Direct %1% instance %2% should take a constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
@@ -1357,7 +1357,7 @@ getDigestCall(const IR::MethodCallExpression* call,
     }
 
     // The first argument is a numeric constant identifying the receiver.
-    auto receiver = call->arguments->at(0);
+    auto receiver = call->arguments->at(0)->expression;
     if (!receiver->is<IR::Constant>()) {
         ::error("%1%: Expected constant receiver", call);
         return boost::none;
@@ -1368,7 +1368,7 @@ getDigestCall(const IR::MethodCallExpression* call,
     // we could theoretically support passing more complicated expressions to
     // digest(), but it's not well supported right now.
     std::vector<Digest::Field> fields;
-    auto data = call->arguments->at(1);
+    auto data = call->arguments->at(1)->expression;
     auto dataType = typeMap->getType(data, true);
     if (data->is<IR::ListExpression>()) {
         for (auto expression : data->to<IR::ListExpression>()->components) {
@@ -1852,10 +1852,10 @@ getActionProfile(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
     const IR::Expression* sizeExpression;
     if (instance->type->name == P4V1::V1Model::instance.action_selector.name) {
         actionProfileType = ActionProfileType::INDIRECT_WITH_SELECTOR;
-        sizeExpression = instance->arguments->at(1);
+        sizeExpression = instance->arguments->at(1)->expression;
     } else if (instance->type->name == P4V1::V1Model::instance.action_profile.name) {
         actionProfileType = ActionProfileType::INDIRECT;
-        sizeExpression = instance->arguments->at(0);
+        sizeExpression = instance->arguments->at(0)->expression;
     } else {
         ::error("Table '%1%' has an implementation which doesn't resolve to an "
                 "action profile: %2%", table->controlPlaneName(),
@@ -1981,7 +1981,7 @@ class P4RuntimeEntriesConverter {
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
             auto width = parameter->type->width_bits();
-            auto value = stringRepr(arg->to<IR::Constant>()->value, ROUNDUP(width, 8));
+            auto value = stringRepr(arg->expression->to<IR::Constant>()->value, ROUNDUP(width, 8));
             if (value == boost::none) continue;
             protoParam->set_value(*value);
         }

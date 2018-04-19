@@ -34,6 +34,8 @@ class SameExpression {
     bool sameExpression(const IR::Expression* left, const IR::Expression* right) const;
     bool sameExpressions(const IR::Vector<IR::Expression>* left,
                          const IR::Vector<IR::Expression>* right) const;
+    bool sameExpressions(const IR::Vector<IR::Argument>* left,
+                         const IR::Vector<IR::Argument>* right) const;
 };
 
 }  // namespace P4

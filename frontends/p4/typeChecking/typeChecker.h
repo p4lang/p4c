@@ -140,17 +140,17 @@ class TypeInference : public Transform {
     const IR::Node* typeSet(const IR::Operation_Binary* op);
 
     const IR::Type* cloneWithFreshTypeVariables(const IR::IMayBeGenericType* type);
-    std::pair<const IR::Type*, const IR::Vector<IR::Expression>*>
+    std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>
     containerInstantiation(const IR::Node* node,
-                           const IR::Vector<IR::Expression>* args,
+                           const IR::Vector<IR::Argument>* args,
                            const IR::IContainer* container);
     const IR::Expression* actionCall(
         bool inActionList,   // if true this "call" is in the action list of a table
         const IR::MethodCallExpression* actionCall);
-    const IR::Vector<IR::Expression>*
+    const IR::Vector<IR::Argument>*
             checkExternConstructor(const IR::Node* errorPosition,
                                    const IR::Type_Extern* ext,
-                                   const IR::Vector<IR::Expression> *arguments);
+                                   const IR::Vector<IR::Argument> *arguments);
 
     static constexpr bool forbidModules = true;
     static constexpr bool forbidPackages = true;
@@ -217,6 +217,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Key* key) override;
     const IR::Node* postorder(IR::Entry* e) override;
 
+    const IR::Node* postorder(IR::Argument* arg) override;
     const IR::Node* postorder(IR::Parameter* param) override;
     const IR::Node* postorder(IR::Constant* expression) override;
     const IR::Node* postorder(IR::BoolLiteral* expression) override;

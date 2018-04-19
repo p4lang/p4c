@@ -305,10 +305,13 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         auto instanceName = get(renameMap, control->name);
         auto ctrl = new IR::PathExpression(IR::ID(instanceName));
         auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
-        auto args = new IR::Vector<IR::Expression>();
-        args->push_back(structure->conversionContext.header->clone());
-        args->push_back(structure->conversionContext.userMetadata->clone());
-        args->push_back(structure->conversionContext.standardMetadata->clone());
+        auto args = new IR::Vector<IR::Argument>();
+        args->push_back(new IR::Argument(
+            structure->conversionContext.header->clone()));
+        args->push_back(new IR::Argument(
+            structure->conversionContext.userMetadata->clone()));
+        args->push_back(new IR::Argument(
+            structure->conversionContext.standardMetadata->clone()));
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
@@ -461,9 +464,10 @@ const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *struct
     ExpressionConverter conv(structure);
     auto extref = new IR::PathExpression(structure->externs.get(ext));
     auto method = new IR::Member(prim->srcInfo, extref, prim->name);
-    auto args = new IR::Vector<IR::Expression>();
+    auto args = new IR::Vector<IR::Argument>();
     for (unsigned i = 1; i < prim->operands.size(); ++i)
-        args->push_back(conv.convert(prim->operands.at(i)));
+        args->push_back(new IR::Argument(
+            conv.convert(prim->operands.at(i))));
     auto mc = new IR::MethodCallExpression(prim->srcInfo, method, args);
     return new IR::MethodCallStatement(prim->srcInfo, mc);
 }
@@ -925,14 +929,14 @@ class FixExtracts final : public Transform {
             auto var = new IR::Declaration_Variable(IR::ID(varName), t->to<IR::Type>());
             auto length = ::get(lengths, t);
             varDecls.push_back(var);
-            auto args = new IR::Vector<IR::Expression>();
-            args->push_back(new IR::PathExpression(IR::ID(varName)));
+            auto args = new IR::Vector<IR::Argument>();
+            args->push_back(new IR::Argument(new IR::PathExpression(IR::ID(varName))));
             if (length != nullptr) {
                 length = length->apply(rewrite);
                 auto type = IR::Type_Bits::get(
                     P4::P4CoreLibrary::instance.packetIn.extractSecondArgSize);
                 auto cast = new IR::Cast(Util::SourceInfo(), type, length);
-                args->push_back(cast);
+                args->push_back(new IR::Argument(cast));
             }
             auto expression = new IR::MethodCallExpression(
                 mce->srcInfo, mce->method->clone(), args);
@@ -940,15 +944,15 @@ class FixExtracts final : public Transform {
         }
 
         auto setValid = new IR::Member(
-            mce->srcInfo, arg, IR::Type_Header::setValid);
+            mce->srcInfo, arg->expression, IR::Type_Header::setValid);
         result->push_back(new IR::MethodCallStatement(
             new IR::MethodCallExpression(
-                mce->srcInfo, setValid, new IR::Vector<IR::Expression>())));
+                mce->srcInfo, setValid, new IR::Vector<IR::Argument>())));
         unsigned index = 0;
         for (auto t : typeDecls) {
             auto var = varDecls.at(index);
             for (auto f : t->fields) {
-                auto left = new IR::Member(mce->srcInfo, arg, f->name);
+                auto left = new IR::Member(mce->srcInfo, arg->expression, f->name);
                 auto right = new IR::Member(mce->srcInfo,
                                             new IR::PathExpression(var->name), f->name);
                 auto assign = new IR::AssignmentStatement(mce->srcInfo, left, right);

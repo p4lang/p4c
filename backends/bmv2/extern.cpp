@@ -35,11 +35,9 @@ Extern::addExternAttributes(const IR::Declaration_Instance*,  // TODO: Unused pa
             }
         } else if (pVal->is<IR::Declaration_ID>()) {
             auto declId = pVal->to<IR::Declaration_ID>();
-            json->add_extern_attribute(name, "string", declId->name, attributes);
-        } else if (pVal->is<IR::Type_Enum>()) {
-            json->add_extern_attribute(name, "string", pVal->toString(), attributes);
+            json->add_extern_attribute(name, "string", declId->toString(), attributes);
         } else {
-            BUG("%1%: unknown constructor param type", p->type);
+            BUG("%1%: unexpected constructor argument", pVal);
         }
     }
     return attributes;

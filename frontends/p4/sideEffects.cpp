@@ -476,7 +476,7 @@ class DismantleExpression : public Transform {
         void postorder(const IR::ConstructorCallExpression* expression) override {
             const SetOfLocations* result = new SetOfLocations();
             for (auto e : *expression->arguments) {
-                auto s = ::get(rw, e);
+                auto s = ::get(rw, e->expression);
                 result = result->join(s);
             }
             rw.emplace(expression, result);
@@ -538,7 +538,7 @@ class DismantleExpression : public Transform {
         }
 
         auto copyBack = new IR::IndexedVector<IR::StatOrDecl>();
-        auto args = new IR::Vector<IR::Expression>();
+        auto args = new IR::Vector<IR::Argument>();
         MethodCallDescription desc(orig, refMap, typeMap);
         bool savelv = leftValue;
         bool savenu = resultNotUsed;
@@ -618,7 +618,7 @@ class DismantleExpression : public Transform {
         for (auto p : *desc.substitution.getParameters()) {
             auto arg = desc.substitution.lookup(p);
             if (p->direction == IR::Direction::None) {
-                args->push_back(arg);
+                args->push_back(new IR::Argument(arg));
                 continue;
             }
 
@@ -661,7 +661,7 @@ class DismantleExpression : public Transform {
                 copyBack->push_back(assign);
                 LOG3("Will copy out value " << dbp(assign));
             }
-            args->push_back(argValue);
+            args->push_back(new IR::Argument(argValue));
         }
         leftValue = savelv;
         resultNotUsed = savenu;

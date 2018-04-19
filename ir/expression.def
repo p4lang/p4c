@@ -315,19 +315,19 @@ class SelectExpression : Expression {
 class MethodCallExpression : Expression {
     Expression                  method;
     optional Vector<Type>       typeArguments = new Vector<Type>;
-    optional Vector<Expression> arguments = new Vector<Expression>;
+    optional Vector<Argument>   arguments = new Vector<Argument>;
     toString{ return method->toString(); }
     validate{ typeArguments->check_null(); arguments->check_null(); }
-    MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
-    : Expression(si), method(new PathExpression(m)), arguments(new Vector<Expression>(a)) {}
+    MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
+            : Expression(si), method(new PathExpression(m)), arguments(new Vector<Argument>(a)) {}
     MethodCallExpression(Util::SourceInfo si, Expression m,
-                         const std::initializer_list<Expression> &a)
-    : Expression(si), method(m), arguments(new Vector<Expression>(a)) {}
+                         const std::initializer_list<Argument> &a)
+    : Expression(si), method(m), arguments(new Vector<Argument>(a)) {}
 }
 
 class ConstructorCallExpression : Expression {
     Type               constructedType = type;  // Either a Type_Name or a Specialized_Type
-    Vector<Expression> arguments;
+    Vector<Argument>   arguments;
     toString{ return constructedType->toString(); }
     validate{ BUG_CHECK(constructedType->is<Type_Name>() ||
                         constructedType->is<Type_Specialized>(),

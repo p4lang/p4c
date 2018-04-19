@@ -238,7 +238,7 @@ class ProgramStructure {
     const IR::AssignmentStatement* assign(Util::SourceInfo srcInfo, const IR::Expression* left,
                                           const IR::Expression* right, const IR::Type* type);
     virtual const IR::Expression* convertFieldList(const IR::Expression* expression);
-    virtual const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
+    virtual const IR::Expression* convertHashAlgorithm(Util::SourceInfo srcInfo, IR::ID algorithm);
     virtual const IR::Expression* convertHashAlgorithms(const IR::NameList *algorithm);
     virtual const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
                                                     const IR::Type *regElementType = nullptr);

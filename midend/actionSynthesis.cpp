@@ -27,9 +27,10 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto ac = mi->to<ActionCall>();
 
     auto action = ac->action;
-    auto directionArgs = new IR::Vector<IR::Expression>();
+    auto directionArgs = new IR::Vector<IR::Argument>();
     auto mc = statement->methodCall;
 
+    // TODO: should use argument names
     auto it = action->parameters->parameters.begin();
     auto arg = mc->arguments->begin();
     for (; it != action->parameters->parameters.end(); ++it) {
@@ -53,7 +54,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
         IR::ID(IR::TableProperties::actionsPropertyName, nullptr),
         actlist, false);
     // default action property
-    auto otherArgs = new IR::Vector<IR::Expression>();
+    auto otherArgs = new IR::Vector<IR::Argument>();
     for (; it != action->parameters->parameters.end(); ++it) {
         otherArgs->push_back(*arg);
         ++arg;
@@ -81,7 +82,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto method = new IR::Member(tblpath, IR::IApply::applyMethodName);
     auto mce = new IR::MethodCallExpression(
         statement->srcInfo, method, new IR::Vector<IR::Type>(),
-        new IR::Vector<IR::Expression>());
+        new IR::Vector<IR::Argument>());
     auto stat = new IR::MethodCallStatement(mce->srcInfo, mce);
     return stat;
 }
