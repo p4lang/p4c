@@ -245,7 +245,7 @@ class ProgramStructure {
     virtual const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
     virtual const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
     virtual const IR::Expression* paramReference(const IR::Parameter* param);
-    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
+    const IR::Statement* sliceAssign(const IR::Primitive* prim, const IR::Expression* left,
                                      const IR::Expression* right, const IR::Expression* mask);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
