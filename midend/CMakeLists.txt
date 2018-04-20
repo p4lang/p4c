@@ -47,6 +47,7 @@ set (MIDEND_HDRS
   convertEnums.h
   copyStructures.h
   eliminateTuples.h
+  eliminateNewtype.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h

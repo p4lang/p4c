@@ -317,7 +317,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     if (type->is<IR::Type_SpecializedCanonical>() ||
         type->is<IR::Type_InfInt>() ||
         type->is<IR::Type_Action>() ||
-        type->is<IR::Type_Error>()) {
+        type->is<IR::Type_Error>() ||
+        type->is<IR::Type_Newtype>()) {
         return type;
     } else if (type->is<IR::Type_Dontcare>()) {
         return IR::Type_Dontcare::get();
@@ -685,14 +686,20 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
+        } else if (dest->is<IR::Type_Newtype>()) {
+            return src == dest->to<IR::Type_Newtype>()->type;
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
             auto b = dest->to<IR::Type_Bits>();
             return b->size == 1 && !b->isSigned;
+        } else if (dest->is<IR::Type_Newtype>()) {
+            return src == dest->to<IR::Type_Newtype>()->type;
         }
     } else if (src->is<IR::Type_InfInt>()) {
         return dest->is<IR::Type_Bits>();
+    } else if (src->is<IR::Type_Newtype>()) {
+        return dest == src->to<IR::Type_Newtype>()->type;
     }
     return false;
 }
@@ -1231,6 +1238,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Base* type) {
     return type;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_Newtype* type) {
+    (void)setTypeType(type);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Typedef* tdecl) {
     if (done()) return tdecl;
     auto type = getType(tdecl->type);
@@ -1310,12 +1322,14 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) {
+        while (t->is<IR::Type_Newtype>())
+            t = t->to<IR::Type_Newtype>()->type;
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
         t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
-        t->is<IR::Type_Varbits>() ||
-        t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>(); };
+        t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
+        t->is<IR::Type_Tuple>(); };
     validateFields(canon, validator);
     return type;
 }
@@ -2085,7 +2099,9 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
-    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
+    if (!castType->is<IR::Type_Bits>() &&
+        !castType->is<IR::Type_Boolean>() &&
+        !castType->is<IR::Type_Newtype>()) {
         ::error("%1%: casts are only supported to base types", expression->destType);
         return expression;
     }

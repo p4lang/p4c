@@ -209,6 +209,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Tuple* type) override;
     const IR::Node* postorder(IR::Type_Set* type) override;
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
+    const IR::Node* postorder(IR::Type_Newtype* type) override;
     const IR::Node* postorder(IR::Type_Package* type) override;
     const IR::Node* postorder(IR::Type_ActionEnum* type) override;
     const IR::Node* postorder(IR::P4Table* type) override;

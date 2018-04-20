@@ -154,7 +154,7 @@ typedef const IR::Type ConstType;
 %token      TRUE FALSE THIS
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
             ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-            INT KEY SELECT MATCH_KIND OUT PACKAGE PARSER RETURN STATE STRUCT
+            INT KEY SELECT MATCH_KIND NEWTYPE OUT PACKAGE PARSER RETURN STATE STRUCT
             SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE STRING_LITERAL
@@ -760,6 +760,11 @@ typedefDeclaration
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
+    // experimental
+    | optAnnotations NEWTYPE typeRef name   { driver.structure->declareType(*$4);
+          $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
+    | optAnnotations NEWTYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+                        $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
     ;
 
 /*************************** STATEMENTS *************************/
