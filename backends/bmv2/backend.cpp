@@ -244,6 +244,18 @@ class BuildResourceMap : public Inspector {
     }
 };
 
+class ExtractMatchKind : public Inspector {
+ public:
+    Backend *backend;
+    ExtractMatchKind(Backend* backend) : backend(backend) {}
+    bool preorder(const IR::Declaration_MatchKind* kind) override {
+        for (auto member : kind->members) {
+            backend->match_kinds.insert(member->name);
+        }
+        return false;
+    }
+};
+
 void
 Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
@@ -284,6 +296,7 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
 
     // These passes are logically bmv2-specific
     PassManager simplify = {
+        new ExtractMatchKind(this),
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),

@@ -149,7 +149,8 @@ cstring ControlConverter::getKeyMatchType(const IR::KeyElement *ke) {
 
     if (mt->name.name == backend->getCoreLibrary().exactMatch.name ||
         mt->name.name == backend->getCoreLibrary().ternaryMatch.name ||
-        mt->name.name == backend->getCoreLibrary().lpmMatch.name) {
+        mt->name.name == backend->getCoreLibrary().lpmMatch.name ||
+        backend->match_kinds.count(mt->name.name)) {
         return mt->name.name;
     }
 

@@ -88,6 +88,8 @@ class Backend {
     std::set<cstring>                verify_checksum_controls;
     std::set<cstring>                deparser_controls;
 
+    std::set<cstring>                match_kinds;
+
     // map IR node to compile-time allocated resource blocks.
     std::map<const IR::Node*, const IR::CompileTimeValue*>  resourceMap;
 
