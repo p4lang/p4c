@@ -88,6 +88,9 @@ class Backend {
     std::set<cstring>                verify_checksum_controls;
     std::set<cstring>                deparser_controls;
 
+    // map IR node to compile-time allocated resource blocks.
+    std::map<const IR::Node*, const IR::CompileTimeValue*>  resourceMap;
+
     // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
     // provide an map from user program block name to hard-coded names.
     std::map<cstring, cstring>       pipeline_namemap;

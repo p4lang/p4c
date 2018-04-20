@@ -712,16 +712,15 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
         }
     }
 
-    // hanw: skip for PSA
     for (auto c : cont->controlLocals) {
         if (c->is<IR::Declaration_Constant>() ||
             c->is<IR::Declaration_Variable>() ||
             c->is<IR::P4Action>() ||
             c->is<IR::P4Table>())
             continue;
-#if 0
         if (c->is<IR::Declaration_Instance>()) {
-            auto bl = block->getValue(c);
+            auto block = backend->resourceMap.at(cont);
+            auto bl = block->to<IR::ControlBlock>()->getValue(c);
             CHECK_NULL(bl);
             if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
                 // Since this block has not been inlined, it is probably unused
@@ -729,12 +728,12 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
                 continue;
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
+                LOG1("extern block " << eb);
                 backend->getSimpleSwitch()->convertExternInstances(c, eb, action_profiles,
                                                                    selector_check, emitExterns);
                 continue;
             }
         }
-#endif
         P4C_UNIMPLEMENTED("%1%: not yet handled", c);
     }
 

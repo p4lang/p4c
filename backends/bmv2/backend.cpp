@@ -180,6 +180,70 @@ class RenameUserMetadata : public Transform {
     }
 };
 
+class BuildResourceMap : public Inspector {
+ public:
+    Backend* backend;
+
+    BuildResourceMap(Backend *backend) : backend(backend) {};
+
+    bool preorder(const IR::ControlBlock* control) override {
+        backend->resourceMap.emplace(control->container, control);
+        for (auto cv : control->constantValue) {
+            backend->resourceMap.emplace(cv.first, cv.second);
+        }
+
+        for (auto c : control->container->controlLocals) {
+            if (c->is<IR::InstantiatedBlock>()) {
+                backend->resourceMap.emplace(c, control->getValue(c));
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::ParserBlock* parser) override {
+        backend->resourceMap.emplace(parser->container, parser);
+        for (auto cv : parser->constantValue) {
+            backend->resourceMap.emplace(cv.first, cv.second);
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+
+        for (auto c : parser->container->parserLocals) {
+            if (c->is<IR::InstantiatedBlock>()) {
+                backend->resourceMap.emplace(c, parser->getValue(c));
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::TableBlock* table) override {
+        backend->resourceMap.emplace(table->container, table);
+        for (auto cv : table->constantValue) {
+            backend->resourceMap.emplace(cv.first, cv.second);
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::PackageBlock* package) override {
+        for (auto cv : package->constantValue) {
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::ToplevelBlock* tlb) override {
+        auto package = tlb->getMain();
+        visit(package);
+        return false;
+    }
+};
+
 void
 Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
@@ -235,7 +299,12 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new VisitFunctor([this, evaluator]() {
+            toplevel = evaluator->getToplevelBlock();
+            auto main = toplevel->getMain();
+            auto brm = new BuildResourceMap(this);
+            toplevel->apply(*brm);
+        }),
     };
     tlb->getProgram()->apply(simplify);
 

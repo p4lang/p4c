@@ -60,7 +60,7 @@ class ControlConverter : public Inspector {
     explicit ControlConverter(Backend *backend, const bool& emitExterns_) : backend(backend),
         refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
         conv(backend->getExpressionConverter()), json(backend->json), emitExterns(emitExterns_)
-    { setName("Control"); }
+    { setName("ControlConverter"); }
 };
 
 class ChecksumConverter : public Inspector {
