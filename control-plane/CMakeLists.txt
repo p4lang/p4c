@@ -23,6 +23,10 @@ set (P4RUNTIME_RT_PROTO ${P4RUNTIME_STD_DIR}/p4/p4runtime.proto)
 set (P4RUNTIME_RT_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/p4runtime.pb.cc)
 set (P4RUNTIME_RT_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/p4runtime.pb.h)
 
+set (P4RUNTIME_TYPES_PROTO ${P4RUNTIME_STD_DIR}/p4/p4types.proto)
+set (P4RUNTIME_TYPES_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/p4types.pb.cc)
+set (P4RUNTIME_TYPES_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/p4types.pb.h)
+
 set (P4RUNTIME_DEPS_PROTO ${P4RUNTIME_STD_DIR}/google/rpc/status.proto)
 set (P4RUNTIME_DEPS_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/google/rpc/status.pb.cc)
 set (P4RUNTIME_DEPS_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/google/rpc/status.pb.h)
@@ -34,11 +38,14 @@ set (P4RUNTIME_ARCH_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/v1model.pb.cc
 set (P4RUNTIME_ARCH_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/v1model.pb.h)
 
 set (P4RUNTIME_GEN_SRCS ${P4RUNTIME_INFO_GEN_SRCS} ${P4RUNTIME_ARCH_GEN_SRCS}
-                        ${P4RUNTIME_RT_GEN_SRCS} ${P4RUNTIME_DEPS_GEN_SRCS})
+                        ${P4RUNTIME_RT_GEN_SRCS} ${P4RUNTIME_DEPS_GEN_SRCS}
+                        ${P4RUNTIME_TYPES_GEN_SRCS})
 set (P4RUNTIME_GEN_HDRS ${P4RUNTIME_INFO_GEN_HDRS} ${P4RUNTIME_ARCH_GEN_HDRS}
-                        ${P4RUNTIME_RT_GEN_HDRS} ${P4RUNTIME_DEPS_GEN_HDRS})
+                        ${P4RUNTIME_RT_GEN_HDRS} ${P4RUNTIME_DEPS_GEN_HDRS}
+                        ${P4RUNTIME_TYPES_GEN_HDRS})
 set (P4RUNTIME_PROTO ${P4RUNTIME_INFO_PROTO} ${P4RUNTIME_ARCH_PROTO}
-                     ${P4RUNTIME_RT_PROTO} ${P4RUNTIME_DEPS_PROTO})
+                     ${P4RUNTIME_RT_PROTO} ${P4RUNTIME_DEPS_PROTO}
+                     ${P4RUNTIME_TYPES_PROTO})
 set (P4RUNTIME_GEN_PYTHON "control-plane")
 
 # Generate source code from the .proto definitions using protoc. The output is
