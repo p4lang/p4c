@@ -51,7 +51,7 @@ control deparser(packet_out b, in Header_t h) {
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
     @name("ingress.usat_plus") action usat_plus_0() {
         standard_meta.egress_spec = 9w0;
-        h.h.res_8 = h.h.opr1_8 + h.h.opr2_8;
+        h.h.res_8 = h.h.opr1_8 |+| h.h.opr2_8;
     }
     @name("ingress.usat_minus") action usat_minus_0() {
         standard_meta.egress_spec = 9w0;

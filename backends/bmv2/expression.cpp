@@ -51,7 +51,8 @@ const IR::Node* ArithmeticFixup::postorder(IR::Expression* expression) {
 const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() ||
-        expression->is<IR::BXor>())
+        expression->is<IR::BXor>() ||
+        expression->is<IR::AddSat>() || expression->is<IR::SubSat>())
         // no need to clamp these
         return updateType(expression);
     if (type->is<IR::Type_Bits>())
@@ -450,11 +451,7 @@ void ExpressionConverter::postorder(const IR::IntMod* expression)  {
 }
 
 void ExpressionConverter::postorder(const IR::Operation_Binary* expression)  {
-    cstring op = expression->getStringOp();
-    if (op == "|+|" || op == "|-|")
-        saturated_binary(expression);
-    else
-        binary(expression);
+    binary(expression);
 }
 
 void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
@@ -483,8 +480,6 @@ void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
 void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expression) {
     // This should never happen if we correctly typecheck the program
     BUG_CHECK(expression->type->is<IR::Type_Bits>(), "saturated arithmetic requires bit types");
-
-    std::cerr << "saturated arith: " << *expression << std::endl;
 
     auto result = new Util::JsonObject();
     map.emplace(expression, result);
