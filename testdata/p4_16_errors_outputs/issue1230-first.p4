@@ -3,9 +3,10 @@
 control c() {
     table t {
         actions = {
-            NoAction;
+            NoAction();
         }
         size = true;
+        default_action = NoAction();
     }
     apply {
         t.apply();

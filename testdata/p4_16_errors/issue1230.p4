@@ -10,3 +10,9 @@ control c() {
         t.apply();
     }
 }
+
+
+control empty();
+package top(empty e);
+
+top(c()) main;

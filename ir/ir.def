@@ -368,8 +368,8 @@ class Declaration_Constant : Declaration, IAnnotated {
     dbprint { out << annotations << type << ' ' << name << " = " << *initializer; }
 }
 
-// Like a variable, but for a statically allocated instance.
-// The syntax is Contructor(args) name = initializer;
+/// Like a variable, but for a statically allocated instance.
+/// The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated, IInstance {
     optional Annotations  annotations = Annotations::empty;
     Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern
@@ -388,7 +388,7 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
         arguments->check_null(); }
 }
 
-// Toplevel program representation
+/// Toplevel program representation
 class P4Program : ISimpleNamespace {
     optional inline IndexedVector<Node> declarations;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
