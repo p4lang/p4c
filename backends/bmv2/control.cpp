@@ -653,29 +653,16 @@ Util::IJson* ControlConverter::convertIf(const CFG::IfNode* node, cstring prefix
     return result;
 }
 
-/**
-    Custom visitor to enable traversal on other blocks
-*/
-bool ControlConverter::preorder(const IR::PackageBlock *block) {
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::ControlBlock>()) {
-            visit(it.second->getNode());
-        }
-    }
-    return false;
-}
-
-bool ControlConverter::preorder(const IR::ControlBlock* block) {
-    auto bt = backend->pipeline_controls.find(block->container->name);
+bool ControlConverter::preorder(const IR::P4Control* cont) {
+    auto bt = backend->pipeline_controls.find(cont->name);
     if (bt == backend->pipeline_controls.end()) {
         return false;
     }
 
-    const IR::P4Control* cont = block->container;
     auto result = new Util::JsonObject();
-    auto it = backend->pipeline_namemap.find(block->container->name);
+    auto it = backend->pipeline_namemap.find(cont->name);
     BUG_CHECK(it != backend->pipeline_namemap.end(),
-              "Expected to find %1% in control block name map", block->container->name);
+              "Expected to find %1% in control block name map", cont->name);
     result->emplace("name", it->second);
     result->emplace("id", nextId("control"));
     result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
@@ -699,7 +686,7 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
     auto conditionals = mkArrayField(result, "conditionals");
 
     SharedActionSelectorCheck selector_check(refMap, typeMap);
-    block->apply(selector_check);
+    cont->apply(selector_check);
 
     std::set<const IR::P4Table*> done;
 
@@ -732,6 +719,7 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
             c->is<IR::P4Action>() ||
             c->is<IR::P4Table>())
             continue;
+#if 0
         if (c->is<IR::Declaration_Instance>()) {
             auto bl = block->getValue(c);
             CHECK_NULL(bl);
@@ -746,6 +734,7 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
                 continue;
             }
         }
+#endif
         P4C_UNIMPLEMENTED("%1%: not yet handled", c);
     }
 
@@ -753,29 +742,20 @@ bool ControlConverter::preorder(const IR::ControlBlock* block) {
     return false;
 }
 
-bool ChecksumConverter::preorder(const IR::PackageBlock *block) {
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::ControlBlock>()) {
-            visit(it.second->getNode());
-        }
-    }
-    return false;
-}
-
-bool ChecksumConverter::preorder(const IR::ControlBlock* block) {
-    auto it = backend->compute_checksum_controls.find(block->container->name);
+bool ChecksumConverter::preorder(const IR::P4Control* control) {
+    auto it = backend->compute_checksum_controls.find(control->name);
     if (it != backend->compute_checksum_controls.end()) {
         if (backend->target == Target::SIMPLE_SWITCH) {
             P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
-            ss->convertChecksum(block->container->body, backend->json->checksums,
+            ss->convertChecksum(control->body, backend->json->checksums,
                                 backend->json->calculations, false);
         }
     } else {
-        it = backend->verify_checksum_controls.find(block->container->name);
+        it = backend->verify_checksum_controls.find(control->name);
         if (it != backend->verify_checksum_controls.end()) {
             if (backend->target == Target::SIMPLE_SWITCH) {
                 P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
-                ss->convertChecksum(block->container->body, backend->json->checksums,
+                ss->convertChecksum(control->body, backend->json->checksums,
                                     backend->json->calculations, true);
             }
         }

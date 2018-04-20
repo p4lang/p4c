@@ -56,10 +56,7 @@ class ControlConverter : public Inspector {
 
  public:
     const bool emitExterns;
-
-    bool preorder(const IR::PackageBlock* b) override;
-    bool preorder(const IR::ControlBlock* b) override;
-
+    bool preorder(const IR::P4Control* b) override;
     explicit ControlConverter(Backend *backend, const bool& emitExterns_) : backend(backend),
         refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
         conv(backend->getExpressionConverter()), json(backend->json), emitExterns(emitExterns_)
@@ -69,19 +66,9 @@ class ControlConverter : public Inspector {
 class ChecksumConverter : public Inspector {
     Backend* backend;
  public:
-    bool preorder(const IR::PackageBlock* b) override;
-    bool preorder(const IR::ControlBlock* b) override;
+    bool preorder(const IR::P4Control* b) override;
     explicit ChecksumConverter(Backend *backend) : backend(backend)
     { setName("UpdateChecksum"); }
-};
-
-class ConvertControl final : public PassManager {
- public:
-    explicit ConvertControl(Backend *backend, const bool& emitExterns_) {
-        passes.push_back(new ControlConverter(backend, emitExterns_));
-        passes.push_back(new ChecksumConverter(backend));
-        setName("ConvertControl");
-    }
 };
 
 }  // namespace BMV2

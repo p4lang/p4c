@@ -117,7 +117,7 @@ void InspectPsaProgram::postorder(const IR::P4Action* act) {
     // populate structure->actions
 }
 
-void postorder(const IR::Type_Error* err) {
+void InspectPsaProgram::postorder(const IR::Type_Error* err) {
     // inspect IR::Type_Error
     // populate structure->errors.
 }

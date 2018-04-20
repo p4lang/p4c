@@ -77,7 +77,7 @@ public:
     explicit InspectPsaProgram(PsaProgramStructure *structure)
         : structure(structure) {
         CHECK_NULL(structure);
-        setName("GeneratePsaProgram");
+        setName("InspectPsaProgram");
     }
 
     void postorder(const IR::P4Parser *p) override;
@@ -90,20 +90,19 @@ public:
     void postorder(const IR::Type_Error* err) override;
 };
 
-class ConvertPsaProgramToJson : public Inspector {
+class ConvertToJson : public Inspector {
     PsaProgramStructure *structure;
 
 public:
-    explicit ConvertPsaProgramToJson(PsaProgramStructure *structure)
+    explicit ConvertToJson(PsaProgramStructure *structure)
         : structure(structure) {
         CHECK_NULL(structure);
-        setName("GeneratePsaProgram");
+        setName("ConvertPsaProgramToJson");
     }
 
     bool preorder(const IR::P4Program *program) override {
         auto *rv = structure->create(program);
         return false;
-
     }
 };
 

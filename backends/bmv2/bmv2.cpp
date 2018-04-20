@@ -84,12 +84,26 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     // backend depends on the modified refMap and typeMap from midEnd.
-    BMV2::Backend backend(options.isv1(), &midEnd.refMap,
-            &midEnd.typeMap, &midEnd.enumMap);
+    BMV2::Backend backend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+
+    if (auto arch = getenv("P4C_DEFAULT_ARCH")) {
+        if (!strncmp(arch, "v1model", 7))
+            backend.target = BMV2::Target::SIMPLE_SWITCH;
+        else if (!strncmp(arch, "psa", 3))
+            backend.target = BMV2::Target::PORTABLE_SWITCH;
+    } else {
+        if (options.arch == "v1model")
+            backend.target = BMV2::Target::SIMPLE_SWITCH;
+        else if (options.arch == "psa")
+            backend.target = BMV2::Target::PORTABLE_SWITCH;
+    }
+
     try {
-        backend.addDebugHook(hook);
-        backend.process(toplevel, options);
-        backend.convert(options);
+        if (backend.target == BMV2::Target::SIMPLE_SWITCH) {
+            backend.convert_simple_switch(toplevel, options);
+        } else if (backend.target == BMV2::Target::PORTABLE_SWITCH) {
+            backend.convert_portable_switch(toplevel, options);
+        }
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

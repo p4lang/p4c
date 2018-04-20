@@ -181,60 +181,45 @@ class RenameUserMetadata : public Transform {
 };
 
 void
-Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
+Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     if (tlb->getMain() == nullptr)
         return;  // no main
 
-    if (auto arch = getenv("P4C_DEFAULT_ARCH")) {
-        if (!strncmp(arch, "v1model", 7))
-            target = Target::SIMPLE_SWITCH;
-        else if (!strncmp(arch, "psa", 3))
-            target = Target::PORTABLE_SWITCH;
-    } else {
-        if (options.arch == "v1model")
-            target = Target::SIMPLE_SWITCH;
-        else if (options.arch == "psa")
-            target = Target::PORTABLE_SWITCH;
-    }
-
     /// Declaration which introduces the user metadata.
     /// We expect this to be a struct type.
     const IR::Type_Struct* userMetaType = nullptr;
     cstring userMetaName = refMap->newName("userMetadata");
-    if (target == Target::SIMPLE_SWITCH) {
-        simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
-        simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
-        simpleSwitch->setComputeChecksumControls(tlb, &compute_checksum_controls);
-        simpleSwitch->setVerifyChecksumControls(tlb, &verify_checksum_controls);
-        simpleSwitch->setDeparserControls(tlb, &deparser_controls);
-        if (::errorCount() > 0)
-            return;
 
-        // Find the user metadata declaration
-        auto parser = simpleSwitch->getParser(tlb);
-        auto params = parser->getApplyParameters();
-        BUG_CHECK(params->size() == 4, "%1%: expected 4 parameters", parser);
-        auto metaParam = params->parameters.at(2);
-        auto paramType = metaParam->type;
-        if (!paramType->is<IR::Type_Name>()) {
-            ::error("%1%: expected the user metadata type to be a struct", paramType);
-            return;
-        }
-        auto decl = refMap->getDeclaration(paramType->to<IR::Type_Name>()->path);
-        if (!decl->is<IR::Type_Struct>()) {
-            ::error("%1%: expected the user metadata type to be a struct", paramType);
-            return;
-        }
-        userMetaType = decl->to<IR::Type_Struct>();
-        LOG2("User metadata type is " << userMetaType);
-    } else if (target == Target::PORTABLE_SWITCH) {
-        P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
+    simpleSwitch->setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
+    simpleSwitch->setNonPipelineControls(tlb, &non_pipeline_controls);
+    simpleSwitch->setComputeChecksumControls(tlb, &compute_checksum_controls);
+    simpleSwitch->setVerifyChecksumControls(tlb, &verify_checksum_controls);
+    simpleSwitch->setDeparserControls(tlb, &deparser_controls);
+    if (::errorCount() > 0)
+        return;
+
+    // Find the user metadata declaration
+    auto parser = simpleSwitch->getParser(tlb);
+    auto params = parser->getApplyParameters();
+    BUG_CHECK(params->size() == 4, "%1%: expected 4 parameters", parser);
+    auto metaParam = params->parameters.at(2);
+    auto paramType = metaParam->type;
+    if (!paramType->is<IR::Type_Name>()) {
+        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        return;
     }
+    auto decl = refMap->getDeclaration(paramType->to<IR::Type_Name>()->path);
+    if (!decl->is<IR::Type_Struct>()) {
+        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        return;
+    }
+    userMetaType = decl->to<IR::Type_Struct>();
+    LOG2("User metadata type is " << userMetaType);
 
     // These passes are logically bmv2-specific
-    addPasses({
+    PassManager simplify = {
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
@@ -251,13 +236,9 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
         new ErrorCodesVisitor(&errorCodesMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-    });
-    tlb->getProgram()->apply(*this);
-}
+    };
+    tlb->getProgram()->apply(simplify);
 
-/// BMV2 Backend that takes the top level block and converts it to a JsonObject
-/// that can be interpreted by the BMv2 simulator.
-void Backend::convert(BMV2Options& options) {
     jsonTop.emplace("program", options.file);
     jsonTop.emplace("__meta__", json->meta);
     jsonTop.emplace("header_types", json->header_types);
@@ -315,125 +296,132 @@ void Backend::convert(BMV2Options& options) {
     // This visitor is used in multiple passes to convert expression to json
     conv = new ExpressionConverter(this, scalarsName);
 
-    if (options.arch == "v1model") {
-        // if (psa) tlb->apply(new ConvertExterns());
-        PassManager codegen_passes = {
-            new ConvertHeaders(this, scalarsName),
-            new ConvertExterns(this, options.emitExterns),  // only run when target == PSA
-            new ConvertParser(this),
-            new ConvertActions(this, options.emitExterns),
-            new ConvertControl(this, options.emitExterns),
-            new ConvertDeparser(this),
-        };
+    PassManager codegen_passes = {
+        new HeaderConverter(this, scalarsName),
+        new ParserConverter(this),
+        new VisitFunctor([this]() { simpleSwitch->createActions(); }),
+        new ControlConverter(this, options.emitExterns),
+        new ChecksumConverter(this),
+        new DeparserConverter(this),
+    };
 
-        codegen_passes.setName("CodeGen");
-        CHECK_NULL(toplevel);
-        auto main = toplevel->getMain();
-        if (main == nullptr)
-            return;
-
-        main->apply(codegen_passes);
-    } else if (options.arch == "psa") {
-        P4::PsaProgramStructure structure;
-        auto inspectPsaProgram = new P4::InspectPsaProgram(&structure);
-        auto convertPsaProgram = new P4::ConvertPsaProgramToJson(&structure);
-        PassManager psa_codegen = {
-            inspectPsaProgram,
-            convertPsaProgram,
-        };
-        auto main = toplevel->getMain();
-        main->apply(psa_codegen);
-    }
+    codegen_passes.setName("CodeGen");
+    CHECK_NULL(toplevel);
+    auto program = toplevel->getProgram();
+    program->apply(codegen_passes);
 
     (void)toplevel->apply(ConvertGlobals(this));
 }
 
 bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
-    if (target == Target::SIMPLE_SWITCH) {
-        auto parser = simpleSwitch->getParser(getToplevelBlock());
-        auto params = parser->getApplyParameters();
-        if (params->size() != 4) {
-            simpleSwitch->modelError("%1%: Expected 4 parameter for parser", parser);
-            return false;
-        }
-        if (params->parameters.at(3) == param)
-            return true;
-
-        auto ingress = simpleSwitch->getIngress(getToplevelBlock());
-        params = ingress->getApplyParameters();
-        if (params->size() != 3) {
-            simpleSwitch->modelError("%1%: Expected 3 parameter for ingress", ingress);
-            return false;
-        }
-        if (params->parameters.at(2) == param)
-            return true;
-
-        auto egress = simpleSwitch->getEgress(getToplevelBlock());
-        params = egress->getApplyParameters();
-        if (params->size() != 3) {
-            simpleSwitch->modelError("%1%: Expected 3 parameter for egress", egress);
-            return false;
-        }
-        if (params->parameters.at(2) == param)
-            return true;
-
+    auto parser = simpleSwitch->getParser(getToplevelBlock());
+    auto params = parser->getApplyParameters();
+    if (params->size() != 4) {
+        simpleSwitch->modelError("%1%: Expected 4 parameter for parser", parser);
         return false;
-    } else {
-        P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
     }
+    if (params->parameters.at(3) == param)
+        return true;
+
+    auto ingress = simpleSwitch->getIngress(getToplevelBlock());
+    params = ingress->getApplyParameters();
+    if (params->size() != 3) {
+        simpleSwitch->modelError("%1%: Expected 3 parameter for ingress", ingress);
+        return false;
+    }
+    if (params->parameters.at(2) == param)
+        return true;
+
+    auto egress = simpleSwitch->getEgress(getToplevelBlock());
+    params = egress->getApplyParameters();
+    if (params->size() != 3) {
+        simpleSwitch->modelError("%1%: Expected 3 parameter for egress", egress);
+        return false;
+    }
+    if (params->parameters.at(2) == param)
+        return true;
+
+    return false;
 }
 
 bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
-    if (target == Target::SIMPLE_SWITCH) {
-        auto parser = simpleSwitch->getParser(getToplevelBlock());
-        auto params = parser->getApplyParameters();
-        if (params->size() != 4) {
-            simpleSwitch->modelError("%1%: Expected 4 parameters for parser", parser);
-            return false;
-        }
-        if (params->parameters.at(2) == param)
-            return true;
-
-        auto ingress = simpleSwitch->getIngress(getToplevelBlock());
-        params = ingress->getApplyParameters();
-        if (params->size() != 3) {
-            simpleSwitch->modelError("%1%: Expected 3 parameters for ingress", ingress);
-            return false;
-        }
-        if (params->parameters.at(1) == param)
-            return true;
-
-        auto egress = simpleSwitch->getEgress(getToplevelBlock());
-        params = egress->getApplyParameters();
-        if (params->size() != 3) {
-            simpleSwitch->modelError("%1%: Expected 3 parameters for egress", egress);
-            return false;
-        }
-        if (params->parameters.at(1) == param)
-            return true;
-
-        auto update = simpleSwitch->getCompute(getToplevelBlock());
-        params = update->getApplyParameters();
-        if (params->size() != 2) {
-            simpleSwitch->modelError("%1%: Expected 2 parameters for ComputeChecksum", update);
-            return false;
-        }
-        if (params->parameters.at(1) == param)
-            return true;
-
-        auto verify = simpleSwitch->getVerify(getToplevelBlock());
-        params = verify->getApplyParameters();
-        if (params->size() != 2) {
-            simpleSwitch->modelError("%1%: Expected 2 parameters for VerifyChecksum", update);
-            return false;
-        }
-        if (params->parameters.at(1) == param)
-            return true;
-
+    auto parser = simpleSwitch->getParser(getToplevelBlock());
+    auto params = parser->getApplyParameters();
+    if (params->size() != 4) {
+        simpleSwitch->modelError("%1%: Expected 4 parameters for parser", parser);
         return false;
-    } else {
-        P4C_UNIMPLEMENTED("PSA architecture is not yet implemented");
     }
+    if (params->parameters.at(2) == param)
+        return true;
+
+    auto ingress = simpleSwitch->getIngress(getToplevelBlock());
+    params = ingress->getApplyParameters();
+    if (params->size() != 3) {
+        simpleSwitch->modelError("%1%: Expected 3 parameters for ingress", ingress);
+        return false;
+    }
+    if (params->parameters.at(1) == param)
+        return true;
+
+    auto egress = simpleSwitch->getEgress(getToplevelBlock());
+    params = egress->getApplyParameters();
+    if (params->size() != 3) {
+        simpleSwitch->modelError("%1%: Expected 3 parameters for egress", egress);
+        return false;
+    }
+    if (params->parameters.at(1) == param)
+        return true;
+
+    auto update = simpleSwitch->getCompute(getToplevelBlock());
+    params = update->getApplyParameters();
+    if (params->size() != 2) {
+        simpleSwitch->modelError("%1%: Expected 2 parameters for ComputeChecksum", update);
+        return false;
+    }
+    if (params->parameters.at(1) == param)
+        return true;
+
+    auto verify = simpleSwitch->getVerify(getToplevelBlock());
+    params = verify->getApplyParameters();
+    if (params->size() != 2) {
+        simpleSwitch->modelError("%1%: Expected 2 parameters for VerifyChecksum", update);
+        return false;
+    }
+    if (params->parameters.at(1) == param)
+        return true;
+
+    return false;
+}
+
+void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
+    CHECK_NULL(tlb);
+    P4::PsaProgramStructure structure;
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    auto main = tlb->getProgram();
+    if (!main) {
+        ERROR("No main() in program");
+        return;
+    }
+    PassManager toJson = {
+        // new RenameUserMetadata(refMap, userMetaType, userMetaName),
+        new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        new P4::MoveActionsToTables(refMap, typeMap),
+        new P4::TypeChecking(refMap, typeMap),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new LowerExpressions(typeMap),
+        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::TypeChecking(refMap, typeMap),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::RemoveAllUnusedDeclarations(refMap),
+        new ErrorCodesVisitor(&errorCodesMap),
+        evaluator,
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new P4::InspectPsaProgram(&structure),
+        new P4::ConvertToJson(&structure),
+    };
+    main->apply(toJson);
 }
 
 }  // namespace BMV2

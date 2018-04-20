@@ -38,16 +38,17 @@ limitations under the License.
 
 namespace BMV2 {
 
-enum class Target { UNKNOWN_SWITCH, PORTABLE_SWITCH, SIMPLE_SWITCH };
+enum class Target { PORTABLE_SWITCH, SIMPLE_SWITCH };
 
 class ExpressionConverter;
 
-class Backend : public PassManager {
+class Backend {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
     // TODO(hanw): current implementation uses refMap and typeMap from midend.
     // Once all midend passes are refactored to avoid patching refMap, typeMap,
     // We can regenerated the refMap and typeMap in backend.
+    BMV2Options&                     options;
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
     P4::ConvertEnums::EnumMapping*   enumMap;
@@ -59,12 +60,10 @@ class Backend : public PassManager {
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
-
     // bmv2 backend supports multiple target architectures, we create different
     // json generators for each architecture to handle the differences in json
     // format for each architecture.
     P4V1::SimpleSwitch*              simpleSwitch;
-    // PortableSwitchJsonConverter*  portableSwitch;
 
  public:
     BMV2::JsonObjects*               json;
@@ -99,17 +98,18 @@ class Backend : public PassManager {
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
 
  public:
-    Backend(bool isV1, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+    Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
             P4::ConvertEnums::EnumMapping* enumMap) :
+        options(options),
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
         corelib(P4::P4CoreLibrary::instance),
         simpleSwitch(new P4V1::SimpleSwitch(this)),
         json(new BMV2::JsonObjects()),
-        target(Target::SIMPLE_SWITCH) { refMap->setIsV1(isV1); setName("BackEnd"); }
-    void process(const IR::ToplevelBlock* block, BMV2Options& options);
-    void convert(BMV2Options& options);
-    void serialize(std::ostream& out) const
-    { jsonTop.serialize(out); }
+        target(Target::SIMPLE_SWITCH) { refMap->setIsV1(options.isv1()); }
+    void convert_simple_switch(const IR::ToplevelBlock* block, BMV2Options& options);
+    void convert_portable_switch(const IR::ToplevelBlock* block, BMV2Options& options);
+    void serialize(std::ostream& out) const { jsonTop.serialize(out); }
+    BMV2Options&          getOptions() const { return options; }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
     ExpressionConverter * getExpressionConverter() { return conv; }
