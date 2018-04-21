@@ -229,6 +229,8 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::LOr* expression) override { return binaryBool(expression); }
     const IR::Node* postorder(IR::Add* expression) override { return binaryArith(expression); }
     const IR::Node* postorder(IR::Sub* expression) override { return binaryArith(expression); }
+    const IR::Node* postorder(IR::AddSat* expression) override { return binaryArith(expression); }
+    const IR::Node* postorder(IR::SubSat* expression) override { return binaryArith(expression); }
     const IR::Node* postorder(IR::Mul* expression) override { return binaryArith(expression); }
     const IR::Node* postorder(IR::Div* expression) override { return unsBinaryArith(expression); }
     const IR::Node* postorder(IR::Mod* expression) override { return unsBinaryArith(expression); }

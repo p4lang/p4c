@@ -117,6 +117,8 @@ typedef const IR::Type ConstType;
 %token      EQ "=="
 %token      PLUS "+"
 %token      MINUS "-"
+%token      PLUS_SAT "|+|"
+%token      MINUS_SAT "|-|"
 %token      MUL "*"
 %token      DIV "/"
 %token      MOD "%"
@@ -230,7 +232,7 @@ typedef const IR::Type ConstType;
 %left BIT_XOR
 %left BIT_AND
 %left SHL
-%left PP PLUS MINUS
+%left PP PLUS MINUS PLUS_SAT MINUS_SAT
 %left MUL DIV MOD
 %right PREFIX
 %nonassoc R_BRACKET L_PAREN L_BRACKET
@@ -1031,6 +1033,8 @@ expression
     | expression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
     | expression "+" expression          { $$ = new IR::Add(@1 + @3, $1, $3); }
     | expression "-" expression          { $$ = new IR::Sub(@1 + @3, $1, $3); }
+    | expression "|+|" expression        { $$ = new IR::AddSat(@1 + @3, $1, $3); }
+    | expression "|-|" expression        { $$ = new IR::SubSat(@1 + @3, $1, $3); }
     | expression "<<" expression         { $$ = new IR::Shl(@1 + @3, $1, $3); }
     | expression ">" ">" expression
         { driver.checkShift(@2, @3); $$ = new IR::Shr(@1 + @4, $1, $4); }

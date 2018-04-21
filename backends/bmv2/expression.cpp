@@ -51,7 +51,8 @@ const IR::Node* ArithmeticFixup::postorder(IR::Expression* expression) {
 const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() ||
-        expression->is<IR::BXor>())
+        expression->is<IR::BXor>() ||
+        expression->is<IR::AddSat>() || expression->is<IR::SubSat>())
         // no need to clamp these
         return updateType(expression);
     if (type->is<IR::Type_Bits>())
@@ -474,6 +475,38 @@ void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
     e->emplace("left", fixLocal(l));
     auto r = get(expression->right);
     e->emplace("right", fixLocal(r));
+}
+
+void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expression) {
+    // This should never happen if we correctly typecheck the program
+    BUG_CHECK(expression->type->is<IR::Type_Bits>(), "saturated arithmetic requires bit types");
+
+    auto result = new Util::JsonObject();
+    map.emplace(expression, result);
+    result->emplace("type", "expression");
+    auto e = new Util::JsonObject();
+    result->emplace("value", e);
+    auto eType = expression->type->to<IR::Type_Bits>();
+    CHECK_NULL(eType);
+    auto opType = eType->isSigned ? "sat_cast" : "usat_cast";
+    e->emplace("op", opType);
+
+    // the left operand is the binary expression, but as a simple add/sub
+    auto eLeft = new Util::JsonObject();
+    eLeft->emplace("type", "expression");
+    auto e1 = new Util::JsonObject();
+    e1->emplace("op", expression->getStringOp() == "|+|" ? "+" : "-");
+    e1->emplace("left", fixLocal(get(expression->left)));
+    e1->emplace("right", fixLocal(get(expression->right)));
+    eLeft->emplace("value", e1);
+    e->emplace("left", eLeft);
+
+    // the right operand is the width of the type
+    auto r = new Util::JsonObject();
+    r->emplace("type", "hexstr");
+    cstring repr = stringRepr(eType->width_bits());
+    r->emplace("value", repr);
+    e->emplace("right", r);
 }
 
 void ExpressionConverter::postorder(const IR::ListExpression* expression)  {

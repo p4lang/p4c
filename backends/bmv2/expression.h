@@ -76,7 +76,6 @@ class ExpressionConverter : public Inspector {
 
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
-    void binary(const IR::Operation_Binary* expression);
     Util::IJson* get(const IR::Expression* expression) const;
     Util::IJson* fixLocal(Util::IJson* json);
 
@@ -98,6 +97,8 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::BoolLiteral* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
     void postorder(const IR::Cast* expression) override;
+    void postorder(const IR::AddSat* expression) override { saturated_binary(expression); }
+    void postorder(const IR::SubSat* expression) override { saturated_binary(expression); }
     void postorder(const IR::Constant* expression) override;
     void postorder(const IR::ArrayIndex* expression) override;
     void postorder(const IR::Member* expression) override;
@@ -109,6 +110,10 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::TypeNameExpression* expression) override;
     void postorder(const IR::Expression* expression) override;
+
+ private:
+    void binary(const IR::Operation_Binary* expression);
+    void saturated_binary(const IR::Operation_Binary* expression);
 };
 
 }  // namespace BMV2

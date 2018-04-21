@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ limitations under the License.
     M(Mul, Binary, *, ##__VA_ARGS__)                                            \
     M(Div, Binary, /, ##__VA_ARGS__) M(Mod, Binary, %, ##__VA_ARGS__)           \
     M(Add, Binary, +, ##__VA_ARGS__) M(Sub, Binary, -, ##__VA_ARGS__)           \
+    M(AddSat, Binary, |+|, ##__VA_ARGS__) M(SubSat, Binary, |-|, ##__VA_ARGS__) \
     M(Shl, Binary, <<, ##__VA_ARGS__) M(Shr, Binary, >>, ##__VA_ARGS__)         \
     M(Equ, Relation, ==, ##__VA_ARGS__) M(Neq, Relation, !=, ##__VA_ARGS__)     \
     M(Lss, Relation, <, ##__VA_ARGS__) M(Leq, Relation, <=, ##__VA_ARGS__)      \

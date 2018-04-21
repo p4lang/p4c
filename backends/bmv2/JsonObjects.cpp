@@ -21,7 +21,7 @@ limitations under the License.
 namespace BMV2 {
 
 const int JSON_MAJOR_VERSION = 2;
-const int JSON_MINOR_VERSION = 7;
+const int JSON_MINOR_VERSION = 18;
 
 JsonObjects::JsonObjects() {
     toplevel = new Util::JsonObject();
