@@ -511,6 +511,32 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
     jsonTop.emplace("header_union_types", json->header_union_types);
     jsonTop.emplace("header_unions", json->header_unions);
     jsonTop.emplace("header_union_stacks", json->header_union_stacks);
+    field_lists = mkArrayField(&jsonTop, "field_lists");
+    // field list and learn list ids in bmv2 are not consistent with ids for
+    // other objects: they need to start at 1 (not 0) since the id is also used
+    // as a "flag" to indicate that a certain simple_switch primitive has been
+    // called (e.g. resubmit or generate_digest)
+    BMV2::nextId("field_lists");
+    jsonTop.emplace("errors", json->errors);
+    jsonTop.emplace("enums", json->enums);
+    jsonTop.emplace("parsers", json->parsers);
+    jsonTop.emplace("parse_vsets", json->parse_vsets);
+    jsonTop.emplace("deparsers", json->deparsers);
+    meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
+    counters = mkArrayField(&jsonTop, "counter_arrays");
+    register_arrays = mkArrayField(&jsonTop, "register_arrays");
+    jsonTop.emplace("calculations", json->calculations);
+    learn_lists = mkArrayField(&jsonTop, "learn_lists");
+    BMV2::nextId("learn_lists");
+    jsonTop.emplace("actions", json->actions);
+    jsonTop.emplace("pipelines", json->pipelines);
+    jsonTop.emplace("checksums", json->checksums);
+    force_arith = mkArrayField(&jsonTop, "force_arith");
+    jsonTop.emplace("extern_instances", json->externs);
+    jsonTop.emplace("field_aliases", json->field_aliases);
+
+    json->add_program_info(options.file);
+    json->add_meta_info();
 }
 
 }  // namespace BMV2

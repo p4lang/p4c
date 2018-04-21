@@ -30,135 +30,117 @@ const IR::P4Program* PsaProgramStructure::create(const IR::P4Program* program) {
     return program;
 }
 
+void PsaProgramStructure::createStructLike(const IR::Type_StructLike* st) {
+    CHECK_NULL(st);
+    cstring name = st->controlPlaneName();
+    unsigned max_length = 0;  // for variable-sized headers
+    bool varbitFound = false;
+    auto fields = new Util::JsonArray();
+    for (auto f : st->fields) {
+        auto field = new Util::JsonArray();
+        auto ftype = typeMap->getType(f, true);
+        if (ftype->to<IR::Type_StructLike>()) {
+            BUG("%1%: nested structure", st);
+        } else if (ftype->is<IR::Type_Boolean>()) {
+            field->append(f->name.name);
+            field->append(1);
+            field->append(0);
+            max_length += 1;
+        } else if (auto type = ftype->to<IR::Type_Bits>()) {
+            field->append(f->name.name);
+            field->append(type->size);
+            field->append(type->isSigned);
+            max_length += type->size;
+        } else if (auto type = ftype->to<IR::Type_Varbits>()) {
+            field->append(f->name.name);
+            max_length += type->size;
+            field->append("*");
+            if (varbitFound)
+                ::error("%1%: headers with multiple varbit fields not supported", st);
+            varbitFound = true;
+        } else if (auto type = ftype->to<IR::Type_Error>()) {
+            field->append(f->name.name);
+            field->append(error_width);
+            field->append(0);
+            max_length += error_width;
+        } else if (ftype->to<IR::Type_Stack>()) {
+            BUG("%1%: nested stack", st);
+        } else {
+            BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
+        }
+        fields->append(field);
+    }
+    // must add padding
+    unsigned padding = max_length % 8;
+    if (padding != 0) {
+        cstring name = refMap->newName("_padding");
+        auto field = new Util::JsonArray();
+        field->append(name);
+        field->append(8 - padding);
+        field->append(false);
+        fields->append(field);
+    }
+
+    unsigned max_length_bytes = (max_length + padding) / 8;
+    if (!varbitFound) {
+        // ignore
+        max_length = 0;
+        max_length_bytes = 0;
+    }
+    json->add_header_type(name, fields, max_length_bytes);
+}
+
 void PsaProgramStructure::createTypes() {
-    for (auto kv : header_types) {
-        auto st = kv.second;
-        CHECK_NULL(st);
-        cstring name = st->controlPlaneName();
-        unsigned max_length = 0;  // for variable-sized headers
-        bool varbitFound = false;
-        auto fields = new Util::JsonArray();
-        for (auto f : st->fields) {
-            auto field = new Util::JsonArray();
-            auto ftype = typeMap->getType(f, true);
-            if (ftype->to<IR::Type_StructLike>()) {
-                BUG("%1%: nested structure", st);
-            } else if (ftype->is<IR::Type_Boolean>()) {
-                field->append(f->name.name);
-                field->append(1);
-                field->append(0);
-                max_length += 1;
-            } else if (auto type = ftype->to<IR::Type_Bits>()) {
-                field->append(f->name.name);
-                field->append(type->size);
-                field->append(type->isSigned);
-                max_length += type->size;
-            } else if (auto type = ftype->to<IR::Type_Varbits>()) {
-                field->append(f->name.name);
-                max_length += type->size;
-                field->append("*");
-                if (varbitFound)
-                    ::error("%1%: headers with multiple varbit fields not supported", st);
-                varbitFound = true;
-            } else if (ftype->to<IR::Type_Stack>()) {
-                BUG("%1%: nested stack", st);
-            } else {
-                BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
-            }
-            fields->append(field);
-        }
-        // must add padding
-        unsigned padding = max_length % 8;
-        if (padding != 0) {
-            cstring name = refMap->newName("_padding");
-            auto field = new Util::JsonArray();
-            field->append(name);
-            field->append(8 - padding);
-            field->append(false);
-            fields->append(field);
-        }
-
-        unsigned max_length_bytes = (max_length + padding) / 8;
-        if (!varbitFound) {
-            // ignore
-            max_length = 0;
-            max_length_bytes = 0;
-        }
-        json->add_header_type(name, fields, max_length_bytes);
-    }
-
-    for (auto kv : metadata_types) {
-        auto st = kv.second;
-        cstring name = st->controlPlaneName();
-        unsigned max_length = 0;  // for variable-sized headers
-        bool varbitFound = false;
-        auto fields = new Util::JsonArray();
-        for (auto f : st->fields) {
-            auto field = new Util::JsonArray();
-            auto ftype = typeMap->getType(f, true);
-            if (ftype->to<IR::Type_StructLike>()) {
-                BUG("%1%: nested structure", st);
-            } else if (ftype->is<IR::Type_Boolean>()) {
-                field->append(f->name.name);
-                field->append(bool_width);
-                field->append(0);
-                max_length += bool_width;
-            } else if (auto type = ftype->to<IR::Type_Bits>()) {
-                field->append(f->name.name);
-                field->append(type->size);
-                field->append(type->isSigned);
-                max_length += type->size;
-            } else if (auto type = ftype->to<IR::Type_Varbits>()) {
-                field->append(f->name.name);
-                max_length += type->size;
-                field->append("*");
-                if (varbitFound)
-                    ::error("%1%: headers with multiple varbit fields not supported", st);
-                varbitFound = true;
-            } else if (auto type = ftype->to<IR::Type_Error>()) {
-                field->append(f->name.name);
-                field->append(error_width);
-                field->append(0);
-                max_length += error_width;
-            } else if (ftype->to<IR::Type_Stack>()) {
-                BUG("%1%: nested stack", st);
-            } else {
-                BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
-            }
-            fields->append(field);
-        }
-        // must add padding
-        unsigned padding = max_length % 8;
-        if (padding != 0) {
-            cstring name = refMap->newName("_padding");
-            auto field = new Util::JsonArray();
-            field->append(name);
-            field->append(8 - padding);
-            field->append(false);
-            fields->append(field);
-        }
-
-        unsigned max_length_bytes = (max_length + padding) / 8;
-        if (!varbitFound) {
-            // ignore
-            max_length = 0;
-            max_length_bytes = 0;
-        }
-        json->add_header_type(name, fields, max_length_bytes);
-    }
-
+    for (auto kv : header_types)
+        createStructLike(kv.second);
+    for (auto kv : metadata_types)
+        createStructLike(kv.second);
     for (auto kv : header_union_types) {
-
+        auto st = kv.second;
+        auto fields = new Util::JsonArray();
+        for (auto f : st->fields) {
+            auto field = new Util::JsonArray();
+            auto ftype = typeMap->getType(f, true);
+            auto ht = ftype->to<IR::Type_Header>();
+            CHECK_NULL(ht);
+            field->append(f->name.name);
+            field->append(ht->name.name);
+        }
+        json->add_union_type(st->name, fields);
     }
-
     // add errors to json
     // add enums to json
 }
 
 void PsaProgramStructure::createHeaders() {
-    // add headers to json
-    // add header_stacks to json
-    // add header_unions to json
+    for (auto kv : headers) {
+        auto type = kv.second->type->to<IR::Type_StructLike>();
+        json->add_header(type->controlPlaneName(), kv.second->name);
+    }
+    for (auto kv : metadata) {
+        auto type = kv.second->type->to<IR::Type_StructLike>();
+        json->add_header(type->controlPlaneName(), kv.second->name);
+    }
+    for (auto kv : header_stacks) {
+
+        // json->add_header_stack(stack_type, stack_name, stack_size, ids);
+    }
+    for (auto kv : header_unions) {
+        auto header_name = kv.first;
+        auto header_type = kv.second->to<IR::Type_StructLike>()->controlPlaneName();
+        // We have to add separately a header instance for all
+        // headers in the union.  Each instance will be named with
+        // a prefix including the union name, e.g., "u.h"
+        Util::JsonArray* fields = new Util::JsonArray();
+        for (auto uf : kv.second->to<IR::Type_HeaderUnion>()->fields) {
+            auto uft = typeMap->getType(uf, true);
+            auto h_name = header_name + "." + uf->controlPlaneName();
+            auto h_type = uft->to<IR::Type_StructLike>()->controlPlaneName();
+            unsigned id = json->add_header(h_type, h_name);
+            fields->append(id);
+        }
+        json->add_union(header_type, fields, header_name);
+    }
 }
 
 void PsaProgramStructure::createParsers() {
@@ -264,8 +246,19 @@ void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
     }
 }
 
+void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring name) {
+    auto inst = new IR::Declaration_Variable(name, st);
+    if (st->is<IR::Type_Header>())
+        pinfo->headers.emplace(name, inst);
+    else if (st->is<IR::Type_Struct>())
+        pinfo->metadata.emplace(name, inst);
+    else if (st->is<IR::Type_HeaderUnion>())
+        pinfo->header_unions.emplace(name, inst);
+}
+
 void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
     addHeaderType(type);
+    addHeaderInstance(type, type->controlPlaneName());
     for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
@@ -275,27 +268,45 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                         type);
                 return;
             }
-            if (ft->is<IR::Type_Header>()) {
-                addHeaderType(type);
+            if (auto hft = ft->to<IR::Type_Header>()) {
+                addHeaderType(hft);
+                addHeaderInstance(hft, hft->controlPlaneName());
             } else if (ft->is<IR::Type_HeaderUnion>()) {
                 for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                     auto uft = typeMap->getType(uf, true);
                     if (auto h_type = uft->to<IR::Type_Header>()) {
                         addHeaderType(h_type);
+                        addHeaderInstance(h_type, h_type->controlPlaneName());
                     } else {
                         ::error("Type %1% cannot contain type %2%", ft, uft);
                         return;
                     }
                 }
                 pinfo->header_union_types.emplace(type->getName(), type->to<IR::Type_HeaderUnion>());
+                addHeaderInstance(type, type->controlPlaneName());
             } else {
                 LOG1("add struct type " << type);
                 pinfo->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
+                addHeaderInstance(type, type->controlPlaneName());
             }
         } else if (ft->is<IR::Type_Stack>()) {
-            // Done elsewhere
-            LOG1("stack generation done elsewhere");
-            continue;
+            auto stack = ft->to<IR::Type_Stack>();
+            auto stack_name = f->controlPlaneName();
+            auto stack_size = stack->getSize();
+            auto type = typeMap->getTypeType(stack->elementType, true);
+            BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
+            auto ht = type->to<IR::Type_Header>();
+            addHeaderType(ht);
+            auto stack_type = stack->elementType->to<IR::Type_Header>();
+            std::vector<unsigned> ids;
+            for (unsigned i = 0; i < stack_size; i++) {
+                cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
+                // FIXME:
+                // auto id = json->add_header(stack_type, hdrName);
+                addHeaderInstance(stack_type, hdrName);
+                // ids.push_back(id);
+            }
+            // addHeaderStackInstance();
         } else {
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);
@@ -314,10 +325,6 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
             }
         }
     }
-}
-
-void InspectPsaProgram::addHeaderStacks(const IR::Type_Struct* headersStruct) {
-
 }
 
 bool InspectPsaProgram::preorder(const IR::Parameter* param) {

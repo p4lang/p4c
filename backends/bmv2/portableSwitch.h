@@ -49,6 +49,7 @@ class PsaProgramStructure {
     ordered_map<cstring, const IR::Type_Struct*> metadata_types;
     ordered_map<cstring, const IR::Type_HeaderUnion*> header_union_types;
     ordered_map<cstring, const IR::Declaration_Variable*> headers;
+    ordered_map<cstring, const IR::Declaration_Variable*> metadata;
     ordered_map<cstring, const IR::Declaration_Variable*> header_stacks;
     ordered_map<cstring, const IR::Declaration_Variable*> header_unions;
     ordered_map<cstring, const IR::Type_Error*> errors;
@@ -76,6 +77,7 @@ public:
     }
 
     const IR::P4Program* create(const IR::P4Program* program);
+    void createStructLike(const IR::Type_StructLike* st);
     void createTypes();
     void createHeaders();
     void createParsers();
@@ -124,7 +126,7 @@ class InspectPsaProgram : public Inspector {
     bool isHeaders(const IR::Type_StructLike* st);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
-    void addHeaderStacks(const IR::Type_Struct* headersStruct);
+    void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
     bool preorder(const IR::Parameter* parameter) override;
 };
 
