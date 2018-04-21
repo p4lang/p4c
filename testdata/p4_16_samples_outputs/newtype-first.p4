@@ -1,3 +1,5 @@
+#include <core.p4>
+
 typedef bit<32> B32;
 newtype bit<32> N32;
 struct S {
@@ -5,19 +7,38 @@ struct S {
     N32 n;
 }
 
+header H {
+    N32 field;
+}
+
+newtype N32 NN32;
 control c(out B32 x) {
+    N32 k;
+    NN32 nn;
+    table t {
+        actions = {
+            NoAction();
+        }
+        key = {
+            k: exact @name("k") ;
+        }
+        default_action = NoAction();
+    }
     apply {
         bit<32> b = 32w0;
         N32 n;
         N32 n1;
         S s;
         n = (N32)b;
+        nn = (NN32)n;
+        k = n;
         x = (B32)n;
         n1 = (N32)32w1;
         if (n == n1) 
             x = 32w2;
         s.b = b;
         s.n = n;
+        t.apply();
         if (s.b == (B32)s.n) 
             x = 32w3;
     }

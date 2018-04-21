@@ -676,6 +676,13 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
 bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) const {
     if (src == dest)
         return true;
+
+    if (dest->is<IR::Type_Newtype>()) {
+        auto dt = getTypeType(dest->to<IR::Type_Newtype>()->type);
+        if (TypeMap::equivalent(dt, src))
+            return true;
+    }
+
     if (src->is<IR::Type_Bits>()) {
         auto f = src->to<IR::Type_Bits>();
         if (dest->is<IR::Type_Bits>()) {
@@ -686,20 +693,17 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
-        } else if (dest->is<IR::Type_Newtype>()) {
-            return src == dest->to<IR::Type_Newtype>()->type;
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
             auto b = dest->to<IR::Type_Bits>();
             return b->size == 1 && !b->isSigned;
-        } else if (dest->is<IR::Type_Newtype>()) {
-            return src == dest->to<IR::Type_Newtype>()->type;
         }
     } else if (src->is<IR::Type_InfInt>()) {
         return dest->is<IR::Type_Bits>();
     } else if (src->is<IR::Type_Newtype>()) {
-        return dest == src->to<IR::Type_Newtype>()->type;
+        auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
+        return TypeMap::equivalent(dest, st);
     }
     return false;
 }
@@ -1297,8 +1301,10 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t)
-            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
+    auto validator = [] (const IR::Type* t) {
+        while (t->is<IR::Type_Newtype>())
+            t = t->to<IR::Type_Newtype>()->type;
+        return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -3139,6 +3145,8 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr)
         return elem;
+    while (ktype->is<IR::Type_Newtype>())
+        ktype = ktype->to<IR::Type_Newtype>()->type;
     if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_Enum>() &&
         !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>())
         typeError("Key %1% field type must be a scalar type; it cannot be %2%",
