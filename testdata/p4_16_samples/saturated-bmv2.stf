@@ -31,3 +31,11 @@ expect 0 04 00 00 00 000a 0014 fff6
 # signed: -32766 - 10 = -32768
 packet 0 04 00 00 00 8002 000a 0000
 expect 0 04 00 00 00 8002 000a 8000
+
+# signed: 1 + (-10) = -9
+packet 0 03 00 00 00 0001 fff6 0000
+expect 0 03 00 00 00 0001 fff6 fff7
+
+# signed: 1 - (-10) = 11
+packet 0 04 00 00 00 0001 fff6 0000
+expect 0 04 00 00 00 0001 fff6 000b
