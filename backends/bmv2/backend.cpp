@@ -312,14 +312,11 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
         new DiscoverStructure(&structure),
         new ErrorCodesVisitor(&errorCodesMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() {
-            toplevel = evaluator->getToplevelBlock();
-            auto main = toplevel->getMain();
-            auto brm = new BuildResourceMap(this);
-            toplevel->apply(*brm);
-        }),
     };
     tlb->getProgram()->apply(simplify);
+
+    toplevel = evaluator->getToplevelBlock();
+    toplevel->apply(*new BuildResourceMap(this));
 
     jsonTop.emplace("program", options.file);
     jsonTop.emplace("__meta__", json->meta);
@@ -477,7 +474,7 @@ bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
 
 void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
-    P4::PsaProgramStructure structure;
+    P4::PsaProgramStructure structure(refMap, typeMap);
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto main = tlb->getProgram();
     if (!main) {
@@ -500,10 +497,20 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
         new ErrorCodesVisitor(&errorCodesMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        new P4::InspectPsaProgram(&structure),
+        new P4::InspectPsaProgram(refMap, typeMap, &structure),
         new P4::ConvertToJson(&structure),
     };
     main->apply(toJson);
+
+    auto json = structure.getJson();
+    jsonTop.emplace("program", options.file);
+    jsonTop.emplace("__meta__", json->meta);
+    jsonTop.emplace("header_types", json->header_types);
+    jsonTop.emplace("headers", json->headers);
+    jsonTop.emplace("header_stacks", json->header_stacks);
+    jsonTop.emplace("header_union_types", json->header_union_types);
+    jsonTop.emplace("header_unions", json->header_unions);
+    jsonTop.emplace("header_union_stacks", json->header_union_stacks);
 }
 
 }  // namespace BMV2
