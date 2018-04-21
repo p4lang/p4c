@@ -114,7 +114,6 @@ class ExpressionConverter : public Inspector {
  private:
     void binary(const IR::Operation_Binary* expression);
     void saturated_binary(const IR::Operation_Binary* expression);
-
 };
 
 }  // namespace BMV2
