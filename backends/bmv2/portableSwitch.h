@@ -98,6 +98,15 @@ public:
     }
 };
 
+class ParsePsaArchitecture : public Inspector {
+    PsaProgramStructure* structure;
+ public:
+    explicit ParsePsaArchitecture(PsaProgramStructure* structure) : structure(structure) { }
+
+    bool preorder(const IR::ToplevelBlock* block) override;
+    bool preorder(const IR::PackageBlock* block) override;
+};
+
 class InspectPsaProgram : public Inspector {
     ReferenceMap* refMap;
     TypeMap* typeMap;
@@ -120,6 +129,12 @@ class InspectPsaProgram : public Inspector {
     void postorder(const IR::Declaration_Instance* di) override;
     void postorder(const IR::P4Action* act) override;
     void postorder(const IR::Type_Error* err) override;
+
+    // control
+    bool preorder(const IR::P4Control *control) override;
+
+    // parser
+    bool preorder(const IR::P4Parser *p) override;
 
     // header
     std::set<cstring> visitedHeaders;

@@ -475,12 +475,14 @@ bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
 void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     CHECK_NULL(tlb);
     P4::PsaProgramStructure structure(refMap, typeMap);
+
+    auto parsePsaArch = new P4::ParsePsaArchitecture(&structure);
+    auto main = tlb->getMain();
+    if (!main) return;
+    main->apply(*parsePsaArch);
+
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
-    auto main = tlb->getProgram();
-    if (!main) {
-        ERROR("No main() in program");
-        return;
-    }
+    auto program = tlb->getProgram();
     PassManager toJson = {
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
@@ -500,7 +502,7 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
         new P4::InspectPsaProgram(refMap, typeMap, &structure),
         new P4::ConvertToJson(&structure),
     };
-    main->apply(toJson);
+    program->apply(toJson);
 
     auto json = structure.getJson();
     jsonTop.emplace("program", options.file);

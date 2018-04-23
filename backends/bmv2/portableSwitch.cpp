@@ -145,6 +145,9 @@ void PsaProgramStructure::createHeaders() {
 
 void PsaProgramStructure::createParsers() {
     // add parsers to json
+    for (auto kv : parsers) {
+        LOG1("parser " << kv.first << kv.second);
+    }
 }
 
 void PsaProgramStructure::createExterns() {
@@ -168,6 +171,20 @@ void PsaProgramStructure::createControls() {
 
 void PsaProgramStructure::createDeparsers() {
     // add deparsers to json
+}
+
+bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
+    return false;
+}
+
+bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
+    for (auto t : block->constantValue) {
+        LOG1("first " << t.first << " second " << t.second);
+        if (t.second->is<IR::Block>()) {
+            visit(t.second->getNode());
+        }
+    }
+    return false;
 }
 
 void InspectPsaProgram::postorder(const IR::P4Parser* p) {
@@ -339,6 +356,20 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     LOG1("type struct " << ft);
     auto isHeader = isHeaders(st);
     addTypesAndInstances(st, isHeader);
+    return false;
+}
+
+bool InspectPsaProgram::preorder(const IR::P4Parser* parser) {
+    // search std::map<IR::Node*, cstring> nameMap for name in json
+    // pinfo->parsers.emplace(name, parser);
+    return false;
+}
+
+bool InspectPsaProgram::preorder(const IR::P4Control *control) {
+    // TODO:
+    // search std::map<IR::Node*, cstring> namemap for name in json
+    // if control, go to pipelines
+    // if deparser, save to deparsers
     return false;
 }
 
