@@ -22,11 +22,12 @@ limitations under the License.
 #include "control-plane/p4RuntimeSerializer.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "PI/pi_base.h"
 
 namespace Test {
 
 namespace {
+
+using P4Ids = ::p4::config::P4Ids;
 
 boost::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(const std::string& source,
@@ -37,17 +38,58 @@ createP4RuntimeTestCase(const std::string& source,
     return P4::generateP4Runtime(frontendTestCase->program);
 }
 
+/// Generic meta function which searches an object by @name in the given range
+/// and @returns the P4Runtime representation, or null if none is found.
+template <typename It>
+auto findP4InfoObject(const It& first, const It& last, const std::string& name)
+    -> const typename std::iterator_traits<It>::value_type* {
+    using T = typename std::iterator_traits<It>::value_type;
+    auto desiredObject = std::find_if(first, last,
+                                      [&](const T& object) {
+        return object.preamble().name() == name;
+    });
+    if (desiredObject == last) return nullptr;
+    return &*desiredObject;
+}
+
 /// @return the P4Runtime representation of the table with the given name, or
 /// null if none is found.
 const ::p4::config::Table* findTable(const P4::P4RuntimeAPI& analysis,
                                      const std::string& name) {
     auto& tables = analysis.p4Info->tables();
-    auto desiredTable = std::find_if(tables.begin(), tables.end(),
-                                     [&](const ::p4::config::Table& table) {
-        return table.preamble().name() == name;
-    });
-    if (desiredTable == tables.end()) return nullptr;
-    return &*desiredTable;
+    return findP4InfoObject(tables.begin(), tables.end(), name);
+}
+
+/// @return the P4Runtime representation of the action with the given name, or
+/// null if none is found.
+const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
+                                       const std::string& name) {
+    auto& actions = analysis.p4Info->actions();
+    return findP4InfoObject(actions.begin(), actions.end(), name);
+}
+
+/// @return the P4Runtime representation of the value set with the given name,
+/// or null if none is found.
+const ::p4::config::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
+                                           const std::string& name) {
+    auto& vsets = analysis.p4Info->value_sets();
+    return findP4InfoObject(vsets.begin(), vsets.end(), name);
+}
+
+/// @return the P4Runtime representation of the counter with the given name, or
+/// null if none is found.
+const ::p4::config::Counter* findCounter(const P4::P4RuntimeAPI& analysis,
+                                     const std::string& name) {
+    auto& counters = analysis.p4Info->counters();
+    return findP4InfoObject(counters.begin(), counters.end(), name);
+}
+
+/// @return the P4Runtime representation of the direct counter with the given
+/// name, or null if none is found.
+const ::p4::config::DirectCounter* findDirectCounter(const P4::P4RuntimeAPI& analysis,
+                                               const std::string& name) {
+    auto& counters = analysis.p4Info->direct_counters();
+    return findP4InfoObject(counters.begin(), counters.end(), name);
 }
 
 /// @return the P4Runtime representation of the extern with the given name, or
@@ -61,32 +103,6 @@ const ::p4::config::Extern* findExtern(const P4::P4RuntimeAPI& analysis,
     });
     if (desiredExtern == externs.end()) return nullptr;
     return &*desiredExtern;
-}
-
-/// @return the P4Runtime representation of the action with the given name, or
-/// null if none is found.
-const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
-                                       const std::string& name) {
-    auto& actions = analysis.p4Info->actions();
-    auto desiredAction = std::find_if(actions.begin(), actions.end(),
-                                     [&](const ::p4::config::Action& action) {
-        return action.preamble().name() == name;
-    });
-    if (desiredAction == actions.end()) return nullptr;
-    return &*desiredAction;
-}
-
-/// @return the P4Runtime representation of the value set with the given name,
-/// or null if none is found.
-const ::p4::config::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
-                                           const std::string& name) {
-    auto& vsets = analysis.p4Info->value_sets();
-    auto desiredVSet = std::find_if(vsets.begin(), vsets.end(),
-                                    [&](const ::p4::config::ValueSet& vset) {
-        return vset.preamble().name() == name;
-    });
-    if (desiredVSet == vsets.end()) return nullptr;
-    return &*desiredVSet;
 }
 
 }  // namespace
@@ -172,7 +188,7 @@ TEST_F(P4Runtime, IdAssignment) {
         ASSERT_TRUE(igTable != nullptr);
 
         // Check that the id indicates the correct resource type.
-        EXPECT_EQ(unsigned(PI_TABLE_ID), igTable->preamble().id() >> 24);
+        EXPECT_EQ(unsigned(P4Ids::TABLE), igTable->preamble().id() >> 24);
 
         // Check that the rest of the id matches the hash value that we expect.
         // (If we were to ever change the hash algorithm we use when mapping P4
@@ -190,7 +206,7 @@ TEST_F(P4Runtime, IdAssignment) {
 
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
-        EXPECT_EQ(unsigned(PI_TABLE_ID), igTableWithName->preamble().id() >> 24);
+        EXPECT_EQ(unsigned(P4Ids::TABLE), igTableWithName->preamble().id() >> 24);
         EXPECT_EQ(59806u, igTableWithName->preamble().id() & 0x00ffffff);
     }
 
@@ -223,6 +239,84 @@ TEST_F(P4Runtime, IdAssignment) {
                     conflictingTableB->preamble().id() == 4321);
         EXPECT_NE(conflictingTableA->preamble().id(),
                   conflictingTableB->preamble().id());
+    }
+}
+
+TEST_F(P4Runtime, IdAssignmentCounters) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action noop() { }
+
+            @name(".myDirectCounter1")
+            direct_counter(CounterType.packets) myDirectCounter1;
+
+            @name(".myTable1")
+            table myTable1 {
+                actions = { noop; }
+                default_action = noop;
+                counters = myDirectCounter1;
+            }
+
+            @name(".myTable2")
+            table myTable2 {
+                actions = { noop; }
+                default_action = noop;
+                @name(".myDirectCounter2") counters = direct_counter(CounterType.packets);
+            }
+
+            @name(".myCounter")
+            counter(32w1024, CounterType.packets) myCounter;
+
+            apply {
+                myTable1.apply();
+                myTable2.apply();
+                myCounter.count(32w128);
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+
+    // checks that myDirectCounter1 with the right ID prefix
+    {
+        auto* myTable1 = findTable(*test, "myTable1");
+        ASSERT_TRUE(myTable1 != nullptr);
+        auto* myDirectCounter1 = findDirectCounter(*test, "myDirectCounter1");
+        ASSERT_TRUE(myDirectCounter1 != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter1->preamble().id() >> 24);
+        EXPECT_EQ(myDirectCounter1->preamble().id(), myTable1->direct_resource_ids(0));
+    }
+    // checks that myDirectCounter2 with the right ID prefix
+    {
+        auto* myTable2 = findTable(*test, "myTable2");
+        ASSERT_TRUE(myTable2 != nullptr);
+        auto* myDirectCounter2 = findDirectCounter(*test, "myDirectCounter2");
+        ASSERT_TRUE(myDirectCounter2 != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter2->preamble().id() >> 24);
+        EXPECT_EQ(myDirectCounter2->preamble().id(), myTable2->direct_resource_ids(0));
+    }
+    // checks that myCounter with the right ID prefix
+    {
+        auto* myCounter = findCounter(*test, "myCounter");
+        ASSERT_TRUE(myCounter != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::COUNTER), myCounter->preamble().id() >> 24);
     }
 }
 
@@ -771,6 +865,7 @@ TEST_F(P4Runtime, ValueSet) {
 
     auto vset = findValueSet(*test, "parse.pvs");
     ASSERT_TRUE(vset != nullptr);
+    EXPECT_EQ(unsigned(P4Ids::VALUE_SET), vset->preamble().id() >> 24);
     EXPECT_EQ(48, vset->bitwidth());
     EXPECT_EQ(16, vset->size());
 }

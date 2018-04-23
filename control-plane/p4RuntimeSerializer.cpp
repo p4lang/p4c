@@ -48,7 +48,6 @@ limitations under the License.
 #include "midend/eliminateTuples.h"
 #include "midend/removeParameters.h"
 #include "midend/synthesizeValidField.h"
-#include "PI/pi_base.h"
 
 #include "p4RuntimeSerializer.h"
 
@@ -60,6 +59,10 @@ namespace P4 {
  */
 /// XXX(seth) High level goals of the generator go here!!
 namespace ControlPlaneAPI {
+
+using p4rt_id_t = uint32_t;
+
+static const p4rt_id_t INVALID_ID = p4::config::P4Ids::UNSPECIFIED;
 
 // XXX(seth): Here are the known issues:
 // - We don't currently distinguish between the case where the const default
@@ -498,7 +501,7 @@ struct Counterlike {
 
 /// @return the value of any P4 '@id' annotation @declaration may have. The name
 /// 'externalId' is in analogy with externalName().
-static boost::optional<pi_p4_id_t>
+static boost::optional<p4rt_id_t>
 externalId(const IR::IDeclaration* declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
@@ -533,9 +536,13 @@ enum class P4RuntimeSymbolType {
     ACTION_PROFILE,
     CONTROLLER_HEADER,
     COUNTER,
+    DIGEST,
+    DIRECT_COUNTER,
+    DIRECT_METER,
     EXTERN,
     EXTERN_INSTANCE,
     METER,
+    REGISTER,
     TABLE,
     VALUE_SET
 };
@@ -690,7 +697,7 @@ class P4RuntimeSymbolTable {
 
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
     void add(P4RuntimeSymbolType type, cstring name,
-                      boost::optional<pi_p4_id_t> id = boost::none) {
+                      boost::optional<p4rt_id_t> id = boost::none) {
         auto& symbolTable = symbolTables[type];
         if (symbolTable.find(name) != symbolTable.end()) {
             return;  // This is a duplicate, but that's OK.
@@ -701,13 +708,13 @@ class P4RuntimeSymbolTable {
     }
 
     /// @return the P4Runtime id for the symbol of @type corresponding to @declaration.
-    pi_p4_id_t getId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) const {
+    p4rt_id_t getId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) const {
         CHECK_NULL(declaration);
         return getId(type, declaration->controlPlaneName());
     }
 
     /// @return the P4Runtime id for the symbol of @type with name @name.
-    pi_p4_id_t getId(P4RuntimeSymbolType type, cstring name) const {
+    p4rt_id_t getId(P4RuntimeSymbolType type, cstring name) const {
         const auto& symbolTable = symbolTables.at(type);
         const auto symbolId = symbolTable.find(name);
         if (symbolId == symbolTable.end()) {
@@ -731,16 +738,16 @@ class P4RuntimeSymbolTable {
     /// @return an initial (possibly invalid) id for a resource, and if the id is
     /// not invalid, record the assignment. An initial @id typically comes from
     /// the P4 '@id' annotation.
-    pi_p4_id_t tryToAssignId(boost::optional<pi_p4_id_t> id) {
+    p4rt_id_t tryToAssignId(boost::optional<p4rt_id_t> id) {
         if (!id) {
-            // The user didn't assign an id, so return the special value PI_INVALID_ID
+            // The user didn't assign an id, so return the special value INVALID_ID
             // to indicate that computeIds() should assign one later.
-            return PI_INVALID_ID;
+            return INVALID_ID;
         }
 
         if (assignedIds.find(*id) != assignedIds.end()) {
             ::error("@id %1% is assigned to multiple declarations", *id);
-            return PI_INVALID_ID;
+            return INVALID_ID;
         }
 
         assignedIds.insert(*id);
@@ -748,9 +755,9 @@ class P4RuntimeSymbolTable {
     }
 
     /**
-     * Assign an id to each resource of @type (PI_ACTION_ID, PI_TABLE_ID, etc..)
-     * which does not yet have an id, and update the resource in place.
-     * Existing ids are avoided to ensure that each id is unique.
+     * Assign an id to each resource of @type (ACTION, TABLE, etc..)  which does
+     * not yet have an id, and update the resource in place.  Existing ids are
+     * avoided to ensure that each id is unique.
      */
     void computeIdsForSymbols(P4RuntimeSymbolType type) {
         // The id for most resources follows a standard format:
@@ -767,7 +774,7 @@ class P4RuntimeSymbolTable {
         // for details.
         std::map<cstring, SymbolTable::iterator> nameToIteratorMap;
         for (auto it = symbolTable.begin(); it != symbolTable.end(); it++) {
-            if (it->second == PI_INVALID_ID) {
+            if (it->second == INVALID_ID) {
                 nameToIteratorMap.emplace(std::make_pair(it->first, it));
             }
         }
@@ -780,7 +787,7 @@ class P4RuntimeSymbolTable {
             // Hash the name and construct an id. Because linear probing is used to
             // resolve hash collisions, the id that we select depends on the order in
             // which the names are hashed. This is why we sort the names above.
-            boost::optional<pi_p4_id_t> id = probeForId(nameId, [=](uint32_t nameId) {
+            boost::optional<p4rt_id_t> id = probeForId(nameId, [=](uint32_t nameId) {
                 return (resourceType << 24) | (nameId & 0xffff);
             });
 
@@ -806,8 +813,8 @@ class P4RuntimeSymbolTable {
      * resource type, and those bits need to remain correct.
      */
     template <typename ConstructIdFunc>
-    boost::optional<pi_p4_id_t> probeForId(const uint32_t sourceValue,
-                                           ConstructIdFunc constructId) {
+    boost::optional<p4rt_id_t> probeForId(const uint32_t sourceValue,
+                                          ConstructIdFunc constructId) {
         uint32_t value = sourceValue;
         while (assignedIds.find(constructId(value)) != assignedIds.end()) {
             ++value;
@@ -836,30 +843,37 @@ class P4RuntimeSymbolTable {
     }
 
     /// @return the P4Runtime resource type for the given type of symbol.
-    static pi_p4_id_t piResourceType(P4RuntimeSymbolType symbolType) {
+    static p4rt_id_t piResourceType(P4RuntimeSymbolType symbolType) {
         // XXX(seth): It may be a bit confusing that the P4Runtime resource types
         // we're working with here have "PI" in the name. That's just the name
         // P4Runtime had while it was under development.  Hopefully things will be
         // made more consistent at some point.
         switch (symbolType) {
-            case P4RuntimeSymbolType::ACTION: return PI_ACTION_ID;
-            case P4RuntimeSymbolType::ACTION_PROFILE: return PI_ACT_PROF_ID;
-
-            // XXX(antonin): no support from PI library for now
-            // the choice for the resource type id has little importance here
-            case P4RuntimeSymbolType::CONTROLLER_HEADER: return 0xab;
-
-            case P4RuntimeSymbolType::COUNTER: return PI_COUNTER_ID;
-
-            // XXX(seth): These are arbitrary values for now, but we'll create
-            // official PI resource types for these soon.
+            case P4RuntimeSymbolType::ACTION:
+              return p4::config::P4Ids::ACTION;
+            case P4RuntimeSymbolType::ACTION_PROFILE:
+              return p4::config::P4Ids::ACTION_PROFILE;
+            case P4RuntimeSymbolType::CONTROLLER_HEADER:
+              return p4::config::P4Ids::CONTROLLER_HEADER;
+            case P4RuntimeSymbolType::COUNTER:
+              return p4::config::P4Ids::COUNTER;
+            case P4RuntimeSymbolType::DIGEST:
+              return p4::config::P4Ids::DIGEST;
+            case P4RuntimeSymbolType::DIRECT_COUNTER:
+              return p4::config::P4Ids::DIRECT_COUNTER;
+            case P4RuntimeSymbolType::DIRECT_METER:
+              return p4::config::P4Ids::DIRECT_METER;
+            // TODO(antonin): remove and use DIGEST
             case P4RuntimeSymbolType::EXTERN: return 0x98;
             case P4RuntimeSymbolType::EXTERN_INSTANCE: return 0x99;
-
-            case P4RuntimeSymbolType::METER: return PI_METER_ID;
-            case P4RuntimeSymbolType::TABLE: return PI_TABLE_ID;
-            // XXX(antonin): reserve 0x03 for value sets
-            case P4RuntimeSymbolType::VALUE_SET: return 0x03;
+            case P4RuntimeSymbolType::METER:
+              return p4::config::P4Ids::METER;
+            case P4RuntimeSymbolType::REGISTER:
+              return p4::config::P4Ids::REGISTER;
+            case P4RuntimeSymbolType::TABLE:
+              return p4::config::P4Ids::TABLE;
+            case P4RuntimeSymbolType::VALUE_SET:
+              return p4::config::P4Ids::VALUE_SET;
         }
         BUG("Unexpected P4RuntimeSymbolType");  // Unreachable.
     }
@@ -867,18 +881,22 @@ class P4RuntimeSymbolTable {
 
     // All the ids we've assigned so far. Used to avoid id collisions; this is
     // especially crucial since ids can be set manually via the '@id' annotation.
-    std::set<pi_p4_id_t> assignedIds;
+    std::set<p4rt_id_t> assignedIds;
 
     // Symbol tables, mapping symbols to P4Runtime ids.
-    using SymbolTable = std::map<cstring, pi_p4_id_t>;
+    using SymbolTable = std::map<cstring, p4rt_id_t>;
     std::map<P4RuntimeSymbolType, SymbolTable> symbolTables = {
         { P4RuntimeSymbolType::ACTION, SymbolTable() },
         { P4RuntimeSymbolType::ACTION_PROFILE, SymbolTable() },
         { P4RuntimeSymbolType::CONTROLLER_HEADER, SymbolTable() },
         { P4RuntimeSymbolType::COUNTER, SymbolTable() },
+        { P4RuntimeSymbolType::DIGEST, SymbolTable() },
+        { P4RuntimeSymbolType::DIRECT_COUNTER, SymbolTable() },
+        { P4RuntimeSymbolType::DIRECT_METER, SymbolTable() },
         { P4RuntimeSymbolType::EXTERN, SymbolTable() },
         { P4RuntimeSymbolType::EXTERN_INSTANCE, SymbolTable() },
         { P4RuntimeSymbolType::METER, SymbolTable() },
+        { P4RuntimeSymbolType::REGISTER, SymbolTable() },
         { P4RuntimeSymbolType::TABLE, SymbolTable() },
         { P4RuntimeSymbolType::VALUE_SET, SymbolTable() }
     };
@@ -935,8 +953,6 @@ class P4RuntimeAnalyzer {
     /// Set common fields between p4::config::Counter and p4::config::DirectCounter.
     template <typename Kind>
     void setCounterCommon(Kind *counter, const Counterlike<IR::Counter>& counterInstance) {
-        auto id = symbols.getId(P4RuntimeSymbolType::COUNTER, counterInstance.name);
-        counter->mutable_preamble()->set_id(id);
         counter->mutable_preamble()->set_name(counterInstance.name);
         counter->mutable_preamble()->set_alias(symbols.getAlias(counterInstance.name));
         addAnnotations(counter->mutable_preamble(), counterInstance.annotations);
@@ -956,11 +972,15 @@ class P4RuntimeAnalyzer {
     void addCounter(const Counterlike<IR::Counter>& counterInstance) {
         if (counterInstance.table) {
             auto counter = p4Info->add_direct_counters();
+            auto id = symbols.getId(P4RuntimeSymbolType::DIRECT_COUNTER, counterInstance.name);
+            counter->mutable_preamble()->set_id(id);
             setCounterCommon(counter, counterInstance);
-            auto id = symbols.getId(P4RuntimeSymbolType::TABLE, *counterInstance.table);
-            counter->set_direct_table_id(id);
+            auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE, *counterInstance.table);
+            counter->set_direct_table_id(tableId);
         } else {
             auto counter = p4Info->add_counters();
+            auto id = symbols.getId(P4RuntimeSymbolType::COUNTER, counterInstance.name);
+            counter->mutable_preamble()->set_id(id);
             setCounterCommon(counter, counterInstance);
             counter->set_size(counterInstance.size);
         }
@@ -969,8 +989,6 @@ class P4RuntimeAnalyzer {
     /// Set common fields between p4::config::Meter and p4::config::DirectMeter.
     template <typename Kind>
     void setMeterCommon(Kind *meter, const Counterlike<IR::Meter>& meterInstance) {
-        auto id = symbols.getId(P4RuntimeSymbolType::METER, meterInstance.name);
-        meter->mutable_preamble()->set_id(id);
         meter->mutable_preamble()->set_name(meterInstance.name);
         meter->mutable_preamble()->set_alias(symbols.getAlias(meterInstance.name));
         addAnnotations(meter->mutable_preamble(), meterInstance.annotations);
@@ -989,11 +1007,15 @@ class P4RuntimeAnalyzer {
     void addMeter(const Counterlike<IR::Meter>& meterInstance) {
         if (meterInstance.table) {
             auto meter = p4Info->add_direct_meters();
+            auto id = symbols.getId(P4RuntimeSymbolType::DIRECT_METER, meterInstance.name);
+            meter->mutable_preamble()->set_id(id);
             setMeterCommon(meter, meterInstance);
-            auto id = symbols.getId(P4RuntimeSymbolType::TABLE, *meterInstance.table);
-            meter->set_direct_table_id(id);
+            auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE, *meterInstance.table);
+            meter->set_direct_table_id(tableId);
         } else {
             auto meter = p4Info->add_meters();
+            auto id = symbols.getId(P4RuntimeSymbolType::METER, meterInstance.name);
+            meter->mutable_preamble()->set_id(id);
             setMeterCommon(meter, meterInstance);
             meter->set_size(meterInstance.size);
         }
@@ -1155,14 +1177,14 @@ class P4RuntimeAnalyzer {
         }
 
         if (directCounter) {
-            auto id = symbols.getId(P4RuntimeSymbolType::COUNTER,
+            auto id = symbols.getId(P4RuntimeSymbolType::DIRECT_COUNTER,
                                     directCounter->name);
             table->add_direct_resource_ids(id);
             addCounter(*directCounter);
         }
 
         if (directMeter) {
-            auto id = symbols.getId(P4RuntimeSymbolType::METER,
+            auto id = symbols.getId(P4RuntimeSymbolType::DIRECT_METER,
                                     directMeter->name);
             table->add_direct_resource_ids(id);
             addMeter(*directMeter);
@@ -1312,9 +1334,9 @@ class P4RuntimeAnalyzer {
     /// The symbols used in the API and their ids.
     const P4RuntimeSymbolTable& symbols;
     /// The actions we've serialized so far. Used for deduplication.
-    std::set<pi_p4_id_t> serializedActions;
+    std::set<p4rt_id_t> serializedActions;
     /// The extern instances we've serialized so far. Used for deduplication.
-    std::set<pi_p4_id_t> serializedInstances;
+    std::set<p4rt_id_t> serializedInstances;
     /// Type information for the P4 program we're serializing.
     TypeMap* typeMap;
 };
@@ -1466,9 +1488,9 @@ static void collectExternSymbols(P4RuntimeSymbolTable& symbols,
     auto decl = externBlock->node->to<IR::IDeclaration>();
     if (decl == nullptr) return;
 
-    if (externBlock->type->name == "counter") {
+    if (externBlock->type->name == CounterlikeTraits<IR::Counter>::typeName()) {
         symbols.add(P4RuntimeSymbolType::COUNTER, decl);
-    } else if (externBlock->type->name == "meter") {
+    } else if (externBlock->type->name == CounterlikeTraits<IR::Meter>::typeName()) {
         symbols.add(P4RuntimeSymbolType::METER, decl);
     } else if (externBlock->type->name == P4V1::V1Model::instance.action_profile.name ||
                externBlock->type->name == P4V1::V1Model::instance.action_selector.name) {
@@ -1574,12 +1596,12 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
 
     auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
     if (directCounter) {
-        symbols.add(P4RuntimeSymbolType::COUNTER, directCounter->name);
+        symbols.add(P4RuntimeSymbolType::DIRECT_COUNTER, directCounter->name);
     }
 
     auto directMeter = getDirectCounterlike<IR::Meter>(table, refMap, typeMap);
     if (directMeter) {
-        symbols.add(P4RuntimeSymbolType::METER, directMeter->name);
+        symbols.add(P4RuntimeSymbolType::DIRECT_METER, directMeter->name);
     }
 }
 
