@@ -114,6 +114,9 @@ typedef const IR::Type ConstType;
 // types, and another with null checking for pointer types.
 %printer { yyoutput << $$; } <BBoxType> <CaseValue> <cstring> <HeaderType>
                              <int> <IR::Direction> <IR::ID> <UnparsedConstant>
+
+%printer { ; } <std::pair<ConstType*, int>>
+
 %printer {
     auto val = $$;
     if (val != nullptr) {
@@ -224,7 +227,8 @@ typedef const IR::Type ConstType;
 %type<IR::V1Parser*>                parser_statement_list
 %type<IR::Register*>                register_spec_list
 %type<IR::V1Table*>                 table_body
-%type<ConstType*>                   bit_width type
+%type<ConstType*>                   type
+%type<std::pair<ConstType*, int>>   bit_width
 
 %%
 
@@ -281,7 +285,12 @@ field_declarations: /* epsilon */
       { $$.annotations = new IR::Vector<IR::Annotation>;
         $$.fields = new IR::IndexedVector<IR::StructField>; }
     | field_declarations name ":" bit_width ";"
-      { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2), $4)); }
+      {   auto annots = IR::Annotations::empty;
+          if ($4.second & 2) {
+            annots = new IR::Annotations({
+                new IR::Annotation(IR::ID("isSaturating"), { }) }); }
+          ($$=$1).fields->push_back(
+            new IR::StructField(@2+@4, IR::ID(@2, $2), annots, $4.first)); }
     | field_declarations type name ";"
       { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
 ;
@@ -289,11 +298,13 @@ field_declarations: /* epsilon */
 bit_width:
       const_expression opt_field_modifiers
       { if ($1)
-            $$ = IR::Type::Bits::get(@1, $1->asInt(), $2 & 1);
+            $$.first = IR::Type::Bits::get(@1, $1->asInt(), $2 & 1);
         else
-            $$ = IR::Type::Unknown::get(); }
+            $$.first = IR::Type::Unknown::get();
+        $$.second = $2; }
     | "*" opt_field_modifiers
-      { $$ = IR::Type::Varbits::get(); }
+      { $$.first = IR::Type::Varbits::get();
+        $$.second = $2; }
 ;
 
 opt_field_modifiers: /* epsilon */ { $$ = 0;}
@@ -307,7 +318,6 @@ attributes:
 
 attrib:
       SIGNED     { $$ = 1; }
-      // TODO: these seem to be currently ignored
     | SATURATING { $$ = 2; }
 ;
 
