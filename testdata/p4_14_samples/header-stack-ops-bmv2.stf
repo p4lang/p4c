@@ -5,10 +5,10 @@
 # exception that P4_14 push still makes the newly inserted headers
 # valid, whereas P4_16 push_front makes the newly inserted headers
 # invalid.  Thus some of the test cases are different to test that
-# different in P4_14 push vs. P4_16 push_front behavior difference.
+# difference in P4_14 push vs. P4_16 push_front behavior difference.
 
 # Relevant changes to behavioral-model and p4c that these tests are
-# only intended to work _after_ thsoe changes were made:
+# only intended to work _after_ those changes were made:
 
 # https://github.com/p4lang/behavioral-model/pull/564
 # https://github.com/p4lang/behavioral-model/pull/515
