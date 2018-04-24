@@ -1,7 +1,7 @@
 {
   "program" : "ternary.p4",
   "__meta__" : {
-    "version" : [2, 7],
+    "version" : [2, 18],
     "compiler" : "https://github.com/p4lang/p4c"
   },
   "header_types" : [

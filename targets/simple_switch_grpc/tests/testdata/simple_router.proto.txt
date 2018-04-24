@@ -18,7 +18,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@default_only()"
+    annotations: "@defaultonly()"
   }
   size: 512
 }
@@ -42,7 +42,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@default_only()"
+    annotations: "@defaultonly()"
   }
   size: 1024
 }
@@ -66,7 +66,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@default_only()"
+    annotations: "@defaultonly()"
   }
   size: 256
 }

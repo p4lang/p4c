@@ -1,7 +1,7 @@
 {
-  "program" : "counter/counter.p4i",
+  "program" : "counter.p4",
   "__meta__" : {
-    "version" : [2, 7],
+    "version" : [2, 18],
     "compiler" : "https://github.com/p4lang/p4c"
   },
   "header_types" : [
@@ -27,12 +27,14 @@
         ["deq_timedelta", 32, false],
         ["deq_qdepth", 19, false],
         ["ingress_global_timestamp", 48, false],
+        ["egress_global_timestamp", 48, false],
         ["lf_field_list", 32, false],
         ["mcast_grp", 16, false],
-        ["resubmit_flag", 1, false],
+        ["resubmit_flag", 32, false],
         ["egress_rid", 16, false],
         ["checksum_error", 1, false],
-        ["_padding", 4, false]
+        ["recirculate_flag", 32, false],
+        ["_padding", 5, false]
       ]
     }
   ],
@@ -88,13 +90,14 @@
       ]
     }
   ],
+  "parse_vsets" : [],
   "deparsers" : [
     {
       "name" : "deparser",
       "id" : 0,
       "source_info" : {
         "filename" : "counter.p4",
-        "line" : 38,
+        "line" : 36,
         "column" : 8,
         "source_fragment" : "deparser"
       },
@@ -153,7 +156,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "counter.p4",
-        "line" : 42,
+        "line" : 40,
         "column" : 8,
         "source_fragment" : "ingress"
       },
@@ -164,13 +167,14 @@
           "id" : 0,
           "source_info" : {
             "filename" : "counter.p4",
-            "line" : 48,
+            "line" : 49,
             "column" : 10,
             "source_fragment" : "t_redirect"
           },
           "key" : [
             {
               "match_type" : "exact",
+              "name" : "sm.packet_length",
               "target" : ["standard_metadata", "packet_length"],
               "mask" : null
             }
@@ -204,7 +208,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "counter.p4",
-        "line" : 34,
+        "line" : 32,
         "column" : 8,
         "source_fragment" : "egress"
       },
@@ -239,6 +243,10 @@
       ["standard_metadata", "ingress_global_timestamp"]
     ],
     [
+      "intrinsic_metadata.egress_global_timestamp",
+      ["standard_metadata", "egress_global_timestamp"]
+    ],
+    [
       "intrinsic_metadata.lf_field_list",
       ["standard_metadata", "lf_field_list"]
     ],
@@ -253,6 +261,10 @@
     [
       "intrinsic_metadata.egress_rid",
       ["standard_metadata", "egress_rid"]
+    ],
+    [
+      "intrinsic_metadata.recirculate_flag",
+      ["standard_metadata", "recirculate_flag"]
     ]
   ]
 }

@@ -17,7 +17,7 @@ tables {
     id: 16800567
     annotations: "@defaultonly()"
   }
-  direct_resource_ids: 318808304
+  direct_resource_ids: 352362736
   size: 1024
 }
 actions {
@@ -36,7 +36,7 @@ actions {
 }
 direct_meters {
   preamble {
-    id: 318808304
+    id: 352362736
     name: "ingress.mtr"
     alias: "mtr"
   }

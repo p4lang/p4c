@@ -430,8 +430,8 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
   // in bmv2, a table can have at most one direct counter and one direct meter
   pi_p4_id_t counter_id = PI_INVALID_ID, meter_id = PI_INVALID_ID;
   for (size_t i = 0; i < num_direct_resources; i++) {
-    if (pi_is_counter_id(res_ids[i])) counter_id = res_ids[i];
-    if (pi_is_meter_id(res_ids[i])) meter_id = res_ids[i];
+    if (pi_is_direct_counter_id(res_ids[i])) counter_id = res_ids[i];
+    if (pi_is_direct_meter_id(res_ids[i])) meter_id = res_ids[i];
   }
 
   Buffer buffer;
@@ -497,7 +497,7 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
         PIDirectResMsgSizeFn msg_size_fn;
         PIDirectResEmitFn emit_fn;
         pi_direct_res_get_fns(
-            PI_COUNTER_ID, &msg_size_fn, &emit_fn, NULL, NULL);
+            PI_DIRECT_COUNTER_ID, &msg_size_fn, &emit_fn, NULL, NULL);
         emit_p4_id(buffer.extend(sizeof(s_pi_p4_id_t)), counter_id);
         pi_counter_data_t counter_data;
         pibmv2::convert_to_counter_data(&counter_data, bytes, packets);
@@ -508,7 +508,8 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
       if (valid_meter) {
         PIDirectResMsgSizeFn msg_size_fn;
         PIDirectResEmitFn emit_fn;
-        pi_direct_res_get_fns(PI_METER_ID, &msg_size_fn, &emit_fn, NULL, NULL);
+        pi_direct_res_get_fns(
+            PI_DIRECT_METER_ID, &msg_size_fn, &emit_fn, NULL, NULL);
         emit_p4_id(buffer.extend(sizeof(s_pi_p4_id_t)), meter_id);
         pi_meter_spec_t meter_spec;
         pibmv2::convert_to_meter_spec(p4info, meter_id, &meter_spec, rates);
@@ -559,7 +560,7 @@ void set_direct_resources(const pi_p4info_t *p4info, pi_dev_id_t dev_id,
     pi_res_type_id_t type = PI_GET_TYPE_ID(config->res_id);
     bm::MatchErrorCode error_code;
     switch (type) {
-      case PI_COUNTER_ID:
+      case PI_DIRECT_COUNTER_ID:
         {
           uint64_t bytes, packets;
           pibmv2::convert_from_counter_data(
@@ -569,7 +570,7 @@ void set_direct_resources(const pi_p4info_t *p4info, pi_dev_id_t dev_id,
               0, t_name, entry_handle, bytes, packets);
         }
         break;
-      case PI_METER_ID:
+      case PI_DIRECT_METER_ID:
         {
           auto rates = pibmv2::convert_from_meter_spec(
               reinterpret_cast<pi_meter_spec_t *>(config->config));

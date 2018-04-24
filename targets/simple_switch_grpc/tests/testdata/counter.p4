@@ -38,11 +38,14 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name(".cntr")
     direct_counter(CounterType.packets_and_bytes) cntr;
+    @name(".port_redirect")
     action port_redirect() {
         sm.egress_spec = sm.ingress_port;
         cntr.count();
     }
+    @name(".t_redirect")
     table t_redirect {
         key = { sm.packet_length : exact; }
         actions = { port_redirect; }
