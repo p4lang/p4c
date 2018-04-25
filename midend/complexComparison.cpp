@@ -86,6 +86,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
             const IR::Type* rightType;
             if (!rightTuple) {
                 fright = new IR::Member(srcInfo, right, f->name);
+                rightType = f->type;
             } else {
                 fright = right->to<IR::ListExpression>()->components.at(index);
                 rightType = rightTuple->components.at(index);
