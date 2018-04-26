@@ -21,7 +21,6 @@ limitations under the License.
 #include <vector>
 
 #include "control-plane/p4/config/p4info.pb.h"
-#include "control-plane/p4/config/v1model.pb.h"
 #include "control-plane/p4/p4runtime.pb.h"
 #include "control-plane/p4/p4types.pb.h"
 #include "gtest/gtest.h"
