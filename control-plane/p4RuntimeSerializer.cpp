@@ -17,6 +17,7 @@ limitations under the License.
 #include <algorithm>
 #include <iostream>
 #include <typeinfo>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -27,8 +28,8 @@ limitations under the License.
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
 #include "p4/config/p4info.pb.h"
-#include "p4/config/v1model.pb.h"
 #include "p4/p4runtime.pb.h"
+#include "p4/p4types.pb.h"
 
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -45,9 +46,9 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "lib/ordered_set.h"
-#include "midend/eliminateTuples.h"
 #include "midend/removeParameters.h"
 #include "midend/synthesizeValidField.h"
+#include "typeSpecConverter.h"
 
 #include "p4RuntimeSerializer.h"
 
@@ -310,8 +311,7 @@ struct Digest {
     const cstring name;       // The fully qualified external name of the digest
                               // *data* - in P4-14, the field list name, or in
                               // P4-16, the type of the 'data' parameter.
-    const uint64_t receiver;  // The numeric id of the digest receiver.
-    const std::vector<Field> fields;  // The fields that make up the digest data.
+    const p4::P4DataTypeSpec* typeSpec;  // The format of the packed data.
 };
 
 /// The information about a default action which is needed to serialize it.
@@ -539,8 +539,6 @@ enum class P4RuntimeSymbolType {
     DIGEST,
     DIRECT_COUNTER,
     DIRECT_METER,
-    EXTERN,
-    EXTERN_INSTANCE,
     METER,
     REGISTER,
     TABLE,
@@ -863,9 +861,6 @@ class P4RuntimeSymbolTable {
               return p4::config::P4Ids::DIRECT_COUNTER;
             case P4RuntimeSymbolType::DIRECT_METER:
               return p4::config::P4Ids::DIRECT_METER;
-            // TODO(antonin): remove and use DIGEST
-            case P4RuntimeSymbolType::EXTERN: return 0x98;
-            case P4RuntimeSymbolType::EXTERN_INSTANCE: return 0x99;
             case P4RuntimeSymbolType::METER:
               return p4::config::P4Ids::METER;
             case P4RuntimeSymbolType::REGISTER:
@@ -893,8 +888,6 @@ class P4RuntimeSymbolTable {
         { P4RuntimeSymbolType::DIGEST, SymbolTable() },
         { P4RuntimeSymbolType::DIRECT_COUNTER, SymbolTable() },
         { P4RuntimeSymbolType::DIRECT_METER, SymbolTable() },
-        { P4RuntimeSymbolType::EXTERN, SymbolTable() },
-        { P4RuntimeSymbolType::EXTERN_INSTANCE, SymbolTable() },
         { P4RuntimeSymbolType::METER, SymbolTable() },
         { P4RuntimeSymbolType::REGISTER, SymbolTable() },
         { P4RuntimeSymbolType::TABLE, SymbolTable() },
@@ -914,7 +907,6 @@ class P4RuntimeAnalyzer {
     using Meter = ::p4::config::Meter;
     using CounterSpec = ::p4::config::CounterSpec;
     using MeterSpec = ::p4::config::MeterSpec;
-    using Extern = ::p4::config::Extern;
     using Preamble = ::p4::config::Preamble;
     using P4Info = ::p4::config::P4Info;
 
@@ -1022,33 +1014,19 @@ class P4RuntimeAnalyzer {
     }
 
     void addDigest(const Digest& digest) {
-        // XXX(seth): It's a bit unclear when two calls to digest() should be
-        // treated as being the same from the control plane's perspective.
+        // Each call to digest() creates a new digest entry in the P4Info.
         // Right now we only take the type of data included in the digest
         // (encoded in its name) into account, but it may be that we should also
         // consider the receiver.
-        auto id = symbols.getId(P4RuntimeSymbolType::EXTERN_INSTANCE, digest.name);
+        auto id = symbols.getId(P4RuntimeSymbolType::DIGEST, digest.name);
         if (serializedInstances.find(id) != serializedInstances.end()) return;
         serializedInstances.insert(id);
 
-        auto digestExtern = findExtern(P4V1::V1Model::instance.digest_receiver.name);
-        auto instance = digestExtern->add_instances();
-        instance->mutable_preamble()->set_id(id);
-        instance->mutable_preamble()->set_name(digest.name);
-        instance->mutable_preamble()->set_alias(symbols.getAlias(digest.name));
-
-        ::p4::config::v1model::Digest digestInstance;
-        digestInstance.set_receiver(digest.receiver);
-
-        size_t index = 1;
-        for (auto& field : digest.fields) {
-            auto instanceField = digestInstance.add_fields();
-            instanceField->set_id(index++);
-            instanceField->set_name(field.name);
-            instanceField->set_bitwidth(field.bitwidth);
-        }
-
-        instance->mutable_info()->PackFrom(digestInstance);
+        auto* digestInstance = p4Info->add_digests();
+        digestInstance->mutable_preamble()->set_id(id);
+        digestInstance->mutable_preamble()->set_name(digest.name);
+        digestInstance->mutable_preamble()->set_alias(symbols.getAlias(digest.name));
+        digestInstance->mutable_type_spec()->CopyFrom(*digest.typeSpec);
     }
 
     void addAction(const IR::P4Action* actionDeclaration) {
@@ -1313,22 +1291,6 @@ class P4RuntimeAnalyzer {
         addAnnotations(message, annotated, [](cstring){ return false; });
     }
 
-    /// @return the P4Runtime Extern message for the extern @name, creating a
-    /// new one if no existing one is found.
-    Extern* findExtern(cstring name) {
-        auto externs = p4Info->mutable_externs();
-        auto existingExtern =
-          std::find_if(externs->pointer_begin(), externs->pointer_end(),
-              [&](const Extern* e) { return e->extern_type_name() == name; });
-        if (existingExtern != externs->pointer_end()) return *existingExtern;
-
-        auto newExtern = p4Info->add_externs();
-        auto id = symbols.getId(P4RuntimeSymbolType::EXTERN, name);
-        newExtern->set_extern_type_id(id);
-        newExtern->set_extern_type_name(name);
-        return newExtern;
-    }
-
     /// P4Runtime's representation of a program's control plane API.
     P4Info* p4Info;
     /// The symbols used in the API and their ids.
@@ -1346,7 +1308,8 @@ class P4RuntimeAnalyzer {
 static boost::optional<Digest>
 getDigestCall(const IR::MethodCallExpression* call,
               ReferenceMap* refMap,
-              TypeMap* typeMap) {
+              TypeMap* typeMap,
+              p4::P4TypeInfo* p4RtTypeInfo) {
     auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
     if (!instance->is<P4::ExternFunction>()) return boost::none;
 
@@ -1360,71 +1323,36 @@ getDigestCall(const IR::MethodCallExpression* call,
 
     // An invocation of digest() looks like this:
     //   digest<T>(receiver, { fields });
-    // The name that shows up in the control plane API is the type name T.
-    const IR::Type_StructLike* structType = nullptr;
+    // The name that shows up in the control plane API is the type name T. If T
+    // doesn't have a name (e.g. tuple), we auto-generate one; ideally we would
+    // be able to annotate the digest method call with a @name annotation in the
+    // P4 but annotations are not supported on expressions.
+    cstring controlPlaneName;
     auto* typeArg = call->typeArguments->at(0);
     if (typeArg->is<IR::Type_StructLike>()) {
-        structType = typeArg->to<IR::Type_StructLike>();
+        auto structType = typeArg->to<IR::Type_StructLike>();
+        controlPlaneName = structType->controlPlaneName();
     } else if (auto* typeName = typeArg->to<IR::Type_Name>()) {
         auto* referencedType = refMap->getDeclaration(typeName->path, true);
-        if (!referencedType || !referencedType->is<IR::Type_StructLike>()) {
-            ::error("digest() is instantiated with an unexpected "
-                    "type name: %1%", typeArg);
-            return boost::none;
-        }
-        structType = referencedType->to<IR::Type_StructLike>();
+        CHECK_NULL(referencedType);
+        controlPlaneName = referencedType->controlPlaneName();
     } else {
-        ::error("digest() is instantiated with an unexpected type: %1%", typeArg);
-        return boost::none;
-    }
-
-    // The first argument is a numeric constant identifying the receiver.
-    auto receiver = call->arguments->at(0)->expression;
-    if (!receiver->is<IR::Constant>()) {
-        ::error("%1%: Expected constant receiver", call);
-        return boost::none;
-    }
-
-    // The second argument is either a value of struct type or a list of values.
-    // In either case we try to boil things down to a list of fields. In P4-16
-    // we could theoretically support passing more complicated expressions to
-    // digest(), but it's not well supported right now.
-    std::vector<Digest::Field> fields;
-    auto data = call->arguments->at(1)->expression;
-    auto dataType = typeMap->getType(data, true);
-    if (data->is<IR::ListExpression>()) {
-        for (auto expression : data->to<IR::ListExpression>()->components) {
-            auto path = HeaderFieldPath::from(expression, refMap, typeMap);
-            if (!path) {
-                ::error("Digest data '%1%' is too complicated to represent in "
-                        "P4Runtime", expression);
-                return boost::none;
-            }
-            fields.push_back({path->serialize(),
-                              uint32_t(path->type->width_bits())});
+        static std::unordered_map<const IR::MethodCallExpression*, cstring> autoNames;
+        auto it = autoNames.find(call);
+        if (it == autoNames.end()) {
+            controlPlaneName = "digest_" + cstring::to_cstring(autoNames.size());
+            ::warning("Cannot find a good name for %1% method call, using "
+                      "auto-generated name '%2%'", call, controlPlaneName);
+            autoNames.emplace(call, controlPlaneName);
+        } else {
+            controlPlaneName = it->second;
         }
-    } else if (dataType->is<IR::Type_StructLike>()) {
-        for (auto field : dataType->to<IR::Type_StructLike>()->fields) {
-            auto member = new IR::Member(data, field->name);
-            typeMap->setType(member, typeMap->getType(field, true));
-            auto path = HeaderFieldPath::from(member, refMap, typeMap);
-            if (!path) {
-                ::error("Digest data '%1%' is too complicated to represent in "
-                        "P4Runtime", data);
-                return boost::none;
-            }
-            fields.push_back({path->serialize(),
-                              uint32_t(path->type->width_bits())});
-        }
-    } else {
-        ::error("Digest data '%1%' is too complicated to represent in "
-                "P4Runtime", data);
-        return boost::none;
     }
 
-    return Digest{structType->controlPlaneName(),
-                  receiver->to<IR::Constant>()->value.get_ui(),
-                  std::move(fields)};
+    // Convert the generic type for the digest method call to a P4DataTypeSpec
+    auto* typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
+    BUG_CHECK(typeSpec != nullptr, "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+    return Digest{controlPlaneName, typeSpec};
 }
 
 static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
@@ -1446,12 +1374,8 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
         // Collect any extern functions it may invoke.
         forAllMatching<IR::MethodCallExpression>(action->body,
                       [&](const IR::MethodCallExpression* call) {
-            auto digest = getDigestCall(call, refMap, typeMap);
-            if (digest) {
-                symbols.add(P4RuntimeSymbolType::EXTERN,
-                            P4V1::V1Model::instance.digest_receiver.name);
-                symbols.add(P4RuntimeSymbolType::EXTERN_INSTANCE, digest->name);
-            }
+            auto digest = getDigestCall(call, refMap, typeMap, nullptr);
+            if (digest) symbols.add(P4RuntimeSymbolType::DIGEST, digest->name);
         });
     });
 }
@@ -1459,7 +1383,8 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
 static void analyzeControl(P4RuntimeAnalyzer& analyzer,
                            const IR::ControlBlock* controlBlock,
                            ReferenceMap* refMap,
-                           TypeMap* typeMap) {
+                           TypeMap* typeMap,
+                           p4::P4TypeInfo* p4RtTypeInfo) {
     CHECK_NULL(controlBlock);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
@@ -1475,7 +1400,7 @@ static void analyzeControl(P4RuntimeAnalyzer& analyzer,
         // Generate P4Info for any extern functions it may invoke.
         forAllMatching<IR::MethodCallExpression>(action->body,
                       [&](const IR::MethodCallExpression* call) {
-            auto digest = getDigestCall(call, refMap, typeMap);
+            auto digest = getDigestCall(call, refMap, typeMap, p4RtTypeInfo);
             if (digest) analyzer.addDigest(*digest);
         });
     });
@@ -2182,7 +2107,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     P4RuntimeAnalyzer analyzer(symbols, typeMap);
     forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::ControlBlock>()) {
-            analyzeControl(analyzer, block->to<IR::ControlBlock>(), refMap, typeMap);
+            analyzeControl(analyzer, block->to<IR::ControlBlock>(), refMap, typeMap,
+                           analyzer.p4Info->mutable_type_info());
         } else if (block->is<IR::ExternBlock>()) {
             analyzeExtern(analyzer, block->to<IR::ExternBlock>(), typeMap);
         } else if (block->is<IR::TableBlock>()) {
@@ -2229,8 +2155,6 @@ P4RuntimeAPI generateP4Runtime(const IR::P4Program* program) {
         new P4::RemoveActionParameters(&refMap, &typeMap),
         // We need a $valid$ field preinserted before we generate P4Runtime.
         new P4::SynthesizeValidField(&refMap, &typeMap),
-        // We currently can't handle tuples.
-        new P4::EliminateTuples(&refMap, &typeMap),
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true),
         evaluator

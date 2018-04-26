@@ -105,17 +105,12 @@ const ::p4::config::DirectCounter* findDirectCounter(const P4::P4RuntimeAPI& ana
     return findP4InfoObject(counters.begin(), counters.end(), name);
 }
 
-/// @return the P4Runtime representation of the extern with the given name, or
+/// @return the P4Runtime representation of the digest with the given name, or
 /// null if none is found.
-const ::p4::config::Extern* findExtern(const P4::P4RuntimeAPI& analysis,
+const ::p4::config::Digest* findDigest(const P4::P4RuntimeAPI& analysis,
                                        const std::string& name) {
-    auto& externs = analysis.p4Info->externs();
-    auto desiredExtern = std::find_if(externs.begin(), externs.end(),
-                                      [&](const ::p4::config::Extern& e) {
-        return e.extern_type_name() == name;
-    });
-    if (desiredExtern == externs.end()) return nullptr;
-    return &*desiredExtern;
+    auto& digests = analysis.p4Info->digests();
+    return findP4InfoObject(digests.begin(), digests.end(), name);
 }
 
 }  // namespace
@@ -611,8 +606,6 @@ TEST_F(P4Runtime, Digests) {
                 // digest<T>() where T is a struct.
                 digest(2, m);
                 // digest<T>() where T is a tuple.
-                // XXX(seth): Right now this requires that the EliminateTuples
-                // pass has run; we may want to change that.
                 digest(3, { h.h.headerFieldA, m.metadataFieldB });
             }
             apply {
@@ -625,82 +618,41 @@ TEST_F(P4Runtime, Digests) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
-
-    auto* digestExtern = findExtern(*test, "digest");
-    ASSERT_TRUE(digestExtern != nullptr);
-    ASSERT_EQ(3, digestExtern->instances_size());
+    // we expect one warning for the third digest, for which T is a tuple and we
+    // have to auto-generate a name for the digest.
+    EXPECT_EQ(1u, ::diagnosticCount());
+    const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the
-    // program. Note that we don't check the resource type of the id (i.e., we
-    // mask off the first 8 bits) because extern instances haven't yet been
-    // assigned an "official" resource type.
+    // program.
 
     // digest<T>() where T is a header.
     {
-        auto& instance = digestExtern->instances(0);
-        EXPECT_EQ(std::string("Header"), instance.preamble().name());
-        EXPECT_EQ(0x0000B33Fu, instance.preamble().id() & 0x00ffffff);
-
-        ::p4::config::v1model::Digest digest;
-        instance.info().UnpackTo(&digest);
-        EXPECT_EQ(1u, digest.receiver());
-
-        // XXX(seth): There are actually three fields in this digest because
-        // `h.$valid$` is incorrectly included. We need to fix that.
-        ASSERT_EQ(3, digest.fields_size())
-          << "If you fixed the inclusion of $valid$ fields in digests, "
-             "please update this test.";
-
-        EXPECT_EQ(1u, digest.fields(0).id());
-        EXPECT_EQ(std::string("h.headerFieldA"), digest.fields(0).name());
-        EXPECT_EQ(16, digest.fields(0).bitwidth());
-
-        EXPECT_EQ(2u, digest.fields(1).id());
-        EXPECT_EQ(std::string("h.headerFieldB"), digest.fields(1).name());
-        EXPECT_EQ(8, digest.fields(1).bitwidth());
+        auto digest = findDigest(*test, "Header");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_header());
+        EXPECT_EQ("Header", digest->type_spec().header().name());
+        EXPECT_TRUE(typeInfo.headers().find("Header") != typeInfo.headers().end());
     }
 
     // digest<T>() where T is a struct.
     {
-        auto& instance = digestExtern->instances(1);
-        EXPECT_EQ(std::string("Metadata"), instance.preamble().name());
-        EXPECT_EQ(0x0000D0C6u, instance.preamble().id() & 0x00ffffff);
-
-        ::p4::config::v1model::Digest digest;
-        instance.info().UnpackTo(&digest);
-        EXPECT_EQ(2u, digest.receiver());
-        ASSERT_EQ(2, digest.fields_size());
-
-        EXPECT_EQ(1u, digest.fields(0).id());
-        EXPECT_EQ(std::string("metadataFieldA"), digest.fields(0).name());
-        EXPECT_EQ(3, digest.fields(0).bitwidth());
-
-        EXPECT_EQ(2u, digest.fields(1).id());
-        EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
-        EXPECT_EQ(1, digest.fields(1).bitwidth());
+        auto digest = findDigest(*test, "Metadata");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_struct_());
+        EXPECT_EQ("Metadata", digest->type_spec().struct_().name());
+        EXPECT_TRUE(typeInfo.structs().find("Metadata") != typeInfo.structs().end());
     }
 
     // digest<T>() where T is a tuple.
     {
-        // XXX(seth): The name is generated by EliminateTuples. We should do
-        // something nicer than this.
-        auto& instance = digestExtern->instances(2);
-        EXPECT_EQ(std::string("tuple_0"), instance.preamble().name());
-        EXPECT_EQ(0x00003620u, instance.preamble().id() & 0x00ffffff);
-
-        ::p4::config::v1model::Digest digest;
-        instance.info().UnpackTo(&digest);
-        EXPECT_EQ(3u, digest.receiver());
-        ASSERT_EQ(2, digest.fields_size());
-
-        EXPECT_EQ(1u, digest.fields(0).id());
-        EXPECT_EQ(std::string("h.headerFieldA"), digest.fields(0).name());
-        EXPECT_EQ(16, digest.fields(0).bitwidth());
-
-        EXPECT_EQ(2u, digest.fields(1).id());
-        EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
-        EXPECT_EQ(1, digest.fields(1).bitwidth());
+        auto digest = findDigest(*test, "digest_0");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_tuple());
+        EXPECT_EQ(2, digest->type_spec().tuple().members_size());
     }
 }
 
