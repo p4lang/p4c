@@ -74,6 +74,7 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
 
 set (CONTROLPLANE_SRCS
   p4RuntimeSerializer.cpp
+  typeSpecConverter.cpp
   )
 set (CONTROLPLANE_SOURCES
   ${P4RUNTIME_GEN_SRCS}
@@ -82,6 +83,7 @@ set (CONTROLPLANE_SOURCES
 
 set (CONTROLPLANE_HDRS
   p4RuntimeSerializer.h
+  typeSpecConverter.h
   )
 
 # exclude p4RuntimeSerializer.cpp because it is has issues with
