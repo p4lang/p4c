@@ -14,20 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <google/protobuf/util/message_differencer.h>
+
+#include <iterator>
+#include <string>
+#include <vector>
+
 #include "control-plane/p4/config/p4info.pb.h"
 #include "control-plane/p4/config/v1model.pb.h"
 #include "control-plane/p4/p4runtime.pb.h"
+#include "control-plane/p4/p4types.pb.h"
 #include "gtest/gtest.h"
 
 #include "control-plane/p4RuntimeSerializer.h"
+#include "control-plane/typeSpecConverter.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace Test {
 
 namespace {
 
 using P4Ids = ::p4::config::P4Ids;
+
+using google::protobuf::util::MessageDifferencer;
 
 boost::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(const std::string& source,
@@ -868,6 +881,258 @@ TEST_F(P4Runtime, ValueSet) {
     EXPECT_EQ(unsigned(P4Ids::VALUE_SET), vset->preamble().id() >> 24);
     EXPECT_EQ(48, vset->bitwidth());
     EXPECT_EQ(16, vset->size());
+}
+
+class P4RuntimeDataTypeSpec : public P4Runtime {
+ protected:
+    const IR::P4Program* getProgram(const std::string& programStr) {
+        auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
+        if (pgm == nullptr) return nullptr;
+        PassManager  passes({
+            new TypeChecking(&refMap, &typeMap)
+        });
+        pgm = pgm->apply(passes);
+        return pgm;
+    }
+
+    template <typename T>
+    const T* findExternTypeParameterName(
+        const IR::P4Program* program, cstring externName) const {
+        const T* type = nullptr;
+        forAllMatching<IR::Type_Specialized>(program, [&](const IR::Type_Specialized* ts) {
+            if (ts->baseType->toString() != externName) return;
+            ASSERT_TRUE(type == nullptr);
+            ASSERT_TRUE(ts->arguments->at(0)->is<T>());
+            type = ts->arguments->at(0)->to<T>();
+        });
+        return type;
+    }
+
+    p4::P4TypeInfo typeInfo;
+    ReferenceMap refMap;
+    TypeMap typeMap;
+};
+
+TEST_F(P4RuntimeDataTypeSpec, Bits) {
+    int size(9);
+    bool isSigned(true);
+    auto type = new IR::Type_Bits(size, isSigned);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_bitstring());
+    const auto& bitstringTypeSpec = typeSpec->bitstring();
+    ASSERT_TRUE(bitstringTypeSpec.has_int_());  // signed type
+    EXPECT_EQ(size, bitstringTypeSpec.int_().bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Varbits) {
+    int size(64);
+    auto type = new IR::Type_Varbits(size);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_bitstring());
+    const auto& bitstringTypeSpec = typeSpec->bitstring();
+    ASSERT_TRUE(bitstringTypeSpec.has_varbit());
+    EXPECT_EQ(size, bitstringTypeSpec.varbit().max_bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Boolean) {
+    auto type = new IR::Type_Boolean();
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    EXPECT_TRUE(typeSpec->has_bool_());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Tuple) {
+    auto typeMember1 = new IR::Type_Bits(1, false);
+    auto typeMember2 = new IR::Type_Bits(2, false);
+    IR::Vector<IR::Type> components = {typeMember1, typeMember2};
+    auto type = new IR::Type_Tuple(std::move(components));
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_tuple());
+    const auto& tupleTypeSpec = typeSpec->tuple();
+    ASSERT_EQ(2, tupleTypeSpec.members_size());
+    {
+        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+            &typeMap, &refMap, typeMember1, nullptr);
+        EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(0)));
+    }
+    {
+        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+            &typeMap, &refMap, typeMember2, nullptr);
+        EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(1)));
+    }
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Struct) {
+    std::string program = P4_SOURCE(R"(
+        struct my_struct { bit<8> f; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_struct>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_struct_());
+    EXPECT_EQ("my_struct", typeSpec->struct_().name());
+
+    auto it = typeInfo.structs().find("my_struct");
+    ASSERT_TRUE(it != typeInfo.structs().end());
+    ASSERT_EQ(1, it->second.members_size());
+    EXPECT_EQ("f", it->second.members(0).name());
+    const auto &memberTypeSpec = it->second.members(0).type_spec();
+    ASSERT_TRUE(memberTypeSpec.has_bitstring());
+    ASSERT_TRUE(memberTypeSpec.bitstring().has_bit());
+    EXPECT_EQ(8, memberTypeSpec.bitstring().bit().bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Header) {
+    std::string program = P4_SOURCE(R"(
+        header my_header { bit<8> f; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header());
+    EXPECT_EQ("my_header", typeSpec->header().name());
+
+    auto it = typeInfo.headers().find("my_header");
+    ASSERT_TRUE(it != typeInfo.headers().end());
+    ASSERT_EQ(1, it->second.members_size());
+    EXPECT_EQ("f", it->second.members(0).name());
+    const auto &memberBitstringTypeSpec = it->second.members(0).type_spec();
+    ASSERT_TRUE(memberBitstringTypeSpec.has_bit());
+    EXPECT_EQ(8, memberBitstringTypeSpec.bit().bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, HeaderUnion) {
+    std::string program = P4_SOURCE(R"(
+        header my_header_1 { bit<8> f; }
+        header my_header_2 { bit<16> f; }
+        header_union my_header_union { my_header_1 h1; my_header_2 h2; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header_union>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header_union());
+    EXPECT_EQ("my_header_union", typeSpec->header_union().name());
+
+    {
+        auto it = typeInfo.header_unions().find("my_header_union");
+        ASSERT_TRUE(it != typeInfo.header_unions().end());
+        ASSERT_EQ(2, it->second.members_size());
+        EXPECT_EQ("h1", it->second.members(0).name());
+        EXPECT_EQ("my_header_1", it->second.members(0).header().name());
+        EXPECT_EQ("h2", it->second.members(1).name());
+        EXPECT_EQ("my_header_2", it->second.members(1).header().name());
+    }
+
+    EXPECT_TRUE(typeInfo.headers().find("my_header_1") != typeInfo.headers().end());
+    EXPECT_TRUE(typeInfo.headers().find("my_header_2") != typeInfo.headers().end());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
+    std::string program = P4_SOURCE(R"(
+        header my_header { bit<8> f; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header[3]>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header_stack());
+    EXPECT_EQ("my_header", typeSpec->header_stack().header().name());
+    EXPECT_EQ(3, typeSpec->header_stack().size());
+
+    EXPECT_TRUE(typeInfo.headers().find("my_header") != typeInfo.headers().end());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, HeaderUnionStack) {
+    std::string program = P4_SOURCE(R"(
+        header my_header_1 { bit<8> f; }
+        header my_header_2 { bit<16> f; }
+        header_union my_header_union { my_header_1 h1; my_header_2 h2; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header_union[3]>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header_union_stack());
+    EXPECT_EQ("my_header_union", typeSpec->header_union_stack().header_union().name());
+    EXPECT_EQ(3, typeSpec->header_union_stack().size());
+
+    EXPECT_TRUE(typeInfo.header_unions().find("my_header_union") != typeInfo.header_unions().end());
+    EXPECT_TRUE(typeInfo.headers().find("my_header_1") != typeInfo.headers().end());
+    EXPECT_TRUE(typeInfo.headers().find("my_header_2") != typeInfo.headers().end());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Enum) {
+    std::string program = P4_SOURCE(R"(
+        enum my_enum { MBR_1, MBR_2 }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_enum>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_enum_());
+    EXPECT_EQ("my_enum", typeSpec->enum_().name());
+
+    auto it = typeInfo.enums().find("my_enum");
+    ASSERT_TRUE(it != typeInfo.enums().end());
+    ASSERT_EQ(2, it->second.members_size());
+    EXPECT_EQ("MBR_1", it->second.members(0).name());
+    EXPECT_EQ("MBR_2", it->second.members(1).name());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Error) {
+    std::string program = P4_SOURCE(R"(
+        error { MBR_1, MBR_2 }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<error>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_error());
+
+    ASSERT_TRUE(typeInfo.has_error());
+    EXPECT_EQ("MBR_1", typeInfo.error().members(0));
+    EXPECT_EQ("MBR_2", typeInfo.error().members(1));
 }
 
 }  // namespace Test
