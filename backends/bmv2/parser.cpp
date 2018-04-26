@@ -391,14 +391,4 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
     return false;
 }
 
-/// visit ParserBlock only
-bool ParserConverter::preorder(const IR::PackageBlock* block) {
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::ParserBlock>()) {
-            visit(it.second->getNode());
-        }
-    }
-    return false;
-}
-
 }  // namespace BMV2
