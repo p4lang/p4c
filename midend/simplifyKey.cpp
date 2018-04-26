@@ -47,7 +47,8 @@ bool IsValid::isSimple(const IR::Expression* expression) {
 }
 
 const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
-    bool simple = policy->isSimple(element->expression);
+    LOG1("Key element " << element);
+    bool simple = key_policy->isSimple(element->expression);
     if (simple)
         return element;
 
@@ -76,6 +77,15 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     element->expression = path;
     LOG2("Created new key expression " << element);
     return element;
+}
+
+const IR::Node* DoSimplifyKey::preorder(IR::P4Table *table) {
+    bool simple = table_policy->isSimple(table);
+    LOG1("Simple " << simple << " " << table->name);
+    if (simple) {
+        prune();
+    }
+    return table;
 }
 
 const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
