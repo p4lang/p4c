@@ -30,7 +30,7 @@ namespace P4 {
 class KeyIsSimple {
  public:
     virtual ~KeyIsSimple() {}
-    virtual bool isSimple(const IR::Expression* expression) = 0;
+    virtual bool isSimple(const IR::Expression *expression, const Visitor::Context *) = 0;
 };
 
 
@@ -54,7 +54,7 @@ class IsLikeLeftValue : public KeyIsSimple, public Inspector {
     void postorder(const IR::PathExpression*) override {}
     void postorder(const IR::ArrayIndex*) override {}
 
-    bool isSimple(const IR::Expression* expression) override {
+    bool isSimple(const IR::Expression* expression, const Visitor::Context *) override {
         (void)expression->apply(*this);
         return simple;
     }
@@ -70,7 +70,7 @@ class IsValid : public KeyIsSimple {
     IsValid(ReferenceMap* refMap, TypeMap* typeMap)
             : refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    bool isSimple(const IR::Expression* expression);
+    bool isSimple(const IR::Expression* expression, const Visitor::Context *);
 };
 
 /**
@@ -79,13 +79,13 @@ class IsValid : public KeyIsSimple {
  */
 class IsMask : public IsLikeLeftValue {
  public:
-    bool isSimple(const IR::Expression* expression) {
+    bool isSimple(const IR::Expression* expression, const Visitor::Context *ctxt) {
         if (auto mask = expression->to<IR::BAnd>()) {
             if (mask->right->is<IR::Constant>())
                 expression = mask->left;
             else if (mask->left->is<IR::Constant>())
                 expression = mask->right; }
-        return IsLikeLeftValue::isSimple(expression); }
+        return IsLikeLeftValue::isSimple(expression, ctxt); }
 };
 
 /**
@@ -99,38 +99,8 @@ class OrPolicy : public KeyIsSimple {
  public:
     OrPolicy(KeyIsSimple* left, KeyIsSimple* right): left(left), right(right)
     { CHECK_NULL(left); CHECK_NULL(right); }
-    bool isSimple(const IR::Expression* expression) {
-        return left->isSimple(expression) || right->isSimple(expression);
-    }
-};
-
-/**
- * Policy used to decide if an entire table can be skipped as its key is simplified
- * and can be used directly
- */
-class TableIsSimple {
- public:
-    virtual ~TableIsSimple() {}
-    virtual bool isSimple(const IR::P4Table *table) = 0;
-};
-
-/**
- * Class necessary to not impact the SimplifyKey Constructors
- */
-class NoTableIsSimple : public TableIsSimple {
- public:
-    bool isSimple(const IR::P4Table *) { return false; }
-};
-
-class OrTablePolicy : public TableIsSimple {
-    TableIsSimple *left;
-    TableIsSimple *right;
-
- public:
-    OrTablePolicy(TableIsSimple *left, TableIsSimple *right) : left(left), right(right)
-    { CHECK_NULL(left); CHECK_NULL(right); }
-    bool isSimple(const IR::P4Table *table) {
-        return left->isSimple(table) || right->isSimple(table);
+    bool isSimple(const IR::Expression* expression, const Visitor::Context *ctxt) {
+        return left->isSimple(expression, ctxt) || right->isSimple(expression, ctxt);
     }
 };
 
@@ -175,20 +145,12 @@ class DoSimplifyKey : public Transform {
     ReferenceMap*     refMap;
     TypeMap*          typeMap;
     KeyIsSimple*      key_policy;
-    TableIsSimple*    table_policy;
     std::map<const IR::P4Table*, TableInsertions*> toInsert;
 
  public:
-    DoSimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* key_policy,
-                  TableIsSimple *table_policy) :
-            refMap(refMap), typeMap(typeMap), key_policy(key_policy),
-            table_policy(table_policy) {
-        CHECK_NULL(refMap);
-        CHECK_NULL(typeMap);
-        CHECK_NULL(key_policy);
-        CHECK_NULL(table_policy);
-        setName("DoSimplifyKey");
-    }
+    DoSimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* key_policy) :
+            refMap(refMap), typeMap(typeMap), key_policy(key_policy)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(key_policy); setName("DoSimplifyKey"); }
     const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
 
     // These should be all kinds of statements that may contain a table apply
@@ -203,7 +165,6 @@ class DoSimplifyKey : public Transform {
     { return doStatement(statement, statement->right); }
     const IR::Node* postorder(IR::KeyElement* element) override;
     const IR::Node* postorder(IR::P4Table* table) override;
-    const IR::Node* preorder(IR::P4Table *table) override;
 };
 
 /**
@@ -212,15 +173,11 @@ class DoSimplifyKey : public Transform {
  */
 class SimplifyKey : public PassManager {
  public:
-    SimplifyKey(ReferenceMap *refMap, TypeMap* typeMap, KeyIsSimple *key_policy,
-                TableIsSimple *table_policy) {
+    SimplifyKey(ReferenceMap *refMap, TypeMap* typeMap, KeyIsSimple *key_policy) {
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoSimplifyKey(refMap, typeMap, key_policy, table_policy));
+        passes.push_back(new DoSimplifyKey(refMap, typeMap, key_policy));
         setName("SimplifyKey");
     }
-
-    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* policy)
-        : SimplifyKey(refMap, typeMap, policy, new NoTableIsSimple()) { }
 };
 
 }  // namespace P4
