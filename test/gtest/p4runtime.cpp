@@ -88,6 +88,14 @@ const ::p4::config::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
     return findP4InfoObject(vsets.begin(), vsets.end(), name);
 }
 
+/// @return the P4Runtime representation of the register with the given name, or
+/// null if none is found.
+const ::p4::config::Register* findRegister(const P4::P4RuntimeAPI& analysis,
+                                           const std::string& name) {
+    auto& registers = analysis.p4Info->registers();
+    return findP4InfoObject(registers.begin(), registers.end(), name);
+}
+
 /// @return the P4Runtime representation of the counter with the given name, or
 /// null if none is found.
 const ::p4::config::Counter* findCounter(const P4::P4RuntimeAPI& analysis,
@@ -832,6 +840,44 @@ TEST_F(P4Runtime, ValueSet) {
     EXPECT_EQ(unsigned(P4Ids::VALUE_SET), vset->preamble().id() >> 24);
     EXPECT_EQ(48, vset->bitwidth());
     EXPECT_EQ(16, vset->size());
+}
+
+TEST_F(P4Runtime, Register) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<32> hfA; bit<16> hfB; }
+        struct Headers { Header h; }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            @my_anno("This is an annotation!")
+            register<tuple<bit<16>, bit<8> > >(128) my_register;
+            apply { my_register.write(32w10, {16w1, 8w2}); } }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+    auto register_ = findRegister(*test, "ingress.my_register");
+    ASSERT_TRUE(register_ != nullptr);
+    EXPECT_EQ(unsigned(P4Ids::REGISTER), register_->preamble().id() >> 24);
+    const auto& annotations = register_->preamble().annotations();
+    ASSERT_EQ(1, annotations.size());
+    EXPECT_EQ("@my_anno(\"This is an annotation!\")", annotations.Get(0));
+    EXPECT_EQ(128, register_->size());
+    const auto& typeSpec = register_->type_spec();
+    ASSERT_TRUE(typeSpec.has_tuple());
+    EXPECT_EQ(2, typeSpec.tuple().members_size());
 }
 
 class P4RuntimeDataTypeSpec : public P4Runtime {
