@@ -99,6 +99,8 @@ int main(int argc, char *const argv[]) {
         }
         log_dump(program, "Initial program");
         if (program != nullptr && ::errorCount() == 0) {
+            P4::serializeP4RuntimeIfRequired(program, options);
+
             if (!options.parseOnly && !options.validateOnly) {
                 P4Test::MidEnd midEnd(options);
                 midEnd.addDebugHook(hook);
@@ -145,8 +147,6 @@ int main(int argc, char *const argv[]) {
             }
         }
     }
-
-    P4::serializeP4RuntimeIfRequired(program, options);
 
     if (Log::verbose())
         std::cerr << "Done." << std::endl;
