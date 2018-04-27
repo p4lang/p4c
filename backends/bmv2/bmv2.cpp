@@ -66,6 +66,10 @@ int main(int argc, char *const argv[]) {
     if (program == nullptr || ::errorCount() > 0)
         return 1;
 
+    P4::serializeP4RuntimeIfRequired(program, options);
+    if (::errorCount() > 0)
+        return 1;
+
     const IR::ToplevelBlock* toplevel = nullptr;
     BMV2::MidEnd midEnd(options);
     midEnd.addDebugHook(hook);
@@ -104,8 +108,6 @@ int main(int argc, char *const argv[]) {
             out->flush();
         }
     }
-
-    P4::serializeP4RuntimeIfRequired(program, options);
 
     return ::errorCount() > 0;
 }
