@@ -39,8 +39,8 @@ namespace ControlPlaneAPI {
 /// Generates the appropriate p4.P4DataTypeSpec for a given IR::Type node.
 class TypeSpecConverter : public Inspector {
  private:
-    P4::TypeMap* typeMap;
-    P4::ReferenceMap* refMap;
+    const P4::TypeMap* typeMap;
+    const P4::ReferenceMap* refMap;
     /// type_info field of the P4Info message: includes information about P4
     /// named types (struct, header, header union, enum, error).
     p4::P4TypeInfo* p4RtTypeInfo;
@@ -48,7 +48,7 @@ class TypeSpecConverter : public Inspector {
     /// to 'map'.
     std::map<const IR::Type*, p4::P4DataTypeSpec*> map;
 
-    TypeSpecConverter(P4::TypeMap* typeMap, P4::ReferenceMap* refMap,
+    TypeSpecConverter(const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap,
                       p4::P4TypeInfo* p4RtTypeInfo);
 
     // fallback for unsupported types, should be unreachable
@@ -76,7 +76,7 @@ class TypeSpecConverter : public Inspector {
     /// @typeInfo is nullptr, then the relevant information is not generated for
     /// named types.
     static const p4::P4DataTypeSpec* convert(
-        P4::TypeMap* typeMap, P4::ReferenceMap* refMap,
+        const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap,
         const IR::Type* type, p4::P4TypeInfo* typeInfo);
 };
 

@@ -34,7 +34,7 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 TypeSpecConverter::TypeSpecConverter(
-    P4::TypeMap* typeMap, P4::ReferenceMap* refMap, p4::P4TypeInfo* p4RtTypeInfo)
+    const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap, p4::P4TypeInfo* p4RtTypeInfo)
     : typeMap(typeMap), refMap(refMap), p4RtTypeInfo(p4RtTypeInfo) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
@@ -231,7 +231,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Error* type) {
 }
 
 const p4::P4DataTypeSpec* TypeSpecConverter::convert(
-    P4::TypeMap* typeMap, P4::ReferenceMap* refMap,
+    const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap,
     const IR::Type* type, p4::P4TypeInfo* typeInfo) {
     TypeSpecConverter typeSpecConverter(typeMap, refMap, typeInfo);
     type->apply(typeSpecConverter);

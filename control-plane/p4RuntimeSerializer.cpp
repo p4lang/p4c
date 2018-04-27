@@ -181,6 +181,50 @@ struct Digest {
     const p4::P4DataTypeSpec* typeSpec;  // The format of the packed data.
 };
 
+struct Register {
+    const cstring name;  // The fully qualified external name of this register.
+    const IR::IAnnotated* annotations;  // If non-null, any annotations applied
+                                        // to this field.
+    const int64_t size;
+    const p4::P4DataTypeSpec* typeSpec;  // The format of the stored data.
+
+    /// @return the information required to serialize an @instance of register
+    /// or boost::none in case of error.
+    static boost::optional<Register>
+    from(const IR::ExternBlock* instance,
+         const ReferenceMap* refMap,
+         const TypeMap* typeMap,
+         p4::P4TypeInfo* p4RtTypeInfo) {
+        CHECK_NULL(instance);
+        auto declaration = instance->node->to<IR::IDeclaration>();
+
+        auto size = instance->getParameterValue("size")->to<IR::Constant>();
+        if (!size->is<IR::Constant>()) {
+            ::error("Register '%1%' has a non-constant size: %2%", declaration, size);
+            return boost::none;
+        }
+        if (!size->to<IR::Constant>()->fitsInt()) {
+            ::error("Register '%1%' has a size that doesn't fit in an integer: %2%",
+                    declaration, size);
+            return boost::none;
+        }
+
+        // retrieve type parameter for the register instance and convert it to p4::P4DataTypeSpec
+        BUG_CHECK(instance->instanceType->is<IR::Type_SpecializedCanonical>(),
+                  "%1%: expected Type_SpecializedCanonical", instance->instanceType);
+        auto instanceType = instance->instanceType->to<IR::Type_SpecializedCanonical>();
+        BUG_CHECK(instanceType->arguments->size() == 1,
+                  "%1%: expected one type argument", instance);
+        auto typeArg = instanceType->arguments->at(0);
+        auto typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
+
+        return Register{declaration->controlPlaneName(),
+                        declaration->to<IR::IAnnotated>(),
+                        size->value.get_si(),
+                        typeSpec};
+    }
+};
+
 /// The information about a default action which is needed to serialize it.
 struct DefaultAction {
     const cstring name;  // The fully qualified external name of this action.
@@ -880,6 +924,17 @@ class P4RuntimeAnalyzer {
         }
     }
 
+    void addRegister(const Register& registerInstance) {
+        auto register_ = p4Info->add_registers();
+        auto id = symbols.getId(P4RuntimeSymbolType::REGISTER, registerInstance.name);
+        register_->mutable_preamble()->set_id(id);
+        register_->mutable_preamble()->set_name(registerInstance.name);
+        register_->mutable_preamble()->set_alias(symbols.getAlias(registerInstance.name));
+        addAnnotations(register_->mutable_preamble(), registerInstance.annotations);
+        register_->set_size(registerInstance.size);
+        register_->mutable_type_spec()->CopyFrom(*registerInstance.typeSpec);
+    }
+
     void addDigest(const Digest& digest) {
         // Each call to digest() creates a new digest entry in the P4Info.
         // Right now we only take the type of data included in the digest
@@ -1063,7 +1118,9 @@ class P4RuntimeAnalyzer {
         }
 
         if (supportsTimeout) {
-            table->set_with_entry_timeout(true);
+            table->set_idle_timeout_behavior(p4::config::Table::NOTIFY_CONTROL);
+        } else {
+            table->set_idle_timeout_behavior(p4::config::Table::NO_TIMEOUT);
         }
 
         if (isConstTable) {
@@ -1287,12 +1344,16 @@ static void collectExternSymbols(P4RuntimeSymbolTable& symbols,
     } else if (externBlock->type->name == P4V1::V1Model::instance.action_profile.name ||
                externBlock->type->name == P4V1::V1Model::instance.action_selector.name) {
         symbols.add(P4RuntimeSymbolType::ACTION_PROFILE, decl);
+    } else if (externBlock->type->name == P4V1::V1Model::instance.registers.name) {
+        symbols.add(P4RuntimeSymbolType::REGISTER, decl);
     }
 }
 
 static void analyzeExtern(P4RuntimeAnalyzer& analyzer,
                           const IR::ExternBlock* externBlock,
-                          const TypeMap* typeMap) {
+                          const ReferenceMap* refMap,
+                          const TypeMap* typeMap,
+                          p4::P4TypeInfo* p4RtTypeInfo) {
     CHECK_NULL(externBlock);
     CHECK_NULL(typeMap);
 
@@ -1302,6 +1363,9 @@ static void analyzeExtern(P4RuntimeAnalyzer& analyzer,
     } else if (externBlock->type->name == CounterlikeTraits<IR::Meter>::typeName()) {
         auto meter = Counterlike<IR::Meter>::from(externBlock);
         if (meter) analyzer.addMeter(*meter);
+    } else if (externBlock->type->name == P4V1::V1Model::instance.registers.name) {
+        auto register_ = Register::from(externBlock, refMap, typeMap, p4RtTypeInfo);
+        if (register_) analyzer.addRegister(*register_);
     }
 }
 
@@ -1977,7 +2041,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
             analyzeControl(analyzer, block->to<IR::ControlBlock>(), refMap, typeMap,
                            analyzer.p4Info->mutable_type_info());
         } else if (block->is<IR::ExternBlock>()) {
-            analyzeExtern(analyzer, block->to<IR::ExternBlock>(), typeMap);
+            analyzeExtern(analyzer, block->to<IR::ExternBlock>(), refMap, typeMap,
+                          analyzer.p4Info->mutable_type_info());
         } else if (block->is<IR::TableBlock>()) {
             analyzeTable(analyzer, block->to<IR::TableBlock>(), refMap, typeMap);
         } else if (block->is<IR::ParserBlock>()) {
