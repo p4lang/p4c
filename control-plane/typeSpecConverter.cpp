@@ -101,6 +101,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Tuple* type) {
     for (auto cType : type->components) {
         visit(cType);
         auto cTypeSpec = map.at(cType);
+        CHECK_NULL(cTypeSpec);
         auto member = tupleTypeSpec->add_members();
         member->CopyFrom(*cTypeSpec);
     }
@@ -146,6 +147,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Struct* type) {
                 auto fType = f->type;
                 visit(fType);
                 auto fTypeSpec = map.at(fType);
+                CHECK_NULL(fTypeSpec);
                 auto member = structTypeSpec->add_members();
                 member->set_name(f->controlPlaneName());
                 member->mutable_type_spec()->CopyFrom(*fTypeSpec);
@@ -167,6 +169,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Header* type) {
                 auto fType = f->type;
                 visit(fType);
                 auto fTypeSpec = map.at(fType);
+                CHECK_NULL(fTypeSpec);
                 BUG_CHECK(fTypeSpec->has_bitstring(),
                           "Only bistring fields expected in header type declaration %1%", type);
                 auto member = headerTypeSpec->add_members();
@@ -190,6 +193,7 @@ bool TypeSpecConverter::preorder(const IR::Type_HeaderUnion* type) {
                 auto fType = f->type;
                 visit(fType);
                 auto fTypeSpec = map.at(fType);
+                CHECK_NULL(fTypeSpec);
                 BUG_CHECK(fTypeSpec->has_header(),
                           "Only header fields expected in header union declaration %1%", type);
                 auto member = headerUnionTypeSpec->add_members();

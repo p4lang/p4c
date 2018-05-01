@@ -196,7 +196,7 @@ struct Register {
          const TypeMap* typeMap,
          p4::P4TypeInfo* p4RtTypeInfo) {
         CHECK_NULL(instance);
-        auto declaration = instance->node->to<IR::IDeclaration>();
+        auto declaration = instance->node->to<IR::Declaration_Instance>();
 
         auto size = instance->getParameterValue("size")->to<IR::Constant>();
         if (!size->is<IR::Constant>()) {
@@ -210,13 +210,14 @@ struct Register {
         }
 
         // retrieve type parameter for the register instance and convert it to p4::P4DataTypeSpec
-        BUG_CHECK(instance->instanceType->is<IR::Type_SpecializedCanonical>(),
-                  "%1%: expected Type_SpecializedCanonical", instance->instanceType);
-        auto instanceType = instance->instanceType->to<IR::Type_SpecializedCanonical>();
-        BUG_CHECK(instanceType->arguments->size() == 1,
+        BUG_CHECK(declaration->type->is<IR::Type_Specialized>(),
+                  "%1%: expected Type_Specialized", declaration->type);
+        auto type = declaration->type->to<IR::Type_Specialized>();
+        BUG_CHECK(type->arguments->size() == 1,
                   "%1%: expected one type argument", instance);
-        auto typeArg = instanceType->arguments->at(0);
+        auto typeArg = type->arguments->at(0);
         auto typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
+        CHECK_NULL(typeSpec);
 
         return Register{declaration->controlPlaneName(),
                         declaration->to<IR::IAnnotated>(),
