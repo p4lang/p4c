@@ -71,8 +71,6 @@ class CompilerOptions : public Util::Options {
     cstring dumpFolder = ".";
     // Pretty-print the program in the specified file
     cstring prettyPrintFile = nullptr;
-    // file to output to
-    cstring outputFile = nullptr;
     // Compiler version.
     cstring compilerVersion;
 

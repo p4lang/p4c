@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,8 +22,14 @@ limitations under the License.
 
 class EbpfOptions : public CompilerOptions {
  public:
+    // file to output to
+    cstring outputFile = nullptr;
+
     EbpfOptions() {
         langVersion = CompilerOptions::FrontendVersion::P4_16;
+        registerOption("-o", "outfile",
+                [this](const char* arg) { outputFile = arg; return true; },
+                "Write output to outfile");
     }
 };
 
