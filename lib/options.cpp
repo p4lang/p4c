@@ -38,6 +38,16 @@ void Util::Options::registerOption(const char* option, const char* argName,
     optionOrder.push_back(option);
 }
 
+void Util::Options::eraseOption(const char *option) {
+    if (option == nullptr)
+        throw std::logic_error("Null argument to eraseOption");
+    options.erase(option);
+    optionOrder.erase(
+        std::remove_if(optionOrder.begin(), optionOrder.end(),
+        [option](cstring str) { return str == option; }),
+        optionOrder.end());
+}
+
 // Process options; return list of remaining options.
 // Returns 'nullptr' if an error is signalled
 std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
