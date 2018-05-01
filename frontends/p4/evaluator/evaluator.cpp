@@ -98,13 +98,13 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
 }
 
 std::vector<const IR::CompileTimeValue*>*
-Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments, IR::Block* context) {
+Evaluator::evaluateArguments(const IR::Vector<IR::Argument>* arguments, IR::Block* context) {
     LOG2("Evaluating arguments in " << dbp(context));
     P4::DoConstantFolding cf(refMap, nullptr);
     auto values = new std::vector<const IR::CompileTimeValue*>();
     pushBlock(context);
     for (auto e : *arguments) {
-        auto folded = e->apply(cf);  // constant fold argument
+        auto folded = e->expression->apply(cf);  // constant fold argument
         CHECK_NULL(folded);
         visit(folded);  // recursive evaluation
         auto value = getValue(folded);
@@ -126,7 +126,7 @@ Evaluator::processConstructor(
                            // could be a Declaration_Instance or a ConstructorCallExpression.
     const IR::Type* type,  // Type that appears in the program that is instantiated.
     const IR::Type* instanceType,  // Actual canonical type of generated instance.
-    const IR::Vector<IR::Expression>* arguments) {  // Constructor arguments
+    const IR::Vector<IR::Argument>* arguments) {  // Constructor arguments
     LOG2("Evaluating constructor " << dbp(type));
     if (type->is<IR::Type_Specialized>())
         type = type->to<IR::Type_Specialized>()->baseType;

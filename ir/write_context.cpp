@@ -40,15 +40,16 @@ bool P4WriteContext::isWrite(bool root_value) {
         return prim->isOutput(ctxt->child_index);
     if (ctxt->node->is<IR::AssignmentStatement>())
         return ctxt->child_index == 0;
-    if (ctxt->node->is<IR::Vector<IR::Expression>>()) {
-        if (!ctxt->parent || !ctxt->parent->node)
+    if (ctxt->node->is<IR::Argument>()) {
+        // MethodCallExpression(Vector<Argument(Expression)>)
+        if (!ctxt->parent || !ctxt->parent->parent || !ctxt->parent->parent->node)
             return false;
-        if (auto *mc = ctxt->parent->node->to<IR::MethodCallExpression>()) {
+        if (auto *mc = ctxt->parent->parent->node->to<IR::MethodCallExpression>()) {
             auto type = mc->method->type->to<IR::Type_Method>();
             if (!type) {
                 /* FIXME -- can't find the type of the method -- should be a BUG? */
                 return true; }
-            auto param = type->parameters->getParameter(ctxt->child_index);
+            auto param = type->parameters->getParameter(ctxt->parent->child_index);
             return param->direction == IR::Direction::Out ||
                    param->direction == IR::Direction::InOut; }
         if (ctxt->parent->node->is<IR::ConstructorCallExpression>()) {
@@ -83,15 +84,16 @@ bool P4WriteContext::isRead(bool root_value) {
         return !prim->isOutput(ctxt->child_index);
     if (ctxt->node->is<IR::AssignmentStatement>())
         return ctxt->child_index != 0;
-    if (ctxt->node->is<IR::Vector<IR::Expression>>()) {
-        if (!ctxt->parent || !ctxt->parent->node)
+    if (ctxt->node->is<IR::Argument>()) {
+        // MethodCallExpression(Vector<Argument(Expression)>)
+        if (!ctxt->parent || !ctxt->parent->parent || !ctxt->parent->parent->node)
             return false;
-        if (auto *mc = ctxt->parent->node->to<IR::MethodCallExpression>()) {
+        if (auto *mc = ctxt->parent->parent->node->to<IR::MethodCallExpression>()) {
             auto type = mc->method->type->to<IR::Type_Method>();
             if (!type) {
                 /* FIXME -- can't find the type of the method -- should be a BUG? */
                 return true; }
-            auto param = type->parameters->getParameter(ctxt->child_index);
+            auto param = type->parameters->getParameter(ctxt->parent->child_index);
             return param->direction != IR::Direction::Out; } }
     if (ctxt->node->is<IR::IndexedVector<IR::StatOrDecl>>())
         return false;

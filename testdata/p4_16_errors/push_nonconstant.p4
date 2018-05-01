@@ -10,3 +10,8 @@ control c() {
         h.push_front(x);
     }
 }
+
+control proto();
+package top(proto _p);
+
+top(c()) main;

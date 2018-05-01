@@ -143,7 +143,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
-        new CheckConstants(&refMap, &typeMap),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new FrontEndDump(),  // used for testing the program at this point
@@ -170,6 +169,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         evaluator,
         new Inline(&refMap, &typeMap, evaluator),
         new InlineActions(&refMap, &typeMap),
+        // Check for constants only after inlining
+        new CheckConstants(&refMap, &typeMap),
         new LocalizeAllActions(&refMap),
         new UniqueNames(&refMap),  // needed again after inlining
         new UniqueParameters(&refMap, &typeMap),

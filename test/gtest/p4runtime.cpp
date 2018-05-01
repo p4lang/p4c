@@ -14,19 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <google/protobuf/util/message_differencer.h>
+
+#include <iterator>
+#include <string>
+#include <vector>
+
 #include "control-plane/p4/config/p4info.pb.h"
-#include "control-plane/p4/config/v1model.pb.h"
 #include "control-plane/p4/p4runtime.pb.h"
+#include "control-plane/p4/p4types.pb.h"
 #include "gtest/gtest.h"
 
 #include "control-plane/p4RuntimeSerializer.h"
+#include "control-plane/typeSpecConverter.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "PI/pi_base.h"
+#include "lib/cstring.h"
 
 namespace Test {
 
 namespace {
+
+using P4Ids = ::p4::config::P4Ids;
+
+using google::protobuf::util::MessageDifferencer;
 
 boost::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(const std::string& source,
@@ -37,30 +50,26 @@ createP4RuntimeTestCase(const std::string& source,
     return P4::generateP4Runtime(frontendTestCase->program);
 }
 
+/// Generic meta function which searches an object by @name in the given range
+/// and @returns the P4Runtime representation, or null if none is found.
+template <typename It>
+auto findP4InfoObject(const It& first, const It& last, const std::string& name)
+    -> const typename std::iterator_traits<It>::value_type* {
+    using T = typename std::iterator_traits<It>::value_type;
+    auto desiredObject = std::find_if(first, last,
+                                      [&](const T& object) {
+        return object.preamble().name() == name;
+    });
+    if (desiredObject == last) return nullptr;
+    return &*desiredObject;
+}
+
 /// @return the P4Runtime representation of the table with the given name, or
 /// null if none is found.
 const ::p4::config::Table* findTable(const P4::P4RuntimeAPI& analysis,
                                      const std::string& name) {
     auto& tables = analysis.p4Info->tables();
-    auto desiredTable = std::find_if(tables.begin(), tables.end(),
-                                     [&](const ::p4::config::Table& table) {
-        return table.preamble().name() == name;
-    });
-    if (desiredTable == tables.end()) return nullptr;
-    return &*desiredTable;
-}
-
-/// @return the P4Runtime representation of the extern with the given name, or
-/// null if none is found.
-const ::p4::config::Extern* findExtern(const P4::P4RuntimeAPI& analysis,
-                                       const std::string& name) {
-    auto& externs = analysis.p4Info->externs();
-    auto desiredExtern = std::find_if(externs.begin(), externs.end(),
-                                      [&](const ::p4::config::Extern& e) {
-        return e.extern_type_name() == name;
-    });
-    if (desiredExtern == externs.end()) return nullptr;
-    return &*desiredExtern;
+    return findP4InfoObject(tables.begin(), tables.end(), name);
 }
 
 /// @return the P4Runtime representation of the action with the given name, or
@@ -68,12 +77,7 @@ const ::p4::config::Extern* findExtern(const P4::P4RuntimeAPI& analysis,
 const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
                                        const std::string& name) {
     auto& actions = analysis.p4Info->actions();
-    auto desiredAction = std::find_if(actions.begin(), actions.end(),
-                                     [&](const ::p4::config::Action& action) {
-        return action.preamble().name() == name;
-    });
-    if (desiredAction == actions.end()) return nullptr;
-    return &*desiredAction;
+    return findP4InfoObject(actions.begin(), actions.end(), name);
 }
 
 /// @return the P4Runtime representation of the value set with the given name,
@@ -81,12 +85,39 @@ const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
 const ::p4::config::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
                                            const std::string& name) {
     auto& vsets = analysis.p4Info->value_sets();
-    auto desiredVSet = std::find_if(vsets.begin(), vsets.end(),
-                                    [&](const ::p4::config::ValueSet& vset) {
-        return vset.preamble().name() == name;
-    });
-    if (desiredVSet == vsets.end()) return nullptr;
-    return &*desiredVSet;
+    return findP4InfoObject(vsets.begin(), vsets.end(), name);
+}
+
+/// @return the P4Runtime representation of the register with the given name, or
+/// null if none is found.
+const ::p4::config::Register* findRegister(const P4::P4RuntimeAPI& analysis,
+                                           const std::string& name) {
+    auto& registers = analysis.p4Info->registers();
+    return findP4InfoObject(registers.begin(), registers.end(), name);
+}
+
+/// @return the P4Runtime representation of the counter with the given name, or
+/// null if none is found.
+const ::p4::config::Counter* findCounter(const P4::P4RuntimeAPI& analysis,
+                                     const std::string& name) {
+    auto& counters = analysis.p4Info->counters();
+    return findP4InfoObject(counters.begin(), counters.end(), name);
+}
+
+/// @return the P4Runtime representation of the direct counter with the given
+/// name, or null if none is found.
+const ::p4::config::DirectCounter* findDirectCounter(const P4::P4RuntimeAPI& analysis,
+                                               const std::string& name) {
+    auto& counters = analysis.p4Info->direct_counters();
+    return findP4InfoObject(counters.begin(), counters.end(), name);
+}
+
+/// @return the P4Runtime representation of the digest with the given name, or
+/// null if none is found.
+const ::p4::config::Digest* findDigest(const P4::P4RuntimeAPI& analysis,
+                                       const std::string& name) {
+    auto& digests = analysis.p4Info->digests();
+    return findP4InfoObject(digests.begin(), digests.end(), name);
 }
 
 }  // namespace
@@ -172,7 +203,7 @@ TEST_F(P4Runtime, IdAssignment) {
         ASSERT_TRUE(igTable != nullptr);
 
         // Check that the id indicates the correct resource type.
-        EXPECT_EQ(unsigned(PI_TABLE_ID), igTable->preamble().id() >> 24);
+        EXPECT_EQ(unsigned(P4Ids::TABLE), igTable->preamble().id() >> 24);
 
         // Check that the rest of the id matches the hash value that we expect.
         // (If we were to ever change the hash algorithm we use when mapping P4
@@ -190,7 +221,7 @@ TEST_F(P4Runtime, IdAssignment) {
 
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
-        EXPECT_EQ(unsigned(PI_TABLE_ID), igTableWithName->preamble().id() >> 24);
+        EXPECT_EQ(unsigned(P4Ids::TABLE), igTableWithName->preamble().id() >> 24);
         EXPECT_EQ(59806u, igTableWithName->preamble().id() & 0x00ffffff);
     }
 
@@ -223,6 +254,84 @@ TEST_F(P4Runtime, IdAssignment) {
                     conflictingTableB->preamble().id() == 4321);
         EXPECT_NE(conflictingTableA->preamble().id(),
                   conflictingTableB->preamble().id());
+    }
+}
+
+TEST_F(P4Runtime, IdAssignmentCounters) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action noop() { }
+
+            @name(".myDirectCounter1")
+            direct_counter(CounterType.packets) myDirectCounter1;
+
+            @name(".myTable1")
+            table myTable1 {
+                actions = { noop; }
+                default_action = noop;
+                counters = myDirectCounter1;
+            }
+
+            @name(".myTable2")
+            table myTable2 {
+                actions = { noop; }
+                default_action = noop;
+                @name(".myDirectCounter2") counters = direct_counter(CounterType.packets);
+            }
+
+            @name(".myCounter")
+            counter(32w1024, CounterType.packets) myCounter;
+
+            apply {
+                myTable1.apply();
+                myTable2.apply();
+                myCounter.count(32w128);
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+
+    // checks that myDirectCounter1 with the right ID prefix
+    {
+        auto* myTable1 = findTable(*test, "myTable1");
+        ASSERT_TRUE(myTable1 != nullptr);
+        auto* myDirectCounter1 = findDirectCounter(*test, "myDirectCounter1");
+        ASSERT_TRUE(myDirectCounter1 != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter1->preamble().id() >> 24);
+        EXPECT_EQ(myDirectCounter1->preamble().id(), myTable1->direct_resource_ids(0));
+    }
+    // checks that myDirectCounter2 with the right ID prefix
+    {
+        auto* myTable2 = findTable(*test, "myTable2");
+        ASSERT_TRUE(myTable2 != nullptr);
+        auto* myDirectCounter2 = findDirectCounter(*test, "myDirectCounter2");
+        ASSERT_TRUE(myDirectCounter2 != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter2->preamble().id() >> 24);
+        EXPECT_EQ(myDirectCounter2->preamble().id(), myTable2->direct_resource_ids(0));
+    }
+    // checks that myCounter with the right ID prefix
+    {
+        auto* myCounter = findCounter(*test, "myCounter");
+        ASSERT_TRUE(myCounter != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::COUNTER), myCounter->preamble().id() >> 24);
     }
 }
 
@@ -504,8 +613,6 @@ TEST_F(P4Runtime, Digests) {
                 // digest<T>() where T is a struct.
                 digest(2, m);
                 // digest<T>() where T is a tuple.
-                // XXX(seth): Right now this requires that the EliminateTuples
-                // pass has run; we may want to change that.
                 digest(3, { h.h.headerFieldA, m.metadataFieldB });
             }
             apply {
@@ -518,82 +625,41 @@ TEST_F(P4Runtime, Digests) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
-
-    auto* digestExtern = findExtern(*test, "digest");
-    ASSERT_TRUE(digestExtern != nullptr);
-    ASSERT_EQ(3, digestExtern->instances_size());
+    // we expect one warning for the third digest, for which T is a tuple and we
+    // have to auto-generate a name for the digest.
+    EXPECT_EQ(1u, ::diagnosticCount());
+    const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the
-    // program. Note that we don't check the resource type of the id (i.e., we
-    // mask off the first 8 bits) because extern instances haven't yet been
-    // assigned an "official" resource type.
+    // program.
 
     // digest<T>() where T is a header.
     {
-        auto& instance = digestExtern->instances(0);
-        EXPECT_EQ(std::string("Header"), instance.preamble().name());
-        EXPECT_EQ(0x0000B33Fu, instance.preamble().id() & 0x00ffffff);
-
-        ::p4::config::v1model::Digest digest;
-        instance.info().UnpackTo(&digest);
-        EXPECT_EQ(1u, digest.receiver());
-
-        // XXX(seth): There are actually three fields in this digest because
-        // `h.$valid$` is incorrectly included. We need to fix that.
-        ASSERT_EQ(3, digest.fields_size())
-          << "If you fixed the inclusion of $valid$ fields in digests, "
-             "please update this test.";
-
-        EXPECT_EQ(1u, digest.fields(0).id());
-        EXPECT_EQ(std::string("h.headerFieldA"), digest.fields(0).name());
-        EXPECT_EQ(16, digest.fields(0).bitwidth());
-
-        EXPECT_EQ(2u, digest.fields(1).id());
-        EXPECT_EQ(std::string("h.headerFieldB"), digest.fields(1).name());
-        EXPECT_EQ(8, digest.fields(1).bitwidth());
+        auto digest = findDigest(*test, "Header");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_header());
+        EXPECT_EQ("Header", digest->type_spec().header().name());
+        EXPECT_TRUE(typeInfo.headers().find("Header") != typeInfo.headers().end());
     }
 
     // digest<T>() where T is a struct.
     {
-        auto& instance = digestExtern->instances(1);
-        EXPECT_EQ(std::string("Metadata"), instance.preamble().name());
-        EXPECT_EQ(0x0000D0C6u, instance.preamble().id() & 0x00ffffff);
-
-        ::p4::config::v1model::Digest digest;
-        instance.info().UnpackTo(&digest);
-        EXPECT_EQ(2u, digest.receiver());
-        ASSERT_EQ(2, digest.fields_size());
-
-        EXPECT_EQ(1u, digest.fields(0).id());
-        EXPECT_EQ(std::string("metadataFieldA"), digest.fields(0).name());
-        EXPECT_EQ(3, digest.fields(0).bitwidth());
-
-        EXPECT_EQ(2u, digest.fields(1).id());
-        EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
-        EXPECT_EQ(1, digest.fields(1).bitwidth());
+        auto digest = findDigest(*test, "Metadata");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_struct_());
+        EXPECT_EQ("Metadata", digest->type_spec().struct_().name());
+        EXPECT_TRUE(typeInfo.structs().find("Metadata") != typeInfo.structs().end());
     }
 
     // digest<T>() where T is a tuple.
     {
-        // XXX(seth): The name is generated by EliminateTuples. We should do
-        // something nicer than this.
-        auto& instance = digestExtern->instances(2);
-        EXPECT_EQ(std::string("tuple_0"), instance.preamble().name());
-        EXPECT_EQ(0x00003620u, instance.preamble().id() & 0x00ffffff);
-
-        ::p4::config::v1model::Digest digest;
-        instance.info().UnpackTo(&digest);
-        EXPECT_EQ(3u, digest.receiver());
-        ASSERT_EQ(2, digest.fields_size());
-
-        EXPECT_EQ(1u, digest.fields(0).id());
-        EXPECT_EQ(std::string("h.headerFieldA"), digest.fields(0).name());
-        EXPECT_EQ(16, digest.fields(0).bitwidth());
-
-        EXPECT_EQ(2u, digest.fields(1).id());
-        EXPECT_EQ(std::string("metadataFieldB"), digest.fields(1).name());
-        EXPECT_EQ(1, digest.fields(1).bitwidth());
+        auto digest = findDigest(*test, "digest_0");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_tuple());
+        EXPECT_EQ(2, digest->type_spec().tuple().members_size());
     }
 }
 
@@ -771,8 +837,299 @@ TEST_F(P4Runtime, ValueSet) {
 
     auto vset = findValueSet(*test, "parse.pvs");
     ASSERT_TRUE(vset != nullptr);
+    EXPECT_EQ(unsigned(P4Ids::VALUE_SET), vset->preamble().id() >> 24);
     EXPECT_EQ(48, vset->bitwidth());
     EXPECT_EQ(16, vset->size());
+}
+
+TEST_F(P4Runtime, Register) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<32> hfA; bit<16> hfB; }
+        struct Headers { Header h; }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            @my_anno("This is an annotation!")
+            register<tuple<bit<16>, bit<8> > >(128) my_register;
+            apply { my_register.write(32w10, {16w1, 8w2}); } }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+    auto register_ = findRegister(*test, "ingress.my_register");
+    ASSERT_TRUE(register_ != nullptr);
+    EXPECT_EQ(unsigned(P4Ids::REGISTER), register_->preamble().id() >> 24);
+    const auto& annotations = register_->preamble().annotations();
+    ASSERT_EQ(1, annotations.size());
+    EXPECT_EQ("@my_anno(\"This is an annotation!\")", annotations.Get(0));
+    EXPECT_EQ(128, register_->size());
+    const auto& typeSpec = register_->type_spec();
+    ASSERT_TRUE(typeSpec.has_tuple());
+    EXPECT_EQ(2, typeSpec.tuple().members_size());
+}
+
+class P4RuntimeDataTypeSpec : public P4Runtime {
+ protected:
+    const IR::P4Program* getProgram(const std::string& programStr) {
+        auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
+        if (pgm == nullptr) return nullptr;
+        PassManager  passes({
+            new TypeChecking(&refMap, &typeMap)
+        });
+        pgm = pgm->apply(passes);
+        return pgm;
+    }
+
+    template <typename T>
+    const T* findExternTypeParameterName(
+        const IR::P4Program* program, cstring externName) const {
+        const T* type = nullptr;
+        forAllMatching<IR::Type_Specialized>(program, [&](const IR::Type_Specialized* ts) {
+            if (ts->baseType->toString() != externName) return;
+            ASSERT_TRUE(type == nullptr);
+            ASSERT_TRUE(ts->arguments->at(0)->is<T>());
+            type = ts->arguments->at(0)->to<T>();
+        });
+        return type;
+    }
+
+    p4::P4TypeInfo typeInfo;
+    ReferenceMap refMap;
+    TypeMap typeMap;
+};
+
+TEST_F(P4RuntimeDataTypeSpec, Bits) {
+    int size(9);
+    bool isSigned(true);
+    auto type = new IR::Type_Bits(size, isSigned);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_bitstring());
+    const auto& bitstringTypeSpec = typeSpec->bitstring();
+    ASSERT_TRUE(bitstringTypeSpec.has_int_());  // signed type
+    EXPECT_EQ(size, bitstringTypeSpec.int_().bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Varbits) {
+    int size(64);
+    auto type = new IR::Type_Varbits(size);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_bitstring());
+    const auto& bitstringTypeSpec = typeSpec->bitstring();
+    ASSERT_TRUE(bitstringTypeSpec.has_varbit());
+    EXPECT_EQ(size, bitstringTypeSpec.varbit().max_bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Boolean) {
+    auto type = new IR::Type_Boolean();
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    EXPECT_TRUE(typeSpec->has_bool_());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Tuple) {
+    auto typeMember1 = new IR::Type_Bits(1, false);
+    auto typeMember2 = new IR::Type_Bits(2, false);
+    IR::Vector<IR::Type> components = {typeMember1, typeMember2};
+    auto type = new IR::Type_Tuple(std::move(components));
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_tuple());
+    const auto& tupleTypeSpec = typeSpec->tuple();
+    ASSERT_EQ(2, tupleTypeSpec.members_size());
+    {
+        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+            &typeMap, &refMap, typeMember1, nullptr);
+        EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(0)));
+    }
+    {
+        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+            &typeMap, &refMap, typeMember2, nullptr);
+        EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(1)));
+    }
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Struct) {
+    std::string program = P4_SOURCE(R"(
+        struct my_struct { bit<8> f; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_struct>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_struct_());
+    EXPECT_EQ("my_struct", typeSpec->struct_().name());
+
+    auto it = typeInfo.structs().find("my_struct");
+    ASSERT_TRUE(it != typeInfo.structs().end());
+    ASSERT_EQ(1, it->second.members_size());
+    EXPECT_EQ("f", it->second.members(0).name());
+    const auto &memberTypeSpec = it->second.members(0).type_spec();
+    ASSERT_TRUE(memberTypeSpec.has_bitstring());
+    ASSERT_TRUE(memberTypeSpec.bitstring().has_bit());
+    EXPECT_EQ(8, memberTypeSpec.bitstring().bit().bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Header) {
+    std::string program = P4_SOURCE(R"(
+        header my_header { bit<8> f; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header());
+    EXPECT_EQ("my_header", typeSpec->header().name());
+
+    auto it = typeInfo.headers().find("my_header");
+    ASSERT_TRUE(it != typeInfo.headers().end());
+    ASSERT_EQ(1, it->second.members_size());
+    EXPECT_EQ("f", it->second.members(0).name());
+    const auto &memberBitstringTypeSpec = it->second.members(0).type_spec();
+    ASSERT_TRUE(memberBitstringTypeSpec.has_bit());
+    EXPECT_EQ(8, memberBitstringTypeSpec.bit().bitwidth());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, HeaderUnion) {
+    std::string program = P4_SOURCE(R"(
+        header my_header_1 { bit<8> f; }
+        header my_header_2 { bit<16> f; }
+        header_union my_header_union { my_header_1 h1; my_header_2 h2; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header_union>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header_union());
+    EXPECT_EQ("my_header_union", typeSpec->header_union().name());
+
+    {
+        auto it = typeInfo.header_unions().find("my_header_union");
+        ASSERT_TRUE(it != typeInfo.header_unions().end());
+        ASSERT_EQ(2, it->second.members_size());
+        EXPECT_EQ("h1", it->second.members(0).name());
+        EXPECT_EQ("my_header_1", it->second.members(0).header().name());
+        EXPECT_EQ("h2", it->second.members(1).name());
+        EXPECT_EQ("my_header_2", it->second.members(1).header().name());
+    }
+
+    EXPECT_TRUE(typeInfo.headers().find("my_header_1") != typeInfo.headers().end());
+    EXPECT_TRUE(typeInfo.headers().find("my_header_2") != typeInfo.headers().end());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
+    std::string program = P4_SOURCE(R"(
+        header my_header { bit<8> f; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header[3]>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header_stack());
+    EXPECT_EQ("my_header", typeSpec->header_stack().header().name());
+    EXPECT_EQ(3, typeSpec->header_stack().size());
+
+    EXPECT_TRUE(typeInfo.headers().find("my_header") != typeInfo.headers().end());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, HeaderUnionStack) {
+    std::string program = P4_SOURCE(R"(
+        header my_header_1 { bit<8> f; }
+        header my_header_2 { bit<16> f; }
+        header_union my_header_union { my_header_1 h1; my_header_2 h2; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_header_union[3]>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_header_union_stack());
+    EXPECT_EQ("my_header_union", typeSpec->header_union_stack().header_union().name());
+    EXPECT_EQ(3, typeSpec->header_union_stack().size());
+
+    EXPECT_TRUE(typeInfo.header_unions().find("my_header_union") != typeInfo.header_unions().end());
+    EXPECT_TRUE(typeInfo.headers().find("my_header_1") != typeInfo.headers().end());
+    EXPECT_TRUE(typeInfo.headers().find("my_header_2") != typeInfo.headers().end());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Enum) {
+    std::string program = P4_SOURCE(R"(
+        enum my_enum { MBR_1, MBR_2 }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_enum>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_enum_());
+    EXPECT_EQ("my_enum", typeSpec->enum_().name());
+
+    auto it = typeInfo.enums().find("my_enum");
+    ASSERT_TRUE(it != typeInfo.enums().end());
+    ASSERT_EQ(2, it->second.members_size());
+    EXPECT_EQ("MBR_1", it->second.members(0).name());
+    EXPECT_EQ("MBR_2", it->second.members(1).name());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, Error) {
+    std::string program = P4_SOURCE(R"(
+        error { MBR_1, MBR_2 }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<error>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_error());
+
+    ASSERT_TRUE(typeInfo.has_error());
+    EXPECT_EQ("MBR_1", typeInfo.error().members(0));
+    EXPECT_EQ("MBR_2", typeInfo.error().members(1));
 }
 
 }  // namespace Test

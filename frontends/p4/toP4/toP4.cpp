@@ -238,6 +238,15 @@ bool ToP4::preorder(const IR::Type_Specialized* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Argument* arg) {
+    if (!arg->name.name.isNullOrEmpty()) {
+        builder.append(arg->name.toString());
+        builder.append(" = ");
+    }
+    visit(arg->expression);
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Typedef* t) {
     dump(2);
     visit(t->annotations);
@@ -636,6 +645,7 @@ VECTOR_VISIT(Vector, ActionListElement)
 VECTOR_VISIT(Vector, Annotation)
 VECTOR_VISIT(Vector, Entry)
 VECTOR_VISIT(Vector, Expression)
+VECTOR_VISIT(Vector, Argument)
 VECTOR_VISIT(Vector, KeyElement)
 VECTOR_VISIT(Vector, Method)
 VECTOR_VISIT(Vector, Node)

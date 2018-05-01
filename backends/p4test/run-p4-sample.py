@@ -331,6 +331,9 @@ def main(argv):
             options.testName = options.testName[:-3]
 
     result = process_file(options, argv)
+    if isError(options.p4filename) and result == FAILURE:
+        print("Program was expected to fail")
+
     sys.exit(result)
 
 if __name__ == "__main__":

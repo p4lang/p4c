@@ -27,6 +27,7 @@ const cstring TableProperties::actionsPropertyName = "actions";
 const cstring TableProperties::keyPropertyName = "key";
 const cstring TableProperties::defaultActionPropertyName = "default_action";
 const cstring TableProperties::entriesPropertyName = "entries";
+const cstring TableProperties::sizePropertyName = "size";
 const cstring IApply::applyMethodName = "apply";
 const cstring P4Program::main = "main";
 const cstring Type_Error::error = "error";

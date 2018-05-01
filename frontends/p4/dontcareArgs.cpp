@@ -20,7 +20,7 @@ namespace P4 {
 
 const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
     bool changes = false;
-    auto vec = new IR::Vector<IR::Expression>();
+    auto vec = new IR::Vector<IR::Argument>();
 
     MethodCallDescription mcd(expression, refMap, typeMap);
     for (auto p : *mcd.substitution.getParameters()) {
@@ -31,9 +31,9 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
             toAdd.push_back(decl);
             changes = true;
-            vec->push_back(new IR::PathExpression(IR::ID(name)));
+            vec->push_back(new IR::Argument(a->srcInfo, new IR::PathExpression(IR::ID(name))));
         } else {
-            vec->push_back(a);
+            vec->push_back(new IR::Argument(a->srcInfo, a));
         }
     }
     if (changes)

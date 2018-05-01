@@ -32,9 +32,9 @@ class RemoveMethodCallArguments : public Transform {
     { setName("RemoveMethodCallArguments"); }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override {
         if (argumentsToRemove == -1) {
-            expression->arguments = new IR::Vector<IR::Expression>();
+            expression->arguments = new IR::Vector<IR::Argument>();
         } else {
-            auto args = new IR::Vector<IR::Expression>();
+            auto args = new IR::Vector<IR::Argument>();
             for (int i = 0; i < static_cast<int>(expression->arguments->size()); i++) {
                 if (i < argumentsToRemove)
                     continue;
@@ -106,13 +106,13 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                 p->direction == IR::Direction::InOut ||
                 p->direction == IR::Direction::None) {
                 auto left = new IR::PathExpression(p->name);
-                auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg);
+                auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
                 initializers->push_back(assign);
             }
             if (p->direction == IR::Direction::Out ||
                 p->direction == IR::Direction::InOut) {
                 auto right = new IR::PathExpression(p->name);
-                auto assign = new IR::AssignmentStatement(arg->srcInfo, arg, right);
+                auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
                 postamble->push_back(assign);
             }
         }

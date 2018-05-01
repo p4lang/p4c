@@ -139,7 +139,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             ctr->emplace("type", "counter_array");
             ctr->emplace("value", em->object->controlPlaneName());
             parameters->append(ctr);
-            auto index = conv->convert(mc->arguments->at(0));
+            auto index = conv->convert(mc->arguments->at(0)->expression);
             parameters->append(index);
         }
     } else if (em->originalExternType->name == v1model.meter.name) {
@@ -155,9 +155,9 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             mtr->emplace("type", "meter_array");
             mtr->emplace("value", em->object->controlPlaneName());
             parameters->append(mtr);
-            auto index = conv->convert(mc->arguments->at(0));
+            auto index = conv->convert(mc->arguments->at(0)->expression);
             parameters->append(index);
-            auto result = conv->convert(mc->arguments->at(1));
+            auto result = conv->convert(mc->arguments->at(1)->expression);
             parameters->append(result);
         }
     } else if (em->originalExternType->name == v1model.registers.name) {
@@ -173,19 +173,19 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             auto primitive = mkPrimitive("register_read", result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-            auto dest = conv->convert(mc->arguments->at(0));
+            auto dest = conv->convert(mc->arguments->at(0)->expression);
             parameters->append(dest);
             parameters->append(reg);
-            auto index = conv->convert(mc->arguments->at(1));
+            auto index = conv->convert(mc->arguments->at(1)->expression);
             parameters->append(index);
         } else if (em->method->name == v1model.registers.write.name) {
             auto primitive = mkPrimitive("register_write", result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
             parameters->append(reg);
-            auto index = conv->convert(mc->arguments->at(0));
+            auto index = conv->convert(mc->arguments->at(0)->expression);
             parameters->append(index);
-            auto value = conv->convert(mc->arguments->at(1));
+            auto value = conv->convert(mc->arguments->at(1)->expression);
             parameters->append(value);
         }
     } else if (em->originalExternType->name == v1model.directMeter.name) {
@@ -195,7 +195,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
                 return;
             }
             auto dest = mc->arguments->at(0);
-            backend->getMeterMap().setDestination(em->object, dest);
+            backend->getMeterMap().setDestination(em->object, dest->expression);
             // Do not generate any code for this operation
         }
     } else if (em->originalExternType->name == v1model.directCounter.name) {
@@ -217,7 +217,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
             etr->emplace("value", em->object->getName());
             parameters->append(etr);
             for (auto arg : *mc->arguments) {
-                auto args = conv->convert(arg);
+                auto args = conv->convert(arg->expression);
                 parameters->append(args);
             }
         } else {
@@ -252,18 +252,18 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 return;
             }
             cstring name = refMap->newName("fl");
-            id = createFieldList(mc->arguments->at(2), "field_lists", name,
+            id = createFieldList(mc->arguments->at(2)->expression, "field_lists", name,
                                  backend->field_lists);
         }
         auto cloneType = mc->arguments->at(0);
-        auto ei = P4::EnumInstance::resolve(cloneType, typeMap);
+        auto ei = P4::EnumInstance::resolve(cloneType->expression, typeMap);
         if (ei == nullptr) {
             modelError("%1%: must be a constant on this target", cloneType);
             return;
         } else {
             cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
                     "clone_egress_pkt_to_egress";
-            auto session = conv->convert(mc->arguments->at(1));
+            auto session = conv->convert(mc->arguments->at(1)->expression);
             auto primitive = mkPrimitive(prim, result);
             auto parameters = mkParameters(primitive);
             // TODO(jafingerhut):
@@ -292,24 +292,24 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         auto primitive = mkPrimitive("modify_field_with_hash_based_offset", result);
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        auto dest = conv->convert(mc->arguments->at(0));
+        auto dest = conv->convert(mc->arguments->at(0)->expression);
         parameters->append(dest);
-        auto base = conv->convert(mc->arguments->at(2));
+        auto base = conv->convert(mc->arguments->at(2)->expression);
         parameters->append(base);
         auto calculation = new Util::JsonObject();
-        auto ei = P4::EnumInstance::resolve(mc->arguments->at(1), typeMap);
+        auto ei = P4::EnumInstance::resolve(mc->arguments->at(1)->expression, typeMap);
         CHECK_NULL(ei);
         if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end()) {
             ::error("%1%: unexpected algorithm", ei->name);
             return;
         }
         auto fields = mc->arguments->at(3);
-        auto calcName = createCalculation(ei->name, fields, backend->json->calculations,
+        auto calcName = createCalculation(ei->name, fields->expression, backend->json->calculations,
                                           false, nullptr);
         calculation->emplace("type", "calculation");
         calculation->emplace("value", calcName);
         parameters->append(calculation);
-        auto max = conv->convert(mc->arguments->at(4));
+        auto max = conv->convert(mc->arguments->at(4)->expression);
         parameters->append(max);
     } else if (ef->method->name == v1model.digest_receiver.name) {
         if (mc->arguments->size() != 2) {
@@ -320,7 +320,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         auto parameters = mkParameters(primitive);
         // TODO(jafingerhut):
         // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        auto dest = conv->convert(mc->arguments->at(0));
+        auto dest = conv->convert(mc->arguments->at(0)->expression);
         parameters->append(dest);
         cstring listName = "digest";
         // If we are supplied a type argument that is a named type use
@@ -338,7 +338,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 listName = st->controlPlaneName();
             }
         }
-        int id = createFieldList(mc->arguments->at(1), "learn_lists",
+        int id = createFieldList(mc->arguments->at(1)->expression, "learn_lists",
                                  listName, backend->learn_lists);
         auto cst = new IR::Constant(id);
         typeMap->setType(cst, IR::Type_Bits::get(32));
@@ -372,7 +372,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
                 listName = st->controlPlaneName();
             }
         }
-        int id = createFieldList(mc->arguments->at(0), "field_lists",
+        int id = createFieldList(mc->arguments->at(0)->expression, "field_lists",
                                  listName, backend->field_lists);
         auto cst = new IR::Constant(id);
         typeMap->setType(cst, IR::Type_Bits::get(32));
@@ -396,9 +396,9 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         auto params = mkParameters(primitive);
         // TODO(jafingerhut):
         // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        auto dest = conv->convert(mc->arguments->at(0));
-        auto lo = conv->convert(mc->arguments->at(1));
-        auto hi = conv->convert(mc->arguments->at(2));
+        auto dest = conv->convert(mc->arguments->at(0)->expression);
+        auto lo = conv->convert(mc->arguments->at(1)->expression);
+        auto hi = conv->convert(mc->arguments->at(2)->expression);
         params->append(dest);
         params->append(lo);
         params->append(hi);
@@ -411,7 +411,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
         auto params = mkParameters(primitive);
         // TODO(jafingerhut):
         // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        auto len = conv->convert(mc->arguments->at(0));
+        auto len = conv->convert(mc->arguments->at(0)->expression);
         params->append(len);
     }
 }
@@ -681,22 +681,25 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
                         return;
                     }
                     auto cksum = new Util::JsonObject();
-                    auto ei = P4::EnumInstance::resolve(mi->expr->arguments->at(3), typeMap);
+                    auto ei = P4::EnumInstance::resolve(
+                        mi->expr->arguments->at(3)->expression, typeMap);
                     if (ei->name != "csum16") {
                         ::error("%1%: the only supported algorithm is csum16",
-                                mi->expr->arguments->at(3));
+                                mi->expr->arguments->at(3)->expression);
                         return;
                     }
-                    cstring calcName = createCalculation(ei->name, mi->expr->arguments->at(1),
-                                                         calculations, usePayload, mc);
+                    cstring calcName = createCalculation(
+                        ei->name, mi->expr->arguments->at(1)->expression,
+                        calculations, usePayload, mc);
                     cksum->emplace("name", refMap->newName("cksum_"));
                     cksum->emplace("id", nextId("checksums"));
                     // TODO(jafingerhut) - add line/col here?
-                    auto jleft = conv->convert(mi->expr->arguments->at(2));
+                    auto jleft = conv->convert(mi->expr->arguments->at(2)->expression);
                     cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
                     cksum->emplace("type", "generic");
                     cksum->emplace("calculation", calcName);
-                    auto ifcond = conv->convert(mi->expr->arguments->at(0), true, false);
+                    auto ifcond = conv->convert(
+                        mi->expr->arguments->at(0)->expression, true, false);
                     cksum->emplace("if_cond", ifcond);
                     checksums->append(cksum);
                     continue;

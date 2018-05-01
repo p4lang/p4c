@@ -751,7 +751,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         // Evaluate in and inout parameters in order.
         auto it = call->methodCall->arguments->begin();
         for (auto param : callee->getApplyParameters()->parameters) {
-            auto initializer = *it;
+            auto initializer = (*it)->expression;
             LOG3("Looking for " << param->name);
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
                 auto expr = substs->paramSubst.lookupByName(param->name);
@@ -795,7 +795,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         // Copy back out and inout parameters
         it = call->methodCall->arguments->begin();
         for (auto param : callee->getApplyParameters()->parameters) {
-            auto left = *it;
+            auto left = (*it)->expression;
             if (param->direction == IR::Direction::InOut ||
                 param->direction == IR::Direction::Out) {
                 auto expr = substs->paramSubst.lookupByName(param->name);

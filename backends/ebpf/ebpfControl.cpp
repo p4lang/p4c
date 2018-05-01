@@ -180,10 +180,10 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression* expr, cstring
     builder->endOfStatement(true);
 }
 
-void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Expression>* args) {
+void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument>* args) {
     BUG_CHECK(args->size() == 1, "%1%: expected 1 argument for emit", args);
 
-    auto expr = args->at(0);
+    auto expr = args->at(0)->expression;
     auto type = typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {

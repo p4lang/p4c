@@ -1,0 +1,41 @@
+# Test saturating arithmetic
+
+# unsigned: 1 + 1 = 2
+packet 0 01 01 01 00 0000 0000 0000
+expect 0 01 01 01 02 0000 0000 0000
+
+# unsigned: 2 - 1 = 1
+packet 0 02 02 01 00 0000 0000 0000
+expect 0 02 02 01 01 0000 0000 0000
+
+# unsigned: 254 + 2 = 255
+packet 0 01 fe 02 00 0000 0000 0000
+expect 0 01 fe 02 ff 0000 0000 0000
+
+# # unsigned: 8 - 10 = 0
+packet 0 02 08 0a aa 0000 0000 0000
+expect 0 02 08 0a 00 0000 0000 0000
+
+# signed: 10 + 10 = 20
+packet 0 03 00 00 00 000a 000a 0000
+expect 0 03 00 00 00 000a 000a 0014
+
+# signed: 32766 + 10 = 32767
+packet 0 03 00 00 00 7ffe 000a 0000
+expect 0 03 00 00 00 7ffe 000a 7fff
+
+# signed: 10 - 20 = -10
+packet 0 04 00 00 00 000a 0014 0000
+expect 0 04 00 00 00 000a 0014 fff6
+
+# signed: -32766 - 10 = -32768
+packet 0 04 00 00 00 8002 000a 0000
+expect 0 04 00 00 00 8002 000a 8000
+
+# signed: 1 + (-10) = -9
+packet 0 03 00 00 00 0001 fff6 0000
+expect 0 03 00 00 00 0001 fff6 fff7
+
+# signed: 1 - (-10) = 11
+packet 0 04 00 00 00 0001 fff6 0000
+expect 0 04 00 00 00 0001 fff6 000b

@@ -168,7 +168,9 @@ using Parser = P4::P4Parser;
 "++"            { BEGIN(NORMAL); return Parser::make_PP(driver.yylloc); }
 
 "+"            { BEGIN(NORMAL); return Parser::make_PLUS(driver.yylloc); }
+"|+|"          { BEGIN(NORMAL); return Parser::make_PLUS_SAT(driver.yylloc); }
 "-"            { BEGIN(NORMAL); return Parser::make_MINUS(driver.yylloc); }
+"|-|"          { BEGIN(NORMAL); return Parser::make_MINUS_SAT(driver.yylloc); }
 "*"            { BEGIN(NORMAL); return Parser::make_MUL(driver.yylloc); }
 "/"            { BEGIN(NORMAL); return Parser::make_DIV(driver.yylloc); }
 "%"            { BEGIN(NORMAL); return Parser::make_MOD(driver.yylloc); }

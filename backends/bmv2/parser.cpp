@@ -55,7 +55,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     cstring ename = argCount == 1 ? "extract" : "extract_VL";
                     result->emplace("op", ename);
                     auto arg = mce->arguments->at(0);
-                    auto argtype = typeMap->getType(arg, true);
+                    auto argtype = typeMap->getType(arg->expression, true);
                     if (!argtype->is<IR::Type_Header>()) {
                         ::error("%1%: extract only accepts arguments with header types, not %2%",
                                 arg, argtype);
@@ -66,8 +66,8 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     cstring type;
                     Util::IJson* j = nullptr;
 
-                    if (arg->is<IR::Member>()) {
-                        auto mem = arg->to<IR::Member>();
+                    if (arg->expression->is<IR::Member>()) {
+                        auto mem = arg->expression->to<IR::Member>();
                         auto baseType = typeMap->getType(mem->expr, true);
                         if (baseType->is<IR::Type_Stack>()) {
                             if (mem->member == IR::Type_Stack::next) {
@@ -80,7 +80,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     }
                     if (j == nullptr) {
                         type = "regular";
-                        j = conv->convert(arg);
+                        j = conv->convert(arg->expression);
                     }
                     auto value = j->to<Util::JsonObject>()->get("value");
                     param->emplace("type", type);
@@ -88,7 +88,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
                     if (argCount == 2) {
                         auto arg2 = mce->arguments->at(1);
-                        auto jexpr = conv->convert(arg2, true, false);
+                        auto jexpr = conv->convert(arg2->expression, true, false);
                         auto rwrap = new Util::JsonObject();
                         // The spec says that this must always be wrapped in an expression
                         rwrap->emplace("type", "expression");
@@ -107,14 +107,14 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     auto cond = mce->arguments->at(0);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = conv->convert(cond, true, false);
+                    auto jexpr = conv->convert(cond->expression, true, false);
                     params->append(jexpr);
                 }
                 {
                     auto error = mce->arguments->at(1);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = conv->convert(error, true, false);
+                    auto jexpr = conv->convert(error->expression, true, false);
                     params->append(jexpr);
                 }
                 return result;
@@ -153,7 +153,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     primitive = "pop";
 
                 BUG_CHECK(mce->arguments->size() == 1, "Expected 1 argument for %1%", mce);
-                auto arg = conv->convert(mce->arguments->at(0));
+                auto arg = conv->convert(mce->arguments->at(0)->expression);
                 pp->append(arg);
             } else {
                 BUG("%1%: Unexpected built-in method", bi->name);

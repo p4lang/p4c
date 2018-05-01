@@ -135,6 +135,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     toString { return cstring("control ") + externalName(); }
 }
 
+/// A P4-16 action
 class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     optional Annotations        annotations = Annotations::empty;
     ParameterList               parameters;
@@ -164,10 +165,10 @@ class Declaration_MatchKind : ISimpleNamespace {
     validate{ members.check_null(); }
 }
 
-// Table property value abstract base class
+/// Table property value abstract base class
 abstract PropertyValue { }
 
-// A property whose value is an expression
+/// A table property whose value is an expression
 class ExpressionValue : PropertyValue {
     Expression expression;
     dbprint { out << expression; }
@@ -281,6 +282,7 @@ class TableProperties : ISimpleNamespace {
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
     static const cstring entriesPropertyName;
+    static const cstring sizePropertyName;
 #nodbprint
     validate{ properties.check_null(); properties.check_valid(); }
 }
@@ -321,8 +323,11 @@ class P4Table : Declaration, IAnnotated, IApply {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
                     return k; } }
-            error("%1% must be a constant expression", d); }
+            error("%1% must be a constant numeric expression", d); }
         return nullptr; }
+    Constant getSizeProperty() const {
+        return getConstantProperty(TableProperties::sizePropertyName);
+    }
     EntriesList getEntries() const {
         auto ep = properties->getProperty(TableProperties::entriesPropertyName);
         if (ep == nullptr)
@@ -363,12 +368,12 @@ class Declaration_Constant : Declaration, IAnnotated {
     dbprint { out << annotations << type << ' ' << name << " = " << *initializer; }
 }
 
-// Like a variable, but for a statically allocated instance.
-// The syntax is Contructor(args) name = initializer;
+/// Like a variable, but for a statically allocated instance.
+/// The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated, IInstance {
     optional Annotations  annotations = Annotations::empty;
     Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern
-    Vector<Expression>    arguments;
+    Vector<Argument>      arguments;
     inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
     optional NullOK BlockStatement initializer = nullptr;
         // experimental only; contains just declarations, no code
@@ -383,7 +388,7 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
         arguments->check_null(); }
 }
 
-// Toplevel program representation
+/// Toplevel program representation
 class P4Program : ISimpleNamespace {
     optional inline IndexedVector<Node> declarations;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
@@ -445,10 +450,10 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
 class MethodCallStatement : Statement {
     MethodCallExpression methodCall;
     MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
-    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Expression> &a)
+    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
     MethodCallStatement(Util::SourceInfo si, Expression m,
-                        const std::initializer_list<Expression> &a)
+                        const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
 }
 
