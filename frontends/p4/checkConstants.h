@@ -36,6 +36,7 @@ class DoCheckConstants : public Inspector {
     }
 
     void postorder(const IR::MethodCallExpression* expr) override;
+    void postorder(const IR::KeyElement* expr) override;
     void postorder(const IR::P4Table* table) override;
 };
 

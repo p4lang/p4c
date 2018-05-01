@@ -33,10 +33,14 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression* expression) {
     }
 }
 
+void DoCheckConstants::postorder(const IR::KeyElement* key) {
+    if (key->expression->is<IR::Literal>())
+        ::warning("%1%: Constant key field", key->expression);
+}
+
 void DoCheckConstants::postorder(const IR::P4Table* table) {
     // This will print an error if the property exists and is not an integer
     (void)table->getSizeProperty();
 }
-
 
 }  // namespace P4

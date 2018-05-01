@@ -157,6 +157,7 @@ class Constant : Literal {
 #end
     bool fitsInt() const { return value.fits_sint_p(); }
     bool fitsLong() const { return value.fits_slong_p(); }
+    bool fitsUint() const { return value.fits_uint_p(); }
     long asLong() const {
         if (!fitsLong())
             ::error("%1%: Value too large", this);
@@ -165,6 +166,11 @@ class Constant : Literal {
         if (!fitsInt())
             ::error("%1%: Value too large", this);
         return value.get_si(); }
+    unsigned asUnsigned() const {
+        if (!fitsUint())
+            ::error("%1%: Value too large", this);
+        return value.get_ui();
+    }
     // The following operators are only used in special circumstances.
     // They do not look at the type when operating.  There are separate
     // implementations of these computations when doing proper constant folding.
@@ -218,8 +224,8 @@ class Slice : Operation_Ternary {
     stringOp = "[:]";
     toString{ return e0->toString() + "[" + e1->toString() + ":" + e2->toString() + "]"; }
     // After type checking e1 and e2 will be constants
-    int getH() const { return e1->to<IR::Constant>()->asInt(); }
-    int getL() const { return e2->to<IR::Constant>()->asInt(); }
+    unsigned getH() const { return e1->to<IR::Constant>()->asUnsigned(); }
+    unsigned getL() const { return e2->to<IR::Constant>()->asUnsigned(); }
     Slice(Expression a, int hi, int lo)
     : Operation_Ternary(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
     Slice(Util::SourceInfo si, Expression a, int hi, int lo)
@@ -228,7 +234,7 @@ class Slice : Operation_Ternary {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
     // make a slice, folding slices on slices and slices on constants automatically
-    static Expression make(Expression a, int hi, int lo);
+    static Expression make(Expression a, unsigned hi, unsigned lo);
 }
 
 class Member : Operation_Unary {
