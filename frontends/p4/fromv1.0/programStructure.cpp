@@ -930,17 +930,19 @@ const IR::Expression* ProgramStructure::convertHashAlgorithms(const IR::NameList
     return convertHashAlgorithm(algorithm->srcInfo, algorithm->names[0]);
 }
 
-static bool sameBitsType(const IR::Type* left, const IR::Type* right) {
+static bool sameBitsType(
+    const IR::Node* errorPosition, const IR::Type* left, const IR::Type* right) {
     if (typeid(*left) != typeid(*right))
         return false;
     if (left->is<IR::Type_Bits>())
         return left->to<IR::Type_Bits>()->operator==(* right->to<IR::Type_Bits>());
-    BUG("%1%: Expected a bit/int type", right);
+    ::error("%1%: operation only defined for bit/int types", errorPosition);
+    return true;  // to prevent inserting a cast
 }
 
 // Implement modify_field(left, right, mask)
 const IR::Statement* ProgramStructure::sliceAssign(
-    Util::SourceInfo srcInfo, const IR::Expression* left,
+    const IR::Primitive* primitive, const IR::Expression* left,
     const IR::Expression* right, const IR::Expression* mask) {
     if (mask->is<IR::Constant>()) {
         auto cst = mask->to<IR::Constant>();
@@ -955,21 +957,21 @@ const IR::Statement* ProgramStructure::sliceAssign(
                 auto l = new IR::Constant(range.lowIndex);
                 left = new IR::Slice(left->srcInfo, left, h, l);
                 right = new IR::Slice(right->srcInfo, right, h, l);
-                return assign(srcInfo, left, right, nullptr);
+                return assign(primitive->srcInfo, left, right, nullptr);
             }
         }
         // else value is too complex for a slice
     }
 
     auto type = left->type;
-    if (!sameBitsType(mask->type, left->type))
+    if (!sameBitsType(primitive, mask->type, left->type))
         mask = new IR::Cast(type, mask);
-    if (!sameBitsType(right->type, left->type))
+    if (!sameBitsType(primitive, right->type, left->type))
         right = new IR::Cast(type, right);
     auto op1 = new IR::BAnd(left->srcInfo, left, new IR::Cmpl(mask));
     auto op2 = new IR::BAnd(right->srcInfo, right, mask);
     auto result = new IR::BOr(mask->srcInfo, op1, op2);
-    return assign(srcInfo, left, result, type);
+    return assign(primitive->srcInfo, left, result, type);
 }
 
 const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* expression) {
@@ -1029,14 +1031,14 @@ CONVERT_PRIMITIVE(modify_field) {
         return structure->assign(primitive->srcInfo, args[0], args[1],
                                  primitive->operands.at(0)->type);
     } else if (args.size() == 3) {
-        return structure->sliceAssign(primitive->srcInfo, args[0], args[1], args[2]); }
+        return structure->sliceAssign(primitive, args[0], args[1], args[2]); }
     return nullptr;
 }
 
 CONVERT_PRIMITIVE(bit_xor) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BXor(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1045,7 +1047,7 @@ CONVERT_PRIMITIVE(bit_xor) {
 CONVERT_PRIMITIVE(min) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Mux(primitive->srcInfo,
                           new IR::Leq(primitive->srcInfo, args[1], args[2]), args[1], args[2]);
@@ -1055,7 +1057,7 @@ CONVERT_PRIMITIVE(min) {
 CONVERT_PRIMITIVE(max) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Mux(primitive->srcInfo,
                           new IR::Geq(primitive->srcInfo, args[1], args[2]), args[1], args[2]);
@@ -1065,7 +1067,7 @@ CONVERT_PRIMITIVE(max) {
 CONVERT_PRIMITIVE(bit_or) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BOr(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1074,7 +1076,7 @@ CONVERT_PRIMITIVE(bit_or) {
 CONVERT_PRIMITIVE(bit_xnor) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Cmpl(primitive->srcInfo, new IR::BXor(primitive->srcInfo, args[1], args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1083,7 +1085,7 @@ CONVERT_PRIMITIVE(bit_xnor) {
 CONVERT_PRIMITIVE(add) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Add(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1092,7 +1094,7 @@ CONVERT_PRIMITIVE(add) {
 CONVERT_PRIMITIVE(bit_nor) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Cmpl(primitive->srcInfo, new IR::BOr(primitive->srcInfo, args[1], args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1101,7 +1103,7 @@ CONVERT_PRIMITIVE(bit_nor) {
 CONVERT_PRIMITIVE(bit_nand) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Cmpl(primitive->srcInfo, new IR::BAnd(primitive->srcInfo, args[1], args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1110,7 +1112,7 @@ CONVERT_PRIMITIVE(bit_nand) {
 CONVERT_PRIMITIVE(bit_orca) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BOr(primitive->srcInfo, new IR::Cmpl(primitive->srcInfo, args[1]), args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1119,7 +1121,7 @@ CONVERT_PRIMITIVE(bit_orca) {
 CONVERT_PRIMITIVE(bit_orcb) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BOr(primitive->srcInfo, args[1], new IR::Cmpl(primitive->srcInfo, args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1128,7 +1130,7 @@ CONVERT_PRIMITIVE(bit_orcb) {
 CONVERT_PRIMITIVE(bit_andca) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BAnd(primitive->srcInfo, new IR::Cmpl(primitive->srcInfo, args[1]), args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1137,7 +1139,7 @@ CONVERT_PRIMITIVE(bit_andca) {
 CONVERT_PRIMITIVE(bit_andcb) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BAnd(primitive->srcInfo, args[1], new IR::Cmpl(primitive->srcInfo, args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1146,7 +1148,7 @@ CONVERT_PRIMITIVE(bit_andcb) {
 CONVERT_PRIMITIVE(bit_and) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BAnd(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1155,7 +1157,7 @@ CONVERT_PRIMITIVE(bit_and) {
 CONVERT_PRIMITIVE(subtract) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(args[1]->type, args[2]->type))
+    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::Sub(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
@@ -1342,7 +1344,7 @@ CONVERT_PRIMITIVE(modify_field_from_rng) {
     auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
     block->push_back(call);
     if (mask != nullptr) {
-        auto assgn = structure->sliceAssign(primitive->srcInfo, field, dest->clone(), mask);
+        auto assgn = structure->sliceAssign(primitive, field, dest->clone(), mask);
         block->push_back(assgn); }
     return block;
 }
@@ -1508,7 +1510,7 @@ CONVERT_PRIMITIVE(modify_field_with_shift) {
     auto src = conv.convert(primitive->operands.at(1));
     auto shift = conv.convert(primitive->operands.at(2));
     auto mask = conv.convert(primitive->operands.at(3));
-    auto result = structure->sliceAssign(primitive->srcInfo, dest, new IR::Shr(src, shift), mask);
+    auto result = structure->sliceAssign(primitive, dest, new IR::Shr(src, shift), mask);
     return result;
 }
 
