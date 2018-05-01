@@ -26,12 +26,17 @@ class BMV2Options : public CompilerOptions {
  public:
     // Externs generation
     bool emitExterns = false;
+    // file to output to
+    cstring outputFile = nullptr;
 
     BMV2Options() {
         registerOption("--emit-externs", nullptr,
-                       [this](const char*) { emitExterns = true; return true; },
-                       "[BMv2 back-end] Force externs be emitted by the backend.\n"
-                       "The generated code follows the BMv2 JSON specification.");
+                [this](const char*) { emitExterns = true; return true; },
+                "[BMv2 back-end] Force externs be emitted by the backend.\n"
+                "The generated code follows the BMv2 JSON specification.");
+        registerOption("-o", "outfile",
+                [this](const char* arg) { outputFile = arg; return true; },
+                "Write output to outfile");
     }
 };
 
