@@ -2854,7 +2854,7 @@ void TypeInference::explodeStructType(const IR::Type_StructLike* structType, IR:
         } else if (auto ft = field->type->to<IR::Type_StructLike>()) {
             explodeStructType(ft, tuple);
         } else {
-            ::error("Unhandled type %1% in explodeStructType", field->type);
+            BUG("Unexpected type %1% for struct field %2%", field->type, field);
         }
     }
 }
