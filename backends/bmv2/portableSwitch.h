@@ -57,7 +57,7 @@ class PsaProgramStructure {
     unsigned                            bool_width = 1;
 
     // architecture related information
-    ordered_map<IR::Node*, std::pair<gress_t, block_t>> block_type;
+    ordered_map<const IR::Node*, std::pair<gress_t, block_t>> block_type;
 
     ordered_map<cstring, const IR::Type_Header*> header_types;
     ordered_map<cstring, const IR::Type_Struct*> metadata_types;
