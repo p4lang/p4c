@@ -2847,7 +2847,8 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
     return expression;
 }
 
-void TypeInference::explodeStructType(const IR::Type_StructLike* structType, IR::Type_Tuple *tuple) {
+void TypeInference::explodeStructType(const IR::Type_StructLike* structType, 
+                                      IR::Type_Tuple *tuple) {
     for (auto field : structType->fields) {
         if (auto ft = field->type->to<IR::Type_Bits>()) {
             tuple->components.push_back(ft);
