@@ -178,22 +178,21 @@ bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
 }
 
 void ParsePsaArchitecture::parse_pipeline(const IR::PackageBlock* block, gress_t gress) {
-    const IR::ParserBlock* parser;
-    const IR::ControlBlock* pipeline;
-    const IR::ControlBlock* deparser;
     if (gress == INGRESS) {
-        parser = block->getParameterValue("ip")->to<IR::ParserBlock>();
-        pipeline = block->getParameterValue("ig")->to<IR::ControlBlock>();
-        deparser = block->getParameterValue("id")->to<IR::ControlBlock>();
+        auto parser = block->getParameterValue("ip")->to<IR::ParserBlock>();
+        auto pipeline = block->getParameterValue("ig")->to<IR::ControlBlock>();
+        auto deparser = block->getParameterValue("id")->to<IR::ControlBlock>();
+        structure->block_type.emplace(parser->container, std::make_pair(gress, PARSER));
+        structure->block_type.emplace(pipeline->container, std::make_pair(gress, PIPELINE));
+        structure->block_type.emplace(deparser->container, std::make_pair(gress, DEPARSER));
     } else if (gress == EGRESS) {
-        parser = block->getParameterValue("ep")->to<IR::ParserBlock>();
-        pipeline = block->getParameterValue("eg")->to<IR::ControlBlock>();
-        deparser = block->getParameterValue("ed")->to<IR::ControlBlock>();
+        auto parser = block->getParameterValue("ep")->to<IR::ParserBlock>();
+        auto pipeline = block->getParameterValue("eg")->to<IR::ControlBlock>();
+        auto deparser = block->getParameterValue("ed")->to<IR::ControlBlock>();
+        structure->block_type.emplace(parser->container, std::make_pair(gress, PARSER));
+        structure->block_type.emplace(pipeline->container, std::make_pair(gress, PIPELINE));
+        structure->block_type.emplace(deparser->container, std::make_pair(gress, DEPARSER));
     }
-
-    structure->block_type.emplace(parser->container, std::make_pair(gress, PARSER));
-    structure->block_type.emplace(pipeline->container, std::make_pair(gress, PIPELINE));
-    structure->block_type.emplace(deparser->container, std::make_pair(gress, DEPARSER));
 }
 
 bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
@@ -210,13 +209,10 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
 
 void InspectPsaProgram::postorder(const IR::P4Parser* p) {
     // populate structure->parsers
-
 }
 
 void InspectPsaProgram::postorder(const IR::P4Control* c) {
-    // inspect IR::P4Control
-    // populate structure->pipelines or
-    //          structure->deparsers
+
 }
 
 void InspectPsaProgram::postorder(const IR::Type_Header* h) {
@@ -380,17 +376,29 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     return false;
 }
 
-bool InspectPsaProgram::preorder(const IR::P4Parser* parser) {
-    // search std::map<IR::Node*, cstring> nameMap for name in json
-    // pinfo->parsers.emplace(name, parser);
+bool InspectPsaProgram::preorder(const IR::P4Parser* p) {
+    if (pinfo->block_type.count(p)) {
+        auto info = pinfo->block_type.at(p);
+        if (info.first == INGRESS && info.second == PARSER)
+            pinfo->parsers.emplace("ingress", p);
+        else if (info.first == EGRESS && info.second == PARSER)
+            pinfo->parsers.emplace("egress", p);
+    }
     return false;
 }
 
-bool InspectPsaProgram::preorder(const IR::P4Control *control) {
-    // TODO:
-    // search std::map<IR::Node*, cstring> namemap for name in json
-    // if control, go to pipelines
-    // if deparser, save to deparsers
+bool InspectPsaProgram::preorder(const IR::P4Control *c) {
+    if (pinfo->block_type.count(c)) {
+        auto info = pinfo->block_type.at(c);
+        if (info.first == INGRESS && info.second == PIPELINE)
+            pinfo->pipelines.emplace("ingress", c);
+        else if (info.first == EGRESS && info.second == PIPELINE)
+            pinfo->pipelines.emplace("egress", c);
+        else if (info.first == INGRESS && info.second == DEPARSER)
+            pinfo->deparsers.emplace("ingress", c);
+        else if (info.first == EGRESS && info.second == DEPARSER)
+            pinfo->deparsers.emplace("egress", c);
+    }
     return false;
 }
 
