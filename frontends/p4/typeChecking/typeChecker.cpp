@@ -2847,6 +2847,18 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
     return expression;
 }
 
+static void convertStructToTuple(const IR::Type_StructLike* structType, IR::Type_Tuple *tuple) {
+    for (auto field : structType->fields) {
+        if (auto ft = field->type->to<IR::Type_Bits>()) {
+            tuple->components.push_back(ft);
+        } else if (auto ft = field->type->to<IR::Type_StructLike>()) {
+            convertStructToTuple(ft, tuple);
+        } else {
+            BUG("Unexpected type %1% for struct field %2%", field->type, field);
+        }
+    }
+}
+
 const IR::SelectCase*
 TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tuple* selectType,
                          const IR::SelectCase* selectCase, const IR::Type* caseType) {
@@ -2858,6 +2870,11 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
     if (caseType->is<IR::Type_Dontcare>())
         return selectCase;
 
+    if (caseType->is<IR::Type_StructLike>()) {
+        auto tupleType = new IR::Type_Tuple();
+        convertStructToTuple(caseType->to<IR::Type_StructLike>(), tupleType);
+        caseType = tupleType;
+    }
     const IR::Type* useSelType = selectType;
     if (!caseType->is<IR::Type_Tuple>()) {
         if (selectType->components.size() != 1) {
