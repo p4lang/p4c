@@ -30,6 +30,17 @@ limitations under the License.
 
 namespace P4 {
 
+enum gress_t {
+    INGRESS,
+    EGRESS
+};
+
+enum block_t {
+    PARSER,
+    PIPELINE,
+    DEPARSER
+};
+
 class PsaProgramStructure {
     BMV2::JsonObjects*   json;     // output json data structure
     ReferenceMap* refMap;
@@ -44,6 +55,9 @@ class PsaProgramStructure {
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
     unsigned                            bool_width = 1;
+
+    // architecture related information
+    ordered_map<IR::Node*, std::pair<gress_t, block_t>> block_type;
 
     ordered_map<cstring, const IR::Type_Header*> header_types;
     ordered_map<cstring, const IR::Type_Struct*> metadata_types;
@@ -103,6 +117,7 @@ class ParsePsaArchitecture : public Inspector {
  public:
     explicit ParsePsaArchitecture(PsaProgramStructure* structure) : structure(structure) { }
 
+    void parse_pipeline(const IR::PackageBlock* block, gress_t gress);
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
 };

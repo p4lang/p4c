@@ -177,19 +177,40 @@ bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
     return false;
 }
 
+void ParsePsaArchitecture::parse_pipeline(const IR::PackageBlock* block, gress_t gress) {
+    const IR::ParserBlock* parser;
+    const IR::ControlBlock* pipeline;
+    const IR::ControlBlock* deparser;
+    if (gress == INGRESS) {
+        parser = block->getParameterValue("ip")->to<IR::ParserBlock>();
+        pipeline = block->getParameterValue("ig")->to<IR::ControlBlock>();
+        deparser = block->getParameterValue("id")->to<IR::ControlBlock>();
+    } else if (gress == EGRESS) {
+        parser = block->getParameterValue("ep")->to<IR::ParserBlock>();
+        pipeline = block->getParameterValue("eg")->to<IR::ControlBlock>();
+        deparser = block->getParameterValue("ed")->to<IR::ControlBlock>();
+    }
+
+    structure->block_type.emplace(parser->container, std::make_pair(gress, PARSER));
+    structure->block_type.emplace(pipeline->container, std::make_pair(gress, PIPELINE));
+    structure->block_type.emplace(deparser->container, std::make_pair(gress, DEPARSER));
+}
+
 bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
-    for (auto t : block->constantValue) {
-        LOG1("first " << t.first << " second " << t.second);
-        if (t.second->is<IR::Block>()) {
-            visit(t.second->getNode());
-        }
+    auto pkg = block->getParameterValue("ingress");
+    if (auto ingress = pkg->to<IR::PackageBlock>()) {
+        parse_pipeline(ingress, INGRESS);
+    }
+    pkg = block->getParameterValue("egress");
+    if (auto egress = pkg->to<IR::PackageBlock>()) {
+        parse_pipeline(egress, EGRESS);
     }
     return false;
 }
 
 void InspectPsaProgram::postorder(const IR::P4Parser* p) {
-    // inspect IR::P4Parser
     // populate structure->parsers
+
 }
 
 void InspectPsaProgram::postorder(const IR::P4Control* c) {
