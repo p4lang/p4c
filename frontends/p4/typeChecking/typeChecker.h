@@ -158,7 +158,6 @@ class TypeInference : public Transform {
                          bool forbidModules = false, bool forbidPackage = false) const;
     const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
-    void explodeStructType(const IR::Type_StructLike* structType, IR::Type_Tuple* tuple);
     //////////////////////////////////////////////////////////////
 
  public:
