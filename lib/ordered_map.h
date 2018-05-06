@@ -153,20 +153,22 @@ class ordered_map {
         if (it == data.end()) throw std::out_of_range("ordered_map");
         return it->second; }
 
-    template<typename KK, typename VV>
-    std::pair<iterator, bool> emplace(KK &&k, VV &&v) {
+    template<typename KK, typename... VV>
+    std::pair<iterator, bool> emplace(KK &&k, VV &&... v) {
         auto it = find(k);
         if (it == data.end()) {
-            it = data.emplace(data.end(), std::forward<KK>(k), std::forward<VV>(v));
+            it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),
+                              std::forward_as_tuple(std::forward<VV>(v)...));
             data_map.emplace(&it->first, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
-    template<typename KK, typename VV>
-    std::pair<iterator, bool> emplace_hint(iterator pos, KK &&k, VV &&v) {
+    template<typename KK, typename... VV>
+    std::pair<iterator, bool> emplace_hint(iterator pos, KK &&k, VV &&... v) {
         /* should be const_iterator pos, but glibc++ std::list is broken */
         auto it = find(k);
         if (it == data.end()) {
-            it = data.emplace(pos, std::forward<KK>(k), std::forward<VV>(v));
+            it = data.emplace(pos, std::piecewise_construct_t(), std::forward_as_tuple(k),
+                              std::forward_as_tuple(std::forward<VV>(v)...));
             data_map.emplace(&it->first, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
