@@ -27,6 +27,10 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
+#include "backend.h"
+#include "psaExpression.h"
+#include "JsonObjects.h"
+
 
 namespace P4 {
 
@@ -45,12 +49,15 @@ class PsaProgramStructure {
     BMV2::JsonObjects*   json;     // output json data structure
     ReferenceMap* refMap;
     TypeMap* typeMap;
+    P4::P4CoreLibrary&   corelib;
+    BMV2::PsaExpressionConverter* conv;
+
 
  public:
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
-    ordered_map<cstring, const IR::StructField*> scalarMetadataFields;
+    std::map<const IR::StructField*, cstring> scalarMetadataFields;
     std::vector<const IR::StructField*> scalars;
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
@@ -84,14 +91,18 @@ class PsaProgramStructure {
 
 public:
     PsaProgramStructure(ReferenceMap* refMap, TypeMap* typeMap)
-        : refMap(refMap), typeMap(typeMap) {
+        : refMap(refMap), typeMap(typeMap),
+    corelib(P4::P4CoreLibrary::instance) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         json = new BMV2::JsonObjects();
+        cstring scalarsName = refMap->newName("scalars");
+        conv = new BMV2::PsaExpressionConverter(refMap,typeMap,scalarsName,&scalarMetadataFields);
     }
 
     const IR::P4Program* create(const IR::P4Program* program);
     void createStructLike(const IR::Type_StructLike* st);
+    Util::IJson* convertParserStatement(const IR::StatOrDecl* stat);
     void createTypes();
     void createHeaders();
     void createParsers();
@@ -110,6 +121,19 @@ public:
             return header_union_types.count(u->getName());
         return false;
     }
+
+    protected:
+    void convertSimpleKey(const IR::Expression* keySet, mpz_class& value, mpz_class& mask) const;
+    unsigned combine(const IR::Expression* keySet, const IR::ListExpression* select,
+                     mpz_class& value, mpz_class& mask, bool& is_vset, cstring& vset_name) const;
+    Util::IJson* stateName(IR::ID state);
+    Util::IJson* toJson(const IR::P4Parser* cont);
+    Util::IJson* toJson(const IR::ParserState* state);
+
+    Util::IJson* convertSelectKey(const IR::SelectExpression* expr);
+    Util::IJson* convertPathExpression(const IR::PathExpression* expr);
+    Util::IJson* createDefaultTransition();
+    std::vector<Util::IJson*> convertSelectExpression(const IR::SelectExpression* expr);
 };
 
 class ParsePsaArchitecture : public Inspector {
@@ -158,6 +182,7 @@ class InspectPsaProgram : public Inspector {
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
     bool preorder(const IR::Parameter* parameter) override;
+
 };
 
 class ConvertToJson : public Inspector {

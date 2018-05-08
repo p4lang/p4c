@@ -28,6 +28,7 @@ set (BMV2_BACKEND_SRCS
   deparser.cpp
   errorcode.cpp
   expression.cpp
+  psaExpression.cpp
   extern.cpp
   globals.cpp
   header.cpp
@@ -50,6 +51,7 @@ set (BMV2_BACKEND_HDRS
   deparser.h
   errorcode.h
   expression.h
+  psaExpression.h
   extern.h
   globals.h
   header.h
