@@ -34,7 +34,6 @@ class SimpleSwitch {
     BMV2::Backend* backend;
     V1Model&       v1model;
 
-
  protected:
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
     int createFieldList(const IR::Expression* expr, cstring group,
@@ -56,6 +55,10 @@ class SimpleSwitch {
                                 const bool& emitExterns);
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
                          Util::JsonArray* calculations, bool verify);
+    void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
+                           Util::JsonArray* result);
+    void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params);
+    void createActions();
 
     void setPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls,
                              std::map<cstring, cstring>* map);
