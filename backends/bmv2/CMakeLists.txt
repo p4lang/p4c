@@ -29,7 +29,6 @@ set (BMV2_BACKEND_SRCS
   errorcode.cpp
   expression.cpp
   extern.cpp
-  extractArchInfo.cpp
   globals.cpp
   header.cpp
   helpers.cpp
@@ -52,7 +51,6 @@ set (BMV2_BACKEND_HDRS
   errorcode.h
   expression.h
   extern.h
-  extractArchInfo.h
   globals.h
   header.h
   helpers.h
@@ -74,16 +72,16 @@ add_library(bmv2backend ${BMV2_BACKEND_SRCS})
 add_dependencies(bmv2backend genIR)
 
 build_unified(BMV2_SRCS)
-add_executable(p4c-bm2-ss ${BMV2_SRCS})
-target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+add_executable(p4c-bmv2 ${BMV2_SRCS})
+target_link_libraries (p4c-bmv2 bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
-install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+install(TARGETS p4c-bmv2 RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we
 # remove automake and fix the scripts.
 add_custom_target(linkbmv2
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-bmv2 ${P4C_BINARY_DIR}/p4c-bmv2
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   )

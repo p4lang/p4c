@@ -29,7 +29,7 @@ namespace BMV2 {
 
 class Backend;
 
-class ConvertHeaders : public Inspector {
+class HeaderConverter : public Inspector {
     Backend*             backend;
     cstring              scalarsName;
     cstring              scalarsTypeName;
@@ -55,10 +55,9 @@ class ConvertHeaders : public Inspector {
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* node) override;
 
-    bool preorder(const IR::PackageBlock* b) override;
     bool preorder(const IR::Parameter* param) override;
 
-    ConvertHeaders(Backend* backend, cstring scalarsName);
+    HeaderConverter(Backend* backend, cstring scalarsName);
 };
 
 }  // namespace BMV2
