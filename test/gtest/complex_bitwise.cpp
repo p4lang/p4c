@@ -106,7 +106,7 @@ TEST_F(SimplifyBitwiseTest, SimpleSplit) {
     std::string program_string = builder.toString();
     std::string value1 = "headers.h.f1[15:0] = headers.h.f2[15:0]";
     std::string value2 = "headers.h.f1[31:16] = headers.h.f1[31:16]";
-    EXPECT_FALSE(program_string.find(value1) == std::string::npos); 
+    EXPECT_FALSE(program_string.find(value1) == std::string::npos);
     EXPECT_FALSE(program_string.find(value2) == std::string::npos);
 }
 
@@ -170,7 +170,7 @@ TEST_F(SimplifyBitwiseTest, SplitWithZero) {
     std::string value2 = "headers.h.f1[31:24] = headers.h.f3[31:24]";
     std::string value3 = "headers.h.f1[23:8] = 16w0";
 
-    EXPECT_FALSE(program_string.find(value1) == std::string::npos); 
+    EXPECT_FALSE(program_string.find(value1) == std::string::npos);
     EXPECT_FALSE(program_string.find(value2) == std::string::npos);
     EXPECT_FALSE(program_string.find(value3) == std::string::npos);
 }
