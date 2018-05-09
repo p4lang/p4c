@@ -1244,6 +1244,13 @@ const IR::Node* TypeInference::postorder(IR::Type_Base* type) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Newtype* type) {
     (void)setTypeType(type);
+    auto argType = getTypeType(type->type);
+    if (!argType->is<IR::Type_Bits>() &&
+        !argType->is<IR::Type_Boolean>() &&
+        !argType->is<IR::Type_Tuple>() &&
+        !argType->is<IR::Type_Newtype>())
+        ::error("%1%: `type' can only be applied to base types or tuple types",
+                type);
     return type;
 }
 
@@ -2108,14 +2115,18 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (!castType->is<IR::Type_Bits>() &&
         !castType->is<IR::Type_Boolean>() &&
         !castType->is<IR::Type_Newtype>()) {
-        ::error("%1%: casts are only supported to base types", expression->destType);
+        ::error("%1%: cast not supported", expression->destType);
         return expression;
     }
 
     if (!canCastBetween(castType, sourceType)) {
-        // This cast is not legal, but let's try to see whether
-        // performing a substitution can help
-        auto rhs = assignment(expression, castType, expression->expr);
+        // This cast is not legal directly, but let's try to see whether
+        // performing a substitution can help.  This will allow the use
+        // of constants on the RHS.
+        const IR::Type* destType = castType;
+        while (destType->is<IR::Type_Newtype>())
+            destType = destType->to<IR::Type_Newtype>()->type;
+        auto rhs = assignment(expression, destType, expression->expr);
         if (rhs == nullptr)
             // error
             return expression;

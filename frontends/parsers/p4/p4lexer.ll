@@ -91,7 +91,7 @@ using Parser = P4::P4Parser;
 "int"           { BEGIN(NORMAL); return Parser::make_INT(driver.yylloc); }
 "key"           { BEGIN(NORMAL); return Parser::make_KEY(driver.yylloc); }
 "match_kind"    { BEGIN(NORMAL); return Parser::make_MATCH_KIND(driver.yylloc); }
-"newtype"       { BEGIN(NORMAL); return Parser::make_NEWTYPE(driver.yylloc); }
+"type"          { BEGIN(NORMAL); return Parser::make_NEWTYPE(driver.yylloc); }
 "out"           { BEGIN(NORMAL); return Parser::make_OUT(driver.yylloc); }
 "parser"        { BEGIN(NORMAL); return Parser::make_PARSER(driver.yylloc); }
 "package"       { BEGIN(NORMAL); return Parser::make_PACKAGE(driver.yylloc); }

@@ -156,6 +156,7 @@ typedef const IR::Type ConstType;
             ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
             INT KEY SELECT MATCH_KIND NEWTYPE OUT PACKAGE PARSER RETURN STATE STRUCT
             SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+// NEWTYPE is actually "type" as a token, but we already have a TYPE token
 
 %token<cstring> IDENTIFIER TYPE STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -280,6 +281,7 @@ declaration
 
 nonTypeName
     : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | NEWTYPE     { $$ = new IR::ID(@1, "type"); }
     | APPLY       { $$ = new IR::ID(@1, "apply"); }
     | KEY         { $$ = new IR::ID(@1, "key"); }
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }

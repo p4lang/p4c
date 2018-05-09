@@ -71,7 +71,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     PassManager midEnd = {
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
         new P4::ClearTypeMap(&typeMap),
-        new P4::EliminateNewtype(&typeMap),
+        new P4::EliminateNewtype(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,

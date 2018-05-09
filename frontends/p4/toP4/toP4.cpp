@@ -261,7 +261,7 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
 bool ToP4::preorder(const IR::Type_Newtype* t) {
     dump(2);
     visit(t->annotations);
-    builder.append("newtype ");
+    builder.append("type ");
     visit(t->type);
     builder.spc();
     builder.append(t->name);

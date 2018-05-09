@@ -1,7 +1,7 @@
 #include <core.p4>
 
 typedef bit<32> B32;
-newtype bit<32> N32;
+type bit<32> N32;
 struct S {
     B32 b;
     N32 n;
@@ -11,7 +11,7 @@ header H {
     N32 field;
 }
 
-newtype N32 NN32;
+type N32 NN32;
 control c(out B32 x) {
     N32 k;
     NN32 nn;
@@ -25,9 +25,10 @@ control c(out B32 x) {
     }
     apply {
         B32 b = 0;
-        N32 n;
+        N32 n = (N32)1;
         N32 n1;
         S s;
+        NN32 n5 = (NN32)(N32)5;
         n = (N32)b;
         nn = (NN32)n;
         k = n;

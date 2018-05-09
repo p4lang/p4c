@@ -1,5 +1,5 @@
 typedef bit<32> B32;
-newtype bit<32> N32;
+type bit<32> N32;
 
 control c(out B32 x) {
     apply {

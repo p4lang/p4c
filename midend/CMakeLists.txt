@@ -18,6 +18,7 @@ set (MIDEND_SRCS
   convertEnums.cpp
   copyStructures.cpp
   eliminateTuples.cpp
+  eliminateNewtype.cpp
   expandEmit.cpp
   expandLookahead.cpp
   interpreter.cpp

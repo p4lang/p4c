@@ -29,20 +29,23 @@ namespace P4 {
  * the newtype by a typedef.
  */
 class DoReplaceNewtype final : public Transform {
+    const TypeMap* typeMap;
  public:
-    DoReplaceNewtype()
+    explicit DoReplaceNewtype(const TypeMap* typeMap): typeMap(typeMap)
     { setName("DoReplaceNewtype"); }
     const IR::Node* postorder(IR::Type_Newtype* type) override {
         return new IR::Type_Typedef(type->srcInfo, type->name, type->type);
     }
+    const IR::Node* postorder(IR::Cast* expression) override;
 };
 
 class EliminateNewtype final : public PassManager {
  public:
-    explicit EliminateNewtype(TypeMap* typeMap) {
-        passes.push_back(new DoReplaceNewtype());
+    EliminateNewtype(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DoReplaceNewtype(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
-        setName("EliminateNewType");
+        setName("EliminateNewtype");
     }
 };
 

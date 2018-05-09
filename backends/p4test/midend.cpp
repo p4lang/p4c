@@ -32,6 +32,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
+#include "midend/eliminateNewtype.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
 #include "midend/local_copyprop.h"
@@ -75,6 +76,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: lower errors to integers
     // TODO: handle bit-slices as out arguments
     addPasses({
+        new P4::EliminateNewtype(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::OrPolicy(

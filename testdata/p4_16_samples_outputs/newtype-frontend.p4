@@ -1,7 +1,7 @@
 #include <core.p4>
 
 typedef bit<32> B32;
-newtype bit<32> N32;
+type bit<32> N32;
 struct S {
     B32 b;
     N32 n;
