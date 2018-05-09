@@ -54,19 +54,11 @@ class ParserConverter : public Inspector {
 
  public:
     bool preorder(const IR::P4Parser* p) override;
-    bool preorder(const IR::PackageBlock* b) override;
+    bool preorder(const IR::P4Control* c) override { return false; }  // do not visit control block
     explicit ParserConverter(Backend* backend) : backend(backend), refMap(backend->getRefMap()),
     typeMap(backend->getTypeMap()), json(backend->json),
     conv(backend->getExpressionConverter()),
     corelib(P4::P4CoreLibrary::instance) { setName("ParserConverter"); }
-};
-
-class ConvertParser final : public PassManager {
- public:
-    explicit ConvertParser(Backend* backend) {
-        passes.push_back(new ParserConverter(backend));
-        setName("ConvertParser");
-    }
 };
 
 }  // namespace BMV2
