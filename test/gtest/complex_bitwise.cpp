@@ -5,9 +5,11 @@
 #include "ir/ir.h"
 #include "helpers.h"
 #include "lib/log.h"
+#include "lib/sourceCodeBuilder.h"
 
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
 #include "midend/simplifyBitwise.h"
 
@@ -66,9 +68,8 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
 
 class CountAssignmentStatements : public Inspector {
     int _as_total = 0;
-    bool preorder(const IR::AssignmentStatement *as) {
+    bool preorder(const IR::AssignmentStatement *) {
         _as_total++;
-        LOG1("As " << as);
         return true;
     }
 
@@ -87,15 +88,26 @@ TEST_F(SimplifyBitwiseTest, SimpleSplit) {
 
     ReferenceMap refMap;
     TypeMap typeMap;
+
     CountAssignmentStatements cas;
+    Util::SourceCodeBuilder builder;
+    ToP4 dump(builder, false);
+
     PassManager quick_midend = {
         new TypeChecking(&refMap, &typeMap, true),
         new SimplifyBitwise,
-        &cas
+        &cas,
+        &dump
     };
 
     test->program->apply(quick_midend);
     EXPECT_EQ(2, cas.as_total());
+
+    std::string program_string = builder.toString();
+    std::string value1 = "headers.h.f1[15:0] = headers.h.f2[15:0]";
+    std::string value2 = "headers.h.f1[31:16] = headers.h.f1[31:16]";
+    EXPECT_FALSE(program_string.find(value1) == std::string::npos); 
+    EXPECT_FALSE(program_string.find(value2) == std::string::npos);
 }
 
 TEST_F(SimplifyBitwiseTest, ManySplit) {
@@ -105,15 +117,31 @@ TEST_F(SimplifyBitwiseTest, ManySplit) {
 
     ReferenceMap refMap;
     TypeMap typeMap;
+
     CountAssignmentStatements cas;
+    Util::SourceCodeBuilder builder;
+    ToP4 dump(builder, false);
+
     PassManager quick_midend = {
         new TypeChecking(&refMap, &typeMap, true),
         new SimplifyBitwise,
-        &cas
+        &cas,
+        &dump
     };
 
     test->program->apply(quick_midend);
     EXPECT_EQ(32, cas.as_total());
+    std::string program_string = builder.toString();
+    for (int i = 0; i < 32; i += 2) {
+        std::string value1 = "headers.h.f1[" + std::to_string(i) + ":" + std::to_string(i)
+                              + "] = headers.h.f2[" + std::to_string(i) + ":"
+                              + std::to_string(i) + "]";
+        std::string value2 = "headers.h.f1[" + std::to_string(i+1) + ":" + std::to_string(i+1)
+                              + "] = headers.h.f1[" + std::to_string(i+1) + ":"
+                              + std::to_string(i+1) + "]";
+        EXPECT_FALSE(program_string.find(value1) == std::string::npos);
+        EXPECT_FALSE(program_string.find(value2) == std::string::npos);
+    }
 }
 
 TEST_F(SimplifyBitwiseTest, SplitWithZero) {
@@ -124,14 +152,27 @@ TEST_F(SimplifyBitwiseTest, SplitWithZero) {
     ReferenceMap refMap;
     TypeMap typeMap;
     CountAssignmentStatements cas;
+
+    Util::SourceCodeBuilder builder;
+    ToP4 dump(builder, false);
     PassManager quick_midend = {
         new TypeChecking(&refMap, &typeMap, true),
         new SimplifyBitwise,
-        &cas
+        &cas,
+        &dump
     };
 
     test->program->apply(quick_midend);
     EXPECT_EQ(3, cas.as_total());
+    std::string program_string = builder.toString();
+
+    std::string value1 = "headers.h.f1[7:0] = headers.h.f2[7:0]";
+    std::string value2 = "headers.h.f1[31:24] = headers.h.f3[31:24]";
+    std::string value3 = "headers.h.f1[23:8] = 16w0";
+
+    EXPECT_FALSE(program_string.find(value1) == std::string::npos); 
+    EXPECT_FALSE(program_string.find(value2) == std::string::npos);
+    EXPECT_FALSE(program_string.find(value3) == std::string::npos);
 }
 
 }  // namespace Test
