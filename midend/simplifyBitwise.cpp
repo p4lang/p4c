@@ -12,7 +12,6 @@ void SimplifyBitwise::assignSlices(const IR::Expression *expr, mpz_class mask) {
         auto left_slice = IR::Slice::make(changing_as->left, one_pos, zero_pos - 1);
         auto right_slice = IR::Slice::make(expr, one_pos, zero_pos - 1);
         auto new_as = new IR::AssignmentStatement(changing_as->srcInfo, left_slice, right_slice);
-        LOG1("New as " << new_as);
         slice_statements->push_back(new_as);
         one_pos = mpz_scan1(mask.get_mpz_t(), zero_pos);
     }
