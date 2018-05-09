@@ -150,6 +150,7 @@ class TagGlobalActions : public Transform {
 /**
 Creates copies of actions;
 after this pass each action appears in a single table.
+Pre: Must be run after action inlining.
 */
 class LocalizeAllActions : public PassManager {
     GlobalActionReplacements globalReplacements;
