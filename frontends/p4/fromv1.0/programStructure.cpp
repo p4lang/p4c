@@ -1851,6 +1851,10 @@ ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
     auto kindarg = counterType(c);
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
+    if (c->min_width >= 0)
+        annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
+    if (c->max_width >= 0)
+        annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
     auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
     return decl;
 }
