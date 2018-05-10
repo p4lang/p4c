@@ -828,7 +828,7 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
 }
 
 void SimpleSwitchBackend::createActions(ConversionContext* ctxt, V1ProgramStructure* structure) {
-    auto cvt = new ActionConverter(ctxt, true);
+    auto cvt = new ActionConverter(ctxt, options.emitExterns);
     for (auto it : structure->actions) {
         auto action = it.first;
         action->apply(*cvt);
