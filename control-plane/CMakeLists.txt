@@ -70,6 +70,8 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
 #PROTOBUF_GENERATE_PYTHON (P4RUNTIME_GEN_PYTHON P4RUNTIME_INFO_GEN_HDRS ${P4RUNTIME_INFO_PROTO})
 
 set (CONTROLPLANE_SRCS
+  p4RuntimeArchHandler.cpp
+  p4RuntimeArchStandard.cpp
   p4RuntimeSerializer.cpp
   typeSpecConverter.cpp
   )
@@ -79,6 +81,7 @@ set (CONTROLPLANE_SOURCES
   )
 
 set (CONTROLPLANE_HDRS
+  p4RuntimeArchHandler.h
   p4RuntimeSerializer.h
   typeSpecConverter.h
   )
