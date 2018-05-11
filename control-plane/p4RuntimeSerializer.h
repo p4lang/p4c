@@ -18,6 +18,9 @@ limitations under the License.
 #define CONTROL_PLANE_P4RUNTIMESERIALIZER_H_
 
 #include <iosfwd>
+#include <unordered_map>
+
+#include "lib/cstring.h"
 
 namespace p4 {
 namespace config {
@@ -63,28 +66,61 @@ struct P4RuntimeAPI {
     const ::p4::v1::WriteRequest* entries;
 };
 
-/**
- * Generate a P4Runtime control-plane API for the provided program.
- *
- * API generation never fails, but if errors are encountered in the program some
- * constructs may be excluded from the API. In this case, a program error will
- * be reported.
- *
- * @param program  The program to construct the control-plane API from. All
- *                 frontend passes must have already run.
- * @return the generated P4Runtime API.
- */
-P4RuntimeAPI generateP4Runtime(const IR::P4Program* program);
+namespace ControlPlaneAPI {
+struct P4RuntimeArchHandlerBuilderIface;
+}  // namespace ControlPlaneAPI
 
-/**
- * A convenience wrapper for P4::generateP4Runtime() which generates the
- * P4RuntimeAPI structure for the provided program and serializes it according
- * to the provided command-line options.
- *
- * @param program  The program to construct the control-plane API from. All
- *                 frontend passes must have already run.
- * @param options  The command-line options used to invoke the compiler.
- */
+/// Public APIs to generate P4Info message. Uses the singleton pattern.
+class P4RuntimeSerializer {
+ public:
+    static P4RuntimeSerializer* get();
+
+    void registerArch(const cstring archName,
+                      const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* builder);
+
+    /**
+     * Generate a P4Runtime control-plane API for the provided program and
+     * architecture.
+     *
+     * API generation never fails, but if errors are encountered in the program
+     * some constructs may be excluded from the API. In this case, a program
+     * error will be reported.
+     *
+     * @param program  The program to construct the control-plane API from. All
+     *                 frontend passes must have already run.
+     * @return the generated P4Runtime API.
+     */
+    P4RuntimeAPI generateP4Runtime(const IR::P4Program* program, cstring arch);
+
+    /**
+     * A convenience wrapper for P4::generateP4Runtime() which generates the
+     * P4RuntimeAPI structure for the provided program and serializes it
+     * according to the provided command-line options.
+     *
+     * @param program  The program to construct the control-plane API from. All
+     *                 frontend passes must have already run.
+     * @param options  The command-line options used to invoke the compiler.
+     */
+    void serializeP4RuntimeIfRequired(const IR::P4Program* program,
+                                      const CompilerOptions& options);
+
+    /// @return architecture name based on provided command-line @options and
+    /// environment.
+    static cstring resolveArch(const CompilerOptions& options);
+
+ private:
+    P4RuntimeSerializer();
+
+    std::unordered_map<cstring, const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface*>
+    archHandlerBuilders{};
+};
+
+/// Calls @ref P4RuntimeSerializer::generateP4Runtime on the @ref
+/// P4RuntimeSerializer singleton.
+P4RuntimeAPI generateP4Runtime(const IR::P4Program* program, cstring arch = "v1model");
+
+/// Calls @ref P4RuntimeSerializer::serializeP4RuntimeIfRequired on the @ref
+/// P4RuntimeSerializer singleton.
 void serializeP4RuntimeIfRequired(const IR::P4Program* program,
                                   const CompilerOptions& options);
 
