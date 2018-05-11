@@ -71,7 +71,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                            return false;
                        }
                        return true; },
-                    "[Deprecated] Specify language version to compile.",
+                    "[Deprecated; use --std instead] Specify language version to compile.",
                     OptionFlags::Hide);
     registerOption("--std", "{p4-14|p4-16}",
                    [this](const char* arg) {
@@ -96,10 +96,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    "Pretty-print the program in the specified file.");
     registerOption("--toJSON", "file",
                    [this](const char* arg) { dumpJsonFile = arg; return true; },
-                   "Dump IR to JSON in the specified file.");
-    registerOption("--testJson", nullptr,
-                    [this](const char*) { debugJson = true; return true; },
-                    "Dump and undump the IR");
+                   "Dump the compiler IR after the midend as JSON in the specified file.");
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
@@ -160,6 +157,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
         }, "Report an error for a compiler diagnostic, or treat all warnings as "
            "errors if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
+    registerOption("--testJson", nullptr,
+                    [this](const char*) { debugJson = true; return true; },
+                    "[Compiler debugging] Dump and undump the IR");
     registerOption("-T", "loglevel",
                    [](const char* arg) { Log::addDebugSpec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
