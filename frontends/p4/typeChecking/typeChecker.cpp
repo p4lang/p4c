@@ -655,7 +655,11 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
-        }
+        }  else if (dest->is<IR::Type_Struct>()) {
+	    auto t = dest->to<IR::Type_Struct>();
+	    if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(dest)) 
+	        return true;
+	}
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
             auto b = dest->to<IR::Type_Bits>();
@@ -663,6 +667,15 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         }
     } else if (src->is<IR::Type_InfInt>()) {
         return dest->is<IR::Type_Bits>();
+    } else if (src->is<IR::Type_Struct>()) {
+      if (dest->is<IR::Type_Bits>()) {
+	  auto f = dest->to<IR::Type_Bits>();
+	  auto t = src->to<IR::Type_Struct>();
+	  if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(src)) { 
+	      return true;
+	  }
+      }
+      return dest->is<IR::Type_Bits>();
     }
     return false;
 }
@@ -2495,11 +2508,11 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
             auto ftype = typeMap->getType(f);
             if (ftype == nullptr)
                 continue;
-            if (onlyBitsOrBitStructs(ftype))
-                return true;
+            if (!onlyBitsOrBitStructs(ftype))
+                return false;
         }
     }
-    return false;
+    return true;
 }
 
 void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
