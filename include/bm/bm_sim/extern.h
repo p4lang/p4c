@@ -54,6 +54,8 @@ class ExternFactoryMap {
 
 #define _BM_EXTERN_TO_STRING(name) #name
 
+#define BM_EXTERN_ADD_EXTERN_PREFIX(name) __extern_##name
+
 #define BM_REGISTER_EXTERN_W_NAME(extern_name, extern__)                \
   static_assert(std::is_default_constructible<extern__>::value,         \
                 "User-defined extern type " #extern__                   \
@@ -96,6 +98,24 @@ class ExternFactoryMap {
   struct _##extern_name##_##extern_method_name                            \
       : public _##extern_name##_##extern_method_name##_0<__VA_ARGS__> {}; \
   REGISTER_PRIMITIVE(_##extern_name##_##extern_method_name)
+
+#define BM_REGISTER_EXTERN_FUNCTION_W_NAME(extern_function_name,          \
+                                           __extern_func, ...)            \
+  template <typename... Args>                                             \
+  struct __extern_##__extern_func##_0                                     \
+      : public ::bm::ActionPrimitive<Args...> {                           \
+    void operator ()(Args... args) override {                             \
+      __extern_func(args...);                                             \
+    }                                                                     \
+  };                                                                      \
+  struct __extern_##__extern_func                                         \
+      : public __extern_##__extern_func##_0<__VA_ARGS__> {};              \
+  REGISTER_PRIMITIVE_W_NAME(_BM_EXTERN_TO_STRING(extern_function_name),   \
+                            __extern_##__extern_func)
+
+#define BM_REGISTER_EXTERN_FUNCTION(extern_function_name, ...)            \
+  BM_REGISTER_EXTERN_FUNCTION_W_NAME(extern_function_name,                \
+                                     extern_function_name, __VA_ARGS__)
 
 #define BM_EXTERN_ATTRIBUTES void _register_attributes() override
 

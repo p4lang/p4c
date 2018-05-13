@@ -24,6 +24,7 @@
 #include <bm/bm_sim/P4Objects.h>
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <cassert>
 
@@ -168,6 +169,23 @@ BM_REGISTER_EXTERN(ExternExpression);
 BM_REGISTER_EXTERN_METHOD(ExternExpression, set_var2, const Data &);
 BM_REGISTER_EXTERN_METHOD(ExternExpression, execute, Data &);
 
+void set_field1(Field &v) {
+  v.set(1);
+}
+
+void set_field2(Field &v) {
+  v.set(2);
+}
+
+void set_field3(Field &v) {
+  v.set(3);
+}
+
+BM_REGISTER_EXTERN_FUNCTION(set_field1, Field &);
+BM_REGISTER_EXTERN_FUNCTION_W_NAME(set_field2_test, set_field2, Field &);
+BM_REGISTER_EXTERN_FUNCTION_W_NAME(BM_EXTERN_ADD_EXTERN_PREFIX(set_field3),
+                                   set_field3, Field &);
+
 namespace {
 
 // Google Test fixture for extern tests
@@ -207,6 +225,11 @@ class ExternTest : public ::testing::Test {
       const std::string &extern_name, const std::string &method_name) {
     return ActionOpcodesMap::get_instance()->get_primitive(
         "_" + extern_name + "_" + method_name);
+  }
+
+  static std::unique_ptr<ActionPrimitive_> get_extern_primitive(
+      const std::string &extern_name) {
+    return ActionOpcodesMap::get_instance()->get_primitive(extern_name);
   }
 
   virtual void SetUp() {
@@ -353,5 +376,31 @@ TEST_F(ExternTest, ExternCounterRename) {
   check_name("ExternCounter");
   check_name("counter2");
 }
+
+class ExternTestTestRegister : public ExternTest,
+        public ::testing::WithParamInterface<std::pair<const std::string,
+                                                       const int> > { };
+
+TEST_P(ExternTestTestRegister, TestRegister) {
+  auto param = GetParam();
+  auto name = param.first;
+  auto expected = param.second;
+  auto primitive = get_extern_primitive(name);
+
+  ASSERT_NE(nullptr, primitive.get());
+
+  testActionFn.push_back_primitive(primitive.get());
+  testActionFn.parameter_push_back_field(testHeader1, 0);
+  testActionFnEntry(pkt.get());
+
+  const auto &dst = pkt->get_phv()->get_field(testHeader1, 0);
+  ASSERT_EQ(expected, dst.get<int>());
+}
+
+INSTANTIATE_TEST_CASE_P(RegisterExternFunction, ExternTestTestRegister,
+  ::testing::Values(
+    std::make_pair("set_field1", 1),
+    std::make_pair("set_field2_test", 2),
+    std::make_pair("__extern_set_field3", 3)));
 
 }  // namespace
