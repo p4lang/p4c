@@ -656,10 +656,10 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
         }  else if (dest->is<IR::Type_Struct>()) {
-	    auto t = dest->to<IR::Type_Struct>();
-	    if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(dest)) 
-	        return true;
-	}
+            auto t = dest->to<IR::Type_Struct>();
+            if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(dest))
+                return true;
+        }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
             auto b = dest->to<IR::Type_Bits>();
@@ -669,11 +669,11 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         return dest->is<IR::Type_Bits>();
     } else if (src->is<IR::Type_Struct>()) {
       if (dest->is<IR::Type_Bits>()) {
-	  auto f = dest->to<IR::Type_Bits>();
-	  auto t = src->to<IR::Type_Struct>();
-	  if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(src)) { 
-	      return true;
-	  }
+          auto f = dest->to<IR::Type_Bits>();
+          auto t = src->to<IR::Type_Struct>();
+          if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(src)) {
+              return true;
+          }
       }
       return dest->is<IR::Type_Bits>();
     }
