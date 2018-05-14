@@ -127,6 +127,14 @@ std::istream& operator>>(std::istream &in, JsonData*& json) {
         case '"': {
             std::string s;
             getline(in, s, '"');
+            while (!s.empty() && s.back() == '\\') {
+                int bscount = 0;  // odd number of '\' chars mean the quote is escaped
+                for (auto t = s.rbegin(); t != s.rend() && *t == '\\'; ++t) bscount++;
+                if ((bscount & 1) == 0) break;
+                s += '"';
+                std::string more;
+                getline(in, more, '"');
+                s += more; }
             json = new JsonString(s);
             return in;
         }
