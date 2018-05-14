@@ -25,11 +25,15 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "midend/convertEnums.h"
 #include "helpers.h"
 #include "backend.h"
 #include "psaExpression.h"
 #include "JsonObjects.h"
+#include "sharedActionSelectorCheck.h"
+#include "metermap.h"
 
 
 namespace P4 {
@@ -53,15 +57,21 @@ class PsaProgramStructure {
     BMV2::PsaExpressionConverter* conv;
 
 
+
  public:
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
     std::vector<const IR::StructField*> scalars;
+    using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
     unsigned                            bool_width = 1;
+    Util::JsonArray*    counters;
+    BMV2::ProgramParts    structure;
+    DirectCounterMap    directCounterMap;
+    BMV2::DirectMeterMap  meterMap;
 
     // architecture related information
     ordered_map<const IR::Node*, std::pair<gress_t, block_t>> block_type;
@@ -88,6 +98,8 @@ class PsaProgramStructure {
     // ordered_map<cstring, ??? > learn_lists;  // P4-16 has no field list;
     ordered_map<cstring, const IR::Declaration_Instance*> extern_instances;
     ordered_map<cstring, cstring> field_aliases;
+    std::map<const IR::Node*, const IR::CompileTimeValue*>  resourceMap;
+    std::set<cstring>   match_kinds;
 
 public:
     PsaProgramStructure(ReferenceMap* refMap, TypeMap* typeMap)
@@ -111,6 +123,10 @@ public:
     void createControls();
     void createDeparsers();
     BMV2::JsonObjects* getJson() { return json; }
+    P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
+    DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
+    BMV2::DirectMeterMap &      getMeterMap()  { return meterMap; }
+    BMV2::ProgramParts &        getStructure() { return structure; }
 
     bool hasVisited(const IR::Type_StructLike* st) {
         if (auto h = st->to<IR::Type_Header>())
@@ -129,11 +145,22 @@ public:
     Util::IJson* stateName(IR::ID state);
     Util::IJson* toJson(const IR::P4Parser* cont);
     Util::IJson* toJson(const IR::ParserState* state);
-
+    Util::IJson* convertDeparser(const cstring& name, const IR::P4Control* ctrl);
+    void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
     Util::IJson* convertSelectKey(const IR::SelectExpression* expr);
     Util::IJson* convertPathExpression(const IR::PathExpression* expr);
     Util::IJson* createDefaultTransition();
     std::vector<Util::IJson*> convertSelectExpression(const IR::SelectExpression* expr);
+    Util::IJson* convertTable(const BMV2::CFG::TableNode* node,
+                              Util::JsonArray* action_profiles,
+                              BMV2::SharedActionSelectorCheck& selector_check);
+    void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
+    cstring getKeyMatchType(const IR::KeyElement *ke);
+    /// Return 'true' if the table is 'simple'
+    bool handleTableImplementation(const IR::Property* implementation, const IR::Key* key,
+                                   Util::JsonObject* table, Util::JsonArray* action_profiles,
+                                   BMV2::SharedActionSelectorCheck& selector_check);
+    Util::IJson* convertIf(const BMV2::CFG::IfNode* node, cstring prefix);
 };
 
 class ParsePsaArchitecture : public Inspector {
@@ -171,6 +198,7 @@ class InspectPsaProgram : public Inspector {
 
     // control
     bool preorder(const IR::P4Control *control) override;
+    bool preorder(const IR::Declaration_MatchKind* kind) override;
 
     // parser
     bool preorder(const IR::P4Parser *p) override;

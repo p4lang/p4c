@@ -355,6 +355,692 @@ PsaProgramStructure::createDefaultTransition() {
     return trans;
 }
 
+void PsaProgramStructure::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
+                                          Util::JsonArray* result) {
+    conv->simpleExpressionsOnly = true;
+    for (auto s : *body) {
+        if (auto block = s->to<IR::BlockStatement>()) {
+            convertDeparserBody(&block->components, result);
+            continue;
+        } else if (s->is<IR::ReturnStatement>() || s->is<IR::ExitStatement>()) {
+            break;
+        } else if (s->is<IR::EmptyStatement>()) {
+            continue;
+        } else if (s->is<IR::MethodCallStatement>()) {
+            auto mc = s->to<IR::MethodCallStatement>()->methodCall;
+            auto mi = P4::MethodInstance::resolve(mc,
+                    refMap, typeMap);
+            if (mi->is<P4::ExternMethod>()) {
+                auto em = mi->to<P4::ExternMethod>();
+                if (em->originalExternType->name.name == getCoreLibrary().packetOut.name) {
+                    if (em->method->name.name == getCoreLibrary().packetOut.emit.name) {
+                        BUG_CHECK(mc->arguments->size() == 1,
+                                  "Expected exactly 1 argument for %1%", mc);
+                        auto arg = mc->arguments->at(0);
+                        auto type = typeMap->getType(arg, true);
+                        if (type->is<IR::Type_Stack>()) {
+                            // This branch is in fact never taken, because
+                            // arrays are expanded into elements.
+                            int size = type->to<IR::Type_Stack>()->getSize();
+                            for (int i=0; i < size; i++) {
+                                auto j = conv->convert(arg->expression);
+                                auto e = j->to<Util::JsonObject>()->get("value");
+                                BUG_CHECK(e->is<Util::JsonValue>(),
+                                          "%1%: Expected a Json value", e->toString());
+                                cstring ref = e->to<Util::JsonValue>()->getString();
+                                ref += "[" + Util::toString(i) + "]";
+                                result->append(ref);
+                            }
+                        } else if (type->is<IR::Type_Header>()) {
+                            auto j = conv->convert(arg->expression);
+                            auto val = j->to<Util::JsonObject>()->get("value");
+                            result->append(val);
+                        } else {
+                            ::error("%1%: emit only supports header and stack arguments, not %2%",
+                                    arg, type);
+                        }
+                    }
+                    continue;
+                }
+            }
+        }
+        ::error("%1%: not supported with a deparser on this target", s);
+    }
+    conv->simpleExpressionsOnly = false;
+}
+
+Util::IJson* PsaProgramStructure::convertDeparser(const cstring& name, const IR::P4Control* ctrl) {
+    auto result = new Util::JsonObject();
+    result->emplace("name", name);
+    result->emplace("id", BMV2::nextId("deparser"));
+    result->emplace_non_null("source_info", ctrl->sourceInfoJsonObj());
+    auto order = BMV2::mkArrayField(result, "order");
+    convertDeparserBody(&ctrl->body->components, order);
+    return result;
+}
+
+void PsaProgramStructure::convertTableEntries(const IR::P4Table *table,
+                                           Util::JsonObject *jsonTable) {
+    auto entriesList = table->getEntries();
+    if (entriesList == nullptr) return;
+
+    auto entries = BMV2::mkArrayField(jsonTable, "entries");
+    int entryPriority = 1;  // default priority is defined by index position
+    for (auto e : entriesList->entries) {
+        // TODO(jafingerhut) - add line/col here?
+        auto entry = new Util::JsonObject();
+
+        auto keyset = e->getKeys();
+        auto matchKeys = BMV2::mkArrayField(entry, "match_key");
+        int keyIndex = 0;
+        for (auto k : keyset->components) {
+            auto key = new Util::JsonObject();
+            auto tableKey = table->getKey()->keyElements.at(keyIndex);
+            auto keyWidth = tableKey->expression->type->width_bits();
+            auto k8 = ROUNDUP(keyWidth, 8);
+            auto matchType = getKeyMatchType(tableKey);
+            key->emplace("match_type", matchType);
+            if (matchType == getCoreLibrary().exactMatch.name) {
+                if (k->is<IR::Constant>())
+                    key->emplace("key", BMV2::stringRepr(k->to<IR::Constant>()->value, k8));
+                else if (k->is<IR::BoolLiteral>())
+                    // booleans are converted to ints
+                    key->emplace("key", BMV2::stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
+                else
+                    ::error("%1% unsupported exact key expression", k);
+            } else if (matchType == getCoreLibrary().ternaryMatch.name) {
+                if (k->is<IR::Mask>()) {
+                    auto km = k->to<IR::Mask>();
+                    key->emplace("key", BMV2::stringRepr(km->left->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", BMV2::stringRepr(km->right->to<IR::Constant>()->value, k8));
+                } else if (k->is<IR::Constant>()) {
+                    key->emplace("key", BMV2::stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", BMV2::stringRepr(Util::mask(keyWidth), k8));
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("key", BMV2::stringRepr(0, k8));
+                    key->emplace("mask", BMV2::stringRepr(0, k8));
+                } else {
+                    ::error("%1% unsupported ternary key expression", k);
+                }
+            } else if (matchType == getCoreLibrary().lpmMatch.name) {
+                if (k->is<IR::Mask>()) {
+                    auto km = k->to<IR::Mask>();
+                    key->emplace("key", BMV2::stringRepr(km->left->to<IR::Constant>()->value, k8));
+                    auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
+                    auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
+                    unsigned long mask = km->right->to<IR::Constant>()->value.get_ui();
+                    auto len = trailing_zeros(mask);
+                    if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
+                        ::error("%1% invalid mask for LPM key", k);
+                    else
+                        key->emplace("prefix_length", keyWidth - len);
+                } else if (k->is<IR::Constant>()) {
+                    key->emplace("key", BMV2::stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("prefix_length", keyWidth);
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("key", BMV2::stringRepr(0, k8));
+                    key->emplace("prefix_length", 0);
+                } else {
+                    ::error("%1% unsupported LPM key expression", k);
+                }
+            } else if (matchType == "range") {
+                if (k->is<IR::Range>()) {
+                    auto kr = k->to<IR::Range>();
+                    key->emplace("start", BMV2::stringRepr(kr->left->to<IR::Constant>()->value, k8));
+                    key->emplace("end", BMV2::stringRepr(kr->right->to<IR::Constant>()->value, k8));
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("start", BMV2::stringRepr(0, k8));
+                    key->emplace("end", BMV2::stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
+                } else {
+                    ::error("%1% invalid range key expression", k);
+                }
+            } else {
+                ::error("unkown key match type '%1%' for key %2%", matchType, k);
+            }
+            matchKeys->append(key);
+            keyIndex++;
+        }
+
+        auto action = new Util::JsonObject();
+        auto actionRef = e->getAction();
+        if (!actionRef->is<IR::MethodCallExpression>())
+            ::error("%1%: invalid action in entries list", actionRef);
+        auto actionCall = actionRef->to<IR::MethodCallExpression>();
+        auto method = actionCall->method->to<IR::PathExpression>()->path;
+        auto decl = refMap->getDeclaration(method, true);
+        auto actionDecl = decl->to<IR::P4Action>();
+        unsigned id = get(getStructure().ids, actionDecl);
+        action->emplace("action_id", id);
+        auto actionData = BMV2::mkArrayField(action, "action_data");
+        for (auto arg : *actionCall->arguments) {
+            actionData->append(BMV2::stringRepr(arg->expression->to<IR::Constant>()->value, 0));
+        }
+        entry->emplace("action_entry", action);
+
+        auto priorityAnnotation = e->getAnnotation("priority");
+        if (priorityAnnotation != nullptr) {
+            if (priorityAnnotation->expr.size() > 1)
+                ::error("invalid priority value %1%", priorityAnnotation->expr);
+            auto priValue = priorityAnnotation->expr.front();
+            if (!priValue->is<IR::Constant>())
+                ::error("invalid priority value %1%. must be constant", priorityAnnotation->expr);
+            entry->emplace("priority", priValue->to<IR::Constant>()->value);
+        } else {
+            entry->emplace("priority", entryPriority);
+        }
+        entryPriority += 1;
+
+        entries->append(entry);
+    }
+}
+
+cstring PsaProgramStructure::getKeyMatchType(const IR::KeyElement *ke) {
+    auto path = ke->matchType->path;
+    auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
+    BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+
+    if (mt->name.name == getCoreLibrary().exactMatch.name ||
+        mt->name.name == getCoreLibrary().ternaryMatch.name ||
+        mt->name.name == getCoreLibrary().lpmMatch.name ||
+        match_kinds.count(mt->name.name)) {
+        return mt->name.name;
+    }
+
+    ::error("%1%: match type not supported on this target", mt);
+    return "invalid";
+}
+
+bool
+PsaProgramStructure::handleTableImplementation(const IR::Property* implementation,
+                                            const IR::Key* key,
+                                            Util::JsonObject* table,
+                                            Util::JsonArray* action_profiles,
+                                            BMV2::SharedActionSelectorCheck& selector_check) {
+    if (implementation == nullptr) {
+        table->emplace("type", "simple");
+        return true;
+    }
+
+    if (!implementation->value->is<IR::ExpressionValue>()) {
+        ::error("%1%: expected expression for property", implementation);
+        return false;
+    }
+    auto propv = implementation->value->to<IR::ExpressionValue>();
+
+    bool isSimpleTable = true;
+    Util::JsonObject* action_profile;
+    cstring apname;
+
+    if (propv->expression->is<IR::ConstructorCallExpression>()) {
+        auto cc = P4::ConstructorCall::resolve(
+            propv->expression->to<IR::ConstructorCallExpression>(),
+            refMap, typeMap);
+        if (!cc->is<P4::ExternConstructorCall>()) {
+            ::error("%1%: expected extern object for property", implementation);
+            return false;
+        }
+        auto ecc = cc->to<P4::ExternConstructorCall>();
+        auto implementationType = ecc->type;
+        auto arguments = ecc->cce->arguments;
+        apname = implementation->controlPlaneName(refMap->newName("action_profile"));
+        action_profile = new Util::JsonObject();
+        action_profiles->append(action_profile);
+        action_profile->emplace("name", apname);
+        action_profile->emplace("id", BMV2::nextId("action_profiles"));
+        // TODO(jafingerhut) - add line/col here?
+        // TBD what about the else if cases below?
+
+        auto add_size = [&action_profile, &arguments](size_t arg_index) {
+            auto size_expr = arguments->at(arg_index)->expression;
+            int size;
+            if (!size_expr->is<IR::Constant>()) {
+                ::error("%1% must be a constant", size_expr);
+                size = 0;
+            } else {
+                size = size_expr->to<IR::Constant>()->asInt();
+            }
+            action_profile->emplace("max_size", size);
+        };
+        if (implementationType->name == BMV2::TableImplementation::actionSelectorName) {
+            BUG_CHECK(arguments->size() == 3, "%1%: expected 3 arguments", arguments);
+            isSimpleTable = false;
+            auto selector = new Util::JsonObject();
+            table->emplace("type", "indirect_ws");
+            action_profile->emplace("selector", selector);
+            add_size(1);
+            auto hash = arguments->at(0)->expression;
+            auto ei = P4::EnumInstance::resolve(hash, typeMap);
+            if (ei == nullptr) {
+                ::error("%1%: must be a constant on this target", hash);
+            } else {
+                cstring algo = ei->name;
+                selector->emplace("algo", algo);
+            }
+            auto input = BMV2::mkArrayField(selector, "input");
+            for (auto ke : key->keyElements) {
+                auto mt = refMap->getDeclaration(ke->matchType->path, true)
+                        ->to<IR::Declaration_ID>();
+                BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+                if (mt->name.name != BMV2::MatchImplementation::selectorMatchTypeName)
+                    continue;
+
+                auto expr = ke->expression;
+                auto jk = conv->convert(expr);
+                input->append(jk);
+            }
+        } else if (implementationType->name == BMV2::TableImplementation::actionProfileName) {
+            isSimpleTable = false;
+            table->emplace("type", "indirect");
+            add_size(0);
+        } else {
+            ::error("%1%: unexpected value for property", propv);
+        }
+    } else if (propv->expression->is<IR::PathExpression>()) {
+        auto pathe = propv->expression->to<IR::PathExpression>();
+        auto decl = refMap->getDeclaration(pathe->path, true);
+        if (!decl->is<IR::Declaration_Instance>()) {
+            ::error("%1%: expected a reference to an instance", pathe);
+            return false;
+        }
+        apname = decl->controlPlaneName();
+        auto dcltype = typeMap->getType(pathe, true);
+        if (!dcltype->is<IR::Type_Extern>()) {
+            ::error("%1%: unexpected type for implementation", dcltype);
+            return false;
+        }
+        auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
+        if (type_extern_name == BMV2::TableImplementation::actionProfileName) {
+            table->emplace("type", "indirect");
+        } else if (type_extern_name == BMV2::TableImplementation::actionSelectorName) {
+            table->emplace("type", "indirect_ws");
+        } else {
+            ::error("%1%: unexpected type for implementation", dcltype);
+            return false;
+        }
+        isSimpleTable = false;
+    } else {
+        ::error("%1%: unexpected value for property", propv);
+        return false;
+    }
+    table->emplace("action_profile", apname);
+    return isSimpleTable;
+}
+
+Util::IJson*
+PsaProgramStructure::convertTable(const BMV2::CFG::TableNode* node,
+                               Util::JsonArray* action_profiles,
+                               BMV2::SharedActionSelectorCheck& selector_check) {
+    auto table = node->table;
+    LOG3("Processing " << dbp(table));
+    auto result = new Util::JsonObject();
+    cstring name = table->controlPlaneName();
+    result->emplace("name", name);
+    result->emplace("id", BMV2::nextId("tables"));
+    result->emplace_non_null("source_info", table->sourceInfoJsonObj());
+    cstring table_match_type = getCoreLibrary().exactMatch.name;
+    auto key = table->getKey();
+    auto tkey = BMV2::mkArrayField(result, "key");
+    conv->simpleExpressionsOnly = true;
+
+    if (key != nullptr) {
+        for (auto ke : key->keyElements) {
+            auto expr = ke->expression;
+            auto ket = typeMap->getType(expr, true);
+            if (!ket->is<IR::Type_Bits>() && !ket->is<IR::Type_Boolean>())
+                ::error("%1%: Unsupported key type %2%", expr, ket);
+
+            auto match_type = getKeyMatchType(ke);
+            if (match_type == BMV2::MatchImplementation::selectorMatchTypeName)
+                continue;
+            // Decreasing order of precedence (bmv2 specification):
+            // 0) more than one LPM field is an error
+            // 1) if there is at least one RANGE field, then the table is RANGE
+            // 2) if there is at least one TERNARY field, then the table is TERNARY
+            // 3) if there is a LPM field, then the table is LPM
+            // 4) otherwise the table is EXACT
+            if (match_type != table_match_type) {
+                if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
+                    table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
+                if (match_type == getCoreLibrary().ternaryMatch.name &&
+                    table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
+                    table_match_type = getCoreLibrary().ternaryMatch.name;
+                if (match_type == getCoreLibrary().lpmMatch.name &&
+                    table_match_type == getCoreLibrary().exactMatch.name)
+                    table_match_type = getCoreLibrary().lpmMatch.name;
+            } else if (match_type == getCoreLibrary().lpmMatch.name) {
+                ::error("%1%, Multiple LPM keys in table", table);
+            }
+
+            mpz_class mask;
+            if (auto mexp = expr->to<IR::BAnd>()) {
+                if (mexp->right->is<IR::Constant>()) {
+                    mask = mexp->right->to<IR::Constant>()->value;
+                    expr = mexp->left;
+                } else if (mexp->left->is<IR::Constant>()) {
+                    mask = mexp->left->to<IR::Constant>()->value;
+                    expr = mexp->right;
+                } else {
+                    ::error("%1%: key mask must be a constant", expr); }
+            } else if (auto slice = expr->to<IR::Slice>()) {
+                expr = slice->e0;
+                int h = slice->getH();
+                int l = slice->getL();
+                mask = Util::maskFromSlice(h, l);
+            }
+
+            auto keyelement = new Util::JsonObject();
+            keyelement->emplace("match_type", match_type);
+            if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
+                BUG_CHECK(na->expr.size() == 1, "%1%: expected 1 name", na);
+                auto name = na->expr[0]->to<IR::StringLiteral>();
+                BUG_CHECK(name != nullptr, "%1%: expected a string", na);
+                // This is a BMv2 JSON extension: specify a
+                // control-plane name for this key
+                keyelement->emplace("name", name->value);
+            }
+
+            auto jk = conv->convert(expr);
+            keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
+            if (mask != 0)
+                keyelement->emplace("mask", BMV2::stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
+            else
+                keyelement->emplace("mask", Util::JsonValue::null);
+            tkey->append(keyelement);
+        }
+    }
+    result->emplace("match_type", table_match_type);
+    conv->simpleExpressionsOnly = false;
+
+    auto impl = table->properties->getProperty(BMV2::TableAttributes::implementationName);
+    bool simple = handleTableImplementation(impl, key, result, action_profiles, selector_check);
+
+    unsigned size = 0;
+    auto sz = table->properties->getProperty(BMV2::TableAttributes::sizeName);
+    if (sz != nullptr) {
+        if (sz->value->is<IR::ExpressionValue>()) {
+            auto expr = sz->value->to<IR::ExpressionValue>()->expression;
+            if (!expr->is<IR::Constant>()) {
+                ::error("%1% must be a constant", sz);
+                size = 0;
+            } else {
+                size = expr->to<IR::Constant>()->asInt();
+            }
+        } else {
+            ::error("%1%: expected a number", sz);
+        }
+    }
+    if (size == 0)
+        size = BMV2::TableAttributes::defaultTableSize;
+
+    result->emplace("max_size", size);
+    auto ctrs = table->properties->getProperty(BMV2::TableAttributes::countersName);
+    if (ctrs != nullptr) {
+        // The counters attribute should list the counters of the table, accessed in
+        // actions of the table.  We should be checking that this attribute and the
+        // actions are consistent?
+        if (ctrs->value->is<IR::ExpressionValue>()) {
+            auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
+            if (expr->is<IR::ConstructorCallExpression>()) {
+                auto type = typeMap->getType(expr, true);
+                if (type == nullptr)
+                    return result;
+                if (!type->is<IR::Type_Extern>()) {
+                    ::error("%1%: Unexpected type %2% for property", ctrs, type);
+                    return result;
+                }
+                auto te = type->to<IR::Type_Extern>();
+                if (te->name != BMV2::TableImplementation::directCounterName &&
+                    te->name != BMV2::TableImplementation::counterName) {
+                    ::error("%1%: Unexpected type %2% for property", ctrs, type);
+                    return result;
+                }
+                auto jctr = new Util::JsonObject();
+                cstring ctrname = ctrs->controlPlaneName("counter");
+                jctr->emplace("name", ctrname);
+                jctr->emplace("id", BMV2::nextId("counter_arrays"));
+                // TODO(jafingerhut) - what kind of P4_16 code causes this
+                // code to run, if any?
+                // TODO(jafingerhut):
+                // jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
+                bool direct = te->name == BMV2::TableImplementation::directCounterName;
+                jctr->emplace("is_direct", direct);
+                jctr->emplace("binding", table->controlPlaneName());
+                counters->append(jctr);
+            } else if (expr->is<IR::PathExpression>()) {
+                auto pe = expr->to<IR::PathExpression>();
+                auto decl = refMap->getDeclaration(pe->path, true);
+                if (!decl->is<IR::Declaration_Instance>()) {
+                    ::error("%1%: expected an instance", decl->getNode());
+                    return result;
+                }
+                cstring ctrname = decl->controlPlaneName();
+                auto it = getDirectCounterMap().find(ctrname);
+                LOG3("Looking up " << ctrname);
+                if (it != getDirectCounterMap().end()) {
+                   ::error("%1%: Direct counters cannot be attached to multiple tables %2% and %3%",
+                           decl, it->second, table);
+                   return result;
+                }
+                getDirectCounterMap().emplace(ctrname, table);
+            } else {
+                ::error("%1%: expected a counter", ctrs);
+            }
+        }
+        result->emplace("with_counters", true);
+    } else {
+        result->emplace("with_counters", false);
+    }
+
+    bool sup_to = false;
+    auto timeout = table->properties->getProperty(BMV2::TableAttributes::supportTimeoutName);
+    if (timeout != nullptr) {
+        if (timeout->value->is<IR::ExpressionValue>()) {
+            auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
+            if (!expr->is<IR::BoolLiteral>()) {
+                ::error("%1% must be true/false", timeout);
+            } else {
+                sup_to = expr->to<IR::BoolLiteral>()->value;
+            }
+        } else {
+            ::error("%1%: expected a Boolean", timeout);
+        }
+    }
+    result->emplace("support_timeout", sup_to);
+
+    auto dm = table->properties->getProperty(BMV2::TableAttributes::metersName);
+    if (dm != nullptr) {
+        if (dm->value->is<IR::ExpressionValue>()) {
+            auto expr = dm->value->to<IR::ExpressionValue>()->expression;
+            if (!expr->is<IR::PathExpression>()) {
+                ::error("%1%: expected a reference to a meter declaration", expr);
+            } else {
+                auto pe = expr->to<IR::PathExpression>();
+                auto decl = refMap->getDeclaration(pe->path, true);
+                auto type = typeMap->getType(expr, true);
+                if (type == nullptr)
+                    return result;
+                if (type->is<IR::Type_SpecializedCanonical>())
+                    type = type->to<IR::Type_SpecializedCanonical>()->baseType;
+                if (!type->is<IR::Type_Extern>()) {
+                    ::error("%1%: Unexpected type %2% for property", dm, type);
+                    return result;
+                }
+                auto te = type->to<IR::Type_Extern>();
+                if (te->name != BMV2::TableImplementation::directMeterName) {
+                    ::error("%1%: Unexpected type %2% for property", dm, type);
+                    return result;
+                }
+                if (!decl->is<IR::Declaration_Instance>()) {
+                    ::error("%1%: expected an instance", decl->getNode());
+                    return result;
+                }
+                getMeterMap().setTable(decl, table);
+                getMeterMap().setSize(decl, size);
+                BUG_CHECK(decl->is<IR::Declaration_Instance>(),
+                          "%1%: expected an instance", decl->getNode());
+                cstring name = decl->controlPlaneName();
+                result->emplace("direct_meters", name);
+            }
+        } else {
+            ::error("%1%: expected a meter", dm);
+        }
+    } else {
+        result->emplace("direct_meters", Util::JsonValue::null);
+    }
+
+    auto action_ids = BMV2::mkArrayField(result, "action_ids");
+    auto actions = BMV2::mkArrayField(result, "actions");
+    auto al = table->getActionList();
+
+    std::map<cstring, cstring> useActionName;
+    for (auto a : al->actionList) {
+        if (a->expression->is<IR::MethodCallExpression>()) {
+            auto mce = a->expression->to<IR::MethodCallExpression>();
+            if (mce->arguments->size() > 0)
+                ::error("%1%: Actions in action list with arguments not supported", a);
+        }
+        auto decl = refMap->getDeclaration(a->getPath(), true);
+        BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
+        auto action = decl->to<IR::P4Action>();
+        unsigned id = get(getStructure().ids, action);
+        LOG3("look up id " << action << " " << id);
+        action_ids->append(id);
+        auto name = action->controlPlaneName();
+        actions->append(name);
+        useActionName.emplace(action->name, name);
+    }
+
+    auto next_tables = new Util::JsonObject();
+
+    BMV2::CFG::Node* nextDestination = nullptr;  // if no action is executed
+    BMV2::CFG::Node* defaultLabelDestination = nullptr;  // if the "default" label is executed
+    // Note: the "default" label is not the default_action.
+    bool hitMiss = false;
+    for (auto s : node->successors.edges) {
+        if (s->isUnconditional())
+            nextDestination = s->endpoint;
+        else if (s->isBool())
+            hitMiss = true;
+        else if (s->label == "default")
+            defaultLabelDestination = s->endpoint;
+    }
+
+    Util::IJson* nextLabel = nullptr;
+    if (!hitMiss) {
+        BUG_CHECK(nextDestination, "Could not find default destination for %1%", node->invocation);
+        nextLabel = nodeName(nextDestination);
+        result->emplace("base_default_next", nextLabel);
+        // So if a "default:" switch case exists we set the nextLabel
+        // to be the destination of the default: label.
+        if (defaultLabelDestination != nullptr)
+            nextLabel = nodeName(defaultLabelDestination);
+    } else {
+        result->emplace("base_default_next", Util::JsonValue::null);
+    }
+
+    std::set<cstring> labelsDone;
+    for (auto s : node->successors.edges) {
+        cstring label;
+        if (s->isBool()) {
+            label = s->getBool() ? "__HIT__" : "__MISS__";
+        } else if (s->isUnconditional()) {
+            continue;
+        } else {
+            label = s->label;
+            if (label == "default")
+                continue;
+            label = ::get(useActionName, label);
+        }
+        next_tables->emplace(label, nodeName(s->endpoint));
+        labelsDone.emplace(label);
+    }
+
+    // Generate labels which don't show up and send them to
+    // the nextLabel.
+    if (!hitMiss) {
+        for (auto a : al->actionList) {
+            cstring name = a->getName().name;
+            cstring label = ::get(useActionName, name);
+            if (labelsDone.find(label) == labelsDone.end())
+                next_tables->emplace(label, nextLabel);
+        }
+    }
+
+    result->emplace("next_tables", next_tables);
+    auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+    if (defact != nullptr) {
+        if (!simple) {
+            ::warning("Target does not support default_action for %1% (due to action profiles)",
+                      table);
+            return result;
+        }
+
+        if (!defact->value->is<IR::ExpressionValue>()) {
+            ::error("%1%: expected an action", defact);
+            return result;
+        }
+        auto expr = defact->value->to<IR::ExpressionValue>()->expression;
+        const IR::P4Action* action = nullptr;
+        const IR::Vector<IR::Argument>* args = nullptr;
+
+        if (expr->is<IR::PathExpression>()) {
+            auto path = expr->to<IR::PathExpression>()->path;
+            auto decl = refMap->getDeclaration(path, true);
+            BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
+            action = decl->to<IR::P4Action>();
+        } else if (expr->is<IR::MethodCallExpression>()) {
+            auto mce = expr->to<IR::MethodCallExpression>();
+            auto mi = P4::MethodInstance::resolve(mce,
+                    refMap, typeMap);
+            BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
+            action = mi->to<P4::ActionCall>()->action;
+            args = mce->arguments;
+        } else {
+            BUG("%1%: unexpected expression", expr);
+        }
+
+        unsigned actionid = get(getStructure().ids, action);
+        auto entry = new Util::JsonObject();
+        entry->emplace("action_id", actionid);
+        entry->emplace("action_const", defact->isConstant);
+        auto fields = BMV2::mkArrayField(entry, "action_data");
+        if (args != nullptr) {
+            // TODO: use argument names
+            for (auto a : *args) {
+                if (a->expression->is<IR::Constant>()) {
+                    cstring repr = BMV2::stringRepr(a->expression->to<IR::Constant>()->value);
+                    fields->append(repr);
+                } else {
+                    ::error("%1%: argument must evaluate to a constant integer", a);
+                    return result;
+                }
+            }
+        }
+        entry->emplace("action_entry_const", defact->isConstant);
+        result->emplace("default_entry", entry);
+    }
+    convertTableEntries(table, result);
+    return result;
+}
+
+Util::IJson* PsaProgramStructure::convertIf(const BMV2::CFG::IfNode* node, cstring prefix) {
+    (void) prefix;
+    auto result = new Util::JsonObject();
+    result->emplace("name", node->name);
+    result->emplace("id", BMV2::nextId("conditionals"));
+    result->emplace_non_null("source_info", node->statement->condition->sourceInfoJsonObj());
+    auto j = conv->convert(node->statement->condition, true, false);
+    CHECK_NULL(j);
+    result->emplace("expression", j);
+    for (auto e : node->successors.edges) {
+        Util::IJson* dest = nodeName(e->endpoint);
+        cstring label = Util::toString(e->getBool());
+        label += "_next";
+        result->emplace(label, dest);
+    }
+    return result;
+}
+
 void PsaProgramStructure::createStructLike(const IR::Type_StructLike* st) {
     CHECK_NULL(st);
     cstring name = st->controlPlaneName();
@@ -536,14 +1222,76 @@ void PsaProgramStructure::createActions() {
     // add actions to json
 }
 
+
+
 void PsaProgramStructure::createControls() {
     // add pipelines to json
-}
 
+    for (auto kv : pipelines) {
+        LOG1("pipelines" << kv.first << kv.second);
+        auto result = new Util::JsonObject();
+        result->emplace("name", kv.first);
+        result->emplace("id", BMV2::nextId("control"));
+        result->emplace_non_null("source_info", kv.second->sourceInfoJsonObj());
+
+        auto cfg = new BMV2::CFG();
+        cfg->build(kv.second, refMap, typeMap);
+        if (cfg->entryPoint->successors.size() == 0) {
+            result->emplace("init_table", Util::JsonValue::null);
+        }
+        else {
+            BUG_CHECK(cfg->entryPoint->successors.size() == 1, "Expected 1 start node for %1%", kv.second);
+            auto start = (*(cfg->entryPoint->successors.edges.begin()))->endpoint;
+            result->emplace("init_table", nodeName(start));
+        }
+
+        auto tables = BMV2::mkArrayField(result, "tables");
+        auto action_profiles = BMV2::mkArrayField(result, "action_profiles");
+        auto conditionals = BMV2::mkArrayField(result, "conditionals");
+
+        BMV2::SharedActionSelectorCheck selector_check(refMap, typeMap);
+        kv.second->apply(selector_check);
+
+        std::set<const IR::P4Table*> done;
+
+    // Tables are created prior to the other local declarations
+
+        for (auto node : cfg->allNodes) {
+            auto tn = node->to<BMV2::CFG::TableNode>();
+            if (tn != nullptr) {
+                if (done.find(tn->table) != done.end())
+                // The same table may appear in multiple nodes in the CFG.
+                // We emit it only once.  Other checks should ensure that
+                // the CFG is implementable.
+                    continue;
+                done.emplace(tn->table);
+                auto j = convertTable(tn, action_profiles, selector_check);
+                if (::errorCount() > 0)
+                    return;
+                tables->append(j);
+            } else if (node->is<BMV2::CFG::IfNode>()) {
+                auto j = convertIf(node->to<BMV2::CFG::IfNode>(), kv.first);
+                if (::errorCount() > 0)
+                    return;
+                conditionals->append(j);
+            }
+        }
+
+        json->pipelines->append(result);
+
+    }
+
+}
 void PsaProgramStructure::createDeparsers() {
     // add deparsers to json
+
+    for (auto kv : deparsers) {
+        LOG1("deparser" << kv.first << kv.second);
+        auto deparserJson = convertDeparser(kv.first, kv.second);
+        json->deparsers->append(deparserJson);
 }
 
+}
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
     return false;
 }
@@ -583,6 +1331,9 @@ void InspectPsaProgram::postorder(const IR::P4Parser* p) {
 }
 
 void InspectPsaProgram::postorder(const IR::P4Control* c) {
+
+
+
 
 }
 
@@ -769,6 +1520,13 @@ bool InspectPsaProgram::preorder(const IR::P4Control *c) {
             pinfo->deparsers.emplace("ingress", c);
         else if (info.first == EGRESS && info.second == DEPARSER)
             pinfo->deparsers.emplace("egress", c);
+    }
+    return false;
+}
+
+bool InspectPsaProgram::preorder(const IR::Declaration_MatchKind* kind) {
+    for (auto member : kind->members) {
+        pinfo->match_kinds.insert(member->name);
     }
     return false;
 }
