@@ -37,6 +37,7 @@ class P4TestOptions : public CompilerOptions {
  public:
     bool parseOnly = false;
     bool validateOnly = false;
+    bool fromJSON = false;
     P4TestOptions() {
         registerOption("--parse-only", nullptr,
                        [this](const char*) {
@@ -49,6 +50,12 @@ class P4TestOptions : public CompilerOptions {
                            return true;
                        },
                        "Validate the P4 input, running just the front-end");
+        registerOption("--fromJSON", nullptr,
+                       [this](const char*) {
+                           fromJSON = true;
+                           return true;
+                       },
+                       "read previously dumped json instead of P4 source code");
      }
 };
 
@@ -79,8 +86,20 @@ int main(int argc, char *const argv[]) {
         options.setInputFile();
     if (::errorCount() > 0)
         return 1;
-
-    auto program = P4::parseP4File(options);
+    const IR::P4Program *program;
+    if (options.fromJSON) {
+        std::ifstream json(options.file);
+        if (json) {
+            JSONLoader loader(json);
+            const IR::Node* node = nullptr;
+            loader >> node;
+            if (!(program = node->to<IR::P4Program>()))
+                error("%s is not a P4Program in json format", options.file);
+        } else {
+            error("Can't open %s", options.file); }
+    } else {
+        program = P4::parseP4File(options);
+    }
     auto hook = options.getDebugHook();
 
     if (program != nullptr && ::errorCount() == 0) {
