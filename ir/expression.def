@@ -12,6 +12,7 @@ abstract Operation_Unary : Operation {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
+    toString { return getStringOp() + expr->toString(); }
 }
 
 class Neg : Operation_Unary {
@@ -33,6 +34,7 @@ abstract Operation_Binary : Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
+    toString { return left->toString() + " " + getStringOp() + " " + right->toString(); }
 }
 
 abstract Operation_Ternary : Operation {
@@ -227,9 +229,9 @@ class Slice : Operation_Ternary {
     unsigned getH() const { return e1->to<IR::Constant>()->asUnsigned(); }
     unsigned getL() const { return e2->to<IR::Constant>()->asUnsigned(); }
     Slice(Expression a, int hi, int lo)
-    : Operation_Ternary(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
+    : Operation_Ternary(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) { }
     Slice(Util::SourceInfo si, Expression a, int hi, int lo)
-    : Operation_Ternary(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
+    : Operation_Ternary(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) { }
     Slice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
@@ -263,10 +265,12 @@ class ArrayIndex : Operation_Binary {
     ArrayIndex {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
+    toString { return left->toString() + "[" + right->toString() + "]"; }
 }
 
 class Range : Operation_Binary {
     stringOp = "..";
+    toString { return left->toString() + getStringOp() + right->toString(); }
     precedence = DBPrint::Prec_Low;
     Range { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
@@ -289,6 +293,7 @@ class Mux : Operation_Ternary {
         clone.visit(e2, "e2");
         v.flow_merge(clone); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
+    toString { return e0->toString() + " ? " + e1->toString() + " : " + e2->toString(); }
 }
 
 class DefaultExpression : Expression {}
@@ -308,7 +313,7 @@ class Cast : Operation_Unary {
     /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
-    toString{ return "cast"; }
+    toString{ return "(" + type->toString() + ")(" + expr->toString() + ")"; }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 
