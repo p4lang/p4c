@@ -99,6 +99,14 @@ set (BMV2_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   )
 
+set (PSA_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2-psa.p4"
+  )
+
+# -p to use portable switch model
+# -a to pass flags to compiler
+set (testExtraFlags "${testExtraFlags} -p -a '--target bmv2 --arch psa'")
+
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
   # Even though the P4 spec allows it, it doesn't really make sense in a switch
@@ -121,6 +129,7 @@ set (XFAIL_TESTS
 
 if (HAVE_SIMPLE_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_TEST_SUITES}" "${XFAIL_TESTS}")
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding BMv2 tests")
 endif()
