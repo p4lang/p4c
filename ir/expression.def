@@ -12,6 +12,7 @@ abstract Operation_Unary : Operation {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
+    toString { return getStringOp() + expr->toString(); }
 }
 
 class Neg : Operation_Unary {
@@ -292,6 +293,7 @@ class Mux : Operation_Ternary {
         clone.visit(e2, "e2");
         v.flow_merge(clone); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
+    toString { return e0->toString() + " ? " + e1->toString() + " : " + e2->toString(); }
 }
 
 class DefaultExpression : Expression {}
@@ -311,7 +313,7 @@ class Cast : Operation_Unary {
     /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
-    toString{ return "cast"; }
+    toString{ return "(" + type->toString() + ")(" + expr->toString() + ")"; }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 

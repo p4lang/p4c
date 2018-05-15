@@ -20,6 +20,28 @@ limitations under the License.
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 
+TEST(IR, UnOpToString) {
+    auto c = new IR::Constant(2);
+    auto f = new IR::Member(new IR::PathExpression("obj"), "f");
+
+    // Members are printed "parent.member".
+    EXPECT_STREQ("obj.f", f->toString());
+
+    // Unary operations printed "OPy".
+    std::vector<IR::Operation_Unary*> ops = {
+        new IR::Neg(f),
+        new IR::Cmpl(f),
+        new IR::LNot(f),
+    };
+    for (auto* op : ops) {
+        std::string expected = op->getStringOp() + "obj.f";
+        EXPECT_STREQ(expected.c_str(), op->toString());
+    }
+
+    // Casts are printed "(type)(expr)".
+    EXPECT_STREQ("(bit<8>)(2)", IR::Cast(IR::Type_Bits::get(8, false), c).toString());
+}
+
 TEST(IR, BinOpToString) {
     auto c = new IR::Constant(2);
     auto f = new IR::Member(new IR::PathExpression("obj"), "f");
@@ -63,3 +85,16 @@ TEST(IR, BinOpToString) {
     // Range is printed "left..right".
     EXPECT_STREQ("obj.f..2", IR::Range(f, c).toString());
 }
+
+TEST(IR, TernOpToString) {
+    auto c1 = new IR::Constant(1);
+    auto c2 = new IR::Constant(2);
+    auto f = new IR::Member(new IR::PathExpression("obj"), "f");
+
+    // Slices are printed "field[e1:e2]".
+    EXPECT_STREQ("obj.f[2:1]", IR::Slice(f, c2, c1).toString());
+
+    // Muxes are printed "e0 ? e1 : e2".
+    EXPECT_STREQ("obj.f ? 1 : 2", IR::Mux(f, c1, c2).toString());
+}
+
