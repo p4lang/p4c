@@ -154,9 +154,9 @@ typedef const IR::Type ConstType;
 %token      TRUE FALSE THIS
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
             ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-            INT KEY SELECT MATCH_KIND NEWTYPE OUT PACKAGE PARSER RETURN STATE STRUCT
+            INT KEY SELECT MATCH_KIND T_TYPE OUT PACKAGE PARSER RETURN STATE STRUCT
             SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
-// NEWTYPE is actually "type" as a token, but we already have a TYPE token
+// T_TYPE is actually "type" as a token, but we already have a TYPE token
 
 %token<cstring> IDENTIFIER TYPE STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -281,7 +281,7 @@ declaration
 
 nonTypeName
     : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | NEWTYPE     { $$ = new IR::ID(@1, "type"); }
+    | T_TYPE     { $$ = new IR::ID(@1, "type"); }
     | APPLY       { $$ = new IR::ID(@1, "apply"); }
     | KEY         { $$ = new IR::ID(@1, "key"); }
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
@@ -763,9 +763,9 @@ typedefDeclaration
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     // experimental
-    | optAnnotations NEWTYPE typeRef name   { driver.structure->declareType(*$4);
+    | optAnnotations T_TYPE typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
-    | optAnnotations NEWTYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+    | optAnnotations T_TYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
     ;
 
