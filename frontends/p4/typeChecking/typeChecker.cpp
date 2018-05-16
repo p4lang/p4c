@@ -655,7 +655,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
-        }  else if (dest->is<IR::Type_Struct>()) {
+        } else if (dest->is<IR::Type_Struct>()) {
             auto t = dest->to<IR::Type_Struct>();
             if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(dest))
                 return true;
@@ -2011,8 +2011,10 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
-    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
-        ::error("%1%: casts are only supported to base types", expression->destType);
+    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()
+        && !castType->is<IR::Type_Struct>()) {
+        ::error("%1%: casts are only supported to base types or bit-vector structs",
+                expression->destType);
         return expression;
     }
 
