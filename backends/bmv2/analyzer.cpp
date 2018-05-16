@@ -302,8 +302,7 @@ class CFGBuilder : public Inspector {
 };
 }  // end anonymous namespace
 
-void CFG::build(const IR::P4Control* cc,
-                P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+void CFG::build(const IR::P4Control* cc, P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
     container = cc;
     entryPoint = makeNode(cc->name + ".entry");
     exitPoint = makeNode("");  // the only node with an empty name
@@ -339,6 +338,14 @@ void DiscoverStructure::postorder(const IR::P4Action* action) {
 
 void DiscoverStructure::postorder(const IR::Declaration_Variable* decl) {
     structure->variables.push_back(decl);
+}
+
+void DiscoverStructure::postorder(const IR::Type_Error* errors) {
+    auto &map = structure->errorCodesMap;
+    for (auto m : *errors->getDeclarations()) {
+        BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
+        map[m] = map.size();
+    }
 }
 
 }  // namespace BMV2

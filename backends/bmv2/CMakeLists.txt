@@ -26,7 +26,6 @@ set (BMV2_BACKEND_SRCS
   backend.cpp
   control.cpp
   deparser.cpp
-  errorcode.cpp
   expression.cpp
   extern.cpp
   globals.cpp
@@ -48,7 +47,6 @@ set (BMV2_BACKEND_HDRS
   backend.h
   control.h
   deparser.h
-  errorcode.h
   expression.h
   extern.h
   globals.h

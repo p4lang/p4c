@@ -62,14 +62,11 @@ class V1ModelProperties {
     static const cstring validField;
 };
 
-using ErrorValue = unsigned int;
-using ErrorCodesMap = ordered_map<const IR::IDeclaration *, ErrorValue>;
 using BlockTypeMap = std::map<const IR::Block*, const IR::Type*>;
 
 Util::IJson* nodeName(const CFG::Node* node);
 Util::JsonArray* mkArrayField(Util::JsonObject* parent, cstring name);
 Util::JsonArray* mkParameters(Util::JsonObject* object);
-Util::JsonArray* pushNewArray(Util::JsonArray* parent);
 Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo);
 cstring stringRepr(mpz_class value, unsigned bytes = 0);
 unsigned nextId(cstring group);

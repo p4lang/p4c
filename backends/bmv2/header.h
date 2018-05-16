@@ -30,11 +30,11 @@ namespace BMV2 {
 class Backend;
 
 class HeaderConverter : public Inspector {
-    Backend*             backend;
     cstring              scalarsName;
     cstring              scalarsTypeName;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
+    ProgramParts*        structure;
     JsonObjects*         json;
     std::set<cstring>    visitedHeaders;
 
@@ -57,7 +57,8 @@ class HeaderConverter : public Inspector {
 
     bool preorder(const IR::Parameter* param) override;
 
-    HeaderConverter(Backend* backend, cstring scalarsName);
+    HeaderConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ProgramParts* structure,
+                    JsonObjects* json, cstring scalarsName);
 };
 
 }  // namespace BMV2

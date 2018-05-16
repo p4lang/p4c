@@ -21,7 +21,6 @@ limitations under the License.
 #include "lib/json.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "backend.h"
 #include "expression.h"
 
 namespace BMV2 {
@@ -29,23 +28,17 @@ namespace BMV2 {
 class JsonObjects;
 
 class ParserConverter : public Inspector {
-    Backend* backend;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
-    BMV2::JsonObjects*   json;
+    JsonObjects*         json;
     ExpressionConverter* conv;
     P4::P4CoreLibrary&   corelib;
-    std::map<const IR::P4Parser*, Util::IJson*> parser_map;
-    std::map<const IR::ParserState*, Util::IJson*> state_map;
-    std::vector<Util::IJson*> context;
 
  protected:
     void convertSimpleKey(const IR::Expression* keySet, mpz_class& value, mpz_class& mask) const;
     unsigned combine(const IR::Expression* keySet, const IR::ListExpression* select,
                      mpz_class& value, mpz_class& mask, bool& is_vset, cstring& vset_name) const;
     Util::IJson* stateName(IR::ID state);
-    Util::IJson* toJson(const IR::P4Parser* cont);
-    Util::IJson* toJson(const IR::ParserState* state);
     Util::IJson* convertParserStatement(const IR::StatOrDecl* stat);
     Util::IJson* convertSelectKey(const IR::SelectExpression* expr);
     Util::IJson* convertPathExpression(const IR::PathExpression* expr);
@@ -55,10 +48,12 @@ class ParserConverter : public Inspector {
  public:
     bool preorder(const IR::P4Parser* p) override;
     bool preorder(const IR::P4Control* c) override { return false; }  // do not visit control block
-    explicit ParserConverter(Backend* backend) : backend(backend), refMap(backend->getRefMap()),
-    typeMap(backend->getTypeMap()), json(backend->json),
-    conv(backend->getExpressionConverter()),
-    corelib(P4::P4CoreLibrary::instance) { setName("ParserConverter"); }
+    ParserConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BMV2::JsonObjects* json,
+                    BMV2::ExpressionConverter* conv) :
+        refMap(refMap), typeMap(typeMap), json(json), conv(conv),
+        corelib(P4::P4CoreLibrary::instance) {
+        setName("ParserConverter");
+    }
 };
 
 }  // namespace BMV2

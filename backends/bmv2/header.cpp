@@ -27,11 +27,13 @@ Util::JsonArray* HeaderConverter::pushNewArray(Util::JsonArray* parent) {
     return result;
 }
 
-HeaderConverter::HeaderConverter(Backend* backend, cstring scalarsName)
-        : backend(backend), scalarsName(scalarsName), refMap(backend->getRefMap()),
-          typeMap(backend->getTypeMap()), json(backend->json) {
+HeaderConverter::HeaderConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                                 ProgramParts* structure, JsonObjects* json,
+                                 cstring scalarsName)
+        : refMap(refMap), typeMap(typeMap), structure(structure), scalarsName(scalarsName),
+          json(json) {
     setName("HeaderConverter");
-    CHECK_NULL(backend->json);
+    CHECK_NULL(json);
 }
 
 /**
@@ -94,15 +96,15 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
                 auto tb = ft->to<IR::Type_Bits>();
                 addHeaderField(scalarsTypeName, newName, tb->size, tb->isSigned);
                 scalars_width += tb->size;
-                backend->scalarMetadataFields.emplace(f, newName);
+                structure->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Boolean>()) {
                 addHeaderField(scalarsTypeName, newName, boolWidth, 0);
                 scalars_width += boolWidth;
-                backend->scalarMetadataFields.emplace(f, newName);
+                structure->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Error>()) {
                 addHeaderField(scalarsTypeName, newName, errorWidth, 0);
                 scalars_width += errorWidth;
-                backend->scalarMetadataFields.emplace(f, newName);
+                structure->scalarMetadataFields.emplace(f, newName);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
@@ -249,7 +251,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
     json->add_header_type(scalarsTypeName);
     // bit<n>, bool, error are packed into scalars type,
     // varbit, struct and stack introduce new header types
-    for (auto v : backend->getStructure().variables) {
+    for (auto v : structure->variables) {
         LOG1("variable " << v);
         auto type = typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {

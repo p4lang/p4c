@@ -18,7 +18,6 @@ limitations under the License.
 #include "backend.h"
 #include "control.h"
 #include "deparser.h"
-#include "errorcode.h"
 #include "expression.h"
 #include "extern.h"
 #include "globals.h"
@@ -36,6 +35,7 @@ limitations under the License.
 #include "parser.h"
 #include "JsonObjects.h"
 #include "portableSwitch.h"
+#include "simpleSwitch.h"
 
 namespace BMV2 {
 
@@ -312,7 +312,6 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new DiscoverStructure(&structure),
-        new ErrorCodesVisitor(&errorCodesMap),
         evaluator,
     };
     tlb->getProgram()->apply(simplify);
@@ -366,7 +365,7 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
         return;
 
     /// generate error types
-    for (const auto &p : errorCodesMap) {
+    for (const auto &p : structure.errorCodesMap) {
         auto name = p.first->toString();
         auto type = p.second;
         json->add_error(name, type);
@@ -375,11 +374,12 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
     cstring scalarsName = refMap->newName("scalars");
 
     // This visitor is used in multiple passes to convert expression to json
-    conv = new ExpressionConverter(this, scalarsName);
+    conv = new P4V1::SimpleSwitchExpressionConverter(refMap, typeMap, &structure,
+                                                     scalarsName, toplevel);
 
     PassManager codegen_passes = {
-        new HeaderConverter(this, scalarsName),
-        new ParserConverter(this),
+        new HeaderConverter(refMap, typeMap, &structure, json, scalarsName),
+        new ParserConverter(refMap, typeMap, json, conv),
         new VisitFunctor([this]() { simpleSwitch->createActions(); }),
         new ControlConverter(this, options.emitExterns),
         new ChecksumConverter(this),
@@ -392,86 +392,6 @@ Backend::convert_simple_switch(const IR::ToplevelBlock* tlb, BMV2Options& option
     program->apply(codegen_passes);
 
     (void)toplevel->apply(ConvertGlobals(this));
-}
-
-bool Backend::isStandardMetadataParameter(const IR::Parameter* param) {
-    auto parser = simpleSwitch->getParser(getToplevelBlock());
-    auto params = parser->getApplyParameters();
-    if (params->size() != 4) {
-        simpleSwitch->modelError("%1%: Expected 4 parameter for parser", parser);
-        return false;
-    }
-    if (params->parameters.at(3) == param)
-        return true;
-
-    auto ingress = simpleSwitch->getIngress(getToplevelBlock());
-    params = ingress->getApplyParameters();
-    if (params->size() != 3) {
-        simpleSwitch->modelError("%1%: Expected 3 parameter for ingress", ingress);
-        return false;
-    }
-    if (params->parameters.at(2) == param)
-        return true;
-
-    auto egress = simpleSwitch->getEgress(getToplevelBlock());
-    params = egress->getApplyParameters();
-    if (params->size() != 3) {
-        simpleSwitch->modelError("%1%: Expected 3 parameter for egress", egress);
-        return false;
-    }
-    if (params->parameters.at(2) == param)
-        return true;
-
-    return false;
-}
-
-bool Backend::isUserMetadataParameter(const IR::Parameter* param) {
-    auto parser = simpleSwitch->getParser(getToplevelBlock());
-    auto params = parser->getApplyParameters();
-    if (params->size() != 4) {
-        simpleSwitch->modelError("%1%: Expected 4 parameters for parser", parser);
-        return false;
-    }
-    if (params->parameters.at(2) == param)
-        return true;
-
-    auto ingress = simpleSwitch->getIngress(getToplevelBlock());
-    params = ingress->getApplyParameters();
-    if (params->size() != 3) {
-        simpleSwitch->modelError("%1%: Expected 3 parameters for ingress", ingress);
-        return false;
-    }
-    if (params->parameters.at(1) == param)
-        return true;
-
-    auto egress = simpleSwitch->getEgress(getToplevelBlock());
-    params = egress->getApplyParameters();
-    if (params->size() != 3) {
-        simpleSwitch->modelError("%1%: Expected 3 parameters for egress", egress);
-        return false;
-    }
-    if (params->parameters.at(1) == param)
-        return true;
-
-    auto update = simpleSwitch->getCompute(getToplevelBlock());
-    params = update->getApplyParameters();
-    if (params->size() != 2) {
-        simpleSwitch->modelError("%1%: Expected 2 parameters for ComputeChecksum", update);
-        return false;
-    }
-    if (params->parameters.at(1) == param)
-        return true;
-
-    auto verify = simpleSwitch->getVerify(getToplevelBlock());
-    params = verify->getApplyParameters();
-    if (params->size() != 2) {
-        simpleSwitch->modelError("%1%: Expected 2 parameters for VerifyChecksum", update);
-        return false;
-    }
-    if (params->parameters.at(1) == param)
-        return true;
-
-    return false;
 }
 
 void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options& options) {
@@ -498,9 +418,9 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
         new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
-        new ErrorCodesVisitor(&errorCodesMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new BMV2::DiscoverStructure(&structure),
         new P4::InspectPsaProgram(refMap, typeMap, &structure),
         new P4::ConvertToJson(&structure),
     };

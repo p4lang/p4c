@@ -14,7 +14,6 @@ limitations under the License.
 */
 
 #include "expression.h"
-#include "backend.h"
 
 namespace BMV2 {
 
@@ -101,8 +100,7 @@ void ExpressionConverter::postorder(const IR::BoolLiteral* expression)  {
 }
 
 void ExpressionConverter::postorder(const IR::MethodCallExpression* expression)  {
-    auto instance = P4::MethodInstance::resolve(expression,
-                                                backend->getRefMap(), backend->getTypeMap());
+    auto instance = P4::MethodInstance::resolve(expression, refMap, typeMap);
     if (instance->is<P4::ExternMethod>()) {
         auto em = instance->to<P4::ExternMethod>();
         if (em->originalExternType->name == corelib.packetIn.name &&
@@ -110,7 +108,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             BUG_CHECK(expression->typeArguments->size() == 1,
                       "Expected 1 type parameter for %1%", em->method);
             auto targ = expression->typeArguments->at(0);
-            auto typearg = backend->getTypeMap()->getTypeType(targ, true);
+            auto typearg = typeMap->getTypeType(targ, true);
             int width = typearg->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", targ);
             auto j = new Util::JsonObject();
@@ -124,7 +122,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
     } else if (instance->is<P4::BuiltInMethod>()) {
         auto bim = instance->to<P4::BuiltInMethod>();
         if (bim->name == IR::Type_Header::isValid) {
-            auto type = backend->getTypeMap()->getType(bim->appliedTo, true);
+            auto type = typeMap->getType(bim->appliedTo, true);
             auto result = new Util::JsonObject();
             auto l = get(bim->appliedTo);
             if (type->is<IR::Type_HeaderUnion>()) {
@@ -190,7 +188,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     if (expression->left->is<IR::Member>()) {
         // This is a header part of the parameters
         auto mem = expression->left->to<IR::Member>();
-        auto parentType = backend->getTypeMap()->getType(mem->expr, true);
+        auto parentType = typeMap->getType(mem->expr, true);
         BUG_CHECK(parentType->is<IR::Type_StructLike>(), "%1%: expected a struct", parentType);
         auto st = parentType->to<IR::Type_StructLike>();
         auto field = st->getField(mem->member);
@@ -220,22 +218,21 @@ ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
         return nullptr;
 
     auto pe = expression->to<IR::PathExpression>();
-    auto decl = backend->getRefMap()->getDeclaration(pe->path, true);
+    auto decl = refMap->getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
     if (param == nullptr)
         return param;
-    if (backend->getStructure().nonActionParameters.count(param) > 0)
+    if (structure->nonActionParameters.count(param) > 0)
         return param;
     return nullptr;
 }
 
 void ExpressionConverter::postorder(const IR::Member* expression)  {
-    // TODO: deal with references that return bool
     auto result = new Util::JsonObject();
 
-    auto parentType = backend->getTypeMap()->getType(expression->expr, true);
+    auto parentType = typeMap->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
-    auto type = backend->getTypeMap()->getType(expression, true);
+    auto type = typeMap->getType(expression, true);
 
     if (parentType->is<IR::Type_StructLike>()) {
         auto st = parentType->to<IR::Type_StructLike>();
@@ -245,154 +242,154 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             fieldName = field->controlPlaneName();
     }
 
-    {
-        if (type->is<IR::Type_Error>() && expression->expr->is<IR::TypeNameExpression>()) {
-            // this deals with constants that have type 'error'
-            result->emplace("type", "hexstr");
-            auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
-            ErrorCodesMap errCodes = backend->getErrorCodesMap();
-            auto errorValue = errCodes.at(decl);
-            result->emplace("value", Util::toString(errorValue));
-            map.emplace(expression, result);
-            return;
-        }
+    // handle error
+    if (type->is<IR::Type_Error>() && expression->expr->is<IR::TypeNameExpression>()) {
+        // this deals with constants that have type 'error'
+        result->emplace("type", "hexstr");
+        auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
+        auto errorValue = structure->errorCodesMap.at(decl);
+        result->emplace("value", Util::toString(errorValue));
+        map.emplace(expression, result);
+        return;
     }
 
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
-        if (backend->isStandardMetadataParameter(param)) {
-            result->emplace("type", "field");
-            auto e = mkArrayField(result, "value");
-            e->append(BMV2::V1ModelProperties::jsonMetadataParameterName);
-            e->append(fieldName);
-        } else {
-            if (type->is<IR::Type_Stack>()) {
-                result->emplace("type", "header_stack");
-                result->emplace("value", fieldName);
-            } else if (type->is<IR::Type_HeaderUnion>()) {
-                result->emplace("type", "header_union");
-                result->emplace("value", fieldName);
-            } else if (parentType->is<IR::Type_HeaderUnion>()) {
-                auto l = get(expression->expr);
-                cstring nestedField = fieldName;
-                if (l->is<Util::JsonObject>()) {
-                    auto lv = l->to<Util::JsonObject>()->get("value");
-                    if (lv->is<Util::JsonValue>()) {
-                        // header in union reference ["u", "f"] => "u.f"
-                        cstring prefix = lv->to<Util::JsonValue>()->getString();
-                        nestedField = prefix + "." + nestedField;
-                    }
-                }
-                result->emplace("type", "header");
-                result->emplace("value", nestedField);
-            } else if (parentType->is<IR::Type_StructLike>() &&
-                       (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
-                        type->is<IR::Type_Boolean>())) {
-                auto field = parentType->to<IR::Type_StructLike>()->getField(
-                    expression->member);
-                LOG3("looking up field " << field);
-                CHECK_NULL(field);
-                auto name = ::get(backend->scalarMetadataFields, field);
-                CHECK_NULL(name);
-                if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
-                    leftValue || simpleExpressionsOnly) {
-                    result->emplace("type", "field");
-                    auto e = mkArrayField(result, "value");
-                    e->append(scalarsName);
-                    e->append(name);
-                } else if (type->is<IR::Type_Boolean>()) {
-                    // Boolean variables are stored as ints, so we
-                    // have to insert a conversion when reading such a
-                    // variable
-                    result->emplace("type", "expression");
-                    auto e = new Util::JsonObject();
-                    result->emplace("value", e);
-                    e->emplace("op", "d2b");  // data to Boolean cast
-                    e->emplace("left", Util::JsonValue::null);
-                    auto r = new Util::JsonObject();
-                    e->emplace("right", r);
-
-                    r->emplace("type", "field");
-                    auto a = mkArrayField(r, "value");
-                    a->append(scalarsName);
-                    a->append(name);
-                }
-            } else {
-                // This may be wrong, but the caller will handle it properly
-                // (e.g., this can be a method, such as packet.lookahead)
-                result->emplace("type", "header");
-                result->emplace("value", fieldName);
-            }
+        // convert architecture-dependent parameter
+        if (auto result = convertParam(param, fieldName)) {
+            map.emplace(expression, result);
+            return;
         }
-    } else {
-        bool done = false;
-        if (expression->expr->is<IR::Member>()) {
-            // array.next.field => type: "stack_field", value: [ array, field ]
-            auto mem = expression->expr->to<IR::Member>();
-            auto memtype = backend->getTypeMap()->getType(mem->expr, true);
-            if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
-                auto l = get(mem->expr);
-                CHECK_NULL(l);
-                result->emplace("type", "stack_field");
-                auto e = mkArrayField(result, "value");
-                if (l->is<Util::JsonObject>())
-                    e->append(l->to<Util::JsonObject>()->get("value"));
-                else
-                    e->append(l);
-                e->append(fieldName);
-                done = true;
-            }
-        }
-
-        if (!done) {
+        // convert normal parameters
+        if (type->is<IR::Type_Stack>()) {
+            result->emplace("type", "header_stack");
+            result->emplace("value", fieldName);
+        } else if (type->is<IR::Type_HeaderUnion>()) {
+            result->emplace("type", "header_union");
+            result->emplace("value", fieldName);
+        } else if (parentType->is<IR::Type_HeaderUnion>()) {
             auto l = get(expression->expr);
-            CHECK_NULL(l);
-            if (parentType->is<IR::Type_HeaderUnion>()) {
-                BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
+            cstring nestedField = fieldName;
+            if (l->is<Util::JsonObject>()) {
                 auto lv = l->to<Util::JsonObject>()->get("value");
-                BUG_CHECK(lv->is<Util::JsonValue>(), "Not a JsonValue");
-                fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
-                // Each header in a union is allocated a separate header instance.
-                // Refer to that instance directly.
-                result->emplace("type", "header");
-                result->emplace("value", fieldName);
-            } else {
+                if (lv->is<Util::JsonValue>()) {
+                    // header in union reference ["u", "f"] => "u.f"
+                    cstring prefix = lv->to<Util::JsonValue>()->getString();
+                    nestedField = prefix + "." + nestedField;
+                }
+            }
+            result->emplace("type", "header");
+            result->emplace("value", nestedField);
+        } else if (parentType->is<IR::Type_StructLike>() &&
+                   (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
+                    type->is<IR::Type_Boolean>())) {
+            auto field = parentType->to<IR::Type_StructLike>()->getField(
+                expression->member);
+            LOG3("looking up field " << field);
+            CHECK_NULL(field);
+            auto name = ::get(structure->scalarMetadataFields, field);
+            CHECK_NULL(name);
+            if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
+                leftValue || simpleExpressionsOnly) {
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
-                if (l->is<Util::JsonObject>()) {
-                    auto lv = l->to<Util::JsonObject>()->get("value");
-                    if (lv->is<Util::JsonArray>()) {
-                        // TODO: is this case still necessary after eliminating nested structs?
-                        // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
-                        auto array = lv->to<Util::JsonArray>();
-                        BUG_CHECK(array->size() == 2, "expected 2 elements");
-                        auto first = array->at(0);
-                        auto second = array->at(1);
-                        BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
-                        e->append(first);
-                        cstring nestedField = second->to<Util::JsonValue>()->getString();
-                        nestedField += "." + fieldName;
-                        e->append(nestedField);
-                    } else if (lv->is<Util::JsonValue>()) {
-                        e->append(lv);
-                        e->append(fieldName);
-                    } else {
-                        BUG("%1%: Unexpected json", lv);
-                    }
-                } else {
-                    e->append(l);
+                e->append(scalarsName);
+                e->append(name);
+            } else if (type->is<IR::Type_Boolean>()) {
+                // Boolean variables are stored as ints, so we
+                // have to insert a conversion when reading such a
+                // variable
+                result->emplace("type", "expression");
+                auto e = new Util::JsonObject();
+                result->emplace("value", e);
+                e->emplace("op", "d2b");  // data to Boolean cast
+                e->emplace("left", Util::JsonValue::null);
+                auto r = new Util::JsonObject();
+                e->emplace("right", r);
+
+                r->emplace("type", "field");
+                auto a = mkArrayField(r, "value");
+                a->append(scalarsName);
+                a->append(name);
+            }
+        } else {
+            // This may be wrong, but the caller will handle it properly
+            // (e.g., this can be a method, such as packet.lookahead)
+            result->emplace("type", "header");
+            result->emplace("value", fieldName);
+        }
+        map.emplace(expression, result);
+        return;
+    }
+
+    // handle stack params
+    bool done = false;
+    if (expression->expr->is<IR::Member>()) {
+        // array.next.field => type: "stack_field", value: [ array, field ]
+        auto mem = expression->expr->to<IR::Member>();
+        auto memtype = typeMap->getType(mem->expr, true);
+        if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
+            auto l = get(mem->expr);
+            CHECK_NULL(l);
+            result->emplace("type", "stack_field");
+            auto e = mkArrayField(result, "value");
+            if (l->is<Util::JsonObject>())
+                e->append(l->to<Util::JsonObject>()->get("value"));
+            else
+                e->append(l);
+            e->append(fieldName);
+            done = true;
+        }
+    }
+
+    if (!done) {
+        auto l = get(expression->expr);
+        CHECK_NULL(l);
+        if (parentType->is<IR::Type_HeaderUnion>()) {
+            BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
+            auto lv = l->to<Util::JsonObject>()->get("value");
+            BUG_CHECK(lv->is<Util::JsonValue>(), "Not a JsonValue");
+            fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
+            // Each header in a union is allocated a separate header instance.
+            // Refer to that instance directly.
+            result->emplace("type", "header");
+            result->emplace("value", fieldName);
+        } else {
+            result->emplace("type", "field");
+            auto e = mkArrayField(result, "value");
+            if (l->is<Util::JsonObject>()) {
+                auto lv = l->to<Util::JsonObject>()->get("value");
+                if (lv->is<Util::JsonArray>()) {
+                    // TODO: is this case still necessary after eliminating nested structs?
+                    // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
+                    auto array = lv->to<Util::JsonArray>();
+                    BUG_CHECK(array->size() == 2, "expected 2 elements");
+                    auto first = array->at(0);
+                    auto second = array->at(1);
+                    BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
+                    e->append(first);
+                    cstring nestedField = second->to<Util::JsonValue>()->getString();
+                    nestedField += "." + fieldName;
+                    e->append(nestedField);
+                } else if (lv->is<Util::JsonValue>()) {
+                    e->append(lv);
                     e->append(fieldName);
+                } else {
+                    BUG("%1%: Unexpected json", lv);
                 }
-                if (!simpleExpressionsOnly && !leftValue && type->is<IR::Type_Boolean>()) {
-                    auto cast = new Util::JsonObject();
-                    auto value = new Util::JsonObject();
-                    cast->emplace("type", "expression");
-                    cast->emplace("value", value);
-                    value->emplace("op", "d2b");  // data to Boolean cast
-                    value->emplace("left", Util::JsonValue::null);
-                    value->emplace("right", result);
-                    result = cast;
-                }
+            } else {
+                e->append(l);
+                e->append(fieldName);
+            }
+            if (!simpleExpressionsOnly && !leftValue && type->is<IR::Type_Boolean>()) {
+                auto cast = new Util::JsonObject();
+                auto value = new Util::JsonObject();
+                cast->emplace("type", "expression");
+                cast->emplace("value", value);
+                value->emplace("op", "d2b");  // data to Boolean cast
+                value->emplace("left", Util::JsonValue::null);
+                value->emplace("right", result);
+                result = cast;
             }
         }
     }
@@ -545,11 +542,11 @@ void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
 
 void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     // This is useful for action bodies mostly
-    auto decl = backend->getRefMap()->getDeclaration(expression->path, true);
+    auto decl = refMap->getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
-        if (backend->getStructure().nonActionParameters.find(param) !=
-            backend->getStructure().nonActionParameters.end()) {
-            auto type = backend->getTypeMap()->getType(param, true);
+        if (structure->nonActionParameters.find(param) !=
+            structure->nonActionParameters.end()) {
+            auto type = typeMap->getType(param, true);
             if (type->is<IR::Type_StructLike>()) {
                 auto result = new Util::JsonObject();
                 result->emplace("type", "header");
@@ -562,13 +559,13 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
         }
         auto result = new Util::JsonObject();
         result->emplace("type", "runtime_data");
-        unsigned paramIndex = ::get(&backend->getStructure().index, param);
+        unsigned paramIndex = ::get(&structure->index, param);
         result->emplace("value", paramIndex);
         map.emplace(expression, result);
     } else if (auto var = decl->to<IR::Declaration_Variable>()) {
         LOG3("Variable to json " << var);
         auto result = new Util::JsonObject();
-        auto type = backend->getTypeMap()->getType(var, true);
+        auto type = typeMap->getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
             result->emplace("type", "header");
             result->emplace("value", var->name);
@@ -630,7 +627,7 @@ Util::IJson*
 ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, bool convertBool) {
     const IR::Expression *expr = e;
     if (doFixup) {
-        ArithmeticFixup af(backend->getTypeMap());
+        ArithmeticFixup af(typeMap);
         auto r = e->apply(af);
         CHECK_NULL(r);
         expr = r->to<IR::Expression>();
@@ -675,7 +672,7 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
 Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
     leftValue = true;
     const IR::Expression *expr = e;
-    ArithmeticFixup af(backend->getTypeMap());
+    ArithmeticFixup af(typeMap);
     auto r = e->apply(af);
     CHECK_NULL(r);
     expr = r->to<IR::Expression>();

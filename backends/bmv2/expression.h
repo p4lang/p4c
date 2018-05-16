@@ -21,17 +21,14 @@ limitations under the License.
 #include "lower.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "helpers.h"
-#include "backend.h"
 
 namespace BMV2 {
-
-class Backend;
 
 /**
    Inserts casts and narrowing operations to implement correctly the semantics of
@@ -54,9 +51,11 @@ class ArithmeticFixup : public Transform {
 };
 
 class ExpressionConverter : public Inspector {
-    Backend*           backend;
-    P4::P4CoreLibrary& corelib;
-    cstring            scalarsName;
+    P4::ReferenceMap*    refMap;
+    P4::TypeMap*         typeMap;
+    BMV2::ProgramParts*  structure;
+    P4::P4CoreLibrary&   corelib;
+    cstring              scalarsName;
 
     /// after translating an Expression to JSON, save the result to 'map'.
     std::map<const IR::Expression*, Util::IJson*> map;
@@ -67,8 +66,10 @@ class ExpressionConverter : public Inspector {
     bool withConstantWidths{false};
 
  public:
-    ExpressionConverter(Backend *backend, cstring scalarsName) :
-            backend(backend), corelib(P4::P4CoreLibrary::instance),
+    ExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                        BMV2::ProgramParts* structure, cstring scalarsName) :
+            refMap(refMap), typeMap(typeMap), structure(structure),
+            corelib(P4::P4CoreLibrary::instance),
             scalarsName(scalarsName), leftValue(false), simpleExpressionsOnly(false) {}
     /// If this is 'true' we fail to convert complex expressions.
     /// This is used for table key expressions, for example.
@@ -76,6 +77,13 @@ class ExpressionConverter : public Inspector {
 
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
+
+    /// Architectures typically has some special parameters that requires special handling.
+    /// The examples are standard_metadata in the v1model and packet path related metadata
+    /// in PSA. Each target should subclass the ExpressionConverter and implement this
+    /// function with target-specific handling code to deal with the special parameters.
+    virtual Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) = 0;
+
     Util::IJson* get(const IR::Expression* expression) const;
     Util::IJson* fixLocal(Util::IJson* json);
 

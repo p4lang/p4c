@@ -122,7 +122,6 @@ void PsaProgramStructure::createHeaders() {
         json->add_header(type->controlPlaneName(), kv.second->name);
     }
     for (auto kv : header_stacks) {
-
         // json->add_header_stack(stack_type, stack_name, stack_size, ids);
     }
     for (auto kv : header_unions) {
@@ -144,9 +143,10 @@ void PsaProgramStructure::createHeaders() {
 }
 
 void PsaProgramStructure::createParsers() {
-    // add parsers to json
+    auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, this, "scalar");
+    auto cvt = new BMV2::ParserConverter(refMap, typeMap, json, conv);
     for (auto kv : parsers) {
-        LOG1("parser " << kv.first << kv.second);
+        kv.second->apply(*cvt);
     }
 }
 
@@ -347,13 +347,13 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
             if (ft->is<IR::Type_Bits>()) {
                 auto tb = ft->to<IR::Type_Bits>();
                 pinfo->scalars_width += tb->size;
-                pinfo->scalarMetadataFields.emplace(newName, f);
+                pinfo->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Boolean>()) {
                 pinfo->scalars_width += 1;
-                pinfo->scalarMetadataFields.emplace(newName, f);
+                pinfo->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Error>()) {
                 pinfo->scalars_width += 32;
-                pinfo->scalarMetadataFields.emplace(newName, f);
+                pinfo->scalarMetadataFields.emplace(f, newName);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
@@ -361,6 +361,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
     }
 }
 
+// This visitor only visits the parameter in the statement from architecture.
 bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     auto ft = typeMap->getType(param->getNode(), true);
     // only convert parameters that are IR::Type_StructLike
@@ -370,7 +371,6 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st))
         return false;
-    LOG1("type struct " << ft);
     auto isHeader = isHeaders(st);
     addTypesAndInstances(st, isHeader);
     return false;

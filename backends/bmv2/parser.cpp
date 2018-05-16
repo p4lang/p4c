@@ -19,7 +19,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-// TODO(hanw) refactor this function
 Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");

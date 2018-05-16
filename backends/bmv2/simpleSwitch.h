@@ -30,6 +30,102 @@ class Backend;
 
 namespace P4V1 {
 
+// Unfortunately, we cannot use ExpressionConverter as the subclass name.
+// Dynamic dispatching does not seems to work in clang, when the subclass has
+// the same name as the superclass, and they are in different namespaces.
+class SimpleSwitchExpressionConverter : public BMV2::ExpressionConverter {
+    const IR::ToplevelBlock* toplevel;
+
+ public:
+    SimpleSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+        BMV2::ProgramParts* structure, cstring scalarsName, const IR::ToplevelBlock* toplevel) :
+        BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName), toplevel(toplevel) { }
+
+    void modelError(const char* format, const IR::Node* node) {
+        ::error(format, node);
+        ::error("Are you using an up-to-date v1model.p4?");
+    }
+
+    const IR::P4Control* getIngress(const IR::ToplevelBlock* blk) {
+        auto main = blk->getMain();
+        auto ctrl = main->findParameterValue("ig");
+        if (ctrl == nullptr)
+            return nullptr;
+        if (!ctrl->is<IR::ControlBlock>()) {
+            modelError("%1%: main package  match the expected model", main);
+            return nullptr;
+        }
+        return ctrl->to<IR::ControlBlock>()->container;
+    }
+
+    const IR::P4Control* getEgress(const IR::ToplevelBlock* blk) {
+        auto main = blk->getMain();
+        auto ctrl = main->findParameterValue("eg");
+        if (ctrl == nullptr)
+            return nullptr;
+        if (!ctrl->is<IR::ControlBlock>()) {
+            modelError("%1%: main package  match the expected model", main);
+            return nullptr;
+        }
+        return ctrl->to<IR::ControlBlock>()->container;
+    }
+
+    const IR::P4Parser* getParser(const IR::ToplevelBlock* blk) {
+        auto main = blk->getMain();
+        auto ctrl = main->findParameterValue("p");
+        if (ctrl == nullptr)
+            return nullptr;
+        if (!ctrl->is<IR::ParserBlock>()) {
+            modelError("%1%: main package  match the expected model", main);
+            return nullptr;
+        }
+        return ctrl->to<IR::ParserBlock>()->container;
+    }
+
+    bool isStandardMetadataParameter(const IR::Parameter* param) {
+        auto parser = getParser(toplevel);
+        auto params = parser->getApplyParameters();
+        if (params->size() != 4) {
+            modelError("%1%: Expected 4 parameter for parser", parser);
+            return false;
+        }
+        if (params->parameters.at(3) == param)
+            return true;
+
+        auto ingress = getIngress(toplevel);
+        params = ingress->getApplyParameters();
+        if (params->size() != 3) {
+            modelError("%1%: Expected 3 parameter for ingress", ingress);
+            return false;
+        }
+        if (params->parameters.at(2) == param)
+            return true;
+
+        auto egress = getEgress(toplevel);
+        params = egress->getApplyParameters();
+        if (params->size() != 3) {
+            modelError("%1%: Expected 3 parameter for egress", egress);
+            return false;
+        }
+        if (params->parameters.at(2) == param)
+            return true;
+
+        return false;
+    }
+
+    Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
+        if (isStandardMetadataParameter(param)) {
+            auto result = new Util::JsonObject();
+            result->emplace("type", "field");
+            auto e = BMV2::mkArrayField(result, "value");
+            e->append(BMV2::V1ModelProperties::jsonMetadataParameterName);
+            e->append(fieldName);
+            return result;
+        }
+        return nullptr;
+    }
+};
+
 class SimpleSwitch {
     BMV2::Backend* backend;
     V1Model&       v1model;
@@ -67,8 +163,6 @@ class SimpleSwitch {
     void setVerifyChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
     void setDeparserControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
 
-    const IR::P4Control* getIngress(const IR::ToplevelBlock* blk);
-    const IR::P4Control* getEgress(const IR::ToplevelBlock* blk);
     const IR::P4Parser*  getParser(const IR::ToplevelBlock* blk);
     const IR::P4Control* getCompute(const IR::ToplevelBlock* blk);
     const IR::P4Control* getVerify(const IR::ToplevelBlock* blk);

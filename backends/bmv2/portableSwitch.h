@@ -41,20 +41,58 @@ enum block_t {
     DEPARSER
 };
 
-class PsaProgramStructure {
+class PortableSwitchExpressionConverter : public BMV2::ExpressionConverter {
+ public:
+    PortableSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                                      BMV2::ProgramParts* structure, cstring scalarsName) :
+    BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
+
+    Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
+        return nullptr;
+    }
+};
+
+// helper class to collect information to Json
+struct DeparserInfo {
+    cstring name;
+    std::vector<IR::Declaration_Variable> header_instances;
+};
+
+struct PipelineInfo {
+    cstring name;
+    cstring init_table;
+    std::vector<const IR::Declaration_Instance *> action_profiles;
+    std::vector<const IR::P4Table *> tables;
+    std::vector<const IR::Node *> conditionals;
+    std::vector<const IR::MethodCallStatement *> action_calls;
+};
+
+struct ParserInfo {
+    cstring name;
+    cstring init_state;
+    std::vector<const IR::ParserState*> parse_states;
+};
+
+class PsaProgramStructure : public BMV2::ProgramParts {
     BMV2::JsonObjects*   json;     // output json data structure
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap*        refMap;
+    TypeMap*             typeMap;
 
  public:
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
-    ordered_map<cstring, const IR::StructField*> scalarMetadataFields;
+    ordered_map<const IR::StructField*, cstring> scalarMetadataFields;
     std::vector<const IR::StructField*> scalars;
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
     unsigned                            bool_width = 1;
+
+    // used to stored information extracted from IR objects before
+    // converting to json
+    std::vector<DeparserInfo *> deparser_info;
+    std::vector<PipelineInfo *> pipeline_info;
+    std::vector<ParserInfo *> parser_info;
 
     // architecture related information
     ordered_map<const IR::Node*, std::pair<gress_t, block_t>> block_type;
@@ -144,14 +182,9 @@ class InspectPsaProgram : public Inspector {
     void postorder(const IR::Declaration_Instance* di) override;
     void postorder(const IR::P4Action* act) override;
     void postorder(const IR::Type_Error* err) override;
-
-    // control
     bool preorder(const IR::P4Control *control) override;
-
-    // parser
     bool preorder(const IR::P4Parser *p) override;
 
-    // header
     std::set<cstring> visitedHeaders;
     bool isHeaders(const IR::Type_StructLike* st);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);

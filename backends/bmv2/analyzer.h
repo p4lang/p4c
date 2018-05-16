@@ -206,11 +206,13 @@ class ProgramParts {
     ordered_map<const IR::P4Action*, unsigned> ids;
     /// All local variables.
     std::vector<const IR::Declaration_Variable*> variables;
-    /// All the parsers.
-    std::vector<const IR::P4Parser *> parsers;
-
+    /// All error codes.
+    ordered_map<const IR::IDeclaration *, unsigned int> errorCodesMap;
+    // We place scalar user metadata fields (i.e., bit<>, bool)
+    // in the scalarsName metadata object, so we may need to rename
+    // these fields.  This map holds the new names.
+    std::map<const IR::StructField*, cstring> scalarMetadataFields;
     ProgramParts() {}
-    void analyze(const IR::ToplevelBlock* toplevel);
 };
 
 class DiscoverStructure : public Inspector {
@@ -221,7 +223,7 @@ class DiscoverStructure : public Inspector {
     void postorder(const IR::ParameterList* paramList) override;
     void postorder(const IR::P4Action* action) override;
     void postorder(const IR::Declaration_Variable* decl) override;
-    void postorder(const IR::P4Parser *p) override { structure->parsers.push_back(p); }
+    void postorder(const IR::Type_Error* errors) override;
 };
 
 }  // namespace BMV2

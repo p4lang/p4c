@@ -45,9 +45,6 @@ class ExpressionConverter;
 class Backend {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
-    // TODO(hanw): current implementation uses refMap and typeMap from midend.
-    // Once all midend passes are refactored to avoid patching refMap, typeMap,
-    // We can regenerated the refMap and typeMap in backend.
     BMV2Options&                     options;
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
@@ -59,7 +56,6 @@ class Backend {
     Util::JsonObject                 jsonTop;
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
-    ErrorCodesMap                    errorCodesMap;
     // bmv2 backend supports multiple target architectures, we create different
     // json generators for each architecture to handle the differences in json
     // format for each architecture.
@@ -77,11 +73,6 @@ class Backend {
     Util::JsonArray*                 force_arith;
     Util::JsonArray*                 field_aliases;
 
-    // We place scalar user metadata fields (i.e., bit<>, bool)
-    // in the scalarsName metadata object, so we may need to rename
-    // these fields.  This map holds the new names.
-    std::map<const IR::StructField*, cstring> scalarMetadataFields;
-
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
     std::set<cstring>                compute_checksum_controls;
@@ -97,11 +88,6 @@ class Backend {
     // provide an map from user program block name to hard-coded names.
     std::map<cstring, cstring>       pipeline_namemap;
 
- protected:
-    ErrorValue retrieveErrorValue(const IR::Member* mem) const;
-    void createFieldAliases(const char *remapFile);
-    void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
-
  public:
     Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
             P4::ConvertEnums::EnumMapping* enumMap) :
@@ -116,7 +102,6 @@ class Backend {
     void serialize(std::ostream& out) const { jsonTop.serialize(out); }
     BMV2Options&          getOptions() const { return options; }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
-    ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
     ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
