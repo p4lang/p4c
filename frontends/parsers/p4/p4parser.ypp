@@ -745,6 +745,16 @@ enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
         "{" identifierList "}" { $$ = new IR::Type_Enum(@2, *$3, *$6); }
+    | optAnnotations ENUM BIT "<" INTEGER ">" name "{" specifiedIdentifierList "}"
+    ;
+
+specifiedIdentifierList
+    : specifiedIdentifier
+    | specifiedIdentifierList "," specifiedIdentifier
+    ;
+
+specifiedIdentifier
+    : name "=" initializer
     ;
 
 errorDeclaration
