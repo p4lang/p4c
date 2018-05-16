@@ -1,7 +1,7 @@
 extern Virtual {
     Virtual();
-    abstract bit<16> f(in bit<16> ix);
     void run(in bit<16> ix);
+    @synchronous(run) abstract bit<16> f(in bit<16> ix);
 }
 
 extern State {

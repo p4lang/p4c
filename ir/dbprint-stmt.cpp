@@ -24,7 +24,7 @@ void IR::ReturnStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << "return";
     if (expression) {
-        out << Prec_Low << expression << setprec(prec); }
+        out << " " << Prec_Low << expression << setprec(prec); }
     if (!prec) out << ';';
 }
 
