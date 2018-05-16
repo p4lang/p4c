@@ -127,6 +127,7 @@ class TypeInference : public Transform {
 
     // various helpers
     bool hasVarbitsOrUnions(const IR::Type* type) const;
+    bool onlyBitsOrBitStructs(const IR::Type* type) const;
     void checkCorelibMethods(const ExternMethod* em) const;
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);

@@ -685,6 +685,10 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
+        } else if (dest->is<IR::Type_Struct>()) {
+            auto t = dest->to<IR::Type_Struct>();
+            if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(dest))
+                return true;
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
@@ -693,6 +697,15 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         }
     } else if (src->is<IR::Type_InfInt>()) {
         return dest->is<IR::Type_Bits>();
+    } else if (src->is<IR::Type_Struct>()) {
+      if (dest->is<IR::Type_Bits>()) {
+          auto f = dest->to<IR::Type_Bits>();
+          auto t = src->to<IR::Type_Struct>();
+          if ((f->size == t->width_bits()) && onlyBitsOrBitStructs(src)) {
+              return true;
+          }
+      }
+      return dest->is<IR::Type_Bits>();
     }
     return false;
 }
@@ -1285,8 +1298,15 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
+    // See PR # 971 related to fixing p4lang/p4-spec#342
+    // This experemental code augments the return statement below
+    // to allow a struct in a P4 header.  Further, the struct
+    // MUST be a bit-vector struct as defined in Issue 342.
+    // The canonical form of the header is used to check if
+    // the struct in the header is a bit-vector struct.
     auto validator = [] (const IR::Type* t)
-            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
+            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>()
+              || t->is<IR::Type_Struct>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1302,6 +1322,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                           varbit, field);
                 return type;
             }
+        } else if (ftype->is<IR::Type_Struct>()) {
+          for (auto nfield : ftype->to<IR::Type_Struct>()->fields) {
+               auto ntype = getType(nfield);
+               if (ntype == nullptr)
+                   return type;
+               if (!onlyBitsOrBitStructs(ntype)) {
+                   typeError("struct %1% in header %2% contains non-fixed"
+                             " width bitfields or structs",
+                             field, type->toString());
+                   return type;
+               }
+          }
         }
     }
     return type;
@@ -2085,8 +2117,10 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
-    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
-        ::error("%1%: casts are only supported to base types", expression->destType);
+    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()
+        && !castType->is<IR::Type_Struct>()) {
+        ::error("%1%: casts are only supported to base types or bit-vector structs",
+                expression->destType);
         return expression;
     }
 
@@ -2579,6 +2613,22 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
         }
     }
     return false;
+}
+
+bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
+    // called for a canonical type
+    if (type->is<IR::Type_Bits>()) {
+        return true;
+    } else if (auto ht = type->to<IR::Type_Struct>()) {
+        for (auto f : ht->fields) {
+            auto ftype = typeMap->getType(f);
+            if (ftype == nullptr)
+                continue;
+            if (!onlyBitsOrBitStructs(ftype))
+                return false;
+        }
+    }
+    return true;
 }
 
 void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
