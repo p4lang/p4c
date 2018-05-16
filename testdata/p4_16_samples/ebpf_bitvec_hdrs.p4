@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Cavium Networks, Inc.
+Copyright 2017 Cavium, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ limitations under the License.
 #ifndef _EBPF_HEADERS_
 #define _EBPF_HEADERS_
 
-struct ipaddr
-{
+struct ipaddr {
    bit<24> lower24Bits;
    bit<8>  upper8Bits;
 }
@@ -27,8 +26,7 @@ struct ipaddr
 @ipv4address     typedef bit<32>     IPv4Address;
 
 // standard Ethernet header
-header Ethernet_h
-{
+header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
     bit<16> etherType;

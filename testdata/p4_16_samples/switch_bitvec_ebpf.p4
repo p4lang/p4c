@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Cavium Networks, Inc.
+Copyright 2017 Cavium, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,21 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <ebpf_model.p4>
 #include <core.p4>
-
+#include <ebpf_model.p4>
 #include "ebpf_bitvec_hdrs.p4"
 
-struct Headers_t
-{
+struct Headers_t {
     Ethernet_h ethernet;
     IPv4_h     ipv4;
 }
 
-parser prs(packet_in p, out Headers_t headers)
-{
-    state start
-    {
+parser prs(packet_in p, out Headers_t headers) {
+    state start {
         p.extract(headers.ethernet);
         transition select(headers.ethernet.etherType)
         {
@@ -37,17 +33,14 @@ parser prs(packet_in p, out Headers_t headers)
         }
     }
 
-    state ip
-    {
+    state ip {
         p.extract(headers.ipv4);
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, out bool pass)
-{
-    action Reject(IPv4Address add)
-    {
+control pipe(inout Headers_t headers, out bool pass) {
+    action Reject(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr.lower24Bits = add[23:0];
         headers.ipv4.srcAddr.upper8Bits  = add[7:0];	
