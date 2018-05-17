@@ -278,6 +278,7 @@ declaration
     | instantiation           { $$ = $1; }
     | errorDeclaration        { driver.onReadErrorDeclaration($1); $$ = nullptr; }
     | matchKindDeclaration    { $$ = $1; }
+    | functionDeclaration     { $$ = $1; }
     ;
 
 nonTypeName
