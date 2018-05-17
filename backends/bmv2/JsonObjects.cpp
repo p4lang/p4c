@@ -23,8 +23,7 @@ namespace BMV2 {
 const int JSON_MAJOR_VERSION = 2;
 const int JSON_MINOR_VERSION = 18;
 
-JsonObjects::JsonObjects() {
-    toplevel = new Util::JsonObject();
+JsonObjects::JsonObjects(Util::JsonObject* toplevel) : toplevel(toplevel) {
     meta = new Util::JsonObject();
     header_types = insert_array_field(toplevel, "header_types");
     headers = insert_array_field(toplevel, "headers");
@@ -49,6 +48,7 @@ JsonObjects::JsonObjects() {
     force_arith = insert_array_field(toplevel, "force_arith");
     externs = insert_array_field(toplevel, "extern_instances");
     field_aliases = insert_array_field(toplevel, "field_aliases");
+
 }
 
 Util::JsonObject*

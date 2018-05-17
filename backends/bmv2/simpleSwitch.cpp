@@ -238,7 +238,7 @@ SimpleSwitchBackend::convertExternFunctions(Util::JsonArray *result,
             }
             cstring name = refMap->newName("fl");
             auto emptylist = new IR::ListExpression({});
-            id = createFieldList(emptylist, "field_lists", name, field_lists);
+            id = createFieldList(emptylist, "field_lists", name, json->field_lists);
         } else {
             if (mc->arguments->size() != 3) {
                 modelError("Expected 3 arguments for %1%", mc);
@@ -246,7 +246,7 @@ SimpleSwitchBackend::convertExternFunctions(Util::JsonArray *result,
             }
             cstring name = refMap->newName("fl");
             id = createFieldList(mc->arguments->at(2)->expression, "field_lists", name,
-                                 field_lists);
+                                 json->field_lists);
         }
         auto cloneType = mc->arguments->at(0);
         auto ei = P4::EnumInstance::resolve(cloneType->expression, typeMap);
@@ -332,7 +332,7 @@ SimpleSwitchBackend::convertExternFunctions(Util::JsonArray *result,
             }
         }
         int id = createFieldList(mc->arguments->at(1)->expression, "learn_lists",
-                                 listName, learn_lists);
+                                 listName, json->learn_lists);
         auto cst = new IR::Constant(id);
         typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = conv->convert(cst);
@@ -366,7 +366,7 @@ SimpleSwitchBackend::convertExternFunctions(Util::JsonArray *result,
             }
         }
         int id = createFieldList(mc->arguments->at(0)->expression, "field_lists",
-                                 listName, field_lists);
+                                 listName, json->field_lists);
         auto cst = new IR::Constant(id);
         typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = conv->convert(cst);
@@ -430,7 +430,7 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
         }
         jctr->emplace("size", sz->to<IR::Constant>()->value);
         jctr->emplace("is_direct", false);
-        counters->append(jctr);
+        json->counters->append(jctr);
     } else if (eb->type->name == v1model.meter.name) {
         auto jmtr = new Util::JsonObject();
         jmtr->emplace("name", name);
@@ -460,7 +460,7 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
         else
             ::error("Unexpected meter type %1%", mkind->getNode());
         jmtr->emplace("type", type);
-        meter_arrays->append(jmtr);
+        json->meter_arrays->append(jmtr);
     } else if (eb->type->name == v1model.registers.name) {
         auto jreg = new Util::JsonObject();
         jreg->emplace("name", name);
@@ -495,7 +495,7 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
             return;
         }
         jreg->emplace("bitwidth", width);
-        register_arrays->append(jreg);
+        json->register_arrays->append(jreg);
     } else if (eb->type->name == v1model.directCounter.name) {
         auto it = directCounterMap.find(name);
         if (it == directCounterMap.end()) {
@@ -507,7 +507,7 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
             // TODO(jafingerhut) - add line/col here?
             jctr->emplace("is_direct", true);
             jctr->emplace("binding", it->second->controlPlaneName());
-            counters->append(jctr);
+            json->counters->append(jctr);
         }
     } else if (eb->type->name == v1model.directMeter.name) {
         auto info = meterMap.getInfo(c);
@@ -543,7 +543,7 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
         jmtr->emplace("binding", tblname);
         auto result = conv->convert(info->destinationField);
         jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
-        meter_arrays->append(jmtr);
+        json->meter_arrays->append(jmtr);
     } else if (eb->type->name == v1model.action_profile.name ||
             eb->type->name == v1model.action_selector.name) {
         // Might call this multiple times if the selector/profile is used more than
@@ -989,38 +989,12 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& op
     toplevel = evaluator->getToplevelBlock();
     toplevel->apply(*new BMV2::BuildResourceMap(this));
 
-    jsonTop.emplace("program", options.file);
-    jsonTop.emplace("__meta__", json->meta);
-    jsonTop.emplace("header_types", json->header_types);
-    jsonTop.emplace("headers", json->headers);
-    jsonTop.emplace("header_stacks", json->header_stacks);
-    jsonTop.emplace("header_union_types", json->header_union_types);
-    jsonTop.emplace("header_unions", json->header_unions);
-    jsonTop.emplace("header_union_stacks", json->header_union_stacks);
-    field_lists = mkArrayField(&jsonTop, "field_lists");
     // field list and learn list ids in bmv2 are not consistent with ids for
     // other objects: they need to start at 1 (not 0) since the id is also used
     // as a "flag" to indicate that a certain simple_switch primitive has been
     // called (e.g. resubmit or generate_digest)
     BMV2::nextId("field_lists");
-    jsonTop.emplace("errors", json->errors);
-    jsonTop.emplace("enums", json->enums);
-    jsonTop.emplace("parsers", json->parsers);
-    jsonTop.emplace("parse_vsets", json->parse_vsets);
-    jsonTop.emplace("deparsers", json->deparsers);
-    meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
-    counters = mkArrayField(&jsonTop, "counter_arrays");
-    register_arrays = mkArrayField(&jsonTop, "register_arrays");
-    jsonTop.emplace("calculations", json->calculations);
-    learn_lists = mkArrayField(&jsonTop, "learn_lists");
     BMV2::nextId("learn_lists");
-    jsonTop.emplace("actions", json->actions);
-    jsonTop.emplace("pipelines", json->pipelines);
-    jsonTop.emplace("checksums", json->checksums);
-    force_arith = mkArrayField(&jsonTop, "force_arith");
-    jsonTop.emplace("extern_instances", json->externs);
-    jsonTop.emplace("field_aliases", json->field_aliases);
-
     json->add_program_info(options.file);
     json->add_meta_info();
 
@@ -1052,7 +1026,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& op
         new ParserConverter(refMap, typeMap, json, conv),
         new VisitFunctor([this]() { createActions(); }),
         new ControlConverter(this, refMap, typeMap, json, conv, &structure, options.emitExterns),
-        new ChecksumConverter(this),
+        new ChecksumConverter(this, json),
         new DeparserConverter(this),
     };
 

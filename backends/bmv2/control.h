@@ -66,9 +66,11 @@ class ControlConverter : public Inspector {
 
 class ChecksumConverter : public Inspector {
     Backend* backend;
+    BMV2::JsonObjects*     json;
+
  public:
     bool preorder(const IR::P4Control* b) override;
-    explicit ChecksumConverter(Backend *backend) : backend(backend)
+    explicit ChecksumConverter(Backend *backend, BMV2::JsonObjects* json) : backend(backend), json(json)
     { setName("UpdateChecksum"); }
 };
 

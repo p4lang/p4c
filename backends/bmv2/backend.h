@@ -59,14 +59,6 @@ class Backend {
     DirectMeterMap                   meterMap;
 
     BMV2::JsonObjects*               json;
-    Util::JsonArray*                 counters;
-    Util::JsonArray*                 externs;
-    Util::JsonArray*                 field_lists;
-    Util::JsonArray*                 learn_lists;
-    Util::JsonArray*                 meter_arrays;
-    Util::JsonArray*                 register_arrays;
-    Util::JsonArray*                 force_arith;
-    Util::JsonArray*                 field_aliases;
 
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
@@ -88,8 +80,8 @@ class Backend {
             P4::ConvertEnums::EnumMapping* enumMap) :
         options(options),
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
-        corelib(P4::P4CoreLibrary::instance),
-        json(new BMV2::JsonObjects()) { refMap->setIsV1(options.isv1()); }
+        corelib(P4::P4CoreLibrary::instance), json(new BMV2::JsonObjects(&jsonTop)) {
+        refMap->setIsV1(options.isv1()); }
     void serialize(std::ostream& out) const { jsonTop.serialize(out); }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ExpressionConverter * getExpressionConverter() { return conv; }

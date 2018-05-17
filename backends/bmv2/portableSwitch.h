@@ -122,11 +122,11 @@ class PsaProgramStructure : public BMV2::ProgramParts {
     ordered_map<cstring, cstring> field_aliases;
 
 public:
-    PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+    PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, Util::JsonObject* jsonTop)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
-        json = new BMV2::JsonObjects();
+        json = new BMV2::JsonObjects(jsonTop);
     }
 
     const IR::P4Program* create(const IR::P4Program* program);
