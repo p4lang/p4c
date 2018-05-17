@@ -27,8 +27,9 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
+#include "backend.h"
 
-namespace P4 {
+namespace BMV2 {
 
 enum gress_t {
     INGRESS,
@@ -41,7 +42,7 @@ enum block_t {
     DEPARSER
 };
 
-class PortableSwitchExpressionConverter : public BMV2::ExpressionConverter {
+class PortableSwitchExpressionConverter : public ExpressionConverter {
  public:
     PortableSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                                       BMV2::ProgramParts* structure, cstring scalarsName) :
@@ -75,8 +76,8 @@ struct ParserInfo {
 
 class PsaProgramStructure : public BMV2::ProgramParts {
     BMV2::JsonObjects*   json;     // output json data structure
-    ReferenceMap*        refMap;
-    TypeMap*             typeMap;
+    P4::ReferenceMap*    refMap;
+    P4::TypeMap*         typeMap;
 
  public:
     // We place scalar user metadata fields (i.e., bit<>, bool)
@@ -121,7 +122,7 @@ class PsaProgramStructure : public BMV2::ProgramParts {
     ordered_map<cstring, cstring> field_aliases;
 
 public:
-    PsaProgramStructure(ReferenceMap* refMap, TypeMap* typeMap)
+    PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -161,12 +162,12 @@ class ParsePsaArchitecture : public Inspector {
 };
 
 class InspectPsaProgram : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
     PsaProgramStructure *pinfo;
 
  public:
-    explicit InspectPsaProgram(ReferenceMap* refMap, TypeMap* typeMap, PsaProgramStructure *pinfo)
+    explicit InspectPsaProgram(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, PsaProgramStructure *pinfo)
         : refMap(refMap), typeMap(typeMap), pinfo(pinfo) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -209,6 +210,26 @@ public:
     }
 };
 
-}  // namespace P4
+class PortableSwitchBackend : public Backend {
+    BMV2Options &options;
+ public:
+    void convert(const IR::ToplevelBlock* block, BMV2::BMV2Options& options) override;
+    void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
+                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
+                              const bool& emitExterns) override {}
+    void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
+                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s) override {}
+    void convertExternInstances(const IR::Declaration *c,
+                                const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
+                                BMV2::SharedActionSelectorCheck& selector_check,
+                                const bool& emitExterns) override {}
+    void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
+                         Util::JsonArray* calculations, bool verify) override { }
+    PortableSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                          P4::ConvertEnums::EnumMapping* enumMap) :
+        Backend(options, refMap, typeMap, enumMap), options(options) { }
+};
+
+}  // namespace BMV2
 
 #endif  /* _BACKENDS_BMV2_PORTABLESWITCH_H_ */

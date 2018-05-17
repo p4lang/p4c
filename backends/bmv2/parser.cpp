@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "parser.h"
 #include "JsonObjects.h"
+#include "backend.h"
 
 namespace BMV2 {
 

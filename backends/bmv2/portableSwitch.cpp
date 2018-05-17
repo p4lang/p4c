@@ -17,7 +17,7 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "portableSwitch.h"
 
-namespace P4 {
+namespace BMV2 {
 
 const IR::P4Program* PsaProgramStructure::create(const IR::P4Program* program) {
     createTypes();
@@ -402,4 +402,73 @@ bool InspectPsaProgram::preorder(const IR::P4Control *c) {
     return false;
 }
 
-}  // namespace P4
+void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& options) {
+    CHECK_NULL(tlb);
+    PsaProgramStructure structure(refMap, typeMap);
+
+    auto parsePsaArch = new ParsePsaArchitecture(&structure);
+    auto main = tlb->getMain();
+    if (!main) return;
+    main->apply(*parsePsaArch);
+
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    auto program = tlb->getProgram();
+    PassManager toJson = {
+        // new RenameUserMetadata(refMap, userMetaType, userMetaName),
+        new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        new P4::MoveActionsToTables(refMap, typeMap),
+        new P4::TypeChecking(refMap, typeMap),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new LowerExpressions(typeMap),
+        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::TypeChecking(refMap, typeMap),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::RemoveAllUnusedDeclarations(refMap),
+        evaluator,
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new DiscoverStructure(&structure),
+        new InspectPsaProgram(refMap, typeMap, &structure),
+        new ConvertToJson(&structure),
+    };
+    program->apply(toJson);
+
+    auto json = structure.getJson();
+    jsonTop.emplace("program", options.file);
+    jsonTop.emplace("__meta__", json->meta);
+    jsonTop.emplace("header_types", json->header_types);
+    jsonTop.emplace("headers", json->headers);
+    jsonTop.emplace("header_stacks", json->header_stacks);
+    jsonTop.emplace("header_union_types", json->header_union_types);
+    jsonTop.emplace("header_unions", json->header_unions);
+    jsonTop.emplace("header_union_stacks", json->header_union_stacks);
+    field_lists = mkArrayField(&jsonTop, "field_lists");
+    // field list and learn list ids in bmv2 are not consistent with ids for
+    // other objects: they need to start at 1 (not 0) since the id is also used
+    // as a "flag" to indicate that a certain simple_switch primitive has been
+    // called (e.g. resubmit or generate_digest)
+    BMV2::nextId("field_lists");
+    jsonTop.emplace("errors", json->errors);
+    jsonTop.emplace("enums", json->enums);
+    jsonTop.emplace("parsers", json->parsers);
+    jsonTop.emplace("parse_vsets", json->parse_vsets);
+    jsonTop.emplace("deparsers", json->deparsers);
+    meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
+    counters = mkArrayField(&jsonTop, "counter_arrays");
+    register_arrays = mkArrayField(&jsonTop, "register_arrays");
+    jsonTop.emplace("calculations", json->calculations);
+    learn_lists = mkArrayField(&jsonTop, "learn_lists");
+    BMV2::nextId("learn_lists");
+    jsonTop.emplace("actions", json->actions);
+    jsonTop.emplace("pipelines", json->pipelines);
+    jsonTop.emplace("checksums", json->checksums);
+    force_arith = mkArrayField(&jsonTop, "force_arith");
+    jsonTop.emplace("extern_instances", json->externs);
+    jsonTop.emplace("field_aliases", json->field_aliases);
+
+    json->add_program_info(options.file);
+    json->add_meta_info();
+}
+
+}  // namespace BMV2

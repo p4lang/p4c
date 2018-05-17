@@ -28,16 +28,16 @@ limitations under the License.
 #include "expression.h"
 #include "helpers.h"
 #include "sharedActionSelectorCheck.h"
-#include "simpleSwitch.h"
 
 namespace BMV2 {
 
 class ControlConverter : public Inspector {
-    Backend*               backend;
+    Backend* backend;
     P4::ReferenceMap*      refMap;
     P4::TypeMap*           typeMap;
-    ExpressionConverter*   conv;
     BMV2::JsonObjects*     json;
+    ExpressionConverter*   conv;
+    ProgramParts*          structure;
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
@@ -57,9 +57,10 @@ class ControlConverter : public Inspector {
  public:
     const bool emitExterns;
     bool preorder(const IR::P4Control* b) override;
-    explicit ControlConverter(Backend *backend, const bool& emitExterns_) : backend(backend),
-        refMap(backend->getRefMap()), typeMap(backend->getTypeMap()),
-        conv(backend->getExpressionConverter()), json(backend->json), emitExterns(emitExterns_)
+    explicit ControlConverter(Backend* backend, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                              BMV2::JsonObjects* json, BMV2::ExpressionConverter* conv,
+                              ProgramParts* structure, const bool& emitExterns_) :
+        backend(backend), refMap(refMap), typeMap(typeMap), json(json), conv(conv), structure(structure), emitExterns(emitExterns_)
     { setName("ControlConverter"); }
 };
 

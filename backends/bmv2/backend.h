@@ -32,19 +32,20 @@ limitations under the License.
 #include "JsonObjects.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
+#include "midend/actionSynthesis.h"
+#include "midend/removeLeftSlices.h"
+#include "sharedActionSelectorCheck.h"
 #include "options.h"
-#include "portableSwitch.h"
-#include "simpleSwitch.h"
 
 namespace BMV2 {
 
-enum class Target { PORTABLE_SWITCH, SIMPLE_SWITCH };
-
 class ExpressionConverter;
 
+// Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
+ public:
     BMV2Options&                     options;
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
@@ -56,14 +57,8 @@ class Backend {
     Util::JsonObject                 jsonTop;
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
-    // bmv2 backend supports multiple target architectures, we create different
-    // json generators for each architecture to handle the differences in json
-    // format for each architecture.
-    P4V1::SimpleSwitch*              simpleSwitch;
 
- public:
     BMV2::JsonObjects*               json;
-    Target                           target;
     Util::JsonArray*                 counters;
     Util::JsonArray*                 externs;
     Util::JsonArray*                 field_lists;
@@ -94,32 +89,229 @@ class Backend {
         options(options),
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
         corelib(P4::P4CoreLibrary::instance),
-        simpleSwitch(new P4V1::SimpleSwitch(this)),
-        json(new BMV2::JsonObjects()),
-        target(Target::SIMPLE_SWITCH) { refMap->setIsV1(options.isv1()); }
-    void convert_simple_switch(const IR::ToplevelBlock* block, BMV2Options& options);
-    void convert_portable_switch(const IR::ToplevelBlock* block, BMV2Options& options);
+        json(new BMV2::JsonObjects()) { refMap->setIsV1(options.isv1()); }
     void serialize(std::ostream& out) const { jsonTop.serialize(out); }
-    BMV2Options&          getOptions() const { return options; }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
-    ProgramParts &        getStructure() { return structure; }
     P4::ReferenceMap*     getRefMap()    { return refMap; }
     P4::TypeMap*          getTypeMap()   { return typeMap; }
-    P4V1::SimpleSwitch*   getSimpleSwitch()        { return simpleSwitch; }
     const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
-    /// True if this parameter represents the standard_metadata input.
-    bool isStandardMetadataParameter(const IR::Parameter* param);
 
+    virtual void convert(const IR::ToplevelBlock* block, BMV2Options& options) = 0;
+    virtual void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
+                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
+                              const bool& emitExterns) = 0;
+    virtual void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
+                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s) = 0;
+    virtual void convertExternInstances(const IR::Declaration *c,
+                                const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
+                                BMV2::SharedActionSelectorCheck& selector_check,
+                                const bool& emitExterns) = 0;
+    virtual void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
+                                 Util::JsonArray* calculations, bool verify) = 0;
     /**
      * Returns the correct operation for performing an assignment in
      * the BMv2 JSON language depending on the type of data assigned.
      */
     static cstring jsonAssignment(const IR::Type* type, bool inParser);
-    /// True if this parameter represents the user_metadata input.
-    bool isUserMetadataParameter(const IR::Parameter* param);
+};
+
+/**
+This class implements a policy suitable for the SynthesizeActions pass.
+The policy is: do not synthesize actions for the controls whose names
+are in the specified set.
+For example, we expect that the code in the deparser will not use any
+tables or actions.
+*/
+class SkipControls : public P4::ActionSynthesisPolicy {
+    // set of controls where actions are not synthesized
+    const std::set<cstring> *skip;
+
+public:
+    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    bool convert(const IR::P4Control* control) const {
+        if (skip->find(control->name) != skip->end())
+            return false;
+        return true;
+    }
+};
+
+/**
+This class implements a policy suitable for the RemoveComplexExpression pass.
+The policy is: only remove complex expression for the controls whose names
+are in the specified set.
+For example, we expect that the code in ingress and egress will have complex
+expression removed.
+*/
+class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
+    const std::set<cstring> *process;
+
+public:
+    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
+        CHECK_NULL(process);
+    }
+    bool convert(const IR::P4Control* control) const {
+        if (process->find(control->name) != process->end())
+            return true;
+        return false;
+    }
+};
+
+/**
+This pass adds @name annotations to all fields of the user metadata
+structure so that they do not clash with fields of the headers
+structure.  This is necessary because both of them become global
+objects in the output json.
+*/
+class RenameUserMetadata : public Transform {
+    P4::ReferenceMap* refMap;
+    const IR::Type_Struct* userMetaType;
+    // Used as a prefix for the fields of the userMetadata structure
+    // and also as a name for the userMetadata type clone.
+    cstring namePrefix;
+
+public:
+    RenameUserMetadata(P4::ReferenceMap* refMap,
+                       const IR::Type_Struct* userMetaType, cstring namePrefix):
+        refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix)
+    { setName("RenameUserMetadata"); CHECK_NULL(refMap); }
+
+    const IR::Node* postorder(IR::Type_Struct* type) override {
+        // Clone the user metadata type.  We want this type to be used
+        // only for parameters.  For any other variables we will used
+        // the clone we create.
+        if (userMetaType != getOriginal())
+            return type;
+
+        auto vec = new IR::IndexedVector<IR::Node>();
+        LOG2("Creating clone" << getOriginal());
+        auto clone = type->clone();
+        clone->name = namePrefix;
+        vec->push_back(clone);
+
+        // Rename all fields
+        IR::IndexedVector<IR::StructField> fields;
+        for (auto f : type->fields) {
+            auto anno = f->getAnnotation(IR::Annotation::nameAnnotation);
+            cstring suffix = "";
+            if (anno != nullptr)
+                suffix = IR::Annotation::getName(anno);
+            if (suffix.startsWith(".")) {
+                // We can't change the name of this field.
+                // Hopefully the user knows what they are doing.
+                fields.push_back(f->clone());
+                continue;
+            }
+
+            if (!suffix.isNullOrEmpty())
+                suffix = cstring(".") + suffix;
+            else
+                suffix = cstring(".") + f->name;
+            cstring newName = namePrefix + suffix;
+            auto stringLit = new IR::StringLiteral(newName);
+            LOG2("Renaming " << f << " to " << newName);
+            auto annos = f->annotations->addOrReplace(
+                IR::Annotation::nameAnnotation, stringLit);
+            auto field = new IR::StructField(f->srcInfo, f->name, annos, f->type);
+            fields.push_back(field);
+        }
+
+        auto annotated = new IR::Type_Struct(
+            type->srcInfo, type->name, type->annotations, std::move(fields));
+        vec->push_back(annotated);
+        return vec;
+    }
+
+    const IR::Node* preorder(IR::Type_Name* type) override {
+        // Find any reference to the user metadata type that is used
+        // (but not for parameters or the package instantiation)
+        // and replace it with the cloned type.
+        if (!findContext<IR::Declaration_Variable>())
+            return type;
+        auto decl = refMap->getDeclaration(type->path);
+        if (decl == userMetaType)
+            type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
+        LOG2("Replacing reference with " << type);
+        return type;
+    }
+};
+
+class BuildResourceMap : public Inspector {
+public:
+    Backend* backend;
+
+    BuildResourceMap(Backend *backend) : backend(backend) {};
+
+    bool preorder(const IR::ControlBlock* control) override {
+        backend->resourceMap.emplace(control->container, control);
+        for (auto cv : control->constantValue) {
+            backend->resourceMap.emplace(cv.first, cv.second);
+        }
+
+        for (auto c : control->container->controlLocals) {
+            if (c->is<IR::InstantiatedBlock>()) {
+                backend->resourceMap.emplace(c, control->getValue(c));
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::ParserBlock* parser) override {
+        backend->resourceMap.emplace(parser->container, parser);
+        for (auto cv : parser->constantValue) {
+            backend->resourceMap.emplace(cv.first, cv.second);
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+
+        for (auto c : parser->container->parserLocals) {
+            if (c->is<IR::InstantiatedBlock>()) {
+                backend->resourceMap.emplace(c, parser->getValue(c));
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::TableBlock* table) override {
+        backend->resourceMap.emplace(table->container, table);
+        for (auto cv : table->constantValue) {
+            backend->resourceMap.emplace(cv.first, cv.second);
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::PackageBlock* package) override {
+        for (auto cv : package->constantValue) {
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::ToplevelBlock* tlb) override {
+        auto package = tlb->getMain();
+        visit(package);
+        return false;
+    }
+};
+
+class ExtractMatchKind : public Inspector {
+public:
+    Backend *backend;
+    ExtractMatchKind(Backend* backend) : backend(backend) {}
+    bool preorder(const IR::Declaration_MatchKind* kind) override {
+        for (auto member : kind->members) {
+            backend->match_kinds.insert(member->name);
+        }
+        return false;
+    }
 };
 
 }  // namespace BMV2

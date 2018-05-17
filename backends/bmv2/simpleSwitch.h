@@ -20,26 +20,20 @@ limitations under the License.
 #include <algorithm>
 #include <cstring>
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "midend/convertEnums.h"
 #include "sharedActionSelectorCheck.h"
+#include "backend.h"
+#include "deparser.h"
 
 namespace BMV2 {
 
-class Backend;
-
-}  // namespace BMV2
-
-namespace P4V1 {
-
-// Unfortunately, we cannot use ExpressionConverter as the subclass name.
-// Dynamic dispatching does not seems to work in clang, when the subclass has
-// the same name as the superclass, and they are in different namespaces.
-class SimpleSwitchExpressionConverter : public BMV2::ExpressionConverter {
+class SimpleSwitchExpressionConverter : public ExpressionConverter {
     const IR::ToplevelBlock* toplevel;
 
  public:
     SimpleSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-        BMV2::ProgramParts* structure, cstring scalarsName, const IR::ToplevelBlock* toplevel) :
-        BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName), toplevel(toplevel) { }
+        ProgramParts* structure, cstring scalarsName, const IR::ToplevelBlock* toplevel) :
+        ExpressionConverter(refMap, typeMap, structure, scalarsName), toplevel(toplevel) { }
 
     void modelError(const char* format, const IR::Node* node) {
         ::error(format, node);
@@ -126,9 +120,9 @@ class SimpleSwitchExpressionConverter : public BMV2::ExpressionConverter {
     }
 };
 
-class SimpleSwitch {
-    BMV2::Backend* backend;
-    V1Model&       v1model;
+class SimpleSwitchBackend : public Backend {
+    BMV2Options&        options;
+    P4V1::V1Model&      v1model;
 
  protected:
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
@@ -142,15 +136,15 @@ class SimpleSwitch {
     void modelError(const char* format, const IR::Node* place) const;
     void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
                               const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
-                              const bool& emitExterns);
+                              const bool& emitExterns) override;
     void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
-                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s);
+                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s) override;
     void convertExternInstances(const IR::Declaration *c,
                                 const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
                                 BMV2::SharedActionSelectorCheck& selector_check,
-                                const bool& emitExterns);
+                                const bool& emitExterns) override;
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
-                         Util::JsonArray* calculations, bool verify);
+                         Util::JsonArray* calculations, bool verify) override;
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params);
@@ -167,11 +161,13 @@ class SimpleSwitch {
     const IR::P4Control* getCompute(const IR::ToplevelBlock* blk);
     const IR::P4Control* getVerify(const IR::ToplevelBlock* blk);
 
-    explicit SimpleSwitch(BMV2::Backend* backend) :
-        backend(backend), v1model(V1Model::instance)
-    { CHECK_NULL(backend); }
+    void convert(const IR::ToplevelBlock* block, BMV2::BMV2Options& options) override;
+
+    SimpleSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                        P4::ConvertEnums::EnumMapping* enumMap) :
+        Backend(options, refMap, typeMap, enumMap), options(options), v1model(P4V1::V1Model::instance) { }
 };
 
-}  // namespace P4V1
+}  // namespace BMV2
 
 #endif /* _BACKENDS_BMV2_SIMPLESWITCH_H_ */

@@ -28,9 +28,10 @@ limitations under the License.
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "backend.h"
 #include "midend.h"
 #include "JsonObjects.h"
+#include "simpleSwitch.h"
+#include "portableSwitch.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -87,27 +88,16 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    // backend depends on the modified refMap and typeMap from midEnd.
-    BMV2::Backend backend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+    // default backend is simple switch
+    BMV2::Backend* backend = new BMV2::SimpleSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
 
-    if (auto arch = getenv("P4C_DEFAULT_ARCH")) {
-        if (!strncmp(arch, "v1model", 7))
-            backend.target = BMV2::Target::SIMPLE_SWITCH;
-        else if (!strncmp(arch, "psa", 3))
-            backend.target = BMV2::Target::PORTABLE_SWITCH;
-    } else {
-        if (options.arch == "v1model")
-            backend.target = BMV2::Target::SIMPLE_SWITCH;
-        else if (options.arch == "psa")
-            backend.target = BMV2::Target::PORTABLE_SWITCH;
+    // if arch is psa, use portable switch
+    if (options.arch == "psa") {
+        backend = new BMV2::PortableSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
     }
 
     try {
-        if (backend.target == BMV2::Target::SIMPLE_SWITCH) {
-            backend.convert_simple_switch(toplevel, options);
-        } else if (backend.target == BMV2::Target::PORTABLE_SWITCH) {
-            backend.convert_portable_switch(toplevel, options);
-        }
+        backend->convert(toplevel, options);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -118,7 +108,7 @@ int main(int argc, char *const argv[]) {
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.outputFile, false);
         if (out != nullptr) {
-            backend.serialize(*out);
+            backend->serialize(*out);
             out->flush();
         }
     }

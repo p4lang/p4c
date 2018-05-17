@@ -27,7 +27,6 @@ set (BMV2_BACKEND_SRCS
   control.cpp
   deparser.cpp
   expression.cpp
-  extern.cpp
   globals.cpp
   header.cpp
   helpers.cpp
@@ -48,7 +47,6 @@ set (BMV2_BACKEND_HDRS
   control.h
   deparser.h
   expression.h
-  extern.h
   globals.h
   header.h
   helpers.h

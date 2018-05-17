@@ -22,8 +22,11 @@ limitations under the License.
 #include <cstring>
 #include <set>
 #include "frontends/p4/fromv1.0/v1model.h"
-#include "backends/bmv2/backend.h"
 #include "simpleSwitch.h"
+#include "control.h"
+#include "deparser.h"
+#include "globals.h"
+#include "header.h"
 
 using BMV2::mkArrayField;
 using BMV2::mkParameters;
@@ -31,22 +34,16 @@ using BMV2::mkPrimitive;
 using BMV2::nextId;
 using BMV2::stringRepr;
 
-namespace P4V1 {
-
-// need a class to generate simpleSwitch
-
-cstring jsonMetadataParameterName = "standard_metadata";
+namespace BMV2 {
 
 void
-SimpleSwitch::modelError(const char* format, const IR::Node* node) const {
+SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const {
     ::error(format, node);
     ::error("Are you using an up-to-date v1model.p4?");
 }
 
 void
-SimpleSwitch::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
-    auto typeMap = backend->getTypeMap();
-    auto conv = backend->getExpressionConverter();
+SimpleSwitchBackend::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
     if (expr->is<IR::ListExpression>()) {
         auto le = expr->to<IR::ListExpression>();
         for (auto e : le->components) {
@@ -86,7 +83,7 @@ SimpleSwitch::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
 
 // returns id of created field list
 int
-SimpleSwitch::createFieldList(const IR::Expression* expr, cstring group,
+SimpleSwitchBackend::createFieldList(const IR::Expression* expr, cstring group,
                               cstring listName, Util::JsonArray* field_lists) {
     auto fl = new Util::JsonObject();
     field_lists->append(fl);
@@ -100,7 +97,7 @@ SimpleSwitch::createFieldList(const IR::Expression* expr, cstring group,
 }
 
 cstring
-SimpleSwitch::convertHashAlgorithm(cstring algorithm) {
+SimpleSwitchBackend::convertHashAlgorithm(cstring algorithm) {
     cstring result;
     if (algorithm == v1model.algorithm.crc32.name)
         result = "crc32";
@@ -120,12 +117,11 @@ SimpleSwitch::convertHashAlgorithm(cstring algorithm) {
 }
 
 void
-SimpleSwitch::convertExternObjects(Util::JsonArray *result,
+SimpleSwitchBackend::convertExternObjects(Util::JsonArray *result,
                                    const P4::ExternMethod *em,
                                    const IR::MethodCallExpression *mc,
                                    const IR::StatOrDecl *s,
                                    const bool& emitExterns) {
-    auto conv = backend->getExpressionConverter();
     if (em->originalExternType->name == v1model.counter.name) {
         if (em->method->name == v1model.counter.increment.name) {
             if (mc->arguments->size() != 1) {
@@ -195,7 +191,7 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
                 return;
             }
             auto dest = mc->arguments->at(0);
-            backend->getMeterMap().setDestination(em->object, dest->expression);
+            meterMap.setDestination(em->object, dest->expression);
             // Do not generate any code for this operation
         }
     } else if (em->originalExternType->name == v1model.directCounter.name) {
@@ -228,13 +224,10 @@ SimpleSwitch::convertExternObjects(Util::JsonArray *result,
 }
 
 void
-SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
+SimpleSwitchBackend::convertExternFunctions(Util::JsonArray *result,
                                      const P4::ExternFunction *ef,
                                      const IR::MethodCallExpression *mc,
                                      const IR::StatOrDecl* s) {
-    auto refMap = backend->getRefMap();
-    auto typeMap = backend->getTypeMap();
-    auto conv = backend->getExpressionConverter();
     if (ef->method->name == v1model.clone.name ||
         ef->method->name == v1model.clone.clone3.name) {
         int id = -1;
@@ -245,7 +238,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             }
             cstring name = refMap->newName("fl");
             auto emptylist = new IR::ListExpression({});
-            id = createFieldList(emptylist, "field_lists", name, backend->field_lists);
+            id = createFieldList(emptylist, "field_lists", name, field_lists);
         } else {
             if (mc->arguments->size() != 3) {
                 modelError("Expected 3 arguments for %1%", mc);
@@ -253,7 +246,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             }
             cstring name = refMap->newName("fl");
             id = createFieldList(mc->arguments->at(2)->expression, "field_lists", name,
-                                 backend->field_lists);
+                                 field_lists);
         }
         auto cloneType = mc->arguments->at(0);
         auto ei = P4::EnumInstance::resolve(cloneType->expression, typeMap);
@@ -304,7 +297,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             return;
         }
         auto fields = mc->arguments->at(3);
-        auto calcName = createCalculation(ei->name, fields->expression, backend->json->calculations,
+        auto calcName = createCalculation(ei->name, fields->expression, json->calculations,
                                           false, nullptr);
         calculation->emplace("type", "calculation");
         calculation->emplace("value", calcName);
@@ -339,7 +332,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             }
         }
         int id = createFieldList(mc->arguments->at(1)->expression, "learn_lists",
-                                 listName, backend->learn_lists);
+                                 listName, learn_lists);
         auto cst = new IR::Constant(id);
         typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = conv->convert(cst);
@@ -373,7 +366,7 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
             }
         }
         int id = createFieldList(mc->arguments->at(0)->expression, "field_lists",
-                                 listName, backend->field_lists);
+                                 listName, field_lists);
         auto cst = new IR::Constant(id);
         typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = conv->convert(cst);
@@ -417,13 +410,11 @@ SimpleSwitch::convertExternFunctions(Util::JsonArray *result,
 }
 
 void
-SimpleSwitch::convertExternInstances(const IR::Declaration *c,
+SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
                                      const IR::ExternBlock* eb,
                                      Util::JsonArray* action_profiles,
                                      BMV2::SharedActionSelectorCheck& selector_check,
                                      const bool& emitExterns) {
-    CHECK_NULL(backend);
-    auto conv = backend->getExpressionConverter();
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     if (eb->type->name == v1model.counter.name) {
@@ -439,7 +430,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         }
         jctr->emplace("size", sz->to<IR::Constant>()->value);
         jctr->emplace("is_direct", false);
-        backend->counters->append(jctr);
+        counters->append(jctr);
     } else if (eb->type->name == v1model.meter.name) {
         auto jmtr = new Util::JsonObject();
         jmtr->emplace("name", name);
@@ -469,7 +460,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         else
             ::error("Unexpected meter type %1%", mkind->getNode());
         jmtr->emplace("type", type);
-        backend->meter_arrays->append(jmtr);
+        meter_arrays->append(jmtr);
     } else if (eb->type->name == v1model.registers.name) {
         auto jreg = new Util::JsonObject();
         jreg->emplace("name", name);
@@ -504,10 +495,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             return;
         }
         jreg->emplace("bitwidth", width);
-        backend->register_arrays->append(jreg);
+        register_arrays->append(jreg);
     } else if (eb->type->name == v1model.directCounter.name) {
-        auto it = backend->getDirectCounterMap().find(name);
-        if (it == backend->getDirectCounterMap().end()) {
+        auto it = directCounterMap.find(name);
+        if (it == directCounterMap.end()) {
             ::warning("%1%: Direct counter not used; ignoring", inst);
         } else {
             auto jctr = new Util::JsonObject();
@@ -516,10 +507,10 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
             // TODO(jafingerhut) - add line/col here?
             jctr->emplace("is_direct", true);
             jctr->emplace("binding", it->second->controlPlaneName());
-            backend->counters->append(jctr);
+            counters->append(jctr);
         }
     } else if (eb->type->name == v1model.directMeter.name) {
-        auto info = backend->getMeterMap().getInfo(c);
+        auto info = meterMap.getInfo(c);
         CHECK_NULL(info);
         CHECK_NULL(info->table);
         CHECK_NULL(info->destinationField);
@@ -552,7 +543,7 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
         jmtr->emplace("binding", tblname);
         auto result = conv->convert(info->destinationField);
         jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
-        backend->meter_arrays->append(jmtr);
+        meter_arrays->append(jmtr);
     } else if (eb->type->name == v1model.action_profile.name ||
             eb->type->name == v1model.action_selector.name) {
         // Might call this multiple times if the selector/profile is used more than
@@ -611,12 +602,9 @@ SimpleSwitch::convertExternInstances(const IR::Declaration *c,
 }
 
 cstring
-SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
+SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* fields,
                                 Util::JsonArray* calculations, bool withPayload,
                                 const IR::Node* sourcePositionNode = nullptr) {
-    auto typeMap = backend->getTypeMap();
-    auto refMap = backend->getRefMap();
-    auto conv = backend->getExpressionConverter();
     cstring calcName = refMap->newName("calc_");
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
@@ -656,13 +644,10 @@ SimpleSwitch::createCalculation(cstring algo, const IR::Expression* fields,
 }
 
 void
-SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* checksums,
+SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* checksums,
                               Util::JsonArray* calculations, bool verify) {
     if (errorCount() > 0)
         return;
-    auto typeMap = backend->getTypeMap();
-    auto refMap = backend->getRefMap();
-    auto conv = backend->getExpressionConverter();
     for (auto stat : block->components) {
         if (auto blk = stat->to<IR::BlockStatement>()) {
             convertChecksum(blk, checksums, calculations, verify);
@@ -713,7 +698,7 @@ SimpleSwitch::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* 
     }
 }
 
-void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
+void SimpleSwitchBackend::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                                      Util::JsonArray* result) {
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
@@ -737,15 +722,15 @@ void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             l = assign->left;
             r = assign->right;
 
-            auto type = backend->getTypeMap()->getType(l, true);
+            auto type = typeMap->getType(l, true);
             cstring operation = BMV2::Backend::jsonAssignment(type, false);
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
-            auto left = backend->getExpressionConverter()->convertLeftValue(l);
+            auto left = conv->convertLeftValue(l);
             parameters->append(left);
             bool convertBool = type->is<IR::Type_Boolean>();
-            auto right = backend->getExpressionConverter()->convert(r, true, true, convertBool);
+            auto right = conv->convert(r, true, true, convertBool);
             parameters->append(right);
             continue;
         } else if (s->is<IR::EmptyStatement>()) {
@@ -753,7 +738,7 @@ void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
         } else if (s->is<IR::MethodCallStatement>()) {
             LOG3("Visit " << dbp(s));
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
-            auto mi = P4::MethodInstance::resolve(mc, backend->getRefMap(), backend->getTypeMap());
+            auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
             if (mi->is<P4::ActionCall>()) {
                 BUG("%1%: action call should have been inlined", mc);
                 continue;
@@ -762,7 +747,7 @@ void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
 
                 cstring prim;
                 auto parameters = new Util::JsonArray();
-                auto obj = backend->getExpressionConverter()->convert(builtin->appliedTo);
+                auto obj = conv->convert(builtin->appliedTo);
                 parameters->append(obj);
 
                 if (builtin->name == IR::Type_Header::setValid) {
@@ -771,12 +756,12 @@ void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     prim = "remove_header";
                 } else if (builtin->name == IR::Type_Stack::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                    auto arg = backend->getExpressionConverter()->convert(mc->arguments->at(0)->expression);
+                    auto arg = conv->convert(mc->arguments->at(0)->expression);
                     prim = "push";
                     parameters->append(arg);
                 } else if (builtin->name == IR::Type_Stack::pop_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                    auto arg = backend->getExpressionConverter()->convert(mc->arguments->at(0)->expression);
+                    auto arg = conv->convert(mc->arguments->at(0)->expression);
                     prim = "pop";
                     parameters->append(arg);
                 } else {
@@ -789,12 +774,11 @@ void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 LOG3("P4V1:: convert " << s);
-                backend->getSimpleSwitch()->convertExternObjects(result, em, mc, s,
-                                                                 backend->getOptions().emitExterns);
+                convertExternObjects(result, em, mc, s, options.emitExterns);
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
-                backend->getSimpleSwitch()->convertExternFunctions(result, ef, mc, s);
+                convertExternFunctions(result, ef, mc, s);
                 continue;
             }
         }
@@ -802,14 +786,14 @@ void SimpleSwitch::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
     }
 }
 
-void SimpleSwitch::convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params) {
+void SimpleSwitchBackend::convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params) {
     for (auto p : *parameters->getEnumerator()) {
-        if (!backend->getRefMap()->isUsed(p))
+        if (!refMap->isUsed(p))
             ::warning("Unused action parameter %1%", p);
 
         auto param = new Util::JsonObject();
         param->emplace("name", p->name);
-        auto type = backend->getTypeMap()->getType(p, true);
+        auto type = typeMap->getType(p, true);
         if (!type->is<IR::Type_Bits>())
             ::error("%1%: Action parameters can only be bit<> or int<> on this target", p);
         param->emplace("bitwidth", type->width_bits());
@@ -817,21 +801,21 @@ void SimpleSwitch::convertActionParams(const IR::ParameterList *parameters, Util
     }
 }
 
-void SimpleSwitch::createActions() {
-    for (auto it : backend->getStructure().actions) {
+void SimpleSwitchBackend::createActions() {
+    for (auto it : structure.actions) {
         auto action = it.first;
         cstring name = action->controlPlaneName();
         auto params = new Util::JsonArray();
         convertActionParams(action->parameters, params);
         auto body = new Util::JsonArray();
         convertActionBody(&action->body->components, body);
-        auto id = backend->json->add_action(name, params, body);
-        backend->getStructure().ids.emplace(action, id);
+        auto id = json->add_action(name, params, body);
+        structure.ids.emplace(action, id);
     }
 }
 
 const IR::P4Parser*
-SimpleSwitch::getParser(const IR::ToplevelBlock* blk) {
+SimpleSwitchBackend::getParser(const IR::ToplevelBlock* blk) {
     auto main = blk->getMain();
     auto ctrl = main->findParameterValue(v1model.sw.parser.name);
     if (ctrl == nullptr)
@@ -844,7 +828,7 @@ SimpleSwitch::getParser(const IR::ToplevelBlock* blk) {
 }
 
 void
-SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
+SimpleSwitchBackend::setPipelineControls(const IR::ToplevelBlock* toplevel,
                                   std::set<cstring>* controls,
                                   std::map<cstring, cstring>* map) {
     if (errorCount() != 0)
@@ -870,7 +854,7 @@ SimpleSwitch::setPipelineControls(const IR::ToplevelBlock* toplevel,
 }
 
 void
-SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
+SimpleSwitchBackend::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
                                      std::set<cstring>* controls) {
     if (errorCount() != 0)
         return;
@@ -889,7 +873,7 @@ SimpleSwitch::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
 }
 
 const IR::P4Control*
-SimpleSwitch::getCompute(const IR::ToplevelBlock* toplevel) {
+SimpleSwitchBackend::getCompute(const IR::ToplevelBlock* toplevel) {
     if (errorCount() != 0)
         return nullptr;
     auto main = toplevel->getMain();
@@ -902,7 +886,7 @@ SimpleSwitch::getCompute(const IR::ToplevelBlock* toplevel) {
 }
 
 const IR::P4Control*
-SimpleSwitch::getVerify(const IR::ToplevelBlock* toplevel) {
+SimpleSwitchBackend::getVerify(const IR::ToplevelBlock* toplevel) {
     if (errorCount() != 0)
         return nullptr;
     auto main = toplevel->getMain();
@@ -915,7 +899,7 @@ SimpleSwitch::getVerify(const IR::ToplevelBlock* toplevel) {
 }
 
 void
-SimpleSwitch::setComputeChecksumControls(const IR::ToplevelBlock* toplevel,
+SimpleSwitchBackend::setComputeChecksumControls(const IR::ToplevelBlock* toplevel,
                                          std::set<cstring>* controls) {
     auto ctrl = getCompute(toplevel);
     if (ctrl == nullptr)
@@ -924,7 +908,7 @@ SimpleSwitch::setComputeChecksumControls(const IR::ToplevelBlock* toplevel,
 }
 
 void
-SimpleSwitch::setVerifyChecksumControls(const IR::ToplevelBlock* toplevel,
+SimpleSwitchBackend::setVerifyChecksumControls(const IR::ToplevelBlock* toplevel,
                                         std::set<cstring>* controls) {
     auto ctrl = getVerify(toplevel);
     if (ctrl == nullptr)
@@ -933,7 +917,7 @@ SimpleSwitch::setVerifyChecksumControls(const IR::ToplevelBlock* toplevel,
 }
 
 void
-SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel,
+SimpleSwitchBackend::setDeparserControls(const IR::ToplevelBlock* toplevel,
                                   std::set<cstring>* controls) {
     auto main = toplevel->getMain();
     auto deparser = main->findParameterValue(v1model.sw.deparser.name);
@@ -944,4 +928,140 @@ SimpleSwitch::setDeparserControls(const IR::ToplevelBlock* toplevel,
     controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
 }
 
-}  // namespace P4V1
+void
+SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& options) {
+    CHECK_NULL(tlb);
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    if (tlb->getMain() == nullptr)
+        return;  // no main
+
+    /// Declaration which introduces the user metadata.
+    /// We expect this to be a struct type.
+    const IR::Type_Struct* userMetaType = nullptr;
+    cstring userMetaName = refMap->newName("userMetadata");
+
+    setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
+    setNonPipelineControls(tlb, &non_pipeline_controls);
+    setComputeChecksumControls(tlb, &compute_checksum_controls);
+    setVerifyChecksumControls(tlb, &verify_checksum_controls);
+    setDeparserControls(tlb, &deparser_controls);
+    if (::errorCount() > 0)
+        return;
+
+    // Find the user metadata declaration
+    auto parser = getParser(tlb);
+    auto params = parser->getApplyParameters();
+    BUG_CHECK(params->size() == 4, "%1%: expected 4 parameters", parser);
+    auto metaParam = params->parameters.at(2);
+    auto paramType = metaParam->type;
+    if (!paramType->is<IR::Type_Name>()) {
+        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        return;
+    }
+    auto decl = refMap->getDeclaration(paramType->to<IR::Type_Name>()->path);
+    if (!decl->is<IR::Type_Struct>()) {
+        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        return;
+    }
+    userMetaType = decl->to<IR::Type_Struct>();
+    LOG2("User metadata type is " << userMetaType);
+
+    // These passes are logically bmv2-specific
+    PassManager simplify = {
+        new ExtractMatchKind(this),
+        new RenameUserMetadata(refMap, userMetaType, userMetaName),
+        new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        new P4::MoveActionsToTables(refMap, typeMap),
+        new P4::TypeChecking(refMap, typeMap),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new LowerExpressions(typeMap),
+        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::TypeChecking(refMap, typeMap),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::RemoveAllUnusedDeclarations(refMap),
+        new DiscoverStructure(&structure),
+        evaluator,
+    };
+    tlb->getProgram()->apply(simplify);
+
+    toplevel = evaluator->getToplevelBlock();
+    toplevel->apply(*new BMV2::BuildResourceMap(this));
+
+    jsonTop.emplace("program", options.file);
+    jsonTop.emplace("__meta__", json->meta);
+    jsonTop.emplace("header_types", json->header_types);
+    jsonTop.emplace("headers", json->headers);
+    jsonTop.emplace("header_stacks", json->header_stacks);
+    jsonTop.emplace("header_union_types", json->header_union_types);
+    jsonTop.emplace("header_unions", json->header_unions);
+    jsonTop.emplace("header_union_stacks", json->header_union_stacks);
+    field_lists = mkArrayField(&jsonTop, "field_lists");
+    // field list and learn list ids in bmv2 are not consistent with ids for
+    // other objects: they need to start at 1 (not 0) since the id is also used
+    // as a "flag" to indicate that a certain simple_switch primitive has been
+    // called (e.g. resubmit or generate_digest)
+    BMV2::nextId("field_lists");
+    jsonTop.emplace("errors", json->errors);
+    jsonTop.emplace("enums", json->enums);
+    jsonTop.emplace("parsers", json->parsers);
+    jsonTop.emplace("parse_vsets", json->parse_vsets);
+    jsonTop.emplace("deparsers", json->deparsers);
+    meter_arrays = mkArrayField(&jsonTop, "meter_arrays");
+    counters = mkArrayField(&jsonTop, "counter_arrays");
+    register_arrays = mkArrayField(&jsonTop, "register_arrays");
+    jsonTop.emplace("calculations", json->calculations);
+    learn_lists = mkArrayField(&jsonTop, "learn_lists");
+    BMV2::nextId("learn_lists");
+    jsonTop.emplace("actions", json->actions);
+    jsonTop.emplace("pipelines", json->pipelines);
+    jsonTop.emplace("checksums", json->checksums);
+    force_arith = mkArrayField(&jsonTop, "force_arith");
+    jsonTop.emplace("extern_instances", json->externs);
+    jsonTop.emplace("field_aliases", json->field_aliases);
+
+    json->add_program_info(options.file);
+    json->add_meta_info();
+
+    // convert all enums to json
+    for (const auto &pEnum : *enumMap) {
+        auto name = pEnum.first->getName();
+        for (const auto &pEntry : *pEnum.second) {
+            json->add_enum(name, pEntry.first, pEntry.second);
+        }
+    }
+    if (::errorCount() > 0)
+        return;
+
+    /// generate error types
+    for (const auto &p : structure.errorCodesMap) {
+        auto name = p.first->toString();
+        auto type = p.second;
+        json->add_error(name, type);
+    }
+
+    cstring scalarsName = refMap->newName("scalars");
+
+    // This visitor is used in multiple passes to convert expression to json
+    conv = new SimpleSwitchExpressionConverter(refMap, typeMap, &structure,
+                                                     scalarsName, toplevel);
+
+    PassManager codegen_passes = {
+        new HeaderConverter(refMap, typeMap, &structure, json, scalarsName),
+        new ParserConverter(refMap, typeMap, json, conv),
+        new VisitFunctor([this]() { createActions(); }),
+        new ControlConverter(this, refMap, typeMap, json, conv, &structure, options.emitExterns),
+        new ChecksumConverter(this),
+        new DeparserConverter(this),
+    };
+
+    codegen_passes.setName("CodeGen");
+    CHECK_NULL(toplevel);
+    auto program = toplevel->getProgram();
+    program->apply(codegen_passes);
+
+    (void)toplevel->apply(ConvertGlobals(this));
+}
+
+}  // namespace BMV2

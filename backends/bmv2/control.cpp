@@ -110,7 +110,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
         auto method = actionCall->method->to<IR::PathExpression>()->path;
         auto decl = refMap->getDeclaration(method, true);
         auto actionDecl = decl->to<IR::P4Action>();
-        unsigned id = get(backend->getStructure().ids, actionDecl);
+        unsigned id = get(structure->ids, actionDecl);
         action->emplace("action_id", id);
         auto actionData = mkArrayField(action, "action_data");
         for (auto arg : *actionCall->arguments) {
@@ -269,7 +269,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
         if (backend->getToplevelBlock()->hasValue(decl->getNode())) {
             auto eb = backend->getToplevelBlock()->getValue(decl->getNode());
             BUG_CHECK(eb->is<IR::ExternBlock>(), "Not an extern block?");
-            backend->getSimpleSwitch()->convertExternInstances(decl->to<IR::Declaration>(),
+            backend->convertExternInstances(decl->to<IR::Declaration>(),
                         eb->to<IR::ExternBlock>(), action_profiles, selector_check, emitExterns); }
     } else {
         ::error("%1%: unexpected value for property", propv);
@@ -515,7 +515,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         auto decl = refMap->getDeclaration(a->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
-        unsigned id = get(backend->getStructure().ids, action);
+        unsigned id = get(structure->ids, action);
         LOG3("look up id " << action << " " << id);
         action_ids->append(id);
         auto name = action->controlPlaneName();
@@ -612,7 +612,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             BUG("%1%: unexpected expression", expr);
         }
 
-        unsigned actionid = get(backend->getStructure().ids, action);
+        unsigned actionid = get(structure->ids, action);
         auto entry = new Util::JsonObject();
         entry->emplace("action_id", actionid);
         entry->emplace("action_const", defact->isConstant);
@@ -730,8 +730,8 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 LOG1("extern block " << eb);
-                backend->getSimpleSwitch()->convertExternInstances(c, eb, action_profiles,
-                                                                   selector_check, emitExterns);
+                backend->convertExternInstances(c, eb, action_profiles,
+                                                selector_check, emitExterns);
                 continue;
             }
         }
@@ -745,19 +745,13 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
 bool ChecksumConverter::preorder(const IR::P4Control* control) {
     auto it = backend->compute_checksum_controls.find(control->name);
     if (it != backend->compute_checksum_controls.end()) {
-        if (backend->target == Target::SIMPLE_SWITCH) {
-            P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
-            ss->convertChecksum(control->body, backend->json->checksums,
-                                backend->json->calculations, false);
-        }
+        backend->convertChecksum(control->body, backend->json->checksums,
+                                 backend->json->calculations, false);
     } else {
         it = backend->verify_checksum_controls.find(control->name);
         if (it != backend->verify_checksum_controls.end()) {
-            if (backend->target == Target::SIMPLE_SWITCH) {
-                P4V1::SimpleSwitch* ss = backend->getSimpleSwitch();
-                ss->convertChecksum(control->body, backend->json->checksums,
-                                    backend->json->calculations, true);
-            }
+            backend->convertChecksum(control->body, backend->json->checksums,
+                                     backend->json->calculations, true);
         }
     }
     return false;

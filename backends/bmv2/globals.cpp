@@ -27,7 +27,7 @@ bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
     // global action profiles here; they are synthesized also
     // from each table that uses them.
     auto action_profiles = new Util::JsonArray();
-    backend->getSimpleSwitch()->convertExternInstances(
+    backend->convertExternInstances(
         block->node->to<IR::Declaration>(),
         block->to<IR::ExternBlock>(), action_profiles, ssc, false);
     return false;
