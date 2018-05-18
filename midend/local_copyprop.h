@@ -100,7 +100,6 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void apply_function(FuncInfo *tbl);
     IR::P4Table *preorder(IR::P4Table *) override;
     IR::P4Table *postorder(IR::P4Table *) override;
-    bool equiv(const IR::Expression *left, const IR::Expression *right);
     class ElimDead;
     class RewriteTableKeys;
 

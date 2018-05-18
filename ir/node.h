@@ -110,6 +110,7 @@ class Node : public virtual INode {
     void sourceInfoToJSON(JSONGenerator &json) const;
     Util::JsonObject* sourceInfoJsonObj() const;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
+    virtual bool equiv(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
