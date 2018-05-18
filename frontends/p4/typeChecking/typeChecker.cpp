@@ -2500,11 +2500,11 @@ TypeInference::actionCall(bool inActionList,
 
     // keep track of parameters that have not been matched yet
     std::map<cstring, const IR::Parameter*> left;
-    for (auto p: baseType->parameters->parameters)
+    for (auto p : baseType->parameters->parameters)
         left.emplace(p->name, p);
 
     auto paramIt = baseType->parameters->parameters.begin();
-    for (auto arg: *actionCall->arguments) {
+    for (auto arg : *actionCall->arguments) {
         cstring argName = arg->name.name;
         bool named = !argName.isNullOrEmpty();
         const IR::Parameter* param;
@@ -2547,7 +2547,8 @@ TypeInference::actionCall(bool inActionList,
                 // table (as default_action or entries), then the
                 // arguments do have to be compile-time constants.
                 if (!isCompileTimeConstant(arg->expression))
-                    typeError("%1%: action argument must be a compile-time constant", arg->expression);
+                    typeError(
+                        "%1%: action argument must be a compile-time constant", arg->expression);
             }
         } else if (param->direction == IR::Direction::Out ||
                    param->direction == IR::Direction::InOut) {
@@ -2559,12 +2560,15 @@ TypeInference::actionCall(bool inActionList,
     }
 
     // Check remaining parameters: they must be all non-directional
-    for (auto p: left) {
+    bool error = false;
+    for (auto p : left) {
         if (p.second->direction != IR::Direction::None) {
-            typeError("%1%: Parameter must be bound", p.second);
-            return actionCall;
+            typeError("%1%: Parameter %2% must be bound", actionCall, p.second);
+            error = true;
         }
     }
+    if (error)
+        return actionCall;
 
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, params);
 

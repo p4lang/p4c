@@ -26,11 +26,9 @@ control comp(inout bit<16> x, out bool b)(bit<16> compare, bit<2> ignore) {
 control c(out bool b) {
     comp(ignore = 1, compare = 0) c0;
     comp(ignore = 2, compare = 1) c1;
-
     action a(in bit<16> bi, out bit<16> mb) {
         mb = -bi;
     }
-
     apply {
         bit<16> xv = 0;
         a(bi = 3, mb = xv);
@@ -46,6 +44,5 @@ control c(out bool b) {
 control ce(out bool b);
 parser pe(out bool b);
 package top(pe _p, ce _e, @optional ce _e1);
+top(_e = c(), _p = par()) main;
 
-top(_e = c(),
-    _p = par()) main;

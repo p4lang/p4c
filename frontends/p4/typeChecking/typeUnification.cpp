@@ -63,10 +63,10 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     auto paramIt = dest->parameters->begin();
     // keep track of parameters that have not been matched yet
     std::map<cstring, const IR::Parameter*> left;
-    for (auto p: dest->parameters->parameters)
+    for (auto p : dest->parameters->parameters)
         left.emplace(p->name, p);
 
-    for (auto arg: *src->arguments) {
+    for (auto arg : *src->arguments) {
         cstring argName = arg->name.name;
         bool named = !argName.isNullOrEmpty();
         const IR::Parameter* param;
@@ -100,11 +100,13 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         if ((param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
             if (reportErrors)
-                ::error("%1%: Read-only value used for out/inout parameter %2%", arg->srcInfo, param);
+                ::error("%1%: Read-only value used for out/inout parameter %2%",
+                        arg->srcInfo, param);
             return false;
         } else if (param->direction == IR::Direction::None && !arg->compileTimeConstant) {
             if (reportErrors)
-                ::error("%1%: not a compile-time constant when binding to %2%", arg->srcInfo, param);
+                ::error("%1%: not a compile-time constant when binding to %2%",
+                        arg->srcInfo, param);
             return false;
         }
 
@@ -120,7 +122,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     }
 
     // Check remaining parameters: they must be all optional
-    for (auto p: left) {
+    for (auto p : left) {
         bool opt = p.second->getAnnotation("optional") != nullptr;
         if (opt) continue;
         if (reportErrors)

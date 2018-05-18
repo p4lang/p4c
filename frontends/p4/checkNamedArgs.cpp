@@ -23,7 +23,7 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument>* arguments) {
     bool hasName = false;
     std::map<cstring, const IR::Argument*> found;
 
-    for (auto arg: *arguments) {
+    for (auto arg : *arguments) {
         cstring argName = arg->name.name;
         bool argHasName = !argName.isNullOrEmpty();
         if (first) {

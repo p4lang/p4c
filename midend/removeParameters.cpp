@@ -102,7 +102,10 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
             LOG3("Added declaration " << decl << " annotations " << p->annotations);
             result->push_back(decl);
             auto arg = substitution.lookup(p);
-            BUG_CHECK(arg != nullptr, "%1%: too few arguments", invocation);
+            if (arg == nullptr) {
+                ::error("action %1%: parameter %2% must be bound", invocation, p);
+                continue;
+            }
 
             if (p->direction == IR::Direction::In ||
                 p->direction == IR::Direction::InOut ||
