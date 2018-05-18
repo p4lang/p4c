@@ -963,8 +963,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
     // in arguments are unchanged, and the out arguments have an unknown value.
     for (auto p : *mcd.substitution.getParameters()) {
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-            auto expr = mcd.substitution.lookup(p);
-            auto val = get(expr);
+            auto arg = mcd.substitution.lookup(p);
+            auto val = get(arg->expression);
             val->setAllUnknown();
         }
     }

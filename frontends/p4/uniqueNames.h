@@ -24,19 +24,15 @@ limitations under the License.
 namespace P4 {
 
 class RenameMap {
-    // Internal declaration name
+    /// Internal declaration name
     std::map<const IR::IDeclaration*, cstring> newName;
-    std::set<const IR::P4Action*> inTable;  // all actions that appear in tables
+    /// all actions that appear in tables
+    std::set<const IR::P4Action*> inTable;
+    /// Map from method call to action that is being called
+    std::map<const IR::MethodCallExpression*, const IR::P4Action*> actionCall;
 
  public:
-    void setNewName(const IR::IDeclaration* decl, cstring name) {
-        CHECK_NULL(decl);
-        BUG_CHECK(!name.isNullOrEmpty(), "Empty name");
-        LOG1("Renaming " << decl << " to " << name);
-        if (newName.find(decl) != newName.end())
-            BUG("%1%: already renamed", decl);
-        newName.emplace(decl, name);
-    }
+    void setNewName(const IR::IDeclaration* decl, cstring name);
     cstring getName(const IR::IDeclaration* decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(newName.find(decl) != newName.end(), "%1%: no new name", decl);
@@ -47,14 +43,15 @@ class RenameMap {
         CHECK_NULL(decl);
         return newName.find(decl) != newName.end();
     }
-    void foundInTable(const IR::P4Action* action)
-    { inTable.emplace(action); }
+    void foundInTable(const IR::P4Action* action);
+    void markActionCall(const IR::P4Action* action, const IR::MethodCallExpression* call);
     bool isInTable(const IR::P4Action* action)
     { return inTable.find(action) != inTable.end(); }
+    const IR::P4Action* actionCalled(const IR::MethodCallExpression* expression) const;
 };
 
-// Give unique names to various declarations to make it easier to
-// move declarations around.
+/// Give unique names to various declarations to make it easier to
+/// move declarations around.
 class UniqueNames : public PassManager {
  private:
     RenameMap    *renameMap;
@@ -62,9 +59,9 @@ class UniqueNames : public PassManager {
     explicit UniqueNames(ReferenceMap* refMap);
 };
 
-// Finds and allocates new names for some symbols:
-// Declaration_Variable, Declaration_Constant, Declaration_Instance,
-// P4Table, P4Action.
+/// Finds and allocates new names for some symbols:
+/// Declaration_Variable, Declaration_Constant, Declaration_Instance,
+/// P4Table, P4Action.
 class FindSymbols : public Inspector {
     ReferenceMap *refMap;  // used to generate new names
     RenameMap    *renameMap;
@@ -112,9 +109,10 @@ class RenameSymbols : public Transform {
     const IR::Node* postorder(IR::P4Action* decl) override;
     const IR::Node* postorder(IR::P4ValueSet* decl) override;
     const IR::Node* postorder(IR::Parameter* param) override;
+    const IR::Node* postorder(IR::Argument* argument) override;
 };
 
-// Finds parameters for actions that will be given unique names
+/// Finds parameters for actions that will be given unique names
 class FindParameters : public Inspector {
     ReferenceMap* refMap;  // used to generate new names
     RenameMap*    renameMap;
@@ -139,7 +137,8 @@ class FindParameters : public Inspector {
     }
 };
 
-// Give each parameter of a table and action a new unique name
+/// Give each parameter of an action a new unique name
+/// This must also rename named arguments
 class UniqueParameters : public PassManager {
  private:
     RenameMap    *renameMap;

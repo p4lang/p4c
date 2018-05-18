@@ -20,6 +20,29 @@ limitations under the License.
 
 namespace P4 {
 
+void RenameMap::setNewName(const IR::IDeclaration* decl, cstring name) {
+    CHECK_NULL(decl);
+    BUG_CHECK(!name.isNullOrEmpty(), "Empty name");
+    LOG1("Will rename " << dbp(decl) << " to " << name);
+    if (newName.find(decl) != newName.end())
+        BUG("%1%: already renamed", decl);
+    newName.emplace(decl, name);
+}
+
+const IR::P4Action* RenameMap::actionCalled(const IR::MethodCallExpression* expression) const {
+    CHECK_NULL(expression);
+    return ::get(actionCall, expression);
+}
+
+void RenameMap::markActionCall(const IR::P4Action* action, const IR::MethodCallExpression* call) {
+    LOG2("Action " << dbp(action) << " called from " << dbp(call));
+    actionCall.emplace(call, action);
+}
+
+void RenameMap::foundInTable(const IR::P4Action* action) {
+    inTable.emplace(action);
+}
+
 namespace {
 
 class FindActionCalls : public Inspector {
@@ -36,6 +59,7 @@ class FindActionCalls : public Inspector {
         if (!mi->is<P4::ActionCall>())
             return;
         auto ac = mi->to<P4::ActionCall>();
+        renameMap->markActionCall(ac->action, getOriginal<IR::MethodCallExpression>());
 
         auto table = findContext<IR::P4Table>();
         if (table != nullptr)
@@ -115,6 +139,7 @@ const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
     // This should be a local name.
     BUG_CHECK(!expression->path->absolute,
               "%1%: renaming absolute path", expression);
+    LOG2("Renaming " << expression->path);
     auto newName = renameMap->getName(decl);
     auto name = IR::ID(expression->path->name.srcInfo, newName,
                        expression->path->name.originalName);
@@ -160,6 +185,26 @@ const IR::Node* RenameSymbols::postorder(IR::P4ValueSet* decl) {
         decl->annotations = annos;
     }
     return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Argument* arg) {
+    if (!arg->name)
+        return arg;
+    auto mce = findOrigCtxt<IR::MethodCallExpression>();
+    if (mce == nullptr)
+        return arg;
+    LOG2("Found named argument " << arg << " of " << dbp(mce));
+    auto action = renameMap->actionCalled(mce);
+    if (action == nullptr)
+        return arg;
+    auto origParam = action->parameters->getParameter(arg->name.name);
+    CHECK_NULL(origParam);
+
+    if (!renameMap->toRename(origParam))
+        return arg;
+    auto newName = renameMap->getName(origParam);
+    arg->name = IR::ID(arg->name.srcInfo, newName, arg->name.originalName);
+    return arg;
 }
 
 }  // namespace P4

@@ -561,7 +561,7 @@ class DismantleExpression : public Transform {
             auto arg = desc.substitution.lookup(p);
             // If an argument evaluation has side-effects then
             // always use a temporary to hold the argument value.
-            if (SideEffects::check(arg, refMap, typeMap)) {
+            if (SideEffects::check(arg->expression, refMap, typeMap)) {
                 LOG3("Using temporary for " << dbp(mce) <<
                      " param " << dbp(p) << " arg side effect");
                 useTemporary.emplace(p);
@@ -600,7 +600,7 @@ class DismantleExpression : public Transform {
                     if (useTemporary.find(p2) != useTemporary.end())
                         continue;
                     auto arg2 = desc.substitution.lookup(p2);
-                    if (mayAlias(arg1, arg2)) {
+                    if (mayAlias(arg1->expression, arg2->expression)) {
                         LOG3("Using temporary for " << dbp(mce) <<
                              " param " << dbp(p1) << " aliasing" << dbp(p2));
                         useTemporary.emplace(p1);
@@ -618,7 +618,7 @@ class DismantleExpression : public Transform {
         for (auto p : *desc.substitution.getParameters()) {
             auto arg = desc.substitution.lookup(p);
             if (p->direction == IR::Direction::None) {
-                args->push_back(new IR::Argument(arg));
+                args->push_back(arg);
                 continue;
             }
 
@@ -661,7 +661,7 @@ class DismantleExpression : public Transform {
                 copyBack->push_back(assign);
                 LOG3("Will copy out value " << dbp(assign));
             }
-            args->push_back(new IR::Argument(argValue));
+            args->push_back(new IR::Argument(arg->name, argValue));
         }
         leftValue = savelv;
         resultNotUsed = savenu;

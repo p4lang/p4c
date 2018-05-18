@@ -26,13 +26,13 @@ limitations under the License.
 
 namespace P4 {
 
-/* Maps Parameters to Expressions via their name.  Note that
+/* Maps Parameters to Arguments via their name.  Note that
    parameter identity is not important, but the parameter name is. */
 class ParameterSubstitution : public IHasDbPrint {
  protected:
     // Parameter names are unique for a procedure, so each name
     // should show up only once.
-    std::map<cstring, const IR::Expression*> parameterValues;
+    std::map<cstring, const IR::Argument*> parameterValues;
     // Map from parameter name to parameter.
     std::map<cstring, const IR::Parameter*>  parametersByName;
     std::vector<const IR::Parameter*>        parameters;
@@ -44,7 +44,7 @@ class ParameterSubstitution : public IHasDbPrint {
     ParameterSubstitution() = default;
     ParameterSubstitution(const ParameterSubstitution& other) = default;
 
-    void add(const IR::Parameter* parameter, const IR::Expression* value) {
+    void add(const IR::Parameter* parameter, const IR::Argument* value) {
         LOG1("Mapping " << dbp(parameter) << " to " << dbp(value));
         cstring name = parameter->name.name;
         auto par = get(parametersByName, name);
@@ -55,10 +55,10 @@ class ParameterSubstitution : public IHasDbPrint {
         parameters.push_back(parameter);
     }
 
-    const IR::Expression* lookupByName(cstring name) const
+    const IR::Argument* lookupByName(cstring name) const
     { return get(parameterValues, name); }
 
-    const IR::Expression* lookup(const IR::Parameter* param) const
+    const IR::Argument* lookup(const IR::Parameter* param) const
     { return lookupByName(param->name.name); }
 
     bool contains(const IR::Parameter* param) const {
@@ -69,20 +69,6 @@ class ParameterSubstitution : public IHasDbPrint {
 
     bool empty() const
     { return parameterValues.empty(); }
-
-    void populate(const IR::ParameterList* params,
-                  const IR::Vector<IR::Expression>* args) {
-        // Allow for binding only some parameters: used for actions
-        BUG_CHECK(params->size() >= args->size(),
-                  "Incompatible number of arguments for parameter list: %1% and %2%",
-                  params, args);
-        auto pe = params->getEnumerator();
-        for (auto a : *args) {
-            bool success = pe->moveNext();
-            BUG_CHECK(success, "Enumerator finished too soon");
-            add(pe->getCurrent(), a);
-        }
-    }
 
     void populate(const IR::ParameterList* params,
                   const IR::Vector<IR::Argument>* args) {
@@ -103,11 +89,11 @@ class ParameterSubstitution : public IHasDbPrint {
                     ::error("No parameter named %1%", a->name);
                     continue;
                 }
-                add(p, a->expression);
+                add(p, a);
             } else {
                 bool success = pe->moveNext();
                 BUG_CHECK(success, "Enumerator finished too soon");
-                add(pe->getCurrent(), a->expression);
+                add(pe->getCurrent(), a);
             }
         }
     }
