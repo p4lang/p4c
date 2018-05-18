@@ -127,6 +127,12 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
         state->name == IR::ParserState::reject ||
         state->name == IR::ParserState::start)
         return state;
+
+    // Do not eliminate states with annotations other than name.
+    for (const auto* anno : state->getAnnotations()->annotations) {
+        if (anno->name.name != "name") {
+            return state; } }
+
     if (refMap->isUsed(getOriginal<IR::ParserState>()))
         return state;
     LOG3("Removing " << state);
