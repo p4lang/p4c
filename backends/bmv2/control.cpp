@@ -655,16 +655,9 @@ Util::IJson* ControlConverter::convertIf(const CFG::IfNode* node, cstring prefix
 }
 
 bool ControlConverter::preorder(const IR::P4Control* cont) {
-    auto bt = backend->pipeline_controls.find(cont->name);
-    if (bt == backend->pipeline_controls.end()) {
-        return false;
-    }
-
     auto result = new Util::JsonObject();
-    auto it = backend->pipeline_namemap.find(cont->name);
-    BUG_CHECK(it != backend->pipeline_namemap.end(),
-              "Expected to find %1% in control block name map", cont->name);
-    result->emplace("name", it->second);
+
+    result->emplace("name", cont->name);
     result->emplace("id", nextId("control"));
     result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 
@@ -720,7 +713,7 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
             c->is<IR::P4Table>())
             continue;
         if (c->is<IR::Declaration_Instance>()) {
-            auto block = backend->resourceMap.at(cont);
+            auto block = structure->resourceMap.at(cont);
             auto bl = block->to<IR::ControlBlock>()->getValue(c);
             CHECK_NULL(bl);
             if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
@@ -739,21 +732,6 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
     }
 
     json->pipelines->append(result);
-    return false;
-}
-
-bool ChecksumConverter::preorder(const IR::P4Control* control) {
-    auto it = backend->compute_checksum_controls.find(control->name);
-    if (it != backend->compute_checksum_controls.end()) {
-        backend->convertChecksum(control->body, backend->json->checksums,
-                                 backend->json->calculations, false);
-    } else {
-        it = backend->verify_checksum_controls.find(control->name);
-        if (it != backend->verify_checksum_controls.end()) {
-            backend->convertChecksum(control->body, backend->json->checksums,
-                                     backend->json->calculations, true);
-        }
-    }
     return false;
 }
 

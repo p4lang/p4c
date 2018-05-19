@@ -177,32 +177,24 @@ bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
     return false;
 }
 
-void ParsePsaArchitecture::parse_pipeline(const IR::PackageBlock* block, gress_t gress) {
-    if (gress == INGRESS) {
-        auto parser = block->getParameterValue("ip")->to<IR::ParserBlock>();
-        auto pipeline = block->getParameterValue("ig")->to<IR::ControlBlock>();
-        auto deparser = block->getParameterValue("id")->to<IR::ControlBlock>();
-        structure->block_type.emplace(parser->container, std::make_pair(gress, PARSER));
-        structure->block_type.emplace(pipeline->container, std::make_pair(gress, PIPELINE));
-        structure->block_type.emplace(deparser->container, std::make_pair(gress, DEPARSER));
-    } else if (gress == EGRESS) {
-        auto parser = block->getParameterValue("ep")->to<IR::ParserBlock>();
-        auto pipeline = block->getParameterValue("eg")->to<IR::ControlBlock>();
-        auto deparser = block->getParameterValue("ed")->to<IR::ControlBlock>();
-        structure->block_type.emplace(parser->container, std::make_pair(gress, PARSER));
-        structure->block_type.emplace(pipeline->container, std::make_pair(gress, PIPELINE));
-        structure->block_type.emplace(deparser->container, std::make_pair(gress, DEPARSER));
-    }
-}
-
 bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
     auto pkg = block->getParameterValue("ingress");
     if (auto ingress = pkg->to<IR::PackageBlock>()) {
-        parse_pipeline(ingress, INGRESS);
+        auto parser = ingress->getParameterValue("ip")->to<IR::ParserBlock>();
+        auto pipeline = ingress->getParameterValue("ig")->to<IR::ControlBlock>();
+        auto deparser = ingress->getParameterValue("id")->to<IR::ControlBlock>();
+        structure->block_type.emplace(parser->container, std::make_pair(INGRESS, PARSER));
+        structure->block_type.emplace(pipeline->container, std::make_pair(INGRESS, PIPELINE));
+        structure->block_type.emplace(deparser->container, std::make_pair(INGRESS, DEPARSER));
     }
     pkg = block->getParameterValue("egress");
     if (auto egress = pkg->to<IR::PackageBlock>()) {
-        parse_pipeline(egress, EGRESS);
+        auto parser = egress->getParameterValue("ep")->to<IR::ParserBlock>();
+        auto pipeline = egress->getParameterValue("eg")->to<IR::ControlBlock>();
+        auto deparser = egress->getParameterValue("ed")->to<IR::ControlBlock>();
+        structure->block_type.emplace(parser->container, std::make_pair(EGRESS, PARSER));
+        structure->block_type.emplace(pipeline->container, std::make_pair(EGRESS, PIPELINE));
+        structure->block_type.emplace(deparser->container, std::make_pair(EGRESS, DEPARSER));
     }
     return false;
 }
@@ -402,7 +394,7 @@ bool InspectPsaProgram::preorder(const IR::P4Control *c) {
     return false;
 }
 
-void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& options) {
+void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     CHECK_NULL(tlb);
     PsaProgramStructure structure(refMap, typeMap, &jsonTop);
 
@@ -416,21 +408,21 @@ void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Opti
     PassManager toJson = {
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        //new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        //new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
         new DiscoverStructure(&structure),
         new InspectPsaProgram(refMap, typeMap, &structure),
-        new ConvertToJson(&structure),
+        new ConvertPsaToJson(&structure),
     };
     program->apply(toJson);
 

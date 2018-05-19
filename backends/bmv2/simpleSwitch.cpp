@@ -36,6 +36,68 @@ using BMV2::stringRepr;
 
 namespace BMV2 {
 
+void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
+    ::error(format, node);
+    ::error("Are you using an up-to-date v1model.p4?");
+}
+
+bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
+    auto prsr = main->findParameterValue(v1model.sw.parser.name);
+    if (prsr == nullptr || !prsr->is<IR::ParserBlock>()) {
+        modelError("%1%: main package  match the expected model", main);
+        return false;
+    }
+    structure->block_type.emplace(prsr->to<IR::ParserBlock>()->container, V1_PARSER);
+
+    auto ingress = main->findParameterValue(v1model.sw.ingress.name);
+    if (ingress == nullptr || !ingress->is<IR::ControlBlock>()) {
+        modelError("%1%: main package does not match the expected model", main);
+        return false;
+    }
+    auto ingress_name = ingress->to<IR::ControlBlock>()->container->name;
+    structure->block_type.emplace(ingress->to<IR::ControlBlock>()->container, V1_INGRESS);
+    structure->pipeline_controls.emplace(ingress_name);
+    structure->pipeline_namemap.emplace(ingress_name, "ingress");
+
+    auto verify = main->findParameterValue(v1model.sw.verify.name);
+    if (verify == nullptr || !verify->is<IR::ControlBlock>()) {
+        modelError("%1%: main package does not match the expected model", main);
+        return false;
+    }
+    structure->block_type.emplace(verify->to<IR::ControlBlock>()->container, V1_VERIFY);
+    structure->non_pipeline_controls.emplace(verify->to<IR::ControlBlock>()->container->name);
+    structure->verify_checksum_controls.emplace(verify->to<IR::ControlBlock>()->container->name);
+
+    auto egress = main->findParameterValue(v1model.sw.egress.name);
+    if (egress == nullptr || !egress->is<IR::ControlBlock>()) {
+        modelError("%1%: main package does not match the expected model", main);
+        return false;
+    }
+    auto egress_name = egress->to<IR::ControlBlock>()->container->name;
+    structure->block_type.emplace(egress->to<IR::ControlBlock>()->container, V1_EGRESS);
+    structure->pipeline_controls.emplace(egress_name);
+    structure->pipeline_namemap.emplace(egress_name, "egress");
+
+    auto compute = main->findParameterValue(v1model.sw.compute.name);
+    if (compute == nullptr || !compute->is<IR::ControlBlock>()) {
+        modelError("%1%: main package does not match the expected model", main);
+        return false;
+    }
+    structure->block_type.emplace(compute->to<IR::ControlBlock>()->container, V1_COMPUTE);
+    structure->non_pipeline_controls.emplace(compute->to<IR::ControlBlock>()->container->name);
+    structure->compute_checksum_controls.emplace(compute->to<IR::ControlBlock>()->container->name);
+
+    auto deparser = main->findParameterValue(v1model.sw.deparser.name);
+    if (deparser == nullptr || !deparser->is<IR::ControlBlock>()) {
+        modelError("%1%: main package  match the expected model", main);
+        return false;
+    }
+    structure->block_type.emplace(deparser->to<IR::ControlBlock>()->container, V1_DEPARSER);
+    structure->non_pipeline_controls.emplace(deparser->to<IR::ControlBlock>()->container->name);
+
+    return false;
+}
+
 void
 SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const {
     ::error(format, node);
@@ -801,8 +863,8 @@ void SimpleSwitchBackend::convertActionParams(const IR::ParameterList *parameter
     }
 }
 
-void SimpleSwitchBackend::createActions() {
-    for (auto it : structure.actions) {
+void SimpleSwitchBackend::createActions(V1ProgramStructure* structure) {
+    for (auto it : structure->actions) {
         auto action = it.first;
         cstring name = action->controlPlaneName();
         auto params = new Util::JsonArray();
@@ -810,147 +872,34 @@ void SimpleSwitchBackend::createActions() {
         auto body = new Util::JsonArray();
         convertActionBody(&action->body->components, body);
         auto id = json->add_action(name, params, body);
-        structure.ids.emplace(action, id);
+        structure->ids.emplace(action, id);
     }
-}
-
-const IR::P4Parser*
-SimpleSwitchBackend::getParser(const IR::ToplevelBlock* blk) {
-    auto main = blk->getMain();
-    auto ctrl = main->findParameterValue(v1model.sw.parser.name);
-    if (ctrl == nullptr)
-        return nullptr;
-    if (!ctrl->is<IR::ParserBlock>()) {
-        modelError("%1%: main package  match the expected model", main);
-        return nullptr;
-    }
-    return ctrl->to<IR::ParserBlock>()->container;
 }
 
 void
-SimpleSwitchBackend::setPipelineControls(const IR::ToplevelBlock* toplevel,
-                                  std::set<cstring>* controls,
-                                  std::map<cstring, cstring>* map) {
-    if (errorCount() != 0)
-        return;
-    auto main = toplevel->getMain();
-    if (main == nullptr) {
-        ::error("`%1%' module not found for simple switch", IR::P4Program::main);
-        return;
-    }
-    auto ingress = main->findParameterValue(v1model.sw.ingress.name);
-    auto egress = main->findParameterValue(v1model.sw.egress.name);
-    if (ingress == nullptr || egress == nullptr ||
-        !ingress->is<IR::ControlBlock>() || !egress->is<IR::ControlBlock>()) {
-        modelError("%1%: main package does not match the expected model", main);
-        return;
-    }
-    auto ingress_name = ingress->to<IR::ControlBlock>()->container->name;
-    auto egress_name = egress->to<IR::ControlBlock>()->container->name;
-    controls->emplace(ingress_name);
-    controls->emplace(egress_name);
-    map->emplace(ingress_name, "ingress");
-    map->emplace(egress_name, "egress");
-}
+SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
+    V1ProgramStructure structure(refMap, typeMap, json);
 
-void
-SimpleSwitchBackend::setNonPipelineControls(const IR::ToplevelBlock* toplevel,
-                                     std::set<cstring>* controls) {
-    if (errorCount() != 0)
+    auto parseV1Arch = new ParseV1Architecture(&structure);
+    auto main = tlb->getMain();
+    if (!main) return;  // no main
+    main->apply(*parseV1Arch);
+    if (::errorCount() > 0)
         return;
-    auto main = toplevel->getMain();
-    auto verify = getVerify(toplevel);
-    auto compute = getCompute(toplevel);
-    auto deparser = main->findParameterValue(v1model.sw.deparser.name);
-    if (verify == nullptr || compute == nullptr || deparser == nullptr ||
-        !deparser->is<IR::ControlBlock>()) {
-        modelError("%1%: main package  match the expected model", main);
-        return;
-    }
-    controls->emplace(verify->name);
-    controls->emplace(compute->name);
-    controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
-}
-
-const IR::P4Control*
-SimpleSwitchBackend::getCompute(const IR::ToplevelBlock* toplevel) {
-    if (errorCount() != 0)
-        return nullptr;
-    auto main = toplevel->getMain();
-    auto update = main->findParameterValue(v1model.sw.compute.name);
-    if (update == nullptr || !update->is<IR::ControlBlock>()) {
-        modelError("%1%: main package does not match the expected model", main);
-        return nullptr;
-    }
-    return update->to<IR::ControlBlock>()->container;
-}
-
-const IR::P4Control*
-SimpleSwitchBackend::getVerify(const IR::ToplevelBlock* toplevel) {
-    if (errorCount() != 0)
-        return nullptr;
-    auto main = toplevel->getMain();
-    auto verify = main->findParameterValue(v1model.sw.verify.name);
-    if (verify == nullptr || !verify->is<IR::ControlBlock>()) {
-        modelError("%1%: main package does not match the expected model", main);
-        return nullptr;
-    }
-    return verify->to<IR::ControlBlock>()->container;
-}
-
-void
-SimpleSwitchBackend::setComputeChecksumControls(const IR::ToplevelBlock* toplevel,
-                                         std::set<cstring>* controls) {
-    auto ctrl = getCompute(toplevel);
-    if (ctrl == nullptr)
-        return;
-    controls->emplace(ctrl->name);
-}
-
-void
-SimpleSwitchBackend::setVerifyChecksumControls(const IR::ToplevelBlock* toplevel,
-                                        std::set<cstring>* controls) {
-    auto ctrl = getVerify(toplevel);
-    if (ctrl == nullptr)
-        return;
-    controls->emplace(ctrl->name);
-}
-
-void
-SimpleSwitchBackend::setDeparserControls(const IR::ToplevelBlock* toplevel,
-                                  std::set<cstring>* controls) {
-    auto main = toplevel->getMain();
-    auto deparser = main->findParameterValue(v1model.sw.deparser.name);
-    if (deparser == nullptr || !deparser->is<IR::ControlBlock>()) {
-        modelError("%1%: main package does not match the expected model", main);
-        return;
-    }
-    controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
-}
-
-void
-SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& options) {
-    CHECK_NULL(tlb);
-    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
-    if (tlb->getMain() == nullptr)
-        return;  // no main
 
     /// Declaration which introduces the user metadata.
     /// We expect this to be a struct type.
     const IR::Type_Struct* userMetaType = nullptr;
     cstring userMetaName = refMap->newName("userMetadata");
 
-    setPipelineControls(tlb, &pipeline_controls, &pipeline_namemap);
-    setNonPipelineControls(tlb, &non_pipeline_controls);
-    setComputeChecksumControls(tlb, &compute_checksum_controls);
-    setVerifyChecksumControls(tlb, &verify_checksum_controls);
-    setDeparserControls(tlb, &deparser_controls);
-    if (::errorCount() > 0)
-        return;
-
     // Find the user metadata declaration
-    auto parser = getParser(tlb);
-    auto params = parser->getApplyParameters();
+    auto parser = main->findParameterValue(v1model.sw.parser.name);
+    if (parser == nullptr) return;
+    if (!parser->is<IR::ParserBlock>()) {
+        modelError("%1%: main package  match the expected model", main);
+        return;
+    }
+    auto params = parser->to<IR::ParserBlock>()->container->getApplyParameters();
     BUG_CHECK(params->size() == 4, "%1%: expected 4 parameters", parser);
     auto metaParam = params->parameters.at(2);
     auto paramType = metaParam->type;
@@ -966,28 +915,30 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& op
     userMetaType = decl->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
     PassManager simplify = {
         new ExtractMatchKind(this),
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&structure.pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
-        new DiscoverStructure(&structure),
         evaluator,
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     };
-    tlb->getProgram()->apply(simplify);
+    program->apply(simplify);
 
-    toplevel = evaluator->getToplevelBlock();
-    toplevel->apply(*new BMV2::BuildResourceMap(this));
+    // map IR node to compile-time allocated resource blocks.
+    toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
 
     // field list and learn list ids in bmv2 are not consistent with ids for
     // other objects: they need to start at 1 (not 0) since the id is also used
@@ -1015,25 +966,39 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb, BMV2::BMV2Options& op
         json->add_error(name, type);
     }
 
-    cstring scalarsName = refMap->newName("scalars");
-
-    // This visitor is used in multiple passes to convert expression to json
-    conv = new SimpleSwitchExpressionConverter(refMap, typeMap, &structure,
-                                                     scalarsName, toplevel);
-
-    PassManager codegen_passes = {
-        new HeaderConverter(refMap, typeMap, &structure, json, scalarsName),
-        new ParserConverter(refMap, typeMap, json, conv),
-        new VisitFunctor([this]() { createActions(); }),
-        new ControlConverter(this, refMap, typeMap, json, conv, &structure, options.emitExterns),
-        new ChecksumConverter(this, json),
-        new DeparserConverter(this),
+    main = toplevel->getMain();
+    if (!main) return;  // no main
+    main->apply(*parseV1Arch);
+    PassManager updateStructure {
+        new DiscoverV1Structure(refMap, typeMap, &structure),
     };
+    program = toplevel->getProgram();
+    program->apply(updateStructure);
 
-    codegen_passes.setName("CodeGen");
-    CHECK_NULL(toplevel);
-    auto program = toplevel->getProgram();
-    program->apply(codegen_passes);
+    cstring scalarsName = refMap->newName("scalars");
+    // This visitor is used in multiple passes to convert expression to json
+    conv = new SimpleSwitchExpressionConverter(refMap, typeMap, &structure, scalarsName);
+
+    auto hconv = new HeaderConverter(refMap, typeMap, &structure, json, scalarsName);
+    program->apply(*hconv);
+
+    auto pconv = new ParserConverter(refMap, typeMap, json, conv);
+    structure.parser->apply(*pconv);
+
+    createActions(&structure);
+
+    auto cconv = new ControlConverter(this, refMap, typeMap, json, conv, &structure, options.emitExterns);
+    structure.ingress->apply(*cconv);
+    structure.egress->apply(*cconv);
+
+    auto dconv = new DeparserConverter(this);
+    structure.deparser->apply(*dconv);
+
+    convertChecksum(structure.compute_checksum->body, json->checksums,
+                    json->calculations, false);
+
+    convertChecksum(structure.verify_checksum->body, json->checksums,
+                    json->calculations, true);
 
     (void)toplevel->apply(ConvertGlobals(this));
 }

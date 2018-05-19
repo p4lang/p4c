@@ -37,7 +37,7 @@ class ControlConverter : public Inspector {
     P4::TypeMap*           typeMap;
     BMV2::JsonObjects*     json;
     ExpressionConverter*   conv;
-    ProgramParts*          structure;
+    V1ProgramStructure*    structure;
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
@@ -50,28 +50,15 @@ class ControlConverter : public Inspector {
                                    Util::JsonObject* table, Util::JsonArray* action_profiles,
                                    BMV2::SharedActionSelectorCheck& selector_check);
     Util::IJson* convertIf(const CFG::IfNode* node, cstring prefix);
-    Util::IJson* convertControl(const IR::ControlBlock* block, cstring name,
-                                Util::JsonArray *counters, Util::JsonArray* meters,
-                                Util::JsonArray* registers);
 
  public:
     const bool emitExterns;
     bool preorder(const IR::P4Control* b) override;
     explicit ControlConverter(Backend* backend, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                               BMV2::JsonObjects* json, BMV2::ExpressionConverter* conv,
-                              ProgramParts* structure, const bool& emitExterns_) :
+                              V1ProgramStructure* structure, const bool& emitExterns_) :
         backend(backend), refMap(refMap), typeMap(typeMap), json(json), conv(conv), structure(structure), emitExterns(emitExterns_)
     { setName("ControlConverter"); }
-};
-
-class ChecksumConverter : public Inspector {
-    Backend* backend;
-    BMV2::JsonObjects*     json;
-
- public:
-    bool preorder(const IR::P4Control* b) override;
-    explicit ChecksumConverter(Backend *backend, BMV2::JsonObjects* json) : backend(backend), json(json)
-    { setName("UpdateChecksum"); }
 };
 
 }  // namespace BMV2

@@ -212,12 +212,14 @@ class ProgramParts {
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
+
+    //virtual const IR::P4Program* create(const IR::P4Program* program) = 0;
     ProgramParts() {}
 };
 
 class DiscoverStructure : public Inspector {
-    ProgramParts*           structure;
  public:
+    ProgramParts*           structure;
     explicit DiscoverStructure(ProgramParts* structure) : structure(structure)
     { setName("DiscoverStructure"); }
     void postorder(const IR::ParameterList* paramList) override;

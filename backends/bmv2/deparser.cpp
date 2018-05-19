@@ -84,10 +84,6 @@ Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
 }
 
 bool DeparserConverter::preorder(const IR::P4Control* control) {
-    auto bt = backend->deparser_controls.find(control->name);
-    if (bt == backend->deparser_controls.end()) {
-        return false;
-    }
     auto deparserJson = convertDeparser(control);
     json->deparsers->append(deparserJson);
     return false;

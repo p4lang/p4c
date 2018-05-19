@@ -97,7 +97,7 @@ int main(int argc, char *const argv[]) {
     }
 
     try {
-        backend->convert(toplevel, options);
+        backend->convert(toplevel);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

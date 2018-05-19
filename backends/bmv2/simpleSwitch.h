@@ -27,78 +27,72 @@ limitations under the License.
 
 namespace BMV2 {
 
-class SimpleSwitchExpressionConverter : public ExpressionConverter {
-    const IR::ToplevelBlock* toplevel;
+class V1ProgramStructure : public ProgramParts {
+    P4::ReferenceMap*    refMap;
+    P4::TypeMap*         typeMap;
+    BMV2::JsonObjects*   json;
 
  public:
+    std::set<cstring>                pipeline_controls;
+    std::set<cstring>                non_pipeline_controls;
+    std::set<cstring>                compute_checksum_controls;
+    std::set<cstring>                verify_checksum_controls;
+    std::set<cstring>                deparser_controls;
+
+    // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
+    // provide an map from user program block name to hard-coded names.
+    std::map<cstring, cstring>       pipeline_namemap;
+
+    const IR::P4Parser* parser;
+    const IR::P4Control* ingress;
+    const IR::P4Control* egress;
+    const IR::P4Control* compute_checksum;
+    const IR::P4Control* verify_checksum;
+    const IR::P4Control* deparser;
+
+    // architecture related information
+    ordered_map<const IR::Node*, block_t> block_type;
+
+    ResourceMap resourceMap;
+
+    V1ProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BMV2::JsonObjects* json) :
+        refMap(refMap), typeMap(typeMap), json(json) {
+    }
+};
+
+class SimpleSwitchExpressionConverter : public ExpressionConverter {
+    V1ProgramStructure* structure;
+ public:
     SimpleSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-        ProgramParts* structure, cstring scalarsName, const IR::ToplevelBlock* toplevel) :
-        ExpressionConverter(refMap, typeMap, structure, scalarsName), toplevel(toplevel) { }
+        V1ProgramStructure* structure, cstring scalarsName) :
+        ExpressionConverter(refMap, typeMap, structure, scalarsName), structure(structure) { }
 
     void modelError(const char* format, const IR::Node* node) {
         ::error(format, node);
         ::error("Are you using an up-to-date v1model.p4?");
     }
 
-    const IR::P4Control* getIngress(const IR::ToplevelBlock* blk) {
-        auto main = blk->getMain();
-        auto ctrl = main->findParameterValue("ig");
-        if (ctrl == nullptr)
-            return nullptr;
-        if (!ctrl->is<IR::ControlBlock>()) {
-            modelError("%1%: main package  match the expected model", main);
-            return nullptr;
-        }
-        return ctrl->to<IR::ControlBlock>()->container;
-    }
-
-    const IR::P4Control* getEgress(const IR::ToplevelBlock* blk) {
-        auto main = blk->getMain();
-        auto ctrl = main->findParameterValue("eg");
-        if (ctrl == nullptr)
-            return nullptr;
-        if (!ctrl->is<IR::ControlBlock>()) {
-            modelError("%1%: main package  match the expected model", main);
-            return nullptr;
-        }
-        return ctrl->to<IR::ControlBlock>()->container;
-    }
-
-    const IR::P4Parser* getParser(const IR::ToplevelBlock* blk) {
-        auto main = blk->getMain();
-        auto ctrl = main->findParameterValue("p");
-        if (ctrl == nullptr)
-            return nullptr;
-        if (!ctrl->is<IR::ParserBlock>()) {
-            modelError("%1%: main package  match the expected model", main);
-            return nullptr;
-        }
-        return ctrl->to<IR::ParserBlock>()->container;
-    }
-
     bool isStandardMetadataParameter(const IR::Parameter* param) {
-        auto parser = getParser(toplevel);
-        auto params = parser->getApplyParameters();
+        auto st = dynamic_cast<V1ProgramStructure*>(structure);
+        auto params = st->parser->getApplyParameters();
         if (params->size() != 4) {
-            modelError("%1%: Expected 4 parameter for parser", parser);
+            modelError("%1%: Expected 4 parameter for parser", st->parser);
             return false;
         }
         if (params->parameters.at(3) == param)
             return true;
 
-        auto ingress = getIngress(toplevel);
-        params = ingress->getApplyParameters();
+        params = st->ingress->getApplyParameters();
         if (params->size() != 3) {
-            modelError("%1%: Expected 3 parameter for ingress", ingress);
+            modelError("%1%: Expected 3 parameter for ingress", st->ingress);
             return false;
         }
         if (params->parameters.at(2) == param)
             return true;
 
-        auto egress = getEgress(toplevel);
-        params = egress->getApplyParameters();
+        params = st->egress->getApplyParameters();
         if (params->size() != 3) {
-            modelError("%1%: Expected 3 parameter for egress", egress);
+            modelError("%1%: Expected 3 parameter for egress", st->egress);
             return false;
         }
         if (params->parameters.at(2) == param)
@@ -112,11 +106,60 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
             auto result = new Util::JsonObject();
             result->emplace("type", "field");
             auto e = BMV2::mkArrayField(result, "value");
-            e->append(BMV2::V1ModelProperties::jsonMetadataParameterName);
+            e->append("standard_metadata");
             e->append(fieldName);
             return result;
         }
         return nullptr;
+    }
+};
+
+class ParseV1Architecture : public Inspector {
+    V1ProgramStructure* structure;
+    P4V1::V1Model&      v1model;
+
+public:
+    explicit ParseV1Architecture(V1ProgramStructure* structure) :
+        structure(structure), v1model(P4V1::V1Model::instance) { }
+    void modelError(const char* format, const IR::Node* node);
+    bool preorder(const IR::PackageBlock* block) override;
+};
+
+class DiscoverV1Structure : public DiscoverStructure {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    V1ProgramStructure* structure;
+
+ public:
+    DiscoverV1Structure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, V1ProgramStructure* structure)
+        : DiscoverStructure(structure), refMap(refMap), typeMap(typeMap), structure(structure) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(structure);
+        setName("InspectV1Program");
+    }
+
+    void postorder(const IR::P4Parser* p) override {
+        if (structure->block_type.count(p)) {
+            auto info = structure->block_type.at(p);
+            if (info == V1_PARSER) {
+                structure->parser = p;
+            }
+        }
+    }
+
+    void postorder(const IR::P4Control* c) override {
+        if (structure->block_type.count(c)) {
+            auto info = structure->block_type.at(c);
+            if (info == V1_INGRESS)
+                structure->ingress = c;
+            else if (info == V1_EGRESS)
+                structure->egress = c;
+            else if (info == V1_COMPUTE)
+                structure->compute_checksum = c;
+            else if (info == V1_VERIFY)
+                structure->verify_checksum = c;
+            else if (info == V1_DEPARSER)
+                structure->deparser = c;
+        }
     }
 };
 
@@ -148,21 +191,9 @@ class SimpleSwitchBackend : public Backend {
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params);
-    void createActions();
+    void createActions(V1ProgramStructure* structure);
 
-    void setPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls,
-                             std::map<cstring, cstring>* map);
-    void setNonPipelineControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
-    void setComputeChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
-    void setVerifyChecksumControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
-    void setDeparserControls(const IR::ToplevelBlock* blk, std::set<cstring>* controls);
-
-    const IR::P4Parser*  getParser(const IR::ToplevelBlock* blk);
-    const IR::P4Control* getCompute(const IR::ToplevelBlock* blk);
-    const IR::P4Control* getVerify(const IR::ToplevelBlock* blk);
-
-    void convert(const IR::ToplevelBlock* block, BMV2::BMV2Options& options) override;
-
+    void convert(const IR::ToplevelBlock* tlb) override;
     SimpleSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                         P4::ConvertEnums::EnumMapping* enumMap) :
         Backend(options, refMap, typeMap, enumMap), options(options), v1model(P4V1::V1Model::instance) { }

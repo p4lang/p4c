@@ -75,6 +75,7 @@ class ExpressionConverter : public Inspector {
     /// This is used for table key expressions, for example.
     bool simpleExpressionsOnly;
 
+    BMV2::ProgramParts* getStructure() { return structure; }
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
 

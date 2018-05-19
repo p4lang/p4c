@@ -39,7 +39,13 @@ limitations under the License.
 
 namespace BMV2 {
 
+enum gress_t { INGRESS, EGRESS };
+enum block_t { PARSER, PIPELINE, DEPARSER, V1_PARSER, V1_DEPARSER, V1_INGRESS, V1_EGRESS, V1_VERIFY, V1_COMPUTE};
+
 class ExpressionConverter;
+
+// map IR node to compile-time allocated resource blocks.
+using ResourceMap = std::map<const IR::Node*, const IR::CompileTimeValue*>;
 
 // Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
@@ -53,27 +59,14 @@ class Backend {
     const IR::ToplevelBlock*         toplevel;
     ExpressionConverter*             conv;
     P4::P4CoreLibrary&               corelib;
-    ProgramParts                     structure;
     Util::JsonObject                 jsonTop;
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
 
     BMV2::JsonObjects*               json;
-
-    std::set<cstring>                pipeline_controls;
-    std::set<cstring>                non_pipeline_controls;
-    std::set<cstring>                compute_checksum_controls;
-    std::set<cstring>                verify_checksum_controls;
-    std::set<cstring>                deparser_controls;
-
     std::set<cstring>                match_kinds;
 
-    // map IR node to compile-time allocated resource blocks.
-    std::map<const IR::Node*, const IR::CompileTimeValue*>  resourceMap;
 
-    // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
-    // provide an map from user program block name to hard-coded names.
-    std::map<cstring, cstring>       pipeline_namemap;
 
  public:
     Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
@@ -91,7 +84,7 @@ class Backend {
     P4::TypeMap*          getTypeMap()   { return typeMap; }
     const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
 
-    virtual void convert(const IR::ToplevelBlock* block, BMV2Options& options) = 0;
+    virtual void convert(const IR::ToplevelBlock* block) = 0;
     virtual void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
                               const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
                               const bool& emitExterns) = 0;
@@ -231,29 +224,31 @@ public:
 };
 
 class BuildResourceMap : public Inspector {
-public:
-    Backend* backend;
+    ResourceMap *resourceMap;
 
-    BuildResourceMap(Backend *backend) : backend(backend) {};
+ public:
+    explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {
+        CHECK_NULL(resourceMap);
+    };
 
     bool preorder(const IR::ControlBlock* control) override {
-        backend->resourceMap.emplace(control->container, control);
+        resourceMap->emplace(control->container, control);
         for (auto cv : control->constantValue) {
-            backend->resourceMap.emplace(cv.first, cv.second);
+            resourceMap->emplace(cv.first, cv.second);
         }
 
         for (auto c : control->container->controlLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
-                backend->resourceMap.emplace(c, control->getValue(c));
+                resourceMap->emplace(c, control->getValue(c));
             }
         }
         return false;
     }
 
     bool preorder(const IR::ParserBlock* parser) override {
-        backend->resourceMap.emplace(parser->container, parser);
+        resourceMap->emplace(parser->container, parser);
         for (auto cv : parser->constantValue) {
-            backend->resourceMap.emplace(cv.first, cv.second);
+            resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
             }
@@ -261,16 +256,16 @@ public:
 
         for (auto c : parser->container->parserLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
-                backend->resourceMap.emplace(c, parser->getValue(c));
+                resourceMap->emplace(c, parser->getValue(c));
             }
         }
         return false;
     }
 
     bool preorder(const IR::TableBlock* table) override {
-        backend->resourceMap.emplace(table->container, table);
+        resourceMap->emplace(table->container, table);
         for (auto cv : table->constantValue) {
-            backend->resourceMap.emplace(cv.first, cv.second);
+            resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
             }

@@ -47,7 +47,6 @@ class ParserConverter : public Inspector {
 
  public:
     bool preorder(const IR::P4Parser* p) override;
-    bool preorder(const IR::P4Control* c) override { return false; }  // do not visit control block
     ParserConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BMV2::JsonObjects* json,
                     BMV2::ExpressionConverter* conv) :
         refMap(refMap), typeMap(typeMap), json(json), conv(conv),

@@ -31,17 +31,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-enum gress_t {
-    INGRESS,
-    EGRESS
-};
-
-enum block_t {
-    PARSER,
-    PIPELINE,
-    DEPARSER
-};
-
 class PortableSwitchExpressionConverter : public ExpressionConverter {
  public:
     PortableSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
@@ -129,7 +118,7 @@ public:
         json = new BMV2::JsonObjects(jsonTop);
     }
 
-    const IR::P4Program* create(const IR::P4Program* program);
+    const IR::P4Program* create(const IR::P4Program* program) ;
     void createStructLike(const IR::Type_StructLike* st);
     void createTypes();
     void createHeaders();
@@ -156,7 +145,6 @@ class ParsePsaArchitecture : public Inspector {
  public:
     explicit ParsePsaArchitecture(PsaProgramStructure* structure) : structure(structure) { }
 
-    void parse_pipeline(const IR::PackageBlock* block, gress_t gress);
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
 };
@@ -167,7 +155,7 @@ class InspectPsaProgram : public Inspector {
     PsaProgramStructure *pinfo;
 
  public:
-    explicit InspectPsaProgram(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, PsaProgramStructure *pinfo)
+    InspectPsaProgram(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, PsaProgramStructure *pinfo)
         : refMap(refMap), typeMap(typeMap), pinfo(pinfo) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -194,26 +182,24 @@ class InspectPsaProgram : public Inspector {
     bool preorder(const IR::Parameter* parameter) override;
 };
 
-class ConvertToJson : public Inspector {
-    PsaProgramStructure *structure;
-
+class ConvertPsaToJson : public Inspector {
 public:
-    explicit ConvertToJson(PsaProgramStructure *structure)
-        : structure(structure) {
+    PsaProgramStructure* structure;
+
+    explicit ConvertPsaToJson(PsaProgramStructure* structure)
+    : structure(structure) {
         CHECK_NULL(structure);
-        setName("ConvertPsaProgramToJson");
     }
 
-    bool preorder(const IR::P4Program *program) override {
-        auto *rv = structure->create(program);
-        return false;
+    void postorder(const IR::P4Program *program) override {
+        structure->create(program);
     }
 };
 
 class PortableSwitchBackend : public Backend {
     BMV2Options &options;
  public:
-    void convert(const IR::ToplevelBlock* block, BMV2::BMV2Options& options) override;
+    void convert(const IR::ToplevelBlock* tlb) override;
     void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
                               const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
                               const bool& emitExterns) override {}
