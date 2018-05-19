@@ -1283,7 +1283,7 @@ void PsaProgramStructure::createControls() {
 
             if (c->is<IR::Declaration_Instance>()) {
 
-                LOG1("control local is " << c);
+                auto block = psa_resourceMap.at(kv.second);
             }
         }
 
@@ -1545,23 +1545,6 @@ bool InspectPsaProgram::preorder(const IR::Declaration_MatchKind* kind) {
     for (auto member : kind->members) {
         pinfo->match_kinds.insert(member->name);
     }
-    return false;
-}
-
-bool InspectPsaProgram::preorder(const IR::ControlBlock* control)  {
-
-    LOG1("CONTROL IS" << control);
-    pinfo->resourceMap.emplace(control->container, control);
-    for (auto cv : control->constantValue) {
-        pinfo->resourceMap.emplace(cv.first, cv.second);
-    }
-
-    for (auto c : control->container->controlLocals) {
-        if (c->is<IR::InstantiatedBlock>()) {
-            pinfo->resourceMap.emplace(c, control->getValue(c));
-        }
-    }
-
     return false;
 }
 

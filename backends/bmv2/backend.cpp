@@ -244,6 +244,73 @@ class BuildResourceMap : public Inspector {
     }
 };
 
+
+class PSA_BuildResourceMap : public Inspector {
+public:
+
+    using PSA_ResourceMap = std::map<const IR::Node*, const IR::CompileTimeValue*>;
+    PSA_ResourceMap *psa_resourceMap;
+
+    PSA_BuildResourceMap(PSA_ResourceMap *psa_resourceMap) : psa_resourceMap(psa_resourceMap) {};
+
+    bool preorder(const IR::ControlBlock* control) override {
+        psa_resourceMap.emplace(control->container, control);
+        for (auto cv : control->constantValue) {
+            psa_resourceMap.emplace(cv.first, cv.second);
+        }
+
+        for (auto c : control->container->controlLocals) {
+            if (c->is<IR::InstantiatedBlock>()) {
+                psa_resourceMap.emplace(c, control->getValue(c));
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::ParserBlock* parser) override {
+        psa_resourceMap.emplace(parser->container, parser);
+        for (auto cv : parser->constantValue) {
+            psa_resourceMap.emplace(cv.first, cv.second);
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+
+        for (auto c : parser->container->parserLocals) {
+            if (c->is<IR::InstantiatedBlock>()) {
+                psa_resourceMap.emplace(c, parser->getValue(c));
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::TableBlock* table) override {
+        psa_resourceMap.emplace(table->container, table);
+        for (auto cv : table->constantValue) {
+            psa_resourceMap.emplace(cv.first, cv.second);
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::PackageBlock* package) override {
+        for (auto cv : package->constantValue) {
+            if (cv.second->is<IR::Block>()) {
+                visit(cv.second->getNode());
+            }
+        }
+        return false;
+    }
+
+    bool preorder(const IR::ToplevelBlock* tlb) override {
+        auto package = tlb->getMain();
+        visit(package);
+        return false;
+    }
+};
+
 class ExtractMatchKind : public Inspector {
  public:
     Backend *backend;
@@ -502,7 +569,9 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
         new P4::InspectPsaProgram(refMap, typeMap, &structure),
         new P4::ConvertToJson(&structure),
     };
+    toplevel->apply(*new BMV2::PSA_BuildResourceMap(&structure->psa_resourceMap));
     program->apply(toJson);
+
 
     auto json = structure.getJson();
     jsonTop.emplace("program", options.file);
