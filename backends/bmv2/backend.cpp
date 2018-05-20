@@ -254,23 +254,26 @@ public:
     PSA_BuildResourceMap(PSA_ResourceMap *psa_resourceMap) : psa_resourceMap(psa_resourceMap) {};
 
     bool preorder(const IR::ControlBlock* control) override {
-        psa_resourceMap.emplace(control->container, control);
+
+        psa_resourceMap->emplace(control->container, control);
         for (auto cv : control->constantValue) {
-            psa_resourceMap.emplace(cv.first, cv.second);
+            psa_resourceMap->emplace(cv.first, cv.second);
         }
 
         for (auto c : control->container->controlLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
-                psa_resourceMap.emplace(c, control->getValue(c));
+                psa_resourceMap->emplace(c, control->getValue(c));
             }
         }
+
         return false;
     }
 
     bool preorder(const IR::ParserBlock* parser) override {
-        psa_resourceMap.emplace(parser->container, parser);
+
+        psa_resourceMap->emplace(parser->container, parser);
         for (auto cv : parser->constantValue) {
-            psa_resourceMap.emplace(cv.first, cv.second);
+            psa_resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
             }
@@ -278,16 +281,16 @@ public:
 
         for (auto c : parser->container->parserLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
-                psa_resourceMap.emplace(c, parser->getValue(c));
+                psa_resourceMap->emplace(c, parser->getValue(c));
             }
         }
         return false;
     }
 
     bool preorder(const IR::TableBlock* table) override {
-        psa_resourceMap.emplace(table->container, table);
+        psa_resourceMap->emplace(table->container, table);
         for (auto cv : table->constantValue) {
-            psa_resourceMap.emplace(cv.first, cv.second);
+            psa_resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
             }
@@ -569,7 +572,8 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
         new P4::InspectPsaProgram(refMap, typeMap, &structure),
         new P4::ConvertToJson(&structure),
     };
-    toplevel->apply(*new BMV2::PSA_BuildResourceMap(&structure->psa_resourceMap));
+    toplevel = evaluator->getToplevelBlock();
+    toplevel->apply(*new BMV2::PSA_BuildResourceMap(&structure.psa_resourceMap));
     program->apply(toJson);
 
 

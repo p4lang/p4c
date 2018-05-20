@@ -1283,7 +1283,12 @@ void PsaProgramStructure::createControls() {
 
             if (c->is<IR::Declaration_Instance>()) {
 
+                LOG1("LIFE IS SET");
+
                 auto block = psa_resourceMap.at(kv.second);
+
+                LOG1("LIFE IS SET");
+
             }
         }
 
