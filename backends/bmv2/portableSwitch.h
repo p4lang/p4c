@@ -25,81 +25,216 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "midend/convertEnums.h"
 #include "helpers.h"
+#include "backend.h"
+#include "psaExpression.h"
+#include "JsonObjects.h"
+#include "sharedActionSelectorCheck.h"
+#include "metermap.h"
+
 
 namespace P4 {
 
-using ::Model::Elem;
-using ::Model::Type_Model;
-using ::Model::Param_Model;
-
-// Block has a name and a collection of elements
-template<typename T>
-struct Block_Model : public Type_Model {
-    std::vector<T> elems;
-    explicit Block_Model(cstring name) :
-        ::Model::Type_Model(name) {}
+enum gress_t {
+    INGRESS,
+    EGRESS
 };
 
-/// Enum_Model : Block_Model<Elem> : Type_Model
-struct Enum_Model : public Block_Model<Elem> {
-    ::Model::Type_Model type;
-    explicit Enum_Model(cstring name) :
-        Block_Model(name), type("Enum") {}
+enum block_t {
+    PARSER,
+    PIPELINE,
+    DEPARSER
 };
 
-/// Parser_Model : Block_Model<Param_Model> : Type_Model
-struct Parser_Model : public Block_Model<Param_Model> {
-    ::Model::Type_Model type;
-    explicit Parser_Model(cstring name) :
-        Block_Model<Param_Model>(name), type("Parser") {}
-};
+class PsaProgramStructure {
+    BMV2::JsonObjects*   json;     // output json data structure
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    P4::P4CoreLibrary&   corelib;
+    BMV2::PsaExpressionConverter* conv;
 
-/// Control_Model : Block_Model<Param_Model> : Type_Model
-struct Control_Model : public Block_Model<Param_Model> {
-    ::Model::Type_Model type;
-    explicit Control_Model(cstring name) :
-        Block_Model<Param_Model>(name), type("Control") {}
-};
 
-/// Method_Model : Block_Model<Param_Model> : Type_Model
-struct Method_Model : public Block_Model<Param_Model> {
-    ::Model::Type_Model type;
-    explicit Method_Model(cstring name) :
-        Block_Model<Param_Model>(name), type("Method") {}
-};
 
-/// Extern_Model : Block_Model<Method_Model> : Type_Model
-struct Extern_Model : public Block_Model<Method_Model> {
-    ::Model::Type_Model type;
-    explicit Extern_Model(cstring name) :
-        Block_Model<Method_Model>(name), type("Extern") {}
-};
-
-/// PortableModel : Model::Model
-class PortableModel : public ::Model::Model {
  public:
-    std::vector<Parser_Model*>  parsers;
-    std::vector<Control_Model*> controls;
-    std::vector<Extern_Model*>  externs;
-    std::vector<Type_Model*>    match_kinds;
-    bool find_match_kind(cstring kind_name);
-    bool find_extern(cstring extern_name);
-    static PortableModel instance;
-    PortableModel() : ::Model::Model("0.2") {}
+    // We place scalar user metadata fields (i.e., bit<>, bool)
+    // in the scalarsName metadata object, so we may need to rename
+    // these fields.  This map holds the new names.
+    std::map<const IR::StructField*, cstring> scalarMetadataFields;
+    std::map<const IR::Node*, const IR::CompileTimeValue*> psa_resourceMap;
+    std::vector<const IR::StructField*> scalars;
+    using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
+    unsigned                            scalars_width = 0;
+    unsigned                            error_width = 32;
+    unsigned                            bool_width = 1;
+    Util::JsonArray*    counters;
+    BMV2::ProgramParts    structure;
+    DirectCounterMap    directCounterMap;
+    BMV2::DirectMeterMap  meterMap;
+
+    // architecture related information
+    ordered_map<const IR::Node*, std::pair<gress_t, block_t>> block_type;
+
+    ordered_map<cstring, const IR::Type_Header*> header_types;
+    ordered_map<cstring, const IR::Type_Struct*> metadata_types;
+    ordered_map<cstring, const IR::Type_HeaderUnion*> header_union_types;
+    ordered_map<cstring, const IR::Declaration_Variable*> headers;
+    ordered_map<cstring, const IR::Declaration_Variable*> metadata;
+    ordered_map<cstring, const IR::Declaration_Variable*> header_stacks;
+    ordered_map<cstring, const IR::Declaration_Variable*> header_unions;
+    ordered_map<cstring, const IR::Type_Error*> errors;
+    ordered_map<cstring, const IR::Type_Enum*> enums;
+    ordered_map<cstring, const IR::P4Parser*> parsers;
+    ordered_map<cstring, const IR::P4ValueSet*> parse_vsets;
+    ordered_map<cstring, const IR::P4Control*> deparsers;
+    ordered_map<cstring, const IR::Declaration_Instance*> meter_arrays;
+    ordered_map<cstring, const IR::Declaration_Instance*> counter_arrays;
+    ordered_map<cstring, const IR::Declaration_Instance*> register_arrays;
+    ordered_map<cstring, const IR::P4Action*> actions;
+    ordered_map<cstring, const IR::P4Control*> pipelines;
+    // ordered_map<cstring, ???> calculations;  // P4-16 has no field list.
+    ordered_map<cstring, const IR::Declaration_Instance*> checksums;
+    // ordered_map<cstring, ??? > learn_lists;  // P4-16 has no field list;
+    ordered_map<cstring, const IR::Declaration_Instance*> extern_instances;
+    ordered_map<cstring, cstring> field_aliases;
+    std::set<cstring>   match_kinds;
+
+public:
+    PsaProgramStructure(ReferenceMap* refMap, TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap),
+    corelib(P4::P4CoreLibrary::instance) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        json = new BMV2::JsonObjects();
+        cstring scalarsName = refMap->newName("scalars");
+        conv = new BMV2::PsaExpressionConverter(refMap,typeMap,scalarsName,&scalarMetadataFields);
+    }
+
+    const IR::P4Program* create(const IR::P4Program* program);
+    void createStructLike(const IR::Type_StructLike* st);
+    Util::IJson* convertParserStatement(const IR::StatOrDecl* stat);
+    void createTypes();
+    void createHeaders();
+    void createParsers();
+    void createExterns();
+    void createActions();
+    void createControls();
+    void createDeparsers();
+    BMV2::JsonObjects* getJson() { return json; }
+    P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
+    DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
+    BMV2::DirectMeterMap &      getMeterMap()  { return meterMap; }
+    BMV2::ProgramParts &        getStructure() { return structure; }
+
+    bool hasVisited(const IR::Type_StructLike* st) {
+        if (auto h = st->to<IR::Type_Header>())
+            return header_types.count(h->getName());
+        else if (auto s = st->to<IR::Type_Struct>())
+            return metadata_types.count(s->getName());
+        else if (auto u = st->to<IR::Type_HeaderUnion>())
+            return header_union_types.count(u->getName());
+        return false;
+    }
+
+    protected:
+    void convertSimpleKey(const IR::Expression* keySet, mpz_class& value, mpz_class& mask) const;
+    unsigned combine(const IR::Expression* keySet, const IR::ListExpression* select,
+                     mpz_class& value, mpz_class& mask, bool& is_vset, cstring& vset_name) const;
+    Util::IJson* stateName(IR::ID state);
+    Util::IJson* toJson(const IR::P4Parser* cont);
+    Util::IJson* toJson(const IR::ParserState* state);
+    Util::IJson* convertDeparser(const cstring& name, const IR::P4Control* ctrl);
+    void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
+    Util::IJson* convertSelectKey(const IR::SelectExpression* expr);
+    Util::IJson* convertPathExpression(const IR::PathExpression* expr);
+    Util::IJson* createDefaultTransition();
+    std::vector<Util::IJson*> convertSelectExpression(const IR::SelectExpression* expr);
+    Util::IJson* convertTable(const BMV2::CFG::TableNode* node,
+                              Util::JsonArray* action_profiles,
+                              BMV2::SharedActionSelectorCheck& selector_check);
+    void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable);
+    cstring getKeyMatchType(const IR::KeyElement *ke);
+    /// Return 'true' if the table is 'simple'
+    bool handleTableImplementation(const IR::Property* implementation, const IR::Key* key,
+                                   Util::JsonObject* table, Util::JsonArray* action_profiles,
+                                   BMV2::SharedActionSelectorCheck& selector_check);
+    Util::IJson* convertIf(const BMV2::CFG::IfNode* node, cstring prefix);
+};
+
+class ParsePsaArchitecture : public Inspector {
+    PsaProgramStructure* structure;
+ public:
+    explicit ParsePsaArchitecture(PsaProgramStructure* structure) : structure(structure) { }
+
+    void parse_pipeline(const IR::PackageBlock* block, gress_t gress);
+    bool preorder(const IR::ToplevelBlock* block) override;
+    bool preorder(const IR::PackageBlock* block) override;
+};
+
+
+
+class InspectPsaProgram : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    PsaProgramStructure *pinfo;
+
+
+ public:
+    explicit InspectPsaProgram(ReferenceMap* refMap, TypeMap* typeMap, PsaProgramStructure *pinfo)
+        : refMap(refMap), typeMap(typeMap), pinfo(pinfo) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        CHECK_NULL(pinfo);
+        setName("InspectPsaProgram");
+    }
+
+    void postorder(const IR::P4Parser *p) override;
+    void postorder(const IR::P4Control* c) override;
+    void postorder(const IR::Type_Header* h) override;
+    void postorder(const IR::Type_HeaderUnion* hu) override;
+    void postorder(const IR::Declaration_Variable* var) override;
+    void postorder(const IR::Declaration_Instance* di) override;
+    void postorder(const IR::P4Action* act) override;
+    void postorder(const IR::Type_Error* err) override;
+
+
+    // control
+
+    bool preorder(const IR::P4Control *control) override;
+    bool preorder(const IR::Declaration_MatchKind* kind) override;
+
+
+    // parser
+    bool preorder(const IR::P4Parser *p) override;
+
+    // header
+    std::set<cstring> visitedHeaders;
+    bool isHeaders(const IR::Type_StructLike* st);
+    void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
+    void addHeaderType(const IR::Type_StructLike *st);
+    void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
+    bool preorder(const IR::Parameter* parameter) override;
+
+};
+
+class ConvertToJson : public Inspector {
+    PsaProgramStructure *structure;
+
+public:
+    explicit ConvertToJson(PsaProgramStructure *structure)
+        : structure(structure) {
+        CHECK_NULL(structure);
+        setName("ConvertPsaProgramToJson");
+    }
+
+    bool preorder(const IR::P4Program *program) override {
+        auto *rv = structure->create(program);
+        return false;
+    }
 };
 
 }  // namespace P4
-
-std::ostream& operator<<(std::ostream &out, Model::Type_Model& m);
-std::ostream& operator<<(std::ostream &out, Model::Param_Model& p);
-std::ostream& operator<<(std::ostream &out, P4::PortableModel& e);
-std::ostream& operator<<(std::ostream &out, P4::Method_Model& p);
-std::ostream& operator<<(std::ostream &out, P4::Parser_Model* p);
-std::ostream& operator<<(std::ostream &out, P4::Control_Model* p);
-std::ostream& operator<<(std::ostream &out, P4::Extern_Model* p);
-
-// portableSwitch
 
 #endif  /* _BACKENDS_BMV2_PORTABLESWITCH_H_ */
