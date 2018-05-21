@@ -553,7 +553,7 @@ class DismantleExpression : public Transform {
         std::set<const IR::Parameter*> useTemporary;
 
         bool anyOut = false;
-        for (auto p : *desc.substitution.getParameters()) {
+        for (auto p : *desc.substitution.getParametersInArgumentOrder()) {
             if (p->direction == IR::Direction::None)
                 continue;
             if (p->hasOut())
@@ -588,9 +588,9 @@ class DismantleExpression : public Transform {
         if (anyOut) {
             // Check aliasing between all pairs of arguments where at
             // least one of them is out or inout.
-            for (auto p1 : *desc.substitution.getParameters()) {
+            for (auto p1 : *desc.substitution.getParametersInArgumentOrder()) {
                 auto arg1 = desc.substitution.lookup(p1);
-                for (auto p2 : *desc.substitution.getParameters()) {
+                for (auto p2 : *desc.substitution.getParametersInArgumentOrder()) {
                     if (p2 == p1)
                         break;
                     if (!p1->hasOut() && !p2->hasOut())
@@ -615,7 +615,7 @@ class DismantleExpression : public Transform {
         auto method = result->final;
 
         ClonePathExpressions cloner;  // a cheap version of deep copy
-        for (auto p : *desc.substitution.getParameters()) {
+        for (auto p : *desc.substitution.getParametersInArgumentOrder()) {
             auto arg = desc.substitution.lookup(p);
             if (p->direction == IR::Direction::None) {
                 args->push_back(arg);

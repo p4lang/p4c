@@ -266,8 +266,8 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
             return false;
         }
         isSimpleTable = false;
-        auto eb = backend->getToplevelBlock()->getValue(decl->getNode());
-        if (eb) {
+        if (backend->getToplevelBlock()->hasValue(decl->getNode())) {
+            auto eb = backend->getToplevelBlock()->getValue(decl->getNode());
             BUG_CHECK(eb->is<IR::ExternBlock>(), "Not an extern block?");
             backend->getSimpleSwitch()->convertExternInstances(decl->to<IR::Declaration>(),
                         eb->to<IR::ExternBlock>(), action_profiles, selector_check, emitExterns); }

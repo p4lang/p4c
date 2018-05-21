@@ -63,6 +63,10 @@ void IR::Block::dbprint_recursive(std::ostream& out) const {
     out << dbp(this);
     out << indent;
     for (auto it : constantValue) {
+        if (it.second == nullptr) {
+            out << endl << dbp(it.first) << " => null";
+            continue;
+        }
         if (it.second->is<IR::Block>() && it.first->is<IR::IDeclaration>()) {
             auto block = it.second->to<IR::Block>();
             out << endl << dbp(it.first) << " => ";

@@ -23,7 +23,7 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
     auto vec = new IR::Vector<IR::Argument>();
 
     MethodCallDescription mcd(expression, refMap, typeMap);
-    for (auto p : *mcd.substitution.getParameters()) {
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         auto a = mcd.substitution.lookup(p);
         if (a->expression->is<IR::DefaultExpression>()) {
             cstring name = refMap->newName("arg");

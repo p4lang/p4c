@@ -35,6 +35,7 @@ set (P4_FRONTEND_SRCS
   p4/modelInstances.cpp
   p4/moveConstructors.cpp
   p4/moveDeclarations.cpp
+  p4/parameterSubstitution.cpp
   p4/parserCallGraph.cpp
   p4/parserControlFlow.cpp
   p4/removeReturns.cpp

@@ -489,31 +489,36 @@ class Function : Declaration {
 
 /////////////////////////////////////////////////////////////
 
-// Block is the base class for IR nodes produced by the evaluator.
-// A block represents a compile-time allocated resource.
-// Blocks are not visited using visitors, so the visit_children()
-// method is empty.  Users have to write custom visitors to
-// traverse the constantValue map.
+/**
+ * Block is the base class for IR nodes produced by the evaluator.
+ * A block represents a compile-time allocated resource.
+ * Blocks are not visited using visitors, so the visit_children()
+ * method is empty.  Users have to write custom visitors to
+ * traverse the constantValue map.
+ */
 abstract Block : CompileTimeValue {
-    Node node;  // Node that evaluates to this block.
-    // It's either a Declaration_Instance or a ConstructorCallExpression.
+    Node node;  /// Node that evaluates to this block.
+    /// This is either a Declaration_Instance or a ConstructorCallExpression.
 
-    // One value for each Node inside that evaluates to a compile-time constant.
-    // This includes all constructor parameters, and all inner nested blocks.
+    /// One value for each Node inside that evaluates to a compile-time constant.
+    /// This includes all constructor parameters, and all inner nested blocks.
     ordered_map<Node, CompileTimeValue> constantValue = {};
 
     virtual void dbprint(std::ostream& out) const override;
     virtual void dbprint_recursive(std::ostream& out) const;
+    /// value can be null for parameters which are optional
     void setValue(Node node, CompileTimeValue value) {
-        CHECK_NULL(node); CHECK_NULL(value);
+        CHECK_NULL(node);
         auto it = constantValue.find(node);
         BUG_CHECK(it == constantValue.end(), "%1% already set", node);
         constantValue[node] = value; }
+    bool hasValue(Node node) const {
+        return constantValue.find(node) != constantValue.end();
+    }
     CompileTimeValue getValue(Node node) const {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
-        if (it == constantValue.end())
-            return nullptr;
+        BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
     visit_children { (void)v; }
 }
@@ -523,8 +528,7 @@ class TableBlock : Block {
 #nodbprint
 }
 
-// An object that has been instantiated
-// The substitution holds the constructor arguments.
+/// An object that has been instantiated
 abstract InstantiatedBlock : Block {
     Type instanceType;  // May be a SpecializedType
 
@@ -574,11 +578,12 @@ class ExternBlock : InstantiatedBlock {
 #nodbprint
 }
 
-// Represents the program as a whole
+/// Represents the program as a whole
 class ToplevelBlock : Block {
     P4Program getProgram() const { return node->to<IR::P4Program>(); }
     PackageBlock getMain() const;
 #nodbprint
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }
+
 /** @} *//* end group irdefs */

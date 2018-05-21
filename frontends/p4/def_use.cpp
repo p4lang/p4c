@@ -678,7 +678,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 
     auto result = LocationSet::empty;
     // For all methods out/inout arguments are written
-    for (auto p : *mcd.substitution.getParameters()) {
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         auto arg = mcd.substitution.lookup(p);
         bool save = lhs;
         // pretend we are on the lhs

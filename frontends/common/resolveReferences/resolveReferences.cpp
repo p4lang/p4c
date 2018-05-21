@@ -28,7 +28,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
 
     for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
         const IR::INamespace* current = *it;
-        LOG2("Trying to resolve in " << current->toString());
+        LOG3("Trying to resolve in " << current->toString());
 
         if (current->is<IR::IGeneralNamespace>()) {
             auto gen = current->to<IR::IGeneralNamespace>();
@@ -61,7 +61,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                     Util::SourceInfo nsi = name.srcInfo;
                     Util::SourceInfo dsi = d->getNode()->srcInfo;
                     bool before = dsi <= nsi;
-                    LOG2("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                    LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
                     return before;
                 };
                 decls = decls->where(locationFilter);
@@ -69,7 +69,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
 
             auto vector = decls->toVector();
             if (!vector->empty()) {
-                LOG2("Resolved in " << dbp(current->getNode()));
+                LOG3("Resolved in " << dbp(current->getNode()));
                 return vector;
             } else {
                 continue;
@@ -100,12 +100,12 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 Util::SourceInfo nsi = name.srcInfo;
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
-                LOG2("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
                 if (!before)
                     continue;
             }
 
-            LOG2("Resolved in " << dbp(current->getNode()));
+            LOG3("Resolved in " << dbp(current->getNode()));
             auto result = new std::vector<const IR::IDeclaration*>();
             result->push_back(decl);
             return result;
@@ -177,7 +177,7 @@ ResolveReferences::ResolveReferences(ReferenceMap* refMap,
 }
 
 void ResolveReferences::addToContext(const IR::INamespace* ns) {
-    LOG1("Adding to context " << dbp(ns));
+    LOG2("Adding to context " << dbp(ns));
     BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     checkShadowing(ns);
     context->push(ns);
@@ -189,13 +189,13 @@ void ResolveReferences::addToGlobals(const IR::INamespace* ns) {
 }
 
 void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
-    LOG1("Removing from context " << dbp(ns));
+    LOG2("Removing from context " << dbp(ns));
     BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     context->pop(ns);
 }
 
 void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
-    LOG1("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
+    LOG2("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
     ResolutionContext* ctx = context;
     if (path->absolute)
         ctx = new ResolutionContext(rootNamespace);
@@ -271,7 +271,7 @@ void ResolveReferences::postorder(const IR::P4Program*) {
     resolveForward.pop_back();
     BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
     context = nullptr;
-    LOG1("Reference map " << refMap);
+    LOG2("Reference map " << refMap);
 }
 
 bool ResolveReferences::preorder(const IR::This* pointer) {

@@ -511,6 +511,8 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnn
             ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     Method lookupMethod(cstring name, int argCount) const;
+    Method lookupConstructor(int argCount) const
+    { return lookupMethod(name.name, argCount); }
     validate{ methods.check_null(); }
     Annotations getAnnotations() const override { return annotations; }
 }

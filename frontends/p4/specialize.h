@@ -106,9 +106,9 @@ class FindSpecializations : public Inspector {
     bool isSimpleConstant(const IR::Expression* expression) const;
     Visitor::profile_t init_apply(const IR::Node* node) override
     { specMap->clear(); return Inspector::init_apply(node); }
-    // True if this container does not have constructor or type
-    // parameters i.e., we can look inside for invocations to
-    // specialize.
+    /// True if this container does not have constructor or type
+    /// parameters i.e., we can look inside for invocations to
+    /// specialize.
     bool noParameters(const IR::IContainer* container);
 
     bool preorder(const IR::P4Parser* parser) override
@@ -132,7 +132,7 @@ class FindSpecializations : public Inspector {
  * Instantiations with constructor arguments that are not constant values are
  * ignored---see SpecializeAll for details.
  *
- * Note that this pass handles type substition for instantiating generic Parser
+ * Note that this pass handles type substitution for instantiating generic Parser
  * or Control types, which is an experimental feature.
  *
  * For example:

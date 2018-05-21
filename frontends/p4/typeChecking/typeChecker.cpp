@@ -762,7 +762,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         typeError("%1%: Type parameters must be supplied for constructor", errorPosition);
         return nullptr;
     }
-    auto constructor = ext->lookupMethod(ext->name.name, arguments->size());
+    auto constructor = ext->lookupConstructor(arguments->size());
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no constructor with %3% arguments",
                   errorPosition, ext, arguments->size());

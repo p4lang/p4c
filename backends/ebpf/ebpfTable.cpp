@@ -361,7 +361,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
-    for (auto p : *mcd.substitution.getParameters()) {
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         builder->emitIndent();
         builder->appendFormat(".%s = ", p->name.name.c_str());
         auto arg = mcd.substitution.lookup(p);

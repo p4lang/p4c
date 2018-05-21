@@ -410,6 +410,8 @@ void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
 
 void DiscoverInlining::visit_all(const IR::Block* block) {
     for (auto it : block->constantValue) {
+        if (it.second == nullptr)
+            continue;
         if (it.second->is<IR::Block>()) {
             visit(it.second->getNode());
         }
@@ -517,15 +519,15 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                 FindLocationSets fls(refMap, typeMap);
 
                 mcd = new MethodCallDescription(call->methodCall, refMap, typeMap);
-                for (auto param : *mcd->substitution.getParameters()) {
+                for (auto param : *mcd->substitution.getParametersInArgumentOrder()) {
                     auto arg = mcd->substitution.lookup(param);
                     auto ls = fls.locations(arg->expression);
                     locationSets.emplace(param, ls);
                 }
 
-                for (auto param1 : *mcd->substitution.getParameters()) {
+                for (auto param1 : *mcd->substitution.getParametersInArgumentOrder()) {
                     auto ls1 = ::get(locationSets, param1);
-                    for (auto param2 : *mcd->substitution.getParameters()) {
+                    for (auto param2 : *mcd->substitution.getParametersInArgumentOrder()) {
                         if (param1 == param2) continue;
                         auto ls2 = ::get(locationSets, param2);
                         if (ls1->overlaps(ls2)) {
@@ -604,7 +606,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
 
     MethodCallDescription mcd(statement->methodCall, refMap, typeMap);
-    for (auto param : *mcd.substitution.getParameters()) {
+    for (auto param : *mcd.substitution.getParametersInArgumentOrder()) {
         LOG3("Looking for " << param->name);
         auto initializer = substs->paramSubst.lookup(param);
         auto arg = mcd.substitution.lookup(param);
@@ -624,7 +626,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     body.append(callee->body->components);
 
     // Copy values of out and inout parameters
-    for (auto param : *mcd.substitution.getParameters()) {
+    for (auto param : *mcd.substitution.getParametersInArgumentOrder()) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             auto left = mcd.substitution.lookup(param);
             auto arg = substs->paramSubst.lookupByName(param->name);

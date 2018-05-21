@@ -33,9 +33,12 @@ class ParameterSubstitution : public IHasDbPrint {
     // Parameter names are unique for a procedure, so each name
     // should show up only once.
     std::map<cstring, const IR::Argument*> parameterValues;
-    // Map from parameter name to parameter.
+    /// Map from parameter name to parameter.
     std::map<cstring, const IR::Parameter*>  parametersByName;
+    /// Parameters in the order they were added.
     std::vector<const IR::Parameter*>        parameters;
+    /// If created using populate this is non-null.
+    const IR::ParameterList*                 paramList = nullptr;
 
     bool containsName(cstring name) const
     { return parameterValues.find(name) != parameterValues.end(); }
@@ -44,17 +47,7 @@ class ParameterSubstitution : public IHasDbPrint {
     ParameterSubstitution() = default;
     ParameterSubstitution(const ParameterSubstitution& other) = default;
 
-    void add(const IR::Parameter* parameter, const IR::Argument* value) {
-        LOG1("Mapping " << dbp(parameter) << " to " << dbp(value));
-        cstring name = parameter->name.name;
-        auto par = get(parametersByName, name);
-        BUG_CHECK(par == nullptr,
-                  "Two parameters with the same name %1% in a substitution", name);
-        parameterValues.emplace(name, value);
-        parametersByName.emplace(name, parameter);
-        parameters.push_back(parameter);
-    }
-
+    void add(const IR::Parameter* parameter, const IR::Argument* value);
     const IR::Argument* lookupByName(cstring name) const
     { return get(parameterValues, name); }
 
@@ -70,36 +63,23 @@ class ParameterSubstitution : public IHasDbPrint {
     bool empty() const
     { return parameterValues.empty(); }
 
+    /// Only the parameters which have corresponding arguments
+    /// will be bound.  PARAMETERS ARE ADDED IN THE ORDER OF THE ARGUMENTS.
+    // For actions only some parameters may be bound.
     void populate(const IR::ParameterList* params,
-                  const IR::Vector<IR::Argument>* args) {
-        // Allow for binding only some parameters: used for actions
-        BUG_CHECK(params->size() >= args->size(),
-                  "Incompatible number of arguments for parameter list: %1% and %2%",
-                  params, args);
+                  const IR::Vector<IR::Argument>* args);
 
-        std::map<cstring, const IR::Parameter*> byName;
-        for (auto p : params->parameters)
-            byName.emplace(p->name, p);
-
-        auto pe = params->getEnumerator();
-        for (auto a : *args) {
-            if (a->name) {
-                auto p = ::get(byName, a->name);
-                if (p == nullptr) {
-                    ::error("No parameter named %1%", a->name);
-                    continue;
-                }
-                add(p, a);
-            } else {
-                bool success = pe->moveNext();
-                BUG_CHECK(success, "Enumerator finished too soon");
-                add(pe->getCurrent(), a);
-            }
-        }
-    }
-
-    Util::Enumerator<const IR::Parameter*>* getParameters() const
+    /// Returns parameters in the order they were added
+    Util::Enumerator<const IR::Parameter*>* getParametersInArgumentOrder() const
     { return Util::Enumerator<const IR::Parameter*>::createEnumerator(parameters); }
+
+    /// Returns parameters in the order of the parameter list.
+    /// Only works if parameters were inserted using populate.
+    Util::Enumerator<const IR::Parameter*>* getParametersInOrder() const {
+        if (paramList == nullptr)
+            return nullptr;
+        return paramList->getEnumerator();
+    }
 
     void dbprint(std::ostream& out) const {
         for (auto s : parametersByName)
