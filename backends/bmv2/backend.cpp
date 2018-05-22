@@ -572,8 +572,8 @@ void Backend::convert_portable_switch(const IR::ToplevelBlock* tlb, BMV2Options&
         new P4::InspectPsaProgram(refMap, typeMap, &structure),
         new P4::ConvertToJson(&structure),
     };
-    toplevel = evaluator->getToplevelBlock();
-    toplevel->apply(*new BMV2::PSA_BuildResourceMap(&structure.psa_resourceMap));
+
+    tlb->apply(*new BMV2::PSA_BuildResourceMap(&structure.psa_resourceMap));
     program->apply(toJson);
 
 

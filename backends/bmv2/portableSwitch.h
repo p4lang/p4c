@@ -34,6 +34,7 @@ limitations under the License.
 #include "JsonObjects.h"
 #include "sharedActionSelectorCheck.h"
 #include "metermap.h"
+#include "frontends/p4/fromv1.0/psa_model.h"
 
 
 namespace P4 {
@@ -55,7 +56,7 @@ class PsaProgramStructure {
     TypeMap* typeMap;
     P4::P4CoreLibrary&   corelib;
     BMV2::PsaExpressionConverter* conv;
-
+    BFN::PSA::PsaModel* psa_model;
 
 
  public:
@@ -70,6 +71,9 @@ class PsaProgramStructure {
     unsigned                            error_width = 32;
     unsigned                            bool_width = 1;
     Util::JsonArray*    counters;
+    Util::JsonArray*    counter_arrays;
+    Util::JsonArray*    meter_arrays;
+    Util::JsonArray*    register_arrays;
     BMV2::ProgramParts    structure;
     DirectCounterMap    directCounterMap;
     BMV2::DirectMeterMap  meterMap;
@@ -89,9 +93,6 @@ class PsaProgramStructure {
     ordered_map<cstring, const IR::P4Parser*> parsers;
     ordered_map<cstring, const IR::P4ValueSet*> parse_vsets;
     ordered_map<cstring, const IR::P4Control*> deparsers;
-    ordered_map<cstring, const IR::Declaration_Instance*> meter_arrays;
-    ordered_map<cstring, const IR::Declaration_Instance*> counter_arrays;
-    ordered_map<cstring, const IR::Declaration_Instance*> register_arrays;
     ordered_map<cstring, const IR::P4Action*> actions;
     ordered_map<cstring, const IR::P4Control*> pipelines;
     // ordered_map<cstring, ???> calculations;  // P4-16 has no field list.
@@ -110,6 +111,7 @@ public:
         json = new BMV2::JsonObjects();
         cstring scalarsName = refMap->newName("scalars");
         conv = new BMV2::PsaExpressionConverter(refMap,typeMap,scalarsName,&scalarMetadataFields);
+        psa_model = new BFN::PSA::PsaModel();
     }
 
     const IR::P4Program* create(const IR::P4Program* program);
@@ -161,6 +163,12 @@ public:
                                    Util::JsonObject* table, Util::JsonArray* action_profiles,
                                    BMV2::SharedActionSelectorCheck& selector_check);
     Util::IJson* convertIf(const BMV2::CFG::IfNode* node, cstring prefix);
+    cstring convertHashAlgorithm(cstring algorithm);
+    void convertExternInstances(const IR::Declaration *c,
+                                  const IR::ExternBlock* eb,
+                                  Util::JsonArray* action_profiles,
+                                  BMV2::SharedActionSelectorCheck& selector_check,
+                                  const bool& emitExterns);
 };
 
 class ParsePsaArchitecture : public Inspector {

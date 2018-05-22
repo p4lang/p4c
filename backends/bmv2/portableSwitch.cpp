@@ -19,6 +19,7 @@ limitations under the License.
 
 namespace P4 {
 
+
 const IR::P4Program* PsaProgramStructure::create(const IR::P4Program* program) {
     createTypes();
     createHeaders();
@@ -1041,6 +1042,219 @@ Util::IJson* PsaProgramStructure::convertIf(const BMV2::CFG::IfNode* node, cstri
     return result;
 }
 
+
+cstring
+PsaProgramStructure::convertHashAlgorithm(cstring algorithm) {
+    cstring result;
+    if (algorithm == psa_model->algorithm.crc32.name)
+        result = "crc32";
+    else if (algorithm == psa_model->algorithm.crc32_custom.name)
+        result = "crc32_custom";
+    else if (algorithm == psa_model->algorithm.crc16.name)
+        result = "crc16";
+    else if (algorithm == psa_model->algorithm.crc16_custom.name)
+        result = "crc16_custom";
+    else if (algorithm == psa_model->algorithm.random.name)
+        result = "random";
+    else if (algorithm == psa_model->algorithm.identity.name)
+        result = "identity";
+    else
+        ::error("%1%: unexpected algorithm", algorithm);
+    return result;
+}
+
+void PsaProgramStructure::convertExternInstances(const IR::Declaration *c,
+                                         const IR::ExternBlock* eb,
+                                         Util::JsonArray* action_profiles,
+                                         BMV2::SharedActionSelectorCheck& selector_check,
+                                         const bool& emitExterns) {
+
+    auto inst = c->to<IR::Declaration_Instance>();
+    cstring name = inst->controlPlaneName();
+    LOG1("eb is " << eb);
+    if (eb->type->name == psa_model->counter.name) {
+        auto jctr = new Util::JsonObject();
+        jctr->emplace("name", name);
+        jctr->emplace("id", BMV2::nextId("counter_arrays"));
+        jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        //auto sz = eb->findParameterValue(psa_model->counter.sizeParam.name);
+        //jctr->emplace("size", sz->to<IR::Constant>()->value);
+        jctr->emplace("is_direct", false);
+        counter_arrays->append(jctr);
+    }
+    else if (eb->type->name == psa_model->meter.name) {
+        auto jmtr = new Util::JsonObject();
+        jmtr->emplace("name", name);
+        jmtr->emplace("id", BMV2::nextId("meter_arrays"));
+        jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        jmtr->emplace("is_direct", false);
+        auto sz = eb->findParameterValue(psa_model->meter.sizeParam.name);
+        CHECK_NULL(sz);
+        if (!sz->is<IR::Constant>()) {
+            ::error("%1%: expected a constant", sz->getNode());
+            return;
+        }
+        jmtr->emplace("size", sz->to<IR::Constant>()->value);
+        jmtr->emplace("rate_count", 2);
+        auto mkind = eb->findParameterValue(psa_model->meter.typeParam.name);
+        CHECK_NULL(mkind);
+        if (!mkind->is<IR::Declaration_ID>()) {
+            ::error("%1%: expected a member", mkind->getNode());
+            return;
+        }
+        cstring name = mkind->to<IR::Declaration_ID>()->name;
+        cstring type = "?";
+        if (name == psa_model->meter.meterType.packets.name)
+            type = "packets";
+        else if (name == psa_model->meter.meterType.bytes.name)
+            type = "bytes";
+        else
+            ::error("Unexpected meter type %1%", mkind->getNode());
+        jmtr->emplace("type", type);
+        meter_arrays->append(jmtr);
+    } else if (eb->type->name == psa_model->registers.name) {
+        auto jreg = new Util::JsonObject();
+        jreg->emplace("name", name);
+        jreg->emplace("id", BMV2::nextId("register_arrays"));
+        jreg->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        auto sz = eb->findParameterValue(psa_model->registers.sizeParam.name);
+        CHECK_NULL(sz);
+        if (!sz->is<IR::Constant>()) {
+            ::error("%1%: expected a constant", sz->getNode());
+            return;
+        }
+        if (sz->to<IR::Constant>()->value == 0)
+            ::error("%1%: direct registers are not supported in bmv2", inst);
+        jreg->emplace("size", sz->to<IR::Constant>()->value);
+        if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
+            ::error("%1%: Expected a generic specialized type", eb->instanceType);
+            return;
+        }
+        auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
+        if (st->arguments->size() != 1) {
+            ::error("%1%: expected 1 type argument", st);
+            return;
+        }
+        auto regType = st->arguments->at(0);
+        if (!regType->is<IR::Type_Bits>()) {
+            ::error("%1%: Only registers with bit or int types are currently supported", eb);
+            return;
+        }
+        unsigned width = regType->width_bits();
+        if (width == 0) {
+            ::error("%1%: unknown width", st->arguments->at(0));
+            return;
+        }
+        jreg->emplace("bitwidth", width);
+        register_arrays->append(jreg);
+    } else if (eb->type->name == psa_model->directCounter.name) {
+        auto it = getDirectCounterMap().find(name);
+        if (it == getDirectCounterMap().end()) {
+            ::warning("%1%: Direct counter not used; ignoring", inst);
+        } else {
+            auto jctr = new Util::JsonObject();
+            jctr->emplace("name", name);
+            jctr->emplace("id", BMV2::nextId("counter_arrays"));
+            // TODO(jafingerhut) - add line/col here?
+            jctr->emplace("is_direct", true);
+            jctr->emplace("binding", it->second->controlPlaneName());
+            counter_arrays->append(jctr);
+        }
+    } else if (eb->type->name == psa_model->directMeter.name) {
+        auto info = getMeterMap().getInfo(c);
+        CHECK_NULL(info);
+        CHECK_NULL(info->table);
+        CHECK_NULL(info->destinationField);
+
+        auto jmtr = new Util::JsonObject();
+        jmtr->emplace("name", name);
+        jmtr->emplace("id", BMV2::nextId("meter_arrays"));
+        jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        jmtr->emplace("is_direct", true);
+        jmtr->emplace("rate_count", 2);
+        auto mkind = eb->findParameterValue(psa_model->directMeter.typeParam.name);
+        CHECK_NULL(mkind);
+        if (!mkind->is<IR::Declaration_ID>()) {
+            ::error("%1%: expected a member", mkind->getNode());
+            return;
+        }
+        cstring name = mkind->to<IR::Declaration_ID>()->name;
+        cstring type = "?";
+        if (name == psa_model->meter.meterType.packets.name) {
+            type = "packets";
+        } else if (name == psa_model->meter.meterType.bytes.name) {
+            type = "bytes";
+        } else {
+            ::error("%1%: unexpected meter type", mkind->getNode());
+            return;
+        }
+        jmtr->emplace("type", type);
+        jmtr->emplace("size", info->tableSize);
+        cstring tblname = info->table->controlPlaneName();
+        jmtr->emplace("binding", tblname);
+        auto result = conv->convert(info->destinationField);
+        jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
+        meter_arrays->append(jmtr);
+    } else if (eb->type->name == psa_model->action_profile.name ||
+               eb->type->name == psa_model->action_selector.name) {
+        // Might call this multiple times if the selector/profile is used more than
+        // once in a pipeline, so only add it to the action_profiles once
+        if (BMV2::JsonObjects::find_object_by_name(action_profiles, name))
+            return;
+        auto action_profile = new Util::JsonObject();
+        action_profile->emplace("name", name);
+        action_profile->emplace("id", BMV2::nextId("action_profiles"));
+        // TODO(jafingerhut) - add line/col here?
+
+        auto add_size = [&action_profile, &eb](const cstring &pname) {
+            auto sz = eb->findParameterValue(pname);
+            if (!sz->is<IR::Constant>()) {
+                ::error("%1%: expected a constant", sz);
+                return;
+            }
+            action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+        };
+
+        if (eb->type->name == psa_model->action_profile.name) {
+            add_size(psa_model->action_profile.sizeParam.name);
+        } else {
+            add_size(psa_model->action_selector.sizeParam.name);
+            auto selector = new Util::JsonObject();
+            auto hash = eb->findParameterValue(
+                    psa_model->action_selector.algorithmParam.name);
+            if (!hash->is<IR::Declaration_ID>()) {
+                ::error("%1%: expected a member", hash->getNode());
+                return;
+            }
+            auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+            selector->emplace("algo", algo);
+            auto input = selector_check.get_selector_input(
+                    c->to<IR::Declaration_Instance>());
+            if (input == nullptr) {
+                // the selector is never used by any table, we cannot figure out its
+                // input and therefore cannot include it in the JSON
+                ::warning("Action selector '%1%' is never referenced by a table "
+                          "and cannot be included in bmv2 JSON", c);
+                return;
+            }
+            auto j_input = BMV2::mkArrayField(selector, "input");
+            for (auto expr : *input) {
+                auto jk = conv->convert(expr);
+                j_input->append(jk);
+            }
+            action_profile->emplace("selector", selector);
+        }
+
+        action_profiles->append(action_profile);
+    } else {
+        if (!emitExterns)
+            error("Unknown extern instance %1%", eb->type->name);
+    }
+
+
+}
+
+
 void PsaProgramStructure::createStructLike(const IR::Type_StructLike* st) {
     CHECK_NULL(st);
     cstring name = st->controlPlaneName();
@@ -1277,17 +1491,21 @@ void PsaProgramStructure::createControls() {
             }
         }
 
+        //for ( auto p : psa_resourceMap) {
 
-        for ( auto p : psa_resourceMap) {
-
-            LOG1("psa resource map is": << p.first << p.second);
-        }
+            //LOG1("psa resource map is " << p.first << p.second);
+        //}
         for (auto c : kv.second->controlLocals) {
-
             if (c->is<IR::Declaration_Instance>()) {
-
                 auto block = psa_resourceMap.at(kv.second);
-
+                auto bl = block->to<IR::ControlBlock>()->getValue(c);
+                CHECK_NULL(bl);
+                if (bl->is<IR::ExternBlock>()) {
+                    auto eb = bl->to<IR::ExternBlock>();
+                    LOG1("extern block " << eb);
+                    convertExternInstances(c, eb, action_profiles, selector_check, false);
+                    continue;
+                }
             }
         }
 
@@ -1303,7 +1521,7 @@ void PsaProgramStructure::createDeparsers() {
         LOG1("deparser" << kv.first << kv.second);
         auto deparserJson = convertDeparser(kv.first, kv.second);
         json->deparsers->append(deparserJson);
-}
+    }
 
 }
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
