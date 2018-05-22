@@ -38,16 +38,17 @@ limitations under the License.
 
 namespace BMV2 {
 
-enum class Target { UNKNOWN_SWITCH, PORTABLE_SWITCH, SIMPLE_SWITCH };
+enum class Target { PORTABLE_SWITCH, SIMPLE_SWITCH };
 
 class ExpressionConverter;
 
-class Backend : public PassManager {
+class Backend {
     using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
 
     // TODO(hanw): current implementation uses refMap and typeMap from midend.
     // Once all midend passes are refactored to avoid patching refMap, typeMap,
     // We can regenerated the refMap and typeMap in backend.
+    BMV2Options&                     options;
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
     P4::ConvertEnums::EnumMapping*   enumMap;
@@ -56,16 +57,13 @@ class Backend : public PassManager {
     P4::P4CoreLibrary&               corelib;
     ProgramParts                     structure;
     Util::JsonObject                 jsonTop;
-    P4::PortableModel&               model;  // remove
     DirectCounterMap                 directCounterMap;
     DirectMeterMap                   meterMap;
     ErrorCodesMap                    errorCodesMap;
-
     // bmv2 backend supports multiple target architectures, we create different
     // json generators for each architecture to handle the differences in json
     // format for each architecture.
     P4V1::SimpleSwitch*              simpleSwitch;
-    // PortableSwitchJsonConverter*  portableSwitch;
 
  public:
     BMV2::JsonObjects*               json;
@@ -90,6 +88,11 @@ class Backend : public PassManager {
     std::set<cstring>                verify_checksum_controls;
     std::set<cstring>                deparser_controls;
 
+    std::set<cstring>                match_kinds;
+
+    // map IR node to compile-time allocated resource blocks.
+    std::map<const IR::Node*, const IR::CompileTimeValue*>  resourceMap;
+
     // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
     // provide an map from user program block name to hard-coded names.
     std::map<cstring, cstring>       pipeline_namemap;
@@ -100,24 +103,23 @@ class Backend : public PassManager {
     void genExternMethod(Util::JsonArray* result, P4::ExternMethod *em);
 
  public:
-    Backend(bool isV1, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+    Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
             P4::ConvertEnums::EnumMapping* enumMap) :
+        options(options),
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
         corelib(P4::P4CoreLibrary::instance),
-        model(P4::PortableModel::instance),
         simpleSwitch(new P4V1::SimpleSwitch(this)),
         json(new BMV2::JsonObjects()),
-        target(Target::SIMPLE_SWITCH) { refMap->setIsV1(isV1); setName("BackEnd"); }
-    void process(const IR::ToplevelBlock* block, BMV2Options& options);
-    void convert(BMV2Options& options);
-    void serialize(std::ostream& out) const
-    { jsonTop.serialize(out); }
+        target(Target::SIMPLE_SWITCH) { refMap->setIsV1(options.isv1()); }
+    void convert_simple_switch(const IR::ToplevelBlock* block, BMV2Options& options);
+    void convert_portable_switch(const IR::ToplevelBlock* block, BMV2Options& options);
+    void serialize(std::ostream& out) const { jsonTop.serialize(out); }
+    BMV2Options&          getOptions() const { return options; }
     P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
     ErrorCodesMap &       getErrorCodesMap()       { return errorCodesMap; }
     ExpressionConverter * getExpressionConverter() { return conv; }
     DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
     DirectMeterMap &      getMeterMap()  { return meterMap; }
-    P4::PortableModel &   getModel()     { return model; }
     ProgramParts &        getStructure() { return structure; }
     P4::ReferenceMap*     getRefMap()    { return refMap; }
     P4::TypeMap*          getTypeMap()   { return typeMap; }

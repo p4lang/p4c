@@ -21,16 +21,16 @@ limitations under the License.
 namespace BMV2 {
 
 // TODO(hanw): remove
-Util::JsonArray* ConvertHeaders::pushNewArray(Util::JsonArray* parent) {
+Util::JsonArray* HeaderConverter::pushNewArray(Util::JsonArray* parent) {
     auto result = new Util::JsonArray();
     parent->append(result);
     return result;
 }
 
-ConvertHeaders::ConvertHeaders(Backend* backend, cstring scalarsName)
+HeaderConverter::HeaderConverter(Backend* backend, cstring scalarsName)
         : backend(backend), scalarsName(scalarsName), refMap(backend->getRefMap()),
           typeMap(backend->getTypeMap()), json(backend->json) {
-    setName("ConvertHeaders");
+    setName("HeaderConverter");
     CHECK_NULL(backend->json);
 }
 
@@ -39,7 +39,7 @@ ConvertHeaders::ConvertHeaders(Backend* backend, cstring scalarsName)
  *
  * @param meta this boolean indicates if the struct is a metadata or header.
  */
-void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
+void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
     LOG1("Adding " << type);
     for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
@@ -110,7 +110,7 @@ void ConvertHeaders::addTypesAndInstances(const IR::Type_StructLike* type, bool 
     }
 }
 
-void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
+void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     LOG1("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
         auto ft = typeMap->getType(f, true);
@@ -135,7 +135,7 @@ void ConvertHeaders::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     }
 }
 
-bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
+bool HeaderConverter::isHeaders(const IR::Type_StructLike* st) {
     bool result = false;
     for (auto f : st->fields) {
         if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
@@ -145,7 +145,7 @@ bool ConvertHeaders::isHeaders(const IR::Type_StructLike* st) {
     return result;
 }
 
-void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
+void HeaderConverter::addHeaderField(const cstring& header, const cstring& name,
                                     int size, bool is_signed) {
     Util::JsonArray* field = new Util::JsonArray();
     field->append(name);
@@ -154,7 +154,7 @@ void ConvertHeaders::addHeaderField(const cstring& header, const cstring& name,
     json->add_header_field(header, field);
 }
 
-void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
+void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     cstring name = st->controlPlaneName();
     auto fields = new Util::JsonArray();
     unsigned max_length = 0;  // for variable-sized headers
@@ -244,7 +244,7 @@ void ConvertHeaders::addHeaderType(const IR::Type_StructLike *st) {
  * We synthesize a "header_type" for each local which has a struct type
  * and we pack all the scalar-typed locals into a 'scalar' type
  */
-Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
+Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
     scalarsTypeName = refMap->newName("scalars");
     json->add_header_type(scalarsTypeName);
     // bit<n>, bool, error are packed into scalars type,
@@ -312,7 +312,7 @@ Visitor::profile_t ConvertHeaders::init_apply(const IR::Node* node) {
     return Inspector::init_apply(node);
 }
 
-void ConvertHeaders::end_apply(const IR::Node*) {
+void HeaderConverter::end_apply(const IR::Node*) {
     // pad scalars to byte boundary
     unsigned padding = scalars_width % 8;
     if (padding != 0) {
@@ -341,7 +341,7 @@ void ConvertHeaders::end_apply(const IR::Node*) {
  * @pre assumes no nested struct in parameters.
  * @post none
  */
-bool ConvertHeaders::preorder(const IR::Parameter* param) {
+bool HeaderConverter::preorder(const IR::Parameter* param) {
     //// keep track of which headers we've already generated the json for
     auto ft = typeMap->getType(param->getNode(), true);
     if (ft->is<IR::Type_Struct>()) {
@@ -361,16 +361,6 @@ bool ConvertHeaders::preorder(const IR::Parameter* param) {
             } else {
                 addTypesAndInstances(st, true);
             }
-        }
-    }
-    return false;
-}
-
-/// Blocks are not in IR tree, use a custom visitor to traverse
-bool ConvertHeaders::preorder(const IR::PackageBlock *block) {
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>()) {
-            visit(it.second->getNode());
         }
     }
     return false;

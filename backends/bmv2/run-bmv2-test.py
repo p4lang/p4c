@@ -200,7 +200,7 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-bm2-ss", "-o", jsonfile] + options.compilerOptions
+    args = ["./p4c-bmv2", "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"]);
     args.extend(argv)  # includes p4filename
