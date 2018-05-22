@@ -192,42 +192,6 @@ class CFG final : public IHasDbPrint {
     bool checkMergeable(std::set<TableNode*> nodes) const;
 };
 
-// Represents global information about a P4-16 program.
-class ProgramParts {
- public:
-    /// Map action to parent control.
-    ordered_map<const IR::P4Action*, const IR::P4Control*> actions;
-    /// Maps each Parameter of an action to its positional index.
-    /// Needed to generate code for actions.
-    ordered_map<const IR::Parameter*, unsigned> index;
-    /// Parameters of controls/parsers
-    ordered_set<const IR::Parameter*> nonActionParameters;
-    /// For each action its json id.
-    ordered_map<const IR::P4Action*, unsigned> ids;
-    /// All local variables.
-    std::vector<const IR::Declaration_Variable*> variables;
-    /// All error codes.
-    ordered_map<const IR::IDeclaration *, unsigned int> errorCodesMap;
-    // We place scalar user metadata fields (i.e., bit<>, bool)
-    // in the scalarsName metadata object, so we may need to rename
-    // these fields.  This map holds the new names.
-    std::map<const IR::StructField*, cstring> scalarMetadataFields;
-
-    //virtual const IR::P4Program* create(const IR::P4Program* program) = 0;
-    ProgramParts() {}
-};
-
-class DiscoverStructure : public Inspector {
- public:
-    ProgramParts*           structure;
-    explicit DiscoverStructure(ProgramParts* structure) : structure(structure)
-    { setName("DiscoverStructure"); }
-    void postorder(const IR::ParameterList* paramList) override;
-    void postorder(const IR::P4Action* action) override;
-    void postorder(const IR::Declaration_Variable* decl) override;
-    void postorder(const IR::Type_Error* errors) override;
-};
-
 }  // namespace BMV2
 
 #endif /* _BACKENDS_BMV2_ANALYZER_H_ */

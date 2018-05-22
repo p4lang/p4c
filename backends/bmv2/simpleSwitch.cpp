@@ -57,7 +57,6 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
     auto ingress_name = ingress->to<IR::ControlBlock>()->container->name;
     structure->block_type.emplace(ingress->to<IR::ControlBlock>()->container, V1_INGRESS);
     structure->pipeline_controls.emplace(ingress_name);
-    structure->pipeline_namemap.emplace(ingress_name, "ingress");
 
     auto verify = main->findParameterValue(v1model.sw.verify.name);
     if (verify == nullptr || !verify->is<IR::ControlBlock>()) {
@@ -66,7 +65,6 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
     }
     structure->block_type.emplace(verify->to<IR::ControlBlock>()->container, V1_VERIFY);
     structure->non_pipeline_controls.emplace(verify->to<IR::ControlBlock>()->container->name);
-    structure->verify_checksum_controls.emplace(verify->to<IR::ControlBlock>()->container->name);
 
     auto egress = main->findParameterValue(v1model.sw.egress.name);
     if (egress == nullptr || !egress->is<IR::ControlBlock>()) {
@@ -76,7 +74,6 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
     auto egress_name = egress->to<IR::ControlBlock>()->container->name;
     structure->block_type.emplace(egress->to<IR::ControlBlock>()->container, V1_EGRESS);
     structure->pipeline_controls.emplace(egress_name);
-    structure->pipeline_namemap.emplace(egress_name, "egress");
 
     auto compute = main->findParameterValue(v1model.sw.compute.name);
     if (compute == nullptr || !compute->is<IR::ControlBlock>()) {
@@ -85,7 +82,6 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
     }
     structure->block_type.emplace(compute->to<IR::ControlBlock>()->container, V1_COMPUTE);
     structure->non_pipeline_controls.emplace(compute->to<IR::ControlBlock>()->container->name);
-    structure->compute_checksum_controls.emplace(compute->to<IR::ControlBlock>()->container->name);
 
     auto deparser = main->findParameterValue(v1model.sw.deparser.name);
     if (deparser == nullptr || !deparser->is<IR::ControlBlock>()) {
@@ -253,7 +249,7 @@ SimpleSwitchBackend::convertExternObjects(Util::JsonArray *result,
                 return;
             }
             auto dest = mc->arguments->at(0);
-            meterMap.setDestination(em->object, dest->expression);
+            structure->directMeterMap.setDestination(em->object, dest->expression);
             // Do not generate any code for this operation
         }
     } else if (em->originalExternType->name == v1model.directCounter.name) {
@@ -559,8 +555,8 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
         jreg->emplace("bitwidth", width);
         json->register_arrays->append(jreg);
     } else if (eb->type->name == v1model.directCounter.name) {
-        auto it = directCounterMap.find(name);
-        if (it == directCounterMap.end()) {
+        auto it = structure->directCounterMap.find(name);
+        if (it == structure->directCounterMap.end()) {
             ::warning("%1%: Direct counter not used; ignoring", inst);
         } else {
             auto jctr = new Util::JsonObject();
@@ -572,7 +568,7 @@ SimpleSwitchBackend::convertExternInstances(const IR::Declaration *c,
             json->counters->append(jctr);
         }
     } else if (eb->type->name == v1model.directMeter.name) {
-        auto info = meterMap.getInfo(c);
+        auto info = structure->directMeterMap.getInfo(c);
         CHECK_NULL(info);
         CHECK_NULL(info->table);
         CHECK_NULL(info->destinationField);
@@ -878,9 +874,9 @@ void SimpleSwitchBackend::createActions(V1ProgramStructure* structure) {
 
 void
 SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
-    V1ProgramStructure structure(refMap, typeMap, json);
+    structure = new V1ProgramStructure();
 
-    auto parseV1Arch = new ParseV1Architecture(&structure);
+    auto parseV1Arch = new ParseV1Architecture(structure);
     auto main = tlb->getMain();
     if (!main) return;  // no main
     main->apply(*parseV1Arch);
@@ -919,17 +915,16 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
     PassManager simplify = {
-        new ExtractMatchKind(this),
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&structure.non_pipeline_controls)),
+        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&structure->non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&structure.pipeline_controls)),
+        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
@@ -938,7 +933,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
-    toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+    toplevel->apply(*new BMV2::BuildResourceMap(&structure->resourceMap));
 
     // field list and learn list ids in bmv2 are not consistent with ids for
     // other objects: they need to start at 1 (not 0) since the id is also used
@@ -960,7 +955,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         return;
 
     /// generate error types
-    for (const auto &p : structure.errorCodesMap) {
+    for (const auto &p : structure->errorCodesMap) {
         auto name = p.first->toString();
         auto type = p.second;
         json->add_error(name, type);
@@ -970,37 +965,39 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (!main) return;  // no main
     main->apply(*parseV1Arch);
     PassManager updateStructure {
-        new DiscoverV1Structure(refMap, typeMap, &structure),
+        new DiscoverV1Structure(structure),
     };
     program = toplevel->getProgram();
     program->apply(updateStructure);
 
     cstring scalarsName = refMap->newName("scalars");
     // This visitor is used in multiple passes to convert expression to json
-    conv = new SimpleSwitchExpressionConverter(refMap, typeMap, &structure, scalarsName);
+    conv = new SimpleSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
 
-    auto hconv = new HeaderConverter(refMap, typeMap, &structure, json, scalarsName);
+    auto hconv = new HeaderConverter(refMap, typeMap, structure, json, scalarsName);
     program->apply(*hconv);
 
     auto pconv = new ParserConverter(refMap, typeMap, json, conv);
-    structure.parser->apply(*pconv);
+    structure->parser->apply(*pconv);
 
-    createActions(&structure);
+    createActions(structure);
 
-    auto cconv = new ControlConverter(this, refMap, typeMap, json, conv, &structure, options.emitExterns);
-    structure.ingress->apply(*cconv);
-    structure.egress->apply(*cconv);
+    auto cconv = new ControlConverter(this, toplevel, refMap, typeMap, json, conv, structure, "ingress", options.emitExterns);
+    structure->ingress->apply(*cconv);
 
-    auto dconv = new DeparserConverter(this);
-    structure.deparser->apply(*dconv);
+    cconv = new ControlConverter(this, toplevel, refMap, typeMap, json, conv, structure, "egress", options.emitExterns);
+    structure->egress->apply(*cconv);
 
-    convertChecksum(structure.compute_checksum->body, json->checksums,
+    auto dconv = new DeparserConverter(refMap, typeMap, json, conv);
+    structure->deparser->apply(*dconv);
+
+    convertChecksum(structure->compute_checksum->body, json->checksums,
                     json->calculations, false);
 
-    convertChecksum(structure.verify_checksum->body, json->checksums,
+    convertChecksum(structure->verify_checksum->body, json->checksums,
                     json->calculations, true);
 
-    (void)toplevel->apply(ConvertGlobals(this));
+    (void)toplevel->apply(ConvertGlobals(this, refMap, typeMap));
 }
 
 }  // namespace BMV2

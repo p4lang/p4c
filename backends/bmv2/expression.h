@@ -27,6 +27,7 @@ limitations under the License.
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
+#include "programStructure.h"
 
 namespace BMV2 {
 
@@ -53,7 +54,7 @@ class ArithmeticFixup : public Transform {
 class ExpressionConverter : public Inspector {
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
-    BMV2::ProgramParts*  structure;
+    ProgramStructure*    structure;
     P4::P4CoreLibrary&   corelib;
     cstring              scalarsName;
 
@@ -67,7 +68,7 @@ class ExpressionConverter : public Inspector {
 
  public:
     ExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                        BMV2::ProgramParts* structure, cstring scalarsName) :
+                        ProgramStructure* structure, cstring scalarsName) :
             refMap(refMap), typeMap(typeMap), structure(structure),
             corelib(P4::P4CoreLibrary::instance),
             scalarsName(scalarsName), leftValue(false), simpleExpressionsOnly(false) {}
@@ -75,7 +76,6 @@ class ExpressionConverter : public Inspector {
     /// This is used for table key expressions, for example.
     bool simpleExpressionsOnly;
 
-    BMV2::ProgramParts* getStructure() { return structure; }
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
 

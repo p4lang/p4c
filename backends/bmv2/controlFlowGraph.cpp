@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "analyzer.h"
+#include "controlFlowGraph.h"
 
 #include "ir/ir.h"
 #include "frontends/p4/fromv1.0/v1model.h"
@@ -317,35 +317,6 @@ void CFG::build(const IR::P4Control* cc, P4::ReferenceMap* refMap, P4::TypeMap* 
         computeSuccessors();
     }
     LOG2(this);
-}
-
-void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
-    bool inAction = findContext<IR::P4Action>() != nullptr;
-    unsigned index = 0;
-    for (auto p : *paramList->getEnumerator()) {
-        structure->index.emplace(p, index);
-        if (!inAction)
-            structure->nonActionParameters.emplace(p);
-        index++;
-    }
-}
-
-void DiscoverStructure::postorder(const IR::P4Action* action) {
-    LOG2("discovered action " << action);
-    auto control = findContext<IR::P4Control>();
-    structure->actions.emplace(action, control);
-}
-
-void DiscoverStructure::postorder(const IR::Declaration_Variable* decl) {
-    structure->variables.push_back(decl);
-}
-
-void DiscoverStructure::postorder(const IR::Type_Error* errors) {
-    auto &map = structure->errorCodesMap;
-    for (auto m : *errors->getDeclarations()) {
-        BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
-        map[m] = map.size();
-    }
 }
 
 }  // namespace BMV2

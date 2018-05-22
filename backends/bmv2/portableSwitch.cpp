@@ -27,6 +27,7 @@ const IR::P4Program* PsaProgramStructure::create(const IR::P4Program* program) {
     createActions();
     createControls();
     createDeparsers();
+    createGlobals();
     return program;
 }
 
@@ -163,17 +164,53 @@ void PsaProgramStructure::createExterns() {
 
 void PsaProgramStructure::createActions() {
     // add actions to json
+    //
 }
 
 void PsaProgramStructure::createControls() {
-    // add pipelines to json
+    auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, this, "scalar");
+    // TODO: remove backend from control converter.
+#if 0
+    auto cconv = new BMV2::ControlConverter(this, refMap, typeMap, json, conv, this, "ingress", true);
+    auto ingress = pipelines.at("ingress");
+    ingress->apply(*cconv);
+
+    cconv = new BMV2::ControlConverter(this, refMap, typeMap, json, conv, this, "egress", true);
+    auto egress = pipelines.at("egress");
+    egress->apply(*cconv);
+#endif
 }
 
 void PsaProgramStructure::createDeparsers() {
     // add deparsers to json
+
+    // ingress deparser
+#if 0
+    auto dconv = new DeparserConverter(this);
+    structure.deparser->apply(*dconv);
+#endif
+
+    // egress deparser
+}
+
+void PsaProgramStructure::createGlobals() {
+    for (auto e : globals) {
+        // convertExternInstances(e->node->to<IR::Declaration>(), e->to<IR::ExternBlock>());
+    }
 }
 
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
+    /// Blocks are not in IR tree, use a custom visitor to traverse
+    for (auto it : block->constantValue) {
+        if (it.second->is<IR::Block>())
+            visit(it.second->getNode());
+    }
+    return false;
+}
+
+bool ParsePsaArchitecture::preorder(const IR::ExternBlock* block) {
+    if (block->node->is<IR::Declaration>())
+        structure->globals.push_back(block);
     return false;
 }
 

@@ -21,10 +21,9 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SRCS}")
 
 set (BMV2_BACKEND_SRCS
   JsonObjects.cpp
-  action.cpp
-  analyzer.cpp
   backend.cpp
   control.cpp
+  controlFlowGraph.cpp
   deparser.cpp
   expression.cpp
   globals.cpp
@@ -35,16 +34,16 @@ set (BMV2_BACKEND_SRCS
   midend.cpp
   parser.cpp
   portableSwitch.cpp
+  programStructure.cpp
   sharedActionSelectorCheck.cpp
   simpleSwitch.cpp
   )
 
 set (BMV2_BACKEND_HDRS
   JsonObjects.h
-  action.h
-  analyzer.h
   backend.h
   control.h
+  controlFlowGraph.h
   deparser.h
   expression.h
   globals.h
@@ -56,6 +55,7 @@ set (BMV2_BACKEND_HDRS
   options.h
   parser.h
   portableSwitch.h
+  programStructure.h
   sharedActionSelectorCheck.h
   simpleSwitch.h
   )

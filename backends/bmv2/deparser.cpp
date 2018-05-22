@@ -36,8 +36,8 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                     refMap, typeMap);
             if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
-                if (em->originalExternType->name.name == backend->getCoreLibrary().packetOut.name) {
-                    if (em->method->name.name == backend->getCoreLibrary().packetOut.emit.name) {
+                if (em->originalExternType->name.name == corelib.packetOut.name) {
+                    if (em->method->name.name == corelib.packetOut.emit.name) {
                         BUG_CHECK(mc->arguments->size() == 1,
                                   "Expected exactly 1 argument for %1%", mc);
                         auto arg = mc->arguments->at(0);

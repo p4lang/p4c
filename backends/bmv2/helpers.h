@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/json.h"
 #include "lib/ordered_map.h"
-#include "analyzer.h"
+#include "controlFlowGraph.h"
 #include "frontends/common/model.h"
 
 namespace BMV2 {

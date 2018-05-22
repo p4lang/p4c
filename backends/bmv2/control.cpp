@@ -41,7 +41,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
             auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
             key->emplace("match_type", matchType);
-            if (matchType == backend->getCoreLibrary().exactMatch.name) {
+            if (matchType == corelib.exactMatch.name) {
                 if (k->is<IR::Constant>())
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                 else if (k->is<IR::BoolLiteral>())
@@ -49,7 +49,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     key->emplace("key", stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                 else
                     ::error("%1% unsupported exact key expression", k);
-            } else if (matchType == backend->getCoreLibrary().ternaryMatch.name) {
+            } else if (matchType == corelib.ternaryMatch.name) {
                 if (k->is<IR::Mask>()) {
                     auto km = k->to<IR::Mask>();
                     key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
@@ -63,7 +63,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                 } else {
                     ::error("%1% unsupported ternary key expression", k);
                 }
-            } else if (matchType == backend->getCoreLibrary().lpmMatch.name) {
+            } else if (matchType == corelib.lpmMatch.name) {
                 if (k->is<IR::Mask>()) {
                     auto km = k->to<IR::Mask>();
                     key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
@@ -147,10 +147,10 @@ cstring ControlConverter::getKeyMatchType(const IR::KeyElement *ke) {
     auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
 
-    if (mt->name.name == backend->getCoreLibrary().exactMatch.name ||
-        mt->name.name == backend->getCoreLibrary().ternaryMatch.name ||
-        mt->name.name == backend->getCoreLibrary().lpmMatch.name ||
-        backend->match_kinds.count(mt->name.name)) {
+    if (mt->name.name == corelib.exactMatch.name ||
+        mt->name.name == corelib.ternaryMatch.name ||
+        mt->name.name == corelib.lpmMatch.name ||
+        structure->match_kinds.count(mt->name.name)) {
         return mt->name.name;
     }
 
@@ -290,7 +290,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     result->emplace("name", name);
     result->emplace("id", nextId("tables"));
     result->emplace_non_null("source_info", table->sourceInfoJsonObj());
-    cstring table_match_type = backend->getCoreLibrary().exactMatch.name;
+    cstring table_match_type = corelib.exactMatch.name;
     auto key = table->getKey();
     auto tkey = mkArrayField(result, "key");
     conv->simpleExpressionsOnly = true;
@@ -314,13 +314,13 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             if (match_type != table_match_type) {
                 if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
-                if (match_type == backend->getCoreLibrary().ternaryMatch.name &&
+                if (match_type == corelib.ternaryMatch.name &&
                     table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
-                    table_match_type = backend->getCoreLibrary().ternaryMatch.name;
-                if (match_type == backend->getCoreLibrary().lpmMatch.name &&
-                    table_match_type == backend->getCoreLibrary().exactMatch.name)
-                    table_match_type = backend->getCoreLibrary().lpmMatch.name;
-            } else if (match_type == backend->getCoreLibrary().lpmMatch.name) {
+                    table_match_type = corelib.ternaryMatch.name;
+                if (match_type == corelib.lpmMatch.name &&
+                    table_match_type == corelib.exactMatch.name)
+                    table_match_type = corelib.lpmMatch.name;
+            } else if (match_type == corelib.lpmMatch.name) {
                 ::error("%1%, Multiple LPM keys in table", table);
             }
 
@@ -427,14 +427,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     return result;
                 }
                 cstring ctrname = decl->controlPlaneName();
-                auto it = backend->getDirectCounterMap().find(ctrname);
+                auto it = structure->directCounterMap.find(ctrname);
                 LOG3("Looking up " << ctrname);
-                if (it != backend->getDirectCounterMap().end()) {
+                if (it != structure->directCounterMap.end()) {
                    ::error("%1%: Direct counters cannot be attached to multiple tables %2% and %3%",
                            decl, it->second, table);
                    return result;
                 }
-                backend->getDirectCounterMap().emplace(ctrname, table);
+                structure->directCounterMap.emplace(ctrname, table);
             } else {
                 ::error("%1%: expected a counter", ctrs);
             }
@@ -487,8 +487,8 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     ::error("%1%: expected an instance", decl->getNode());
                     return result;
                 }
-                backend->getMeterMap().setTable(decl, table);
-                backend->getMeterMap().setSize(decl, size);
+                structure->directMeterMap.setTable(decl, table);
+                structure->directMeterMap.setSize(decl, size);
                 BUG_CHECK(decl->is<IR::Declaration_Instance>(),
                           "%1%: expected an instance", decl->getNode());
                 cstring name = decl->controlPlaneName();
@@ -657,7 +657,7 @@ Util::IJson* ControlConverter::convertIf(const CFG::IfNode* node, cstring prefix
 bool ControlConverter::preorder(const IR::P4Control* cont) {
     auto result = new Util::JsonObject();
 
-    result->emplace("name", cont->name);
+    result->emplace("name", name);
     result->emplace("id", nextId("control"));
     result->emplace_non_null("source_info", cont->sourceInfoJsonObj());
 
@@ -713,8 +713,7 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
             c->is<IR::P4Table>())
             continue;
         if (c->is<IR::Declaration_Instance>()) {
-            auto block = structure->resourceMap.at(cont);
-            auto bl = block->to<IR::ControlBlock>()->getValue(c);
+            auto bl = structure->resourceMap.at(c);
             CHECK_NULL(bl);
             if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
                 // Since this block has not been inlined, it is probably unused
@@ -722,7 +721,6 @@ bool ControlConverter::preorder(const IR::P4Control* cont) {
                 continue;
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
-                LOG1("extern block " << eb);
                 backend->convertExternInstances(c, eb, action_profiles,
                                                 selector_check, emitExterns);
                 continue;

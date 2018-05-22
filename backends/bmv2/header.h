@@ -24,17 +24,18 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "helpers.h"
 #include "JsonObjects.h"
+#include "programStructure.h"
 
 namespace BMV2 {
 
 class Backend;
 
 class HeaderConverter : public Inspector {
-    cstring              scalarsName;
-    cstring              scalarsTypeName;
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
-    ProgramParts*        structure;
+    ProgramStructure*    structure;
+    cstring              scalarsName;
+    cstring              scalarsTypeName;
     JsonObjects*         json;
     std::set<cstring>    visitedHeaders;
 
@@ -57,7 +58,7 @@ class HeaderConverter : public Inspector {
 
     bool preorder(const IR::Parameter* param) override;
 
-    HeaderConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ProgramParts* structure,
+    HeaderConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ProgramStructure* structure,
                     JsonObjects* json, cstring scalarsName);
 };
 

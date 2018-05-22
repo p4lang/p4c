@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef _BACKENDS_BMV2_BACKEND_H_
 #define _BACKENDS_BMV2_BACKEND_H_
 
-#include "analyzer.h"
+#include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
@@ -44,13 +44,8 @@ enum block_t { PARSER, PIPELINE, DEPARSER, V1_PARSER, V1_DEPARSER, V1_INGRESS, V
 
 class ExpressionConverter;
 
-// map IR node to compile-time allocated resource blocks.
-using ResourceMap = std::map<const IR::Node*, const IR::CompileTimeValue*>;
-
 // Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
-    using DirectCounterMap = std::map<cstring, const IR::P4Table*>;
-
  public:
     BMV2Options&                     options;
     P4::ReferenceMap*                refMap;
@@ -60,13 +55,7 @@ class Backend {
     ExpressionConverter*             conv;
     P4::P4CoreLibrary&               corelib;
     Util::JsonObject                 jsonTop;
-    DirectCounterMap                 directCounterMap;
-    DirectMeterMap                   meterMap;
-
     BMV2::JsonObjects*               json;
-    std::set<cstring>                match_kinds;
-
-
 
  public:
     Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
@@ -76,13 +65,6 @@ class Backend {
         corelib(P4::P4CoreLibrary::instance), json(new BMV2::JsonObjects(&jsonTop)) {
         refMap->setIsV1(options.isv1()); }
     void serialize(std::ostream& out) const { jsonTop.serialize(out); }
-    P4::P4CoreLibrary &   getCoreLibrary() const   { return corelib; }
-    ExpressionConverter * getExpressionConverter() { return conv; }
-    DirectCounterMap &    getDirectCounterMap()    { return directCounterMap; }
-    DirectMeterMap &      getMeterMap()  { return meterMap; }
-    P4::ReferenceMap*     getRefMap()    { return refMap; }
-    P4::TypeMap*          getTypeMap()   { return typeMap; }
-    const IR::ToplevelBlock* getToplevelBlock() { CHECK_NULL(toplevel); return toplevel; }
 
     virtual void convert(const IR::ToplevelBlock* block) = 0;
     virtual void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
@@ -220,84 +202,6 @@ public:
             type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
         LOG2("Replacing reference with " << type);
         return type;
-    }
-};
-
-class BuildResourceMap : public Inspector {
-    ResourceMap *resourceMap;
-
- public:
-    explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {
-        CHECK_NULL(resourceMap);
-    };
-
-    bool preorder(const IR::ControlBlock* control) override {
-        resourceMap->emplace(control->container, control);
-        for (auto cv : control->constantValue) {
-            resourceMap->emplace(cv.first, cv.second);
-        }
-
-        for (auto c : control->container->controlLocals) {
-            if (c->is<IR::InstantiatedBlock>()) {
-                resourceMap->emplace(c, control->getValue(c));
-            }
-        }
-        return false;
-    }
-
-    bool preorder(const IR::ParserBlock* parser) override {
-        resourceMap->emplace(parser->container, parser);
-        for (auto cv : parser->constantValue) {
-            resourceMap->emplace(cv.first, cv.second);
-            if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode());
-            }
-        }
-
-        for (auto c : parser->container->parserLocals) {
-            if (c->is<IR::InstantiatedBlock>()) {
-                resourceMap->emplace(c, parser->getValue(c));
-            }
-        }
-        return false;
-    }
-
-    bool preorder(const IR::TableBlock* table) override {
-        resourceMap->emplace(table->container, table);
-        for (auto cv : table->constantValue) {
-            resourceMap->emplace(cv.first, cv.second);
-            if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode());
-            }
-        }
-        return false;
-    }
-
-    bool preorder(const IR::PackageBlock* package) override {
-        for (auto cv : package->constantValue) {
-            if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode());
-            }
-        }
-        return false;
-    }
-
-    bool preorder(const IR::ToplevelBlock* tlb) override {
-        auto package = tlb->getMain();
-        visit(package);
-        return false;
-    }
-};
-
-class ExtractMatchKind : public Inspector {
-public:
-    Backend *backend;
-    ExtractMatchKind(Backend* backend) : backend(backend) {}
-    bool preorder(const IR::Declaration_MatchKind* kind) override {
-        for (auto member : kind->members) {
-            backend->match_kinds.insert(member->name);
-        }
-        return false;
     }
 };
 

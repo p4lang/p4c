@@ -21,7 +21,7 @@ namespace BMV2 {
 
 bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
     // Not really used, but necessary as an argument
-    SharedActionSelectorCheck ssc(backend->getRefMap(), backend->getTypeMap());
+    SharedActionSelectorCheck ssc(refMap, typeMap);
     LOG2("Converting " << block);
     // This object will be lost, but we don't care about
     // global action profiles here; they are synthesized also

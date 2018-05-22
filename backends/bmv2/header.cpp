@@ -28,7 +28,7 @@ Util::JsonArray* HeaderConverter::pushNewArray(Util::JsonArray* parent) {
 }
 
 HeaderConverter::HeaderConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                 ProgramParts* structure, JsonObjects* json,
+                                 ProgramStructure* structure, JsonObjects* json,
                                  cstring scalarsName)
         : refMap(refMap), typeMap(typeMap), structure(structure), scalarsName(scalarsName),
           json(json) {

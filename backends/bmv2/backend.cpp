@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "action.h"
 #include "backend.h"
 #include "control.h"
 #include "deparser.h"
@@ -60,5 +59,6 @@ cstring Backend::jsonAssignment(const IR::Type* type, bool inParser) {
     else
         return "assign";
 }
+
 
 }  // namespace BMV2

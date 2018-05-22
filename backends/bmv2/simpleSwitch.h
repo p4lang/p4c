@@ -24,24 +24,14 @@ limitations under the License.
 #include "sharedActionSelectorCheck.h"
 #include "backend.h"
 #include "deparser.h"
+#include "programStructure.h"
 
 namespace BMV2 {
 
-class V1ProgramStructure : public ProgramParts {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    BMV2::JsonObjects*   json;
-
+class V1ProgramStructure : public ProgramStructure {
  public:
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
-    std::set<cstring>                compute_checksum_controls;
-    std::set<cstring>                verify_checksum_controls;
-    std::set<cstring>                deparser_controls;
-
-    // bmv2 expects 'ingress' and 'egress' pipeline to have fixed name.
-    // provide an map from user program block name to hard-coded names.
-    std::map<cstring, cstring>       pipeline_namemap;
 
     const IR::P4Parser* parser;
     const IR::P4Control* ingress;
@@ -50,14 +40,14 @@ class V1ProgramStructure : public ProgramParts {
     const IR::P4Control* verify_checksum;
     const IR::P4Control* deparser;
 
+    // ArchInfo* archInfo;
+    // ordered_map<IR::CompileTimeValue*, const IR::Node*> block_to_node;
+    // ordered_map<const IR::Node*, IR::CompileTimeValue*> node_to_block;
+
     // architecture related information
     ordered_map<const IR::Node*, block_t> block_type;
 
-    ResourceMap resourceMap;
-
-    V1ProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BMV2::JsonObjects* json) :
-        refMap(refMap), typeMap(typeMap), json(json) {
-    }
+    V1ProgramStructure() { }
 };
 
 class SimpleSwitchExpressionConverter : public ExpressionConverter {
@@ -126,14 +116,12 @@ public:
 };
 
 class DiscoverV1Structure : public DiscoverStructure {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
     V1ProgramStructure* structure;
 
  public:
-    DiscoverV1Structure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, V1ProgramStructure* structure)
-        : DiscoverStructure(structure), refMap(refMap), typeMap(typeMap), structure(structure) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(structure);
+    DiscoverV1Structure(V1ProgramStructure* structure)
+        : DiscoverStructure(structure), structure(structure) {
+        CHECK_NULL(structure);
         setName("InspectV1Program");
     }
 
@@ -166,6 +154,7 @@ class DiscoverV1Structure : public DiscoverStructure {
 class SimpleSwitchBackend : public Backend {
     BMV2Options&        options;
     P4V1::V1Model&      v1model;
+    V1ProgramStructure* structure;
 
  protected:
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);

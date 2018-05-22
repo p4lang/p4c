@@ -27,14 +27,15 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
-#include "backend.h"
+#include "parser.h"
+#include "control.h"
 
 namespace BMV2 {
 
 class PortableSwitchExpressionConverter : public ExpressionConverter {
  public:
     PortableSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                      BMV2::ProgramParts* structure, cstring scalarsName) :
+                                      ProgramStructure* structure, cstring scalarsName) :
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
     Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
@@ -63,7 +64,7 @@ struct ParserInfo {
     std::vector<const IR::ParserState*> parse_states;
 };
 
-class PsaProgramStructure : public BMV2::ProgramParts {
+class PsaProgramStructure : public ProgramStructure {
     BMV2::JsonObjects*   json;     // output json data structure
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
@@ -110,6 +111,8 @@ class PsaProgramStructure : public BMV2::ProgramParts {
     ordered_map<cstring, const IR::Declaration_Instance*> extern_instances;
     ordered_map<cstring, cstring> field_aliases;
 
+    std::vector<const IR::ExternBlock*> globals;
+
 public:
     PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, Util::JsonObject* jsonTop)
         : refMap(refMap), typeMap(typeMap) {
@@ -127,6 +130,7 @@ public:
     void createActions();
     void createControls();
     void createDeparsers();
+    void createGlobals();
     BMV2::JsonObjects* getJson() { return json; }
 
     bool hasVisited(const IR::Type_StructLike* st) {
@@ -138,15 +142,24 @@ public:
             return header_union_types.count(u->getName());
         return false;
     }
+
+
 };
 
 class ParsePsaArchitecture : public Inspector {
     PsaProgramStructure* structure;
  public:
-    explicit ParsePsaArchitecture(PsaProgramStructure* structure) : structure(structure) { }
+    explicit ParsePsaArchitecture(PsaProgramStructure* structure) :
+        structure(structure) { CHECK_NULL(structure); }
 
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
+    bool preorder(const IR::ExternBlock* block) override;
+
+    profile_t init_apply(const IR::Node *root) override {
+        structure->block_type.clear();
+        structure->globals.clear();
+    }
 };
 
 class InspectPsaProgram : public Inspector {
