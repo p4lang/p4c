@@ -165,7 +165,7 @@ class SimpleSwitchBackend : public Backend {
  public:
     void modelError(const char* format, const IR::Node* place) const;
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
-                         Util::JsonArray* calculations, bool verify) override;
+                         Util::JsonArray* calculations, bool verify);
     void convertActionBody(ConversionContext* ctxt, const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params);
@@ -178,21 +178,21 @@ class SimpleSwitchBackend : public Backend {
 };
 
 EXTERN_CONVERTER_W_FUNCTION(clone)
-EXTERN_CONVERTER_W_FUNCTION(clone3)
-EXTERN_CONVERTER_W_FUNCTION(hash)
+EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(clone3, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(hash, P4V1::V1Model, v1model)
 EXTERN_CONVERTER_W_FUNCTION(digest)
 EXTERN_CONVERTER_W_FUNCTION(resubmit)
 EXTERN_CONVERTER_W_FUNCTION(recirculate)
 EXTERN_CONVERTER_W_FUNCTION(mark_to_drop)
-EXTERN_CONVERTER_W_FUNCTION(random)
-EXTERN_CONVERTER_W_FUNCTION(truncate)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(register)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(counter)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(meter)
+EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(random, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(truncate, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(register, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(counter, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(meter, P4V1::V1Model, v1model)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(direct_counter)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(direct_meter)
-EXTERN_CONVERTER_W_INSTANCE(action_profile)
-EXTERN_CONVERTER_W_INSTANCE(action_selector)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(direct_meter, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(action_profile, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(action_selector, P4V1::V1Model, v1model)
 
 }  // namespace BMV2
 

@@ -29,6 +29,8 @@ limitations under the License.
 #include "helpers.h"
 #include "parser.h"
 #include "control.h"
+#include "deparser.h"
+#include "extern.h"
 
 namespace BMV2 {
 
@@ -65,7 +67,6 @@ struct ParserInfo {
 };
 
 class PsaProgramStructure : public ProgramStructure {
-    BMV2::JsonObjects*   json;     // output json data structure
     P4::ReferenceMap*    refMap;
     P4::TypeMap*         typeMap;
 
@@ -115,22 +116,21 @@ class PsaProgramStructure : public ProgramStructure {
 
 public:
     PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
-        : refMap(refMap), typeMap(typeMap), json(new BMV2::JsonObjects()) {
+        : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
 
-    const IR::P4Program* create(const IR::P4Program* program) ;
-    void createStructLike(const IR::Type_StructLike* st);
-    void createTypes();
-    void createHeaders();
-    void createParsers();
+    void create(ConversionContext* ctxt);
+    void createStructLike(ConversionContext* ctxt, const IR::Type_StructLike* st);
+    void createTypes(ConversionContext* ctxt);
+    void createHeaders(ConversionContext* ctxt);
+    void createParsers(ConversionContext* ctxt);
     void createExterns();
     void createActions();
-    void createControls();
-    void createDeparsers();
+    void createControls(ConversionContext* ctxt);
+    void createDeparsers(ConversionContext* ctxt);
     void createGlobals();
-    BMV2::JsonObjects* getJson() { return json; }
 
     bool hasVisited(const IR::Type_StructLike* st) {
         if (auto h = st->to<IR::Type_Header>())
@@ -141,8 +141,6 @@ public:
             return header_union_types.count(u->getName());
         return false;
     }
-
-
 };
 
 class ParsePsaArchitecture : public Inspector {
@@ -158,6 +156,7 @@ class ParsePsaArchitecture : public Inspector {
     profile_t init_apply(const IR::Node *root) override {
         structure->block_type.clear();
         structure->globals.clear();
+        return Inspector::init_apply(root);
     }
 };
 
@@ -196,15 +195,25 @@ class InspectPsaProgram : public Inspector {
 
 class ConvertPsaToJson : public Inspector {
 public:
-    PsaProgramStructure* structure;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    const IR::ToplevelBlock *toplevel;
+    JsonObjects *json;
+    PsaProgramStructure *structure;
 
-    explicit ConvertPsaToJson(PsaProgramStructure* structure)
-    : structure(structure) {
+    explicit ConvertPsaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel,
+                              JsonObjects *json, PsaProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), toplevel(toplevel), json(json), structure(structure) {
         CHECK_NULL(structure);
     }
 
-    void postorder(const IR::P4Program *program) override {
-        structure->create(program);
+    profile_t init_apply(const IR::Node *root) override {
+        cstring scalarsName = refMap->newName("scalars");
+        // This visitor is used in multiple passes to convert expression to json
+        auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
+        auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
+        structure->create(ctxt);
+        return Inspector::init_apply(root);
     }
 };
 
@@ -212,12 +221,23 @@ class PortableSwitchBackend : public Backend {
     BMV2Options &options;
  public:
     void convert(const IR::ToplevelBlock* tlb) override;
-    void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
-                         Util::JsonArray* calculations, bool verify) override { }
     PortableSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                           P4::ConvertEnums::EnumMapping* enumMap) :
         Backend(options, refMap, typeMap, enumMap), options(options) { }
 };
+
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Hash)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Checksum)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(InternetChecksum)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Counter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(DirectCounter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Meter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(DirectMeter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Register)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Random)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(ActionProfile)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(ActionSelector)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Digest)
 
 }  // namespace BMV2
 

@@ -21,7 +21,7 @@ namespace BMV2 {
 
 void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
                                           Util::JsonArray* result) {
-    conv->simpleExpressionsOnly = true;
+    ctxt->conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
         if (auto block = s->to<IR::BlockStatement>()) {
             convertDeparserBody(&block->components, result);
@@ -32,8 +32,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
             continue;
         } else if (s->is<IR::MethodCallStatement>()) {
             auto mc = s->to<IR::MethodCallStatement>()->methodCall;
-            auto mi = P4::MethodInstance::resolve(mc,
-                    refMap, typeMap);
+            auto mi = P4::MethodInstance::resolve(mc, ctxt->refMap, ctxt->typeMap);
             if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 if (em->originalExternType->name.name == corelib.packetOut.name) {
@@ -41,13 +40,13 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                         BUG_CHECK(mc->arguments->size() == 1,
                                   "Expected exactly 1 argument for %1%", mc);
                         auto arg = mc->arguments->at(0);
-                        auto type = typeMap->getType(arg, true);
+                        auto type = ctxt->typeMap->getType(arg, true);
                         if (type->is<IR::Type_Stack>()) {
                             // This branch is in fact never taken, because
                             // arrays are expanded into elements.
                             int size = type->to<IR::Type_Stack>()->getSize();
                             for (int i=0; i < size; i++) {
-                                auto j = conv->convert(arg->expression);
+                                auto j = ctxt->conv->convert(arg->expression);
                                 auto e = j->to<Util::JsonObject>()->get("value");
                                 BUG_CHECK(e->is<Util::JsonValue>(),
                                           "%1%: Expected a Json value", e->toString());
@@ -56,7 +55,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                                 result->append(ref);
                             }
                         } else if (type->is<IR::Type_Header>()) {
-                            auto j = conv->convert(arg->expression);
+                            auto j = ctxt->conv->convert(arg->expression);
                             auto val = j->to<Util::JsonObject>()->get("value");
                             result->append(val);
                         } else {
@@ -70,7 +69,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
         }
         ::error("%1%: not supported with a deparser on this target", s);
     }
-    conv->simpleExpressionsOnly = false;
+    ctxt->conv->simpleExpressionsOnly = false;
 }
 
 Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
@@ -85,7 +84,7 @@ Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
 
 bool DeparserConverter::preorder(const IR::P4Control* control) {
     auto deparserJson = convertDeparser(control);
-    json->deparsers->append(deparserJson);
+    ctxt->json->deparsers->append(deparserJson);
     return false;
 }
 

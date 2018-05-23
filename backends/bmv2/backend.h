@@ -67,8 +67,6 @@ class Backend {
     void serialize(std::ostream& out) const { json->toplevel->serialize(out); }
 
     virtual void convert(const IR::ToplevelBlock* block) = 0;
-    virtual void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
-                                 Util::JsonArray* calculations, bool verify) = 0;
     /**
      * Returns the correct operation for performing an assignment in
      * the BMv2 JSON language depending on the type of data assigned.

@@ -146,6 +146,7 @@ CONVERT_EXTERN_FUNCTION(clone) {
 }
 
 CONVERT_EXTERN_FUNCTION(clone3) {
+    (void) v1model.clone.clone3.name;
     int id = -1;
     if (mc->arguments->size() != 3) {
         modelError("Expected 3 arguments for %1%", mc);
@@ -1069,7 +1070,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     cconv = new ControlConverter(ctxt, "egress", options.emitExterns);
     structure->egress->apply(*cconv);
 
-    auto dconv = new DeparserConverter(refMap, typeMap, json, conv);
+    auto dconv = new DeparserConverter(ctxt);
     structure->deparser->apply(*dconv);
 
     convertChecksum(structure->compute_checksum->body, json->checksums,

@@ -27,10 +27,7 @@ limitations under the License.
 namespace BMV2 {
 
 class DeparserConverter : public Inspector {
-    P4::ReferenceMap*      refMap;
-    P4::TypeMap*           typeMap;
-    BMV2::JsonObjects*     json;
-    ExpressionConverter*   conv;
+    ConversionContext*     ctxt;
     P4::P4CoreLibrary&     corelib;
 
  protected:
@@ -39,10 +36,9 @@ class DeparserConverter : public Inspector {
  public:
     bool preorder(const IR::P4Control* ctrl);
 
-    explicit DeparserConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BMV2::JsonObjects* json,
-                               BMV2::ExpressionConverter* conv) :
-        refMap(refMap), typeMap(typeMap), json(json), conv(conv),
-        corelib(P4::P4CoreLibrary::instance) { setName("DeparserConverter"); }
+    explicit DeparserConverter(ConversionContext* ctxt) :
+        ctxt(ctxt), corelib(P4::P4CoreLibrary::instance) {
+        setName("DeparserConverter"); }
 };
 
 }  // namespace BMV2

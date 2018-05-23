@@ -19,19 +19,18 @@ limitations under the License.
 
 namespace BMV2 {
 
-const IR::P4Program* PsaProgramStructure::create(const IR::P4Program* program) {
-    createTypes();
-    createHeaders();
+void PsaProgramStructure::create(ConversionContext* ctxt) {
+    createTypes(ctxt);
+    createHeaders(ctxt);
     createExterns();
-    createParsers();
+    createParsers(ctxt);
     createActions();
-    createControls();
-    createDeparsers();
+    createControls(ctxt);
+    createDeparsers(ctxt);
     createGlobals();
-    return program;
 }
 
-void PsaProgramStructure::createStructLike(const IR::Type_StructLike* st) {
+void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Type_StructLike* st) {
     CHECK_NULL(st);
     cstring name = st->controlPlaneName();
     unsigned max_length = 0;  // for variable-sized headers
@@ -88,14 +87,14 @@ void PsaProgramStructure::createStructLike(const IR::Type_StructLike* st) {
         max_length = 0;
         max_length_bytes = 0;
     }
-    json->add_header_type(name, fields, max_length_bytes);
+    ctxt->json->add_header_type(name, fields, max_length_bytes);
 }
 
-void PsaProgramStructure::createTypes() {
+void PsaProgramStructure::createTypes(ConversionContext* ctxt) {
     for (auto kv : header_types)
-        createStructLike(kv.second);
+        createStructLike(ctxt, kv.second);
     for (auto kv : metadata_types)
-        createStructLike(kv.second);
+        createStructLike(ctxt, kv.second);
     for (auto kv : header_union_types) {
         auto st = kv.second;
         auto fields = new Util::JsonArray();
@@ -107,20 +106,20 @@ void PsaProgramStructure::createTypes() {
             field->append(f->name.name);
             field->append(ht->name.name);
         }
-        json->add_union_type(st->name, fields);
+        ctxt->json->add_union_type(st->name, fields);
     }
     // add errors to json
     // add enums to json
 }
 
-void PsaProgramStructure::createHeaders() {
+void PsaProgramStructure::createHeaders(ConversionContext* ctxt) {
     for (auto kv : headers) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
-        json->add_header(type->controlPlaneName(), kv.second->name);
+        ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
     }
     for (auto kv : metadata) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
-        json->add_header(type->controlPlaneName(), kv.second->name);
+        ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
     }
     for (auto kv : header_stacks) {
         // json->add_header_stack(stack_type, stack_name, stack_size, ids);
@@ -136,18 +135,18 @@ void PsaProgramStructure::createHeaders() {
             auto uft = typeMap->getType(uf, true);
             auto h_name = header_name + "." + uf->controlPlaneName();
             auto h_type = uft->to<IR::Type_StructLike>()->controlPlaneName();
-            unsigned id = json->add_header(h_type, h_name);
+            unsigned id = ctxt->json->add_header(h_type, h_name);
             fields->append(id);
         }
-        json->add_union(header_type, fields, header_name);
+        ctxt->json->add_union(header_type, fields, header_name);
     }
 }
 
-void PsaProgramStructure::createParsers() {
-//    auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, this, "scalar");
-//    for (auto kv : parsers) {
-//        kv.second->apply(*cvt);
-//    }
+void PsaProgramStructure::createParsers(ConversionContext* ctxt) {
+    auto cvt = new ParserConverter(ctxt);
+    for (auto kv : parsers) {
+        kv.second->apply(*cvt);
+    }
 }
 
 void PsaProgramStructure::createExterns() {
@@ -165,30 +164,22 @@ void PsaProgramStructure::createActions() {
     // add actions to json
 }
 
-void PsaProgramStructure::createControls() {
-    auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, this, "scalar");
-    // TODO: remove backend from control converter.
-#if 0
-    auto cconv = new BMV2::ControlConverter(this, refMap, typeMap, json, conv, this, "ingress", true);
+void PsaProgramStructure::createControls(ConversionContext* ctxt) {
+    auto cvt = new BMV2::ControlConverter(ctxt, "ingress", true);
     auto ingress = pipelines.at("ingress");
-    ingress->apply(*cconv);
+    ingress->apply(*cvt);
 
-    cconv = new BMV2::ControlConverter(this, refMap, typeMap, json, conv, this, "egress", true);
+    cvt = new BMV2::ControlConverter(ctxt, "egress", true);
     auto egress = pipelines.at("egress");
-    egress->apply(*cconv);
-#endif
+    egress->apply(*cvt);
 }
 
-void PsaProgramStructure::createDeparsers() {
-    // add deparsers to json
-
-    // ingress deparser
-#if 0
-    auto dconv = new DeparserConverter(this);
-    structure.deparser->apply(*dconv);
-#endif
-
-    // egress deparser
+void PsaProgramStructure::createDeparsers(ConversionContext* ctxt) {
+    auto cvt = new DeparserConverter(ctxt);
+    auto ingress = deparsers.at("ingress");
+    ingress->apply(*cvt);
+    auto egress = deparsers.at("egress");
+    egress->apply(*cvt);
 }
 
 void PsaProgramStructure::createGlobals() {
@@ -457,12 +448,112 @@ void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
         new DiscoverStructure(&structure),
         new InspectPsaProgram(refMap, typeMap, &structure),
-        new ConvertPsaToJson(&structure),
+        new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)
     };
     program->apply(toJson);
 
     json->add_program_info(options.file);
     json->add_meta_info();
+}
+
+EXTERN_CONVERTER_SINGLETON(Hash)
+EXTERN_CONVERTER_SINGLETON(Checksum)
+EXTERN_CONVERTER_SINGLETON(InternetChecksum)
+EXTERN_CONVERTER_SINGLETON(Counter)
+EXTERN_CONVERTER_SINGLETON(DirectCounter)
+EXTERN_CONVERTER_SINGLETON(Meter)
+EXTERN_CONVERTER_SINGLETON(DirectMeter)
+EXTERN_CONVERTER_SINGLETON(Register)
+EXTERN_CONVERTER_SINGLETON(Random)
+EXTERN_CONVERTER_SINGLETON(ActionProfile)
+EXTERN_CONVERTER_SINGLETON(ActionSelector)
+EXTERN_CONVERTER_SINGLETON(Digest)
+
+CONVERT_EXTERN_OBJECT(Hash) {
+    auto primitive = mkPrimitive("Hash");
+    return primitive;
+}
+
+CONVERT_EXTERN_OBJECT(Checksum) {
+    auto primitive = mkPrimitive("Checksum");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(InternetChecksum) {
+    auto primitive = mkPrimitive("InternetChecksum");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(Counter) {
+    auto primitive = mkPrimitive("Counter");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(DirectCounter) {
+    auto primitive = mkPrimitive("DirectCounter");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(Meter) {
+    auto primitive = mkPrimitive("Meter");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(DirectMeter) {
+    auto primitive = mkPrimitive("DirectMeter");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(Register) {
+    auto primitive = mkPrimitive("Register");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(Random) {
+    auto primitive = mkPrimitive("Random");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(ActionProfile) {
+    auto primitive = mkPrimitive("ActionProfile");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(ActionSelector) {
+    auto primitive = mkPrimitive("ActionSelector");
+    return primitive;
+}
+CONVERT_EXTERN_OBJECT(Digest) {
+    auto primitive = mkPrimitive("Digest");
+    return primitive;
+}
+
+CONVERT_EXTERN_INSTANCE(Hash) {
+    // ctxt->json->
+}
+CONVERT_EXTERN_INSTANCE(Checksum) {
+    // ctxt->json
+}
+CONVERT_EXTERN_INSTANCE(InternetChecksum) {
+    // ctxt->json
+}
+CONVERT_EXTERN_INSTANCE(Counter) {
+    // ctxt->json->counters
+}
+CONVERT_EXTERN_INSTANCE(DirectCounter) {
+    // ctxt->json->counters
+}
+CONVERT_EXTERN_INSTANCE(Meter) {
+    // ctxt->json->meter_arrays
+}
+CONVERT_EXTERN_INSTANCE(DirectMeter) {
+    // ctxt->json->meter_arrays
+}
+CONVERT_EXTERN_INSTANCE(Register) {
+    // ctxt->json->registers
+}
+CONVERT_EXTERN_INSTANCE(Random) {
+    // ctxt->json->
+}
+CONVERT_EXTERN_INSTANCE(ActionProfile) {
+    // ctxt->action_profiles
+}
+CONVERT_EXTERN_INSTANCE(ActionSelector) {
+    // ctxt->action_profiles
+}
+CONVERT_EXTERN_INSTANCE(Digest) {
+    // ctxt->json
 }
 
 }  // namespace BMV2

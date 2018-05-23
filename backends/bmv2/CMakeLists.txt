@@ -90,15 +90,24 @@ add_dependencies(p4c_driver linkbmv2)
 
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
 
-set (BMV2_TEST_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+set (V1_INCLUDE_PATTERNS "include.*v1model.p4")
+set (P4TESTS_FOR_V1MODEL "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
+p4c_find_tests("${P4TESTS_FOR_V1MODEL}" v1tests INCLUDE "${V1_INCLUDE_PATTERNS}")
+
+set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/*-bmv2.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
+  ${v1tests}
   )
 
-set (PSA_TEST_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2-psa.p4"
+set (PSA_INCLUDE_PATTERNS "include.*psa.p4")
+set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4")
+set (P4TESTS_FOR_PSA "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
+p4c_find_tests("${P4TESTS_FOR_PSA}" psa_tests INCLUDE "${PSA_INCLUDE_PATTERNS}" EXCLUDE "${PSA_EXCLUDE_PATTERNS}")
+
+set (BMV2_PSA_TEST_SUITES
+  ${psa_tests}
   )
 
 # -p to use portable switch model
@@ -126,8 +135,8 @@ set (XFAIL_TESTS
   )
 
 if (HAVE_SIMPLE_SWITCH)
-  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_TEST_SUITES}" "${XFAIL_TESTS}")
-  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
+  #p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding BMv2 tests")
 endif()
