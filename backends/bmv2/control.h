@@ -32,15 +32,10 @@ limitations under the License.
 namespace BMV2 {
 
 class ControlConverter : public Inspector {
-    Backend* backend;
-    const IR::ToplevelBlock* toplevel;
-    P4::ReferenceMap*      refMap;
-    P4::TypeMap*           typeMap;
-    BMV2::JsonObjects*     json;
-    ExpressionConverter*   conv;
-    ProgramStructure*      structure;
-    cstring                name;
-    P4::P4CoreLibrary&     corelib;
+    Backend*           backend;
+    ConversionContext* ctxt;
+    cstring            name;
+    P4::P4CoreLibrary& corelib;
 
  protected:
     Util::IJson* convertTable(const CFG::TableNode* node,
@@ -57,10 +52,9 @@ class ControlConverter : public Inspector {
  public:
     const bool emitExterns;
     bool preorder(const IR::P4Control* b) override;
-    explicit ControlConverter(Backend* backend, const IR::ToplevelBlock* toplevel, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                              BMV2::JsonObjects* json, BMV2::ExpressionConverter* conv,
-                              ProgramStructure* structure, cstring name, const bool& emitExterns_) :
-        backend(backend), toplevel(toplevel), refMap(refMap), typeMap(typeMap), json(json), conv(conv), structure(structure), name(name), emitExterns(emitExterns_),
+    explicit ControlConverter(Backend* backend, ConversionContext* ctxt,
+                              cstring name, const bool& emitExterns_) :
+        backend(backend), ctxt(ctxt), name(name), emitExterns(emitExterns_),
         corelib(P4::P4CoreLibrary::instance)
     { setName("ControlConverter"); }
 };

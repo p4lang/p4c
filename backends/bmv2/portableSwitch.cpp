@@ -144,11 +144,10 @@ void PsaProgramStructure::createHeaders() {
 }
 
 void PsaProgramStructure::createParsers() {
-    auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, this, "scalar");
-    auto cvt = new BMV2::ParserConverter(refMap, typeMap, json, conv);
-    for (auto kv : parsers) {
-        kv.second->apply(*cvt);
-    }
+//    auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, this, "scalar");
+//    for (auto kv : parsers) {
+//        kv.second->apply(*cvt);
+//    }
 }
 
 void PsaProgramStructure::createExterns() {
@@ -164,7 +163,6 @@ void PsaProgramStructure::createExterns() {
 
 void PsaProgramStructure::createActions() {
     // add actions to json
-    //
 }
 
 void PsaProgramStructure::createControls() {
@@ -433,7 +431,7 @@ bool InspectPsaProgram::preorder(const IR::P4Control *c) {
 
 void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     CHECK_NULL(tlb);
-    PsaProgramStructure structure(refMap, typeMap, &jsonTop);
+    PsaProgramStructure structure(refMap, typeMap);
 
     auto parsePsaArch = new ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();

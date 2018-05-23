@@ -22,16 +22,14 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "expression.h"
+#include "helpers.h"
 
 namespace BMV2 {
 
 class JsonObjects;
 
 class ParserConverter : public Inspector {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    JsonObjects*         json;
-    ExpressionConverter* conv;
+    ConversionContext*   ctxt;
     P4::P4CoreLibrary&   corelib;
 
  protected:
@@ -47,10 +45,8 @@ class ParserConverter : public Inspector {
 
  public:
     bool preorder(const IR::P4Parser* p) override;
-    ParserConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BMV2::JsonObjects* json,
-                    BMV2::ExpressionConverter* conv) :
-        refMap(refMap), typeMap(typeMap), json(json), conv(conv),
-        corelib(P4::P4CoreLibrary::instance) {
+    ParserConverter(ConversionContext* ctxt) :
+        ctxt(ctxt), corelib(P4::P4CoreLibrary::instance) {
         setName("ParserConverter");
     }
 };

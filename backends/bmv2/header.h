@@ -31,12 +31,9 @@ namespace BMV2 {
 class Backend;
 
 class HeaderConverter : public Inspector {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    ProgramStructure*    structure;
+    ConversionContext*   ctxt;
     cstring              scalarsName;
     cstring              scalarsTypeName;
-    JsonObjects*         json;
     std::set<cstring>    visitedHeaders;
 
     const unsigned       boolWidth = 1;    // convert booleans to 1-bit integers
@@ -58,8 +55,7 @@ class HeaderConverter : public Inspector {
 
     bool preorder(const IR::Parameter* param) override;
 
-    HeaderConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ProgramStructure* structure,
-                    JsonObjects* json, cstring scalarsName);
+    HeaderConverter(ConversionContext* ctxt, cstring scalarsName);
 };
 
 }  // namespace BMV2

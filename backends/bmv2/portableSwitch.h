@@ -114,11 +114,10 @@ class PsaProgramStructure : public ProgramStructure {
     std::vector<const IR::ExternBlock*> globals;
 
 public:
-    PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, Util::JsonObject* jsonTop)
-        : refMap(refMap), typeMap(typeMap) {
+    PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap), json(new BMV2::JsonObjects()) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
-        json = new BMV2::JsonObjects(jsonTop);
     }
 
     const IR::P4Program* create(const IR::P4Program* program) ;
@@ -213,15 +212,6 @@ class PortableSwitchBackend : public Backend {
     BMV2Options &options;
  public:
     void convert(const IR::ToplevelBlock* tlb) override;
-    void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
-                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
-                              const bool& emitExterns) override {}
-    void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
-                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s) override {}
-    void convertExternInstances(const IR::Declaration *c,
-                                const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
-                                BMV2::SharedActionSelectorCheck& selector_check,
-                                const bool& emitExterns) override {}
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
                          Util::JsonArray* calculations, bool verify) override { }
     PortableSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,

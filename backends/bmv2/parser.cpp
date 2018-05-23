@@ -25,12 +25,12 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
     auto params = mkArrayField(result, "parameters");
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
-        auto type = typeMap->getType(assign->left, true);
+        auto type = ctxt->typeMap->getType(assign->left, true);
         cstring operation = Backend::jsonAssignment(type, true);
         result->emplace("op", operation);
-        auto l = conv->convertLeftValue(assign->left);
+        auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
-        auto r = conv->convert(assign->right, true, true, convertBool);
+        auto r = ctxt->conv->convert(assign->right, true, true, convertBool);
         params->append(l);
         params->append(r);
 
@@ -46,7 +46,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
-        auto minst = P4::MethodInstance::resolve(mce, refMap, typeMap);
+        auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
         if (minst->is<P4::ExternMethod>()) {
             auto extmeth = minst->to<P4::ExternMethod>();
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
@@ -55,7 +55,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     cstring ename = argCount == 1 ? "extract" : "extract_VL";
                     result->emplace("op", ename);
                     auto arg = mce->arguments->at(0);
-                    auto argtype = typeMap->getType(arg->expression, true);
+                    auto argtype = ctxt->typeMap->getType(arg->expression, true);
                     if (!argtype->is<IR::Type_Header>()) {
                         ::error("%1%: extract only accepts arguments with header types, not %2%",
                                 arg, argtype);
@@ -68,11 +68,11 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
                     if (arg->expression->is<IR::Member>()) {
                         auto mem = arg->expression->to<IR::Member>();
-                        auto baseType = typeMap->getType(mem->expr, true);
+                        auto baseType = ctxt->typeMap->getType(mem->expr, true);
                         if (baseType->is<IR::Type_Stack>()) {
                             if (mem->member == IR::Type_Stack::next) {
                                 type = "stack";
-                                j = conv->convert(mem->expr);
+                                j = ctxt->conv->convert(mem->expr);
                             } else {
                                 BUG("%1%: unsupported", mem);
                             }
@@ -80,7 +80,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     }
                     if (j == nullptr) {
                         type = "regular";
-                        j = conv->convert(arg->expression);
+                        j = ctxt->conv->convert(arg->expression);
                     }
                     auto value = j->to<Util::JsonObject>()->get("value");
                     param->emplace("type", type);
@@ -88,7 +88,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
                     if (argCount == 2) {
                         auto arg2 = mce->arguments->at(1);
-                        auto jexpr = conv->convert(arg2->expression, true, false);
+                        auto jexpr = ctxt->conv->convert(arg2->expression, true, false);
                         auto rwrap = new Util::JsonObject();
                         // The spec says that this must always be wrapped in an expression
                         rwrap->emplace("type", "expression");
@@ -107,14 +107,14 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     auto cond = mce->arguments->at(0);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = conv->convert(cond->expression, true, false);
+                    auto jexpr = ctxt->conv->convert(cond->expression, true, false);
                     params->append(jexpr);
                 }
                 {
                     auto error = mce->arguments->at(1);
                     // false means don't wrap in an outer expression object, which is not needed
                     // here
-                    auto jexpr = conv->convert(error->expression, true, false);
+                    auto jexpr = ctxt->conv->convert(error->expression, true, false);
                     params->append(jexpr);
                 }
                 return result;
@@ -138,7 +138,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             params->append(paramsValue);
 
             auto pp = mkArrayField(paramsValue, "parameters");
-            auto obj = conv->convert(bi->appliedTo);
+            auto obj = ctxt->conv->convert(bi->appliedTo);
             pp->append(obj);
 
             if (bi->name == IR::Type_Header::setValid) {
@@ -153,7 +153,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     primitive = "pop";
 
                 BUG_CHECK(mce->arguments->size() == 1, "Expected 1 argument for %1%", mce);
-                auto arg = conv->convert(mce->arguments->at(0)->expression);
+                auto arg = ctxt->conv->convert(mce->arguments->at(0)->expression);
                 pp->append(arg);
             } else {
                 BUG("%1%: Unexpected built-in method", bi->name);
@@ -229,7 +229,7 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
             auto e = *it;
             auto keyElement = le->components.at(index);
 
-            auto type = typeMap->getType(e, true);
+            auto type = ctxt->typeMap->getType(e, true);
             int width = type->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", e);
 
@@ -260,14 +260,14 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
         return totalWidth;
     } else if (keySet->is<IR::PathExpression>()) {
         auto pe = keySet->to<IR::PathExpression>();
-        auto decl = refMap->getDeclaration(pe->path, true);
+        auto decl = ctxt->refMap->getDeclaration(pe->path, true);
         vset_name = decl->controlPlaneName();
         is_vset = true;
         return totalWidth;
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
         convertSimpleKey(keySet, value, mask);
-        auto type = typeMap->getType(select->components.at(0), true);
+        auto type = ctxt->typeMap->getType(select->components.at(0), true);
         return ROUNDUP(type->width_bits(), 8);
     }
 }
@@ -322,7 +322,7 @@ Util::IJson*
 ParserConverter::convertSelectKey(const IR::SelectExpression* expr) {
     auto se = expr->to<IR::SelectExpression>();
     CHECK_NULL(se);
-    auto key = conv->convert(se->select, false);
+    auto key = ctxt->conv->convert(se->select, false);
     return key;
 }
 
@@ -346,13 +346,13 @@ ParserConverter::createDefaultTransition() {
 
 bool ParserConverter::preorder(const IR::P4Parser* parser) {
     // hanw hard-coded parser name assumed by BMv2
-    auto parser_id = json->add_parser("parser");
+    auto parser_id = ctxt->json->add_parser("parser");
 
     for (auto s : parser->parserLocals) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
             auto bitwidth = inst->elementType->width_bits();
             auto name = inst->controlPlaneName();
-            json->add_parse_vset(name, bitwidth);
+            ctxt->json->add_parse_vset(name, bitwidth);
         }
     }
 
@@ -360,11 +360,11 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
     for (auto state : parser->states) {
         if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
             continue;
-        auto state_id = json->add_parser_state(parser_id, state->controlPlaneName());
+        auto state_id = ctxt->json->add_parser_state(parser_id, state->controlPlaneName());
         // convert statements
         for (auto s : state->components) {
             auto op = convertParserStatement(s);
-            json->add_parser_op(state_id, op);
+            ctxt->json->add_parser_op(state_id, op);
         }
         // convert transitions
         if (state->selectExpression != nullptr) {
@@ -372,20 +372,20 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
                 auto expr = state->selectExpression->to<IR::SelectExpression>();
                 auto transitions = convertSelectExpression(expr);
                 for (auto transition : transitions) {
-                    json->add_parser_transition(state_id, transition);
+                    ctxt->json->add_parser_transition(state_id, transition);
                 }
                 auto key = convertSelectKey(expr);
-                json->add_parser_transition_key(state_id, key);
+                ctxt->json->add_parser_transition_key(state_id, key);
             } else if (state->selectExpression->is<IR::PathExpression>()) {
                 auto expr = state->selectExpression->to<IR::PathExpression>();
                 auto transition = convertPathExpression(expr);
-                json->add_parser_transition(state_id, transition);
+                ctxt->json->add_parser_transition(state_id, transition);
             } else {
                 BUG("%1%: unexpected selectExpression", state->selectExpression);
             }
         } else {
             auto transition = createDefaultTransition();
-            json->add_parser_transition(state_id, transition);
+            ctxt->json->add_parser_transition(state_id, transition);
         }
     }
     return false;

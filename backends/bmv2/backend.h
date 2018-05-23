@@ -51,31 +51,22 @@ class Backend {
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
     P4::ConvertEnums::EnumMapping*   enumMap;
-    const IR::ToplevelBlock*         toplevel;
-    ExpressionConverter*             conv;
     P4::P4CoreLibrary&               corelib;
-    Util::JsonObject                 jsonTop;
     BMV2::JsonObjects*               json;
+    ExpressionConverter*             conv;
+    const IR::ToplevelBlock*         toplevel;
 
  public:
     Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
             P4::ConvertEnums::EnumMapping* enumMap) :
         options(options),
         refMap(refMap), typeMap(typeMap), enumMap(enumMap),
-        corelib(P4::P4CoreLibrary::instance), json(new BMV2::JsonObjects(&jsonTop)) {
-        refMap->setIsV1(options.isv1()); }
-    void serialize(std::ostream& out) const { jsonTop.serialize(out); }
+        corelib(P4::P4CoreLibrary::instance), json(new BMV2::JsonObjects()) {
+        refMap->setIsV1(options.isv1());
+        }
+    void serialize(std::ostream& out) const { json->toplevel->serialize(out); }
 
     virtual void convert(const IR::ToplevelBlock* block) = 0;
-    virtual void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
-                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
-                              const bool& emitExterns) = 0;
-    virtual void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
-                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s) = 0;
-    virtual void convertExternInstances(const IR::Declaration *c,
-                                const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
-                                BMV2::SharedActionSelectorCheck& selector_check,
-                                const bool& emitExterns) = 0;
     virtual void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
                                  Util::JsonArray* calculations, bool verify) = 0;
     /**

@@ -65,6 +65,12 @@ Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo) {
     return result;
 }
 
+Util::JsonObject* mkPrimitive(cstring name) {
+    auto result = new Util::JsonObject();
+    result->emplace("op", name);
+    return result;
+}
+
 cstring stringRepr(mpz_class value, unsigned bytes) {
     cstring sign = "";
     const char* r;

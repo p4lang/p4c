@@ -26,6 +26,7 @@ set (BMV2_BACKEND_SRCS
   controlFlowGraph.cpp
   deparser.cpp
   expression.cpp
+  extern.cpp
   globals.cpp
   header.cpp
   helpers.cpp
@@ -46,6 +47,7 @@ set (BMV2_BACKEND_HDRS
   controlFlowGraph.h
   deparser.h
   expression.h
+  extern.h
   globals.h
   header.h
   helpers.h

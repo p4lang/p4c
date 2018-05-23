@@ -23,6 +23,10 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "controlFlowGraph.h"
 #include "frontends/common/model.h"
+#include "programStructure.h"
+#include "expression.h"
+#include "JsonObjects.h"
+#include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 
@@ -62,12 +66,41 @@ class V1ModelProperties {
     static const cstring validField;
 };
 
+// XXX(hanw): This convenience class stores pointers to the data structures
+// that are commonly used during the program translation. Due to the limitation
+// of current IR structure, these data structure are only refreshed by the
+// evaluator pass. In the long term, integrating these data structures as part
+// of the IR tree would simplify this kind of bookkeeping effort.
+struct ConversionContext {
+    // context
+    P4::ReferenceMap*                refMap;
+    P4::TypeMap*                     typeMap;
+    const IR::ToplevelBlock*         toplevel;
+    //
+    ProgramStructure*                structure;
+    // expression converter is used in many places.
+    ExpressionConverter*             conv;
+    // final json output.
+    BMV2::JsonObjects*               json;
+
+    // for action profile conversion
+    Util::JsonArray*                 action_profiles;
+    SharedActionSelectorCheck*       selector_check;
+
+    ConversionContext(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                      const IR::ToplevelBlock* toplevel, ProgramStructure* structure,
+                      ExpressionConverter* conv, JsonObjects* json) :
+        refMap(refMap), typeMap(typeMap), toplevel(toplevel), structure(structure),
+        conv(conv), json(json) { }
+};
+
 using BlockTypeMap = std::map<const IR::Block*, const IR::Type*>;
 
 Util::IJson* nodeName(const CFG::Node* node);
 Util::JsonArray* mkArrayField(Util::JsonObject* parent, cstring name);
 Util::JsonArray* mkParameters(Util::JsonObject* object);
 Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo);
+Util::JsonObject* mkPrimitive(cstring name);
 cstring stringRepr(mpz_class value, unsigned bytes = 0);
 unsigned nextId(cstring group);
 

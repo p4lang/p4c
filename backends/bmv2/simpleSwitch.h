@@ -24,6 +24,7 @@ limitations under the License.
 #include "sharedActionSelectorCheck.h"
 #include "backend.h"
 #include "deparser.h"
+#include "extern.h"
 #include "programStructure.h"
 
 namespace BMV2 {
@@ -157,36 +158,40 @@ class SimpleSwitchBackend : public Backend {
     V1ProgramStructure* structure;
 
  protected:
-    void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
-    int createFieldList(const IR::Expression* expr, cstring group,
-                        cstring listName, Util::JsonArray* field_lists);
     cstring convertHashAlgorithm(cstring algorithm);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
 
  public:
     void modelError(const char* format, const IR::Node* place) const;
-    void convertExternObjects(Util::JsonArray *result, const P4::ExternMethod *em,
-                              const IR::MethodCallExpression *mc, const IR::StatOrDecl *s,
-                              const bool& emitExterns) override;
-    void convertExternFunctions(Util::JsonArray *result, const P4::ExternFunction *ef,
-                                const IR::MethodCallExpression *mc, const IR::StatOrDecl* s) override;
-    void convertExternInstances(const IR::Declaration *c,
-                                const IR::ExternBlock* eb, Util::JsonArray* action_profiles,
-                                BMV2::SharedActionSelectorCheck& selector_check,
-                                const bool& emitExterns) override;
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
                          Util::JsonArray* calculations, bool verify) override;
-    void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
+    void convertActionBody(ConversionContext* ctxt, const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params);
-    void createActions(V1ProgramStructure* structure);
+    void createActions(ConversionContext* ctxt, V1ProgramStructure* structure);
 
     void convert(const IR::ToplevelBlock* tlb) override;
     SimpleSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                         P4::ConvertEnums::EnumMapping* enumMap) :
         Backend(options, refMap, typeMap, enumMap), options(options), v1model(P4V1::V1Model::instance) { }
 };
+
+EXTERN_CONVERTER_W_FUNCTION(clone)
+EXTERN_CONVERTER_W_FUNCTION(hash)
+EXTERN_CONVERTER_W_FUNCTION(digest_receiver)
+EXTERN_CONVERTER_W_FUNCTION(resubmit)
+EXTERN_CONVERTER_W_FUNCTION(recirculate)
+EXTERN_CONVERTER_W_FUNCTION(drop)
+EXTERN_CONVERTER_W_FUNCTION(random)
+EXTERN_CONVERTER_W_FUNCTION(truncate)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(register)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(counter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(meter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(directCounter)
+EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(directMeter)
+EXTERN_CONVERTER_W_INSTANCE(action_profile)
+EXTERN_CONVERTER_W_INSTANCE(action_selector)
 
 }  // namespace BMV2
 
