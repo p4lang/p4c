@@ -23,6 +23,7 @@ std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
 void ExternConverter::registerExternConverter(cstring name, ExternConverter* cvt) {
     static std::map<cstring, ExternConverter *> map;
     cvtForType = &map;
+    LOG3("registered extern " << name);
     map[name] = cvt;
 }
 
@@ -35,7 +36,7 @@ ExternConverter* ExternConverter::get(cstring type) {
 
 Util::IJson* ExternConverter::cvtExternObject(ConversionContext* ctxt, const P4::ExternMethod* em,
                                     const IR::MethodCallExpression* mc, const IR::StatOrDecl* s) {
-    // return get(di)->convertExternObject(st, em, mc, s);
+    return get(em)->convertExternObject(ctxt, em, mc, s);
 }
 
 Util::IJson* ExternConverter::cvtExternInstance(ConversionContext* ctxt, const IR::Declaration* c,
@@ -45,7 +46,7 @@ Util::IJson* ExternConverter::cvtExternInstance(ConversionContext* ctxt, const I
 
 Util::IJson* ExternConverter::cvtExternFunction(ConversionContext* ctxt, const P4::ExternFunction* ef,
                                       const IR::MethodCallExpression* mc, const IR::StatOrDecl* s) {
-    // return get(di)->convertExternFunction(st, ef, mc, s);
+    return get(ef)->convertExternFunction(ctxt, ef, mc, s);
 }
 
 Util::IJson* ExternConverter::convertExternObject(ConversionContext* ctxt, const P4::ExternMethod* em,

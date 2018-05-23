@@ -32,7 +32,6 @@ limitations under the License.
 namespace BMV2 {
 
 class ControlConverter : public Inspector {
-    Backend*           backend;
     ConversionContext* ctxt;
     cstring            name;
     P4::P4CoreLibrary& corelib;
@@ -52,9 +51,8 @@ class ControlConverter : public Inspector {
  public:
     const bool emitExterns;
     bool preorder(const IR::P4Control* b) override;
-    explicit ControlConverter(Backend* backend, ConversionContext* ctxt,
-                              cstring name, const bool& emitExterns_) :
-        backend(backend), ctxt(ctxt), name(name), emitExterns(emitExterns_),
+    explicit ControlConverter(ConversionContext* ctxt, cstring name, const bool& emitExterns_) :
+        ctxt(ctxt), name(name), emitExterns(emitExterns_),
         corelib(P4::P4CoreLibrary::instance)
     { setName("ControlConverter"); }
 };

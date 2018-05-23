@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "backend.h"
 #include "control.h"
 #include "extern.h"
 #include "sharedActionSelectorCheck.h"

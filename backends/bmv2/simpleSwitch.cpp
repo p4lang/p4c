@@ -95,63 +95,87 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
 }
 
 EXTERN_CONVERTER_SINGLETON(clone)
+EXTERN_CONVERTER_SINGLETON(clone3)
 EXTERN_CONVERTER_SINGLETON(hash)
-EXTERN_CONVERTER_SINGLETON(digest_receiver)
+EXTERN_CONVERTER_SINGLETON(digest)
 EXTERN_CONVERTER_SINGLETON(resubmit)
 EXTERN_CONVERTER_SINGLETON(recirculate)
-EXTERN_CONVERTER_SINGLETON(drop)
+EXTERN_CONVERTER_SINGLETON(mark_to_drop)
 EXTERN_CONVERTER_SINGLETON(random)
 EXTERN_CONVERTER_SINGLETON(truncate)
 EXTERN_CONVERTER_SINGLETON(register)
 EXTERN_CONVERTER_SINGLETON(counter)
 EXTERN_CONVERTER_SINGLETON(meter)
-EXTERN_CONVERTER_SINGLETON(directCounter)
-EXTERN_CONVERTER_SINGLETON(directMeter)
+EXTERN_CONVERTER_SINGLETON(direct_counter)
+EXTERN_CONVERTER_SINGLETON(direct_meter)
 EXTERN_CONVERTER_SINGLETON(action_profile)
 EXTERN_CONVERTER_SINGLETON(action_selector)
 
 CONVERT_EXTERN_FUNCTION(clone) {
     int id = -1;
-    if (ef->method->name == v1model.clone.name) {
-        if (mc->arguments->size() != 2) {
-            modelError("Expected 2 arguments for %1%", mc);
-            return nullptr;
-        }
-        cstring name = ctxt->refMap->newName("fl");
-        auto emptylist = new IR::ListExpression({});
-        id = createFieldList(ctxt, emptylist, "field_lists", name, ctxt->json->field_lists);
-    } else {
-        if (mc->arguments->size() != 3) {
-            modelError("Expected 3 arguments for %1%", mc);
-            return nullptr;
-        }
-        cstring name = ctxt->refMap->newName("fl");
-        id = createFieldList(ctxt, mc->arguments->at(2)->expression, "field_lists", name,
-                             ctxt->json->field_lists);
+    if (mc->arguments->size() != 2) {
+        modelError("Expected 2 arguments for %1%", mc);
+        return nullptr;
     }
+    cstring name = ctxt->refMap->newName("fl");
+    auto emptylist = new IR::ListExpression({});
+    id = createFieldList(ctxt, emptylist, "field_lists", name, ctxt->json->field_lists);
+
     auto cloneType = mc->arguments->at(0);
     auto ei = P4::EnumInstance::resolve(cloneType->expression, ctxt->typeMap);
     if (ei == nullptr) {
         modelError("%1%: must be a constant on this target", cloneType);
         return nullptr;
-    } else {
-        cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
-                       "clone_egress_pkt_to_egress";
-        auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        auto primitive = mkPrimitive(prim);
-        auto parameters = mkParameters(primitive);
-        // TODO(jafingerhut):
-        // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        parameters->append(session);
-
-        if (id >= 0) {
-            auto cst = new IR::Constant(id);
-            ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
-            auto jcst = ctxt->conv->convert(cst);
-            parameters->append(jcst);
-        }
-        return primitive;
     }
+    cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
+                   "clone_egress_pkt_to_egress";
+    auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
+    auto primitive = mkPrimitive(prim);
+    auto parameters = mkParameters(primitive);
+    // TODO(jafingerhut):
+    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    parameters->append(session);
+
+    if (id >= 0) {
+        auto cst = new IR::Constant(id);
+        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+        auto jcst = ctxt->conv->convert(cst);
+        parameters->append(jcst);
+    }
+    return primitive;
+}
+
+CONVERT_EXTERN_FUNCTION(clone3) {
+    int id = -1;
+    if (mc->arguments->size() != 3) {
+        modelError("Expected 3 arguments for %1%", mc);
+        return nullptr;
+    }
+    cstring name = ctxt->refMap->newName("fl");
+    id = createFieldList(ctxt, mc->arguments->at(2)->expression, "field_lists", name,
+                         ctxt->json->field_lists);
+    auto cloneType = mc->arguments->at(0);
+    auto ei = P4::EnumInstance::resolve(cloneType->expression, ctxt->typeMap);
+    if (ei == nullptr) {
+        modelError("%1%: must be a constant on this target", cloneType);
+        return nullptr;
+    }
+    cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
+                   "clone_egress_pkt_to_egress";
+    auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
+    auto primitive = mkPrimitive(prim);
+    auto parameters = mkParameters(primitive);
+    // TODO(jafingerhut):
+    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    parameters->append(session);
+
+    if (id >= 0) {
+        auto cst = new IR::Constant(id);
+        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+        auto jcst = ctxt->conv->convert(cst);
+        parameters->append(jcst);
+    }
+    return primitive;
 }
 
 CONVERT_EXTERN_FUNCTION(hash) {
@@ -191,7 +215,7 @@ CONVERT_EXTERN_FUNCTION(hash) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(digest_receiver) {
+CONVERT_EXTERN_FUNCTION(digest) {
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
@@ -294,7 +318,7 @@ CONVERT_EXTERN_FUNCTION(recirculate) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(drop) {
+CONVERT_EXTERN_FUNCTION(mark_to_drop) {
     if (mc->arguments->size() != 0) {
         modelError("Expected 0 arguments for %1%", mc);
         return nullptr;
@@ -498,7 +522,7 @@ CONVERT_EXTERN_INSTANCE(register) {
     ctxt->json->register_arrays->append(jreg);
 }
 
-CONVERT_EXTERN_OBJECT(directCounter) {
+CONVERT_EXTERN_OBJECT(direct_counter) {
     if (mc->arguments->size() != 0) {
         modelError("Expected 0 argument for %1%", mc);
         return nullptr;
@@ -507,7 +531,7 @@ CONVERT_EXTERN_OBJECT(directCounter) {
     return nullptr;
 }
 
-CONVERT_EXTERN_INSTANCE(directCounter) {
+CONVERT_EXTERN_INSTANCE(direct_counter) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
@@ -524,7 +548,7 @@ CONVERT_EXTERN_INSTANCE(directCounter) {
     }
 }
 
-CONVERT_EXTERN_OBJECT(directMeter) {
+CONVERT_EXTERN_OBJECT(direct_meter) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -535,7 +559,7 @@ CONVERT_EXTERN_OBJECT(directMeter) {
     return nullptr;
 }
 
-CONVERT_EXTERN_INSTANCE(directMeter) {
+CONVERT_EXTERN_INSTANCE(direct_meter) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
@@ -1039,10 +1063,10 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 
     createActions(ctxt, structure);
 
-    auto cconv = new ControlConverter(this, ctxt, "ingress", options.emitExterns);
+    auto cconv = new ControlConverter(ctxt, "ingress", options.emitExterns);
     structure->ingress->apply(*cconv);
 
-    cconv = new ControlConverter(this, ctxt, "egress", options.emitExterns);
+    cconv = new ControlConverter(ctxt, "egress", options.emitExterns);
     structure->egress->apply(*cconv);
 
     auto dconv = new DeparserConverter(refMap, typeMap, json, conv);
@@ -1054,7 +1078,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     convertChecksum(structure->verify_checksum->body, json->checksums,
                     json->calculations, true);
 
-    (void)toplevel->apply(ConvertGlobals(this, refMap, typeMap));
+    (void)toplevel->apply(ConvertGlobals(ctxt));
 }
 
 }  // namespace BMV2

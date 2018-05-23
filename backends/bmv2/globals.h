@@ -23,14 +23,11 @@ limitations under the License.
 namespace BMV2 {
 
 class ConvertGlobals : public Inspector {
-    Backend*          backend;
-    P4::ReferenceMap* refMap;
-    P4::TypeMap*      typeMap;
+    ConversionContext* ctxt;
 
  public:
-    explicit ConvertGlobals(Backend* backend, P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
-    backend(backend), refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("ConvertGlobals"); }
+    explicit ConvertGlobals(ConversionContext* ctxt) : ctxt(ctxt) {
+        setName("ConvertGlobals"); }
 
     bool preorder(const IR::ExternBlock* block) override;
     bool preorder(const IR::ToplevelBlock *block) override {
