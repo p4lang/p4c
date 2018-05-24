@@ -31,12 +31,14 @@ class Pattern {
         virtual bool match(const IR::Node *) = 0;
     } *pattern;
     Pattern(Base *p) : pattern(p) {}
-    template<class T> class Match : public Base {
+
+    template<class T> class MatchExt : public Base {
         const T *&m;
      public:
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
-        Match(const T *&m) : m(m) {}
+        MatchExt(const T *&m) : m(m) {}
     };
+
     class Const : public Base {
         mpz_class       value;
      public:
@@ -71,7 +73,36 @@ class Pattern {
     };
 
  public:
-    template <class T> Pattern(const T*&m) : pattern(new Match<T>(m)) {}
+
+    template<class T> class Match : public Base {
+        const T *m;
+     public:
+        bool match(const IR::Node *n) override { return (m = n->to<T>()); }
+        Match() : m(nullptr) {}
+        const T *operator->() const { return m; }
+        operator const T *() const { return m; }
+        Pattern operator*(const Pattern &a) { return Pattern(*this) * a; }
+        Pattern operator/(const Pattern &a) { return Pattern(*this) / a; }
+        Pattern operator%(const Pattern &a) { return Pattern(*this) % a; }
+        Pattern operator+(const Pattern &a) { return Pattern(*this) + a; }
+        Pattern operator-(const Pattern &a) { return Pattern(*this) - a; }
+        Pattern operator<<(const Pattern &a) { return Pattern(*this) << a; }
+        Pattern operator>>(const Pattern &a) { return Pattern(*this) >> a; }
+        Pattern operator==(const Pattern &a) { return Pattern(*this) == a; }
+        Pattern operator!=(const Pattern &a) { return Pattern(*this) != a; }
+        Pattern operator<(const Pattern &a) { return Pattern(*this) < a; }
+        Pattern operator<=(const Pattern &a) { return Pattern(*this) <= a; }
+        Pattern operator>(const Pattern &a) { return Pattern(*this) > a; }
+        Pattern operator>=(const Pattern &a) { return Pattern(*this) >= a; }
+        Pattern operator&(const Pattern &a) { return Pattern(*this) & a; }
+        Pattern operator|(const Pattern &a) { return Pattern(*this) | a; }
+        Pattern operator^(const Pattern &a) { return Pattern(*this) ^ a; }
+        Pattern operator&&(const Pattern &a) { return Pattern(*this) && a; }
+        Pattern operator||(const Pattern &a) { return Pattern(*this) || a; }
+    };
+
+    template <class T> Pattern(const T*&m) : pattern(new MatchExt<T>(m)) {}
+    template <class T>Pattern(Match<T> &m) : pattern(&m) {}
     Pattern(mpz_class v) : pattern(new Const(v)) {}     // NOLINT(runtime/explicit)
     Pattern(int v) : pattern(new Const(v)) {}           // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
@@ -135,5 +166,6 @@ inline Pattern operator|(int v, const Pattern &a) { return Pattern(v) | a; }
 inline Pattern operator^(int v, const Pattern &a) { return Pattern(v) ^ a; }
 inline Pattern operator&&(int v, const Pattern &a) { return Pattern(v) && a; }
 inline Pattern operator||(int v, const Pattern &a) { return Pattern(v) || a; }
+
 
 #endif /* IR_PATTERN_H_ */
