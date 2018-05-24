@@ -38,8 +38,8 @@ P4 program you supplied, and the following suffixes instead of the
   BMv2 behavioral model `simple_switch`.
 
 ```bash
-p4c --target bmv2 my-p4-16-prog.p4
-p4c --target bmv2 --std p4-14 my-p4-14-prog.p4
+p4c --target bmv2 --arch v1model my-p4-16-prog.p4
+p4c --target bmv2 --arch v1model --std p4-14 my-p4-14-prog.p4
 ```
 
 Auto-translate P4_14 source to P4_16 source:
