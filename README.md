@@ -24,9 +24,10 @@ The code contains four sample backends:
 
 Sample command lines:
 
-Compile P4_16 or P4_14 source code, creating a directory you name
- after the `-o` option.  If your program successfully compiles, the
- directory will contain three files:
+Compile P4_16 or P4_14 source code.  If your program successfully
+compiles, the command will create files with the same base name as the
+P4 program you supplied, and the following suffixes instead of the
+`.p4`:
 
 + a file with suffix `.p4i`, which is the output from running the
   preprocessor on your P4 program.
@@ -37,8 +38,8 @@ Compile P4_16 or P4_14 source code, creating a directory you name
   BMv2 behavioral model `simple_switch`.
 
 ```bash
-p4c --target bmv2 my-p4-16-prog.p4 -o my-p4-16-prog-dir
-p4c --target bmv2 --std p4-14 my-p4-14-prog.p4 -o my-p4-14-prog-dir
+p4c --target bmv2 my-p4-16-prog.p4
+p4c --target bmv2 --std p4-14 my-p4-14-prog.p4
 ```
 
 Auto-translate P4_14 source to P4_16 source:
