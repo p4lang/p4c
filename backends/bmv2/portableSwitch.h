@@ -31,6 +31,8 @@ limitations under the License.
 #include "control.h"
 #include "deparser.h"
 #include "extern.h"
+#include "header.h"
+#include "programStructure.h"
 
 namespace BMV2 {
 
@@ -41,6 +43,7 @@ class PortableSwitchExpressionConverter : public ExpressionConverter {
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
     Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
+        LOG3("convert " << fieldName);
         return nullptr;
     }
 };
@@ -74,7 +77,6 @@ class PsaProgramStructure : public ProgramStructure {
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
-    ordered_map<const IR::StructField*, cstring> scalarMetadataFields;
     std::vector<const IR::StructField*> scalars;
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
@@ -121,7 +123,7 @@ public:
         CHECK_NULL(typeMap);
     }
 
-    void create(ConversionContext* ctxt);
+    void create(ConversionContext* ctxt, const IR::P4Program* program, cstring scalarsName);
     void createStructLike(ConversionContext* ctxt, const IR::Type_StructLike* st);
     void createTypes(ConversionContext* ctxt);
     void createHeaders(ConversionContext* ctxt);
@@ -182,15 +184,13 @@ class InspectPsaProgram : public Inspector {
     void postorder(const IR::Declaration_Instance* di) override;
     void postorder(const IR::P4Action* act) override;
     void postorder(const IR::Type_Error* err) override;
-    bool preorder(const IR::P4Control *control) override;
-    bool preorder(const IR::P4Parser *p) override;
 
     std::set<cstring> visitedHeaders;
     bool isHeaders(const IR::Type_StructLike* st);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
-    bool preorder(const IR::Parameter* parameter) override;
+    void postorder(const IR::Parameter* parameter) override;
 };
 
 class ConvertPsaToJson : public Inspector {
@@ -207,14 +207,14 @@ public:
         CHECK_NULL(structure);
     }
 
-    profile_t init_apply(const IR::Node *root) override {
+    void postorder(const IR::P4Program* program) override {
         cstring scalarsName = refMap->newName("scalars");
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
-        structure->create(ctxt);
-        return Inspector::init_apply(root);
+        structure->create(ctxt, program, scalarsName);
     }
+
 };
 
 class PortableSwitchBackend : public Backend {

@@ -51,7 +51,7 @@ public:
     // All match kinds
     std::set<cstring>  match_kinds;
     // map IR node to compile-time allocated resource blocks.
-    ordered_map<const IR::Node*, const IR::CompileTimeValue*> resourceMap;
+    ResourceMap resourceMap;
 
     ProgramStructure() {}
 };
@@ -73,7 +73,7 @@ public:
 // The Evaluator pass generates a mapping from IR::Block to IR::Node. This pass
 // provides a reversed map.
 class BuildResourceMap : public Inspector {
-    ordered_map<const IR::Node*, const IR::CompileTimeValue*> *resourceMap;
+    ResourceMap *resourceMap;
 
 public:
     explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {

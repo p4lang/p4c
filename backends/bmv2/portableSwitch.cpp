@@ -19,9 +19,11 @@ limitations under the License.
 
 namespace BMV2 {
 
-void PsaProgramStructure::create(ConversionContext* ctxt) {
+void PsaProgramStructure::create(ConversionContext* ctxt, const IR::P4Program* program, cstring scalarsName) {
     createTypes(ctxt);
     createHeaders(ctxt);
+    //auto hconv = new HeaderConverter(ctxt, scalarsName);
+    //program->apply(*hconv);
     createExterns();
     createParsers(ctxt);
     createActions();
@@ -225,14 +227,6 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
     return false;
 }
 
-void InspectPsaProgram::postorder(const IR::P4Parser* p) {
-    // populate structure->parsers
-}
-
-void InspectPsaProgram::postorder(const IR::P4Control* c) {
-
-}
-
 void InspectPsaProgram::postorder(const IR::Type_Header* h) {
     // inspect IR::Type_Header
     // populate structure->header_types;
@@ -380,21 +374,21 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
 }
 
 // This visitor only visits the parameter in the statement from architecture.
-bool InspectPsaProgram::preorder(const IR::Parameter* param) {
+void InspectPsaProgram::postorder(const IR::Parameter* param) {
     auto ft = typeMap->getType(param->getNode(), true);
+    LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
     if (!ft->is<IR::Type_StructLike>())
-        return false;
+        return;
     auto st = ft->to<IR::Type_StructLike>();
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st))
-        return false;
+        return;
     auto isHeader = isHeaders(st);
     addTypesAndInstances(st, isHeader);
-    return false;
 }
 
-bool InspectPsaProgram::preorder(const IR::P4Parser* p) {
+void InspectPsaProgram::postorder(const IR::P4Parser* p) {
     if (pinfo->block_type.count(p)) {
         auto info = pinfo->block_type.at(p);
         if (info.first == INGRESS && info.second == PARSER)
@@ -402,10 +396,9 @@ bool InspectPsaProgram::preorder(const IR::P4Parser* p) {
         else if (info.first == EGRESS && info.second == PARSER)
             pinfo->parsers.emplace("egress", p);
     }
-    return false;
 }
 
-bool InspectPsaProgram::preorder(const IR::P4Control *c) {
+void InspectPsaProgram::postorder(const IR::P4Control *c) {
     if (pinfo->block_type.count(c)) {
         auto info = pinfo->block_type.at(c);
         if (info.first == INGRESS && info.second == PIPELINE)
@@ -417,7 +410,6 @@ bool InspectPsaProgram::preorder(const IR::P4Control *c) {
         else if (info.first == EGRESS && info.second == DEPARSER)
             pinfo->deparsers.emplace("egress", c);
     }
-    return false;
 }
 
 void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
@@ -431,7 +423,7 @@ void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
-    PassManager toJson = {
+    PassManager simplify = {
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         //new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
@@ -445,7 +437,14 @@ void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        new VisitFunctor([this, evaluator, structure]() { toplevel = evaluator->getToplevelBlock(); }),
+    };
+    program->apply(simplify);
+
+    // map IR node to compile-time allocated resource blocks.
+    toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+
+    PassManager toJson = {
         new DiscoverStructure(&structure),
         new InspectPsaProgram(refMap, typeMap, &structure),
         new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)

@@ -105,8 +105,12 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::MoveDeclarations(),
-        new P4::ValidateTableProperties({ "implementation", "size", "counters",
-                                          "meters", "support_timeout" }),
+        (options.arch == "v1model") ?
+         new P4::ValidateTableProperties({ "implementation", "size", "counters",
+                                           "meters", "support_timeout" }) : nullptr,
+        (options.arch == "psa") ?
+        new P4::ValidateTableProperties({ "psa_implementation", "size", "psa_direct_counter",
+                                          "psa_direct_meter", "psa_idle_timeout" }) : nullptr,
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),

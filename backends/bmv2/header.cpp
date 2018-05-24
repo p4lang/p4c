@@ -341,6 +341,7 @@ void HeaderConverter::end_apply(const IR::Node*) {
  * @post none
  */
 bool HeaderConverter::preorder(const IR::Parameter* param) {
+    LOG3("convert param " << param);
     //// keep track of which headers we've already generated the ctxt->json for
     auto ft = ctxt->typeMap->getType(param->getNode(), true);
     if (ft->is<IR::Type_Struct>()) {

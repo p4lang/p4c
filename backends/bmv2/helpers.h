@@ -35,9 +35,7 @@ class TableImplementation {
  public:
     static const cstring actionProfileName;
     static const cstring actionSelectorName;
-    static const cstring directCounterName;
     static const cstring directMeterName;
-    static const cstring counterName;
 };
 
 class MatchImplementation {
@@ -48,12 +46,7 @@ class MatchImplementation {
 
 class TableAttributes {
  public:
-    static const cstring implementationName;
-    static const cstring sizeName;
-    static const cstring supportTimeoutName;
     static const unsigned defaultTableSize;
-    static const cstring countersName;
-    static const cstring metersName;
 };
 
 class V1ModelProperties {

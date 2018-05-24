@@ -21,16 +21,8 @@ namespace BMV2 {
 /// constant definition for bmv2
 const cstring TableImplementation::actionProfileName = "action_profile";
 const cstring TableImplementation::actionSelectorName = "action_selector";
-const cstring TableImplementation::directCounterName = "direct_counter";
-const cstring TableImplementation::counterName = "counter";
-const cstring TableImplementation::directMeterName = "direct_meter";
 const cstring MatchImplementation::selectorMatchTypeName = "selector";
 const cstring MatchImplementation::rangeMatchTypeName = "range";
-const cstring TableAttributes::implementationName = "implementation";
-const cstring TableAttributes::sizeName = "size";
-const cstring TableAttributes::supportTimeoutName = "supportTimeout";
-const cstring TableAttributes::countersName = "counters";
-const cstring TableAttributes::metersName = "meters";
 const unsigned TableAttributes::defaultTableSize = 1024;
 const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata";
 const cstring V1ModelProperties::validField = "$valid$";

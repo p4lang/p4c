@@ -364,11 +364,11 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     result->emplace("match_type", table_match_type);
     ctxt->conv->simpleExpressionsOnly = false;
 
-    auto impl = table->properties->getProperty(BMV2::TableAttributes::implementationName);
+    auto impl = table->properties->getProperty("implementation");
     bool simple = handleTableImplementation(impl, key, result, action_profiles, selector_check);
 
     unsigned size = 0;
-    auto sz = table->properties->getProperty(BMV2::TableAttributes::sizeName);
+    auto sz = table->properties->getProperty("size");
     if (sz != nullptr) {
         if (sz->value->is<IR::ExpressionValue>()) {
             auto expr = sz->value->to<IR::ExpressionValue>()->expression;
@@ -386,7 +386,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         size = BMV2::TableAttributes::defaultTableSize;
 
     result->emplace("max_size", size);
-    auto ctrs = table->properties->getProperty(BMV2::TableAttributes::countersName);
+    auto ctrs = table->properties->getProperty("counters");
     if (ctrs != nullptr) {
         // The counters attribute should list the counters of the table, accessed in
         // actions of the table.  We should be checking that this attribute and the
@@ -402,8 +402,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     return result;
                 }
                 auto te = type->to<IR::Type_Extern>();
-                if (te->name != BMV2::TableImplementation::directCounterName &&
-                    te->name != BMV2::TableImplementation::counterName) {
+                if (te->name != "direct_counter" && te->name != "counter") {
                     ::error("%1%: Unexpected type %2% for property", ctrs, type);
                     return result;
                 }
@@ -415,7 +414,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 // code to run, if any?
                 // TODO(jafingerhut):
                 // jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
-                bool direct = te->name == BMV2::TableImplementation::directCounterName;
+                bool direct = te->name == "direct_counter";
                 jctr->emplace("is_direct", direct);
                 jctr->emplace("binding", table->controlPlaneName());
                 ctxt->json->counters->append(jctr);
@@ -445,7 +444,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     }
 
     bool sup_to = false;
-    auto timeout = table->properties->getProperty(BMV2::TableAttributes::supportTimeoutName);
+    auto timeout = table->properties->getProperty("support_timeout");
     if (timeout != nullptr) {
         if (timeout->value->is<IR::ExpressionValue>()) {
             auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
@@ -460,7 +459,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     }
     result->emplace("support_timeout", sup_to);
 
-    auto dm = table->properties->getProperty(BMV2::TableAttributes::metersName);
+    auto dm = table->properties->getProperty("meters");
     if (dm != nullptr) {
         if (dm->value->is<IR::ExpressionValue>()) {
             auto expr = dm->value->to<IR::ExpressionValue>()->expression;
@@ -479,7 +478,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     return result;
                 }
                 auto te = type->to<IR::Type_Extern>();
-                if (te->name != BMV2::TableImplementation::directMeterName) {
+                if (te->name != "direct_meter") {
                     ::error("%1%: Unexpected type %2% for property", dm, type);
                     return result;
                 }
@@ -499,6 +498,21 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         }
     } else {
         result->emplace("direct_meters", Util::JsonValue::null);
+    }
+
+    auto psa_counter = table->properties->getProperty("psa_direct_counter");
+    if (psa_counter != nullptr) {
+
+    }
+
+    auto psa_meter = table->properties->getProperty("psa_direct_meter");
+    if (psa_meter != nullptr) {
+
+    }
+
+    auto psa_implementation = table->properties->getProperty("psa_implementation");
+    if (psa_implementation != nullptr) {
+
     }
 
     auto action_ids = mkArrayField(result, "action_ids");
