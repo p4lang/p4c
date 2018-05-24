@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_JSONOBJECTS_H_
-#define _BACKENDS_BMV2_JSONOBJECTS_H_
+#ifndef BACKENDS_BMV2_COMMON_JSONOBJECTS_H_
+#define BACKENDS_BMV2_COMMON_JSONOBJECTS_H_
 
 #include <map>
 #include "lib/json.h"
@@ -93,4 +93,4 @@ class JsonObjects {
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_JSONOBJECTS_H_ */
+#endif /* BACKENDS_BMV2_COMMON_JSONOBJECTS_H_ */

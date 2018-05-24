@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_HELPERS_H_
-#define _BACKENDS_BMV2_HELPERS_H_
+#ifndef BACKENDS_BMV2_COMMON_HELPERS_H_
+#define BACKENDS_BMV2_COMMON_HELPERS_H_
 
 #include "ir/ir.h"
 #include "lib/cstring.h"
@@ -99,4 +99,4 @@ unsigned nextId(cstring group);
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_HELPERS_H_ */
+#endif /* BACKENDS_BMV2_COMMON_HELPERS_H_ */

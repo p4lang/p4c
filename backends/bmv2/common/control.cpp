@@ -269,7 +269,8 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
         if (backend->getToplevelBlock()->hasValue(decl->getNode())) {
             auto eb = backend->getToplevelBlock()->getValue(decl->getNode());
             BUG_CHECK(eb->is<IR::ExternBlock>(), "Not an extern block?");
-            ExternConverter::cvtExternInstance(ctxt, decl->to<IR::Declaration>(), eb->to<IR::ExternBlock>());
+            ExternConverter::cvtExternInstance(ctxt, decl->to<IR::Declaration>(),
+                eb->to<IR::ExternBlock>());
         }
     } else {
         ::error("%1%: unexpected value for property", propv);
@@ -501,19 +502,13 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     }
 
     auto psa_counter = table->properties->getProperty("psa_direct_counter");
-    if (psa_counter != nullptr) {
-
-    }
+    if (psa_counter != nullptr) { /* TODO */ }
 
     auto psa_meter = table->properties->getProperty("psa_direct_meter");
-    if (psa_meter != nullptr) {
-
-    }
+    if (psa_meter != nullptr) { /* TODO */ }
 
     auto psa_implementation = table->properties->getProperty("psa_implementation");
-    if (psa_implementation != nullptr) {
-
-    }
+    if (psa_implementation != nullptr) { /* TODO */ }
 
     auto action_ids = mkArrayField(result, "action_ids");
     auto actions = mkArrayField(result, "actions");

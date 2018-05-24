@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_OPTIONS_H_
-#define _BACKENDS_BMV2_OPTIONS_H_
+#ifndef BACKENDS_BMV2_COMMON_OPTIONS_H_
+#define BACKENDS_BMV2_COMMON_OPTIONS_H_
 
 #include <getopt.h>
 #include "frontends/common/options.h"
@@ -44,4 +44,4 @@ using BMV2Context = P4CContextWithOptions<BMV2Options>;
 
 };  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_OPTIONS_H_ */
+#endif /* BACKENDS_BMV2_COMMON_OPTIONS_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-void PsaProgramStructure::create(ConversionContext* ctxt, const IR::P4Program* program, cstring scalarsName) {
+void PsaProgramStructure::create(ConversionContext* ctxt) {
     createTypes(ctxt);
     createHeaders(ctxt);
     createExterns();
@@ -303,7 +303,8 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                         return;
                     }
                 }
-                pinfo->header_union_types.emplace(type->getName(), type->to<IR::Type_HeaderUnion>());
+                pinfo->header_union_types.emplace(type->getName(),
+                                                  type->to<IR::Type_HeaderUnion>());
                 addHeaderInstance(type, f->controlPlaneName());
             } else {
                 LOG1("add struct type " << type);
@@ -402,18 +403,19 @@ void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     PassManager simplify = {
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-        //new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        // new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        //new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        // new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
-        new VisitFunctor([this, evaluator, structure]() { toplevel = evaluator->getToplevelBlock(); }),
+        new VisitFunctor([this, evaluator, structure]() {
+            toplevel = evaluator->getToplevelBlock(); }),
     };
     program->apply(simplify);
 
@@ -524,12 +526,11 @@ CONVERT_EXTERN_OBJECT(Register) {
         auto primitive = mkPrimitive("register_read");
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        //FIXME
-        //auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-        //parameters->append(dest);
+        // auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        // parameters->append(dest);
         parameters->append(reg);
-        //auto index = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        //parameters->append(index);
+        // auto index = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        // parameters->append(index);
         return primitive;
     } else if (em->method->name == "write") {
         auto primitive = mkPrimitive("register_write");
@@ -555,11 +556,11 @@ CONVERT_EXTERN_OBJECT(Random) {
     // TODO(jafingerhut):
     // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-    //auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
-    //auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
+    // auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
+    // auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
     params->append(dest);
-    //params->append(lo);
-    //params->append(hi);
+    // params->append(lo);
+    // params->append(hi);
     return primitive;
 }
 

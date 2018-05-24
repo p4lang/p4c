@@ -29,7 +29,8 @@ bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
     auto action_profiles = new Util::JsonArray();
     ctxt->action_profiles = action_profiles;
     ctxt->selector_check = &ssc;
-    ExternConverter::cvtExternInstance(ctxt, block->node->to<IR::Declaration>(), block->to<IR::ExternBlock>());
+    ExternConverter::cvtExternInstance(ctxt, block->node->to<IR::Declaration>(),
+        block->to<IR::ExternBlock>());
     return false;
 }
 

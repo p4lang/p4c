@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_EXPRESSION_H_
-#define _BACKENDS_BMV2_EXPRESSION_H_
+#ifndef BACKENDS_BMV2_COMMON_EXPRESSION_H_
+#define BACKENDS_BMV2_COMMON_EXPRESSION_H_
 
 #include "ir/ir.h"
 #include "lower.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
@@ -127,4 +126,4 @@ class ExpressionConverter : public Inspector {
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_EXPRESSION_H_ */
+#endif /* BACKENDS_BMV2_COMMON_EXPRESSION_H_ */

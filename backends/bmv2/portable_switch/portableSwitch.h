@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_PORTABLESWITCH_H_
-#define _BACKENDS_BMV2_PORTABLESWITCH_H_
+#ifndef BACKENDS_BMV2_PORTABLE_SWITCH_PORTABLESWITCH_H_
+#define BACKENDS_BMV2_PORTABLE_SWITCH_PORTABLESWITCH_H_
 
 #include "ir/ir.h"
 #include "lib/gmputil.h"
@@ -114,14 +114,14 @@ class PsaProgramStructure : public ProgramStructure {
 
     std::vector<const IR::ExternBlock*> globals;
 
-public:
+ public:
     PsaProgramStructure(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
 
-    void create(ConversionContext* ctxt, const IR::P4Program* program, cstring scalarsName);
+    void create(ConversionContext* ctxt);
     void createStructLike(ConversionContext* ctxt, const IR::Type_StructLike* st);
     void createTypes(ConversionContext* ctxt);
     void createHeaders(ConversionContext* ctxt);
@@ -186,31 +186,36 @@ class InspectPsaProgram : public Inspector {
 };
 
 class ConvertPsaToJson : public Inspector {
-public:
+ public:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     const IR::ToplevelBlock *toplevel;
     JsonObjects *json;
     PsaProgramStructure *structure;
 
-    explicit ConvertPsaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel,
-                              JsonObjects *json, PsaProgramStructure *structure)
-        : refMap(refMap), typeMap(typeMap), toplevel(toplevel), json(json), structure(structure) {
-        CHECK_NULL(structure);
-    }
+    ConvertPsaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                     const IR::ToplevelBlock *toplevel,
+                     JsonObjects *json, PsaProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), toplevel(toplevel), json(json),
+          structure(structure) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        CHECK_NULL(toplevel);
+        CHECK_NULL(json);
+        CHECK_NULL(structure); }
 
     void postorder(const IR::P4Program* program) override {
         cstring scalarsName = refMap->newName("scalars");
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
-        structure->create(ctxt, program, scalarsName);
+        structure->create(ctxt);
     }
-
 };
 
 class PortableSwitchBackend : public Backend {
     BMV2Options &options;
+
  public:
     void convert(const IR::ToplevelBlock* tlb) override;
     PortableSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
@@ -233,4 +238,4 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Digest)
 
 }  // namespace BMV2
 
-#endif  /* _BACKENDS_BMV2_PORTABLESWITCH_H_ */
+#endif  /* BACKENDS_BMV2_PORTABLE_SWITCH_PORTABLESWITCH_H_ */

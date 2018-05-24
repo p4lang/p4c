@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_PROGRAMSTRUCTURE_H_
-#define _BACKENDS_BMV2_PROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
+#define BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 
 #include "metermap.h"
 
@@ -26,7 +26,7 @@ using ResourceMap = ordered_map<const IR::Node*, const IR::CompileTimeValue*>;
 // Represents all the compile-time information about a P4-16 program that
 // is common to all bmv2 targets (simple switch and portable switch).
 class ProgramStructure {
-public:
+ public:
     /// Map action to parent control.
     ordered_map<const IR::P4Action *, const IR::P4Control *> actions;
     /// Maps each Parameter of an action to its positional index.
@@ -57,10 +57,11 @@ public:
 };
 
 class DiscoverStructure : public Inspector {
-public:
+ public:
     ProgramStructure *structure;
 
-    explicit DiscoverStructure(ProgramStructure *structure) : structure(structure) { setName("DiscoverStructure"); }
+    explicit DiscoverStructure(ProgramStructure *structure) :
+        structure(structure) { setName("DiscoverStructure"); }
     void postorder(const IR::ParameterList *paramList) override;
     void postorder(const IR::P4Action *action) override;
     void postorder(const IR::Declaration_Variable *decl) override;
@@ -75,10 +76,9 @@ public:
 class BuildResourceMap : public Inspector {
     ResourceMap *resourceMap;
 
-public:
+ public:
     explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {
-        CHECK_NULL(resourceMap);
-    };
+        CHECK_NULL(resourceMap); }
 
     bool preorder(const IR::ControlBlock* control) override {
         resourceMap->emplace(control->container, control);
@@ -133,4 +133,4 @@ public:
 
 }  // namespace BMV2
 
-#endif  /* _BACKENDS_BMV2_PROGRAMSTRUCTURE_H_ */
+#endif  /* BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_ */

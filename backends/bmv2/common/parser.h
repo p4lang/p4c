@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_PARSER_H_
-#define _BACKENDS_BMV2_PARSER_H_
+#ifndef BACKENDS_BMV2_COMMON_PARSER_H_
+#define BACKENDS_BMV2_COMMON_PARSER_H_
 
 #include "ir/ir.h"
 #include "lib/json.h"
@@ -46,7 +46,7 @@ class ParserConverter : public Inspector {
 
  public:
     bool preorder(const IR::P4Parser* p) override;
-    ParserConverter(ConversionContext* ctxt) :
+    explicit ParserConverter(ConversionContext* ctxt) :
         ctxt(ctxt), corelib(P4::P4CoreLibrary::instance) {
         setName("ParserConverter");
     }
@@ -54,4 +54,4 @@ class ParserConverter : public Inspector {
 
 }  // namespace BMV2
 
-#endif  /* _BACKENDS_BMV2_PARSER_H_ */
+#endif  /* BACKENDS_BMV2_COMMON_PARSER_H_ */

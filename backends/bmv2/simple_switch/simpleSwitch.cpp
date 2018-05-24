@@ -880,14 +880,16 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     PassManager simplify = {
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-        new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&structure->non_pipeline_controls)),
+        new P4::SynthesizeActions(refMap, typeMap,
+                                  new SkipControls(&structure->non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&structure->pipeline_controls)),
+        new RemoveComplexExpressions(refMap, typeMap,
+                                     new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,

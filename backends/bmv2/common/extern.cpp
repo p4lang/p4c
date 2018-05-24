@@ -34,36 +34,52 @@ ExternConverter* ExternConverter::get(cstring type) {
     return &defaultCvt;
 }
 
-Util::IJson* ExternConverter::cvtExternObject(ConversionContext* ctxt, const P4::ExternMethod* em,
-                                    const IR::MethodCallExpression* mc, const IR::StatOrDecl* s) {
+Util::IJson*
+ExternConverter::cvtExternObject(ConversionContext* ctxt,
+                                 const P4::ExternMethod* em,
+                                 const IR::MethodCallExpression* mc,
+                                 const IR::StatOrDecl* s) {
     return get(em)->convertExternObject(ctxt, em, mc, s);
 }
 
-Util::IJson* ExternConverter::cvtExternInstance(ConversionContext* ctxt, const IR::Declaration* c,
-                                      const IR::ExternBlock* eb) {
+Util::IJson*
+ExternConverter::cvtExternInstance(ConversionContext* ctxt,
+                                   const IR::Declaration* c,
+                                   const IR::ExternBlock* eb) {
     return get(eb)->convertExternInstance(ctxt, c, eb);
 }
 
-Util::IJson* ExternConverter::cvtExternFunction(ConversionContext* ctxt, const P4::ExternFunction* ef,
-                                      const IR::MethodCallExpression* mc, const IR::StatOrDecl* s) {
+Util::IJson*
+ExternConverter::cvtExternFunction(ConversionContext* ctxt,
+                                   const P4::ExternFunction* ef,
+                                   const IR::MethodCallExpression* mc,
+                                   const IR::StatOrDecl* s) {
     return get(ef)->convertExternFunction(ctxt, ef, mc, s);
 }
 
-Util::IJson* ExternConverter::convertExternObject(ConversionContext* , const P4::ExternMethod* em,
-                                 const IR::MethodCallExpression* , const IR::StatOrDecl* ) {
+Util::IJson*
+ExternConverter::convertExternObject(ConversionContext* ,
+                                     const P4::ExternMethod* em,
+                                     const IR::MethodCallExpression* ,
+                                     const IR::StatOrDecl* ) {
     ::error("Unknown extern method %1% from type %2%",
           em->method->name, em->originalExternType->name);
     return nullptr;
 }
 
-Util::IJson* ExternConverter::convertExternInstance(ConversionContext* , const IR::Declaration* ,
-                                   const IR::ExternBlock* eb) {
+Util::IJson*
+ExternConverter::convertExternInstance(ConversionContext* ,
+                                       const IR::Declaration* ,
+                                       const IR::ExternBlock* eb) {
     ::error("Unknown extern instance %1%", eb->type->name);
     return nullptr;
 }
 
-Util::IJson* ExternConverter::convertExternFunction(ConversionContext* , const P4::ExternFunction* ef,
-                                   const IR::MethodCallExpression* , const IR::StatOrDecl* ) {
+Util::IJson*
+ExternConverter::convertExternFunction(ConversionContext* ,
+                                       const P4::ExternFunction* ef,
+                                       const IR::MethodCallExpression* ,
+                                       const IR::StatOrDecl* ) {
     ::error("Unknown extern function %1%", ef->method->name);
     return nullptr;
 }
@@ -130,7 +146,8 @@ ExternConverter::createFieldList(ConversionContext* ctxt,
 }
 
 cstring
-ExternConverter::createCalculation(ConversionContext* ctxt, cstring algo, const IR::Expression* fields,
+ExternConverter::createCalculation(ConversionContext* ctxt,
+                                   cstring algo, const IR::Expression* fields,
                                    Util::JsonArray* calculations, bool withPayload,
                                    const IR::Node* sourcePositionNode = nullptr) {
     cstring calcName = ctxt->refMap->newName("calc_");

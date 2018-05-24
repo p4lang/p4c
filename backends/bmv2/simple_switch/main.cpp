@@ -87,8 +87,8 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    // default backend is simple switch
-    auto backend = new BMV2::SimpleSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+    auto backend = new BMV2::SimpleSwitchBackend(options, &midEnd.refMap,
+                                                 &midEnd.typeMap, &midEnd.enumMap);
 
     try {
         backend->convert(toplevel);

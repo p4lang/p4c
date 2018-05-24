@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_BACKEND_H_
-#define _BACKENDS_BMV2_BACKEND_H_
+#ifndef BACKENDS_BMV2_COMMON_BACKEND_H_
+#define BACKENDS_BMV2_COMMON_BACKEND_H_
 
 #include "controlFlowGraph.h"
 #include "expression.h"
@@ -40,7 +40,8 @@ limitations under the License.
 namespace BMV2 {
 
 enum gress_t { INGRESS, EGRESS };
-enum block_t { PARSER, PIPELINE, DEPARSER, V1_PARSER, V1_DEPARSER, V1_INGRESS, V1_EGRESS, V1_VERIFY, V1_COMPUTE};
+enum block_t { PARSER, PIPELINE, DEPARSER, V1_PARSER, V1_DEPARSER,
+               V1_INGRESS, V1_EGRESS, V1_VERIFY, V1_COMPUTE};
 
 class ExpressionConverter;
 
@@ -79,7 +80,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     // set of controls where actions are not synthesized
     const std::set<cstring> *skip;
 
-public:
+ public:
     explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
     bool convert(const IR::P4Control* control) const {
         if (skip->find(control->name) != skip->end())
@@ -98,7 +99,7 @@ expression removed.
 class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
-public:
+ public:
     explicit ProcessControls(const std::set<cstring> *process) : process(process) {
         CHECK_NULL(process);
     }
@@ -122,7 +123,7 @@ class RenameUserMetadata : public Transform {
     // and also as a name for the userMetadata type clone.
     cstring namePrefix;
 
-public:
+ public:
     RenameUserMetadata(P4::ReferenceMap* refMap,
                        const IR::Type_Struct* userMetaType, cstring namePrefix):
         refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix)
@@ -190,4 +191,4 @@ public:
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_BACKEND_H_ */
+#endif /* BACKENDS_BMV2_COMMON_BACKEND_H_ */

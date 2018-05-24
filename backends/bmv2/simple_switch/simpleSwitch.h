@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_SIMPLESWITCH_H_
-#define _BACKENDS_BMV2_SIMPLESWITCH_H_
+#ifndef BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_
+#define BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_
 
 #include <algorithm>
 #include <cstring>
@@ -50,10 +50,6 @@ class V1ProgramStructure : public ProgramStructure {
     const IR::P4Control* verify_checksum;
     const IR::P4Control* deparser;
 
-    // ArchInfo* archInfo;
-    // ordered_map<IR::CompileTimeValue*, const IR::Node*> block_to_node;
-    // ordered_map<const IR::Node*, IR::CompileTimeValue*> node_to_block;
-
     // architecture related information
     ordered_map<const IR::Node*, block_t> block_type;
 
@@ -62,6 +58,7 @@ class V1ProgramStructure : public ProgramStructure {
 
 class SimpleSwitchExpressionConverter : public ExpressionConverter {
     V1ProgramStructure* structure;
+
  public:
     SimpleSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
         V1ProgramStructure* structure, cstring scalarsName) :
@@ -118,7 +115,7 @@ class ParseV1Architecture : public Inspector {
     V1ProgramStructure* structure;
     P4V1::V1Model&      v1model;
 
-public:
+ public:
     explicit ParseV1Architecture(V1ProgramStructure* structure) :
         structure(structure), v1model(P4V1::V1Model::instance) { }
     void modelError(const char* format, const IR::Node* node);
@@ -129,7 +126,7 @@ class DiscoverV1Structure : public DiscoverStructure {
     V1ProgramStructure* structure;
 
  public:
-    DiscoverV1Structure(V1ProgramStructure* structure)
+    explicit DiscoverV1Structure(V1ProgramStructure* structure)
         : DiscoverStructure(structure), structure(structure) {
         CHECK_NULL(structure);
         setName("InspectV1Program");
@@ -180,7 +177,8 @@ class SimpleSwitchBackend : public Backend {
     void convert(const IR::ToplevelBlock* tlb) override;
     SimpleSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                         P4::ConvertEnums::EnumMapping* enumMap) :
-        Backend(options, refMap, typeMap, enumMap), options(options), v1model(P4V1::V1Model::instance) { }
+        Backend(options, refMap, typeMap, enumMap), options(options),
+        v1model(P4V1::V1Model::instance) { }
 };
 
 EXTERN_CONVERTER_W_FUNCTION(clone)
@@ -202,4 +200,4 @@ EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(action_selector, P4V1::V1Model, v1model)
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_SIMPLESWITCH_H_ */
+#endif /* BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_ */

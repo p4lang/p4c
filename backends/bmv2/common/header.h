@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_HEADER_H_
-#define _BACKENDS_BMV2_HEADER_H_
+#ifndef BACKENDS_BMV2_COMMON_HEADER_H_
+#define BACKENDS_BMV2_COMMON_HEADER_H_
 
 #include <list>
 #include "ir/ir.h"
@@ -60,4 +60,4 @@ class HeaderConverter : public Inspector {
 
 }  // namespace BMV2
 
-#endif /* _BACKENDS_BMV2_HEADER_H_ */
+#endif /* BACKENDS_BMV2_COMMON_HEADER_H_ */
