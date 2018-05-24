@@ -28,9 +28,8 @@ limitations under the License.
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "midend.h"
-#include "JsonObjects.h"
-#include "simpleSwitch.h"
+#include "backends/bmv2/common/midend.h"
+#include "backends/bmv2/common/JsonObjects.h"
 #include "portableSwitch.h"
 
 int main(int argc, char *const argv[]) {
@@ -88,13 +87,8 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    // default backend is simple switch
-    BMV2::Backend* backend = new BMV2::SimpleSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
-
-    // if arch is psa, use portable switch
-    if (options.arch == "psa") {
-        backend = new BMV2::PortableSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
-    }
+    auto backend = new BMV2::PortableSwitchBackend(options, &midEnd.refMap,
+            &midEnd.typeMap, &midEnd.enumMap);
 
     try {
         backend->convert(toplevel);

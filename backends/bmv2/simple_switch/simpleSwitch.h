@@ -19,13 +19,22 @@ limitations under the License.
 
 #include <algorithm>
 #include <cstring>
+#include "frontends/common/constantFolding.h"
+#include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "midend/convertEnums.h"
-#include "sharedActionSelectorCheck.h"
-#include "backend.h"
-#include "deparser.h"
-#include "extern.h"
-#include "programStructure.h"
+#include "backends/bmv2/common/action.h"
+#include "backends/bmv2/common/backend.h"
+#include "backends/bmv2/common/control.h"
+#include "backends/bmv2/common/deparser.h"
+#include "backends/bmv2/common/extern.h"
+#include "backends/bmv2/common/globals.h"
+#include "backends/bmv2/common/header.h"
+#include "backends/bmv2/common/parser.h"
+#include "backends/bmv2/common/programStructure.h"
+#include "backends/bmv2/common/sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 

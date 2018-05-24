@@ -23,10 +23,6 @@ limitations under the License.
 #include <set>
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "simpleSwitch.h"
-#include "control.h"
-#include "deparser.h"
-#include "globals.h"
-#include "header.h"
 
 using BMV2::mkArrayField;
 using BMV2::mkParameters;

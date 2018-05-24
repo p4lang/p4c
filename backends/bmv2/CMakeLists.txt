@@ -16,71 +16,84 @@
 # compiling for the simple_switch target.
 
 # sources for backend executable
-set (BMV2_SRCS bmv2.cpp)
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SRCS}")
+set (BMV2_SIMPLE_SWITCH_SRCS
+    simple_switch/main.cpp
+    simple_switch/simpleSwitch.cpp
+    simple_switch/simpleSwitch.h
+    )
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SIMPLE_SWITCH_SRCS}")
 
-set (BMV2_BACKEND_SRCS
-  JsonObjects.cpp
-  action.cpp
-  control.cpp
-  controlFlowGraph.cpp
-  deparser.cpp
-  expression.cpp
-  extern.cpp
-  globals.cpp
-  header.cpp
-  helpers.cpp
-  lower.cpp
-  metermap.cpp
-  midend.cpp
-  parser.cpp
-  portableSwitch.cpp
-  programStructure.cpp
-  sharedActionSelectorCheck.cpp
-  simpleSwitch.cpp
+set (BMV2_PORTABLE_SWITCH_SRCS
+    portable_switch/main.cpp
+    portable_switch/portableSwitch.cpp
+    portable_switch/portableSwitch.h
+    )
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PORTABLE_SWITCH_SRCS}")
+
+set (BMV2_BACKEND_COMMON_SRCS
+  common/JsonObjects.cpp
+  common/action.cpp
+  common/control.cpp
+  common/controlFlowGraph.cpp
+  common/deparser.cpp
+  common/expression.cpp
+  common/extern.cpp
+  common/globals.cpp
+  common/header.cpp
+  common/helpers.cpp
+  common/lower.cpp
+  common/metermap.cpp
+  common/midend.cpp
+  common/parser.cpp
+  common/programStructure.cpp
+  common/sharedActionSelectorCheck.cpp
   )
 
-set (BMV2_BACKEND_HDRS
-  JsonObjects.h
-  action.h
-  backend.h
-  control.h
-  controlFlowGraph.h
-  deparser.h
-  expression.h
-  extern.h
-  globals.h
-  header.h
-  helpers.h
-  lower.h
-  metermap.h
-  midend.h
-  options.h
-  parser.h
-  portableSwitch.h
-  programStructure.h
-  sharedActionSelectorCheck.h
-  simpleSwitch.h
+set (BMV2_BACKEND_COMMON_HDRS
+  common/JsonObjects.h
+  common/action.h
+  common/backend.h
+  common/control.h
+  common/controlFlowGraph.h
+  common/deparser.h
+  common/expression.h
+  common/extern.h
+  common/globals.h
+  common/header.h
+  common/helpers.h
+  common/lower.h
+  common/metermap.h
+  common/midend.h
+  common/options.h
+  common/parser.h
+  common/programStructure.h
+  common/sharedActionSelectorCheck.h
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_SRCS};${BMV2_BACKEND_HDRS}")
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_COMMON_SRCS};${BMV2_BACKEND_COMMON_HDRS}")
 
-build_unified(BMV2_BACKEND_SRCS)
-add_library(bmv2backend ${BMV2_BACKEND_SRCS})
+build_unified(BMV2_BACKEND_COMMON_SRCS)
+add_library(bmv2backend ${BMV2_BACKEND_COMMON_SRCS})
 add_dependencies(bmv2backend genIR)
 
-build_unified(BMV2_SRCS)
-add_executable(p4c-bmv2 ${BMV2_SRCS})
-target_link_libraries (p4c-bmv2 bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+build_unified(BMV2_SIMPLE_SWiTCH_SRCS)
+add_executable(p4c-bm-ss ${BMV2_SIMPLE_SWITCH_SRCS})
+target_link_libraries (p4c-bm-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
-install(TARGETS p4c-bmv2 RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+install(TARGETS p4c-bm-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
+build_unified(BMV2_PORTABLE_SWiTCH_SRCS)
+add_executable(p4c-bm-psa ${BMV2_PORTABLE_SWITCH_SRCS})
+target_link_libraries (p4c-bm-psa bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+install(TARGETS p4c-bm-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we
 # remove automake and fix the scripts.
 add_custom_target(linkbmv2
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-bmv2 ${P4C_BINARY_DIR}/p4c-bmv2
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm-ss ${P4C_BINARY_DIR}/p4c-bm-ss
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm-psa ${P4C_BINARY_DIR}/p4c-bm-psa
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   )
