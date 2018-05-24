@@ -44,7 +44,7 @@ control MyIC(
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
 
-    DirectMeter(MeterType_t.PACKETS) meter0;
+    DirectMeter(PSA_MeterType_t.PACKETS) meter0;
 
     table tbl {
         key = {
