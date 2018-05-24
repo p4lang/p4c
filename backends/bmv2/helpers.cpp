@@ -44,12 +44,6 @@ Util::JsonArray* mkParameters(Util::JsonObject* object) {
     return mkArrayField(object, "parameters");
 }
 
-Util::JsonArray* pushNewArray(Util::JsonArray* parent) {
-    auto result = new Util::JsonArray();
-    parent->append(result);
-    return result;
-}
-
 Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo) {
     auto result = new Util::JsonObject();
     result->emplace("op", name);

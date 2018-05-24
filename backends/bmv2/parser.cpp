@@ -20,13 +20,35 @@ limitations under the License.
 
 namespace BMV2 {
 
+cstring ParserConverter::jsonAssignment(const IR::Type* type, bool inParser) {
+    if (!inParser && type->is<IR::Type_Varbits>())
+        return "assign_VL";
+    if (type->is<IR::Type_HeaderUnion>())
+        return "assign_union";
+    if (type->is<IR::Type_Header>())
+        return "assign_header";
+    if (auto ts = type->to<IR::Type_Stack>()) {
+        auto et = ts->elementType;
+        if (et->is<IR::Type_HeaderUnion>())
+            return "assign_union_stack";
+        else
+            return "assign_header_stack";
+    }
+    if (inParser)
+        // Unfortunately set can do some things that assign cannot,
+        // e.g., handle lookahead on the RHS.
+        return "set";
+    else
+        return "assign";
+}
+
 Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         auto type = ctxt->typeMap->getType(assign->left, true);
-        cstring operation = Backend::jsonAssignment(type, true);
+        cstring operation = jsonAssignment(type, true);
         result->emplace("op", operation);
         auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();

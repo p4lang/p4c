@@ -49,20 +49,23 @@ Util::IJson* ExternConverter::cvtExternFunction(ConversionContext* ctxt, const P
     return get(ef)->convertExternFunction(ctxt, ef, mc, s);
 }
 
-Util::IJson* ExternConverter::convertExternObject(ConversionContext* ctxt, const P4::ExternMethod* em,
-                                 const IR::MethodCallExpression* mc, const IR::StatOrDecl* s) {
+Util::IJson* ExternConverter::convertExternObject(ConversionContext* , const P4::ExternMethod* em,
+                                 const IR::MethodCallExpression* , const IR::StatOrDecl* ) {
     ::error("Unknown extern method %1% from type %2%",
           em->method->name, em->originalExternType->name);
+    return nullptr;
 }
 
-Util::IJson* ExternConverter::convertExternInstance(ConversionContext* ctxt, const IR::Declaration* c,
+Util::IJson* ExternConverter::convertExternInstance(ConversionContext* , const IR::Declaration* ,
                                    const IR::ExternBlock* eb) {
     ::error("Unknown extern instance %1%", eb->type->name);
+    return nullptr;
 }
 
-Util::IJson* ExternConverter::convertExternFunction(ConversionContext* ctxt, const P4::ExternFunction* ef,
-                                   const IR::MethodCallExpression* mc, const IR::StatOrDecl* s) {
+Util::IJson* ExternConverter::convertExternFunction(ConversionContext* , const P4::ExternFunction* ef,
+                                   const IR::MethodCallExpression* , const IR::StatOrDecl* ) {
     ::error("Unknown extern function %1%", ef->method->name);
+    return nullptr;
 }
 
 void

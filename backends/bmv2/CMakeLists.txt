@@ -21,7 +21,7 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SRCS}")
 
 set (BMV2_BACKEND_SRCS
   JsonObjects.cpp
-  backend.cpp
+  action.cpp
   control.cpp
   controlFlowGraph.cpp
   deparser.cpp
@@ -42,6 +42,7 @@ set (BMV2_BACKEND_SRCS
 
 set (BMV2_BACKEND_HDRS
   JsonObjects.h
+  action.h
   backend.h
   control.h
   controlFlowGraph.h

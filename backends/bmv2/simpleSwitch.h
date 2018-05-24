@@ -166,9 +166,6 @@ class SimpleSwitchBackend : public Backend {
     void modelError(const char* format, const IR::Node* place) const;
     void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
                          Util::JsonArray* calculations, bool verify);
-    void convertActionBody(ConversionContext* ctxt, const IR::Vector<IR::StatOrDecl>* body,
-                           Util::JsonArray* result);
-    void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray* params);
     void createActions(ConversionContext* ctxt, V1ProgramStructure* structure);
 
     void convert(const IR::ToplevelBlock* tlb) override;

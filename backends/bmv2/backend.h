@@ -65,13 +65,7 @@ class Backend {
         refMap->setIsV1(options.isv1());
         }
     void serialize(std::ostream& out) const { json->toplevel->serialize(out); }
-
     virtual void convert(const IR::ToplevelBlock* block) = 0;
-    /**
-     * Returns the correct operation for performing an assignment in
-     * the BMv2 JSON language depending on the type of data assigned.
-     */
-    static cstring jsonAssignment(const IR::Type* type, bool inParser);
 };
 
 /**

@@ -26,12 +26,13 @@ limitations under the License.
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "helpers.h"
-#include "parser.h"
+#include "action.h"
 #include "control.h"
 #include "deparser.h"
 #include "extern.h"
 #include "header.h"
+#include "helpers.h"
+#include "parser.h"
 #include "programStructure.h"
 
 namespace BMV2 {
@@ -103,14 +104,7 @@ class PsaProgramStructure : public ProgramStructure {
     ordered_map<cstring, const IR::P4Parser*> parsers;
     ordered_map<cstring, const IR::P4ValueSet*> parse_vsets;
     ordered_map<cstring, const IR::P4Control*> deparsers;
-    ordered_map<cstring, const IR::Declaration_Instance*> meter_arrays;
-    ordered_map<cstring, const IR::Declaration_Instance*> counter_arrays;
-    ordered_map<cstring, const IR::Declaration_Instance*> register_arrays;
-    ordered_map<cstring, const IR::P4Action*> actions;
     ordered_map<cstring, const IR::P4Control*> pipelines;
-    // ordered_map<cstring, ???> calculations;  // P4-16 has no field list.
-    ordered_map<cstring, const IR::Declaration_Instance*> checksums;
-    // ordered_map<cstring, ??? > learn_lists;  // P4-16 has no field list;
     ordered_map<cstring, const IR::Declaration_Instance*> extern_instances;
     ordered_map<cstring, cstring> field_aliases;
 
@@ -129,7 +123,7 @@ public:
     void createHeaders(ConversionContext* ctxt);
     void createParsers(ConversionContext* ctxt);
     void createExterns();
-    void createActions();
+    void createActions(ConversionContext* ctxt);
     void createControls(ConversionContext* ctxt);
     void createDeparsers(ConversionContext* ctxt);
     void createGlobals();
@@ -178,19 +172,13 @@ class InspectPsaProgram : public Inspector {
 
     void postorder(const IR::P4Parser *p) override;
     void postorder(const IR::P4Control* c) override;
-    void postorder(const IR::Type_Header* h) override;
-    void postorder(const IR::Type_HeaderUnion* hu) override;
-    void postorder(const IR::Declaration_Variable* var) override;
     void postorder(const IR::Declaration_Instance* di) override;
-    void postorder(const IR::P4Action* act) override;
-    void postorder(const IR::Type_Error* err) override;
 
-    std::set<cstring> visitedHeaders;
     bool isHeaders(const IR::Type_StructLike* st);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
-    void postorder(const IR::Parameter* parameter) override;
+    bool preorder(const IR::Parameter* parameter) override;
 };
 
 class ConvertPsaToJson : public Inspector {
@@ -235,8 +223,8 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Meter)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(DirectMeter)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Register)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Random)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(ActionProfile)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(ActionSelector)
+EXTERN_CONVERTER_W_INSTANCE(ActionProfile)
+EXTERN_CONVERTER_W_INSTANCE(ActionSelector)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Digest)
 
 }  // namespace BMV2
