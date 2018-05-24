@@ -42,6 +42,15 @@ p4c --target bmv2 --arch v1model my-p4-16-prog.p4
 p4c --target bmv2 --arch v1model --std p4-14 my-p4-14-prog.p4
 ```
 
+All of these commands take the `--help` argument to show documentation
+of supported command line options.  `p4c --target-help` shows the
+supported "target, arch" pairs.
+
+```bash
+p4c --help
+p4c --target-help
+```
+
 Auto-translate P4_14 source to P4_16 source:
 
 ```bash
