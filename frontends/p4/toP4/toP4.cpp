@@ -1014,6 +1014,19 @@ bool ToP4::preorder(const IR::Annotation * a) {
         doneVec();
         builder.append(")");
     }
+    if (!a->kv.empty()) {
+        builder.append("(");
+        bool first = true;
+        for (auto kvp : a->kv) {
+            if (!first)
+                builder.append(", ");
+            first = false;
+            builder.append(kvp.first);
+            builder.append("=");
+            visit(kvp.second);
+        }
+        builder.append(")");
+    }
     builder.spc();
     return false;
 }
