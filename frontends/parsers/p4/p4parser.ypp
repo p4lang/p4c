@@ -59,6 +59,11 @@ inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) 
     return out;
 }
 
+struct KV {
+    cstring name;
+    const IR::Expression* expression;
+};
+
 // Bison uses the types you provide to %type to make constructors for the
 // variant type it uses under the hood, but its code generation is a little
 // naive and it always prepends 'const' to the type. This is problematic when
@@ -220,6 +225,8 @@ typedef const IR::Type ConstType;
 %type<IR::Entry*>           entry
 %type<IR::Vector<IR::Entry>*>  entriesList
 %type<IR::MethodCallExpression*>  actionBinding
+%type<IR::NameMap<IR::Expression>*> kvList
+%type<KV*> kvPair
 
 %left COMMA
 %nonassoc QUESTION
@@ -303,6 +310,17 @@ annotations
 annotation
     : "@" name                        { $$ = new IR::Annotation(@1, *$2, {}); }
     | "@" name "(" expressionList ")" { $$ = new IR::Annotation(@1, *$2, *$4); }
+    | "@" name "(" kvList ")"         { $$ = new IR::Annotation(@1, *$2, *$4); }
+    ;
+
+kvList
+    : kvPair                          { $$ = new IR::NameMap<IR::Expression>;
+                                        $$->add($1->name, $1->expression); }
+    | kvList "," kvPair               { $$ = $1; $$->add($3->name, $3->expression); }
+    ;
+
+kvPair
+    : name "=" expression             { $$ = new KV; $$->name = $1->name; $$->expression = $3; }
     ;
 
 parameterList
