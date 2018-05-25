@@ -42,6 +42,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/diagnostics.cpp
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
+  gtest/equiv_test.cpp
   gtest/exception_test.cpp
   gtest/expr_uses_test.cpp
   gtest/format_test.cpp

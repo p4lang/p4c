@@ -337,6 +337,11 @@ class MethodCallExpression : Expression {
     MethodCallExpression(Util::SourceInfo si, Expression m,
                          const std::initializer_list<Argument> &a)
     : Expression(si), method(m), arguments(new Vector<Argument>(a)) {}
+    MethodCallExpression(Expression m, const std::initializer_list<const Expression *> &a)
+    : method(m), arguments(nullptr)  {
+        auto arguments = new Vector<Argument>;
+        for (auto arg : a) arguments->push_back(new Argument(arg));
+        this->arguments = arguments; }
 }
 
 class ConstructorCallExpression : Expression {
