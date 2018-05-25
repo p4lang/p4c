@@ -47,31 +47,10 @@ class PortableSwitchExpressionConverter : public ExpressionConverter {
                                       ProgramStructure* structure, cstring scalarsName) :
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
-    Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
+    Util::IJson* convertParam(UNUSED const IR::Parameter* param, cstring fieldName) override {
         LOG3("convert " << fieldName);
         return nullptr;
     }
-};
-
-// helper class to collect information to Json
-struct DeparserInfo {
-    cstring name;
-    std::vector<IR::Declaration_Variable> header_instances;
-};
-
-struct PipelineInfo {
-    cstring name;
-    cstring init_table;
-    std::vector<const IR::Declaration_Instance *> action_profiles;
-    std::vector<const IR::P4Table *> tables;
-    std::vector<const IR::Node *> conditionals;
-    std::vector<const IR::MethodCallStatement *> action_calls;
-};
-
-struct ParserInfo {
-    cstring name;
-    cstring init_state;
-    std::vector<const IR::ParserState*> parse_states;
 };
 
 class PsaProgramStructure : public ProgramStructure {
@@ -86,12 +65,6 @@ class PsaProgramStructure : public ProgramStructure {
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
     unsigned                            bool_width = 1;
-
-    // used to stored information extracted from IR objects before
-    // converting to json
-    std::vector<DeparserInfo *> deparser_info;
-    std::vector<PipelineInfo *> pipeline_info;
-    std::vector<ParserInfo *> parser_info;
 
     // architecture related information
     ordered_map<const IR::Node*, std::pair<gress_t, block_t>> block_type;
@@ -204,7 +177,7 @@ class ConvertPsaToJson : public Inspector {
         CHECK_NULL(json);
         CHECK_NULL(structure); }
 
-    void postorder(const IR::P4Program* program) override {
+    void postorder(UNUSED const IR::P4Program* program) override {
         cstring scalarsName = refMap->newName("scalars");
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);

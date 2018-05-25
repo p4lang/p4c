@@ -108,6 +108,7 @@ void PsaProgramStructure::createTypes(ConversionContext* ctxt) {
         }
         ctxt->json->add_union_type(st->name, fields);
     }
+    /* TODO */
     // add errors to json
     // add enums to json
 }
@@ -121,9 +122,10 @@ void PsaProgramStructure::createHeaders(ConversionContext* ctxt) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
         ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
     }
-    for (auto kv : header_stacks) {
-        // json->add_header_stack(stack_type, stack_name, stack_size, ids);
-    }
+    /* TODO */
+    // for (auto kv : header_stacks) {
+    //     json->add_header_stack(stack_type, stack_name, stack_size, ids);
+    // }
     for (auto kv : header_unions) {
         auto header_name = kv.first;
         auto header_type = kv.second->to<IR::Type_StructLike>()->controlPlaneName();
@@ -150,6 +152,7 @@ void PsaProgramStructure::createParsers(ConversionContext* ctxt) {
 }
 
 void PsaProgramStructure::createExterns() {
+    /* TODO */
     // add parse_vsets to json
     // add meter_arrays to json
     // add counter_arrays to json
@@ -187,9 +190,10 @@ void PsaProgramStructure::createDeparsers(ConversionContext* ctxt) {
 }
 
 void PsaProgramStructure::createGlobals() {
-    for (auto e : globals) {
-        // convertExternInstances(e->node->to<IR::Declaration>(), e->to<IR::ExternBlock>());
-    }
+    /* TODO */
+    // for (auto e : globals) {
+    //     convertExternInstances(e->node->to<IR::Declaration>(), e->to<IR::ExternBlock>());
+    // }
 }
 
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
@@ -313,7 +317,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
             }
         } else if (ft->is<IR::Type_Stack>()) {
             auto stack = ft->to<IR::Type_Stack>();
-            auto stack_name = f->controlPlaneName();
+            // auto stack_name = f->controlPlaneName();
             auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
@@ -323,7 +327,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
             std::vector<unsigned> ids;
             for (unsigned i = 0; i < stack_size; i++) {
                 cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
-                // FIXME:
+                /* TODO */
                 // auto id = json->add_header(stack_type, hdrName);
                 addHeaderInstance(stack_type, hdrName);
                 // ids.push_back(id);
@@ -401,6 +405,7 @@ void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     PassManager simplify = {
+        /* TODO */
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         // new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
@@ -526,6 +531,7 @@ CONVERT_EXTERN_OBJECT(Register) {
         auto primitive = mkPrimitive("register_read");
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+        /* TODO */
         // auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
         // parameters->append(dest);
         parameters->append(reg);
@@ -556,6 +562,7 @@ CONVERT_EXTERN_OBJECT(Random) {
     // TODO(jafingerhut):
     // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+    /* TODO */
     // auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
     // auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
     params->append(dest);
@@ -598,15 +605,9 @@ CONVERT_EXTERN_OBJECT(Digest) {
     return primitive;
 }
 
-CONVERT_EXTERN_INSTANCE(Hash) {
-    // ctxt->json->
-}
-CONVERT_EXTERN_INSTANCE(Checksum) {
-    // ctxt->json
-}
-CONVERT_EXTERN_INSTANCE(InternetChecksum) {
-    // ctxt->json
-}
+CONVERT_EXTERN_INSTANCE(Hash) { /* TODO */ }
+CONVERT_EXTERN_INSTANCE(Checksum) { /* TODO */ }
+CONVERT_EXTERN_INSTANCE(InternetChecksum) { /* TODO */ }
 CONVERT_EXTERN_INSTANCE(Counter) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
@@ -618,7 +619,7 @@ CONVERT_EXTERN_INSTANCE(Counter) {
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
-        return nullptr;
+        return;
     }
     jctr->emplace("size", sz->to<IR::Constant>()->value);
     jctr->emplace("is_direct", false);
@@ -652,7 +653,7 @@ CONVERT_EXTERN_INSTANCE(Meter) {
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
-        return nullptr;
+        return;
     }
     jmtr->emplace("size", sz->to<IR::Constant>()->value);
     jmtr->emplace("rate_count", 2);
@@ -660,7 +661,7 @@ CONVERT_EXTERN_INSTANCE(Meter) {
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
         modelError("%1%: expected a member", mkind->getNode());
-        return nullptr;
+        return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
     cstring type = "?";
@@ -692,7 +693,7 @@ CONVERT_EXTERN_INSTANCE(DirectMeter) {
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
         modelError("%1%: expected a member", mkind->getNode());
-        return nullptr;
+        return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
     cstring type = "?";
@@ -702,7 +703,7 @@ CONVERT_EXTERN_INSTANCE(DirectMeter) {
         type = "bytes";
     } else {
         modelError("%1%: unexpected meter type", mkind->getNode());
-        return nullptr;
+        return;
     }
     jmtr->emplace("type", type);
     jmtr->emplace("size", info->tableSize);
@@ -724,43 +725,41 @@ CONVERT_EXTERN_INSTANCE(Register) {
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
-        return nullptr;
+        return;
     }
     if (sz->to<IR::Constant>()->value == 0)
         error("%1%: direct registers are not supported in bmv2", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
-        return nullptr;
+        return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
     if (st->arguments->size() != 1) {
         modelError("%1%: expected 1 type argument", st);
-        return nullptr;
+        return;
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
         ::error("%1%: Only registers with bit or int types are currently supported", eb);
-        return nullptr;
+        return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
         ::error("%1%: unknown width", st->arguments->at(0));
-        return nullptr;
+        return;
     }
     jreg->emplace("bitwidth", width);
     ctxt->json->register_arrays->append(jreg);
 }
-CONVERT_EXTERN_INSTANCE(Random) {
-    // ctxt->json->
-}
+CONVERT_EXTERN_INSTANCE(Random) { /* TODO */ }
 CONVERT_EXTERN_INSTANCE(ActionProfile) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name))
-        return nullptr;
+        return;
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
@@ -780,7 +779,7 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
     // Might call this multiple times if the selector/profile is used more than
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name))
-        return nullptr;
+        return;
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
@@ -797,7 +796,7 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
 
     if (!hash->is<IR::Declaration_ID>()) {
         modelError("%1%: expected a member", hash->getNode());
-        return nullptr;
+        return;
     }
     auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
     selector->emplace("algo", algo);
@@ -808,7 +807,7 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
         // input and therefore cannot include it in the JSON
         ::warning("Action selector '%1%' is never referenced by a table "
                   "and cannot be included in bmv2 JSON", c);
-        return nullptr;
+        return;
     }
     auto j_input = mkArrayField(selector, "input");
     for (auto expr : *input) {
@@ -819,8 +818,6 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
 
     ctxt->action_profiles->append(action_profile);
 }
-CONVERT_EXTERN_INSTANCE(Digest) {
-    // ctxt->json
-}
+CONVERT_EXTERN_INSTANCE(Digest) { /* TODO */ }
 
 }  // namespace BMV2

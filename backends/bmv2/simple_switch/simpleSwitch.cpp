@@ -387,7 +387,7 @@ CONVERT_EXTERN_INSTANCE(counter) {
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
-        return nullptr;
+        return;
     }
     jctr->emplace("size", sz->to<IR::Constant>()->value);
     jctr->emplace("is_direct", false);
@@ -425,7 +425,7 @@ CONVERT_EXTERN_INSTANCE(meter) {
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
-        return nullptr;
+        return;
     }
     jmtr->emplace("size", sz->to<IR::Constant>()->value);
     jmtr->emplace("rate_count", 2);
@@ -433,7 +433,7 @@ CONVERT_EXTERN_INSTANCE(meter) {
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
         modelError("%1%: expected a member", mkind->getNode());
-        return nullptr;
+        return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
     cstring type = "?";
@@ -491,29 +491,29 @@ CONVERT_EXTERN_INSTANCE(register) {
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
-        return nullptr;
+        return;
     }
     if (sz->to<IR::Constant>()->value == 0)
         error("%1%: direct registers are not supported in bmv2", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
-        return nullptr;
+        return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
     if (st->arguments->size() != 1) {
         modelError("%1%: expected 1 type argument", st);
-        return nullptr;
+        return;
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
         ::error("%1%: Only registers with bit or int types are currently supported", eb);
-        return nullptr;
+        return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
         ::error("%1%: unknown width", st->arguments->at(0));
-        return nullptr;
+        return;
     }
     jreg->emplace("bitwidth", width);
     ctxt->json->register_arrays->append(jreg);
@@ -574,7 +574,7 @@ CONVERT_EXTERN_INSTANCE(direct_meter) {
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
         modelError("%1%: expected a member", mkind->getNode());
-        return nullptr;
+        return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
     cstring type = "?";
@@ -584,7 +584,7 @@ CONVERT_EXTERN_INSTANCE(direct_meter) {
         type = "bytes";
     } else {
         modelError("%1%: unexpected meter type", mkind->getNode());
-        return nullptr;
+        return;
     }
     jmtr->emplace("type", type);
     jmtr->emplace("size", info->tableSize);
@@ -601,7 +601,7 @@ CONVERT_EXTERN_INSTANCE(action_profile) {
     // Might call this multiple times if the selector/profile is used more than
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name))
-        return nullptr;
+        return;
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
@@ -625,7 +625,7 @@ CONVERT_EXTERN_INSTANCE(action_profile) {
             v1model.action_selector.algorithmParam.name);
         if (!hash->is<IR::Declaration_ID>()) {
             modelError("%1%: expected a member", hash->getNode());
-            return nullptr;
+            return;
         }
         auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
@@ -636,7 +636,7 @@ CONVERT_EXTERN_INSTANCE(action_profile) {
             // input and therefore cannot include it in the JSON
             ::warning("Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
-            return nullptr;
+            return;
         }
         auto j_input = mkArrayField(selector, "input");
         for (auto expr : *input) {
@@ -656,7 +656,7 @@ CONVERT_EXTERN_INSTANCE(action_selector) {
     // Might call this multiple times if the selector/profile is used more than
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name))
-        return nullptr;
+        return;
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
@@ -680,7 +680,7 @@ CONVERT_EXTERN_INSTANCE(action_selector) {
             v1model.action_selector.algorithmParam.name);
         if (!hash->is<IR::Declaration_ID>()) {
             modelError("%1%: expected a member", hash->getNode());
-            return nullptr;
+            return;
         }
         auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
@@ -691,7 +691,7 @@ CONVERT_EXTERN_INSTANCE(action_selector) {
             // input and therefore cannot include it in the JSON
             ::warning("Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
-            return nullptr;
+            return;
         }
         auto j_input = mkArrayField(selector, "input");
         for (auto expr : *input) {

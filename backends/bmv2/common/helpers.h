@@ -30,6 +30,10 @@ limitations under the License.
 
 namespace BMV2 {
 
+#ifndef UNUSED
+#   define UNUSED __attribute__((__unused__))
+#endif
+
 /// constant used in bmv2 backend code generation
 class TableImplementation {
  public:

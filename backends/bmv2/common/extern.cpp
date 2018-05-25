@@ -42,11 +42,11 @@ ExternConverter::cvtExternObject(ConversionContext* ctxt,
     return get(em)->convertExternObject(ctxt, em, mc, s);
 }
 
-Util::IJson*
+void
 ExternConverter::cvtExternInstance(ConversionContext* ctxt,
                                    const IR::Declaration* c,
                                    const IR::ExternBlock* eb) {
-    return get(eb)->convertExternInstance(ctxt, c, eb);
+    get(eb)->convertExternInstance(ctxt, c, eb);
 }
 
 Util::IJson*
@@ -67,12 +67,11 @@ ExternConverter::convertExternObject(ConversionContext* ,
     return nullptr;
 }
 
-Util::IJson*
+void
 ExternConverter::convertExternInstance(ConversionContext* ,
                                        const IR::Declaration* ,
                                        const IR::ExternBlock* eb) {
     ::error("Unknown extern instance %1%", eb->type->name);
-    return nullptr;
 }
 
 Util::IJson*
