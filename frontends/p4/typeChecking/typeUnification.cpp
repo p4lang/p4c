@@ -19,10 +19,12 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 
 namespace P4 {
-bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
-                                     const IR::Type_MethodBase* dest,
-                                     const IR::Type_MethodCall* src,
-                                     bool reportErrors) {
+
+/// Unifies a call with a prototype.
+bool TypeUnification::unifyCall(const IR::Node* errorPosition,
+                                const IR::Type_MethodBase* dest,
+                                const IR::Type_MethodCall* src,
+                                bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying function " << dest << " with caller " << src);
@@ -123,7 +125,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
 
     // Check remaining parameters: they must be all optional
     for (auto p : left) {
-        bool opt = p.second->getAnnotation("optional") != nullptr;
+        bool opt = p.second->isOptional();
         if (opt) continue;
         if (reportErrors)
             ::error("%1%: No argument for parameter %2%", errorPosition, p.second);
@@ -160,7 +162,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     auto sit = src->parameters->parameters.begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
         if (sit == src->parameters->parameters.end()) {
-            if (dit->getAnnotation("optional"))
+            if (dit->isOptional())
                 continue;
             if (reportErrors)
                 ::error("%1%: Cannot unify functions with different number of arguments: "
@@ -177,7 +179,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         ++sit;
     }
     while (sit != src->parameters->parameters.end()) {
-        if ((*sit)->getAnnotation("optional")) {
+        if ((*sit)->isOptional()) {
             ++sit;
             continue; }
         if (reportErrors)
@@ -269,7 +271,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         auto destt = dest->to<IR::Type_MethodBase>();
         auto srct = src->to<IR::Type_MethodCall>();
         if (srct != nullptr)
-            return unifyFunctions(errorPosition, destt, srct, reportErrors);
+            return unifyCall(errorPosition, destt, srct, reportErrors);
         auto srcf = src->to<IR::Type_MethodBase>();
         if (srcf != nullptr)
             return unifyFunctions(errorPosition, destt, srcf, reportErrors);

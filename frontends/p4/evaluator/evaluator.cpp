@@ -120,8 +120,7 @@ Evaluator::evaluateArguments(
     for (auto p : parameters->parameters) {
         auto arg = substitution.lookup(p);
         if (arg == nullptr) {
-            BUG_CHECK(p->getAnnotations()->getSingle("optional") != nullptr,
-                      "Missing parameter %1%", p);
+            BUG_CHECK(p->isOptional(), "Missing parameter %1%", p);
             values->push_back(nullptr);
             continue;
         }

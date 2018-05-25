@@ -22,6 +22,8 @@ limitations under the License.
 namespace P4 {
 
 /// A method call must have either all or none of the arguments named.
+/// We also check that no argument appears twice.
+/// We also check that no optional parameter has a default value.
 class CheckNamedArgs : public Inspector {
  public:
     CheckNamedArgs() {
@@ -33,6 +35,7 @@ class CheckNamedArgs : public Inspector {
     { return checkArguments(call->arguments); }
     bool preorder(const IR::Declaration_Instance* call) override
     { return checkArguments(call->arguments); }
+    bool preorder(const IR::Parameter* parameter) override;
 };
 
 }  // namespace P4

@@ -781,7 +781,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
-            BUG_CHECK(pi->getAnnotation("optional"), "Missing nonoptional arg %s", pi);
+            BUG_CHECK(pi->isOptional(), "Missing nonoptional arg %s", pi);
             break; }
         auto arg = arguments->at(i++);
         if (!isCompileTimeConstant(arg->expression))

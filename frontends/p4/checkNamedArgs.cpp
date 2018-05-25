@@ -44,4 +44,14 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument>* arguments) {
     return true;
 }
 
+bool CheckNamedArgs::preorder(const IR::Parameter* parameter) {
+    if (parameter->defaultValue != nullptr) {
+        if (parameter->isOptional())
+            ::error("%1%: optional parameters cannot have default values", parameter);
+        if (parameter->hasOut())
+            ::error("%1%: out parameters cannot have default values", parameter);
+    }
+    return true;
+}
+
 }  // namespace P4
