@@ -302,69 +302,8 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     return postorder(as);
 }
 
-/* Function to check if two expressions are equivalent -
- * used to remove no-op assignments.
- * FIXME -- This function only covers a limited subset of expressions,
- * but will not output true for expressions which are not equivalent.
- * Proper deep comparisons may be required */
-bool DoLocalCopyPropagation::equiv(const IR::Expression *left, const IR::Expression *right) {
-    // Compare names of variables (at this pass, all names are unique)
-    auto pl = left->to<IR::PathExpression>();
-    auto pr = right->to<IR::PathExpression>();
-    if (pl && pr) {
-        return pl->path->name == pr->path->name &&
-        pl->path->absolute == pr->path->absolute;
-    }
-    auto al = left->to<IR::ArrayIndex>();
-    auto ar = right->to<IR::ArrayIndex>();
-    if (al && ar) {
-        return equiv(al->left, ar->left) && equiv(al->right, ar->right);
-    }
-    auto tl = left->to<IR::Operation_Ternary>();
-    auto tr = right->to<IR::Operation_Ternary>();
-    if (tl && tr) {
-        bool check = equiv(tl->e0, tr->e0) && equiv(tl->e1, tr->e1) && equiv(tl->e2, tr->e2) &&
-        typeid(*tl) == typeid(*tr);
-        return check;
-    }
-
-    // Compare binary operations (array indices)
-    auto bl = left->to<IR::Operation_Binary>();
-    auto br = right->to<IR::Operation_Binary>();
-    if (bl && br) {
-        return equiv(bl->left, br->left) && equiv(bl->right, br->right) &&
-        typeid(*bl) == typeid(*br);
-    }
-    // Compare packet header/metadata fields
-    auto ml = left->to<IR::Member>();
-    auto mr = right->to<IR::Member>();
-    if (ml && mr) {
-        return ml->member == mr->member && equiv(ml->expr, mr->expr);
-    }
-    // Compare unary operations (can be used inside array indices)
-    auto ul = left->to<IR::Operation_Unary>();
-    auto ur = right->to<IR::Operation_Unary>();
-    if (ul && ur) {
-        return equiv(ul->expr, ur->expr) &&
-        typeid(*ul) == typeid(*ur);
-    }
-
-    // Compare value and base of the constants, but do not include the type
-    auto cl = left->to<IR::Constant>();
-    auto cr = right->to<IR::Constant>();
-    if (cl && cr) {
-        return cl->base == cr->base && cl->value == cr->value &&
-        typeid(*cl) == typeid(*cr);
-    }
-
-    // Compare literals (strings, booleans and integers)
-    if (*left == *right)
-      return true;
-    return false;
-}
-
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
-    if (equiv(as->left, as->right)) {
+    if (as->left->equiv(*as->right)) {
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
     // FIXME -- if as->right is an uninitialized value, we could legally eliminate this
@@ -560,7 +499,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
         forOverlapAvail(key, [key, tbl, this](VarInfo *var) {
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
-                    (!tbl->key_remap.count(key) || !equiv(tbl->key_remap.at(key), var->val))) {
+                    (!tbl->key_remap.count(key) || !tbl->key_remap.at(key)->equiv(*var->val))) {
                     /* FIXME -- need deep expr comparison here, not shallow */
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(key);
