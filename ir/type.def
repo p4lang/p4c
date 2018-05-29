@@ -104,8 +104,12 @@ class Parameter : Declaration, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Direction           direction;
     Type                type;
+    optional NullOK Expression defaultValue;
     Annotations getAnnotations() const override { return annotations; }
-    bool hasOut() const { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
+    bool hasOut() const
+    { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
+    bool isOptional() const {
+        return getAnnotation(Annotation::optionalAnnotation) != nullptr; }
     dbprint { out << annotations << direction << ' ' << type << ' ' << name; }
 }
 
@@ -459,6 +463,7 @@ class ArgumentInfo {
     bool leftValue;
     bool compileTimeConstant;
     Type type;
+    ID   name;  // only present if using named arguments
 #nodbprint
 }
 
@@ -510,6 +515,8 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnn
             ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     Method lookupMethod(cstring name, int argCount) const;
+    Method lookupConstructor(int argCount) const
+    { return lookupMethod(name.name, argCount); }
     validate{ methods.check_null(); }
     Annotations getAnnotations() const override { return annotations; }
 }

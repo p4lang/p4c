@@ -97,7 +97,8 @@ class BackendDriver:
         # set debug info
         if opts.debug_info:
             for c in self._commands:
-                if c != 'none': self.add_command_option(c, "-g")
+                if c == 'assembler' or c == 'compiler' or c == 'linker':
+                    self.add_command_option(c, "-g")
 
         # set assembler options
         if 'assembler' in self._commands:

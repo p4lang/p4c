@@ -149,33 +149,35 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     TypeVariableSubstitution tvs;  // empty
 
     std::map<const IR::Parameter*, cstring> paramRename;
+    ParameterSubstitution substitution;
+    substitution.populate(callee->parameters, statement->methodCall->arguments);
 
     // evaluate in and inout parameters in order
-    auto it = statement->methodCall->arguments->begin();
     for (auto param : callee->parameters->parameters) {
-        auto initializer = (*it)->expression;
+        auto argument = substitution.lookup(param);
         cstring newName = refMap->newName(param->name);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations,
-                                                        param->type, initializer);
+                                                        param->type, argument->expression);
             body.push_back(vardecl);
-            subst.add(param, new IR::PathExpression(newName));
+            subst.add(param, new IR::Argument(
+                argument->srcInfo, argument->name, new IR::PathExpression(newName)));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
-            subst.add(param, initializer);
+            subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
             auto vardecl = new IR::Declaration_Variable(newName,
                                                         param->annotations, param->type);
-            subst.add(param, new IR::PathExpression(newName));
+            subst.add(param, new IR::Argument(
+                argument->srcInfo, argument->name, new IR::PathExpression(newName)));
             body.push_back(vardecl);
         }
-        ++it;
     }
 
-    P4::SubstituteParameters sp(refMap, &subst, &tvs);
+    SubstituteParameters sp(refMap, &subst, &tvs);
     auto clone = callee->apply(sp);
     if (::errorCount() > 0)
         return statement;
@@ -185,16 +187,14 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     body.append(actclone->body->components);
 
     // copy out and inout parameters
-    it = statement->methodCall->arguments->begin();
     for (auto param : callee->parameters->parameters) {
-        auto left = (*it)->expression;
+        auto left = substitution.lookup(param);
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(left, right);
+            auto copyout = new IR::AssignmentStatement(left->expression, right);
             body.push_back(copyout);
         }
-        ++it;
     }
 
     auto annotations = callee->annotations->where(

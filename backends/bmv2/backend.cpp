@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
+#include "midend/orderArguments.h"
 #include "midend/removeLeftSlices.h"
 #include "lower.h"
 #include "header.h"
@@ -237,6 +238,7 @@ Backend::process(const IR::ToplevelBlock* tlb, BMV2Options& options) {
     addPasses({
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
+        new P4::OrderArguments(refMap, typeMap),
         new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),

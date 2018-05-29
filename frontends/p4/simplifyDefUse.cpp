@@ -386,7 +386,7 @@ class FindUninitialized : public Inspector {
             (void)callee->apply(fu);
         }
 
-        for (auto p : *mcd.substitution.getParameters()) {
+        for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
             auto expr = mcd.substitution.lookup(p);
             if (p->direction == IR::Direction::Out) {
                 // out parameters are not read; they behave as if they are on

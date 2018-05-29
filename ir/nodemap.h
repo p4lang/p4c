@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -72,6 +72,16 @@ class NodeMap : public Node {
     IRNODE_SUBCLASS(NodeMap)
     bool operator==(const Node &a) const override { return a == *this; }
     bool operator==(const NodeMap &a) const { return symbols == a.symbols; }
+    bool equiv(const Node &a_) const override {
+        if (static_cast<const Node *>(this) == &a_) return true;
+        if (typeid(*this) != typeid(a_)) return false;
+        auto &a = static_cast<const NodeMap<KEY, VALUE, MAP, COMP, ALLOC> &>(a_);
+        if (size() != a.size()) return false;
+        auto it = a.begin();
+        for (auto &el : *this)
+            if (el.first != it->first || !el.second->equiv(*(it++)->second))
+                return false;
+        return true; }
     cstring node_type_name() const override {
         return "NodeMap<" + KEY::static_type_name() + "," + VALUE::static_type_name() + ">"; }
     static cstring static_type_name() {

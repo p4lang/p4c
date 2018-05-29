@@ -19,10 +19,12 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 
 namespace P4 {
-bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
-                                     const IR::Type_MethodBase* dest,
-                                     const IR::Type_MethodCall* src,
-                                     bool reportErrors) {
+
+/// Unifies a call with a prototype.
+bool TypeUnification::unifyCall(const IR::Node* errorPosition,
+                                const IR::Type_MethodBase* dest,
+                                const IR::Type_MethodCall* src,
+                                bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying function " << dest << " with caller " << src);
@@ -60,46 +62,75 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         return false;
     }
 
-    auto sit = src->arguments->begin();
-    for (auto dit : *dest->parameters->getEnumerator()) {
-        bool optarg = dit->getAnnotation("optional") != nullptr;
-        if (sit == src->arguments->end()) {
-            if (optarg) continue;
-            if (reportErrors)
-                ::error("%1%: Not enough arguments for call", errorPosition);
-            return false; }
-        auto arg = (*sit);
-        if (arg->type->is<IR::Type_Dontcare>() && dit->direction != IR::Direction::Out) {
+    auto paramIt = dest->parameters->begin();
+    // keep track of parameters that have not been matched yet
+    std::map<cstring, const IR::Parameter*> left;
+    for (auto p : dest->parameters->parameters)
+        left.emplace(p->name, p);
+
+    for (auto arg : *src->arguments) {
+        cstring argName = arg->name.name;
+        bool named = !argName.isNullOrEmpty();
+        const IR::Parameter* param;
+
+        if (named) {
+            param = dest->parameters->getParameter(argName);
+            if (param == nullptr) {
+                if (reportErrors)
+                    ::error("%1%: No parameter named %2%", errorPosition, arg->name);
+                return false;
+            }
+        } else {
+            if (paramIt == dest->parameters->end()) {
+                if (reportErrors)
+                    ::error("%1%: Too many arguments for call", errorPosition);
+                return false;
+            }
+            param = *paramIt;
+        }
+
+        auto leftIt = left.find(param->name.name);
+        // This shold have been checked by the CheckNamedArgs pass.
+        BUG_CHECK(leftIt != left.end(), "%1%: Duplicate argument name?", param->name);
+        left.erase(leftIt);
+
+        if (arg->type->is<IR::Type_Dontcare>() && param->direction != IR::Direction::Out) {
             if (reportErrors)
                 ::error("%1%: don't care argument only allowed for out parameters", arg->srcInfo);
             return false;
         }
-        if ((dit->direction == IR::Direction::Out || dit->direction == IR::Direction::InOut) &&
+        if ((param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
-            if (optarg) continue;
             if (reportErrors)
-                ::error("%1%: Read-only value used for out/inout parameter %2%", arg->srcInfo, dit);
+                ::error("%1%: Read-only value used for out/inout parameter %2%",
+                        arg->srcInfo, param);
             return false;
-        } else if (dit->direction == IR::Direction::None && !arg->compileTimeConstant) {
-            if (optarg) continue;
+        } else if (param->direction == IR::Direction::None && !arg->compileTimeConstant) {
             if (reportErrors)
-                ::error("%1%: not a compile-time constant when binding to %2%", arg->srcInfo, dit);
+                ::error("%1%: not a compile-time constant when binding to %2%",
+                        arg->srcInfo, param);
             return false;
         }
 
-        if (dit->direction != IR::Direction::None && dit->type->is<IR::Type_Extern>()) {
+        if (param->direction != IR::Direction::None && param->type->is<IR::Type_Extern>()) {
             if (optarg) continue;
-            ::error("%1%: extern values cannot be passed in/out/inout", dit);
+            ::error("%1%: extern values cannot be passed in/out/inout", param);
             return false;
         }
 
-        constraints->addEqualityConstraint(dit->type, arg->type);
-        ++sit;
+        constraints->addEqualityConstraint(param->type, arg->type);
+        if (!named)
+            ++paramIt;
     }
-    if (sit != src->arguments->end()) {
+
+    // Check remaining parameters: they must be all optional
+    for (auto p : left) {
+        bool opt = p.second->isOptional();
+        if (opt) continue;
         if (reportErrors)
-            ::error("%1%: Too many arguments for call", errorPosition);
-        return false; }
+            ::error("%1%: No argument for parameter %2%", errorPosition, p.second);
+        return false;
+    }
 
     return true;
 }
@@ -131,7 +162,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     auto sit = src->parameters->parameters.begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
         if (sit == src->parameters->parameters.end()) {
-            if (dit->getAnnotation("optional"))
+            if (dit->isOptional())
                 continue;
             if (reportErrors)
                 ::error("%1%: Cannot unify functions with different number of arguments: "
@@ -148,7 +179,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         ++sit;
     }
     while (sit != src->parameters->parameters.end()) {
-        if ((*sit)->getAnnotation("optional")) {
+        if ((*sit)->isOptional()) {
             ++sit;
             continue; }
         if (reportErrors)
@@ -240,7 +271,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         auto destt = dest->to<IR::Type_MethodBase>();
         auto srct = src->to<IR::Type_MethodCall>();
         if (srct != nullptr)
-            return unifyFunctions(errorPosition, destt, srct, reportErrors);
+            return unifyCall(errorPosition, destt, srct, reportErrors);
         auto srcf = src->to<IR::Type_MethodBase>();
         if (srcf != nullptr)
             return unifyFunctions(errorPosition, destt, srcf, reportErrors);

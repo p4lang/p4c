@@ -79,6 +79,9 @@ const IR::Argument* SpecializationMap::convertArgument(
 void SpecializationMap::addSpecialization(
     const IR::ConstructorCallExpression* invocation, const IR::IContainer* cont,
     const IR::Node* insertion) {
+    LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode())
+         << " " << cont->getNode() << " inserted after" << insertion);
+
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
@@ -98,6 +101,9 @@ void SpecializationMap::addSpecialization(
 void SpecializationMap::addSpecialization(
     const IR::Declaration_Instance* invocation, const IR::IContainer* cont,
     const IR::Node* insertion) {
+    LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode()) <<
+         " inserted after" << insertion);
+
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);

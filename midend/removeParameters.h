@@ -107,7 +107,8 @@ class FindActionParameters : public Inspector {
  * \endcode
  *
  * @pre This pass requires each action to have a single caller.
- *      It must run after the LocalizeActions pass.
+ *      It must run after the LocalizeActions pass, which
+ *      in turn must be run after actions inlining.
  * @post in/inout/out parameters of an action are removed.
  */
 class DoRemoveActionParameters : public Transform {

@@ -113,6 +113,16 @@ class NameMap : public Node {
     IRNODE_SUBCLASS(NameMap)
     bool operator==(const Node &a) const override { return a == *this; }
     bool operator==(const NameMap &a) const { return symbols == a.symbols; }
+    bool equiv(const Node &a_) const override {
+        if (static_cast<const Node *>(this) == &a_) return true;
+        if (typeid(*this) != typeid(a_)) return false;
+        auto &a = static_cast<const NameMap<T, MAP, COMP, ALLOC> &>(a_);
+        if (size() != a.size()) return false;
+        auto it = a.begin();
+        for (auto &el : *this)
+            if (el.first != it->first || !el.second->equiv(*(it++)->second))
+                return false;
+        return true; }
     cstring node_type_name() const override {
         return "NameMap<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {

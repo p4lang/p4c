@@ -29,6 +29,7 @@ limitations under the License.
 // Passes
 #include "actionsInlining.h"
 #include "createBuiltins.h"
+#include "checkNamedArgs.h"
 #include "deprecated.h"
 #include "directCalls.h"
 #include "dontcareArgs.h"
@@ -136,6 +137,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // explicit casts where implicit casts exist.
         new ResolveReferences(&refMap),  // check shadowing
         new Deprecated(&refMap),
+        new CheckNamedArgs(),
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.

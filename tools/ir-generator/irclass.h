@@ -129,8 +129,10 @@ class IrField : public IrElement {
     : IrElement(info), type(type), name(name), initializer(init), nullOK(flags & NullOK),
       optional(flags & Optional), isInline(flags & Inline), isStatic(flags & Static),
       isConst(flags & Const) {}
-    IrField(const Type *type, cstring name, cstring init = cstring())
-    : type(type), name(name), initializer(init) {}
+    IrField(const Type *type, cstring name, cstring init = cstring(), int flags = 0)
+    : IrField(Util::SourceInfo(), type, name, init, flags) {}
+    IrField(const Type *type, cstring name, int flags)
+    : IrField(Util::SourceInfo(), type, name, cstring(), flags) {}
     void generate(std::ostream &out, bool asField) const;
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override;

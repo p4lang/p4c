@@ -36,10 +36,10 @@ Constraint solving can fail, which means that the program does not type-check.
 class TypeUnification final {
     TypeConstraints*  constraints;
 
-    bool unifyFunctions(const IR::Node* errorPosition,
-                        const IR::Type_MethodBase* dest,
-                        const IR::Type_MethodCall* src,
-                        bool reportErrors);
+    bool unifyCall(const IR::Node* errorPosition,
+                   const IR::Type_MethodBase* dest,
+                   const IR::Type_MethodCall* src,
+                   bool reportErrors);
     bool unifyFunctions(const IR::Node* errorPosition,
                         const IR::Type_MethodBase* dest,
                         const IR::Type_MethodBase* src,

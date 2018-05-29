@@ -23,17 +23,18 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
     auto vec = new IR::Vector<IR::Argument>();
 
     MethodCallDescription mcd(expression, refMap, typeMap);
-    for (auto p : *mcd.substitution.getParameters()) {
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         auto a = mcd.substitution.lookup(p);
-        if (a->is<IR::DefaultExpression>()) {
+        if (a->expression->is<IR::DefaultExpression>()) {
             cstring name = refMap->newName("arg");
             auto ptype = p->type;
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
             toAdd.push_back(decl);
             changes = true;
-            vec->push_back(new IR::Argument(a->srcInfo, new IR::PathExpression(IR::ID(name))));
+            vec->push_back(new IR::Argument(
+                a->srcInfo, a->name, new IR::PathExpression(IR::ID(name))));
         } else {
-            vec->push_back(new IR::Argument(a->srcInfo, a));
+            vec->push_back(a);
         }
     }
     if (changes)

@@ -165,7 +165,14 @@ class Vector : public VectorBase {
      * of IR::Vector that appear somewhere in a .def file -- you can usually make
      * it work by using an instantiation with an (abstract) base class rather
      * than a concrete class, as most of those appear in .def files. */
-
+    bool equiv(const Node &a_) const override {
+        if (static_cast<const Node *>(this) == &a_) return true;
+        if (typeid(*this) != typeid(a_)) return false;
+        auto &a = static_cast<const Vector<T> &>(a_);
+        if (size() != a.size()) return false;
+        auto it = a.begin();
+        for (auto *el : *this) if (!el->equiv(**it++)) return false;
+        return true; }
     cstring node_type_name() const override {
         return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {

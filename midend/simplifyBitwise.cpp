@@ -18,10 +18,10 @@ void SimplifyBitwise::assignSlices(const IR::Expression *expr, mpz_class mask) {
 }
 
 const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
-    const IR::Expression *a, *b;
-    const IR::Constant *maskA, *maskB;
+    Pattern::Match<IR::Expression> a, b;
+    Pattern::Match<IR::Constant> maskA, maskB;
 
-    if (!((Pattern(a) & Pattern(maskA)) | (Pattern(b) & Pattern(maskB))).match(as->right))
+    if (!((a & maskA) | (b & maskB)).match(as->right))
         return as;
     if ((maskA->value & maskB->value) != 0)
         return as;

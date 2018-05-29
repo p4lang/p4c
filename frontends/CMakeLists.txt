@@ -16,6 +16,7 @@ set (P4_FRONTEND_SRCS
   p4/actionsInlining.cpp
   p4/callGraph.cpp
   p4/checkConstants.cpp
+  p4/checkNamedArgs.cpp
   p4/createBuiltins.cpp
   p4/def_use.cpp
   p4/deprecated.cpp
@@ -34,6 +35,7 @@ set (P4_FRONTEND_SRCS
   p4/modelInstances.cpp
   p4/moveConstructors.cpp
   p4/moveDeclarations.cpp
+  p4/parameterSubstitution.cpp
   p4/parserCallGraph.cpp
   p4/parserControlFlow.cpp
   p4/removeReturns.cpp
@@ -68,6 +70,7 @@ set (P4_FRONTEND_HDRS
   p4/actionsInlining.h
   p4/callGraph.h
   p4/checkConstants.h
+  p4/checkNamedArgs.h
   p4/cloner.h
   p4/coreLibrary.h
   p4/createBuiltins.h
