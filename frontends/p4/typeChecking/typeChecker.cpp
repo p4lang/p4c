@@ -762,7 +762,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         typeError("%1%: Type parameters must be supplied for constructor", errorPosition);
         return nullptr;
     }
-    auto constructor = ext->lookupMethod(ext->name.name, arguments->size());
+    auto constructor = ext->lookupConstructor(arguments->size());
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no constructor with %3% arguments",
                   errorPosition, ext, arguments->size());
@@ -781,7 +781,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
-            BUG_CHECK(pi->getAnnotation("optional"), "Missing nonoptional arg %s", pi);
+            BUG_CHECK(pi->isOptional(), "Missing nonoptional arg %s", pi);
             break; }
         auto arg = arguments->at(i++);
         if (!isCompileTimeConstant(arg->expression))
@@ -970,7 +970,7 @@ TypeInference::containerInstantiation(
         auto argType = getType(arg);
         if (argType == nullptr)
             return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
-        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType);
+        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg->name);
         args->push_back(argInfo);
     }
     auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R")));
@@ -2487,7 +2487,6 @@ TypeInference::actionCall(bool inActionList,
     auto baseType = methodType->to<IR::Type_Action>();
     LOG2("Action type " << baseType);
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
-    auto arguments = actionCall->arguments;
     BUG_CHECK(baseType->returnType == nullptr,
               "%1%: action with return type?", baseType->returnType);
     if (!baseType->typeParameters->empty())
@@ -2498,47 +2497,79 @@ TypeInference::actionCall(bool inActionList,
 
     TypeConstraints constraints(typeMap->getSubstitutions());
     auto params = new IR::ParameterList;
-    auto it = arguments->begin();
-    for (auto p : baseType->parameters->parameters) {
-        LOG2("Action parameter " << dbp(p));
-        if (it == arguments->end()) {
-            params->parameters.push_back(p);
-            if ((p->direction != IR::Direction::None) || !inActionList)
-                typeError("%1%: parameter %2% must be bound", actionCall, p);
-        } else {
-            auto arg = (*it)->expression;
-            auto paramType = getType(p);
-            auto argType = getType(arg);
-            if (paramType == nullptr || argType == nullptr)
-                // type checking failed before
+
+    // keep track of parameters that have not been matched yet
+    std::map<cstring, const IR::Parameter*> left;
+    for (auto p : baseType->parameters->parameters)
+        left.emplace(p->name, p);
+
+    auto paramIt = baseType->parameters->parameters.begin();
+    for (auto arg : *actionCall->arguments) {
+        cstring argName = arg->name.name;
+        bool named = !argName.isNullOrEmpty();
+        const IR::Parameter* param;
+
+        if (named) {
+            param = baseType->parameters->getParameter(argName);
+            if (param == nullptr) {
+                typeError("%1%: No parameter named %2%", baseType->parameters, arg->name);
                 return actionCall;
-            constraints.addEqualityConstraint(paramType, argType);
-            if (p->direction == IR::Direction::None) {
-                if (inActionList) {
-                    typeError("%1%: parameter %2% cannot be bound: it is set by the control plane",
-                              arg, p);
-                } else if (inTable) {
-                    // For actions None parameters are treated as IN
-                    // parameters when the action is called directly.  We
-                    // don't require them to be bound to a compile-time
-                    // constant.  But if the action is instantiated in a
-                    // table (as default_action or entries), then the
-                    // arguments do have to be compile-time constants.
-                    if (!isCompileTimeConstant(arg))
-                        typeError("%1%: action argument must be a compile-time constant", arg);
-                }
-            } else if (p->direction == IR::Direction::Out ||
-                       p->direction == IR::Direction::InOut) {
-                if (!isLeftValue(arg))
-                    typeError("%1%: must be a left-value", arg);
             }
-            it++;
+        } else {
+            if (paramIt == baseType->parameters->parameters.end()) {
+                typeError("%1%: Too many arguments for action", actionCall);
+                return actionCall;
+            }
+            param = *paramIt;
+        }
+
+        LOG2("Action parameter " << dbp(param));
+        auto leftIt = left.find(param->name.name);
+        // This shold have been checked by the CheckNamedArgs pass.
+        BUG_CHECK(leftIt != left.end(), "%1%: Duplicate argument name?", param->name);
+        left.erase(leftIt);
+
+        auto paramType = getType(param);
+        auto argType = getType(arg);
+        if (paramType == nullptr || argType == nullptr)
+            // type checking failed before
+            return actionCall;
+        constraints.addEqualityConstraint(paramType, argType);
+        if (param->direction == IR::Direction::None) {
+            if (inActionList) {
+                typeError("%1%: parameter %2% cannot be bound: it is set by the control plane",
+                          arg, param);
+            } else if (inTable) {
+                // For actions None parameters are treated as IN
+                // parameters when the action is called directly.  We
+                // don't require them to be bound to a compile-time
+                // constant.  But if the action is instantiated in a
+                // table (as default_action or entries), then the
+                // arguments do have to be compile-time constants.
+                if (!isCompileTimeConstant(arg->expression))
+                    typeError(
+                        "%1%: action argument must be a compile-time constant", arg->expression);
+            }
+        } else if (param->direction == IR::Direction::Out ||
+                   param->direction == IR::Direction::InOut) {
+            if (!isLeftValue(arg->expression))
+                typeError("%1%: must be a left-value", arg->expression);
+        }
+        if (!named)
+            ++paramIt;
+    }
+
+    // Check remaining parameters: they must be all non-directional
+    bool error = false;
+    for (auto p : left) {
+        if (p.second->direction != IR::Direction::None) {
+            typeError("%1%: Parameter %2% must be bound", actionCall, p.second);
+            error = true;
         }
     }
-    if (it != arguments->end()) {
-        typeError("%1% Too many arguments for action", *it);
+    if (error)
         return actionCall;
-    }
+
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, params);
 
     setType(getOriginal(), resultType);
@@ -2706,7 +2737,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             if (argType == nullptr)
                 return expression;
             auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
-                                                isCompileTimeConstant(arg), argType);
+                                                isCompileTimeConstant(arg), argType, aarg->name);
             args->push_back(argInfo);
             constArgs &= isCompileTimeConstant(arg);
         }

@@ -191,7 +191,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
     visit(expression->method);
     builder->append("(");
     bool first = true;
-    for (auto p : *mcd.substitution.getParameters()) {
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         if (!first)
             builder->append(", ");
         first = false;

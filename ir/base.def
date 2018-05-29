@@ -198,6 +198,7 @@ class Annotation {
     static const cstring atomicAnnotation;  /// Code should be executed atomically.
     static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
+    static const cstring optionalAnnotation;  /// Optional parameter annotation
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 

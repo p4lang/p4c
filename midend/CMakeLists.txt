@@ -24,6 +24,7 @@ set (MIDEND_SRCS
   local_copyprop.cpp
   nestedStructs.cpp
   noMatch.cpp
+  orderArguments.cpp
   parserUnroll.cpp
   predication.cpp
   removeExits.cpp
@@ -56,6 +57,7 @@ set (MIDEND_HDRS
   midEndLast.h
   nestedStructs.h
   noMatch.h
+  orderArguments.h
   parserUnroll.h
   predication.h
   removeExits.h

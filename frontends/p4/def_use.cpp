@@ -678,15 +678,15 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 
     auto result = LocationSet::empty;
     // For all methods out/inout arguments are written
-    for (auto p : *mcd.substitution.getParameters()) {
-        auto expr = mcd.substitution.lookup(p);
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
+        auto arg = mcd.substitution.lookup(p);
         bool save = lhs;
         // pretend we are on the lhs
         lhs = true;
-        visit(expr);
+        visit(arg);
         lhs = save;
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-            auto val = get(expr);
+            auto val = get(arg->expression);
             result = result->join(val);
         }
     }

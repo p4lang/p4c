@@ -58,7 +58,7 @@ p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}")
 
 set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_errors/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_errors/*.p4"
   )
 p4c_add_tests("p14_to_16" ${P4TEST_DRIVER} "${P4_14_SUITES}" "")

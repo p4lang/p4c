@@ -97,8 +97,8 @@ set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
 set (BMV2_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/*-bmv2.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   )
 
 set (XFAIL_TESTS

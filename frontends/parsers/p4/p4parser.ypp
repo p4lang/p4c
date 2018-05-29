@@ -335,7 +335,8 @@ nonEmptyParameterList
     ;
 
 parameter
-    : optAnnotations direction typeRef name { $$ = new IR::Parameter(@4, *$4, $1, $2, $3); }
+    : optAnnotations direction typeRef name { $$ = new IR::Parameter(@4, *$4, $1, $2, $3, nullptr); }
+    | optAnnotations direction typeRef name "=" expression { $$ = new IR::Parameter(@4, *$4, $1, $2, $3, $6); }
     ;
 
 direction

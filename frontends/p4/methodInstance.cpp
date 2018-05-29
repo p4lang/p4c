@@ -118,10 +118,11 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
                          ReferenceMap* refMap, TypeMap* typeMap) {
-    auto t = typeMap->getTypeType(cce->constructedType, true);
+    auto ct = typeMap->getTypeType(cce->constructedType, true);
     ConstructorCall* result;
-    const IR::Vector<IR::Type>* typeArguments = nullptr;
+    const IR::Vector<IR::Type>* typeArguments;
     const IR::Type_Name* type;
+    const IR::ParameterList* constructorParameters;
 
     if (cce->constructedType->is<IR::Type_Specialized>()) {
         auto spec = cce->constructedType->to<IR::Type_Specialized>();
@@ -133,24 +134,29 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
         typeArguments = new IR::Vector<IR::Type>();
     }
 
-    if (t->is<IR::Type_SpecializedCanonical>()) {
-        auto tsc = t->to<IR::Type_SpecializedCanonical>();
-        t = typeMap->getTypeType(tsc->baseType, true);
-    }
+    if (auto tsc = ct->to<IR::Type_SpecializedCanonical>())
+        ct = typeMap->getTypeType(tsc->baseType, true);
 
-    if (t->is<IR::Type_Extern>()) {
-        auto ext = refMap->getDeclaration(type->path, true);
-        BUG_CHECK(ext->is<IR::Type_Extern>(), "%1%: expected an extern type", dbp(ext));
-        result = new ExternConstructorCall(ext->to<IR::Type_Extern>());
-    } else if (t->is<IR::IContainer>()) {
-        auto cont = refMap->getDeclaration(type->path, true);
-        BUG_CHECK(cont->is<IR::IContainer>(), "%1%: expected a container", dbp(cont));
-        result = new ContainerConstructorCall(cont->to<IR::IContainer>());
+    if (ct->is<IR::Type_Extern>()) {
+        auto decl = refMap->getDeclaration(type->path, true);
+        auto ext = decl->to<IR::Type_Extern>();
+        BUG_CHECK(ext, "%1%: expected an extern type", dbp(decl));
+        auto constr = ext->lookupConstructor(cce->arguments->size());
+        result = new ExternConstructorCall(ext->to<IR::Type_Extern>(), constr);
+        BUG_CHECK(constr, "%1%: constructor not found", ext);
+        constructorParameters = constr->type->parameters;
+    } else if (ct->is<IR::IContainer>()) {
+        auto decl = refMap->getDeclaration(type->path, true);
+        auto cont = decl->to<IR::IContainer>();
+        BUG_CHECK(cont, "%1%: expected a container", dbp(decl));
+        result = new ContainerConstructorCall(cont);
+        constructorParameters = cont->getConstructorParameters();
     } else {
-        BUG("Unexpected constructor call %1%; type is %2%", dbp(cce), dbp(t));
+        BUG("Unexpected constructor call %1%; type is %2%", dbp(cce), dbp(ct));
     }
     result->cce = cce;
     result->typeArguments = typeArguments;
+    result->constructorParameters = constructorParameters;
     return result;
 }
 
@@ -159,6 +165,33 @@ MethodCallDescription::MethodCallDescription(const IR::MethodCallExpression* mce
     instance = MethodInstance::resolve(mce, refMap, typeMap);
     auto params = instance->getActualParameters();
     substitution.populate(params, mce->arguments);
+}
+
+Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
+                                      ReferenceMap* ,
+                                      TypeMap* typeMap) {
+    auto type = typeMap->getTypeType(instance->type, true);
+    auto simpleType = type;
+    const IR::Vector<IR::Type>* typeArguments;
+
+    if (auto st = type->to<IR::Type_SpecializedCanonical>()) {
+        simpleType = st->substituted;
+        typeArguments = st->arguments;
+    } else {
+        typeArguments = new IR::Vector<IR::Type>();
+    }
+
+    if (auto et = simpleType->to<IR::Type_Extern>()) {
+        return new ExternInstantiation(instance, typeArguments, et);
+    } else if (auto pt = simpleType->to<IR::Type_Package>()) {
+        return new PackageInstantiation(instance, typeArguments, pt);
+    } else if (auto pt = simpleType->to<IR::P4Parser>()) {
+        return new ParserInstantiation(instance, typeArguments, pt);
+    } else if (auto ct = simpleType->to<IR::P4Control>()) {
+        return new ControlInstantiation(instance, typeArguments, ct);
+    }
+    BUG("Unexpected instantiation %1%", instance);
+    return nullptr;  // unreachable
 }
 
 }  // namespace P4

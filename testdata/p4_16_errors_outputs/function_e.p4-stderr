@@ -1,6 +1,9 @@
-function_e.p4(22): error: f: Not enough arguments for call
+function_e.p4(22): error: f: No argument for parameter x
         f(); // not enough arguments
         ^^^
+function_e.p4(16)
+extern void f(in bit x);
+                     ^
 function_e.p4(23): error: f: Passing 2 arguments when 1 expected
         f(1w1, 1w0); // too many arguments
         ^^^^^^^^^^^
