@@ -1,0 +1,20 @@
+#!/bin/bash
+# Overrides the default build command with one that sets PARENT_VERSION arg to
+# the appropriate value. behavioral-model:latest will be built from pi:latest,
+# while behavioral-model:stable will be built from pi:stable. Thanks to this we
+# don't have to duplicate the Dockerfile for the sake of dockerhub.
+
+# dockerhub uses DOCKER_TAG and not CACHE_TAG
+echo "DOCKER_TAG: $DOCKER_TAG"
+# echo "CACHE_TAG: $CACHE_TAG"
+# dockerhub seems to be using BUILD_PATH and not DOCKERFILE_PATH (which is
+# empty)
+echo "BUILD_PATH: $BUILD_PATH"
+# echo "DOCKERFILE_PATH: $DOCKERFILE_PATH"
+echo "IMAGE_NAME: $IMAGE_NAME"
+DOCKERFILE_PATH_OPTION=
+if [ "$BUILD_PATH" != "/" ]; then
+    # remove leading '/'
+    DOCKERFILE_PATH_OPTION="-f ${BUILD_PATH:1}"
+fi
+docker build --build-arg PARENT_VERSION=$DOCKER_TAG $DOCKERFILE_PATH_OPTION -t $IMAGE_NAME .
