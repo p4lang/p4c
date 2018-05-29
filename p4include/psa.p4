@@ -420,7 +420,7 @@ enum MeterType_t {
 // END:MeterType_defn
 
 // BEGIN:MeterColor_defn
-enum MeterColor_t { RED, GREEN, YELLOW };
+enum MeterColor_t { RED, GREEN, YELLOW }
 // END:MeterColor_defn
 
 // BEGIN:Meter_extern
