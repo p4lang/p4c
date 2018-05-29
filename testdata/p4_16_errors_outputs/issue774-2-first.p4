@@ -10,11 +10,11 @@ struct M {
 
 parser ParserI(packet_in b, out Header p, inout M m, inout standard_metadata_t s) {
     state start {
-        b.extract(_);
+        b.extract<_>(_);
         transition next;
     }
     state next {
-        b.extract(p);
+        b.extract<Header>(p);
         transition accept;
     }
 }
@@ -44,5 +44,5 @@ control ComputeChecksumI(inout Header hdr, inout M meta) {
     }
 }
 
-V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch<Header, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
 

@@ -28,6 +28,10 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
         if (a->expression->is<IR::DefaultExpression>()) {
             cstring name = refMap->newName("arg");
             auto ptype = p->type;
+            if (ptype->is<IR::Type_Dontcare>()) {
+                ::error("Could not infer type for %1%", a);
+                return expression;
+            }
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
             toAdd.push_back(decl);
             changes = true;
