@@ -75,6 +75,10 @@ libsimpleswitch.la \
 libsimpleswitch_thrift.la
 
 simple_switch_SOURCES = main.cpp
+simple_switch_LDFLAGS =
+if ENABLE_MODULES
+simple_switch_LDFLAGS += -rdynamic
+endif
 
 lib_LTLIBRARIES = libsimpleswitch_thrift.la
 

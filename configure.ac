@@ -213,6 +213,32 @@ AC_LINK_IFELSE(
 
 AM_CONDITIONAL([WITH_PCAP_FIX], [test "$pcap_fix" = "yes"])
 
+# Check for dlopen and dlfcn.h
+AC_ARG_ENABLE(modules,
+    AS_HELP_STRING([--enable-modules],
+                   [Allow loading third-party modules at runtime]))
+modules_enabled=no
+AS_IF([test "x$enable_modules" != "xno"], [
+  AC_MSG_CHECKING(for dlopen())
+  AC_CHECK_HEADERS(dlfcn.h, [
+    AC_SEARCH_LIBS([dlopen], [dl], [
+      MY_CPPFLAGS="$MY_CPPFLAGS -DBM_HAVE_DLOPEN -DBM_ENABLE_MODULES"
+      modules_enabled=yes
+    ], [
+      AC_MSG_RESULT(no)
+      AS_IF([test "x$enable_modules" == "xyes"], [
+        AC_MSG_ERROR([Cannot enable modules without dlopen])
+      ])
+    ])
+  ],[
+    AC_MSG_RESULT(no)
+    AS_IF([test "x$enable_modules" == "xyes"], [
+      AC_MSG_ERROR([Cannot enable modules without dlfcn.h])
+    ])
+  ])
+])
+AM_CONDITIONAL([ENABLE_MODULES], [test "x$modules_enabled" == "xyes"])
+
 # C++ libraries are harder (http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/),
 # so use headers to check
 AC_CHECK_HEADER([boost/thread.hpp], [], [AC_MSG_ERROR([Boost threading headers not found])])

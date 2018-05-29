@@ -57,7 +57,7 @@ class TargetParserBasicStore;
 
 //! A basic target-specific command-line options parser, which should be enough
 //! for many targets.
-class TargetParserBasic final : public TargetParserIface {
+class TargetParserBasic : public TargetParserIface {
  public:
   //! Return codes for this class
   enum class ReturnCode {
