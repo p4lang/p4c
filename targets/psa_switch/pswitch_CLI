@@ -1,0 +1,26 @@
+#!/bin/bash
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+json=""
+if [ $# -eq 1 ]; then
+    echo "Using JSON input $1"
+    json="--json $1"
+fi
+port=""
+if [ $# -eq 2 ]; then
+    echo "Using Thrift port $2"
+    port="--thrift-port $2"
+else
+    echo "No Thrift port specified, using CLI default"
+fi
+if [ $# -gt 2 ]; then
+    echo "Invalid number of arguments"
+    echo "Usage: $0 [<json input> [<switch Thrift RPC port>]]"
+    exit 1
+fi
+
+CLI=$THIS_DIR/pswitch_CLI.py
+TOOLS_DIR=$THIS_DIR/../../tools/
+
+PYTHONPATH=$PYTHONPATH:$TOOLS_DIR python $CLI $json $port

@@ -266,6 +266,8 @@ AC_CONFIG_FILES([Makefile
 		targets/simple_switch/Makefile
 		targets/simple_switch/tests/Makefile
 		targets/simple_switch/tests/CLI_tests/Makefile
+		targets/psa_switch/Makefile
+		targets/psa_switch/tests/Makefile
 		tests/Makefile
 		tests/stress_tests/Makefile
                 tools/Makefile
