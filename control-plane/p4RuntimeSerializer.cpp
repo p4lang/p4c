@@ -1695,6 +1695,8 @@ static void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock,
 
         // Add child blocks to the frontier if we haven't already visited them.
         for (auto evaluatedChild : evaluatedBlock->constantValue) {
+            // child block may be nullptr due to optional argument.
+            if (!evaluatedChild.second) continue;
             if (!evaluatedChild.second->is<IR::Block>()) continue;
             auto evaluatedChildBlock = evaluatedChild.second->to<IR::Block>();
             if (visited.find(evaluatedChildBlock) != visited.end()) continue;
