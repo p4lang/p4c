@@ -452,7 +452,7 @@ enum PSA_MeterType_t {
 // END:MeterType_defn
 
 // BEGIN:MeterColor_defn
-enum PSA_MeterColor_t { RED, GREEN, YELLOW };
+enum PSA_MeterColor_t { RED, GREEN, YELLOW }
 // END:MeterColor_defn
 
 // BEGIN:Meter_extern
