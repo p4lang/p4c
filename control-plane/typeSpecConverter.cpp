@@ -17,7 +17,7 @@ limitations under the License.
 #include <map>
 #include <string>
 
-#include "p4/p4types.pb.h"
+#include "p4/config/v1/p4types.pb.h"
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
@@ -29,12 +29,17 @@ limitations under the License.
 
 #include "typeSpecConverter.h"
 
+namespace p4configv1 = ::p4::config::v1;
+
+using p4configv1::P4DataTypeSpec;
+using p4configv1::P4TypeInfo;
+
 namespace P4 {
 
 namespace ControlPlaneAPI {
 
 TypeSpecConverter::TypeSpecConverter(
-    const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap, p4::P4TypeInfo* p4RtTypeInfo)
+    const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap, P4TypeInfo* p4RtTypeInfo)
     : typeMap(typeMap), refMap(refMap), p4RtTypeInfo(p4RtTypeInfo) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
@@ -42,12 +47,12 @@ TypeSpecConverter::TypeSpecConverter(
 
 bool TypeSpecConverter::preorder(const IR::Type* type) {
     ::error("Unexpected type %1%", type);
-    map.emplace(type, new p4::P4DataTypeSpec());
+    map.emplace(type, new P4DataTypeSpec());
     return false;
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Bits* type) {
-    auto typeSpec = new p4::P4DataTypeSpec();
+    auto typeSpec = new P4DataTypeSpec();
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     auto bw = type->width_bits();
     if (type->isSigned) bitTypeSpec->mutable_int_()->set_bitwidth(bw);
@@ -57,7 +62,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Bits* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Varbits* type) {
-    auto typeSpec = new p4::P4DataTypeSpec();
+    auto typeSpec = new P4DataTypeSpec();
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     bitTypeSpec->mutable_varbit()->set_max_bitwidth(type->size);
     map.emplace(type, typeSpec);
@@ -65,7 +70,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Varbits* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Boolean* type) {
-    auto typeSpec = new p4::P4DataTypeSpec();
+    auto typeSpec = new P4DataTypeSpec();
     // enable "bool" field in P4DataTypeSpec's type_spec oneof
     (void)typeSpec->mutable_bool_();
     map.emplace(type, typeSpec);
@@ -73,7 +78,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Boolean* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
-    auto typeSpec = new p4::P4DataTypeSpec();
+    auto typeSpec = new P4DataTypeSpec();
     auto decl = refMap->getDeclaration(type->path, true);
     auto name = decl->controlPlaneName();
     if (decl->is<IR::Type_Struct>()) {
@@ -96,7 +101,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Tuple* type) {
-    auto typeSpec = new p4::P4DataTypeSpec();
+    auto typeSpec = new P4DataTypeSpec();
     auto tupleTypeSpec = typeSpec->mutable_tuple();
     for (auto cType : type->components) {
         visit(cType);
@@ -110,7 +115,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Tuple* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Stack* type) {
-    auto typeSpec = new p4::P4DataTypeSpec();
+    auto typeSpec = new P4DataTypeSpec();
     if (!type->elementType->is<IR::Type_Name>()) {
         BUG("Unexpected stack element type %1%", type->elementType);
     }
@@ -142,7 +147,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Struct* type) {
         auto name = std::string(type->controlPlaneName());
         auto structs = p4RtTypeInfo->mutable_structs();
         if (structs->find(name) == structs->end()) {
-            auto structTypeSpec = new p4::P4StructTypeSpec();
+            auto structTypeSpec = new p4configv1::P4StructTypeSpec();
             for (auto f : type->fields) {
                 auto fType = f->type;
                 visit(fType);
@@ -164,7 +169,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Header* type) {
         auto name = std::string(type->controlPlaneName());
         auto headers = p4RtTypeInfo->mutable_headers();
         if (headers->find(name) == headers->end()) {
-            auto headerTypeSpec = new p4::P4HeaderTypeSpec();
+            auto headerTypeSpec = new p4configv1::P4HeaderTypeSpec();
             for (auto f : type->fields) {
                 auto fType = f->type;
                 visit(fType);
@@ -188,7 +193,7 @@ bool TypeSpecConverter::preorder(const IR::Type_HeaderUnion* type) {
         auto name = std::string(type->controlPlaneName());
         auto headerUnions = p4RtTypeInfo->mutable_header_unions();
         if (headerUnions->find(name) == headerUnions->end()) {
-            auto headerUnionTypeSpec = new p4::P4HeaderUnionTypeSpec();
+            auto headerUnionTypeSpec = new p4configv1::P4HeaderUnionTypeSpec();
             for (auto f : type->fields) {
                 auto fType = f->type;
                 visit(fType);
@@ -212,7 +217,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Enum* type) {
         auto name = std::string(type->controlPlaneName());
         auto enums = p4RtTypeInfo->mutable_enums();
         if (enums->find(name) == enums->end()) {
-            auto enumTypeSpec = new p4::P4EnumTypeSpec();
+            auto enumTypeSpec = new p4configv1::P4EnumTypeSpec();
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
@@ -234,9 +239,9 @@ bool TypeSpecConverter::preorder(const IR::Type_Error* type) {
     return false;
 }
 
-const p4::P4DataTypeSpec* TypeSpecConverter::convert(
+const P4DataTypeSpec* TypeSpecConverter::convert(
     const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap,
-    const IR::Type* type, p4::P4TypeInfo* typeInfo) {
+    const IR::Type* type, P4TypeInfo* typeInfo) {
     TypeSpecConverter typeSpecConverter(typeMap, refMap, typeInfo);
     type->apply(typeSpecConverter);
     return typeSpecConverter.map.at(type);

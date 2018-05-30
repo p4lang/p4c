@@ -21,9 +21,13 @@ limitations under the License.
 
 namespace p4 {
 namespace config {
+namespace v1 {
 class P4Info;
+}  // namespace v1
 }  // namespace config
+namespace v1 {
 class WriteRequest;
+}  // namespace v1
 }  // namespace p4
 
 namespace IR {
@@ -53,10 +57,10 @@ struct P4RuntimeAPI {
 
     /// A P4Runtime P4Info message, which encodes the control-plane API of the
     /// program. Never null.
-    const p4::config::P4Info* p4Info;
+    const ::p4::config::v1::P4Info* p4Info;
     /// All static table entries as one P4Runtime WriteRequest object. Never
     /// null.
-    const p4::WriteRequest* entries;
+    const ::p4::v1::WriteRequest* entries;
 };
 
 /**

@@ -20,9 +20,9 @@ limitations under the License.
 #include <string>
 #include <vector>
 
-#include "control-plane/p4/config/p4info.pb.h"
-#include "control-plane/p4/p4runtime.pb.h"
-#include "control-plane/p4/p4types.pb.h"
+#include "control-plane/p4/config/v1/p4info.pb.h"
+#include "control-plane/p4/config/v1/p4types.pb.h"
+#include "control-plane/p4/v1/p4runtime.pb.h"
 #include "gtest/gtest.h"
 
 #include "control-plane/p4RuntimeSerializer.h"
@@ -33,11 +33,14 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+namespace p4v1 = ::p4::v1;
+namespace p4configv1 = ::p4::config::v1;
+
 namespace Test {
 
 namespace {
 
-using P4Ids = ::p4::config::P4Ids;
+using P4Ids = p4configv1::P4Ids;
 
 using google::protobuf::util::MessageDifferencer;
 
@@ -66,56 +69,56 @@ auto findP4InfoObject(const It& first, const It& last, const std::string& name)
 
 /// @return the P4Runtime representation of the table with the given name, or
 /// null if none is found.
-const ::p4::config::Table* findTable(const P4::P4RuntimeAPI& analysis,
-                                     const std::string& name) {
+const p4configv1::Table* findTable(const P4::P4RuntimeAPI& analysis,
+                                   const std::string& name) {
     auto& tables = analysis.p4Info->tables();
     return findP4InfoObject(tables.begin(), tables.end(), name);
 }
 
 /// @return the P4Runtime representation of the action with the given name, or
 /// null if none is found.
-const ::p4::config::Action* findAction(const P4::P4RuntimeAPI& analysis,
-                                       const std::string& name) {
+const p4configv1::Action* findAction(const P4::P4RuntimeAPI& analysis,
+                                     const std::string& name) {
     auto& actions = analysis.p4Info->actions();
     return findP4InfoObject(actions.begin(), actions.end(), name);
 }
 
 /// @return the P4Runtime representation of the value set with the given name,
 /// or null if none is found.
-const ::p4::config::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
-                                           const std::string& name) {
+const p4configv1::ValueSet* findValueSet(const P4::P4RuntimeAPI& analysis,
+                                         const std::string& name) {
     auto& vsets = analysis.p4Info->value_sets();
     return findP4InfoObject(vsets.begin(), vsets.end(), name);
 }
 
 /// @return the P4Runtime representation of the register with the given name, or
 /// null if none is found.
-const ::p4::config::Register* findRegister(const P4::P4RuntimeAPI& analysis,
-                                           const std::string& name) {
+const p4configv1::Register* findRegister(const P4::P4RuntimeAPI& analysis,
+                                         const std::string& name) {
     auto& registers = analysis.p4Info->registers();
     return findP4InfoObject(registers.begin(), registers.end(), name);
 }
 
 /// @return the P4Runtime representation of the counter with the given name, or
 /// null if none is found.
-const ::p4::config::Counter* findCounter(const P4::P4RuntimeAPI& analysis,
-                                     const std::string& name) {
+const p4configv1::Counter* findCounter(const P4::P4RuntimeAPI& analysis,
+                                       const std::string& name) {
     auto& counters = analysis.p4Info->counters();
     return findP4InfoObject(counters.begin(), counters.end(), name);
 }
 
 /// @return the P4Runtime representation of the direct counter with the given
 /// name, or null if none is found.
-const ::p4::config::DirectCounter* findDirectCounter(const P4::P4RuntimeAPI& analysis,
-                                               const std::string& name) {
+const p4configv1::DirectCounter* findDirectCounter(const P4::P4RuntimeAPI& analysis,
+                                                   const std::string& name) {
     auto& counters = analysis.p4Info->direct_counters();
     return findP4InfoObject(counters.begin(), counters.end(), name);
 }
 
 /// @return the P4Runtime representation of the digest with the given name, or
 /// null if none is found.
-const ::p4::config::Digest* findDigest(const P4::P4RuntimeAPI& analysis,
-                                       const std::string& name) {
+const p4configv1::Digest* findDigest(const P4::P4RuntimeAPI& analysis,
+                                     const std::string& name) {
     auto& digests = analysis.p4Info->digests();
     return findP4InfoObject(digests.begin(), digests.end(), name);
 }
@@ -343,13 +346,13 @@ struct ExpectedMatchField {
     unsigned id;
     std::string name;
     int bitWidth;
-    ::p4::config::MatchField::MatchType matchType;
+    p4configv1::MatchField::MatchType matchType;
 };
 
 }  // namespace
 
 TEST_F(P4Runtime, P4_16_MatchFields) {
-    using MatchField = ::p4::config::MatchField;
+    using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<16> headerField; }
@@ -501,7 +504,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
 }
 
 TEST_F(P4Runtime, P4_14_MatchFields) {
-    using MatchField = ::p4::config::MatchField;
+    using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::NONE, R"(
         header_type header_t { fields { headerField : 16; } }
@@ -716,12 +719,12 @@ TEST_F(P4Runtime, StaticTableEntries) {
     const auto& updates = entries->updates();
     ASSERT_EQ(4, updates.size());
     int priority = 0;
-    auto check_entry = [&](const p4::Update& update,
+    auto check_entry = [&](const p4v1::Update& update,
                            const std::string& exact_v,
                            const std::string& ternary_v,
                            const std::string& ternary_mask,
                            const std::string& param_v) {
-        EXPECT_EQ(p4::Update::INSERT, update.type());
+        EXPECT_EQ(p4v1::Update::INSERT, update.type());
         const auto& protoEntry = update.entity().table_entry();
         EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
 
@@ -919,7 +922,7 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
         return type;
     }
 
-    p4::P4TypeInfo typeInfo;
+    p4configv1::P4TypeInfo typeInfo;
     ReferenceMap refMap;
     TypeMap typeMap;
 };

@@ -27,9 +27,9 @@ limitations under the License.
 #include <boost/variant.hpp>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
-#include "p4/config/p4info.pb.h"
-#include "p4/p4runtime.pb.h"
-#include "p4/p4types.pb.h"
+#include "p4/config/v1/p4info.pb.h"
+#include "p4/config/v1/p4types.pb.h"
+#include "p4/v1/p4runtime.pb.h"
 
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -52,6 +52,9 @@ limitations under the License.
 
 #include "p4RuntimeSerializer.h"
 
+namespace p4v1 = ::p4::v1;
+namespace p4configv1 = ::p4::config::v1;
+
 namespace P4 {
 
 /** \defgroup control_plane Control Plane API Generation */
@@ -63,7 +66,7 @@ namespace ControlPlaneAPI {
 
 using p4rt_id_t = uint32_t;
 
-static const p4rt_id_t INVALID_ID = p4::config::P4Ids::UNSPECIFIED;
+static const p4rt_id_t INVALID_ID = p4configv1::P4Ids::UNSPECIFIED;
 
 // XXX(seth): Here are the known issues:
 // - We don't currently distinguish between the case where the const default
@@ -178,7 +181,7 @@ struct Digest {
     const cstring name;       // The fully qualified external name of the digest
                               // *data* - in P4-14, the field list name, or in
                               // P4-16, the type of the 'data' parameter.
-    const p4::P4DataTypeSpec* typeSpec;  // The format of the packed data.
+    const p4configv1::P4DataTypeSpec* typeSpec;  // The format of the packed data.
 };
 
 struct Register {
@@ -186,7 +189,7 @@ struct Register {
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
     const int64_t size;
-    const p4::P4DataTypeSpec* typeSpec;  // The format of the stored data.
+    const p4configv1::P4DataTypeSpec* typeSpec;  // The format of the stored data.
 
     /// @return the information required to serialize an @instance of register
     /// or boost::none in case of error.
@@ -194,7 +197,7 @@ struct Register {
     from(const IR::ExternBlock* instance,
          const ReferenceMap* refMap,
          const TypeMap* typeMap,
-         p4::P4TypeInfo* p4RtTypeInfo) {
+         p4configv1::P4TypeInfo* p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
@@ -209,7 +212,7 @@ struct Register {
             return boost::none;
         }
 
-        // retrieve type parameter for the register instance and convert it to p4::P4DataTypeSpec
+        // retrieve type parameter for the register instance and convert it to P4DataTypeSpec
         BUG_CHECK(declaration->type->is<IR::Type_Specialized>(),
                   "%1%: expected Type_Specialized", declaration->type);
         auto type = declaration->type->to<IR::Type_Specialized>();
@@ -234,8 +237,8 @@ struct DefaultAction {
 
 /// The information about a match field which is needed to serialize it.
 struct MatchField {
-    using MatchType = ::p4::config::MatchField::MatchType;
-    using MatchTypes = ::p4::config::MatchField;  // Make short enum names visible.
+    using MatchType = p4configv1::MatchField::MatchType;
+    using MatchTypes = p4configv1::MatchField;  // Make short enum names visible.
 
     const cstring name;       // The fully qualified external name of this field.
     const MatchType type;     // The match algorithm - exact, ternary, range, etc.
@@ -754,33 +757,30 @@ class P4RuntimeSymbolTable {
 
     /// @return the P4Runtime resource type for the given type of symbol.
     static p4rt_id_t piResourceType(P4RuntimeSymbolType symbolType) {
-        // XXX(seth): It may be a bit confusing that the P4Runtime resource types
-        // we're working with here have "PI" in the name. That's just the name
-        // P4Runtime had while it was under development.  Hopefully things will be
-        // made more consistent at some point.
+        using p4configv1::P4Ids;
         switch (symbolType) {
             case P4RuntimeSymbolType::ACTION:
-              return p4::config::P4Ids::ACTION;
+              return P4Ids::ACTION;
             case P4RuntimeSymbolType::ACTION_PROFILE:
-              return p4::config::P4Ids::ACTION_PROFILE;
+              return P4Ids::ACTION_PROFILE;
             case P4RuntimeSymbolType::CONTROLLER_HEADER:
-              return p4::config::P4Ids::CONTROLLER_HEADER;
+              return P4Ids::CONTROLLER_HEADER;
             case P4RuntimeSymbolType::COUNTER:
-              return p4::config::P4Ids::COUNTER;
+              return P4Ids::COUNTER;
             case P4RuntimeSymbolType::DIGEST:
-              return p4::config::P4Ids::DIGEST;
+              return P4Ids::DIGEST;
             case P4RuntimeSymbolType::DIRECT_COUNTER:
-              return p4::config::P4Ids::DIRECT_COUNTER;
+              return P4Ids::DIRECT_COUNTER;
             case P4RuntimeSymbolType::DIRECT_METER:
-              return p4::config::P4Ids::DIRECT_METER;
+              return P4Ids::DIRECT_METER;
             case P4RuntimeSymbolType::METER:
-              return p4::config::P4Ids::METER;
+              return P4Ids::METER;
             case P4RuntimeSymbolType::REGISTER:
-              return p4::config::P4Ids::REGISTER;
+              return P4Ids::REGISTER;
             case P4RuntimeSymbolType::TABLE:
-              return p4::config::P4Ids::TABLE;
+              return P4Ids::TABLE;
             case P4RuntimeSymbolType::VALUE_SET:
-              return p4::config::P4Ids::VALUE_SET;
+              return P4Ids::VALUE_SET;
         }
         BUG("Unexpected P4RuntimeSymbolType");  // Unreachable.
     }
@@ -815,12 +815,12 @@ class P4RuntimeSymbolTable {
 /// An analyzer which translates the information available in the P4 IR into a
 /// representation of the control plane API which is consumed by P4Runtime.
 class P4RuntimeAnalyzer {
-    using Counter = ::p4::config::Counter;
-    using Meter = ::p4::config::Meter;
-    using CounterSpec = ::p4::config::CounterSpec;
-    using MeterSpec = ::p4::config::MeterSpec;
-    using Preamble = ::p4::config::Preamble;
-    using P4Info = ::p4::config::P4Info;
+    using Counter = p4configv1::Counter;
+    using Meter = p4configv1::Meter;
+    using CounterSpec = p4configv1::CounterSpec;
+    using MeterSpec = p4configv1::MeterSpec;
+    using Preamble = p4configv1::Preamble;
+    using P4Info = p4configv1::P4Info;
 
     P4RuntimeAnalyzer(const P4RuntimeSymbolTable& symbols,
                       TypeMap* typeMap)
@@ -854,7 +854,7 @@ class P4RuntimeAnalyzer {
                                 ReferenceMap* refMap,
                                 TypeMap* typeMap);
 
-    /// Set common fields between p4::config::Counter and p4::config::DirectCounter.
+    /// Set common fields between Counter and DirectCounter.
     template <typename Kind>
     void setCounterCommon(Kind *counter, const Counterlike<IR::Counter>& counterInstance) {
         counter->mutable_preamble()->set_name(counterInstance.name);
@@ -890,7 +890,7 @@ class P4RuntimeAnalyzer {
         }
     }
 
-    /// Set common fields between p4::config::Meter and p4::config::DirectMeter.
+    /// Set common fields between Meter and DirectMeter.
     template <typename Kind>
     void setMeterCommon(Kind *meter, const Counterlike<IR::Meter>& meterInstance) {
         meter->mutable_preamble()->set_name(meterInstance.name);
@@ -1119,9 +1119,9 @@ class P4RuntimeAnalyzer {
         }
 
         if (supportsTimeout) {
-            table->set_idle_timeout_behavior(p4::config::Table::NOTIFY_CONTROL);
+            table->set_idle_timeout_behavior(p4configv1::Table::NOTIFY_CONTROL);
         } else {
-            table->set_idle_timeout_behavior(p4::config::Table::NO_TIMEOUT);
+            table->set_idle_timeout_behavior(p4configv1::Table::NO_TIMEOUT);
         }
 
         if (isConstTable) {
@@ -1234,7 +1234,7 @@ static boost::optional<Digest>
 getDigestCall(const IR::MethodCallExpression* call,
               ReferenceMap* refMap,
               TypeMap* typeMap,
-              p4::P4TypeInfo* p4RtTypeInfo) {
+              p4configv1::P4TypeInfo* p4RtTypeInfo) {
     auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
     if (!instance->is<P4::ExternFunction>()) return boost::none;
 
@@ -1309,7 +1309,7 @@ static void analyzeControl(P4RuntimeAnalyzer& analyzer,
                            const IR::ControlBlock* controlBlock,
                            ReferenceMap* refMap,
                            TypeMap* typeMap,
-                           p4::P4TypeInfo* p4RtTypeInfo) {
+                           p4configv1::P4TypeInfo* p4RtTypeInfo) {
     CHECK_NULL(controlBlock);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
@@ -1354,7 +1354,7 @@ static void analyzeExtern(P4RuntimeAnalyzer& analyzer,
                           const IR::ExternBlock* externBlock,
                           const ReferenceMap* refMap,
                           const TypeMap* typeMap,
-                          p4::P4TypeInfo* p4RtTypeInfo) {
+                          p4configv1::P4TypeInfo* p4RtTypeInfo) {
     CHECK_NULL(externBlock);
     CHECK_NULL(typeMap);
 
@@ -1787,10 +1787,10 @@ class P4RuntimeEntriesConverter {
     friend class P4RuntimeAnalyzer;
 
     P4RuntimeEntriesConverter(const P4RuntimeSymbolTable& symbols)
-        : entries(new p4::WriteRequest), symbols(symbols) { }
+        : entries(new p4v1::WriteRequest), symbols(symbols) { }
 
     /// @return the P4Runtime WriteRequest message generated by this analyzer.
-    const p4::WriteRequest* getEntries() const {
+    const p4v1::WriteRequest* getEntries() const {
         BUG_CHECK(entries != nullptr, "Didn't produce a P4Runtime WriteRequest object?");
         return entries;
     }
@@ -1810,7 +1810,7 @@ class P4RuntimeEntriesConverter {
         auto needsPriority = tableNeedsPriority(table, refMap);
         for (auto e : entriesList->entries) {
             auto protoUpdate = entries->add_updates();
-            protoUpdate->set_type(p4::Update::INSERT);
+            protoUpdate->set_type(p4v1::Update::INSERT);
             auto protoEntity = protoUpdate->mutable_entity();
             auto protoEntry = protoEntity->mutable_table_entry();
             protoEntry->set_table_id(tableId);
@@ -1839,7 +1839,7 @@ class P4RuntimeEntriesConverter {
       return false;
     }
 
-    void addAction(p4::TableEntry* protoEntry,
+    void addAction(p4v1::TableEntry* protoEntry,
                    const IR::Expression* actionRef,
                    ReferenceMap* refMap) const {
         if (!actionRef->is<IR::MethodCallExpression>()) {
@@ -1868,7 +1868,7 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addMatchKey(p4::TableEntry* protoEntry,
+    void addMatchKey(p4v1::TableEntry* protoEntry,
                      const IR::P4Table* table,
                      const IR::ListExpression* keyset,
                      ReferenceMap* refMap) const {
@@ -1896,7 +1896,7 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addExact(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
         auto bytes = ROUNDUP(keyWidth, 8);
         auto protoExact = protoMatch->mutable_exact();
         if (k->is<IR::Constant>()) {
@@ -1908,7 +1908,7 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addLpm(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addLpm(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
         auto bytes = ROUNDUP(keyWidth, 8);
         auto protoLpm = protoMatch->mutable_lpm();
         if (k->is<IR::Mask>()) {
@@ -1938,7 +1938,7 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addTernary(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addTernary(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
         auto bytes = ROUNDUP(keyWidth, 8);
         auto protoTernary = protoMatch->mutable_ternary();
         if (k->is<IR::Mask>()) {
@@ -1961,7 +1961,7 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addRange(p4::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addRange(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
         auto bytes = ROUNDUP(keyWidth, 8);
         auto protoRange = protoMatch->mutable_range();
         if (k->is<IR::Range>()) {
@@ -2004,7 +2004,7 @@ class P4RuntimeEntriesConverter {
     }
 
     /// We represent all static table entries as one P4Runtime WriteRequest object
-    p4::WriteRequest *entries;
+    p4v1::WriteRequest *entries;
     /// The symbols used in the API and their ids.
     const P4RuntimeSymbolTable& symbols;
 };
