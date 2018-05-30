@@ -13,6 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <core.p4>
+
 #ifndef _PORTABLE_SWITCH_ARCHITECTURE_P4_
 #define _PORTABLE_SWITCH_ARCHITECTURE_P4_
 
