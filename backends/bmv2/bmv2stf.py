@@ -540,8 +540,8 @@ class RunBMV2(object):
         wait = 0  # Time to wait before model starts running
 
         if self.options.usePsa:
-            switch = "portable_switch"
-            switch_cli = "portable_switch_CLI"
+            switch = "psa_switch"
+            switch_cli = "psa_switch_CLI"
         else:
             switch = "simple_switch"
             switch_cli = "simple_switch_CLI"

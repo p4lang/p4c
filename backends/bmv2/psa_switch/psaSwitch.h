@@ -41,9 +41,9 @@ limitations under the License.
 
 namespace BMV2 {
 
-class PortableSwitchExpressionConverter : public ExpressionConverter {
+class PsaSwitchExpressionConverter : public ExpressionConverter {
  public:
-    PortableSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+    PsaSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                                       ProgramStructure* structure, cstring scalarsName) :
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
@@ -180,18 +180,18 @@ class ConvertPsaToJson : public Inspector {
     void postorder(UNUSED const IR::P4Program* program) override {
         cstring scalarsName = refMap->newName("scalars");
         // This visitor is used in multiple passes to convert expression to json
-        auto conv = new PortableSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
+        auto conv = new PsaSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
         structure->create(ctxt);
     }
 };
 
-class PortableSwitchBackend : public Backend {
+class PsaSwitchBackend : public Backend {
     BMV2Options &options;
 
  public:
     void convert(const IR::ToplevelBlock* tlb) override;
-    PortableSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+    PsaSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                           P4::ConvertEnums::EnumMapping* enumMap) :
         Backend(options, refMap, typeMap, enumMap), options(options) { }
 };

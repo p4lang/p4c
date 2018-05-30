@@ -30,7 +30,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "backends/bmv2/common/midend.h"
 #include "backends/bmv2/common/JsonObjects.h"
-#include "portableSwitch.h"
+#include "psaSwitch.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -87,7 +87,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto backend = new BMV2::PortableSwitchBackend(options, &midEnd.refMap,
+    auto backend = new BMV2::PsaSwitchBackend(options, &midEnd.refMap,
             &midEnd.typeMap, &midEnd.enumMap);
 
     try {

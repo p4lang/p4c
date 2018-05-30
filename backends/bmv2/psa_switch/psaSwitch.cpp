@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include "frontends/common/model.h"
-#include "portableSwitch.h"
+#include "psaSwitch.h"
 
 namespace BMV2 {
 
@@ -393,7 +393,7 @@ void InspectPsaProgram::postorder(const IR::P4Control *c) {
     }
 }
 
-void PortableSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
+void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     CHECK_NULL(tlb);
     PsaProgramStructure structure(refMap, typeMap);
 

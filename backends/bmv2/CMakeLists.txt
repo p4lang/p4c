@@ -23,12 +23,12 @@ set (BMV2_SIMPLE_SWITCH_SRCS
     )
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SIMPLE_SWITCH_SRCS}")
 
-set (BMV2_PORTABLE_SWITCH_SRCS
-    portable_switch/main.cpp
-    portable_switch/portableSwitch.cpp
-    portable_switch/portableSwitch.h
+set (BMV2_PSA_SWITCH_SRCS
+    psa_switch/main.cpp
+    psa_switch/psaSwitch.cpp
+    psa_switch/psaSwitch.h
     )
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PORTABLE_SWITCH_SRCS}")
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
 
 set (BMV2_BACKEND_COMMON_SRCS
   common/JsonObjects.cpp
@@ -83,8 +83,8 @@ target_link_libraries (p4c-bm-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 install(TARGETS p4c-bm-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
-build_unified(BMV2_PORTABLE_SWiTCH_SRCS)
-add_executable(p4c-bm-psa ${BMV2_PORTABLE_SWITCH_SRCS})
+build_unified(BMV2_PSA_SWiTCH_SRCS)
+add_executable(p4c-bm-psa ${BMV2_PSA_SWITCH_SRCS})
 target_link_libraries (p4c-bm-psa bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 install(TARGETS p4c-bm-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
@@ -124,7 +124,7 @@ set (BMV2_PSA_TEST_SUITES
   ${psa_tests}
   )
 
-# -p to use portable switch model
+# -p to use psa switch model
 # -a to pass flags to compiler
 set (testExtraFlags "${testExtraFlags} -p -a '--target bmv2 --arch psa'")
 

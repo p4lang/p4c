@@ -52,7 +52,7 @@ class Options(object):
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
         self.hasBMv2 = False            # Is the behavioral model installed?
-        self.usePsa = False             # Use the portable switch behavioral model?
+        self.usePsa = False             # Use the psa switch behavioral model?
         self.runDebugger = False
         self.observationLog = None           # Log packets produced by the BMV2 model if path to log is supplied
 
@@ -109,7 +109,7 @@ def usage(options):
     print("options:")
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
-    print("          -p: use portable switch")
+    print("          -p: use psa switch")
     print("          -f: replace reference outputs with newly generated ones")
     print("          -a option: pass this option to the compiler")
     print("          -gdb: run compiler under gdb")

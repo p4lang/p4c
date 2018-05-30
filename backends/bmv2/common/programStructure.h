@@ -24,7 +24,7 @@ namespace BMV2 {
 using ResourceMap = ordered_map<const IR::Node*, const IR::CompileTimeValue*>;
 
 // Represents all the compile-time information about a P4-16 program that
-// is common to all bmv2 targets (simple switch and portable switch).
+// is common to all bmv2 targets (simple switch and psa switch).
 class ProgramStructure {
  public:
     /// Map action to parent control.
