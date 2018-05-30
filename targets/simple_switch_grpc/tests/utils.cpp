@@ -28,11 +28,13 @@
 #include <streambuf>
 #include <string>
 
+namespace p4configv1 = ::p4::config::v1;
+
 namespace sswitch_grpc {
 
 namespace testing {
 
-int get_table_id(const p4::config::P4Info &p4info,
+int get_table_id(const p4configv1::P4Info &p4info,
                  const std::string &t_name) {
   for (const auto &table : p4info.tables()) {
     const auto &pre = table.preamble();
@@ -41,7 +43,7 @@ int get_table_id(const p4::config::P4Info &p4info,
   return 0;
 }
 
-int get_action_id(const p4::config::P4Info &p4info,
+int get_action_id(const p4configv1::P4Info &p4info,
                   const std::string &a_name) {
   for (const auto &action : p4info.actions()) {
     const auto &pre = action.preamble();
@@ -50,7 +52,7 @@ int get_action_id(const p4::config::P4Info &p4info,
   return 0;
 }
 
-int get_mf_id(const p4::config::P4Info &p4info,
+int get_mf_id(const p4configv1::P4Info &p4info,
               const std::string &t_name, const std::string &mf_name) {
   for (const auto &table : p4info.tables()) {
     const auto &pre = table.preamble();
@@ -61,7 +63,7 @@ int get_mf_id(const p4::config::P4Info &p4info,
   return -1;
 }
 
-int get_param_id(const p4::config::P4Info &p4info,
+int get_param_id(const p4configv1::P4Info &p4info,
                  const std::string &a_name, const std::string &param_name) {
   for (const auto &action : p4info.actions()) {
     const auto &pre = action.preamble();
@@ -72,8 +74,8 @@ int get_param_id(const p4::config::P4Info &p4info,
   return -1;
 }
 
-p4::config::P4Info parse_p4info(const char *path) {
-  p4::config::P4Info p4info;
+p4configv1::P4Info parse_p4info(const char *path) {
+  p4configv1::P4Info p4info;
   std::ifstream istream(path);
   assert(istream.good());
   // p4info.ParseFromIstream(&istream);

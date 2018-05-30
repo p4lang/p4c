@@ -21,7 +21,7 @@
 #include <grpc++/grpc++.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 
 #include <google/protobuf/util/message_differencer.h>
 
@@ -31,6 +31,8 @@
 #include <string>
 
 #include "base_test.h"
+
+namespace p4v1 = ::p4::v1;
 
 namespace sswitch_grpc {
 
@@ -62,9 +64,9 @@ class SimpleSwitchGrpcTest_Ternary : public SimpleSwitchGrpcBaseTest {
     a_s2_id = get_action_id(p4info, "ingress.send_2");
   }
 
-  p4::Entity make_entry(const std::string &v, const std::string &mask,
+  p4v1::Entity make_entry(const std::string &v, const std::string &mask,
                         int32_t priority, int a_id) const {
-    p4::Entity entity;
+    p4v1::Entity entity;
     auto table_entry = entity.mutable_table_entry();
     table_entry->set_table_id(t_id);
     auto match = table_entry->add_match();
@@ -79,25 +81,25 @@ class SimpleSwitchGrpcTest_Ternary : public SimpleSwitchGrpcBaseTest {
     return entity;
   }
 
-  grpc::Status add_entry(const p4::Entity &entry) const {
-    p4::WriteRequest request;
+  grpc::Status add_entry(const p4v1::Entity &entry) const {
+    p4v1::WriteRequest request;
     request.set_device_id(device_id);
     auto update = request.add_updates();
-    update->set_type(p4::Update_Type_INSERT);
+    update->set_type(p4v1::Update_Type_INSERT);
     update->mutable_entity()->CopyFrom(entry);
     ClientContext context;
-    p4::WriteResponse rep;
+    p4v1::WriteResponse rep;
     return Write(&context, request, &rep);
   }
 
-  grpc::Status read_entry(const p4::Entity &entry,
-                          p4::ReadResponse *rep) const {
-    p4::ReadRequest request;
+  grpc::Status read_entry(const p4v1::Entity &entry,
+                          p4v1::ReadResponse *rep) const {
+    p4v1::ReadRequest request;
     request.set_device_id(device_id);
     auto *entity = request.add_entities();
     entity->CopyFrom(entry);
     ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
         p4runtime_stub->Read(&context, request));
     reader->Read(rep);
     return reader->Finish();
@@ -136,7 +138,7 @@ TEST_F(SimpleSwitchGrpcTest_Ternary, ReadEntry) {
     EXPECT_TRUE(status.ok());
   }
   {
-    p4::ReadResponse rep;
+    p4v1::ReadResponse rep;
     auto status = read_entry(entity, &rep);
     EXPECT_TRUE(status.ok());
     ASSERT_EQ(1u, rep.entities().size());

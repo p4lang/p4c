@@ -21,7 +21,7 @@
 #include <grpc++/grpc++.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 
 #include <gtest/gtest.h>
 
@@ -29,6 +29,8 @@
 #include <string>
 
 #include "base_test.h"
+
+namespace p4v1 = ::p4::v1;
 
 namespace sswitch_grpc {
 
@@ -62,7 +64,7 @@ TEST_F(SimpleSwitchGrpcTest_Meter, ReadDefault) {
   auto mf_id = get_mf_id(p4info, "ingress.t_redirect", "sm.ingress_port");
   auto a_id = get_action_id(p4info, "ingress.port_redirect");
 
-  p4::TableEntry table_entry;
+  p4v1::TableEntry table_entry;
   table_entry.set_table_id(t_id);
   auto match = table_entry.add_match();
   match->set_field_id(mf_id);
@@ -73,29 +75,29 @@ TEST_F(SimpleSwitchGrpcTest_Meter, ReadDefault) {
   action->set_action_id(a_id);
 
   {
-    p4::WriteRequest write_request;
+    p4v1::WriteRequest write_request;
     write_request.set_device_id(device_id);
     auto update = write_request.add_updates();
-    update->set_type(p4::Update_Type_INSERT);
+    update->set_type(p4v1::Update_Type_INSERT);
     auto entity = update->mutable_entity();
     entity->mutable_table_entry()->CopyFrom(table_entry);
-    p4::WriteResponse write_response;
+    p4v1::WriteResponse write_response;
     ClientContext context;
     auto status = Write(&context, write_request, &write_response);
     EXPECT_TRUE(status.ok());
   }
 
   {
-    p4::ReadRequest read_request;
+    p4v1::ReadRequest read_request;
     read_request.set_device_id(device_id);
     auto read_entity = read_request.add_entities();
     table_entry.mutable_meter_config();  // make sure meter config is read
     read_entity->mutable_table_entry()->CopyFrom(table_entry);
 
     ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
         p4runtime_stub->Read(&context, read_request));
-    p4::ReadResponse read_response;
+    p4v1::ReadResponse read_response;
     reader->Read(&read_response);
     auto status = reader->Finish();
     EXPECT_TRUE(status.ok());

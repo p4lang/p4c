@@ -21,7 +21,7 @@
 #include <grpc++/grpc++.h>
 
 #include <google/rpc/code.pb.h>
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 #include <p4/tmp/p4config.grpc.pb.h>
 
 #include <google/protobuf/util/message_differencer.h>
@@ -32,6 +32,8 @@
 #include <string>
 
 #include "utils.h"
+
+namespace p4v1 = ::p4::v1;
 
 namespace sswitch_grpc {
 
@@ -53,12 +55,12 @@ test() {
 
   auto channel = grpc::CreateChannel(
       "localhost:50051", grpc::InsecureChannelCredentials());
-  std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
-      p4::P4Runtime::NewStub(channel));
+  std::unique_ptr<p4v1::P4Runtime::Stub> pi_stub_(
+      p4v1::P4Runtime::NewStub(channel));
 
   auto p4info = parse_p4info(test_proto_txt);
 
-  auto set_election_id = [](p4::Uint128 *election_id) {
+  auto set_election_id = [](p4v1::Uint128 *election_id) {
     election_id->set_high(0);
     election_id->set_low(1);
   };
@@ -68,22 +70,22 @@ test() {
   ClientContext stream_context;
   auto stream = pi_stub_->StreamChannel(&stream_context);
   {
-    p4::StreamMessageRequest request;
+    p4v1::StreamMessageRequest request;
     auto arbitration = request.mutable_arbitration();
     arbitration->set_device_id(dev_id);
     set_election_id(arbitration->mutable_election_id());
     stream->Write(request);
-    p4::StreamMessageResponse response;
+    p4v1::StreamMessageResponse response;
     stream->Read(&response);
-    assert(response.update_case() == p4::StreamMessageResponse::kArbitration);
+    assert(response.update_case() == p4v1::StreamMessageResponse::kArbitration);
     assert(response.arbitration().status().code() == ::google::rpc::Code::OK);
   }
 
   {
-    p4::SetForwardingPipelineConfigRequest request;
+    p4v1::SetForwardingPipelineConfigRequest request;
     request.set_device_id(dev_id);
     request.set_action(
-        p4::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
+        p4v1::SetForwardingPipelineConfigRequest_Action_VERIFY_AND_COMMIT);
     set_election_id(request.mutable_election_id());
     auto config = request.mutable_config();
     config->set_allocated_p4info(&p4info);
@@ -94,7 +96,7 @@ test() {
          std::istreambuf_iterator<char>());
     device_config.SerializeToString(config->mutable_p4_device_config());
 
-    p4::SetForwardingPipelineConfigResponse rep;
+    p4v1::SetForwardingPipelineConfigResponse rep;
     ClientContext context;
     auto status = pi_stub_->SetForwardingPipelineConfig(
         &context, request, &rep);
@@ -108,7 +110,7 @@ test() {
   auto p0_id = get_param_id(p4info, "set_nhop", "nhop_ipv4");
   auto p1_id = get_param_id(p4info, "set_nhop", "port");
 
-  p4::Entity entity;
+  p4v1::Entity entity;
   auto table_entry = entity.mutable_table_entry();
   table_entry->set_table_id(t_id);
   auto match = table_entry->add_match();
@@ -132,28 +134,28 @@ test() {
 
   // add entry
   {
-    p4::WriteRequest request;
+    p4v1::WriteRequest request;
     set_election_id(request.mutable_election_id());
     request.set_device_id(dev_id);
     auto update = request.add_updates();
-    update->set_type(p4::Update_Type_INSERT);
+    update->set_type(p4v1::Update_Type_INSERT);
     update->set_allocated_entity(&entity);
     ClientContext context;
-    p4::WriteResponse rep;
+    p4v1::WriteResponse rep;
     auto status = pi_stub_->Write(&context, request, &rep);
     assert(status.ok());
     update->release_entity();
   }
 
   auto read_one = [&dev_id, &pi_stub_, &table_entry] () {
-    p4::ReadRequest request;
+    p4v1::ReadRequest request;
     request.set_device_id(dev_id);
     auto entity = request.add_entities();
     entity->set_allocated_table_entry(table_entry);
     ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
         pi_stub_->Read(&context, request));
-    p4::ReadResponse rep;
+    p4v1::ReadResponse rep;
     reader->Read(&rep);
     auto status = reader->Finish();
     assert(status.ok());
@@ -170,14 +172,14 @@ test() {
 
   // remove entry
   {
-    p4::WriteRequest request;
+    p4v1::WriteRequest request;
     set_election_id(request.mutable_election_id());
     request.set_device_id(dev_id);
     auto update = request.add_updates();
-    update->set_type(p4::Update_Type_DELETE);
+    update->set_type(p4v1::Update_Type_DELETE);
     update->set_allocated_entity(&entity);
     ClientContext context;
-    p4::WriteResponse rep;
+    p4v1::WriteResponse rep;
     auto status = pi_stub_->Write(&context, request, &rep);
     assert(status.ok());
     update->release_entity();
@@ -191,7 +193,7 @@ test() {
 
   {
     stream->WritesDone();
-    p4::StreamMessageResponse response;
+    p4v1::StreamMessageResponse response;
     while (stream->Read(&response)) { }
     auto status = stream->Finish();
     assert(status.ok());

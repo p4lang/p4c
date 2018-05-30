@@ -20,7 +20,7 @@
 
 #include <grpc++/grpc++.h>
 
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 
 #include <gtest/gtest.h>
 
@@ -30,6 +30,8 @@
 #include <string>
 
 #include "base_test.h"
+
+namespace p4v1 = ::p4::v1;
 
 namespace sswitch_grpc {
 
@@ -60,7 +62,7 @@ TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
   auto p0_id = get_param_id(p4info, "set_nhop", "nhop_ipv4");
   auto p1_id = get_param_id(p4info, "set_nhop", "port");
 
-  p4::Entity entity;
+  p4v1::Entity entity;
   auto table_entry = entity.mutable_table_entry();
   table_entry->set_table_id(t_id);
   auto match = table_entry->add_match();
@@ -84,27 +86,27 @@ TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
 
   // add entry
   {
-    p4::WriteRequest request;
+    p4v1::WriteRequest request;
     request.set_device_id(device_id);
     auto update = request.add_updates();
-    update->set_type(p4::Update_Type_INSERT);
+    update->set_type(p4v1::Update_Type_INSERT);
     update->set_allocated_entity(&entity);
     ClientContext context;
-    p4::WriteResponse rep;
+    p4v1::WriteResponse rep;
     auto status = Write(&context, request, &rep);
     EXPECT_TRUE(status.ok());
     update->release_entity();
   }
 
   auto read_one = [this, &table_entry] () {
-    p4::ReadRequest request;
+    p4v1::ReadRequest request;
     request.set_device_id(device_id);
     auto entity = request.add_entities();
     entity->set_allocated_table_entry(table_entry);
     ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
         p4runtime_stub->Read(&context, request));
-    p4::ReadResponse rep;
+    p4v1::ReadResponse rep;
     reader->Read(&rep);
     auto status = reader->Finish();
     EXPECT_TRUE(status.ok());
@@ -121,13 +123,13 @@ TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
 
   // remove entry
   {
-    p4::WriteRequest request;
+    p4v1::WriteRequest request;
     request.set_device_id(device_id);
     auto update = request.add_updates();
-    update->set_type(p4::Update_Type_DELETE);
+    update->set_type(p4v1::Update_Type_DELETE);
     update->set_allocated_entity(&entity);
     ClientContext context;
-    p4::WriteResponse rep;
+    p4v1::WriteResponse rep;
     auto status = Write(&context, request, &rep);
     EXPECT_TRUE(status.ok());
     update->release_entity();

@@ -21,7 +21,7 @@
 #ifndef SIMPLE_SWITCH_GRPC_TESTS_UTILS_H_
 #define SIMPLE_SWITCH_GRPC_TESTS_UTILS_H_
 
-#include <p4/config/p4info.grpc.pb.h>
+#include <p4/config/v1/p4info.grpc.pb.h>
 
 #include <string>
 
@@ -29,17 +29,19 @@ namespace sswitch_grpc {
 
 namespace testing {
 
-int get_table_id(const p4::config::P4Info &p4info, const std::string &t_name);
+int get_table_id(const p4::config::v1::P4Info &p4info,
+                 const std::string &t_name);
 
-int get_action_id(const p4::config::P4Info &p4info, const std::string &a_name);
+int get_action_id(const p4::config::v1::P4Info &p4info,
+                  const std::string &a_name);
 
-int get_mf_id(const p4::config::P4Info &p4info,
+int get_mf_id(const p4::config::v1::P4Info &p4info,
               const std::string &t_name, const std::string &mf_name);
 
-int get_param_id(const p4::config::P4Info &p4info,
+int get_param_id(const p4::config::v1::P4Info &p4info,
                  const std::string &a_name, const std::string &param_name);
 
-p4::config::P4Info parse_p4info(const char *path);
+p4::config::v1::P4Info parse_p4info(const char *path);
 
 }  // namespace testing
 

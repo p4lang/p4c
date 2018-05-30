@@ -20,7 +20,7 @@
 
 #include <grpc++/grpc++.h>
 
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 #include <PI/proto/pi_server.h>
 
 #include <gtest/gtest.h>
@@ -29,6 +29,8 @@
 #include <string>
 
 #include "base_test.h"
+
+namespace p4v1 = ::p4::v1;
 
 namespace sswitch_grpc {
 
@@ -52,7 +54,7 @@ class SimpleSwitchGrpcTest_PacketIO : public SimpleSwitchGrpcBaseTest {
 
 TEST_F(SimpleSwitchGrpcTest_PacketIO, SendAndReceiveCPUPacket) {
   std::string payload(10, '\xab');
-  p4::StreamMessageRequest request;
+  p4v1::StreamMessageRequest request;
 
   ClientContext context;
   auto stream = p4runtime_stub->StreamChannel(&context);
@@ -71,10 +73,10 @@ TEST_F(SimpleSwitchGrpcTest_PacketIO, SendAndReceiveCPUPacket) {
   packet_out->set_payload(payload);
   stream->Write(request);
 
-  p4::StreamMessageResponse response;
+  p4v1::StreamMessageResponse response;
   size_t packet_count = 0;
   while (stream->Read(&response)) {
-    if (response.update_case() == p4::StreamMessageResponse::kPacket) {
+    if (response.update_case() == p4v1::StreamMessageResponse::kPacket) {
       const auto &packet_in = response.packet();
       EXPECT_EQ(packet_in.payload(), payload);
       packet_count++;

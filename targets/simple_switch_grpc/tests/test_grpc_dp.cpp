@@ -21,7 +21,6 @@
 #include <grpc++/grpc++.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
-#include <p4/p4runtime.grpc.pb.h>
 
 #include <gtest/gtest.h>
 

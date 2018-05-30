@@ -15,7 +15,7 @@
 #include <grpc++/grpc++.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 
 #include <gtest/gtest.h>
 
@@ -23,6 +23,8 @@
 #include <string>
 
 #include "base_test.h"
+
+namespace p4v1 = ::p4::v1;
 
 namespace sswitch_grpc {
 
@@ -57,7 +59,7 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
   auto a_id = get_action_id(p4info, "port_redirect");
 
   auto make_table_entry = [&](const std::string &key_string,
-                              p4::TableEntry *table_entry) {
+                              p4v1::TableEntry *table_entry) {
     table_entry->set_table_id(t_id);
     auto match = table_entry->add_match();
     match->set_field_id(mf_id);
@@ -69,14 +71,14 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
   };
 
   auto write_one_entry = [&](const std::string &key_string) {
-    p4::WriteRequest write_request;
+    p4v1::WriteRequest write_request;
     write_request.set_device_id(device_id);
     auto update = write_request.add_updates();
-    update->set_type(p4::Update_Type_INSERT);
+    update->set_type(p4v1::Update_Type_INSERT);
     auto entity = update->mutable_entity();
     make_table_entry(key_string, entity->mutable_table_entry());
 
-    p4::WriteResponse write_response;
+    p4v1::WriteResponse write_response;
     ClientContext context;
     auto status = Write(&context, write_request, &write_response);
     EXPECT_TRUE(status.ok());
@@ -107,16 +109,16 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
 
   auto read_one_counter = [&](const std::string &key_string,
                               int packet_count, int byte_count) {
-    p4::ReadRequest read_request;
+    p4v1::ReadRequest read_request;
     read_request.set_device_id(device_id);
     auto read_entity = read_request.add_entities();
     auto direct_counter_entry = read_entity->mutable_direct_counter_entry();
     make_table_entry(key_string, direct_counter_entry->mutable_table_entry());
 
     ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
         p4runtime_stub->Read(&context, read_request));
-    p4::ReadResponse read_response;
+    p4v1::ReadResponse read_response;
     reader->Read(&read_response);
     auto status = reader->Finish();
     EXPECT_TRUE(status.ok());
@@ -131,7 +133,7 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
 
   auto read_one_counter_from_table_entry = [&](
       const std::string &key_string, int packet_count, int byte_count) {
-    p4::ReadRequest read_request;
+    p4v1::ReadRequest read_request;
     read_request.set_device_id(device_id);
     auto read_entity = read_request.add_entities();
     auto table_entry = read_entity->mutable_table_entry();
@@ -139,9 +141,9 @@ TEST_F(SimpleSwitchGrpcTest_Counter, CounterHit) {
     table_entry->mutable_counter_data();  // makes sure that counter is read
 
     ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4::ReadResponse> > reader(
+    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
         p4runtime_stub->Read(&context, read_request));
-    p4::ReadResponse read_response;
+    p4v1::ReadResponse read_response;
     reader->Read(&read_response);
     auto status = reader->Finish();
     EXPECT_TRUE(status.ok());

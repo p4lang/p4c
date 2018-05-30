@@ -21,8 +21,8 @@
 #ifndef SIMPLE_SWITCH_GRPC_TESTS_BASE_TEST_H_
 #define SIMPLE_SWITCH_GRPC_TESTS_BASE_TEST_H_
 
-#include <p4/config/p4info.grpc.pb.h>
-#include <p4/p4runtime.grpc.pb.h>
+#include <p4/config/v1/p4info.grpc.pb.h>
+#include <p4/v1/p4runtime.grpc.pb.h>
 
 #include <gtest/gtest.h>
 
@@ -59,20 +59,20 @@ class SimpleSwitchGrpcBaseTest : public ::testing::Test {
 
   void update_json(const char *json_path);
 
-  void set_election_id(p4::Uint128 *election_id) const;
+  void set_election_id(p4::v1::Uint128 *election_id) const;
 
   // calls p4runtime_stub->Write, with the appropriate election_id
   grpc::Status Write(ClientContext *context,
-                     p4::WriteRequest &request,
-                     p4::WriteResponse *response) const;
+                     p4::v1::WriteRequest &request,
+                     p4::v1::WriteResponse *response) const;
 
   std::shared_ptr<grpc::Channel> p4runtime_channel;
-  std::unique_ptr<p4::P4Runtime::Stub> p4runtime_stub;
-  using ReaderWriter = ::grpc::ClientReaderWriter<p4::StreamMessageRequest,
-                                                  p4::StreamMessageResponse>;
+  std::unique_ptr<p4::v1::P4Runtime::Stub> p4runtime_stub;
+  using ReaderWriter = ::grpc::ClientReaderWriter<
+      p4::v1::StreamMessageRequest, p4::v1::StreamMessageResponse>;
   ClientContext stream_context;
   std::unique_ptr<ReaderWriter> stream{nullptr};
-  p4::config::P4Info p4info{};
+  p4::config::v1::P4Info p4info{};
 };
 
 }  // namespace testing
