@@ -13,6 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include<core.p4>
+
 #ifndef _PORTABLE_SWITCH_ARCHITECTURE_P4_
 #define _PORTABLE_SWITCH_ARCHITECTURE_P4_
 
@@ -420,7 +422,7 @@ enum MeterType_t {
 // END:MeterType_defn
 
 // BEGIN:MeterColor_defn
-enum MeterColor_t { RED, GREEN, YELLOW };
+enum MeterColor_t { RED, GREEN, YELLOW }
 // END:MeterColor_defn
 
 // BEGIN:Meter_extern
