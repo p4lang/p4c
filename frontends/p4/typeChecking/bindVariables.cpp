@@ -9,6 +9,8 @@ const IR::Type* BindTypeVariables::getVarValue(
     auto type = typeMap->getSubstitution(var);
     if (type != nullptr)
         rtype = type->getP4Type();
+    else
+        rtype = new IR::Type_Dontcare;
     if (rtype == nullptr) {
         cstring errorMessage;
         if (type != nullptr && type->is<IR::Type_InfInt>())

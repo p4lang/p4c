@@ -1,6 +1,3 @@
-issue774-2.p4(9): error: p.extract: cannot infer type for type parameter T
-        p.extract(_);
-        ^^^^^^^^^^^^
-core.p4(36)
-    void extract<T>(out T hdr);
-                 ^
+issue774-2.p4(11): error: Could not infer type for DefaultExpression
+        b.extract(_);
+                  ^
