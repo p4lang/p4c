@@ -57,10 +57,21 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
 /// Width of a bit<> type is at least 0
 /// Width of an int<> type is at least 1
 void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
+    if (type->expression)
+        // cannot validate yet
+        return;
     if (type->size <= 0)
-        ::error("%1%: Illegal bit size", type);
+        ::error("%1%: Illegal type size", type);
     if (type->size == 1 && type->isSigned)
         ::error("%1%: Signed types cannot be 1-bit wide", type);
+}
+
+void ValidateParsedProgram::postorder(const IR::Type_Varbits* type) {
+    if (type->expression)
+        // cannot validate yet
+        return;
+    if (type->size <= 0)
+        ::error("%1%: Illegal type size", type);
 }
 
 /// The accept and reject states cannot be implemented

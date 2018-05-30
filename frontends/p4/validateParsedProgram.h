@@ -61,6 +61,7 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::ParserState* s) override;
     void postorder(const IR::P4Table* t) override;
     void postorder(const IR::Type_Bits* type) override;
+    void postorder(const IR::Type_Varbits* type) override;
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Variable* decl) override;
     void postorder(const IR::Declaration_Instance* inst) override;
