@@ -21,11 +21,11 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/json.h"
 #include "lib/ordered_map.h"
+#include "JsonObjects.h"
 #include "controlFlowGraph.h"
+#include "expression.h"
 #include "frontends/common/model.h"
 #include "programStructure.h"
-#include "expression.h"
-#include "JsonObjects.h"
 #include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {

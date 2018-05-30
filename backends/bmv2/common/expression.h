@@ -78,10 +78,11 @@ class ExpressionConverter : public Inspector {
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
 
-    /// Architectures typically has some special parameters that requires special handling.
-    /// The examples are standard_metadata in the v1model and packet path related metadata
-    /// in PSA. Each target should subclass the ExpressionConverter and implement this
-    /// function with target-specific handling code to deal with the special parameters.
+    // Each architecture typically has some special parameters that requires
+    // special handling. The examples are standard_metadata in the v1model and
+    // packet path related metadata in PSA. Each target should subclass the
+    // ExpressionConverter and implement this function with target-specific
+    // handling code to deal with the special parameters.
     virtual Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) = 0;
 
     Util::IJson* get(const IR::Expression* expression) const;

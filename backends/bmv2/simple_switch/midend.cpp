@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "midend.h"
-#include "lower.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -52,31 +51,9 @@ limitations under the License.
 
 namespace BMV2 {
 
-/**
-This class implements a policy suitable for the ConvertEnums pass.
-The policy is: convert all enums that are not part of the v1model.
-Use 32-bit values for all enums.
-*/
-class EnumOn32Bits : public P4::ChooseEnumRepresentation {
-    bool convert(const IR::Type_Enum* type) const override {
-        if (type->srcInfo.isValid()) {
-            auto sourceFile = type->srcInfo.getSourceFile();
-            if (sourceFile.endsWith(P4V1::V1Model::instance.file.name))
-                // Don't convert any of the standard enums
-                return false;
-        }
-        return true;
-    }
-    unsigned enumSize(unsigned) const override
-    { return 32; }
-};
-
-MidEnd::MidEnd(CompilerOptions& options) {
-    bool isv1 = options.isv1();
-    setName("MidEnd");
-    refMap.setIsV1(isv1);  // must be done BEFORE creating passes
+SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
     addPasses({
         new P4::RemoveActionParameters(&refMap, &typeMap),
         convertEnums,
@@ -105,12 +82,11 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::MoveDeclarations(),
-        (options.arch == "v1model") ?
-         new P4::ValidateTableProperties({ "implementation", "size", "counters",
-                                           "meters", "support_timeout" }) : nullptr,
-        (options.arch == "psa") ?
-        new P4::ValidateTableProperties({ "psa_implementation", "size", "psa_direct_counter",
-                                          "psa_direct_meter", "psa_idle_timeout" }) : nullptr,
+        new P4::ValidateTableProperties({ "implementation",
+                                          "size",
+                                          "counters",
+                                          "meters",
+                                          "support_timeout" }),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),

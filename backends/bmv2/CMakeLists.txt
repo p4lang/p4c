@@ -18,6 +18,8 @@
 # sources for backend executable
 set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/main.cpp
+    simple_switch/midend.cpp
+    simple_switch/midend.h
     simple_switch/simpleSwitch.cpp
     simple_switch/simpleSwitch.h
     )
@@ -25,6 +27,8 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SIMPLE_SWITCH_SRCS}")
 
 set (BMV2_PSA_SWITCH_SRCS
     psa_switch/main.cpp
+    psa_switch/midend.cpp
+    psa_switch/midend.h
     psa_switch/psaSwitch.cpp
     psa_switch/psaSwitch.h
     )
@@ -43,7 +47,6 @@ set (BMV2_BACKEND_COMMON_SRCS
   common/helpers.cpp
   common/lower.cpp
   common/metermap.cpp
-  common/midend.cpp
   common/parser.cpp
   common/programStructure.cpp
   common/sharedActionSelectorCheck.cpp
@@ -150,9 +153,14 @@ set (XFAIL_TESTS
 
 if (HAVE_SIMPLE_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
-  #p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding BMv2 tests")
+endif()
+
+if (HAVE_PSA_SWITCH)
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
+else()
+  MESSAGE(WARNING "BMv2 psa switch is not available, not adding BMv2 tests")
 endif()
 
 set (GTEST_BMV2_SOURCES

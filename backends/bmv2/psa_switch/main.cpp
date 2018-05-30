@@ -28,9 +28,9 @@ limitations under the License.
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "backends/bmv2/common/midend.h"
 #include "backends/bmv2/common/JsonObjects.h"
-#include "psaSwitch.h"
+#include "backends/bmv2/psa_switch/midend.h"
+#include "backends/bmv2/psa_switch/psaSwitch.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -71,7 +71,7 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     const IR::ToplevelBlock* toplevel = nullptr;
-    BMV2::MidEnd midEnd(options);
+    BMV2::PsaSwitchMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);

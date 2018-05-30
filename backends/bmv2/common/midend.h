@@ -18,11 +18,35 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_MIDEND_H_
 
 #include "ir/ir.h"
+#include "lower.h"
 #include "frontends/common/options.h"
 #include "midend/convertEnums.h"
-#include "helpers.h"
 
 namespace BMV2 {
+
+/**
+This class implements a policy suitable for the ConvertEnums pass.
+The policy is: convert all enums that are not part of the v1model.
+Use 32-bit values for all enums.
+*/
+class EnumOn32Bits : public P4::ChooseEnumRepresentation {
+    cstring filename;
+
+    bool convert(const IR::Type_Enum* type) const override {
+        if (type->srcInfo.isValid()) {
+            auto sourceFile = type->srcInfo.getSourceFile();
+            if (sourceFile.endsWith(filename))
+                // Don't convert any of the standard enums
+                return false;
+        }
+        return true;
+    }
+    unsigned enumSize(unsigned) const override
+    { return 32; }
+
+ public:
+    explicit EnumOn32Bits(cstring filename) : filename(filename) { }
+};
 
 class MidEnd : public PassManager {
  public:
@@ -31,8 +55,12 @@ class MidEnd : public PassManager {
     P4::TypeMap         typeMap;
     const IR::ToplevelBlock   *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
+    bool isv1;
 
-    explicit MidEnd(CompilerOptions& options);
+    explicit MidEnd(CompilerOptions& options) {
+        isv1 = options.isv1();
+        refMap.setIsV1(isv1);  // must be done BEFORE creating passes
+    }
     const IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }
