@@ -43,6 +43,7 @@ limitations under the License.
 #include "midend/removeSelectBooleans.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
+#include "midend/orderArguments.h"
 #include "midend/predication.h"
 #include "midend/expandLookahead.h"
 #include "midend/expandEmit.h"
@@ -58,6 +59,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
         new P4::RemoveActionParameters(&refMap, &typeMap),
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
+        new P4::OrderArguments(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::OrPolicy(

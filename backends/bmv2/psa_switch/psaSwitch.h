@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PORTABLE_SWITCH_PORTABLESWITCH_H_
-#define BACKENDS_BMV2_PORTABLE_SWITCH_PORTABLESWITCH_H_
+#ifndef BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_
+#define BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_
 
 #include "ir/ir.h"
 #include "lib/gmputil.h"
@@ -211,4 +211,4 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Digest)
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_PORTABLE_SWITCH_PORTABLESWITCH_H_ */
+#endif  /* BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_ */

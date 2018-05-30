@@ -43,6 +43,7 @@ limitations under the License.
 #include "midend/removeSelectBooleans.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
+#include "midend/orderArguments.h"
 #include "midend/predication.h"
 #include "midend/expandLookahead.h"
 #include "midend/expandEmit.h"
@@ -52,13 +53,13 @@ limitations under the License.
 namespace BMV2 {
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
-
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("psa.p4"));
     addPasses({
         new P4::RemoveActionParameters(&refMap, &typeMap),
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
+        new P4::OrderArguments(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::OrPolicy(
