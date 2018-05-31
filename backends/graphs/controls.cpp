@@ -89,6 +89,7 @@ void ControlGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
 
 bool ControlGraphs::preorder(const IR::PackageBlock *block) {
     for (auto it : block->constantValue) {
+        if (!it.second) continue;
         if (it.second->is<IR::ControlBlock>()) {
             auto name = it.second->to<IR::ControlBlock>()->container->name;
             LOG1("Generating graph for top-level control " << name);
@@ -108,6 +109,8 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
             controlStack.popBack();
             GraphAttributeSetter()(g_);
             writeGraphToFile(g_, name);
+        } else if (it.second->is<IR::PackageBlock>()) {
+            visit(it.second->getNode());
         }
     }
     return false;
