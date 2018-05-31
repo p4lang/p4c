@@ -149,6 +149,11 @@ set (XFAIL_TESTS
   testdata/p4_14_samples/issue604.p4
   # This test uses an incorrect model
   testdata/p4_16_samples/issue1205-bmv2.p4
+  # These psa tests are not ready to run on bmv2 yet
+  testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  testdata/p4_16_samples/psa-example-digest-bmv2.p4
+  testdata/p4_16_samples/psa-example-register2-bmv2.p4
+  testdata/p4_16_samples/psa-fwd-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
