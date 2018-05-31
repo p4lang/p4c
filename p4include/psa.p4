@@ -13,6 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#ifndef __PSA_P4__
+#define __PSA_P4__
+
 #include <core.p4>
 
 #ifndef _PORTABLE_SWITCH_ARCHITECTURE_P4_
@@ -684,3 +687,5 @@ package PSA_Switch<IH, IM, EH, EM, NM, CI2EM, CE2EM, RESUBM, RECIRCM> (
 // END:Programmable_blocks
 
 #endif  /* _PORTABLE_SWITCH_ARCHITECTURE_P4_ */
+
+#endif   // __PSA_P4__
