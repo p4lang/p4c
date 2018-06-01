@@ -71,14 +71,14 @@ TEST(cstring, compare) {
     EXPECT_FALSE(c == "other");   // NOLINT
     EXPECT_TRUE(c != "other");    // NOLINT
 
-    EXPECT_TRUE(c < "zombie");
-    EXPECT_FALSE(c < "awesome");
-    EXPECT_TRUE(c <= "zombie");
-    EXPECT_FALSE(c <= "awesome");
-    EXPECT_TRUE(c >= "awesome");
-    EXPECT_TRUE(c > "awesome");
-    EXPECT_FALSE(c >= "zombie");
-    EXPECT_FALSE(c > "zombie");
+    EXPECT_TRUE(c < "zombie");    // NOLINT
+    EXPECT_FALSE(c < "awesome");  // NOLINT
+    EXPECT_TRUE(c <= "zombie");   // NOLINT
+    EXPECT_FALSE(c <= "awesome"); // NOLINT
+    EXPECT_TRUE(c >= "awesome");  // NOLINT
+    EXPECT_TRUE(c > "awesome");   // NOLINT
+    EXPECT_FALSE(c >= "zombie");  // NOLINT
+    EXPECT_FALSE(c > "zombie");   // NOLINT
 
     const char* ptr = c.c_str();
     EXPECT_FALSE(strncmp(ptr, "simple", 7));
