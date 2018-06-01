@@ -136,7 +136,7 @@ class DoConstantFolding : public Transform {
     const IR::Node* postorder(IR::Type_Bits* type) override;
     const IR::Node* postorder(IR::Type_Varbits* type) override;
     const IR::Node* postorder(IR::SelectExpression* e) override;
-    const IR::Node* postorder(IR::IfStatement* ) override;
+    const IR::Node* postorder(IR::IfStatement* statement) override;
 };
 
 /** Optionally runs @ref TypeChecking if @p typeMap is not

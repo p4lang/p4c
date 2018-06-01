@@ -87,8 +87,12 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->size <= 0)
+            if (type->size <= 0) {
                 ::error("%1%: Illegal type size", type);
+                // Convert it to something legal so we don't get
+                // weird errors elsewhere.
+                type->size = 64;
+            }
             if (type->size == 1 && type->isSigned)
                 ::error("%1%: Signed types cannot be 1-bit wide", type);
         } else {
