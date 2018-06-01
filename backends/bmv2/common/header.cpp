@@ -112,7 +112,7 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
                 ctxt->typeMap->setType(sf, ft);
                 auto hdrType = new IR::Type_Header(headerName, *vec);
                 ctxt->typeMap->setType(hdrType, hdrType);
-                json->add_metadata(headerName, f->name);
+                ctxt->json->add_metadata(headerName, f->name);
                 if (visitedHeaders.find(headerName) != visitedHeaders.end())
                     continue;  // already seen
                 visitedHeaders.emplace(headerName);
