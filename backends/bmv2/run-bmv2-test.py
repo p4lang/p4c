@@ -38,7 +38,7 @@ try:
 except ImportError:
     pass
 from bmv2stf import RunBMV2
-
+import pdb
 SUCCESS = 0
 FAILURE = 1
 
@@ -52,6 +52,7 @@ class Options(object):
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
         self.hasBMv2 = False            # Is the behavioral model installed?
+        self.usePsa = False             # Use the psa switch behavioral model?
         self.runDebugger = False
         self.observationLog = None           # Log packets produced by the BMV2 model if path to log is supplied
 
@@ -108,11 +109,13 @@ def usage(options):
     print("options:")
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
+    print("          -p: use psa switch")
     print("          -f: replace reference outputs with newly generated ones")
     print("          -a option: pass this option to the compiler")
     print("          -gdb: run compiler under gdb")
     print("          --pp file: pass this option to the compiler")
     print("          -observation-log <file>: save packet output to <file>")
+
 
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
@@ -170,7 +173,6 @@ def run_model(options, tmpdir, jsonfile):
     if not os.path.isfile(testfile):
         # If no empty.stf present, don't try to run the model at all
         return SUCCESS
-
     bmv2 = RunBMV2(tmpdir, options, jsonfile)
     result = bmv2.generate_model_inputs(testfile)
     if result != SUCCESS:
@@ -200,7 +202,13 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-bm2-ss", "-o", jsonfile] + options.compilerOptions
+
+    if options.usePsa:
+        binary = "./p4c-bm-psa"
+    else:
+        binary = "./p4c-bm-ss"
+
+    args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"]);
     args.extend(argv)  # includes p4filename
@@ -208,6 +216,7 @@ def process_file(options, argv):
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
+    #result = SUCCESS
 
     if result != SUCCESS:
         print("Error compiling")
@@ -257,6 +266,8 @@ def main(argv):
             options.verbose = True
         elif argv[0] == "-f":
             options.replace = True
+        elif argv[0] == "-p":
+            options.usePsa = True
         elif argv[0] == "-a":
             if len(argv) == 0:
                 reportError("Missing argument for -a option")

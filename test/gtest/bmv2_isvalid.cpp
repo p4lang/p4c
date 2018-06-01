@@ -17,7 +17,7 @@ limitations under the License.
 #include <map>
 
 #include "gtest/gtest.h"
-#include "backends/bmv2/helpers.h"
+#include "backends/bmv2/common/helpers.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/createBuiltins.h"
