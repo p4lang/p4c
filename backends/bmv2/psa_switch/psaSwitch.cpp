@@ -58,7 +58,7 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
             if (varbitFound)
                 ::error("%1%: headers with multiple varbit fields not supported", st);
             varbitFound = true;
-        } else if (auto type = ftype->to<IR::Type_Error>()) {
+        } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
             field->append(error_width);
             field->append(0);

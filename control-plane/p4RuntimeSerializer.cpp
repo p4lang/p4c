@@ -47,7 +47,6 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "lib/ordered_set.h"
 #include "midend/removeParameters.h"
-#include "midend/synthesizeValidField.h"
 
 #include "p4RuntimeSerializer.h"
 #include "p4RuntimeArchHandler.h"
@@ -1302,8 +1301,6 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
         // We can only handle a very restricted class of action parameters - the
         // types need to be bit<> or int<> - so we fail without this pass.
         new P4::RemoveActionParameters(&refMap, &typeMap),
-        // We need a $valid$ field preinserted before we generate P4Runtime.
-        new P4::SynthesizeValidField(&refMap, &typeMap),
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true),
         evaluator

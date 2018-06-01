@@ -105,4 +105,12 @@ TEST(cstring, substr) {
     ASSERT_TRUE(c.exceptLast(2) == "simple"); // NOLINT
 }
 
+TEST(cstring, replace) {
+    cstring c = "Original";
+    ASSERT_TRUE(c.replace("in", "out") == "Origoutal");  // NOLINT
+    ASSERT_TRUE(c.replace("", "out") == c);  // NOLINT
+    ASSERT_TRUE(c.replace("i", "o") == "Orogonal");  // NOLINT
+    ASSERT_TRUE(c.replace("i", "") == "Orgnal");  // NOLINT
+}
+
 }  // namespace Test

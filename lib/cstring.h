@@ -150,6 +150,7 @@ class cstring {
     { return (start >= size()) ? "" : substr(start, size() - start); }
     cstring substr(size_t start, size_t length) const;
     cstring replace(char find, char replace) const;
+    cstring replace(cstring find, cstring replace) const;
     cstring exceptLast(size_t count) { return substr(0, size() - count); }
 
     // Useful singletons.
