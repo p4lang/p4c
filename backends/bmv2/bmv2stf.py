@@ -55,6 +55,7 @@ class Options(object):
         self.verbose = False
         self.preserveTmp = False
         self.observationLog = None
+        self.usePsa = False
 
 def nextWord(text, sep = None):
     # Split a text at the indicated separator.
@@ -354,6 +355,7 @@ class RunBMV2(object):
         self.actions = []
         self.switchLogFile = "switch.log"  # .txt is added by BMv2
         self.readJson()
+
     def readJson(self):
         with open(self.jsonfile) as jf:
             self.json = json.load(jf)
@@ -537,6 +539,13 @@ class RunBMV2(object):
             print("Running model")
         wait = 0  # Time to wait before model starts running
 
+        if self.options.usePsa:
+            switch = "psa_switch"
+            switch_cli = "psa_switch_CLI"
+        else:
+            switch = "simple_switch"
+            switch_cli = "simple_switch_CLI"
+
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
         if rand is None:
@@ -549,7 +558,7 @@ class RunBMV2(object):
         except OSError:
             pass
         try:
-            runswitch = [FindExe("behavioral-model", "simple_switch"),
+            runswitch = [FindExe("behavioral-model", switch),
                          "--log-file", self.switchLogFile, "--log-flush",
                          "--use-files", str(wait), "--thrift-port", thriftPort,
                          "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
@@ -598,7 +607,7 @@ class RunBMV2(object):
                 return FAILURE
             time.sleep(0.1)
 
-            runcli = [FindExe("behavioral-model", "simple_switch_CLI"), "--thrift-port", thriftPort]
+            runcli = [FindExe("behavioral-model", switch_cli), "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
 
@@ -625,10 +634,10 @@ class RunBMV2(object):
             # This only works on Unix: negative returncode is
             # minus the signal number that killed the process.
             if sw.returncode != 0 and sw.returncode != -15:  # 15 is SIGTERM
-                reportError("simple_switch died with return code", sw.returncode);
+                reportError(switch, "died with return code", sw.returncode);
                 rv = FAILURE
             elif self.options.verbose:
-                print("simple_switch exit code", sw.returncode)
+                print(switch, "exit code", sw.returncode)
             cli.wait()
             if cli.returncode != 0 and cli.returncode != -15:
                 reportError("CLI process failed with exit code", cli.returncode)
@@ -730,7 +739,7 @@ def run_model(options, tmpdir, jsonfile, testfile):
 ######################### main
 
 def usage(options):
-    print("usage:", options.binary, "[-v] [-observation-log <file>] <json file> <stf file>");
+    print("usage:", options.binary, "[-v] [-p] [-observation-log <file>] <json file> <stf file>");
 
 def main(argv):
     options = Options()
@@ -741,6 +750,8 @@ def main(argv):
             options.preserveTmp = True
         elif argv[0] == "-v":
             options.verbose = True
+        elif argv[0] == "-p":
+            options.usePsa = True
         elif argv[0] == '-observation-log':
             if len(argv) == 1:
                 reportError("Missing argument", argv[0])
