@@ -92,6 +92,16 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
     } else if (decl->is<IR::Type_Error>()) {
         // enable "error" field in P4DataTypeSpec's type_spec oneof
         (void)typeSpec->mutable_error();
+    } else if (decl->is<IR::Type_Typedef>()) {
+        // Type_Name nodes for typedefs are only replaced in the midend, not the
+        // frontend, but the P4Info generation happens after the frontend, so we
+        // have to handle this case.
+        auto typedefType = decl->to<IR::Type_Typedef>()->type;
+        visit(typedefType);
+        typeSpec = map.at(typedefType);
+        CHECK_NULL(typeSpec);
+        map.emplace(type, typeSpec);
+        return false;
     } else {
         BUG("Unexpected named type %1%", type);
     }
