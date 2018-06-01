@@ -19,6 +19,82 @@ limitations under the License.
 
 namespace EBPF {
 
+void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+    builder->append(
+        "#define KBUILD_MODNAME \"bpftest\"\n"
+        "#include <linux/bpf.h>\n"
+        "#include \"../ebpf_user.h\"\n"
+        "\n"
+        "#define load_byte(data, b)  (*(((u8*)(data)) + (b)))\n"
+        "#define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))\n"
+        "#define load_word(data, b) __constant_ntohl(*(u32 *)((u8*)(data) + (b)))\n"
+        "#define load_dword(data, b) __constant_ntohl(*(u64 *)((u8*)(data) + (b)))\n"
+        "#define htonl(d) __constant_htonl(d)\n"
+        "#define htons(d) __constant_htons(d)\n");
+}
+
+void TestTarget::emitMain(Util::SourceCodeBuilder* builder,
+                                   cstring functionName,
+                                   cstring argName) const {
+    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+}
+
+void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
+                                        cstring tblName, bool isHash,
+                                        cstring keyType, cstring valueType,
+                                        unsigned size) const {
+    builder->emitIndent();
+    builder->appendFormat("struct bpf_map_def SEC(\"maps\") %s = ", tblName);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append(".type = ");
+    if (isHash)
+        builder->appendLine("BPF_MAP_TYPE_HASH,");
+    else
+        builder->appendLine("BPF_MAP_TYPE_ARRAY,");
+
+    builder->emitIndent();
+    builder->appendFormat(".key_size = sizeof(%s),", keyType);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat(".value_size = sizeof(%s),", valueType);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat(".max_entries = %d, ", size);
+    builder->newline();
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+}
+
+void TestTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
+                                          cstring key, cstring value) const {
+    builder->appendFormat("%s = bpf_map_lookup_elem(&%s, &%s)",
+                          value, tblName, key);
+}
+
+void TestTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                                          cstring key, cstring value) const {
+    builder->appendFormat("bpf_map_update_elem(&%s, &%s, &%s, BPF_ANY);",
+                          tblName, key, value);
+}
+
+void TestTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                                          cstring key, cstring value) const {
+    builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
+                          tblName, key, value);
+}
+
+void TestTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
+    builder->emitIndent();
+    builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license);
+    builder->newline();
+}
+
+//////////////////////////////////////////////////////////////
+
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
     builder->append(
         "#include <linux/skbuff.h>\n"
