@@ -36,7 +36,6 @@ set (MIDEND_SRCS
   simplifyKey.cpp
   simplifySelectCases.cpp
   simplifySelectList.cpp
-  synthesizeValidField.cpp
   tableHit.cpp
   validateProperties.cpp
   )
@@ -69,7 +68,6 @@ set (MIDEND_HDRS
   simplifyKey.h
   simplifySelectCases.h
   simplifySelectList.h
-  synthesizeValidField.h
   tableHit.h
   validateProperties.h
   )
