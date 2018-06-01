@@ -204,9 +204,9 @@ def process_file(options, argv):
         raise Exception("No such file " + options.p4filename)
 
     if options.usePsa:
-        binary = "./p4c-bm-psa"
+        binary = "./p4c-bm2-psa"
     else:
-        binary = "./p4c-bm-ss"
+        binary = "./p4c-bm2-ss"
 
     args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
