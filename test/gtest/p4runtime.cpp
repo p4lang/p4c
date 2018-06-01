@@ -1149,4 +1149,36 @@ TEST_F(P4RuntimeDataTypeSpec, Error) {
     EXPECT_EQ("MBR_2", typeInfo.error().members(1));
 }
 
+TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
+    std::string program = P4_SOURCE(R"(
+        typedef bit<8> my_type_t;
+        typedef my_type_t my_type2_t;
+        struct my_struct { my_type_t f; my_type2_t f2; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_struct>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &typeMap, &refMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_struct_());
+    EXPECT_EQ("my_struct", typeSpec->struct_().name());
+
+    auto it = typeInfo.structs().find("my_struct");
+    ASSERT_TRUE(it != typeInfo.structs().end());
+    ASSERT_EQ(2, it->second.members_size());
+    auto check_member = [&](cstring name, int index) {
+      EXPECT_EQ(name, it->second.members(index).name());
+      const auto &memberTypeSpec = it->second.members(0).type_spec();
+      ASSERT_TRUE(memberTypeSpec.has_bitstring());
+      ASSERT_TRUE(memberTypeSpec.bitstring().has_bit());
+      EXPECT_EQ(8, memberTypeSpec.bitstring().bit().bitwidth());
+    };
+    check_member("f", 0);
+    check_member("f2", 1);
+}
+
 }  // namespace Test
