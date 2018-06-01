@@ -16,7 +16,7 @@ limitations under the License.
 #ifndef __PSA_P4__
 #define __PSA_P4__
 
-#include <core.p4>
+#include<core.p4>
 
 #ifndef _PORTABLE_SWITCH_ARCHITECTURE_P4_
 #define _PORTABLE_SWITCH_ARCHITECTURE_P4_
