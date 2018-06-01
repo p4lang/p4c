@@ -105,7 +105,8 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
             } else if (auto vbt = ft->to<IR::Type_Varbits>()) {
                 // For each varbit variable we synthesize a separate header instance,
                 // since we cannot have multiple varbit fields in a single header.
-                cstring headerName = "struct$varbit" + Util::toString(vbt->size);  // This name will be unique
+                // This name will be unique
+                cstring headerName = "struct$varbit" + Util::toString(vbt->size);
                 auto vec = new IR::IndexedVector<IR::StructField>();
                 auto sf = new IR::StructField("field", ft);
                 vec->push_back(sf);
