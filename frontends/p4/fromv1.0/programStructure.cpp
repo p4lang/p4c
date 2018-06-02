@@ -1836,9 +1836,11 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     auto kindarg = counterType(m);
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(m->name, m->annotations);
-    auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
-    if (meterPreColor != nullptr)
-        annos = annos->addAnnotation("pre_color", meterPreColor);
+    if (m->pre_color != nullptr) {
+        auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
+        if (meterPreColor != nullptr)
+            annos = annos->addAnnotation("pre_color", meterPreColor);
+    }
     auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
     return decl;
 }
