@@ -36,6 +36,12 @@ void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
 void TestTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
+    builder->appendFormat("void init_tables() {");
+    builder->newline();
+    builder->newline();
+    builder->appendFormat("}");
+    builder->newline();
+    builder->newline();
     builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
 }
 
@@ -71,19 +77,25 @@ void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
 
 void TestTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("%s = bpf_map_lookup_elem(&%s, &%s)",
-                          value, tblName, key);
+    builder->appendFormat("value = malloc(%s.value_size);", tblName);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("int ret = bpf_map_lookup_elem(%s.id, &%s, value);",
+                          tblName, key, value);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("if (ret == -1) free(value), value = NULL");
 }
 
 void TestTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("bpf_map_update_elem(&%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("bpf_map_update_elem(%s.id, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
 void TestTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("bpf_map_update_elem(%s.id, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
