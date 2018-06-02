@@ -159,17 +159,16 @@ set (XFAIL_TESTS
 if (HAVE_SIMPLE_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
 else()
-  MESSAGE(WARNING "BMv2 simple switch is not available, not adding BMv2 tests")
+  MESSAGE(WARNING "BMv2 simple switch is not available, not adding v1model BMv2 tests")
 endif()
 
 if (HAVE_PSA_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
 else()
-  MESSAGE(WARNING "BMv2 psa switch is not available, not adding BMv2 tests")
+  MESSAGE(WARNING "BMv2 PSA switch is not available, not adding PSA BMv2 tests")
 endif()
 
 set (GTEST_BMV2_SOURCES
-  ${P4C_SOURCE_DIR}/test/gtest/bmv2_isvalid.cpp
   )
 
 set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BMV2_SOURCES} PARENT_SCOPE)

@@ -44,5 +44,5 @@ endif(PSA_SWITCH_CLI)
 mark_as_advanced(PSA_SWITCH PSA_SWITCH_CLI)
 
 find_package_handle_standard_args ("BMv2 programs"
-  "Program 'psa_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_SEARCH_PATHS}.\nWill not run BMv2 tests."
+  "Program 'psa_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_SEARCH_PATHS}.\nWill not run PSA BMv2 tests."
   PSA_SWITCH PSA_SWITCH_CLI)

@@ -78,6 +78,22 @@ cstring cstring::replace(char c, char with) const {
     return cstring(dup);
 }
 
+cstring cstring::replace(cstring search, cstring replace) const {
+    if (search.isNullOrEmpty() || isNullOrEmpty())
+        return *this;
+
+    std::string s_str = str;
+    std::string s_search = search.str;
+    std::string s_replace = replace.str;
+
+    size_t pos = 0;
+    while ((pos = s_str.find(s_search, pos)) != std::string::npos) {
+         s_str.replace(pos, s_search.length(), s_replace);
+         pos += s_replace.length();
+    }
+    return cstring(s_str);
+}
+
 cstring cstring::escapeJson() const {
     std::string out;
     for (size_t i = 0; i < size(); i++) {

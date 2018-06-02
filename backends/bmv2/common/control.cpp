@@ -163,7 +163,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
                                             const IR::Key* key,
                                             Util::JsonObject* table,
                                             Util::JsonArray* action_profiles,
-                                            BMV2::SharedActionSelectorCheck& selector_check) {
+                                            BMV2::SharedActionSelectorCheck&) {
     if (implementation == nullptr) {
         table->emplace("type", "simple");
         return true;
