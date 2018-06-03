@@ -1070,10 +1070,10 @@ class P4RuntimeEntriesConverter {
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
             auto width = parameter->type->width_bits();
             if (arg->expression->is<IR::Constant>()) {
-                auto value = stringRepr(arg->expression->to<IR::Constant>(), ROUNDUP(width, 8));
+                auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
             } else if (arg->expression->is<IR::BoolLiteral>()) {
-                auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), ROUNDUP(width, 8));
+                auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), width);
                 protoParam->set_value(*value);
             } else {
                 ::error("%1% unsupported argument expression", arg->expression);
@@ -1114,11 +1114,11 @@ class P4RuntimeEntriesConverter {
     /// expression is simple (integer literal or boolean literal) or returns
     /// boost::none otherwise.
     boost::optional<std::string> convertSimpleKeyExpression(
-        const IR::Expression* k, int bytes) const {
+        const IR::Expression* k, int keyWidth) const {
         if (k->is<IR::Constant>()) {
-            return stringRepr(k->to<IR::Constant>(), bytes);
+            return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
-            return stringRepr(k->to<IR::BoolLiteral>(), bytes);
+            return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
@@ -1126,19 +1126,17 @@ class P4RuntimeEntriesConverter {
     }
 
     void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto bytes = ROUNDUP(keyWidth, 8);
         auto protoExact = protoMatch->mutable_exact();
-        auto value = convertSimpleKeyExpression(k, bytes);
+        auto value = convertSimpleKeyExpression(k, keyWidth);
         if (value == boost::none) return;
         protoExact->set_value(*value);
     }
 
     void addLpm(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto bytes = ROUNDUP(keyWidth, 8);
         auto protoLpm = protoMatch->mutable_lpm();
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = convertSimpleKeyExpression(km->left, bytes);
+            auto value = convertSimpleKeyExpression(km->left, keyWidth);
             if (value == boost::none) return;
             protoLpm->set_value(*value);
             auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
@@ -1151,10 +1149,10 @@ class P4RuntimeEntriesConverter {
             }
             protoLpm->set_prefix_len(keyWidth - len);
         } else if (k->is<IR::DefaultExpression>()) {
-            protoLpm->set_value(*stringReprConstant(0, bytes));
+            protoLpm->set_value(*stringReprConstant(0, keyWidth));
             protoLpm->set_prefix_len(0);
         } else {
-            auto value = convertSimpleKeyExpression(k, bytes);
+            auto value = convertSimpleKeyExpression(k, keyWidth);
             if (value == boost::none) return;
             protoLpm->set_value(*value);
             protoLpm->set_prefix_len(keyWidth);
@@ -1162,41 +1160,39 @@ class P4RuntimeEntriesConverter {
     }
 
     void addTernary(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto bytes = ROUNDUP(keyWidth, 8);
         auto protoTernary = protoMatch->mutable_ternary();
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = convertSimpleKeyExpression(km->left, bytes);
-            auto mask = convertSimpleKeyExpression(km->right, bytes);
+            auto value = convertSimpleKeyExpression(km->left, keyWidth);
+            auto mask = convertSimpleKeyExpression(km->right, keyWidth);
             if (value == boost::none || mask == boost::none) return;
             protoTernary->set_value(*value);
             protoTernary->set_mask(*mask);
         } else if (k->is<IR::DefaultExpression>()) {
-            protoTernary->set_value(*stringReprConstant(0, bytes));
-            protoTernary->set_mask(*stringReprConstant(0, bytes));
+            protoTernary->set_value(*stringReprConstant(0, keyWidth));
+            protoTernary->set_mask(*stringReprConstant(0, keyWidth));
         } else {
-            auto value = convertSimpleKeyExpression(k, bytes);
+            auto value = convertSimpleKeyExpression(k, keyWidth);
             if (value == boost::none) return;
             protoTernary->set_value(*value);
-            protoTernary->set_mask(*stringReprConstant(Util::mask(keyWidth), bytes));
+            protoTernary->set_mask(*stringReprConstant(Util::mask(keyWidth), keyWidth));
         }
     }
 
     void addRange(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto bytes = ROUNDUP(keyWidth, 8);
         auto protoRange = protoMatch->mutable_range();
         if (k->is<IR::Range>()) {
             auto kr = k->to<IR::Range>();
-            auto start = convertSimpleKeyExpression(kr->left, bytes);
-            auto end = convertSimpleKeyExpression(kr->right, bytes);
+            auto start = convertSimpleKeyExpression(kr->left, keyWidth);
+            auto end = convertSimpleKeyExpression(kr->right, keyWidth);
             if (start == boost::none || end == boost::none) return;
             protoRange->set_low(*start);
             protoRange->set_high(*end);
         } else if (k->is<IR::DefaultExpression>()) {
-            protoRange->set_low(*stringReprConstant(0, bytes));
-            protoRange->set_high(*stringReprConstant((1 << keyWidth)-1, bytes));
+            protoRange->set_low(*stringReprConstant(0, keyWidth));
+            protoRange->set_high(*stringReprConstant((1 << keyWidth)-1, keyWidth));
         } else {
-            auto value = convertSimpleKeyExpression(k, bytes);
+            auto value = convertSimpleKeyExpression(k, keyWidth);
             if (value == boost::none) return;
             protoRange->set_low(*value);
             protoRange->set_high(*value);
@@ -1210,30 +1206,29 @@ class P4RuntimeEntriesConverter {
         return mt->name.name;
     }
 
-    boost::optional<std::string> stringReprConstant(mpz_class value, int bytes) const {
+    boost::optional<std::string> stringReprConstant(mpz_class value, int width) const {
         if (value < 0) {
             ::error("%1%: P4Runtime does not support negative values in match key", value);
             return boost::none;
         }
-        BUG_CHECK(bytes > 0, "Cannot have match fields with width 0");
-        auto bytes_required = [](mpz_class v) {
-            return ROUNDUP(mpz_sizeinbase(v.get_mpz_t(), 2), 8);
-        };
-        BUG_CHECK(static_cast<size_t>(bytes) >= bytes_required(value),
-                  "Cannot represent %1% on %2% bytes", value, bytes);
+        BUG_CHECK(width > 0, "Cannot have match fields with width 0");
+        auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
+        BUG_CHECK(static_cast<size_t>(width) >= bitsRequired,
+                  "Cannot represent %1% on %2% bits", value, width);
+        auto bytes = ROUNDUP(width, 8);
         std::vector<char> data(bytes);
         mpz_export(data.data(), NULL, 1 /* big endian word */, bytes,
                    1 /* big endian bytes */, 0 /* full words */, value.get_mpz_t());
         return std::string(data.begin(), data.end());
     }
 
-    boost::optional<std::string> stringRepr(const IR::Constant* constant, int bytes) const {
-        return stringReprConstant(constant->value, bytes);
+    boost::optional<std::string> stringRepr(const IR::Constant* constant, int width) const {
+        return stringReprConstant(constant->value, width);
     }
 
-    boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int bytes) const {
+    boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width) const {
         auto v = static_cast<mpz_class>(constant->value ? 1 : 0);
-        return stringReprConstant(v, bytes);
+        return stringReprConstant(v, width);
     }
 
     /// We represent all static table entries as one P4Runtime WriteRequest object
