@@ -1069,9 +1069,16 @@ class P4RuntimeEntriesConverter {
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
             auto width = parameter->type->width_bits();
-            auto value = stringRepr(arg->expression->to<IR::Constant>()->value, ROUNDUP(width, 8));
-            if (value == boost::none) continue;
-            protoParam->set_value(*value);
+            if (arg->expression->is<IR::Constant>()) {
+                auto value = stringRepr(arg->expression->to<IR::Constant>(), ROUNDUP(width, 8));
+                protoParam->set_value(*value);
+            } else if (arg->expression->is<IR::BoolLiteral>()) {
+                auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), ROUNDUP(width, 8));
+                protoParam->set_value(*value);
+            } else {
+                ::error("%1% unsupported argument expression", arg->expression);
+                continue;
+            }
         }
     }
 
@@ -1103,16 +1110,27 @@ class P4RuntimeEntriesConverter {
         }
     }
 
+    /// Convert a key expression to the P4Runtime bytes representation if the
+    /// expression is simple (integer literal or boolean literal) or returns
+    /// boost::none otherwise.
+    boost::optional<std::string> convertSimpleKeyExpression(
+        const IR::Expression* k, int bytes) const {
+        if (k->is<IR::Constant>()) {
+            return stringRepr(k->to<IR::Constant>(), bytes);
+        } else if (k->is<IR::BoolLiteral>()) {
+            return stringRepr(k->to<IR::BoolLiteral>(), bytes);
+        } else {
+            ::error("%1% invalid key expression", k);
+            return boost::none;
+        }
+    }
+
     void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
         auto bytes = ROUNDUP(keyWidth, 8);
         auto protoExact = protoMatch->mutable_exact();
-        if (k->is<IR::Constant>()) {
-            auto value = stringRepr(k->to<IR::Constant>()->value, bytes);
-            if (value == boost::none) return;
-            protoExact->set_value(*value);
-        } else {
-            ::error("%1% invalid exact key expression", k);
-        }
+        auto value = convertSimpleKeyExpression(k, bytes);
+        if (value == boost::none) return;
+        protoExact->set_value(*value);
     }
 
     void addLpm(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
@@ -1120,7 +1138,7 @@ class P4RuntimeEntriesConverter {
         auto protoLpm = protoMatch->mutable_lpm();
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = stringRepr(km->left->to<IR::Constant>()->value, bytes);
+            auto value = convertSimpleKeyExpression(km->left, bytes);
             if (value == boost::none) return;
             protoLpm->set_value(*value);
             auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
@@ -1132,16 +1150,14 @@ class P4RuntimeEntriesConverter {
                 return;
             }
             protoLpm->set_prefix_len(keyWidth - len);
-        } else if (k->is<IR::Constant>()) {
-            auto value = stringRepr(k->to<IR::Constant>()->value, bytes);
+        } else if (k->is<IR::DefaultExpression>()) {
+            protoLpm->set_value(*stringReprConstant(0, bytes));
+            protoLpm->set_prefix_len(0);
+        } else {
+            auto value = convertSimpleKeyExpression(k, bytes);
             if (value == boost::none) return;
             protoLpm->set_value(*value);
             protoLpm->set_prefix_len(keyWidth);
-        } else if (k->is<IR::DefaultExpression>()) {
-            protoLpm->set_value(*stringRepr(0, bytes));
-            protoLpm->set_prefix_len(0);
-        } else {
-            ::error("%1% invalid LPM key expression", k);
         }
     }
 
@@ -1150,21 +1166,19 @@ class P4RuntimeEntriesConverter {
         auto protoTernary = protoMatch->mutable_ternary();
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = stringRepr(km->left->to<IR::Constant>()->value, bytes);
-            auto mask = stringRepr(km->right->to<IR::Constant>()->value, bytes);
+            auto value = convertSimpleKeyExpression(km->left, bytes);
+            auto mask = convertSimpleKeyExpression(km->right, bytes);
             if (value == boost::none || mask == boost::none) return;
             protoTernary->set_value(*value);
             protoTernary->set_mask(*mask);
-        } else if (k->is<IR::Constant>()) {
-            auto value = stringRepr(k->to<IR::Constant>()->value, bytes);
+        } else if (k->is<IR::DefaultExpression>()) {
+            protoTernary->set_value(*stringReprConstant(0, bytes));
+            protoTernary->set_mask(*stringReprConstant(0, bytes));
+        } else {
+            auto value = convertSimpleKeyExpression(k, bytes);
             if (value == boost::none) return;
             protoTernary->set_value(*value);
-            protoTernary->set_mask(*stringRepr(Util::mask(keyWidth), bytes));
-        } else if (k->is<IR::DefaultExpression>()) {
-            protoTernary->set_value(*stringRepr(0, bytes));
-            protoTernary->set_mask(*stringRepr(0, bytes));
-        } else {
-            ::error("%1% invalid ternary key expression", k);
+            protoTernary->set_mask(*stringReprConstant(Util::mask(keyWidth), bytes));
         }
     }
 
@@ -1173,16 +1187,19 @@ class P4RuntimeEntriesConverter {
         auto protoRange = protoMatch->mutable_range();
         if (k->is<IR::Range>()) {
             auto kr = k->to<IR::Range>();
-            auto start = stringRepr(kr->left->to<IR::Constant>()->value, bytes);
-            auto end = stringRepr(kr->right->to<IR::Constant>()->value, bytes);
+            auto start = convertSimpleKeyExpression(kr->left, bytes);
+            auto end = convertSimpleKeyExpression(kr->right, bytes);
             if (start == boost::none || end == boost::none) return;
             protoRange->set_low(*start);
             protoRange->set_high(*end);
         } else if (k->is<IR::DefaultExpression>()) {
-            protoRange->set_low(*stringRepr(0, bytes));
-            protoRange->set_high(*stringRepr((1 << keyWidth)-1, bytes));
+            protoRange->set_low(*stringReprConstant(0, bytes));
+            protoRange->set_high(*stringReprConstant((1 << keyWidth)-1, bytes));
         } else {
-            ::error("%1% invalid range key expression", k);
+            auto value = convertSimpleKeyExpression(k, bytes);
+            if (value == boost::none) return;
+            protoRange->set_low(*value);
+            protoRange->set_high(*value);
         }
     }
 
@@ -1193,7 +1210,7 @@ class P4RuntimeEntriesConverter {
         return mt->name.name;
     }
 
-    boost::optional<std::string> stringRepr(mpz_class value, int bytes) const {
+    boost::optional<std::string> stringReprConstant(mpz_class value, int bytes) const {
         if (value < 0) {
             ::error("%1%: P4Runtime does not support negative values in match key", value);
             return boost::none;
@@ -1208,6 +1225,15 @@ class P4RuntimeEntriesConverter {
         mpz_export(data.data(), NULL, 1 /* big endian word */, bytes,
                    1 /* big endian bytes */, 0 /* full words */, value.get_mpz_t());
         return std::string(data.begin(), data.end());
+    }
+
+    boost::optional<std::string> stringRepr(const IR::Constant* constant, int bytes) const {
+        return stringReprConstant(constant->value, bytes);
+    }
+
+    boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int bytes) const {
+        auto v = static_cast<mpz_class>(constant->value ? 1 : 0);
+        return stringReprConstant(v, bytes);
     }
 
     /// We represent all static table entries as one P4Runtime WriteRequest object

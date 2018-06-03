@@ -670,7 +670,7 @@ TEST_F(P4Runtime, StaticTableEntries) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<8> hfA; bit<16> hfB; }
         struct Headers { Header h; }
-        struct Metadata { }
+        struct Metadata { bool b; }
 
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
@@ -697,7 +697,19 @@ TEST_F(P4Runtime, StaticTableEntries) {
                     (0x04, _                ) : a_with_control_params(4);
                 }
             }
-            apply { t_exact_ternary.apply(); }
+
+            action a_with_bool_param(bool x) { m.b = x; }
+
+            table t_exact_valid {
+                key = { h.h.isValid() : exact; }
+                actions = { a; a_with_bool_param; }
+                default_action = a;
+                const entries = {
+                    (true) : a_with_bool_param(true);
+                    (false) : a_with_bool_param(false);
+                }
+            }
+            apply { t_exact_ternary.apply(); t_exact_valid.apply(); }
         }
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
@@ -706,58 +718,91 @@ TEST_F(P4Runtime, StaticTableEntries) {
     ASSERT_TRUE(test);
     EXPECT_EQ(0u, ::diagnosticCount());
 
-    auto table = findTable(*test, "ingress.t_exact_ternary");
-    ASSERT_TRUE(table != nullptr);
-    EXPECT_TRUE(table->is_const_table());
-    auto action = findAction(*test, "ingress.a_with_control_params");
-    ASSERT_TRUE(action != nullptr);
-    unsigned int hfAId = 1;
-    unsigned int hfBId = 2;
-    unsigned int xId = 1;
-
     auto entries = test->entries;
     const auto& updates = entries->updates();
-    ASSERT_EQ(4, updates.size());
-    int priority = 0;
-    auto check_entry = [&](const p4v1::Update& update,
-                           const std::string& exact_v,
-                           const std::string& ternary_v,
-                           const std::string& ternary_mask,
-                           const std::string& param_v) {
-        EXPECT_EQ(p4v1::Update::INSERT, update.type());
-        const auto& protoEntry = update.entity().table_entry();
-        EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
+    ASSERT_EQ(6, updates.size());
 
-        ASSERT_EQ(2, protoEntry.match().size());
-        const auto& mfA = protoEntry.match().Get(0);
-        EXPECT_EQ(hfAId, mfA.field_id());
-        EXPECT_EQ(exact_v, mfA.exact().value());
-        const auto& mfB = protoEntry.match().Get(1);
-        EXPECT_EQ(hfBId, mfB.field_id());
-        EXPECT_EQ(ternary_v, mfB.ternary().value());
-        EXPECT_EQ(ternary_mask, mfB.ternary().mask());
+    {
+        auto table = findTable(*test, "ingress.t_exact_ternary");
+        ASSERT_TRUE(table != nullptr);
+        EXPECT_TRUE(table->is_const_table());
+        unsigned int hfAId = 1;
+        unsigned int hfBId = 2;
+        unsigned int xId = 1;
+        auto action = findAction(*test, "ingress.a_with_control_params");
+        ASSERT_TRUE(action != nullptr);
 
-        const auto& protoAction = protoEntry.action().action();
-        EXPECT_EQ(action->preamble().id(), protoAction.action_id());
-        ASSERT_EQ(1, protoAction.params().size());
-        const auto& param = protoAction.params().Get(0);
-        EXPECT_EQ(xId, param.param_id());
-        EXPECT_EQ(param_v, param.value());
+        int priority = 0;
+        auto check_entry = [&](const p4v1::Update& update,
+                               const std::string& exact_v,
+                               const std::string& ternary_v,
+                               const std::string& ternary_mask,
+                               const std::string& param_v) {
+            EXPECT_EQ(p4v1::Update::INSERT, update.type());
+            const auto& protoEntry = update.entity().table_entry();
+            EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
 
-        // increasing numerical priority, i.e. decreasing logical priority
-        EXPECT_LT(priority, protoEntry.priority());
-        priority = protoEntry.priority();
-    };
-    // We assume that the entries are generated in the same order as they appear
-    // in the P4 program
-    check_entry(updates.Get(0), "\x01", "\x11\x11", std::string("\x00\x0f", 2),
-                std::string("\x00\x01", 2));
-    check_entry(updates.Get(1), "\x02", "\x11\x81", "\xff\xff",
-                std::string("\x00\x02", 2));
-    check_entry(updates.Get(2), "\x03", "\x11\x11", std::string("\xf0\x00", 2),
-                std::string("\x00\x03", 2));
-    check_entry(updates.Get(3), "\x04", std::string("\x00\x00", 2),
-                std::string("\x00\x00", 2), std::string("\x00\x04", 2));
+            ASSERT_EQ(2, protoEntry.match().size());
+            const auto& mfA = protoEntry.match().Get(0);
+            EXPECT_EQ(hfAId, mfA.field_id());
+            EXPECT_EQ(exact_v, mfA.exact().value());
+            const auto& mfB = protoEntry.match().Get(1);
+            EXPECT_EQ(hfBId, mfB.field_id());
+            EXPECT_EQ(ternary_v, mfB.ternary().value());
+            EXPECT_EQ(ternary_mask, mfB.ternary().mask());
+
+            const auto& protoAction = protoEntry.action().action();
+            EXPECT_EQ(action->preamble().id(), protoAction.action_id());
+            ASSERT_EQ(1, protoAction.params().size());
+            const auto& param = protoAction.params().Get(0);
+            EXPECT_EQ(xId, param.param_id());
+            EXPECT_EQ(param_v, param.value());
+
+            // increasing numerical priority, i.e. decreasing logical priority
+            EXPECT_LT(priority, protoEntry.priority());
+            priority = protoEntry.priority();
+        };
+        // We assume that the entries are generated in the same order as they
+        // appear in the P4 program
+        check_entry(updates.Get(0), "\x01", "\x11\x11", std::string("\x00\x0f", 2),
+                    std::string("\x00\x01", 2));
+        check_entry(updates.Get(1), "\x02", "\x11\x81", "\xff\xff",
+                    std::string("\x00\x02", 2));
+        check_entry(updates.Get(2), "\x03", "\x11\x11", std::string("\xf0\x00", 2),
+                    std::string("\x00\x03", 2));
+        check_entry(updates.Get(3), "\x04", std::string("\x00\x00", 2),
+                    std::string("\x00\x00", 2), std::string("\x00\x04", 2));
+    }
+
+    {
+        auto table = findTable(*test, "ingress.t_exact_valid");
+        ASSERT_TRUE(table != nullptr);
+        EXPECT_TRUE(table->is_const_table());
+        auto action = findAction(*test, "ingress.a_with_bool_param");
+        ASSERT_TRUE(action != nullptr);
+
+        auto check_entry = [&](const p4v1::Update& update,
+                               const std::string& exact_v,
+                               const std::string& param_v) {
+            EXPECT_EQ(p4v1::Update::INSERT, update.type());
+            const auto& protoEntry = update.entity().table_entry();
+            EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
+
+            ASSERT_EQ(1, protoEntry.match().size());
+            const auto& mf = protoEntry.match().Get(0);
+            EXPECT_EQ(exact_v, mf.exact().value());
+
+            const auto& protoAction = protoEntry.action().action();
+            EXPECT_EQ(action->preamble().id(), protoAction.action_id());
+            ASSERT_EQ(1, protoAction.params().size());
+            const auto& param = protoAction.params().Get(0);
+            EXPECT_EQ(param_v, param.value());
+        };
+        // We assume that the entries are generated in the same order as they
+        // appear in the P4 program
+        check_entry(updates.Get(4), "\x01", "\x01");
+        check_entry(updates.Get(5), std::string("\x00", 1), std::string("\x00", 1));
+    }
 }
 
 TEST_F(P4Runtime, IsConstTable) {
