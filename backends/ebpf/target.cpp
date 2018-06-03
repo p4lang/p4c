@@ -23,7 +23,7 @@ void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
     builder->append(
         "#define KBUILD_MODNAME \"bpftest\"\n"
         "#include <linux/bpf.h>\n"
-        "#include \"../ebpf_user.h\"\n"
+        "#include \"ebpf_user.h\"\n"
         "\n"
         "#define load_byte(data, b)  (*(((u8*)(data)) + (b)))\n"
         "#define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))\n"
@@ -37,7 +37,6 @@ void TestTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
     builder->appendFormat("void init_tables() {");
-    builder->newline();
     builder->newline();
     builder->appendFormat("}");
     builder->newline();
