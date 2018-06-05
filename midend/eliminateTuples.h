@@ -74,6 +74,8 @@ class DoReplaceTuples final : public Transform {
     { return insertReplacements(type); }
     const IR::Node* postorder(IR::Type_Typedef* type) override
     { return insertReplacements(type); }
+    const IR::Node* postorder(IR::Type_Newtype* type) override
+    { return insertReplacements(type); }
     const IR::Node* postorder(IR::P4Parser* parser) override
     { return insertReplacements(parser); }
     const IR::Node* postorder(IR::P4Control* control) override

@@ -26,7 +26,7 @@
       '("action" "apply" "const" "control"
         "else" "extern" "if" "parser" "package"
         "return" "select" "state" "switch" "table"
-        "transition" "typedef"
+        "transition" "typedef" "type" "value_set"
         ))
 
 (setq p4-attributes

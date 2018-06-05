@@ -40,7 +40,9 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type->is<IR::Type_Var>() ||
         // Similarly for tuples.  This may need to be revisited if we
         // add tuple field accessors.
-        type->is<IR::Type_Tuple>())
+        type->is<IR::Type_Tuple>() ||
+        // Also for newtype
+        type->is<IR::Type_Newtype>())
         return new BaseLocation(type, name);
     if (type->is<IR::Type_StructLike>()) {
         type = typeMap->getTypeType(type, true);  // get the canonical version

@@ -258,6 +258,17 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Type_Newtype* t) {
+    dump(2);
+    visit(t->annotations);
+    builder.append("type ");
+    visit(t->type);
+    builder.spc();
+    builder.append(t->name);
+    builder.endOfStatement();
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Tuple* t) {
     dump(3);
     builder.append("tuple<");

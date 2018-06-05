@@ -503,6 +503,19 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 #nodbprint
 }
 
+/// A newtype is similar to typedef, but it introduces a new type; the
+/// the new type does not inherit any
+/// of the operations of the original type.  The new type has
+/// assignment, equality, and casts to/from the original type.
+/// The keyword for newtype is actually `type'.
+class Type_Newtype : Type_Declaration, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
+    Type                 type;
+    int width_bits() const override { return type->width_bits(); }
+    Annotations getAnnotations() const override { return annotations; }
+#nodbprint
+}
+
 /// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnnotated {
     optional TypeParameters typeParameters = new TypeParameters;

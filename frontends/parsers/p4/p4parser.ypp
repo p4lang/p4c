@@ -154,10 +154,10 @@ typedef const IR::Type ConstType;
 %token      TRUE FALSE THIS
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
             ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-            INT KEY SELECT MATCH_KIND OUT PACKAGE PARSER RETURN STATE STRUCT
+            INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER RETURN STATE STRUCT
             SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
-%token<cstring> IDENTIFIER TYPE STRING_LITERAL
+%token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
 
 %type<IR::ID*>              name nonTypeName
@@ -280,6 +280,7 @@ declaration
 
 nonTypeName
     : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | TYPE        { $$ = new IR::ID(@1, "type"); }
     | APPLY       { $$ = new IR::ID(@1, "apply"); }
     | KEY         { $$ = new IR::ID(@1, "key"); }
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
@@ -289,7 +290,7 @@ nonTypeName
 
 name
     : nonTypeName { $$ = $1; }
-    | TYPE        { $$ = new IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
 optCONST
@@ -594,7 +595,7 @@ methodPrototype
     : optAnnotations functionPrototype ";" { $$ = $2; $2->annotations = $1; }
     | optAnnotations ABSTRACT functionPrototype ";"    { $$ = $3; $$->setAbstract();
                                                          $3->annotations = $1; }  // experimental
-    | optAnnotations TYPE "(" parameterList ")" ";"  // constructor
+    | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@4, *$4);
                                           auto mt = new IR::Type_Method(@2, par);
                                           $$ = new IR::Method(@2, IR::ID(@2, $2), mt, $1); }
@@ -616,8 +617,8 @@ namedType
     ;
 
 prefixedType
-    : TYPE                             { $$ = new IR::Path(IR::ID(@1, $1)); }
-    | dotPrefix TYPE                   { $$ = new IR::Path(IR::ID(@2, $2), true);
+    : TYPE_IDENTIFIER                  { $$ = new IR::Path(IR::ID(@1, $1)); }
+    | dotPrefix TYPE_IDENTIFIER        { $$ = new IR::Path(IR::ID(@2, $2), true);
                                          driver.structure->clearPath(); }
     ;
 
@@ -685,7 +686,7 @@ realTypeArg
     ;
 
 // For use in contexts where the `<` might be a less-than rather than introducing a type
-// argument list -- we only allow the token after `<` to be a TYPE, not an ID
+// argument list -- we only allow the token after `<` to be a TYPE_IDENTIFIER, not an ID
 realTypeArgumentList
     : realTypeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
     | realTypeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
@@ -760,6 +761,10 @@ typedefDeclaration
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
+    | optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
+          $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
+    | optAnnotations TYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+                        $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
     ;
 
 /*************************** STATEMENTS *************************/

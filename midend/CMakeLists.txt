@@ -18,6 +18,7 @@ set (MIDEND_SRCS
   convertEnums.cpp
   copyStructures.cpp
   eliminateTuples.cpp
+  eliminateNewtype.cpp
   expandEmit.cpp
   expandLookahead.cpp
   interpreter.cpp
@@ -47,6 +48,7 @@ set (MIDEND_HDRS
   convertEnums.h
   copyStructures.h
   eliminateTuples.h
+  eliminateNewtype.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h

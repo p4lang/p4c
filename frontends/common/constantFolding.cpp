@@ -27,12 +27,18 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
         return expr;
     if (expr->is<IR::BoolLiteral>())
         return expr;
-    if (expr->is<IR::ListExpression>()) {
-        auto list = expr->to<IR::ListExpression>();
+    if (auto list = expr->to<IR::ListExpression>()) {
         for (auto e : list->components)
             if (getConstant(e) == nullptr)
                 return nullptr;
         return expr;
+    }
+    if (auto cast = expr->to<IR::Cast>()) {
+        // Casts of a constant to a value with type Type_Newtype
+        // are constants, but we cannot fold them.
+        if (getConstant(cast->expr))
+            return expr;
+        return nullptr;
     }
     if (typesKnown) {
         auto ei = EnumInstance::resolve(expr, typeMap);
@@ -621,7 +627,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     if (typesKnown)
         etype = typeMap->getType(getOriginal(), true);
     else
-        etype = e->type;
+        etype = e->destType;
 
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();

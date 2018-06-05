@@ -317,7 +317,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     if (type->is<IR::Type_SpecializedCanonical>() ||
         type->is<IR::Type_InfInt>() ||
         type->is<IR::Type_Action>() ||
-        type->is<IR::Type_Error>()) {
+        type->is<IR::Type_Error>() ||
+        type->is<IR::Type_Newtype>()) {
         return type;
     } else if (type->is<IR::Type_Dontcare>()) {
         return IR::Type_Dontcare::get();
@@ -675,6 +676,13 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
 bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) const {
     if (src == dest)
         return true;
+
+    if (dest->is<IR::Type_Newtype>()) {
+        auto dt = getTypeType(dest->to<IR::Type_Newtype>()->type);
+        if (TypeMap::equivalent(dt, src))
+            return true;
+    }
+
     if (src->is<IR::Type_Bits>()) {
         auto f = src->to<IR::Type_Bits>();
         if (dest->is<IR::Type_Bits>()) {
@@ -693,6 +701,9 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         }
     } else if (src->is<IR::Type_InfInt>()) {
         return dest->is<IR::Type_Bits>();
+    } else if (src->is<IR::Type_Newtype>()) {
+        auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
+        return TypeMap::equivalent(dest, st);
     }
     return false;
 }
@@ -1231,6 +1242,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Base* type) {
     return type;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_Newtype* type) {
+    (void)setTypeType(type);
+    auto argType = getTypeType(type->type);
+    if (!argType->is<IR::Type_Bits>() &&
+        !argType->is<IR::Type_Boolean>() &&
+        !argType->is<IR::Type_Tuple>() &&
+        !argType->is<IR::Type_Newtype>())
+        ::error("%1%: `type' can only be applied to base types or tuple types",
+                type);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Typedef* tdecl) {
     if (done()) return tdecl;
     auto type = getType(tdecl->type);
@@ -1285,8 +1308,10 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t)
-            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
+    auto validator = [] (const IR::Type* t) {
+        while (t->is<IR::Type_Newtype>())
+            t = t->to<IR::Type_Newtype>()->type;
+        return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1310,12 +1335,14 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) {
+        while (t->is<IR::Type_Newtype>())
+            t = t->to<IR::Type_Newtype>()->type;
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
         t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
-        t->is<IR::Type_Varbits>() ||
-        t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>(); };
+        t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
+        t->is<IR::Type_Tuple>(); };
     validateFields(canon, validator);
     return type;
 }
@@ -2085,15 +2112,21 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
-    if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>()) {
-        ::error("%1%: casts are only supported to base types", expression->destType);
+    if (!castType->is<IR::Type_Bits>() &&
+        !castType->is<IR::Type_Boolean>() &&
+        !castType->is<IR::Type_Newtype>()) {
+        ::error("%1%: cast not supported", expression->destType);
         return expression;
     }
 
     if (!canCastBetween(castType, sourceType)) {
-        // This cast is not legal, but let's try to see whether
-        // performing a substitution can help
-        auto rhs = assignment(expression, castType, expression->expr);
+        // This cast is not legal directly, but let's try to see whether
+        // performing a substitution can help.  This will allow the use
+        // of constants on the RHS.
+        const IR::Type* destType = castType;
+        while (destType->is<IR::Type_Newtype>())
+            destType = getTypeType(destType->to<IR::Type_Newtype>()->type);
+        auto rhs = assignment(expression, destType, expression->expr);
         if (rhs == nullptr)
             // error
             return expression;
@@ -3123,6 +3156,8 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr)
         return elem;
+    while (ktype->is<IR::Type_Newtype>())
+        ktype = ktype->to<IR::Type_Newtype>()->type;
     if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_Enum>() &&
         !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>())
         typeError("Key %1% field type must be a scalar type; it cannot be %2%",

@@ -17,6 +17,7 @@ limitations under the License.
 #include "midend.h"
 #include "midend/actionSynthesis.h"
 #include "midend/complexComparison.h"
+#include "midend/eliminateNewtype.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
@@ -70,6 +71,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     PassManager midEnd = {
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
         new P4::ClearTypeMap(&typeMap),
+        new P4::EliminateNewtype(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,

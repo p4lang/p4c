@@ -91,6 +91,7 @@ using Parser = P4::P4Parser;
 "int"           { BEGIN(NORMAL); return Parser::make_INT(driver.yylloc); }
 "key"           { BEGIN(NORMAL); return Parser::make_KEY(driver.yylloc); }
 "match_kind"    { BEGIN(NORMAL); return Parser::make_MATCH_KIND(driver.yylloc); }
+"type"          { BEGIN(NORMAL); return Parser::make_TYPE(driver.yylloc); }
 "out"           { BEGIN(NORMAL); return Parser::make_OUT(driver.yylloc); }
 "parser"        { BEGIN(NORMAL); return Parser::make_PARSER(driver.yylloc); }
 "package"       { BEGIN(NORMAL); return Parser::make_PACKAGE(driver.yylloc); }
@@ -121,7 +122,7 @@ using Parser = P4::P4Parser;
                       driver.onReadIdentifier(name);
                       return Parser::make_IDENTIFIER(name, driver.yylloc);
                   case Util::ProgramStructure::SymbolKind::Type:
-                      return Parser::make_TYPE(name, driver.yylloc);
+                      return Parser::make_TYPE_IDENTIFIER(name, driver.yylloc);
                   default:
                       BUG("Unexpected symbol kind");
                   }
