@@ -520,10 +520,13 @@ void EBPFControl::emitTableTypes(CodeBuilder* builder) {
 }
 
 void EBPFControl::emitTableInstances(CodeBuilder* builder) {
+    builder->append("REGISTER_START()");
+    builder->newline();
     for (auto it : tables)
         it.second->emitInstance(builder);
     for (auto it : counters)
         it.second->emitInstance(builder);
+    builder->append("REGISTER_END()");
 }
 
 void EBPFControl::emitTableInitializers(CodeBuilder* builder) {

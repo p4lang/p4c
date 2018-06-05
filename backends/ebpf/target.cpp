@@ -78,19 +78,19 @@ void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
 
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("%s = bpf_map_lookup_elem(&%s, &%s)",
+    builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &%s)",
                           value, tblName, key);
 }
 
 void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("bpf_map_update_elem(&%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
 void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
@@ -99,29 +99,17 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                                         cstring keyType, cstring valueType,
                                         unsigned size) const {
     builder->emitIndent();
-    builder->appendFormat("struct bpf_map_def SEC(\"maps\") %s = ", tblName);
-    builder->blockStart();
-    builder->emitIndent();
-    builder->append(".type = ");
+    builder->appendFormat("REGISTER_TABLE(");
+    builder->appendFormat("%s, ", tblName);
     if (isHash)
-        builder->appendLine("BPF_MAP_TYPE_HASH,");
+        builder->appendFormat("BPF_MAP_TYPE_HASH, ");
     else
-        builder->appendLine("BPF_MAP_TYPE_ARRAY,");
-
-    builder->emitIndent();
-    builder->appendFormat(".key_size = sizeof(%s),", keyType);
+        builder->appendFormat("BPF_MAP_TYPE_ARRAY, ");
+    builder->appendFormat("sizeof(%s), ", keyType);
+    builder->appendFormat("sizeof(%s), ", valueType);
+    builder->appendFormat("%d)", size);
     builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".value_size = sizeof(%s),", valueType);
     builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".max_entries = %d, ", size);
-    builder->newline();
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
 }
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
