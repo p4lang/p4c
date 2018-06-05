@@ -31,79 +31,16 @@ void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
         "#define load_dword(data, b) __constant_ntohl(*(u64 *)((u8*)(data) + (b)))\n"
         "#define htonl(d) __constant_htonl(d)\n"
         "#define htons(d) __constant_htons(d)\n");
+    builder->newline();
 }
 
 void TestTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("void init_tables() {");
-    builder->newline();
-    builder->appendFormat("}");
-    builder->newline();
-    builder->newline();
-    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+    builder->appendFormat("int %s(struct pkt *%s)", functionName, argName);
 }
 
-void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
-                                        cstring tblName, bool isHash,
-                                        cstring keyType, cstring valueType,
-                                        unsigned size) const {
-    builder->emitIndent();
-    builder->appendFormat("struct bpf_map_def SEC(\"maps\") %s = ", tblName);
-    builder->blockStart();
-    builder->emitIndent();
-    builder->append(".type = ");
-    if (isHash)
-        builder->appendLine("BPF_MAP_TYPE_HASH,");
-    else
-        builder->appendLine("BPF_MAP_TYPE_ARRAY,");
-
-    builder->emitIndent();
-    builder->appendFormat(".key_size = sizeof(%s),", keyType);
-    builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".value_size = sizeof(%s),", valueType);
-    builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".max_entries = %d, ", size);
-    builder->newline();
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
-}
-
-void TestTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
-                                          cstring key, cstring value) const {
-    builder->appendFormat("value = malloc(%s.value_size);", tblName);
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("int ret = bpf_map_lookup_elem(%s.id, &%s, value);",
-                          tblName, key, value);
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("if (ret == -1) free(value), value = NULL");
-}
-
-void TestTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                                          cstring key, cstring value) const {
-    builder->appendFormat("bpf_map_update_elem(%s.id, &%s, &%s, BPF_ANY);",
-                          tblName, key, value);
-}
-
-void TestTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                                          cstring key, cstring value) const {
-    builder->appendFormat("bpf_map_update_elem(%s.id, &%s, &%s, BPF_ANY);",
-                          tblName, key, value);
-}
-
-void TestTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
-    builder->emitIndent();
-    builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license);
-    builder->newline();
-}
-
+void TestTarget::emitLicense(Util::SourceCodeBuilder*, cstring) const {}
 //////////////////////////////////////////////////////////////
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {

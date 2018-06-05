@@ -115,29 +115,21 @@ class BccTarget : public Target {
     cstring abortReturnCode() const override { return "1"; }
     cstring sysMapPath() const override { return "/sys/fs/bpf"; }
 };
-
-// Target Test
-class TestTarget : public Target {
+// A userspace test version with functionality equivalent to the kernel
+// Compiles with gcc
+class TestTarget : public EBPF::KernelSamplesTarget {
  public:
-    TestTarget() : Target("Userspace Test") {}
+    TestTarget() : KernelSamplesTarget("Userspace Test") {}
     void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
     void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
-    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                             cstring key, cstring value) const override;
     void emitMain(Util::SourceCodeBuilder* builder,
                   cstring functionName,
                   cstring argName) const override;
-    void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, bool isHash,
-                       cstring keyType, cstring valueType, unsigned size) const override;
-    cstring dataOffset(cstring base) const override { return base; }
+    cstring dataOffset(cstring base) const override
+    { return cstring("((void*)(long)")+ base + "->data)"; }
     cstring dataEnd(cstring base) const override
-    { return cstring("(") + base + " + " + base + "->len)"; }
+    { return cstring("((void*)(long)(")+ base + "->data + "+ base +"->len))"; }
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }
