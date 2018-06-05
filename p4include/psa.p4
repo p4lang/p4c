@@ -13,6 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#ifndef __PSA_P4__
+#define __PSA_P4__
+
+#include<core.p4>
+
 #ifndef _PORTABLE_SWITCH_ARCHITECTURE_P4_
 #define _PORTABLE_SWITCH_ARCHITECTURE_P4_
 
@@ -379,7 +384,7 @@ extern InternetChecksum {
   /// returned from an earlier call to the get_state method.  This
   /// state could have been returned from the same instance of the
   /// InternetChecksum extern, or a different one.
-  void set_state(bit<16> checksum_state);
+  void set_state(in bit<16> checksum_state);
 }
 // END:InternetChecksum_extern
 
@@ -433,7 +438,7 @@ extern DirectCounter<W> {
   {
     W    read<W>      (in TableEntry key);
     W    sync_read<W> (in TableEntry key);
-    void set          (in W seed);
+    void set          (in TableEntry key, in W seed);
     void reset        (in TableEntry key);
     void start        (in TableEntry key);
     void stop         (in TableEntry key);
@@ -450,7 +455,7 @@ enum PSA_MeterType_t {
 // END:MeterType_defn
 
 // BEGIN:MeterColor_defn
-enum PSA_MeterColor_t { RED, GREEN, YELLOW };
+enum PSA_MeterColor_t { RED, GREEN, YELLOW }
 // END:MeterColor_defn
 
 // BEGIN:Meter_extern
@@ -682,3 +687,5 @@ package PSA_Switch<IH, IM, EH, EM, NM, CI2EM, CE2EM, RESUBM, RECIRCM> (
 // END:Programmable_blocks
 
 #endif  /* _PORTABLE_SWITCH_ARCHITECTURE_P4_ */
+
+#endif   // __PSA_P4__
