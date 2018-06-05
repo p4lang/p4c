@@ -2125,7 +2125,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         // of constants on the RHS.
         const IR::Type* destType = castType;
         while (destType->is<IR::Type_Newtype>())
-            destType = destType->to<IR::Type_Newtype>()->type;
+            destType = getTypeType(destType->to<IR::Type_Newtype>()->type);
         auto rhs = assignment(expression, destType, expression->expr);
         if (rhs == nullptr)
             // error
