@@ -27,6 +27,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 #include "ir.h"
 #include "json_parser.h"
@@ -80,6 +82,24 @@ class JSONLoader {
         for (auto e : *json->to<JsonVector>()) {
             load(e, temp);
             v.push_back(temp);
+        }
+    }
+
+    template<typename T>
+    void unpack_json(std::set<T> &v) {
+        T temp;
+        for (auto e : *json->to<JsonVector>()) {
+            load(e, temp);
+            v.insert(temp);
+        }
+    }
+
+    template<typename T>
+    void unpack_json(ordered_set<T> &v) {
+        T temp;
+        for (auto e : *json->to<JsonVector>()) {
+            load(e, temp);
+            v.insert(temp);
         }
     }
 
