@@ -184,12 +184,18 @@ bool ToP4::preorder(const IR::P4Program* program) {
 }
 
 bool ToP4::preorder(const IR::Type_Bits* t) {
-    builder.appendFormat(t->toString());
+    if (t->expression) {
+        builder.append("bit<(");
+        visit(t->expression);
+        builder.append(")>");
+    } else {
+        builder.append(t->toString());
+    }
     return false;
 }
 
 bool ToP4::preorder(const IR::Type_InfInt* t) {
-    builder.appendFormat(t->toString());
+    builder.append(t->toString());
     return false;
 }
 
@@ -407,7 +413,13 @@ bool ToP4::preorder(const IR::Type_Boolean*) {
 }
 
 bool ToP4::preorder(const IR::Type_Varbits* t) {
-    builder.appendFormat("varbit<%d>", t->size);
+    if (t->expression) {
+        builder.append("varbit<(");
+        visit(t->expression);
+        builder.append(")>");
+    } else {
+        builder.appendFormat("varbit<%d>", t->size);
+    }
     return false;
 }
 

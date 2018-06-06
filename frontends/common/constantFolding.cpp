@@ -88,6 +88,40 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
     return e;
 }
 
+const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
+    if (type->expression != nullptr) {
+        if (auto cst = type->expression->to<IR::Constant>()) {
+            type->size = cst->asInt();
+            type->expression = nullptr;
+            if (type->size <= 0) {
+                ::error("%1%: Illegal type size", type);
+                // Convert it to something legal so we don't get
+                // weird errors elsewhere.
+                type->size = 64;
+            }
+            if (type->size == 1 && type->isSigned)
+                ::error("%1%: Signed types cannot be 1-bit wide", type);
+        } else {
+            ::error("Could not evaluate %1% to a constant", type->expression);
+        }
+    }
+    return type;
+}
+
+const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
+    if (type->expression != nullptr) {
+        if (auto cst = type->expression->to<IR::Constant>()) {
+            type->size = cst->asInt();
+            type->expression = nullptr;
+            if (type->size <= 0)
+                ::error("%1%: Illegal type size", type);
+        } else {
+            ::error("Could not evaluate %1% to a constant", type->expression);
+        }
+    }
+    return type;
+}
+
 const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
     auto init = getConstant(d->initializer);
     if (init == nullptr) {
@@ -115,6 +149,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
         if (init != d->initializer)
             d = new IR::Declaration_Constant(d->srcInfo, d->name, d->annotations, d->type, init);
     }
+    LOG3("Constant " << d << " set to " << init);
     constants.emplace(getOriginal<IR::Declaration_Constant>(), init);
     return d;
 }

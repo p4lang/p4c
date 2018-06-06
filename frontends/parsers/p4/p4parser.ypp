@@ -648,6 +648,13 @@ baseType
       { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
     | VARBIT "<" INTEGER ">"
       { $$ = IR::Type::Varbits::get(@3, parseConstant(@3, $3, 0)->asInt()); }
+
+    | BIT "<" "(" expression ")" ">"
+      { $$ = new IR::Type_Bits(@4, $4, false); }
+    | INT "<" "(" expression ")" ">"
+      { $$ = new IR::Type_Bits(@4, $4, true); }
+    | VARBIT "<" "(" expression ")" ">"
+      { $$ = new IR::Type_Varbits(@4, $4); }
     ;
 
 typeOrVoid
