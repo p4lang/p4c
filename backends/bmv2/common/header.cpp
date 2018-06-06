@@ -102,6 +102,22 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
                 addHeaderField(scalarsTypeName, newName, errorWidth, 0);
                 scalars_width += errorWidth;
                 ctxt->structure->scalarMetadataFields.emplace(f, newName);
+            } else if (auto vbt = ft->to<IR::Type_Varbits>()) {
+                // For each varbit variable we synthesize a separate header instance,
+                // since we cannot have multiple varbit fields in a single header.
+                // This name will be unique
+                cstring headerName = "struct$varbit" + Util::toString(vbt->size);
+                auto vec = new IR::IndexedVector<IR::StructField>();
+                auto sf = new IR::StructField("field", ft);
+                vec->push_back(sf);
+                ctxt->typeMap->setType(sf, ft);
+                auto hdrType = new IR::Type_Header(headerName, *vec);
+                ctxt->typeMap->setType(hdrType, hdrType);
+                ctxt->json->add_metadata(headerName, f->name);
+                if (visitedHeaders.find(headerName) != visitedHeaders.end())
+                    continue;  // already seen
+                visitedHeaders.emplace(headerName);
+                addHeaderType(hdrType);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
