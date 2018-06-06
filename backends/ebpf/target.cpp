@@ -20,17 +20,9 @@ limitations under the License.
 namespace EBPF {
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append(
-        "#define KBUILD_MODNAME \"bpftest\"\n"
-        "#include <linux/bpf.h>\n"
-        "#include \"ebpf_user.h\"\n"
-        "\n"
-        "#define load_byte(data, b)  (*(((u8*)(data)) + (b)))\n"
-        "#define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))\n"
-        "#define load_word(data, b) __constant_ntohl(*(u32 *)((u8*)(data) + (b)))\n"
-        "#define load_dword(data, b) __constant_ntohl(*(u64 *)((u8*)(data) + (b)))\n"
-        "#define htonl(d) __constant_htonl(d)\n"
-        "#define htons(d) __constant_htons(d)\n");
+    builder->append("#include <linux/bpf.h>");
+    builder->newline();
+    builder->append("#include \"ebpf_user.h\"\n");
     builder->newline();
 }
 
@@ -44,36 +36,8 @@ void TestTarget::emitLicense(Util::SourceCodeBuilder*, cstring) const {}
 //////////////////////////////////////////////////////////////
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append(
-        "#include <linux/skbuff.h>\n"
-        "#include <linux/netdevice.h>\n"
-        "#include <linux/version.h>\n"
-        "#include <uapi/linux/bpf.h>\n"
-        "/* TODO: these should be in some header somewhere in the kernel, but where? */\n"
-        "#define SEC(NAME) __attribute__((section(NAME), used))\n"
-        "static void *(*bpf_map_lookup_elem)(void *map, void *key) =\n"
-        "       (void *) BPF_FUNC_map_lookup_elem;\n"
-        "static int (*bpf_map_update_elem)(void *map, void *key, void *value,\n"
-        "                                  unsigned long long flags) =\n"
-        "       (void *) BPF_FUNC_map_update_elem;\n"
-        "static int (*bpf_map_update_elem)(void *map, void *key, void *value\n"
-        "                                  unsigned long long flags) =\n"
-        "       (void *) BPF_FUNC_map_update_elem;\n"
-        "unsigned long long load_byte(void *skb,\n"
-        "                             unsigned long long off) asm(\"llvm.bpf.load.byte\");\n"
-        "unsigned long long load_half(void *skb,\n"
-        "                             unsigned long long off) asm(\"llvm.bpf.load.half\");\n"
-        "unsigned long long load_word(void *skb,\n"
-        "                             unsigned long long off) asm(\"llvm.bpf.load.word\");\n"
-        "struct bpf_map_def {\n"
-        "        __u32 type;\n"
-        "        __u32 key_size;\n"
-        "        __u32 value_size;\n"
-        "        __u32 max_entries;\n"
-        "        __u32 flags;\n"
-        "        __u32 id;\n"
-        "        __u32 pinning;\n"
-        "};\n");
+    builder->append("#include \"ebpf_kernel.h\"\n");
+    builder->newline();
 }
 
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
@@ -98,17 +62,9 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                                         cstring tblName, bool isHash,
                                         cstring keyType, cstring valueType,
                                         unsigned size) const {
-    builder->emitIndent();
-    builder->appendFormat("REGISTER_TABLE(");
-    builder->appendFormat("%s, ", tblName);
-    if (isHash)
-        builder->appendFormat("BPF_MAP_TYPE_HASH, ");
-    else
-        builder->appendFormat("BPF_MAP_TYPE_ARRAY, ");
-    builder->appendFormat("sizeof(%s), ", keyType);
-    builder->appendFormat("sizeof(%s), ", valueType);
-    builder->appendFormat("%d)", size);
-    builder->newline();
+    cstring kind = isHash ? "BPF_MAP_TYPE_HASH" : "BPF_MAP_TYPE_ARRAY";
+    builder->appendFormat("REGISTER_TABLE(%s, %s, ", tblName, kind);
+    builder->appendFormat("sizeof(%s), sizeof(%s), %d)", keyType, valueType, size);
     builder->newline();
 }
 

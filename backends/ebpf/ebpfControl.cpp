@@ -527,6 +527,7 @@ void EBPFControl::emitTableInstances(CodeBuilder* builder) {
     for (auto it : counters)
         it.second->emitInstance(builder);
     builder->append("REGISTER_END()");
+    builder->newline();
 }
 
 void EBPFControl::emitTableInitializers(CodeBuilder* builder) {
