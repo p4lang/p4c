@@ -1106,6 +1106,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Package* decl) {
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Specialized *type) {
+    // Check for recursive type specializations, e.g.,
+    // extern e<T> {};  e<e<bit>> x;
+    auto ctx = getContext();
+    while (ctx) {
+        if (auto ts = ctx->node->to<IR::Type_Specialized>()) {
+            if (type->baseType->path->equiv(*ts->baseType->path)) {
+                typeError("%1%: recursive type specialization", type->baseType);
+                return type;
+            }
+        }
+        ctx = ctx->parent;
+    }
     (void)setTypeType(type);
     return type;
 }
