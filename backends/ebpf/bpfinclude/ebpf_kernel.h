@@ -5,7 +5,12 @@
 #include <linux/version.h>
 #include <uapi/linux/bpf.h>
 
+/* helper macro to place programs, maps, license in
+ * different sections in elf_bpf file. Section names
+ * are interpreted by elf_bpf loader
+i*/
 #define SEC(NAME) __attribute__((section(NAME), used))
+
 static void *(*bpf_map_lookup_elem)(void *map, void *key) =
        (void *) BPF_FUNC_map_lookup_elem;
 static int (*bpf_map_update_elem)(void *map, void *key, void *value,
@@ -31,13 +36,13 @@ u64 load_dword(void *skb, u64 off) {
  * to describe map attributes to elf_bpf loader
  */
 struct bpf_map_def {
-        __u32 type;
-        __u32 key_size;
-        __u32 value_size;
-        __u32 max_entries;
-        __u32 flags;
-        __u32 id;
-        __u32 pinning;
+        u32 type;
+        u32 key_size;
+        u32 value_size;
+        u32 max_entries;
+        u32 flags;
+        u32 id;
+        u32 pinning;
 };
 
 #define REGISTER_START()

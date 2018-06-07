@@ -3,9 +3,9 @@
 #define VAR_SIZE 32
 
 struct map_register {
-    char name[VAR_SIZE];     // name of the map
-    struct bpf_map_def *map;             // ptr to the map
-    UT_hash_handle hh;    // makes this structure hashable
+    char name[VAR_SIZE];        // name of the map
+    struct bpf_map_def *map;    // ptr to the map
+    UT_hash_handle hh;          // makes this structure hashable
 };
 
 struct map_register *maps = NULL;

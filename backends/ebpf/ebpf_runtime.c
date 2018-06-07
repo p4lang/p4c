@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     ++argv; --argc;
     if ( argc != 1 ) {
         fprintf(stderr, "Missing input trace file, exiting...\n");
-         exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     /* Initialize the registry of shared tables */
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     if (in_handle == NULL) {
         fprintf(stderr, "error reading pcap file: %s\n", errbuf);
         pcap_close(in_handle);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     /* Create the output file. */
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "error creating pcap file: %s\n", errbuf);
         pcap_close(in_handle);
         pcap_dump_close(out_handle);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     /* Parse each packet in the file and check the result*/
@@ -50,7 +50,6 @@ int main(int argc, char **argv) {
     }
     pcap_close(in_handle);
     pcap_dump_close(out_handle);
-    // terminate
     return EXIT_SUCCESS;
 }
 
