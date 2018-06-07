@@ -26,7 +26,6 @@ int main(int argc, char **argv) {
     in_handle = pcap_open_offline(argv[0], errbuf);
     if (in_handle == NULL) {
         fprintf(stderr, "error reading pcap file: %s\n", errbuf);
-        pcap_close(in_handle);
         return EXIT_FAILURE;
     }
 
@@ -35,7 +34,6 @@ int main(int argc, char **argv) {
     if (out_handle == NULL) {
         fprintf(stderr, "error creating pcap file: %s\n", errbuf);
         pcap_close(in_handle);
-        pcap_dump_close(out_handle);
         return EXIT_FAILURE;
     }
 

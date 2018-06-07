@@ -3,10 +3,8 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
-#include "../contrib/uthash.h"
-
+#include "ebpf_registry.h"
 
 #define printk(fmt, ...)                                               \
                 ({                                                      \
@@ -91,25 +89,6 @@ typedef unsigned long long u64;
  */
 #define SEC(NAME)
 
-struct bpf_map {
-    void *key;
-    void *value;
-    UT_hash_handle hh; // makes this structure hashable
-};
-
-/* a helper structure used to describe map attributes */
-struct bpf_map_def {
-    char *name;
-    unsigned int type;
-    unsigned int key_size;
-    unsigned int value_size;
-    unsigned int max_entries;
-    // unsigned int map_flags; // unused
-    // unsigned int id;        // unused
-    // unsigned int pinning;   // unused
-    struct bpf_map *bpf_map;
-};
-
 /* simple descriptor which replaces the kernel sk_buff structure */
 struct sk_buff {
     void *data;
@@ -124,23 +103,10 @@ struct bpf_map_def tables[] = {
     { 0, 0, 0, 0, 0 } \
 };
 
-int registry_add(struct bpf_map_def *map);
-struct bpf_map_def *registry_lookup(const char *name);
-void *bpf_map_lookup_elem(struct bpf_map_def *map, void *key);
-int bpf_map_update_elem(struct bpf_map_def *map, void *key, void *value,
-                  unsigned long long flags);
-int bpf_map_delete_elem(struct bpf_map_def *map, void *key);
-
 #define BPF_MAP_LOOKUP_ELEM(table, key) bpf_map_lookup_elem(registry_lookup(#table), key)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) bpf_map_update_elem(registry_lookup(#table), key, value, flags)
-
 #define BPF_OBJ_PIN(table, name) registry_add(table)
-
 #define BPF_OBJ_GET(name) registry_lookup(name)
-
-
-// int bpf_obj_pin(int fd, const char *pathname);
-// int bpf_obj_get(const char *pathname);
 
 /* These should be automatically generated and included in the x.h header file */
 extern struct bpf_map_def tables[];
