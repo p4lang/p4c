@@ -13,14 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 /**
- * This file defines a library of ebpf hashmap operations which emulate the behavior
- * of the kernel ebpf API. It also contains a shared registry which acts as an
- * interface between our emulated control and data plane.
- * This library is currently not thread-safe.
- */
-
-
+ * This file defines a shared registry which acts as an interface between the emulated control and data plane. This library is currently not thread-safe.
+**/
 
 #ifndef _P4_BPF_REGISTRY
 #define _P4_BPF_REGISTRY
