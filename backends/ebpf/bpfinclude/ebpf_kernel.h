@@ -1,5 +1,25 @@
-#ifndef _P4_BPF_USER
-#define _P4_BPF_USER
+/*
+Copyright 2018 VMware, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+/**
+ * This file contains all functions and definitions necessary for the kernel target C code to compile. It must be included with any generated file.
+ */
+
+#ifndef _P4_BPF_KERNEL
+#define _P4_BPF_KERNEL
 #include <linux/skbuff.h>
 #include <linux/netdevice.h>
 #include <linux/version.h>
@@ -32,8 +52,8 @@ u64 load_dword(void *skb, u64 off) {
   return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
 }
 
-/* a helper structure used by eBPF C program
- * to describe map attributes to elf_bpf loader
+/* a helper structure used by the eBPF C program
+ * to describe map attributes to the elf_bpf loader
  */
 struct bpf_map_def {
         u32 type;
@@ -58,4 +78,5 @@ struct bpf_map_def SEC("maps") NAME = {          \
 
 #define BPF_MAP_LOOKUP_ELEM(table, key) bpf_map_lookup_elem(table, key)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) bpf_map_update_elem(table, key, value, flags)
-#endif
+#endif /* _P4_BPF_KERNEL */
+

@@ -1,12 +1,33 @@
-#include "ebpf_registry.h"
-#define VAR_SIZE 32
+/*
+Copyright 2018 VMware, Inc.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+#include "ebpf_registry.h"
+
+/**
+ * @brief The central shared register
+ * @details A central register hashmap containing all of the maps
+ * in the registry.
+ *
+ */
 struct map_register {
     char name[VAR_SIZE];        // name of the map
     struct bpf_map_def *map;    // ptr to the map
     UT_hash_handle hh;          // makes this structure hashable
 };
 
+/** Instantiation of the central register **/
 struct map_register *reg_maps = NULL;
 
 struct bpf_map_def *registry_lookup(const char *name) {
@@ -42,11 +63,29 @@ void *bpf_map_lookup_elem(struct bpf_map_def *map, void *key) {
     return tmp_map->value;
 }
 
+int check_flags(void *elem, unsigned long long map_flags) {
+    if (map_flags > BPF_EXIST)
+        /* unknown flags */
+        return EXIT_FAILURE;
+    if (elem && map_flags == BPF_NOEXIST)
+        /* elem already exists */
+        return EXIT_FAILURE;
+
+    if (!elem && map_flags == BPF_EXIST)
+        /* elem doesn't exist, cannot update it */
+        return EXIT_FAILURE;
+
+    return EXIT_SUCCESS;
+}
+
 int bpf_map_update_elem(struct bpf_map_def *map, void *key, void *value,
                   unsigned long long flags) {
     struct bpf_map *tmp_map;
     HASH_FIND_PTR(map->bpf_map, key, tmp_map);
-    if (tmp_map == NULL) {
+    int ret = check_flags(tmp_map, flags);
+    if (ret)
+        return ret;
+    if (!tmp_map) {
         tmp_map = (struct bpf_map *) malloc(sizeof(struct bpf_map));
         tmp_map->key = key;
         HASH_ADD_KEYPTR(hh, map->bpf_map, key, map->key_size, tmp_map);

@@ -19,8 +19,10 @@ int main(int argc, char **argv) {
 
     /* Initialize the registry of shared tables */
     struct bpf_map_def* current = tables;
-    while (current->name != 0)
-        registry_add(current), current++;
+    while (current->name != 0) {
+        registry_add(current);
+        current++;
+    }
 
     /* Open and read pcap file */
     in_handle = pcap_open_offline(argv[0], errbuf);
