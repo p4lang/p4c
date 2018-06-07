@@ -127,8 +127,8 @@ struct bpf_map_def tables[] = {
     { 0, 0, 0, 0, 0 } \
 };
 
-#define BPF_MAP_LOOKUP_ELEM(table, key) bpf_map_lookup_elem(registry_lookup(#table), key)
-#define BPF_MAP_UPDATE_ELEM(table, key, value, flags) bpf_map_update_elem(registry_lookup(#table), key, value, flags)
+#define BPF_MAP_LOOKUP_ELEM(table, key) bpf_map_lookup_elem(registry_lookup_map(#table), key, registry_lookup_table(#table)->key_size)
+#define BPF_MAP_UPDATE_ELEM(table, key, value, flags) bpf_map_update_elem(registry_lookup_map(#table), key, registry_lookup_table(#table)->key_size, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
 #define BPF_OBJ_GET(name) registry_lookup(name)
 

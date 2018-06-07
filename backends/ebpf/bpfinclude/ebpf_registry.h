@@ -25,21 +25,9 @@ limitations under the License.
 #ifndef _P4_BPF_REGISTRY
 #define _P4_BPF_REGISTRY
 
-#include "../contrib/uthash.h"
+#include "ebpf_map.h"
 
 #define VAR_SIZE 32 // maximum length of the table name
-
-
-/* flags for the bpf_map_update_elem command */
-#define BPF_ANY       0 // create new element or update existing
-#define BPF_NOEXIST   1 // create new element only if it didn't exist
-#define BPF_EXIST     2 // only update existing element
-
-struct bpf_map {
-    void *key;
-    void *value;
-    UT_hash_handle hh; // makes this structure hashable
-};
 
 /* a helper structure used to describe map attributes */
 struct bpf_map_def {
@@ -51,7 +39,7 @@ struct bpf_map_def {
     // unsigned int map_flags;  // unused
     // unsigned int id;         // unused
     // unsigned int pinning;    // unused
-    struct bpf_map *bpf_map;    // Pointer to the actual hashmap
+    struct bpf_map *bpf_map;    // Pointer to the actual hashmap, n to 1 relation
 };
 
 /**
@@ -77,40 +65,22 @@ int registry_delete(const char *name);
 /**
  * @brief Retrieve a table from the registry
  * @details Retrieves a table from the shared registry.
- * This operation uses name as key.
+ * This operation uses name as the key.
  * map->name should not exceed VAR_SIZE.
  *
  * @return NULL if map cannot be found
  */
-struct bpf_map_def *registry_lookup(const char *name);
+struct bpf_map_def *registry_lookup_table(const char *name);
 
 /**
- * @brief Add/Update a value in the map
- * @details Updates a value in the map based on the provided key.
- * If the key does not exist, it depends the provided flags if the
- * element is added or the operation is rejected.
+ * @brief Retrieve the map in a table from the registry
+ * @details Retrieves the associated map from a table
+ * in the shared registry.
+ * This operation uses name as the key.
+ * map->name should not exceed VAR_SIZE.
  *
- * @return error if update operation fails
+ * @return NULL if map cannot be found
  */
-int bpf_map_update_elem(struct bpf_map_def *map, void *key, void *value,
-                  unsigned long long flags);
-
-/**
- * @brief Find a value based on a key.
- * @details Provides a pointer to a value in the map based on the provided key.
- * If the key does not exist, NULL is returned.
- *
- * @return NULL if key does not exist
- */
-void *bpf_map_lookup_elem(struct bpf_map_def *map, void *key);
-
-/**
- * @brief Delete key and value from the map.
- * @details Deletes the key and the corresponding value from the map.
- * If the key does not exist, no operation is performed.
- *
- * @return error if operation fails.
- */
-int bpf_map_delete_elem(struct bpf_map_def *map, void *key);
+struct bpf_map *registry_lookup_map(const char *name);
 
 #endif /* _P4_BPF_REGISTRY */
