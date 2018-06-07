@@ -16,7 +16,7 @@ limitations under the License.
 
 /**
  * This file defines a shared registry which acts as an interface between the emulated control and data plane. This library is currently not thread-safe.
-**/
+ */
 
 #ifndef _P4_BPF_REGISTRY
 #define _P4_BPF_REGISTRY

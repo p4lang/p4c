@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This file defines a library of ebpf hashmap operations which emulate the behavior
  * of the kernel ebpf API. This library is currently not thread-safe.
- **/
+ */
 
 #ifndef _P4_BPF_MAP
 #define _P4_BPF_MAP

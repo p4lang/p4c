@@ -28,7 +28,7 @@ limitations under the License.
 /* helper macro to place programs, maps, license in
  * different sections in elf_bpf file. Section names
  * are interpreted by elf_bpf loader
-i*/
+ */
 #define SEC(NAME) __attribute__((section(NAME), used))
 
 static void *(*bpf_map_lookup_elem)(void *map, void *key) =

@@ -21,7 +21,6 @@ limitations under the License.
  * and user ebpf functions.
  */
 
-
 #ifndef _P4_BPF_USER
 #define _P4_BPF_USER
 
