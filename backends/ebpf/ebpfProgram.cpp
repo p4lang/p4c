@@ -61,8 +61,9 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
 
     builder->target->emitIncludes(builder);
     emitPreamble(builder);
+    builder->append("REGISTER_START()\n");
     control->emitTableInstances(builder);
-
+    builder->append("REGISTER_END()\n");
     builder->newline();
     builder->emitIndent();
     builder->target->emitCodeSection(builder, functionName);

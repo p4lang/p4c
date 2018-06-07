@@ -19,24 +19,9 @@ limitations under the License.
 
 namespace EBPF {
 
-void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include <linux/bpf.h>");
-    builder->newline();
-    builder->append("#include \"ebpf_user.h\"\n");
-    builder->newline();
-}
-
-void TestTarget::emitMain(Util::SourceCodeBuilder* builder,
-                                   cstring functionName,
-                                   cstring argName) const {
-    builder->appendFormat("int %s(struct pkt *%s)", functionName, argName);
-}
-
-void TestTarget::emitLicense(Util::SourceCodeBuilder*, cstring) const {}
-//////////////////////////////////////////////////////////////
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"ebpf_kernel.h\"\n");
+    builder->append("#include \"bpfinclude/ebpf_kernel.h\"\n");
     builder->newline();
 }
 
@@ -82,7 +67,16 @@ void KernelSamplesTarget::emitCodeSection(
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+    builder->appendFormat("int %s(struct sk_buff* %s)", functionName, argName);
+}
+
+//////////////////////////////////////////////////////////////
+
+void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+    builder->append("#include <linux/bpf.h>");
+    builder->newline();
+    builder->append("#include \"bpfinclude/ebpf_user.h\"\n");
+    builder->newline();
 }
 
 //////////////////////////////////////////////////////////////
@@ -122,8 +116,6 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                       kind, keyType, valueType, tblName, size);
     builder->newline();
 }
-
-void BccTarget::emitLicense(Util::SourceCodeBuilder*, cstring) const {}
 
 void BccTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,

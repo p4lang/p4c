@@ -92,7 +92,7 @@ class KernelSamplesTarget : public Target {
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
-    void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
+    void emitLicense(Util::SourceCodeBuilder*, cstring) const override {};
     void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
     void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
@@ -115,17 +115,13 @@ class BccTarget : public Target {
     cstring abortReturnCode() const override { return "1"; }
     cstring sysMapPath() const override { return "/sys/fs/bpf"; }
 };
+
 // A userspace test version with functionality equivalent to the kernel
 // Compiles with gcc
 class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget("Userspace Test") {}
-    void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
-    void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
-    void emitMain(Util::SourceCodeBuilder* builder,
-                  cstring functionName,
-                  cstring argName) const override;
     cstring dataOffset(cstring base) const override
     { return cstring("((void*)(long)")+ base + "->data)"; }
     cstring dataEnd(cstring base) const override
