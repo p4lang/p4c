@@ -36,14 +36,16 @@ limitations under the License.
  */
 #define SEC(NAME) __attribute__((section(NAME), used))
 
+/* helper functions called from eBPF programs written in C */
 static void *(*bpf_map_lookup_elem)(void *map, void *key) =
-       (void *) BPF_FUNC_map_lookup_elem;
+  (void *) BPF_FUNC_map_lookup_elem;
 static int (*bpf_map_update_elem)(void *map, void *key, void *value,
-                                  unsigned long long flags) =
-       (void *) BPF_FUNC_map_update_elem;
-static int (*bpf_map_update_elem)(void *map, void *key, void *value
-                                  unsigned long long flags) =
-       (void *) BPF_FUNC_map_update_elem;
+          unsigned long long flags) =
+  (void *) BPF_FUNC_map_update_elem;
+static int (*bpf_map_delete_elem)(void *map, void *key) =
+  (void *) BPF_FUNC_map_delete_elem;
+static int (*bpf_probe_read)(void *dst, int size, void *unsafe_ptr) =
+(void *) BPF_FUNC_probe_read;
 
 unsigned long long load_byte(void *skb,
                              unsigned long long off) asm("llvm.bpf.load.byte");
@@ -56,6 +58,20 @@ static inline __attribute__((always_inline))
 u64 load_dword(void *skb, u64 off) {
   return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
 }
+
+/* a helper structure used by eBPF C program
+ * to describe map attributes to elf_bpf loader
+ */
+struct bpf_map_def {
+  unsigned int type;
+  unsigned int key_size;
+  unsigned int value_size;
+  unsigned int max_entries;
+  unsigned int map_flags;
+  unsigned int inner_map_idx;
+  unsigned int numa_node;
+};
+
 
 #define REGISTER_START()
 #define REGISTER_TABLE(NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES) \
