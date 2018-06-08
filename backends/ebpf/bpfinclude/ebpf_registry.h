@@ -14,28 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/**
- * This file defines a shared registry which acts as an interface between the emulated control and data plane. This library is currently not thread-safe.
+/*
+ * This file defines a shared registry. It is required by the p4c-ebpf test framework
+ * and acts as an interface between the emulated control and data plane. It provides
+ * a mechanism to access shared tables by name or id (TODO: Add id map) and is
+ * intended to approximate the kernel ebpf object API as closely as possible.
+ * This library is currently not thread-safe.
  */
 
-#ifndef _P4_BPF_REGISTRY
-#define _P4_BPF_REGISTRY
+#ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_
+#define BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_
 
 #include "ebpf_map.h"
 
-#define VAR_SIZE 32 // maximum length of the table name
+#define VAR_SIZE 32  // maximum length of the table name
 
-/* a helper structure used to describe map attributes */
+/**
+ * @brief A helper structure used to describe attributes.
+ * @details This structure describes various properties of the ebpf table
+ * such as key and value size and the maximum amount of entries possible.
+ * In userspace, this space is theoretically unlimited.
+ * This table definition points to an actual hashmap managed by uthash,
+ * the relation is many-to-one.
+ *
+ */
 struct bpf_map_def {
     char *name;                 // table name length should not exceed VAR_SIZE
     unsigned int type;          // currently only hashmap is supported
     unsigned int key_size;      // size of the key structure
     unsigned int value_size;    // size of the value structure
-    unsigned int max_entries;
-    // unsigned int map_flags;  // unused
-    // unsigned int id;         // unused
-    // unsigned int pinning;    // unused
-    struct bpf_map *bpf_map;    // Pointer to the actual hashmap, n to 1 relation
+    unsigned int max_entries;   // Maximum of possible entries
+    struct bpf_map *bpf_map;
 };
 
 /**
@@ -79,4 +88,4 @@ struct bpf_map_def *registry_lookup_table(const char *name);
  */
 struct bpf_map *registry_lookup_map(const char *name);
 
-#endif /* _P4_BPF_REGISTRY */
+#endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_

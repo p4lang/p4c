@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 #include "ebpf_registry.h"
 
 /**
@@ -27,7 +28,7 @@ struct map_register {
     UT_hash_handle hh;          // makes this structure hashable
 };
 
-/** Instantiation of the central register **/
+/* Instantiation of the central register */
 struct map_register *reg_maps = NULL;
 
 struct bpf_map *registry_lookup_map(const char *name) {
@@ -45,7 +46,6 @@ struct bpf_map_def *registry_lookup_table(const char *name) {
         return NULL;
     return tmp_reg->table;
 }
-
 
 int registry_add(struct bpf_map_def *map) {
     struct map_register *tmp_reg = (struct map_register *) malloc(sizeof(struct map_register));

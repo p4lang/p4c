@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/**
- * This file defines a library of ebpf hashmap operations which emulate the behavior
- * of the kernel ebpf API. This library is currently not thread-safe.
+/*
+ * This file defines a library of simple hashmap operations which emulate the behavior
+ * of the kernel ebpf map API. This library is currently not thread-safe.
  */
 
-#ifndef _P4_BPF_MAP
-#define _P4_BPF_MAP
+#ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
+#define BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
 
 #include "../contrib/uthash.h"
 
-/* flags for the bpf_map_update_elem command */
 #define BPF_ANY       0  // create new element or update existing
 #define BPF_NOEXIST   1  // create new element only if it didn't exist
 #define BPF_EXIST     2  // only update existing element
@@ -64,4 +63,4 @@ void *bpf_map_lookup_elem(struct bpf_map *map, void *key, unsigned int key_size)
  */
 int bpf_map_delete_elem(struct bpf_map *map, void *key, unsigned int key_size);
 
-#endif /* _P4_BPF_MAP */
+#endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
