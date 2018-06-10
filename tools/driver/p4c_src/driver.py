@@ -206,8 +206,7 @@ class BackendDriver:
 
         args = shlex.split(" ".join(cmd))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+            p = subprocess.Popen(args)
         except:
             import traceback
             print >> sys.stderr, "error invoking {}".format(" ".join(cmd))
@@ -215,9 +214,7 @@ class BackendDriver:
             return 1
 
         if self._verbose: print 'running {}'.format(' '.join(cmd))
-        out, err = p.communicate() # now wait
-        if len(out) > 0: print out
-        if len(err) > 0: print >> sys.stderr, err
+        p.communicate() # now wait
         return p.returncode
 
 
