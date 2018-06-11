@@ -13,15 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "ebpf_map.h"
 
-void *bpf_map_lookup_elem(struct bpf_map *map, void *key, unsigned int key_size) {
-    struct bpf_map *tmp_map;
-    HASH_FIND(hh, map, key, key_size, tmp_map);
-    if (tmp_map == NULL)
-        return NULL;
-    return tmp_map->value;
-}
+#include "ebpf_map.h"
 
 int check_flags(void *elem, unsigned long long map_flags) {
     if (map_flags > BPF_EXIST)
@@ -37,6 +30,15 @@ int check_flags(void *elem, unsigned long long map_flags) {
 
     return EXIT_SUCCESS;
 }
+
+void *bpf_map_lookup_elem(struct bpf_map *map, void *key, unsigned int key_size) {
+    struct bpf_map *tmp_map;
+    HASH_FIND(hh, map, key, key_size, tmp_map);
+    if (tmp_map == NULL)
+        return NULL;
+    return tmp_map->value;
+}
+
 
 int bpf_map_update_elem(struct bpf_map *map, void *key, unsigned int key_size, void *value,
                   unsigned long long flags) {

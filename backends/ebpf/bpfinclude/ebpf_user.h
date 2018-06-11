@@ -134,7 +134,7 @@ struct bpf_map_def tables[] = {
     bpf_map_update_elem(registry_lookup_map(#table), key, \
     registry_lookup_table(#table)->key_size, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
-#define BPF_OBJ_GET(name) registry_lookup(name)
+#define BPF_OBJ_GET(name) registry_get_id(name)
 
 /* These should be automatically generated and included in the generated x.h header file */
 extern struct bpf_map_def tables[];
