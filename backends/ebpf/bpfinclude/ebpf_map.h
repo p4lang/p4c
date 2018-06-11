@@ -22,7 +22,7 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
 #define BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
 
-#include "../contrib/uthash.h"
+#include "../contrib/uthash.h"  // exports string.h, stddef.h, and stdlib.h
 
 #define BPF_ANY       0  // create new element or update existing
 #define BPF_NOEXIST   1  // create new element only if it didn't exist

@@ -94,7 +94,7 @@ void registry_add(struct bpf_map_def *map) {
     // Check if the register exists already
     table_register *tmp_reg = _find_table(map->name);
     if (tmp_reg != NULL)
-        return NULL;
+        return;
 
     // Check key size
     unsigned int key_length = VAR_SIZE;

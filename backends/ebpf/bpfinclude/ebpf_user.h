@@ -25,8 +25,8 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_
 #define BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <stdio.h>      // printf
+#include <stdbool.h>    // true, false
 
 #include "ebpf_registry.h"
 
@@ -133,6 +133,9 @@ struct bpf_map_def tables[] = {
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \
     bpf_map_update_elem(registry_lookup_map(#table), key, \
     registry_lookup_table(#table)->key_size, value, flags)
+#define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags) \
+    bpf_map_update_elem(registry_lookup_map_id(index), key, \
+    registry_lookup_table(index)->key_size, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
 #define BPF_OBJ_GET(name) registry_get_id(name)
 

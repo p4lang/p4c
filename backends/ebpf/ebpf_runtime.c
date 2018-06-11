@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     /* Initialize the registry of shared tables */
     struct bpf_map_def* current = tables;
     while (current->name != 0) {
-        registry_add(current);
+        BPF_OBJ_PIN(current, current->name);
         current++;
     }
 
@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
         printf("\nebpf result is: %d\n", result);
         pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
     }
+
     pcap_close(in_handle);
     pcap_dump_close(out_handle);
     return EXIT_SUCCESS;

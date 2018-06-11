@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <assert.h>
 
 #include "ebpf_map.h"
 
@@ -63,30 +64,5 @@ int bpf_map_delete_elem(struct bpf_map *map, void *key, unsigned int key_size) {
         HASH_DEL(map, tmp_map);
         free(tmp_map);
     }
-    return EXIT_SUCCESS;
-}
-
-int bpf_map_get_next_key(struct bpf_map *map, const void *key, void *next_key){
-    // TODO: Implement
-    return EXIT_SUCCESS;
-}
-
-struct bpf_map *bpf_map_get_next_id(unsigned int start_id, unsigned int *next_id) {
-    // TODO: Implement
-    return EXIT_SUCCESS;
-}
-
-struct bpf_map *bpf_prog_get_map_by_id(unsigned int id) {
-    // TODO: Implement
-    return EXIT_SUCCESS;
-}
-
-struct bpf_map *bpf_map_get_map_by_id(unsigned int id) {
-    // TODO: Implement
-    return EXIT_SUCCESS;
-}
-
-int bpf_obj_get_info_by_map(struct bpf_map *map, void *info, unsigned int *info_len){
-    // TODO: Implement
     return EXIT_SUCCESS;
 }
