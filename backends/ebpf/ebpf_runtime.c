@@ -20,21 +20,24 @@ int main(int argc, char **argv) {
     /* Initialize the registry of shared tables */
     struct bpf_map_def* current = tables;
     while (current->name != 0) {
-        BPF_OBJ_PIN(current, current->name);
+         if (BPF_OBJ_PIN(current, current->name) != 0) {
+            fprintf(stderr, "Error: Failed to register table.\n");
+            return EXIT_FAILURE;
+         }
         current++;
     }
 
     /* Open and read pcap file */
     in_handle = pcap_open_offline(argv[0], errbuf);
     if (in_handle == NULL) {
-        fprintf(stderr, "error reading pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error: Failed to read pcap file: %s\n", errbuf);
         return EXIT_FAILURE;
     }
 
     /* Create the output file. */
     out_handle = pcap_dump_open(in_handle, "out.pcap");
     if (out_handle == NULL) {
-        fprintf(stderr, "error creating pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error: Failed to create pcap file: %s\n", errbuf);
         pcap_close(in_handle);
         return EXIT_FAILURE;
     }
