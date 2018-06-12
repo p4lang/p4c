@@ -27,6 +27,7 @@ limitations under the License.
 
 #include <stdio.h>      // printf
 #include <stdbool.h>    // true, false
+#include <linux/bpf.h>
 
 #include "ebpf_registry.h"
 
