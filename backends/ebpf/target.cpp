@@ -19,54 +19,27 @@ limitations under the License.
 
 namespace EBPF {
 
+
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append(
-        "#include <linux/skbuff.h>\n"
-        "#include <linux/netdevice.h>\n"
-        "#include <linux/version.h>\n"
-        "#include <uapi/linux/bpf.h>\n"
-        "/* TODO: these should be in some header somewhere in the kernel, but where? */\n"
-        "#define SEC(NAME) __attribute__((section(NAME), used))\n"
-        "static void *(*bpf_map_lookup_elem)(void *map, void *key) =\n"
-        "       (void *) BPF_FUNC_map_lookup_elem;\n"
-        "static int (*bpf_map_update_elem)(void *map, void *key, void *value,\n"
-        "                                  unsigned long long flags) =\n"
-        "       (void *) BPF_FUNC_map_update_elem;\n"
-        "static int (*bpf_map_update_elem)(void *map, void *key, void *value\n"
-        "                                  unsigned long long flags) =\n"
-        "       (void *) BPF_FUNC_map_update_elem;\n"
-        "unsigned long long load_byte(void *skb,\n"
-        "                             unsigned long long off) asm(\"llvm.bpf.load.byte\");\n"
-        "unsigned long long load_half(void *skb,\n"
-        "                             unsigned long long off) asm(\"llvm.bpf.load.half\");\n"
-        "unsigned long long load_word(void *skb,\n"
-        "                             unsigned long long off) asm(\"llvm.bpf.load.word\");\n"
-        "struct bpf_map_def {\n"
-        "        __u32 type;\n"
-        "        __u32 key_size;\n"
-        "        __u32 value_size;\n"
-        "        __u32 max_entries;\n"
-        "        __u32 flags;\n"
-        "        __u32 id;\n"
-        "        __u32 pinning;\n"
-        "};\n");
+    builder->append("#include \"bpfinclude/ebpf_kernel.h\"\n");
+    builder->newline();
 }
 
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("%s = bpf_map_lookup_elem(&%s, &%s)",
+    builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &%s)",
                           value, tblName, key);
 }
 
 void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("bpf_map_update_elem(&%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
 void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("BPF_USER_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
@@ -74,30 +47,10 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                                         cstring tblName, bool isHash,
                                         cstring keyType, cstring valueType,
                                         unsigned size) const {
-    builder->emitIndent();
-    builder->appendFormat("struct bpf_map_def SEC(\"maps\") %s = ", tblName);
-    builder->blockStart();
-    builder->emitIndent();
-    builder->append(".type = ");
-    if (isHash)
-        builder->appendLine("BPF_MAP_TYPE_HASH,");
-    else
-        builder->appendLine("BPF_MAP_TYPE_ARRAY,");
-
-    builder->emitIndent();
-    builder->appendFormat(".key_size = sizeof(%s),", keyType);
+    cstring kind = isHash ? "BPF_MAP_TYPE_HASH" : "BPF_MAP_TYPE_ARRAY";
+    builder->appendFormat("REGISTER_TABLE(%s, %s, ", tblName, kind);
+    builder->appendFormat("sizeof(%s), sizeof(%s), %d)", keyType, valueType, size);
     builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".value_size = sizeof(%s),", valueType);
-    builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".max_entries = %d, ", size);
-    builder->newline();
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
 }
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
@@ -114,7 +67,14 @@ void KernelSamplesTarget::emitCodeSection(
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+    builder->appendFormat("int %s(struct sk_buff* %s)", functionName, argName);
+}
+
+//////////////////////////////////////////////////////////////
+
+void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+    builder->append("#include \"bpfinclude/ebpf_user.h\"\n");
+    builder->newline();
 }
 
 //////////////////////////////////////////////////////////////
@@ -154,8 +114,6 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                       kind, keyType, valueType, tblName, size);
     builder->newline();
 }
-
-void BccTarget::emitLicense(Util::SourceCodeBuilder*, cstring) const {}
 
 void BccTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
