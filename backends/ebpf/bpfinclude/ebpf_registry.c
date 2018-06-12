@@ -97,13 +97,13 @@ int registry_add(struct bpf_map_def *map) {
     // Check if the register exists already
     registry_entry *tmp_reg = find_table(map->name);
     if (tmp_reg != NULL) {
-        fprintf(stderr, "%s", "Error: Table already exists!\n");
+        fprintf(stderr, "Error: Table already exists!\n");
         return EXIT_FAILURE;
     }
 
     // Check key maximum length
     if (strlen(map->name) > MAX_TABLE_NAME_LENGTH){
-        fprintf(stderr, "%s", "Error: Key length exceeds maximum size!\n");
+        fprintf(stderr, "Error: Key length exceeds maximum size!\n");
         return EXIT_FAILURE;
     }
 

@@ -24,11 +24,6 @@ limitations under the License.
 
 #include "../contrib/uthash.h"  // exports string.h, stddef.h, and stdlib.h
 
-// BPF_ANY create new element or update existing
-// BPF_NOEXIST: create new element only if it didn't exist
-// BPF_EXIST: only update existing element
-enum bpf_flags { BPF_ANY, BPF_NOEXIST, BPF_EXIST};
-
 struct bpf_map {
     void *key;
     void *value;
@@ -41,7 +36,7 @@ struct bpf_map {
  * If the key does not exist, it depends the provided flags if the
  * element is added or the operation is rejected.
  *
- * @return error if update operation fails
+ * @return EXIT_FAILURE if update operation fails
  */
 int bpf_map_update_elem(struct bpf_map *map, void *key, unsigned int key_size, void *value,
                   unsigned long long flags);
@@ -60,7 +55,7 @@ void *bpf_map_lookup_elem(struct bpf_map *map, void *key, unsigned int key_size)
  * @details Deletes the key and the corresponding value from the map.
  * If the key does not exist, no operation is performed.
  *
- * @return error if operation fails.
+ * @return EXIT_FAILURE if operation fails.
  */
 int bpf_map_delete_elem(struct bpf_map *map, void *key, unsigned int key_size);
 

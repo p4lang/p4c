@@ -3,6 +3,10 @@
 #include <pcap/pcap.h>
 #include "test.h"
 
+void usage() {
+    printf("Missing input trace file. Expected .pcap file as input\n");
+}
+
 int main(int argc, char **argv) {
     pcap_t *in_handle;
     pcap_dumper_t *out_handle;
@@ -13,7 +17,7 @@ int main(int argc, char **argv) {
     /* Skip over the program name. */
     ++argv; --argc;
     if (argc != 1) {
-        fprintf(stderr, "Missing input trace file, exiting...\n");
+        usage();
         return EXIT_FAILURE;
     }
 
