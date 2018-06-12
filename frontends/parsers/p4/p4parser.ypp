@@ -280,7 +280,6 @@ declaration
 
 nonTypeName
     : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | TYPE        { $$ = new IR::ID(@1, "type"); }
     | APPLY       { $$ = new IR::ID(@1, "apply"); }
     | KEY         { $$ = new IR::ID(@1, "key"); }
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
@@ -291,6 +290,7 @@ nonTypeName
 name
     : nonTypeName { $$ = $1; }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | TYPE        { $$ = new IR::ID(@1, "type"); }
     ;
 
 optCONST
