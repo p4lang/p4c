@@ -1,11 +1,10 @@
 #include <string.h>
+#include <libgen.h>
 #define PCAP_DONT_INCLUDE_PCAP_BPF_H
 #include <pcap/pcap.h>
 #include "test.h"
 
-void usage() {
-    printf("Missing input trace file. Expected .pcap file as input\n");
-}
+#define PATH_MAX 4096
 
 int main(int argc, char **argv) {
     pcap_t *in_handle;
@@ -13,35 +12,36 @@ int main(int argc, char **argv) {
     const unsigned char *packet;
     char errbuf[PCAP_ERRBUF_SIZE];
     struct pcap_pkthdr *pcap_hdr;
-
+    static char out_file[PATH_MAX];
     /* Skip over the program name. */
     ++argv; --argc;
-    if (argc != 1) {
-        usage();
+    if ( argc != 1 ) {
+        fprintf(stderr, "Missing input trace file, exiting...\n");
         return EXIT_FAILURE;
     }
 
     /* Initialize the registry of shared tables */
     struct bpf_map_def* current = tables;
     while (current->name != 0) {
-         if (BPF_OBJ_PIN(current, current->name) != 0) {
-            fprintf(stderr, "Error: Failed to register table.\n");
-            return EXIT_FAILURE;
-         }
+        registry_add(current);
         current++;
     }
 
     /* Open and read pcap file */
     in_handle = pcap_open_offline(argv[0], errbuf);
     if (in_handle == NULL) {
-        fprintf(stderr, "Error: Failed to read pcap file: %s\n", errbuf);
+        fprintf(stderr, "error reading pcap file: %s\n", errbuf);
         return EXIT_FAILURE;
     }
 
     /* Create the output file. */
-    out_handle = pcap_dump_open(in_handle, "out.pcap");
+    char *in_file = strdup(argv[0]);
+    char *in_dir = dirname(in_file);
+    memcpy(out_file, in_dir, strlen(in_dir));
+    memcpy(out_file + strlen(in_dir), "/pcap0_out.pcap", strlen("/pcap0_out.pcap"));
+    out_handle = pcap_dump_open(in_handle, out_file);
     if (out_handle == NULL) {
-        fprintf(stderr, "Error: Failed to create pcap file: %s\n", errbuf);
+        fprintf(stderr, "error creating pcap file: %s\n", errbuf);
         pcap_close(in_handle);
         return EXIT_FAILURE;
     }
@@ -52,11 +52,9 @@ int main(int argc, char **argv) {
         skb.data = (void *) packet;
         skb.len = pcap_hdr->len;
         int result = ebpf_filter(&skb);
-        printf("\nebpf result is: %d\n", result);
-        if (!result)
-            pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
+        printf("\nResult of the eBPF parsing is: %d\n", result );
+        pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
     }
-
     pcap_close(in_handle);
     pcap_dump_close(out_handle);
     return EXIT_SUCCESS;

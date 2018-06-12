@@ -78,9 +78,22 @@ add_dependencies(p4c_driver linkp4cebpf)
 
 # Tests
 
-set(EBPF_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-sample.py)
+set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel")
+set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc")
+set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
+
+set (XFAIL_TESTS_KERNEL)
+set (XFAIL_TESTS_BCC)
+set (XFAIL_TESTS_TEST
+  # These test currently generate malfunctioning code that does not compile
+  testdata/p4_16_samples/hit_ebpf.p4
+  testdata/p4_16_samples/two_ebpf.p4
+  )
 
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
-p4c_add_tests("ebpf" ${EBPF_DRIVER} ${EBPF_TEST_SUITES} "")
+
+p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
+p4c_add_tests("ebpf-bcc" ${EBPF_DRIVER_BCC} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_BCC}")
+p4c_add_tests("ebpf-test" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST}")

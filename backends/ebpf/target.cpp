@@ -39,7 +39,7 @@ void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstr
 
 void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("BPF_USER_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 
@@ -73,6 +73,8 @@ void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
 //////////////////////////////////////////////////////////////
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+    builder->append("#include <linux/bpf.h>");
+    builder->newline();
     builder->append("#include \"bpfinclude/ebpf_user.h\"\n");
     builder->newline();
 }

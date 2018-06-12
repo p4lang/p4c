@@ -56,7 +56,8 @@ bool EBPFProgram::build() {
 void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitGeneratedComment(builder);
 
-    builder->appendFormat("#include \"%s\"", header);
+    const char* header_stripped = header.findlast('/') + 1;
+    builder->appendFormat("#include \"%s\"", header_stripped);
     builder->newline();
 
     builder->target->emitIncludes(builder);
