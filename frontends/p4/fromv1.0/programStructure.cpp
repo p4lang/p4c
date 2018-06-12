@@ -758,6 +758,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     auto ctr = get(directCounters, table->name);
     const std::vector<IR::ID> &actionsToDo =
             action_profile ? action_profile->actions : table->actions;
+    cstring default_action = table->default_action;
     for (auto a : actionsToDo) {
         auto action = actions.get(a);
         cstring newname;
@@ -773,14 +774,17 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         }
         auto ale = new IR::ActionListElement(a.srcInfo, new IR::PathExpression(newname));
         actionList->push_back(ale);
+        if (table->default_action.name == action->name.name) {
+            default_action = newname;
+        }
     }
     if (!table->default_action.name.isNullOrEmpty() &&
-        !actionList->getDeclaration(actions.newname(table->default_action))) {
+        !actionList->getDeclaration(default_action)) {
         actionList->push_back(
             new IR::ActionListElement(
                 new IR::Annotations(
                     {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
-                new IR::PathExpression(actions.newname(table->default_action)))); }
+                new IR::PathExpression(default_action))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
 
@@ -838,7 +842,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     }
 
     if (!table->default_action.name.isNullOrEmpty()) {
-        auto act = new IR::PathExpression(actions.newname(table->default_action));
+        auto act = new IR::PathExpression(default_action);
         auto args = new IR::Vector<IR::Argument>();
         if (table->default_action_args != nullptr) {
             for (auto e : *table->default_action_args) {
