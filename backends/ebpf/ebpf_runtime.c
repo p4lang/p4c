@@ -6,6 +6,10 @@
 
 #define PATH_MAX 4096
 
+void usage() {
+    printf("Missing input trace file. Expected .pcap file as input\n");
+}
+
 int main(int argc, char **argv) {
     pcap_t *in_handle;
     pcap_dumper_t *out_handle;
@@ -15,9 +19,8 @@ int main(int argc, char **argv) {
     static char out_file[PATH_MAX];
     /* Skip over the program name. */
     ++argv; --argc;
-    if ( argc != 1 ) {
-        fprintf(stderr, "Missing input trace file, exiting...\n");
-        return EXIT_FAILURE;
+    if (argc != 1) {
+        usage();
     }
 
     /* Initialize the registry of shared tables */
@@ -30,7 +33,7 @@ int main(int argc, char **argv) {
     /* Open and read pcap file */
     in_handle = pcap_open_offline(argv[0], errbuf);
     if (in_handle == NULL) {
-        fprintf(stderr, "error reading pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error: Failed to read pcap file: %s\n", errbuf);
         return EXIT_FAILURE;
     }
 
@@ -41,7 +44,7 @@ int main(int argc, char **argv) {
     memcpy(out_file + strlen(in_dir), "/pcap0_out.pcap", strlen("/pcap0_out.pcap"));
     out_handle = pcap_dump_open(in_handle, out_file);
     if (out_handle == NULL) {
-        fprintf(stderr, "error creating pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error: Failed to create pcap file: %s\n", errbuf);
         pcap_close(in_handle);
         return EXIT_FAILURE;
     }
@@ -52,8 +55,9 @@ int main(int argc, char **argv) {
         skb.data = (void *) packet;
         skb.len = pcap_hdr->len;
         int result = ebpf_filter(&skb);
-        printf("\nResult of the eBPF parsing is: %d\n", result );
+        // if (!result)  for now we do not check for the result
         pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
+        printf("\nResult of the eBPF parsing is: %d\n", result );
     }
     pcap_close(in_handle);
     pcap_dump_close(out_handle);
