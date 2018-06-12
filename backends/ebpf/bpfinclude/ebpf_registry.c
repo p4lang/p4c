@@ -13,14 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+/*
+Implementation of ebpf registry. Intended to provide a common access interface between control and data plane. Emulates the linux userspace API which can access the kernel eBPF map using string and integer identifiers.
+*/
+
 #include <stdio.h>
 #include "ebpf_registry.h"
 
 /**
  * @brief Defines the structure of the central registry.
- * @details Defines a registry type, which is a hashmap of
- * tables identified by their name. Also associates a unique
- * integer value as descriptor.
+ * @details Defines a registry type, which maps names to tables
+ * as well as integer identifiers.
  */
 typedef struct {
     char name[MAX_TABLE_NAME_LENGTH];         // name of the map
