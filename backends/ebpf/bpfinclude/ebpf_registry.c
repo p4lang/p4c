@@ -17,59 +17,57 @@ limitations under the License.
 #include "ebpf_registry.h"
 
 /**
- * @brief Defines the structure of the central register.
- * @details Defines a register type, which is a hashmap of
+ * @brief Defines the structure of the central registry.
+ * @details Defines a registry type, which is a hashmap of
  * tables identified by their name. Also associates a unique
  * integer value as descriptor.
  */
 typedef struct {
-    char name[VAR_SIZE];         // name of the map
-    int map_fd;                  // id of the map
-    struct bpf_map_def *table;   // ptr to the map
-    UT_hash_handle hh;           // makes this structure hashable
-} table_register;
+    char name[MAX_TABLE_NAME_LENGTH];         // name of the map
+    int map_handle;                           // id of the map
+    struct bpf_map_def *table;                // ptr to the map
+    UT_hash_handle hh;                        // makes this structure hashable
+} registry_entry;
 
 /**
- * @brief A mapping between names and file descriptors.
- * @details Maps the table names to their respective file descriptors.
+ * @brief A mapping between names and handles.
+ * @details Maps the table names to their respective integer handles.
  * Provides a mechanism to find a table name by its integer value
  * representation.
  */
 typedef struct {
-    int map_fd;                 // file descriptor of the map
-    char name[VAR_SIZE];        // name of the map
-    UT_hash_handle hh;          // makes this structure hashable
-} fd_mapping;
+    int map_handle;                    // file descriptor of the map
+    char name[MAX_TABLE_NAME_LENGTH];  // name of the map
+    UT_hash_handle hh;                 // makes this structure hashable
+} handle_entry;
 
 
 static int map_indexer = 0;
 
-/* Instantiation of the central register */
-table_register *reg_maps = NULL;
-fd_mapping *map_fds = NULL;
+/* Instantiation of the central registry */
+registry_entry *reg_tables = NULL;
+handle_entry *table_handles = NULL;
 
 
-table_register *_find_table(const char *name) {
-    unsigned int key_length = VAR_SIZE;
-    if (strlen(name) > VAR_SIZE)
-        perror("Warning: Key exceeds maximum length.\n");
-    else
-        key_length = strlen(name);
-    table_register *tmp_reg;
-    HASH_FIND(hh, reg_maps, name, key_length, tmp_reg);
+static registry_entry *find_table(const char *name) {
+    if (strlen(name) > MAX_TABLE_NAME_LENGTH)
+        // Key exceeds maximum length, ignore and return NULL
+        return NULL;
+    registry_entry *tmp_reg;
+    HASH_FIND(hh, reg_tables, name, strlen(name), tmp_reg);
     return tmp_reg;
 }
 
 struct bpf_map_def *registry_lookup_table(const char *name) {
-    table_register *tmp_reg = _find_table(name);
+    registry_entry *tmp_reg = find_table(name);
     if (tmp_reg == NULL)
         return NULL;
     return tmp_reg->table;
 }
 
 struct bpf_map_def *registry_lookup_table_id(int map_id) {
-    fd_mapping *tmp_fd;
-    HASH_FIND_INT(map_fds, &map_id, tmp_fd);
+    handle_entry *tmp_fd;
+    HASH_FIND_INT(table_handles, &map_id, tmp_fd);
     if (tmp_fd == NULL)
         return NULL;
     struct bpf_map_def *tmp_map = registry_lookup_table(tmp_fd->name);
@@ -90,43 +88,51 @@ struct bpf_map *registry_lookup_map_id(int map_id) {
     return tmp_map->bpf_map;
 }
 
-void registry_add(struct bpf_map_def *map) {
+int registry_add(struct bpf_map_def *map) {
     // Check if the register exists already
-    table_register *tmp_reg = _find_table(map->name);
+    registry_entry *tmp_reg = find_table(map->name);
     if (tmp_reg != NULL)
-        return;
+        return EXIT_FAILURE;
 
-    // Check key size
-    unsigned int key_length = VAR_SIZE;
-    if (strlen(map->name) > VAR_SIZE)
-        perror("Warning: Key exceeds maximum length.\n");
-    else
-        key_length = strlen(map->name);
+    // Check key maximum length
+    if (strlen(map->name) > MAX_TABLE_NAME_LENGTH)
+        return EXIT_FAILURE;
 
     // Add the table
-    tmp_reg = malloc(sizeof(table_register));
-    HASH_ADD_KEYPTR(hh, reg_maps, map->name, key_length, tmp_reg);
+    tmp_reg = malloc(sizeof(registry_entry));
+    if (!tmp_reg) {
+        perror("Fatal: Could not allocate memory\n");
+        exit(EXIT_FAILURE);
+    }
+    HASH_ADD_KEYPTR(hh, reg_tables, map->name, strlen(map->name), tmp_reg);
     tmp_reg->table = map;
 
     // Assign an id to the map and update the descriptor mapping
-    fd_mapping *tmp_fd = malloc(sizeof(fd_mapping));
-    tmp_fd->map_fd = map_indexer;
-    HASH_ADD_INT(map_fds, map_fd, tmp_fd);
-    memcpy(tmp_reg->name, map->name, key_length);
+    handle_entry *tmp_fd = malloc(sizeof(handle_entry));
+    if (!tmp_fd) {
+        perror("Fatal: Could not allocate memory\n");
+        exit(EXIT_FAILURE);
+    }
+    tmp_fd->map_handle = map_indexer;
+    HASH_ADD_INT(table_handles, map_handle, tmp_fd);
+    memcpy(tmp_reg->name, map->name, strlen(map->name));
     map_indexer++;
+    return EXIT_SUCCESS;
 }
 
-void registry_delete(const char *name) {
-    table_register *tmp_reg = _find_table(name);
+int registry_delete(const char *name) {
+    registry_entry *tmp_reg = find_table(name);
     if (tmp_reg != NULL) {
-        HASH_DEL(reg_maps, tmp_reg);
+        HASH_DEL(reg_tables, tmp_reg);
         free(tmp_reg);
+        return EXIT_SUCCESS;
     }
+    return EXIT_FAILURE;
 }
 
 int registry_get_id(const char *name) {
-    table_register *tmp_reg = _find_table(name);
+    registry_entry *tmp_reg = find_table(name);
     if (tmp_reg == NULL)
         return -1;
-    return tmp_reg->map_fd;
+    return tmp_reg->map_handle;
 }

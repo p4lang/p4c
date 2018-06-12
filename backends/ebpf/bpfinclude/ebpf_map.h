@@ -24,9 +24,10 @@ limitations under the License.
 
 #include "../contrib/uthash.h"  // exports string.h, stddef.h, and stdlib.h
 
-#define BPF_ANY       0  // create new element or update existing
-#define BPF_NOEXIST   1  // create new element only if it didn't exist
-#define BPF_EXIST     2  // only update existing element
+// BPF_ANY create new element or update existing
+// BPF_NOEXIST: create new element only if it didn't exist
+// BPF_EXIST: only update existing element
+enum bpf_flags { BPF_ANY, BPF_NOEXIST, BPF_EXIST};
 
 struct bpf_map {
     void *key;

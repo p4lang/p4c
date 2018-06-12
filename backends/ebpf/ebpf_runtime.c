@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
     /* Skip over the program name. */
     ++argv; --argc;
-    if ( argc != 1 ) {
+    if (argc != 1) {
         fprintf(stderr, "Missing input trace file, exiting...\n");
         return EXIT_FAILURE;
     }
@@ -46,7 +46,8 @@ int main(int argc, char **argv) {
         skb.len = pcap_hdr->len;
         int result = ebpf_filter(&skb);
         printf("\nebpf result is: %d\n", result);
-        pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
+        if (!result)
+            pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
     }
 
     pcap_close(in_handle);

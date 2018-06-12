@@ -27,7 +27,7 @@ limitations under the License.
 
 #include "ebpf_map.h"
 
-#define VAR_SIZE 32  // maximum length of the table name
+#define MAX_TABLE_NAME_LENGTH 32  // maximum length of the table name
 
 /**
  * @brief A helper structure used to describe attributes.
@@ -36,6 +36,8 @@ limitations under the License.
  * In userspace, this space is theoretically unlimited.
  * This table definition points to an actual hashmap managed by uthash,
  * the relation is many-to-one.
+ * "name" should not exceed VAR_SIZE. Functions using bpf_map_def also assume
+ * that "name" is a conventional null-terminated string.
  *
  */
 struct bpf_map_def {
@@ -51,31 +53,22 @@ struct bpf_map_def {
  * @brief Adds a new table to the registry.
  * @details Adds a new table to the shared registry.
  * This operation uses a char name stored in map as a key.
- * map->name should not exceed VAR_SIZE.
- * This function also assumes conventional, null-terminated
- * strings as input.
  *
  */
-void registry_add(struct bpf_map_def *map);
+int registry_add(struct bpf_map_def *map);
 
 /**
  * @brief Removes a new table from the registry.
  * @details Removes a table from the shared registry.
  * This operation uses a char name as the key.
- * map->name should not exceed VAR_SIZE.
- * This function also assumes conventional, null-terminated
- * strings as input.
+ * @return error if map cannot be found.
  */
-void registry_delete(const char *name);
+int registry_delete(const char *name);
 
 /**
  * @brief Retrieve a table from the registry.
  * @details Retrieves a table from the shared registry.
  * This operation uses a char name as the key.
- * map->name should not exceed VAR_SIZE.
- * This function also assumes conventional, null-terminated
- * strings as input.
- *
  * @return NULL if map cannot be found.
  */
 struct bpf_map_def *registry_lookup_table(const char *name);
@@ -107,9 +100,6 @@ struct bpf_map *registry_lookup_map_id(int map_fd);
  * This function calls registry_lookup_table and directly
  * returns the hash map contained in the table.
  * This operation uses a char name as the key.
- * map->name should not exceed VAR_SIZE.
- * This function also assumes conventional, null-terminated
- * strings as input.
  *
  * @return NULL if map cannot be found.
  */
@@ -119,11 +109,6 @@ struct bpf_map *registry_lookup_map(const char *name);
  * @brief Retrieve id of a table in the registry
  * @details Retrieves a one-to-one mapped id of
  * a table identified by its name.
- * This operation uses a char name as the key.
- * map->name should not exceed VAR_SIZE.
- * This function also assumes conventional,
- * null-terminated strings as input.
- *
  * @return -1 if map cannot be found.
  */
 int registry_get_id(const char *name);

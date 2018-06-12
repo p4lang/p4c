@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "ebpf_map.h"
 
-int check_flags(void *elem, unsigned long long map_flags) {
+static int check_flags(void *elem, unsigned long long map_flags) {
     if (map_flags > BPF_EXIST)
         /* unknown flags */
         return EXIT_FAILURE;
