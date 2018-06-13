@@ -24,6 +24,7 @@ limitations under the License.
 #include "ebpfTable.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/options.h"
+#include <stdio.h>
 
 namespace EBPF {
 
@@ -56,8 +57,15 @@ bool EBPFProgram::build() {
 void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitGeneratedComment(builder);
 
-    const char* header_stripped = header.findlast('/') + 1;
-    builder->appendFormat("#include \"%s\"", header_stripped);
+    // Find the last occurrence of a folder slash (Linux only)
+    const char* header_stripped = header.findlast('/');
+    if (header_stripped)
+        // Remove the path from the header
+        builder->appendFormat("#include \"%s\"", header_stripped + 1);
+    else
+        // There is no prepended path, just include the header
+        builder->appendFormat("#include \"%s\"", header);
+
     builder->newline();
 
     builder->target->emitIncludes(builder);
