@@ -312,13 +312,16 @@ class EBPFTestTarget(EBPFTarget):
         args.append("-lpcap")
         procstderr = None
         if self.stderr is not None:
-            procstderr = open(self.stderr, "w")
+            procstderr = open(self.stderr, "w+")
         p = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
         out, err = p.communicate()
         if self.options.verbose:
-            print(out)
+            print (out)
         if p.returncode != 0:
-            reportError("Failed to compile", err)
+            procstderr.seek(0)
+            err_output = procstderr.read()
+            reportError("Failed to compile:\n", err_output)
+        procstderr.close()
         return p.returncode
 
     def run(self):
@@ -339,5 +342,8 @@ class EBPFTestTarget(EBPFTarget):
         if self.options.verbose:
             print(out)
         if p.returncode != 0:
-            reportError("Failed to run", err)
+            procstderr.seek(0)
+            err_output = procstderr.read()
+            reportError("Failed to compile:\n", err_output)
+        procstderr.close()
         return p.returncode
