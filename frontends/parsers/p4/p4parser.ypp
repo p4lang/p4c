@@ -1044,7 +1044,7 @@ expression
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
     | THIS                               { $$ = new IR::This(@1); }  // experimental
     | nonTypeName                        { $$ = new IR::PathExpression(*$1); }
-    | "." nonTypeName                    { $$ = new IR::PathExpression(new IR::Path(*$2, true)); }
+    | dotPrefix nonTypeName              { $$ = new IR::PathExpression(new IR::Path(*$2, true)); driver.structure->clearPath(); }
     | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }
