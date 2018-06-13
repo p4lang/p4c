@@ -173,6 +173,26 @@ TEST_F(SimpleSwitchGrpcTest_Ternary, PriorityOrder) {
   }
 }
 
+// zero is the lowest priority in P4Runtime (which corresponds to a high
+// priority value in bmv2); this test was added for the following issue:
+// https://github.com/p4lang/behavioral-model/issues/618
+TEST_F(SimpleSwitchGrpcTest_Ternary, PriorityZero) {
+  int priority = 0;
+  int ig_port = 3;
+  std::string pkt("\xaa\xbb");
+  p4::bm::PacketStreamResponse rcv_pkt;
+  auto entity = make_entry("\xaa\xbb", "\xff\xff", priority, a_s1_id);
+  {
+    auto status = add_entry(entity);
+    EXPECT_TRUE(status.ok());
+  }
+  {
+    auto status = send_and_receive(pkt, ig_port, &rcv_pkt);
+    EXPECT_TRUE(status.ok());
+    EXPECT_EQ(1, rcv_pkt.port());
+  }
+}
+
 }  // namespace
 
 }  // namespace testing

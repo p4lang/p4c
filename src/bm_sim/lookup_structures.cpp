@@ -269,7 +269,10 @@ class EntryList {
     internal_handle_t min_handle = 0;
 
     for (const Entry *entry = head; entry; entry = entry->next) {
-      if (entry->priority >= min_priority) continue;
+      // not sufficient if the first entry in the table has priority
+      // "min_priority" (= max integer value).
+      // if (entry->priority >= min_priority) continue;
+      if (entry->priority >= min_priority && min_entry != nullptr) continue;
 
       if (cmp(key_data, *entry->key)) {
         min_priority = entry->priority;
