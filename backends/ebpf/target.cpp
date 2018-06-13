@@ -61,13 +61,13 @@ void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring 
 
 void KernelSamplesTarget::emitCodeSection(
     Util::SourceCodeBuilder* builder, cstring sectionName) const {
-    builder->appendFormat("SEC(\"%s\")\n", sectionName);
+    builder->appendFormat("SEC(\"%s_sec\")\n", sectionName);
 }
 
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(SK_BUFF* %s)", functionName, argName);
+    builder->appendFormat("int %s(SK_BUFF *%s)", functionName, argName);
 }
 
 //////////////////////////////////////////////////////////////
