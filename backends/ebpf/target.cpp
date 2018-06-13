@@ -67,7 +67,7 @@ void KernelSamplesTarget::emitCodeSection(
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(struct sk_buff* %s)", functionName, argName);
+    builder->appendFormat("int %s(SK_BUFF* %s)", functionName, argName);
 }
 
 //////////////////////////////////////////////////////////////
