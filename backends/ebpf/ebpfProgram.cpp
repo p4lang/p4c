@@ -24,7 +24,6 @@ limitations under the License.
 #include "ebpfTable.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/options.h"
-#include <stdio.h>
 
 namespace EBPF {
 
