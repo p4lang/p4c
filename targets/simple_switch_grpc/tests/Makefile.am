@@ -35,7 +35,8 @@ test_gtest_SOURCES = \
 $(common_source) main.cpp \
 test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp \
 test_counter.cpp test_meter.cpp \
-test_ternary.cpp
+test_ternary.cpp \
+test_multicast.cpp
 if WITH_SYSREPO
 test_gtest_SOURCES += test_gnmi.cpp
 endif
@@ -54,4 +55,5 @@ packet_io.p4 packet_io.json packet_io.proto.txt \
 loopback.p4 loopback.json loopback.proto.txt \
 counter.p4 counter.json counter.proto.txt \
 meter.p4 meter.json meter.proto.txt \
-ternary.p4 ternary.json ternary.proto.txt
+ternary.p4 ternary.json ternary.proto.txt \
+multicast.p4 multicast.json multicast.proto.txt

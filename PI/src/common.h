@@ -48,7 +48,8 @@ static inline const pi_p4info_t *get_device_info(size_t dev_id) {
   return pi_get_device_p4info(dev_id);
 }
 
-static inline pi_status_t convert_error_code(bm::MatchErrorCode error_code) {
+template<typename T>
+static inline pi_status_t convert_error_code(T error_code) {
   return static_cast<pi_status_t>(
       PI_STATUS_TARGET_ERROR + static_cast<int>(error_code));
 }

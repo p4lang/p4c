@@ -1,0 +1,317 @@
+{
+  "program" : "multicast.p4",
+  "__meta__" : {
+    "version" : [2, 7],
+    "compiler" : "https://github.com/p4lang/p4c"
+  },
+  "header_types" : [
+    {
+      "name" : "scalars_0",
+      "id" : 0,
+      "fields" : []
+    },
+    {
+      "name" : "Hdr",
+      "id" : 1,
+      "fields" : [
+        ["f1", 16, false]
+      ]
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 2,
+      "fields" : [
+        ["ingress_port", 9, false],
+        ["egress_spec", 9, false],
+        ["egress_port", 9, false],
+        ["clone_spec", 32, false],
+        ["instance_type", 32, false],
+        ["drop", 1, false],
+        ["recirculate_port", 16, false],
+        ["packet_length", 32, false],
+        ["enq_timestamp", 32, false],
+        ["enq_qdepth", 19, false],
+        ["deq_timedelta", 32, false],
+        ["deq_qdepth", 19, false],
+        ["ingress_global_timestamp", 48, false],
+        ["egress_global_timestamp", 48, false],
+        ["lf_field_list", 32, false],
+        ["mcast_grp", 16, false],
+        ["resubmit_flag", 32, false],
+        ["egress_rid", 16, false],
+        ["checksum_error", 1, false],
+        ["recirculate_flag", 32, false],
+        ["_padding", 5, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "scalars",
+      "id" : 0,
+      "header_type" : "scalars_0",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "header_type" : "standard_metadata",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "hdr",
+      "id" : 2,
+      "header_type" : "Hdr",
+      "metadata" : false,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [],
+  "header_union_types" : [],
+  "header_unions" : [],
+  "header_union_stacks" : [],
+  "field_lists" : [],
+  "errors" : [
+    ["NoError", 1],
+    ["PacketTooShort", 2],
+    ["NoMatch", 3],
+    ["StackOutOfBounds", 4],
+    ["HeaderTooShort", 5],
+    ["ParserTimeout", 6]
+  ],
+  "enums" : [],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
+        {
+          "name" : "start",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "hdr"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        }
+      ]
+    }
+  ],
+  "parse_vsets" : [],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "multicast.p4",
+        "line" : 48,
+        "column" : 8,
+        "source_fragment" : "deparser"
+      },
+      "order" : ["hdr"]
+    }
+  ],
+  "meter_arrays" : [],
+  "counter_arrays" : [],
+  "register_arrays" : [],
+  "calculations" : [],
+  "learn_lists" : [],
+  "actions" : [
+    {
+      "name" : "act",
+      "id" : 0,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "mcast_grp"]
+            },
+            {
+              "type" : "field",
+              "value" : ["hdr", "f1"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "multicast.p4",
+            "line" : 41,
+            "column" : 12,
+            "source_fragment" : "sm.mcast_grp = h.hdr.f1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "act_0",
+      "id" : 1,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["hdr", "f1"]
+            },
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_rid"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "multicast.p4",
+            "line" : 45,
+            "column" : 12,
+            "source_fragment" : "h.hdr.f1 = sm.egress_rid"
+          }
+        }
+      ]
+    }
+  ],
+  "pipelines" : [
+    {
+      "name" : "ingress",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "multicast.p4",
+        "line" : 40,
+        "column" : 8,
+        "source_fragment" : "ingress"
+      },
+      "init_table" : "tbl_act",
+      "tables" : [
+        {
+          "name" : "tbl_act",
+          "id" : 0,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [0],
+          "actions" : ["act"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "act" : null
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : []
+    },
+    {
+      "name" : "egress",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "multicast.p4",
+        "line" : 44,
+        "column" : 8,
+        "source_fragment" : "egress"
+      },
+      "init_table" : "tbl_act_0",
+      "tables" : [
+        {
+          "name" : "tbl_act_0",
+          "id" : 1,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [1],
+          "actions" : ["act_0"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "act_0" : null
+          },
+          "default_entry" : {
+            "action_id" : 1,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : []
+    }
+  ],
+  "checksums" : [],
+  "force_arith" : [],
+  "extern_instances" : [],
+  "field_aliases" : [
+    [
+      "queueing_metadata.enq_timestamp",
+      ["standard_metadata", "enq_timestamp"]
+    ],
+    [
+      "queueing_metadata.enq_qdepth",
+      ["standard_metadata", "enq_qdepth"]
+    ],
+    [
+      "queueing_metadata.deq_timedelta",
+      ["standard_metadata", "deq_timedelta"]
+    ],
+    [
+      "queueing_metadata.deq_qdepth",
+      ["standard_metadata", "deq_qdepth"]
+    ],
+    [
+      "intrinsic_metadata.ingress_global_timestamp",
+      ["standard_metadata", "ingress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.egress_global_timestamp",
+      ["standard_metadata", "egress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.lf_field_list",
+      ["standard_metadata", "lf_field_list"]
+    ],
+    [
+      "intrinsic_metadata.mcast_grp",
+      ["standard_metadata", "mcast_grp"]
+    ],
+    [
+      "intrinsic_metadata.resubmit_flag",
+      ["standard_metadata", "resubmit_flag"]
+    ],
+    [
+      "intrinsic_metadata.egress_rid",
+      ["standard_metadata", "egress_rid"]
+    ],
+    [
+      "intrinsic_metadata.recirculate_flag",
+      ["standard_metadata", "recirculate_flag"]
+    ]
+  ]
+}
