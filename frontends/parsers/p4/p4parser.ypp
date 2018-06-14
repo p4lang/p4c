@@ -285,12 +285,12 @@ nonTypeName
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
     | STATE       { $$ = new IR::ID(@1, "state"); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
+    | TYPE        { $$ = new IR::ID(@1, "type"); }
     ;
 
 name
     : nonTypeName { $$ = $1; }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | TYPE        { $$ = new IR::ID(@1, "type"); }
     ;
 
 optCONST
@@ -658,9 +658,9 @@ baseType
     ;
 
 typeOrVoid
-    : typeRef                          { $$ = $1; }
-    | VOID                             { $$ = IR::Type_Void::get(); }
-    | nonTypeName                      { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
+    : typeRef     { $$ = $1; }
+    | VOID        { $$ = IR::Type_Void::get(); }
+    | IDENTIFIER  { $$ = new IR::Type_Name(@1, new IR::Path(*(new IR::ID(@1, $1)))); }
         // This is necessary because template arguments may introduce the return type
     ;
 
