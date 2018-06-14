@@ -1,6 +1,9 @@
 # Travis CI integration for p4c using Docker.
+
 before_install:
-  - sudo apt install libpcap-dev
+  - sudo apt-get update
+  - sudo apt-get install libpcap-dev
+
 branches:
   only:
   - master
