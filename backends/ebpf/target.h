@@ -126,9 +126,9 @@ class TestTarget : public EBPF::KernelSamplesTarget {
     { return cstring("((void*)(long)")+ base + "->data)"; }
     cstring dataEnd(cstring base) const override
     { return cstring("((void*)(long)(")+ base + "->data + "+ base +"->len))"; }
-    cstring forwardReturnCode() const override { return "0"; }
-    cstring dropReturnCode() const override { return "1"; }
-    cstring abortReturnCode() const override { return "1"; }
+    cstring forwardReturnCode() const override { return "true"; }
+    cstring dropReturnCode() const override { return "false"; }
+    cstring abortReturnCode() const override { return "false"; }
     cstring sysMapPath() const override { return "/sys/fs/bpf"; }
 };
 

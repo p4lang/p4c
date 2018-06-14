@@ -338,8 +338,7 @@ class EBPFTestTarget(EBPFTarget):
         args.append(self.tmpdir + "/filter")
         # input
         args.append(self.tmpdir + "/in.pcap")
-
         result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
         if result != SUCCESS:
-            reportError("Failed to run:\n", errtext)
+            reportError("Failed to run the filter:\n", errtext)
         return result

@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         skb.data = (void *) packet;
         skb.len = pcap_hdr->len;
         int result = ebpf_filter(&skb);
-        if (!result)
+        if (result)
             pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
         printf("\nResult of the eBPF parsing is: %d\n", result );
     }

@@ -27,7 +27,7 @@ limitations under the License.
 
 #include <stdio.h>      // printf
 #include <linux/bpf.h>  // types, and general bpf definitions
-
+#include <stdbool.h>    // true and false
 #include "ebpf_registry.h"
 
 #define printk(fmt, ...)                                               \
@@ -118,11 +118,6 @@ struct sk_buff {
     void *data;
     u_int16_t len;
 };
-
-/* counterintuitive but we have to conform to the eBPF standard implementation */
-static const int true = 0;
-static const int false = 1;
-
 
 #define REGISTER_START() \
 struct bpf_map_def tables[] = {
