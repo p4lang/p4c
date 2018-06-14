@@ -89,6 +89,8 @@ def run_timeout(options, args, timeout, stderr):
             procstderr = open(stderr, "w")
         local.process = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
         out, err = local.process.communicate()
+        if options.verbose:
+            print(out)
     thread = Thread(target=target)
     thread.start()
     thread.join(timeout)
@@ -96,14 +98,13 @@ def run_timeout(options, args, timeout, stderr):
         print("Timeout ", " ".join(args), file=sys.stderr)
         local.process.terminate()
         thread.join()
+    if options.verbose:
+        print("Exit code %d\n" % local.process.returncode)
     if local.process is None:
         # never even started
         if options.verbose:
             print("Process failed to start")
         return FAILURE
-    if options.verbose:
-        print(out)
-        print("Exit code ", local.process.returncode)
 
     if local.process.returncode != SUCCESS:
         procstderr = open(stderr, "r")
@@ -177,7 +178,8 @@ class EBPFTarget(object):
         args.extend(argv)
         result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
         if result != SUCCESS:
-            reportError("Failed to compile p4:\n", errtext)
+            reportError("Error %d: Failed to compile P4." %
+                        (result))
             print("".join(open(self.stderr).readlines()))
             # If the compiler crashed fail the test
             if 'Compiler Bug' in open(self.stderr).readlines():
@@ -326,7 +328,8 @@ class EBPFTestTarget(EBPFTarget):
         args.append("-lpcap")
         result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
         if result != SUCCESS:
-            reportError("Failed to build the filter:\n", errtext)
+            reportError("Error %d: Failed to build the filter:\n%s" %
+                        (result, errtext))
         return result
 
     def run(self):
@@ -340,5 +343,6 @@ class EBPFTestTarget(EBPFTarget):
         args.append(self.tmpdir + "/in.pcap")
         result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
         if result != SUCCESS:
-            reportError("Failed to run the filter:\n", errtext)
+            reportError("Error %d: Failed to run the filter:\n%s" %
+                        (result, errtext))
         return result
