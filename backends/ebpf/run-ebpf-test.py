@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-# Runs the p4c-ebpf compiler on a P4-16 program
-# TODO: do something with the output of the compiler
+''' Runs the p4c-ebpf compiler on a P4-16 program
+    TODO: do something with the output of the compiler'''
 
 from __future__ import print_function
 import sys
@@ -44,19 +44,6 @@ class Options(object):
         self.target = "bcc"             # the name of the target compiler
 
 
-def usage(options):
-    name = options.binary
-    print(name, "usage:")
-    print(name, "rootdir [options] file.p4")
-    print("Invokes compiler on the supplied file, possibly adding extra arguments")
-    print("`rootdir` is the root directory of the compiler source tree")
-    print("options:")
-    print("          -t: Specify the compiler backend target, default is bcc")
-    print("          -b: do not remove temporary results for failing tests")
-    print("          -v: verbose operation")
-    print("          -f: replace reference outputs with newly generated ones")
-
-
 def isdir(path):
     try:
         return stat.S_ISDIR(os.stat(path).st_mode)
@@ -66,54 +53,6 @@ def isdir(path):
 
 def reportError(*message):
     print("***", *message)
-
-
-# Currently not in use.
-def compare_files(options, produced, expected):
-    if options.replace:
-        if options.verbose:
-            print("Saving new version of ", expected)
-        shutil.copy2(produced, expected)
-        return SUCCESS
-
-    if options.verbose:
-        print("Comparing", produced, "and", expected)
-    diff = difflib.Differ().compare(
-        open(produced).readlines(), open(expected).readlines())
-    result = SUCCESS
-
-    message = ""
-    for l in diff:
-        if l[0] == ' ':
-            continue
-        result = FAILURE
-        message += l
-
-    if message is not "":
-        print("Files ", produced, " and ",
-              expected, " differ:", file=sys.stderr)
-        print(message, file=sys.stderr)
-
-    return result
-
-
-# Currently not in use.
-def check_generated_files(options, tmpdir, expecteddir):
-    files = os.listdir(tmpdir)
-    for file in files:
-        if options.verbose:
-            print("Checking", file)
-        produced = tmpdir + "/" + file
-        expected = expecteddir + "/" + file
-        if not os.path.isfile(expected):
-            if options.verbose:
-                print("Expected file does not exist; creating", expected)
-            shutil.copy2(produced, expected)
-        else:
-            result = compare_files(options, produced, expected)
-            if result != SUCCESS:
-                return result
-    return SUCCESS
 
 
 def run_model(ebpf, stffile):
@@ -126,7 +65,7 @@ def run_model(ebpf, stffile):
     if result != SUCCESS:
         return result
 
-    result = ebpf.create_switch()
+    result = ebpf.create_filter()
     if result != SUCCESS:
         return result
 
@@ -138,9 +77,9 @@ def run_model(ebpf, stffile):
     return result
 
 
-# Define the test environment and compile the p4 target
-# Optional: Run the generated model
 def run_test(options, argv):
+    ''' Define the test environment and compile the p4 target
+        Optional: Run the generated model '''
     assert isinstance(options, Options)
 
     tmpdir = tempfile.mkdtemp(dir=".")
@@ -164,13 +103,15 @@ def run_test(options, argv):
 
     ebpf = EBPFFactory.create(tmpdir, options, cfile, stderr)
 
-    # Compile the p4 file to the specifies target
+    # Compile the p4 file to the specified target
     result, expected_error = ebpf.compile_p4(argv)
 
     # Compile and run the generated output
     # only if we did not expect it to fail
     if result == SUCCESS and not expected_error:
         result = run_model(ebpf, stffile)
+    if result != SUCCESS:
+        return result
 
     # Remove the tmp folder
     if options.cleanupTmp:
@@ -180,9 +121,23 @@ def run_test(options, argv):
     return result
 
 
-# Parse the input of the CMake script.
-# TODO: This function should use the default python parse package
+def usage(options):
+    name = options.binary
+    print(name, "usage:")
+    print(name, "[-t] rootdir [options] file.p4")
+    print("Invokes compiler on the supplied file, possibly adding extra arguments")
+    print("`rootdir` is the root directory of the compiler source tree")
+    print("-t: Specify the compiler backend target, default is bcc")
+    print("options:")
+    print("          -b: do not remove temporary results for failing tests")
+    print("          -v: verbose operation")
+    print("          -f: replace reference outputs with newly generated ones")
+
+
 def parse_options(argv):
+    ''' Parses the input arguments and stores them in the options object
+        which is passed to target objects.
+        TODO: This function should use the default python parse package '''
     options = Options()
     options.binary = argv[0]
     if len(argv) <= 2:
@@ -227,8 +182,8 @@ def parse_options(argv):
     return options, argv
 
 
-# main
 def main(argv):
+    ''' main '''
     # parse options and process argv
     options, argv = parse_options(argv)
     # run the test with the extracted options and modified argv

@@ -64,7 +64,6 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     else
         // There is no prepended path, just include the header
         builder->appendFormat("#include \"%s\"", header);
-
     builder->newline();
 
     builder->target->emitIncludes(builder);
