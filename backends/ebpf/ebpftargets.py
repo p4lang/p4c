@@ -24,7 +24,7 @@
 
 from __future__ import print_function
 from subprocess import Popen
-from threading import Thread
+from threading import Thread, Timer
 from glob import glob
 try:
     from scapy.layers.all import *
@@ -71,46 +71,37 @@ def reportError(*message):
     print("***", *message)
 
 
-class Local(object):
-    ''' Object to hold local vars accessable to nested functions '''
-    pass
-
-
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
         print("Executing ", " ".join(args))
-    local = Local()
-    local.process = None
+    proc = None
     errtext = ""
 
-    def target():
-        procstderr = None
-        if stderr is not None:
-            procstderr = open(stderr, "w")
-        local.process = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
-        out, err = local.process.communicate()
-        if options.verbose:
-            print(out)
-    thread = Thread(target=target)
-    thread.start()
-    thread.join(timeout)
-    if thread.is_alive():
-        print("Timeout ", " ".join(args), file=sys.stderr)
-        local.process.terminate()
-        thread.join()
-    if options.verbose:
-        print("Exit code %d\n" % local.process.returncode)
-    if local.process is None:
+    def kill(process):
+        process.kill()
+
+    procstderr = None
+    if stderr is not None:
+        procstderr = open(stderr, "w")
+        proc = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
+
+    timer = Timer(TIMEOUT, kill, [proc])
+    try:
+        timer.start()
+        out, err = proc.communicate()
+    finally:
+        timer.cancel()
+    if proc is None:
         # never even started
         if options.verbose:
             print("Process failed to start")
         return FAILURE
 
-    if local.process.returncode != SUCCESS:
+    if proc.returncode != SUCCESS:
         procstderr = open(stderr, "r")
         errtext = procstderr.read()
         procstderr.close
-    return local.process.returncode, errtext
+    return proc.returncode, errtext
 
 
 def comparePacket(expected, received):
@@ -291,6 +282,51 @@ class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, stderr):
         EBPFTarget.__init__(self, tmpdir, options, template, stderr)
 
+    def _compile_c_clang(self, ebpfdir):
+        # compiler
+        args = ["clang"]
+        args.append("-emit-llvm")
+        args.append("-g")
+        # main source
+        args.append("-c")
+        args.append(self.template)
+        # bc output
+        args.append("-o")
+        template_obj = os.path.splitext(self.template)[0] + ".bc"
+        args.append(template_obj)
+        # includes
+        args.append("-I" + self.tmpdir)
+        args.append("-I" + ebpfdir)
+        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
+        if result != SUCCESS:
+            reportError("Error %d: Failed to build the filter:\n%s" %
+                        (result, errtext))
+        return result
+
+    def _compile_ebpf_llvm(self, ebpfdir):
+        # compiler
+        args = ["llc"]
+        args.append("-march=bpf")
+        args.append("-filetype=obj")
+        # bc input
+        template_obj = os.path.splitext(self.template)[0] + ".bc"
+        args.append(template_obj)
+        # object output
+        args.append("-o")
+        template_obj = os.path.splitext(self.template)[0] + ".o"
+        args.append(template_obj)
+        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
+        if result != SUCCESS:
+            reportError("Error %d: Failed to build the filter:\n%s" %
+                        (result, errtext))
+        return result
+
+    def create_filter(self):
+        ebpfdir = os.path.dirname(__file__)
+        result = self._compile_c_clang(ebpfdir)
+        result = self._compile_ebpf_llvm(ebpfdir)
+        return result
+
     def checkOutputs(self):
         # Not implemented yet, just pass the test
         return SUCCESS
@@ -313,6 +349,7 @@ class EBPFTestTarget(EBPFTarget):
         ebpfdir = os.path.dirname(__file__)
         # compiler
         args = ["gcc"]
+        args.append("-g")
         # main
         args.append("-o")
         args.append(self.tmpdir + "/filter")
