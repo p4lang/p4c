@@ -27,7 +27,8 @@ ENV P4C_DEPS bison \
              python-ipaddr \
              python-pip \
              python-setuptools \
-             tcpdump
+             tcpdump \
+             libpcap-dev
 ENV P4C_RUNTIME_DEPS cpp \
                      libboost-graph1.58.0 \
                      libboost-iostreams1.58.0 \

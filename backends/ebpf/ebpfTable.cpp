@@ -344,7 +344,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->emitIndent();
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")", fd.c_str(), table.c_str());
+    builder->appendFormat("int %s = bpf_obj_get(MAP_PATH \"/%s\")", fd.c_str(), table.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\"); exit(1); }",

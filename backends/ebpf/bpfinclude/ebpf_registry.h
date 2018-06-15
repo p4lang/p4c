@@ -53,7 +53,7 @@ struct bpf_map_def {
  * @brief Adds a new table to the registry.
  * @details Adds a new table to the shared registry.
  * This operation uses a char name stored in map as a key.
- *
+  * @return EXIT_FAILURE if map already exists or cannot be added.
  */
 int registry_add(struct bpf_map_def *map);
 
@@ -61,7 +61,7 @@ int registry_add(struct bpf_map_def *map);
  * @brief Removes a new table from the registry.
  * @details Removes a table from the shared registry.
  * This operation uses a char name as the key.
- * @return error if map cannot be found.
+ * @return EXIT_FAILURE if map cannot be found.
  */
 int registry_delete(const char *name);
 

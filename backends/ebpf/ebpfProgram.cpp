@@ -56,7 +56,14 @@ bool EBPFProgram::build() {
 void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitGeneratedComment(builder);
 
-    builder->appendFormat("#include \"%s\"", header);
+    // Find the last occurrence of a folder slash (Linux only)
+    const char* header_stripped = header.findlast('/');
+    if (header_stripped)
+        // Remove the path from the header
+        builder->appendFormat("#include \"%s\"", header_stripped + 1);
+    else
+        // There is no prepended path, just include the header
+        builder->appendFormat("#include \"%s\"", header);
     builder->newline();
 
     builder->target->emitIncludes(builder);

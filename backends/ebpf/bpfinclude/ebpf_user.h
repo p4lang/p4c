@@ -26,8 +26,8 @@ limitations under the License.
 #define BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_
 
 #include <stdio.h>      // printf
-#include <stdbool.h>    // true, false
-
+#include <linux/bpf.h>  // types, and general bpf definitions
+#include <stdbool.h>    // true and false
 #include "ebpf_registry.h"
 
 #define printk(fmt, ...)                                               \

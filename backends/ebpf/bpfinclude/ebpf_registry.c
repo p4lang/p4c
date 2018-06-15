@@ -55,7 +55,7 @@ handle_entry *table_handles = NULL;
 
 static registry_entry *find_table(const char *name) {
     if (strlen(name) > MAX_TABLE_NAME_LENGTH){
-        fprintf(stderr, "%s", "Error: Key length exceeds maximum size!\n");
+        fprintf(stderr, "Error: Key name %s exceeds maximum size %d", name, MAX_TABLE_NAME_LENGTH);
         return NULL;
     }
     registry_entry *tmp_reg;
@@ -97,13 +97,13 @@ int registry_add(struct bpf_map_def *map) {
     // Check if the register exists already
     registry_entry *tmp_reg = find_table(map->name);
     if (tmp_reg != NULL) {
-        fprintf(stderr, "%s", "Error: Table already exists!\n");
+        fprintf(stderr, "Error: Table %s already exists!\n", map->name);
         return EXIT_FAILURE;
     }
 
     // Check key maximum length
     if (strlen(map->name) > MAX_TABLE_NAME_LENGTH){
-        fprintf(stderr, "%s", "Error: Key length exceeds maximum size!\n");
+        fprintf(stderr, "Error: Key name %s exceeds maximum size %d", map->name, MAX_TABLE_NAME_LENGTH);
         return EXIT_FAILURE;
     }
 

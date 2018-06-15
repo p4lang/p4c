@@ -22,6 +22,12 @@ Implementation of userlevel eBPF map structure. Emulates the linux kernel bpf ma
 
 #include "ebpf_map.h"
 
+enum bpf_flags {
+    BPF_ANY,  // create new element or update existing
+    BPF_NOEXIST,  // create new element only if it didn't exist
+    BPF_EXIST  // only update existing element
+};
+
 static int check_flags(void *elem, unsigned long long map_flags) {
     if (map_flags > BPF_EXIST)
         /* unknown flags */
