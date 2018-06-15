@@ -22,7 +22,7 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
 #define BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
 
-#include "../contrib/uthash.h"  // exports string.h, stddef.h, and stdlib.h
+#include "contrib/uthash.h"  // exports string.h, stddef.h, and stdlib.h
 
 struct bpf_map {
     void *key;

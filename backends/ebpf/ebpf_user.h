@@ -28,7 +28,7 @@ limitations under the License.
 #include <stdio.h>      // printf
 #include <linux/bpf.h>  // types, and general bpf definitions
 #include <stdbool.h>    // true and false
-#include "ebpf_registry.h"
+#include "testinclude/ebpf_registry.h"
 
 #define printk(fmt, ...)                                               \
                 ({                                                      \

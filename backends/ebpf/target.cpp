@@ -21,7 +21,7 @@ namespace EBPF {
 
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"bpfinclude/ebpf_kernel.h\"\n");
+    builder->append("#include \"ebpf_kernel.h\"\n");
     builder->newline();
 }
 
@@ -73,7 +73,7 @@ void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
 //////////////////////////////////////////////////////////////
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"bpfinclude/ebpf_user.h\"\n");
+    builder->append("#include \"ebpf_user.h\"\n");
     builder->newline();
 }
 

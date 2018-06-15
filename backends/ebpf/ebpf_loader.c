@@ -24,20 +24,19 @@ limitations under the License.
 #include <unistd.h>
 #include <sys/resource.h>
 
-#include "bpfinclude/bpf_load.h"
-#include "bpfinclude/libbpf.h"
+#include "kernelinclude/bpf_load.h"
 
 int main(int ac, char **argv)
 {
     char filename[256];
-    struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
+    // struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
 
     snprintf(filename, sizeof(filename), "%s", argv[1]);
 
-    if (setrlimit(RLIMIT_MEMLOCK, &r)) {
-        perror("setrlimit(RLIMIT_MEMLOCK, RLIM_INFINITY)");
-        return 1;
-    }
+    // if (setrlimit(RLIMIT_MEMLOCK, &r)) {
+    //     perror("setrlimit(RLIMIT_MEMLOCK, RLIM_INFINITY)");
+    //     return 1;
+    // }
 
     if (ac != 2) {
         printf("usage: %s BPF.o\n", argv[0]);

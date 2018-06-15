@@ -24,7 +24,7 @@
 
 from __future__ import print_function
 from subprocess import Popen
-from threading import Thread, Timer
+from threading import Timer
 from glob import glob
 try:
     from scapy.layers.all import *
@@ -38,9 +38,9 @@ TIMEOUT = 10 * 60
 
 
 def nextWord(text, sep=None):
-    ''' Split a text at the indicated separator.
+    """ Split a text at the indicated separator.
      Note that the separator can be a string.
-     Separator is discarded. '''
+     Separator is discarded. """
     spl = text.split(sep, 1)
     if len(spl) == 0:
         return '', ''
@@ -63,7 +63,7 @@ def HexToByte(hexStr):
 
 
 def isError(p4filename):
-    ''' True if the filename represents a p4 program that should fail. '''
+    """ True if the filename represents a p4 program that should fail. """
     return "_errors" in p4filename
 
 
@@ -71,11 +71,11 @@ def reportError(*message):
     print("***", *message)
 
 
-def run_timeout(options, args, timeout, stderr):
+def run_timeout(options, args, timeout, stderr, errmsg):
     if options.verbose:
         print("Executing ", " ".join(args))
     proc = None
-    errtext = ""
+    errreport = ""
 
     def kill(process):
         process.kill()
@@ -83,7 +83,15 @@ def run_timeout(options, args, timeout, stderr):
     procstderr = None
     if stderr is not None:
         procstderr = open(stderr, "w")
-        proc = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
+        try:
+            proc = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
+        except OSError as e:
+            print("Failed executing: ", e)
+    if proc is None:
+        # Never even started
+        if options.verbose:
+            print("Process failed to start")
+        return FAILURE
 
     timer = Timer(TIMEOUT, kill, [proc])
     try:
@@ -91,17 +99,14 @@ def run_timeout(options, args, timeout, stderr):
         out, err = proc.communicate()
     finally:
         timer.cancel()
-    if proc is None:
-        # never even started
-        if options.verbose:
-            print("Process failed to start")
-        return FAILURE
 
     if proc.returncode != SUCCESS:
         procstderr = open(stderr, "r")
-        errtext = procstderr.read()
+        errreport = procstderr.read()
         procstderr.close
-    return proc.returncode, errtext
+        reportError("Error %d: %s\n%s" %
+                    (proc.returncode, errmsg, errreport))
+    return proc.returncode, errreport
 
 
 def comparePacket(expected, received):
@@ -124,8 +129,8 @@ def comparePacket(expected, received):
 
 
 class EBPFFactory(object):
-    ''' Generator class.
-     Returns a target subclass based on the provided target option.'''
+    """ Generator class.
+     Returns a target subclass based on the provided target option."""
     @staticmethod
     def create(tmpdir, options, template, stderr):
         if options.target == "kernel":
@@ -137,8 +142,8 @@ class EBPFFactory(object):
 
 
 class EBPFTarget(object):
-    ''' Parent Object of the EBPF Targets
-     Defines common functions and variables'''
+    """ Parent Object of the EBPF Targets
+     Defines common functions and variables"""
 
     def __init__(self, tmpdir, options, template, stderr):
         self.tmpdir = tmpdir        # dir in which all files are stored
@@ -151,6 +156,9 @@ class EBPFTarget(object):
         self.expectedAny = []       # num packets does not matter
 
     def filename(self, interface, direction):
+        """ Constructs the pcap filename from the given interface and
+            packet stream direction. For example "pcap1_out.pcap" implies
+            that the given stream contains tx packets from interface 1 """
         return (self.tmpdir + "/" + self.pcapPrefix +
                 str(interface) + "_" + direction + ".pcap")
 
@@ -159,26 +167,25 @@ class EBPFTarget(object):
                    lstrip(self.pcapPrefix).rsplit('_', 1)[0])
 
     def compile_p4(self, argv):
-        ''' To override '''
-        ''' Compile the p4 target '''
+        """ To override """
+        """ Compile the p4 target """
         if not os.path.isfile(self.options.p4filename):
             raise Exception("No such file " + self.options.p4filename)
         args = ["./p4c-ebpf"]
         args.extend(["--target", self.options.target])
         args.extend(["-o", self.template])
         args.extend(argv)
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
+        result, errtext = run_timeout(
+            self.options, args, TIMEOUT, self.stderr, "Failed to compile P4:")
         if result != SUCCESS:
-            reportError("Error %d: Failed to compile P4." %
-                        (result))
             print("".join(open(self.stderr).readlines()))
             # If the compiler crashed fail the test
             if 'Compiler Bug' in open(self.stderr).readlines():
                 sys.exit(FAILURE)
-        # check if we expect the p4 compilation of the p4 file to fail
+        # Check if we expect the p4 compilation of the p4 file to fail
         expected_error = isError(self.options.p4filename)
         if expected_error:
-            # we do, so invert the result
+            # We do, so invert the result
             if result == SUCCESS:
                 result = FAILURE
             else:
@@ -186,12 +193,12 @@ class EBPFTarget(object):
         return result, expected_error
 
     def generate_model_inputs(self, stffile):
-        ''' To override '''
-        ''' Parses the stf file and creates a .pcap file with input packets.
+        """ To override """
+        """ Parses the stf file and creates a .pcap file with input packets.
             It also adds the expected output packets per interface to a global
             dictionary.
             TODO: Create pcap packet data structure and differentiate
-            between input interfaces.'''
+            between input interfaces."""
         infile = self.tmpdir + "/in.pcap"
         fp = RawPcapWriter(infile, linktype=1)
         fp._write_header(None)
@@ -220,17 +227,17 @@ class EBPFTarget(object):
         return SUCCESS
 
     def create_filter(self):
-        ''' To override '''
-        ''' Compiles a filter from the previously generated template '''
+        """ To override """
+        """ Compiles a filter from the previously generated template """
         return SUCCESS
 
     def run(self):
-        ''' To override '''
-        ''' Runs the filter and feed attached interfaces with packets '''
+        """ To override """
+        """ Runs the filter and feed attached interfaces with packets """
         return SUCCESS
 
-    def checkOutputs(self):
-        ''' Checks if the output of the filter matches expectations '''
+    def check_outputs(self):
+        """ Checks if the output of the filter matches expectations """
         if self.options.verbose:
             print("Comparing outputs")
         direction = "out"
@@ -266,11 +273,11 @@ class EBPFTarget(object):
                     reportError("Packet", i, "on port",
                                 str(interface), "differs")
                     return FAILURE
-            # remove successfully checked interfaces
+            # Remove successfully checked interfaces
             if interface in self.expected:
                 del self.expected[interface]
         if len(self.expected) != 0:
-            # didn't find all the expects we were expecting
+            # Didn't find all the expects we were expecting
             reportError("Expected packects on ports",
                         self.expected.keys(), "not received")
             return FAILURE
@@ -282,52 +289,89 @@ class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, stderr):
         EBPFTarget.__init__(self, tmpdir, options, template, stderr)
 
-    def _compile_c_clang(self, ebpfdir):
-        # compiler
+    def _build_ebpf_loader(self, ebpfdir):
+        ebpfdir = os.path.dirname(__file__)
+        # Compiler
+        args = ["gcc"]
+        args.append("-g")
+        # Main
+        args.append("-o")
+        args.append(self.tmpdir + "/loader")
+        # Sources
+        args.append(ebpfdir + "/ebpf_loader.c")
+        args.append(ebpfdir + "/kernelinclude/nlattr.c")
+        args.append(ebpfdir + "/kernelinclude/bpf.c")
+        args.append(ebpfdir + "/kernelinclude/bpf_load.c")
+        # Includes
+        args.append("-I" + ebpfdir)
+        # Libs
+        args.append("-lelf")
+        errmsg = "Failed to build the eBPF loader:"
+        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
+
+    def _compile_c_to_bc(self, ebpfdir):
+        # Compiler
         args = ["clang"]
         args.append("-emit-llvm")
         args.append("-g")
-        # main source
+        # Main source
         args.append("-c")
         args.append(self.template)
         # bc output
         args.append("-o")
         template_obj = os.path.splitext(self.template)[0] + ".bc"
         args.append(template_obj)
-        # includes
+        # Includes
         args.append("-I" + self.tmpdir)
         args.append("-I" + ebpfdir)
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
-        if result != SUCCESS:
-            reportError("Error %d: Failed to build the filter:\n%s" %
-                        (result, errtext))
-        return result
+        errmsg = "Failed to compile with the C code:"
+        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
-    def _compile_ebpf_llvm(self, ebpfdir):
-        # compiler
+    def _compile_bc_to_ebpf(self):
+        # Compiler
         args = ["llc"]
         args.append("-march=bpf")
         args.append("-filetype=obj")
         # bc input
         template_obj = os.path.splitext(self.template)[0] + ".bc"
         args.append(template_obj)
-        # object output
+        # Object output
         args.append("-o")
         template_obj = os.path.splitext(self.template)[0] + ".o"
         args.append(template_obj)
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
-        if result != SUCCESS:
-            reportError("Error %d: Failed to build the filter:\n%s" %
-                        (result, errtext))
-        return result
+        errmsg = "Failed to compile with LLVM:"
+        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
+
+    def _load_ebpf(self):
+        # The loading application
+        args = [self.tmpdir + "/loader"]
+        # The ebpf byte code
+        template_obj = os.path.splitext(self.template)[0] + ".o"
+        args.append(template_obj)
+        errmsg = "Failed to load and verify the eBPF byte code:"
+        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
     def create_filter(self):
         ebpfdir = os.path.dirname(__file__)
-        result = self._compile_c_clang(ebpfdir)
-        result = self._compile_ebpf_llvm(ebpfdir)
+        # Build the kernel eBPF loader
+        result, errtext = self._build_ebpf_loader(ebpfdir)
+        if result != SUCCESS:
+            return result
+        # Use clang to compile the generated C code to a LLVM IR
+        result, errtext = self._compile_c_to_bc(ebpfdir)
+        if result != SUCCESS:
+            return result
+        # Parse the IR to finally create actual ebpf code
+        result, errtext = self._compile_bc_to_ebpf()
+        if result != SUCCESS:
+            return result
+        # Load the eBPF code into the kernel and check if it is accepted
+        result, errtext = self._load_ebpf()
+        if result != SUCCESS:
+            return result
         return result
 
-    def checkOutputs(self):
+    def check_outputs(self):
         # Not implemented yet, just pass the test
         return SUCCESS
 
@@ -336,7 +380,7 @@ class EBPFBCCTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, stderr):
         EBPFTarget.__init__(self, tmpdir, options, template, stderr)
 
-    def checkOutputs(self):
+    def check_outputs(self):
         # Not implemented yet, just pass the test
         return SUCCESS
 
@@ -355,31 +399,27 @@ class EBPFTestTarget(EBPFTarget):
         args.append(self.tmpdir + "/filter")
         # sources
         args.append(ebpfdir + "/ebpf_runtime.c")
-        args.append(ebpfdir + "/bpfinclude/ebpf_registry.c")
-        args.append(ebpfdir + "/bpfinclude/ebpf_map.c")
+        args.append(ebpfdir + "/testinclude/ebpf_registry.c")
+        args.append(ebpfdir + "/testinclude/ebpf_map.c")
         args.append(self.template)
         # includes
         args.append("-I" + self.tmpdir)
         args.append("-I" + ebpfdir)
         # libs
         args.append("-lpcap")
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
-        if result != SUCCESS:
-            reportError("Error %d: Failed to build the filter:\n%s" %
-                        (result, errtext))
+        errmsg = "Failed to build the filter:"
+        result, errtext = run_timeout(
+            self.options, args, TIMEOUT, self.stderr, errmsg)
         return result
 
     def run(self):
         if self.options.verbose:
             print("Running model")
-        # compiler
-        args = []
         # main
-        args.append(self.tmpdir + "/filter")
+        args = [self.tmpdir + "/filter"]
         # input
         args.append(self.tmpdir + "/in.pcap")
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
-        if result != SUCCESS:
-            reportError("Error %d: Failed to run the filter:\n%s" %
-                        (result, errtext))
+        errmsg = "Failed to execute the filter:"
+        result, errtext = run_timeout(
+            self.options, args, TIMEOUT, self.stderr, errmsg)
         return result

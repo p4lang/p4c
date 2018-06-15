@@ -4,9 +4,12 @@
 #include <pcap/pcap.h>
 #include "test.h"
 
+#define FILE_NAME_MAX 256
 
-void usage() {
-    printf("This program parses a pcap file, feeds the individual packets into a filter function, and returns the output.\n");
+void usage(char *name) {
+    printf("usage: %s [file].pcap\n"
+           "This program parses a pcap file, feeds the individual packets"
+           " into a filter function, and returns the output.\n");
 }
 
 int main(int argc, char **argv) {
@@ -16,14 +19,14 @@ int main(int argc, char **argv) {
     char errbuf[PCAP_ERRBUF_SIZE];
     struct pcap_pkthdr *pcap_hdr;
     int ret;
-    /* Skip over the program name. */
-    ++argv; --argc;
-    if (argc != 1) {
-        usage();
+    if (argc != 2) {
+        usage(argv[0]);
         fprintf(stderr, "The input trace file is missing."
                  "Expected .pcap file as input argument.\n");
         return EXIT_FAILURE;
     }
+    /* Skip over the program name. */
+    ++argv; --argc;
 
     /* Initialize the registry of shared tables */
     struct bpf_map_def* current = tables;
@@ -40,24 +43,23 @@ int main(int argc, char **argv) {
     }
 
     /* Create the output file. */
-    char *in_file = strdup(argv[0]);
-    char *in_dir = dirname(in_file);
+    char *in_file_name = strdup(argv[0]);
+    char *in_dir = dirname(in_file_name);
     int in_dir_len = strlen(in_dir);
-    /* length of the input directory plus the expected length of the pcap name */
-    char *out_file = calloc(in_dir_len + strlen("/pcapxxxx_out.pcap") , 1);
-    memcpy(out_file, in_dir, in_dir_len);
-    memcpy(out_file + in_dir_len, "/pcap0_out.pcap", strlen("/pcap0_out.pcap"));
+    /* length of the input directory plus the filename max length */
+    char *out_file_name = calloc(in_dir_len + FILE_NAME_MAX , 1);
+    snprintf(out_file_name, in_dir_len + FILE_NAME_MAX, "%s/pcap0_out.pcap", in_dir);
 
     /* Open the output file */
-    out_handle = pcap_dump_open(in_handle, out_file);
+    out_handle = pcap_dump_open(in_handle, out_file_name);
     if (out_handle == NULL) {
         pcap_perror(in_handle, "Error: Failed to create pcap file ");
         pcap_close(in_handle);
-        free(out_file);
+        free(out_file_name);
         return EXIT_FAILURE;
     }
 
-    /* Parse each packet in the file and check the result*/
+    /* Parse each packet in the file and check the result */
     while ((ret = pcap_next_ex(in_handle, &pcap_hdr, &packet)) == 1) {
         struct sk_buff skb;
         skb.data = (void *) packet;
@@ -72,6 +74,6 @@ int main(int argc, char **argv) {
 
     pcap_close(in_handle);
     pcap_dump_close(out_handle);
-    free(out_file);
+    free(out_file_name);
     return EXIT_SUCCESS;
 }
