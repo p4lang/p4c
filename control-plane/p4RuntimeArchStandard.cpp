@@ -229,7 +229,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
                 refMap,
                 typeMap,
                 &isConstructedInPlace);
-            if (instance != boost::none) {
+            if (instance) {
                 if (instance->type->name != P4V1::V1Model::instance.action_profile.name &&
                     instance->type->name != P4V1::V1Model::instance.action_selector.name) {
                     ::error("Expected an action profile or action selector: %1%",
@@ -246,7 +246,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
                 refMap,
                 typeMap,
                 &isConstructedInPlace);
-            if (instance != boost::none) {
+            if (instance) {
                 if (instance->type->name != P4V1::V1Model::instance.directCounter.name) {
                     ::error("Expected a direct counter: %1%", instance->expression);
                 } else if (isConstructedInPlace) {
@@ -261,7 +261,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
                 refMap,
                 typeMap,
                 &isConstructedInPlace);
-            if (instance != boost::none) {
+            if (instance) {
                 if (instance->type->name != P4V1::V1Model::instance.directMeter.name) {
                     ::error("Expected a direct meter: %1%", instance->expression);
                 } else if (isConstructedInPlace) {
