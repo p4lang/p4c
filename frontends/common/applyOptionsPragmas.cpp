@@ -57,7 +57,7 @@ P4COptionPragmaParser::tryToParse(const IR::Annotation* annotation) {
 
 boost::optional<IOptionPragmaParser::CommandLineOptions>
 P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
-    boost::optional<CommandLineOptions> newOptions;
+    CommandLineOptions newOptions;
 
     auto& pragmaArgs = annotation->expr;
     if (pragmaArgs.size() != 2) {
@@ -86,8 +86,7 @@ P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
     }
 
     diagnosticOption += diagnosticName->value;
-    newOptions.emplace();
-    newOptions->push_back(diagnosticOption.c_str());
+    newOptions.push_back(diagnosticOption.c_str());
     return newOptions;
 }
 
