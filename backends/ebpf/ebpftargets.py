@@ -23,14 +23,13 @@
 #   5. Evaluates the output with the expected result from the .stf file
 
 from __future__ import print_function
+import os
+import subprocess
 from subprocess import Popen
 from threading import Timer
 from glob import glob
-try:
-    from scapy.layers.all import *
-    from scapy.utils import *
-except ImportError:
-    pass
+from scapy.layers.all import RawPcapWriter
+from scapy.utils import rdpcap
 
 SUCCESS = 0
 FAILURE = 1
@@ -233,7 +232,7 @@ class EBPFTarget(object):
 
     def run(self):
         """ To override """
-        """ Runs the filter and feed attached interfaces with packets """
+        """ Runs the filter and feeds attached interfaces with packets """
         return SUCCESS
 
     def check_outputs(self):
@@ -314,6 +313,7 @@ class EBPFKernelTarget(EBPFTarget):
         args = ["clang"]
         args.append("-emit-llvm")
         args.append("-g")
+        args.append("-O2")
         # Main source
         args.append("-c")
         args.append(self.template)

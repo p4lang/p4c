@@ -101,13 +101,11 @@ set (EBPF_TEST_SUITES
 
 set (MIN_KERNEL 4.16.0)
 string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
-message("-- CMAKE_SYSTEM:           ${KERNEL_VER}")
 
 if (${KERNEL_VER} STRGREATER ${MIN_KERNEL} )
-  message("Kernel version high enough, adding ebpf tests...")
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
 else()
-  message("Kernel version too small, ignoring ebpf tests...")
+  MESSAGE(WARNING "Kernel version too small, ignoring ebpf tests...")
 endif()
 
 p4c_add_tests("ebpf-bcc" ${EBPF_DRIVER_BCC} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_BCC}")
