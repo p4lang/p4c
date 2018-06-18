@@ -1,5 +1,5 @@
 /*
-Copyright 2017 VMware, Inc.
+Copyright 2018 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/* Loads eBPF byte code files and checks whether the kernel rejects or accepts the code */
+
 #include <linux/bpf.h>
 #include <assert.h>
 #include <errno.h>
@@ -26,19 +28,20 @@ limitations under the License.
 
 #include "kernelinclude/bpf_load.h"
 
-int main(int ac, char **argv)
+int main(int argc, char **argv)
 {
     char filename[256];
-    // struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
 
     snprintf(filename, sizeof(filename), "%s", argv[1]);
 
+    /* For now these operations are inactive as they required root privileges */
+    // struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
     // if (setrlimit(RLIMIT_MEMLOCK, &r)) {
     //     perror("setrlimit(RLIMIT_MEMLOCK, RLIM_INFINITY)");
     //     return 1;
     // }
 
-    if (ac != 2) {
+    if (argc != 2) {
         printf("usage: %s BPF.o\n", argv[0]);
         return 1;
     }

@@ -1,3 +1,24 @@
+/*
+Copyright 2018 VMware, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+/* The runtime emulates a loaded eBPF program and provides an interface to feed
+   packets to the emulated eBPF filter. */
+
+
+
 #include <string.h>
 #include <libgen.h>
 #define PCAP_DONT_INCLUDE_PCAP_BPF_H
@@ -53,7 +74,7 @@ int main(int argc, char **argv) {
     /* Open the output file */
     out_handle = pcap_dump_open(in_handle, out_file_name);
     if (out_handle == NULL) {
-        pcap_perror(in_handle, "Error: Failed to create pcap file ");
+        pcap_perror(in_handle, "Error: Failed to create pcap output file ");
         pcap_close(in_handle);
         free(out_file_name);
         return EXIT_FAILURE;
