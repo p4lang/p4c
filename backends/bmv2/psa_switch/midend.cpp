@@ -52,9 +52,36 @@ limitations under the License.
 
 namespace BMV2 {
 
+/**
+This class implements a policy suitable for the ConvertEnums pass.
+The policy is: convert all enums that are not part of the psa.
+Use 32-bit values for all enums.
+Also convert PSA_PacketPath_t to bit<32>
+*/
+class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
+    cstring filename;
+
+    bool convert(const IR::Type_Enum* type) const override {
+        if (type->name == "PSA_PacketPath_t")
+            return true;
+        if (type->srcInfo.isValid()) {
+            auto sourceFile = type->srcInfo.getSourceFile();
+            if (sourceFile.endsWith(filename))
+                // Don't convert any of the standard enums
+                return false;
+        }
+        return true;
+    }
+    unsigned enumSize(unsigned) const override
+    { return 32; }
+
+ public:
+    explicit PsaEnumOn32Bits(cstring filename) : filename(filename) { }
+};
+
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("psa.p4"));
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
     addPasses({
         new P4::RemoveActionParameters(&refMap, &typeMap),
         convertEnums,
