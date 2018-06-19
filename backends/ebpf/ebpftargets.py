@@ -38,7 +38,7 @@ FAILURE = 1
 TIMEOUT = 10 * 60
 
 
-def nextWord(text, sep=None):
+def next_word(text, sep=None):
     """ Split a text at the indicated separator.
      Note that the separator can be a string.
      Separator is discarded. """
@@ -51,11 +51,11 @@ def nextWord(text, sep=None):
         return spl[0].strip(), spl[1].strip()
 
 
-def ByteToHex(byteStr):
+def byte_to_hex(byteStr):
     return ''.join(["%02X " % ord(x) for x in byteStr]).strip()
 
 
-def HexToByte(hexStr):
+def hex_to_byte(hexStr):
     bytes = []
     hexStr = ''.join(hexStr.split(" "))
     for i in range(0, len(hexStr), 2):
@@ -63,12 +63,12 @@ def HexToByte(hexStr):
     return ''.join(bytes)
 
 
-def isError(p4filename):
+def is_err(p4filename):
     """ True if the filename represents a p4 program that should fail. """
     return "_errors" in p4filename
 
 
-def reportError(*message):
+def report_err(*message):
     print("***", file=sys.stderr, *message)
 
 
@@ -108,28 +108,37 @@ def run_timeout(options, args, timeout, stderr, errmsg):
         procstderr.write("Error %d: %s\n%s" %
                          (proc.returncode, errmsg, errreport))
         procstderr.close
-        reportError("Error %d: %s\n%s" %
-                    (proc.returncode, errmsg, errreport))
+        report_err("Error %d: %s\n%s" %
+                   (proc.returncode, errmsg, errreport))
     return proc.returncode, errreport
 
 
-def comparePacket(expected, received):
-    received = ''.join(ByteToHex(str(received)).split()).upper()
+def compare_pkt(expected, received):
+    received = ''.join(byte_to_hex(str(received)).split()).upper()
     expected = ''.join(expected.split()).upper()
     if len(received) < len(expected):
-        reportError("Received packet too short",
-                    len(received), "vs", len(expected))
+        report_err("Received packet too short",
+                   len(received), "vs", len(expected))
         return FAILURE
     for i in range(0, len(expected)):
         if expected[i] == "*":
             continue
         if expected[i] != received[i]:
-            reportError("Received packet ", received)
-            reportError("Packet different at position", i,
-                        ": expected", expected[i], ", received", received[i])
-            reportError("Full received packed is ", received)
+            report_err("Received packet ", received)
+            report_err("Packet different at position", i,
+                       ": expected", expected[i], ", received", received[i])
+            report_err("Full received packed is ", received)
             return FAILURE
     return SUCCESS
+
+
+def get_make_args(ebpfdir, target):
+    args = ["make"]
+    # target makefile
+    args.extend(["-f", target + ".mk"])
+    # Source folder of the makefile
+    args.extend(["-C", ebpfdir])
+    return args
 
 
 class EBPFFactory(object):
@@ -187,7 +196,7 @@ class EBPFTarget(object):
             if 'Compiler Bug' in open(self.stderr).readlines():
                 sys.exit(FAILURE)
         # Check if we expect the p4 compilation of the p4 file to fail
-        expected_error = isError(self.options.p4filename)
+        expected_error = is_err(self.options.p4filename)
         if expected_error:
             # We do, so invert the result
             if result == SUCCESS:
@@ -208,20 +217,20 @@ class EBPFTarget(object):
         fp._write_header(None)
         with open(stffile) as i:
             for line in i:
-                line, comment = nextWord(line, "#")
-                first, cmd = nextWord(line)
+                line, comment = next_word(line, "#")
+                first, cmd = next_word(line)
                 if first == "packet":
-                    interface, cmd = nextWord(cmd)
+                    interface, cmd = next_word(cmd)
                     interface = int(interface)
                     data = ''.join(cmd.split())
                     try:
-                        fp._write_packet(HexToByte(data))
+                        fp._write_packet(hex_to_byte(data))
                     except ValueError:
-                        reportError("Invalid packet data", data)
+                        report_err("Invalid packet data", data)
                         os.remove(infile)
                         return FAILURE
                 elif first == "expect":
-                    interface, data = nextWord(cmd)
+                    interface, data = next_word(cmd)
                     interface = int(interface)
                     data = ''.join(data.split())
                     if data != '':
@@ -253,37 +262,37 @@ class EBPFTarget(object):
                 try:
                     packets = rdpcap(file)
                 except:
-                    reportError("Corrupt pcap file", file)
+                    report_err("Corrupt pcap file", file)
                     self.showLog()
                     return FAILURE
 
             # Check for expected packets.
             if interface in self.expectedAny:
                 if interface in self.expected:
-                    reportError("Interface " + interface +
-                                " has both expected with packets and without")
+                    report_err("Interface " + interface +
+                               " has both expected with packets and without")
                 continue
             if interface not in self.expected:
                 expected = []
             else:
                 expected = self.expected[interface]
             if len(expected) != len(packets):
-                reportError("Expected", len(expected), "packets on port",
-                            str(interface), "got", len(packets))
+                report_err("Expected", len(expected), "packets on port",
+                           str(interface), "got", len(packets))
                 return FAILURE
             for i in range(0, len(expected)):
-                cmp = comparePacket(expected[i], packets[i])
+                cmp = compare_pkt(expected[i], packets[i])
                 if cmp != SUCCESS:
-                    reportError("Packet", i, "on port",
-                                str(interface), "differs")
+                    report_err("Packet", i, "on port",
+                               str(interface), "differs")
                     return FAILURE
             # Remove successfully checked interfaces
             if interface in self.expected:
                 del self.expected[interface]
         if len(self.expected) != 0:
             # Didn't find all the expects we were expecting
-            reportError("Expected packects on ports",
-                        self.expected.keys(), "not received")
+            report_err("Expected packects on ports",
+                       self.expected.keys(), "not received")
             return FAILURE
         else:
             return SUCCESS
@@ -313,57 +322,34 @@ class EBPFKernelTarget(EBPFTarget):
         if len(device):
             ip.link("remove", ifname=ifname, kind="dummy")
 
-    def _load_ebpf(self, ifname):
-        # The loading application
-        args = ["sudo", "tc", "qdisc", "add", "dev",
-                ifname, "clsact"]
-        errmsg = "Failed to create qdisc:"
-        result, errtext = run_timeout(
-            self.options, args, TIMEOUT, self.stderr, errmsg)
-        if result != SUCCESS:
-            return result, errtext
-        # The loading application
-        args = ["sudo", "tc", "filter", "add", "dev",
-                ifname, "ingress", "bpf", "da", "obj"]
-        # The ebpf byte code
-        template_obj = os.path.splitext(self.template)[0] + ".o"
-        args.append(template_obj)
-        args.extend(["sec", "prog"])
-        args.append("verb")
+    def _load_ebpf(self, ebpfdir, ifname):
+        args = get_make_args(ebpfdir, self.options.target)
+        # Input eBPF byte code
+        template_bc = os.path.splitext(self.template)[0] + ".o"
+        # List of bpf programs to attach to the interface
+        args.append("BPFOBJ=" + template_bc)
+        # Name of the interface
+        args.append("IFACE=" + ifname)
         errmsg = "Failed to load eBPF byte code:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
     def _compile_c_to_bc(self, ebpfdir):
-        # Compiler
-        args = ["clang"]
-        args.append("-emit-llvm")
-        args.append("-g")
-        args.append("-O2")
-        # Main source
-        args.append("-c")
-        args.append(self.template)
-        # bc output
-        args.append("-o")
-        template_obj = os.path.splitext(self.template)[0] + ".bc"
-        args.append(template_obj)
-        # Includes
-        args.append("-I" + self.tmpdir)
-        args.append("-I" + ebpfdir)
+        args = get_make_args(ebpfdir, self.options.target)
+        # Output llvm representation
+        template_bc = os.path.splitext(self.template)[0] + ".bc"
+        args.append(template_bc)
+        # Path of the temporary test dir
+        args.append("SRCDIR=" + self.tmpdir)
         errmsg = "Failed to compile the C code with clang:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
-    def _compile_bc_to_ebpf(self):
-        # Compiler
-        args = ["llc"]
-        args.append("-march=bpf")
-        args.append("-filetype=obj")
-        # bc input
-        template_obj = os.path.splitext(self.template)[0] + ".bc"
-        args.append(template_obj)
-        # Object output
-        args.append("-o")
-        template_obj = os.path.splitext(self.template)[0] + ".o"
-        args.append(template_obj)
+    def _compile_bc_to_ebpf(self, ebpfdir):
+        args = get_make_args(ebpfdir, self.options.target)
+        # Output object
+        template_bc = os.path.splitext(self.template)[0] + ".o"
+        args.append(template_bc)
+        # Path of the temporary test dir
+        args.append("SRCDIR=" + self.tmpdir)
         errmsg = "Failed to compile with LLVM:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
@@ -377,12 +363,12 @@ class EBPFKernelTarget(EBPFTarget):
             self._remove_interface(ifname)
             return result
         # Parse the IR to finally create actual ebpf code
-        result, errtext = self._compile_bc_to_ebpf()
+        result, errtext = self._compile_bc_to_ebpf(ebpfdir)
         if result != SUCCESS:
             self._remove_interface(ifname)
             return result
         # Load the eBPF code into the kernel and check if it is accepted
-        result, errtext = self._load_ebpf(ifname)
+        result, errtext = self._load_ebpf(ebpfdir, ifname)
         if result != SUCCESS:
             self._remove_interface(ifname)
             return result

@@ -81,7 +81,7 @@ def run_test(options, argv):
         Optional: Run the generated model """
     assert isinstance(options, Options)
 
-    tmpdir = tempfile.mkdtemp(dir=".")
+    tmpdir = tempfile.mkdtemp(dir=os.path.dirname(options.binary))
     basename = os.path.basename(options.p4filename)  # Name of the p4 test
     base, ext = os.path.splitext(basename)           # Name without the type
     dirname = os.path.dirname(options.p4filename)    # Directory of the file
