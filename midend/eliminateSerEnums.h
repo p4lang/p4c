@@ -30,7 +30,7 @@ class DoEliminateSerEnums final : public Transform {
  public:
     explicit DoEliminateSerEnums(const TypeMap* typeMap): typeMap(typeMap)
     { setName("DoEliminateSerEnums"); }
-    const IR::Node* preorder(IR::Type_Enum* type) override;
+    const IR::Node* preorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Member* expression) override;
 };

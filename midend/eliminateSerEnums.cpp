@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoEliminateSerEnums::preorder(IR::Type_Enum*) {
+const IR::Node* DoEliminateSerEnums::preorder(IR::Type_SerEnum*) {
     return nullptr;  // delete the declaration
 }
 
