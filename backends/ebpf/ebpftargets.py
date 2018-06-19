@@ -24,12 +24,14 @@
 
 from __future__ import print_function
 import os
+import sys
 import subprocess
 from subprocess import Popen
 from threading import Timer
 from glob import glob
 from scapy.layers.all import RawPcapWriter
 from scapy.utils import rdpcap
+from pyroute2 import IPRoute, NetlinkError
 
 SUCCESS = 0
 FAILURE = 1
@@ -67,7 +69,7 @@ def isError(p4filename):
 
 
 def reportError(*message):
-    print("***", *message)
+    print("***", file=sys.stderr, *message)
 
 
 def run_timeout(options, args, timeout, stderr, errmsg):
@@ -100,8 +102,11 @@ def run_timeout(options, args, timeout, stderr, errmsg):
         timer.cancel()
 
     if proc.returncode != SUCCESS:
-        procstderr = open(stderr, "r")
+        procstderr = open(stderr, "r+")
         errreport = procstderr.read()
+        procstderr.seek(0, 0)
+        procstderr.write("Error %d: %s\n%s" %
+                         (proc.returncode, errmsg, errreport))
         procstderr.close
         reportError("Error %d: %s\n%s" %
                     (proc.returncode, errmsg, errreport))
@@ -288,24 +293,44 @@ class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, stderr):
         EBPFTarget.__init__(self, tmpdir, options, template, stderr)
 
-    def _build_ebpf_loader(self, ebpfdir):
-        ebpfdir = os.path.dirname(__file__)
-        # Compiler
-        args = ["gcc"]
-        args.append("-g")
-        # Main
-        args.append("-o")
-        args.append(self.tmpdir + "/loader")
-        # Sources
-        args.append(ebpfdir + "/ebpf_loader.c")
-        args.append(ebpfdir + "/kernelinclude/nlattr.c")
-        args.append(ebpfdir + "/kernelinclude/bpf.c")
-        args.append(ebpfdir + "/kernelinclude/bpf_load.c")
-        # Includes
-        args.append("-I" + ebpfdir)
-        # Libs
-        args.append("-lelf")
-        errmsg = "Failed to build the eBPF loader:"
+    def _create_interface(self, ifname):
+        ip = IPRoute()
+        try:
+            device = ip.link_lookup(ifname=ifname)
+            if len(device):
+                if self.options.verbose:
+                    print("Trying to replace existing dummy interface...")
+                ip.link("remove", ifname=ifname, kind="dummy")
+            ip.link("add", ifname=ifname, kind="dummy")
+        except Exception as e:
+            procstderr = open(self.stderr, "a+")
+            procstderr.write(e.message)
+            procstderr.close()
+
+    def _remove_interface(self, ifname):
+        ip = IPRoute()
+        device = ip.link_lookup(ifname=ifname)
+        if len(device):
+            ip.link("remove", ifname=ifname, kind="dummy")
+
+    def _load_ebpf(self, ifname):
+        # The loading application
+        args = ["sudo", "tc", "qdisc", "add", "dev",
+                ifname, "clsact"]
+        errmsg = "Failed to create qdisc:"
+        result, errtext = run_timeout(
+            self.options, args, TIMEOUT, self.stderr, errmsg)
+        if result != SUCCESS:
+            return result, errtext
+        # The loading application
+        args = ["sudo", "tc", "filter", "add", "dev",
+                ifname, "ingress", "bpf", "da", "obj"]
+        # The ebpf byte code
+        template_obj = os.path.splitext(self.template)[0] + ".o"
+        args.append(template_obj)
+        args.extend(["sec", "prog"])
+        args.append("verb")
+        errmsg = "Failed to load eBPF byte code:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
     def _compile_c_to_bc(self, ebpfdir):
@@ -324,7 +349,7 @@ class EBPFKernelTarget(EBPFTarget):
         # Includes
         args.append("-I" + self.tmpdir)
         args.append("-I" + ebpfdir)
-        errmsg = "Failed to compile with the C code:"
+        errmsg = "Failed to compile the C code with clang:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
     def _compile_bc_to_ebpf(self):
@@ -342,33 +367,26 @@ class EBPFKernelTarget(EBPFTarget):
         errmsg = "Failed to compile with LLVM:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
-    def _load_ebpf(self):
-        # The loading application
-        args = [self.tmpdir + "/loader"]
-        # The ebpf byte code
-        template_obj = os.path.splitext(self.template)[0] + ".o"
-        args.append(template_obj)
-        errmsg = "Failed to load and verify the eBPF byte code:"
-        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
-
     def create_filter(self):
+        ifname = "test" + str(os.getpid())
+        self._create_interface(ifname)
         ebpfdir = os.path.dirname(__file__)
-        # Build the kernel eBPF loader
-        result, errtext = self._build_ebpf_loader(ebpfdir)
-        if result != SUCCESS:
-            return result
         # Use clang to compile the generated C code to a LLVM IR
         result, errtext = self._compile_c_to_bc(ebpfdir)
         if result != SUCCESS:
+            self._remove_interface(ifname)
             return result
         # Parse the IR to finally create actual ebpf code
         result, errtext = self._compile_bc_to_ebpf()
         if result != SUCCESS:
+            self._remove_interface(ifname)
             return result
         # Load the eBPF code into the kernel and check if it is accepted
-        result, errtext = self._load_ebpf()
+        result, errtext = self._load_ebpf(ifname)
         if result != SUCCESS:
+            self._remove_interface(ifname)
             return result
+        self._remove_interface(ifname)
         return result
 
     def check_outputs(self):

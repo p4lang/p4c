@@ -101,7 +101,6 @@ static unsigned long long (*bpf_get_prandom_u32)(void) =
 static int (*bpf_xdp_adjust_head)(void *ctx, int offset) =
     (void *) BPF_FUNC_xdp_adjust_head;
 
-
 /** helper macro to place programs, maps, license in
  * different sections in elf_bpf file. Section names
  * are interpreted by elf_bpf loader
@@ -128,7 +127,6 @@ unsigned long long load_half(void *skb,
                              unsigned long long off) asm("llvm.bpf.load.half");
 unsigned long long load_word(void *skb,
                              unsigned long long off) asm("llvm.bpf.load.word");
-
 static inline __attribute__((always_inline))
 u64 load_dword(void *skb, u64 off) {
   return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
