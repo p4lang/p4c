@@ -381,8 +381,8 @@ ProgramStructure::explodeLabel(const IR::Constant* value, const IR::Constant* ma
         return new IR::DefaultExpression(value->srcInfo);
     bool useMask = mask->value != -1;
 
-    mpz_class v = value->value;
-    mpz_class m = mask->value;
+    big_int v = value->value;
+    big_int m = mask->value;
 
     auto rv = new IR::ListExpression(value->srcInfo, {});
     for (auto it = fieldTypes.rbegin(); it != fieldTypes.rend(); ++it) {

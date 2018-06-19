@@ -19,7 +19,6 @@ limitations under the License.
 
 #include <assert.h>
 #include <boost/optional.hpp>
-#include <gmpxx.h>
 #include <string>
 #include <map>
 #include <unordered_map>
@@ -197,7 +196,7 @@ class JSONLoader {
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value>::type
     unpack_json(T &v) { v = *json->to<JsonNumber>(); }
-    void unpack_json(mpz_class &v) { v = json->to<JsonNumber>()->val; }
+    void unpack_json(big_int &v) { v = json->to<JsonNumber>()->val; }
     void unpack_json(cstring &v) { if (!json->is<JsonNull>()) v = *json->to<std::string>(); }
     void unpack_json(IR::ID &v) { if (!json->is<JsonNull>()) v.name = *json->to<std::string>(); }
 

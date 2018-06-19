@@ -10,6 +10,9 @@
 /* Define to 1 if you have the LIBGC library. */
 #cmakedefine HAVE_LIBGC 1
 
+/* Define to 1 if you have the GMP library. */
+#cmakedefine HAVE_LIBGMP 1
+
 /* Define to 1 if you have the memchr function. */
 #cmakedefine HAVE_MEMCHR 1
 

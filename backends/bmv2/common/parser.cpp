@@ -261,7 +261,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
 // Operates on a select keyset
 void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
-                                       mpz_class& value, mpz_class& mask) const {
+                                       big_int& value, big_int& mask) const {
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
@@ -292,7 +292,7 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
 
 unsigned ParserConverter::combine(const IR::Expression* keySet,
                                 const IR::ListExpression* select,
-                                mpz_class& value, mpz_class& mask,
+                                big_int& value, big_int& mask,
                                 bool& is_vset, cstring& vset_name) const {
     // From the BMv2 spec: For values and masks, make sure that you
     // use the correct format. They need to be the concatenation (in
@@ -325,7 +325,7 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
             int width = type->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", e);
 
-            mpz_class key_value, mask_value;
+            big_int key_value, mask_value;
             convertSimpleKey(keyElement, key_value, mask_value);
             unsigned w = 8 * ROUNDUP(width, 8);
             totalWidth += ROUNDUP(width, 8);
@@ -383,7 +383,7 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
     auto se = expr->to<IR::SelectExpression>();
     for (auto sc : se->selectCases) {
         auto trans = new Util::JsonObject();
-        mpz_class value, mask;
+        big_int value, mask;
         bool is_vset;
         cstring vset_name;
         unsigned bytes = combine(sc->keyset, se->select, value, mask, is_vset, vset_name);

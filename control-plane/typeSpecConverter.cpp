@@ -140,8 +140,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
                 return false;
             }
             auto value = sdnB->value;
-            auto bitsRequired = static_cast<size_t>(
-                                mpz_sizeinbase(value.get_mpz_t(), 2));
+            auto bitsRequired = floor_log2(value) + 1;
             BUG_CHECK(bitsRequired <= 31,
                       "Cannot represent %1% on 31 bits, require %2%",
                       value, bitsRequired);
@@ -162,7 +161,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
             } else {
                 auto dataType = newTypeSpec->mutable_translated_type();
                 dataType->set_uri(std::string(uri->value));
-                dataType->set_sdn_bitwidth((uint32_t) sdnB->value.get_ui());
+                dataType->set_sdn_bitwidth((uint32_t) sdnB->value);
             }
             (*types)[name] = *newTypeSpec;
        }
@@ -195,7 +194,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Stack* type) {
     auto name = decl->controlPlaneName();
 
     auto sizeConstant = type->size->to<IR::Constant>();
-    auto size = sizeConstant->value.get_ui();
+    unsigned size = static_cast<unsigned>(sizeConstant->value);
 
     if (decl->is<IR::Type_Header>()) {
         auto headerStackTypeSpec = typeSpec->mutable_header_stack();

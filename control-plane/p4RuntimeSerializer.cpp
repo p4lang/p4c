@@ -217,7 +217,7 @@ externalId(const IR::IDeclaration* declaration) {
             return boost::none;
         }
 
-        const uint32_t id = idConstant->value.get_si();
+        const uint32_t id = static_cast<uint32_t>(idConstant->value);
         return id;
     }
 
@@ -647,13 +647,13 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
             return -1;
         }
         auto value = sdnB->value;
-        auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
+        auto bitsRequired = floor_log2(value) + 1;
         if (bitsRequired > 31) {
-            ::error("Cannot represent %1% on 31 bits, require %2%", value.get_ui(),
+            ::error("Cannot represent %1% on 31 bits, require %2%", value,
                     bitsRequired);
             return -2;
         }
-        return static_cast<int>(value.get_ui());
+        return static_cast<int>(value);
     }
     return typeMap->minWidthBits(type, type->getNode());
 }
@@ -1084,7 +1084,7 @@ class P4RuntimeAnalyzer {
             ::error("@size should be a positive integer for declaration %1%", inst);
             return;
         }
-        size = sizeConstant->value.get_ui();
+        size = static_cast<unsigned int>(sizeConstant->value);
 
         auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET(), name);
         setPreamble(vs->mutable_preamble(), id, name, symbols.getAlias(name),
@@ -1491,15 +1491,15 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    /// Convert a key expression to the mpz_class integer value if the
+    /// Convert a key expression to the big_int integer value if the
     /// expression is simple (integer literal or boolean literal) or returns
     /// boost::none otherwise.
-    boost::optional<mpz_class> simpleKeyExpressionValue(
+    boost::optional<big_int> simpleKeyExpressionValue(
         const IR::Expression* k, TypeMap* typeMap) const {
         if (k->is<IR::Constant>()) {
             return k->to<IR::Constant>()->value;
         } else if (k->is<IR::BoolLiteral>()) {
-            return static_cast<mpz_class>(k->to<IR::BoolLiteral>()->value ? 1 : 0);
+            return static_cast<big_int>(k->to<IR::BoolLiteral>()->value ? 1 : 0);
         } else if (k->is<IR::Member>()) {  // handle SerEnum members
              auto mem = k->to<IR::Member>();
              auto ei = EnumInstance::resolve(mem, typeMap);
@@ -1539,10 +1539,10 @@ class P4RuntimeEntriesConverter {
             auto km = k->to<IR::Mask>();
             auto value = simpleKeyExpressionValue(km->left, typeMap);
             if (value == boost::none) return;
-            auto trailing_zeros = [keyWidth](const mpz_class& n) -> int {
-                return (n == 0) ? keyWidth : mpz_scan1(n.get_mpz_t(), 0); };
-            auto count_ones = [](const mpz_class& n) -> int {
-                return mpz_popcount(n.get_mpz_t()); };
+            auto trailing_zeros = [keyWidth](const big_int& n) -> int {
+                return (n == 0) ? keyWidth : boost::multiprecision::lsb(n); };
+            auto count_ones = [](const big_int& n) -> int {
+                return bitcount(n); };
             auto mask = km->right->to<IR::Constant>()->value;
             auto len = trailing_zeros(mask);
             if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
@@ -1616,7 +1616,7 @@ class P4RuntimeEntriesConverter {
             auto start = simpleKeyExpressionValue(kr->left, typeMap);
             auto end = simpleKeyExpressionValue(kr->right, typeMap);
             if (start == boost::none || end == boost::none) return;
-            mpz_class maxValue = (mpz_class(1) << keyWidth) - 1;
+            big_int maxValue = (big_int(1) << keyWidth) - 1;
             // These should be guaranteed by the frontend
             BUG_CHECK(*start <= *end, "Invalid range with start greater than end");
             BUG_CHECK(*end <= maxValue, "End of range is too large");

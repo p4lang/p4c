@@ -318,7 +318,7 @@ struct Register {
 
         return Register{declaration->controlPlaneName(),
                         declaration->to<IR::IAnnotated>(),
-                        size->value.get_si(),
+                        int(size->value),
                         typeSpec};
     }
 };

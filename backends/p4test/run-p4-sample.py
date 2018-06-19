@@ -117,7 +117,7 @@ def run_timeout(options, args, timeout, stderr):
 
 timeout = 10 * 60
 
-def compare_files(options, produced, expected):
+def compare_files(options, produced, expected, ignore_case):
     if options.replace:
         if options.verbose:
             print("Saving new version of ", expected)
@@ -127,7 +127,10 @@ def compare_files(options, produced, expected):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    cmd = ("diff -B -u -w " + expected + " " + produced + " >&2")
+    args = "-B -u -w";
+    if ignore_case:
+        args = args + " -i";
+    cmd = ("diff " + args + " " + expected + " " + produced + " >&2")
     if options.verbose:
         print(cmd)
     exitcode = subprocess.call(cmd, shell=True);
@@ -145,7 +148,7 @@ def recompile_file(options, produced, mustBeIdentical):
     if result != SUCCESS:
         return result
     if mustBeIdentical:
-        result = compare_files(options, produced, secondFile)
+        result = compare_files(options, produced, secondFile, false)
     return result
 
 def check_generated_files(options, tmpdir, expecteddir):
@@ -160,7 +163,7 @@ def check_generated_files(options, tmpdir, expecteddir):
                 print("Expected file does not exist; creating", expected)
             shutil.copy2(produced, expected)
         else:
-            result = compare_files(options, produced, expected)
+            result = compare_files(options, produced, expected, file[-7:] == "-stderr")
             if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
                 return result
     return SUCCESS

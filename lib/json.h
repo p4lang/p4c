@@ -55,7 +55,7 @@ class JsonValue final : public IJson {
     };
     JsonValue() : tag(Kind::Null) {}
     JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}          // NOLINT
-    JsonValue(mpz_class v) : tag(Kind::Number), value(v) {}           // NOLINT
+    JsonValue(big_int v) : tag(Kind::Number), value(v) {}             // NOLINT
     JsonValue(int v) : tag(Kind::Number), value(v) {}                 // NOLINT
     JsonValue(long v) : tag(Kind::Number), value(v) {}                // NOLINT
     JsonValue(long long v);                                           // NOLINT
@@ -69,7 +69,7 @@ class JsonValue final : public IJson {
     JsonValue(const char* s) : tag(Kind::String), str(s) {}           // NOLINT
     void serialize(std::ostream& out) const;
 
-    bool operator==(const mpz_class& v) const;
+    bool operator==(const big_int& v) const;
     // is_integral is true for bool
     template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
     bool operator==(const T& v) const
@@ -88,7 +88,7 @@ class JsonValue final : public IJson {
 
     bool getBool() const;
     cstring getString() const;
-    mpz_class getValue() const;
+    big_int getValue() const;
     int getInt() const;
 
     static JsonValue* null;
@@ -99,11 +99,11 @@ class JsonValue final : public IJson {
             throw std::logic_error("Incorrect constructor called");
     }
 
-    static mpz_class makeValue(long long v);
-    static mpz_class makeValue(unsigned long long v);
+    static big_int makeValue(long long v);
+    static big_int makeValue(unsigned long long v);
 
     const Kind tag;
-    const mpz_class value = 0;
+    const big_int value = 0;
     const cstring str = nullptr;
 };
 
@@ -113,7 +113,7 @@ class JsonArray final : public IJson, public std::vector<IJson*> {
     void serialize(std::ostream& out) const;
     JsonArray* clone() const { return new JsonArray(*this); }
     JsonArray* append(IJson* value);
-    JsonArray* append(mpz_class v) { append(new JsonValue(v)); return this; }
+    JsonArray* append(big_int v) { append(new JsonValue(v)); return this; }
     template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
     JsonArray* append(T v) { append(new JsonValue(v)); return this; }
     JsonArray* append(double v) { append(new JsonValue(v)); return this; }
@@ -138,7 +138,7 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson*> {
     void serialize(std::ostream& out) const;
     JsonObject* emplace(cstring label, IJson* value);
     JsonObject* emplace_non_null(cstring label, IJson* value);
-    JsonObject* emplace(cstring label, mpz_class v)
+    JsonObject* emplace(cstring label, big_int v)
     { emplace(label, new JsonValue(v)); return this; }
     template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
     JsonObject* emplace(cstring label, T v)

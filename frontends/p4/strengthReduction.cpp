@@ -51,13 +51,11 @@ int DoStrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return -1;
-    mpz_class value = cst->value;
-    if (sgn(value) <= 0)
+    if (cst->value <= 0)
         return -1;
-    auto bitcnt = mpz_popcount(value.get_mpz_t());
-    if (bitcnt != 1)
+    auto log = boost::multiprecision::msb(cst->value);
+    if (log != boost::multiprecision::lsb(cst->value))
         return -1;
-    auto log = mpz_scan1(value.get_mpz_t(), 0);
     // Assumes value does not have more than 2 billion bits
     return log;
 }
@@ -66,10 +64,10 @@ bool DoStrengthReduction::isAllOnes(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return false;
-    mpz_class value = cst->value;
-    if (sgn(value) <= 0)
+    big_int value = cst->value;
+    if (value <= 0)
         return false;
-    auto bitcnt = mpz_popcount(value.get_mpz_t());
+    auto bitcnt = bitcount(value);
     return bitcnt == (unsigned long)(expr->type->width_bits());
 }
 
@@ -250,7 +248,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
         return expr->left;
     auto exp = isPowerOf2(expr->right);
     if (exp >= 0) {
-        mpz_class mask = 1;
+        big_int mask = 1;
         mask = (mask << exp) - 1;
         auto amt = new IR::Constant(expr->right->to<IR::Constant>()->type, mask);
         auto sh = new IR::BAnd(expr->srcInfo, expr->left, amt);

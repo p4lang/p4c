@@ -385,7 +385,7 @@ struct Counterlike {
         return Counterlike<Kind>{declaration->controlPlaneName(),
                                  declaration->to<IR::IAnnotated>(),
                                  unit->to<IR::Declaration_ID>()->name,
-                                 size->template to<IR::Constant>()->value.get_si(),
+                                 int(size->template to<IR::Constant>()->value),
                                  boost::none};
     }
 

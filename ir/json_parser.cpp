@@ -178,10 +178,16 @@ std::istream& operator>>(std::istream &in, JsonData*& json) {
         }
         case '-': case '0': case '1': case '2': case '3':
         case '4': case '5': case '6': case '7': case '8': case '9': {
-            mpz_class num;
+            // operator>>(istream, big_int) is broken and throws exceptions if the
+            // number is not followed by whitespace, so we need to manually extract all
+            // the digits into a buffer and convert that to big_int
+            std::string num;
+            do {
+                num += ch;
+                in >> ch;
+            } while (isdigit(ch));
             in.unget();
-            in >> num;
-            json = new JsonNumber(num);
+            json = new JsonNumber(big_int(num));
             return in;
         }
         case 't': case 'T':

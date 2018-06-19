@@ -206,7 +206,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
         return e;
     }
 
-    mpz_class value = ~cst->value;
+    big_int value = ~cst->value;
     return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
 }
 
@@ -231,7 +231,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
         return e;
     }
 
-    mpz_class value = -cst->value;
+    big_int value = -cst->value;
     return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
 }
 
@@ -241,35 +241,35 @@ DoConstantFolding::cast(const IR::Constant* node, unsigned base, const IR::Type_
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Add* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a + b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a + b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::AddSat* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a + b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Sub* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a - b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a - b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::SubSat* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a - b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mul* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a * b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a * b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::BXor* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a ^ b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a ^ b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::BAnd* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a & b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a & b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::BOr* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a | b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a | b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Equ* e) {
@@ -281,28 +281,28 @@ const IR::Node* DoConstantFolding::postorder(IR::Neq* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Lss* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a < b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a < b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Grt* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a > b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a > b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Leq* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a <= b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a <= b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Geq* e) {
-    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a >= b; });
+    return binary(e, [](big_int a, big_int b) -> big_int { return a >= b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Div* e) {
-    return binary(e, [e](mpz_class a, mpz_class b) -> mpz_class {
-            if (sgn(a) < 0 || sgn(b) < 0) {
+    return binary(e, [e](big_int a, big_int b) -> big_int {
+            if (a < 0 || b < 0) {
                 ::error("%1%: Division is not defined for negative numbers", e);
                 return 0;
             }
-            if (sgn(b) == 0) {
+            if (b == 0) {
                 ::error("%1%: Division by zero", e);
                 return 0;
             }
@@ -311,12 +311,12 @@ const IR::Node* DoConstantFolding::postorder(IR::Div* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mod* e) {
-    return binary(e, [e](mpz_class a, mpz_class b) -> mpz_class {
-            if (sgn(a) < 0 || sgn(b) < 0) {
+    return binary(e, [e](big_int a, big_int b) -> big_int {
+            if (a < 0 || b < 0) {
                 ::error("%1%: Modulo is not defined for negative numbers", e);
                 return 0;
             }
-            if (sgn(b) == 0) {
+            if (b == 0) {
                 ::error("%1%: Modulo by zero", e);
                 return 0;
             }
@@ -386,14 +386,14 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
     }
 
     if (eqTest)
-        return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a == b; });
+        return binary(e, [](big_int a, big_int b) -> big_int { return a == b; });
     else
-        return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a != b; });
+        return binary(e, [](big_int a, big_int b) -> big_int { return a != b; });
 }
 
 const IR::Node*
 DoConstantFolding::binary(const IR::Operation_Binary* e,
-                          std::function<mpz_class(mpz_class, mpz_class)> func,
+                          std::function<big_int(big_int, big_int)> func,
                           bool saturating) {
     auto eleft = getConstant(e->left);
     auto eright = getConstant(e->right);
@@ -417,7 +417,7 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
     bool runk = rt->is<IR::Type_InfInt>();
 
     const IR::Type* resultType;
-    mpz_class value = func(left->value, right->value);
+    big_int value = func(left->value, right->value);
 
     const IR::Type_Bits* ltb = nullptr;
     const IR::Type_Bits* rtb = nullptr;
@@ -460,7 +460,7 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
     }
     if (saturating) {
         if ((rtb = resultType->to<IR::Type::Bits>())) {
-            mpz_class limit = 1;
+            big_int limit = 1;
             if (rtb->isSigned) {
                 limit <<= rtb->size-1;
                 if (value < -limit)
@@ -556,8 +556,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
                 e, P4CConfiguration::MaximumWidthSupported);
         return e;
     }
-    mpz_class value = cbase->value >> l;
-    mpz_class mask = 1;
+    big_int value = cbase->value >> l;
+    big_int mask = 1;
     mask = (mask << (m - l + 1)) - 1;
     value = value & mask;
     auto resultType = typeMap->getType(getOriginal(), true);
@@ -637,7 +637,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
     }
 
     auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
-    mpz_class value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
+    big_int value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
@@ -677,12 +677,12 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
         ::error(ErrorType::ERR_EXPECTED, "an integer value", right);
         return e;
     }
-    if (sgn(cr->value) < 0) {
+    if (cr->value < 0) {
         ::error("%1%: Shifts with negative amounts are not permitted", e);
         return e;
     }
 
-    if (sgn(cr->value) == 0) {
+    if (cr->value == 0) {
         // ::warning("%1% with zero", e);
         return e->left;
     }
@@ -697,7 +697,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
         return e;
     }
 
-    mpz_class value = cl->value;
+    big_int value = cl->value;
     unsigned shift = static_cast<unsigned>(cr->asInt());
 
     auto tb = left->type->to<IR::Type_Bits>();

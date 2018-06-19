@@ -48,7 +48,7 @@ parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
 
     bool isSigned = *sep++ == 's';
     sep += strspn(sep, " \t\r\n");
-    mpz_class value = Util::cvtInt(sep+skip, base);
+    big_int value = Util::cvtInt(sep+skip, base);
     const IR::Type* type = IR::Type_Bits::get(srcInfo, size, isSigned);
     IR::Constant* result = new IR::Constant(srcInfo, type, value, base);
     return result;

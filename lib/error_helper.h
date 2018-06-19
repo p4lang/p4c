@@ -77,11 +77,11 @@ auto error_helper(boost::format& f, std::string message, std::string position,
 
 template<class... Args>
 std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class *t, Args... args);
+                         std::string tail, const big_int *t, Args... args);
 
 template<class... Args>
 std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class &t, Args... args);
+                         std::string tail, const big_int &t, Args... args);
 
 template<typename T, class... Args>
 auto
@@ -122,14 +122,14 @@ auto error_helper(boost::format& f, std::string message, std::string position,
 
 template<class... Args>
 std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class *t, Args... args) {
-    return error_helper(f % t->get_str(), message, position, tail, std::forward<Args>(args)...);
+                         std::string tail, const big_int *t, Args... args) {
+    return error_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
 std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class &t, Args... args) {
-    return error_helper(f % t.get_str(), message, position, tail, std::forward<Args>(args)...);
+                         std::string tail, const big_int &t, Args... args) {
+    return error_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template<typename T, class... Args>
@@ -231,11 +231,11 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class *t, Args... args);
+                       std::string tail, const big_int *t, Args... args);
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class &t, Args... args);
+                       std::string tail, const big_int &t, Args... args);
 
 template<typename T, class... Args>
 auto
@@ -270,14 +270,14 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class *t, Args... args) {
-    return bug_helper(f % t->get_str(), message, position, tail, std::forward<Args>(args)...);
+                       std::string tail, const big_int *t, Args... args) {
+    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class &t, Args... args) {
-    return bug_helper(f % t.get_str(), message, position, tail, std::forward<Args>(args)...);
+                       std::string tail, const big_int &t, Args... args) {
+    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template<typename T, class... Args>

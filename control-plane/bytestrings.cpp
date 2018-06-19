@@ -25,14 +25,14 @@ namespace ControlPlaneAPI {
 /// Convert a bignum to the P4Runtime bytes representation. The value must fit
 /// within the provided @width expressed in bits. Padding will be added as
 /// necessary (as the most significant bits).
-boost::optional<std::string> stringReprConstant(mpz_class value, int width) {
+boost::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
         ::error("%1%: Negative values not supported yet", value);
         return boost::none;
     }
     BUG_CHECK(width > 0, "Unexpected width 0");
-    auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
+    size_t bitsRequired = floor_log2(value) + 1;
     BUG_CHECK(static_cast<size_t>(width) >= bitsRequired,
               "Cannot represent %1% on %2% bits", value, width);
     // TODO(antonin): P4Runtime defines the canonical representation for bit<W>
@@ -45,8 +45,9 @@ boost::optional<std::string> stringReprConstant(mpz_class value, int width) {
     // auto bytes = ROUNDUP(mpz_sizeinbase(value.get_mpz_t(), 2), 8);
     auto bytes = ROUNDUP(width, 8);
     std::vector<char> data(bytes);
-    mpz_export(data.data(), NULL, 1 /* big endian word */, bytes,
-               1 /* big endian bytes */, 0 /* full words */, value.get_mpz_t());
+    for (auto &d : data) {
+        big_int v = (value >> (--bytes * 8)) & 0xff;
+        d = static_cast<uint8_t>(v); }
     return std::string(data.begin(), data.end());
 }
 
@@ -59,7 +60,7 @@ boost::optional<std::string> stringRepr(const IR::Constant* constant, int width)
 /// Convert a BoolLiteral to the P4Runtime bytes representation by calling
 /// stringReprConstant.
 boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width) {
-    auto v = static_cast<mpz_class>(constant->value ? 1 : 0);
+    auto v = static_cast<big_int>(constant->value ? 1 : 0);
     return stringReprConstant(v, width);
 }
 

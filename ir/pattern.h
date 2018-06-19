@@ -40,13 +40,13 @@ class Pattern {
     };
 
     class Const : public Base {
-        mpz_class       value;
+        big_int       value;
      public:
         bool match(const IR::Node *n) override {
             if (auto k = n->to<IR::Constant>())
                 return k->value == value;
             return false; }
-        Const(mpz_class v) : value(v) {}
+        Const(big_int v) : value(v) {}
         Const(int v) : value(v) {}
     };
     template<class T> class Unary : public Base {
@@ -108,7 +108,7 @@ class Pattern {
 
     template <class T> Pattern(const T*&m) : pattern(new MatchExt<T>(m)) {}
     template <class T>Pattern(Match<T> &m) : pattern(&m) {}
-    Pattern(mpz_class v) : pattern(new Const(v)) {}     // NOLINT(runtime/explicit)
+    Pattern(big_int v) : pattern(new Const(v)) {}     // NOLINT(runtime/explicit)
     Pattern(int v) : pattern(new Const(v)) {}           // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
     Pattern operator~() const { return Pattern(new Unary<IR::Cmpl>(pattern)); }

@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <sstream>
 #include <string>
+#include <deque>
 #include "toP4.h"
 #include "frontends/common/options.h"
 #include "frontends/parsers/p4/p4parser.hpp"
@@ -553,10 +554,10 @@ bool ToP4::preorder(const IR::Type_Control* t) {
 ///////////////////////
 
 bool ToP4::preorder(const IR::Constant* c) {
-    mpz_class value = c->value;
+    big_int value = c->value;
     const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(c->type);
     if (tb != nullptr) {
-        mpz_class zero = 0;
+        big_int zero = 0;
         if (value < zero) {
             builder.append("-");
             value = -value;
@@ -564,7 +565,6 @@ bool ToP4::preorder(const IR::Constant* c) {
         builder.appendFormat("%d", tb->size);
         builder.append(tb->isSigned ? "s" : "w");
     }
-    const char* repr = mpz_get_str(nullptr, c->base, value.get_mpz_t());
     switch (c->base) {
         case 2:
             builder.append("0b");
@@ -580,7 +580,13 @@ bool ToP4::preorder(const IR::Constant* c) {
         default:
             BUG("%1%: Unexpected base %2%", c, c->base);
     }
-    builder.append(repr);
+    std::deque<char> buf;
+    do {
+        buf.push_front("0123456789abcdef"[static_cast<int>(static_cast<big_int>(value % c->base))]);
+        value = value / c->base;
+    } while (value > 0);
+    for (auto ch : buf)
+        builder.appendFormat("%c", ch);
     return false;
 }
 
