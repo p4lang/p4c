@@ -75,7 +75,7 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     unsigned enumSize(unsigned) const override
     { return 32; }
 
-public:
+ public:
     explicit PsaEnumOn32Bits(cstring filename) : filename(filename) { }
 };
 
