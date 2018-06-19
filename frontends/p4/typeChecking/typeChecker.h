@@ -197,6 +197,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Base* type) override;
     const IR::Node* postorder(IR::Type_Var* type) override;
     const IR::Node* postorder(IR::Type_Enum* type) override;
+    const IR::Node* postorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Extern* type) override;
     const IR::Node* postorder(IR::StructField* field) override;
     const IR::Node* postorder(IR::Type_Header* type) override;
@@ -219,6 +220,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Entry* e) override;
 
     const IR::Node* postorder(IR::Argument* arg) override;
+    const IR::Node* postorder(IR::SerEnumMember* member) override;
     const IR::Node* postorder(IR::Parameter* param) override;
     const IR::Node* postorder(IR::Constant* expression) override;
     const IR::Node* postorder(IR::BoolLiteral* expression) override;

@@ -328,6 +328,30 @@ bool ToP4::preorder(const IR::Type_Enum* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Type_SerEnum* t) {
+    dump(1);
+    builder.append("enum ");
+    visit(t->type);
+    builder.spc();
+    builder.append(t->name);
+    builder.spc();
+    builder.blockStart();
+    bool first = true;
+    for (auto a : t->members) {
+        dump(2, a->getNode(), 1);
+        if (!first)
+            builder.append(",\n");
+        first = false;
+        builder.emitIndent();
+        builder.append(a->getName());
+        builder.append(" = ");
+        visit(a->value);
+    }
+    builder.newline();
+    builder.blockEnd(true);
+    return false;
+}
+
 bool ToP4::preorder(const IR::TypeParameters* t) {
     if (!t->empty()) {
         builder.append("<");

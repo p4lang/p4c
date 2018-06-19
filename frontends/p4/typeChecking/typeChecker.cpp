@@ -330,6 +330,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto canon = IR::Type_Bits::get(tb->size, tb->isSigned);
         return canon;
     } else if (type->is<IR::Type_Enum>() ||
+               type->is<IR::Type_SerEnum>() ||
                type->is<IR::Type_ActionEnum>() ||
                type->is<IR::Type_MatchKind>()) {
         return type;
@@ -693,6 +694,8 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
+        } else if (auto se = dest->to<IR::Type_SerEnum>()) {
+            return TypeMap::equivalent(src, se->type);
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
@@ -704,6 +707,10 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
     } else if (src->is<IR::Type_Newtype>()) {
         auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
         return TypeMap::equivalent(dest, st);
+    } else if (auto se = src->to<IR::Type_SerEnum>()) {
+        if (auto db = dest->to<IR::Type_Bits>()) {
+            return TypeMap::equivalent(se->type, db);
+        }
     }
     return false;
 }
@@ -1171,6 +1178,13 @@ const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
     return type;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_SerEnum* type) {
+    auto canon = setTypeType(type);
+    for (auto e : *type->getDeclarations())
+        setType(e->getNode(), canon);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Var* typeVar) {
     if (done()) return typeVar;
     const IR::Type* type;
@@ -1192,6 +1206,25 @@ const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     (void)setTypeType(type);
     return type;
+}
+
+const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
+    if (done())
+        return member;
+    auto serEnum = findContext<IR::Type_SerEnum>();
+    CHECK_NULL(serEnum);
+    auto type = getTypeType(serEnum->type);
+    auto exprType = getType(member->value);
+    auto tvs = unify(member, type, exprType, true);
+    if (tvs == nullptr)
+        // error already signalled
+        return member;
+    if (tvs->isIdentity())
+        return member;
+
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+    member->value = cts.convert(member->value);  // sets type
+    return member;
 }
 
 const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
@@ -1323,7 +1356,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto validator = [] (const IR::Type* t) {
         while (t->is<IR::Type_Newtype>())
             t = t->to<IR::Type_Newtype>()->type;
-        return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
+        return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
+               t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1354,7 +1388,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
-        t->is<IR::Type_Tuple>(); };
+        t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
     return type;
 }
@@ -2126,7 +2160,8 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
 
     if (!castType->is<IR::Type_Bits>() &&
         !castType->is<IR::Type_Boolean>() &&
-        !castType->is<IR::Type_Newtype>()) {
+        !castType->is<IR::Type_Newtype>() &&
+        !castType->is<IR::Type_SerEnum>()) {
         ::error("%1%: cast not supported", expression->destType);
         return expression;
     }
@@ -2483,7 +2518,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
     if (type->is<IR::Type_Type>()) {
         auto base = type->to<IR::Type_Type>()->type;
-        if (base->is<IR::Type_Error>() || base->is<IR::Type_Enum>()) {
+        if (base->is<IR::Type_Error>() || base->is<IR::Type_Enum>() ||
+            base->is<IR::Type_SerEnum>()) {
             if (isCompileTimeConstant(expression->expr)) {
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>()); }

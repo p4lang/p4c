@@ -137,10 +137,12 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         return equivalent(ls->elementType, rs->elementType) &&
                 ls->getSize() == rs->getSize();
     }
-    if (left->is<IR::Type_Enum>()) {
-        auto le = left->to<IR::Type_Enum>();
+    if (auto le = left->to<IR::Type_Enum>()) {
         auto re = right->to<IR::Type_Enum>();
-        // only one enum with the same name allowed
+        return le->name == re->name;
+    }
+    if (auto le = left->to<IR::Type_SerEnum>()) {
+        auto re = right->to<IR::Type_SerEnum>();
         return le->name == re->name;
     }
     if (left->is<IR::Type_StructLike>()) {

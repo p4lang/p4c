@@ -9,7 +9,7 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
         return type;
     unsigned long long count = type->members.size();
     unsigned long long width = policy->enumSize(count);
-    LOG1("Converting enum " << type->name << " to " << "bit<" << width << ">");
+    LOG2("Converting enum " << type->name << " to " << "bit<" << width << ">");
     BUG_CHECK(count <= (1ULL << width),
               "%1%: not enough bits to represent %2%", width, type);
     auto r = new EnumRepresentation(type->srcInfo, width);
@@ -39,14 +39,15 @@ const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
 /// process enum expression, e.g., X.a
 const IR::Node* DoConvertEnums::postorder(IR::Member* expression) {
     auto ei = EnumInstance::resolve(getOriginal<IR::Member>(), typeMap);
-    if (ei == nullptr)
-        return expression;
-    auto r = ::get(repr, ei->type);
-    if (r == nullptr)
-        return expression;
-    unsigned value = r->get(ei->name.name);
-    auto cst = new IR::Constant(expression->srcInfo, r->type, value);
-    return cst;
+    if (ei->is<SimpleEnumInstance>()) {
+        auto r = ::get(repr, ei->type->to<IR::Type_Enum>());
+        if (r == nullptr)
+            return expression;
+        unsigned value = r->get(ei->name.name);
+        auto cst = new IR::Constant(expression->srcInfo, r->type, value);
+        return cst;
+    }
+    return expression;
 }
 
 }  // namespace P4

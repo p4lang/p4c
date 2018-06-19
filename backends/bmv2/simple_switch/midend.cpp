@@ -33,6 +33,7 @@ limitations under the License.
 #include "midend/copyStructures.h"
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateNewtype.h"
+#include "midend/eliminateSerEnums.h"
 #include "midend/local_copyprop.h"
 #include "midend/nestedStructs.h"
 #include "midend/removeLeftSlices.h"
@@ -58,6 +59,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
     addPasses({
         new P4::EliminateNewtype(&refMap, &typeMap),
+        new P4::EliminateSerEnums(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
         convertEnums,
         new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),

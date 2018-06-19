@@ -38,7 +38,15 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
         LOG3("Removing " << type);
         return nullptr;
     }
+    return type;
+}
 
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_SerEnum* type) {
+    prune();  // never remove individual enum members
+    if (!refMap->isUsed(getOriginal<IR::Type_SerEnum>())) {
+        LOG3("Removing " << type);
+        return nullptr;
+    }
     return type;
 }
 

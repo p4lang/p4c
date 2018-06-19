@@ -51,11 +51,11 @@ class RemoveUnusedDeclarations : public Transform {
      */
     std::set<const IR::Node*>* warned;
 
-    /** Stores @node in @warned if: 
+    /** Stores @node in @warned if:
      *   - @warned is non-null,
-     *   - @node is an unused declaration, 
+     *   - @node is an unused declaration,
      *   - @node is not already present in @warned.
-     * 
+     *
      * @return true if @node is added to @warned.
      */
     bool giveWarning(const IR::Node* node);
@@ -78,6 +78,7 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::P4Table* cont) override;
     const IR::Node* preorder(IR::ParserState* state)  override;
     const IR::Node* preorder(IR::Type_Enum* type)  override;
+    const IR::Node* preorder(IR::Type_SerEnum* type)  override;
 
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
 

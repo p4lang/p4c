@@ -406,7 +406,26 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
- }
+}
+
+/// A member of a serializable enum with a backing value
+class SerEnumMember : Declaration, CompileTimeValue {
+    Expression value;
+    validate { CHECK_NULL(value); }
+#nodbprint
+}
+
+/** A serializable enumeration with a backing type */
+class Type_SerEnum : Type_Declaration, ISimpleNamespace {
+    Type_Bits type;
+    inline IndexedVector<SerEnumMember> members;
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return members.getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return members.getDeclaration(name); }
+#nodbprint
+    validate{ members.check_null(); }
+}
 
 class Type_Table : Type, IApply {
     P4Table  table;

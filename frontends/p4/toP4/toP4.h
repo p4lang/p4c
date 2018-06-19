@@ -138,6 +138,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Stack* t) override;
     bool preorder(const IR::Type_Specialized* t) override;
     bool preorder(const IR::Type_Enum* t) override;
+    bool preorder(const IR::Type_SerEnum* t) override;
     bool preorder(const IR::Type_Typedef* t) override;
     bool preorder(const IR::Type_Newtype* t) override;
     bool preorder(const IR::Type_Extern* t) override;

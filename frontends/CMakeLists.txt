@@ -22,6 +22,7 @@ set (P4_FRONTEND_SRCS
   p4/deprecated.cpp
   p4/directCalls.cpp
   p4/dontcareArgs.cpp
+  p4/enumInstance.cpp
   p4/evaluator/evaluator.cpp
   p4/evaluator/substituteParameters.cpp
   p4/externInstance.cpp
