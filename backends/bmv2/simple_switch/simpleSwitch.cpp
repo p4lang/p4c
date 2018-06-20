@@ -964,7 +964,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     convertChecksum(structure->verify_checksum->body, json->checksums,
                     json->calculations, true);
 
-    (void)toplevel->apply(ConvertGlobals(ctxt));
+    (void)toplevel->apply(ConvertGlobals(ctxt, options.emitExterns));
 }
 
 }  // namespace BMV2

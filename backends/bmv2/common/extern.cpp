@@ -38,15 +38,17 @@ Util::IJson*
 ExternConverter::cvtExternObject(ConversionContext* ctxt,
                                  const P4::ExternMethod* em,
                                  const IR::MethodCallExpression* mc,
-                                 const IR::StatOrDecl* s) {
-    return get(em)->convertExternObject(ctxt, em, mc, s);
+                                 const IR::StatOrDecl* s,
+                                 const bool& emitExterns) {
+    return get(em)->convertExternObject(ctxt, em, mc, s, emitExterns);
 }
 
 void
 ExternConverter::cvtExternInstance(ConversionContext* ctxt,
                                    const IR::Declaration* c,
-                                   const IR::ExternBlock* eb) {
-    get(eb)->convertExternInstance(ctxt, c, eb);
+                                   const IR::ExternBlock* eb,
+                                   const bool& emitExterns) {
+    get(eb)->convertExternInstance(ctxt, c, eb, emitExterns);
 }
 
 Util::IJson*
@@ -61,17 +63,38 @@ Util::IJson*
 ExternConverter::convertExternObject(ConversionContext* ,
                                      const P4::ExternMethod* em,
                                      const IR::MethodCallExpression* ,
-                                     const IR::StatOrDecl* ) {
-    ::error("Unknown extern method %1% from type %2%",
-          em->method->name, em->originalExternType->name);
-    return nullptr;
+                                     const IR::StatOrDecl*,
+                                     const bool& emitExterns) {
+    if (emitExterns) {
+        auto primitive = mkPrimitive("_" + em->originalExternType->name +
+                                         "_" + em->method->name,
+                                     result);
+        auto parameters = mkParameters(primitive);
+        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+        auto etr = new Util::JsonObject();
+        etr->emplace("type", "extern");
+        etr->emplace("value", em->object->getName());
+        parameters->append(etr);
+        for (auto arg : *mc->arguments)
+        {
+            auto args = conv->convert(arg);
+            parameters->append(args);
+        }
+        return primitive;
+    } else {
+        ::error("Unknown extern method %1% from type %2%",
+                em->method->name, em->originalExternType->name);
+        return nullptr;
+    }
 }
 
 void
 ExternConverter::convertExternInstance(ConversionContext* ,
                                        const IR::Declaration* ,
-                                       const IR::ExternBlock* eb) {
-    ::error("Unknown extern instance %1%", eb->type->name);
+                                       const IR::ExternBlock* eb,
+                                       const bool& emitExterns) {
+    if (!emitExterns)
+        ::error("Unknown extern instance %1%", eb->type->name);
 }
 
 Util::IJson*
