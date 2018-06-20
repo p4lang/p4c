@@ -1,17 +1,30 @@
+# Argument for the CLANG compiler
 LLC ?= llc
 CLANG ?= clang
-# If needed, bpf target files can be hardcoded here
-BPFOBJ=
-# Interface to attach programs to
-IFACE=
 INCLUDE=-I./
+# Optimization flags to save space
+CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value -Wno-pointer-sign \
+		-Wno-compare-distinct-pointer-types \
+		-Wno-gnu-variable-sized-type-not-at-end \
+		-Wno-address-of-packed-member -Wno-tautological-compare \
+		-Wno-unknown-warning-option
 
-# P4 Compiler
+# Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
+# P4 source file argument for the compiler
+P4FILE=
 P4C=p4c-ebpf
 TARGET=kernel
-# Arguments for the compiler
+# Extra arguments for the compiler
 ARGS=
+
+# If needed, bpf target files can be hardcoded here
+# This can be any file of type .c, .bc, or, .o
+BPFOBJ=
+# Get the source name of the object to match targets
+BPFNAME=$(basename $(BPFOBJ))
+# Interface to attach programs to
+IFACE=
 
 
 all: verify_target_bpf $(BPFOBJ)
@@ -41,7 +54,7 @@ verify_target_bpf: verify_cmds
 # Generate .c files with the P4 compiler
 # Keep the intermediate .c file
 .PRECIOUS: %.c
-%.c: %.p4
+$(BPFNAME).c: $(P4FILE)
 	@if ! ($(P4C) --help > /dev/null 2>&1); then \
 		echo "*** ERROR: Cannot find p4c-ebpf"; \
 		exit 1;\
@@ -50,26 +63,12 @@ verify_target_bpf: verify_cmds
 
 # Compile the C code with the clang llvm compiler
 # do extra CLANG so first pass can return non-zero to shell and stop make
-%.bc: %.c
-	@$(CLANG) \
-		-D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value -Wno-pointer-sign \
-		-Wno-compare-distinct-pointer-types \
-		-Wno-gnu-variable-sized-type-not-at-end \
-		-Wno-address-of-packed-member -Wno-tautological-compare \
-		-Wno-unknown-warning-option \
-		$(INCLUDE) \
-		-O2 -emit-llvm -g -c $< -o - > /dev/null
-	$(CLANG) \
-		-D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value -Wno-pointer-sign \
-		-Wno-compare-distinct-pointer-types \
-		-Wno-gnu-variable-sized-type-not-at-end \
-		-Wno-address-of-packed-member -Wno-tautological-compare \
-		-Wno-unknown-warning-option \
-		$(INCLUDE) \
-		-O2 -emit-llvm -g -c $< -o $@
+$(BPFNAME).bc: %.bc : %.c
+	@$(CLANG) $(CFLAGS) $(INCLUDE) -emit-llvm -c $< -o - > /dev/null
+	$(CLANG) $(CFLAGS) $(INCLUDE) -emit-llvm -c $< -o $@
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code
-%.o: %.bc
+$(BPFNAME).o: %.o : %.bc
 	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
 
 clean: clean_loader

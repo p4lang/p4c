@@ -101,6 +101,9 @@ def run_timeout(options, args, timeout, stderr, errmsg):
     finally:
         timer.cancel()
 
+    if options.verbose:
+        print ("\n########### PROCESS OUTPUT BEGIN:\n", out)
+        print ("########### PROCESS OUTPUT END\n")
     if proc.returncode != SUCCESS:
         procstderr = open(stderr, "r+")
         errreport = procstderr.read()
@@ -302,6 +305,39 @@ class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, stderr):
         EBPFTarget.__init__(self, tmpdir, options, template, stderr)
 
+    def compile_p4(self, argv):
+        """ To override """
+        """ Compile the p4 target """
+        if not os.path.isfile(self.options.p4filename):
+            raise Exception("No such file " + self.options.p4filename)
+        ebpfdir = os.path.dirname(__file__)
+        # Initialize arguments for the makefile
+        args = get_make_args(ebpfdir, self.options.target)
+        # name of the output source file
+        args.append("BPFOBJ=" + self.template)
+        # location of the P4 input file
+        args.append("P4FILE=" + self.options.p4filename)
+        p4_args = ' '.join(map(str, argv))
+        # Remaining arguments
+        args.append("ARGS=\"" + p4_args + "\"")
+        errmsg = "Failed to compile P4:"
+        result, errtext = run_timeout(
+            self.options, args, TIMEOUT, self.stderr, errmsg)
+        if result != SUCCESS:
+            print("".join(open(self.stderr).readlines()))
+            # If the compiler crashed fail the test
+            if 'Compiler Bug' in open(self.stderr).readlines():
+                sys.exit(FAILURE)
+        # Check if we expect the p4 compilation of the p4 file to fail
+        expected_error = is_err(self.options.p4filename)
+        if expected_error:
+            # We do, so invert the result
+            if result == SUCCESS:
+                result = FAILURE
+            else:
+                result = SUCCESS
+        return result, expected_error
+
     def _create_interface(self, ifname):
         ip = IPRoute()
         try:
@@ -322,35 +358,18 @@ class EBPFKernelTarget(EBPFTarget):
         if len(device):
             ip.link("remove", ifname=ifname, kind="dummy")
 
-    def _load_ebpf(self, ebpfdir, ifname):
+    def _compile_and_load_ebpf(self, ebpfdir, ifname):
         args = get_make_args(ebpfdir, self.options.target)
         # Input eBPF byte code
         template_bc = os.path.splitext(self.template)[0] + ".o"
+        args.append(template_bc)
         # List of bpf programs to attach to the interface
         args.append("BPFOBJ=" + template_bc)
+        # Path of the temporary test dir
+        args.append("WORKDIR=" + self.tmpdir)
         # Name of the interface
         args.append("IFACE=" + ifname)
-        errmsg = "Failed to load eBPF byte code:"
-        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
-
-    def _compile_c_to_bc(self, ebpfdir):
-        args = get_make_args(ebpfdir, self.options.target)
-        # Output llvm representation
-        template_bc = os.path.splitext(self.template)[0] + ".bc"
-        args.append(template_bc)
-        # Path of the temporary test dir
-        args.append("SRCDIR=" + self.tmpdir)
-        errmsg = "Failed to compile the C code with clang:"
-        return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
-
-    def _compile_bc_to_ebpf(self, ebpfdir):
-        args = get_make_args(ebpfdir, self.options.target)
-        # Output object
-        template_bc = os.path.splitext(self.template)[0] + ".o"
-        args.append(template_bc)
-        # Path of the temporary test dir
-        args.append("SRCDIR=" + self.tmpdir)
-        errmsg = "Failed to compile with LLVM:"
+        errmsg = "Failed to compile and load the eBPF byte code:"
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
     def create_filter(self):
@@ -358,17 +377,7 @@ class EBPFKernelTarget(EBPFTarget):
         self._create_interface(ifname)
         ebpfdir = os.path.dirname(__file__)
         # Use clang to compile the generated C code to a LLVM IR
-        result, errtext = self._compile_c_to_bc(ebpfdir)
-        if result != SUCCESS:
-            self._remove_interface(ifname)
-            return result
-        # Parse the IR to finally create actual ebpf code
-        result, errtext = self._compile_bc_to_ebpf(ebpfdir)
-        if result != SUCCESS:
-            self._remove_interface(ifname)
-            return result
-        # Load the eBPF code into the kernel and check if it is accepted
-        result, errtext = self._load_ebpf(ebpfdir, ifname)
+        result, errtext = self._compile_and_load_ebpf(ebpfdir, ifname)
         if result != SUCCESS:
             self._remove_interface(ifname)
             return result
