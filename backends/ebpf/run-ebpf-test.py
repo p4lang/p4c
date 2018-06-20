@@ -97,10 +97,13 @@ def run_test(options, argv):
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
-    cfile = tmpdir + "/" + "test" + ".c"          # Name of the target c file
-    stderr = tmpdir + "/" + basename + "-stderr"  # Location of error output
 
-    ebpf = EBPFFactory.create(tmpdir, options, cfile, stderr)
+    template = tmpdir + "/" + "test"
+    output = {}
+    output["stderr"] = tmpdir + "/" + basename + "-stderr"
+    output["stdout"] = tmpdir + "/" + basename + "-stdout"
+
+    ebpf = EBPFFactory.create(tmpdir, options, template, output)
 
     # Compile the p4 file to the specified target
     result, expected_error = ebpf.compile_p4(argv)

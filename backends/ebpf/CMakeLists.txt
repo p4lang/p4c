@@ -109,12 +109,19 @@ if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
 endif()
 
 # Check if we have the right llvm version
-find_package(LLVM CONFIG)
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 3.7.1 )
-  MESSAGE(WARNING "LLVM version too small, ignoring ebpf tests...")
+
+find_package(LLVM)
+if(LLVM_PACKAGE_VERSION)
+  message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+  if (${LLVM_PACKAGE_VERSION} VERSION_LESS 3.7.1 )
+    MESSAGE(WARNING "LLVM version too small, ignoring ebpf tests...")
+    set (SUPPORTS_KERNEL False)
+  endif()
+else()
+  message(STATUS "LLVM missing")
   set (SUPPORTS_KERNEL False)
 endif()
+
 
 # Only add the kernel tests if the two requirements are met
 if (SUPPORTS_KERNEL)
