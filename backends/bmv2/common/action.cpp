@@ -117,7 +117,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 LOG3("P4V1:: convert " << s);
-                auto json = ExternConverter::cvtExternObject(ctxt, em, mc, s);
+                auto json = ExternConverter::cvtExternObject(ctxt, em, mc, s, emitExterns);
                 if (json)
                     result->append(json);
                 continue;

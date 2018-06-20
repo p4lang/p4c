@@ -24,9 +24,11 @@ namespace BMV2 {
 
 class ConvertGlobals : public Inspector {
     ConversionContext* ctxt;
+    const bool emitExterns;
 
  public:
-    explicit ConvertGlobals(ConversionContext* ctxt) : ctxt(ctxt) {
+    explicit ConvertGlobals(ConversionContext* ctxt, const bool& emitExterns_) :
+    ctxt(ctxt), emitExterns(emitExterns_) {
         setName("ConvertGlobals"); }
 
     bool preorder(const IR::ExternBlock* block) override;
