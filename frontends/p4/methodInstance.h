@@ -152,6 +152,21 @@ class ActionCall final : public MethodInstance {
     const IR::P4Action* action;
 };
 
+/**
+  Represents the call of a function.
+*/
+class FunctionCall final : public MethodInstance {
+    FunctionCall(const IR::MethodCallExpression* expr,
+                 const IR::Function* function,
+                 const IR::Type_Method* originalMethodType,
+                 const IR::Type_Method* actualMethodType) :
+            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), function(function)
+    { CHECK_NULL(function); }
+    friend class MethodInstance;
+ public:
+    const IR::Function* function;
+};
+
 /** This class represents the call of a built-in method:
 These methods are:
 - header.setValid(),
