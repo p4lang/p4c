@@ -27,8 +27,12 @@ ENV P4C_DEPS bison \
              python-ipaddr \
              python-pip \
              python-setuptools \
-             tcpdump \
-             libpcap-dev
+             tcpdump
+ENV P4C_EBPF_DEPS libpcap-dev \
+             libelf-dev \
+             llvm \
+             clang \
+             iproute2
 ENV P4C_RUNTIME_DEPS cpp \
                      libboost-graph1.58.0 \
                      libboost-iostreams1.58.0 \
@@ -39,8 +43,9 @@ ENV P4C_RUNTIME_DEPS cpp \
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends $P4C_DEPS $P4C_RUNTIME_DEPS && \
+    apt-get install -y --no-install-recommends $P4C_DEPS $P4C_EBPF_DEPS $P4C_RUNTIME_DEPS && \
     pip install tenjin && \
+    pip install pyroute2 && \
     mkdir build && \
     cd build && \
     cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3' && \

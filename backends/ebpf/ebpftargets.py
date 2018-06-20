@@ -320,14 +320,17 @@ class EBPFKernelTarget(EBPFTarget):
         p4_args = ' '.join(map(str, argv))
         # Remaining arguments
         args.append("ARGS=\"" + p4_args + "\"")
+
         errmsg = "Failed to compile P4:"
         result, errtext = run_timeout(
             self.options, args, TIMEOUT, self.stderr, errmsg)
+
         if result != SUCCESS:
             print("".join(open(self.stderr).readlines()))
             # If the compiler crashed fail the test
             if 'Compiler Bug' in open(self.stderr).readlines():
                 sys.exit(FAILURE)
+
         # Check if we expect the p4 compilation of the p4 file to fail
         expected_error = is_err(self.options.p4filename)
         if expected_error:
@@ -343,11 +346,13 @@ class EBPFKernelTarget(EBPFTarget):
         try:
             device = ip.link_lookup(ifname=ifname)
             if len(device):
+                # Interface exists already
                 if self.options.verbose:
                     print("Trying to replace existing dummy interface...")
                 ip.link("remove", ifname=ifname, kind="dummy")
             ip.link("add", ifname=ifname, kind="dummy")
         except Exception as e:
+            # Something broke, provide feedback
             procstderr = open(self.stderr, "a+")
             procstderr.write(e.message)
             procstderr.close()
@@ -356,6 +361,7 @@ class EBPFKernelTarget(EBPFTarget):
         ip = IPRoute()
         device = ip.link_lookup(ifname=ifname)
         if len(device):
+            # Interface actually exists
             ip.link("remove", ifname=ifname, kind="dummy")
 
     def _compile_and_load_ebpf(self, ebpfdir, ifname):
@@ -373,6 +379,7 @@ class EBPFKernelTarget(EBPFTarget):
         return run_timeout(self.options, args, TIMEOUT, self.stderr, errmsg)
 
     def create_filter(self):
+        # Create interface with unique id (allows parallel tests)
         ifname = "test" + str(os.getpid())
         self._create_interface(ifname)
         ebpfdir = os.path.dirname(__file__)
