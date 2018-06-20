@@ -25,7 +25,7 @@ cstring ParserConverter::jsonAssignment(const IR::Type* type, bool inParser) {
         return "assign_VL";
     if (type->is<IR::Type_HeaderUnion>())
         return "assign_union";
-    if (type->is<IR::Type_Header>())
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>())
         return "assign_header";
     if (auto ts = type->to<IR::Type_Stack>()) {
         auto et = ts->elementType;

@@ -774,7 +774,7 @@ SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* field
 
 void
 SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* checksums,
-                              Util::JsonArray* calculations, bool verify) {
+                                     Util::JsonArray* calculations, bool verify) {
     if (errorCount() > 0)
         return;
     for (auto stat : block->components) {
@@ -895,6 +895,10 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     };
+
+    auto hook = options.getDebugHook();
+    simplify.addDebugHook(hook);
+
     program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
