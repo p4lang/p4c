@@ -214,6 +214,8 @@ typedef const IR::Type ConstType;
 %type<IR::IndexedVector<IR::Declaration>*>  parserLocalElements controlLocalDeclarations
 %type<IR::StructField*>     structField
 %type<IR::IndexedVector<IR::StructField>*>  structFieldList
+%type<IR::IndexedVector<IR::SerEnumMember>*> specifiedIdentifierList
+%type<IR::SerEnumMember*>   specifiedIdentifier
 %type<IR::Method*>          methodPrototype functionPrototype
 %type<IR::Vector<IR::Method>*>  methodPrototypes
 %type<IR::Property*>        tableProperty
@@ -643,18 +645,18 @@ baseType
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | BIT "<" INTEGER ">"
-      { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), false); }
+      { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), false); }
     | INT "<" INTEGER ">"
-      { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
+      { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), true); }
     | VARBIT "<" INTEGER ">"
-      { $$ = IR::Type::Varbits::get(@3, parseConstant(@3, $3, 0)->asInt()); }
+      { $$ = IR::Type::Varbits::get(@1+@4, parseConstant(@3, $3, 0)->asInt()); }
 
     | BIT "<" "(" expression ")" ">"
-      { $$ = new IR::Type_Bits(@4, $4, false); }
+      { $$ = new IR::Type_Bits(@1+@6, $4, false); }
     | INT "<" "(" expression ")" ">"
-      { $$ = new IR::Type_Bits(@4, $4, true); }
+      { $$ = new IR::Type_Bits(@1+@6, $4, true); }
     | VARBIT "<" "(" expression ")" ">"
-      { $$ = new IR::Type_Varbits(@4, $4); }
+      { $$ = new IR::Type_Varbits(@1+@6, $4); }
     ;
 
 typeOrVoid
@@ -744,7 +746,20 @@ structField
 enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
-        "{" identifierList "}" { $$ = new IR::Type_Enum(@2, *$3, *$6); }
+        "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
+    | optAnnotations ENUM BIT "<" INTEGER ">" name { driver.structure->declareType(*$7); }
+        "{" specifiedIdentifierList "}" {
+            auto type = IR::Type::Bits::get(@3+@6, parseConstant(@5, $5, 0)->asInt());
+            $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
+    ;
+
+specifiedIdentifierList
+    : specifiedIdentifier     { $$ = new IR::IndexedVector<IR::SerEnumMember>(); $$->push_back($1); }
+    | specifiedIdentifierList "," specifiedIdentifier { $$ = $1; $1->push_back($3); }
+    ;
+
+specifiedIdentifier
+    : name "=" initializer    { $$ = new IR::SerEnumMember(@1+@3, *$1, $3); }
     ;
 
 errorDeclaration

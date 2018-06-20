@@ -34,6 +34,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type->is<IR::Type_Boolean>() ||
         type->is<IR::Type_Varbits>() ||
         type->is<IR::Type_Enum>() ||
+        type->is<IR::Type_SerEnum>() ||
         type->is<IR::Type_Error>() ||
         // Since we don't have any operations except assignment for a
         // type described by a type variable, we treat is as a base type.

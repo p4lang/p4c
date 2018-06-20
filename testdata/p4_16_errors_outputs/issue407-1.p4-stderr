@@ -12,7 +12,7 @@ issue407-1.p4(49): error: Field x9 of header H cannot have type myenum1
             ^^
 issue407-1.p4(32)
 enum myenum1 {
-^^^^
+     ^^^^^^^
 issue407-1.p4(50): error: Field x10 of header H cannot have type header Ethernet_h
     Ethernet_h x10;
                ^^^
