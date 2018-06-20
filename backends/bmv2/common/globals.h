@@ -27,7 +27,7 @@ class ConvertGlobals : public Inspector {
     const bool emitExterns;
 
  public:
-    explicit ConvertGlobals(ConversionContext* ctxt, const bool& emitExterns_) : 
+    explicit ConvertGlobals(ConversionContext* ctxt, const bool& emitExterns_) :
     ctxt(ctxt), emitExterns(emitExterns_) {
         setName("ConvertGlobals"); }
 
