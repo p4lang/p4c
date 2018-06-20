@@ -1,7 +1,8 @@
 # Argument for the CLANG compiler
 LLC ?= llc
 CLANG ?= clang
-INCLUDE=-I./
+INCLUDES+= -I./
+LIBS+=
 # Optimization flags to save space
 CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value -Wno-pointer-sign \
 		-Wno-compare-distinct-pointer-types \
@@ -19,7 +20,7 @@ TARGET=kernel
 ARGS=
 
 # If needed, bpf target files can be hardcoded here
-# This can be any file of type .c, .bc, or, .o
+# This can be any file of type ".c", ".bc" or, ".o"
 BPFOBJ=
 # Get the source name of the object to match targets
 BPFNAME=$(basename $(BPFOBJ))
@@ -59,20 +60,20 @@ $(BPFNAME).c: $(P4FILE)
 		echo "*** ERROR: Cannot find p4c-ebpf"; \
 		exit 1;\
 	fi;
-	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $<;
+	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS);
 
 # Compile the C code with the clang llvm compiler
 # do extra CLANG so first pass can return non-zero to shell and stop make
 $(BPFNAME).bc: %.bc : %.c
-	@$(CLANG) $(CFLAGS) $(INCLUDE) -emit-llvm -c $< -o - > /dev/null
-	$(CLANG) $(CFLAGS) $(INCLUDE) -emit-llvm -c $< -o $@
+	@$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o - > /dev/null
+	$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o $@
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code
 $(BPFNAME).o: %.o : %.bc
 	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
 
 clean: clean_loader
-	rm -f *.o *.bc
+	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h
 
 # For actually attaching BPF programs
 attach:

@@ -171,6 +171,7 @@ def parse_options(argv):
             usage(options)
         argv = argv[1:]
     options.p4filename = argv[-1]
+    argv = argv[1:]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):
         options.testName = options.p4filename[len(options.compilerSrcDir):]

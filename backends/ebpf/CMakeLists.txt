@@ -98,13 +98,26 @@ set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
 
+set (SUPPORTS_KERNEL True)
 
+# Check if the kernel version is new enough to support ebpf features
 set (MIN_KERNEL 4.16.0)
 string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
-
 if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
-  MESSAGE(WARNING "Kernel version too small, ignoring ebpf tests...")
-else()
+  MESSAGE(WARNING "Kernel version too small, ignoring ebpf kernel tests...")
+  set (SUPPORTS_KERNEL False)
+endif()
+
+# Check if we have the right llvm version
+find_package(LLVM CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 3.7.1 )
+  MESSAGE(WARNING "LLVM version too small, ignoring ebpf tests...")
+  set (SUPPORTS_KERNEL False)
+endif()
+
+# Only add the kernel tests if the two requirements are met
+if (SUPPORTS_KERNEL)
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
 endif()
 

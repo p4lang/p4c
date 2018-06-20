@@ -30,7 +30,7 @@ limitations under the License.
 void usage(char *name) {
     printf("usage: %s [file].pcap\n"
            "This program parses a pcap file, feeds the individual packets"
-           " into a filter function, and returns the output.\n");
+           " into a filter function, and returns the output.\n" , name);
 }
 
 int main(int argc, char **argv) {
