@@ -1,15 +1,5 @@
 #include <core.p4>
 
-enum bit<16> EthTypes {
-    IPv4 = 16w0x800,
-    ARP = 16w0x806,
-    RARP = 16w0x8035,
-    EtherTalk = 16w0x809b,
-    VLAN = 16w0x8100,
-    IPX = 16w0x8137,
-    IPv6 = 16w0x86dd
-}
-
 header Ethernet {
     bit<48> src;
     bit<48> dest;

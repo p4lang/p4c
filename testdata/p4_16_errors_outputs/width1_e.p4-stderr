@@ -3,7 +3,7 @@ const int<32> c1 = 0xFFFFFFFF;
                    ^^^^^^^^^^
 width1_e.p4(17): error: int<-2>: Illegal type size
 const int<(c1 + c1)> c2 = 0;
-           ^^^^^^^
+      ^^^^^^^^^^^^^^
 width1_e.p4(18): error: int<-3>: Illegal type size
 const int<(-3)> c3 = 0;
-           ^^
+      ^^^^^^^^^
