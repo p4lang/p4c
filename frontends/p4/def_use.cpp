@@ -884,8 +884,13 @@ bool ComputeWriteSet::preorder(const IR::Function* function) {
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
-
     enterScope(function->type->parameters, locals, point, false);
+
+    // The return value is uninitialized
+    auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
+    auto retVal = definitions->storageMap->addRetVal();
+    currentDefinitions->set(retVal, uninit);
+
     returnedDefinitions = new Definitions();
     visit(function->body);
     currentDefinitions = currentDefinitions->join(returnedDefinitions);

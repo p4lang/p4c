@@ -433,7 +433,12 @@ IR::P4Action *DoLocalCopyPropagation::postorder(IR::P4Action *act) {
 IR::Function *DoLocalCopyPropagation::preorder(IR::Function *fn) {
     visitOnce();
     BUG_CHECK(!working && !inferForFunc && available.empty(), "corrupt internal data struct");
-    auto name = findContext<IR::Declaration_Instance>()->name + '.' + fn->name;
+    cstring name;
+    if (auto decl = findContext<IR::Declaration_Instance>())
+        // abstract function implementation
+        name = decl->name + '.' + fn->name;
+    else
+        name = fn->name;
     working = true;
     inferForFunc = &methods[name];
     LOG2("DoLocalCopyPropagation working on function " << name);
@@ -442,7 +447,12 @@ IR::Function *DoLocalCopyPropagation::preorder(IR::Function *fn) {
 }
 
 IR::Function *DoLocalCopyPropagation::postorder(IR::Function *fn) {
-    auto name = findContext<IR::Declaration_Instance>()->name + '.' + fn->name;
+    cstring name;
+    if (auto decl = findContext<IR::Declaration_Instance>())
+        // abstract function implementation
+        name = decl->name + '.' + fn->name;
+    else
+        name = fn->name;
     LOG5("DoLocalCopyPropagation before ElimDead " << name);
     LOG5(fn);
     BUG_CHECK(inferForFunc == &methods[name], "corrupt internal data struct");

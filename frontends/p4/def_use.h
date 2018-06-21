@@ -162,7 +162,8 @@ class LocationSet : public IHasDbPrint {
  public:
     LocationSet() = default;
     explicit LocationSet(const std::set<const StorageLocation*> &other) : locations(other) {}
-    explicit LocationSet(const StorageLocation* location) { locations.emplace(location); }
+    explicit LocationSet(const StorageLocation* location)
+    { CHECK_NULL(location); locations.emplace(location); }
     static const LocationSet* empty;
 
     const LocationSet* getField(cstring field) const;
@@ -172,7 +173,7 @@ class LocationSet : public IHasDbPrint {
     const LocationSet* getArrayLastIndex() const;
 
     void add(const StorageLocation* location)
-    { locations.emplace(location); }
+    { CHECK_NULL(location); locations.emplace(location); }
     const LocationSet* join(const LocationSet* other) const;
     /// @returns this location set expressed only in terms of BaseLocation;
     /// e.g., a StructLocation is expanded in all its fields.
@@ -195,7 +196,10 @@ class LocationSet : public IHasDbPrint {
 
 /// Maps a declaration to its associated storage.
 class StorageMap {
+    /// Storage location for each declaration.
     std::map<const IR::IDeclaration*, StorageLocation*> storage;
+    /// Storage location for the return value in the current function
+    StorageLocation* retVal;
     StorageFactory factory;
 
  public:
@@ -203,7 +207,7 @@ class StorageMap {
     TypeMap*       typeMap;
 
     StorageMap(ReferenceMap* refMap, TypeMap* typeMap) :
-            factory(typeMap), refMap(refMap), typeMap(typeMap)
+            retVal(nullptr), factory(typeMap), refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     StorageLocation* add(const IR::IDeclaration* decl) {
         CHECK_NULL(decl);
@@ -212,6 +216,16 @@ class StorageMap {
         if (loc != nullptr)
             storage.emplace(decl, loc);
         return loc;
+    }
+    /// Creates a storage location representing the returned
+    /// value from a function.  The actual type does not really matter,
+    /// since this value is always returned entirely.
+    StorageLocation* addRetVal() {
+        return retVal = factory.create(IR::Type::Boolean::get(), "$retval");
+    }
+    const BaseLocation* getRetVal() const {
+        CHECK_NULL(retVal);
+        return retVal->to<BaseLocation>();
     }
     StorageLocation* getOrAdd(const IR::IDeclaration* decl) {
         auto s = getStorage(decl);
@@ -318,6 +332,8 @@ class Definitions : public IHasDbPrint {
     { CHECK_NULL(loc); CHECK_NULL(point); definitions[loc] = point; }
     void set(const StorageLocation* loc, const ProgramPoints* point);
     void set(const LocationSet* loc, const ProgramPoints* point);
+    bool has(const BaseLocation* location) const
+    { return definitions.find(location) != definitions.end(); }
     const ProgramPoints* get(const BaseLocation* location) const {
         auto r = ::get(definitions, location);
         BUG_CHECK(r != nullptr, "%1%: no definitions", location);
