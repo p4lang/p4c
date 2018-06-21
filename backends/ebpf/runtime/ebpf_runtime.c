@@ -28,7 +28,7 @@ limitations under the License.
 #define FILE_NAME_MAX 256
 
 void usage(char *name) {
-    printf("usage: %s [file].pcap\n"
+    printf("usage: %s file.pcap\n"
            "This program parses a pcap file, feeds the individual packets"
            " into a filter function, and returns the output.\n" , name);
 }

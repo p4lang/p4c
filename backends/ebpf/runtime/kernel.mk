@@ -74,18 +74,3 @@ $(BPFNAME).o: %.o : %.bc
 
 clean: clean_loader
 	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h
-
-# For actually attaching BPF programs
-attach:
-	ip link show $(IFACE); \
-	tc qdisc add dev $(IFACE) clsact; \
-	for TOOL in $(BPFOBJ); do \
-		tc filter add dev $(IFACE) ingress bpf da $(TOOL) sec prog verb; \
-	done
-
-# Detach the loaded programs
-detach:
-	ip link show $(IFACE); \
-	tc filter del dev $(IFACE) ingress; \
-
-

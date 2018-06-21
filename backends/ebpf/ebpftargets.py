@@ -172,6 +172,9 @@ class EBPFTarget(object):
         self.interfaces = {}        # list of active interfaces
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
+        # TODO: Make the runtime dir independent
+        #       on the location of the python file
+        self.ebpfdir = os.path.dirname(__file__) + "/runtime"
 
     def get_make_args(self, ebpfdir, target):
         args = ["make"]
@@ -193,14 +196,12 @@ class EBPFTarget(object):
                    lstrip(self.pcapPrefix).rsplit('_', 1)[0])
 
     def compile_p4(self, argv):
-        """ To override """
+        # To override
         """ Compile the p4 target """
         if not os.path.isfile(self.options.p4filename):
             raise Exception("No such file " + self.options.p4filename)
-        ebpfdir = os.path.dirname(__file__)
-
         # Initialize arguments for the makefile
-        args = self.get_make_args(ebpfdir, self.options.target)
+        args = self.get_make_args(self.ebpfdir, self.options.target)
         # name of the output source file
         args.append("BPFOBJ=" + self.template + ".c")
         # location of the P4 input file
@@ -228,12 +229,12 @@ class EBPFTarget(object):
         return result, expected_error
 
     def generate_model_inputs(self, stffile):
-        """ To override """
+        # To override
         """ Parses the stf file and creates a .pcap file with input packets.
             It also adds the expected output packets per interface to a global
-            dictionary.
-            TODO: Create pcap packet data structure and differentiate
-            between input interfaces."""
+            dictionary. """
+        # TODO: Create pcap packet data structure and differentiate
+        # between input interfaces.
         infile = self.tmpdir + "/in.pcap"
         fp = RawPcapWriter(infile, linktype=1)
         fp._write_header(None)
@@ -263,12 +264,12 @@ class EBPFTarget(object):
         return SUCCESS
 
     def create_filter(self):
-        """ To override """
+        # To override
         """ Compiles a filter from the previously generated template """
         return SUCCESS
 
     def run(self):
-        """ To override """
+        # To override
         """ Runs the filter and feeds attached interfaces with packets """
         return SUCCESS
 
@@ -352,34 +353,52 @@ class EBPFKernelTarget(EBPFTarget):
             # Interface actually exists
             ip.link("remove", ifname=ifname, kind="dummy")
 
-    def _compile_and_load_ebpf(self, ebpfdir, ifname):
+    def _compile_ebpf(self, ebpfdir):
         args = self.get_make_args(ebpfdir, self.options.target)
         # Input eBPF byte code
         args.append(self.template + ".o")
         # The bpf program to attach to the interface
-        args.append("BPFOBJ=" + self.template +".o")
-        # Name of the interface
-        args.append("IFACE=" + ifname)
-        errmsg = "Failed to compile and load the eBPF byte code:"
+        args.append("BPFOBJ=" + self.template + ".o")
+        errmsg = "Failed to compile the eBPF byte code:"
+        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+
+    def _load_ebpf(self, ebpfdir, ifname):
+        args = ["tc"]
+        # Create a qdisc for our custom virtual interface
+        args.extend(["qdisc", "add", "dev", ifname, "clsact"])
+        errmsg = "Failed to add tc qdisc:"
+        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        if result != SUCCESS:
+            return result
+        args = ["tc"]
+        # Launch tc to load the ebpf object to the specified interface
+        args.extend(["filter", "add", "dev", ifname, "ingress",
+                     "bpf", "da", "obj", self.template + ".o",
+                     "sec", "prog", "verb"])
+        # The bpf program to attach to the interface
+        errmsg = "Failed to load the eBPF byte code using tc:"
         return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
 
     def create_filter(self):
-
         require_root(self.outputs)
         # Create interface with unique id (allows parallel tests)
+        # TODO: Create one custom interface per pcap file we parse
         ifname = "test" + str(os.getpid())
         self._create_interface(ifname)
-        ebpfdir = os.path.dirname(__file__)
         # Use clang to compile the generated C code to a LLVM IR
-        result = self._compile_and_load_ebpf(ebpfdir, ifname)
+        result = self._compile_ebpf(self.ebpfdir)
         if result != SUCCESS:
             self._remove_interface(ifname)
             return result
-        self._remove_interface(ifname)
+        result = self._load_ebpf(self.ebpfdir, ifname)
+        if result != SUCCESS:
+            self._remove_interface(ifname)
         return result
 
     def check_outputs(self):
         # Not implemented yet, just pass the test
+        ifname = "test" + str(os.getpid())
+        self._remove_interface(ifname)
         return SUCCESS
 
 
@@ -388,7 +407,7 @@ class EBPFBCCTarget(EBPFTarget):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
     def compile_p4(self, argv):
-        """ To override """
+        # To override
         """ Compile the p4 target """
         if not os.path.isfile(self.options.p4filename):
             raise Exception("No such file " + self.options.p4filename)
@@ -424,8 +443,7 @@ class EBPFTestTarget(EBPFTarget):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
     def create_filter(self):
-        ebpfdir = os.path.dirname(__file__)
-        args = self.get_make_args(ebpfdir, self.options.target)
+        args = self.get_make_args(self.ebpfdir, self.options.target)
         # List of bpf programs to attach to the interface
         args.append("BPFOBJ=" + self.template)
         errmsg = "Failed to build the filter:"

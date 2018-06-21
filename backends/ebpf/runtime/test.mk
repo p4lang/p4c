@@ -1,12 +1,11 @@
 # Argument for the GCC compiler
 GCC ?= gcc
-SRCDIR=testinclude
-INCLUDES+=-I./ -I./$(SRCDIR)
+SRCDIR=.
+INCLUDES+= -I./$(SRCDIR)
 # Optimization flags to save space
 CFLAGS+= -O2 -g # -Wall -Werror
 LIBS+=-lpcap
-SRC+= $(SRCDIR)/ebpf_map.c $(SRCDIR)/ebpf_registry.c
-MAIN= ebpf_runtime
+SRC+= $(SRCDIR)/ebpf_runtime.c $(SRCDIR)/ebpf_map.c $(SRCDIR)/ebpf_registry.c
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -36,7 +35,7 @@ $(BPFNAME).c: $(P4FILE)
 
 # Compile the runtime with the generated file as dependency
 $(BPFNAME): $(BPFNAME).c
-	$(GCC) $(CFLAGS) $(MAIN).c -o $@ $(SRC) $< $(INCLUDES) $(LIBS)
+	$(GCC) $(CFLAGS) -o $@ $(SRC) $< $(INCLUDES) $(LIBS)
 
 clean: clean_loader
 	rm -f *.o $(BPFNAME).c $(BPFNAME).h
