@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2018-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ limitations under the License.
 
 #include "p4/config/v1/p4info.pb.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
 
@@ -221,6 +223,8 @@ void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock, Func functio
     }
 }
 
+std::string serializeOneAnnotation(const IR::Annotation* annotation);
+
 /// Serialize @annotated's P4 annotations and attach them to a P4Info message
 /// with an 'annotations' field. '@name' and '@id' are ignored, as well as
 /// annotations whose name satisfies predicate @p.
@@ -238,18 +242,7 @@ void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPred
         if (annotation->name == "id") continue;
         if (p(annotation->name)) continue;
 
-        // Serialize the annotation.
-        // XXX(unknown): Might be nice to do something better than rely on
-        // toString().
-        std::string serializedAnnotation = "@" + annotation->name + "(";
-        auto expressions = annotation->expr;
-        for (unsigned i = 0; i < expressions.size(); ++i) {
-            serializedAnnotation.append(expressions[i]->toString());
-            if (i + 1 < expressions.size()) serializedAnnotation.append(", ");
-        }
-        serializedAnnotation.append(")");
-
-        message->add_annotations(serializedAnnotation);
+        message->add_annotations(serializeOneAnnotation(annotation));
     }
 }
 
@@ -301,7 +294,7 @@ struct Counterlike {
             return boost::none;
         }
 
-        auto size = instance->getParameterValue("size")->to<IR::Constant>();
+        auto size = instance->getParameterValue("size");
         if (!size->is<IR::Constant>()) {
             ::error("%1% '%2%' has a non-constant size: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, size);
@@ -330,7 +323,7 @@ struct Counterlike {
             return boost::none;
         }
 
-        auto unitArgument = instance.arguments->at(0)->expression;
+        auto unitArgument = instance.substitution.lookupByName("type")->expression;
         if (unitArgument == nullptr) {
             ::error("Direct %1% instance %2% should take a constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
@@ -362,19 +355,6 @@ getDirectCounterlike(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* ty
 }
 
 }  // namespace Helpers
-
-/// Declarations specific to standard architectures (v1model & PSA).
-namespace Standard {
-
-/// The architecture handler builder implementation for v1model.
-struct V1ModelArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
-    P4RuntimeArchHandlerIface* operator()(
-        ReferenceMap* refMap,
-        TypeMap* typeMap,
-        const IR::ToplevelBlock* evaluatedProgram) const override;
-};
-
-}  // namespace Standard
 
 }  // namespace ControlPlaneAPI
 

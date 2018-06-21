@@ -82,6 +82,7 @@ set (CONTROLPLANE_SOURCES
 
 set (CONTROLPLANE_HDRS
   p4RuntimeArchHandler.h
+  p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
   typeSpecConverter.h
   )

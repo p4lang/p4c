@@ -62,20 +62,14 @@ ExternInstance::resolve(const IR::PathExpression* path,
         return boost::none;
     }
 
-    // If this is a type instantiation, extract the underlying generic type.
-    if (type->is<IR::Type_Specialized>()) {
-        type = typeMap->getTypeType(type->to<IR::Type_Specialized>()
-                                        ->baseType, true);
-    } else if (type->is<IR::Type_SpecializedCanonical>()) {
-        type = typeMap->getTypeType(type->to<IR::Type_SpecializedCanonical>()
-                                        ->baseType, true);
-    }
-
-    if (!type->is<IR::Type_Extern>()) return boost::none;
+    auto instantiation = Instantiation::resolve(instance, refMap, typeMap);
+    if (!instantiation->is<ExternInstantiation>()) return boost::none;
+    auto externInstantiation = instantiation->to<ExternInstantiation>();
 
     return ExternInstance{instance->controlPlaneName(), path,
-                          type->to<IR::Type_Extern>(),
+                          externInstantiation->type,
                           instance->arguments,
+                          externInstantiation->substitution,
                           instance->to<IR::IAnnotated>()};
 }
 
@@ -92,9 +86,12 @@ ExternInstance::resolve(const IR::ConstructorCallExpression* constructorCallExpr
       P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
     if (!constructorCall->is<P4::ExternConstructorCall>()) return boost::none;
 
+    ConstructorCallDescription ccDesc(constructorCallExpr, refMap, typeMap);
+
     auto type = constructorCall->to<P4::ExternConstructorCall>()->type;
     return ExternInstance{name, constructorCallExpr, type,
                           constructorCallExpr->arguments,
+                          ccDesc.substitution,
                           constructorCallExpr->to<IR::IAnnotated>()};
 }
 
