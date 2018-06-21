@@ -175,7 +175,8 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << dbp(func));
         currentPoint = ProgramPoint(func);
         visit(func->body);
-        checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), true);
+        bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
+        checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), checkReturn);
         return false;
     }
 
