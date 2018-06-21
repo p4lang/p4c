@@ -38,7 +38,8 @@ class ExternConverter {
                           const IR::ExternBlock* eb, const bool& emitExterns);
     virtual Util::IJson*
     convertExternFunction(ConversionContext* ctxt, const P4::ExternFunction* ef,
-                          const IR::MethodCallExpression* mc, const IR::StatOrDecl* s);
+                          const IR::MethodCallExpression* mc, const IR::StatOrDecl* s,
+                          const bool emitExterns);
 
     static ExternConverter* get(cstring type);
     static ExternConverter* get(const IR::Type_Extern* type) { return get(type->name); }
@@ -57,7 +58,8 @@ class ExternConverter {
                       const bool& emitExterns);
     static Util::IJson*
     cvtExternFunction(ConversionContext* ctxt, const P4::ExternFunction* ef,
-                      const IR::MethodCallExpression* mc, const IR::StatOrDecl* s);
+                      const IR::MethodCallExpression* mc, const IR::StatOrDecl* s,
+                      const bool emitExterns);
 
     // helper function for simple switch
     void modelError(const char* format, const IR::Node* place) const;
@@ -78,7 +80,7 @@ class ExternConverter {
         static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
         Util::IJson* convertExternFunction(ConversionContext* ctxt,             \
             const P4::ExternFunction* ef, const IR::MethodCallExpression* mc,   \
-            const IR::StatOrDecl* s) override;  };
+            const IR::StatOrDecl* s, const bool emitExterns) override;  };
 
 #define EXTERN_CONVERTER_W_FUNCTION(extern_name, ...)                           \
     class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
@@ -87,7 +89,7 @@ class ExternConverter {
         static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
         Util::IJson* convertExternFunction(ConversionContext* ctxt,             \
             const P4::ExternFunction* ef, const IR::MethodCallExpression* mc,   \
-            const IR::StatOrDecl* s) override;  };
+            const IR::StatOrDecl* s, const bool emitExterns) override;  };
 
 #define EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(extern_name, model_type, model_name, ...) \
     class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
@@ -155,7 +157,8 @@ class ExternConverter {
 #define CONVERT_EXTERN_FUNCTION(extern_name, ...)                                     \
     Util::IJson* ExternConverter_##extern_name##__VA_ARGS__::convertExternFunction(   \
         UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,          \
-        UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s)
+        UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,    \
+        UNUSED const bool emitExterns)
 
 }  // namespace BMV2
 

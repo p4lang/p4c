@@ -55,8 +55,9 @@ Util::IJson*
 ExternConverter::cvtExternFunction(ConversionContext* ctxt,
                                    const P4::ExternFunction* ef,
                                    const IR::MethodCallExpression* mc,
-                                   const IR::StatOrDecl* s) {
-    return get(ef)->convertExternFunction(ctxt, ef, mc, s);
+                                   const IR::StatOrDecl* s,
+                                   const bool emitExterns) {
+    return get(ef)->convertExternFunction(ctxt, ef, mc, s, emitExterns);
 }
 
 Util::IJson*
@@ -96,12 +97,23 @@ ExternConverter::convertExternInstance(ConversionContext* ,
 }
 
 Util::IJson*
-ExternConverter::convertExternFunction(ConversionContext* ,
+ExternConverter::convertExternFunction(ConversionContext* ctxt,
                                        const P4::ExternFunction* ef,
-                                       const IR::MethodCallExpression* ,
-                                       const IR::StatOrDecl* ) {
-    ::error("Unknown extern function %1%", ef->method->name);
-    return nullptr;
+                                       const IR::MethodCallExpression* mc,
+                                       const IR::StatOrDecl* s,
+                                       const bool emitExterns) {
+    if (!emitExterns) {
+        ::error("Unknown extern function %1%", ef->method->name);
+        return nullptr;
+    }
+    auto primitive = mkPrimitive(ef->method->name);
+    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    auto parameters = mkParameters(primitive);
+    for (auto arg : *mc->arguments) {
+        auto args = ctxt->conv->convert(arg->expression);
+        parameters->append(args);
+    }
+    return primitive;
 }
 
 void

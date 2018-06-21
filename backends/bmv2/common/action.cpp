@@ -123,7 +123,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 continue;
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
-                auto json = ExternConverter::cvtExternFunction(ctxt, ef, mc, s);
+                auto json = ExternConverter::cvtExternFunction(ctxt, ef, mc, s, emitExterns);
                 if (json)
                     result->append(json);
                 continue;

@@ -355,6 +355,8 @@ class RunBMV2(object):
         self.actions = []
         self.switchLogFile = "switch.log"  # .txt is added by BMv2
         self.readJson()
+        self.cmd_line_args = getattr(options, 'switchOptions', ())
+        self.target_specific_cmd_line_args = getattr(options, 'switchTargetSpecificOptions', ())
 
     def readJson(self):
         with open(self.jsonfile) as jf:
@@ -562,6 +564,10 @@ class RunBMV2(object):
                          "--log-file", self.switchLogFile, "--log-flush",
                          "--use-files", str(wait), "--thrift-port", thriftPort,
                          "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
+            if self.cmd_line_args:
+                runswitch += self.cmd_line_args
+            if self.target_specific_cmd_line_args:
+                runswitch += ['--',] + self.target_specific_cmd_line_args
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
