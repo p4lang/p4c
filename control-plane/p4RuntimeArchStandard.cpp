@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2018-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ limitations under the License.
 #include "typeSpecConverter.h"
 
 #include "p4RuntimeArchHandler.h"
+#include "p4RuntimeArchStandard.h"
 
 using ::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
 using ::P4::ControlPlaneAPI::Helpers::addAnnotations;
@@ -62,7 +63,7 @@ namespace Helpers {
 // gcc reports an error when trying so specialize CounterlikeTraits<> for
 // Standard::CounterExtern & Standard::MeterExtern outside of the Helpers
 // namespace, even when qualifying CounterlikeTraits<> with Helpers::. It seems
-// to be related to thsi bug:
+// to be related to this bug:
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480.
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern
@@ -343,9 +344,6 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
                                     directCounter->name);
             table->add_direct_resource_ids(id);
             // no risk to add twice because direct counters cannot be shared
-            // auto propertyName = P4V1::V1Model::instance.tableAttributes.counters.name;
-            // if (isExternPropertyConstructedInPlace(tableDeclaration, propertyName))
-            //     addCounter(symbols, p4info, *directCounter);
             addCounter(symbols, p4info, *directCounter);
         }
 
@@ -354,9 +352,6 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
                                     directMeter->name);
             table->add_direct_resource_ids(id);
             // no risk to add twice because direct meters cannot be shared
-            // auto propertyName = P4V1::V1Model::instance.tableAttributes.meters.name;
-            // if (isExternPropertyConstructedInPlace(tableDeclaration, propertyName))
-            //     addMeter(symbols, p4info, *directMeter);
             addMeter(symbols, p4info, *directMeter);
         }
 
@@ -385,7 +380,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
             if (register_) addRegister(symbols, p4info, *register_);
         } else if (externBlock->type->name == P4V1::V1Model::instance.action_profile.name ||
                    externBlock->type->name == P4V1::V1Model::instance.action_selector.name) {
-            auto actionProfile = getActionProfile(decl, externBlock->type);
+            auto actionProfile = getActionProfile(externBlock);
             if (actionProfile) addActionProfile(symbols, p4info, *actionProfile);
         }
     }
@@ -468,27 +463,17 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
     static boost::optional<ActionProfile>
     getActionProfile(cstring name,
                      const IR::Type_Extern* type,
-                     const IR::Vector<IR::Argument>* arguments,
+                     int64_t size,
                      const IR::IAnnotated* annotations) {
         ActionProfileType actionProfileType;
-        const IR::Expression* sizeExpression;
         if (type->name == P4V1::V1Model::instance.action_selector.name) {
             actionProfileType = ActionProfileType::INDIRECT_WITH_SELECTOR;
-            sizeExpression = arguments->at(1)->expression;
         } else if (type->name == P4V1::V1Model::instance.action_profile.name) {
             actionProfileType = ActionProfileType::INDIRECT;
-            sizeExpression = arguments->at(0)->expression;
         } else {
             return boost::none;
         }
 
-        if (!sizeExpression->is<IR::Constant>()) {
-            ::error("Action profile '%1%' has non-constant size '%1%'",
-                    name, sizeExpression);
-            return boost::none;
-        }
-
-        const int64_t size = sizeExpression->to<IR::Constant>()->asInt();
         return ActionProfile{name, actionProfileType, size, annotations};
     }
 
@@ -500,14 +485,29 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerIface {
         auto instance =
             getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
         if (!instance) return boost::none;
-        return getActionProfile(*instance->name, instance->type, instance->arguments,
+        auto size = instance->substitution.lookupByName("size")->expression;
+        if (!size->is<IR::Constant>()) {
+            ::error("Action profile '%1%' has non-constant size '%2%'",
+                    *instance->name, size);
+            return boost::none;
+        }
+        return getActionProfile(*instance->name, instance->type,
+                                size->to<IR::Constant>()->asInt(),
                                 getTableImplementationAnnotations(table, refMap));
     }
 
     /// @return the action profile declared with @decl
     static boost::optional<ActionProfile>
-    getActionProfile(const IR::Declaration_Instance* decl, const IR::Type_Extern* type) {
-        return getActionProfile(decl->controlPlaneName(), type, decl->arguments,
+    getActionProfile(const IR::ExternBlock* instance) {
+        auto decl = instance->node->to<IR::IDeclaration>();
+        auto size = instance->getParameterValue("size");
+        if (!size->is<IR::Constant>()) {
+            ::error("Action profile '%1%' has non-constant size '%2%'",
+                    decl->controlPlaneName(), size);
+            return boost::none;
+        }
+        return getActionProfile(decl->controlPlaneName(), instance->type,
+                                size->to<IR::Constant>()->asInt(),
                                 decl->to<IR::IAnnotated>());
     }
 

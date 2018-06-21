@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2018-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@ limitations under the License.
 
 #include <boost/optional.hpp>
 
+#include <sstream>  // for std::ostringstream
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 // TODO(antonin): this include should go away when we cleanup getTableSize
 // implementation.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/externInstance.h"
+#include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
@@ -108,6 +111,37 @@ int64_t getTableSize(const IR::P4Table* table) {
 
     const int64_t tableSize = expression->to<IR::Constant>()->asInt();
     return tableSize == 0 ? defaultTableSize : tableSize;
+}
+
+static std::string serializeAnnotationExpression(const IR::Expression* expr) {
+    // Using the ToP4 inspector seems to be giving slightly better results than
+    // toString(). However, the type checker is run on annotation expressions
+    // which is why most of the time a string literal is used, in which case
+    // there is probably no difference between toString() and ToP4.
+    std::ostringstream oss;
+    ToP4 top4(&oss, false);
+    expr->apply(top4);
+    return oss.str();
+}
+
+std::string serializeOneAnnotation(const IR::Annotation* annotation) {
+    std::string serializedAnnotation = "@" + annotation->name + "(";
+    auto expressions = annotation->expr;
+    for (size_t i = 0; i < expressions.size(); ++i) {
+        serializedAnnotation.append(serializeAnnotationExpression(expressions[i]));
+        if (i + 1 < expressions.size()) serializedAnnotation.append(", ");
+    }
+    auto kvs = annotation->kv;
+    if (expressions.size() > 0 && kvs.size() > 0) serializedAnnotation.append(", ");
+    for (auto it = kvs.begin(); it != kvs.end();) {
+        serializedAnnotation.append(it->first);
+        serializedAnnotation.append("=");
+        serializedAnnotation.append(serializeAnnotationExpression(it->second));
+        if (++it != kvs.end()) serializedAnnotation.append(", ");
+    }
+    serializedAnnotation.append(")");
+
+    return serializedAnnotation;
 }
 
 }  // namespace Helpers

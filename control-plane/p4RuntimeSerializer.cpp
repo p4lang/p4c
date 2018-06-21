@@ -537,6 +537,8 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
 /// @return @table's default action, if it has one, or boost::none otherwise.
 static boost::optional<DefaultAction>
 getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+    // not using getDefaultAction() here as I actually need the property IR node
+    // to check if the default action is constant.
     auto defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
     if (defaultActionProperty == nullptr) return boost::none;
@@ -571,6 +573,8 @@ getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
 /// check but we perform the check again here in case the constraint is relaxed
 /// in the specification in the future.
 static bool getConstTable(const IR::P4Table* table) {
+    // not using IR::P4Table::getEntries() here as I need to check if the
+    // property is constant.
     BUG_CHECK(table != nullptr, "Failed precondition for getConstTable");
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
     if (ep == nullptr) return false;
@@ -1427,7 +1431,7 @@ cstring
 P4RuntimeSerializer::resolveArch(const CompilerOptions& options) {
     if (auto arch = getenv("P4C_DEFAULT_ARCH")) {
         return cstring(arch);
-    } else if (options.arch != "") {
+    } else if (options.arch != nullptr) {
         return options.arch;
     } else {
         return "v1model";
