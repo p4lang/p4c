@@ -924,7 +924,7 @@ tableProperty
     | optAnnotations optCONST nonTableKwName "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
           auto id = *$3;
-          $$ = new IR::Property(id, $1, v, $2.isConst); }
+          $$ = new IR::Property($3->srcInfo, id, $1, v, $2.isConst); }
     ;
 
 keyElementList
