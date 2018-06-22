@@ -503,7 +503,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     }
     mpz_class value = cbase->value >> l;
     mpz_class mask = 1;
-    mask = mask << (m - l + 1) - 1;
+    mask = (mask << (m - l + 1)) - 1;
     value = value & mask;
     auto resultType = typeMap->getType(getOriginal(), true);
     if (!resultType->is<IR::Type_Bits>())
