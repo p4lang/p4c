@@ -181,9 +181,18 @@ dataplane/control-plane APIs.
 
 ### Dependencies
 
-EBPF programs require a Linux kernel with version 4.2 or newer.
+EBPF programs require a Linux kernel with version 4.15 or newer.
+In addition the following packages and programs are required:
 
-clang with an ebpf back-end.
+- Clang 3.3 and llvm 3.7.1 or later are required.
+
+- libpcap-dev to parse and generate .pcap files.
+
+- libelf-dev to compile C-programs to eBPF byte code.
+
+- iproute2 to use tc/ip commands to load eBPF programs.
+
+- The python iproute2 package to create virtual interfaces.
 
 ### Supported capabilities
 

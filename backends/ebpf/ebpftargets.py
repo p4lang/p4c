@@ -453,7 +453,6 @@ class EBPFTestTarget(EBPFTarget):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Running model")
         # main executable
-        # main executable
         args = [self.template]
         # input
         args.append(self.tmpdir + "/in.pcap")
