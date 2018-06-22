@@ -45,12 +45,13 @@ using P4Ids = p4configv1::P4Ids;
 using google::protobuf::util::MessageDifferencer;
 
 boost::optional<P4::P4RuntimeAPI>
-createP4RuntimeTestCase(const std::string& source,
-                        CompilerOptions::FrontendVersion langVersion
-                            = CompilerOptions::FrontendVersion::P4_16) {
+createP4RuntimeTestCase(
+    const std::string& source,
+    CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16,
+    const cstring arch = "v1model") {
     auto frontendTestCase = FrontendTestCase::create(source, langVersion);
     if (!frontendTestCase) return boost::none;
-    return P4::generateP4Runtime(frontendTestCase->program);
+    return P4::generateP4Runtime(frontendTestCase->program, arch);
 }
 
 /// Generic meta function which searches an object by @name in the given range
@@ -659,6 +660,126 @@ TEST_F(P4Runtime, Digests) {
     // digest<T>() where T is a tuple.
     {
         auto digest = findDigest(*test, "digest_0");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_tuple());
+        EXPECT_EQ(2, digest->type_spec().tuple().members_size());
+    }
+}
+
+// TODO(antonin): there is a boiler-plate code required for PSA so if we write
+// more tests for the PSA P4Info generation, we will need to find a less verbose
+// solution.
+TEST_F(P4Runtime, PSADigests) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::PSA, R"(
+        header Header { bit<16> headerFieldA; bit<8> headerFieldB; }
+        struct Headers { Header h; }
+        struct Metadata { bit<3> metadataFieldA; bit<1> metadataFieldB; }
+        struct EMPTY { };
+
+        parser MyIP(
+            packet_in buffer,
+            out Headers h,
+            inout Metadata m,
+            in psa_ingress_parser_input_metadata_t c,
+            in EMPTY d,
+            in EMPTY e) {
+            state start { transition accept; } }
+
+        parser MyEP(
+            packet_in buffer,
+            out EMPTY a,
+            inout EMPTY b,
+            in psa_egress_parser_input_metadata_t c,
+            in EMPTY d,
+            in EMPTY e,
+            in EMPTY f) {
+            state start { transition accept; } }
+
+        control MyIC(
+            inout Headers h,
+            inout Metadata m,
+            in psa_ingress_input_metadata_t c,
+            inout psa_ingress_output_metadata_t d) {
+            // Digest<T> where T is a header.
+            Digest<Header>() digest1;
+            // Digest<T> where T is a struct.
+            Digest<Metadata>() digest2;
+            // Digest<T> where T is a tuple.
+            Digest<tuple<bit<16>, bit<1> > >() digest3;
+            action generateDigest() {
+                digest1.pack(h.h);
+                digest2.pack(m);
+                digest3.pack({ h.h.headerFieldA, m.metadataFieldB });
+            }
+            apply {
+                generateDigest();
+            }
+        }
+
+        control MyEC(
+            inout EMPTY a,
+            inout EMPTY b,
+            in psa_egress_input_metadata_t c,
+            inout psa_egress_output_metadata_t d) {
+            apply { } }
+
+        control MyID(
+            packet_out buffer,
+            out EMPTY a,
+            out EMPTY b,
+            out EMPTY c,
+            inout Headers h,
+            in Metadata e,
+            in psa_ingress_output_metadata_t f) {
+            apply { } }
+
+        control MyED(
+            packet_out buffer,
+            out EMPTY a,
+            out EMPTY b,
+            inout EMPTY c,
+            in EMPTY d,
+            in psa_egress_output_metadata_t e,
+            in psa_egress_deparser_input_metadata_t f) {
+        apply { } }
+
+        IngressPipeline(MyIP(), MyIC(), MyID()) ip;
+        EgressPipeline(MyEP(), MyEC(), MyED()) ep;
+
+       PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+    )"), CompilerOptions::FrontendVersion::P4_16, "psa");
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+    const auto &typeInfo = test->p4Info->type_info();
+
+    // Verify that that the digest() instances match the ones we expect from the
+    // program.
+
+    // Digest<T> where T is a header.
+    {
+        auto digest = findDigest(*test, "MyIC.digest1");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_header());
+        EXPECT_EQ("Header", digest->type_spec().header().name());
+        EXPECT_TRUE(typeInfo.headers().find("Header") != typeInfo.headers().end());
+    }
+
+    // Digest<T> where T is a struct.
+    {
+        auto digest = findDigest(*test, "MyIC.digest2");
+        ASSERT_TRUE(digest != nullptr);
+        EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
+        ASSERT_TRUE(digest->type_spec().has_struct_());
+        EXPECT_EQ("Metadata", digest->type_spec().struct_().name());
+        EXPECT_TRUE(typeInfo.structs().find("Metadata") != typeInfo.structs().end());
+    }
+
+    // Digest<T> where T is a tuple.
+    {
+        auto digest = findDigest(*test, "MyIC.digest3");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_tuple());

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <cstdio>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -41,7 +42,6 @@ std::string makeP4Source(const char* file, unsigned line,
             source << P4CTestEnvironment::get()->v1Model();
             break;
         case P4Headers::PSA:
-            source << P4CTestEnvironment::get()->coreP4();
             source << P4CTestEnvironment::get()->psaP4();
             break;
     }
@@ -77,28 +77,51 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
 }
 
 P4CTestEnvironment::P4CTestEnvironment() {
-    auto readHeader = [](const char* filename) {
-        std::ifstream input(filename);
-        if (!input.good()) {
-          throw std::runtime_error(std::string("Couldn't read standard header ")
-                                     + filename);
+    auto readHeader = [](const char* filename, bool preprocess = false) {
+        if (preprocess) {
+#ifdef __clang__
+            std::string cmd("cc -E -x c -Wno-comment");
+#else
+            std::string cmd("cpp");
+#endif
+            cmd += cstring(" -C -undef -nostdinc") + " " +  "-Ip4include" + " " + filename;
+            FILE* in = popen(cmd.c_str(), "r");
+            if (in == nullptr)
+                throw std::runtime_error(std::string("Couldn't invoke preprocessor"));
+            std::stringstream buffer;
+            char string[100];
+            while (fgets(string, sizeof(string), in)) buffer << string;
+            int exitCode = pclose(in);
+            if (WIFEXITED(exitCode) && WEXITSTATUS(exitCode) == 4) {
+                throw std::runtime_error(std::string("Couldn't find standard header ") + filename);
+            } else if (exitCode != 0) {
+                throw std::runtime_error(std::string("Couldn't preprocess standard header ")
+                                         + filename);
+            }
+            return buffer.str();
+        } else {
+            std::ifstream input(filename);
+            if (!input.good()) {
+                throw std::runtime_error(std::string("Couldn't read standard header ")
+                                         + filename);
+            }
+
+            // Initialize a buffer with a #line preprocessor directive. This
+            // ensures that any errors we encounter in this header will
+            // reference the correct file and line.
+            std::stringstream buffer;
+            buffer << "#line 1 \"" << filename << "\"" << std::endl;
+
+            // Read the header into the buffer and return it.
+            while (input >> buffer.rdbuf()) continue;
+            return buffer.str();
         }
-
-        // Initialize a buffer with a #line preprocessor directive. This ensures
-        // that any errors we encounter in this header will reference the
-        // correct file and line.
-        std::stringstream buffer;
-        buffer << "#line 1 \"" << filename << "\"" << std::endl;
-
-        // Read the header into the buffer and return it.
-        while (input >> buffer.rdbuf()) continue;
-        return buffer.str();
     };
 
     // XXX(seth): We should find a more robust way to locate these headers.
     _coreP4 = readHeader("p4include/core.p4");
     _v1Model = readHeader("p4include/v1model.p4");
-    _psaP4 = readHeader("p4include/psa.p4");
+    _psaP4 = readHeader("p4include/psa.p4", true);
 }
 
 namespace Test {
