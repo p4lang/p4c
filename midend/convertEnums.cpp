@@ -39,6 +39,8 @@ const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
 /// process enum expression, e.g., X.a
 const IR::Node* DoConvertEnums::postorder(IR::Member* expression) {
     auto ei = EnumInstance::resolve(getOriginal<IR::Member>(), typeMap);
+    if (!ei)
+        return expression;
     if (ei->is<SimpleEnumInstance>()) {
         auto r = ::get(repr, ei->type->to<IR::Type_Enum>());
         if (r == nullptr)
