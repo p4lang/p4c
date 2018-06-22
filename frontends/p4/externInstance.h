@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <boost/optional.hpp>
 #include "lib/cstring.h"
+#include "frontends/p4/parameterSubstitution.h"
 
 namespace IR {
 class ConstructorCallExpression;
