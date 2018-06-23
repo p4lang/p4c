@@ -160,7 +160,7 @@ typedef const IR::Type ConstType;
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
 
-%type<IR::ID*>              name nonTypeName
+%type<IR::ID*>              name nonTypeName nonTableKwName
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
@@ -293,6 +293,14 @@ nonTypeName
 name
     : nonTypeName { $$ = $1; }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    ;
+
+nonTableKwName
+    : IDENTIFIER       { $$ = new IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | APPLY            { $$ = new IR::ID(@1, "apply"); }
+    | STATE            { $$ = new IR::ID(@1, "state"); }
+    | TYPE             { $$ = new IR::ID(@1, "type"); }
     ;
 
 optCONST
@@ -913,10 +921,10 @@ tableProperty
         { auto l = new IR::EntriesList(@3, *$6);
           auto id = IR::ID(@3+@7, "entries");
           $$ = new IR::Property(@3, id, $1, l, $2.isConst); }
-    | optAnnotations optCONST IDENTIFIER "=" initializer ";"
+    | optAnnotations optCONST nonTableKwName "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
-          auto id = IR::ID(@3, $3);
-          $$ = new IR::Property(@3, id, $1, v, $2.isConst); }
+          auto id = *$3;
+          $$ = new IR::Property($3->srcInfo, id, $1, v, $2.isConst); }
     ;
 
 keyElementList
