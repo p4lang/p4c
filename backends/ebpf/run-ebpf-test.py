@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +15,8 @@
 # limitations under the License.
 
 
-''' Runs the p4c-ebpf compiler on a P4-16 program
-    TODO: do something with the output of the compiler'''
+""" Runs the p4c-ebpf compiler on a P4-16 program
+    TODO: do something with the output of the compiler"""
 
 from __future__ import print_function
 import sys
@@ -23,7 +24,6 @@ import os
 import stat
 import tempfile
 import shutil
-import difflib
 
 from ebpftargets import EBPFFactory
 
@@ -34,14 +34,13 @@ FAILURE = 1
 
 class Options(object):
     def __init__(self):
-        self.binary = ""                # this program's name
-        self.cleanupTmp = True          # if false do not remote tmp folder created
-        self.p4Filename = ""            # file that is being compiled
-        self.compilerSrcDir = ""        # path to compiler source tree
-        self.verbose = False
-        self.replace = False            # replace previous outputs
-        self.compilerOptions = []
-        self.target = "bcc"             # the name of the target compiler
+        self.binary = ""                # This program's name
+        self.cleanupTmp = True          # If false do not remote tmp folder created
+        self.p4Filename = ""            # File that is being compiled
+        self.compilerSrcDir = ""        # Path to compiler source tree
+        self.verbose = False            # Enable verbose output
+        self.replace = False            # Replace previous outputs
+        self.target = "bcc"             # The name of the target compiler
 
 
 def isdir(path):
@@ -51,7 +50,7 @@ def isdir(path):
         return False
 
 
-def reportError(*message):
+def report_error(*message):
     print("***", *message)
 
 
@@ -73,20 +72,20 @@ def run_model(ebpf, stffile):
     if result != SUCCESS:
         return result
 
-    result = ebpf.checkOutputs()
+    result = ebpf.check_outputs()
     return result
 
 
 def run_test(options, argv):
-    ''' Define the test environment and compile the p4 target
-        Optional: Run the generated model '''
+    """ Define the test environment and compile the p4 target
+        Optional: Run the generated model """
     assert isinstance(options, Options)
 
-    tmpdir = tempfile.mkdtemp(dir=".")
-    basename = os.path.basename(options.p4filename)  # name of the p4 test
-    base, ext = os.path.splitext(basename)           # name without the type
-    dirname = os.path.dirname(options.p4filename)    # directory of the file
-    expected_dirname = dirname + "_outputs"          # expected outputs folder
+    tmpdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
+    basename = os.path.basename(options.p4filename)  # Name of the p4 test
+    base, ext = os.path.splitext(basename)           # Name without the type
+    dirname = os.path.dirname(options.p4filename)    # Directory of the file
+    expected_dirname = dirname + "_outputs"          # Expected outputs folder
 
     # We can do this if an *.stf file is present
     stffile = dirname + "/" + base + ".stf"
@@ -98,18 +97,21 @@ def run_test(options, argv):
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
-    cfile = tmpdir + "/" + "test" + ".c"          # name of the target c file
-    stderr = tmpdir + "/" + basename + "-stderr"  # location of error output
 
-    ebpf = EBPFFactory.create(tmpdir, options, cfile, stderr)
+    template = tmpdir + "/" + "test"
+    output = {}
+    output["stderr"] = tmpdir + "/" + basename + "-stderr"
+    output["stdout"] = tmpdir + "/" + basename + "-stdout"
+
+    ebpf = EBPFFactory.create(tmpdir, options, template, output)
 
     # Compile the p4 file to the specified target
     result, expected_error = ebpf.compile_p4(argv)
 
     # Compile and run the generated output
-    # only if we did not expect it to fail
     if result == SUCCESS and not expected_error:
         result = run_model(ebpf, stffile)
+    # Only if we did not expect it to fail
     if result != SUCCESS:
         return result
 
@@ -135,9 +137,9 @@ def usage(options):
 
 
 def parse_options(argv):
-    ''' Parses the input arguments and stores them in the options object
+    """ Parses the input arguments and stores them in the options object
         which is passed to target objects.
-        TODO: This function should use the default python parse package '''
+        TODO: This function should use the default python parse package """
     options = Options()
     options.binary = argv[0]
     if len(argv) <= 2:
@@ -146,7 +148,7 @@ def parse_options(argv):
 
     if argv[1] == '-t':
         if len(argv) == 0:
-            reportError("Missing argument for -t option")
+            report_error("Missing argument for -t option")
             usage(options)
             sys.exit(FAILURE)
         else:
@@ -172,6 +174,7 @@ def parse_options(argv):
             usage(options)
         argv = argv[1:]
     options.p4filename = argv[-1]
+    argv = argv[1:]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):
         options.testName = options.p4filename[len(options.compilerSrcDir):]
@@ -183,10 +186,10 @@ def parse_options(argv):
 
 
 def main(argv):
-    ''' main '''
-    # parse options and process argv
+    """ main """
+    # Parse options and process argv
     options, argv = parse_options(argv)
-    # run the test with the extracted options and modified argv
+    # Run the test with the extracted options and modified argv
     result = run_test(options, argv)
     sys.exit(result)
 

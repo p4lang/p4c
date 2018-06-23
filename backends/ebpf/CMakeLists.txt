@@ -82,7 +82,11 @@ set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel")
 set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc")
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
 
-set (XFAIL_TESTS_KERNEL)
+set (XFAIL_TESTS_KERNEL
+  # These test currently generate malfunctioning code that does not compile
+  testdata/p4_16_samples/hit_ebpf.p4
+  testdata/p4_16_samples/two_ebpf.p4
+  )
 set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST
   # These test currently generate malfunctioning code that does not compile
@@ -94,6 +98,37 @@ set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
 
-p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
+set (SUPPORTS_KERNEL True)
+
+# Check if the kernel version is new enough to support ebpf features
+set (MIN_KERNEL 4.16.0)
+string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
+if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
+  MESSAGE(WARNING "Kernel version ${KERNEL_VER} too small, expected ${MIN_KERNEL}. Ignoring ebpf kernel tests...")
+  set (SUPPORTS_KERNEL False)
+endif()
+
+# Check if we have the right llvm version
+set (MIN_LLVM 3.7.1)
+
+find_package(LLVM)
+if (LLVM_PACKAGE_VERSION)
+  message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+  if (${LLVM_PACKAGE_VERSION} VERSION_LESS ${MIN_LLVM})
+    MESSAGE(WARNING "LLVM version ${LLVM_PACKAGE_VERSION} too small, expected ${MIN_LLVM}.
+    Ignoring ebpf tests...")
+    set (SUPPORTS_KERNEL False)
+  endif()
+else()
+  message(STATUS "LLVM missing, disabling kernel tests...")
+  set (SUPPORTS_KERNEL False)
+endif()
+
+# Only add the kernel tests if the two requirements are met
+if (SUPPORTS_KERNEL)
+  p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
+endif()
+# ToDo Add check which verifies that BCC is installed
+# Ideally, this is done via check for the python package
 p4c_add_tests("ebpf-bcc" ${EBPF_DRIVER_BCC} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_BCC}")
 p4c_add_tests("ebpf-test" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST}")

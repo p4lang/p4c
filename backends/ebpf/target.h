@@ -81,7 +81,7 @@ class KernelSamplesTarget : public Target {
                   cstring argName) const override;
     cstring dataOffset(cstring base) const override { return base; }
     cstring dataEnd(cstring base) const override
-    { return cstring("(") + base + " + " + base + "->len)"; }
+    { return cstring("((void*)(long)(")+ base + " + "+ base +"->len))"; }
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }

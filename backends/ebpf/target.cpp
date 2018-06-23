@@ -21,7 +21,7 @@ namespace EBPF {
 
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"bpfinclude/ebpf_kernel.h\"\n");
+    builder->append("#include \"ebpf_kernel.h\"\n");
     builder->newline();
 }
 
@@ -61,19 +61,19 @@ void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring 
 
 void KernelSamplesTarget::emitCodeSection(
     Util::SourceCodeBuilder* builder, cstring sectionName) const {
-    builder->appendFormat("SEC(\"%s\")\n", sectionName);
+    builder->appendFormat("SEC(\"prog\")\n", sectionName);
 }
 
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(struct sk_buff* %s)", functionName, argName);
+    builder->appendFormat("int %s(SK_BUFF *%s)", functionName, argName);
 }
 
 //////////////////////////////////////////////////////////////
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"bpfinclude/ebpf_user.h\"\n");
+    builder->append("#include \"ebpf_user.h\"\n");
     builder->newline();
 }
 

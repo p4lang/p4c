@@ -23,24 +23,25 @@
 #   5. Evaluates the output with the expected result from the .stf file
 
 from __future__ import print_function
+import os
+import sys
+import subprocess
 from subprocess import Popen
-from threading import Thread
+from threading import Timer
 from glob import glob
-try:
-    from scapy.layers.all import *
-    from scapy.utils import *
-except ImportError:
-    pass
+from scapy.layers.all import RawPcapWriter
+from scapy.utils import rdpcap
+from pyroute2 import IPRoute
 
 SUCCESS = 0
 FAILURE = 1
 TIMEOUT = 10 * 60
 
 
-def nextWord(text, sep=None):
-    ''' Split a text at the indicated separator.
+def next_word(text, sep=None):
+    """ Split a text at the indicated separator.
      Note that the separator can be a string.
-     Separator is discarded. '''
+     Separator is discarded. """
     spl = text.split(sep, 1)
     if len(spl) == 0:
         return '', ''
@@ -50,11 +51,11 @@ def nextWord(text, sep=None):
         return spl[0].strip(), spl[1].strip()
 
 
-def ByteToHex(byteStr):
+def byte_to_hex(byteStr):
     return ''.join(["%02X " % ord(x) for x in byteStr]).strip()
 
 
-def HexToByte(hexStr):
+def hex_to_byte(hexStr):
     bytes = []
     hexStr = ''.join(hexStr.split(" "))
     for i in range(0, len(hexStr), 2):
@@ -62,104 +63,131 @@ def HexToByte(hexStr):
     return ''.join(bytes)
 
 
-def isError(p4filename):
-    ''' True if the filename represents a p4 program that should fail. '''
+def is_err(p4filename):
+    """ True if the filename represents a p4 program that should fail. """
     return "_errors" in p4filename
 
 
-def reportError(*message):
-    print("***", *message)
+def report_err(file, *message):
+    print("***", file=sys.stderr, *message)
+
+    if (file and file != sys.stderr):
+        err_file = open(file, "a+")
+        print("***", file=err_file, *message)
+        err_file.close()
 
 
-class Local(object):
-    ''' Object to hold local vars accessable to nested functions '''
-    pass
+def report_output(file, verbose, *message):
+    if (verbose):
+        print(file=sys.stdout, *message)
+
+    if (file and file != sys.stdout):
+        out_file = open(file, "a+")
+        print("", file=out_file, *message)
+        out_file.close()
 
 
-def run_timeout(options, args, timeout, stderr):
-    if options.verbose:
-        print("Executing ", " ".join(args))
-    local = Local()
-    local.process = None
-    errtext = ""
+def run_timeout(options, args, timeout, outputs, errmsg):
+    report_output(outputs["stdout"],
+                  options.verbose, "Executing ", " ".join(args))
+    proc = None
 
-    def target():
-        procstderr = None
-        if stderr is not None:
-            procstderr = open(stderr, "w")
-        local.process = Popen(args, stdout=subprocess.PIPE, stderr=procstderr)
-        out, err = local.process.communicate()
-        if options.verbose:
-            print(out)
-    thread = Thread(target=target)
-    thread.start()
-    thread.join(timeout)
-    if thread.is_alive():
-        print("Timeout ", " ".join(args), file=sys.stderr)
-        local.process.terminate()
-        thread.join()
-    if options.verbose:
-        print("Exit code %d\n" % local.process.returncode)
-    if local.process is None:
-        # never even started
-        if options.verbose:
-            print("Process failed to start")
+    def kill(process):
+        process.kill()
+
+    if outputs["stderr"] is not None:
+        try:
+            proc = Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except OSError as e:
+            report_err(outputs["stderr"], "Failed executing: ", e)
+    if proc is None:
+        # Never even started
+        report_err(outputs["stderr"], "Process failed to start")
         return FAILURE
 
-    if local.process.returncode != SUCCESS:
-        procstderr = open(stderr, "r")
-        errtext = procstderr.read()
-        procstderr.close
-    return local.process.returncode, errtext
+    timer = Timer(TIMEOUT, kill, [proc])
+    try:
+        timer.start()
+        out, err = proc.communicate()
+    finally:
+        timer.cancel()
+    msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
+           "%s########### PROCESS OUTPUT END\n" % out)
+    report_output(outputs["stdout"], options.verbose, msg)
+    if proc.returncode != SUCCESS:
+        report_err(outputs["stderr"], "Error %d: %s\n%s" %
+                   (proc.returncode, errmsg, err))
+    return proc.returncode
 
 
-def comparePacket(expected, received):
-    received = ''.join(ByteToHex(str(received)).split()).upper()
+def compare_pkt(outputs, expected, received):
+    received = ''.join(byte_to_hex(str(received)).split()).upper()
     expected = ''.join(expected.split()).upper()
     if len(received) < len(expected):
-        reportError("Received packet too short",
-                    len(received), "vs", len(expected))
+        report_err(outputs["stderr"], "Received packet too short",
+                   len(received), "vs", len(expected))
         return FAILURE
     for i in range(0, len(expected)):
         if expected[i] == "*":
             continue
         if expected[i] != received[i]:
-            reportError("Received packet ", received)
-            reportError("Packet different at position", i,
-                        ": expected", expected[i], ", received", received[i])
-            reportError("Full received packed is ", received)
+            report_err(outputs["stderr"], "Received packet ", received)
+            report_err(outputs["stderr"], "Packet different at position", i,
+                       ": expected", expected[i], ", received", received[i])
+            report_err(outputs["stderr"], "Full received packed is ", received)
             return FAILURE
     return SUCCESS
 
 
+def require_root(outputs):
+    if (not (os.getuid() == 0)):
+        errmsg = "This test requires root privileges! Failing..."
+        report_err(outputs["stderr"], errmsg)
+        sys.exit(FAILURE)
+
+
 class EBPFFactory(object):
-    ''' Generator class.
-     Returns a target subclass based on the provided target option.'''
+    """ Generator class.
+     Returns a target subclass based on the provided target option."""
     @staticmethod
-    def create(tmpdir, options, template, stderr):
+    def create(tmpdir, options, template, outputs):
         if options.target == "kernel":
-            return EBPFKernelTarget(tmpdir, options, template, stderr)
+            return EBPFKernelTarget(tmpdir, options, template, outputs)
         if options.target == "bcc":
-            return EBPFBCCTarget(tmpdir, options, template, stderr)
+            return EBPFBCCTarget(tmpdir, options, template, outputs)
         if options.target == "test":
-            return EBPFTestTarget(tmpdir, options, template, stderr)
+            return EBPFTestTarget(tmpdir, options, template, outputs)
 
 
 class EBPFTarget(object):
-    ''' Parent Object of the EBPF Targets
-     Defines common functions and variables'''
+    """ Parent Object of the EBPF Targets
+     Defines common functions and variables"""
 
-    def __init__(self, tmpdir, options, template, stderr):
+    def __init__(self, tmpdir, options, template, outputs):
         self.tmpdir = tmpdir        # dir in which all files are stored
         self.options = options      # contains meta information
         self.template = template    # template to generate a filter
-        self.stderr = stderr        # error file
+        self.outputs = outputs      # contains standard and error output
         self.pcapPrefix = "pcap"    # could also be "pcapng"
         self.interfaces = {}        # list of active interfaces
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
+        # TODO: Make the runtime dir independent
+        #       on the location of the python file
+        self.ebpfdir = os.path.dirname(__file__) + "/runtime"
+
+    def get_make_args(self, ebpfdir, target):
+        args = ["make"]
+        # target makefile
+        args.extend(["-f", target + ".mk"])
+        # Source folder of the makefile
+        args.extend(["-C", ebpfdir])
+        return args
 
     def filename(self, interface, direction):
+        """ Constructs the pcap filename from the given interface and
+            packet stream direction. For example "pcap1_out.pcap" implies
+            that the given stream contains tx packets from interface 1 """
         return (self.tmpdir + "/" + self.pcapPrefix +
                 str(interface) + "_" + direction + ".pcap")
 
@@ -168,26 +196,32 @@ class EBPFTarget(object):
                    lstrip(self.pcapPrefix).rsplit('_', 1)[0])
 
     def compile_p4(self, argv):
-        ''' To override '''
-        ''' Compile the p4 target '''
+        # To override
+        """ Compile the p4 target """
         if not os.path.isfile(self.options.p4filename):
             raise Exception("No such file " + self.options.p4filename)
-        args = ["./p4c-ebpf"]
-        args.extend(["--target", self.options.target])
-        args.extend(["-o", self.template])
-        args.extend(argv)
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
+        # Initialize arguments for the makefile
+        args = self.get_make_args(self.ebpfdir, self.options.target)
+        # name of the output source file
+        args.append("BPFOBJ=" + self.template + ".c")
+        # location of the P4 input file
+        args.append("P4FILE=" + self.options.p4filename)
+        p4_args = ' '.join(map(str, argv))
+        if (p4_args):
+            # Remaining arguments
+            args.append("P4ARGS=\"" + p4_args + "\"")
+        errmsg = "Failed to compile P4:"
+        result = run_timeout(self.options, args, TIMEOUT,
+                             self.outputs, errmsg)
         if result != SUCCESS:
-            reportError("Error %d: Failed to compile P4." %
-                        (result))
-            print("".join(open(self.stderr).readlines()))
             # If the compiler crashed fail the test
-            if 'Compiler Bug' in open(self.stderr).readlines():
+            if 'Compiler Bug' in open(self.outputs["stderr"]).readlines():
                 sys.exit(FAILURE)
-        # check if we expect the p4 compilation of the p4 file to fail
-        expected_error = isError(self.options.p4filename)
+
+        # Check if we expect the p4 compilation of the p4 file to fail
+        expected_error = is_err(self.options.p4filename)
         if expected_error:
-            # we do, so invert the result
+            # We do, so invert the result
             if result == SUCCESS:
                 result = FAILURE
             else:
@@ -195,31 +229,32 @@ class EBPFTarget(object):
         return result, expected_error
 
     def generate_model_inputs(self, stffile):
-        ''' To override '''
-        ''' Parses the stf file and creates a .pcap file with input packets.
+        # To override
+        """ Parses the stf file and creates a .pcap file with input packets.
             It also adds the expected output packets per interface to a global
-            dictionary.
-            TODO: Create pcap packet data structure and differentiate
-            between input interfaces.'''
+            dictionary. """
+        # TODO: Create pcap packet data structure and differentiate
+        # between input interfaces.
         infile = self.tmpdir + "/in.pcap"
         fp = RawPcapWriter(infile, linktype=1)
         fp._write_header(None)
         with open(stffile) as i:
             for line in i:
-                line, comment = nextWord(line, "#")
-                first, cmd = nextWord(line)
+                line, comment = next_word(line, "#")
+                first, cmd = next_word(line)
                 if first == "packet":
-                    interface, cmd = nextWord(cmd)
+                    interface, cmd = next_word(cmd)
                     interface = int(interface)
                     data = ''.join(cmd.split())
                     try:
-                        fp._write_packet(HexToByte(data))
+                        fp._write_packet(hex_to_byte(data))
                     except ValueError:
-                        reportError("Invalid packet data", data)
+                        report_err(self.outputs["stderr"],
+                                   "Invalid packet data", data)
                         os.remove(infile)
                         return FAILURE
                 elif first == "expect":
-                    interface, data = nextWord(cmd)
+                    interface, data = next_word(cmd)
                     interface = int(interface)
                     data = ''.join(data.split())
                     if data != '':
@@ -229,19 +264,19 @@ class EBPFTarget(object):
         return SUCCESS
 
     def create_filter(self):
-        ''' To override '''
-        ''' Compiles a filter from the previously generated template '''
+        # To override
+        """ Compiles a filter from the previously generated template """
         return SUCCESS
 
     def run(self):
-        ''' To override '''
-        ''' Runs the filter and feed attached interfaces with packets '''
+        # To override
+        """ Runs the filter and feeds attached interfaces with packets """
         return SUCCESS
 
-    def checkOutputs(self):
-        ''' Checks if the output of the filter matches expectations '''
-        if self.options.verbose:
-            print("Comparing outputs")
+    def check_outputs(self):
+        """ Checks if the output of the filter matches expectations """
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Comparing outputs")
         direction = "out"
         for file in glob(self.filename('*', direction)):
             interface = self.interface_of_filename(file)
@@ -251,98 +286,175 @@ class EBPFTarget(object):
                 try:
                     packets = rdpcap(file)
                 except:
-                    reportError("Corrupt pcap file", file)
+                    report_err(self.outputs["stderr"],
+                               "Corrupt pcap file", file)
                     self.showLog()
                     return FAILURE
 
             # Check for expected packets.
             if interface in self.expectedAny:
                 if interface in self.expected:
-                    reportError("Interface " + interface +
-                                " has both expected with packets and without")
+                    report_err(self.outputs["stderr"],
+                               ("Interface " + interface +
+                                " has both expected with packets and without"))
                 continue
             if interface not in self.expected:
                 expected = []
             else:
                 expected = self.expected[interface]
             if len(expected) != len(packets):
-                reportError("Expected", len(expected), "packets on port",
-                            str(interface), "got", len(packets))
+                report_err(self.outputs["stderr"], "Expected", len(
+                    expected), "packets on port",
+                    str(interface), "got", len(packets))
                 return FAILURE
             for i in range(0, len(expected)):
-                cmp = comparePacket(expected[i], packets[i])
+                cmp = compare_pkt(
+                    self.outputs, expected[i], packets[i])
                 if cmp != SUCCESS:
-                    reportError("Packet", i, "on port",
-                                str(interface), "differs")
+                    report_err(self.outputs["stderr"], "Packet", i, "on port",
+                               str(interface), "differs")
                     return FAILURE
-            # remove successfully checked interfaces
+            # Remove successfully checked interfaces
             if interface in self.expected:
                 del self.expected[interface]
         if len(self.expected) != 0:
-            # didn't find all the expects we were expecting
-            reportError("Expected packects on ports",
-                        self.expected.keys(), "not received")
+            # Didn't find all the expects we were expecting
+            report_err(self.outputs["stderr"], "Expected packects on ports",
+                       self.expected.keys(), "not received")
             return FAILURE
         else:
             return SUCCESS
 
 
 class EBPFKernelTarget(EBPFTarget):
-    def __init__(self, tmpdir, options, template, stderr):
-        EBPFTarget.__init__(self, tmpdir, options, template, stderr)
+    def __init__(self, tmpdir, options, template, outputs):
+        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def checkOutputs(self):
+    def _create_interface(self, ifname):
+        ip = IPRoute()
+        try:
+            device = ip.link_lookup(ifname=ifname)
+            if len(device):
+                # Interface exists already
+                report_output(self.outputs["stdout"], self.options.verbose,
+                              "Trying to replace existing dummy interface...")
+                ip.link("remove", ifname=ifname, kind="dummy")
+            ip.link("add", ifname=ifname, kind="dummy")
+        except Exception as e:
+            # Something broke, provide feedback
+            procstderr = open(self.outputs["stderr"], "a+")
+            procstderr.write(e.message)
+            procstderr.close()
+
+    def _remove_interface(self, ifname):
+        ip = IPRoute()
+        device = ip.link_lookup(ifname=ifname)
+        if len(device):
+            # Interface actually exists
+            ip.link("remove", ifname=ifname, kind="dummy")
+
+    def _compile_ebpf(self, ebpfdir):
+        args = self.get_make_args(ebpfdir, self.options.target)
+        # Input eBPF byte code
+        args.append(self.template + ".o")
+        # The bpf program to attach to the interface
+        args.append("BPFOBJ=" + self.template + ".o")
+        errmsg = "Failed to compile the eBPF byte code:"
+        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+
+    def _load_ebpf(self, ebpfdir, ifname):
+        args = ["tc"]
+        # Create a qdisc for our custom virtual interface
+        args.extend(["qdisc", "add", "dev", ifname, "clsact"])
+        errmsg = "Failed to add tc qdisc:"
+        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        if result != SUCCESS:
+            return result
+        args = ["tc"]
+        # Launch tc to load the ebpf object to the specified interface
+        args.extend(["filter", "add", "dev", ifname, "ingress",
+                     "bpf", "da", "obj", self.template + ".o",
+                     "sec", "prog", "verb"])
+        # The bpf program to attach to the interface
+        errmsg = "Failed to load the eBPF byte code using tc:"
+        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+
+    def create_filter(self):
+        require_root(self.outputs)
+        # Create interface with unique id (allows parallel tests)
+        # TODO: Create one custom interface per pcap file we parse
+        ifname = "test" + str(os.getpid())
+        self._create_interface(ifname)
+        # Use clang to compile the generated C code to a LLVM IR
+        result = self._compile_ebpf(self.ebpfdir)
+        if result != SUCCESS:
+            self._remove_interface(ifname)
+            return result
+        result = self._load_ebpf(self.ebpfdir, ifname)
+        if result != SUCCESS:
+            self._remove_interface(ifname)
+        return result
+
+    def check_outputs(self):
         # Not implemented yet, just pass the test
+        ifname = "test" + str(os.getpid())
+        self._remove_interface(ifname)
         return SUCCESS
 
 
 class EBPFBCCTarget(EBPFTarget):
-    def __init__(self, tmpdir, options, template, stderr):
-        EBPFTarget.__init__(self, tmpdir, options, template, stderr)
+    def __init__(self, tmpdir, options, template, outputs):
+        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def checkOutputs(self):
+    def compile_p4(self, argv):
+        # To override
+        """ Compile the p4 target """
+        if not os.path.isfile(self.options.p4filename):
+            raise Exception("No such file " + self.options.p4filename)
+        args = ["./p4c-ebpf"]
+        args.extend(["--target", self.options.target])
+        args.extend(["-o", self.template])
+        args.append(self.options.p4filename)
+        args.extend(argv)
+        result = run_timeout(self.options, args, TIMEOUT,
+                             self.outputs, "Failed to compile P4:")
+        if result != SUCCESS:
+            print("".join(open(self.outputs["stderr"]).readlines()))
+            # If the compiler crashed fail the test
+            if 'Compiler Bug' in open(self.outputs["stderr"]).readlines():
+                sys.exit(FAILURE)
+        # Check if we expect the p4 compilation of the p4 file to fail
+        expected_error = is_err(self.options.p4filename)
+        if expected_error:
+            # We do, so invert the result
+            if result == SUCCESS:
+                result = FAILURE
+            else:
+                result = SUCCESS
+        return result, expected_error
+
+    def check_outputs(self):
         # Not implemented yet, just pass the test
         return SUCCESS
 
 
 class EBPFTestTarget(EBPFTarget):
-    def __init__(self, tmpdir, options, template, stderr):
-        EBPFTarget.__init__(self, tmpdir, options, template, stderr)
+    def __init__(self, tmpdir, options, template, outputs):
+        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
     def create_filter(self):
-        ebpfdir = os.path.dirname(__file__)
-        # compiler
-        args = ["gcc"]
-        # main
-        args.append("-o")
-        args.append(self.tmpdir + "/filter")
-        # sources
-        args.append(ebpfdir + "/ebpf_runtime.c")
-        args.append(ebpfdir + "/bpfinclude/ebpf_registry.c")
-        args.append(ebpfdir + "/bpfinclude/ebpf_map.c")
-        args.append(self.template)
-        # includes
-        args.append("-I" + self.tmpdir)
-        args.append("-I" + ebpfdir)
-        # libs
-        args.append("-lpcap")
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
-        if result != SUCCESS:
-            reportError("Error %d: Failed to build the filter:\n%s" %
-                        (result, errtext))
-        return result
+        args = self.get_make_args(self.ebpfdir, self.options.target)
+        # List of bpf programs to attach to the interface
+        args.append("BPFOBJ=" + self.template)
+        errmsg = "Failed to build the filter:"
+        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
 
     def run(self):
-        if self.options.verbose:
-            print("Running model")
-        # compiler
-        args = []
-        # main
-        args.append(self.tmpdir + "/filter")
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Running model")
+        # main executable
+        args = [self.template]
         # input
         args.append(self.tmpdir + "/in.pcap")
-        result, errtext = run_timeout(self.options, args, TIMEOUT, self.stderr)
-        if result != SUCCESS:
-            reportError("Error %d: Failed to run the filter:\n%s" %
-                        (result, errtext))
-        return result
+        errmsg = "Failed to execute the filter:"
+        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)

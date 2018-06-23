@@ -118,6 +118,8 @@ struct sk_buff {
     void *data;
     u_int16_t len;
 };
+#define SK_BUFF struct sk_buff
+
 
 #define REGISTER_START() \
 struct bpf_map_def tables[] = {
