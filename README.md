@@ -102,7 +102,7 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
     ```
     mkdir build
     cd build
-    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=ON (default off)] [-DENABLE_P4RUNTIME_TO_PD=OFF (default on)] [-DENABLE_PROTOBUF_STATIC=OFF (default on)]
+    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=ON (default off)] [-DENABLE_P4RUNTIME_TO_PD=OFF (default on)] [-DENABLE_PROTOBUF_STATIC=OFF (default on)] [-DENABLE_GC=OFF (default on)]
     make -j4
     make -j4 check
     ```
@@ -234,6 +234,16 @@ Installing on macOS:
   [here](https://github.com/google/protobuf/blob/master/src/README.md). Check
   out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you
   build.
+
+## Garbage collector
+
+P4c relies on [BDW garbage collector](https://github.com/ivmai/bdwgc)
+to manage its memory.  By default, the p4c exectuables are linked with
+the garbage collector library.  In rare cases when the GC causes
+problems, this can be disabled by setting `ENABLE_GC` cmake option to
+`OFF`.  However, this will dramatically increase the memory usage by the
+compiler, and may become impractical for compiling large programs.  **Do
+not disable the GC**, unless you really have to.
 
 # Development tools
 
