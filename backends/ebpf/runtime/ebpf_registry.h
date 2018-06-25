@@ -27,7 +27,7 @@ limitations under the License.
 
 #include "ebpf_map.h"
 
-#define MAX_TABLE_NAME_LENGTH 32  // maximum length of the table name
+#define MAX_TABLE_NAME_LENGTH 256  // maximum length of the table name
 
 /**
  * @brief A helper structure used to describe attributes.

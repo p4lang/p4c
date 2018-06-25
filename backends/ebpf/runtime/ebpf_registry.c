@@ -115,6 +115,8 @@ int registry_add(struct bpf_map_def *map) {
     }
     HASH_ADD_KEYPTR(hh, reg_tables, map->name, strlen(map->name), tmp_reg);
     tmp_reg->table = map;
+    // Do not forget to actually copy the name...
+    memcpy(tmp_reg->name, map->name, strlen(map->name));
 
     // Assign an id to the map and update the descriptor mapping
     handle_entry *tmp_fd = malloc(sizeof(handle_entry));
@@ -124,7 +126,8 @@ int registry_add(struct bpf_map_def *map) {
     }
     tmp_fd->map_handle = map_indexer;
     HASH_ADD_INT(table_handles, map_handle, tmp_fd);
-    memcpy(tmp_reg->name, map->name, strlen(map->name));
+    // Do not forget to actually copy the name...
+    memcpy(tmp_fd->name, map->name, strlen(map->name));
     map_indexer++;
     return EXIT_SUCCESS;
 }

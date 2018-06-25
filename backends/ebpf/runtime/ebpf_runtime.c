@@ -51,11 +51,11 @@ int main(int argc, char **argv) {
 
     /* Initialize the registry of shared tables */
     struct bpf_map_def* current = tables;
-    while (current->name != 0) {
+    while (current->name != NULL) {
+        printf("Adding table %s\n", current->name);
         registry_add(current);
         current++;
     }
-
     /* Open and read pcap file */
     in_handle = pcap_open_offline(argv[0], errbuf);
     if (in_handle == NULL) {
@@ -80,6 +80,8 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+
+    initialize_tables();
     /* Parse each packet in the file and check the result */
     while ((ret = pcap_next_ex(in_handle, &pcap_hdr, &packet)) == 1) {
         struct sk_buff skb;
@@ -92,7 +94,6 @@ int main(int argc, char **argv) {
     }
     if (ret == -1)
         pcap_perror(in_handle, "Error: Failed to parse ");
-
     pcap_close(in_handle);
     pcap_dump_close(out_handle);
     free(out_file_name);

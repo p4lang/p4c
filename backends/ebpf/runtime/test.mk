@@ -3,7 +3,7 @@ GCC ?= gcc
 SRCDIR=.
 INCLUDES+= -I./$(SRCDIR)
 # Optimization flags to save space
-CFLAGS+= -O2 -g # -Wall -Werror
+CFLAGS+= -DCONTROL_PLANE -O2 -g # -Wall -Werror
 LIBS+=-lpcap
 SRC+= $(SRCDIR)/ebpf_runtime.c $(SRCDIR)/ebpf_map.c $(SRCDIR)/ebpf_registry.c
 
@@ -31,7 +31,7 @@ $(BPFNAME).c: $(P4FILE)
 		echo "*** ERROR: Cannot find p4c-ebpf"; \
 		exit 1;\
 	fi;
-	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $(BPFOBJ) $< $(P4ARGS);
+	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS)
 
 # Compile the runtime with the generated file as dependency
 $(BPFNAME): $(BPFNAME).c

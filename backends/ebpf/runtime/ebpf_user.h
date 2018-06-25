@@ -124,20 +124,23 @@ struct sk_buff {
 #define REGISTER_START() \
 struct bpf_map_def tables[] = {
 #define REGISTER_TABLE(NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES) \
-    { #NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES },
+    { MAP_PATH"/"#NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES },
 #define REGISTER_END() \
     { 0, 0, 0, 0, 0 } \
 };
 
+/* TODO: We do not check for NULL output, which causes a segmentation fault.
+ * Ideally we should fine a more elegant way to handle this case.
+ */
 #define BPF_MAP_LOOKUP_ELEM(table, key) \
-    bpf_map_lookup_elem(registry_lookup_map(#table), \
-    key, registry_lookup_table(#table)->key_size)
+    bpf_map_lookup_elem(registry_lookup_map(MAP_PATH"/"#table), \
+    key, registry_lookup_table(MAP_PATH"/"#table)->key_size)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \
-    bpf_map_update_elem(registry_lookup_map(#table), key, \
-    registry_lookup_table(#table)->key_size, value, flags)
+    bpf_map_update_elem(registry_lookup_map(MAP_PATH"/"#table), key, \
+    registry_lookup_table(MAP_PATH"/"#table)->key_size, value, flags)
 #define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags) \
     bpf_map_update_elem(registry_lookup_map_id(index), key, \
-    registry_lookup_table(index)->key_size, value, flags)
+    registry_lookup_table_id(index)->key_size, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
 #define BPF_OBJ_GET(name) registry_get_id(name)
 
