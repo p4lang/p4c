@@ -443,6 +443,13 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
     }
 
+    void collectExternFunction(P4RuntimeSymbolTableIface* symbols,
+                               const P4::ExternFunction* externFunction) override {
+        // no common task
+        (void)symbols;
+        (void)externFunction;
+    }
+
     void postCollect(const P4RuntimeSymbolTableIface& symbols) override {
         (void)symbols;
         // analyze action profiles and build a mapping from action profile name
@@ -518,6 +525,15 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto actionProfile = getActionProfile(externBlock);
             if (actionProfile) addActionProfile(symbols, p4info, *actionProfile);
         }
+    }
+
+    void addExternFunction(const P4RuntimeSymbolTableIface& symbols,
+                           p4configv1::P4Info* p4info,
+                           const P4::ExternFunction* externFunction) override {
+        // no common task
+        (void)symbols;
+        (void)p4info;
+        (void)externFunction;
     }
 
     static boost::optional<ActionProfile>
@@ -883,15 +899,6 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         }
     }
 
-    void collectExternFunction(P4RuntimeSymbolTableIface* symbols,
-                               const P4::ExternFunction* externFunction) override {
-        // no extern functions are exposed to the control-plane for PSA,
-        // everything is an extern instance which makes things much more
-        // convenient
-        (void)symbols;
-        (void)externFunction;
-    }
-
     void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
                             p4configv1::P4Info* p4info,
                             p4configv1::Table* table,
@@ -915,14 +922,6 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
             auto digest = getDigest(decl, p4RtTypeInfo);
             if (digest) addDigest(symbols, p4info, *digest);
         }
-    }
-
-    void addExternFunction(const P4RuntimeSymbolTableIface& symbols,
-                           p4configv1::P4Info* p4info,
-                           const P4::ExternFunction* externFunction) override {
-        (void)symbols;
-        (void)p4info;
-        (void)externFunction;
     }
 
     /// @return serialization information for the Digest extern instacne @decl
