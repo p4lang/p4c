@@ -50,6 +50,7 @@ limitations under the License.
 
 #include "p4RuntimeSerializer.h"
 #include "p4RuntimeArchHandler.h"
+#include "p4RuntimeArchStandard.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
@@ -616,8 +617,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
 
         MatchField::MatchType matchType;
         // TODO(antonin): remove v1model dependency and find a way to handle
-        // architecture-specific match types, which are not currently supported
-        // by P4Runtime.
+        // architecture-specific match types, which are supported by P4Runtime.
         if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
             matchType = MatchField::MatchTypes::EXACT;
         } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
@@ -1417,8 +1417,7 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
 
 P4RuntimeSerializer::P4RuntimeSerializer() {
     registerArch("v1model", new ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder());
-    // TODO(antonin): implement P4RuntimeArchHandlerIface for PSA and register
-    // it here.
+    registerArch("psa", new ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
 }
 
 P4RuntimeSerializer*
