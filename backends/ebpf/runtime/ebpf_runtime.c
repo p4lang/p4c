@@ -33,13 +33,49 @@ void usage(char *name) {
            " into a filter function, and returns the output.\n" , name);
 }
 
+
+// void generate_init() {
+
+//     u32 field0 = 0x4598010a;
+//     u32 field1 = 0x6ac81232;
+//     u64 field2 = 0x300100171b000000;
+//     u64 field3 = 0xb7aeb79881b80000;
+//     struct pipe_t_key key = {};
+//     key.field0 = load_word(&field0, 0);
+//     key.field1 = load_word(&field1, 0);
+//     key.field2 = load_dword(&field2, 0);
+//     key.field3 = load_dword(&field3, 0);
+//     int tableFileDescriptor = BPF_OBJ_GET(MAP_PATH "/pipe_t");
+//     if (tableFileDescriptor < 0) { fprintf(stderr, "map pipe_t not loaded\n"); exit(1); }
+//     struct pipe_t_value value = {
+//         .action = pipe_invalidate,
+//     };
+//     int ok = BPF_USER_MAP_UPDATE_ELEM(tableFileDescriptor, &key, &value, BPF_ANY);
+//     if (ok != 0) { perror("Could not write in pipe_t"); exit(1); }
+// }
+
+
+int pcap_while_loop(pcap_t *in_handle, pcap_dumper_t *out_handle) {
+    struct pcap_pkthdr *pcap_hdr;
+    const unsigned char *packet;
+    int ret;
+    while ((ret = pcap_next_ex(in_handle, &pcap_hdr, &packet)) == 1) {
+    /* Parse each packet in the file and check the result */
+        struct sk_buff skb;
+        skb.data = (void *) packet;
+        skb.len = pcap_hdr->len;
+        int result = ebpf_filter(&skb);
+        if (result)
+            pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
+         printf("\nResult of the eBPF parsing is: %d\n", result);
+    }
+    return ret;
+}
+
 int main(int argc, char **argv) {
     pcap_t *in_handle;
     pcap_dumper_t *out_handle;
-    const unsigned char *packet;
     char errbuf[PCAP_ERRBUF_SIZE];
-    struct pcap_pkthdr *pcap_hdr;
-    int ret;
     if (argc != 2) {
         usage(argv[0]);
         fprintf(stderr, "The input trace file is missing."
@@ -50,10 +86,10 @@ int main(int argc, char **argv) {
     ++argv; --argc;
 
     /* Initialize the registry of shared tables */
-    struct bpf_map_def* current = tables;
+    struct bpf_table* current = tables;
     while (current->name != NULL) {
         printf("Adding table %s\n", current->name);
-        registry_add(current);
+        BPF_OBJ_PIN(current, current->name);
         current++;
     }
     /* Open and read pcap file */
@@ -80,18 +116,10 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-
+    /* Set the default action for the userspace hash tables */
     initialize_tables();
-    /* Parse each packet in the file and check the result */
-    while ((ret = pcap_next_ex(in_handle, &pcap_hdr, &packet)) == 1) {
-        struct sk_buff skb;
-        skb.data = (void *) packet;
-        skb.len = pcap_hdr->len;
-        int result = ebpf_filter(&skb);
-        if (result)
-            pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
-        printf("\nResult of the eBPF parsing is: %d\n", result);
-    }
+    //generate_init();
+    int ret = pcap_while_loop(in_handle, out_handle);
     if (ret == -1)
         pcap_perror(in_handle, "Error: Failed to parse ");
     pcap_close(in_handle);
