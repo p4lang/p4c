@@ -17,9 +17,8 @@ limitations under the License.
 /*
  * This file defines a shared registry. It is required by the p4c-ebpf test framework
  * and acts as an interface between the emulated control and data plane. It provides
- * a mechanism to access shared tables by name or id (TODO: Add id map) and is
- * intended to approximate the kernel ebpf object API as closely as possible.
- * This library is currently not thread-safe.
+ * a mechanism to access shared tables by name or id and is intended to approximate the
+ * kernel ebpf object API as closely as possible. This library is currently not thread-safe.
  */
 
 #ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_
@@ -38,7 +37,6 @@ limitations under the License.
  * the relation is many-to-one.
  * "name" should not exceed VAR_SIZE. Functions using bpf_table also assume
  * that "name" is a conventional null-terminated string.
- *
  */
 struct bpf_table {
     char *name;                 // table name longer than VAR_SIZE is not accessed
@@ -46,16 +44,16 @@ struct bpf_table {
     unsigned int key_size;      // size of the key structure
     unsigned int value_size;    // size of the value structure
     unsigned int max_entries;   // Maximum of possible entries
-    struct bpf_map *bpf_map;
+    struct bpf_map *bpf_map;    // Pointer to the actual hash map
 };
 
 /**
  * @brief Adds a new table to the registry.
- * @details Adds a new table to the shared registry.
- * This operation uses a char name stored in map as a key.
+ * @details Adds a new table to the shared registry and assigns
+ * an id to it. This operation uses a char name stored in "table" as a key.
   * @return EXIT_FAILURE if map already exists or cannot be added.
  */
-int registry_add(struct bpf_table *map);
+int registry_add(struct bpf_table *table);
 
 /**
  * @brief Removes a new table from the registry.
@@ -76,10 +74,10 @@ struct bpf_table *registry_lookup_table(const char *name);
 /**
  * @brief Retrieve a table from the registry.
  * @details Retrieves a table from the shared registry.
- * This operation uses an unsigned integer as the key.
+ * This operation uses an integer as the key.
  * @return NULL if map cannot be found.
  */
-struct bpf_table *registry_lookup_table_id(int map_fd);
+struct bpf_table *registry_lookup_table_id(int table_id);
 
 /**
  * @brief Retrieve id of a table in the registry
@@ -89,9 +87,46 @@ struct bpf_table *registry_lookup_table_id(int map_fd);
  */
 int registry_get_id(const char *name);
 
-
+/**
+ * @brief Insert a key/value pair into the hashmap.
+ * @details A safe wrapper function to update a bpf map.
+ * If the map can be found and exists, this function calls
+ * the bpf_map_update_elem function to insert an entry.
+ * This operation uses a char name as the key.
+ * @return EXIT_FAILURE if map cannot be found.
+ */
 int registry_update_table(const char *name, void *key, void *value, unsigned long long flags);
-int registry_update_table_id(int map_fd, void *key, void *value, unsigned long long flags);
+
+/**
+ * @brief Insert a key/value pair into the hashmap.
+ * @details A safe wrapper function to update a bpf map.
+ * If the map can be found and exists, this function calls
+ * the bpf_map_update_elem function to insert an entry.
+ * This operation uses an integer as the key.
+ * @return EXIT_FAILURE if map cannot be found.
+ */
+int registry_update_table_id(int table_id, void *key, void *value, unsigned long long flags);
+
+/**
+ * @brief Retrieve a value from a bpf map through the registry.
+ * @details A wrapper function to retrieve a value from a hash map
+ * where only the name is known. The function looks up the identifier
+ * in the registry and calls bpf_map_lookup_elem on the retrieved list.
+ * If there is no table, this function also returns NULL.
+ * This operation uses a char name as the key.
+ * @return NULL if the value cannot be found.
+ */
 void *registry_lookup_table_elem(const char *name, void *key);
+
+/**
+ * @brief Retrieve a value from a bpf map through the registry.
+ * @details A wrapper function to retrieve a value from a hash map
+ * where only the name is known. The function looks up the identifier
+ * in the registry and calls bpf_map_lookup_elem on the retrieved list.
+ * If there is no table, this function also returns NULL.
+ * This operation uses an integer as the key.
+ * @return NULL if the value cannot be found.
+ */
+void *registry_lookup_table_elem_id(int table_id, void *key);
 
 #endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_

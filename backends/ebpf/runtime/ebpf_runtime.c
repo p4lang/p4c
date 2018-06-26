@@ -33,34 +33,12 @@ void usage(char *name) {
            " into a filter function, and returns the output.\n" , name);
 }
 
-
-// void generate_init() {
-
-//     u32 field0 = 0x4598010a;
-//     u32 field1 = 0x6ac81232;
-//     u64 field2 = 0x300100171b000000;
-//     u64 field3 = 0xb7aeb79881b80000;
-//     struct pipe_t_key key = {};
-//     key.field0 = load_word(&field0, 0);
-//     key.field1 = load_word(&field1, 0);
-//     key.field2 = load_dword(&field2, 0);
-//     key.field3 = load_dword(&field3, 0);
-//     int tableFileDescriptor = BPF_OBJ_GET(MAP_PATH "/pipe_t");
-//     if (tableFileDescriptor < 0) { fprintf(stderr, "map pipe_t not loaded\n"); exit(1); }
-//     struct pipe_t_value value = {
-//         .action = pipe_invalidate,
-//     };
-//     int ok = BPF_USER_MAP_UPDATE_ELEM(tableFileDescriptor, &key, &value, BPF_ANY);
-//     if (ok != 0) { perror("Could not write in pipe_t"); exit(1); }
-// }
-
-
 int pcap_while_loop(pcap_t *in_handle, pcap_dumper_t *out_handle) {
     struct pcap_pkthdr *pcap_hdr;
     const unsigned char *packet;
     int ret;
     while ((ret = pcap_next_ex(in_handle, &pcap_hdr, &packet)) == 1) {
-    /* Parse each packet in the file and check the result */
+        /* Parse each packet in the file and check the result */
         struct sk_buff skb;
         skb.data = (void *) packet;
         skb.len = pcap_hdr->len;
@@ -118,7 +96,6 @@ int main(int argc, char **argv) {
 
     /* Set the default action for the userspace hash tables */
     initialize_tables();
-    //generate_init();
     int ret = pcap_while_loop(in_handle, out_handle);
     if (ret == -1)
         pcap_perror(in_handle, "Error: Failed to parse ");

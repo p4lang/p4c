@@ -106,21 +106,6 @@ static u64 load_dword(void *skb, u64 off) {
   return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
 }
 
-/*
- * Print reverse byte buffer including specified length
- */
-static int print_n_bytes(void *receiveBuffer, int num) {
-    int i;
-
-    // for (i = num-1; i>=0; i--) {
-    //  printf("%02x", (unsigned char) receiveBuffer[i]);
-    // }
-    for (i =0; i<=num-1; i++) {
-        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
-    }
-    printf("\n");
-    return i;
-}
 #define htonl(d) __constant_htonl(d)
 #define htons(d) __constant_htons(d)
 
