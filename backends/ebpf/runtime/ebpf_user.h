@@ -102,7 +102,10 @@ typedef unsigned long long u64;
 #define load_byte(data, b)  (*(((u8*)(data)) + (b)))
 #define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))
 #define load_word(data, b) __constant_ntohl(*(u32 *)((u8*)(data) + (b)))
-#define load_dword(data, b) __constant_ntohl(*(u64 *)((u8*)(data) + (b)))
+static u64 load_dword(void *skb, u64 off) {
+  return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
+}
+
 #define htonl(d) __constant_htonl(d)
 #define htons(d) __constant_htons(d)
 
@@ -120,29 +123,25 @@ struct sk_buff {
 };
 #define SK_BUFF struct sk_buff
 
-
 #define REGISTER_START() \
-struct bpf_map_def tables[] = {
+struct bpf_table tables[] = {
 #define REGISTER_TABLE(NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES) \
-    { #NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES },
+    { MAP_PATH"/"#NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES, NULL },
 #define REGISTER_END() \
     { 0, 0, 0, 0, 0 } \
 };
 
 #define BPF_MAP_LOOKUP_ELEM(table, key) \
-    bpf_map_lookup_elem(registry_lookup_map(#table), \
-    key, registry_lookup_table(#table)->key_size)
+    registry_lookup_table_elem(MAP_PATH"/"#table, key)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \
-    bpf_map_update_elem(registry_lookup_map(#table), key, \
-    registry_lookup_table(#table)->key_size, value, flags)
-#define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags) \
-    bpf_map_update_elem(registry_lookup_map_id(index), key, \
-    registry_lookup_table(index)->key_size, value, flags)
+    registry_update_table(MAP_PATH"/"#table, key, value, flags)
+#define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
+    registry_update_table_id(index, key, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
 #define BPF_OBJ_GET(name) registry_get_id(name)
 
 /* These should be automatically generated and included in the generated x.h header file */
-extern struct bpf_map_def tables[];
+extern struct bpf_table tables[];
 extern int ebpf_filter(struct sk_buff *skb);
 
 #endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_

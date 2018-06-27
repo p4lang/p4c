@@ -234,8 +234,8 @@ class EBPFTarget(object):
             It also adds the expected output packets per interface to a global
             dictionary. """
         # TODO: Create pcap packet data structure and differentiate
-        # between input interfaces.
-        infile = self.tmpdir + "/in.pcap"
+        # between input interfaces. Right now it is always interface 0.
+        infile = self.tmpdir + "/pcap0_in.pcap"
         fp = RawPcapWriter(infile, linktype=1)
         fp._write_header(None)
         with open(stffile) as i:
@@ -330,28 +330,28 @@ class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def _create_interface(self, ifname):
-        ip = IPRoute()
-        try:
-            device = ip.link_lookup(ifname=ifname)
-            if len(device):
-                # Interface exists already
-                report_output(self.outputs["stdout"], self.options.verbose,
-                              "Trying to replace existing dummy interface...")
-                ip.link("remove", ifname=ifname, kind="dummy")
-            ip.link("add", ifname=ifname, kind="dummy")
-        except Exception as e:
-            # Something broke, provide feedback
-            procstderr = open(self.outputs["stderr"], "a+")
-            procstderr.write(e.message)
-            procstderr.close()
+    def _create_bridge(self, br_name):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Creating the bridge...")
+        ipr = IPRoute()
+        ipr.link_create(ifname=br_name, kind='bridge')
+        for index in (range(len(self.expected))):
+            if_bridge = "%s_%d" % (br_name, index)
+            if_veth = "veth_%s_%d" % (br_name, index)
+            print (if_bridge, if_veth)
+            ipr.link_create(ifname=if_veth, kind="veth", peer=if_bridge)
+            ipr.link('set', index=ipr.link_lookup(ifname=if_veth)[
+                     0], master=ipr.link_lookup(ifname=br_name)[0])
+        ipr.link("set", index=ipr.link_lookup(ifname=br_name), state="up")
 
-    def _remove_interface(self, ifname):
-        ip = IPRoute()
-        device = ip.link_lookup(ifname=ifname)
-        if len(device):
-            # Interface actually exists
-            ip.link("remove", ifname=ifname, kind="dummy")
+    def _remove_bridge(self, br_name):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Deleting the bridge...")
+        ipr = IPRoute()
+        ipr.link_remove(index=ipr.link_lookup(ifname=br_name)[0])
+        for index in (range(len(self.expected))):
+            if_bridge = "%s_%d" % (br_name, index)
+            ipr.link_remove(index=ipr.link_lookup(ifname=if_bridge)[0])
 
     def _compile_ebpf(self, ebpfdir):
         args = self.get_make_args(ebpfdir, self.options.target)
@@ -383,22 +383,22 @@ class EBPFKernelTarget(EBPFTarget):
         require_root(self.outputs)
         # Create interface with unique id (allows parallel tests)
         # TODO: Create one custom interface per pcap file we parse
-        ifname = "test" + str(os.getpid())
-        self._create_interface(ifname)
+        ifname = str(os.getpid())
+        self._create_bridge(ifname)
         # Use clang to compile the generated C code to a LLVM IR
         result = self._compile_ebpf(self.ebpfdir)
         if result != SUCCESS:
-            self._remove_interface(ifname)
+            self._remove_bridge(ifname)
             return result
         result = self._load_ebpf(self.ebpfdir, ifname)
         if result != SUCCESS:
-            self._remove_interface(ifname)
+            self._remove_bridge(ifname)
         return result
 
     def check_outputs(self):
         # Not implemented yet, just pass the test
-        ifname = "test" + str(os.getpid())
-        self._remove_interface(ifname)
+        ifname = str(os.getpid())
+        self._remove_bridge(ifname)
         return SUCCESS
 
 
@@ -452,9 +452,11 @@ class EBPFTestTarget(EBPFTarget):
     def run(self):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Running model")
-        # main executable
+        # Main executable
         args = [self.template]
-        # input
-        args.append(self.tmpdir + "/in.pcap")
+        # Input
+        args.extend(["-f", self.tmpdir + "/pcap0_in.pcap"])
+        # Debug flag
+        args.append("-d")
         errmsg = "Failed to execute the filter:"
         return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)

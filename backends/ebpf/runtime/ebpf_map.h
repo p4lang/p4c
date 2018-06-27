@@ -38,8 +38,7 @@ struct bpf_map {
  *
  * @return EXIT_FAILURE if update operation fails
  */
-int bpf_map_update_elem(struct bpf_map *map, void *key, unsigned int key_size, void *value,
-                  unsigned long long flags);
+int bpf_map_update_elem(struct bpf_map **map, void *key, unsigned int key_size, void *value,unsigned int value_size, unsigned long long flags);
 
 /**
  * @brief Find a value based on a key.
@@ -58,5 +57,15 @@ void *bpf_map_lookup_elem(struct bpf_map *map, void *key, unsigned int key_size)
  * @return EXIT_FAILURE if operation fails.
  */
 int bpf_map_delete_elem(struct bpf_map *map, void *key, unsigned int key_size);
+
+/**
+ * @brief Delete the entire map at once.
+ * @details Deletes all the keys and values in the map.
+ * Also frees all the values allocated with the map.
+ *
+ * @return EXIT_FAILURE if operation fails.
+ */
+int bpf_map_delete_map(struct bpf_map *map);
+
 
 #endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
