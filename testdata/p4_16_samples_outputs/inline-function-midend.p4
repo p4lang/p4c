@@ -1,27 +1,25 @@
-control c(out bit<16> b) {
-    bool hasReturned_0;
-    bit<16> retval_0;
+control c(inout bit<32> x) {
+    bit<32> tmp_6;
     @hidden action act() {
-        hasReturned_0 = true;
-        retval_0 = 16w12;
+        tmp_6 = x;
     }
     @hidden action act_0() {
-        hasReturned_0 = false;
+        tmp_6 = x;
     }
     @hidden action act_1() {
-        b = retval_0;
+        x = x + tmp_6;
     }
     @hidden table tbl_act {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
     }
     @hidden table tbl_act_1 {
         actions = {
@@ -30,15 +28,15 @@ control c(out bit<16> b) {
         const default_action = act_1();
     }
     apply {
-        tbl_act.apply();
-        if (!hasReturned_0) {
+        if (x > x) 
+            tbl_act.apply();
+        else 
             tbl_act_0.apply();
-        }
         tbl_act_1.apply();
     }
 }
 
-control ctr(out bit<16> b);
+control ctr(inout bit<32> x);
 package top(ctr _c);
 top(c()) main;
 

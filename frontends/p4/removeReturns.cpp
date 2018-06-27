@@ -53,6 +53,14 @@ const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
         return function;
     }
 
+    HasExits he;
+    (void)function->apply(he);
+    if (!he.hasReturns) {
+        // don't pollute the code unnecessarily
+        prune();
+        return function;
+    }
+
     bool returnsVal = function->type->returnType != nullptr &&
                       !function->type->returnType->is<IR::Type_Void>();
 

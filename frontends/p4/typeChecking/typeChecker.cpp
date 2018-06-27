@@ -2801,6 +2801,10 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     // Handle differently methods and actions: action invocations return actions
     // with different signatures
     if (methodType->is<IR::Type_Action>()) {
+        if (findContext<IR::Function>()) {
+            typeError("%1%: Functions cannot call actions", expression);
+            return expression;
+        }
         bool inActionsList = false;
         auto prop = findContext<IR::Property>();
         if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)

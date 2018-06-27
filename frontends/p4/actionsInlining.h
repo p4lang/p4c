@@ -20,54 +20,13 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "commonInlining.h"
 
 namespace P4 {
 
-struct ActionCallInfo {
-    const IR::P4Action* caller;
-    const IR::P4Action* callee;
-    const IR::MethodCallStatement* call;
-
-    ActionCallInfo(const IR::P4Action* caller, const IR::P4Action* callee,
-                   const IR::MethodCallStatement* call) :
-            caller(caller), callee(callee), call(call)
-    { CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(call); }
-    void dbprint(std::ostream& out) const
-    { out << callee << " into " << caller << " at " << call; }
-};
-
-struct AInlineWorkList {
-    // Map caller -> statement -> callee
-    std::map<const IR::P4Action*,
-             std::map<const IR::MethodCallStatement*, const IR::P4Action*>> sites;
-    void add(ActionCallInfo* info) {
-        CHECK_NULL(info);
-        sites[info->caller][info->call] = info->callee;
-    }
-    void dbprint(std::ostream& out) const;
-    bool empty() const
-    { return sites.empty(); }
-};
-
-class ActionsInlineList {
-    std::vector<ActionCallInfo*> toInline;     // initial data
-    std::vector<ActionCallInfo*> inlineOrder;  // sorted in inlining order
- public:
-    void analyze();  // generate the inlining order
-    AInlineWorkList* next();
-    void add(ActionCallInfo* aci)
-    { toInline.push_back(aci); }
-
-    void replace(const IR::P4Action* container, const IR::P4Action* replacement) {
-        LOG1("Substituting " << container << " with " << replacement);
-        for (auto e : inlineOrder) {
-            if (e->callee == container)
-                e->callee = replacement;
-            if (e->caller == container)
-                e->caller = replacement;
-        }
-    }
-};
+typedef SimpleCallInfo<IR::P4Action, IR::MethodCallStatement> ActionCallInfo;
+typedef SimpleInlineWorkList<IR::P4Action, IR::MethodCallStatement, ActionCallInfo> AInlineWorkList;
+typedef SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList> ActionsInlineList;
 
 class DiscoverActionsInlining : public Inspector {
     ActionsInlineList* toInline;  // output
@@ -84,27 +43,8 @@ class DiscoverActionsInlining : public Inspector {
     void postorder(const IR::MethodCallStatement* mcs) override;
 };
 
-// Base class for an inliner that processes actions.
-class AbstractActionInliner : public Transform {
- protected:
-    ActionsInlineList* list;
-    AInlineWorkList*   toInline;
-    AbstractActionInliner() : list(nullptr), toInline(nullptr) {}
- public:
-    void prepare(ActionsInlineList* list, AInlineWorkList* toInline) {
-        CHECK_NULL(list); CHECK_NULL(toInline);
-        this->list = list;
-        this->toInline = toInline;
-    }
-    Visitor::profile_t init_apply(const IR::Node* node) {
-        LOG1("AbstractActionInliner " << toInline);
-        return Transform::init_apply(node);
-    }
-    virtual ~AbstractActionInliner() {}
-};
-
 // General-purpose actions inliner.
-class ActionsInliner : public AbstractActionInliner {
+class ActionsInliner : public AbstractInliner<ActionsInlineList, AInlineWorkList> {
     P4::ReferenceMap* refMap;
     std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
  public:
@@ -118,17 +58,7 @@ class ActionsInliner : public AbstractActionInliner {
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
 };
 
-class InlineActionsDriver : public Transform {
-    ActionsInlineList*     toInline;
-    AbstractActionInliner* inliner;
- public:
-    InlineActionsDriver(ActionsInlineList* toInline, AbstractActionInliner *inliner) :
-            toInline(toInline), inliner(inliner)
-    { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineActionsDriver"); }
-    // Not really a visitor, but we want to embed it into a PassManager,
-    // so we make it look like a visitor.
-    const IR::Node* preorder(IR::P4Program* program) override;
-};
+typedef InlineDriver<ActionsInlineList, AInlineWorkList> InlineActionsDriver;
 
 class InlineActions : public PassManager {
     ActionsInlineList actionsToInline;
@@ -147,7 +77,7 @@ class InlineActions : public PassManager {
 
 namespace P4_14 {
 
-// Special inliner which works directly on P4 v1.0 representation
+/// Special inliner which works directly on P4-14 representation
 class InlineActions : public Transform {
     const IR::V1Program    *global;
     class SubstActionArgs : public Transform {

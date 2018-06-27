@@ -27,10 +27,6 @@ namespace P4 {
 This inspector detects whether an IR tree contains
 'return' or 'exit' statements.
 It sets a boolean flag for each of them.
-
-It treats exceptionally Functions - it claims that
-returns do not exist in Functions.  This is because these
-are handled separately.
 */
 class HasExits : public Inspector {
  public:
@@ -38,8 +34,6 @@ class HasExits : public Inspector {
     bool hasReturns;
     HasExits() : hasExits(false), hasReturns(false) { setName("HasExits"); }
 
-    bool preorder(const IR::Function*) override
-    { return false; }
     void postorder(const IR::ExitStatement*) override
     { hasExits = true; }
     void postorder(const IR::ReturnStatement*) override

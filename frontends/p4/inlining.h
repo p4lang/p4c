@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "commonInlining.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
 // This only works correctly after local variable initializers have been removed,
@@ -95,7 +96,7 @@ struct PerInstanceSubstitutions {
 };
 
 /// Summarizes all inline operations to be performed.
-struct InlineSummary {
+struct InlineSummary : public IHasDbPrint {
     /// Various substitutions that must be applied for each instance
     struct PerCaller {  // information for each caller
         /// For each instance (key) the container that is intantiated.
@@ -132,10 +133,11 @@ struct InlineSummary {
 };
 
 // Inling information constructed here.
-class InlineWorkList {
+class InlineList {
     // We use an ordered map to make the iterator deterministic
     ordered_map<const IR::Declaration_Instance*, CallInfo*> inlineMap;
     std::vector<CallInfo*> toInline;  // sorted in order of inlining
+    const bool allowMultipleCalls = true;
 
  public:
     void addInstantiation(const IR::IContainer* caller, const IR::IContainer* callee,
@@ -166,49 +168,13 @@ class InlineWorkList {
         }
     }
 
-    void analyze(bool allowMultipleCalls);
+    void analyze();
     InlineSummary* next();
-};
-
-/// Base class for an inliner.
-class AbstractInliner : public Transform {
- protected:
-    /// Information to inline
-    InlineWorkList* list;
-    /// Future inlining information; must be updated as inlining is
-    /// performed (since callers change into new nodes).
-    InlineSummary*  toInline;
-    AbstractInliner() : list(nullptr), toInline(nullptr) {}
- public:
-    void prepare(InlineWorkList* list, InlineSummary* toInline) {
-        CHECK_NULL(list); CHECK_NULL(toInline);
-        this->list = list;
-        this->toInline = toInline;
-    }
-
-    Visitor::profile_t init_apply(const IR::Node* node) {
-        LOG3("AbstractInliner " << toInline);
-        return Transform::init_apply(node);
-    }
-    virtual ~AbstractInliner() {}
-};
-
-/// Repeatedly invokes an abstract inliner with work from the worklist
-class InlineDriver : public Transform {
-    InlineWorkList*  toInline;
-    AbstractInliner* inliner;
- public:
-    InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner) :
-            toInline(toInline), inliner(inliner)
-    { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineDriver"); }
-    // This is not really a visitor, but we want to embed it into a PassManager,
-    // so we make it look like a visitor.
-    const IR::Node* preorder(IR::P4Program* program) override;
 };
 
 /// Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    InlineWorkList*     inlineList;  // output: result is here
+    InlineList*         inlineList;  // output: result is here
     ReferenceMap*       refMap;      // input
     TypeMap*            typeMap;     // input
     IHasBlock*          evaluator;   // used to obtain the toplevel block
@@ -218,7 +184,7 @@ class DiscoverInlining : public Inspector {
     bool allowParsers = true;
     bool allowControls = true;
 
-    DiscoverInlining(InlineWorkList* inlineList, ReferenceMap* refMap,
+    DiscoverInlining(InlineList* inlineList, ReferenceMap* refMap,
                      TypeMap* typeMap, IHasBlock* evaluator) :
             inlineList(inlineList), refMap(refMap), typeMap(typeMap),
             evaluator(evaluator), toplevel(nullptr) {
@@ -241,7 +207,7 @@ class DiscoverInlining : public Inspector {
 };
 
 /// Performs actual inlining work
-class GeneralInliner : public AbstractInliner {
+class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     InlineSummary::PerCaller* workToDo;
@@ -261,12 +227,13 @@ class GeneralInliner : public AbstractInliner {
 
 /// Performs one round of inlining bottoms-up
 class InlinePass : public PassManager {
-    InlineWorkList toInline;
+    InlineList toInline;
  public:
     InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
-        passes.push_back(new InlineDriver(&toInline, new P4::GeneralInliner(refMap->isV1())));
+        passes.push_back(new InlineDriver<InlineList, InlineSummary>(
+            &toInline, new P4::GeneralInliner(refMap->isV1())));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap));
         setName("InlinePass");
     }
