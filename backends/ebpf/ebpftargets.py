@@ -206,6 +206,8 @@ class EBPFTarget(object):
         args.append("BPFOBJ=" + self.template + ".c")
         # location of the P4 input file
         args.append("P4FILE=" + self.options.p4filename)
+        # location of the P4 compiler
+        args.append("P4C=" + self.options.compilerSrcDir + "/build/p4c-ebpf")
         p4_args = ' '.join(map(str, argv))
         if (p4_args):
             # Remaining arguments
