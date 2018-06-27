@@ -53,7 +53,7 @@ p4c
   https://p4lang.github.io/p4-spec/p4-14/v1.0.4/tex/p4.pdf
 
 * the P4_16 language (v1.1.0) is described in [this pdf
-  document](https://p4lang.github.io/p4-spec/docs/P4-16-v1.0.0-spec.pdf)
+  document](https://p4.org/p4-spec/docs/P4-16-v1.1.0-draft.pdf)
 
 * the core design of the compiler intermediate representation (IR) and
   the visitor patterns are briefly described in [IR](IR.md)

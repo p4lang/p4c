@@ -130,7 +130,7 @@ class SimpleInlineList {
     }
 };
 
-// Base class for an inliner that processes actions.
+// Base class for inliners
 template <class InlineList, class InlineWorkList>
 class AbstractInliner : public Transform {
  protected:
