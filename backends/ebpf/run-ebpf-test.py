@@ -56,15 +56,16 @@ def report_error(*message):
 
 def run_model(ebpf, stffile):
 
-    result = ebpf.create_filter()
-    if result != SUCCESS:
-        return result
 
     if not os.path.isfile(stffile):
         # If no empty.stf present, don't try to run the model at all
         return SUCCESS
 
     result = ebpf.generate_model_inputs(stffile)
+    if result != SUCCESS:
+        return result
+
+    result = ebpf.create_filter()
     if result != SUCCESS:
         return result
 

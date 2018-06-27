@@ -35,17 +35,15 @@ static int check_flags(void *elem, unsigned long long map_flags) {
     if (elem && map_flags == BPF_NOEXIST)
         /* elem already exists */
         return EXIT_FAILURE;
-
     if (!elem && map_flags == BPF_EXIST)
         /* elem doesn't exist, cannot update it */
         return EXIT_FAILURE;
-
     return EXIT_SUCCESS;
 }
 
-void *bpf_map_lookup_elem(struct bpf_map **map, void *key, unsigned int key_size) {
+void *bpf_map_lookup_elem(struct bpf_map *map, void *key, unsigned int key_size) {
     struct bpf_map *tmp_map;
-    HASH_FIND(hh, *map, key, key_size, tmp_map);
+    HASH_FIND(hh, map, key, key_size, tmp_map);
     if (tmp_map == NULL)
         return NULL;
     return tmp_map->value;
@@ -68,12 +66,26 @@ int bpf_map_update_elem(struct bpf_map **map, void *key, unsigned int key_size, 
     return EXIT_SUCCESS;
 }
 
-int bpf_map_delete_elem(struct bpf_map **map, void *key, unsigned int key_size) {
+int bpf_map_delete_elem(struct bpf_map *map, void *key, unsigned int key_size) {
     struct bpf_map *tmp_map;
-    HASH_FIND(hh, *map, key, key_size, tmp_map);
+    HASH_FIND(hh, map, key, key_size, tmp_map);
     if (tmp_map != NULL) {
-        HASH_DEL(*map, tmp_map);
+        HASH_DEL(map, tmp_map);
+        free(tmp_map->value);
+        free(tmp_map->key);
         free(tmp_map);
     }
+    return EXIT_SUCCESS;
+}
+
+int bpf_map_delete_map(struct bpf_map *map) {
+    struct bpf_map *curr_map, *tmp_map;
+    HASH_ITER(hh, map, curr_map, tmp_map) {
+        HASH_DEL(map, curr_map);
+        free(curr_map->value);
+        free(curr_map->key);
+        free(curr_map);
+    }
+    free(map);
     return EXIT_SUCCESS;
 }

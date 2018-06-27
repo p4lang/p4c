@@ -53,7 +53,7 @@ struct bpf_table {
  * an id to it. This operation uses a char name stored in "table" as a key.
   * @return EXIT_FAILURE if map already exists or cannot be added.
  */
-int registry_add(struct bpf_table *table);
+int registry_add(struct bpf_table *tbl);
 
 /**
  * @brief Removes a new table from the registry.
@@ -61,7 +61,15 @@ int registry_add(struct bpf_table *table);
  * This operation uses a char name as the key.
  * @return EXIT_FAILURE if map cannot be found.
  */
-int registry_delete(const char *name);
+int registry_delete_tbl(const char *name);
+
+/**
+ * @brief Clears the entire registry.
+ * @details Removes all the tables from the registry.
+ * Also cleans up all the entries of the tables.
+ * Cleans the id as well as name identifier.
+ */
+void registry_delete();
 
 /**
  * @brief Retrieve a table from the registry.
@@ -77,7 +85,7 @@ struct bpf_table *registry_lookup_table(const char *name);
  * This operation uses an integer as the key.
  * @return NULL if map cannot be found.
  */
-struct bpf_table *registry_lookup_table_id(int table_id);
+struct bpf_table *registry_lookup_table_id(int tbl_id);
 
 /**
  * @brief Retrieve id of a table in the registry
@@ -105,7 +113,7 @@ int registry_update_table(const char *name, void *key, void *value, unsigned lon
  * This operation uses an integer as the key.
  * @return EXIT_FAILURE if map cannot be found.
  */
-int registry_update_table_id(int table_id, void *key, void *value, unsigned long long flags);
+int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long long flags);
 
 /**
  * @brief Retrieve a value from a bpf map through the registry.
@@ -127,6 +135,6 @@ void *registry_lookup_table_elem(const char *name, void *key);
  * This operation uses an integer as the key.
  * @return NULL if the value cannot be found.
  */
-void *registry_lookup_table_elem_id(int table_id, void *key);
+void *registry_lookup_table_elem_id(int tbl_id, void *key);
 
 #endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_

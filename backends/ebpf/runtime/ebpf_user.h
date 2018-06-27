@@ -131,9 +131,6 @@ struct bpf_table tables[] = {
     { 0, 0, 0, 0, 0 } \
 };
 
-/* TODO: We do not check for NULL output, which causes a segmentation fault.
- * Ideally we should find a more elegant way to handle this case.
- */
 #define BPF_MAP_LOOKUP_ELEM(table, key) \
     registry_lookup_table_elem(MAP_PATH"/"#table, key)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \

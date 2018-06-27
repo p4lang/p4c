@@ -28,7 +28,7 @@ Implementation of ebpf registry. Intended to provide a common access interface b
  */
 typedef struct {
     char name[MAX_TABLE_NAME_LENGTH];   // name of the map
-    struct bpf_table *table;            // ptr to the map
+    struct bpf_table *tbl;            // ptr to the map
     int handle;                         // id of the map
     UT_hash_handle h_name;              // the hash handle for names
     UT_hash_handle h_id;                // the hash handle for ids
@@ -50,16 +50,16 @@ static registry_entry *find_register(const char *name) {
     return tmp_reg;
 }
 
-int registry_add(struct bpf_table *table) {
+int registry_add(struct bpf_table *tbl) {
     /* Check if the register exists already */
-    registry_entry *tmp_reg = find_register(table->name);
+    registry_entry *tmp_reg = find_register(tbl->name);
     if (tmp_reg != NULL) {
-        fprintf(stderr, "Error: Table %s already exists!\n", table->name);
+        fprintf(stderr, "Error: Table %s already exists!\n", tbl->name);
         return EXIT_FAILURE;
     }
     /* Check key maximum length */
-    if (strlen(table->name) > MAX_TABLE_NAME_LENGTH){
-        fprintf(stderr, "Error: Key name %s exceeds maximum size %d", table->name, MAX_TABLE_NAME_LENGTH);
+    if (strlen(tbl->name) > MAX_TABLE_NAME_LENGTH) {
+        fprintf(stderr, "Error: Key name %s exceeds maximum size %d", tbl->name, MAX_TABLE_NAME_LENGTH);
         return EXIT_FAILURE;
     }
     /* Add the table */
@@ -69,23 +69,39 @@ int registry_add(struct bpf_table *table) {
         exit(EXIT_FAILURE);
     }
     /* Do not forget to actually copy the values to the entry... */
-    memcpy(tmp_reg->name, table->name, strlen(table->name));
+    memcpy(tmp_reg->name, tbl->name, strlen(tbl->name));
     tmp_reg->handle = table_indexer;
-    tmp_reg->table = table;
+    tmp_reg->tbl = tbl;
     /* Add the id and name to the registry. */
-    HASH_ADD(h_name, reg_tables_name, name, strlen(table->name), tmp_reg);
+    HASH_ADD(h_name, reg_tables_name, name, strlen(tbl->name), tmp_reg);
     HASH_ADD(h_id, reg_tables_id, handle, sizeof(int), tmp_reg);
     table_indexer++;
     return EXIT_SUCCESS;
 }
 
-int registry_delete(const char *name) {
+void registry_delete() {
+    registry_entry *curr_tbl, *tmp_tbl;
+    HASH_ITER(h_name, reg_tables_name, curr_tbl, tmp_tbl) {
+        HASH_DELETE(h_name, reg_tables_name, curr_tbl);
+        bpf_map_delete_map(curr_tbl->tbl->bpf_map);
+        free(curr_tbl);
+    }
+    curr_tbl = NULL;
+    tmp_tbl = NULL;
+    HASH_ITER(h_id, reg_tables_id, curr_tbl, tmp_tbl) {
+        HASH_DELETE(h_id, reg_tables_id, curr_tbl);
+    }
+}
+
+int registry_delete_tbl(const char *name) {
     registry_entry *tmp_reg = find_register(name);
     if (tmp_reg != NULL) {
+        bpf_map_delete_map(tmp_reg->tbl->bpf_map);
         HASH_DELETE(h_name, reg_tables_name, tmp_reg);
         HASH_DELETE(h_id, reg_tables_id, tmp_reg);
+        free(tmp_reg->tbl);
         free(tmp_reg);
-        return EXIT_SUCCESS;
+        return  EXIT_SUCCESS;
     }
     return EXIT_FAILURE;
 }
@@ -94,51 +110,51 @@ struct bpf_table *registry_lookup_table(const char *name) {
     registry_entry *tmp_reg = find_register(name);
     if (tmp_reg == NULL)
         return NULL;
-    return tmp_reg->table;
+    return tmp_reg->tbl;
 }
 
-struct bpf_table *registry_lookup_table_id(int table_id) {
+struct bpf_table *registry_lookup_table_id(int tbl_id) {
     registry_entry *tmp_reg;
-    HASH_FIND(h_id, reg_tables_id, &table_id, sizeof(int), tmp_reg);
+    HASH_FIND(h_id, reg_tables_id, &tbl_id, sizeof(int), tmp_reg);
     if (tmp_reg == NULL)
         return NULL;
-    return tmp_reg->table;
+    return tmp_reg->tbl;
 }
 
 int registry_update_table(const char *name, void *key, void *value, unsigned long long flags) {
-    struct bpf_table *tmp_table = registry_lookup_table(name);
-    if (tmp_table == NULL)
+    struct bpf_table *tmp_tbl = registry_lookup_table(name);
+    if (tmp_tbl == NULL)
         /* not found, return */
         return EXIT_FAILURE;
-    bpf_map_update_elem(&tmp_table->bpf_map, key, tmp_table->key_size, value, tmp_table->value_size, flags);
+    bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
     return EXIT_SUCCESS;
 }
 
-int registry_update_table_id(int table_id, void *key, void *value, unsigned long long flags) {
-    struct bpf_table *tmp_table = registry_lookup_table_id(table_id);
-    if (tmp_table == NULL)
+int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long long flags) {
+    struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
+    if (tmp_tbl == NULL)
         /* not found, return */
         return EXIT_FAILURE;
-    bpf_map_update_elem(&tmp_table->bpf_map, key, tmp_table->key_size, value, tmp_table->value_size, flags);
+    bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
     return EXIT_SUCCESS;
 }
 
 void *registry_lookup_table_elem(const char *name, void *key) {
-    struct bpf_table *tmp_table = registry_lookup_table(name);
-    if (tmp_table == NULL)
+    struct bpf_table *tmp_tbl = registry_lookup_table(name);
+    if (tmp_tbl == NULL)
         /* not found, return */
         return NULL;
-    if (tmp_table->bpf_map)
-    return bpf_map_lookup_elem(&tmp_table->bpf_map, key, tmp_table->key_size);
+    if (tmp_tbl->bpf_map)
+    return bpf_map_lookup_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);
 }
 
-void *registry_lookup_table_elem_id(int table_id, void *key) {
-    struct bpf_table *tmp_table = registry_lookup_table_id(table_id);
-    if (tmp_table == NULL)
+void *registry_lookup_table_elem_id(int tbl_id, void *key) {
+    struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
+    if (tmp_tbl == NULL)
         /* not found, return */
         return NULL;
-    if (tmp_table->bpf_map)
-    return bpf_map_lookup_elem(&tmp_table->bpf_map, key, tmp_table->key_size);
+    if (tmp_tbl->bpf_map)
+    return bpf_map_lookup_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);
 }
 
 int registry_get_id(const char *name) {

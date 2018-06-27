@@ -24,16 +24,24 @@ limitations under the License.
 #define PCAP_DONT_INCLUDE_PCAP_BPF_H
 #include <pcap/pcap.h>
 #include "test.h"
-
+#include <unistd.h>
+#include <ctype.h>
 #define FILE_NAME_MAX 256
 
+static int debug = 0;
+
 void usage(char *name) {
-    printf("usage: %s file.pcap\n"
-           "This program parses a pcap file, feeds the individual packets"
-           " into a filter function, and returns the output.\n" , name);
+    fprintf(stderr, "This program parses a pcap file, "
+            "feeds the individual packets into a filter function, "
+            "and returns the output.\n");
+    fprintf(stderr, "Usage: %s [-d] -f file.pcap\n", name);
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "\t-d: Turn on debug messages\n");
+    fprintf(stderr, "\t-f: The input pcap file\n");
+    exit(EXIT_FAILURE);
 }
 
-int pcap_while_loop(pcap_t *in_handle, pcap_dumper_t *out_handle) {
+static int process_packets(pcap_t *in_handle, pcap_dumper_t *out_handle) {
     struct pcap_pkthdr *pcap_hdr;
     const unsigned char *packet;
     int ret;
@@ -45,7 +53,8 @@ int pcap_while_loop(pcap_t *in_handle, pcap_dumper_t *out_handle) {
         int result = ebpf_filter(&skb);
         if (result)
             pcap_dump((unsigned char *) out_handle, pcap_hdr, packet);
-         printf("\nResult of the eBPF parsing is: %d\n", result);
+        if (debug)
+            printf("\nResult of the eBPF parsing is: %d\n", result);
     }
     return ret;
 }
@@ -54,31 +63,54 @@ int main(int argc, char **argv) {
     pcap_t *in_handle;
     pcap_dumper_t *out_handle;
     char errbuf[PCAP_ERRBUF_SIZE];
-    if (argc != 2) {
-        usage(argv[0]);
-        fprintf(stderr, "The input trace file is missing."
+    char *input_pcap = NULL;
+    int c;
+
+    opterr = 0;
+
+    while ((c = getopt (argc, argv, "df:")) != -1) {
+        switch (c) {
+            case 'd':
+            debug = 1;
+            break;
+            case 'f':
+            input_pcap = optarg;
+            break;
+            case '?':
+            if (optopt == 'f')
+                fprintf(stderr, "The input trace file is missing. "
                  "Expected .pcap file as input argument.\n");
-        return EXIT_FAILURE;
+            else if (isprint (optopt))
+              fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+            else
+              fprintf(stderr,"Unknown option character `\\x%x'.\n", optopt);
+            return EXIT_FAILURE;
+            default:
+            usage(argv[0]);
+            return EXIT_FAILURE;
+        }
     }
-    /* Skip over the program name. */
-    ++argv; --argc;
+    if (!input_pcap) {
+        usage(argv[0]);
+    }
 
     /* Initialize the registry of shared tables */
     struct bpf_table* current = tables;
     while (current->name != NULL) {
-        printf("Adding table %s\n", current->name);
+        if (debug)
+            printf("Adding table %s\n", current->name);
         BPF_OBJ_PIN(current, current->name);
         current++;
     }
     /* Open and read pcap file */
-    in_handle = pcap_open_offline(argv[0], errbuf);
+    in_handle = pcap_open_offline(input_pcap, errbuf);
     if (in_handle == NULL) {
         pcap_perror(in_handle, "Error: Failed to read pcap file ");
         return EXIT_FAILURE;
     }
 
     /* Create the output file. */
-    char *in_file_name = strdup(argv[0]);
+    char *in_file_name = strdup(input_pcap);
     char *in_dir = dirname(in_file_name);
     int in_dir_len = strlen(in_dir);
     /* length of the input directory plus the filename max length */
@@ -96,7 +128,7 @@ int main(int argc, char **argv) {
 
     /* Set the default action for the userspace hash tables */
     initialize_tables();
-    int ret = pcap_while_loop(in_handle, out_handle);
+    int ret = process_packets(in_handle, out_handle);
     if (ret == -1)
         pcap_perror(in_handle, "Error: Failed to parse ");
     pcap_close(in_handle);
