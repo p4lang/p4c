@@ -89,8 +89,7 @@ void ValidateParsedProgram::container(const IR::IContainer* type) {
             ::error("%1%: constructor parameters cannot have a direction", p);
 }
 
-/// Tables must have an 'actions' and a 'default_action' properties.
-/// The latter is just a warning.
+/// Tables must have an 'actions' property.
 void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     auto ac = t->getActionList();
     if (ac == nullptr)
