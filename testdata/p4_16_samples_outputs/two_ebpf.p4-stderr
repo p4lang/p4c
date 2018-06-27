@@ -1,6 +1,0 @@
-two_ebpf.p4(42): [--Wwarn=uninitialized_out_param] warning: out parameter pass may be uninitialized when Check terminates
-control Check(in IPv4Address address, out bool pass) {
-                                               ^^^^
-two_ebpf.p4(42)
-control Check(in IPv4Address address, out bool pass) {
-        ^^^^^

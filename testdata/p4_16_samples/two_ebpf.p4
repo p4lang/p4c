@@ -39,7 +39,7 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-control Check(in IPv4Address address, out bool pass) {
+control Check(in IPv4Address address, inout bool pass) {
     action Reject() {
         pass = false;
     }
