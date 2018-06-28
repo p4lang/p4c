@@ -86,7 +86,7 @@ int main(int argc, char *const argv[]) {
         options.setInputFile();
     if (::errorCount() > 0)
         return 1;
-    const IR::P4Program *program;
+    const IR::P4Program *program = nullptr;
     if (options.fromJSON) {
         std::ifstream json(options.file);
         if (json) {

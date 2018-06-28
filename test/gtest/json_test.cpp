@@ -22,10 +22,10 @@ limitations under the License.
 namespace Util {
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-static std::string getNumStringRepr(T v) {
+static cstring getNumStringRepr(T v) {
     std::ostringstream sstream;
     sstream << std::dec << v;
-    return sstream.str();
+    return cstring(sstream.str());
 }
 
 TEST(Util, Json) {

@@ -34,7 +34,7 @@ class P4TypeInfo;
 namespace P4 {
 
 class TypeMap;
-class RefMap;
+class ReferenceMap;
 
 namespace ControlPlaneAPI {
 
