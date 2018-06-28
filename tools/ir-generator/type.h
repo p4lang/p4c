@@ -71,6 +71,7 @@ class NamedType : public Type {
     const LookupScope     *lookup;
     cstring               name;
     mutable const IrClass *resolved = nullptr;
+
  public:
     NamedType(Util::SourceInfo si, const LookupScope *l, cstring n)
     : Type(si), lookup(l), name(n) {}
@@ -87,8 +88,17 @@ class NamedType : public Type {
         if (name != t.name) return false;
         return (lookup == t.lookup || (lookup && t.lookup && *lookup == *t.lookup)); }
 
-    static NamedType Bool, Int, Void, Cstring, Ostream, Visitor, Unordered_Set, JSONGenerator,
-        JSONLoader, JsonObject, SourceInfo;
+    static NamedType& Bool();
+    static NamedType& Int();
+    static NamedType& Void();
+    static NamedType& Cstring();
+    static NamedType& Ostream();
+    static NamedType& Visitor();
+    static NamedType& Unordered_Set();
+    static NamedType& JSONGenerator();
+    static NamedType& JSONLoader();
+    static NamedType& JSONObject();
+    static NamedType& SourceInfo();
 };
 
 class TemplateInstantiation : public Type {

@@ -19,23 +19,49 @@ limitations under the License.
 #include "lib/enumerator.h"
 
 const char* IrClass::indent = "    ";
-IrNamespace IrNamespace::global(nullptr, nullptr);
+IrNamespace& IrNamespace::global() {
+    static IrNamespace irn(nullptr, nullptr);
+    return irn;
+}
 static const LookupScope utilScope(nullptr, "Util");
 static const NamedType srcInfoType(Util::SourceInfo(), &utilScope, "SourceInfo");
-IrField *IrField::srcInfoField = new IrField(Util::SourceInfo(), &srcInfoType, "srcInfo", nullptr,
-                                             IrField::Inline | IrField::Optional);
-IrClass *IrClass::ideclaration = new IrClass(NodeKind::Interface, "IDeclaration");
-IrClass *IrClass::nodeClass = new IrClass(NodeKind::Abstract, "Node", {IrField::srcInfoField});
-IrClass *IrClass::vectorClass = new IrClass(NodeKind::Template, "Vector");
-IrClass *IrClass::indexedVectorClass = new IrClass(NodeKind::Template, "IndexedVector");
-IrClass *IrClass::namemapClass = new IrClass(NodeKind::Template, "NameMap");
-IrClass *IrClass::nodemapClass = new IrClass(NodeKind::Template, "NodeMap");
+
+IrField* IrField::srcInfoField() {
+    static IrField irf(
+        Util::SourceInfo(), &srcInfoType, "srcInfo", nullptr, IrField::Inline | IrField::Optional);
+    return &irf;
+}
+
+IrClass* IrClass::nodeClass() {
+    static IrClass irc(NodeKind::Abstract, "Node", {IrField::srcInfoField()});
+    return &irc;
+}
+IrClass* IrClass::vectorClass() {
+    static IrClass irc(NodeKind::Template, "Vector");
+    return &irc;
+}
+IrClass* IrClass::namemapClass() {
+    static IrClass irc(NodeKind::Template, "NameMap");
+    return &irc;
+}
+IrClass* IrClass::nodemapClass() {
+    static IrClass irc(NodeKind::Template, "NodeMap");
+    return &irc;
+}
+IrClass* IrClass::ideclaration() {
+    static IrClass irc(NodeKind::Interface, "IDeclaration");
+    return &irc;
+}
+IrClass* IrClass::indexedVectorClass() {
+    static IrClass irc(NodeKind::Template, "IndexedVector");
+    return &irc;
+}
 bool LineDirective::inhibit = false;
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 IrNamespace *IrNamespace::get(IrNamespace *parent, cstring name) {
-    IrNamespace *ns = parent ? parent : &global;
+    IrNamespace *ns = parent ? parent : &global();
     IrNamespace *rv = ns->children[name];
     if (!rv)
         ns->children[name] = rv = new IrNamespace(ns, name);
@@ -43,7 +69,7 @@ IrNamespace *IrNamespace::get(IrNamespace *parent, cstring name) {
 }
 
 void IrNamespace::add_class(IrClass *cl) {
-    IrNamespace *ns = cl->containedIn ? cl->containedIn : &global;
+    IrNamespace *ns = cl->containedIn ? cl->containedIn : &global();
     if (ns->classes[cl->name])
         throw Util::CompilationError("%1%: Duplicate class name", cl->name);
     else
@@ -152,7 +178,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {
-    for (auto p = this; p != nodeClass; p = p->getParent())
+    for (auto p = this; p != nodeClass(); p = p->getParent())
         out << "  ";
     out << "M(";
     const char *sep = "";
@@ -319,7 +345,7 @@ void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {
     if (concreteParent == nullptr) {
         if (kind != NodeKind::Nested) {
             // direct descendant of Node, add srcInfo
-            args.emplace_back(IrField::srcInfoField, IrClass::nodeClass); }
+            args.emplace_back(IrField::srcInfoField(), IrClass::nodeClass()); }
     } else {
         concreteParent->computeConstructorArguments(args); }
 
@@ -445,18 +471,18 @@ void IrField::generate(std::ostream &out, bool asField) const {
         if (tmpl) {
             if (cls->kind != NodeKind::Template)
                 throw Util::CompilationError("Template args with non-template class %1%", cls);
-            unsigned tmpl_args = (cls == IrClass::nodemapClass ? 2 : 1);
+            unsigned tmpl_args = (cls == IrClass::nodemapClass() ? 2 : 1);
             if (tmpl->args.size() < tmpl_args)
                 throw Util::CompilationError("Wrong number of args for template %1%", cls);
             for (unsigned i = 0; i < tmpl_args; i++) {
                 if (auto acl = tmpl->args[i]->resolve(clss ? clss->containedIn : nullptr)) {
-                    if (cls == IrClass::vectorClass)
+                    if (cls == IrClass::vectorClass())
                         acl->needVector = true;
-                    else if (cls == IrClass::indexedVectorClass)
+                    else if (cls == IrClass::indexedVectorClass())
                         acl->needIndexedVector = true;
-                    else if (cls == IrClass::namemapClass && !isInline)
+                    else if (cls == IrClass::namemapClass() && !isInline)
                         acl->needNameMap = true;
-                    else if (cls == IrClass::nodemapClass && !isInline)
+                    else if (cls == IrClass::nodemapClass() && !isInline)
                         acl->needNodeMap = true;
                 } else {
                     throw Util::CompilationError("%1% template argment %2% is not "
