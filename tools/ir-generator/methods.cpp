@@ -57,7 +57,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         buf << cl->indent << "}";
         return buf.str(); } } },
 { "equiv", { &NamedType::Bool,
-             { new IrField(new ReferenceType(new NamedType(IrClass::nodeClass), true), "a_") },
+             { new IrField(new ReferenceType(new NamedType(&IrClass::nodeClass), true), "a_") },
              CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
@@ -211,7 +211,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 };
 
 void IrClass::generateMethods() {
-    if (this == nodeClass || this == vectorClass) return;
+    if (this == &nodeClass || this == &vectorClass) return;
     if (kind != NodeKind::Interface) {
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
@@ -284,7 +284,7 @@ void IrClass::generateMethods() {
                 // This is a factory method. These return an IR:Node*. The
                 // exception is nested classes, which typically aren't IR::Nodes
                 // and therefore just return a pointer to their concrete type.
-                m->rtype = new PointerType(new NamedType(IrClass::nodeClass));
+                m->rtype = new PointerType(new NamedType(&IrClass::nodeClass));
             } else {
                 // By default predefined methods return a pointer to their
                 // concrete type.
