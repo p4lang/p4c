@@ -64,6 +64,8 @@ namespace P4 {
 /// TODO(antonin): High level goals of the generator go here!!
 namespace ControlPlaneAPI {
 
+using Helpers::addAnnotations;
+
 static const p4rt_id_t INVALID_ID = p4configv1::P4Ids::UNSPECIFIED;
 
 // TODO(antonin): Here are the known issues:

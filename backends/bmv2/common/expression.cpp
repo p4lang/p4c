@@ -14,6 +14,7 @@ limitations under the License.
 */
 
 #include "expression.h"
+#include "helpers.h"
 
 namespace BMV2 {
 

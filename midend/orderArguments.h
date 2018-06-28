@@ -17,8 +17,10 @@ limitations under the License.
 #ifndef _MIDEND_ORDERARGUMENTS_H_
 #define _MIDEND_ORDERARGUMENTS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

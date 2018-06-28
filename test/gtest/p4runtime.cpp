@@ -27,7 +27,9 @@ limitations under the License.
 
 #include "control-plane/p4RuntimeSerializer.h"
 #include "control-plane/typeSpecConverter.h"
+#include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
@@ -1069,7 +1071,7 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
         auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
         if (pgm == nullptr) return nullptr;
         PassManager  passes({
-            new TypeChecking(&refMap, &typeMap)
+            new P4::TypeChecking(&refMap, &typeMap)
         });
         pgm = pgm->apply(passes);
         return pgm;
@@ -1089,8 +1091,8 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
     }
 
     p4configv1::P4TypeInfo typeInfo;
-    ReferenceMap refMap;
-    TypeMap typeMap;
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
 };
 
 TEST_F(P4RuntimeDataTypeSpec, Bits) {
