@@ -91,9 +91,12 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
     }
+
     if (!input_pcap) {
         usage(argv[0]);
     }
+    if (access(input_pcap, F_OK) == -1)
+        fprintf(stderr,"File does not exist!\n");
 
     /* Initialize the registry of shared tables */
     struct bpf_table* current = tables;
