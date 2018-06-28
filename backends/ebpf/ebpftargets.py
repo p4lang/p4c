@@ -32,6 +32,8 @@ from glob import glob
 from scapy.layers.all import RawPcapWriter
 from scapy.utils import rdpcap
 from pyroute2 import IPRoute
+sys.path.insert(0, os.path.dirname(__file__) + '/../../tools/stf')
+from stf_parser import STFParser
 
 SUCCESS = 0
 FAILURE = 1
@@ -172,6 +174,7 @@ class EBPFTarget(object):
         self.interfaces = {}        # list of active interfaces
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
+        self.actions = []
         # TODO: Make the runtime dir independent
         #       on the location of the python file
         self.ebpfdir = os.path.dirname(__file__) + "/runtime"
@@ -230,6 +233,39 @@ class EBPFTarget(object):
                 result = SUCCESS
         return result, expected_error
 
+    def generate_table_commands(self):
+        generated = ""
+        for index, cmd in enumerate(self.actions):
+            key_name = "key_%s%d" % (cmd["table"], index)
+            value_name = "value_%s%d" % (cmd["table"], index)
+            generated = "struct %s_key %s = {};\n" % (cmd["table"], key_name)
+            for num, field in enumerate(cmd["key"]):
+                generated += "%s.field%d = %s;\n" % (key_name, num, field[1])
+            generated += ("int tableFileDescriptor = "
+                          "BPF_OBJ_GET(MAP_PATH \"/%s\");\n" %
+                          cmd["table"])
+            generated += ("if (tableFileDescriptor < 0) {"
+                          "fprintf(stderr, \"map %s not loaded\");"
+                          " exit(1); }\n" % cmd["table"])
+            generated += ("struct %s_value %s = {};\n" % (
+                cmd["table"], value_name))
+            generated += "%s.action = %s;\n" % (value_name,
+                                                cmd["value"][1][0][1])
+            generated += ("ok = BPF_USER_MAP_UPDATE_ELEM"
+                          "(tableFileDescriptor, &%s, &%s, BPF_ANY);\n" % (key_name, value_name))
+            generated += "if (ok != 0) { perror(\"Could not write in %s\"); exit(1); }\n" % cmd["table"]
+        return generated
+
+    def create_table_file(self):
+        control_file = open(self.tmpdir +"/control.h", "w+")
+        print (self.tmpdir +"/control.h")
+        control_file.write("#include \"test.h\"\n\n")
+        control_file.write("static inline void generated_init() {\n")
+        control_file.write("int ok;\n")
+        generated_cmds = self.generate_table_commands()
+        control_file.write(generated_cmds)
+        control_file.write("}\n")
+
     def generate_model_inputs(self, stffile):
         # To override
         """ Parses the stf file and creates a .pcap file with input packets.
@@ -240,29 +276,38 @@ class EBPFTarget(object):
         infile = self.tmpdir + "/pcap0_in.pcap"
         fp = RawPcapWriter(infile, linktype=1)
         fp._write_header(None)
-        with open(stffile) as i:
-            for line in i:
-                line, comment = next_word(line, "#")
-                first, cmd = next_word(line)
-                if first == "packet":
-                    interface, cmd = next_word(cmd)
-                    interface = int(interface)
-                    data = ''.join(cmd.split())
+        parser = STFParser()
+        with open(stffile) as raw_stf:
+            stf_str = raw_stf.read()
+            stf_map, errs = parser.parse(stf_str)
+            for stf_entry in stf_map:
+                if stf_entry[0] == "packet":
+                    interface = int(stf_entry[1])
+                    pkt_data = stf_entry[2]
                     try:
-                        fp._write_packet(hex_to_byte(data))
+                        fp._write_packet(hex_to_byte(pkt_data))
                     except ValueError:
                         report_err(self.outputs["stderr"],
-                                   "Invalid packet data", data)
+                                   "Invalid packet data", pkt_data)
                         os.remove(infile)
                         return FAILURE
-                elif first == "expect":
-                    interface, data = next_word(cmd)
-                    interface = int(interface)
-                    data = ''.join(data.split())
-                    if data != '':
-                        self.expected.setdefault(interface, []).append(data)
+                elif stf_entry[0] == "expect":
+                    interface = int(stf_entry[1])
+                    pkt_data = stf_entry[2]
+                    if pkt_data != '':
+                        self.expected.setdefault(
+                            interface, []).append(pkt_data)
                     else:
                         self.expectedAny.append(interface)
+                elif stf_entry[0] == "add":
+                    cmd = {}
+                    cmd["table"] = stf_entry[1]
+                    cmd["priority"] = stf_entry[2]
+                    cmd["key"] = stf_entry[3]
+                    cmd["value"] = stf_entry[4]
+                    cmd["whatisthis"] = stf_entry[5]
+                    self.actions.append(cmd)
+        self.create_table_file()
         return SUCCESS
 
     def create_filter(self):

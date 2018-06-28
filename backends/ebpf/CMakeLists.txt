@@ -92,8 +92,6 @@ set (XFAIL_TESTS_TEST
   # These tests currently generate malfunctioning code that does not compile
   testdata/p4_16_samples/hit_ebpf.p4
   testdata/p4_16_samples/two_ebpf.p4
-  # These tests currently are missing the control plane to pass the test
-  testdata/p4_16_samples/key_ebpf.p4
   )
 
 set (EBPF_TEST_SUITES

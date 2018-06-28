@@ -24,6 +24,7 @@ limitations under the License.
 #define PCAP_DONT_INCLUDE_PCAP_BPF_H
 #include <pcap/pcap.h>
 #include "test.h"
+#include "control.h"
 #include <unistd.h>
 #include <ctype.h>
 #define FILE_NAME_MAX 256
@@ -108,7 +109,6 @@ int main(int argc, char **argv) {
         pcap_perror(in_handle, "Error: Failed to read pcap file ");
         return EXIT_FAILURE;
     }
-
     /* Create the output file. */
     char *in_file_name = strdup(input_pcap);
     char *in_dir = dirname(in_file_name);
@@ -128,6 +128,7 @@ int main(int argc, char **argv) {
 
     /* Set the default action for the userspace hash tables */
     initialize_tables();
+    generated_init();
     int ret = process_packets(in_handle, out_handle);
     if (ret == -1)
         pcap_perror(in_handle, "Error: Failed to parse ");
