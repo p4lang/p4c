@@ -15,33 +15,34 @@ limitations under the License.
 */
 
 #include "midend.h"
+#include "frontends/common/constantFolding.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/p4/uniqueNames.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
 #include "midend/complexComparison.h"
+#include "midend/convertEnums.h"
 #include "midend/eliminateNewtype.h"
-#include "midend/removeParameters.h"
+#include "midend/eliminateTuples.h"
 #include "midend/local_copyprop.h"
+#include "midend/midEndLast.h"
+#include "midend/noMatch.h"
+#include "midend/removeExits.h"
+#include "midend/removeLeftSlices.h"
+#include "midend/removeParameters.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
+#include "midend/tableHit.h"
 #include "midend/validateProperties.h"
-#include "midend/eliminateTuples.h"
-#include "midend/noMatch.h"
-#include "midend/convertEnums.h"
-#include "midend/midEndLast.h"
-#include "midend/removeLeftSlices.h"
-#include "midend/removeExits.h"
-#include "frontends/p4/uniqueNames.h"
-#include "frontends/p4/moveDeclarations.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/toP4/toP4.h"
-#include "frontends/p4/simplify.h"
-#include "frontends/p4/unusedDeclarations.h"
-#include "frontends/common/constantFolding.h"
-#include "frontends/p4/strengthReduction.h"
-#include "frontends/p4/simplifyParsers.h"
 #include "lower.h"
 
 namespace EBPF {
@@ -90,6 +91,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::TableHit(&refMap, &typeMap),
         new P4::ValidateTableProperties({"implementation"}),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         new EBPF::Lower(&refMap, &typeMap),
