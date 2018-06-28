@@ -46,7 +46,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
                 cstring name = EBPFObject::externalName(action);
                 builder->append(name);
                 builder->append(".");
-                builder->append(expression->path->toString()); // original name
+                builder->append(expression->path->toString());  // original name
                 return false;
             }
         }
