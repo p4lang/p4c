@@ -35,6 +35,7 @@ limitations under the License.
 #include "dontcareArgs.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
+#include "functionsInlining.h"
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
@@ -171,6 +172,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         evaluator,
         new Inline(&refMap, &typeMap, evaluator),
         new InlineActions(&refMap, &typeMap),
+        new InlineFunctions(&refMap, &typeMap),
         // Check for constants only after inlining
         new CheckConstants(&refMap, &typeMap),
         new LocalizeAllActions(&refMap),

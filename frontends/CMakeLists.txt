@@ -29,6 +29,7 @@ set (P4_FRONTEND_SRCS
   p4/fromv1.0/converters.cpp
   p4/fromv1.0/programStructure.cpp
   p4/frontend.cpp
+  p4/functionsInlining.cpp
   p4/hierarchicalNames.cpp
   p4/inlining.cpp
   p4/localizeActions.cpp
@@ -73,6 +74,7 @@ set (P4_FRONTEND_HDRS
   p4/checkConstants.h
   p4/checkNamedArgs.h
   p4/cloner.h
+  p4/commonInlining.h
   p4/coreLibrary.h
   p4/createBuiltins.h
   p4/def_use.h
@@ -87,6 +89,7 @@ set (P4_FRONTEND_HDRS
   p4/fromv1.0/programStructure.h
   p4/fromv1.0/v1model.h
   p4/frontend.h
+  p4/functionsInlining.h
   p4/hierarchicalNames.h
   p4/inlining.h
   p4/localizeActions.h

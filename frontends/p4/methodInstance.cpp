@@ -101,13 +101,18 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
     } else if (mce->method->is<IR::PathExpression>()) {
         auto pe = mce->method->to<IR::PathExpression>();
         auto decl = refMap->getDeclaration(pe->path, true);
-        if (decl->is<IR::Method>()) {
+        if (auto meth = decl->to<IR::Method>()) {
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
-            return new ExternFunction(mce, decl->to<IR::Method>(), methodType,
+            return new ExternFunction(mce, meth, methodType,
                                       actualType->to<IR::Type_Method>());
-        } else if (decl->is<IR::P4Action>()) {
-            return new ActionCall(mce, decl->to<IR::P4Action>(), mt->to<IR::Type_Action>());
+        } else if (auto act = decl->to<IR::P4Action>()) {
+            return new ActionCall(mce, act, mt->to<IR::Type_Action>());
+        } else if (auto func = decl->to<IR::Function>()) {
+            auto methodType = mt->to<IR::Type_Method>();
+            CHECK_NULL(methodType);
+            return new FunctionCall(mce, func, methodType,
+                                    actualType->to<IR::Type_Method>());
         }
     }
 

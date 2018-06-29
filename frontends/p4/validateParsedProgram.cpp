@@ -190,11 +190,13 @@ void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
         ::error("%1%: return statements not allowed in parsers", statement);
 }
 
-/// Exit statements are not allowed in parsers
+/// Exit statements are not allowed in parsers or functions
 void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error("%1%: exit statements not allowed in parsers", statement);
+    if (findContext<IR::Function>())
+        ::error("%1%: exit statements not allowed in functions", statement);
 }
 
 }  // namespace P4

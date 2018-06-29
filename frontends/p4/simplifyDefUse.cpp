@@ -126,7 +126,8 @@ class FindUninitialized : public Inspector {
     }
 
     void checkOutParameters(const IR::IDeclaration* block,
-                            const IR::ParameterList* parameters, Definitions* defs) {
+                            const IR::ParameterList* parameters,
+                            Definitions* defs, bool checkReturn = false) {
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
@@ -145,6 +146,15 @@ class FindUninitialized : public Inspector {
                                   "out parameter %1% may be uninitialized when "
                                   "%2% terminates", p, block->getName());
             }
+        }
+
+        if (checkReturn) {
+            // check returned value
+            auto storage = definitions->storageMap->getRetVal();
+            if (storage != nullptr && defs->has(storage))
+                // If this definition is "live" it means that we have
+                // not returned on all paths; returns kill this definition.
+                ::error("Function %1% does not return a value on all paths", block);
         }
     }
 
@@ -165,7 +175,8 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << dbp(func));
         currentPoint = ProgramPoint(func);
         visit(func->body);
-        checkOutParameters(func, func->type->parameters, getCurrentDefinitions());
+        bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
+        checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), checkReturn);
         return false;
     }
 

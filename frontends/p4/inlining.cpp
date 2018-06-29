@@ -315,7 +315,7 @@ const T* PerInstanceSubstitutions::rename(ReferenceMap* refMap, const IR::Node* 
     return result;
 }
 
-void InlineWorkList::analyze(bool allowMultipleCalls) {
+void InlineList::analyze() {
     P4::CallGraph<const IR::IContainer*> cg("Call-graph");
 
     for (auto m : inlineMap) {
@@ -326,7 +326,8 @@ void InlineWorkList::analyze(bool allowMultipleCalls) {
         if (!allowMultipleCalls && inl->invocations.size() > 1) {
             ++it;
             auto second = *it;
-            ::error("Multiple invocations of the same block not supported on this target: %1%, %2%",
+            ::error("Multiple invocations of the same object "
+                    "not supported on this target: %1%, %2%",
                     first, second);
             continue;
         }
@@ -348,7 +349,7 @@ void InlineWorkList::analyze(bool allowMultipleCalls) {
     std::reverse(toInline.begin(), toInline.end());
 }
 
-InlineSummary* InlineWorkList::next() {
+InlineSummary* InlineList::next() {
     if (toInline.size() == 0)
         return nullptr;
     auto result = new InlineSummary();
@@ -362,30 +363,6 @@ InlineSummary* InlineWorkList::next() {
         processing.emplace(toadd->caller);
     }
     return result;
-}
-
-const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
-    LOG3("InlineDriver");
-    const IR::P4Program* prog = program;  // we need the 'const'
-    toInline->analyze(true);
-
-    while (auto todo = toInline->next()) {
-        LOG3("Processing " << todo);
-        inliner->prepare(toInline, todo);
-        prog = prog->apply(*inliner);
-        if (::errorCount() > 0)
-            return prog;
-
-#if 0
-        // debugging code; we don't have an easy way to dump the program here,
-        // since we are not between passes
-        ToP4 top4(&std::cout, false, nullptr);
-        prog->apply(top4);
-#endif
-    }
-
-    prune();
-    return prog;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

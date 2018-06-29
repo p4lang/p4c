@@ -401,8 +401,7 @@ class P4Program : ISimpleNamespace {
 
 ///////////////////////////// Statements //////////////////////////
 
-abstract Statement : StatOrDecl {
-}
+abstract Statement : StatOrDecl {}
 
 class ExitStatement : Statement {
     toString{ return "exit"; }
@@ -411,7 +410,8 @@ class ExitStatement : Statement {
 
 class ReturnStatement : Statement {
     NullOK Expression expression;
-    toString{ return "return"; }
+    toString{ return cstring("return ") +
+                (expression != nullptr ? expression->toString() : cstring("")); }
 }
 
 class EmptyStatement : Statement {
