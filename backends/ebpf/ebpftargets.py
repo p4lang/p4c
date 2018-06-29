@@ -141,9 +141,9 @@ class EBPFTarget(object):
             header for the runtime, which contains the extracted control
              plane commands """
         with open(stffile) as raw_stf:
-            iface_pkts, actions, self.expected, self.expectedAny = parse_stf_file(
+            iface_pkts, cmds, self.expected, self.expectedAny = parse_stf_file(
                 raw_stf)
-            create_table_file(actions, self.tmpdir, "control.h")
+            create_table_file(cmds, self.tmpdir, "control.h")
             self._write_pcap_files(iface_pkts)
         return SUCCESS
 

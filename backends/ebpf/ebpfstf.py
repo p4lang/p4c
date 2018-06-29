@@ -24,20 +24,32 @@ from testutils import *
 from stf.stf_parser import STFParser
 
 
-def _generate_control_actions(actions):
+class eBPFCommand(object):
+    """ Defines a match-action command for eBPF programs"""
+
+    def __init__(self, a_type, table, action, priority="", match=[], extra=""):
+        self.a_type = a_type            # dir in which all files are stored
+        self.table = table          # contains meta information
+        self.action = action          # contains meta information
+        self.priority = priority    # template to generate a filter
+        self.match = match          # contains standard and error output
+        self.extra = extra          # could also be "pcapng"
+
+
+def _generate_control_actions(cmds):
     """ Generates the actual control plane commands.
     This function inserts C code for all the "add" commands that have
     been parsed. """
     generated = ""
-    for index, cmd in enumerate(actions):
-        key_name = "key_%s%d" % (cmd["table"], index)
-        value_name = "value_%s%d" % (cmd["table"], index)
-        if cmd["type"] == "setdefault":
-            tbl_name = cmd["table"] + "_defaultAction"
+    for index, cmd in enumerate(cmds):
+        key_name = "key_%s%d" % (cmd.table, index)
+        value_name = "value_%s%d" % (cmd.table, index)
+        if cmd.a_type == "setdefault":
+            tbl_name = cmd.table + "_defaultAction"
         else:
-            tbl_name = cmd["table"]
-        generated = "struct %s_key %s = {};\n\t" % (cmd["table"], key_name)
-        for key_num, key_field in enumerate(cmd["match"]):
+            tbl_name = cmd.table
+        generated = "struct %s_key %s = {};\n\t" % (cmd.table, key_name)
+        for key_num, key_field in enumerate(cmd.match):
             field = key_field[0].split('.')[1]
             generated += ("%s.%s = %s;\n\t"
                           % (key_name, field, key_field[1]))
@@ -48,10 +60,10 @@ def _generate_control_actions(actions):
                       "fprintf(stderr, \"map %s not loaded\");"
                       " exit(1); }\n\t" % tbl_name)
         generated += ("struct %s_value %s = {\n\t\t" % (
-            cmd["table"], value_name))
-        generated += ".action = %s,\n\t\t" % (cmd["action"][0])
-        generated += ".u = {.%s = {" % cmd["action"][0]
-        for val_num, val_field in enumerate(cmd["action"][1]):
+            cmd.table, value_name))
+        generated += ".action = %s,\n\t\t" % (cmd.action[0])
+        generated += ".u = {.%s = {" % cmd.action[0]
+        for val_num, val_field in enumerate(cmd.action[1]):
             generated += "%s," % val_field[1]
         generated += "}},\n\t"
         generated += "};\n\t"
@@ -72,7 +84,7 @@ def create_table_file(actions, tmpdir, file_name):
         control_file.write("#include \"test.h\"\n\n")
         control_file.write("static inline void generated_init() {\n\t")
         control_file.write("int ok;\n\t")
-        generated_cmds=_generate_control_actions(actions)
+        generated_cmds = _generate_control_actions(actions)
         control_file.write(generated_cmds)
         control_file.write("}\n")
 
@@ -80,41 +92,33 @@ def create_table_file(actions, tmpdir, file_name):
 def parse_stf_file(raw_stf):
     """ Uses the .stf parsing tool to acquire a pre-formatted list.
         Processing entries according to their specified cmd. """
-    parser=STFParser()
-    stf_str=raw_stf.read()
-    stf_map, errs=parser.parse(stf_str)
-    iface_pkts={}
-    actions=[]
-    expected={}
-    expectedAny=[]
+    parser = STFParser()
+    stf_str = raw_stf.read()
+    stf_map, errs = parser.parse(stf_str)
+    iface_pkts = {}
+    cmds = []
+    expected = {}
+    expectedAny = []
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
             iface_pkts.setdefault(stf_entry[1], []).append(
                 hex_to_byte(stf_entry[2]))
         elif stf_entry[0] == "expect":
-            interface=int(stf_entry[1])
-            pkt_data=stf_entry[2]
+            interface = int(stf_entry[1])
+            pkt_data = stf_entry[2]
             if pkt_data != '':
                 expected.setdefault(
                     interface, []).append(pkt_data)
             else:
                 expectedAny.append(interface)
         elif stf_entry[0] == "add":
-            cmd={}
-            cmd["type"]=stf_entry[0]
-            cmd["table"]=stf_entry[1]
-            cmd["priority"]=stf_entry[2]  # not supported
-            cmd["match"]=stf_entry[3]
-            cmd["action"]=stf_entry[4]
-            cmd["extra"]=stf_entry[5]     # not supported
-            actions.append(cmd)
+            cmd = eBPFCommand(
+                a_type=stf_entry[0], table=stf_entry[1],
+                priority=stf_entry[2], match=stf_entry[3],
+                action=stf_entry[4], extra=stf_entry[5])
+            cmds.append(cmd)
         elif stf_entry[0] == "setdefault":
-            cmd={}
-            cmd["type"]=stf_entry[0]
-            cmd["table"]=stf_entry[1]
-            cmd["priority"]=""            # not supported
-            cmd["match"]=""               # not necessary to match
-            cmd["action"]=stf_entry[2]
-            cmd["extra"]=""               # not supported
-            actions.append(cmd)
-    return iface_pkts, actions, expected, expectedAny
+            cmd = eBPFCommand(
+                a_type=stf_entry[0], table=stf_entry[1], action=stf_entry[2])
+            cmds.append(cmd)
+    return iface_pkts, cmds, expected, expectedAny

@@ -363,7 +363,6 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
-    // if (!mcd.substitution.empty()) {
         builder->emitIndent();
         builder->appendFormat(".u = {.%s = {", name.c_str());
         for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
@@ -372,7 +371,6 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
             builder->append(",");
         }
         builder->append("}},\n");
-    // }
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
