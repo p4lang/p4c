@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Defines helper functions which are used across all eBPF Python files."""
+""" Defines helper functions for a general testing framework. Used by multiple
+    Python files."""
 
 from __future__ import print_function
 import subprocess

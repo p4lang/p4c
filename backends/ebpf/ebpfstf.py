@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Contains functions which allow the parsing of stf files
-    and ultimately generate a C header file which defines the control plane
-    commands for that particular P4 program. """
+""" Converts the commands in an stf file which populate tables into a C
+    program that manipulates ebpf tables. """
 
 
 import os
@@ -65,18 +64,18 @@ def _generate_control_actions(actions):
     return generated
 
 
-def create_table_file(actions, tmpdir):
+def create_table_file(actions, tmpdir, file_name):
     """ Create the control plane file.
     The control commands are provided by the stf parser.
     This generated file is required by ebpf_runtime.c to initialize
     the control plane. """
-    control_file = open(tmpdir + "/control.h", "w+")
-    control_file.write("#include \"test.h\"\n\n")
-    control_file.write("static inline void generated_init() {\n\t")
-    control_file.write("int ok;\n\t")
-    generated_cmds = _generate_control_actions(actions)
-    control_file.write(generated_cmds)
-    control_file.write("}\n")
+    with open(tmpdir + "/" + file_name, "w+") as control_file:
+        control_file.write("#include \"test.h\"\n\n")
+        control_file.write("static inline void generated_init() {\n\t")
+        control_file.write("int ok;\n\t")
+        generated_cmds = _generate_control_actions(actions)
+        control_file.write(generated_cmds)
+        control_file.write("}\n")
 
 
 def parse_stf_file(raw_stf):
@@ -89,7 +88,6 @@ def parse_stf_file(raw_stf):
     actions = []
     expected = {}
     expectedAny = []
-    print(stf_map)
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
             iface_pkts.setdefault(stf_entry[1], []).append(

@@ -363,7 +363,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 
     for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         builder->emitIndent();
-        builder->appendFormat(".u = ", p->name.name.c_str());
+        builder->appendFormat(".u = ");
         auto arg = mcd.substitution.lookup(p);
         arg->apply(cg);
         builder->appendLine(",");

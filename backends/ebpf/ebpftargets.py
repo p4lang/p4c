@@ -143,7 +143,7 @@ class EBPFTarget(object):
         with open(stffile) as raw_stf:
             iface_pkts, actions, self.expected, self.expectedAny = parse_stf_file(
                 raw_stf)
-            create_table_file(actions, self.tmpdir)
+            create_table_file(actions, self.tmpdir, "control.h")
             self._write_pcap_files(iface_pkts)
         return SUCCESS
 
@@ -222,7 +222,6 @@ class EBPFKernelTarget(EBPFTarget):
         for index in (range(len(self.expected))):
             if_bridge = "%s_%d" % (br_name, index)
             if_veth = "veth_%s_%d" % (br_name, index)
-            print (if_bridge, if_veth)
             ipr.link_create(ifname=if_veth, kind="veth", peer=if_bridge)
             ipr.link('set', index=ipr.link_lookup(ifname=if_veth)[
                      0], master=ipr.link_lookup(ifname=br_name)[0])
