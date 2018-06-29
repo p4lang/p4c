@@ -84,13 +84,11 @@ set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
 
 set (XFAIL_TESTS_KERNEL
   # These tests currently generate malfunctioning code that does not compile
-  testdata/p4_16_samples/hit_ebpf.p4
   testdata/p4_16_samples/two_ebpf.p4
   )
 set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST
   # These tests currently generate malfunctioning code that does not compile
-  testdata/p4_16_samples/hit_ebpf.p4
   testdata/p4_16_samples/two_ebpf.p4
   # These tests currently are missing the control plane to pass the test
   testdata/p4_16_samples/key_ebpf.p4
