@@ -194,6 +194,13 @@ In addition the following packages and programs are required:
 
 - The python iproute2 package to create virtual interfaces.
 
+You can install these using:
+
+```
+$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2
+$ sudo pip install pyroute2
+```
+
 ### Supported capabilities
 
 The current version of the P4 to EBPF compiler supports a relatively
