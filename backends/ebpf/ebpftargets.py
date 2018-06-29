@@ -30,8 +30,8 @@ from pyroute2 import IPRoute
 from scapy.utils import rdpcap
 from scapy.layers.all import RawPcapWriter
 from ebpfstf import create_table_file, parse_stf_file
+sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
 from ebpfutils import *
-
 
 class EBPFFactory(object):
     """ Generator class.

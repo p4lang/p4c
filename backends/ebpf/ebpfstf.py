@@ -19,9 +19,9 @@
 
 import os
 import sys
+sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
 from ebpfutils import *
-sys.path.insert(0, os.path.dirname(__file__) + '/../../tools/stf')
-from stf_parser import STFParser
+from stf.stf_parser import STFParser
 
 
 def _generate_control_actions(actions):
@@ -54,7 +54,7 @@ def _generate_control_actions(actions):
             generated += ".u = {"
             for val_num, val_field in enumerate(cmd["action"][1]):
                 generated += "%s," % val_field[1]
-            generated += "},\n\t"
+            generated += "}\n\t"
         generated += "};\n\t"
         generated += ("ok = BPF_USER_MAP_UPDATE_ELEM"
                       "(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t"

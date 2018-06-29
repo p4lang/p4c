@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """ Defines helper functions for a general testing framework. Used by multiple
-    Python files."""
+    Python testing scripts in the backends folder."""
 
 from __future__ import print_function
 import subprocess

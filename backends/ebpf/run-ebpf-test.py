@@ -24,11 +24,10 @@ import os
 import stat
 import tempfile
 import shutil
-
 from ebpftargets import EBPFFactory
+sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
+from ebpfutils import *
 
-SUCCESS = 0
-FAILURE = 1
 
 class Options(object):
     def __init__(self):
