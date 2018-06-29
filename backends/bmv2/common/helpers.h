@@ -26,9 +26,11 @@ limitations under the License.
 #include "expression.h"
 #include "frontends/common/model.h"
 #include "programStructure.h"
-#include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
+
+// forward declaration to avoid circular-dependency
+class SharedActionSelectorCheck;
 
 #ifndef UNUSED
 #   define UNUSED __attribute__((__unused__))

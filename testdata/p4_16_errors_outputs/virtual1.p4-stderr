@@ -1,4 +1,4 @@
-virtual1.p4(23): error: return: Cannot unify bit<16> to bool
+virtual1.p4(23): error: return +: Cannot unify bit<16> to bool
             return (ix + 1);
             ^^^^^^
 virtual1.p4(21): error: cntr: Cannot unify bool to bit<16>

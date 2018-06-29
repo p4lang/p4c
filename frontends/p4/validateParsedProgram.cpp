@@ -89,8 +89,7 @@ void ValidateParsedProgram::container(const IR::IContainer* type) {
             ::error("%1%: constructor parameters cannot have a direction", p);
 }
 
-/// Tables must have an 'actions' and a 'default_action' properties.
-/// The latter is just a warning.
+/// Tables must have an 'actions' property.
 void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     auto ac = t->getActionList();
     if (ac == nullptr)
@@ -190,11 +189,13 @@ void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
         ::error("%1%: return statements not allowed in parsers", statement);
 }
 
-/// Exit statements are not allowed in parsers
+/// Exit statements are not allowed in parsers or functions
 void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error("%1%: exit statements not allowed in parsers", statement);
+    if (findContext<IR::Function>())
+        ::error("%1%: exit statements not allowed in functions", statement);
 }
 
 }  // namespace P4

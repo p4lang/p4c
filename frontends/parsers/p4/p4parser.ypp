@@ -278,6 +278,7 @@ declaration
     | instantiation           { $$ = $1; }
     | errorDeclaration        { driver.onReadErrorDeclaration($1); $$ = nullptr; }
     | matchKindDeclaration    { $$ = $1; }
+    | functionDeclaration     { $$ = $1; }
     ;
 
 nonTypeName
@@ -522,7 +523,6 @@ simpleKeysetExpression
     | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
-// experimental
 valueSetDeclaration
     : optAnnotations
         VALUESET "<" baseType ">" "(" expression ")" name ";"
@@ -1017,9 +1017,8 @@ initializer
 
 /**************** Expressions ****************/
 
-// experimental
 functionDeclaration
-    : functionPrototype blockStatement   { $$ = new IR::Function(@1+@2, $1->name, $1->type, $2); }
+    : functionPrototype blockStatement   { $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
     ;
 
 argumentList

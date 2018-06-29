@@ -22,8 +22,8 @@ LookupScope::LookupScope(const IrNamespace *ns)
 
 IrNamespace *LookupScope::resolve(const IrNamespace *in) const {
     if (global)
-        return &IrNamespace::global;
-    if (!in) in = &IrNamespace::global;
+        return &IrNamespace::global();
+    if (!in) in = &IrNamespace::global();
     if (this->in) {
         in = this->in->resolve(in);
         return in->lookupChild(name); }
@@ -32,7 +32,7 @@ IrNamespace *LookupScope::resolve(const IrNamespace *in) const {
             return found;
         in = in->parent; }
     if (name == "IR")
-        return &IrNamespace::global;
+        return &IrNamespace::global();
     return nullptr;
 }
 
@@ -53,13 +53,60 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
     return nullptr;
 }
 
-NamedType NamedType::Bool("bool"), NamedType::Int("int"), NamedType::Void("void"),
-          NamedType::Cstring("cstring"), NamedType::Visitor("Visitor"),
-          NamedType::Ostream(new LookupScope("std"), "ostream"),
-          NamedType::Unordered_Set(new LookupScope("std"), "unordered_set"),
-          NamedType::JSONGenerator("JSONGenerator"), NamedType::JSONLoader("JSONLoader"),
-          NamedType::JsonObject("JsonObject"),
-          NamedType::SourceInfo(new LookupScope("Util"), "SourceInfo");
+NamedType& NamedType::Bool() {
+    static NamedType nt("bool");
+    return nt;
+}
+
+NamedType& NamedType::Int() {
+    static NamedType nt("int");
+    return nt;
+}
+
+NamedType& NamedType::Void() {
+    static NamedType nt("void");
+    return nt;
+}
+
+NamedType& NamedType::Cstring() {
+    static NamedType nt("cstring");
+    return nt;
+}
+
+NamedType& NamedType::Ostream() {
+    static NamedType nt(new LookupScope("std"), "ostream");
+    return nt;
+}
+
+NamedType& NamedType::Visitor() {
+    static NamedType nt("Visitor");
+    return nt;
+}
+
+NamedType& NamedType::Unordered_Set() {
+    static NamedType nt(new LookupScope("std"), "unordered_set");
+    return nt;
+}
+
+NamedType& NamedType::JSONGenerator() {
+    static NamedType nt("JSONGenerator");
+    return nt;
+}
+
+NamedType& NamedType::JSONLoader() {
+    static NamedType nt("JSONLoader");
+    return nt;
+}
+
+NamedType& NamedType::JSONObject() {
+    static NamedType nt("JSONObject");
+    return nt;
+}
+
+NamedType& NamedType::SourceInfo() {
+    static NamedType nt(new LookupScope("Util"), "SourceInfo");
+    return nt;
+}
 
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
@@ -90,8 +137,8 @@ cstring ReferenceType::toString() const {
     return rv;
 }
 
-ReferenceType ReferenceType::OstreamRef(&NamedType::Ostream),
-              ReferenceType::VisitorRef(&NamedType::Visitor);
+ReferenceType ReferenceType::OstreamRef(&NamedType::Ostream()),
+              ReferenceType::VisitorRef(&NamedType::Visitor());
 
 cstring PointerType::toString() const {
     cstring rv = base->toString();

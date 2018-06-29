@@ -196,10 +196,10 @@ In addition the following packages and programs are required to run the full tes
 
 - The python ply package to parse .stf testing files.
 
-These dependencies can be installed running:
-```bash
-apt-get install -y --no-install-recommends libpcap-dev libelf-dev llvm clang iproute2
-pip install pyroute2 ply
+You can install these using:
+```
+$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2
+$ sudo pip install pyroute2 ply
 ```
 
 ### Supported capabilities

@@ -15,8 +15,8 @@
 # limitations under the License.
 
 
-""" Runs the p4c-ebpf compiler on a P4-16 program
-    TODO: do something with the output of the compiler"""
+# Runs the p4c-ebpf compiler on a P4-16 program
+# and then runs the program on specified input packets
 
 from __future__ import print_function
 import sys
@@ -27,10 +27,8 @@ import shutil
 
 from ebpftargets import EBPFFactory
 
-
 SUCCESS = 0
 FAILURE = 1
-
 
 class Options(object):
     def __init__(self):

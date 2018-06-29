@@ -82,17 +82,9 @@ set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel")
 set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc")
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
 
-set (XFAIL_TESTS_KERNEL
-  # These tests currently generate malfunctioning code that does not compile
-  testdata/p4_16_samples/hit_ebpf.p4
-  testdata/p4_16_samples/two_ebpf.p4
-  )
+set (XFAIL_TESTS_KERNEL)
 set (XFAIL_TESTS_BCC)
-set (XFAIL_TESTS_TEST
-  # These tests currently generate malfunctioning code that does not compile
-  testdata/p4_16_samples/hit_ebpf.p4
-  testdata/p4_16_samples/two_ebpf.p4
-  )
+set (XFAIL_TESTS_TEST)
 
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
@@ -111,7 +103,9 @@ endif()
 # Check if we have the right llvm version
 set (MIN_LLVM 3.7.1)
 
-find_package(LLVM)
+# If you get an error here see
+# https://stackoverflow.com/questions/38171543/error-when-using-cmake-with-llvm
+find_package(LLVM QUIET)
 if (LLVM_PACKAGE_VERSION)
   message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
   if (${LLVM_PACKAGE_VERSION} VERSION_LESS ${MIN_LLVM})

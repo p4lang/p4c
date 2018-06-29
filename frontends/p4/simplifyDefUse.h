@@ -34,6 +34,13 @@ class DoSimplifyDefUse : public Transform {
         setName("DoSimplifyDefUse");
     }
 
+    const IR::Node* postorder(IR::Function* function) override {
+        if (findContext<IR::Declaration_Instance>() == nullptr)
+            // not an abstract function implementation: these
+            // are processed as parat of the control body
+            return process(function);
+        return function;
+    }
     const IR::Node* postorder(IR::P4Parser* parser) override
     { return process(parser); }
     const IR::Node* postorder(IR::P4Control* control) override

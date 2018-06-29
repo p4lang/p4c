@@ -64,15 +64,18 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     apply {
         bool hasReturned_0 = false;
+        pass = true;
         if (!headers.ipv4.isValid()) {
             pass = false;
             hasReturned_0 = true;
         }
         if (!hasReturned_0) {
             address = headers.ipv4.srcAddr;
+            pass_1 = pass;
             c1_Check_ip_0.apply();
             pass = pass_1;
             address = headers.ipv4.dstAddr;
+            pass_1 = pass;
             c1_Check_ip_0.apply();
             pass = pass_1;
         }

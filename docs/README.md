@@ -11,6 +11,7 @@ p4c
 ├── backends
 │   ├── p4test                -- "fake" back-end for testing
 │   ├── ebpf                  -- extended Berkeley Packet Filters back-end
+│   ├── graphs                -- backend that can draw graphiz graphs of P4 programs
 │   └── bmv2                  -- behavioral model version 2 (switch simulator) back-end
 ├── control-plane             -- control plane API
 ├── docs                      -- documentation
@@ -19,17 +20,18 @@ p4c
 │   └── XXXX                  -- symlinks to custom back-ends
 ├── frontends
 │   ├── common                -- common front-end code
+│   ├── parsers               -- parser and lexer code for P4_14 and P4_16
 │   ├── p4-14                 -- P4_14 front-end
 │   └── p4                    -- P4_16 front-end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
-├── m4                        -- m4 macros used by autotools
 ├── midend                    -- code that may be useful for writing mid-ends
 ├── p4include                 -- standard P4 files needed by the compiler (e.g., core.p4)
 ├── test                      -- test code
-│   └── unittests             -- unit test code
+│   └── gtest                 -- unit test code written using gtest
 ├── tools                     -- external programs used in the build/test process
-│   ├── driver                -- p4c compiler driver
+│   ├── driver                -- p4c compiler driver: a script that invokes various compilers
+│   ├── stf                   -- Python code to parse STF files (used for testing P4 programs)
 |   └── ir-generator          -- code for the IR C++ class hierarchy generator
 └── testdata                  -- test inputs and reference outputs
     ├── p4_16_samples         -- P4_16 input test programs
@@ -38,6 +40,8 @@ p4c
     ├── p4_16_errors_outputs  -- Expected outputs from P4_16 negative tests
     ├── p4_16_bmv_errors      -- P4_16 negative input tests for the bmv2 backend
     ├── v1_1_samples          -- P4 v1.1 sample programs
+    ├── p4_14_errors          -- P4_14 negative input test programs
+    ├── p4_14_errors_outputs  -- Expected outputs from P4_14 negative tests
     ├── p4_14_samples         -- P4_14 input test programs
     ├── p4_14_samples_outputs -- Expected outputs from P4_14 tests
     └── p4_14_errors          -- P4_14 negative input test programs
@@ -48,8 +52,8 @@ p4c
 * the P4_14 (P4 v1.0.4) language is described in the P4 spec:
   https://p4lang.github.io/p4-spec/p4-14/v1.0.4/tex/p4.pdf
 
-* the P4_16 language (v1.0.0) is described in [this pdf
-  document](https://p4lang.github.io/p4-spec/docs/P4-16-v1.0.0-spec.pdf)
+* the P4_16 language (v1.1.0) is described in [this pdf
+  document](https://p4.org/p4-spec/docs/P4-16-v1.1.0-draft.pdf)
 
 * the core design of the compiler intermediate representation (IR) and
   the visitor patterns are briefly described in [IR](IR.md)
@@ -71,12 +75,14 @@ p4c
   * [BMv2](../backends/bmv2/README.md)
   * [eBPF](../backends/ebpf/README.md)
 
+* Check out the [IntelliJ P4 plugin](https://github.com/TakeshiTseng/IntelliJ-P4-Plugin)
+
 # How to contribute
 
 * do write unit test code
 * code has to be reviewed before it is merged
-* make sure all tests pass when you send a pull request (only PASS tests allowed)
-* make sure `make cpplint` produces no errors
+* make sure all tests pass when you send a pull request
+* make sure `make cpplint` produces no errors (`make check` will also run this)
 * write documentation
 
 # Writing documentation
@@ -168,26 +174,23 @@ git push -f
   in file `pass_manager.cpp` above level 2, use the following compiler
   command-line option: `-Tnode:1,pass_manager:2`
 
+  To execute LOG statements in a header file you must supply the complete
+  name of the header file, e.g.: `-TfunctionsInlining.h:3`.
+
 ## Testing
 
-The testing infrastructure is based on autotools.  We use several
-small python and shell scripts to work around limitations of
-autotools.
+The testing infrastructure is based on small python and shell scripts.
 
 * To run tests execute `make check -j3`
   - There should be no FAIL or XPASS tests.
-  - XFAIL tests are tolerated only transiently - these indicate known
-  unfixed bugs in the compiler.
+  - XFAIL tests are tolerated only transiently.
 
 * To run a subset of tests execute `make check-PATTERN`.  E.g., `make
   check-p4`.
 
-* To rerun the tests that failed last time run `make recheck -j3`
+* To rerun the tests that failed last time run `make recheck`
 
-* Add unit tests in `test/unittests`
-
-* Code for running various compiler back-ends on p4 files is generated
-  using a simple python script `tools/gen-tests.py`.
+* Add unit tests in `test/gtest`
 
 ## Coding conventions
 

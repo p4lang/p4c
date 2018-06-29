@@ -36,12 +36,15 @@ namespace P4 {
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
    - tables have an actions property
+   - table entries lists are const
    - instantiations appear at the top-level only
    - switch statements do not occur in actions
    - instantiations do not occur in actions
    - constructors are not invoked in actions
    - returns and exits do not appear in parsers
+   - exits do not appear in functions
    - extern constructors have the same name as the enclosing extern
+   - names of all parameters are distinct
  */
 class ValidateParsedProgram final : public Inspector {
     void container(const IR::IContainer* type);

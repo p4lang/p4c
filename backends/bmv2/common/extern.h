@@ -17,8 +17,9 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_EXTERN_H_
 #define BACKENDS_BMV2_COMMON_EXTERN_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/methodInstance.h"
+#include "helpers.h"
+#include "ir/ir.h"
 #include "programStructure.h"
 
 namespace BMV2 {

@@ -69,9 +69,11 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @hidden action act_0() {
         hasReturned_0 = false;
+        pass = true;
     }
     @hidden action act_1() {
         address = headers.ipv4.srcAddr;
+        pass_1 = pass;
     }
     @hidden action act_2() {
         pass = pass_1;
