@@ -20,7 +20,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
-from ebpfutils import *
+from testutils import *
 from stf.stf_parser import STFParser
 
 

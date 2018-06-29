@@ -26,7 +26,7 @@ import tempfile
 import shutil
 from ebpftargets import EBPFFactory
 sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
-from ebpfutils import *
+from testutils import *
 
 
 class Options(object):
