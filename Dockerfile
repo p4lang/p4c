@@ -40,12 +40,14 @@ ENV P4C_RUNTIME_DEPS cpp \
                      libgmp10 \
                      libgmpxx4ldbl \
                      python
+ENV P4C_PIP_PACKAGES tenjin \
+                     pyroute2 \
+                     ply
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_EBPF_DEPS $P4C_RUNTIME_DEPS && \
-    pip install tenjin && \
-    pip install pyroute2 && \
+    pip install $P4C_PIP_PACKAGES && \
     mkdir build && \
     cd build && \
     cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3' && \

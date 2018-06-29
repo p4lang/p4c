@@ -182,7 +182,7 @@ dataplane/control-plane APIs.
 ### Dependencies
 
 EBPF programs require a Linux kernel with version 4.15 or newer.
-In addition the following packages and programs are required:
+In addition the following packages and programs are required to run the full test suite:
 
 - Clang 3.3 and llvm 3.7.1 or later are required.
 
@@ -193,6 +193,14 @@ In addition the following packages and programs are required:
 - iproute2 to use tc/ip commands to load eBPF programs.
 
 - The python iproute2 package to create virtual interfaces.
+
+- The python ply package to parse .stf testing files.
+
+These dependencies can be installed running:
+```bash
+apt-get install -y --no-install-recommends libpcap-dev libelf-dev llvm clang iproute2
+pip install pyroute2 ply
+```
 
 ### Supported capabilities
 
