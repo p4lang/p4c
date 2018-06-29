@@ -35,7 +35,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table t {
         actions = { Reject(); }
-        default_action = Reject(0);
+        default_action = Reject(1);
     }
     apply {
         bool x = true;

@@ -35,7 +35,7 @@ FAILURE = 1
 class Options(object):
     def __init__(self):
         self.binary = ""                # This program's name
-        self.cleanupTmp = True          # If false do not remote tmp folder created
+        self.cleanupTmp = True          # Remove tmp folder?
         self.p4Filename = ""            # File that is being compiled
         self.compilerSrcDir = ""        # Path to compiler source tree
         self.verbose = False            # Enable verbose output
@@ -55,7 +55,6 @@ def report_error(*message):
 
 
 def run_model(ebpf, stffile):
-
 
     if not os.path.isfile(stffile):
         # If no empty.stf present, don't try to run the model at all

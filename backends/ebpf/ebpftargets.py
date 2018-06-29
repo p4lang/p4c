@@ -14,125 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Contains different eBPF models and specifies their individual behavior
-# Currently five phases are defined:
-#   1. Invokes the specified compiler on a provided p4 file.
-#   2. Parses an stf file and generates an pcap output.
-#   3. Loads the generated template or compiles it to a runnable binary.
-#   4. Feeds the generated pcap test packets into the P4 "filter"
-#   5. Evaluates the output with the expected result from the .stf file
+""" Contains different eBPF models and specifies their individual behavior
+    Currently five phases are defined:
+   1. Invokes the specified compiler on a provided p4 file.
+   2. Parses an stf file and generates an pcap output.
+   3. Loads the generated template or compiles it to a runnable binary.
+   4. Feeds the generated pcap test packets into the P4 "filter"
+   5. Evaluates the output with the expected result from the .stf file
+"""
 
-from __future__ import print_function
 import os
 import sys
-import subprocess
-from subprocess import Popen
-from threading import Timer
 from glob import glob
-from scapy.layers.all import RawPcapWriter
-from scapy.utils import rdpcap
 from pyroute2 import IPRoute
-sys.path.insert(0, os.path.dirname(__file__) + '/../../tools/stf')
-from stf_parser import STFParser
-
-SUCCESS = 0
-FAILURE = 1
-TIMEOUT = 10 * 60
-
-
-def byte_to_hex(byteStr):
-    return ''.join(["%02X " % ord(x) for x in byteStr]).strip()
-
-
-def hex_to_byte(hexStr):
-    bytes = []
-    hexStr = ''.join(hexStr.split(" "))
-    for i in range(0, len(hexStr), 2):
-        bytes.append(chr(int(hexStr[i:i + 2], 16)))
-    return ''.join(bytes)
-
-
-def is_err(p4filename):
-    """ True if the filename represents a p4 program that should fail. """
-    return "_errors" in p4filename
-
-
-def report_err(file, *message):
-    print("***", file=sys.stderr, *message)
-
-    if (file and file != sys.stderr):
-        err_file = open(file, "a+")
-        print("***", file=err_file, *message)
-        err_file.close()
-
-
-def report_output(file, verbose, *message):
-    if (verbose):
-        print(file=sys.stdout, *message)
-
-    if (file and file != sys.stdout):
-        out_file = open(file, "a+")
-        print("", file=out_file, *message)
-        out_file.close()
-
-
-def run_timeout(options, args, timeout, outputs, errmsg):
-    report_output(outputs["stdout"],
-                  options.verbose, "Executing ", " ".join(args))
-    proc = None
-
-    def kill(process):
-        process.kill()
-
-    if outputs["stderr"] is not None:
-        try:
-            proc = Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except OSError as e:
-            report_err(outputs["stderr"], "Failed executing: ", e)
-    if proc is None:
-        # Never even started
-        report_err(outputs["stderr"], "Process failed to start")
-        return FAILURE
-
-    timer = Timer(TIMEOUT, kill, [proc])
-    try:
-        timer.start()
-        out, err = proc.communicate()
-    finally:
-        timer.cancel()
-    msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
-           "%s########### PROCESS OUTPUT END\n" % out)
-    report_output(outputs["stdout"], options.verbose, msg)
-    if proc.returncode != SUCCESS:
-        report_err(outputs["stderr"], "Error %d: %s\n%s" %
-                   (proc.returncode, errmsg, err))
-    return proc.returncode
-
-
-def compare_pkt(outputs, expected, received):
-    received = ''.join(byte_to_hex(str(received)).split()).upper()
-    expected = ''.join(expected.split()).upper()
-    if len(received) < len(expected):
-        report_err(outputs["stderr"], "Received packet too short",
-                   len(received), "vs", len(expected))
-        return FAILURE
-    for i in range(0, len(expected)):
-        if expected[i] == "*":
-            continue
-        if expected[i] != received[i]:
-            report_err(outputs["stderr"], "Received packet ", received)
-            report_err(outputs["stderr"], "Packet different at position", i,
-                       ": expected", expected[i], ", received", received[i])
-            report_err(outputs["stderr"], "Full received packed is ", received)
-            return FAILURE
-    return SUCCESS
-
-
-def require_root(outputs):
-    if (not (os.getuid() == 0)):
-        errmsg = "This test requires root privileges! Failing..."
-        report_err(outputs["stderr"], errmsg)
-        sys.exit(FAILURE)
+from scapy.utils import rdpcap
+from scapy.layers.all import RawPcapWriter
+from ebpfstf import create_table_file, parse_stf_file
+from ebpfutils import *
 
 
 class EBPFFactory(object):
@@ -158,7 +56,6 @@ class EBPFTarget(object):
         self.template = template    # template to generate a filter
         self.outputs = outputs      # contains standard and error output
         self.pcapPrefix = "pcap"    # could also be "pcapng"
-        self.interfaces = {}        # list of active interfaces
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
         # TODO: Make the runtime dir independent
@@ -181,6 +78,7 @@ class EBPFTarget(object):
                 str(interface) + "_" + direction + ".pcap")
 
     def interface_of_filename(self, f):
+        """ Extracts the interface name out of a pcap filename"""
         return int(os.path.basename(f).rstrip('.pcap').
                    lstrip(self.pcapPrefix).rsplit('_', 1)[0])
 
@@ -219,98 +117,6 @@ class EBPFTarget(object):
                 result = SUCCESS
         return result, expected_error
 
-    def _generate_control_actions(self, actions):
-        """ Generates the actual control plane commands.
-        This function inserts C code for all the "add" commands that have
-        been parsed. """
-        generated = ""
-        for index, cmd in enumerate(actions):
-            key_name = "key_%s%d" % (cmd["table"], index)
-            value_name = "value_%s%d" % (cmd["table"], index)
-            if cmd["type"] == "setdefault":
-                tbl_name = cmd["table"] + "_defaultAction"
-            else:
-                tbl_name = cmd["table"]
-            generated = "struct %s_key %s = {};\n\t" % (cmd["table"], key_name)
-            for key_num, key_field in enumerate(cmd["match"]):
-                field = key_field[0].split('.')[1]
-                generated += ("%s.%s = %s;\n\t"
-                              % (key_name, field, key_field[1]))
-            generated += ("int tableFileDescriptor = "
-                          "BPF_OBJ_GET(MAP_PATH \"/%s\");\n\t" %
-                          tbl_name)
-            generated += ("if (tableFileDescriptor < 0) {"
-                          "fprintf(stderr, \"map %s not loaded\");"
-                          " exit(1); }\n\t" % tbl_name)
-            generated += ("struct %s_value %s = {};\n\t" % (
-                cmd["table"], value_name))
-            generated += "%s.action = %s;\n\t" % (value_name, cmd["action"][0])
-            if cmd["action"][1]:
-                generated += "%s.u = {" % value_name
-                for val_num, val_field in enumerate(cmd["action"][1]):
-                    generated += "%s," % val_field[1]
-                generated += "};\n\t"
-            generated += ("ok = BPF_USER_MAP_UPDATE_ELEM"
-                          "(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t"
-                          % (key_name, value_name))
-            generated += ("if (ok != 0) { perror(\"Could not write in %s\");"
-                          "exit(1); }\n" % tbl_name)
-        return generated
-
-    def _create_table_file(self, actions):
-        """ Create the control plane file.
-        The control commands are provided by the stf parser.
-        This generated file is required by ebpf_runtime.c to initialize
-        the control plane. """
-        control_file = open(self.tmpdir + "/control.h", "w+")
-        print (self.tmpdir + "/control.h")
-        control_file.write("#include \"test.h\"\n\n")
-        control_file.write("static inline void generated_init() {\n\t")
-        control_file.write("int ok;\n\t")
-        generated_cmds = self._generate_control_actions(actions)
-        control_file.write(generated_cmds)
-        control_file.write("}\n")
-
-    def _parse_stf_file(self, raw_stf):
-        """ Uses the .stf parsing tool to acquire a pre-formatted list.
-            Processing entries according to their specified cmd. """
-        parser = STFParser()
-        stf_str = raw_stf.read()
-        stf_map, errs = parser.parse(stf_str)
-        iface_pkts = {}
-        actions = []
-        print(stf_map)
-        for stf_entry in stf_map:
-            if stf_entry[0] == "packet":
-                iface_pkts.setdefault(stf_entry[1], []).append(
-                    hex_to_byte(stf_entry[2]))
-            elif stf_entry[0] == "expect":
-                interface = int(stf_entry[1])
-                pkt_data = stf_entry[2]
-                if pkt_data != '':
-                    self.expected.setdefault(
-                        interface, []).append(pkt_data)
-                else:
-                    self.expectedAny.append(interface)
-            elif stf_entry[0] == "add":
-                cmd = {}
-                cmd["type"] = stf_entry[0]
-                cmd["table"] = stf_entry[1]
-                cmd["priority"] = stf_entry[2]  # not supported
-                cmd["match"] = stf_entry[3]
-                cmd["action"] = stf_entry[4]
-                cmd["whatisthis"] = stf_entry[5] # not supported
-                actions.append(cmd)
-            elif stf_entry[0] == "setdefault":
-                cmd = {}
-                cmd["type"] = stf_entry[0]
-                cmd["table"] = stf_entry[1]
-                cmd["match"] = "" # not necessary to match
-                cmd["priority"] = ""  # not supported
-                cmd["action"] = stf_entry[2]
-                actions.append(cmd)
-        return iface_pkts, actions
-
     def _write_pcap_files(self, iface_pkts_map):
         """ Writes the collected packets to their respective interfaces.
         This is done by creating a pcap file with the corresponding name. """
@@ -335,9 +141,10 @@ class EBPFTarget(object):
             header for the runtime, which contains the extracted control
              plane commands """
         with open(stffile) as raw_stf:
-            iface_pkts, actions = self._parse_stf_file(raw_stf)
+            iface_pkts, actions, self.expected, self.expectedAny = parse_stf_file(
+                raw_stf)
+            create_table_file(actions, self.tmpdir)
             self._write_pcap_files(iface_pkts)
-            self._create_table_file(actions)
         return SUCCESS
 
     def create_filter(self):
