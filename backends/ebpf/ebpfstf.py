@@ -50,11 +50,10 @@ def _generate_control_actions(actions):
         generated += ("struct %s_value %s = {\n\t\t" % (
             cmd["table"], value_name))
         generated += ".action = %s,\n\t\t" % (cmd["action"][0])
-        if cmd["action"][1]:
-            generated += ".u = {"
-            for val_num, val_field in enumerate(cmd["action"][1]):
-                generated += "%s," % val_field[1]
-            generated += "}\n\t"
+        generated += ".u = {.%s = {" % cmd["action"][0]
+        for val_num, val_field in enumerate(cmd["action"][1]):
+            generated += "%s," % val_field[1]
+        generated += "}},\n\t"
         generated += "};\n\t"
         generated += ("ok = BPF_USER_MAP_UPDATE_ELEM"
                       "(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t"
@@ -73,7 +72,7 @@ def create_table_file(actions, tmpdir, file_name):
         control_file.write("#include \"test.h\"\n\n")
         control_file.write("static inline void generated_init() {\n\t")
         control_file.write("int ok;\n\t")
-        generated_cmds = _generate_control_actions(actions)
+        generated_cmds=_generate_control_actions(actions)
         control_file.write(generated_cmds)
         control_file.write("}\n")
 
@@ -81,41 +80,41 @@ def create_table_file(actions, tmpdir, file_name):
 def parse_stf_file(raw_stf):
     """ Uses the .stf parsing tool to acquire a pre-formatted list.
         Processing entries according to their specified cmd. """
-    parser = STFParser()
-    stf_str = raw_stf.read()
-    stf_map, errs = parser.parse(stf_str)
-    iface_pkts = {}
-    actions = []
-    expected = {}
-    expectedAny = []
+    parser=STFParser()
+    stf_str=raw_stf.read()
+    stf_map, errs=parser.parse(stf_str)
+    iface_pkts={}
+    actions=[]
+    expected={}
+    expectedAny=[]
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
             iface_pkts.setdefault(stf_entry[1], []).append(
                 hex_to_byte(stf_entry[2]))
         elif stf_entry[0] == "expect":
-            interface = int(stf_entry[1])
-            pkt_data = stf_entry[2]
+            interface=int(stf_entry[1])
+            pkt_data=stf_entry[2]
             if pkt_data != '':
                 expected.setdefault(
                     interface, []).append(pkt_data)
             else:
                 expectedAny.append(interface)
         elif stf_entry[0] == "add":
-            cmd = {}
-            cmd["type"] = stf_entry[0]
-            cmd["table"] = stf_entry[1]
-            cmd["priority"] = stf_entry[2]  # not supported
-            cmd["match"] = stf_entry[3]
-            cmd["action"] = stf_entry[4]
-            cmd["extra"] = stf_entry[5]     # not supported
+            cmd={}
+            cmd["type"]=stf_entry[0]
+            cmd["table"]=stf_entry[1]
+            cmd["priority"]=stf_entry[2]  # not supported
+            cmd["match"]=stf_entry[3]
+            cmd["action"]=stf_entry[4]
+            cmd["extra"]=stf_entry[5]     # not supported
             actions.append(cmd)
         elif stf_entry[0] == "setdefault":
-            cmd = {}
-            cmd["type"] = stf_entry[0]
-            cmd["table"] = stf_entry[1]
-            cmd["priority"] = ""            # not supported
-            cmd["match"] = ""               # not necessary to match
-            cmd["action"] = stf_entry[2]
-            cmd["extra"] = ""               # not supported
+            cmd={}
+            cmd["type"]=stf_entry[0]
+            cmd["table"]=stf_entry[1]
+            cmd["priority"]=""            # not supported
+            cmd["match"]=""               # not necessary to match
+            cmd["action"]=stf_entry[2]
+            cmd["extra"]=""               # not supported
             actions.append(cmd)
     return iface_pkts, actions, expected, expectedAny
