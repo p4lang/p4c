@@ -82,13 +82,9 @@ set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel")
 set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc")
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
 
-set (XFAIL_TESTS_KERNEL
-  )
+set (XFAIL_TESTS_KERNEL)
 set (XFAIL_TESTS_BCC)
-set (XFAIL_TESTS_TEST
-  # These tests currently are missing the control plane to pass the test
-  testdata/p4_16_samples/key_ebpf.p4
-  )
+set (XFAIL_TESTS_TEST)
 
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"

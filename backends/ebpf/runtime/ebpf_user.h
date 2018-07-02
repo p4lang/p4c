@@ -119,7 +119,8 @@ static u64 load_dword(void *skb, u64 off) {
 /* simple descriptor which replaces the kernel sk_buff structure */
 struct sk_buff {
     void *data;
-    u_int16_t len;
+    u16 len;
+    u16 iface;
 };
 #define SK_BUFF struct sk_buff
 

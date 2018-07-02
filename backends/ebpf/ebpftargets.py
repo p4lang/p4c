@@ -14,137 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Contains different eBPF models and specifies their individual behavior
-# Currently five phases are defined:
-#   1. Invokes the specified compiler on a provided p4 file.
-#   2. Parses an stf file and generates an pcap output.
-#   3. Loads the generated template or compiles it to a runnable binary.
-#   4. Feeds the generated pcap test packets into the P4 "filter"
-#   5. Evaluates the output with the expected result from the .stf file
+""" Contains different eBPF models and specifies their individual behavior
+    Currently five phases are defined:
+   1. Invokes the specified compiler on a provided p4 file.
+   2. Parses an stf file and generates an pcap output.
+   3. Loads the generated template or compiles it to a runnable binary.
+   4. Feeds the generated pcap test packets into the P4 "filter"
+   5. Evaluates the output with the expected result from the .stf file
+"""
 
-from __future__ import print_function
 import os
 import sys
-import subprocess
-from subprocess import Popen
-from threading import Timer
 from glob import glob
-from scapy.layers.all import RawPcapWriter
-from scapy.utils import rdpcap
 from pyroute2 import IPRoute
-
-SUCCESS = 0
-FAILURE = 1
-TIMEOUT = 10 * 60
-
-
-def next_word(text, sep=None):
-    """ Split a text at the indicated separator.
-     Note that the separator can be a string.
-     Separator is discarded. """
-    spl = text.split(sep, 1)
-    if len(spl) == 0:
-        return '', ''
-    elif len(spl) == 1:
-        return spl[0].strip(), ''
-    else:
-        return spl[0].strip(), spl[1].strip()
-
-
-def byte_to_hex(byteStr):
-    return ''.join(["%02X " % ord(x) for x in byteStr]).strip()
-
-
-def hex_to_byte(hexStr):
-    bytes = []
-    hexStr = ''.join(hexStr.split(" "))
-    for i in range(0, len(hexStr), 2):
-        bytes.append(chr(int(hexStr[i:i + 2], 16)))
-    return ''.join(bytes)
-
-
-def is_err(p4filename):
-    """ True if the filename represents a p4 program that should fail. """
-    return "_errors" in p4filename
-
-
-def report_err(file, *message):
-    print("***", file=sys.stderr, *message)
-
-    if (file and file != sys.stderr):
-        err_file = open(file, "a+")
-        print("***", file=err_file, *message)
-        err_file.close()
-
-
-def report_output(file, verbose, *message):
-    if (verbose):
-        print(file=sys.stdout, *message)
-
-    if (file and file != sys.stdout):
-        out_file = open(file, "a+")
-        print("", file=out_file, *message)
-        out_file.close()
-
-
-def run_timeout(options, args, timeout, outputs, errmsg):
-    report_output(outputs["stdout"],
-                  options.verbose, "Executing ", " ".join(args))
-    proc = None
-
-    def kill(process):
-        process.kill()
-
-    if outputs["stderr"] is not None:
-        try:
-            proc = Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except OSError as e:
-            report_err(outputs["stderr"], "Failed executing: ", e)
-    if proc is None:
-        # Never even started
-        report_err(outputs["stderr"], "Process failed to start")
-        return FAILURE
-
-    timer = Timer(TIMEOUT, kill, [proc])
-    try:
-        timer.start()
-        out, err = proc.communicate()
-    finally:
-        timer.cancel()
-    msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
-           "%s########### PROCESS OUTPUT END\n" % out)
-    report_output(outputs["stdout"], options.verbose, msg)
-    if proc.returncode != SUCCESS:
-        report_err(outputs["stderr"], "Error %d: %s\n%s" %
-                   (proc.returncode, errmsg, err))
-    return proc.returncode
-
-
-def compare_pkt(outputs, expected, received):
-    received = ''.join(byte_to_hex(str(received)).split()).upper()
-    expected = ''.join(expected.split()).upper()
-    if len(received) < len(expected):
-        report_err(outputs["stderr"], "Received packet too short",
-                   len(received), "vs", len(expected))
-        return FAILURE
-    for i in range(0, len(expected)):
-        if expected[i] == "*":
-            continue
-        if expected[i] != received[i]:
-            report_err(outputs["stderr"], "Received packet ", received)
-            report_err(outputs["stderr"], "Packet different at position", i,
-                       ": expected", expected[i], ", received", received[i])
-            report_err(outputs["stderr"], "Full received packed is ", received)
-            return FAILURE
-    return SUCCESS
-
-
-def require_root(outputs):
-    if (not (os.getuid() == 0)):
-        errmsg = "This test requires root privileges! Failing..."
-        report_err(outputs["stderr"], errmsg)
-        sys.exit(FAILURE)
-
+from scapy.utils import rdpcap
+from scapy.layers.all import RawPcapWriter
+from ebpfstf import create_table_file, parse_stf_file
+sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
+from testutils import *
 
 class EBPFFactory(object):
     """ Generator class.
@@ -169,7 +56,6 @@ class EBPFTarget(object):
         self.template = template    # template to generate a filter
         self.outputs = outputs      # contains standard and error output
         self.pcapPrefix = "pcap"    # could also be "pcapng"
-        self.interfaces = {}        # list of active interfaces
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
         # TODO: Make the runtime dir independent
@@ -192,6 +78,7 @@ class EBPFTarget(object):
                 str(interface) + "_" + direction + ".pcap")
 
     def interface_of_filename(self, f):
+        """ Extracts the interface name out of a pcap filename"""
         return int(os.path.basename(f).rstrip('.pcap').
                    lstrip(self.pcapPrefix).rsplit('_', 1)[0])
 
@@ -230,39 +117,34 @@ class EBPFTarget(object):
                 result = SUCCESS
         return result, expected_error
 
+    def _write_pcap_files(self, iface_pkts_map):
+        """ Writes the collected packets to their respective interfaces.
+        This is done by creating a pcap file with the corresponding name. """
+        for iface, pkts in iface_pkts_map.items():
+            infile = self.tmpdir + "/pcap%s_in.pcap" % iface
+            fp = RawPcapWriter(infile, linktype=1)
+            fp._write_header(None)
+            for pkt_data in pkts:
+                try:
+                    fp._write_packet(pkt_data)
+                except ValueError:
+                    report_err(self.outputs["stderr"],
+                               "Invalid packet data", pkt_data)
+                    sys.exit(FAILURE)
+
     def generate_model_inputs(self, stffile):
         # To override
         """ Parses the stf file and creates a .pcap file with input packets.
             It also adds the expected output packets per interface to a global
-            dictionary. """
-        # TODO: Create pcap packet data structure and differentiate
-        # between input interfaces. Right now it is always interface 0.
-        infile = self.tmpdir + "/pcap0_in.pcap"
-        fp = RawPcapWriter(infile, linktype=1)
-        fp._write_header(None)
-        with open(stffile) as i:
-            for line in i:
-                line, comment = next_word(line, "#")
-                first, cmd = next_word(line)
-                if first == "packet":
-                    interface, cmd = next_word(cmd)
-                    interface = int(interface)
-                    data = ''.join(cmd.split())
-                    try:
-                        fp._write_packet(hex_to_byte(data))
-                    except ValueError:
-                        report_err(self.outputs["stderr"],
-                                   "Invalid packet data", data)
-                        os.remove(infile)
-                        return FAILURE
-                elif first == "expect":
-                    interface, data = next_word(cmd)
-                    interface = int(interface)
-                    data = ''.join(data.split())
-                    if data != '':
-                        self.expected.setdefault(interface, []).append(data)
-                    else:
-                        self.expectedAny.append(interface)
+            dictionary.
+            After parsing the necessary information, it creates a control
+            header for the runtime, which contains the extracted control
+             plane commands """
+        with open(stffile) as raw_stf:
+            iface_pkts, cmds, self.expected, self.expectedAny = parse_stf_file(
+                raw_stf)
+            create_table_file(cmds, self.tmpdir, "control.h")
+            self._write_pcap_files(iface_pkts)
         return SUCCESS
 
     def create_filter(self):
@@ -287,9 +169,9 @@ class EBPFTarget(object):
             else:
                 try:
                     packets = rdpcap(file)
-                except:
+                except Exception as e:
                     report_err(self.outputs["stderr"],
-                               "Corrupt pcap file", file)
+                               "Corrupt pcap file", file, e)
                     self.showLog()
                     return FAILURE
 
@@ -340,7 +222,6 @@ class EBPFKernelTarget(EBPFTarget):
         for index in (range(len(self.expected))):
             if_bridge = "%s_%d" % (br_name, index)
             if_veth = "veth_%s_%d" % (br_name, index)
-            print (if_bridge, if_veth)
             ipr.link_create(ifname=if_veth, kind="veth", peer=if_bridge)
             ipr.link('set', index=ipr.link_lookup(ifname=if_veth)[
                      0], master=ipr.link_lookup(ifname=br_name)[0])
@@ -454,11 +335,17 @@ class EBPFTestTarget(EBPFTarget):
     def run(self):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Running model")
-        # Main executable
-        args = [self.template]
-        # Input
-        args.extend(["-f", self.tmpdir + "/pcap0_in.pcap"])
-        # Debug flag
-        args.append("-d")
-        errmsg = "Failed to execute the filter:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        direction = "in"
+        for file in glob(self.filename('*', direction)):
+            # Main executable
+            args = [self.template]
+            # Input
+            args.extend(["-f", file])
+            # Debug flag
+            args.append("-d")
+            errmsg = "Failed to execute the filter:"
+            result = run_timeout(self.options, args,
+                                 TIMEOUT, self.outputs, errmsg)
+            if result != SUCCESS:
+                return FAILURE
+        return SUCCESS
