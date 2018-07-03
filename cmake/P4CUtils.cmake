@@ -86,12 +86,12 @@ macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
   file (WRITE  ${__testfile} "#! /bin/bash\n")
   file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
+  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} ${args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
   execute_process(COMMAND chmod +x ${__testfile})
   p4c_test_set_name(__testname ${tag} ${alias})
   separate_arguments(__args UNIX_COMMAND ${args})
   add_test (NAME ${__testname}
-    COMMAND ${tag}/${p4test}.test ${__args}
+    COMMAND ${tag}/${p4test}.test
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
   if (NOT DEFINED ${tag}_timeout)
     set (${tag}_timeout 300)
