@@ -338,20 +338,18 @@ class EBPFTestTarget(EBPFTarget):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Running model")
         direction = "in"
-        file = self.filename('*', direction)
+        pcap_pattern = self.filename('*', direction)
         num_files = len(glob(self.filename('*', direction)))
-
-        print (file)
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
         # Main executable
         args = [self.template]
         # Input
-        args.extend(["-f", file])
+        args.extend(["-f", pcap_pattern])
         args.extend(["-n", str(num_files)])
         # Debug flag
         args.append("-d")
         errmsg = "Failed to execute the filter:"
-        result = run_timeout(self.options, args,
-                             TIMEOUT, self.outputs, errmsg)
-        if result != SUCCESS:
-            return FAILURE
-        return SUCCESS
+        return run_timeout(self.options, args,
+                           TIMEOUT, self.outputs, errmsg)
