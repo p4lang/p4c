@@ -23,9 +23,6 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_KERNEL_H_
 #define BACKENDS_EBPF_BPFINCLUDE_EBPF_KERNEL_H_
 
-// #include <linux/skbuff.h>
-// #include <linux/netdevice.h>
-// #include <linux/version.h>
 #include <linux/bpf.h>
 #include <stdbool.h>
 #include <stdio.h>

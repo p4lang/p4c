@@ -33,6 +33,7 @@ from ebpfstf import create_table_file, parse_stf_file
 sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
 from testutils import *
 
+
 class EBPFFactory(object):
     """ Generator class.
      Returns a target subclass based on the provided target option."""
@@ -329,6 +330,7 @@ class EBPFTestTarget(EBPFTarget):
         args = self.get_make_args(self.ebpfdir, self.options.target)
         # List of bpf programs to attach to the interface
         args.append("BPFOBJ=" + self.template)
+        args.append("CFLAGS+=-DCONTROL_PLANE")
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
 
@@ -336,16 +338,20 @@ class EBPFTestTarget(EBPFTarget):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Running model")
         direction = "in"
-        for file in glob(self.filename('*', direction)):
-            # Main executable
-            args = [self.template]
-            # Input
-            args.extend(["-f", file])
-            # Debug flag
-            args.append("-d")
-            errmsg = "Failed to execute the filter:"
-            result = run_timeout(self.options, args,
-                                 TIMEOUT, self.outputs, errmsg)
-            if result != SUCCESS:
-                return FAILURE
+        file = self.filename('*', direction)
+        num_files = len(glob(self.filename('*', direction)))
+
+        print (file)
+        # Main executable
+        args = [self.template]
+        # Input
+        args.extend(["-f", file])
+        args.extend(["-n", str(num_files)])
+        # Debug flag
+        args.append("-d")
+        errmsg = "Failed to execute the filter:"
+        result = run_timeout(self.options, args,
+                             TIMEOUT, self.outputs, errmsg)
+        if result != SUCCESS:
+            return FAILURE
         return SUCCESS

@@ -10,7 +10,7 @@ GCC ?= gcc
 SRCDIR=.
 INCLUDES+= -I./$(SRCDIR)
 # Optimization flags to save space
-CFLAGS+= -DCONTROL_PLANE -O2 -g # -Wall -Werror
+CFLAGS+=-O2 -g # -Wall -Werror
 LIBS+=-lpcap
 SRC+= $(SRCDIR)/ebpf_runtime.c $(SRCDIR)/ebpf_map.c $(SRCDIR)/ebpf_registry.c
 HDRS := $(BPFNAME).h $(SRCDIR)/ebpf_user.h $(SRCDIR)/ebpf_map.h $(SRCDIR)/ebpf_registry.h

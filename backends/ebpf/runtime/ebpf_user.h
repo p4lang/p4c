@@ -120,10 +120,10 @@ static u64 load_dword(void *skb, u64 off) {
 struct sk_buff {
     void *data;
     u16 len;
-    u16 iface;
+    u32 ifindex;
 };
-#define SK_BUFF struct sk_buff
 
+#define SK_BUFF struct sk_buff
 #define REGISTER_START() \
 struct bpf_table tables[] = {
 #define REGISTER_TABLE(NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES) \
