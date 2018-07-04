@@ -147,21 +147,21 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
         auto ext = decl->to<IR::Type_Extern>();
         BUG_CHECK(ext, "%1%: expected an extern type", dbp(decl));
         auto constr = ext->lookupConstructor(cce->arguments->size());
-        result = new ExternConstructorCall(ext->to<IR::Type_Extern>(), constr);
+        result = new ExternConstructorCall(cce, ext->to<IR::Type_Extern>(), constr);
         BUG_CHECK(constr, "%1%: constructor not found", ext);
         constructorParameters = constr->type->parameters;
     } else if (ct->is<IR::IContainer>()) {
         auto decl = refMap->getDeclaration(type->path, true);
         auto cont = decl->to<IR::IContainer>();
         BUG_CHECK(cont, "%1%: expected a container", dbp(decl));
-        result = new ContainerConstructorCall(cont);
+        result = new ContainerConstructorCall(cce, cont);
         constructorParameters = cont->getConstructorParameters();
     } else {
         BUG("Unexpected constructor call %1%; type is %2%", dbp(cce), dbp(ct));
     }
-    result->cce = cce;
     result->typeArguments = typeArguments;
     result->constructorParameters = constructorParameters;
+    result->substitution.populate(result->constructorParameters, cce->arguments);
     return result;
 }
 

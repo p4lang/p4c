@@ -400,7 +400,7 @@ void DiscoverInlining::visit_all(const IR::Block* block) {
 bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
-        ::error("%1%: invocation of a control from a parser",
+        ::error("%1%: instantiation of control in parser",
                 block->node);
         return false;
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
@@ -421,7 +421,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
 bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
-        ::error("%1%: invocation of a parser from a control",
+        ::error("%1%: instantiation of parser in control",
                 block->node);
         return false;
     } else if (getContext()->node->is<IR::ParserBlock>()) {

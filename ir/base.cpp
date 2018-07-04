@@ -42,7 +42,7 @@ cstring IDeclaration::externalName(cstring replace /* = cstring() */) const {
         return Annotation::getName(anno);
     if (replace)
         return replace;
-    return getName().name;
+    return getName().toString();
 }
 
 cstring IDeclaration::controlPlaneName(cstring replace /* = cstring() */) const {

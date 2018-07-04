@@ -61,15 +61,15 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
 }
 
 const IR::Argument* SpecializationMap::convertArgument(
-    const IR::Argument* arg, SpecializationInfo* spec) {
+    const IR::Argument* arg, SpecializationInfo* spec, const IR::Parameter* param) {
     if (arg->expression->is<IR::ConstructorCallExpression>()) {
         auto cce = arg->expression->to<IR::ConstructorCallExpression>();
-        cstring nName = refMap->newName("inst");
+        cstring nName = refMap->newName(param->name);
+        IR::ID id(param->srcInfo, nName, param->name);
         auto decl = new IR::Declaration_Instance(
-            IR::ID(nName, nullptr),
-            cce->constructedType, cce->arguments);
+            param->srcInfo, id, cce->constructedType, cce->arguments);
         spec->declarations->push_back(decl);
-        auto path = new IR::PathExpression(IR::ID(nName, nullptr));
+        auto path = new IR::PathExpression(param->srcInfo, new IR::Path(param->srcInfo, id));
         return new IR::Argument(arg->srcInfo, arg->name, path);
     } else {
         return arg;
@@ -91,7 +91,9 @@ void SpecializationMap::addSpecialization(
     CHECK_NULL(ccc);
     spec->constructorArguments = new IR::Vector<IR::Argument>();
     for (auto ca : *invocation->arguments) {
-        auto arg = convertArgument(ca, spec);
+        auto param = cc->substitution.findParameter(ca);
+        CHECK_NULL(param);
+        auto arg = convertArgument(ca, spec, param);
         spec->constructorArguments->push_back(arg);
     }
     spec->typeArguments = ccc->typeArguments;
@@ -118,10 +120,14 @@ void SpecializationMap::addSpecialization(
         type = invocation->type->to<IR::Type_Name>();
         typeArgs = new IR::Vector<IR::Type>();
     }
+    Instantiation* inst = Instantiation::resolve(invocation, refMap, typeMap);
+
     spec->typeArguments = typeArgs;
     CHECK_NULL(type);
     for (auto ca : *invocation->arguments) {
-        auto arg = convertArgument(ca, spec);
+        auto param = inst->substitution.findParameter(ca);
+        CHECK_NULL(param);
+        auto arg = convertArgument(ca, spec, param);
         spec->constructorArguments->push_back(arg);
     }
     specializations.emplace(invocation, spec);
@@ -287,7 +293,7 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
     if (!name.isNullOrEmpty()) {
         auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
         replacement = new IR::Declaration_Instance(
-            decl->name, decl->annotations, typeRef,
+            decl->srcInfo, decl->name, decl->annotations, typeRef,
             new IR::Vector<IR::Argument>(), decl->initializer);
         LOG2("Replaced " << decl << " with " << replacement);
     }

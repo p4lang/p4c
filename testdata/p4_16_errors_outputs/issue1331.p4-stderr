@@ -1,1 +1,3 @@
-error: inst: invocation of a parser from a control
+issue1331.p4(17): error: p: instantiation of parser in control
+control MyC(packet_in pkt, inout ethernet ether)(P p) {
+                                                   ^
