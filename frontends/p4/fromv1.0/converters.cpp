@@ -1111,7 +1111,7 @@ class InsertCompilerGeneratedStartState: public Transform {
     IR::Vector<IR::SelectCase>         selCases;
  public:
     InsertCompilerGeneratedStartState(ProgramStructure* structure): structure(structure) {
-        setName("FixMultiEntryPoint"); }
+        setName("InsertCompilerGeneratedStartState"); }
 
     const IR::Node* postorder(IR::P4Program* program) override {
         allTypeDecls.append(program->declarations);
