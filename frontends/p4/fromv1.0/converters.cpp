@@ -1081,6 +1081,96 @@ class RemoveAnnotatedFields : public Transform {
     }
 };
 
+class CheckIfMultiEntryPoint: public Inspector {
+    ProgramStructure* structure;
+
+ public:
+    CheckIfMultiEntryPoint(ProgramStructure* structure) : structure(structure) {
+        setName("CheckIfMultiEntryPoint"); }
+    bool preorder(const IR::ParserState* state) {
+        for (const auto* anno : state->getAnnotations()->annotations) {
+            if (anno->name.name == "packet_entry") {
+                structure->parserEntryPoints.emplace(state->name, state);
+            }
+        }
+        return false;
+    }
+};
+
+class InsertCompilerGeneratedStartState: public Transform {
+    ProgramStructure* structure;
+    IR::IndexedVector<IR::Node>        allTypeDecls;
+    IR::IndexedVector<IR::Declaration> varDecls;
+    IR::Vector<IR::SelectCase>         selCases;
+ public:
+    InsertCompilerGeneratedStartState(ProgramStructure* structure): structure(structure) {
+        setName("FixMultiEntryPoint"); }
+
+    const IR::Node* postorder(IR::P4Program* program) override {
+        allTypeDecls.append(program->declarations);
+        program->declarations = allTypeDecls;
+        return program;
+    }
+
+    // rename original start state
+    const IR::Node* postorder(IR::ParserState* state) override {
+        if (state->name == IR::ParserState::start) {
+            state->name = "$start";
+        }
+        return state;
+    }
+
+    const IR::Node* postorder(IR::P4Parser* parser) override {
+        if (!structure->parserEntryPoints.size())
+            return parser;
+        IR::IndexedVector<IR::SerEnumMember> members;
+        // transition to original start state
+        members.push_back(new IR::SerEnumMember("START", new IR::Constant(0)));
+        selCases.push_back(new IR::SelectCase(
+            new IR::Member(new IR::TypeNameExpression(new IR::Type_Name("$InstanceType")), "START"),
+            new IR::PathExpression(new IR::Path("$start"))));
+
+        // transition to addtional entry points
+        unsigned idx = 1;
+        for (auto p : structure->parserEntryPoints) {
+            members.push_back(new IR::SerEnumMember(p.first, new IR::Constant(idx++)));
+            selCases.push_back(new IR::SelectCase(
+                new IR::Member(new IR::TypeNameExpression(new IR::Type_Name("$InstanceType")),
+                               p.first),
+                new IR::PathExpression(new IR::Path(p.second->name))));
+        }
+        auto instEnum = new IR::Type_SerEnum("$InstanceType", IR::Type_Bits::get(32), members);
+        allTypeDecls.push_back(instEnum);
+
+        IR::Vector<IR::Expression> selExpr;
+        selExpr.push_back(
+            new IR::Cast(new IR::Type_Name("$InstanceType"),
+                         new IR::Member(new IR::PathExpression(new IR::Path("standard_metadata")),
+                                        "instance_type")));
+        auto select = new IR::SelectExpression(new IR::ListExpression(selExpr), selCases);
+        auto startState = new IR::ParserState(IR::ParserState::start, select);
+        varDecls.push_back(startState);
+
+        if (!varDecls.empty()) {
+            parser->parserLocals.append(varDecls);
+            varDecls.clear();
+        }
+        return parser;
+    }
+};
+
+// handle @packet_entry pragma in P4-14.
+// A P4-14 program may be extended to support multiple entry points to
+// the parser. This feature does not compliant to P4-14 specification,
+// but it is useful in certain use cases.
+class FixMultiEntryPoint : public PassManager {
+ public:
+    FixMultiEntryPoint(ProgramStructure* structure) {
+        passes.emplace_back(new CheckIfMultiEntryPoint(structure));
+        passes.emplace_back(new InsertCompilerGeneratedStartState(structure));
+    }
+};
+
 }  // namespace
 
 
@@ -1111,6 +1201,7 @@ Converter::Converter() {
     passes.emplace_back(new Rewriter(structure));
     passes.emplace_back(new FixExtracts(structure));
     passes.emplace_back(new RemoveAnnotatedFields);
+    passes.emplace_back(new FixMultiEntryPoint(structure));
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {
