@@ -1081,6 +1081,116 @@ class RemoveAnnotatedFields : public Transform {
     }
 };
 
+// If a parser state has a pragma @packet_entry, it is treated as a new entry
+// point to the parser.
+class CheckIfMultiEntryPoint: public Inspector {
+    ProgramStructure* structure;
+
+ public:
+    explicit CheckIfMultiEntryPoint(ProgramStructure* structure) : structure(structure) {
+        setName("CheckIfMultiEntryPoint");
+    }
+    bool preorder(const IR::ParserState* state) {
+        for (const auto* anno : state->getAnnotations()->annotations) {
+            if (anno->name.name == "packet_entry") {
+                structure->parserEntryPoints.emplace(state->name, state);
+            }
+        }
+        return false;
+    }
+};
+
+// Generate a new start state that selects on the meta variable,
+// standard_metadata.instance_type and branches into one of the entry points.
+// The backend is responsible for removing the use of the meta variable and
+// eliminate the new start state.  The new start state is not added if the user
+// does not use the @packet_entry pragma.
+class InsertCompilerGeneratedStartState: public Transform {
+    ProgramStructure* structure;
+    IR::IndexedVector<IR::Node>        allTypeDecls;
+    IR::IndexedVector<IR::Declaration> varDecls;
+    IR::Vector<IR::SelectCase>         selCases;
+    cstring newStartState;
+    cstring newInstanceType;
+
+ public:
+    explicit InsertCompilerGeneratedStartState(ProgramStructure* structure) : structure(structure) {
+        setName("InsertCompilerGeneratedStartState");
+        structure->allNames.emplace("start");
+        structure->allNames.emplace("InstanceType");
+        newStartState = structure->makeUniqueName("start");
+        newInstanceType = structure->makeUniqueName("InstanceType");
+    }
+
+    const IR::Node* postorder(IR::P4Program* program) override {
+        allTypeDecls.append(program->declarations);
+        program->declarations = allTypeDecls;
+        return program;
+    }
+
+    // rename original start state
+    const IR::Node* postorder(IR::ParserState* state) override {
+        if (!structure->parserEntryPoints.size())
+            return state;
+        if (state->name == IR::ParserState::start) {
+            state->name = newStartState;
+        }
+        return state;
+    }
+
+    const IR::Node* postorder(IR::P4Parser* parser) override {
+        if (!structure->parserEntryPoints.size())
+            return parser;
+        IR::IndexedVector<IR::SerEnumMember> members;
+        // transition to original start state
+        members.push_back(new IR::SerEnumMember("START", new IR::Constant(0)));
+        selCases.push_back(new IR::SelectCase(
+            new IR::Member(new IR::TypeNameExpression(new IR::Type_Name(newInstanceType)), "START"),
+            new IR::PathExpression(new IR::Path(newStartState))));
+
+        // transition to addtional entry points
+        unsigned idx = 1;
+        for (auto p : structure->parserEntryPoints) {
+            members.push_back(new IR::SerEnumMember(p.first, new IR::Constant(idx++)));
+            selCases.push_back(new IR::SelectCase(
+                new IR::Member(new IR::TypeNameExpression(new IR::Type_Name(newInstanceType)),
+                               p.first),
+                new IR::PathExpression(new IR::Path(p.second->name))));
+        }
+        auto instEnum = new IR::Type_SerEnum(newInstanceType, IR::Type_Bits::get(32), members);
+        allTypeDecls.push_back(instEnum);
+
+        IR::Vector<IR::Expression> selExpr;
+        selExpr.push_back(
+            new IR::Cast(new IR::Type_Name(newInstanceType),
+                         new IR::Member(new IR::PathExpression(new IR::Path("standard_metadata")),
+                                        "instance_type")));
+        auto selects = new IR::SelectExpression(new IR::ListExpression(selExpr), selCases);
+        auto annos = new IR::Annotations();
+        annos->add(new IR::Annotation(IR::Annotation::nameAnnotation,
+                                      {new IR::StringLiteral(IR::ID("$start"))}));
+        auto startState = new IR::ParserState(IR::ParserState::start, annos, selects);
+        varDecls.push_back(startState);
+
+        if (!varDecls.empty()) {
+            parser->parserLocals.append(varDecls);
+            varDecls.clear();
+        }
+        return parser;
+    }
+};
+
+// Handle @packet_entry pragma in P4-14. A P4-14 program may be extended to
+// support multiple entry points to the parser. This feature does not comply
+// with P4-14 specification, but it is useful in certain use cases.
+class FixMultiEntryPoint : public PassManager {
+ public:
+    explicit FixMultiEntryPoint(ProgramStructure* structure) {
+        passes.emplace_back(new CheckIfMultiEntryPoint(structure));
+        passes.emplace_back(new InsertCompilerGeneratedStartState(structure));
+    }
+};
+
 }  // namespace
 
 
@@ -1111,6 +1221,7 @@ Converter::Converter() {
     passes.emplace_back(new Rewriter(structure));
     passes.emplace_back(new FixExtracts(structure));
     passes.emplace_back(new RemoveAnnotatedFields);
+    passes.emplace_back(new FixMultiEntryPoint(structure));
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {
