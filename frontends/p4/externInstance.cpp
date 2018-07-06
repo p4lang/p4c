@@ -83,15 +83,13 @@ ExternInstance::resolve(const IR::ConstructorCallExpression* constructorCallExpr
     CHECK_NULL(typeMap);
 
     auto constructorCall =
-      P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
+            P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
     if (!constructorCall->is<P4::ExternConstructorCall>()) return boost::none;
-
-    ConstructorCallDescription ccDesc(constructorCallExpr, refMap, typeMap);
 
     auto type = constructorCall->to<P4::ExternConstructorCall>()->type;
     return ExternInstance{name, constructorCallExpr, type,
                           constructorCallExpr->arguments,
-                          ccDesc.substitution,
+                          constructorCall->substitution,
                           constructorCallExpr->to<IR::IAnnotated>()};
 }
 

@@ -213,7 +213,11 @@ class MethodCallDescription {
 class ConstructorCall : public InstanceBase {
  protected:
     virtual ~ConstructorCall() {}
+    explicit ConstructorCall(const IR::ConstructorCallExpression* cce): cce(cce)
+    { CHECK_NULL(cce); }
  public:
+    /// For each callee parameter the corresponding argument
+    ParameterSubstitution substitution;
     const IR::ConstructorCallExpression* cce;
     const IR::Vector<IR::Type>*          typeArguments;
     const IR::ParameterList*             constructorParameters;
@@ -224,9 +228,10 @@ class ConstructorCall : public InstanceBase {
 
 /** Represents a constructor call that allocates an Extern object */
 class ExternConstructorCall : public ConstructorCall {
-    explicit ExternConstructorCall(const IR::Type_Extern* type,
+    explicit ExternConstructorCall(const IR::ConstructorCallExpression* cce,
+                                   const IR::Type_Extern* type,
                                    const IR::Method* constructor) :
-            type(type), constructor(constructor)
+            ConstructorCall(cce), type(type), constructor(constructor)
     { CHECK_NULL(type); CHECK_NULL(constructor); }
     friend class ConstructorCall;
  public:
@@ -237,23 +242,12 @@ class ExternConstructorCall : public ConstructorCall {
 /** Represents a constructor call that allocates an object that implements IContainer.
     These can be package, control or parser */
 class ContainerConstructorCall : public ConstructorCall {
-    explicit ContainerConstructorCall(const IR::IContainer* cont) :
-            container(cont) { CHECK_NULL(cont); }
+    explicit ContainerConstructorCall(const IR::ConstructorCallExpression* cce,
+                                      const IR::IContainer* cont) :
+            ConstructorCall(cce), container(cont) { CHECK_NULL(cont); }
     friend class ConstructorCall;
  public:
     const IR::IContainer* container;  // actual container in program IR
-};
-
-class ConstructorCallDescription {
- public:
-    ConstructorCall       *call;
-    /// For each callee parameter the corresponding argument
-    ParameterSubstitution substitution;
-    ConstructorCallDescription(const IR::ConstructorCallExpression* cce,
-                               ReferenceMap* refMap, TypeMap* typeMap) {
-        auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
-        substitution.populate(cc->constructorParameters, cce->arguments);
-    }
 };
 
 /////////////////////////////////////////////

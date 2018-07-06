@@ -55,7 +55,8 @@ struct SpecializationInfo {
 class SpecializationMap {
     /// Maps invocation to specialization info.
     ordered_map<const IR::Node*, SpecializationInfo*> specializations;
-    const IR::Argument* convertArgument(const IR::Argument* arg, SpecializationInfo* info);
+    const IR::Argument* convertArgument(
+        const IR::Argument* arg, SpecializationInfo* info, const IR::Parameter* param);
 
  public:
     TypeMap*      typeMap;

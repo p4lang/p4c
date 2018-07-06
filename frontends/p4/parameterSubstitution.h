@@ -60,6 +60,13 @@ class ParameterSubstitution : public IHasDbPrint {
         return true;
     }
 
+    const IR::Parameter* findParameter(const IR::Argument* argument) const {
+        for (auto p : *getParametersInOrder())
+            if (lookup(p) == argument)
+                return p;
+        return nullptr;
+    }
+
     bool empty() const
     { return parameterValues.empty(); }
 

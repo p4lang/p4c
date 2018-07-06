@@ -392,14 +392,17 @@ void DiscoverInlining::visit_all(const IR::Block* block) {
         if (it.second->is<IR::Block>()) {
             visit(it.second->getNode());
         }
+        if (::errorCount() > 0)
+            return;
     }
 }
 
 bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
-        ::error("%1%: invocation of a control from a parser",
+        ::error("%1%: instantiation of control in parser",
                 block->node);
+        return false;
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
         auto parent = getContext()->node->to<IR::ControlBlock>();
         LOG3("Will inline " << dbp(block) << "@" << dbp(block->node) << " into " << dbp(parent));
@@ -409,6 +412,8 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
     }
 
     visit_all(block);
+    if (::errorCount() > 0)
+        return false;
     visit(block->container->body);
     return false;
 }
@@ -416,8 +421,9 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
 bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
-        ::error("%1%: invocation of a parser from a control",
+        ::error("%1%: instantiation of parser in control",
                 block->node);
+        return false;
     } else if (getContext()->node->is<IR::ParserBlock>()) {
         auto parent = getContext()->node->to<IR::ParserBlock>();
         LOG3("Will inline " << block << "@" << block->node << " into " << parent);
@@ -426,6 +432,8 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
         inlineList->addInstantiation(parent->container, callee, instance);
     }
     visit_all(block);
+    if (::errorCount() > 0)
+        return false;
     visit(block->container->states, "states");
     return false;
 }
