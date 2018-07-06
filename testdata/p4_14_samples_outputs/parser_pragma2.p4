@@ -21,11 +21,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             $InstanceType.start_i2e_mirrored: start_i2e_mirrored;
         }
     }
+    @name(".Cowles") state Cowles {
+        transition accept;
+    }
     @name(".start") state $start {
         transition accept;
     }
     @packet_entry @name(".start_e2e_mirrored") state start_e2e_mirrored {
-        transition accept;
+        transition select((packet.lookahead<bit<32>>())[31:0]) {
+            default: accept;
+            32w0xab00: Cowles;
+        }
     }
     @packet_entry @name(".start_i2e_mirrored") state start_i2e_mirrored {
         transition accept;

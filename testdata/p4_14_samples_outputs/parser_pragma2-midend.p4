@@ -1,9 +1,3 @@
-enum bit<32> $InstanceType {
-    START = 0,
-    start_e2e_mirrored = 1,
-    start_i2e_mirrored = 2
-}
-
 #include <core.p4>
 #include <v1model.p4>
 
@@ -14,34 +8,45 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<32> tmp_0;
     state start {
-        transition select(($InstanceType)standard_metadata.instance_type) {
-            $InstanceType.START: $start;
-            $InstanceType.start_e2e_mirrored: start_e2e_mirrored;
-            $InstanceType.start_i2e_mirrored: start_i2e_mirrored;
+        transition select((bit<32>)standard_metadata.instance_type) {
+            32w0: $start;
+            32w1: start_e2e_mirrored;
+            32w2: start_i2e_mirrored;
+            default: noMatch;
         }
     }
     @name(".start") state $start {
         transition accept;
     }
     @packet_entry @name(".start_e2e_mirrored") state start_e2e_mirrored {
+        tmp_0 = packet.lookahead<bit<32>>();
         transition accept;
     }
     @packet_entry @name(".start_i2e_mirrored") state start_i2e_mirrored {
         transition accept;
     }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".nop") action nop() {
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name(".nop") action nop_0() {
     }
     @name(".exact") table exact_0 {
         actions = {
-            nop;
+            nop_0();
+            @defaultonly NoAction_0();
         }
         key = {
-            standard_metadata.egress_spec: exact;
+            standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec") ;
         }
+        default_action = NoAction_0();
     }
     apply {
         exact_0.apply();
@@ -68,5 +73,5 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
 
