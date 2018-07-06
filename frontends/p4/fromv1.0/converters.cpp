@@ -1121,6 +1121,8 @@ class InsertCompilerGeneratedStartState: public Transform {
 
     // rename original start state
     const IR::Node* postorder(IR::ParserState* state) override {
+        if (!structure->parserEntryPoints.size())
+            return state;
         if (state->name == IR::ParserState::start) {
             state->name = "$start";
         }
