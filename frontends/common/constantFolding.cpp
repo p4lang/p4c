@@ -836,13 +836,16 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
 
 const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
-        if (cond->value)
+        if (cond->value) {
             return ifstmt->ifTrue;
-        else {
-            if (ifstmt->ifFalse == nullptr)
+        } else {
+            if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);
-            else
-                return ifstmt->ifFalse; }}
+            } else {
+                return ifstmt->ifFalse;
+            }
+        }
+    }
     return ifstmt;
 }
 
