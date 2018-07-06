@@ -1081,6 +1081,8 @@ class RemoveAnnotatedFields : public Transform {
     }
 };
 
+// If a parser state has a pragma @packet_entry, it is treated as a new entry
+// point to the parser.
 class CheckIfMultiEntryPoint: public Inspector {
     ProgramStructure* structure;
 
@@ -1097,6 +1099,11 @@ class CheckIfMultiEntryPoint: public Inspector {
     }
 };
 
+// Generate a new start state that selects on the meta variable,
+// standard_metadata.instance_type and branches into one of the entry points.
+// The backend is responsible for removing the use of the meta variable and
+// eliminate the new start state.  The new start state is not added if the user
+// does not use the @packet_entry pragma.
 class InsertCompilerGeneratedStartState: public Transform {
     ProgramStructure* structure;
     IR::IndexedVector<IR::Node>        allTypeDecls;
@@ -1159,10 +1166,9 @@ class InsertCompilerGeneratedStartState: public Transform {
     }
 };
 
-// handle @packet_entry pragma in P4-14.
-// A P4-14 program may be extended to support multiple entry points to
-// the parser. This feature does not compliant to P4-14 specification,
-// but it is useful in certain use cases.
+// Handle @packet_entry pragma in P4-14. A P4-14 program may be extended to
+// support multiple entry points to the parser. This feature does not comply
+// with P4-14 specification, but it is useful in certain use cases.
 class FixMultiEntryPoint : public PassManager {
  public:
     FixMultiEntryPoint(ProgramStructure* structure) {
