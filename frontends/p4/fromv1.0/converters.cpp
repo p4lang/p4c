@@ -1168,7 +1168,7 @@ class InsertCompilerGeneratedStartState: public Transform {
         auto selects = new IR::SelectExpression(new IR::ListExpression(selExpr), selCases);
         auto annos = new IR::Annotations();
         annos->add(new IR::Annotation(IR::Annotation::nameAnnotation,
-                                      {new IR::StringLiteral(IR::ID("$start"))}));
+                                      {new IR::StringLiteral(IR::ID(".$start"))}));
         auto startState = new IR::ParserState(IR::ParserState::start, annos, selects);
         varDecls.push_back(startState);
 
