@@ -50,7 +50,7 @@ void usage(char *name) {
 }
 
 static pcap_list_t *get_packets(const char *pcap_base, uint16_t num_files) {
-    pcap_list_array_t *tmp_list_array = NULL;
+    pcap_list_array_t *tmp_list_array = allocate_pkt_list_array();
     /* Retrieve a list for each file and append it to the temporary array */
     for (uint16_t i = 0; i < num_files; i++) {
         char pcap_in_name[FILE_NAME_MAX];
@@ -66,7 +66,7 @@ static pcap_list_t *get_packets(const char *pcap_base, uint16_t num_files) {
 }
 
 static pcap_list_t *feed_packets(pcap_list_t *pkt_list) {
-    pcap_list_t *output_pkts = NULL;
+    pcap_list_t *output_pkts = allocate_pkt_list();
     uint64_t list_len = get_pkt_list_length(pkt_list);
     for (uint64_t i = 0; i < list_len; i++) {
         /* Parse each packet in the list and check the result */
@@ -113,8 +113,8 @@ void launch_runtime(const char *pcap_name, uint16_t num_pcaps) {
     if (num_pcaps == 0)
         return;
     /* Our pcap handles, do not forget to delete them after */
-    pcap_list_t *pkt_list_handle;
-    pcap_list_array_t *output_array_handle;
+    pcap_list_t *pkt_list_handle = allocate_pkt_list();
+    pcap_list_array_t *output_array_handle = allocate_pkt_list_array();
 
     /* Create the basic pcap filename from the input */
     const char *suffix = strrchr(pcap_name, DELIM);

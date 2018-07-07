@@ -127,6 +127,21 @@ pcap_list_t *append_packet(pcap_list_t *pkt_list, pcap_pkt *pkt);
 pcap_list_array_t *append_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_list);
 
 /**
+ * @brief Allocates a packet list and returns the handle.
+ *
+ * @return The handle to the packet list.
+ */
+pcap_list_t *allocate_pkt_list();
+
+
+/**
+ * @brief Allocates a packet list and returns the handle.
+ *
+ * @return The handle to the list array.
+ */
+pcap_list_array_t *allocate_pkt_list_array();
+
+/**
  * @brief Get the length of the packet list.
  *
  * @param pkt_list Handle to a list.

@@ -36,7 +36,7 @@ struct pcap_list_array {
 pcap_list_t *append_packet(pcap_list_t *pkt_list, pcap_pkt *pkt) {
     if (!pkt_list)
         /* If the list is not allocated yet, create it */
-        pkt_list = calloc(1, sizeof(struct pcap_list));
+        pkt_list = allocate_pkt_list();
     pkt_list->len++;
     pkt_list->pkts = realloc(pkt_list->pkts, pkt_list->len * sizeof(pcap_pkt *));
     if (pkt_list->pkts == NULL) {
@@ -51,7 +51,7 @@ pcap_list_t *append_packet(pcap_list_t *pkt_list, pcap_pkt *pkt) {
 pcap_list_array_t *append_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_list) {
     if (!pkt_array)
         /* If the array is not allocated yet, create it */
-        pkt_array = calloc(1, sizeof(struct pcap_list_array));
+        pkt_array = allocate_pkt_list_array();
     pkt_array->len++;
     pkt_array->lists = realloc(pkt_array->lists, pkt_array->len * sizeof(pcap_list_t *));
     if (pkt_array->lists == NULL) {
@@ -85,6 +85,17 @@ uint32_t get_pkt_list_length(pcap_list_t *pkt_list) {
 
 uint16_t get_list_array_length(pcap_list_array_t *pkt_list_array) {
     return pkt_list_array->len;
+}
+
+
+pcap_list_t *allocate_pkt_list() {
+    pcap_list_t *pkt_list = calloc(1, sizeof(pcap_list_t));
+    return pkt_list;
+}
+
+pcap_list_array_t *allocate_pkt_list_array() {
+    pcap_list_array_t *pkt_list_arr = calloc(1, sizeof(pcap_list_array_t));
+    return pkt_list_arr;
 }
 
 void delete_list(pcap_list_t *pkt_list) {
@@ -175,9 +186,11 @@ pcap_list_t *merge_pcap_lists(pcap_list_array_t *array) {
 }
 
 pcap_list_array_t *split_list_by_interface(pcap_list_t *input_list) {
+    pcap_list_array_t *result_arr = calloc(1, sizeof(pcap_list_array_t));
+    if (input_list->len == 0)
+        return result_arr;
     /* Allocate an empty list map with max size of possible interfaces */
     pcap_list_t *pkt_lists = calloc(UINT16_MAX, sizeof(pcap_list_t));
-    pcap_list_array_t *result_arr = NULL;
     for (uint32_t i = 0; i < input_list->len; i++)
         append_packet(
             &pkt_lists[input_list->pkts[i]->ifindex], input_list->pkts[i]);
