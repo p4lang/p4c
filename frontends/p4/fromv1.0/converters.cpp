@@ -1157,7 +1157,11 @@ class InsertCompilerGeneratedStartState: public Transform {
                                p.first),
                 new IR::PathExpression(new IR::Path(p.second->name))));
         }
-        auto instEnum = new IR::Type_SerEnum(newInstanceType, IR::Type_Bits::get(32), members);
+        auto instAnnos = new IR::Annotations();
+        instAnnos->add(new IR::Annotation(IR::Annotation::nameAnnotation,
+                                          {new IR::StringLiteral(IR::ID(".$InstanceType"))}));
+        auto instEnum =
+            new IR::Type_SerEnum(newInstanceType, instAnnos, IR::Type_Bits::get(32), members);
         allTypeDecls.push_back(instEnum);
 
         IR::Vector<IR::Expression> selExpr;

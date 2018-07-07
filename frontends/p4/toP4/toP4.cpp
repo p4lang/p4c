@@ -310,6 +310,7 @@ bool ToP4::preorder(const IR::P4ValueSet* t) {
 
 bool ToP4::preorder(const IR::Type_Enum* t) {
     dump(1);
+    visit(t->annotations);
     builder.append("enum ");
     builder.append(t->name);
     builder.spc();
@@ -330,6 +331,7 @@ bool ToP4::preorder(const IR::Type_Enum* t) {
 
 bool ToP4::preorder(const IR::Type_SerEnum* t) {
     dump(1);
+    visit(t->annotations);
     builder.append("enum ");
     visit(t->type);
     builder.spc();
