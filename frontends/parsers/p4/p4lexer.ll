@@ -202,6 +202,6 @@ using Parser = P4::P4Parser;
 ";"            { BEGIN(NORMAL); return Parser::make_SEMICOLON(driver.yylloc); }
 "@"            { BEGIN(NORMAL); return Parser::make_AT(driver.yylloc); }
 
-.              { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
+<*>.|\n        { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
 
 %%
