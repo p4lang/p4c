@@ -338,7 +338,7 @@ class EBPFTestTarget(EBPFTarget):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Running model")
         direction = "in"
-        pcap_pattern = self.filename('*', direction)
+        pcap_pattern = self.filename('', direction)
         num_files = len(glob(self.filename('*', direction)))
         report_output(self.outputs["stdout"],
                       self.options.verbose,

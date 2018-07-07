@@ -21,8 +21,8 @@ limitations under the License.
  * kernel ebpf object API as closely as possible. This library is currently not thread-safe.
  */
 
-#ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_
-#define BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_
+#ifndef BACKENDS_EBPF_RUNTIME_EBPF_REGISTRY_H_
+#define BACKENDS_EBPF_RUNTIME_EBPF_REGISTRY_H_
 
 #include "ebpf_map.h"
 
@@ -137,4 +137,4 @@ void *registry_lookup_table_elem(const char *name, void *key);
  */
 void *registry_lookup_table_elem_id(int tbl_id, void *key);
 
-#endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_REGISTRY_H_
+#endif  // BACKENDS_EBPF_RUNTIME_EBPF_REGISTRY_H_

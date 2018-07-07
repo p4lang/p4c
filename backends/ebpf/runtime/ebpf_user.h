@@ -22,8 +22,8 @@ limitations under the License.
  * repository as well as various ebpf map operations.
  */
 
-#ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_
-#define BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_
+#ifndef BACKENDS_EBPF_RUNTIME_EBPF_USER_H_
+#define BACKENDS_EBPF_RUNTIME_EBPF_USER_H_
 
 #include <stdio.h>      // printf
 #include <linux/bpf.h>  // types, and general bpf definitions
@@ -145,4 +145,4 @@ struct bpf_table tables[] = {
 extern struct bpf_table tables[];
 extern int ebpf_filter(struct sk_buff *skb);
 
-#endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_USER_H_
+#endif  // BACKENDS_EBPF_RUNTIME_EBPF_USER_H_
