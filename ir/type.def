@@ -398,8 +398,10 @@ class Type_String : Type_Base {
     toString{ return "string"; }
 }
 
-class Type_Enum : Type_Declaration, ISimpleNamespace {
+class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
     inline IndexedVector<Declaration_ID> members;
+    Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -416,9 +418,11 @@ class SerEnumMember : Declaration, CompileTimeValue {
 }
 
 /** A serializable enumeration with a backing type */
-class Type_SerEnum : Type_Declaration, ISimpleNamespace {
+class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
     Type_Bits type;
     inline IndexedVector<SerEnumMember> members;
+    Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {

@@ -1,4 +1,4 @@
-enum bit<32> InstanceType_0 {
+@name(".$InstanceType") enum bit<32> InstanceType_0 {
     START = 32w0,
     start_e2e_mirrored = 32w1,
     start_i2e_mirrored = 32w2
@@ -14,7 +14,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ParserImpl.$start") state start {
+    @name(".$start") state start {
         transition select((InstanceType_0)standard_metadata.instance_type) {
             InstanceType_0.START: start_0;
             InstanceType_0.start_e2e_mirrored: start_e2e_mirrored;
