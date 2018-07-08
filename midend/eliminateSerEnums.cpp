@@ -38,6 +38,7 @@ const IR::Node* DoEliminateSerEnums::postorder(IR::Type_Name* type) {
 /// process enum expression, e.g., X.a
 const IR::Node* DoEliminateSerEnums::postorder(IR::Member* expression) {
     auto ei = EnumInstance::resolve(getOriginal<IR::Member>(), typeMap);
+    if (!ei) return expression;
     if (auto sei = ei->to<SerEnumInstance>())
         return sei->value;
     return expression;
