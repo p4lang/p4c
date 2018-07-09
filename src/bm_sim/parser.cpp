@@ -92,7 +92,7 @@ ParserOpSet<ParserLookAhead>::operator()(Packet *pkt, const char *data,
                                          size_t *bytes_parsed) const {
   static thread_local ByteContainer bc;
   auto phv = pkt->get_phv();
-  if (pkt->get_ingress_length() - *bytes_parsed < src.nbytes)
+  if (pkt->get_data_size() - *bytes_parsed < src.nbytes)
     throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
   auto &f_dst = phv->get_field(dst.header, dst.offset);
   auto f_bits = f_dst.get_nbits();
@@ -235,7 +235,7 @@ namespace {
 
 void check_enough_data_for_extract(const Packet &pkt, size_t bytes_parsed,
                                    const Header &hdr) {
-  if (pkt.get_ingress_length() - bytes_parsed <
+  if (pkt.get_data_size() - bytes_parsed <
       static_cast<size_t>(hdr.get_nbytes_packet()))
     throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
 }

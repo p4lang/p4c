@@ -398,6 +398,11 @@ class ParserOpSetTest : public ::testing::Test {
     return Packet::make_new(64, PacketBuffer(128), phv_source.get());
   }
 
+  Packet get_pkt(const char *data, size_t size) {
+    return Packet::make_new(
+        size, PacketBuffer(size + 128, data, size), phv_source.get());
+  }
+
   virtual void SetUp() {
     phv_source->set_phv_factory(0, &phv_factory);
   }
@@ -437,11 +442,11 @@ TEST_F(ParserOpSetTest, SetFromLookahead) {
     auto lookahead = ParserLookAhead::make(offset, bitwidth);
     const ParserOpSet<ParserLookAhead> op(testHeader1, 1, lookahead);  // f32
     const ParserOp &opRef = op;
-    auto pkt = get_pkt();
+    auto pkt = get_pkt(data, sizeof(data_));
     auto &f = pkt.get_phv()->get_field(testHeader1, 1);
     f.set(0);
     size_t bytes_parsed = 0;
-    opRef(&pkt, reinterpret_cast<const char *>(data), &bytes_parsed);
+    opRef(&pkt, data, &bytes_parsed);
     ASSERT_EQ(v, f.get_uint());
   };
 

@@ -541,6 +541,9 @@ SimpleSwitch::egress_thread(size_t worker_id) {
         size_t packet_size = packet_copy->get_data_size();
         packet_copy->set_register(PACKET_LENGTH_REG_IDX, packet_size);
         phv_copy->get_field("standard_metadata.packet_length").set(packet_size);
+        // TODO(antonin): really it may be better to create a new packet here or
+        // to fold this functionality into the Packet class?
+        packet_copy->set_ingress_length(packet_size);
         input_buffer.push_front(std::move(packet_copy));
         continue;
       }

@@ -1,0 +1,517 @@
+{
+    "__meta__": {
+        "version": [
+            2,
+            5
+        ],
+        "compiler": "https://github.com/p4lang/p4c-bm"
+    },
+    "header_types": [
+        {
+            "name": "standard_metadata_t",
+            "id": 0,
+            "fields": [
+                [
+                    "ingress_port",
+                    9
+                ],
+                [
+                    "packet_length",
+                    32
+                ],
+                [
+                    "egress_spec",
+                    9
+                ],
+                [
+                    "egress_port",
+                    9
+                ],
+                [
+                    "egress_instance",
+                    32
+                ],
+                [
+                    "instance_type",
+                    32
+                ],
+                [
+                    "clone_spec",
+                    32
+                ],
+                [
+                    "_padding",
+                    5
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "intrinsic_metadata_t",
+            "id": 1,
+            "fields": [
+                [
+                    "mcast_grp",
+                    4
+                ],
+                [
+                    "egress_rid",
+                    4
+                ],
+                [
+                    "mcast_hash",
+                    16
+                ],
+                [
+                    "lf_field_list",
+                    32
+                ],
+                [
+                    "ingress_global_timestamp",
+                    64
+                ],
+                [
+                    "resubmit_flag",
+                    16
+                ],
+                [
+                    "recirculate_flag",
+                    16
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "hdrA_t",
+            "id": 2,
+            "fields": [
+                [
+                    "f1",
+                    8
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        }
+    ],
+    "headers": [
+        {
+            "name": "standard_metadata",
+            "id": 0,
+            "header_type": "standard_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "intrinsic_metadata",
+            "id": 1,
+            "header_type": "intrinsic_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "hdrA1",
+            "id": 2,
+            "header_type": "hdrA_t",
+            "metadata": false
+        },
+        {
+            "name": "hdrA2",
+            "id": 3,
+            "header_type": "hdrA_t",
+            "metadata": false
+        }
+    ],
+    "header_stacks": [],
+    "parsers": [
+        {
+            "name": "parser",
+            "id": 0,
+            "init_state": "start",
+            "parse_states": [
+                {
+                    "name": "start",
+                    "id": 0,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "hdrA1"
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "hdrA1",
+                                "f1"
+                            ]
+                        }
+                    ],
+                    "transitions": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x00",
+                            "mask": null,
+                            "next_state": null
+                        },
+                        {
+                            "type": "default",
+                            "value": null,
+                            "mask": null,
+                            "next_state": "more"
+                        }
+                    ]
+                },
+                {
+                    "name": "more",
+                    "id": 1,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "hdrA2"
+                                }
+                            ]
+                        },
+                        {
+                            "op": "set",
+                            "parameters": [
+                                {
+                                    "type": "field",
+                                    "value": [
+                                        "hdrA2",
+                                        "f1"
+                                    ]
+                                },
+                                {
+                                    "type": "hexstr",
+                                    "value": "0xab"
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "type": "default",
+                            "value": null,
+                            "mask": null,
+                            "next_state": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "parse_vsets": [],
+    "deparsers": [
+        {
+            "name": "deparser",
+            "id": 0,
+            "order": [
+                "hdrA1",
+                "hdrA2"
+            ]
+        }
+    ],
+    "meter_arrays": [],
+    "actions": [
+        {
+            "name": "loopback",
+            "id": 0,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_spec"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "ingress_port"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "recirc",
+            "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "hdrA1",
+                                "f1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "hdrA2"
+                        }
+                    ]
+                },
+                {
+                    "op": "recirculate",
+                    "parameters": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "ingress",
+            "id": 0,
+            "init_table": "t_loopback",
+            "tables": [
+                {
+                    "name": "t_loopback",
+                    "id": 0,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 16384,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "loopback"
+                    ],
+                    "next_tables": {
+                        "loopback": null
+                    },
+                    "default_entry": {
+                        "action_id": 0,
+                        "action_const": true,
+                        "action_data": [],
+                        "action_entry_const": false
+                    },
+                    "base_default_next": null
+                }
+            ],
+            "action_profiles": [],
+            "conditionals": []
+        },
+        {
+            "name": "egress",
+            "id": 1,
+            "init_table": "_condition_0",
+            "tables": [
+                {
+                    "name": "t_recirc",
+                    "id": 1,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 16384,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "recirc"
+                    ],
+                    "next_tables": {
+                        "recirc": null
+                    },
+                    "default_entry": {
+                        "action_id": 1,
+                        "action_const": true,
+                        "action_data": [],
+                        "action_entry_const": false
+                    },
+                    "base_default_next": null
+                }
+            ],
+            "action_profiles": [],
+            "conditionals": [
+                {
+                    "name": "_condition_0",
+                    "id": 0,
+                    "expression": {
+                        "type": "expression",
+                        "value": {
+                            "op": "==",
+                            "left": {
+                                "type": "field",
+                                "value": [
+                                    "standard_metadata",
+                                    "instance_type"
+                                ]
+                            },
+                            "right": {
+                                "type": "hexstr",
+                                "value": "0x0"
+                            }
+                        }
+                    },
+                    "true_next": "t_recirc",
+                    "false_next": null
+                }
+            ]
+        }
+    ],
+    "calculations": [],
+    "checksums": [],
+    "learn_lists": [],
+    "field_lists": [
+        {
+            "id": 1,
+            "name": "recirc_FL",
+            "elements": [
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "ingress_port"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "packet_length"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "egress_spec"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "egress_port"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "egress_instance"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "instance_type"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "clone_spec"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "_padding"
+                    ]
+                }
+            ]
+        }
+    ],
+    "counter_arrays": [],
+    "register_arrays": [],
+    "force_arith": [
+        [
+            "standard_metadata",
+            "ingress_port"
+        ],
+        [
+            "standard_metadata",
+            "packet_length"
+        ],
+        [
+            "standard_metadata",
+            "egress_spec"
+        ],
+        [
+            "standard_metadata",
+            "egress_port"
+        ],
+        [
+            "standard_metadata",
+            "egress_instance"
+        ],
+        [
+            "standard_metadata",
+            "instance_type"
+        ],
+        [
+            "standard_metadata",
+            "clone_spec"
+        ],
+        [
+            "standard_metadata",
+            "_padding"
+        ],
+        [
+            "intrinsic_metadata",
+            "mcast_grp"
+        ],
+        [
+            "intrinsic_metadata",
+            "egress_rid"
+        ],
+        [
+            "intrinsic_metadata",
+            "mcast_hash"
+        ],
+        [
+            "intrinsic_metadata",
+            "lf_field_list"
+        ],
+        [
+            "intrinsic_metadata",
+            "ingress_global_timestamp"
+        ],
+        [
+            "intrinsic_metadata",
+            "resubmit_flag"
+        ],
+        [
+            "intrinsic_metadata",
+            "recirculate_flag"
+        ]
+    ]
+}

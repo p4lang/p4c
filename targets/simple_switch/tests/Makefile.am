@@ -19,7 +19,8 @@ common_source = main.cpp utils.cpp utils.h
 TESTS = test_packet_redirect \
 test_truncate \
 test_swap \
-test_queueing
+test_queueing \
+test_recirc
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -28,16 +29,19 @@ test_packet_redirect_SOURCES = $(common_source) test_packet_redirect.cpp
 test_truncate_SOURCES = $(common_source) test_truncate.cpp
 test_swap_SOURCES = $(common_source) test_swap.cpp
 test_queueing_SOURCES = $(common_source) test_queueing.cpp
+test_recirc_SOURCES = $(common_source) test_recirc.cpp
 
 test_all_SOURCES = $(common_source) \
 test_packet_redirect.cpp \
 test_truncate.cpp \
 test_swap.cpp \
-test_queueing.cpp
+test_queueing.cpp \
+test_recirc.cpp
 
 EXTRA_DIST = \
 testdata/packet_redirect.json \
 testdata/truncate.json \
 testdata/swap_1.json \
 testdata/swap_2.json \
-testdata/queueing.json
+testdata/queueing.json \
+testdata/recirc.json

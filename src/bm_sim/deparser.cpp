@@ -42,7 +42,7 @@ Deparser::get_headers_size(const PHV &phv) const {
 
 void
 Deparser::deparse(Packet *pkt) const {
-  PHV *phv = pkt->get_phv();
+  const PHV *phv = pkt->get_phv();
   BMELOG(deparser_start, *pkt, *this);
   // TODO(antonin)
   // this is temporary while we experiment with the debugger
@@ -56,16 +56,14 @@ Deparser::deparse(Packet *pkt) const {
   // invalidating headers, and resetting header stacks is done in the Packet
   // destructor, when the PHV is released
   for (auto it = headers.begin(); it != headers.end(); ++it) {
-    Header &header = phv->get_header(*it);
+    const auto &header = phv->get_header(*it);
     if (header.is_valid()) {
       BMELOG(deparser_emit, *pkt, *it);
       BMLOG_DEBUG_PKT(*pkt, "Deparsing header '{}'", header.get_name());
       header.deparse(data + bytes_parsed);
       bytes_parsed += header.get_nbytes_packet();
-      // header.mark_invalid();
     }
   }
-  // phv->reset_header_stacks();
   BMELOG(deparser_done, *pkt, *this);
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),

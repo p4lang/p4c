@@ -150,6 +150,11 @@ class Packet final {
   //! length of the outgoing packet may be different.
   int get_ingress_length() const { return ingress_length; }
 
+  //! Sets the ingress_length. This may be needed for some architectures,
+  //! although usually it is better to create a new Packet object. See
+  //! get_ingress_length() for more information about ingress_length.
+  void set_ingress_length(int length) { ingress_length = length; }
+
   void set_payload_size(size_t size) { payload_size = size; }
 
   size_t get_payload_size() const { return payload_size; }
