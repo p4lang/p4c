@@ -53,14 +53,14 @@ control MyIC(
             a.srcAddr : exact;
         }
         actions = { NoAction; execute; }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
     }
     table tbl2 {
         key = {
             a.srcAddr : exact;
         }
         actions = { NoAction; execute; }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
     }
 
     apply {

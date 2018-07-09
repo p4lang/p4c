@@ -3,6 +3,8 @@
 
 struct EMPTY { };
 
+header EMPTY_H {};
+
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
@@ -16,8 +18,8 @@ parser MyIP(
     out ethernet_t eth,
     inout EMPTY b,
     in psa_ingress_parser_input_metadata_t c,
-    in EMPTY d,
-    in EMPTY e) {
+    in EMPTY_H d,
+    in EMPTY_H e) {
 
     state start {
         buffer.extract(eth);
@@ -31,8 +33,8 @@ parser MyEP(
     inout EMPTY b,
     in psa_egress_parser_input_metadata_t c,
     in EMPTY d,
-    in EMPTY e,
-    in EMPTY f) {
+    in EMPTY_H e,
+    in EMPTY_H f) {
     state start {
         transition accept;
     }
@@ -75,8 +77,8 @@ control MyEC(
 
 control MyID(
     packet_out buffer,
-    out EMPTY a,
-    out EMPTY b,
+    out EMPTY_H a,
+    out EMPTY_H b,
     out EMPTY c,
     inout ethernet_t d,
     in EMPTY e,
@@ -86,8 +88,8 @@ control MyID(
 
 control MyED(
     packet_out buffer,
-    out EMPTY a,
-    out EMPTY b,
+    out EMPTY_H a,
+    out EMPTY_H b,
     inout EMPTY c,
     in EMPTY d,
     in psa_egress_output_metadata_t e,

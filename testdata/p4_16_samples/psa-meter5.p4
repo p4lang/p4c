@@ -53,7 +53,7 @@ control MyIC(
             a.srcAddr : exact;
         }
         actions = { NoAction; }
-        psa_direct_meter = { meter0 };
+        psa_direct_meter = meter0;
     }
 
     apply {
