@@ -22,6 +22,8 @@ limitations under the License.
 
 #include <unistd.h>     // getopt()
 #include <ctype.h>      // isprint()
+#include <string.h>     // memcpy()
+#include <stdlib.h>     // malloc()
 #include "test.h"
 #ifdef CONTROL_PLANE
 #include "control.h"
