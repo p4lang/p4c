@@ -35,7 +35,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
         actions = {
             NoAction_0();
         }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
         default_action = NoAction_0();
     }
     apply {

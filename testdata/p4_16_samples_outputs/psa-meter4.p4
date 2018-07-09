@@ -33,7 +33,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
         actions = {
             NoAction;
         }
-        psa_direct_meter = { meter0 };
+        psa_direct_meter = meter0;
     }
     apply {
         tbl.apply();

@@ -44,7 +44,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
             NoAction_0();
             execute_0();
         }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
         default_action = NoAction_0();
     }
     @name("MyIC.tbl2") table tbl2 {
@@ -55,7 +55,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
             NoAction_3();
             execute_3();
         }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
         default_action = NoAction_3();
     }
     apply {

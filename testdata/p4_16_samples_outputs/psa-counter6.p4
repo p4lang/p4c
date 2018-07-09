@@ -37,7 +37,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
             NoAction;
             execute;
         }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
     }
     table tbl2 {
         key = {
@@ -47,7 +47,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
             NoAction;
             execute;
         }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
     }
     apply {
         tbl.apply();

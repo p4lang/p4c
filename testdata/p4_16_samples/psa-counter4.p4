@@ -50,7 +50,7 @@ control MyIC(
             a.srcAddr : exact;
         }
         actions = { NoAction; }
-        psa_direct_counter = { counter0 };
+        psa_direct_counter = counter0;
     }
 
     apply {
