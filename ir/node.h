@@ -85,10 +85,13 @@ class Node : public virtual INode {
  public:
     Util::SourceInfo    srcInfo;
     int id;  // unique id for each node
+    int clone_id;  // unique id this node was cloned from (recursively)
     void traceCreation() const;
-    Node() : id(currentId++) { traceCreation(); }
-    explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++) { traceCreation(); }
-    Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++) { traceCreation(); }
+    Node() : id(currentId++), clone_id(id) { traceCreation(); }
+    explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++), clone_id(id) {
+        traceCreation(); }
+    Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++), clone_id(other.clone_id) {
+        traceCreation(); }
     virtual ~Node() {}
     const Node *apply(Visitor &v) const;
     const Node *apply(Visitor &&v) const { return apply(v); }
