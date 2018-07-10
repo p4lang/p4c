@@ -43,4 +43,9 @@ set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES OBJECT_DEPENDS ${FLEX_IRgenLexer_OUTPUTS})
 build_unified(IRGENERATOR_SRCS ALL)
 add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
+# Unconditionally set the output directory for the irgenerator to the path
+# where the custom command that generates IR sources expects to find it.
+# The generator expression $<BOOL:1> prevents IDE generators like Xcode
+# from appending a per-configuration subdirectory to the specified path.
+set_property(TARGET irgenerator PROPERTY RUNTIME_OUTPUT_DIRECTORY $<$<BOOL:1>:${IR_GENERATOR_DIRECTORY}>)
 target_link_libraries (irgenerator p4ctoolkit ${P4C_LIB_DEPS})

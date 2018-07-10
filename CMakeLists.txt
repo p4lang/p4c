@@ -194,7 +194,10 @@ set (IR_GENERATED_SRCS
   ${P4C_BINARY_DIR}/ir/ir-generated.h
   ${P4C_BINARY_DIR}/ir/ir-generated.cpp
   ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
-set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
+# IR_GENERATOR_DIRECTORY is used to set the RUNTIME_OUTPUT_DIRECTORY property
+# of the irgenerator target to the matching path
+set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
+set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
@@ -279,7 +282,7 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h.fixup
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
   MAIN_DEPENDENCY ${IR_GENERATOR}
-  DEPENDS ${IR_DEF_FILES}
+  DEPENDS irgenerator ${IR_DEF_FILES}
   COMMENT "Generating IR class files")
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
