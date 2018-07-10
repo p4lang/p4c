@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_COMMONINLINING_H_
 #define _FRONTENDS_P4_COMMONINLINING_H_
 
+#include "frontends/p4/callGraph.h"
 #include "ir/ir.h"
 
 /**
