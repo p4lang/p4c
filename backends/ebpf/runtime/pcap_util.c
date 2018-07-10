@@ -48,18 +48,20 @@ pcap_list_t *append_packet(pcap_list_t *pkt_list, pcap_pkt *pkt) {
     return pkt_list;
 }
 
-pcap_list_array_t *append_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_list) {
+pcap_list_array_t *insert_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_list, uint16_t index) {
     if (!pkt_array)
         /* If the array is not allocated yet, create it */
         pkt_array = allocate_pkt_list_array();
-    pkt_array->len++;
-    pkt_array->lists = realloc(pkt_array->lists, pkt_array->len * sizeof(pcap_list_t *));
-    if (pkt_array->lists == NULL) {
-        fprintf(stderr, "Fatal: Failed to expand the "
-            "list array with size %u !\n", pkt_array->len);
-        exit(EXIT_FAILURE);
+    if (index >= pkt_array->len) {
+        pkt_array->lists = realloc(pkt_array->lists, (index+1) * sizeof(pcap_list_t *));
+        if (pkt_array->lists == NULL) {
+            fprintf(stderr, "Fatal: Failed to expand the "
+                "list array with size %u !\n", pkt_array->len);
+            exit(EXIT_FAILURE);
+        }
+        pkt_array->len = index+1;
     }
-    pkt_array->lists[pkt_array->len - 1] = pkt_list;
+    pkt_array->lists[index] = pkt_list;
     return pkt_array;
 }
 
@@ -124,7 +126,8 @@ pcap_list_t *read_pkts_from_pcap(const char *pcap_file_name, iface_index index) 
     pcap_t *in_handle;
     in_handle = pcap_open_offline(pcap_file_name, errbuf);
     if (in_handle == NULL) {
-        fprintf(stderr, "Error: Failed to reopen pcap file!\n");
+        fprintf(stderr, "Failed to open pcap file! %s \n", pcap_file_name );
+        perror("pcap_open_offline");
         return NULL;
     }
     pcap_list_t *pkt_list = NULL;
@@ -168,44 +171,57 @@ int write_pkts_to_pcap(const char *pcap_file_name, const pcap_list_t *list) {
     return EXIT_SUCCESS;
 }
 
-pcap_list_t *merge_pcap_lists(pcap_list_array_t *array) {
-    /* Get the total length of all individual lists combined first */
-    pcap_list_t *merged_list = NULL;
-
+pcap_list_t *delete_and_merge_pcap_lists(pcap_list_array_t *array, pcap_list_t *merged_list) {
     /* Fill the master list by copying over the individual packet descriptors */
     for (uint32_t i = 0; i < array->len; i++) {
             for (uint32_t j = 0; j < array->lists[i]->len; j++)
-                merged_list = append_packet(merged_list, array->lists[i]->pkts[j]);
+                merged_list = append_packet(
+                    merged_list, array->lists[i]->pkts[j]);
         /* We do not need the previous list anymore */
         free(array->lists[i]->pkts);
         free(array->lists[i]);
     }
+    /* Destroy the input array (but keep its data) */
     free(array->lists);
     free(array);
     return merged_list;
 }
 
-pcap_list_array_t *split_list_by_interface(pcap_list_t *input_list) {
-    pcap_list_array_t *result_arr = calloc(1, sizeof(pcap_list_array_t));
+pcap_list_array_t *delete_and_split_list(pcap_list_t *input_list, pcap_list_array_t *result_arr) {
     if (input_list->len == 0)
         return result_arr;
-    /* Allocate an empty list map with max size of possible interfaces */
-    pcap_list_t *pkt_lists = calloc(UINT16_MAX, sizeof(pcap_list_t));
-    for (uint32_t i = 0; i < input_list->len; i++)
-        append_packet(
-            &pkt_lists[input_list->pkts[i]->ifindex], input_list->pkts[i]);
-    for (uint16_t i = 0; i < UINT16_MAX; i++) {
-        if (pkt_lists[i].len != 0) {
-            pcap_list_t *pkt_list = malloc(sizeof(pcap_list_t));
-            memcpy(pkt_list,
-                &pkt_lists[input_list->pkts[i]->ifindex], sizeof(pcap_list_t));
-            result_arr = append_list(result_arr, pkt_list);
-        }
+    /* Find the maximum interface value in the list */
+
+    uint16_t max_index = 0;
+    for (uint32_t i = 0; i < input_list->len; i++){
+        if (input_list->pkts[i]->ifindex > max_index)
+            max_index = input_list->pkts[i]->ifindex;
     }
+
+    /* Allocate as many lists as the maximum index */
+    for (int i = 0; i <= max_index; i++) {
+        pcap_list_t *pkt_list = calloc(1, sizeof(pcap_list_t));
+        result_arr = insert_list(result_arr, pkt_list, i);
+    }
+
+    /* Fill each list with its respective packets */
+    for (uint32_t i = 0; i < input_list->len; i++)
+        append_packet(result_arr->lists[input_list->pkts[i]->ifindex], input_list->pkts[i]);
+
+    /* Destroy the input list (but keep its data) */
     free(input_list->pkts);
     free(input_list);
-    free(pkt_lists);
     return result_arr;
+}
+
+pcap_pkt *copy_pkt(pcap_pkt *src_pkt) {
+    pcap_pkt *new_pkt = malloc(sizeof(pcap_pkt));
+    uint32_t datalen = src_pkt->pcap_hdr.len;
+    new_pkt->data = malloc(datalen);
+    memcpy(new_pkt->data, src_pkt->data, datalen);
+    new_pkt->pcap_hdr = src_pkt->pcap_hdr;
+    new_pkt->ifindex = src_pkt->ifindex;
+    return new_pkt;
 }
 
 /* Rank packets based on the timestamp of the pcap header */
