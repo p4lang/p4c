@@ -632,9 +632,9 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             // Nothing to do here, we cannot even perform some sanity-checking.
             continue;
         } else {
-            ::error("Table '%1%': cannot represent match type '%2%' in P4Runtime",
-                    table->controlPlaneName(), matchTypeName);
-            break;
+            ::warning("Table '%1%': cannot represent match type '%2%' in P4Runtime, ignoring",
+                      table->controlPlaneName(), matchTypeName);
+            continue;
         }
 
         auto matchFieldName = explicitNameAnnotation(keyElement);
