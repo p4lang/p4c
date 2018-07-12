@@ -2148,7 +2148,6 @@ const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculat
         }
         result->fields.insert(result->fields.end(), fl->fields.begin(), fl->fields.end());
         result->payload = result->payload || fl->payload;
-        /* FIXME -- do something with fl->annotations? */
     }
     return result;
 }
@@ -2203,6 +2202,13 @@ void ProgramStructure::createChecksumVerifications() {
 
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
+
+            for (auto annot : cf->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
+            for (auto annot : flc->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
             LOG3("Converted " << flc);
         }
     }
@@ -2261,6 +2267,13 @@ void ProgramStructure::createChecksumUpdates() {
             args->push_back(new IR::Argument(algo));
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
+
+            for (auto annot : cf->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
+            for (auto annot : flc->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
             LOG3("Converted " << flc);
         }
     }
