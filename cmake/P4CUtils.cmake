@@ -109,7 +109,48 @@ macro(p4c_add_test_label tag newLabel testname)
   set_tests_properties(${__testname} PROPERTIES LABELS "${__labels};${newLabel}")
 endmacro(p4c_add_test_label)
 
-# generate all the tests specified in the testsuites
+# generate all the tests specified in the tests list
+# Arguments:
+#   - tag is a label for the set of tests, for example, p4, p14_to_16, bmv2, ebpf
+#   - driver is the script that is used to run the tests and compare the results
+#   - testsuite is a list of test names
+#   - xfail is a set of tests that are expected to fail
+#
+# The macro generates the test files in a directory prefixed by tag.
+#
+macro(p4c_add_test_list tag driver tests xfail)
+  set (__xfail_list "${xfail}")
+  set (__test_list "${tests}")
+  set (__testCounter 0)
+  set (__xfailCounter 0)
+  list (LENGTH __test_list __nTests)
+  foreach(t ${__test_list})
+    list (FIND __xfail_list ${t} __xfail_test)
+    if(__xfail_test GREATER -1)
+      p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}")
+      math (EXPR __xfailCounter "${__xfailCounter} + 1")
+    else()
+      p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}")
+    endif() # __xfail_test
+  endforeach() # tests
+  math (EXPR __testCounter "${__testCounter} + ${__nTests}")
+  # add the tag to the list
+  set (TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
+  MESSAGE(STATUS "Added ${__testCounter} tests to '${tag}' (${__xfailCounter} xfails)")
+endmacro(p4c_add_test_list)
+
+# generate a list of test name suffixes based on specified testsuites
+function(p4c_find_test_names testsuites tests)
+  foreach(ts "${testsuites}")
+    file (GLOB __testfiles RELATIVE ${P4C_SOURCE_DIR} ${ts})
+    list (APPEND __tests ${__testfiles})
+  endforeach()
+  set(${tests} "${__tests}" PARENT_SCOPE)
+endfunction()
+
+# generate all the tests specified in the testsuites: builds a list of tests
+# from the testsuite patterns by calling p4c_find_test_names then pass the list
+# to p4c_add_test_list
 # Arguments:
 #   - tag is a label for the set of tests, for example, p4, p14_to_16, bmv2, ebpf
 #   - driver is the script that is used to run the tests and compare the results
@@ -119,27 +160,21 @@ endmacro(p4c_add_test_label)
 # The macro generates the test files in a directory prefixed by tag.
 #
 macro(p4c_add_tests tag driver testsuites xfail)
-  set (__xfail_list "${xfail}")
-  set (__testCounter 0)
-  set (__xfailCounter 0)
-  foreach(ts "${testsuites}")
-    file (GLOB __testfiles RELATIVE ${P4C_SOURCE_DIR} ${ts})
-    list (LENGTH __testfiles __nTests)
-    foreach(t ${__testfiles})
-      list (FIND __xfail_list ${t} __xfail_test)
-      if(__xfail_test GREATER -1)
-        p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}")
-        math (EXPR __xfailCounter "${__xfailCounter} + 1")
-      else()
-        p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}")
-      endif() # __xfail_test
-    endforeach() # testfiles
-    math (EXPR __testCounter "${__testCounter} + ${__nTests}")
-  endforeach()
-  # add the tag to the list
-  set (TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
-  MESSAGE(STATUS "Added ${__testCounter} tests to '${tag}' (${__xfailCounter} xfails)")
+  set(__tests "")
+  p4c_find_test_names("${testsuites}" __tests)
+  p4c_add_test_list (${tag} ${driver} "${__tests}" "${xfail}" "${ARGN}")
 endmacro(p4c_add_tests)
+
+# same as p4c_add_tests but adds --p4runtime flag when invoking test driver
+# unless test is listed in p4rt_exclude
+macro(p4c_add_tests_w_p4runtime tag driver testsuites xfail p4rt_exclude)
+  p4c_find_test_names("${testsuites}" __tests)
+  set(__tests_no_p4runtime "${p4rt_exclude}")
+  set(__tests_p4runtime "${__tests}")
+  list (REMOVE_ITEM __tests_p4runtime ${__tests_no_p4runtime})
+  p4c_add_test_list (${tag} ${driver} "${__tests_no_p4runtime}" "${xfail}" "${ARGN}")
+  p4c_add_test_list (${tag} ${driver} "${__tests_p4runtime}" "${xfail}" "--p4runtime ${ARGN}")
+endmacro(p4c_add_tests_w_p4runtime)
 
 # add rules to make check and recheck for a specific test suite
 macro (p4c_add_make_check tag)
