@@ -104,6 +104,9 @@ template<> struct RegisterTraits<Arch::V1MODEL> {
         return P4V1::V1Model::instance.registers.name;
     }
     static const cstring sizeParamName() { return "size"; }
+    // the index of the type parameter for the data stored in the register, in
+    // the type parameter list of the extern type declaration
+    static size_t dataTypeParamIdx() { return 0; }
 };
 
 template<> struct RegisterTraits<Arch::PSA> {
@@ -112,6 +115,7 @@ template<> struct RegisterTraits<Arch::PSA> {
         return "Register";
     }
     static const cstring sizeParamName() { return "size"; }
+    static size_t dataTypeParamIdx() { return 0; }
 };
 
 template <Arch arch> struct CounterExtern { };
@@ -281,6 +285,7 @@ struct Register {
 
     /// @return the information required to serialize an @instance of register
     /// or boost::none in case of error.
+    template <Arch arch>
     static boost::optional<Register>
     from(const IR::ExternBlock* instance,
          const ReferenceMap* refMap,
@@ -304,9 +309,10 @@ struct Register {
         BUG_CHECK(declaration->type->is<IR::Type_Specialized>(),
                   "%1%: expected Type_Specialized", declaration->type);
         auto type = declaration->type->to<IR::Type_Specialized>();
-        BUG_CHECK(type->arguments->size() == 1,
-                  "%1%: expected one type argument", instance);
-        auto typeArg = type->arguments->at(0);
+        auto typeParamIdx = RegisterTraits<arch>::dataTypeParamIdx();
+        BUG_CHECK(type->arguments->size() > typeParamIdx,
+                  "%1%: expected at least %2% type arguments", instance, typeParamIdx + 1);
+        auto typeArg = type->arguments->at(typeParamIdx);
         auto typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
         CHECK_NULL(typeSpec);
 
@@ -518,7 +524,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto meter = Helpers::Counterlike<ArchMeterExtern>::from(externBlock);
             if (meter) addMeter(symbols, p4info, *meter);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
-            auto register_ = Register::from(externBlock, refMap, typeMap, p4RtTypeInfo);
+            auto register_ = Register::from<arch>(externBlock, refMap, typeMap, p4RtTypeInfo);
             if (register_) addRegister(symbols, p4info, *register_);
         } else if (externBlock->type->name == ActionProfileTraits<arch>::typeName() ||
                    externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
