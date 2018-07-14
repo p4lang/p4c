@@ -91,9 +91,7 @@ class IsMask : public IsLikeLeftValue {
             else if (mask->left->is<IR::Constant>())
                 expression = mask->right;
         }
-        auto isSimple = IsLikeLeftValue::isSimple(expression, ctxt);
-        std::cout << "is simple? " << expression << isSimple << std::endl;
-        return isSimple;
+        return IsLikeLeftValue::isSimple(expression, ctxt);
     }
 };
 
