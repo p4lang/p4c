@@ -100,7 +100,7 @@ class OrPolicy : public KeyIsSimple {
     KeyIsSimple* right;
 
  public:
-    OrPolicy(KeyIsSimple* left, KeyIsSimple* right) : left(left), right(right) 
+    OrPolicy(KeyIsSimple* left, KeyIsSimple* right) : left(left), right(right)
     { CHECK_NULL(left); CHECK_NULL(right); }
     bool isSimple(const IR::Expression* expression, const Visitor::Context* ctxt) {
         return left->isSimple(expression, ctxt) || right->isSimple(expression, ctxt);
