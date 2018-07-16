@@ -60,9 +60,6 @@ set (P4RUNTIME_EXCLUDE
   testdata/p4_16_samples/psa-counter5.p4
   # Need to convert PSA_MeterColor_t to a serializable enum
   testdata/p4_16_samples/psa-meter1.p4
-  # Compiler Bug: Type_Name is not a canonical type, use getTypeType()?
-  testdata/p4_16_samples/pvs-nested-struct.p4
-  testdata/p4_16_samples/pvs-struct.p4
   # error not supported in static entries, not strictly required for P4Info
   # generation though
   testdata/p4_16_samples/issue1062-bmv2.p4
