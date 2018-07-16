@@ -882,7 +882,8 @@ class P4RuntimeAnalyzer {
         // guaranteed by caller
         CHECK_NULL(inst);
 
-        auto bitwidth = static_cast<uint32_t>(inst->elementType->width_bits());
+        auto et = typeMap->getTypeType(inst->elementType, true);
+        auto bitwidth = static_cast<uint32_t>(et->width_bits());
         auto name = inst->controlPlaneName();
 
         unsigned int size = 0;
