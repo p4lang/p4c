@@ -24,7 +24,7 @@ limitations under the License.
  */
 struct pcap_list {
     pcap_pkt **pkts;
-    uint32_t len;
+    uint64_t len;
 };
 
 /* An array of lists of packets */
@@ -65,7 +65,7 @@ pcap_list_array_t *insert_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_li
     return pkt_array;
 }
 
-pcap_pkt *get_packet(pcap_list_t *list, uint32_t index) {
+pcap_pkt *get_packet(pcap_list_t *list, uint64_t index) {
     if (list->len < index) {
         fprintf(stderr, "Index %u exceeds list size %u!\n", index, list->len);
         return NULL;
@@ -81,7 +81,7 @@ pcap_list_t *get_list(pcap_list_array_t *array, uint16_t index) {
     return array->lists[index];
 }
 
-uint32_t get_pkt_list_length(pcap_list_t *pkt_list) {
+uint64_t get_pkt_list_length(pcap_list_t *pkt_list) {
     return pkt_list->len;
 }
 
@@ -101,7 +101,7 @@ pcap_list_array_t *allocate_pkt_list_array() {
 }
 
 void delete_list(pcap_list_t *pkt_list) {
-    for(uint32_t i = 0; i < pkt_list->len; i++) {
+    for(uint64_t i = 0; i < pkt_list->len; i++) {
         free(pkt_list->pkts[i]->data);
         /* Set the data pointer to NULL, to mitigate duplicate frees */
         pkt_list->pkts[i]->data = NULL;
@@ -112,7 +112,7 @@ void delete_list(pcap_list_t *pkt_list) {
 }
 
 void delete_array(pcap_list_array_t *pkt_list_array) {
-    for(uint32_t i = 0; i< pkt_list_array->len; i++)
+    for(uint64_t i = 0; i< pkt_list_array->len; i++)
         if (pkt_list_array->lists[i])
             delete_list(pkt_list_array->lists[i]);
     free(pkt_list_array->lists);
@@ -164,7 +164,7 @@ int write_pkts_to_pcap(const char *pcap_file_name, const pcap_list_t *list) {
         pcap_close(in_handle);
         return EXIT_FAILURE;
     }
-    for (uint32_t i = 0; i < list->len; i++)
+    for (uint64_t i = 0; i < list->len; i++)
         pcap_dump((unsigned char *)out_handle,
          &list->pkts[i]->pcap_hdr, list->pkts[i]->data);
     pcap_close(in_handle);
@@ -174,8 +174,8 @@ int write_pkts_to_pcap(const char *pcap_file_name, const pcap_list_t *list) {
 
 pcap_list_t *merge_and_delete_lists(pcap_list_array_t *array, pcap_list_t *merged_list) {
     /* Fill the master list by copying over the individual packet descriptors */
-    for (uint32_t i = 0; i < array->len; i++) {
-            for (uint32_t j = 0; j < array->lists[i]->len; j++)
+    for (uint64_t i = 0; i < array->len; i++) {
+            for (uint64_t j = 0; j < array->lists[i]->len; j++)
                 merged_list = append_packet(
                     merged_list, array->lists[i]->pkts[j]);
         /* We do not need the previous list anymore */
@@ -194,7 +194,7 @@ pcap_list_array_t *split_and_delete_list(pcap_list_t *input_list, pcap_list_arra
     /* Find the maximum interface value in the list */
 
     uint16_t max_index = 0;
-    for (uint32_t i = 0; i < input_list->len; i++){
+    for (uint64_t i = 0; i < input_list->len; i++){
         if (input_list->pkts[i]->ifindex > max_index)
             max_index = input_list->pkts[i]->ifindex;
     }
@@ -206,7 +206,7 @@ pcap_list_array_t *split_and_delete_list(pcap_list_t *input_list, pcap_list_arra
     }
 
     /* Fill each list with its respective packets */
-    for (uint32_t i = 0; i < input_list->len; i++)
+    for (uint64_t i = 0; i < input_list->len; i++)
         append_packet(result_arr->lists[input_list->pkts[i]->ifindex], input_list->pkts[i]);
 
     /* Destroy the input list (but keep its data) */
