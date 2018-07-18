@@ -53,13 +53,17 @@ pcap_list_array_t *insert_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_li
         /* If the array is not allocated yet, create it */
         pkt_array = allocate_pkt_list_array();
     if (index >= pkt_array->len) {
-        pkt_array->lists = realloc(pkt_array->lists, (index+1) * sizeof(pcap_list_t *));
+        pkt_array->lists = realloc(pkt_array->lists,
+            (index + 1) * sizeof(pcap_list_t *));
         if (pkt_array->lists == NULL) {
             fprintf(stderr, "Fatal: Failed to expand the "
                 "list array with size %u !\n", pkt_array->len);
             exit(EXIT_FAILURE);
         }
-        pkt_array->len = index+1;
+        /* Set the newly allocated space to zero */
+        for (int i = pkt_array->len; i <= index; i++)
+            pkt_array->lists[i] = NULL;
+        pkt_array->len = index + 1;
     }
     pkt_array->lists[index] = pkt_list;
     return pkt_array;
