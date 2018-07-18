@@ -164,7 +164,6 @@ class SimpleSwitchBackend : public Backend {
     V1ProgramStructure* structure;
 
  protected:
-    cstring convertHashAlgorithm(cstring algorithm);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
 

@@ -236,6 +236,10 @@ ExternConverter::convertHashAlgorithm(cstring algorithm) {
         result = "random";
     else if (algorithm == P4V1::V1Model::instance.algorithm.identity.name)
         result = "identity";
+    else if (algorithm == P4V1::V1Model::instance.algorithm.csum16.name)
+        result = "csum16";
+    else if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name)
+        result = "xor16";
     else
         ::error("%1%: unexpected algorithm", algorithm);
     return result;

@@ -32,6 +32,8 @@ void ToP4::end_apply(const IR::Node*) {
         *outStream << result.c_str();
         outStream->flush();
     }
+    BUG_CHECK(listTerminators.empty(), "Non-empty listTerminators");
+    BUG_CHECK(vectorSeparator.empty(), "Non-empty vectorSeparator");
 }
 
 // Try to guess whether a file is a "system" file
@@ -1304,6 +1306,7 @@ bool ToP4::preorder(const IR::Entry *e) {
     else
         setListTerm("(", ")");
     visit(e->keys);
+    doneList();
     builder.append(" : ");
     visit(e->action);
     visit(e->annotations);

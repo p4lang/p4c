@@ -798,7 +798,7 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
         modelError("%1%: expected a member", hash->getNode());
         return;
     }
-    auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
     selector->emplace("algo", algo);
     auto input = ctxt->selector_check->get_selector_input(
         c->to<IR::Declaration_Instance>());
