@@ -327,9 +327,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     if (expression->expr->is<IR::Member>()) {
         auto mem = expression->expr->to<IR::Member>();
         auto memtype = typeMap->getType(mem->expr, true);
-            // array.next.field => type: "stack_field", value: [ array, field ]
+        // array.next.field => type: "stack_field", value: [ array, field ]
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
-            auto l = get(expression->expr);
+            auto l = get(mem->expr);
             CHECK_NULL(l);
             result->emplace("type", "stack_field");
             auto e = mkArrayField(result, "value");
@@ -354,7 +354,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             // Refer to that instance directly.
             result->emplace("type", "header");
             result->emplace("value", fieldName);
-        } else if (parentType->is<IR::Type_Stack>() && expression->member == IR::Type_Stack::lastIndex) {
+        } else if (parentType->is<IR::Type_Stack>() &&
+                   expression->member == IR::Type_Stack::lastIndex) {
             auto l = get(expression->expr);
             CHECK_NULL(l);
             result->emplace("type", "expression");
