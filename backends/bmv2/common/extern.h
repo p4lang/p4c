@@ -69,7 +69,7 @@ class ExternConverter {
                         cstring listName, Util::JsonArray* field_lists);
     cstring createCalculation(ConversionContext* ctxt, cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
-    cstring convertHashAlgorithm(cstring algorithm);
+    static cstring convertHashAlgorithm(cstring algorithm);
 };
 
 #define EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(extern_name, model_type, model_name, ...)  \

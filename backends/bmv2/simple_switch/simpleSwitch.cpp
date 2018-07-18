@@ -627,7 +627,7 @@ CONVERT_EXTERN_INSTANCE(action_profile) {
             modelError("%1%: expected a member", hash->getNode());
             return;
         }
-        auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+        auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
         auto input = ctxt->selector_check->get_selector_input(
             c->to<IR::Declaration_Instance>());
@@ -682,7 +682,7 @@ CONVERT_EXTERN_INSTANCE(action_selector) {
             modelError("%1%: expected a member", hash->getNode());
             return;
         }
-        auto algo = convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+        auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
         auto input = ctxt->selector_check->get_selector_input(
             c->to<IR::Declaration_Instance>());
@@ -708,26 +708,6 @@ void
 SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const {
     ::error(format, node);
     ::error("Are you using an up-to-date v1model.p4?");
-}
-
-cstring
-SimpleSwitchBackend::convertHashAlgorithm(cstring algorithm) {
-    cstring result;
-    if (algorithm == v1model.algorithm.crc32.name)
-        result = "crc32";
-    else if (algorithm == v1model.algorithm.crc32_custom.name)
-        result = "crc32_custom";
-    else if (algorithm == v1model.algorithm.crc16.name)
-        result = "crc16";
-    else if (algorithm == v1model.algorithm.crc16_custom.name)
-        result = "crc16_custom";
-    else if (algorithm == v1model.algorithm.random.name)
-        result = "random";
-    else if (algorithm == v1model.algorithm.identity.name)
-        result = "identity";
-    else
-        ::error("%1%: unexpected algorithm", algorithm);
-    return result;
 }
 
 cstring
@@ -797,13 +777,9 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                     auto cksum = new Util::JsonObject();
                     auto ei = P4::EnumInstance::resolve(
                         mi->expr->arguments->at(3)->expression, typeMap);
-                    if (ei->name != "csum16") {
-                        ::error("%1%: the only supported algorithm is csum16",
-                                mi->expr->arguments->at(3)->expression);
-                        return;
-                    }
+                    cstring algo = ExternConverter::convertHashAlgorithm(ei->name);
                     cstring calcName = createCalculation(
-                        ei->name, mi->expr->arguments->at(1)->expression,
+                        algo, mi->expr->arguments->at(1)->expression,
                         calculations, usePayload, mc);
                     cksum->emplace("name", refMap->newName("cksum_"));
                     cksum->emplace("id", nextId("checksums"));
