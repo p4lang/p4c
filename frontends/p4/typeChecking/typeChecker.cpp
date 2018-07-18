@@ -2490,8 +2490,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             setType(expression, IR::Type_Bits::get(32));
             return expression;
         } else if (member == IR::Type_Stack::lastIndex) {
-            setType(getOriginal(), IR::Type_Bits::get(32, true));
-            setType(expression, IR::Type_Bits::get(32, true));
+            setType(getOriginal(), IR::Type_Bits::get(32, false));
+            setType(expression, IR::Type_Bits::get(32, false));
             return expression;
         } else if (member == IR::Type_Stack::push_front ||
                    member == IR::Type_Stack::pop_front) {

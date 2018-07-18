@@ -323,12 +323,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         return;
     }
 
-    // handle stack params
     bool done = false;
     if (expression->expr->is<IR::Member>()) {
-        // array.next.field => type: "stack_field", value: [ array, field ]
         auto mem = expression->expr->to<IR::Member>();
         auto memtype = typeMap->getType(mem->expr, true);
+        // array.last.field => type: "stack_field", value: [ array, field ]
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
             auto l = get(mem->expr);
             CHECK_NULL(l);
@@ -355,6 +354,16 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             // Refer to that instance directly.
             result->emplace("type", "header");
             result->emplace("value", fieldName);
+        } else if (parentType->is<IR::Type_Stack>() &&
+                   expression->member == IR::Type_Stack::lastIndex) {
+            auto l = get(expression->expr);
+            CHECK_NULL(l);
+            result->emplace("type", "expression");
+            auto e = new Util::JsonObject();
+            result->emplace("value", e);
+            e->emplace("op", "last_stack_index");
+            e->emplace("left", Util::JsonValue::null);
+            e->emplace("right", l);
         } else {
             result->emplace("type", "field");
             auto e = mkArrayField(result, "value");

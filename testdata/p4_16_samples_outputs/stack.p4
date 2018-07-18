@@ -11,7 +11,7 @@ parser p() {
         b = stack.last;
         stack[2] = b;
         b = stack.next;
-        int<32> e = stack.lastIndex;
+        bit<32> e = stack.lastIndex;
         transition accept;
     }
 }
