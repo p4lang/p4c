@@ -31,9 +31,11 @@ limitations under the License.
 #include "pcap_util.h"
 
 #define FILE_NAME_MAX 256
+#define MAX_10_UINT16 5;
 #define PCAPIN  "_in.pcap"
 #define PCAPOUT "_out.pcap"
 #define DELIM   '_'
+
 
 static int debug = 0;
 
@@ -47,9 +49,32 @@ void usage(char *name) {
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "\t-d: Turn on debug messages\n");
     fprintf(stderr, "\t-f: The input pcap file\n");
-    fprintf(stderr, "\t-n: Specifies the number of input interfaces\n");
+    fprintf(stderr, "\t-n: Specifies the number of input pcap files\n");
     exit(EXIT_FAILURE);
 }
+
+
+/**
+ * @brief Create a pcap file name from a given base name, interface index,
+ * and suffix. Return value must be deallocated after usage.
+ * @param pcap_base The file base name.
+ * @param index The index of the file, represent an interface.
+ * @param suffix  Filename suffix (e.g., _in.pcap)
+ * @return An allocated string containing the file name.
+ */
+static char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
+    /* Dynamic string length plus max decimal representation of uint16_t */
+    int file_length = strlen(pcap_base) + strlen(suffix) + MAX_10_UINT16;
+    char *pcap_name = malloc(file_length);
+    int offset = snprintf(pcap_name, file_length,"%s%d%s",
+                    pcap_base, index, suffix);
+    if (offset >= FILE_NAME_MAX) {
+        fprintf(stderr, "Name %s%d%s too long.\n", pcap_base, index, suffix);
+        exit(EXIT_FAILURE);
+    }
+    return pcap_name;
+}
+
 /**
  * @brief Feed a list packets into an eBPF program.
  * @details This is a mock function emulating the behavior of a running
@@ -72,12 +97,11 @@ static pcap_list_t *feed_packets(pcap_list_t *pkt_list) {
         skb.len = input_pkt->pcap_hdr.len;
         int result = ebpf_filter(&skb);
         if (result != 0) {
-            /* We copy the entire content to emulate an outgoing packet */
             pcap_pkt *out_pkt = copy_pkt(input_pkt);
             output_pkts = append_packet(output_pkts, out_pkt);
         }
         if (debug)
-            printf("Result of the eBPF parsing is: %d\n", result);
+            printf("eBPF filter decision is: %d\n", result);
     }
     return output_pkts;
 }
@@ -85,26 +109,22 @@ static pcap_list_t *feed_packets(pcap_list_t *pkt_list) {
 static void write_pkts_to_pcaps(const char *pcap_base, pcap_list_array_t *output_array) {
     uint16_t arr_len = get_list_array_length(output_array);
     for (uint16_t i = 0; i < arr_len; i++) {
-        char pcap_out_name[FILE_NAME_MAX];
-        if (snprintf(pcap_out_name, FILE_NAME_MAX, "%s%d%s", pcap_base, i, PCAPOUT) >=FILE_NAME_MAX) {
-            fprintf(stderr, "Filename %s%d%s too long. Truncated.\n"
-                ,pcap_base, i, PCAPIN);
-            exit(EXIT_FAILURE);
-        }
+        char *pcap_out_name = generate_pcap_name(pcap_base, i, PCAPOUT);
         if (debug)
             printf("Processing output file: %s\n", pcap_out_name);
         pcap_list_t *out_list = get_list(output_array, i);
         write_pkts_to_pcap(pcap_out_name, out_list);
+        free(pcap_out_name);
     }
 }
 
 static void *run_and_record_output(const char *pcap_base, pcap_list_t *pkt_list) {
     /* Create an array of packet lists */
-    pcap_list_array_t *output_array = NULL;
+    pcap_list_array_t *output_array = allocate_pkt_list_array();
     /* Feed the packets into our "loaded" program */
     pcap_list_t *output_pkts = feed_packets(pkt_list);
     /* Split the output packet list by interface. This destroys the list. */
-    output_array = delete_and_split_list(output_pkts, output_array);
+    output_array = split_and_delete_list(output_pkts, output_array);
     /* Write each list to a separate pcap output file */
     write_pkts_to_pcaps(pcap_base, output_array);
     /* Delete the array, including the data it is holding */
@@ -115,38 +135,33 @@ static pcap_list_t *get_packets(const char *pcap_base, uint16_t num_pcaps, pcap_
     pcap_list_array_t *tmp_list_array = allocate_pkt_list_array();
     /* Retrieve a list for each file and append it to the temporary array */
     for (uint16_t i = 0; i < num_pcaps; i++) {
-        char pcap_in_name[FILE_NAME_MAX];
-        if (snprintf(pcap_in_name, FILE_NAME_MAX, "%s%d%s", pcap_base, i, PCAPIN) >=FILE_NAME_MAX) {
-            fprintf(stderr, "Filename %s%d%s too long. Truncated.\n"
-                ,pcap_base, i, PCAPIN);
-            exit(EXIT_FAILURE);
-        }
-
+        char *pcap_in_name = generate_pcap_name(pcap_base, i, PCAPIN);
         if (debug)
             printf("Processing input file: %s\n", pcap_in_name);
         pcap_list_t *pkt_list = read_pkts_from_pcap(pcap_in_name, i);
         tmp_list_array = insert_list(tmp_list_array, pkt_list, i);
+        free(pcap_in_name);
     }
     /* Merge the array into a newly allocated list. This destroys the array. */
-    return delete_and_merge_pcap_lists(tmp_list_array, merged_list);
+    return merge_and_delete_lists(tmp_list_array, merged_list);
 }
 
 void launch_runtime(const char *pcap_name, uint16_t num_pcaps) {
-    /* Initialize the list of input packets */
-    pcap_list_t *input_list = NULL;
     if (num_pcaps == 0)
         return;
+    /* Initialize the list of input packets */
+    pcap_list_t *input_list = allocate_pkt_list();
 
     /* Create the basic pcap filename from the input */
     const char *suffix = strrchr(pcap_name, DELIM);
     if (suffix == NULL) {
-        fprintf(stderr, "Delimiter not found in %s! Exiting...\n",pcap_name);
+        fprintf(stderr, "Expected a filename with delimiter \"%c\"."
+            "Not found in %s! Exiting...\n", DELIM, pcap_name);
         exit(EXIT_FAILURE);
     }
     int baselen = suffix - pcap_name;
     char pcap_base[baselen + 1];
-    strncpy(pcap_base, pcap_name, baselen);
-    pcap_base[baselen] = '\0';
+    snprintf(pcap_base, baselen + 1 , "%s", pcap_name);
 
     /* Open all matching pcap files retrieve a merged list of packets */
     input_list = get_packets(pcap_base, num_pcaps, input_list);
@@ -173,7 +188,8 @@ int main(int argc, char **argv) {
                 num_pcaps = (int)strtol(optarg, (char **)NULL, 10);
                 if (num_pcaps < 0 || num_pcaps > UINT16_MAX) {
                     fprintf(stderr,
-                        "Number of interfaces out of bounds! Maximum is %d\n", UINT16_MAX);
+                        "Number of inputs out of bounds! Maximum is %d\n",
+                        UINT16_MAX);
                     return EXIT_FAILURE;
                 }
             break;
@@ -183,12 +199,12 @@ int main(int argc, char **argv) {
             case '?':
                 if (optopt == 'f')
                     fprintf(stderr, "The input trace file is missing. "
-                     "Expected .pcap file as input argument.\n");
+                        "Expected .pcap file as input argument.\n");
                 else if (isprint (optopt))
                     fprintf (stderr, "Unknown option `-%c'.\n", optopt);
                 else
-                    fprintf(stderr,"Unknown option character `\\x%x'.\n"
-                        , optopt);
+                    fprintf(stderr,"Unknown option character `\\x%x'.\n",
+                        optopt);
                     return EXIT_FAILURE;
             default:
                 usage(argv[0]);
@@ -196,7 +212,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    /* Check if there was actually any file or number input. */
+    /* Check if there was actually any file or number input */
     if (!pcap_name || num_pcaps == -1) {
         usage(argv[0]);
     }

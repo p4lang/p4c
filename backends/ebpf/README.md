@@ -181,10 +181,10 @@ dataplane/control-plane APIs.
 
 ### Dependencies
 
-EBPF programs require a Linux kernel with version 4.15 or newer.
+Our eBPF programs require a Linux kernel with version 4.15 or newer.
 In addition the following packages and programs are required to run the full test suite:
 
-- Clang 3.3 and llvm 3.7.1 or later are required.
+- Clang 3.3 and llvm 3.7.1 or later are required. (Note: In some versions of Ubuntu Xenial (16.04.4) CMake crashes when checking for llvm. Until the bugfix is committed upstream, workarounds are available in the following issue: https://github.com/p4lang/p4c/issues/1376
 
 - libpcap-dev to parse and generate .pcap files.
 
@@ -192,14 +192,20 @@ In addition the following packages and programs are required to run the full tes
 
 - iproute2 to use tc/ip commands to load eBPF programs.
 
+- net-tools (if not installed already)
+
+Additionally, the eBPF compiler test suite has the following python dependencies:
+
 - The python iproute2 package to create virtual interfaces.
 
 - The python ply package to parse .stf testing files.
 
+- The python scapy package to read and write pcap files.
+
 You can install these using:
 ```
-$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2
-$ sudo pip install pyroute2 ply
+$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools
+$ sudo pip install pyroute2 ply scapy
 ```
 
 ### Supported capabilities

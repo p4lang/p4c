@@ -219,11 +219,11 @@ class EBPFKernelTarget(EBPFTarget):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Creating the bridge...")
         ipr = IPRoute()
-        ipr.link_create(ifname=br_name, kind='bridge')
+        ipr.link('add', ifname=br_name, kind='bridge')
         for index in (range(len(self.expected))):
             if_bridge = "%s_%d" % (br_name, index)
             if_veth = "veth_%s_%d" % (br_name, index)
-            ipr.link_create(ifname=if_veth, kind="veth", peer=if_bridge)
+            ipr.link('add', ifname=if_veth, kind="veth", peer=if_bridge)
             ipr.link('set', index=ipr.link_lookup(ifname=if_veth)[
                      0], master=ipr.link_lookup(ifname=br_name)[0])
         ipr.link("set", index=ipr.link_lookup(ifname=br_name), state="up")
@@ -232,10 +232,10 @@ class EBPFKernelTarget(EBPFTarget):
         report_output(self.outputs["stdout"],
                       self.options.verbose, "Deleting the bridge...")
         ipr = IPRoute()
-        ipr.link_remove(index=ipr.link_lookup(ifname=br_name)[0])
+        ipr.link('del', index=ipr.link_lookup(ifname=br_name)[0])
         for index in (range(len(self.expected))):
             if_bridge = "%s_%d" % (br_name, index)
-            ipr.link_remove(index=ipr.link_lookup(ifname=if_bridge)[0])
+            ipr.link('del', index=ipr.link_lookup(ifname=if_bridge)[0])
 
     def _compile_ebpf(self, ebpfdir):
         args = self.get_make_args(ebpfdir, self.options.target)

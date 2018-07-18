@@ -18,7 +18,7 @@ limitations under the License.
 #include <string.h>     // memcpy()
 #include "pcap_util.h"
 
-#define DLT_EN10MB 1
+#define DLT_EN10MB 1  // Ethernet Link Type, see also 'man pcap-linktype'
 
 /* Dynamically-allocated list of packets.
  */
@@ -101,7 +101,7 @@ pcap_list_array_t *allocate_pkt_list_array() {
 }
 
 void delete_list(pcap_list_t *pkt_list) {
-    for(uint32_t i = 0; i< pkt_list->len; i++) {
+    for(uint32_t i = 0; i < pkt_list->len; i++) {
         free(pkt_list->pkts[i]->data);
         /* Set the data pointer to NULL, to mitigate duplicate frees */
         pkt_list->pkts[i]->data = NULL;
@@ -113,7 +113,8 @@ void delete_list(pcap_list_t *pkt_list) {
 
 void delete_array(pcap_list_array_t *pkt_list_array) {
     for(uint32_t i = 0; i< pkt_list_array->len; i++)
-        delete_list(pkt_list_array->lists[i]);
+        if (pkt_list_array->lists[i])
+            delete_list(pkt_list_array->lists[i]);
     free(pkt_list_array->lists);
     free(pkt_list_array);
 }
@@ -130,7 +131,7 @@ pcap_list_t *read_pkts_from_pcap(const char *pcap_file_name, iface_index index) 
         perror("pcap_open_offline");
         return NULL;
     }
-    pcap_list_t *pkt_list = NULL;
+    pcap_list_t *pkt_list = allocate_pkt_list();
     /* Fill the packet list with packets */
     while ((ret = pcap_next_ex(in_handle, &pcap_hdr, &tmp_pkt)) == 1) {
         /* Save the data we extracted from the pcap buffer */
@@ -171,7 +172,7 @@ int write_pkts_to_pcap(const char *pcap_file_name, const pcap_list_t *list) {
     return EXIT_SUCCESS;
 }
 
-pcap_list_t *delete_and_merge_pcap_lists(pcap_list_array_t *array, pcap_list_t *merged_list) {
+pcap_list_t *merge_and_delete_lists(pcap_list_array_t *array, pcap_list_t *merged_list) {
     /* Fill the master list by copying over the individual packet descriptors */
     for (uint32_t i = 0; i < array->len; i++) {
             for (uint32_t j = 0; j < array->lists[i]->len; j++)
@@ -187,7 +188,7 @@ pcap_list_t *delete_and_merge_pcap_lists(pcap_list_array_t *array, pcap_list_t *
     return merged_list;
 }
 
-pcap_list_array_t *delete_and_split_list(pcap_list_t *input_list, pcap_list_array_t *result_arr) {
+pcap_list_array_t *split_and_delete_list(pcap_list_t *input_list, pcap_list_array_t *result_arr) {
     if (input_list->len == 0)
         return result_arr;
     /* Find the maximum interface value in the list */
@@ -200,7 +201,7 @@ pcap_list_array_t *delete_and_split_list(pcap_list_t *input_list, pcap_list_arra
 
     /* Allocate as many lists as the maximum index */
     for (int i = 0; i <= max_index; i++) {
-        pcap_list_t *pkt_list = calloc(1, sizeof(pcap_list_t));
+        pcap_list_t *pkt_list = allocate_pkt_list();
         result_arr = insert_list(result_arr, pkt_list, i);
     }
 

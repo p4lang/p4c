@@ -82,7 +82,7 @@ int write_pkts_to_pcap(const char *pcap_file_name, const pcap_list_t *pkt_list);
  * @return A single merged list contained all packets. Null if the operation
  * the fails.
  */
-pcap_list_t *delete_and_merge_pcap_lists(pcap_list_array_t *array, pcap_list_t *merged_list);
+pcap_list_t *merge_and_delete_lists(pcap_list_array_t *array, pcap_list_t *merged_list);
 
 /**
  * @brief Splits a list of packets by interface.
@@ -95,7 +95,7 @@ pcap_list_t *delete_and_merge_pcap_lists(pcap_list_array_t *array, pcap_list_t *
 
  * @return The updated array containing the new lists.
  */
-pcap_list_array_t *delete_and_split_list(pcap_list_t *input_list, pcap_list_array_t *result_arr);
+pcap_list_array_t *split_and_delete_list(pcap_list_t *input_list, pcap_list_array_t *result_arr);
 
 /**
  * @brief Appends a  packet to a given list of packets.

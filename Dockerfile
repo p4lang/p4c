@@ -32,7 +32,8 @@ ENV P4C_EBPF_DEPS libpcap-dev \
              libelf-dev \
              llvm \
              clang \
-             iproute2
+             iproute2 \
+             net-tools
 ENV P4C_RUNTIME_DEPS cpp \
                      libboost-graph1.58.0 \
                      libboost-iostreams1.58.0 \
@@ -42,7 +43,8 @@ ENV P4C_RUNTIME_DEPS cpp \
                      python
 ENV P4C_PIP_PACKAGES tenjin \
                      pyroute2 \
-                     ply
+                     ply \
+                     scapy
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
