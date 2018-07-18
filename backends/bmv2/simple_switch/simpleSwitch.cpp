@@ -712,8 +712,8 @@ SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const 
 
 cstring
 SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* fields,
-                                Util::JsonArray* calculations, bool withPayload,
-                                const IR::Node* sourcePositionNode = nullptr) {
+                                       Util::JsonArray* calculations, bool withPayload,
+                                       const IR::Node* sourcePositionNode = nullptr) {
     cstring calcName = refMap->newName("calc_");
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
