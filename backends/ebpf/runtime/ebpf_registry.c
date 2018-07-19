@@ -99,7 +99,6 @@ int registry_delete_tbl(const char *name) {
         bpf_map_delete_map(tmp_reg->tbl->bpf_map);
         HASH_DELETE(h_name, reg_tables_name, tmp_reg);
         HASH_DELETE(h_id, reg_tables_id, tmp_reg);
-        free(tmp_reg->tbl);
         free(tmp_reg);
         return  EXIT_SUCCESS;
     }

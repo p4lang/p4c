@@ -20,12 +20,9 @@ limitations under the License.
  * This header file may change substantially.
  */
 
-#ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_KERNEL_H_
-#define BACKENDS_EBPF_BPFINCLUDE_EBPF_KERNEL_H_
+#ifndef BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
+#define BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
 
-// #include <linux/skbuff.h>
-// #include <linux/netdevice.h>
-// #include <linux/version.h>
 #include <linux/bpf.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -152,4 +149,4 @@ struct bpf_map_def SEC("maps") NAME = {          \
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \
     bpf_map_update_elem(&table, key, value, flags)
 
-#endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_KERNEL_H_
+#endif  // BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_

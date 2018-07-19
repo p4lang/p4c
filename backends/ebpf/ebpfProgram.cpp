@@ -134,7 +134,7 @@ void EBPFProgram::emitH(CodeBuilder* builder, cstring) {
     emitTypes(builder);
     control->emitTableTypes(builder);
     builder->appendLine("#if CONTROL_PLANE");
-    builder->appendLine("static void initialize_tables() ");
+    builder->appendLine("static void init_tables() ");
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat("u32 %s = 0;", zeroKey.c_str());

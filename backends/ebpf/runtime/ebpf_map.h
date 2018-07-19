@@ -19,8 +19,8 @@ limitations under the License.
  * of the kernel ebpf map API. This library is currently not thread-safe.
  */
 
-#ifndef BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
-#define BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
+#ifndef BACKENDS_EBPF_RUNTIME_EBPF_MAP_H_
+#define BACKENDS_EBPF_RUNTIME_EBPF_MAP_H_
 
 #include "contrib/uthash.h"  // exports string.h, stddef.h, and stdlib.h
 
@@ -68,4 +68,4 @@ int bpf_map_delete_elem(struct bpf_map *map, void *key, unsigned int key_size);
 int bpf_map_delete_map(struct bpf_map *map);
 
 
-#endif  // BACKENDS_EBPF_BPFINCLUDE_EBPF_MAP_H_
+#endif  // BACKENDS_EBPF_RUNTIME_EBPF_MAP_H_

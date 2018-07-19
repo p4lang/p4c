@@ -82,7 +82,7 @@ def create_table_file(actions, tmpdir, file_name):
     the control plane. """
     with open(tmpdir + "/" + file_name, "w+") as control_file:
         control_file.write("#include \"test.h\"\n\n")
-        control_file.write("static inline void generated_init() {\n\t")
+        control_file.write("static inline void setup_control_plane() {\n\t")
         control_file.write("int ok;\n\t")
         generated_cmds = _generate_control_actions(actions)
         control_file.write(generated_cmds)
