@@ -159,7 +159,25 @@ class EBPFTarget(object):
     def run(self):
         # To override
         """ Runs the filter and feeds attached interfaces with packets """
-        return SUCCESS
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Running model")
+        direction = "in"
+        pcap_pattern = self.filename('', direction)
+        num_files = len(glob(self.filename('*', direction)))
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
+        # Main executable
+        args = [self.template]
+        # Input pcap pattern
+        args.extend(["-f", pcap_pattern])
+        # Number of input interfaces
+        args.extend(["-n", str(num_files)])
+        # Debug flag (verbose output)
+        args.append("-d")
+        errmsg = "Failed to execute the filter:"
+        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        return result
 
     def check_outputs(self):
         """ Checks if the output of the filter matches expectations """
@@ -306,8 +324,6 @@ class EBPFKernelTarget(EBPFTarget):
         return SUCCESS
 
     def run(self):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Running model")
         ifname = str(os.getpid())
         # Check if the maps have been loaded into the tc folder
         if len(os.listdir('/sys/fs/bpf/tc/globals')) == 0:
@@ -315,22 +331,8 @@ class EBPFKernelTarget(EBPFTarget):
                        "Maps have not been loaded correctly!")
             self._remove_bridge(ifname)
             return FAILURE
-        direction = "in"
-        pcap_pattern = self.filename('', direction)
-        num_files = len(glob(self.filename('*', direction)))
-        report_output(self.outputs["stdout"],
-                      self.options.verbose,
-                      "Input file: %s" % pcap_pattern)
+        result = EBPFTarget.run(self)
         self._remove_bridge(ifname)
-        # Main executable
-        args = [self.template]
-        # Input
-        args.extend(["-f", pcap_pattern])
-        args.extend(["-n", str(num_files)])
-        # Debug flag
-        args.append("-d")
-        errmsg = "Failed to execute the filter:"
-        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
         return result
 
 
@@ -369,6 +371,10 @@ class EBPFBCCTarget(EBPFTarget):
         # Not implemented yet, just pass the test
         return SUCCESS
 
+    def run(self):
+            # Not implemented yet, just pass the test
+        return SUCCESS
+
 
 class EBPFTestTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
@@ -381,23 +387,3 @@ class EBPFTestTarget(EBPFTarget):
         args.append("CFLAGS+=-DCONTROL_PLANE")
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-
-    def run(self):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Running model")
-        direction = "in"
-        pcap_pattern = self.filename('', direction)
-        num_files = len(glob(self.filename('*', direction)))
-        report_output(self.outputs["stdout"],
-                      self.options.verbose,
-                      "Input file: %s" % pcap_pattern)
-        # Main executable
-        args = [self.template]
-        # Input
-        args.extend(["-f", pcap_pattern])
-        args.extend(["-n", str(num_files)])
-        # Debug flag
-        args.append("-d")
-        errmsg = "Failed to execute the filter:"
-        return run_timeout(self.options, args,
-                           TIMEOUT, self.outputs, errmsg)

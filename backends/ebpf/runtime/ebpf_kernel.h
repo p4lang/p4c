@@ -23,12 +23,10 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
 
-#include <linux/bpf.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/syscall.h>
+#include <linux/bpf.h>      // general ebpf variables
+#include <stdbool.h>        // true, false
+#include <stdio.h>          // stderr, fprintf
+#include <sys/syscall.h>    // syscalls
 
 /* Additional headers */
 # define printk(fmt, ...)                                               \
@@ -37,7 +35,6 @@ limitations under the License.
                         bpf_trace_printk(____fmt, sizeof(____fmt),      \
                                      ##__VA_ARGS__);                    \
                 })
-
 
 typedef signed char s8;
 typedef unsigned char u8;
@@ -101,11 +98,43 @@ static unsigned long long (*bpf_get_prandom_u32)(void) =
 static int (*bpf_xdp_adjust_head)(void *ctx, int offset) =
     (void *) BPF_FUNC_xdp_adjust_head;
 
-static __u64 ptr_to_u64(void *ptr) {
-    return (__u64) (unsigned long) ptr;
+
+static u64 ptr_to_u64(void *ptr) {
+    return (u64) (unsigned long) ptr;
 }
 
-static inline int bpf_update_elem(int fd, void *key, void *value, unsigned long long flags) {
+/* eBPF userland syscalls to manipulate maps */
+
+/**
+ * @brief Retrieve an element with the given key.
+ *
+ * @param fd File descriptor of the ebpf map object.
+ * @param key Pointer to the key.
+ * @param value COPY of the value retrieved from the map. Points to the
+ *              allocated object.
+ * @return 0 if operation was successful, else an error code.
+ */
+int bpf_lookup_elem(int fd, void *key, void *value) {
+  union bpf_attr attr;
+  memset(&attr, 0, sizeof(attr));
+  attr.map_fd = fd;
+  attr.key = ptr_to_u64(key);
+  attr.value = ptr_to_u64(value);
+  return syscall(__NR_bpf, BPF_MAP_LOOKUP_ELEM, &attr, sizeof(attr));
+}
+
+/**
+ * @brief Create or update an entry in the map with the provided value.
+ *
+ * @param fd File descriptor of the ebpf map object.
+ * @param key Pointer to the key.
+ * @param value Pointer to the value to insert.
+ * @param flags BPF_ANY(0):  create new element or update existing
+ *              BPF_NOEXIST(1):  create new element if it didn't exist
+ *              BPF_EXIST(2):  update existing element
+ * @return 0 if operation was successful, else an error code.
+ */
+static inline int bpf_update_elem(int fd, void *key, void *value, u64 flags) {
     union bpf_attr attr = {
         .map_fd = fd,
         .key = ptr_to_u64(key),
@@ -115,6 +144,14 @@ static inline int bpf_update_elem(int fd, void *key, void *value, unsigned long 
     return syscall(__NR_bpf, BPF_MAP_UPDATE_ELEM, &attr, sizeof(attr));
 }
 
+/**
+ * @brief Delete an element from an ebpf map.
+ *
+ * @param fd File descriptor of the ebpf map object.
+ * @param key Pointer to the key.
+ *
+ * @return 0 if operation was successful, else an error code.
+ */
 static inline int bpf_delete_elem(int fd, void *key) {
     union bpf_attr attr = {
         .map_fd = fd,
@@ -123,6 +160,14 @@ static inline int bpf_delete_elem(int fd, void *key) {
     return syscall(__NR_bpf, BPF_MAP_DELETE_ELEM, &attr, sizeof(attr));
 }
 
+/**
+ * @brief Pin an object to the given pathname.
+ *
+ * @param fd File descriptor of the ebpf map object.
+ * @param pathname Full path name, commonly "sys/fs/bpf/.."
+ *
+ * @return 0 if operation was successful, else an error code.
+ */
 static inline int bpf_obj_pin(int fd, const char *pathname) {
     union bpf_attr attr = {
         .pathname   = ptr_to_u64((void *)pathname),
@@ -131,14 +176,20 @@ static inline int bpf_obj_pin(int fd, const char *pathname) {
     return syscall(__NR_bpf, BPF_OBJ_PIN, &attr, sizeof(attr));
 }
 
+/**
+ * @brief Retrieve an ebpf object from the given filename.
+ *
+ * @param fd File descriptor of the ebpf map object.
+ * @param pathname Full path name, commonly "sys/fs/bpf/.."
+ *
+ * @return 0 if operation was successful, else an error code.
+ */
 static inline int bpf_obj_get(const char *pathname) {
     union bpf_attr attr = {
         .pathname   = ptr_to_u64((void *)pathname),
     };
     return syscall(__NR_bpf, BPF_OBJ_GET, &attr, sizeof(attr));
 }
-
-
 
 /** helper macro to place programs, maps, license in
  * different sections in elf_bpf file. Section names
