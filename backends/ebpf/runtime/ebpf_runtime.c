@@ -53,7 +53,6 @@ void usage(char *name) {
     exit(EXIT_FAILURE);
 }
 
-
 /**
  * @brief Create a pcap file name from a given base name, interface index,
  * and suffix. Return value must be deallocated after usage.
@@ -75,37 +74,6 @@ static char *generate_pcap_name(const char *pcap_base, int index, const char *su
     return pcap_name;
 }
 
-/**
- * @brief Feed a list packets into an eBPF program.
- * @details This is a mock function emulating the behavior of a running
- * eBPF program. It takes a list of input packets and iteratively parses them
- * using the given imported ebpf_filter function. The output defines whether
- * or not the packet is "dropped." If the packet is not dropped, its content is
- * copied and appended to an output packet list.
- *
- * @param pkt_list A list of input packets running through the filter.
- * @return The list of packets "surviving" the filter function
- */
-static pcap_list_t *feed_packets(pcap_list_t *pkt_list) {
-    pcap_list_t *output_pkts = allocate_pkt_list();
-    uint64_t list_len = get_pkt_list_length(pkt_list);
-    for (uint64_t i = 0; i < list_len; i++) {
-        /* Parse each packet in the list and check the result */
-        struct sk_buff skb;
-        pcap_pkt *input_pkt = get_packet(pkt_list, i);
-        skb.data = (void *) input_pkt->data;
-        skb.len = input_pkt->pcap_hdr.len;
-        int result = ebpf_filter(&skb);
-        if (result != 0) {
-            pcap_pkt *out_pkt = copy_pkt(input_pkt);
-            output_pkts = append_packet(output_pkts, out_pkt);
-        }
-        if (debug)
-            printf("eBPF filter decision is: %d\n", result);
-    }
-    return output_pkts;
-}
-
 static void write_pkts_to_pcaps(const char *pcap_base, pcap_list_array_t *output_array) {
     uint16_t arr_len = get_list_array_length(output_array);
     for (uint16_t i = 0; i < arr_len; i++) {
@@ -122,7 +90,7 @@ static void *run_and_record_output(const char *pcap_base, pcap_list_t *pkt_list)
     /* Create an array of packet lists */
     pcap_list_array_t *output_array = allocate_pkt_list_array();
     /* Feed the packets into our "loaded" program */
-    pcap_list_t *output_pkts = feed_packets(pkt_list);
+    pcap_list_t *output_pkts = FEED_PACKETS(pkt_list, debug);
     /* Split the output packet list by interface. This destroys the list. */
     output_array = split_and_delete_list(output_pkts, output_array);
     /* Write each list to a separate pcap output file */
@@ -213,19 +181,10 @@ int main(int argc, char **argv) {
     }
 
     /* Check if there was actually any file or number input */
-    if (!pcap_name || num_pcaps == -1) {
+    if (!pcap_name || num_pcaps == -1)
         usage(argv[0]);
-    }
 
-    /* Initialize the registry of shared tables */
-    struct bpf_table* current = tables;
-    while (current->name != NULL) {
-        if (debug)
-            printf("Adding table %s\n", current->name);
-        BPF_OBJ_PIN(current, current->name);
-        current++;
-    }
-
+    INIT_EBPF_TABLES(debug);
 #ifdef CONTROL_PLANE
     /* Set the default action for the userspace hash tables */
     init_tables();
@@ -234,14 +193,6 @@ int main(int argc, char **argv) {
 #endif
 
     launch_runtime(pcap_name, num_pcaps);
-
-    /* Delete all the remaining tables in the user program */
-    current = tables;
-    while (current->name != NULL) {
-        if (debug)
-            printf("Deleting table %s\n", current->name);
-        registry_delete_tbl(current->name);
-        current++;
-    }
+    DELETE_EBPF_TABLES(debug);
     return EXIT_SUCCESS;
 }

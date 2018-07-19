@@ -122,6 +122,9 @@ def run_timeout(options, args, timeout, outputs, errmsg):
     if proc.returncode != SUCCESS:
         report_err(outputs["stderr"], "Error %d: %s\n%s" %
                    (proc.returncode, errmsg, err))
+    else:
+        # Also report non fatal warnings in stdout
+        report_err(outputs["stderr"], options.verbose, err)
     return proc.returncode
 
 

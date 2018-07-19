@@ -66,9 +66,10 @@ class EBPFTarget(object):
     def get_make_args(self, ebpfdir, target):
         args = ["make"]
         # target makefile
-        args.extend(["-f", target + ".mk"])
+        args.extend(["-f", "runtime.mk"])
         # Source folder of the makefile
         args.extend(["-C", ebpfdir])
+        args.append("TARGET=%s" % target)
         return args
 
     def filename(self, interface, direction):
@@ -90,6 +91,8 @@ class EBPFTarget(object):
             raise Exception("No such file " + self.options.p4filename)
         # Initialize arguments for the makefile
         args = self.get_make_args(self.ebpfdir, self.options.target)
+        # name of the makefile target
+        args.append(self.template + ".c")
         # name of the output source file
         args.append("BPFOBJ=" + self.template + ".c")
         # location of the P4 input file
@@ -237,8 +240,12 @@ class EBPFKernelTarget(EBPFTarget):
             if_bridge = "%s_%d" % (br_name, index)
             ipr.link('del', index=ipr.link_lookup(ifname=if_bridge)[0])
 
-    def _compile_ebpf(self, ebpfdir):
-        args = self.get_make_args(ebpfdir, self.options.target)
+    def _compile_ebpf_object(self):
+        args = ["make"]
+        # target makefile
+        args.extend(["-f", "%s.mk" % self.options.target])
+        # Source folder of the makefile
+        args.extend(["-C", self.ebpfdir])
         # Input eBPF byte code
         args.append(self.template + ".o")
         # The bpf program to attach to the interface
@@ -246,7 +253,9 @@ class EBPFKernelTarget(EBPFTarget):
         errmsg = "Failed to compile the eBPF byte code:"
         return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
 
-    def _load_ebpf(self, ebpfdir, ifname):
+    def _load_ebpf(self, ifname):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Loading the eBPF program")
         args = ["tc"]
         # Create a qdisc for our custom virtual interface
         args.extend(["qdisc", "add", "dev", ifname, "clsact"])
@@ -257,10 +266,19 @@ class EBPFKernelTarget(EBPFTarget):
         args = ["tc"]
         # Launch tc to load the ebpf object to the specified interface
         args.extend(["filter", "add", "dev", ifname, "ingress",
-                     "bpf", "da", "obj", self.template + ".o",
-                     "sec", "prog", "verb"])
+                     "bpf", "da", "obj", self.template + "_ebpf.o",
+                     "section", "prog", "verbose"])
         # The bpf program to attach to the interface
         errmsg = "Failed to load the eBPF byte code using tc:"
+        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+
+    def _create_runtime(self):
+        args = self.get_make_args(self.ebpfdir, self.options.target)
+        # List of bpf programs to attach to the interface
+        args.append("BPFOBJ=" + self.template)
+        args.append("CFLAGS+=-DCONTROL_PLANE")
+        args.append("SOURCES=")
+        errmsg = "Failed to build the filter:"
         return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
 
     def create_filter(self):
@@ -270,20 +288,50 @@ class EBPFKernelTarget(EBPFTarget):
         ifname = str(os.getpid())
         self._create_bridge(ifname)
         # Use clang to compile the generated C code to a LLVM IR
-        result = self._compile_ebpf(self.ebpfdir)
+        result = self._compile_ebpf_object()
         if result != SUCCESS:
             self._remove_bridge(ifname)
             return result
-        result = self._load_ebpf(self.ebpfdir, ifname)
+        result = self._load_ebpf(ifname)
+        if result != SUCCESS:
+            self._remove_bridge(ifname)
+            return result
+        result = self._create_runtime()
         if result != SUCCESS:
             self._remove_bridge(ifname)
         return result
 
     def check_outputs(self):
         # Not implemented yet, just pass the test
-        ifname = str(os.getpid())
-        self._remove_bridge(ifname)
         return SUCCESS
+
+    def run(self):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Running model")
+        ifname = str(os.getpid())
+        # Check if the maps have been loaded into the tc folder
+        if len(os.listdir('/sys/fs/bpf/tc/globals')) == 0:
+            report_err(self.outputs["stderr"],
+                       "Maps have not been loaded correctly!")
+            self._remove_bridge(ifname)
+            return FAILURE
+        direction = "in"
+        pcap_pattern = self.filename('', direction)
+        num_files = len(glob(self.filename('*', direction)))
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
+        self._remove_bridge(ifname)
+        # Main executable
+        args = [self.template]
+        # Input
+        args.extend(["-f", pcap_pattern])
+        args.extend(["-n", str(num_files)])
+        # Debug flag
+        args.append("-d")
+        errmsg = "Failed to execute the filter:"
+        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        return result
 
 
 class EBPFBCCTarget(EBPFTarget):

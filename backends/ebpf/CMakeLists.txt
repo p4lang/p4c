@@ -87,13 +87,13 @@ set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST)
 
 set (EBPF_TEST_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ebpf/*_ebpf.p4"
   )
 
 set (SUPPORTS_KERNEL True)
 
 # Check if the kernel version is new enough to support ebpf features
-set (MIN_KERNEL 4.16.0)
+set (MIN_KERNEL 4.15.0)
 string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
 if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
   MESSAGE(WARNING "Kernel version ${KERNEL_VER} too small, expected ${MIN_KERNEL}. Ignoring ebpf kernel tests...")

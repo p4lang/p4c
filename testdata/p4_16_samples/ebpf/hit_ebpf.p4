@@ -19,43 +19,35 @@ limitations under the License.
 
 #include "ebpf_headers.p4"
 
-struct Headers_t
-{
+struct Headers_t {
     Ethernet_h ethernet;
     IPv4_h     ipv4;
 }
 
-parser prs(packet_in p, out Headers_t headers)
-{
-    state start
-    {
+parser prs(packet_in p, out Headers_t headers) {
+    state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType)
-        {
+        transition select(headers.ethernet.etherType) {
             16w0x800 : ip;
             default : reject;
         }
     }
 
-    state ip
-    {
+    state ip {
         p.extract(headers.ipv4);
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, out bool pass)
-{
-    action Reject(IPv4Address add)
-    {
+control pipe_hit_ebpf(inout Headers_t headers, out bool pass) {
+    action Reject(IPv4Address add) {
         pass = false;
-        headers.ipv4.srcAddr[31:0] = add[31:16] ++ add[15:0];
+        headers.ipv4.srcAddr = add;
     }
 
     table Check_src_ip {
         key = { headers.ipv4.srcAddr : exact; }
-        actions =
-        {
+        actions = {
             Reject;
             NoAction;
         }
@@ -67,14 +59,15 @@ control pipe(inout Headers_t headers, out bool pass)
     apply {
         pass = true;
 
-        if (!headers.ipv4.isValid())
-        {
+        if (!headers.ipv4.isValid()) {
             pass = false;
             return;
         }
 
-        Check_src_ip.apply();
+        if (Check_src_ip.apply().hit) {
+            pass = pass;  // nothing really useful here
+        }
     }
 }
 
-ebpfFilter(prs(), pipe()) main;
+ebpfFilter(prs(), pipe_hit_ebpf()) main;

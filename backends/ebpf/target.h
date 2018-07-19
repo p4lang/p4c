@@ -85,7 +85,7 @@ class KernelSamplesTarget : public Target {
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }
-    cstring sysMapPath() const override { return "/sys/fs/bpf"; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf/tc/globals"; }
 };
 
 // Represents a target compiled by bcc that uses the TC

@@ -73,7 +73,7 @@ void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
 //////////////////////////////////////////////////////////////
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"ebpf_user.h\"\n");
+    builder->append("#include \"ebpf_test.h\"\n");
     builder->newline();
 }
 

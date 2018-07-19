@@ -19,6 +19,8 @@ TARGET=kernel
 # Extra arguments for the compiler
 ARGS=
 
+
+
 # If needed, bpf target files can be hardcoded here
 # This can be any file of type ".c", ".bc" or, ".o"
 BPFOBJ=
@@ -70,7 +72,7 @@ $(BPFNAME).bc: %.bc : %.c
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code
 $(BPFNAME).o: %.o : %.bc
-	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
+	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $(BPFNAME)_ebpf.o
 
 clean: clean_loader
 	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h

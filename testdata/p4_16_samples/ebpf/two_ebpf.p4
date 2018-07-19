@@ -60,7 +60,7 @@ control Check(in IPv4Address address, inout bool pass) {
     }
 }
 
-control pipe(inout Headers_t headers, out bool pass) {
+control pipe_two_ebpf(inout Headers_t headers, out bool pass) {
     Check() c1;
     apply {
         pass = true;
@@ -75,4 +75,4 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter(prs(), pipe()) main;
+ebpfFilter(prs(), pipe_two_ebpf()) main;

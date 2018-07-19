@@ -26,6 +26,9 @@ limitations under the License.
 #include <linux/bpf.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
 
 /* Additional headers */
 # define printk(fmt, ...)                                               \
@@ -98,6 +101,45 @@ static unsigned long long (*bpf_get_prandom_u32)(void) =
 static int (*bpf_xdp_adjust_head)(void *ctx, int offset) =
     (void *) BPF_FUNC_xdp_adjust_head;
 
+static __u64 ptr_to_u64(void *ptr) {
+    return (__u64) (unsigned long) ptr;
+}
+
+static inline int bpf_update_elem(int fd, void *key, void *value, unsigned long long flags) {
+    union bpf_attr attr = {
+        .map_fd = fd,
+        .key = ptr_to_u64(key),
+        .value = ptr_to_u64(value),
+        .flags = flags,
+    };
+    return syscall(__NR_bpf, BPF_MAP_UPDATE_ELEM, &attr, sizeof(attr));
+}
+
+static inline int bpf_delete_elem(int fd, void *key) {
+    union bpf_attr attr = {
+        .map_fd = fd,
+        .key = ptr_to_u64(key),
+    };
+    return syscall(__NR_bpf, BPF_MAP_DELETE_ELEM, &attr, sizeof(attr));
+}
+
+static inline int bpf_obj_pin(int fd, const char *pathname) {
+    union bpf_attr attr = {
+        .pathname   = ptr_to_u64((void *)pathname),
+        .bpf_fd     = fd,
+    };
+    return syscall(__NR_bpf, BPF_OBJ_PIN, &attr, sizeof(attr));
+}
+
+static inline int bpf_obj_get(const char *pathname) {
+    union bpf_attr attr = {
+        .pathname   = ptr_to_u64((void *)pathname),
+    };
+    return syscall(__NR_bpf, BPF_OBJ_GET, &attr, sizeof(attr));
+}
+
+
+
 /** helper macro to place programs, maps, license in
  * different sections in elf_bpf file. Section names
  * are interpreted by elf_bpf loader
@@ -134,12 +176,14 @@ u64 load_dword(void *skb, u64 off) {
 
 
 #define REGISTER_START()
+/* Note: pinning exports the table name globally, do not remove */
 #define REGISTER_TABLE(NAME, TYPE, KEY_SIZE, VALUE_SIZE, MAX_ENTRIES) \
 struct bpf_map_def SEC("maps") NAME = {          \
     .type       = TYPE,             \
     .key_size   = KEY_SIZE,         \
     .value_size = VALUE_SIZE,       \
-    .max_entries    = MAX_ENTRIES,  \
+    .pinning = 2,                   \
+    .max_entries = MAX_ENTRIES,     \
     .map_flags = 0,                 \
 };
 #define REGISTER_END()
@@ -148,5 +192,9 @@ struct bpf_map_def SEC("maps") NAME = {          \
     bpf_map_lookup_elem(&table, key)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \
     bpf_map_update_elem(&table, key, value, flags)
+#define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
+    bpf_update_elem(index, key, value, flags)
+#define BPF_OBJ_PIN(table, name) bpf_obj_pin(table, name)
+#define BPF_OBJ_GET(name) bpf_obj_get(name)
 
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_

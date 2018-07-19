@@ -41,7 +41,7 @@ pcap_list_t *append_packet(pcap_list_t *pkt_list, pcap_pkt *pkt) {
     pkt_list->pkts = realloc(pkt_list->pkts, pkt_list->len * sizeof(pcap_pkt *));
     if (pkt_list->pkts == NULL) {
         fprintf(stderr, "Fatal: Failed to expand the"
-            "packet list with size %u !\n", pkt_list->len);
+            "packet list with size %lu !\n", pkt_list->len);
         exit(EXIT_FAILURE);
     }
     pkt_list->pkts[pkt_list->len - 1] = pkt;
@@ -71,7 +71,7 @@ pcap_list_array_t *insert_list(pcap_list_array_t *pkt_array, pcap_list_t *pkt_li
 
 pcap_pkt *get_packet(pcap_list_t *list, uint64_t index) {
     if (list->len < index) {
-        fprintf(stderr, "Index %u exceeds list size %u!\n", index, list->len);
+        fprintf(stderr, "Index %lu exceeds list size %lu!\n", index, list->len);
         return NULL;
     }
     return list->pkts[index];
@@ -195,8 +195,8 @@ pcap_list_t *merge_and_delete_lists(pcap_list_array_t *array, pcap_list_t *merge
 pcap_list_array_t *split_and_delete_list(pcap_list_t *input_list, pcap_list_array_t *result_arr) {
     if (input_list->len == 0)
         return result_arr;
-    /* Find the maximum interface value in the list */
 
+    /* Find the maximum interface value in the list */
     uint16_t max_index = 0;
     for (uint64_t i = 0; i < input_list->len; i++){
         if (input_list->pkts[i]->ifindex > max_index)
