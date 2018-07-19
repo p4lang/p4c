@@ -340,33 +340,6 @@ class EBPFBCCTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def compile_p4(self, argv):
-        # To override
-        """ Compile the p4 target """
-        if not os.path.isfile(self.options.p4filename):
-            raise Exception("No such file " + self.options.p4filename)
-        args = ["./p4c-ebpf"]
-        args.extend(["--target", self.options.target])
-        args.extend(["-o", self.template])
-        args.append(self.options.p4filename)
-        args.extend(argv)
-        result = run_timeout(self.options, args, TIMEOUT,
-                             self.outputs, "Failed to compile P4:")
-        if result != SUCCESS:
-            print("".join(open(self.outputs["stderr"]).readlines()))
-            # If the compiler crashed fail the test
-            if 'Compiler Bug' in open(self.outputs["stderr"]).readlines():
-                sys.exit(FAILURE)
-        # Check if we expect the p4 compilation of the p4 file to fail
-        expected_error = is_err(self.options.p4filename)
-        if expected_error:
-            # We do, so invert the result
-            if result == SUCCESS:
-                result = FAILURE
-            else:
-                result = SUCCESS
-        return result, expected_error
-
     def check_outputs(self):
         # Not implemented yet, just pass the test
         return SUCCESS
