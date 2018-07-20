@@ -10,8 +10,13 @@ for idx in 0 1 2 3 4 5 6 7 8; do
         # Set the MTU of these interfaces to be larger than default of
         # 1500 bytes, so that P4 behavioral-model testing can be done
         # on jumbo frames.
-        ifconfig $intf0 mtu 9500 up
-        ifconfig $intf1 mtu 9500 up
+        # Note: ifconfig is deprecated, and no longer installed by
+        # default in Ubuntu Linux minimal installs starting with
+        # Ubuntu 18.04.  The ip command is installed in Ubuntu
+        # versions since at least 16.04, and probably older versions,
+        # too.
+        ip link set $intf0 mtu 9500
+        ip link set $intf1 mtu 9500
 
         # Disable IPv6 on the interfaces, so that the Linux kernel
         # will not automatically send IPv6 MDNS, Router Solicitation,
