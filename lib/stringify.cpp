@@ -88,8 +88,11 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
     if (size < 0)
         throw std::runtime_error("Error in vsnprintf");
     if (static_cast<size_t>(size) >= sizeof(buf)) {
+        va_list ap_copy;
+        va_copy(ap_copy, ap);
         char* formatted = new char[size + 1];
-        vsnprintf(formatted, size, fmt_str, ap);
+        vsnprintf(formatted, size, fmt_str, ap_copy);
+        va_end(ap_copy);
         return cstring(formatted);
     }
     return cstring(buf);
