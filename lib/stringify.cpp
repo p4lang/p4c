@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
         va_list ap_copy;
         va_copy(ap_copy, ap);
         char* formatted = new char[size + 1];
-        vsnprintf(formatted, size, fmt_str, ap_copy);
+        vsnprintf(formatted, size + 1, fmt_str, ap_copy);
         va_end(ap_copy);
         return cstring(formatted);
     }

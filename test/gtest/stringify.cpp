@@ -32,15 +32,14 @@ TEST(stringify, simple) {
 }
 
 TEST(stringify, overflow) {
-    char test_str[129];
-    for (int i = 0; i < 129; i++)
-        test_str[0] = 'A';
+    std::string c(129, 'A');
+    cstring test_str = c;
     cstring str = appendFormat("%s", test_str);
-    EXPECT_EQ(test_str, str);
+    EXPECT_EQ(str, test_str);
 }
 
 TEST(stringify, empty) {
     cstring str = appendFormat("%s", "");
     EXPECT_EQ("", str);
 }
-}
+}  // namespace Test
