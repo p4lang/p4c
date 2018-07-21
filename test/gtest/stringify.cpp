@@ -34,8 +34,9 @@ TEST(stringify, simple) {
 TEST(stringify, overflow) {
     std::string c(129, 'A');
     cstring test_str = c;
-    cstring str = appendFormat("%s", test_str);
-    EXPECT_EQ(str, test_str);
+    cstring str = appendFormat("%s", c.c_str());
+    EXPECT_EQ(str.c_str(), test_str.c_str());
+    EXPECT_EQ(str.size(), test_str.size());
 }
 
 TEST(stringify, empty) {
