@@ -119,6 +119,7 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::TypeNameExpression* expression) override;
     void postorder(const IR::Expression* expression) override;
+    void mapExpression(const IR::Expression* expression, Util::IJson* json);
 
  private:
     void binary(const IR::Operation_Binary* expression);

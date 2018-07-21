@@ -28,6 +28,10 @@ cstring IJson::toString() const {
     return cstring(str.str());
 }
 
+void IJson::dump() const {
+    std::cout << toString();
+}
+
 JsonValue* JsonValue::null = new JsonValue();
 
 mpz_class JsonValue::makeValue(long long v) {

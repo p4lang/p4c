@@ -39,6 +39,7 @@ class IJson {
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> T* to() { return dynamic_cast<T*>(this); }
     template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
+    void dump() const;
 };
 
 class JsonValue final : public IJson {
