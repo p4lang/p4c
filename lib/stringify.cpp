@@ -81,6 +81,8 @@ cstring printf_format(const char* fmt_str, ...) {
 // printf into a string
 cstring vprintf_format(const char* fmt_str, va_list ap) {
     static char buf[128];
+    va_list ap_copy;
+    va_copy(ap_copy, ap);
     if (fmt_str == nullptr)
         throw std::runtime_error("Null format string");
 
@@ -88,8 +90,6 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
     if (size < 0)
         throw std::runtime_error("Error in vsnprintf");
     if (static_cast<size_t>(size) >= sizeof(buf)) {
-        va_list ap_copy;
-        va_copy(ap_copy, ap);
         char* formatted = new char[size + 1];
         vsnprintf(formatted, size + 1, fmt_str, ap_copy);
         va_end(ap_copy);

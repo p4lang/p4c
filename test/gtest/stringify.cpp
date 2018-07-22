@@ -28,19 +28,19 @@ cstring appendFormat(const char* format, ...) {
 
 TEST(stringify, simple) {
     cstring str = appendFormat("%s", "AAA");
-    EXPECT_EQ("AAA", str);
+    EXPECT_EQ(str, "AAA");
 }
 
 TEST(stringify, overflow) {
     std::string c(129, 'A');
     cstring test_str = c;
-    cstring str = appendFormat("%s", c.c_str());
+    cstring str = appendFormat("%s", test_str);
     EXPECT_EQ(str.c_str(), test_str.c_str());
     EXPECT_EQ(str.size(), test_str.size());
 }
 
 TEST(stringify, empty) {
     cstring str = appendFormat("%s", "");
-    EXPECT_EQ("", str);
+    EXPECT_EQ(str, "");
 }
 }  // namespace Test
