@@ -26,12 +26,12 @@ cstring appendFormat(const char* format, ...) {
     return str;
 }
 
-TEST(stringify, simple) {
+TEST(stringify, vprintf_simple) {
     cstring str = appendFormat("%s", "AAA");
     EXPECT_EQ(str, "AAA");
 }
 
-TEST(stringify, overflow) {
+TEST(stringify, vprintf_overflow) {
     std::string c(129, 'A');
     cstring test_str = c;
     cstring str = appendFormat("%s", test_str);
@@ -39,8 +39,27 @@ TEST(stringify, overflow) {
     EXPECT_EQ(str.size(), test_str.size());
 }
 
-TEST(stringify, empty) {
+TEST(stringify, vprintf_empty) {
     cstring str = appendFormat("%s", "");
     EXPECT_EQ(str, "");
 }
+
+TEST(stringify, printf_simple) {
+    cstring str = Util::printf_format("%s", "AAA");
+    EXPECT_EQ(str, "AAA");
+}
+
+TEST(stringify, printf_overflow) {
+    std::string c(129, 'A');
+    cstring test_str = c;
+    cstring str = Util::printf_format("%s", test_str);
+    EXPECT_EQ(str.c_str(), test_str.c_str());
+    EXPECT_EQ(str.size(), test_str.size());
+}
+
+TEST(stringify, printf_empty) {
+    cstring str = Util::printf_format("%s", "");
+    EXPECT_EQ(str, "");
+}
+
 }  // namespace Test

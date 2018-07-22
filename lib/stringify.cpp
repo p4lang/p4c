@@ -59,23 +59,11 @@ cstring toString(StringRef value) {
 cstring printf_format(const char* fmt_str, ...) {
     if (fmt_str == nullptr)
         throw std::runtime_error("Null format string");
-
-    int final_n, n = (strlen(fmt_str)) * 2;
-    /* Reserve two times as much as the length of the fmt_str */
-    char* formatted;
     va_list ap;
-    while (1) {
-        formatted = new char[n];
-        strncpy(formatted, fmt_str, n);
-        va_start(ap, fmt_str);
-        final_n = vsnprintf(formatted, n, fmt_str, ap);
-        va_end(ap);
-        if (final_n < 0 || final_n >= n)
-            n += abs(final_n - n + 1);
-        else
-            break;
-    }
-    return cstring(formatted);
+    va_start(ap, fmt_str);
+    cstring formatted = vprintf_format(fmt_str, ap);
+    va_end(ap);
+    return formatted;
 }
 
 // printf into a string
@@ -92,9 +80,9 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
     if (static_cast<size_t>(size) >= sizeof(buf)) {
         char* formatted = new char[size + 1];
         vsnprintf(formatted, size + 1, fmt_str, ap_copy);
-        va_end(ap_copy);
         return cstring(formatted);
     }
+    va_end(ap_copy);
     return cstring(buf);
 }
 
