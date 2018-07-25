@@ -54,6 +54,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/p4runtime.cpp
   gtest/source_file_test.cpp
   gtest/transforms.cpp
+  gtest/stringify.cpp
   )
 set (GTEST_UNITTEST_HEADERS
   gtest/helpers.h
