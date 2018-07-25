@@ -4,11 +4,11 @@ CLANG ?= clang
 INCLUDES+= -I./
 LIBS+=
 # Optimization flags to save space
-CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value -Wno-pointer-sign \
-		-Wno-compare-distinct-pointer-types \
+CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value \
+		-Wno-pointer-sign -Wno-compare-distinct-pointer-types \
 		-Wno-gnu-variable-sized-type-not-at-end \
 		-Wno-address-of-packed-member -Wno-tautological-compare \
-		-Wno-unknown-warning-option
+		-Wno-unknown-warning-option -Wnoparentheses-equality
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -19,8 +19,6 @@ TARGET=kernel
 # Extra arguments for the compiler
 ARGS=
 
-
-
 # If needed, bpf target files can be hardcoded here
 # This can be any file of type ".c", ".bc" or, ".o"
 BPFOBJ=
@@ -28,7 +26,6 @@ BPFOBJ=
 BPFNAME=$(basename $(BPFOBJ))
 # Interface to attach programs to
 IFACE=
-
 
 all: verify_target_bpf $(BPFOBJ)
 
@@ -72,7 +69,7 @@ $(BPFNAME).bc: %.bc : %.c
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code
 $(BPFNAME).o: %.o : %.bc
-	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $(BPFNAME)_ebpf.o
+	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
 
 clean: clean_loader
 	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h

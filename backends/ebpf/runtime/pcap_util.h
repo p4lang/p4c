@@ -24,7 +24,7 @@ limitations under the License.
 
 #define PCAP_DONT_INCLUDE_PCAP_BPF_H
 #include <pcap/pcap.h>
-#include <stdint.h>     // uint64_t, uint16_t
+#include <stdint.h>     // uint32_t, uint16_t
 
 /* Interfaces are named by integers */
 typedef uint16_t iface_index;
@@ -147,7 +147,7 @@ pcap_list_array_t *allocate_pkt_list_array();
  * @param pkt_list A packet list.
  * @return Length of the list.
  */
-uint64_t get_pkt_list_length(pcap_list_t *pkt_list);
+uint32_t get_pkt_list_length(pcap_list_t *pkt_list);
 
 /**
  * @brief Get the length of the packet list array.
@@ -165,7 +165,7 @@ uint16_t get_list_array_length(pcap_list_array_t *pkt_list_array);
  *
  * @return The list. Null if the index is out of bounds.
  */
-pcap_pkt *get_packet(pcap_list_t *list, uint64_t index);
+pcap_pkt *get_packet(pcap_list_t *list, uint32_t index);
 
 /**
  * @brief Get a list from a given index.

@@ -25,8 +25,10 @@ limitations under the License.
 #include <ctype.h>      // isprint()
 #include <string.h>     // memcpy()
 #include <stdlib.h>     // malloc()
-#include "test.h"
 #include "pcap_util.h"
+#include "ebpf_test.h"
+
+typedef int (*packet_filter)(SK_BUFF* s);
 
 /**
  * @brief Feed a list packets into an eBPF program.
@@ -39,10 +41,10 @@ limitations under the License.
  * @param pkt_list A list of input packets running through the filter.
  * @return The list of packets "surviving" the filter function
  */
-static pcap_list_t *feed_packets(pcap_list_t *pkt_list, int debug) {
+static inline pcap_list_t *feed_packets(packet_filter ebpf_filter, pcap_list_t *pkt_list, int debug) {
     pcap_list_t *output_pkts = allocate_pkt_list();
-    uint64_t list_len = get_pkt_list_length(pkt_list);
-    for (uint64_t i = 0; i < list_len; i++) {
+    uint32_t list_len = get_pkt_list_length(pkt_list);
+    for (uint32_t i = 0; i < list_len; i++) {
         /* Parse each packet in the list and check the result */
         struct sk_buff skb;
         pcap_pkt *input_pkt = get_packet(pkt_list, i);
@@ -83,7 +85,8 @@ static void delete_ebpf_tables(int debug) {
     }
 }
 
-#define FEED_PACKETS(pkt_list, debug) feed_packets(pkt_list, debug)
+#define FEED_PACKETS(ebpf_filter, pkt_list, debug) \
+    feed_packets(ebpf_filter, pkt_list, debug)
 #define INIT_EBPF_TABLES(debug) init_ebpf_tables(debug)
 #define DELETE_EBPF_TABLES(debug) delete_ebpf_tables(debug)
 

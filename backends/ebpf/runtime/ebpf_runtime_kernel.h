@@ -18,18 +18,21 @@ limitations under the License.
 #include <ctype.h>      // isprint()
 #include <string.h>     // memcpy()
 #include <stdlib.h>     // malloc()
-#include "test.h"
 #include "pcap_util.h"
+#include "ebpf_kernel.h"
 
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_KERNEL_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_KERNEL_H_
+
+
+typedef int (*packet_filter)(SK_BUFF* s);
 
 static inline pcap_list_t *feed_packets(pcap_list_t *pkt_list, int debug) {
     pcap_list_t *output_pkts = allocate_pkt_list();
     return output_pkts;
 }
 
-#define FEED_PACKETS(pkt_list, debug) \
+#define FEED_PACKETS(ebpf_filter, pkt_list, debug) \
     feed_packets(pkt_list, debug)
 #define INIT_EBPF_TABLES(debug)
 #define DELETE_EBPF_TABLES(debug)

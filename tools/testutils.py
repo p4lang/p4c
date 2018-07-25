@@ -90,11 +90,11 @@ def compare_pkt(outputs, expected, received):
     return SUCCESS
 
 
-def run_timeout(options, args, timeout, outputs, errmsg):
+def run_timeout(verbose, args, timeout, outputs, errmsg):
     """ Run the given arguments as a subprocess. Time out after TIMEOUT
         seconds and report failures or stdout. """
     report_output(outputs["stdout"],
-                  options.verbose, "Executing ", " ".join(args))
+                  verbose, "Executing ", " ".join(args))
     proc = None
 
     def kill(process):
@@ -116,15 +116,17 @@ def run_timeout(options, args, timeout, outputs, errmsg):
         out, err = proc.communicate()
     finally:
         timer.cancel()
-    msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
-           "%s########### PROCESS OUTPUT END\n" % out)
-    report_output(outputs["stdout"], options.verbose, msg)
+    if (out):
+        msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
+               "%s########### PROCESS OUTPUT END\n" % out)
+        report_output(outputs["stdout"], verbose, msg)
     if proc.returncode != SUCCESS:
         report_err(outputs["stderr"], "Error %d: %s\n%s" %
                    (proc.returncode, errmsg, err))
     else:
         # Also report non fatal warnings in stdout
-        report_err(outputs["stderr"], options.verbose, err)
+        if(err):
+            report_err(outputs["stderr"], verbose, err)
     return proc.returncode
 
 

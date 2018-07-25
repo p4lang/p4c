@@ -90,7 +90,7 @@ static void *run_and_record_output(const char *pcap_base, pcap_list_t *pkt_list)
     /* Create an array of packet lists */
     pcap_list_array_t *output_array = allocate_pkt_list_array();
     /* Feed the packets into our "loaded" program */
-    pcap_list_t *output_pkts = FEED_PACKETS(pkt_list, debug);
+    pcap_list_t *output_pkts = FEED_PACKETS(ebpf_filter, pkt_list, debug);
     /* Split the output packet list by interface. This destroys the list. */
     output_array = split_and_delete_list(output_pkts, output_array);
     /* Write each list to a separate pcap output file */

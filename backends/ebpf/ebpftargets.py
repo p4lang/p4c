@@ -30,7 +30,8 @@ from pyroute2 import IPRoute
 from scapy.utils import rdpcap
 from scapy.layers.all import RawPcapWriter
 from ebpfstf import create_table_file, parse_stf_file
-sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
+from ebpfenv import Bridge
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
 
 
@@ -104,7 +105,7 @@ class EBPFTarget(object):
             # Remaining arguments
             args.append("P4ARGS=\"" + p4_args + "\"")
         errmsg = "Failed to compile P4:"
-        result = run_timeout(self.options, args, TIMEOUT,
+        result = run_timeout(self.options.verbose, args, TIMEOUT,
                              self.outputs, errmsg)
         if result != SUCCESS:
             # If the compiler crashed fail the test
@@ -156,7 +157,7 @@ class EBPFTarget(object):
         """ Compiles a filter from the previously generated template """
         return SUCCESS
 
-    def run(self):
+    def run(self, args=[]):
         # To override
         """ Runs the filter and feeds attached interfaces with packets """
         report_output(self.outputs["stdout"],
@@ -168,7 +169,7 @@ class EBPFTarget(object):
                       self.options.verbose,
                       "Input file: %s" % pcap_pattern)
         # Main executable
-        args = [self.template]
+        args.extend([self.template])
         # Input pcap pattern
         args.extend(["-f", pcap_pattern])
         # Number of input interfaces
@@ -176,7 +177,8 @@ class EBPFTarget(object):
         # Debug flag (verbose output)
         args.append("-d")
         errmsg = "Failed to execute the filter:"
-        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        result = run_timeout(self.options.verbose, args,
+                             TIMEOUT, self.outputs, errmsg)
         return result
 
     def check_outputs(self):
@@ -258,7 +260,39 @@ class EBPFKernelTarget(EBPFTarget):
             if_bridge = "%s_%d" % (br_name, index)
             ipr.link('del', index=ipr.link_lookup(ifname=if_bridge)[0])
 
-    def _compile_ebpf_object(self):
+    def _load_ebpf(self, ifname):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Loading the eBPF program")
+        args = ["tc"]
+        # Create a qdisc for our custom virtual interface
+        args.extend(["qdisc", "add", "dev", ifname, "clsact"])
+        errmsg = "Failed to add tc qdisc:"
+        result = run_timeout(self.options.verbose, args, TIMEOUT,
+                             self.outputs, errmsg)
+        if result != SUCCESS:
+            return result
+        args = ["tc"]
+        # Launch tc to load the ebpf object to the specified interface
+        args.extend(["filter", "add", "dev", ifname, "ingress",
+                     "bpf", "da", "obj", self.template + "_ebpf.o",
+                     "section", "prog", "verbose"])
+        # The bpf program to attach to the interface
+        errmsg = "Failed to load the eBPF byte code using tc:"
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
+
+    def _create_runtime(self):
+        args = self.get_make_args(self.ebpfdir, self.options.target)
+        # List of bpf programs to attach to the interface
+        args.append("BPFOBJ=" + self.template)
+        args.append("CFLAGS+=-DCONTROL_PLANE")
+        args.append("SOURCES=")
+        errmsg = "Failed to build the filter:"
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
+
+    def create_filter(self):
+        # Use clang to compile the generated C code to a LLVM IR
         args = ["make"]
         # target makefile
         args.extend(["-f", "%s.mk" % self.options.target])
@@ -269,70 +303,30 @@ class EBPFKernelTarget(EBPFTarget):
         # The bpf program to attach to the interface
         args.append("BPFOBJ=" + self.template + ".o")
         errmsg = "Failed to compile the eBPF byte code:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-
-    def _load_ebpf(self, ifname):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Loading the eBPF program")
-        args = ["tc"]
-        # Create a qdisc for our custom virtual interface
-        args.extend(["qdisc", "add", "dev", ifname, "clsact"])
-        errmsg = "Failed to add tc qdisc:"
-        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-        if result != SUCCESS:
-            return result
-        args = ["tc"]
-        # Launch tc to load the ebpf object to the specified interface
-        args.extend(["filter", "add", "dev", ifname, "ingress",
-                     "bpf", "da", "obj", self.template + "_ebpf.o",
-                     "section", "prog", "verbose"])
-        # The bpf program to attach to the interface
-        errmsg = "Failed to load the eBPF byte code using tc:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-
-    def _create_runtime(self):
-        args = self.get_make_args(self.ebpfdir, self.options.target)
-        # List of bpf programs to attach to the interface
-        args.append("BPFOBJ=" + self.template)
-        args.append("CFLAGS+=-DCONTROL_PLANE")
-        args.append("SOURCES=")
-        errmsg = "Failed to build the filter:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-
-    def create_filter(self):
-        require_root(self.outputs)
-        # Create interface with unique id (allows parallel tests)
-        # TODO: Create one custom interface per pcap file we parse
-        ifname = str(os.getpid())
-        self._create_bridge(ifname)
-        # Use clang to compile the generated C code to a LLVM IR
-        result = self._compile_ebpf_object()
-        if result != SUCCESS:
-            self._remove_bridge(ifname)
-            return result
-        result = self._load_ebpf(ifname)
-        if result != SUCCESS:
-            self._remove_bridge(ifname)
-            return result
-        result = self._create_runtime()
-        if result != SUCCESS:
-            self._remove_bridge(ifname)
-        return result
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
 
     def check_outputs(self):
         # Not implemented yet, just pass the test
         return SUCCESS
 
     def run(self):
-        ifname = str(os.getpid())
+        # Root is necessary to load ebpf into the kernel
+        require_root(self.outputs)
+        namespace = str(os.getpid())
+        br = Bridge(namespace, self.outputs, self.options.verbose)
+        br.create_virtual_env(len(self.expected))
+        result = self._create_runtime()
+        if result != SUCCESS:
+            br.ns_del()
+        br.load_ebpf(self.template + ".o")
         # Check if the maps have been loaded into the tc folder
-        if len(os.listdir('/sys/fs/bpf/tc/globals')) == 0:
-            report_err(self.outputs["stderr"],
-                       "Maps have not been loaded correctly!")
-            self._remove_bridge(ifname)
+        if br.check_ebpf_maps("/sys/fs/bpf/tc/globals") != SUCCESS:
+            br.ns_del()
             return FAILURE
-        result = EBPFTarget.run(self)
-        self._remove_bridge(ifname)
+        prefix = br.get_ns_prefix()
+        result = EBPFTarget.run(self, prefix)
+        br.ns_del()
         return result
 
 
@@ -359,4 +353,4 @@ class EBPFTestTarget(EBPFTarget):
         args.append("BPFOBJ=" + self.template)
         args.append("CFLAGS+=-DCONTROL_PLANE")
         errmsg = "Failed to build the filter:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        return run_timeout(self.options.verbose, args, TIMEOUT, self.outputs, errmsg)

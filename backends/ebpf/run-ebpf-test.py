@@ -25,7 +25,7 @@ import stat
 import tempfile
 import shutil
 from ebpftargets import EBPFFactory
-sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
 
 

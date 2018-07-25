@@ -32,7 +32,7 @@ DEPS = $(OBJECTS:.o=.d)
 
 # checks the executable and symlinks to the output
 all: $(BPFNAME).c $(BPFNAME)
-	@$(RM) -rf $(BUILDDIR)
+	# @$(RM) -rf $(BUILDDIR)
 
 # Creation of the executable
 $(BPFNAME): $(OBJECTS)
