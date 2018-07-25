@@ -23,7 +23,7 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-control pipe_key_ebpf(inout Headers_t headers, out bool pass) {
+control pipe(inout Headers_t headers, out bool pass) {
     action invalidate() {
         headers.ipv4.setInvalid();
         headers.ethernet.setInvalid();
@@ -51,4 +51,4 @@ control pipe_key_ebpf(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter(prs(), pipe_key_ebpf()) main;
+ebpfFilter(prs(), pipe()) main;

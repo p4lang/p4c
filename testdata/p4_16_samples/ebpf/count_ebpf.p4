@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers)
     }
 }
 
-control pipe_count_ebpf(inout Headers_t headers, out bool pass)
+control pipe(inout Headers_t headers, out bool pass)
 {
     CounterArray(32w10, true) counters;
 
@@ -59,4 +59,4 @@ control pipe_count_ebpf(inout Headers_t headers, out bool pass)
     }
 }
 
-ebpfFilter(prs(), pipe_count_ebpf()) main;
+ebpfFilter(prs(), pipe()) main;

@@ -39,7 +39,7 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-control pipe_hit_ebpf(inout Headers_t headers, out bool pass) {
+control pipe(inout Headers_t headers, out bool pass) {
     action Reject(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
@@ -70,4 +70,4 @@ control pipe_hit_ebpf(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter(prs(), pipe_hit_ebpf()) main;
+ebpfFilter(prs(), pipe()) main;

@@ -25,7 +25,7 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-control pipe_action_call_table_ebpf(inout Headers_t headers, out bool pass) {
+control pipe(inout Headers_t headers, out bool pass) {
     action Reject(bit<8> rej, bit<8> bar) {
         if (rej == 0) {
             pass = true;
@@ -46,4 +46,4 @@ control pipe_action_call_table_ebpf(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter(prs(), pipe_action_call_table_ebpf()) main;
+ebpfFilter(prs(), pipe()) main;
