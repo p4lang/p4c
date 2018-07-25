@@ -87,7 +87,7 @@ set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST)
 
 set (EBPF_TEST_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ebpf/*_ebpf.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
 
 set (SUPPORTS_KERNEL True)

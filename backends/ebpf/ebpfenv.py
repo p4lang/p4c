@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" """
+""" Virtual environment which models a simple bridge with n attached interfaces. Allows loading and testing of eBPF programs. """
 
 import os
 import sys
@@ -32,7 +32,7 @@ class Bridge(object):
         self.verbose = verbose      # contains standard and error output
 
     def ns_init(self):
-        cmd = ["ip", "netns", "add", self.ns_name]
+        cmd = "ip netns add %s" % self.ns_name
         errmsg = "Failed to create namespace:"
         result = run_timeout(True, cmd, TIMEOUT,
                              self.outputs, errmsg)
@@ -41,58 +41,68 @@ class Bridge(object):
 
     def ns_del(self):
         self.ns_exec("ip link del dev %s" % (self.br_name))
-        cmd = ["ip", "netns", "del", self.ns_name]
+        cmd = "ip netns del %s" % self.ns_name
         errmsg = "Failed to delete namespace:"
         return run_timeout(True, cmd, TIMEOUT,
                            self.outputs, errmsg)
 
     def get_ns_prefix(self):
-        # return ["ip", "netns", "exec", self.ns_name]
-        return []
+        return "ip netns exec %s" % self.ns_name
+        # return []
 
     def ns_exec(self, cmd_string):
         prefix = self.get_ns_prefix()
-        prefix.extend(cmd_string.split())
+        cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
         errmsg = "Failed to run command in namespace %s:" % self.ns_name
-        run_timeout(self.verbose, prefix, TIMEOUT,
+        run_timeout(self.verbose, cmd, TIMEOUT,
                     self.outputs, errmsg)
 
     def _configure_bridge(self, br_name):
-        self.ns_exec("ip link set dev %s up" % br_name)
-        self.ns_exec("tc qdisc add dev %s clsact" % br_name)
-        self.ns_exec("sysctl -w net.ipv6.conf.all.accept_ra=0")
-        self.ns_exec("sysctl -w net.ipv6.conf.%s.forwarding=0" % br_name)
-        self.ns_exec("sysctl -w net.ipv6.conf.%s.accept_ra=0" % br_name)
+        cmd = "ip link set dev %s up && "
+        cmd += "tc qdisc add dev %s clsact && " % br_name
+        cmd += "sysctl -w net.ipv6.conf.all.accept_ra=0 && "
+        cmd += "sysctl -w net.ipv6.conf.%s.forwarding=0 && " % br_name
+        cmd += "sysctl -w net.ipv6.conf.%s.accept_ra=0" % br_name
+        return self.ns_exec(cmd)
 
     def create_bridge(self):
-        self.ns_exec("ip link add %s type bridge" % self.br_name)
-        self._configure_bridge(self.br_name)
+        result = self.ns_exec("ip link add %s type bridge" % self.br_name)
+        if result != SUCCESS:
+            return result
+        return self._configure_bridge(self.br_name)
 
     def _configure_bridge_port(self, port_name):
-        self.ns_exec("ip link set dev %s up" % port_name)
-        self.ns_exec("sysctl -w net.ipv6.conf.%s.accept_ra=0" % port_name)
-        self.ns_exec("sysctl -w net.ipv6.conf.%s.forwarding=0" % port_name)
-        self.ns_exec("tc qdisc add dev %s clsact" % port_name)
+        cmd = "ip link set dev %s up && " % port_name
+        cmd += "sysctl -w net.ipv6.conf.%s.accept_ra=0 && " % port_name
+        cmd += "sysctl -w net.ipv6.conf.%s.forwarding=0 && " % port_name
+        cmd += "tc qdisc add dev %s clsact" % port_name
+        return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces):
         for index in (range(num_ifaces)):
             edge_tap = "%s_%d" % (self.ns_name, index)
             self.ns_exec("ip link add link %s name %s"
                          " type macvtap mode vepa" % (self.br_name, edge_tap))
-            self.br_ports.append(edge_tap)
             self._configure_bridge_port(edge_tap)
+            # Add interface to the list of existing bridge ports
+            self.br_ports.append(edge_tap)
+        return SUCCESS
 
     def _load_tc(self, port_name, ebpf_obj):
-        self.ns_exec("tc filter add dev %s ingress"
-                     " bpf da obj %s section prog "
-                     "verbose" % (port_name, ebpf_obj))
-        self.ns_exec("tc filter add dev %s egress"
-                     " bpf da obj %s section prog "
-                     "verbose" % (port_name, ebpf_obj))
+        cmd = ("tc filter add dev %s ingress"
+               " bpf da obj %s section prog "
+               "verbose &&" % (port_name, ebpf_obj))
+        cmd += ("tc filter add dev %s egress"
+                " bpf da obj %s section prog "
+                "verbose" % (port_name, ebpf_obj))
+        return self.ns_exec(cmd)
 
     def load_ebpf(self, prog):
         for port in self.br_ports:
-            self._load_tc(port, prog)
+            result = self._load_tc(port, prog)
+            if result != SUCCESS:
+                return result
+        return SUCCESS
 
     def check_ebpf_maps(self, path):
         return self.ns_exec("ls -1 %s " % path)
@@ -100,7 +110,7 @@ class Bridge(object):
     def create_virtual_env(self, num_ifaces):
         self.ns_init()
         self.create_bridge()
-        self.attach_interfaces(num_ifaces)
+        return self.attach_interfaces(num_ifaces)
 
 
 def main(argv):
@@ -120,7 +130,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-# from scapy.all import *
-# sniff(iface="br0", prn=lambda x: sendp(x, iface=x.sniffed_on))
-# tc filter add dev br0 parent ffff: u32 match u32 0 0 action drop

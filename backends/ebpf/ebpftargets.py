@@ -65,12 +65,12 @@ class EBPFTarget(object):
         self.ebpfdir = os.path.dirname(__file__) + "/runtime"
 
     def get_make_args(self, ebpfdir, target):
-        args = ["make"]
+        args = "make "
         # target makefile
-        args.extend(["-f", "runtime.mk"])
+        args += "-f runtime.mk "
         # Source folder of the makefile
-        args.extend(["-C", ebpfdir])
-        args.append("TARGET=%s" % target)
+        args += "-C " + ebpfdir + " "
+        args += "TARGET=" + target + " "
         return args
 
     def filename(self, interface, direction):
@@ -93,17 +93,17 @@ class EBPFTarget(object):
         # Initialize arguments for the makefile
         args = self.get_make_args(self.ebpfdir, self.options.target)
         # name of the makefile target
-        args.append(self.template + ".c")
+        args += self.template + ".c "
         # name of the output source file
-        args.append("BPFOBJ=" + self.template + ".c")
+        args += "BPFOBJ=" + self.template + ".c "
         # location of the P4 input file
-        args.append("P4FILE=" + self.options.p4filename)
+        args += "P4FILE=" + self.options.p4filename + " "
         # location of the P4 compiler
-        args.append("P4C=" + self.options.compilerSrcDir + "/build/p4c-ebpf")
+        args += "P4C=" + self.options.compilerSrcDir + "/build/p4c-ebpf "
         p4_args = ' '.join(map(str, argv))
         if (p4_args):
             # Remaining arguments
-            args.append("P4ARGS=\"" + p4_args + "\"")
+            args += "P4ARGS=\"" + p4_args + "\" "
         errmsg = "Failed to compile P4:"
         result = run_timeout(self.options.verbose, args, TIMEOUT,
                              self.outputs, errmsg)
@@ -157,7 +157,7 @@ class EBPFTarget(object):
         """ Compiles a filter from the previously generated template """
         return SUCCESS
 
-    def run(self, args=[]):
+    def run(self, args=""):
         # To override
         """ Runs the filter and feeds attached interfaces with packets """
         report_output(self.outputs["stdout"],
@@ -169,13 +169,13 @@ class EBPFTarget(object):
                       self.options.verbose,
                       "Input file: %s" % pcap_pattern)
         # Main executable
-        args.extend([self.template])
+        args += self.template
         # Input pcap pattern
-        args.extend(["-f", pcap_pattern])
+        args += "-f " + pcap_pattern + " "
         # Number of input interfaces
-        args.extend(["-n", str(num_files)])
+        args += "-n " + str(num_files) + " "
         # Debug flag (verbose output)
-        args.append("-d")
+        args += "-d"
         errmsg = "Failed to execute the filter:"
         result = run_timeout(self.options.verbose, args,
                              TIMEOUT, self.outputs, errmsg)
@@ -238,70 +238,27 @@ class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def _create_bridge(self, br_name):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Creating the bridge...")
-        ipr = IPRoute()
-        ipr.link('add', ifname=br_name, kind='bridge')
-        for index in (range(len(self.expected))):
-            if_bridge = "%s_%d" % (br_name, index)
-            if_veth = "veth_%s_%d" % (br_name, index)
-            ipr.link('add', ifname=if_veth, kind="veth", peer=if_bridge)
-            ipr.link('set', index=ipr.link_lookup(ifname=if_veth)[
-                     0], master=ipr.link_lookup(ifname=br_name)[0])
-        ipr.link("set", index=ipr.link_lookup(ifname=br_name), state="up")
-
-    def _remove_bridge(self, br_name):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Deleting the bridge...")
-        ipr = IPRoute()
-        ipr.link('del', index=ipr.link_lookup(ifname=br_name)[0])
-        for index in (range(len(self.expected))):
-            if_bridge = "%s_%d" % (br_name, index)
-            ipr.link('del', index=ipr.link_lookup(ifname=if_bridge)[0])
-
-    def _load_ebpf(self, ifname):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Loading the eBPF program")
-        args = ["tc"]
-        # Create a qdisc for our custom virtual interface
-        args.extend(["qdisc", "add", "dev", ifname, "clsact"])
-        errmsg = "Failed to add tc qdisc:"
-        result = run_timeout(self.options.verbose, args, TIMEOUT,
-                             self.outputs, errmsg)
-        if result != SUCCESS:
-            return result
-        args = ["tc"]
-        # Launch tc to load the ebpf object to the specified interface
-        args.extend(["filter", "add", "dev", ifname, "ingress",
-                     "bpf", "da", "obj", self.template + "_ebpf.o",
-                     "section", "prog", "verbose"])
-        # The bpf program to attach to the interface
-        errmsg = "Failed to load the eBPF byte code using tc:"
-        return run_timeout(self.options.verbose, args, TIMEOUT,
-                           self.outputs, errmsg)
-
     def _create_runtime(self):
         args = self.get_make_args(self.ebpfdir, self.options.target)
         # List of bpf programs to attach to the interface
-        args.append("BPFOBJ=" + self.template)
-        args.append("CFLAGS+=-DCONTROL_PLANE")
-        args.append("SOURCES=")
+        args += "BPFOBJ=" + self.template + " "
+        args += "CFLAGS+=-DCONTROL_PLANE "
+        args += "SOURCES="
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
 
     def create_filter(self):
         # Use clang to compile the generated C code to a LLVM IR
-        args = ["make"]
+        args = "make "
         # target makefile
-        args.extend(["-f", "%s.mk" % self.options.target])
+        args += "-f " + self.options.target + ".mk "
         # Source folder of the makefile
-        args.extend(["-C", self.ebpfdir])
+        args += "-C " + self.ebpfdir + " "
         # Input eBPF byte code
-        args.append(self.template + ".o")
+        args += self.template + ".o "
         # The bpf program to attach to the interface
-        args.append("BPFOBJ=" + self.template + ".o")
+        args += "BPFOBJ=" + self.template + ".o"
         errmsg = "Failed to compile the eBPF byte code:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
@@ -350,7 +307,8 @@ class EBPFTestTarget(EBPFTarget):
     def create_filter(self):
         args = self.get_make_args(self.ebpfdir, self.options.target)
         # List of bpf programs to attach to the interface
-        args.append("BPFOBJ=" + self.template)
-        args.append("CFLAGS+=-DCONTROL_PLANE")
+        args += "BPFOBJ=" + self.template + " "
+        args += "CFLAGS+=-DCONTROL_PLANE "
         errmsg = "Failed to build the filter:"
-        return run_timeout(self.options.verbose, args, TIMEOUT, self.outputs, errmsg)
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)

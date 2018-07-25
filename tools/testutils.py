@@ -94,7 +94,7 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
     """ Run the given arguments as a subprocess. Time out after TIMEOUT
         seconds and report failures or stdout. """
     report_output(outputs["stdout"],
-                  verbose, "Executing ", " ".join(args))
+                  verbose, "Executing ", args)
     proc = None
 
     def kill(process):
@@ -102,7 +102,8 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
 
     if outputs["stderr"] is not None:
         try:
-            proc = Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = Popen(args, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, shell=True)
         except OSError as e:
             report_err(outputs["stderr"], "Failed executing: ", e)
     if proc is None:
