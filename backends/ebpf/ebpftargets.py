@@ -267,7 +267,7 @@ class EBPFKernelTarget(EBPFTarget):
         # Not implemented yet, just pass the test
         return SUCCESS
 
-    def get_run_cmd(self):
+    def _get_run_cmd(self):
         direction = "in"
         pcap_pattern = self.filename('', direction)
         num_files = len(glob(self.filename('*', direction)))
@@ -284,35 +284,69 @@ class EBPFKernelTarget(EBPFTarget):
         cmd += "-d"
         return cmd
 
+    def _get_load_tc_cmd(self, port_name):
+        # Load the specified eBPF object to "port_name" ingress and egress
+        # As a side-effect, this may create maps in /sys/fs/bpf/tc/globals
+        cmd = ("tc filter add dev %s ingress"
+               " bpf da obj %s section prog "
+               "verbose && " % (port_name, self.template + ".o"))
+        cmd += ("tc filter add dev %s egress"
+                " bpf da obj %s section prog "
+                "verbose" % (port_name, self.template + ".o"))
+        return cmd
+
+    def _run_in_namespace(self, bridge):
+        # Open a process in the new namespace
+        proc = bridge.ns_open_process()
+        if not proc:
+            return FAILURE
+        # Get the command to load eBPF code to all the attached ports
+        cmd = ""
+        if (len(bridge.br_ports) > 0):
+            # No ports attached (no pcap files), load to bridge instead
+            for port in bridge.br_ports:
+                cmd += self._get_load_tc_cmd(port)
+        else:
+            cmd += self._get_load_tc_cmd(bridge.br_name)
+        result = bridge.ns_write_to_process(proc, cmd + " &&")
+        if result != SUCCESS:
+            return result
+        # Check if eBPF maps have actually been created
+        result = bridge.ns_write_to_process(proc,
+                                            "ls -1 /sys/fs/bpf/tc/globals && ")
+        if result != SUCCESS:
+            return result
+        # Finally, append the actual runtime command to the process
+        result = bridge.ns_write_to_process(proc, self._get_run_cmd())
+        if result != SUCCESS:
+            return result
+        # Execute the command queue and close the process, retrieve result
+        return bridge.ns_close_process(proc)
+
+    def _create_bridge(self):
+        # The namespace is the id of the process
+        namespace = str(os.getpid())
+        # Create the namespace and the bridge with all its ports
+        br = Bridge(namespace, self.outputs, self.options.verbose)
+        result = br.create_virtual_env(len(self.expected))
+        if result != SUCCESS:
+            br.ns_del()
+            return None
+        return br
+
     def run(self):
         # Root is necessary to load ebpf into the kernel
         require_root(self.outputs)
-        load_bridge = False
-        namespace = str(os.getpid())
         result = self._create_runtime()
         if result != SUCCESS:
             br.ns_del()
             return result
-
-        br = Bridge(namespace, self.outputs, self.options.verbose)
-        if (len(self.expected) == 0):
-            # If no interfaces, attach the ebpf program to the bridge instead
-            load_bridge = True
-        br.create_virtual_env(len(self.expected))
-        if result != SUCCESS:
-            br.ns_del()
-            return result
-        cmd = br.get_load_ebpf_cmd(self.template + ".o", load_bridge)
-        # # Check if the maps have been loaded into the tc folder
-        # if br.check_ebpf_maps("/sys/fs/bpf/tc/globals") != SUCCESS:
-        #     br.ns_del()
-        #     return FAILURE\
-        if (not load_bridge):
-            if (cmd):
-                cmd += " && "
-            cmd += self.get_run_cmd()
-        result = br.ns_exec(cmd)
-        br.ns_del()
+        bridge = self._create_bridge()
+        if not bridge:
+            bridge.ns_del()
+            return FAILURE
+        result = self._run_in_namespace(bridge)
+        bridge.ns_del()
         return result
 
 

@@ -19,7 +19,7 @@
 
 import os
 import sys
-from subprocess import Popen
+from subprocess import Popen, PIPE
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
 
@@ -27,11 +27,11 @@ from testutils import *
 class Bridge(object):
 
     def __init__(self, namespace, outputs, verbose):
-        self.ns_name = namespace    # identifier of the namespace
+        self.ns_name = namespace     # identifier of the namespace
         self.br_name = self.ns_name  # name of the central bridge
-        self.br_ports = []          # list of bridge ports
-        self.outputs = outputs      # contains standard and error output
-        self.verbose = verbose      # do we want to be chatty?
+        self.br_ports = []           # list of bridge ports
+        self.outputs = outputs       # contains standard and error output
+        self.verbose = verbose       # do we want to be chatty?
 
     def ns_init(self):
         cmd = "ip netns add %s" % self.ns_name
@@ -40,6 +40,29 @@ class Bridge(object):
                              self.outputs, errmsg)
         self.ns_exec("ip link set dev lo up")
         return result
+
+    def ns_open_process(self):
+        cmd = self.get_ns_prefix() + " /bin/bash "
+        return open_process(self.verbose, cmd, self.outputs)
+
+    def ns_write_to_process(self, proc, cmd):
+        report_output(self.outputs["stdout"],
+                      self.verbose, "Writing %s " % cmd)
+        try:
+            proc.stdin.write(cmd)
+        except IOError as e:
+            err_text = "Error while writing to process"
+            report_err(self.outputs["stdout"],
+                       self.verbose, err_text, e)
+            # Stop loop on "Invalid pipe" or "Invalid argument".
+            # No sense in continuing with broken pipe.
+            return FAILURE
+        return SUCCESS
+
+    def ns_close_process(self, proc):
+        errmsg = ("Failed to execute the command"
+                  " sequence in namespace %s" % self.ns_name)
+        return run_process(self.verbose, proc, TIMEOUT, self.outputs, errmsg)
 
     def ns_del(self):
         self.ns_exec("ip link del dev %s" % (self.br_name))
@@ -77,7 +100,7 @@ class Bridge(object):
 
     def _configure_bridge_port(self, port_name):
         cmd = "ip link set dev %s up && " % port_name
-        # prevent the broadcasting of link discovery messages
+        # Prevent the broadcasting of link discovery messages
         cmd += "sysctl -w net.ipv6.conf.%s.accept_ra=0 && " % port_name
         cmd += "sysctl -w net.ipv6.conf.%s.forwarding=0 && " % port_name
         cmd += "tc qdisc add dev %s clsact" % port_name
@@ -93,57 +116,6 @@ class Bridge(object):
             self.br_ports.append(edge_tap)
         return SUCCESS
 
-    def _load_tc(self, port_name, prog):
-        # load the specified ebpf object to "port_name" ingress and egress
-        # as a side-effect, this may create maps in /sys/fs/bpf/tc/globals
-        cmd = ("tc filter add dev %s ingress"
-               " bpf da obj %s section prog "
-               "verbose && " % (port_name, prog))
-        cmd += ("tc filter add dev %s egress"
-                " bpf da obj %s section prog "
-                "verbose" % (port_name, prog))
-        return self.ns_exec(cmd)
-
-    def get_load_ebpf_cmd(self, prog, load_bridge=False):
-        cmd = ""
-        if (load_bridge):
-            cmd = ("tc filter add dev %s ingress"
-                   " bpf da obj %s section prog "
-                   "verbose && " % (self.br_name, prog))
-            cmd += ("tc filter add dev %s egress"
-                    " bpf da obj %s section prog "
-                    "verbose " % (self.br_name, prog))
-            return cmd
-        else:
-            for port in self.br_ports:
-                cmd = ("tc filter add dev %s ingress"
-                       " bpf da obj %s section prog "
-                       "verbose && " % (port, prog))
-                cmd += ("tc filter add dev %s egress"
-                        " bpf da obj %s section prog "
-                        "verbose " % (port, prog))
-        return cmd
-
-    def load_ebpf(self, prog, load_bridge):
-        if (load_bridge):
-            cmd = ("tc filter add dev %s ingress"
-                   " bpf da obj %s section prog "
-                   "verbose && " % (self.br_name, prog))
-            cmd += ("tc filter add dev %s egress"
-                    " bpf da obj %s section prog "
-                    "verbose " % (self.br_name, prog))
-            return cmd
-        else:
-            for port in self.br_ports:
-                result = self._load_tc(port, prog)
-                if result != SUCCESS:
-                    return result
-            return SUCCESS
-
-    def check_ebpf_maps(self, path):
-        # check if path has been created
-        return self.ns_exec("ls -1 %s | wc -l" % path)
-
     def create_virtual_env(self, num_ifaces):
         self.ns_init()
         self.create_bridge()
@@ -157,7 +129,6 @@ def main(argv):
     outputs["stdout"] = sys.stdout
     outputs["stderr"] = sys.stderr
     bridge = Bridge("12345", outputs, True)
-    # Run the test with the extracted options and modified argv
     bridge.create_virtual_env(5)
     bridge.ns_del()
 
