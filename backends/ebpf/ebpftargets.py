@@ -157,7 +157,7 @@ class EBPFTarget(object):
         """ Compiles a filter from the previously generated template """
         return SUCCESS
 
-    def run(self, args=""):
+    def run(self):
         # To override
         """ Runs the filter and feeds attached interfaces with packets """
         report_output(self.outputs["stdout"],
@@ -169,7 +169,7 @@ class EBPFTarget(object):
                       self.options.verbose,
                       "Input file: %s" % pcap_pattern)
         # Main executable
-        args += self.template
+        args = self.template + " "
         # Input pcap pattern
         args += "-f " + pcap_pattern + " "
         # Number of input interfaces
@@ -267,22 +267,51 @@ class EBPFKernelTarget(EBPFTarget):
         # Not implemented yet, just pass the test
         return SUCCESS
 
+    def get_run_cmd(self):
+        direction = "in"
+        pcap_pattern = self.filename('', direction)
+        num_files = len(glob(self.filename('*', direction)))
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
+        # Main executable
+        cmd = self.template + " "
+        # Input pcap pattern
+        cmd += "-f " + pcap_pattern + " "
+        # Number of input interfaces
+        cmd += "-n " + str(num_files) + " "
+        # Debug flag (verbose output)
+        cmd += "-d"
+        return cmd
+
     def run(self):
         # Root is necessary to load ebpf into the kernel
         require_root(self.outputs)
+        load_bridge = False
         namespace = str(os.getpid())
-        br = Bridge(namespace, self.outputs, self.options.verbose)
-        br.create_virtual_env(len(self.expected))
         result = self._create_runtime()
         if result != SUCCESS:
             br.ns_del()
-        br.load_ebpf(self.template + ".o")
-        # Check if the maps have been loaded into the tc folder
-        if br.check_ebpf_maps("/sys/fs/bpf/tc/globals") != SUCCESS:
+            return result
+
+        br = Bridge(namespace, self.outputs, self.options.verbose)
+        if (len(self.expected) == 0):
+            # If no interfaces, attach the ebpf program to the bridge instead
+            load_bridge = True
+        br.create_virtual_env(len(self.expected))
+        if result != SUCCESS:
             br.ns_del()
-            return FAILURE
-        prefix = br.get_ns_prefix()
-        result = EBPFTarget.run(self, prefix)
+            return result
+        cmd = br.get_load_ebpf_cmd(self.template + ".o", load_bridge)
+        # # Check if the maps have been loaded into the tc folder
+        # if br.check_ebpf_maps("/sys/fs/bpf/tc/globals") != SUCCESS:
+        #     br.ns_del()
+        #     return FAILURE\
+        if (not load_bridge):
+            if (cmd):
+                cmd += " && "
+            cmd += self.get_run_cmd()
+        result = br.ns_exec(cmd)
         br.ns_del()
         return result
 
@@ -296,7 +325,7 @@ class EBPFBCCTarget(EBPFTarget):
         return SUCCESS
 
     def run(self):
-            # Not implemented yet, just pass the test
+        # Not implemented yet, just pass the test
         return SUCCESS
 
 
