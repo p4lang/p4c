@@ -15,7 +15,8 @@
 
 """ Virtual environment which models a simple bridge with n attached
     interfaces. The bridge runs in a completely isolated namespace.
-    Allows loading and testing of eBPF programs. """
+    Allows the loading and testing of eBPF programs by initializing every
+    interface with a qdisc. """
 
 import os
 import sys
@@ -28,24 +29,49 @@ class Bridge(object):
 
     def __init__(self, namespace, outputs, verbose):
         self.ns_name = namespace     # identifier of the namespace
-        self.br_name = self.ns_name  # name of the central bridge
+        self.br_name = "core"        # name of the central bridge
         self.br_ports = []           # list of bridge ports
         self.outputs = outputs       # contains standard and error output
         self.verbose = verbose       # do we want to be chatty?
 
     def ns_init(self):
+        """ Initialize the namespace. """
         cmd = "ip netns add %s" % self.ns_name
-        errmsg = "Failed to create namespace:"
+        errmsg = "Failed to create namespace %s :" % self.ns_name
         result = run_timeout(True, cmd, TIMEOUT,
                              self.outputs, errmsg)
         self.ns_exec("ip link set dev lo up")
         return result
 
+    def ns_del(self):
+        """ Delete the namespace. """
+        cmd = "ip netns del %s" % self.ns_name
+        errmsg = "Failed to delete namespace %s :" % self.ns_name
+        return run_timeout(True, cmd, TIMEOUT,
+                           self.outputs, errmsg)
+
+    def get_ns_prefix(self):
+        """ Return the command prefix for the namespace of this bridge class.
+            """
+        return "ip netns exec %s" % self.ns_name
+
+    def ns_exec(self, cmd_string):
+        """ Run and execute an isolated command in the namespace. """
+        prefix = self.get_ns_prefix()
+        # bash-c allows us to run multiple commands at once
+        cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
+        errmsg = "Failed to run command in namespace %s:" % self.ns_name
+        return run_timeout(self.verbose, cmd, TIMEOUT,
+                           self.outputs, errmsg)
+
     def ns_open_process(self):
+        """ Open a bash process in the namespace and return the handle """
         cmd = self.get_ns_prefix() + " /bin/bash "
         return open_process(self.verbose, cmd, self.outputs)
 
     def ns_write_to_process(self, proc, cmd):
+        """ Allows writing of a command to a given process. The command is NOT
+            yet executed. """
         report_output(self.outputs["stdout"],
                       self.verbose, "Writing %s " % cmd)
         try:
@@ -54,61 +80,45 @@ class Bridge(object):
             err_text = "Error while writing to process"
             report_err(self.outputs["stdout"],
                        self.verbose, err_text, e)
-            # Stop loop on "Invalid pipe" or "Invalid argument".
-            # No sense in continuing with broken pipe.
             return FAILURE
         return SUCCESS
 
     def ns_close_process(self, proc):
+        """ Close and actually run the process in the namespace. Returns the
+            exit code. """
         errmsg = ("Failed to execute the command"
                   " sequence in namespace %s" % self.ns_name)
         return run_process(self.verbose, proc, TIMEOUT, self.outputs, errmsg)
 
-    def ns_del(self):
-        self.ns_exec("ip link del dev %s" % (self.br_name))
-        cmd = "ip netns del %s" % self.ns_name
-        errmsg = "Failed to delete namespace:"
-        return run_timeout(True, cmd, TIMEOUT,
-                           self.outputs, errmsg)
-
-    def get_ns_prefix(self):
-        return "ip netns exec %s" % self.ns_name
-
-    def ns_exec(self, cmd_string):
-        prefix = self.get_ns_prefix()
-        # bash-c allows us to run multiple commands at once
-        cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
-        errmsg = "Failed to run command in namespace %s:" % self.ns_name
-        return run_timeout(self.verbose, cmd, TIMEOUT,
-                           self.outputs, errmsg)
-
     def _configure_bridge(self, br_name):
+        """ Set the bridge active and load the qdisc. We also disable IPv6 to
+            avoid ICMPv6 spam. """
         cmd = "ip link set dev %s up && " % br_name
+        # Prevent the broadcasting of ipv6 link discovery messages
+        cmd += "sysctl -w net.ipv6.conf.all.disable_ipv6=1 && "
+        cmd += "sysctl -w net.ipv6.conf.default.disable_ipv6=1 && "
         # Add the qdisc. MUST be clsact layer.
-        cmd += "tc qdisc add dev %s clsact && " % br_name
-        # Prevent the broadcasting of link discovery messages
-        cmd += "sysctl -w net.ipv6.conf.all.accept_ra=0 && "
-        cmd += "sysctl -w net.ipv6.conf.%s.forwarding=0 && " % br_name
-        cmd += "sysctl -w net.ipv6.conf.%s.accept_ra=0" % br_name
+        cmd += "tc qdisc add dev %s clsact" % br_name
         return self.ns_exec(cmd)
 
     def create_bridge(self):
+        """ Create the central bridge of the environment and configure it. """
         result = self.ns_exec("ip link add %s type bridge" % self.br_name)
         if result != SUCCESS:
             return result
         return self._configure_bridge(self.br_name)
 
     def _configure_bridge_port(self, port_name):
+        """ Set a bridge port active and load the qdisc. """
         cmd = "ip link set dev %s up && " % port_name
-        # Prevent the broadcasting of link discovery messages
-        cmd += "sysctl -w net.ipv6.conf.%s.accept_ra=0 && " % port_name
-        cmd += "sysctl -w net.ipv6.conf.%s.forwarding=0 && " % port_name
         cmd += "tc qdisc add dev %s clsact" % port_name
         return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces):
+        """ Attach and initialize n interfaces to the central bridge of the
+            namespace. """
         for index in (range(num_ifaces)):
-            edge_tap = "%s_%d" % (self.ns_name, index)
+            edge_tap = "%s" % index
             self.ns_exec("ip link add link %s name %s"
                          " type macvtap mode vepa" % (self.br_name, edge_tap))
             self._configure_bridge_port(edge_tap)
@@ -117,6 +127,8 @@ class Bridge(object):
         return SUCCESS
 
     def create_virtual_env(self, num_ifaces):
+        """ Create the namespace, the bridge, and attach interfaces all at once.
+             """
         self.ns_init()
         self.create_bridge()
         return self.attach_interfaces(num_ifaces)

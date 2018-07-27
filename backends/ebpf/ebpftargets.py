@@ -339,7 +339,6 @@ class EBPFKernelTarget(EBPFTarget):
         require_root(self.outputs)
         result = self._create_runtime()
         if result != SUCCESS:
-            br.ns_del()
             return result
         bridge = self._create_bridge()
         if not bridge:
