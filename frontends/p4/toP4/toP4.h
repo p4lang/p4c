@@ -51,7 +51,9 @@ class ToP4 : public Inspector {
 
     // maintained as stacks
     std::vector<VecPrint> vectorSeparator;
+    size_t      vectorSeparator_init_apply_size;
     std::vector<ListPrint> listTerminators;
+    size_t      listTerminators_init_apply_size;
 
     void setVecSep(const char* sep, const char* term = nullptr) {
         vectorSeparator.push_back(VecPrint(sep, term));
