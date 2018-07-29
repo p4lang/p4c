@@ -23,6 +23,8 @@ namespace P4 {
 
 Visitor::profile_t ToP4::init_apply(const IR::Node* node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
+    listTerminators_init_apply_size = listTerminators.size();
+    vectorSeparator_init_apply_size = vectorSeparator.size();
     return Inspector::init_apply(node);
 }
 
@@ -32,8 +34,10 @@ void ToP4::end_apply(const IR::Node*) {
         *outStream << result.c_str();
         outStream->flush();
     }
-    BUG_CHECK(listTerminators.empty(), "Non-empty listTerminators");
-    BUG_CHECK(vectorSeparator.empty(), "Non-empty vectorSeparator");
+    BUG_CHECK(listTerminators.size() == listTerminators_init_apply_size,
+              "inconsistent listTerminators");
+    BUG_CHECK(vectorSeparator.size() == vectorSeparator_init_apply_size,
+              "inconsistent vectorSeparator");
 }
 
 // Try to guess whether a file is a "system" file
