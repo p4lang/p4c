@@ -564,13 +564,15 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
         options.preprocessor_options += ppoptions; }
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
-    if (FILE* file = options.preprocess()) {
-        if (!::errorCount()) {
+    if (!::errorCount()) {
+        if (FILE* file = options.preprocess()) {
             auto code = P4::P4ParserDriver::parse(file, options.file);
             if (code && !::errorCount())
                 for (auto decl : code->declarations)
-                    declarations->push_back(decl); }
-        options.closeInput(file); }
+                    declarations->push_back(decl);
+            options.closeInput(file);
+        }
+    }
 }
 
 void ProgramStructure::loadModel() {
