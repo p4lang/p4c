@@ -14,26 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <unistd.h>     // getopt()
-#include <ctype.h>      // isprint()
-#include <string.h>     // memcpy()
-#include <stdlib.h>     // malloc()
-#include "pcap_util.h"
-#include "ebpf_kernel.h"
+/*
+
+ */
 
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_KERNEL_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_KERNEL_H_
 
+#include "pcap_util.h"
+#include "ebpf_runtime_kernel.h"
 
-typedef int (*packet_filter)(SK_BUFF* s);
+void run_and_record_output(pcap_list_t *pkt_list, char *pcap_base, uint16_t num_pcaps, int debug);
+char *generate_pcap_name(const char *pcap_base, int index, const char *suffix);
 
-static inline pcap_list_t *feed_packets(pcap_list_t *pkt_list, int debug) {
-    pcap_list_t *output_pkts = allocate_pkt_list();
-    return output_pkts;
-}
-
-#define FEED_PACKETS(ebpf_filter, pkt_list, debug) \
-    feed_packets(pkt_list, debug)
+#define RUN(ebpf_filter, pcap_base, num_pcaps, input_list, debug) \
+    run_and_record_output(input_list, pcap_base, num_pcaps, debug)
 #define INIT_EBPF_TABLES(debug)
 #define DELETE_EBPF_TABLES(debug)
 

@@ -26,7 +26,6 @@
 import os
 import sys
 from glob import glob
-from pyroute2 import IPRoute
 from scapy.utils import rdpcap
 from scapy.layers.all import RawPcapWriter
 from ebpfstf import create_table_file, parse_stf_file
@@ -60,8 +59,6 @@ class EBPFTarget(object):
         self.pcapPrefix = "pcap"    # could also be "pcapng"
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
-        # TODO: Make the runtime dir independent
-        #       on the location of the python file
         self.ebpfdir = os.path.dirname(__file__) + "/runtime"
 
     def get_make_args(self, ebpfdir, target):
@@ -155,31 +152,12 @@ class EBPFTarget(object):
     def create_filter(self):
         # To override
         """ Compiles a filter from the previously generated template """
-        return SUCCESS
+        raise NotImplementedError("Method create_filter not implemented!")
 
     def run(self):
         # To override
         """ Runs the filter and feeds attached interfaces with packets """
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Running model")
-        direction = "in"
-        pcap_pattern = self.filename('', direction)
-        num_files = len(glob(self.filename('*', direction)))
-        report_output(self.outputs["stdout"],
-                      self.options.verbose,
-                      "Input file: %s" % pcap_pattern)
-        # Main executable
-        args = self.template + " "
-        # Input pcap pattern
-        args += "-f " + pcap_pattern + " "
-        # Number of input interfaces
-        args += "-n " + str(num_files) + " "
-        # Debug flag (verbose output)
-        args += "-d"
-        errmsg = "Failed to execute the filter:"
-        result = run_timeout(self.options.verbose, args,
-                             TIMEOUT, self.outputs, errmsg)
-        return result
+        raise NotImplementedError("Method run() not implemented!")
 
     def check_outputs(self):
         """ Checks if the output of the filter matches expectations """
@@ -230,23 +208,12 @@ class EBPFTarget(object):
             report_err(self.outputs["stderr"], "Expected packects on ports",
                        self.expected.keys(), "not received")
             return FAILURE
-        else:
-            return SUCCESS
+        return SUCCESS
 
 
 class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
-
-    def _create_runtime(self):
-        args = self.get_make_args(self.ebpfdir, self.options.target)
-        # List of bpf programs to attach to the interface
-        args += "BPFOBJ=" + self.template + " "
-        args += "CFLAGS+=-DCONTROL_PLANE "
-        args += "SOURCES="
-        errmsg = "Failed to build the filter:"
-        return run_timeout(self.options.verbose, args, TIMEOUT,
-                           self.outputs, errmsg)
 
     def create_filter(self):
         # Use clang to compile the generated C code to a LLVM IR
@@ -263,9 +230,26 @@ class EBPFKernelTarget(EBPFTarget):
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
 
-    def check_outputs(self):
-        # Not implemented yet, just pass the test
-        return SUCCESS
+    def _create_runtime(self):
+        args = self.get_make_args(self.ebpfdir, self.options.target)
+        # List of bpf programs to attach to the interface
+        args += "BPFOBJ=" + self.template + " "
+        args += "CFLAGS+=-DCONTROL_PLANE "
+        args += "SOURCES="
+        errmsg = "Failed to build the filter:"
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
+
+    def _create_bridge(self):
+        # The namespace is the id of the process
+        namespace = str(os.getpid())
+        # Create the namespace and the bridge with all its ports
+        br = Bridge(namespace, self.outputs, self.options.verbose)
+        result = br.create_virtual_env(len(self.expected))
+        if result != SUCCESS:
+            br.ns_del()
+            return None
+        return br
 
     def _get_run_cmd(self):
         direction = "in"
@@ -284,55 +268,48 @@ class EBPFKernelTarget(EBPFTarget):
         cmd += "-d"
         return cmd
 
-    def _get_load_tc_cmd(self, port_name):
+    def _load_tc_cmd(self, bridge, proc, port_name):
         # Load the specified eBPF object to "port_name" ingress and egress
         # As a side-effect, this may create maps in /sys/fs/bpf/tc/globals
-        cmd = ("tc filter add dev %s ingress"
-               " bpf da obj %s section prog "
-               "verbose && " % (port_name, self.template + ".o"))
-        cmd += ("tc filter add dev %s egress"
-                " bpf da obj %s section prog "
-                "verbose" % (port_name, self.template + ".o"))
-        return cmd
+        cmd_ingress = ("tc filter add dev %s ingress"
+                       " bpf da obj %s section prog "
+                       "verbose" % (port_name, self.template + ".o"))
+        cmd_egress = ("tc filter add dev %s egress"
+                      " bpf da obj %s section prog "
+                      "verbose" % (port_name, self.template + ".o"))
+        result = bridge.ns_proc_write(proc, cmd_ingress)
+        if result != SUCCESS:
+            return result
+        return bridge.ns_proc_append(proc, cmd_egress)
 
     def _run_in_namespace(self, bridge):
         # Open a process in the new namespace
-        proc = bridge.ns_open_process()
+        proc = bridge.ns_proc_open()
         if not proc:
             return FAILURE
         # Get the command to load eBPF code to all the attached ports
-        cmd = ""
-        if (len(bridge.br_ports) > 0):
-            # No ports attached (no pcap files), load to bridge instead
+        if len(bridge.br_ports) > 0:
             for port in bridge.br_ports:
-                cmd += self._get_load_tc_cmd(port)
+                result = self._load_tc_cmd(bridge, proc, port)
+                bridge.ns_proc_append(proc, "")
         else:
-            cmd += self._get_load_tc_cmd(bridge.br_name)
-        result = bridge.ns_write_to_process(proc, cmd + " &&")
+            # No ports attached (no pcap files), load to bridge instead
+            result = self._load_tc_cmd(bridge, proc, bridge.br_name)
+            bridge.ns_proc_append(proc, "")
+
         if result != SUCCESS:
             return result
         # Check if eBPF maps have actually been created
-        result = bridge.ns_write_to_process(proc,
-                                            "ls -1 /sys/fs/bpf/tc/globals && ")
+        result = bridge.ns_proc_write(proc,
+                                      "ls -1 /sys/fs/bpf/tc/globals")
         if result != SUCCESS:
             return result
         # Finally, append the actual runtime command to the process
-        result = bridge.ns_write_to_process(proc, self._get_run_cmd())
+        result = bridge.ns_proc_append(proc, self._get_run_cmd())
         if result != SUCCESS:
             return result
         # Execute the command queue and close the process, retrieve result
-        return bridge.ns_close_process(proc)
-
-    def _create_bridge(self):
-        # The namespace is the id of the process
-        namespace = str(os.getpid())
-        # Create the namespace and the bridge with all its ports
-        br = Bridge(namespace, self.outputs, self.options.verbose)
-        result = br.create_virtual_env(len(self.expected))
-        if result != SUCCESS:
-            br.ns_del()
-            return None
-        return br
+        return bridge.ns_proc_close(proc)
 
     def run(self):
         # Root is necessary to load ebpf into the kernel
@@ -340,10 +317,11 @@ class EBPFKernelTarget(EBPFTarget):
         result = self._create_runtime()
         if result != SUCCESS:
             return result
+        # Create the namespace and the central testing bridge
         bridge = self._create_bridge()
         if not bridge:
-            bridge.ns_del()
             return FAILURE
+        # Run the program in the generated namespace
         result = self._run_in_namespace(bridge)
         bridge.ns_del()
         return result
@@ -352,6 +330,10 @@ class EBPFKernelTarget(EBPFTarget):
 class EBPFBCCTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
+
+    def create_filter(self):
+        # Not implemented yet, just pass the test
+        return SUCCESS
 
     def check_outputs(self):
         # Not implemented yet, just pass the test
@@ -374,3 +356,25 @@ class EBPFTestTarget(EBPFTarget):
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
+
+    def run(self):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Running model")
+        direction = "in"
+        pcap_pattern = self.filename('', direction)
+        num_files = len(glob(self.filename('*', direction)))
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
+        # Main executable
+        args = self.template + " "
+        # Input pcap pattern
+        args += "-f " + pcap_pattern + " "
+        # Number of input interfaces
+        args += "-n " + str(num_files) + " "
+        # Debug flag (verbose output)
+        args += "-d"
+        errmsg = "Failed to execute the filter:"
+        result = run_timeout(self.options.verbose, args,
+                             TIMEOUT, self.outputs, errmsg)
+        return result

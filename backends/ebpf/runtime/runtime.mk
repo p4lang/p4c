@@ -26,6 +26,7 @@ CFLAGS+=-O2 -g # -Wall -Werror
 LIBS+=-lpcap
 SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c
 SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
+SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c
 # HDRS := $(BPFNAME).h $(SRCDIR)/ebpf_user.h $(SRCDIR)/ebpf_map.h $(SRCDIR)/ebpf_registry.h $(SRCDIR)/pcap_util.h
 OBJECTS = $(SRC_BASE:%.c=$(BUILDDIR)/%.o)
 DEPS = $(OBJECTS:.o=.d)

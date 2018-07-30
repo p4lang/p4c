@@ -22,6 +22,7 @@ limitations under the License.
 #define BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
 
 #include <linux/bpf.h>      // general ebpf variables
+#include <linux/pkt_cls.h>  // TC_ACT_OK, TC_ACT_SHOT
 #include <stdbool.h>        // true, false
 #include <stdio.h>          // stderr, fprintf()
 #include <string.h>         // memset()

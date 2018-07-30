@@ -64,12 +64,12 @@ class Bridge(object):
         return run_timeout(self.verbose, cmd, TIMEOUT,
                            self.outputs, errmsg)
 
-    def ns_open_process(self):
+    def ns_proc_open(self):
         """ Open a bash process in the namespace and return the handle """
         cmd = self.get_ns_prefix() + " /bin/bash "
         return open_process(self.verbose, cmd, self.outputs)
 
-    def ns_write_to_process(self, proc, cmd):
+    def ns_proc_write(self, proc, cmd):
         """ Allows writing of a command to a given process. The command is NOT
             yet executed. """
         report_output(self.outputs["stdout"],
@@ -83,7 +83,11 @@ class Bridge(object):
             return FAILURE
         return SUCCESS
 
-    def ns_close_process(self, proc):
+    def ns_proc_append(self, proc, cmd):
+        """ Append a command to an open process. """
+        return self.ns_proc_write(proc, " && " + cmd)
+
+    def ns_proc_close(self, proc):
         """ Close and actually run the process in the namespace. Returns the
             exit code. """
         errmsg = ("Failed to execute the command"
@@ -119,18 +123,27 @@ class Bridge(object):
             namespace. """
         for index in (range(num_ifaces)):
             edge_tap = "%s" % index
-            self.ns_exec("ip link add link %s name %s"
-                         " type macvtap mode vepa" % (self.br_name, edge_tap))
-            self._configure_bridge_port(edge_tap)
+            result = self.ns_exec("ip link add link %s name %s"
+                                  " type macvtap mode vepa"
+                                  % (self.br_name, edge_tap))
+            if result != SUCCESS:
+                return result
+            result = self._configure_bridge_port(edge_tap)
+            if result != SUCCESS:
+                return result
             # add interface to the list of existing bridge ports
             self.br_ports.append(edge_tap)
         return SUCCESS
 
     def create_virtual_env(self, num_ifaces):
-        """ Create the namespace, the bridge, and attach interfaces all at once.
-             """
-        self.ns_init()
-        self.create_bridge()
+        """ Create the namespace, the bridge, and attach interfaces all at
+            once. """
+        result = self.ns_init()
+        if result != SUCCESS:
+            return result
+        result = self.create_bridge()
+        if result != SUCCESS:
+            return result
         return self.attach_interfaces(num_ifaces)
 
 
