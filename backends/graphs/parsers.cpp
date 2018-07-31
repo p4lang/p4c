@@ -41,7 +41,7 @@ void ParserGraphs::postorder(const IR::P4Parser *parser) {
     }
 
     (*out) << "digraph " << parser->name << "{" << std::endl;
-    for (auto state : states) {
+    for (auto state : states[parser]) {
         cstring label = state->name;
         if (state->selectExpression != nullptr &&
             state->selectExpression->is<IR::SelectExpression>()) {
@@ -52,19 +52,24 @@ void ParserGraphs::postorder(const IR::P4Parser *parser) {
                 label << "\"]" << std::endl;
     }
 
-    for (auto edge : transitions) {
-        *out << edge->sourceState << " -> " << edge->destState <<
+    for (auto edge : transitions[parser]) {
+        *out << edge->sourceState->name << " -> " << edge->destState->name <<
                 " [label=\"" << edge->label << "\"]" << std::endl;
     }
     *out << "}" << std::endl;
+}
 
-    states.clear();
-    transitions.clear();
+void ParserGraphs::postorder(const IR::ParserState* state) {
+    auto parser = findContext<IR::P4Parser>();
+    CHECK_NULL(parser);
+    states[parser].push_back(state);
 }
 
 void ParserGraphs::postorder(const IR::PathExpression* expression) {
     auto state = findContext<IR::ParserState>();
     if (state != nullptr) {
+        auto parser = findContext<IR::P4Parser>();
+        CHECK_NULL(parser);
         auto decl = refMap->getDeclaration(expression->path);
         if (decl != nullptr && decl->is<IR::ParserState>()) {
             auto sc = findContext<IR::SelectCase>();
@@ -74,7 +79,7 @@ void ParserGraphs::postorder(const IR::PathExpression* expression) {
             } else {
                 label = toString(sc->keyset);
             }
-            transitions.push_back(
+            transitions[parser].push_back(
                 new TransitionEdge(state, decl->to<IR::ParserState>(), label));
         }
     }
@@ -94,7 +99,8 @@ void ParserGraphs::postorder(const IR::SelectExpression* expression) {
     CHECK_NULL(parser);
     auto reject = parser->getDeclByName(IR::ParserState::reject);
     CHECK_NULL(reject);
-    transitions.push_back(new TransitionEdge(state, reject->to<IR::ParserState>(), "fallthrough"));
+    transitions[parser].push_back(
+        new TransitionEdge(state, reject->to<IR::ParserState>(), "fallthrough"));
 }
 
 }  // namespace graphs

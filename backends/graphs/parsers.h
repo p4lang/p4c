@@ -31,19 +31,20 @@ class ParserGraphs : public Inspector {
     const P4::TypeMap* typeMap;
     const cstring graphsDir;
 
+ protected:
     struct TransitionEdge {
-        cstring sourceState;
-        cstring destState;
+        const IR::ParserState* sourceState;
+        const IR::ParserState* destState;
         cstring label;
 
         TransitionEdge(const IR::ParserState* source, const IR::ParserState* dest,
-                       cstring label): sourceState(source->name),
-                                       destState(dest->name),
+                       cstring label): sourceState(source),
+                                       destState(dest),
                                        label(label) {}
     };
 
-    safe_vector<const TransitionEdge*> transitions;
-    safe_vector<const IR::ParserState*> states;
+    std::map<const IR::P4Parser*, safe_vector<const TransitionEdge*>> transitions;
+    std::map<const IR::P4Parser*, safe_vector<const IR::ParserState*>> states;
 
  public:
     ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir) :
@@ -52,7 +53,7 @@ class ParserGraphs : public Inspector {
     }
 
     void postorder(const IR::P4Parser* parser) override;
-    void postorder(const IR::ParserState* state) override { states.push_back(state); }
+    void postorder(const IR::ParserState* state) override;
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::SelectExpression* expression) override;
 };
