@@ -28,7 +28,7 @@ limitations under the License.
 
 
 #define FILE_NAME_MAX 256
-#define MAX_10_UINT16 5;
+#define MAX_10_UINT16 5
 #define PCAPOUT "_out.pcap"
 
 /**
@@ -41,7 +41,7 @@ limitations under the License.
  */
 char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
     /* Dynamic string length plus max decimal representation of uint16_t */
-    int file_length = strlen(pcap_base) + strlen(suffix) + MAX_10_UINT16;
+    int file_length = strlen(pcap_base) + strlen(suffix) + MAX_10_UINT16 + 1;
     char *pcap_name = malloc(file_length);
     int offset = snprintf(pcap_name, file_length,"%s%d%s",
                     pcap_base, index, suffix);
@@ -52,9 +52,10 @@ char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
     return pcap_name;
 }
 
-void *run_tcpdump(char *filename, char *interface) {
+void run_tcpdump(char *filename, char *interface) {
     int len = 64 + strlen(filename) + strlen(interface);
     char *cmd = malloc(len);
+    /* Write to file "filename" and listen on interface "interface" */
     snprintf(cmd, len, "tcpdump -w %s -i %s &", filename, interface);
     int ret = system(cmd);
     if (ret < 0)
@@ -62,13 +63,13 @@ void *run_tcpdump(char *filename, char *interface) {
     free(cmd);
 }
 
-void *kill_tcpdump() {
-    int ret = system("killall tcpdump");
+void kill_tcpdump() {
+    int ret = system("pkill --ns $$ tcpdump");
     if (ret < 0)
         perror("killing tcpdump failed:");
 }
 
-int open_socket(char *iface_name, int num_pcaps) {
+int open_socket(char *iface_name) {
     struct sockaddr_ll iface;
     int sockfd;
     memset (&iface, 0, sizeof (iface));
@@ -100,9 +101,10 @@ void close_sockets(int *sockfds, int num_pcaps) {
 int *init_sockets(char *pcap_base, uint16_t num_pcaps){
     int *sockfds = malloc(sizeof(int) * num_pcaps);
     for (int i = 0; i < num_pcaps; i++) {
-        char iface_name[256];
-        snprintf(iface_name, 256, "%d", i);
-        sockfds[i] = open_socket(iface_name, num_pcaps);
+        char iface_name[MAX_10_UINT16 + 1];
+        snprintf(iface_name, MAX_10_UINT16, "%d", i);
+        sockfds[i] = open_socket(iface_name);
+        /* Start up tcpdump while we open each socket */
         run_tcpdump(generate_pcap_name(pcap_base, i, PCAPOUT), iface_name);
     }
     /* Wait a bit to let tcpdump initialize */

@@ -116,7 +116,7 @@ void delete_list(pcap_list_t *pkt_list) {
 }
 
 void delete_array(pcap_list_array_t *pkt_list_array) {
-    for(uint32_t i = 0; i< pkt_list_array->len; i++)
+    for(uint32_t i = 0; i < pkt_list_array->len; i++)
         if (pkt_list_array->lists[i])
             delete_list(pkt_list_array->lists[i]);
     free(pkt_list_array->lists);
@@ -198,10 +198,9 @@ pcap_list_array_t *split_and_delete_list(pcap_list_t *input_list, pcap_list_arra
 
     /* Find the maximum interface value in the list */
     uint16_t max_index = 0;
-    for (uint32_t i = 0; i < input_list->len; i++){
+    for (uint32_t i = 0; i < input_list->len; i++)
         if (input_list->pkts[i]->ifindex > max_index)
             max_index = input_list->pkts[i]->ifindex;
-    }
 
     /* Allocate as many lists as the maximum index */
     for (int i = 0; i <= max_index; i++) {

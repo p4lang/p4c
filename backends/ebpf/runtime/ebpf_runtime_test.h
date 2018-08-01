@@ -15,7 +15,9 @@ limitations under the License.
 */
 
 /*
-
+ * Runtime operations specific to the test target. Runs a provided filter
+ * function, records the output, and writes it to a physical file. Does not use
+ * any Linux networking tools and only operates on custom hash maps.
  */
 
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_TEST_H_
@@ -28,6 +30,8 @@ typedef int (*packet_filter)(SK_BUFF* s);
 
 void *run_and_record_output(packet_filter ebpf_filter, const char *pcap_base, pcap_list_t *pkt_list, int debug);
 char *generate_pcap_name(const char *pcap_base, int index, const char *suffix);
+void init_ebpf_tables(int debug);
+void delete_ebpf_tables(int debug);
 
 #define RUN(ebpf_filter, pcap_base, num_pcaps, input_list, debug) \
     run_and_record_output(ebpf_filter, pcap_base, input_list, debug)

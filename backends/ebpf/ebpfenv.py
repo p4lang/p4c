@@ -58,7 +58,7 @@ class Bridge(object):
     def ns_exec(self, cmd_string):
         """ Run and execute an isolated command in the namespace. """
         prefix = self.get_ns_prefix()
-        # bash-c allows us to run multiple commands at once
+        # bash -c allows us to run multiple commands at once
         cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
         errmsg = "Failed to run command in namespace %s:" % self.ns_name
         return run_timeout(self.verbose, cmd, TIMEOUT,
