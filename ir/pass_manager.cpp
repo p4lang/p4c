@@ -62,7 +62,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 LOG1(log_indent << "pass " << b->name() << " can't handle it"); }
             if (backup.empty()) {
                 LOG1(log_indent << "rethrow trigger");
-                throw trig; }
+                throw; }
             continue; }
         runDebugHooks(v->name(), program);
         if (early_exit_flag)
