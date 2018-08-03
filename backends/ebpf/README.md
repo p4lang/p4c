@@ -1,4 +1,4 @@
-# EBPF Backend
+# eBPF Backend
 
 The back-end accepts only P4_16 code written for the `ebpf_model.p4`
 filter model.  It generates C code that can be afterwards compiled
@@ -19,19 +19,17 @@ treatment of these topics is outside the scope of this text.
 
 ### P4
 
-P4 (http://p4.org) is a domain-specific programming language for
+[P4] (http://p4.org) is a domain-specific programming language for
 specifying the behavior of the dataplanes of network-forwarding
 elements.  The name of the programming language comes from the title
 of a paper published in the proceedings of SIGCOMM Computer
 Communications Review in 2014:
-http://www.sigcomm.org/ccr/papers/2014/July/0000000.0000004:
-"Programming Protocol-Independent Packet Processors".
+[Programming Protocol-Independent Packet Processors](http://www.sigcomm.org/ccr/papers/2014/July/0000000.0000004)
 
 P4 itself is protocol-independent but allows programmers to express a
 rich set of data plane behaviors and protocols.  This back-end only
 supports the newest version of the P4 programming language,
-[P4_16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html). The
-core P4 abstractions are:
+[P4_16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html). The core P4 abstractions are:
 
 * Headers describe the format (the set of fields and their
   sizes) of each header within a packet.
@@ -66,17 +64,17 @@ runtime the contents of the P4 tables.  P4 cannot be used to specify
 control-planes; however, a P4 program implicitly specifies the
 interface between the data-plane and the control-plane.
 
-### EBPF
+### eBPF
 
 #### Safe code
 
-EBPF is a acronym that stands for Extended Berkeley Packet Filters.
-In essence EBPF is a low-level programming language (similar to
-machine code); EBPF programs are traditionally executed by a virtual
-machine that resides in the Linux kernel.  EBPF programs can be
+eBPF is a acronym that stands for Extended Berkeley Packet Filters.
+In essence eBPF is a low-level programming language (similar to
+machine code); eBPF programs are traditionally executed by a virtual
+machine that resides in the Linux kernel.  eBPF programs can be
 inserted and removed from a live kernel using dynamic code
-instrumentation.  The main feature of EBPF programs is their *static
-safety*: prior to execution all EBPF programs have to be validated as
+instrumentation.  The main feature of eBPF programs is their *static
+safety*: prior to execution all eBPF programs have to be validated as
 being safe, and unsafe programs cannot be executed.  A safe program
 provably cannot compromise the machine it is running on:
 
@@ -91,30 +89,30 @@ provably cannot compromise the machine it is running on:
 
 #### Kernel hooks
 
-EBPF programs are inserted into the kernel using *hooks*.  There are
+eBPF programs are inserted into the kernel using *hooks*.  There are
 several types of hooks available:
 
 * any function entry point in the kernel can act as a hook; attaching
-  an EBPF program to a function `foo()` will cause the EBPF program to
+  an eBPF program to a function `foo()` will cause the eBPF program to
   execute every time some kernel thread executes `foo()`.
 
-* EBPF programs can also be attached using the Linux Traffic Control
+* eBPF programs can also be attached using the Linux Traffic Control
   (TC) subsystem, in the network packet processing datapath.  Such
   programs can be used as TC classifiers and actions.
 
-* EBPF programs can also be attached to sockets or network interfaces.
+* eBPF programs can also be attached to sockets or network interfaces.
   In this case they can be used for processing packets that flow
   through the socket/interface.
 
-EBPF programs can be used for many purposes; the main use cases are
+eBPF programs can be used for many purposes; the main use cases are
 dynamic tracing and monitoring, and packet processing.  We are mostly
 interested in the latter use case in this document.
 
-#### EBPF Tables
+#### eBPF Tables
 
-The EBPF runtime exposes a bi-directional kernel-userspace data
-communication channel, called *tables* (also called maps in some EBPF
-documents and code samples).  EBPF tables are essentially key-value
+The eBPF runtime exposes a bi-directional kernel-userspace data
+communication channel, called *tables* (also called maps in some eBPF
+documents and code samples).  eBPF tables are essentially key-value
 stores, where keys and values are arbitrary fixed-size bitstrings.
 The key width, value width and table size (maximum number of entries
 that can be stored) are declared statically, at table creation time.
@@ -129,53 +127,53 @@ pointers point to copies of the data.
 
 #### Concurrency
 
-An important aspect to understand related to EBPF is the execution
-model.  An EBPF program is triggered by a kernel hook; multiple
+An important aspect to understand related to eBPF is the execution
+model.  An eBPF program is triggered by a kernel hook; multiple
 instances of the same kernel hook can be running simultaneously on
 different cores.
 
 Each table however has a single instances across all the cores.  A
 single table may be accessed simultaneously by multiple instances of
-the same EBPF program running as separate kernel threads on different
-cores.  EBPF tables are native kernel objects, and access to the table
+the same eBPF program running as separate kernel threads on different
+cores.  eBPF tables are native kernel objects, and access to the table
 contents is protected using the kernel RCU mechanism.  This makes
 access to table entries safe under concurrent execution; for example,
 the memory associated to a value cannot be accidentally freed while an
-EBPF program holds a pointer to the respective value.  However,
-accessing tables is prone to data races; since EBPF programs cannot
+eBPF program holds a pointer to the respective value.  However,
+accessing tables is prone to data races; since eBPF programs cannot
 use locks, some of these races often cannot be avoided.
 
-EBPF and the associated tools are also under active development, and
+eBPF and the associated tools are also under active development, and
 new capabilities are added frequently.
 
-## Compiling P4 to EBPF
+## Compiling P4 to eBPF
 
-From the above description it is apparent that the P4 and EBPF
+From the above description it is apparent that the P4 and eBPF
 programming languages have different expressive powers.  However,
 there is a significant overlap in their capabilities, in particular,
 in the domain of network packet processing.  The following image
 illustrates the situation:
 
-![P4 and EBPF overlap in capabilities](scope.png)
+![P4 and eBPF overlap in capabilities](scope.png)
 
 We expect that the overlapping region will grow in size as both P4 and
-EBPF continue to mature.
+eBPF continue to mature.
 
-The current version of the P4 to EBPF compiler translates programs
+The current version of the P4 to eBPF compiler translates programs
 written in the version P4_16 of the programming language to programs
 written in a restricted subset of C.  The subset of C is chosen such
-that it should be compilable to EBPF using clang and/or bcc (the BPF
+that it should be compilable to eBPF using clang and/or bcc (the BPF
 Compiler Collection -- https://github.com/iovisor/bcc).
 
 ```
          --------------              -------
-P4 --->  | P4-to-EBPF | ---> C ----> | BCC | --> EBPF
+P4 --->  | P4-to-eBPF | ---> C ----> | clang/BCC | --> eBPF
          --------------              -------
 ```
 
 The P4 program only describes the packet processing *data plane*, that
 runs in the Linux kernel.  The *control plane* must be separately
-implemented by the user.  BCC tools simplify this task
+implemented by the user. BCC tools simplify this task
 considerably, by generating C and/or Python APIs that expose the
 dataplane/control-plane APIs.
 
@@ -210,7 +208,7 @@ $ sudo pip install pyroute2 ply scapy
 
 ### Supported capabilities
 
-The current version of the P4 to EBPF compiler supports a relatively
+The current version of the P4 to eBPF compiler supports a relatively
 narrow subset of the P4 language, but still powerful enough to write
 very complex packet filters and simple packet forwarding engines.  We expect
 that the compiler's capabilities will improve gradually.
@@ -226,7 +224,7 @@ Here are some limitations imposed on the P4 programs:
 
 * arithmetic on data wider than 32 bits is not supported
 
-* EBPF does not offer support for ternary or LPM tables
+* eBPF does not offer support for ternary or LPM tables
 
 ### Translating P4 to C
 
@@ -247,17 +245,24 @@ state transition | `goto` statement
 `extract` | load/shift/mask data from packet buffer
 
 #### Translating match-action pipelines
-
+## 
 P4 Construct | C Translation
 ----------|------------
-table     | 2 EBPF tables: second one used just for the default action
+table     | 2 eBPF tables: second one used just for the default action
 table key | `struct` type
 table `actions` block | tagged `union` with all possible actions
 `action` arguments | `struct`
-table `reads` | EBPF table access
+table `reads` | eBPF table access
 `action` body | code block
 table `apply` | `switch` statement
-counters  | additional EBPF table
+counters  | additional eBPF table
+
+#### Generating code from a .p4 file
+The C code can be generated using the following command:
+
+`p4c-ebpf PROGRAM.p4 -o out.c`
+
+This will generate the C-file and its corresponding header.
 
 #### Using the generated code
 
@@ -265,20 +270,36 @@ The resulting file contains the complete data structures, tables, and
 a C function named `ebpf_filter` that implements the P4-specified
 data-plane.  This C file can be manipulated using clang or BCC tools;
 please refer to the BCC project documentation and sample test files of
-the P4 to EBPF source code for an in-depth understanding.
+the P4 to eBPF source code for an in-depth understanding.
 
-[TODO]
+The general C-file alone will not compile. It depends on headers specific to the generated target. For the default target, this is the `kernel_ebpf.h` file which can be found in the P4 backend under `p4c/backends/ebpf/runtime`.
+The P4 backend also provides a makefile and sample header which allow for quick generation and automatic compilation of the generated file.
+
+`make -f p4c/backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=PROGRAM.p4`
+
+where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input P4 program. This command sequence will generate an eBPF program, which can be loaded into the kernel using TC.
 
 ##### Connecting the generated program with the TC
 
-The EBPF code that is generated is can be used as a classifier
+The eBPF code that is generated is can be used as a classifier
 attached to the ingress packet path using the Linux TC subsystem.  The
-same EBPF code should be attached to all interfaces.  Note however
-that all EBPF code instances share a single set of tables, which are
+same eBPF code should be attached to all interfaces.  Note however
+that all eBPF code instances share a single set of tables, which are
 used to control the program behavior.
 
-[TODO]
+`tc qdisc add dev IFACE clsact`
 
-# How to run the generated EBPF program
+Creates a classifier qdisc on the respective interface. Once created, eBPF programs can be attached to it using the following command:
 
-[TODO]
+`tc filter add dev IFACE egress bpf da obj YOUREBPFCODE section prog verbose`
+
+`da` implies that tc takes action input directly from the return codes provided by the eBPF program. We currently support `TC_ACT_SHOT` and `TC_ACT_OK`. For more information, see this link:
+
+http://docs.cilium.io/en/latest/bpf/#tc-traffic-control
+
+# How to run the generated eBPF program
+Once the eBPF program is loaded, various methods exist to manipulate the tables. The easiest and simplest way is to use the [bpftool](http://docs.cilium.io/en/latest/bpf/#bpftool) provided by the kernel.
+
+An alternative is to use explicit syscalls (an example can be found in the [kernel tools folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
+
+The P4 compiler automatically provides a set of table initializers, which may also serve as example, in the header of the generated C-file.
