@@ -115,8 +115,10 @@ class BackendDriver:
             self.add_command_option('preprocessor', "-D"+d)
             self.add_command_option('compiler', "-D"+d)
 
-        # Unix and std C keywords should be allowed in P4
-        self.add_command_option('preprocessor', '-undef -nostdinc')
+        # Preserve comments: -C
+        # Unix and std C keywords should be allowed in P4 (-undef and -nostdinc)
+        # Allow using ' for constants rather than delimiters for strings (-x assembler-with-cpp)
+        self.add_command_option('preprocessor', '-C -undef -nostdinc -x assembler-with-cpp')
 
         # default search path
         if opts.language == 'p4-16':
