@@ -43,6 +43,21 @@ static const IR::Statement *makeSideEffectStatement(const IR::Expression *exp) {
     return nullptr;
 }
 
+/// convert an expression into a string that uniqely identifies the value referenced
+/// return null cstring if not a reference to a constant thing.
+static cstring expr_name(const IR::Expression *exp) {
+    if (auto p = exp->to<IR::PathExpression>())
+        return p->path->name;
+    if (auto m = exp->to<IR::Member>()) {
+        if (auto base = expr_name(m->expr))
+            return base + "." + m->member;
+    } else if (auto a = exp->to<IR::ArrayIndex>()) {
+        if (auto k = a->right->to<IR::Constant>())
+            if (auto base = expr_name(a->left))
+                return base + "." + std::to_string(k->asInt()); }
+    return cstring();
+}
+
 /* LocalCopyPropagation does copy propagation and dead code elimination within a 'block'
  * the body of an action or control (TODO -- extend to parsers/states).  Within the
  * block it tracks all variables defined in the block as well as those defined outside the
@@ -112,19 +127,16 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
         BUG_CHECK(table == &self.tables[tbl->name], "corrupt internal state");
         table = nullptr;
         return tbl; }
-    IR::Expression *preorder(IR::Expression *exp) {
+    const IR::Expression *preorder(IR::Expression *exp) {
         visitAgain();
-        return exp; }
-    const IR::Expression *preorder(IR::PathExpression *path) {
-        visitAgain();
-        if (table) {
+        if (!table) return exp;
+        if (auto name = expr_name(exp)) {
             const Visitor::Context *ctxt = nullptr;
             if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
-                if (table->key_remap.count(path->path->name)) {
-                    LOG4("  rewriting key " << path->path->name << " : " <<
-                         table->key_remap.at(path->path->name));
-                    return table->key_remap.at(path->path->name); } } }
-        return path; }
+                if (table->key_remap.count(name)) {
+                    LOG4("  rewriting key " << name << " : " << table->key_remap.at(name));
+                    return table->key_remap.at(name); } } }
+        return exp; }
 
  public:
     explicit RewriteTableKeys(DoLocalCopyPropagation &self) : self(self) {}
@@ -154,15 +166,17 @@ bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
     return false;
 }
 
-void DoLocalCopyPropagation::forOverlapAvail(cstring name, std::function<void(VarInfo *)> fn) {
+void DoLocalCopyPropagation::forOverlapAvail(cstring name,
+                                             std::function<void(cstring, VarInfo *)> fn) {
     for (const char *pfx = name.c_str(); *pfx; pfx += strspn(pfx, ".[")) {
         pfx += strcspn(pfx, ".[");
-        if (auto var = ::getref(available, name.before(pfx)))
-            fn(var); }
+        auto it = available.find(name.before(pfx));
+        if (it != available.end())
+            fn(it->first, &it->second); }
     for (auto it = available.upper_bound(name); it != available.end(); ++it) {
         if (!it->first.startsWith(name) || !strchr(".[", it->first.get(name.size())))
             break;
-        fn(&it->second); }
+        fn(it->first, &it->second); }
 }
 
 void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
@@ -220,7 +234,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
              * read, but we can't dead-code eliminate it without eliminating the entire
              * call, so we mark it as live.  Unfortunate as we then won't dead-code
              * remove other assignmnents. */
-            forOverlapAvail(name, [name](VarInfo *var) {
+            forOverlapAvail(name, [name](cstring, VarInfo *var) {
                 LOG4("  using " << name << " in read-write");
                 var->live = true; });
             if (inferForFunc)
@@ -235,7 +249,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
         } else {
             LOG4("  using " << name << " with no propagated value"); }
         var->live = true; }
-    forOverlapAvail(name, [name](VarInfo *var) {
+    forOverlapAvail(name, [name](cstring, VarInfo *var) {
         LOG4("  using part of " << name);
         var->live = true; });
     if (inferForFunc)
@@ -246,21 +260,6 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
 const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
     auto rv = copyprop_name(path->path->name);
     return rv ? rv : path;
-}
-
-/// convert an expression into a string that uniqely identifies the value referenced
-/// return null cstring if not a reference to a constant thing.
-static cstring expr_name(const IR::Expression *exp) {
-    if (auto p = exp->to<IR::PathExpression>())
-        return p->path->name;
-    if (auto m = exp->to<IR::Member>()) {
-        if (auto base = expr_name(m->expr))
-            return base + "." + m->member;
-    } else if (auto a = exp->to<IR::ArrayIndex>()) {
-        if (auto k = a->right->to<IR::Constant>())
-            if (auto base = expr_name(a->left))
-                return base + "." + std::to_string(k->asInt()); }
-    return cstring();
 }
 
 const IR::Expression *DoLocalCopyPropagation::preorder(IR::Member *member) {
@@ -371,7 +370,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     return mc; }
             } else if (mem->expr->type->is<IR::Type_Header>()) {
                 if (mem->member == "isValid") {
-                    forOverlapAvail(obj, [obj](VarInfo *var) {
+                    forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
                         LOG4("  using " << obj << " (isValid)");
                         var->live = true; });
                     if (inferForFunc)
@@ -387,7 +386,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 dropValuesUsing(obj);
-                forOverlapAvail(obj, [obj](VarInfo *var) {
+                forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
                     LOG4("  using " << obj << " (push/pop)");
                     var->live = true; });
                 if (inferForFunc) {
@@ -499,28 +498,28 @@ void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *ac
     for (auto write : act->writes)
         dropValuesUsing(write);
     for (auto read : act->reads)
-        forOverlapAvail(read, [](VarInfo *var) {
+        forOverlapAvail(read, [](cstring, VarInfo *var) {
             var->live = true; });
 }
 
 void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
     ++tbl->apply_count;
     for (auto key : tbl->keyreads) {
-        forOverlapAvail(key, [key, tbl, this](VarInfo *var) {
+        forOverlapAvail(key, [key, tbl, this](cstring vname, VarInfo *var) {
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
-                    (!tbl->key_remap.count(key) || !tbl->key_remap.at(key)->equiv(*var->val))) {
+                    (!tbl->key_remap.count(vname) || !tbl->key_remap.at(vname)->equiv(*var->val))) {
                     /* FIXME -- need deep expr comparison here, not shallow */
                     LOG3("  different values used in different applies for key " << key);
-                    tbl->key_remap.erase(key);
+                    tbl->key_remap.erase(vname);
                     var->live = true;
                 } else if (policy(getChildContext(), var->val)) {
-                    LOG3("  will propagate value into table key " << key << ": " << var->val);
-                    tbl->key_remap.emplace(key, var->val);
+                    LOG3("  will propagate value into table key " << vname << ": " << var->val);
+                    tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;
                 } else {
                     LOG3("  policy prevents propagation of value into table key " <<
-                         key << ": " << var->val);
+                         vname << ": " << var->val);
                     var->live = true; }
             } else {
                 tbl->key_remap.erase(key);
