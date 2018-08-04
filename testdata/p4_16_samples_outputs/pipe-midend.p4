@@ -62,7 +62,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("Q_pipe.p1.Tinner") table p1_Tinner_0 {
         key = {
-            qArg1.field1: ternary @name("pArg1.field1") ;
+            p1_tArg1_0.field1: ternary @name("pArg1.field1") ;
         }
         actions = {
             p1_Drop();

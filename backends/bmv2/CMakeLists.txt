@@ -136,6 +136,8 @@ set (XFAIL_TESTS
   # Even though the P4 spec allows it, it doesn't really make sense in a switch
   # so we allow it to fail on BMv2.
   testdata/p4_14_samples/issue60.p4
+  # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
+  testdata/p4_14_samples/issue-1426.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
