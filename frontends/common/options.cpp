@@ -292,7 +292,7 @@ FILE* CompilerOptions::preprocess() {
         // line for the preprocessor
         char * driverP4IncludePath =
           isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
-        cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options
+        cmd += cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " + preprocessor_options
             + (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "")
             + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
 
