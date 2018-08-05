@@ -105,8 +105,8 @@ def FindExe(dirname, exe):
         dir = os.path.dirname(dir)
     return exe
 
-def run_timeout(options, args, timeout, stderr):
-    if options.verbose:
+def run_timeout(verbose, args, timeout, stderr):
+    if verbose:
         print("Executing ", " ".join(args))
     local = Local()
     local.process = None
@@ -127,7 +127,7 @@ def run_timeout(options, args, timeout, stderr):
         # never even started
         reportError("Process failed to start")
         return -1
-    if options.verbose:
+    if verbose:
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 

@@ -90,45 +90,59 @@ def compare_pkt(outputs, expected, received):
     return SUCCESS
 
 
-def run_timeout(options, args, timeout, outputs, errmsg):
+def open_process(verbose, args, outputs):
     """ Run the given arguments as a subprocess. Time out after TIMEOUT
         seconds and report failures or stdout. """
     report_output(outputs["stdout"],
-                  options.verbose, "Executing ", " ".join(args))
+                  verbose, "Writing ", args)
     proc = None
-
-    def kill(process):
-        process.kill()
-
     if outputs["stderr"] is not None:
         try:
-            proc = Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = Popen(args, stdout=subprocess.PIPE, shell=True,
+                         stdin=subprocess.PIPE, stderr=subprocess.PIPE,
+                         universal_newlines=True)
         except OSError as e:
             report_err(outputs["stderr"], "Failed executing: ", e)
     if proc is None:
         # Never even started
         report_err(outputs["stderr"], "Process failed to start")
-        return FAILURE
+    return proc
 
+
+def run_process(verbose, proc, timeout, outputs, errmsg):
+    def kill(process):
+        process.kill()
     timer = Timer(TIMEOUT, kill, [proc])
     try:
         timer.start()
         out, err = proc.communicate()
     finally:
         timer.cancel()
-    msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
-           "%s########### PROCESS OUTPUT END\n" % out)
-    report_output(outputs["stdout"], options.verbose, msg)
+    if out:
+        msg = ("\n########### PROCESS OUTPUT BEGIN:\n"
+               "%s########### PROCESS OUTPUT END\n" % out)
+        report_output(outputs["stdout"], verbose, msg)
     if proc.returncode != SUCCESS:
         report_err(outputs["stderr"], "Error %d: %s\n%s" %
                    (proc.returncode, errmsg, err))
+    else:
+        # Also report non fatal warnings in stdout
+        if err:
+            report_err(outputs["stderr"], verbose, err)
     return proc.returncode
+
+
+def run_timeout(verbose, args, timeout, outputs, errmsg):
+    proc = open_process(verbose, args, outputs)
+    if proc is None:
+        return FAILURE
+    return run_process(verbose, proc, timeout, outputs, errmsg)
 
 
 def require_root(outputs):
     """ Some calls may require root, this is how we check for it.
         Caution: Only works on Unix systems """
-    if (not (os.getuid() == 0)):
+    if not (os.getuid() == 0):
         errmsg = "This test requires root privileges! Failing..."
         report_err(outputs["stderr"], errmsg)
         sys.exit(FAILURE)

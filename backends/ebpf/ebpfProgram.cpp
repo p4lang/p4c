@@ -83,13 +83,6 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     parser->headerType->emitInitializer(builder);
     builder->endOfStatement(true);
 
-    // HACK to force LLVM to put the headers on the stack.
-    // This should not be needed, but the llvm bpf back-end seems to be broken.
-    // builder->emitIndent();
-    // builder->append("printk(\"%p\", ");
-    // builder->append(parser->headers->name);
-    // builder->append(")");
-    // builder->endOfStatement(true);
     emitLocalVariables(builder);
     builder->newline();
     builder->emitIndent();
@@ -100,12 +93,19 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitPipeline(builder);
 
     builder->emitIndent();
-    builder->append(endLabel);
-    builder->appendLine(":");
+    builder->appendFormat("%s:\n", endLabel);
     builder->emitIndent();
-    builder->append("return ");
-    builder->append(control->accept->name.name);
-    builder->appendLine(";");
+    builder->appendFormat("if (%s)\n", control->accept->name.name);
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("return %s;\n", builder->target->forwardReturnCode());
+    builder->decreaseIndent();
+    builder->emitIndent();
+    builder->appendLine("else");
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("return %s;\n", builder->target->dropReturnCode());
+    builder->decreaseIndent();
     builder->blockEnd(true);  // end of function
 
     builder->target->emitLicense(builder, license);

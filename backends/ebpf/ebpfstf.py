@@ -46,14 +46,15 @@ def _generate_control_actions(cmds):
         value_name = "value_%s%d" % (cmd.table, index)
         if cmd.a_type == "setdefault":
             tbl_name = cmd.table + "_defaultAction"
+            generated += "u32 %s = 0;\n\t" % (key_name)
         else:
+            generated += "struct %s_key %s = {};\n\t" % (cmd.table, key_name)
             tbl_name = cmd.table
-        generated = "struct %s_key %s = {};\n\t" % (cmd.table, key_name)
-        for key_num, key_field in enumerate(cmd.match):
-            field = key_field[0].split('.')[1]
-            generated += ("%s.%s = %s;\n\t"
-                          % (key_name, field, key_field[1]))
-        generated += ("int tableFileDescriptor = "
+            for key_num, key_field in enumerate(cmd.match):
+                field = key_field[0].split('.')[1]
+                generated += ("%s.%s = %s;\n\t"
+                              % (key_name, field, key_field[1]))
+        generated += ("tableFileDescriptor = "
                       "BPF_OBJ_GET(MAP_PATH \"/%s\");\n\t" %
                       tbl_name)
         generated += ("if (tableFileDescriptor < 0) {"
@@ -84,6 +85,7 @@ def create_table_file(actions, tmpdir, file_name):
         control_file.write("#include \"test.h\"\n\n")
         control_file.write("static inline void setup_control_plane() {\n\t")
         control_file.write("int ok;\n\t")
+        control_file.write("int tableFileDescriptor;\n\t")
         generated_cmds = _generate_control_actions(actions)
         control_file.write(generated_cmds)
         control_file.write("}\n")

@@ -26,11 +26,11 @@
 import os
 import sys
 from glob import glob
-from pyroute2 import IPRoute
 from scapy.utils import rdpcap
 from scapy.layers.all import RawPcapWriter
 from ebpfstf import create_table_file, parse_stf_file
-sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
+from ebpfenv import Bridge
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
 
 
@@ -59,16 +59,15 @@ class EBPFTarget(object):
         self.pcapPrefix = "pcap"    # could also be "pcapng"
         self.expected = {}          # expected packets per interface
         self.expectedAny = []       # num packets does not matter
-        # TODO: Make the runtime dir independent
-        #       on the location of the python file
         self.ebpfdir = os.path.dirname(__file__) + "/runtime"
 
     def get_make_args(self, ebpfdir, target):
-        args = ["make"]
+        args = "make "
         # target makefile
-        args.extend(["-f", target + ".mk"])
+        args += "-f runtime.mk "
         # Source folder of the makefile
-        args.extend(["-C", ebpfdir])
+        args += "-C " + ebpfdir + " "
+        args += "TARGET=" + target + " "
         return args
 
     def filename(self, interface, direction):
@@ -90,18 +89,20 @@ class EBPFTarget(object):
             raise Exception("No such file " + self.options.p4filename)
         # Initialize arguments for the makefile
         args = self.get_make_args(self.ebpfdir, self.options.target)
+        # name of the makefile target
+        args += self.template + ".c "
         # name of the output source file
-        args.append("BPFOBJ=" + self.template + ".c")
+        args += "BPFOBJ=" + self.template + ".c "
         # location of the P4 input file
-        args.append("P4FILE=" + self.options.p4filename)
+        args += "P4FILE=" + self.options.p4filename + " "
         # location of the P4 compiler
-        args.append("P4C=" + self.options.compilerSrcDir + "/build/p4c-ebpf")
+        args += "P4C=" + self.options.compilerSrcDir + "/build/p4c-ebpf "
         p4_args = ' '.join(map(str, argv))
         if (p4_args):
             # Remaining arguments
-            args.append("P4ARGS=\"" + p4_args + "\"")
+            args += "P4ARGS=\"" + p4_args + "\" "
         errmsg = "Failed to compile P4:"
-        result = run_timeout(self.options, args, TIMEOUT,
+        result = run_timeout(self.options.verbose, args, TIMEOUT,
                              self.outputs, errmsg)
         if result != SUCCESS:
             # If the compiler crashed fail the test
@@ -151,12 +152,12 @@ class EBPFTarget(object):
     def create_filter(self):
         # To override
         """ Compiles a filter from the previously generated template """
-        return SUCCESS
+        raise NotImplementedError("Method create_filter not implemented!")
 
     def run(self):
         # To override
         """ Runs the filter and feeds attached interfaces with packets """
-        return SUCCESS
+        raise NotImplementedError("Method run() not implemented!")
 
     def check_outputs(self):
         """ Checks if the output of the filter matches expectations """
@@ -207,117 +208,138 @@ class EBPFTarget(object):
             report_err(self.outputs["stderr"], "Expected packects on ports",
                        self.expected.keys(), "not received")
             return FAILURE
-        else:
-            return SUCCESS
+        return SUCCESS
 
 
 class EBPFKernelTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def _create_bridge(self, br_name):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Creating the bridge...")
-        ipr = IPRoute()
-        ipr.link('add', ifname=br_name, kind='bridge')
-        for index in (range(len(self.expected))):
-            if_bridge = "%s_%d" % (br_name, index)
-            if_veth = "veth_%s_%d" % (br_name, index)
-            ipr.link('add', ifname=if_veth, kind="veth", peer=if_bridge)
-            ipr.link('set', index=ipr.link_lookup(ifname=if_veth)[
-                     0], master=ipr.link_lookup(ifname=br_name)[0])
-        ipr.link("set", index=ipr.link_lookup(ifname=br_name), state="up")
-
-    def _remove_bridge(self, br_name):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Deleting the bridge...")
-        ipr = IPRoute()
-        ipr.link('del', index=ipr.link_lookup(ifname=br_name)[0])
-        for index in (range(len(self.expected))):
-            if_bridge = "%s_%d" % (br_name, index)
-            ipr.link('del', index=ipr.link_lookup(ifname=if_bridge)[0])
-
-    def _compile_ebpf(self, ebpfdir):
-        args = self.get_make_args(ebpfdir, self.options.target)
-        # Input eBPF byte code
-        args.append(self.template + ".o")
-        # The bpf program to attach to the interface
-        args.append("BPFOBJ=" + self.template + ".o")
-        errmsg = "Failed to compile the eBPF byte code:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-
-    def _load_ebpf(self, ebpfdir, ifname):
-        args = ["tc"]
-        # Create a qdisc for our custom virtual interface
-        args.extend(["qdisc", "add", "dev", ifname, "clsact"])
-        errmsg = "Failed to add tc qdisc:"
-        result = run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-        if result != SUCCESS:
-            return result
-        args = ["tc"]
-        # Launch tc to load the ebpf object to the specified interface
-        args.extend(["filter", "add", "dev", ifname, "ingress",
-                     "bpf", "da", "obj", self.template + ".o",
-                     "sec", "prog", "verb"])
-        # The bpf program to attach to the interface
-        errmsg = "Failed to load the eBPF byte code using tc:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
-
     def create_filter(self):
-        require_root(self.outputs)
-        # Create interface with unique id (allows parallel tests)
-        # TODO: Create one custom interface per pcap file we parse
-        ifname = str(os.getpid())
-        self._create_bridge(ifname)
         # Use clang to compile the generated C code to a LLVM IR
-        result = self._compile_ebpf(self.ebpfdir)
-        if result != SUCCESS:
-            self._remove_bridge(ifname)
-            return result
-        result = self._load_ebpf(self.ebpfdir, ifname)
-        if result != SUCCESS:
-            self._remove_bridge(ifname)
-        return result
+        args = "make "
+        # target makefile
+        args += "-f " + self.options.target + ".mk "
+        # Source folder of the makefile
+        args += "-C " + self.ebpfdir + " "
+        # Input eBPF byte code
+        args += self.template + ".o "
+        # The bpf program to attach to the interface
+        args += "BPFOBJ=" + self.template + ".o"
+        errmsg = "Failed to compile the eBPF byte code:"
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
 
-    def check_outputs(self):
-        # Not implemented yet, just pass the test
-        ifname = str(os.getpid())
-        self._remove_bridge(ifname)
-        return SUCCESS
+    def _create_runtime(self):
+        args = self.get_make_args(self.ebpfdir, self.options.target)
+        # List of bpf programs to attach to the interface
+        args += "BPFOBJ=" + self.template + " "
+        args += "CFLAGS+=-DCONTROL_PLANE "
+        args += "SOURCES="
+        errmsg = "Failed to build the filter:"
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
+
+    def _create_bridge(self):
+        # The namespace is the id of the process
+        namespace = str(os.getpid())
+        # Create the namespace and the bridge with all its ports
+        br = Bridge(namespace, self.outputs, self.options.verbose)
+        result = br.create_virtual_env(len(self.expected))
+        if result != SUCCESS:
+            br.ns_del()
+            return None
+        return br
+
+    def _get_run_cmd(self):
+        direction = "in"
+        pcap_pattern = self.filename('', direction)
+        num_files = len(glob(self.filename('*', direction)))
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
+        # Main executable
+        cmd = self.template + " "
+        # Input pcap pattern
+        cmd += "-f " + pcap_pattern + " "
+        # Number of input interfaces
+        cmd += "-n " + str(num_files) + " "
+        # Debug flag (verbose output)
+        cmd += "-d"
+        return cmd
+
+    def _load_tc_cmd(self, bridge, proc, port_name):
+        # Load the specified eBPF object to "port_name" ingress and egress
+        # As a side-effect, this may create maps in /sys/fs/bpf/tc/globals
+        cmd_ingress = ("tc filter add dev %s ingress"
+                       " bpf da obj %s section prog "
+                       "verbose" % (port_name, self.template + ".o"))
+        cmd_egress = ("tc filter add dev %s egress"
+                      " bpf da obj %s section prog "
+                      "verbose" % (port_name, self.template + ".o"))
+        result = bridge.ns_proc_write(proc, cmd_ingress)
+        if result != SUCCESS:
+            return result
+        return bridge.ns_proc_append(proc, cmd_egress)
+
+    def _run_in_namespace(self, bridge):
+        # Open a process in the new namespace
+        proc = bridge.ns_proc_open()
+        if not proc:
+            return FAILURE
+        # Get the command to load eBPF code to all the attached ports
+        if len(bridge.br_ports) > 0:
+            for port in bridge.br_ports:
+                result = self._load_tc_cmd(bridge, proc, port)
+                bridge.ns_proc_append(proc, "")
+        else:
+            # No ports attached (no pcap files), load to bridge instead
+            result = self._load_tc_cmd(bridge, proc, bridge.br_name)
+            bridge.ns_proc_append(proc, "")
+
+        if result != SUCCESS:
+            return result
+        # Check if eBPF maps have actually been created
+        result = bridge.ns_proc_write(proc,
+                                      "ls -1 /sys/fs/bpf/tc/globals")
+        if result != SUCCESS:
+            return result
+        # Finally, append the actual runtime command to the process
+        result = bridge.ns_proc_append(proc, self._get_run_cmd())
+        if result != SUCCESS:
+            return result
+        # Execute the command queue and close the process, retrieve result
+        return bridge.ns_proc_close(proc)
+
+    def run(self):
+        # Root is necessary to load ebpf into the kernel
+        require_root(self.outputs)
+        result = self._create_runtime()
+        if result != SUCCESS:
+            return result
+        # Create the namespace and the central testing bridge
+        bridge = self._create_bridge()
+        if not bridge:
+            return FAILURE
+        # Run the program in the generated namespace
+        result = self._run_in_namespace(bridge)
+        bridge.ns_del()
+        return result
 
 
 class EBPFBCCTarget(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def compile_p4(self, argv):
-        # To override
-        """ Compile the p4 target """
-        if not os.path.isfile(self.options.p4filename):
-            raise Exception("No such file " + self.options.p4filename)
-        args = ["./p4c-ebpf"]
-        args.extend(["--target", self.options.target])
-        args.extend(["-o", self.template])
-        args.append(self.options.p4filename)
-        args.extend(argv)
-        result = run_timeout(self.options, args, TIMEOUT,
-                             self.outputs, "Failed to compile P4:")
-        if result != SUCCESS:
-            print("".join(open(self.outputs["stderr"]).readlines()))
-            # If the compiler crashed fail the test
-            if 'Compiler Bug' in open(self.outputs["stderr"]).readlines():
-                sys.exit(FAILURE)
-        # Check if we expect the p4 compilation of the p4 file to fail
-        expected_error = is_err(self.options.p4filename)
-        if expected_error:
-            # We do, so invert the result
-            if result == SUCCESS:
-                result = FAILURE
-            else:
-                result = SUCCESS
-        return result, expected_error
+    def create_filter(self):
+        # Not implemented yet, just pass the test
+        return SUCCESS
 
     def check_outputs(self):
+        # Not implemented yet, just pass the test
+        return SUCCESS
+
+    def run(self):
         # Not implemented yet, just pass the test
         return SUCCESS
 
@@ -329,10 +351,11 @@ class EBPFTestTarget(EBPFTarget):
     def create_filter(self):
         args = self.get_make_args(self.ebpfdir, self.options.target)
         # List of bpf programs to attach to the interface
-        args.append("BPFOBJ=" + self.template)
-        args.append("CFLAGS+=-DCONTROL_PLANE")
+        args += "BPFOBJ=" + self.template + " "
+        args += "CFLAGS+=-DCONTROL_PLANE "
         errmsg = "Failed to build the filter:"
-        return run_timeout(self.options, args, TIMEOUT, self.outputs, errmsg)
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
 
     def run(self):
         report_output(self.outputs["stdout"],
@@ -344,12 +367,14 @@ class EBPFTestTarget(EBPFTarget):
                       self.options.verbose,
                       "Input file: %s" % pcap_pattern)
         # Main executable
-        args = [self.template]
-        # Input
-        args.extend(["-f", pcap_pattern])
-        args.extend(["-n", str(num_files)])
-        # Debug flag
-        args.append("-d")
+        args = self.template + " "
+        # Input pcap pattern
+        args += "-f " + pcap_pattern + " "
+        # Number of input interfaces
+        args += "-n " + str(num_files) + " "
+        # Debug flag (verbose output)
+        args += "-d"
         errmsg = "Failed to execute the filter:"
-        return run_timeout(self.options, args,
-                           TIMEOUT, self.outputs, errmsg)
+        result = run_timeout(self.options.verbose, args,
+                             TIMEOUT, self.outputs, errmsg)
+        return result
