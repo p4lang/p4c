@@ -238,6 +238,7 @@ struct bpf_map_def SEC("maps") NAME = {          \
     .max_entries = MAX_ENTRIES,     \
     .map_flags = 0,                 \
 };
+
 #define REGISTER_END()
 
 #define BPF_MAP_LOOKUP_ELEM(table, key) \

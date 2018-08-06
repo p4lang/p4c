@@ -19,7 +19,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.dirname(__file__) + '/../../tools')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
 from stf.stf_parser import STFParser
 
@@ -81,14 +81,21 @@ def create_table_file(actions, tmpdir, file_name):
     The control commands are provided by the stf parser.
     This generated file is required by ebpf_runtime.c to initialize
     the control plane. """
-    with open(tmpdir + "/" + file_name, "w+") as control_file:
-        control_file.write("#include \"test.h\"\n\n")
-        control_file.write("static inline void setup_control_plane() {\n\t")
-        control_file.write("int ok;\n\t")
-        control_file.write("int tableFileDescriptor;\n\t")
-        generated_cmds = _generate_control_actions(actions)
-        control_file.write(generated_cmds)
-        control_file.write("}\n")
+    err = ""
+    try:
+        with open(tmpdir + "/" + file_name, "w+") as control_file:
+            control_file.write("#include \"test.h\"\n\n")
+            control_file.write("static inline void setup_control_plane() {")
+            control_file.write("\n\t")
+            control_file.write("int ok;\n\t")
+            control_file.write("int tableFileDescriptor;\n\t")
+            generated_cmds = _generate_control_actions(actions)
+            control_file.write(generated_cmds)
+            control_file.write("}\n")
+    except OSError as e:
+        err = e
+        return FAILURE, err
+    return SUCCESS, err
 
 
 def parse_stf_file(raw_stf):
@@ -97,22 +104,23 @@ def parse_stf_file(raw_stf):
     parser = STFParser()
     stf_str = raw_stf.read()
     stf_map, errs = parser.parse(stf_str)
-    iface_pkts = {}
+    input_pkts = {}
     cmds = []
     expected = {}
-    expectedAny = []
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
-            iface_pkts.setdefault(stf_entry[1], []).append(
+            input_pkts.setdefault(stf_entry[1], []).append(
                 hex_to_byte(stf_entry[2]))
         elif stf_entry[0] == "expect":
             interface = int(stf_entry[1])
             pkt_data = stf_entry[2]
+            expected.setdefault(interface, {})
             if pkt_data != '':
-                expected.setdefault(
-                    interface, []).append(pkt_data)
+                expected[interface]["any"] = False
+                expected[interface].setdefault(
+                    "pkts", []).append(pkt_data)
             else:
-                expectedAny.append(interface)
+                expected[interface]["any"] = True
         elif stf_entry[0] == "add":
             cmd = eBPFCommand(
                 a_type=stf_entry[0], table=stf_entry[1],
@@ -123,4 +131,4 @@ def parse_stf_file(raw_stf):
             cmd = eBPFCommand(
                 a_type=stf_entry[0], table=stf_entry[1], action=stf_entry[2])
             cmds.append(cmd)
-    return iface_pkts, cmds, expected, expectedAny
+    return input_pkts, cmds, expected

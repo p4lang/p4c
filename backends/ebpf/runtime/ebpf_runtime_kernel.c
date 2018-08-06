@@ -56,7 +56,7 @@ void run_tcpdump(char *filename, char *interface) {
     int len = 64 + strlen(filename) + strlen(interface);
     char *cmd = malloc(len);
     /* Write to file "filename" and listen on interface "interface" */
-    snprintf(cmd, len, "tcpdump -w %s -i %s &", filename, interface);
+    snprintf(cmd, len, "tcpdump -w %s -i br_%s &", filename, interface);
     int ret = system(cmd);
     if (ret < 0)
         perror("tcpdump failed:");
@@ -102,7 +102,7 @@ int *init_sockets(char *pcap_base, uint16_t num_pcaps){
     int *sockfds = malloc(sizeof(int) * num_pcaps);
     for (int i = 0; i < num_pcaps; i++) {
         char iface_name[MAX_10_UINT16 + 1];
-        snprintf(iface_name, MAX_10_UINT16, "%d", i);
+        snprintf(iface_name, MAX_10_UINT16, "%hu", i);
         sockfds[i] = open_socket(iface_name);
         /* Start up tcpdump while we open each socket */
         run_tcpdump(generate_pcap_name(pcap_base, i, PCAPOUT), iface_name);
