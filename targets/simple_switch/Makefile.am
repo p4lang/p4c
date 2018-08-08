@@ -2,13 +2,31 @@ if COND_NANOMSG
 MAYBE_TESTS = tests
 endif
 
+if COND_PI
+AM_CPPFLAGS += \
+-DWITH_PI \
+-I$(top_srcdir)/PI
+PI_LIB = $(top_builddir)/PI/libbmpi.la
+else
+PI_LIB =
+endif
+
 SUBDIRS = . $(MAYBE_TESTS)
 
 THRIFT_IDL = $(srcdir)/thrift/simple_switch.thrift
 
 noinst_LTLIBRARIES = libsimpleswitch.la
+lib_LTLIBRARIES = libsimpleswitch_runner.la
 
-libsimpleswitch_la_SOURCES = simple_switch.cpp simple_switch.h primitives.cpp
+libsimpleswitch_la_SOURCES = \
+simple_switch.cpp \
+simple_switch.h \
+primitives.cpp
+
+libsimpleswitch_runner_la_SOURCES = \
+runner.cpp
+
+nobase_include_HEADERS = bm/simple_switch/runner.h
 
 libsimpleswitch_la_LIBADD = \
 $(top_builddir)/src/bm_sim/libbmsim.la \
@@ -16,6 +34,10 @@ $(top_builddir)/src/bf_lpm_trie/libbflpmtrie.la \
 $(top_builddir)/src/BMI/libbmi.la \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
 -lboost_system $(THRIFT_LIB) -lboost_program_options -lboost_filesystem
+
+libsimpleswitch_runner_la_LIBADD = \
+$(PI_LIB) \
+libsimpleswitch.la
 
 if COND_THRIFT
 
@@ -80,7 +102,7 @@ if ENABLE_MODULES
 simple_switch_LDFLAGS += -rdynamic
 endif
 
-lib_LTLIBRARIES = libsimpleswitch_thrift.la
+lib_LTLIBRARIES += libsimpleswitch_thrift.la
 
 nodist_libsimpleswitch_thrift_la_SOURCES = \
 $(simple_switch_thrift_files)

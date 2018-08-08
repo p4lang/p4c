@@ -17,8 +17,9 @@ if COND_PI
     MAYBE_PI = PI
 endif
 
+# simple_switch depends on libbmpi so PI needs to appear first
 SUBDIRS = $(MAYBE_THRIFT) third_party src include \
-$(MAYBE_TESTS) $(MAYBE_TARGETS) tools $(MAYBE_PDFIXED) $(MAYBE_PI)
+$(MAYBE_TESTS) $(MAYBE_PI) $(MAYBE_TARGETS) tools $(MAYBE_PDFIXED)
 
 # I am leaving all style-related files (cpplint) out of dist on purpose, maybe
 # will add them later if needed
