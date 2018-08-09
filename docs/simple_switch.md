@@ -30,6 +30,7 @@ P4-14 code:
 header_type intrinsic_metadata_t {
     fields {
         ingress_global_timestamp : 48;
+        egress_global_timestamp : 48;
         lf_field_list : 8;
         mcast_grp : 16;
         egress_rid : 16;
@@ -43,6 +44,10 @@ metadata intrinsic_metadata_t intrinsic_metadata;
 shows up on ingress. The clock is set to 0 every time the switch starts. This
 field can be read directly from either pipeline (ingress and egress) but should
 not be written to.
+- `egress_global_timestamp`: a timestamp, in microseconds, set when the packet
+starts egress processing. The clock is the same as for
+`ingress_global_timestamp`. This field should only be read from the egress
+pipeline, but should not be written to.
 - `lf_field_list`: used to store the learn id when calling `generate_digest`; do
 not access directly.
 - `mcast_grp`: needed for the multicast feature. This field needs to be written

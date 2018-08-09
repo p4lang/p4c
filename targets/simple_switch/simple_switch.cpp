@@ -465,6 +465,11 @@ SimpleSwitch::egress_thread(size_t worker_id) {
 
     phv = packet->get_phv();
 
+    if (phv->has_field("intrinsic_metadata.egress_global_timestamp")) {
+      phv->get_field("intrinsic_metadata.egress_global_timestamp")
+          .set(get_ts().count());
+    }
+
     if (with_queueing_metadata) {
       auto enq_timestamp =
           phv->get_field("queueing_metadata.enq_timestamp").get<ts_res::rep>();
