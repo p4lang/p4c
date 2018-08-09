@@ -85,7 +85,7 @@ def compare_pkt(outputs, expected, received):
             report_err(outputs["stderr"], "Received packet ", received)
             report_err(outputs["stderr"], "Packet different at position", i,
                        ": expected", expected[i], ", received", received[i])
-            report_err(outputs["stderr"], "Full received packed is ", received)
+            report_err(outputs["stderr"], "Expected packet ", expected)
             return FAILURE
     return SUCCESS
 

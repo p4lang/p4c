@@ -90,18 +90,12 @@ class Target(EBPFTarget):
         return cmd
 
     def _tc_load_cmd(self, bridge, proc, port_name):
-        # Load the specified eBPF object to "port_name" ingress and egress
+        # Load the specified eBPF object to "port_name" egress
         # As a side-effect, this may create maps in /sys/fs/bpf/tc/globals
-        cmd_ingress = ("tc filter add dev %s ingress"
-                       " bpf da obj %s section prog "
-                       "verbose" % (port_name, self.template + ".o"))
         cmd_egress = ("tc filter add dev %s egress"
                       " bpf da obj %s section prog "
                       "verbose" % (port_name, self.template + ".o"))
-        result = bridge.ns_proc_write(proc, cmd_ingress)
-        if result != SUCCESS:
-            return result
-        return bridge.ns_proc_append(proc, cmd_egress)
+        return bridge.ns_proc_write(proc, cmd_egress)
 
     def _run_in_namespace(self, bridge):
         # Open a process in the new namespace
@@ -117,7 +111,6 @@ class Target(EBPFTarget):
             # No ports attached (no pcap files), load to bridge instead
             result = self._tc_load_cmd(bridge, proc, bridge.br_name)
             bridge.ns_proc_append(proc, "")
-
         if result != SUCCESS:
             return result
         # Check if eBPF maps have actually been created

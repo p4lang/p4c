@@ -99,15 +99,13 @@ typedef unsigned long long u64;
 # error "Fix your compiler's __BYTE_ORDER__?!"
 #endif
 
-#define load_byte(data, b)  (*(((u8*)(data)) + (b)))
-#define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))
-#define load_word(data, b) __constant_ntohl(*(u32 *)((u8*)(data) + (b)))
-static u64 load_dword(void *skb, u64 off) {
-  return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
-}
-
 #define htonl(d) __constant_htonl(d)
 #define htons(d) __constant_htons(d)
+
+#define load_byte(data, b)  (*(((u8*)(data)) + (b)))
+#define load_half(data, b) ((u16)load_byte(data, b) << 8) | (u16)load_byte(data, b + 1)
+#define load_word(data, b) ((u32)load_byte(data, b) << 24) | ((u32)load_byte(data, b + 1) << 16) | ((u32)load_byte(data, b + 2) << 8) | ((u32)load_byte(data, b + 3))
+#define load_dword(data, b) (u64)(((u64)load_byte(data, b) << 56) | ((u64)load_byte(data, b + 1) << 48) | ((u64)load_byte(data, b + 2) << 40) | ((u64)load_byte(data, b + 3) << 32) | ((u64)load_byte(data, b + 4) << 24) | ((u64)load_byte(data, b + 5) << 16) | ((u64)load_byte(data, b + 6) << 8) | ((u64)load_byte(data, b + 7)))
 
 /** helper macro to place programs, maps, license in
  * different sections in elf_bpf file. Section names
@@ -140,6 +138,17 @@ struct bpf_table tables[] = {
     registry_update_table_id(index, key, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
 #define BPF_OBJ_GET(name) registry_get_id(name)
+
+/*
+ * Helper function.
+ * Print a byte buffer according to the specified length.
+ */
+static inline void print_n_bytes(void *receiveBuffer, int num) {
+    for (int i =0; i<=num-1; i++)
+        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
+    printf("\n");
+}
+
 
 /* These should be automatically generated and included in the generated x.h header file */
 extern struct bpf_table tables[];

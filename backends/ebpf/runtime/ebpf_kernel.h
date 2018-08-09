@@ -212,16 +212,11 @@ struct bpf_map_def {
     unsigned int pinning;
 };
 
-unsigned long long load_byte(void *skb,
-                             unsigned long long off) asm("llvm.bpf.load.byte");
-unsigned long long load_half(void *skb,
-                             unsigned long long off) asm("llvm.bpf.load.half");
-unsigned long long load_word(void *skb,
-                             unsigned long long off) asm("llvm.bpf.load.word");
-static inline __attribute__((always_inline))
-u64 load_dword(void *skb, u64 off) {
-  return ((u64)load_word(skb, off) << 32) | load_word(skb, off + 4);
-}
+#define load_byte(data, b)  (*(((u8*)(data)) + (b)))
+#define load_half(data, b) (u16)(((u16)load_byte(data, b) << 8) | (u16)load_byte(data, b + 1))
+#define load_word(data, b) (u32)(((u32)load_byte(data, b) << 24) | ((u32)load_byte(data, b + 1) << 16) | ((u32)load_byte(data, b + 2) << 8) | ((u32)load_byte(data, b + 3)))
+#define load_dword(data, b) (u64)(((u64)load_byte(data, b) << 56) | ((u64)load_byte(data, b + 1) << 48) | ((u64)load_byte(data, b + 2) << 40) | ((u64)load_byte(data, b + 3) << 32) | ((u64)load_byte(data, b + 4) << 24) | ((u64)load_byte(data, b + 5) << 16) | ((u64)load_byte(data, b + 6) << 8) | ((u64)load_byte(data, b + 7)))
+
 
 /* simple descriptor which replaces the kernel sk_buff structure */
 #define SK_BUFF struct __sk_buff
