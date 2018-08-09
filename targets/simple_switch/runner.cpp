@@ -27,8 +27,10 @@
 
 #include <bm/simple_switch/runner.h>
 
+#ifdef WITH_PI
 #include <PI/pi.h>
 #include <PI/target/pi_imp.h>
+#endif
 
 #include "simple_switch.h"
 
