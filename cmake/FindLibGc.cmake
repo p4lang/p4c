@@ -32,7 +32,7 @@
 # use pkg-config to get the directories and then use these values
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
-PKG_CHECK_MODULES(PC_LIBGC QUIET bwd-gc)
+PKG_CHECK_MODULES(PC_LIBGC QUIET bdw-gc)
 set(LIBGC_DEFINITIONS ${PC_LIBGC_CFLAGS_OTHER})
 
 find_path(LIBGC_INCLUDE_DIR NAMES gc/gc.h
