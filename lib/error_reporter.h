@@ -443,8 +443,13 @@ class ErrorReporter final {
         return errorCount + warningCount;
     }
 
-    void setOutputStream(std::ostream* stream)
-    { outputstream = stream; }
+    void setOutputStream(std::ostream* stream) {
+        outputstream = stream;
+    }
+
+    std::ostream* getOutputStream() const {
+        return outputstream;
+    }
 
     /// Reports an error @message at @location. This allows us to use the
     /// position information provided by Bison.
