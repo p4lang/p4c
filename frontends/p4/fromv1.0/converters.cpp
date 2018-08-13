@@ -1190,6 +1190,7 @@ class InsertCompilerGeneratedStartState: public Transform {
 class FixMultiEntryPoint : public PassManager {
  public:
     explicit FixMultiEntryPoint(ProgramStructure* structure) {
+        setName("FixMultiEntryPoint");
         passes.emplace_back(new CheckIfMultiEntryPoint(structure));
         passes.emplace_back(new InsertCompilerGeneratedStartState(structure));
     }

@@ -476,11 +476,9 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     auto expr = explodeLabel(first, v.second, sizes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
-                } else if (auto first = v.first->to<IR::PathExpression>()) {
-                    auto sc = new IR::SelectCase(c->srcInfo, first, deststate);
-                    cases.push_back(sc);
                 } else {
-                    ::error("Expected constant or parser value set in %1%", v.first);
+                    auto sc = new IR::SelectCase(c->srcInfo, v.first, deststate);
+                    cases.push_back(sc);
                 }
             }
         }
