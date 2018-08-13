@@ -363,7 +363,7 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
 
 static const IR::Expression*
 explodeLabel(const IR::Constant* value, const IR::Constant* mask,
-             const std::vector<std::pair<bool, int>> &signAndSizes) {
+             const std::vector<const IR::Type::Bits *> &fieldTypes) {
     if (mask->value == 0)
         return new IR::DefaultExpression(value->srcInfo);
     bool useMask = mask->value != -1;
@@ -372,15 +372,13 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     mpz_class m = mask->value;
 
     auto rv = new IR::ListExpression(value->srcInfo, {});
-    for (auto it = signAndSizes.rbegin(); it != signAndSizes.rend(); ++it) {
-        bool sign = it->first;
-        int sz = it->second;
+    for (auto it = fieldTypes.rbegin(); it != fieldTypes.rend(); ++it) {
+        int sz = (*it)->width_bits();
         auto bits = Util::ripBits(v, sz);
-        auto type = IR::Type_Bits::get(sz, sign);
-        const IR::Expression* expr = new IR::Constant(value->srcInfo, type, bits, value->base);
+        const IR::Expression* expr = new IR::Constant(value->srcInfo, *it, bits, value->base);
         if (useMask) {
             auto maskbits = Util::ripBits(m, sz);
-            auto maskcst = new IR::Constant(mask->srcInfo, type, maskbits, mask->base);
+            auto maskcst = new IR::Constant(mask->srcInfo, *it, maskbits, mask->base);
             expr = new IR::Mask(mask->srcInfo, expr, maskcst);
         }
         rv->components.insert(rv->components.begin(), expr);
@@ -391,13 +389,10 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
 }
 
 static const IR::Type*
-explodeType(const std::vector<std::pair<bool, int>> &signAndSizes) {
+explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes) {
     auto rv = new IR::Vector<IR::Type>();
-    for (auto it = signAndSizes.begin(); it != signAndSizes.end(); ++it) {
-        bool sign = it->first;
-        int sz = it->second;
-        auto type = IR::Type_Bits::get(sz, sign);
-        rv->push_back(type);
+    for (auto it = fieldTypes.begin(); it != fieldTypes.end(); ++it) {
+        rv->push_back(*it);
     }
     if (rv->size() == 1)
         return rv->at(0);
@@ -423,17 +418,17 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     const IR::Expression* select = nullptr;
     if (parser->select != nullptr) {
         auto list = new IR::ListExpression(parser->select->srcInfo, {});
-        std::vector<std::pair<bool, int>> signAndSizes;
+        std::vector<const IR::Type::Bits *> fieldTypes;
         for (auto e : *parser->select) {
             auto c = conv.convert(e);
             list->components.push_back(c);
-            int w = c->type->width_bits();
-            bool isSigned = false;
-            if (c->type->is<IR::Type_Bits>())
-                isSigned = c->type->to<IR::Type_Bits>()->isSigned;
-            BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
-            BUG_CHECK(!(w == 1 && isSigned), "1-bit signed type is illegal");
-            signAndSizes.push_back(std::make_pair(isSigned, w));
+            if (auto *t = c->type->to<IR::Type::Bits>())
+                fieldTypes.push_back(t);
+            else {
+                auto w = c->type->width_bits();
+                BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
+                fieldTypes.push_back(IR::Type::Bits::get(w));
+            }
         }
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
@@ -455,7 +450,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto type = explodeType(signAndSizes);
+                auto type = explodeType(fieldTypes);
                 auto sizeAnnotation = value_set->getAnnotation("size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {
@@ -479,7 +474,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             }
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
-                    auto expr = explodeLabel(first, v.second, signAndSizes);
+                    auto expr = explodeLabel(first, v.second, fieldTypes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
                 } else if (auto first = v.first->to<IR::PathExpression>()) {
