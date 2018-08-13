@@ -20,6 +20,10 @@ limitations under the License.
 namespace P4 {
 
 const IR::Expression* Predication::clone(const IR::Expression* expression) {
+    // We often need to clone expressions.  This is necessary because
+    // in the end we will generate different code for the different clones of
+    // an expression.  This is most obvious if one clone is on the LHS and one
+    // on the RHS of an assigment.
     ClonePathExpressions cloner;
     auto result = expression->apply(cloner)->to<IR::Expression>();
     CHECK_NULL(result);
