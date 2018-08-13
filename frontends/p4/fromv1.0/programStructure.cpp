@@ -363,7 +363,7 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
 
 static const IR::Expression*
 explodeLabel(const IR::Constant* value, const IR::Constant* mask,
-             const std::vector<int> &sizes) {
+             const std::vector<const IR::Type::Bits *> &fieldTypes) {
     if (mask->value == 0)
         return new IR::DefaultExpression(value->srcInfo);
     bool useMask = mask->value != -1;
@@ -372,14 +372,13 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     mpz_class m = mask->value;
 
     auto rv = new IR::ListExpression(value->srcInfo, {});
-    for (auto it = sizes.rbegin(); it != sizes.rend(); ++it) {
-        int s = *it;
-        auto bits = Util::ripBits(v, s);
-        auto type = IR::Type_Bits::get(s);
-        const IR::Expression* expr = new IR::Constant(value->srcInfo, type, bits, value->base);
+    for (auto it = fieldTypes.rbegin(); it != fieldTypes.rend(); ++it) {
+        int sz = (*it)->width_bits();
+        auto bits = Util::ripBits(v, sz);
+        const IR::Expression* expr = new IR::Constant(value->srcInfo, *it, bits, value->base);
         if (useMask) {
-            auto maskbits = Util::ripBits(m, s);
-            auto maskcst = new IR::Constant(mask->srcInfo, type, maskbits, mask->base);
+            auto maskbits = Util::ripBits(m, sz);
+            auto maskcst = new IR::Constant(mask->srcInfo, *it, maskbits, mask->base);
             expr = new IR::Mask(mask->srcInfo, expr, maskcst);
         }
         rv->components.insert(rv->components.begin(), expr);
@@ -390,12 +389,10 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
 }
 
 static const IR::Type*
-explodeType(const std::vector<int> &sizes) {
+explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes) {
     auto rv = new IR::Vector<IR::Type>();
-    for (auto it = sizes.begin(); it != sizes.end(); ++it) {
-        int s = *it;
-        auto type = IR::Type_Bits::get(s);
-        rv->push_back(type);
+    for (auto it = fieldTypes.begin(); it != fieldTypes.end(); ++it) {
+        rv->push_back(*it);
     }
     if (rv->size() == 1)
         return rv->at(0);
@@ -421,13 +418,17 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     const IR::Expression* select = nullptr;
     if (parser->select != nullptr) {
         auto list = new IR::ListExpression(parser->select->srcInfo, {});
-        std::vector<int> sizes;
+        std::vector<const IR::Type::Bits *> fieldTypes;
         for (auto e : *parser->select) {
             auto c = conv.convert(e);
             list->components.push_back(c);
-            int w = c->type->width_bits();
-            BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
-            sizes.push_back(w);
+            if (auto *t = c->type->to<IR::Type::Bits>()) {
+                fieldTypes.push_back(t);
+            } else {
+                auto w = c->type->width_bits();
+                BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
+                fieldTypes.push_back(IR::Type::Bits::get(w));
+            }
         }
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
@@ -449,7 +450,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto type = explodeType(sizes);
+                auto type = explodeType(fieldTypes);
                 auto sizeAnnotation = value_set->getAnnotation("size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {
@@ -473,7 +474,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             }
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
-                    auto expr = explodeLabel(first, v.second, sizes);
+                    auto expr = explodeLabel(first, v.second, fieldTypes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
                 } else {
