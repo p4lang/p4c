@@ -422,9 +422,9 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
         for (auto e : *parser->select) {
             auto c = conv.convert(e);
             list->components.push_back(c);
-            if (auto *t = c->type->to<IR::Type::Bits>())
+            if (auto *t = c->type->to<IR::Type::Bits>()) {
                 fieldTypes.push_back(t);
-            else {
+            } else {
                 auto w = c->type->width_bits();
                 BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
                 fieldTypes.push_back(IR::Type::Bits::get(w));
