@@ -144,6 +144,15 @@ class bitvec {
 
     bitvec() : size(1), data(0) {}
     explicit bitvec(uintptr_t v) : size(1), data(v) {}
+    template<typename T, typename = typename
+        std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    explicit bitvec(T v) : size(1), data(v) {
+        if (v != data) {
+            size = sizeof(v)/sizeof(data);
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[size];
+            for (unsigned i = 0; i < size; ++i) {
+                ptr[i] = v;
+                v >>= bits_per_unit; } } }
     bitvec(size_t lo, size_t cnt) : size(1), data(0) { setrange(lo, cnt); }
     bitvec(const bitvec &a) : size(a.size) {
         if (size > 1) {
@@ -199,6 +208,13 @@ class bitvec {
             ptr[0] = raw;
             for (size_t i = 1; i < size; i++)
                 ptr[i] = 0; } }
+    template<typename T, typename = typename
+        std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    void setraw(T raw) {
+        if (sizeof(T)/sizeof(uintptr_t) > size) expand(sizeof(T)/sizeof(uintptr_t));
+        for (size_t i = 0; i < size; i++) {
+            ptr[i] = raw;
+            raw >>= bits_per_unit; } }
     void setraw(uintptr_t *raw, size_t sz) {
         if (sz > size) expand(sz);
         if (size == 1) {
@@ -208,6 +224,16 @@ class bitvec {
                 ptr[i] = raw[i];
             for (size_t i = sz; i < size; i++)
                 ptr[i] = 0; } }
+    template<typename T, typename = typename
+        std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    void setraw(uintptr_t *raw, size_t sz) {
+        constexpr size_t m = sizeof(T)/sizeof(uintptr_t);
+        if (m * sz > size) expand(m * sz);
+        size_t i = 0;
+        for (; i < sz*m; ++i)
+            ptr[i] = raw[i/m] >> ((i%m) * bits_per_unit);
+        for (; i < size; ++i)
+            ptr[i] = 0; }
     bool clrbit(size_t idx) {
         if (idx >= size * bits_per_unit) return false;
         if (size > 1)
@@ -238,21 +264,24 @@ class bitvec {
                 ptr[i] &= ~(((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
     bool getbit(size_t idx) const {
         return (word(idx/bits_per_unit) >> (idx%bits_per_unit)) & 1; }
-    uintptr_t getrange(size_t idx, size_t sz) const {
-        assert(sz > 0 && sz <= bits_per_unit);
+    uintmax_t getrange(size_t idx, size_t sz) const {
+        assert(sz > 0 && sz <= CHAR_BIT * sizeof(uintmax_t));
         if (idx >= size * bits_per_unit) return 0;
         if (size > 1) {
             unsigned shift = idx % bits_per_unit;
             idx /= bits_per_unit;
-            uintptr_t rv = ptr[idx] >> shift;
-            if (shift != 0 && idx + 1 < size)
-                rv |= ptr[idx + 1] << (bits_per_unit - shift);
-            return rv & ~(~(uintptr_t)1 << (sz-1));
+            uintmax_t rv = ptr[idx] >> shift;
+            shift = bits_per_unit - shift;
+            while (shift < sz) {
+                if (++idx >= size) break;
+                rv |= (uintmax_t)ptr[idx] << shift;
+                shift += bits_per_unit; }
+            return rv & ~(~(uintmax_t)1 << (sz-1));
         } else {
-            return (data >> idx) & ~(~(uintptr_t)1 << (sz-1)); }}
-    void putrange(size_t idx, size_t sz, uintptr_t v) {
-        assert(sz > 0 && sz <= bits_per_unit);
-        uintptr_t mask = ~(uintptr_t)0 >> (bits_per_unit - sz);
+            return (data >> idx) & ~(~(uintmax_t)1 << (sz-1)); } }
+    void putrange(size_t idx, size_t sz, uintmax_t v) {
+        assert(sz > 0 && sz <= CHAR_BIT * sizeof(uintmax_t));
+        uintptr_t mask = ~(uintmax_t)0 >> (CHAR_BIT * sizeof(uintmax_t) - sz);
         v &= mask;
         if (idx+sz > size * bits_per_unit) expand(1 + (idx+sz-1)/bits_per_unit);
         if (size == 1) {
@@ -261,11 +290,14 @@ class bitvec {
         } else {
             unsigned shift = idx % bits_per_unit;
             idx /= bits_per_unit;
-            ptr[idx] &= ~(mask >> shift);
-            ptr[idx] |= v >> shift;
-            if (shift != 0 && idx + 1 < size) {
-                ptr[idx + 1] &= ~(mask << (bits_per_unit - shift));
-                ptr[idx + 1] |= v << (bits_per_unit - shift); } } }
+            ptr[idx] &= ~(mask << shift);
+            ptr[idx] |= v << shift;
+            shift = bits_per_unit - shift;
+            while (shift < sz) {
+                assert(idx+1 < size);
+                ptr[++idx] &= ~(mask >> shift);
+                ptr[idx] |= v >> shift;
+                shift += bits_per_unit; } } }
     bitvec getslice(size_t idx, size_t sz) const;
     nonconst_bitref operator[](int idx) { return nonconst_bitref(*this, idx); }
     bool operator[](int idx) const { return getbit(idx); }
