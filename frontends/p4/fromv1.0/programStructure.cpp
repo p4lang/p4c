@@ -363,7 +363,7 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
 
 static const IR::Expression*
 explodeLabel(const IR::Constant* value, const IR::Constant* mask,
-             const std::vector<int> &sizes) {
+             const std::vector<std::pair<bool, int>> &signAndSizes) {
     if (mask->value == 0)
         return new IR::DefaultExpression(value->srcInfo);
     bool useMask = mask->value != -1;
@@ -372,13 +372,14 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     mpz_class m = mask->value;
 
     auto rv = new IR::ListExpression(value->srcInfo, {});
-    for (auto it = sizes.rbegin(); it != sizes.rend(); ++it) {
-        int s = *it;
-        auto bits = Util::ripBits(v, s);
-        auto type = IR::Type_Bits::get(s);
+    for (auto it = signAndSizes.rbegin(); it != signAndSizes.rend(); ++it) {
+        bool sign = it->first;
+        int sz = it->second;
+        auto bits = Util::ripBits(v, sz);
+        auto type = IR::Type_Bits::get(sz, sign);
         const IR::Expression* expr = new IR::Constant(value->srcInfo, type, bits, value->base);
         if (useMask) {
-            auto maskbits = Util::ripBits(m, s);
+            auto maskbits = Util::ripBits(m, sz);
             auto maskcst = new IR::Constant(mask->srcInfo, type, maskbits, mask->base);
             expr = new IR::Mask(mask->srcInfo, expr, maskcst);
         }
@@ -390,11 +391,12 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
 }
 
 static const IR::Type*
-explodeType(const std::vector<int> &sizes) {
+explodeType(const std::vector<std::pair<bool, int>> &signAndSizes) {
     auto rv = new IR::Vector<IR::Type>();
-    for (auto it = sizes.begin(); it != sizes.end(); ++it) {
-        int s = *it;
-        auto type = IR::Type_Bits::get(s);
+    for (auto it = signAndSizes.begin(); it != signAndSizes.end(); ++it) {
+        bool sign = it->first;
+        int sz = it->second;
+        auto type = IR::Type_Bits::get(sz, sign);
         rv->push_back(type);
     }
     if (rv->size() == 1)
@@ -421,13 +423,17 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     const IR::Expression* select = nullptr;
     if (parser->select != nullptr) {
         auto list = new IR::ListExpression(parser->select->srcInfo, {});
-        std::vector<int> sizes;
+        std::vector<std::pair<bool, int>> signAndSizes;
         for (auto e : *parser->select) {
             auto c = conv.convert(e);
             list->components.push_back(c);
             int w = c->type->width_bits();
+            bool isSigned = false;
+            if (c->type->is<IR::Type_Bits>())
+                isSigned = c->type->to<IR::Type_Bits>()->isSigned;
             BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
-            sizes.push_back(w);
+            BUG_CHECK(!(w == 1 && isSigned), "1-bit signed type is illegal");
+            signAndSizes.push_back(std::make_pair(isSigned, w));
         }
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
@@ -449,7 +455,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto type = explodeType(sizes);
+                auto type = explodeType(signAndSizes);
                 auto sizeAnnotation = value_set->getAnnotation("size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {
@@ -473,7 +479,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             }
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
-                    auto expr = explodeLabel(first, v.second, sizes);
+                    auto expr = explodeLabel(first, v.second, signAndSizes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
                 } else if (auto first = v.first->to<IR::PathExpression>()) {
