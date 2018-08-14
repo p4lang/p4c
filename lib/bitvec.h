@@ -226,7 +226,7 @@ class bitvec {
                 ptr[i] = 0; } }
     template<typename T, typename = typename
         std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
-    void setraw(uintptr_t *raw, size_t sz) {
+    void setraw(T *raw, size_t sz) {
         constexpr size_t m = sizeof(T)/sizeof(uintptr_t);
         if (m * sz > size) expand(m * sz);
         size_t i = 0;
