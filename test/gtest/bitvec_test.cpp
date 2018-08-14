@@ -29,4 +29,30 @@ TEST(Bitvec, Shift) {
     EXPECT_EQ((simple << 64).getbit(63), false);
 }
 
+TEST(Bitvec, bigval) {
+    __int128_t val[2] = { 0, 1 };
+    val[1] <<= 100;
+    bitvec bv(val[1]);
+    EXPECT_EQ(bv.getbit(100), true);
+    val[1] <<= 10;
+    bv.setraw(val[1]);
+    EXPECT_EQ(bv.getbit(110), true);
+    bv.setraw(val, 2);
+    EXPECT_EQ(bv.getbit(238), true);
+}
+
+TEST(Bitvec, ranges) {
+    bitvec bv(0, 100);
+    EXPECT_EQ(bv.popcount(), 100);
+    bv.putrange(55, 20, 10);
+    EXPECT_EQ(bv.popcount(), 82);
+    EXPECT_EQ(bv.getrange(54, 22), (uintmax_t)0x200015);
+    EXPECT_EQ(bv.ffz(0), 55);
+    EXPECT_EQ(bv.ffs(55), 56);
+    EXPECT_EQ(bv.ffs(56), 56);
+    EXPECT_EQ(bv.ffs(59), 75);
+    EXPECT_EQ(bv.ffz(75), 100);
+    EXPECT_EQ(bv.ffs(100), -1);
+}
+
 }  // namespace Test
