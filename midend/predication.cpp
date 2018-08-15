@@ -15,13 +15,24 @@ limitations under the License.
 */
 
 #include "predication.h"
+#include "frontends/p4/cloner.h"
 
 namespace P4 {
+
+const IR::Expression* Predication::clone(const IR::Expression* expression) {
+    // We often need to clone expressions.  This is necessary because
+    // in the end we will generate different code for the different clones of
+    // an expression.  This is most obvious if one clone is on the LHS and one
+    // on the RHS of an assigment.
+    ClonePathExpressions cloner;
+    return expression->apply(cloner);
+}
 
 const IR::Node* Predication::postorder(IR::AssignmentStatement* statement) {
     if (!inside_action || ifNestingLevel == 0)
         return statement;
-    auto right = new IR::Mux(predicate(), statement->right, statement->left);
+
+    auto right = new IR::Mux(predicate(), statement->right, clone(statement->left));
     statement->right = right;
     return statement;
 }
@@ -49,14 +60,14 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     // This evaluates the if condition.
     // We are careful not to evaluate any conditional more times
     // than in the original program, since the evaluation may have side-effects.
-    auto trueCond = new IR::AssignmentStatement(condition->clone(), statement->condition);
+    auto trueCond = new IR::AssignmentStatement(clone(condition), statement->condition);
     block->push_back(trueCond);
 
     const IR::Expression* pred;
     if (previousPredicate == nullptr) {
-        pred = condition->clone();
+        pred = clone(condition);
     } else {
-        pred = new IR::LAnd(previousPredicate, condition->clone());
+        pred = new IR::LAnd(previousPredicate, clone(condition));
     }
     auto truePred = new IR::AssignmentStatement(predicate(), pred);
     block->push_back(truePred);
@@ -65,13 +76,13 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     block->push_back(statement->ifTrue);
 
     if (statement->ifFalse != nullptr) {
-        auto neg = new IR::LNot(condition->clone());
-        auto falseCond = new IR::AssignmentStatement(condition->clone(), neg);
+        auto neg = new IR::LNot(clone(condition));
+        auto falseCond = new IR::AssignmentStatement(clone(condition), neg);
         block->push_back(falseCond);
         if (previousPredicate == nullptr) {
-            pred = condition->clone();
+            pred = clone(condition);
         } else {
-            pred = new IR::LAnd(previousPredicate->clone(), condition->clone());
+            pred = new IR::LAnd(clone(previousPredicate), clone(condition));
         }
         auto falsePred = new IR::AssignmentStatement(predicate(), pred);
         block->push_back(falsePred);

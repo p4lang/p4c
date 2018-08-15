@@ -80,6 +80,7 @@ class Predication final : public Transform {
             inside_action(false), ifNestingLevel(0)
     { CHECK_NULL(generator); setName("Predication"); }
 
+    const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* preorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
