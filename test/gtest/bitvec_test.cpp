@@ -47,11 +47,11 @@ TEST(Bitvec, ranges) {
     bv.putrange(55, 20, 10);
     EXPECT_EQ(bv.popcount(), 82);
     EXPECT_EQ(bv.getrange(54, 22), (uintmax_t)0x200015);
-    EXPECT_EQ(bv.ffz(0), 55);
+    EXPECT_EQ(bv.ffz(0), 55U);
     EXPECT_EQ(bv.ffs(55), 56);
     EXPECT_EQ(bv.ffs(56), 56);
     EXPECT_EQ(bv.ffs(59), 75);
-    EXPECT_EQ(bv.ffz(75), 100);
+    EXPECT_EQ(bv.ffz(75), 100U);
     EXPECT_EQ(bv.ffs(100), -1);
 }
 
