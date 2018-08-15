@@ -29,10 +29,10 @@ set (P4C_ARTIFACTS_OUTPUT_DIRECTORY share/p4c)
 set (CMAKE_USE_RELATIVE_PATHS 1)
 
 OPTION (ENABLE_DOCS "Build the documentation" OFF)
-OPTION (ENABLE_GTESTS "Enable building and running GTest unit tests" ON)
-OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON)
-OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
-OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
+OPTION (ENABLE_GTESTS "Enable building and running GTest unit tests" OFF)
+OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" OFF)
+OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" OFF)
+OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
@@ -336,17 +336,17 @@ MESSAGE(STATUS "CTest parallel: -j ${__parallel_test}")
 set (P4C_XFAIL_LOG ${CMAKE_CURRENT_BINARY_DIR}/Testing/Temporary/LastXfail.txt)
 set (P4C_TEST_FLAGS -j "${__parallel_test}")
 
-p4c_add_make_check(all)
-list (REMOVE_DUPLICATES TEST_TAGS)
-foreach(t ${TEST_TAGS})
-  p4c_add_make_check(${t})
-endforeach()
+#p4c_add_make_check(all)
+#list (REMOVE_DUPLICATES TEST_TAGS)
+#foreach(t ${TEST_TAGS})
+#  p4c_add_make_check(${t})
+#endforeach()
 
-add_custom_target(check
-  DEPENDS check-all)
+#add_custom_target(check
+#  DEPENDS check-all)
 
-add_custom_target(recheck
-  DEPENDS recheck-all)
+#add_custom_target(recheck
+#  DEPENDS recheck-all)
 
 # uninstall target
 configure_file(
