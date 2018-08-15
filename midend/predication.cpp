@@ -25,9 +25,7 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
     // an expression.  This is most obvious if one clone is on the LHS and one
     // on the RHS of an assigment.
     ClonePathExpressions cloner;
-    auto result = expression->apply(cloner)->to<IR::Expression>();
-    CHECK_NULL(result);
-    return result;
+    return expression->apply(cloner);
 }
 
 const IR::Node* Predication::postorder(IR::AssignmentStatement* statement) {
