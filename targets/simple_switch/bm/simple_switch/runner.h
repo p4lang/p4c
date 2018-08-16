@@ -34,13 +34,13 @@ namespace sswitch {
 
 class SimpleSwitchRunner {
  public:
-  SimpleSwitchRunner();
+  explicit SimpleSwitchRunner(uint32_t cpu_port = 0);
   ~SimpleSwitchRunner();
 
   int init_and_start(const bm::OptionsParser &parser);
 
  private:
-  uint32_t cpu_port{64};
+  uint32_t cpu_port{0};
   std::unique_ptr<SimpleSwitch> simple_switch;
 };
 
