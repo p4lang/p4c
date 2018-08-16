@@ -295,7 +295,7 @@ class Substitutions : public SubstituteParameters {
             newName = renameMap->getName(decl);
         else
             newName = expression->path->name;
-        IR::ID newid = IR::ID(expression->path->srcInfo, newName);
+        IR::ID newid(expression->path->srcInfo, newName, expression->path->name.originalName);
         auto newpath = new IR::Path(newid, expression->path->absolute);
         auto result = new IR::PathExpression(newpath);
         refMap->setDeclaration(newpath, decl);
@@ -673,7 +673,7 @@ class RenameStates : public Transform {
     const IR::Node* preorder(IR::Path* path) override {
         // This is certainly a state name, by the way we organized the visitors
         cstring newName = ::get(stateRenameMap, path->name);
-        path->name = IR::ID(path->name.srcInfo, newName);
+        path->name = IR::ID(path->name.srcInfo, newName, path->name.originalName);
         return path;
     }
     const IR::Node* preorder(IR::SelectExpression* expression) override {
@@ -693,7 +693,7 @@ class RenameStates : public Transform {
             return state;
         }
         cstring newName = ::get(stateRenameMap, state->name.name);
-        state->name = IR::ID(state->name.srcInfo, newName);
+        state->name.name = newName;
         if (state->selectExpression != nullptr)
             visit(state->selectExpression);
         prune();

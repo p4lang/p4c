@@ -228,7 +228,7 @@ void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var>* typeV
     if (typeVars == nullptr)
         return;
     for (auto tv : *typeVars)
-        declareType(IR::ID(tv->srcInfo, tv->name));
+        declareType(tv->name);
 }
 
 void ProgramStructure::endParse() {
