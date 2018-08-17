@@ -79,7 +79,7 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
 
 void EBPFTable::emitKeyType(CodeBuilder* builder) {
     builder->emitIndent();
-    builder->appendFormat("struct %s ", keyTypeName);
+    builder->appendFormat("struct %s ", keyTypeName.c_str());
     builder->blockStart();
 
     CodeGenInspector commentGen(program->refMap, program->typeMap);
@@ -170,11 +170,11 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
 
     // a type-safe union: a struct with a tag and an union
     builder->emitIndent();
-    builder->appendFormat("struct %s ", valueTypeName);
+    builder->appendFormat("struct %s ", valueTypeName.c_str());
     builder->blockStart();
 
     builder->emitIndent();
-    builder->appendFormat("enum %s action;", actionEnumName);
+    builder->appendFormat("enum %s action;", actionEnumName.c_str());
     builder->newline();
 
     builder->emitIndent();
@@ -297,7 +297,7 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
 
 void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     builder->emitIndent();
-    builder->appendFormat("switch (%s->action) ", valueName);
+    builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
 
     for (auto a : actionList->actionList) {
@@ -305,7 +305,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
         cstring name = EBPFObject::externalName(action);
-        builder->appendFormat("case %s: ", name);
+        builder->appendFormat("case %s: ", name.c_str());
         builder->newline();
         builder->emitIndent();
 
@@ -320,7 +320,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     }
 
     builder->emitIndent();
-    builder->appendFormat("default: return %s", builder->target->abortReturnCode());
+    builder->appendFormat("default: return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
 
     builder->blockEnd(true);
@@ -347,25 +347,26 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->emitIndent();
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")", fd.c_str(), defaultTable);
+    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")",
+                          fd.c_str(), defaultTable.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
-                          fd.c_str(), defaultTable);
+                          fd.c_str(), defaultTable.c_str());
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("struct %s %s = ", valueTypeName, value);
+    builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat(".action = %s,", name);
+    builder->appendFormat(".action = %s,", name.c_str());
     builder->newline();
 
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
     builder->emitIndent();
-    builder->appendFormat(".u = {.%s = {", name);
+    builder->appendFormat(".u = {.%s = {", name.c_str());
     for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
         auto arg = mcd.substitution.lookup(p);
         arg->apply(cg);
@@ -384,7 +385,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("if (ok != 0) { "
                           "perror(\"Could not write in %s\"); exit(1); }",
-                          defaultTable);
+                          defaultTable.c_str());
     builder->newline();
     builder->blockEnd(true);
 
@@ -396,11 +397,12 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->emitIndent();
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")", fd.c_str(), dataMapName);
+    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")",
+                          fd.c_str(), dataMapName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
-                          fd.c_str(), dataMapName);
+                          fd.c_str(), dataMapName.c_str());
     builder->newline();
 
     for (auto e : entries->entries) {
@@ -409,7 +411,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 
         auto entryAction = e->getAction();
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = {", keyTypeName, key);
+        builder->appendFormat("struct %s %s = {", keyTypeName.c_str(), key.c_str());
         e->getKeys()->apply(cg);
         builder->append("}");
         builder->endOfStatement(true);
@@ -425,17 +427,18 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
         cstring name = EBPFObject::externalName(action);
 
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = ", valueTypeName, value);
+        builder->appendFormat("struct %s %s = ",
+                              valueTypeName.c_str(), value.c_str());
         builder->blockStart();
         builder->emitIndent();
-        builder->appendFormat(".action = %s,", name);
+        builder->appendFormat(".action = %s,", name.c_str());
         builder->newline();
 
         CodeGenInspector cg(program->refMap, program->typeMap);
         cg.setBuilder(builder);
 
         builder->emitIndent();
-        builder->appendFormat(".u = {.%s = {", name);
+        builder->appendFormat(".u = {.%s = {", name.c_str());
         for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
             auto arg = mcd.substitution.lookup(p);
             arg->apply(cg);
@@ -454,7 +457,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
         builder->emitIndent();
         builder->appendFormat("if (ok != 0) { "
                               "perror(\"Could not write in %s\"); exit(1); }",
-                              t->name.name);
+                              t->name.name.c_str());
         builder->newline();
         builder->blockEnd(true);
     }
