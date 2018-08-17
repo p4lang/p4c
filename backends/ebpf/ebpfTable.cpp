@@ -340,37 +340,38 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     auto action = ac->action;
     cstring name = EBPFObject::externalName(action);
     cstring fd = "tableFileDescriptor";
-    cstring table = defaultActionMapName;
+    cstring defaultTable = defaultActionMapName;
     cstring value = "value";
+    cstring key = "key";
 
     builder->emitIndent();
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")", fd.c_str(), table.c_str());
+    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")", fd.c_str(), defaultTable);
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
-                          fd.c_str(), table.c_str());
+                          fd.c_str(), defaultTable);
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
+    builder->appendFormat("struct %s %s = ", valueTypeName, value);
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat(".action = %s,", name.c_str());
+    builder->appendFormat(".action = %s,", name);
     builder->newline();
 
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
-        builder->emitIndent();
-        builder->appendFormat(".u = {.%s = {", name.c_str());
-        for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
-            auto arg = mcd.substitution.lookup(p);
-            arg->apply(cg);
-            builder->append(",");
-        }
-        builder->append("}},\n");
+    builder->emitIndent();
+    builder->appendFormat(".u = {.%s = {", name);
+    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
+        auto arg = mcd.substitution.lookup(p);
+        arg->apply(cg);
+        builder->append(",");
+    }
+    builder->append("}},\n");
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
@@ -383,8 +384,80 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("if (ok != 0) { "
                           "perror(\"Could not write in %s\"); exit(1); }",
-                          table);
+                          defaultTable);
     builder->newline();
+    builder->blockEnd(true);
+
+    // Emit code for table initializer
+    auto entries = t->getEntries();
+    if (entries == nullptr)
+        return;
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")", fd.c_str(), dataMapName);
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
+                          fd.c_str(), dataMapName);
+    builder->newline();
+
+    for (auto e : entries->entries) {
+        builder->emitIndent();
+        builder->blockStart();
+
+        auto entryAction = e->getAction();
+        builder->emitIndent();
+        builder->appendFormat("struct %s %s = {", keyTypeName, key);
+        e->getKeys()->apply(cg);
+        builder->append("}");
+        builder->endOfStatement(true);
+
+        BUG_CHECK(entryAction->is<IR::MethodCallExpression>(),
+                  "%1%: expected an action call", defaultAction);
+        auto mce = entryAction->to<IR::MethodCallExpression>();
+        P4::MethodCallDescription mcd(mce, program->refMap, program->typeMap);
+
+        BUG_CHECK(mcd.instance->is<P4::ActionCall>(), "%1%: expected an action call", mce);
+        auto ac = mcd.instance->to<P4::ActionCall>();
+        auto action = ac->action;
+        cstring name = EBPFObject::externalName(action);
+
+        builder->emitIndent();
+        builder->appendFormat("struct %s %s = ", valueTypeName, value);
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat(".action = %s,", name);
+        builder->newline();
+
+        CodeGenInspector cg(program->refMap, program->typeMap);
+        cg.setBuilder(builder);
+
+        builder->emitIndent();
+        builder->appendFormat(".u = {.%s = {", name);
+        for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
+            auto arg = mcd.substitution.lookup(p);
+            arg->apply(cg);
+            builder->append(",");
+        }
+        builder->append("}},\n");
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->append("int ok = ");
+        builder->target->emitUserTableUpdate(builder, fd, key, value);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("if (ok != 0) { "
+                              "perror(\"Could not write in %s\"); exit(1); }",
+                              t->name.name);
+        builder->newline();
+        builder->blockEnd(true);
+    }
     builder->blockEnd(true);
 }
 
