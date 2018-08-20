@@ -850,9 +850,6 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     userMetaType = decl->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
-    // Map for error code numbering.  Errors are converted to 32-bit unsigned integers.
-    std::map<cstring, size_t> errorMap;
-
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
