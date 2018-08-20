@@ -64,7 +64,8 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
     auto et = EBPFTypeFactory::instance->create(type);
 
     bool scalar = (et->is<EBPFScalarType>() &&
-                   EBPFScalarType::generatesScalar(et->to<EBPFScalarType>()->widthInBits()));
+                   EBPFScalarType::generatesScalar(et->to<EBPFScalarType>()->widthInBits()))
+                  || et->is<EBPFBoolType>();
     if (scalar) {
         builder->append("(");
         visit(b->left);
