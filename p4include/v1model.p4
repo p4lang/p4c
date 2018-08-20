@@ -63,7 +63,7 @@ struct standard_metadata_t {
     bit<1>  checksum_error;
     @alias("intrinsic_metadata.recirculate_flag") bit<32> recirculate_flag;
     /// Error produced by parsing
-    bit<32> parser_error;
+    error parser_error;
 }
 
 enum CounterType {
