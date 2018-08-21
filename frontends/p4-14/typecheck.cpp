@@ -144,6 +144,15 @@ class TypeCheck::AssignInitialTypes : public Transform {
             visit(hdr);
             new_node = new IR::ConcreteHeaderRef(ref->srcInfo, hdr);
         } else if (auto obj = global->get<IR::IInstance>(ref->path->name)) {
+            if (auto prim = getParent<IR::Primitive>()) {
+                auto ext = global->get<IR::Declaration_Instance>(ref->path->name);
+                if (ext && ext != obj && getContext()->child_index == 0) {
+                    // prefer a blackbox if it has the method in question
+                    if (auto et = ext->type->to<IR::Type_Extern>()) {
+                        for (auto m : et->methods) {
+                            if (m->name == prim->name) {
+                                obj = ext;
+                                break; } } } } }
             const IR::Node *tmp = obj->getNode();  // FIXME -- can't visit an interface directly
             visit(tmp);
             obj = tmp->to<IR::IInstance>();
