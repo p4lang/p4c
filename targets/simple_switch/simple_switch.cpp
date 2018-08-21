@@ -333,6 +333,11 @@ SimpleSwitch::ingress_thread() {
     const Packet::buffer_state_t packet_in_state = packet->save_buffer_state();
     parser->parse(packet.get());
 
+    if (phv->has_field("standard_metadata.parser_error")) {
+      phv->get_field("standard_metadata.parser_error").set(
+          packet->get_error_code().get());
+    }
+
     ingress_mau->apply(packet.get());
 
     packet->reset_exit();

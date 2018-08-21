@@ -20,7 +20,8 @@ TESTS = test_packet_redirect \
 test_truncate \
 test_swap \
 test_queueing \
-test_recirc
+test_recirc \
+test_parser_error
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -30,13 +31,15 @@ test_truncate_SOURCES = $(common_source) test_truncate.cpp
 test_swap_SOURCES = $(common_source) test_swap.cpp
 test_queueing_SOURCES = $(common_source) test_queueing.cpp
 test_recirc_SOURCES = $(common_source) test_recirc.cpp
+test_parser_error_SOURCES = $(common_source) test_parser_error.cpp
 
 test_all_SOURCES = $(common_source) \
 test_packet_redirect.cpp \
 test_truncate.cpp \
 test_swap.cpp \
 test_queueing.cpp \
-test_recirc.cpp
+test_recirc.cpp \
+test_parser_error.cpp
 
 EXTRA_DIST = \
 testdata/packet_redirect.json \
@@ -44,4 +47,6 @@ testdata/truncate.json \
 testdata/swap_1.json \
 testdata/swap_2.json \
 testdata/queueing.json \
-testdata/recirc.json
+testdata/recirc.json \
+testdata/parser_error.p4 \
+testdata/parser_error.json
