@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/calculations.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/packet.h>
@@ -25,10 +26,11 @@
 
 #include <netinet/in.h>
 
-#include <string>
 #include <algorithm>
 #include <mutex>
 #include <ostream>
+#include <string>
+#include <unordered_map>
 
 #include "xxhash.h"
 #include "crc_tables.h"
@@ -369,6 +371,42 @@ struct identity {
   }
 };
 
+// This "hash" functor keeps an internal counter which is incremented by 1 every
+// time it is called. It does not do any hashing but can be convenient to
+// iterate through all possible scenari when a modulo is applied to the result
+// of the hash (e.g. for action profile member selection).
+// Different instances of the hash use different counters. As a remainder each
+// instance can be executed from multiple threads (e.g. for traffic on different
+// ports), thus the mutex. All the state is declared as "mutable" since we
+// require that the functor be "const".
+struct round_robin {
+  uint64_t operator()(const char *buf, size_t len) const {
+    _BM_UNUSED(buf);
+    _BM_UNUSED(len);
+    std::unique_lock<std::mutex> lock(m);
+    return idx++;
+  }
+
+  mutable uint64_t idx{0};
+  mutable std::mutex m{};
+};
+
+// Same as "round_robin" above but keeps an internal map to ensure that multiple
+// calls to the functor with the same input yield the same result.
+struct round_robin_consistent {
+  uint64_t operator()(const char *buf, size_t len) const {
+    std::unique_lock<std::mutex> lock(m);
+    std::string hash(buf, len);
+    auto p = hashes.emplace(hash, idx);
+    // p.second == true <=> insertion took place
+    return (p.second) ? (idx++) : p.first->second;
+  }
+
+  mutable uint64_t idx{0};
+  mutable std::unordered_map<std::string, uint64_t> hashes;
+  mutable std::mutex m{};
+};
+
 }  // namespace
 
 // if REGISTER_HASH calls placed in the anonymous namespace, some compiler can
@@ -380,6 +418,8 @@ REGISTER_HASH(crcCCITT);
 REGISTER_HASH(cksum16);
 REGISTER_HASH(csum16);
 REGISTER_HASH(identity);
+REGISTER_HASH(round_robin);
+REGISTER_HASH(round_robin_consistent);
 
 using crc8_custom = crc_custom<uint8_t>;
 REGISTER_HASH(crc8_custom);

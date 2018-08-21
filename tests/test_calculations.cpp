@@ -460,6 +460,37 @@ TEST(HashTest, Crc32Custom) {
                 ptr.get(), {0, 0, 0, true, true}));
 }
 
+TEST(HashTest, RoundRobin) {
+  const auto ptr1 = CalculationsMap::get_instance()->get_copy("round_robin");
+  ASSERT_NE(nullptr, ptr1);
+  const auto ptr2 = CalculationsMap::get_instance()->get_copy("round_robin");
+  ASSERT_NE(nullptr, ptr2);
+
+  const char input_buffer[] = {1, 2, 3, 4, 5};
+
+  for (unsigned int i = 0; i < 64; i++) {
+    const uint64_t output1 = ptr1->output(input_buffer, sizeof(input_buffer));
+    EXPECT_EQ(i, output1);
+    const uint64_t output2 = ptr2->output(input_buffer, sizeof(input_buffer));
+    EXPECT_EQ(i, output2);
+  }
+}
+
+TEST(HashTest, RoundRobinConsistent) {
+  const auto ptr = CalculationsMap::get_instance()->get_copy(
+      "round_robin_consistent");
+  ASSERT_NE(nullptr, ptr);
+
+  const char input_buffer1[] = {1, 2, 3, 4, 5};
+  const char input_buffer2[] = {1, 2, 3, 4, 6};
+  const uint64_t output1_1 = ptr->output(input_buffer1, sizeof(input_buffer1));
+  const uint64_t output2_1 = ptr->output(input_buffer2, sizeof(input_buffer2));
+  const uint64_t output1_2 = ptr->output(input_buffer1, sizeof(input_buffer1));
+  EXPECT_EQ(0, output1_1);
+  EXPECT_EQ(1, output2_1);
+  EXPECT_EQ(0, output1_2);
+}
+
 class CrcMapTest : public ::testing::TestWithParam<const char *> { };
 
 namespace {
