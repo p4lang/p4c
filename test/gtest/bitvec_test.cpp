@@ -29,7 +29,7 @@ TEST(Bitvec, Shift) {
     EXPECT_EQ((simple << 64).getbit(63), false);
 }
 
-#ifdef __int128_t
+#ifdef __SIZEOF_INT128__
 TEST(Bitvec, bigval) {
     __int128_t val[2] = { 0, 1 };
     val[1] <<= 100;
