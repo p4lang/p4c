@@ -1,6 +1,6 @@
 
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ TEST(Bitvec, Shift) {
     EXPECT_EQ((simple << 64).getbit(63), false);
 }
 
+#ifdef __SIZEOF_INT128__
 TEST(Bitvec, bigval) {
     __int128_t val[2] = { 0, 1 };
     val[1] <<= 100;
@@ -40,6 +41,19 @@ TEST(Bitvec, bigval) {
     bv.setraw(val, 2);
     EXPECT_EQ(bv.getbit(238), true);
 }
+#else
+TEST(Bitvec, bigval) {
+    int64_t val[2] = { 0, 1 };
+    val[1] <<= 60;
+    bitvec bv(val[1]);
+    EXPECT_EQ(bv.getbit(60), true);
+    val[1] <<= 3;
+    bv.setraw(val[1]);
+    EXPECT_EQ(bv.getbit(63), true);
+    bv.setraw(val, 2);
+    EXPECT_EQ(bv.getbit(127), true);
+}
+#endif
 
 TEST(Bitvec, ranges) {
     bitvec bv(0, 100);
