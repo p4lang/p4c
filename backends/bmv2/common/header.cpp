@@ -213,6 +213,13 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             if (varbitFound)
                 ::error("%1%: headers with multiple varbit fields not supported", st);
             varbitFound = true;
+        } else if (ftype->is<IR::Type_Error>()) {
+            // treat as bit<32>
+            auto field = pushNewArray(fields);
+            field->append(f->name.name);
+            field->append(32);
+            field->append(false);
+            max_length += 32;
         } else if (ftype->to<IR::Type_Stack>()) {
             BUG("%1%: nested stack", st);
         } else {

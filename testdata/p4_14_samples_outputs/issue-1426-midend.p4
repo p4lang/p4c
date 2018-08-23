@@ -119,6 +119,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata_1.recirculate_port = standard_metadata.recirculate_port;
         standard_metadata_1.packet_length = standard_metadata.packet_length;
         standard_metadata_1.checksum_error = standard_metadata.checksum_error;
+        standard_metadata_1.parser_error = standard_metadata.parser_error;
     }
     @hidden action act_0() {
         standard_metadata.egress_port = standard_metadata_1.egress_port;
@@ -133,6 +134,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata_1.recirculate_port = standard_metadata.recirculate_port;
         standard_metadata_1.packet_length = standard_metadata.packet_length;
         standard_metadata_1.checksum_error = standard_metadata.checksum_error;
+        standard_metadata_1.parser_error = standard_metadata.parser_error;
     }
     @hidden action act_2() {
         standard_metadata.egress_port = standard_metadata_1.egress_port;

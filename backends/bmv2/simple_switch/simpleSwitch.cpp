@@ -899,13 +899,6 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (::errorCount() > 0)
         return;
 
-    /// generate error types
-    for (const auto &p : structure->errorCodesMap) {
-        auto name = p.first->toString();
-        auto type = p.second;
-        json->add_error(name, type);
-    }
-
     main = toplevel->getMain();
     if (!main) return;  // no main
     main->apply(*parseV1Arch);
@@ -914,6 +907,13 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     };
     program = toplevel->getProgram();
     program->apply(updateStructure);
+
+    /// generate error types
+    for (const auto &p : structure->errorCodesMap) {
+        auto name = p.first->toString();
+        auto type = p.second;
+        json->add_error(name, type);
+    }
 
     cstring scalarsName = refMap->newName("scalars");
     // This visitor is used in multiple passes to convert expression to json

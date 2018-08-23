@@ -59,8 +59,11 @@ struct standard_metadata_t {
     @alias("intrinsic_metadata.resubmit_flag") bit<32> resubmit_flag;
     @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
     /// Indicates that a verify_checksum() method has failed.
+    // TODO: this should be deprecated in favor of parser_error
     bit<1>  checksum_error;
     @alias("intrinsic_metadata.recirculate_flag") bit<32> recirculate_flag;
+    /// Error produced by parsing
+    error parser_error;
 }
 
 enum CounterType {
