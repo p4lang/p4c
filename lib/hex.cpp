@@ -20,6 +20,7 @@ limitations under the License.
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h) {
     auto save = os.flags();
+    auto save_fill = os.fill();
     char *p = reinterpret_cast<char *>(h.data);
     for (size_t i = 0; i < h.len; i++, p += h.elsize) {
         os << (i ? ' ' : '[');
@@ -42,6 +43,7 @@ std::ostream &operator<<(std::ostream &os, const hexvec &h) {
             val &= ~(~0ULL << 8*h.elsize); }
         os << std::hex << std::setw(h.width) << std::setfill(h.fill) << val; }
     os << ']';
+    os.fill(save_fill);
     os.flags(save);
     return os;
 }
