@@ -96,7 +96,6 @@ TEST_F(ConstantExpr, TestLong) {
     IR::Constant mr(val);
     res = mr.asLong();
     EXPECT_EQ(res, val);
-
 }
 
 TEST_F(ConstantExpr, TestUint64) {
