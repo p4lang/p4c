@@ -148,10 +148,14 @@ class Constant : Literal {
         Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(unsigned v, unsigned base = 10) :
         Literal(new Type_InfInt()), value(v), base(base) {}
+#emit
+#if __WORDSIZE < 64
     Constant(long v, unsigned base = 10) :
         Literal(new Type_InfInt()), value(v), base(base) {}
-    // Constant(unsigned long v, unsigned base = 10) : needs fixing the ir parser
-    //     Literal(new Type_InfInt()), value(v), base(base) {}
+    Constant(unsigned long v, unsigned base = 10) :
+        Literal(new Type_InfInt()), value(v), base(base) {}
+#endif
+#end
     Constant(intmax_t v, unsigned base = 10) :
         Literal(new Type_InfInt()), base(base) {
         mpz_import(value.get_mpz_t(), /* word count */1, /* msb first */0,
