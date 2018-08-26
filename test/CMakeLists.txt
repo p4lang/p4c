@@ -38,6 +38,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/bitvec_test.cpp
   gtest/call_graph_test.cpp
   gtest/complex_bitwise.cpp
+  gtest/constant_expr_test.cpp
   gtest/cstring.cpp
   gtest/diagnostics.cpp
   gtest/dumpjson.cpp

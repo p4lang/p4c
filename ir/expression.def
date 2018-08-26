@@ -141,8 +141,32 @@ class Constant : Literal {
 #noconstructor
     /// if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
+    // We need to enumerate all the integer types because we need proper 64-bit handling on
+    // 32-bit systems (which ain't long!) and mpz_import is too big a hammer because and it loses
+    // the signess of the value.
+    Constant(int v, unsigned base = 10) :
+        Literal(new Type_InfInt()), value(v), base(base) {}
+    Constant(unsigned v, unsigned base = 10) :
+        Literal(new Type_InfInt()), value(v), base(base) {}
+#emit
+#if __WORDSIZE == 64
     Constant(intmax_t v, unsigned base = 10) :
-            Literal(new Type_InfInt()), value((long)v), base(base) {}
+        Literal(new Type_InfInt()), value(v), base(base) {}
+#else
+    Constant(long v, unsigned base = 10) :
+        Literal(new Type_InfInt()), value(v), base(base) {}
+    Constant(unsigned long v, unsigned base = 10) :
+        Literal(new Type_InfInt()), value(v), base(base) {}
+    Constant(intmax_t v, unsigned base = 10) :
+        Literal(new Type_InfInt()), base(base) {
+        mpz_import(value.get_mpz_t(), /* word count */1, /* msb first */0,
+                   /* word size */sizeof(v), /* native endian */0, /* nails */0, &v); }
+#endif
+#end
+    Constant(uint64_t v, unsigned base = 10) :
+        Literal(new Type_InfInt()), base(base) {
+        mpz_import(value.get_mpz_t(), /* word count */1, /* msb first */0,
+                   /* word size */sizeof(v), /* native endian */0, /* nails */0, &v); }
     Constant(mpz_class v, unsigned base = 10) :
             Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
@@ -158,18 +182,29 @@ class Constant : Literal {
     bool fitsInt() const { return value.fits_sint_p(); }
     bool fitsLong() const { return value.fits_slong_p(); }
     bool fitsUint() const { return value.fits_uint_p(); }
+    bool fitsUint64() const { return mpz_sizeinbase(value.get_mpz_t(), 2) < 65; }
     long asLong() const {
         if (!fitsLong())
-            ::error("%1%: Value too large", this);
+            ::error("%1$x: Value too large for long", this);
         return value.get_si(); }
     int asInt() const {
         if (!fitsInt())
-            ::error("%1%: Value too large", this);
+            ::error("%1$x: Value too large for int", this);
         return value.get_si(); }
     unsigned asUnsigned() const {
         if (!fitsUint())
-            ::error("%1%: Value too large", this);
+            ::error("%1$x: Value too large for unsigned int", this);
         return value.get_ui();
+    }
+    uint64_t asUint64() const {
+        if (!fitsUint64())
+            ::error("%1$x: Value too large for uint64", this);
+        uint64_t res = UINT64_C(0);
+        size_t nWords = 0;
+        mpz_export(&res, &nWords, /* msb first */0, /* word size */8,
+                   /* native endian */0, /* nails */0,
+                   value.get_mpz_t());
+        return res;
     }
     // The following operators are only used in special circumstances.
     // They do not look at the type when operating.  There are separate
