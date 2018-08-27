@@ -199,7 +199,7 @@ inline cstring cstring::operator+=(const char *a) { *this = *this + a; return *t
 inline cstring cstring::operator+=(std::string a) { *this = *this + a; return *this; }
 inline cstring cstring::operator+=(char a) { *this = *this + a; return *this; }
 
-inline std::string operator+=(std::string a, cstring b) {
+inline std::string& operator+=(std::string& a, cstring b) {
     a.append(b.c_str());
     return a; }
 
