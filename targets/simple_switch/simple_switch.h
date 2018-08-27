@@ -64,13 +64,19 @@ using bm::FieldList;
 using bm::packet_id_t;
 using bm::p4object_id_t;
 
-
 class SimpleSwitch : public Switch {
  public:
   using mirror_id_t = int;
 
   using TransmitFn = std::function<void(port_t, packet_id_t,
                                         const char *, int)>;
+
+  struct MirroringSessionConfig {
+    port_t egress_port;
+    bool egress_port_valid;
+    unsigned int mgid;
+    bool mgid_valid;
+  };
 
  private:
   using clock = std::chrono::high_resolution_clock;
@@ -87,18 +93,13 @@ class SimpleSwitch : public Switch {
 
   void reset_target_state_() override;
 
-  int mirroring_mapping_add(mirror_id_t mirror_id, port_t egress_port) {
-    mirroring_map[mirror_id] = egress_port;
-    return 0;
-  }
+  bool mirroring_add_session(mirror_id_t mirror_id,
+                             const MirroringSessionConfig &config);
 
-  int mirroring_mapping_delete(mirror_id_t mirror_id) {
-    return mirroring_map.erase(mirror_id);
-  }
+  bool mirroring_delete_session(mirror_id_t mirror_id);
 
-  bool mirroring_mapping_get(mirror_id_t mirror_id, port_t *port) const {
-    return get_mirroring_mapping(mirror_id, port);
-  }
+  bool mirroring_get_session(mirror_id_t mirror_id,
+                             MirroringSessionConfig *config) const;
 
   int set_egress_queue_depth(size_t port, const size_t depth_pkts);
   int set_all_egress_queue_depths(const size_t depth_pkts);
@@ -114,7 +115,7 @@ class SimpleSwitch : public Switch {
 
   // returns the packet id of most recently received packet. Not thread-safe.
   static packet_id_t get_packet_id() {
-    return (packet_id-1);
+    return packet_id - 1;
   }
 
   void set_transmit_fn(TransmitFn fn);
@@ -122,6 +123,8 @@ class SimpleSwitch : public Switch {
  private:
   static constexpr size_t nb_egress_threads = 4u;
   static packet_id_t packet_id;
+
+  class MirroringSessions;
 
   enum PktInstanceType {
     PKT_INSTANCE_TYPE_NORMAL,
@@ -149,15 +152,6 @@ class SimpleSwitch : public Switch {
   void egress_thread(size_t worker_id);
   void transmit_thread();
 
-  bool get_mirroring_mapping(mirror_id_t mirror_id, port_t *port) const {
-    const auto it = mirroring_map.find(mirror_id);
-    if (it != mirroring_map.end()) {
-      *port = it->second;
-      return true;
-    }
-    return false;
-  }
-
   ts_res get_ts() const;
 
   // TODO(antonin): switch to pass by value?
@@ -169,6 +163,8 @@ class SimpleSwitch : public Switch {
       PktInstanceType copy_type, p4object_id_t field_list_id);
 
   void check_queueing_metadata();
+
+  void multicast(Packet *packet, unsigned int mgid);
 
  private:
   port_t max_port;
@@ -184,8 +180,8 @@ class SimpleSwitch : public Switch {
   TransmitFn my_transmit_fn;
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;
-  std::unordered_map<mirror_id_t, port_t> mirroring_map;
   bool with_queueing_metadata{false};
+  std::unique_ptr<MirroringSessions> mirroring_sessions;
 };
 
 #endif  // SIMPLE_SWITCH_SIMPLE_SWITCH_H_

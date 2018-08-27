@@ -402,7 +402,10 @@ SimpleSwitchGrpcRunner::shutdown() {
 int
 SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id,
   bm::DevMgrIface::port_t egress_port) {
-  return simple_switch->mirroring_mapping_add(mirror_id, egress_port);
+  SimpleSwitch::MirroringSessionConfig config = {};
+  config.egress_port = egress_port;
+  config.egress_port_valid = true;
+  return simple_switch->mirroring_add_session(mirror_id, config);
 }
 
 void

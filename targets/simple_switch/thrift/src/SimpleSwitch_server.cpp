@@ -50,22 +50,65 @@ class SimpleSwitchHandler : virtual public SimpleSwitchIf {
 
   int32_t mirroring_mapping_add(const int32_t mirror_id,
                                 const int32_t egress_port) {
-    bm::Logger::get()->trace("mirroring_mapping_add");
-    return switch_->mirroring_mapping_add(mirror_id, egress_port);
+    bm::Logger::get()->trace("mirroring_mapping_add [DEPRECATED]");
+    SimpleSwitch::MirroringSessionConfig config = {};  // value-initialization
+    config.egress_port = egress_port;
+    config.egress_port_valid = true;
+    return switch_->mirroring_add_session(mirror_id, config);
   }
 
   int32_t mirroring_mapping_delete(const int32_t mirror_id) {
-    bm::Logger::get()->trace("mirroring_mapping_delete");
-    return switch_->mirroring_mapping_delete(mirror_id);
+    bm::Logger::get()->trace("mirroring_mapping_delete [DEPRECATED]");
+    return switch_->mirroring_delete_session(mirror_id);
   }
 
   int32_t mirroring_mapping_get_egress_port(const int32_t mirror_id) {
-    bm::Logger::get()->trace("mirroring_mapping_get_egress_port");
-    bm::port_t port;
-    if (switch_->mirroring_mapping_get(mirror_id, &port)) {
-      return port;
+    bm::Logger::get()->trace("mirroring_mapping_get_egress_port [DEPRECATED]");
+    SimpleSwitch::MirroringSessionConfig config;
+    if (switch_->mirroring_get_session(mirror_id, &config) &&
+        config.egress_port_valid) {
+      return config.egress_port;
     }
     return -1;
+  }
+
+  void mirroring_session_add(const int32_t mirror_id,
+                             const MirroringSessionConfig &config) {
+    bm::Logger::get()->trace("mirroring_sesssion_add");
+    SimpleSwitch::MirroringSessionConfig config_ = {};  // value-initialization
+    if (config.__isset.port) {
+      config_.egress_port = config.port;
+      config_.egress_port_valid = true;
+    }
+    if (config.__isset.mgid) {
+      config_.mgid = config.mgid;
+      config_.mgid_valid = true;
+    }
+    switch_->mirroring_add_session(mirror_id, config_);
+  }
+
+  void mirroring_session_delete(const int32_t mirror_id) {
+    bm::Logger::get()->trace("mirroring_session_delete");
+    auto session_found = switch_->mirroring_delete_session(mirror_id);
+    if (!session_found) {
+      InvalidMirroringOperation e;
+      e.code = MirroringOperationErrorCode::SESSION_NOT_FOUND;
+      throw e;
+    }
+  }
+
+  void mirroring_session_get(MirroringSessionConfig& _return,
+                             const int32_t mirror_id) {
+    bm::Logger::get()->trace("mirroring_session_get");
+    SimpleSwitch::MirroringSessionConfig config;
+    if (switch_->mirroring_get_session(mirror_id, &config)) {
+     if (config.egress_port_valid) _return.__set_port(config.egress_port);
+     if (config.mgid_valid) _return.__set_mgid(config.mgid);
+    } else {
+      InvalidMirroringOperation e;
+      e.code = MirroringOperationErrorCode::SESSION_NOT_FOUND;
+      throw e;
+    }
   }
 
   int32_t set_egress_queue_depth(const int32_t port_num,

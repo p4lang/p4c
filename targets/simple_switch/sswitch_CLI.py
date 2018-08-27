@@ -21,11 +21,25 @@
 #
 
 import runtime_CLI
+from runtime_CLI import UIn_Error
 
-import sys
+from functools import wraps
 import os
+import sys
 
 from sswitch_runtime import SimpleSwitch
+from sswitch_runtime.ttypes import *
+
+def handle_bad_input(f):
+    @wraps(f)
+    @runtime_CLI.handle_bad_input
+    def handle(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except InvalidMirroringOperation as e:
+            error = MirroringOperationErrorCode._VALUES_TO_NAMES[e.code]
+            print "Invalid mirroring operation (%s)" % error
+    return handle
 
 class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
     @staticmethod
@@ -37,41 +51,79 @@ class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
                                         standard_client, mc_client)
         self.sswitch_client = sswitch_client
 
+    def parse_int(self, arg, name):
+        try:
+            return int(arg)
+        except:
+            raise UIn_Error("Bad format for {}, expected integer".format(name))
+
+    @handle_bad_input
     def do_set_queue_depth(self, line):
         "Set depth of one / all egress queue(s): set_queue_depth <nb_pkts> [<egress_port>]"
         args = line.split()
-        depth = int(args[0])
+        self.at_least_n_args(args, 1)
+        depth = self.parse_int(args[0], "nb_pkts")
         if len(args) > 1:
-            port = int(args[1])
+            port = self.parse_int(args[1], "egress_port")
             self.sswitch_client.set_egress_queue_depth(port, depth)
         else:
             self.sswitch_client.set_all_egress_queue_depths(depth)
 
+    @handle_bad_input
     def do_set_queue_rate(self, line):
         "Set rate of one / all egress queue(s): set_queue_rate <rate_pps> [<egress_port>]"
         args = line.split()
-        rate = int(args[0])
+        self.at_least_n_args(args, 1)
+        rate = self.parse_int(args[0], "rate_pps")
         if len(args) > 1:
-            port = int(args[1])
+            port = self.parse_int(args[1], "egress_port")
             self.sswitch_client.set_egress_queue_rate(port, rate)
         else:
             self.sswitch_client.set_all_egress_queue_rates(rate)
 
+    @handle_bad_input
     def do_mirroring_add(self, line):
-        "Add mirroring mapping: mirroring_add <mirror_id> <egress_port>"
+        "Add mirroring session to unicast port: mirroring_add <mirror_id> <egress_port>"
         args = line.split()
-        mirror_id, egress_port = int(args[0]), int(args[1])
-        self.sswitch_client.mirroring_mapping_add(mirror_id, egress_port)
+        self.exactly_n_args(args, 2)
+        mirror_id = self.parse_int(args[0], "mirror_id")
+        egress_port = self.parse_int(args[1], "egress_port")
+        config = MirroringSessionConfig(port=egress_port)
+        self.sswitch_client.mirroring_session_add(mirror_id, config)
 
+    @handle_bad_input
+    def do_mirroring_add_mc(self, line):
+        "Add mirroring session to multicast group: mirroring_add_mc <mirror_id> <mgrp>"
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        mirror_id = self.parse_int(args[0], "mirror_id")
+        mgrp = self.parse_int(args[1], "mgrp")
+        config = MirroringSessionConfig(mgid=mgrp)
+        self.sswitch_client.mirroring_session_add(mirror_id, config)
+
+    @handle_bad_input
     def do_mirroring_delete(self, line):
-        "Delete mirroring mapping: mirroring_delete <mirror_id>"
-        mirror_id = int(line)
-        self.sswitch_client.mirroring_mapping_delete(mirror_id)
+        "Delete mirroring session: mirroring_delete <mirror_id>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        mirror_id = self.parse_int(args[0], "mirror_id")
+        self.sswitch_client.mirroring_session_delete(mirror_id)
 
+    @handle_bad_input
+    def do_mirroring_get(self, line):
+        "Display mirroring session: mirroring_get <mirror_id>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        mirror_id = self.parse_int(args[0], "mirror_id")
+        config = self.sswitch_client.mirroring_session_get(mirror_id)
+        print config
+
+    @handle_bad_input
     def do_get_time_elapsed(self, line):
         "Get time elapsed (in microseconds) since the switch started: get_time_elapsed"
         print self.sswitch_client.get_time_elapsed_us()
 
+    @handle_bad_input
     def do_get_time_since_epoch(self, line):
         "Get time elapsed (in microseconds) since the switch clock's epoch: get_time_since_epoch"
         print self.sswitch_client.get_time_since_epoch_us()

@@ -21,9 +21,12 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_apps/packet_pipe.h>
+#include <bm/bm_sim/logger.h>
 
 #include <boost/filesystem.hpp>
 
+#include <initializer_list>
+#include <set>
 #include <string>
 #include <memory>
 #include <vector>
@@ -86,11 +89,10 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   // Per-test-case tear-down.
   static void TearDownTestCase() {
     delete test_switch;
+    bm::EventLogger::init(nullptr);  // close nanomsg socket
   }
 
-  virtual void SetUp() {
-    // TODO(antonin): a lot of manual work here, can I add some of it?
-
+  void SetUp() override {
     packet_inject.start();
     auto cb = std::bind(&PacketInReceiver::receive, &receiver,
                         std::placeholders::_1, std::placeholders::_2,
@@ -106,7 +108,7 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
     test_switch->mt_set_default_action(0, "t_exit", "set_hdr", ActionData());
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // kind of experimental, so reserved for testing
     test_switch->reset_state();
   }
@@ -128,6 +130,11 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
                                   const std::string &a_name) {
     return (event.type == NNEventListener::ACTION_EXECUTE) &&
         (event.id == test_switch->get_action_id(t_name, a_name));
+  }
+
+  static std::string pid(packet_id_t copy_id) {
+    return std::to_string(SimpleSwitch::get_packet_id()) + "." +
+        std::to_string(copy_id);
   }
 
  protected:
@@ -187,7 +194,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
 #ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
-  events.get_and_remove_events("0.0", &pevents, 8u);
+  events.get_and_remove_events(pid(0), &pevents, 8u);
   ASSERT_EQ(8u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -200,6 +207,39 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
   ASSERT_TRUE(check_event_action_execute(pevents[7], "t_exit", "set_hdr"));
 #endif
 }
+
+namespace {
+
+struct PreTestConfiguration {
+  PreTestConfiguration(McSimplePreLAG *pre, int mgrp,
+                       std::initializer_list<int> ports)
+      : pre(pre) {
+    EXPECT_EQ(McSimplePreLAG::SUCCESS, pre->mc_mgrp_create(mgrp, &mgrp_hdl));
+    for (auto port : ports) {
+      McSimplePreLAG::PortMap port_map;
+      port_map[port] = true;
+      McSimplePreLAG::LagMap lag_map;
+      node_hdls.emplace_back();
+      auto &node_hdl = node_hdls.back();
+      EXPECT_EQ(McSimplePreLAG::SUCCESS,
+                pre->mc_node_create(port, port_map, lag_map, &node_hdl));
+      EXPECT_EQ(McSimplePreLAG::SUCCESS,
+                pre->mc_node_associate(mgrp_hdl, node_hdl));
+    }
+  }
+
+  ~PreTestConfiguration() {
+    for (auto node_hdl : node_hdls)
+      EXPECT_EQ(McSimplePreLAG::SUCCESS, pre->mc_node_destroy(node_hdl));
+    EXPECT_EQ(McSimplePreLAG::SUCCESS, pre->mc_mgrp_destroy(mgrp_hdl));
+  }
+
+  McSimplePreLAG *pre;  // non-owning pointer
+  McSimplePreLAG::mgrp_hdl_t mgrp_hdl;
+  std::vector<McSimplePreLAG::l1_hdl_t> node_hdls;
+};
+
+}  // namespace
 
 TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   static constexpr int port_in = 1;
@@ -216,30 +256,9 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
                                                 &handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  auto pre_ptr = test_switch->get_component<McSimplePreLAG>();
-  McSimplePreLAG::mgrp_hdl_t mgrp_hdl;
-  ASSERT_EQ(McSimplePreLAG::SUCCESS, pre_ptr->mc_mgrp_create(mgrp, &mgrp_hdl));
-  McSimplePreLAG::l1_hdl_t node_1, node_2;
-  {
-    std::string port_map = "10";
-    std::string lag_map = "";
-    ASSERT_EQ(McSimplePreLAG::SUCCESS,
-              pre_ptr->mc_node_create(
-                  1, McSimplePreLAG::PortMap(port_map),
-                  McSimplePreLAG::LagMap(lag_map), &node_1));
-    ASSERT_EQ(McSimplePreLAG::SUCCESS,
-              pre_ptr->mc_node_associate(mgrp_hdl, node_1));
-  }
-  {
-    std::string port_map = "100";
-    std::string lag_map = "";
-    ASSERT_EQ(McSimplePreLAG::SUCCESS,
-              pre_ptr->mc_node_create(
-                  2, McSimplePreLAG::PortMap(port_map),
-                  McSimplePreLAG::LagMap(lag_map), &node_2));
-    ASSERT_EQ(McSimplePreLAG::SUCCESS,
-              pre_ptr->mc_node_associate(mgrp_hdl, node_2));
-  }
+  auto pre = test_switch->get_component<McSimplePreLAG>();
+  SCOPED_TRACE("SimpleSwitch_PacketRedirectP4.Multicast");
+  PreTestConfiguration pre_config(pre.get(), mgrp, {1, 2});
 
   const char pkt[] = {'\x02', '\x00', '\x00', '\x00'};
   packet_inject.send(port_in, pkt, sizeof(pkt));
@@ -258,7 +277,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
-  events.get_and_remove_events("1.0", &pevents, 4u);
+  events.get_and_remove_events(pid(0), &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -266,56 +285,63 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
   ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
 
-  events.get_and_remove_events("1.1", &pevents, 4u);
+  events.get_and_remove_events(pid(1), &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_exit"));
   ASSERT_TRUE(check_event_action_execute(pevents[3], "t_exit", "set_hdr"));
 
-  events.get_and_remove_events("1.2", &pevents, 4u);
+  events.get_and_remove_events(pid(2), &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_exit"));
   ASSERT_TRUE(check_event_action_execute(pevents[3], "t_exit", "set_hdr"));
 #endif
-
-  // reset PRE
-  ASSERT_EQ(McSimplePreLAG::SUCCESS, pre_ptr->mc_node_destroy(node_1));
-  ASSERT_EQ(McSimplePreLAG::SUCCESS, pre_ptr->mc_node_destroy(node_2));
-  ASSERT_EQ(McSimplePreLAG::SUCCESS, pre_ptr->mc_mgrp_destroy(mgrp_hdl));
 }
 
-TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
+class SimpleSwitch_PacketRedirectP4_CloneI2E
+    : public SimpleSwitch_PacketRedirectP4 {
+ protected:
+  void add_entries(int port_out, int mirror_id) {
+    std::vector<MatchKeyParam> match_key_1;
+    match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x03"));
+    match_key_1.emplace_back(MatchKeyParam::Type::EXACT,
+                             std::string("\x00", 1));
+    ActionData data_1;
+    data_1.push_back_action_data(port_out);
+    entry_handle_t h_1;
+    EXPECT_EQ(MatchErrorCode::SUCCESS,
+              test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
+                                        "_set_port", std::move(data_1), &h_1));
+
+    std::vector<MatchKeyParam> match_key_2;
+    match_key_2.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x03"));
+    match_key_2.emplace_back(MatchKeyParam::Type::TERNARY,
+                             std::string(4, '\x00'), std::string(4, '\x00'));
+    ActionData data_2;
+    data_2.push_back_action_data(mirror_id);
+    entry_handle_t h_2;
+    EXPECT_EQ(MatchErrorCode::SUCCESS,
+              test_switch->mt_add_entry(0, "t_ingress_2", match_key_2,
+                                        "_clone_i2e", std::move(data_2),
+                                        &h_2, 1));
+  }
+};
+
+TEST_F(SimpleSwitch_PacketRedirectP4_CloneI2E, CloneI2E) {
   static constexpr int port_in = 1;
   static constexpr int port_out = 2;
   static constexpr int port_out_copy = 3;
   static constexpr int mirror_id = 1;
 
-  std::vector<MatchKeyParam> match_key_1;
-  match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x03"));
-  match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x00", 1));
-  ActionData data_1;
-  data_1.push_back_action_data(port_out);
-  entry_handle_t h_1;
-  ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
-                                      "_set_port", std::move(data_1), &h_1));
+  add_entries(port_out, mirror_id);
 
-  std::vector<MatchKeyParam> match_key_2;
-  match_key_2.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x03"));
-  match_key_2.emplace_back(MatchKeyParam::Type::TERNARY,
-                           std::string(4, '\x00'), std::string(4, '\x00'));
-  ActionData data_2;
-  data_2.push_back_action_data(mirror_id);
-  entry_handle_t h_2;
-  ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry(0, "t_ingress_2", match_key_2,
-                                      "_clone_i2e", std::move(data_2),
-                                      &h_2, 1));
-
-  test_switch->mirroring_mapping_add(mirror_id, port_out_copy);
+  SimpleSwitch::MirroringSessionConfig config = {};
+  config.egress_port = port_out_copy;
+  config.egress_port_valid = true;
+  test_switch->mirroring_add_session(mirror_id, config);
 
   const char pkt[] = {'\x03', '\x00', '\x00', '\x00'};
   packet_inject.send(port_in, pkt, sizeof(pkt));
@@ -328,13 +354,13 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
   ASSERT_TRUE((recv_port_1 == port_out && recv_port_2 == port_out_copy) ||
               (recv_port_1 == port_out_copy && recv_port_2 == port_out));
 
-  test_switch->mirroring_mapping_delete(mirror_id);
+  test_switch->mirroring_delete_session(mirror_id);
 
 #ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
-  events.get_and_remove_events("2.0", &pevents, 8u);
+  events.get_and_remove_events(pid(0), &pevents, 8u);
   ASSERT_EQ(8u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -347,7 +373,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
   ASSERT_TRUE(check_event_table_miss(pevents[6], "t_exit"));
   ASSERT_TRUE(check_event_action_execute(pevents[7], "t_exit", "set_hdr"));
 
-  events.get_and_remove_events("2.1", &pevents, 4u);
+  events.get_and_remove_events(pid(1), &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
@@ -356,35 +382,116 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
 #endif
 }
 
-TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
+TEST_F(SimpleSwitch_PacketRedirectP4_CloneI2E, CloneI2E_Multicast) {
+  static constexpr int port_in = 1;
+  static constexpr int port_out = 2;
+  static constexpr int port_out_copy = 3;
+  static constexpr int port_out_mc_copy = 4;
+  static constexpr int mirror_id = 1;
+  static constexpr int mgrp = 1;
+
+  add_entries(port_out, mirror_id);
+
+  SimpleSwitch::MirroringSessionConfig config = {};
+  config.egress_port = port_out_copy;
+  config.egress_port_valid = true;
+  config.mgid = mgrp;
+  config.mgid_valid = true;
+  test_switch->mirroring_add_session(mirror_id, config);
+
+  auto pre = test_switch->get_component<McSimplePreLAG>();
+  SCOPED_TRACE("SimpleSwitch_PacketRedirectP4_CloneI2E.CloneI2E_Multicast");
+  PreTestConfiguration pre_config(pre.get(), mgrp, {port_out_mc_copy});
+
+  const char pkt[] = {'\x03', '\x00', '\x00', '\x00'};
+  packet_inject.send(port_in, pkt, sizeof(pkt));
+  char recv_buffer[kMaxBufSize];
+  int recv_port_1 = -1, recv_port_2 = -1, recv_port_3 = -1;
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port_1);
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port_2);
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port_3);
+  // TODO(antonin): make sure the right packet comes out of the right port
+  ASSERT_EQ(std::set<int>({recv_port_1, recv_port_2, recv_port_3}),
+            std::set<int>({port_out, port_out_copy, port_out_mc_copy}));
+
+  test_switch->mirroring_delete_session(mirror_id);
+  return;
+
+#ifdef BMELOG_ON
+  // event check
+  std::vector<NNEventListener::NNEvent> pevents;
+
+  events.get_and_remove_events(pid(0), &pevents, 8u);
+  ASSERT_EQ(8u, pevents.size());
+  ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
+  ASSERT_TRUE(check_event_table_hit(pevents[2], "t_ingress_2"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2",
+                                         "_clone_i2e"));
+  ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_nop"));
+  ASSERT_TRUE(check_event_table_miss(pevents[6], "t_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[7], "t_exit", "set_hdr"));
+
+  events.get_and_remove_events(pid(1), &pevents, 4u);
+  ASSERT_EQ(4u, pevents.size());
+  ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
+  ASSERT_TRUE(check_event_table_miss(pevents[2], "t_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_exit", "set_hdr"));
+
+  events.get_and_remove_events(pid(2), &pevents, 4u);
+  ASSERT_EQ(4u, pevents.size());
+  ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
+  ASSERT_TRUE(check_event_table_miss(pevents[2], "t_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_exit", "set_hdr"));
+#endif
+}
+
+class SimpleSwitch_PacketRedirectP4_CloneE2E
+    : public SimpleSwitch_PacketRedirectP4 {
+ protected:
+  void add_entries(int port_out, int mirror_id) {
+    std::vector<MatchKeyParam> match_key_1;
+    match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x04"));
+    match_key_1.emplace_back(MatchKeyParam::Type::EXACT,
+                             std::string("\x00", 1));
+    ActionData data_1;
+    data_1.push_back_action_data(port_out);
+    entry_handle_t h_1;
+    ASSERT_EQ(MatchErrorCode::SUCCESS,
+              test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
+                                        "_set_port", std::move(data_1), &h_1));
+
+    std::vector<MatchKeyParam> match_key_2;
+    match_key_2.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x04"));
+    // only PKT_INSTANCE_TYPE_NORMAL (= 0)
+    match_key_2.emplace_back(MatchKeyParam::Type::TERNARY,
+                             std::string(4, '\x00'), std::string(4, '\xff'));
+    ActionData data_2;
+    data_2.push_back_action_data(mirror_id);
+    entry_handle_t h_2;
+    ASSERT_EQ(
+        MatchErrorCode::SUCCESS,
+        test_switch->mt_add_entry(0, "t_egress", match_key_2, "_clone_e2e",
+                                  std::move(data_2), &h_2, 1));
+  }
+};
+
+TEST_F(SimpleSwitch_PacketRedirectP4_CloneE2E, CloneE2E) {
   static constexpr int port_in = 1;
   static constexpr int port_out = 2;
   static constexpr int port_out_copy = 3;
   static constexpr int mirror_id = 1;
 
-  std::vector<MatchKeyParam> match_key_1;
-  match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x04"));
-  match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x00", 1));
-  ActionData data_1;
-  data_1.push_back_action_data(port_out);
-  entry_handle_t h_1;
-  ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
-                                      "_set_port", std::move(data_1), &h_1));
+  add_entries(port_out, mirror_id);
 
-  std::vector<MatchKeyParam> match_key_2;
-  match_key_2.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x04"));
-  // only PKT_INSTANCE_TYPE_NORMAL (= 0)
-  match_key_2.emplace_back(MatchKeyParam::Type::TERNARY,
-                           std::string(4, '\x00'), std::string(4, '\xff'));
-  ActionData data_2;
-  data_2.push_back_action_data(mirror_id);
-  entry_handle_t h_2;
-  ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry(0, "t_egress", match_key_2, "_clone_e2e",
-                                      std::move(data_2), &h_2, 1));
-
-  test_switch->mirroring_mapping_add(mirror_id, port_out_copy);
+  SimpleSwitch::MirroringSessionConfig config = {};
+  config.egress_port = port_out_copy;
+  config.egress_port_valid = true;
+  test_switch->mirroring_add_session(mirror_id, config);
 
   const char pkt[] = {'\x04', '\x00', '\x00', '\x00'};
   packet_inject.send(port_in, pkt, sizeof(pkt));
@@ -397,13 +504,13 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
   ASSERT_TRUE((recv_port_1 == port_out && recv_port_2 == port_out_copy) ||
               (recv_port_1 == port_out_copy && recv_port_2 == port_out));
 
-  test_switch->mirroring_mapping_delete(mirror_id);
+  test_switch->mirroring_delete_session(mirror_id);
 
 #ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
-  events.get_and_remove_events("3.0", &pevents, 8u);
+  events.get_and_remove_events(pid(0), &pevents, 8u);
   ASSERT_EQ(8u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -415,7 +522,73 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
   ASSERT_TRUE(check_event_table_miss(pevents[6], "t_exit"));
   ASSERT_TRUE(check_event_action_execute(pevents[7], "t_exit", "set_hdr"));
 
-  events.get_and_remove_events("3.1", &pevents, 4u);
+  events.get_and_remove_events(pid(1), &pevents, 4u);
+  ASSERT_EQ(4u, pevents.size());
+  ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
+  ASSERT_TRUE(check_event_table_miss(pevents[2], "t_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_exit", "set_hdr"));
+#endif
+}
+
+TEST_F(SimpleSwitch_PacketRedirectP4_CloneE2E, CloneE2E_Multicast) {
+  static constexpr int port_in = 1;
+  static constexpr int port_out = 2;
+  static constexpr int port_out_copy = 3;
+  static constexpr int port_out_mc_copy = 4;
+  static constexpr int mirror_id = 1;
+  static constexpr int mgrp = 1;
+
+  add_entries(port_out, mirror_id);
+
+  SimpleSwitch::MirroringSessionConfig config = {};
+  config.egress_port = port_out_copy;
+  config.egress_port_valid = true;
+  config.mgid = mgrp;
+  config.mgid_valid = true;
+  test_switch->mirroring_add_session(mirror_id, config);
+
+  auto pre = test_switch->get_component<McSimplePreLAG>();
+  SCOPED_TRACE("SimpleSwitch_PacketRedirectP4_CloneE2E.CloneE2E_Multicast");
+  PreTestConfiguration pre_config(pre.get(), mgrp, {port_out_mc_copy});
+
+  const char pkt[] = {'\x04', '\x00', '\x00', '\x00'};
+  packet_inject.send(port_in, pkt, sizeof(pkt));
+  char recv_buffer[kMaxBufSize];
+  int recv_port_1 = -1, recv_port_2 = -1, recv_port_3 = -1;
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port_1);
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port_2);
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port_3);
+  // TODO(antonin): make sure the right packet comes out of the right port
+  ASSERT_EQ(std::set<int>({recv_port_1, recv_port_2, recv_port_3}),
+            std::set<int>({port_out, port_out_copy, port_out_mc_copy}));
+
+  test_switch->mirroring_delete_session(mirror_id);
+
+#ifdef BMELOG_ON
+  // event check
+  std::vector<NNEventListener::NNEvent> pevents;
+
+  events.get_and_remove_events(pid(0), &pevents, 8u);
+  ASSERT_EQ(8u, pevents.size());
+  ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
+  ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
+  ASSERT_TRUE(check_event_table_hit(pevents[4], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_clone_e2e"));
+  ASSERT_TRUE(check_event_table_miss(pevents[6], "t_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[7], "t_exit", "set_hdr"));
+
+  events.get_and_remove_events(pid(1), &pevents, 4u);
+  ASSERT_EQ(4u, pevents.size());
+  ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
+  ASSERT_TRUE(check_event_table_miss(pevents[2], "t_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_exit", "set_hdr"));
+
+  events.get_and_remove_events(pid(1), &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
@@ -474,7 +647,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
-  events.get_and_remove_events("4.0", &pevents, 4u);
+  events.get_and_remove_events(pid(0), &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -485,7 +658,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
 
   // TODO(antonin): if we consider that it is the same packet, then the copy_id
   // should be the same? Update this if this changes in simple_switch
-  events.get_and_remove_events("4.1", &pevents, 8u);
+  events.get_and_remove_events(pid(1), &pevents, 8u);
   ASSERT_EQ(8u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -548,7 +721,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
-  events.get_and_remove_events("5.0", &pevents, 8u);
+  events.get_and_remove_events(pid(0), &pevents, 8u);
   ASSERT_EQ(8u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -563,7 +736,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
 
   // TODO(antonin): if we consider that it is the same packet, then the copy_id
   // should be the same? Update this if this changes in simple_switch
-  events.get_and_remove_events("5.1", &pevents, 8u);
+  events.get_and_remove_events(pid(1), &pevents, 8u);
   ASSERT_EQ(8u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
@@ -601,7 +774,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, ExitIngress) {
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
-  events.get_and_remove_events("6.0", &pevents, 6u);
+  events.get_and_remove_events(pid(0), &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1", "_exit"));
