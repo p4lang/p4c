@@ -142,6 +142,7 @@ const Type* Type_Tuple::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : components) {
         auto at = a->getP4Type();
+        if (!at) return nullptr;
         args->push_back(at);
     }
     return new IR::Type_Tuple(srcInfo, *args);
