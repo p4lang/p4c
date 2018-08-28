@@ -22,6 +22,7 @@ class IRDumper : public Inspector {
     std::set<const IR::Node *>  dumped;
     unsigned                    maxdepth;
     cstring                     ignore;
+    bool                        source;
     bool preorder(const IR::Node *n) override {
         if (auto ctxt = getContext()) {
             if (unsigned(ctxt->depth) > maxdepth)
@@ -31,7 +32,10 @@ class IRDumper : public Inspector {
             out << indent_t(ctxt->depth);
             if (ctxt->child_name)
                 out << ctxt->child_name << ": "; }
-        out << "[" << n->id << "] " << n->node_type_name();
+        out << "[" << n->id << "] ";
+        if (source && n->srcInfo)
+            out << "(" << n->srcInfo.toPositionString() << ") ";
+        out << n->node_type_name();
         n->dump_fields(out);
         if (dumped.count(n)) {
             out << "..." << std::endl;
@@ -50,24 +54,30 @@ class IRDumper : public Inspector {
             dumped.erase(n); }
 
  public:
-    IRDumper(std::ostream &o, unsigned m, cstring ign) : out(o), maxdepth(m), ignore(ign)
-    { visitDagOnce = false; }
+    IRDumper(std::ostream &o, unsigned m, cstring ign, bool src)
+    : out(o), maxdepth(m), ignore(ign), source(src) { visitDagOnce = false; }
 };
 }  // namespace
 
 void dump(std::ostream &out, const IR::Node *n, unsigned maxdepth) {
-    n->apply(IRDumper(out, maxdepth, nullptr)); }
+    n->apply(IRDumper(out, maxdepth, nullptr, false)); }
 void dump(std::ostream &out, const IR::Node *n) { dump(out, n, ~0U); }
 void dump(const IR::Node *n, unsigned maxdepth) { dump(std::cout, n, maxdepth); }
 void dump(const IR::Node *n) { dump(n, ~0U); }
 void dump(const IR::INode *n, unsigned maxdepth) { dump(std::cout, n->getNode(), maxdepth); }
 void dump(const IR::INode *n) { dump(n, ~0U); }
 void dump_notype(const IR::Node *n, unsigned maxdepth) {
-    n->apply(IRDumper(std::cout, maxdepth, "type")); }
+    n->apply(IRDumper(std::cout, maxdepth, "type", false)); }
 void dump_notype(const IR::Node *n) { dump_notype(n, ~0U); }
 void dump_notype(const IR::INode *n, unsigned maxdepth) {
-    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type")); }
+    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type", false)); }
 void dump_notype(const IR::INode *n) { dump_notype(n, ~0U); }
+void dump_src(const IR::Node *n, unsigned maxdepth) {
+    n->apply(IRDumper(std::cout, maxdepth, "type", true)); }
+void dump_src(const IR::Node *n) { dump_src(n, ~0U); }
+void dump_src(const IR::INode *n, unsigned maxdepth) {
+    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type", true)); }
+void dump_src(const IR::INode *n) { dump_src(n, ~0U); }
 
 void dump(uintptr_t p, unsigned maxdepth) {
     dump(reinterpret_cast<const IR::Node *>(p), maxdepth); }
