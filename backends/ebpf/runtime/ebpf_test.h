@@ -25,10 +25,8 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_USER_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_USER_H_
 
-#include <stdio.h>      // printf
-#include <linux/bpf.h>  // types, and general bpf definitions
-#include <stdbool.h>    // true and false
 #include "ebpf_registry.h"
+#include "ebpf_common.h"
 
 #define printk(fmt, ...)                                               \
                 ({                                                      \
@@ -36,76 +34,6 @@ limitations under the License.
                         printf(____fmt, sizeof(____fmt),      \
                                      ##__VA_ARGS__);                    \
                 })
-
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef signed long long s64;
-typedef unsigned long long u64;
-
-#ifndef ___constant_swab16
-#define ___constant_swab16(x) ((__u16)(             \
-    (((__u16)(x) & (__u16)0x00ffU) << 8) |          \
-    (((__u16)(x) & (__u16)0xff00U) >> 8)))
-#endif
-
-#ifndef ___constant_swab32
-#define ___constant_swab32(x) ((__u32)(             \
-    (((__u32)(x) & (__u32)0x000000ffUL) << 24) |        \
-    (((__u32)(x) & (__u32)0x0000ff00UL) <<  8) |        \
-    (((__u32)(x) & (__u32)0x00ff0000UL) >>  8) |        \
-    (((__u32)(x) & (__u32)0xff000000UL) >> 24)))
-#endif
-
-#ifndef ___constant_swab64
-#define ___constant_swab64(x) ((__u64)(             \
-    (((__u64)(x) & (__u64)0x00000000000000ffULL) << 56) |   \
-    (((__u64)(x) & (__u64)0x000000000000ff00ULL) << 40) |   \
-    (((__u64)(x) & (__u64)0x0000000000ff0000ULL) << 24) |   \
-    (((__u64)(x) & (__u64)0x00000000ff000000ULL) <<  8) |   \
-    (((__u64)(x) & (__u64)0x000000ff00000000ULL) >>  8) |   \
-    (((__u64)(x) & (__u64)0x0000ff0000000000ULL) >> 24) |   \
-    (((__u64)(x) & (__u64)0x00ff000000000000ULL) >> 40) |   \
-    (((__u64)(x) & (__u64)0xff00000000000000ULL) >> 56)))
-#endif
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#ifndef __constant_htonll
-#define __constant_htonll(x) (___constant_swab64((x)))
-#endif
-
-#ifndef __constant_ntohll
-#define __constant_ntohll(x) (___constant_swab64((x)))
-#endif
-
-#define __constant_htonl(x) (___constant_swab32((x)))
-#define __constant_ntohl(x) (___constant_swab32(x))
-#define __constant_htons(x) (___constant_swab16((x)))
-#define __constant_ntohs(x) ___constant_swab16((x))
-
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-# warning "I never tested BIG_ENDIAN machine!"
-#define __constant_htonll(x) (x)
-#define __constant_ntohll(X) (x)
-#define __constant_htonl(x) (x)
-#define __constant_ntohl(x) (x)
-#define __constant_htons(x) (x)
-#define __constant_ntohs(x) (x)
-
-#else
-# error "Fix your compiler's __BYTE_ORDER__?!"
-#endif
-
-#define htonl(d) __constant_htonl(d)
-#define htons(d) __constant_htons(d)
-
-#define load_byte(data, b)  (*(((u8*)(data)) + (b)))
-#define load_half(data, b) ((u16)load_byte(data, b) << 8) | (u16)load_byte(data, b + 1)
-#define load_word(data, b) ((u32)load_byte(data, b) << 24) | ((u32)load_byte(data, b + 1) << 16) | ((u32)load_byte(data, b + 2) << 8) | ((u32)load_byte(data, b + 3))
-#define load_dword(data, b) (u64)(((u64)load_byte(data, b) << 56) | ((u64)load_byte(data, b + 1) << 48) | ((u64)load_byte(data, b + 2) << 40) | ((u64)load_byte(data, b + 3) << 32) | ((u64)load_byte(data, b + 4) << 24) | ((u64)load_byte(data, b + 5) << 16) | ((u64)load_byte(data, b + 6) << 8) | ((u64)load_byte(data, b + 7)))
 
 /** helper macro to place programs, maps, license in
  * different sections in elf_bpf file. Section names

@@ -242,14 +242,13 @@ void sort_pcap_list(pcap_list_t *pkt_list) {
 }
 
 char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
-    int file_name_max  = 256;   // Max filename length
     int max_10_uint32  = 10;     // Max size of uint32 in base 10
     /* Dynamic string length plus max decimal representation of uint16_t */
     int file_length = strlen(pcap_base) + strlen(suffix) + max_10_uint32 + 1;
     char *pcap_name = malloc(file_length);
     int offset = snprintf(pcap_name, file_length,"%s%hu%s",
                     pcap_base, index, suffix);
-    if (offset >= file_name_max) {
+    if (offset >= file_length) {
         fprintf(stderr, "Name %s%d%s too long.\n", pcap_base, index, suffix);
         exit(EXIT_FAILURE);
     }

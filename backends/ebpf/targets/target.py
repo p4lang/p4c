@@ -78,7 +78,9 @@ class EBPFTarget(object):
         # To override
         """ Compile the p4 target """
         if not os.path.isfile(self.options.p4filename):
-            raise Exception("No such file " + self.options.p4filename)
+            report_err(self.outputs["stderr"],
+                       ("No such file " + self.options.p4filename))
+            sys.exit(FAILURE)
         # Initialize arguments for the makefile
         args = self.get_make_args(self.runtimedir, self.options.target)
         # name of the makefile target
