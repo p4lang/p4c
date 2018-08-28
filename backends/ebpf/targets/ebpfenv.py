@@ -126,9 +126,6 @@ class Bridge(object):
         for index in (range(num_ifaces)):
             edge_veth = "%s" % index
             bridge_veth = "br_%s" % index
-            # result = self.ns_exec("ip link add link %s name %s"
-            #                       " type macvtap mode vepa"
-            #                       % (self.br_name, edge_tap))
             result = self.ns_exec("ip link add %s type veth "
                                   "peer name %s" % (edge_veth, bridge_veth))
             if result != SUCCESS:

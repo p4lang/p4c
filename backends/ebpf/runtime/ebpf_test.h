@@ -144,11 +144,10 @@ struct bpf_table tables[] = {
  * Print a byte buffer according to the specified length.
  */
 static inline void print_n_bytes(void *receiveBuffer, int num) {
-    for (int i =0; i<=num-1; i++)
+    for (int i = 0; i < num; i++)
         printf("%02x", ((unsigned char *)receiveBuffer)[i]);
     printf("\n");
 }
-
 
 /* These should be automatically generated and included in the generated x.h header file */
 extern struct bpf_table tables[];

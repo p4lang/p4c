@@ -16,6 +16,7 @@
 
 import os
 import sys
+import time
 from glob import glob
 from ebpfenv import Bridge
 from target import EBPFTarget
@@ -26,6 +27,8 @@ from testutils import *
 
 
 class Target(EBPFTarget):
+    EBPF_MAP_PATH = "/sys/fs/bpf/tc/globals"
+
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
@@ -89,33 +92,59 @@ class Target(EBPFTarget):
         cmd += "-d"
         return cmd
 
-    def _tc_load_cmd(self, bridge, proc, port_name):
+    def _kill_processes(self, procs):
+        for proc in procs:
+            # kill process, 15 is SIGTERM
+            os.kill(proc.pid, 15)
+
+    def _load_filter(self, bridge, proc, port_name):
         # Load the specified eBPF object to "port_name" egress
-        # As a side-effect, this may create maps in /sys/fs/bpf/tc/globals
+        # As a side-effect, this may create maps in /sys/fs/bpf/
         cmd_egress = ("tc filter add dev %s egress"
                       " bpf da obj %s section prog "
                       "verbose" % (port_name, self.template + ".o"))
         return bridge.ns_proc_write(proc, cmd_egress)
+
+    def _attach_filters(self, bridge, proc):
+        # Get the command to load eBPF code to all the attached ports
+        if len(bridge.edge_ports) > 0:
+            for port in bridge.edge_ports:
+                result = self._load_filter(bridge, proc, port)
+                bridge.ns_proc_append(proc, "")
+        else:
+            # No ports attached (no pcap files), load to bridge instead
+            result = self._load_filter(bridge, proc, bridge.br_name)
+            bridge.ns_proc_append(proc, "")
+        if result != SUCCESS:
+            return result
+        return SUCCESS
+
+    def _run_tcpdump(self, bridge, filename, port):
+        cmd = bridge.get_ns_prefix() + " tcpdump -w %s -i %s" % (filename, port)
+        return subprocess.Popen(cmd.split())
+
+    def _init_tcpdump_listeners(self, bridge):
+        # Listen to packets with tcpdump on all the ports of the bridge
+        dump_procs = []
+        for i, port in enumerate(bridge.br_ports):
+            outfile_name = self.filename(i, 'out')
+            dump_procs.append(self._run_tcpdump(bridge, outfile_name, port))
+        # Wait for tcpdump to initialise
+        time.sleep(2)
+        return dump_procs
 
     def _run_in_namespace(self, bridge):
         # Open a process in the new namespace
         proc = bridge.ns_proc_open()
         if not proc:
             return FAILURE
-        # Get the command to load eBPF code to all the attached ports
-        if len(bridge.edge_ports) > 0:
-            for port in bridge.edge_ports:
-                result = self._tc_load_cmd(bridge, proc, port)
-                bridge.ns_proc_append(proc, "")
-        else:
-            # No ports attached (no pcap files), load to bridge instead
-            result = self._tc_load_cmd(bridge, proc, bridge.br_name)
-            bridge.ns_proc_append(proc, "")
+        dump_procs = self._init_tcpdump_listeners(bridge)
+        result = self._attach_filters(bridge, proc)
         if result != SUCCESS:
             return result
         # Check if eBPF maps have actually been created
         result = bridge.ns_proc_write(proc,
-                                      "ls -1 /sys/fs/bpf/tc/globals")
+                                      "ls -1 %s" % self.EBPF_MAP_PATH)
         if result != SUCCESS:
             return result
         # Finally, append the actual runtime command to the process
@@ -123,7 +152,11 @@ class Target(EBPFTarget):
         if result != SUCCESS:
             return result
         # Execute the command queue and close the process, retrieve result
-        return bridge.ns_proc_close(proc)
+        result = bridge.ns_proc_close(proc)
+        # Kill tcpdump but let it finish writing packets
+        self._kill_processes(dump_procs)
+        time.sleep(2)
+        return result
 
     def run(self):
         # Root is necessary to load ebpf into the kernel

@@ -164,6 +164,8 @@ class EBPFTarget(object):
                       self.options.verbose, "Comparing outputs")
         direction = "out"
         for file in glob(self.filename('*', direction)):
+            report_output(self.outputs["stdout"],
+                          self.options.verbose, "Checking file %s" % file)
             interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []
@@ -205,7 +207,7 @@ class EBPFTarget(object):
                 del self.expected[interface]
         if len(self.expected) != 0:
             # Didn't find all the expects we were expecting
-            report_err(self.outputs["stderr"], "Expected packects on ports",
+            report_err(self.outputs["stderr"], "Expected packets on port(s)",
                        self.expected.keys(), "not received")
             return FAILURE
         report_output(self.outputs["stdout"],
