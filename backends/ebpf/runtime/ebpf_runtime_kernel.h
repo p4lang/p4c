@@ -28,7 +28,6 @@ limitations under the License.
 #include "ebpf_runtime_kernel.h"
 
 void run_and_record_output(pcap_list_t *pkt_list, char *pcap_base, uint16_t num_pcaps, int debug);
-char *generate_pcap_name(const char *pcap_base, int index, const char *suffix);
 
 #define RUN(ebpf_filter, pcap_base, num_pcaps, input_list, debug) \
     run_and_record_output(input_list, pcap_base, num_pcaps, debug)

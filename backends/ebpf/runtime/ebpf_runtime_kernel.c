@@ -27,30 +27,6 @@ limitations under the License.
 #include "ebpf_runtime_kernel.h"
 
 
-#define FILE_NAME_MAX 256
-#define MAX_10_UINT16 5
-
-/**
- * @brief Create a pcap file name from a given base name, interface index,
- * and suffix. Return value must be deallocated after usage.
- * @param pcap_base The file base name.
- * @param index The index of the file, represent an interface.
- * @param suffix  Filename suffix (e.g., _in.pcap)
- * @return An allocated string containing the file name.
- */
-char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
-    /* Dynamic string length plus max decimal representation of uint16_t */
-    int file_length = strlen(pcap_base) + strlen(suffix) + MAX_10_UINT16 + 1;
-    char *pcap_name = malloc(file_length);
-    int offset = snprintf(pcap_name, file_length,"%s%d%s",
-                    pcap_base, index, suffix);
-    if (offset >= FILE_NAME_MAX) {
-        fprintf(stderr, "Name %s%d%s too long.\n", pcap_base, index, suffix);
-        exit(EXIT_FAILURE);
-    }
-    return pcap_name;
-}
-
 int open_socket(char *iface_name) {
     struct sockaddr_ll iface;
     int sockfd;
@@ -82,9 +58,10 @@ void close_sockets(int *sockfds, int num_pcaps) {
 
 int *init_sockets(char *pcap_base, uint16_t num_pcaps){
     int *sockfds = malloc(sizeof(int) * num_pcaps);
+    int max_10_uint16  = 5;     // Max size of uint16 in base 10
     for (uint16_t i = 0; i < num_pcaps; i++) {
-        char iface_name[MAX_10_UINT16 + 1];
-        snprintf(iface_name, MAX_10_UINT16, "%hu", i);
+        char iface_name[max_10_uint16 + 1];
+        snprintf(iface_name, max_10_uint16, "%hu", i);
         sockfds[i] = open_socket(iface_name);
     }
     return sockfds;
