@@ -54,19 +54,19 @@ class JsonValue final : public IJson {
         Null
     };
     JsonValue() : tag(Kind::Null) {}
-    JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}   // NOLINT
-    JsonValue(mpz_class v) : tag(Kind::Number), value(v) {}    // NOLINT
-    JsonValue(int v) : tag(Kind::Number), value(v) {}          // NOLINT
-    JsonValue(long v) : tag(Kind::Number), value(v) {}         // NOLINT
-    JsonValue(long long v);                                    // NOLINT
-    JsonValue(unsigned v) : tag(Kind::Number), value(v) {}     // NOLINT
-    JsonValue(unsigned long v) : tag(Kind::Number), value(v) {}// NOLINT
-    JsonValue(unsigned long long v);                           // NOLINT
-    JsonValue(double v) : tag(Kind::Number), value(v) {}       // NOLINT
-    JsonValue(float v) : tag(Kind::Number), value(v) {}        // NOLINT
-    JsonValue(cstring s) : tag(Kind::String), str(s) {}        // NOLINT
-    JsonValue(std::string s) : tag(Kind::String), str(s) {}    // NOLINT
-    JsonValue(const char* s) : tag(Kind::String), str(s) {}    // NOLINT
+    JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}          // NOLINT
+    JsonValue(mpz_class v) : tag(Kind::Number), value(v) {}           // NOLINT
+    JsonValue(int v) : tag(Kind::Number), value(v) {}                 // NOLINT
+    JsonValue(long v) : tag(Kind::Number), value(v) {}                // NOLINT
+    JsonValue(long long v);                                           // NOLINT
+    JsonValue(unsigned v) : tag(Kind::Number), value(v) {}            // NOLINT
+    JsonValue(unsigned long v) : tag(Kind::Number), value(v) {}       // NOLINT
+    JsonValue(unsigned long long v);                                  // NOLINT
+    JsonValue(double v) : tag(Kind::Number), value(v) {}              // NOLINT
+    JsonValue(float v) : tag(Kind::Number), value(v) {}               // NOLINT
+    JsonValue(cstring s) : tag(Kind::String), str(s) {}               // NOLINT
+    JsonValue(const std::string &s) : tag(Kind::String), str(s) {}    // NOLINT
+    JsonValue(const char* s) : tag(Kind::String), str(s) {}           // NOLINT
     void serialize(std::ostream& out) const;
 
     bool operator==(const mpz_class& v) const;
@@ -118,7 +118,7 @@ class JsonArray final : public IJson, public std::vector<IJson*> {
     JsonArray* append(double v) { append(new JsonValue(v)); return this; }
     JsonArray* append(float v) { append(new JsonValue(v)); return this; }
     JsonArray* append(cstring s) { append(new JsonValue(s)); return this; }
-    JsonArray* append(std::string s) { append(new JsonValue(s)); return this; }
+    JsonArray* append(const std::string &s) { append(new JsonValue(s)); return this; }
     JsonArray* append(const char* s) { append(new JsonValue(s)); return this; }
     JsonArray(std::initializer_list<IJson*> data) : std::vector<IJson*>(data) {} // NOLINT
     JsonArray() = default;
