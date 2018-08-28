@@ -857,8 +857,9 @@ bool ComputeWriteSet::preorder(const IR::P4Action* action) {
     ProgramPoint pt(callingContext, action);
     enterScope(action->parameters, decls, pt, false);
     visit(action->body);
-    exitScope(action->parameters, decls);
     currentDefinitions = currentDefinitions->join(returnedDefinitions);
+    setDefinitions(currentDefinitions, action->body);
+    exitScope(action->parameters, decls);
     returnedDefinitions = saveReturned;
     return false;
 }
