@@ -30,7 +30,8 @@ class Bridge(object):
     def __init__(self, namespace, outputs, verbose):
         self.ns_name = namespace     # identifier of the namespace
         self.br_name = "core"        # name of the central bridge
-        self.br_ports = []           # list of bridge ports
+        self.br_ports = []           # list of the veth pair bridge ports
+        self.edge_ports = []         # list of the veth pair edge ports
         self.outputs = outputs       # contains standard and error output
         self.verbose = verbose       # do we want to be chatty?
 
@@ -78,8 +79,7 @@ class Bridge(object):
             proc.stdin.write(cmd)
         except IOError as e:
             err_text = "Error while writing to process"
-            report_err(self.outputs["stdout"],
-                       self.verbose, err_text, e)
+            report_err(self.outputs["stdout"], err_text, e)
             return FAILURE
         return SUCCESS
 
@@ -88,6 +88,8 @@ class Bridge(object):
         return self.ns_proc_write(proc, " && " + cmd)
 
     def ns_proc_close(self, proc):
+        report_output(self.outputs["stdout"],
+                      self.verbose, "Executing command.")
         """ Close and actually run the process in the namespace. Returns the
             exit code. """
         errmsg = ("Failed to execute the command"
@@ -122,17 +124,25 @@ class Bridge(object):
         """ Attach and initialize n interfaces to the central bridge of the
             namespace. """
         for index in (range(num_ifaces)):
-            edge_tap = "%s" % index
-            result = self.ns_exec("ip link add link %s name %s"
-                                  " type macvtap mode vepa"
-                                  % (self.br_name, edge_tap))
+            edge_veth = "%s" % index
+            bridge_veth = "br_%s" % index
+            result = self.ns_exec("ip link add %s type veth "
+                                  "peer name %s" % (edge_veth, bridge_veth))
             if result != SUCCESS:
                 return result
-            result = self._configure_bridge_port(edge_tap)
+            result = self.ns_exec("ip link set %s master %s" %
+                                  (edge_veth, self.br_name))
             if result != SUCCESS:
                 return result
-            # add interface to the list of existing bridge ports
-            self.br_ports.append(edge_tap)
+            result = self._configure_bridge_port(edge_veth)
+            if result != SUCCESS:
+                return result
+            result = self._configure_bridge_port(bridge_veth)
+            if result != SUCCESS:
+                return result
+            # add interfaces to the list of existing bridge ports
+            self.br_ports.append(bridge_veth)
+            self.edge_ports.append(edge_veth)
         return SUCCESS
 
     def create_virtual_env(self, num_ifaces):
@@ -144,6 +154,8 @@ class Bridge(object):
         result = self.create_bridge()
         if result != SUCCESS:
             return result
+        report_output(self.outputs["stdout"],
+                      self.verbose, "Attaching %d interfaces..." % num_ifaces)
         return self.attach_interfaces(num_ifaces)
 
 

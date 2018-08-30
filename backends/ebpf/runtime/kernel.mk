@@ -1,17 +1,20 @@
+# Actual location of the makefile
+ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # Argument for the CLANG compiler
 LLC ?= llc
 CLANG ?= clang
-INCLUDES+= -I./
-LIBS+=
+override INCLUDES+= -I$(ROOT_DIR)
+override LIBS+=
 # Optimization flags to save space
-CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H -Wno-unused-value \
-		-Wno-pointer-sign -Wno-compare-distinct-pointer-types \
+override CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H \
+		-Wno-unused-value  -Wno-pointer-sign \
+		-Wno-compare-distinct-pointer-types \
 		-Wno-gnu-variable-sized-type-not-at-end \
 		-Wno-address-of-packed-member -Wno-tautological-compare \
 		-Wno-unknown-warning-option -Wnoparentheses-equality
 
 # Arguments for the P4 Compiler
-P4INCLUDE=-I./p4include
+P4INCLUDE=-I$(ROOT_DIR)/p4include
 # P4 source file argument for the compiler
 P4FILE=
 P4C=p4c-ebpf
@@ -24,13 +27,11 @@ ARGS=
 BPFOBJ=
 # Get the source name of the object to match targets
 BPFNAME=$(basename $(BPFOBJ))
-# Interface to attach programs to
-IFACE=
 
 all: verify_target_bpf $(BPFOBJ)
 
 # Verify LLVM compiler tools are available and bpf target is supported by llc
-.PHONY: verify_cmds verify_target_bpf $(CLANG) $(LLC)
+.PHONY: verify_target_bpf $(CLANG) $(LLC)
 
 verify_cmds: $(CLANG) $(LLC)
 	@for TOOL in $^ ; do \

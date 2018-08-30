@@ -79,9 +79,10 @@ class KernelSamplesTarget : public Target {
     void emitMain(Util::SourceCodeBuilder* builder,
                   cstring functionName,
                   cstring argName) const override;
-    cstring dataOffset(cstring base) const override { return base; }
+    cstring dataOffset(cstring base) const override
+    { return cstring("((void*)(long)")+ base + "->data)"; }
     cstring dataEnd(cstring base) const override
-    { return cstring("((void*)(long)(")+ base + " + "+ base +"->len))"; }
+    { return cstring("((void*)(long)")+ base + "->data_end)"; }
     cstring forwardReturnCode() const override { return "TC_ACT_OK"; }
     cstring dropReturnCode() const override { return "TC_ACT_SHOT"; }
     cstring abortReturnCode() const override { return "TC_ACT_SHOT"; }

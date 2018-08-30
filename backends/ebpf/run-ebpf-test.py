@@ -14,9 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# Runs the p4c-ebpf compiler on a P4-16 program
-# and then runs the program on specified input packets
+""" Contains different eBPF models and specifies their individual behavior
+    Currently five phases are defined:
+   1. Invokes the specified compiler on a provided p4 file.
+   2. Parses an stf file and generates an pcap output.
+   3. Loads the generated template or compiles it to a runnable binary.
+   4. Feeds the generated pcap test packets into the P4 "filter"
+   5. Evaluates the output with the expected result from the .stf file
+"""
 
 from __future__ import print_function
 import sys
@@ -24,9 +29,33 @@ import os
 import stat
 import tempfile
 import shutil
-from ebpftargets import EBPFFactory
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
+sys.path.insert(0, os.path.dirname(
+    os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
+
+
+def import_from(module, name):
+    """ Try to import a module and class directly instead of the typical
+        Python method. Allows for dynamic imports. """
+    module = __import__(module, fromlist=[name])
+    return getattr(module, name)
+
+
+class EBPFFactory(object):
+    """ Generator class.
+     Returns a target subclass based on the provided target option."""
+    @staticmethod
+    def create(tmpdir, options, template, outputs):
+        target_name = "targets." + options.target + "_target"
+        target_class = "Target"
+        report_output(outputs["stdout"], options.verbose,
+                      "Loading target ", target_name)
+        try:
+            EBPFTarget = import_from(target_name, target_class)
+        except ImportError as e:
+            report_err(outputs["stderr"], e)
+            return None
+        return EBPFTarget(tmpdir, options, template, outputs)
 
 
 class Options(object):
@@ -34,10 +63,12 @@ class Options(object):
         self.binary = ""                # This program's name
         self.cleanupTmp = True          # Remove tmp folder?
         self.p4Filename = ""            # File that is being compiled
-        self.compilerSrcDir = ""        # Path to compiler source tree
+        self.compilerdir = ""              # Path to the P4 compiler
         self.verbose = False            # Enable verbose output
         self.replace = False            # Replace previous outputs
-        self.target = "bcc"             # The name of the target compiler
+        self.target = "test"            # The name of the target compiler
+        # Actual location of the test framework
+        self.testdir = os.path.dirname(os.path.realpath(__file__))
 
 
 def isdir(path):
@@ -47,15 +78,7 @@ def isdir(path):
         return False
 
 
-def report_error(*message):
-    print("***", *message)
-
-
 def run_model(ebpf, stffile):
-
-    if not os.path.isfile(stffile):
-        # If no empty.stf present, don't try to run the model at all
-        return SUCCESS
 
     result = ebpf.generate_model_inputs(stffile)
     if result != SUCCESS:
@@ -79,6 +102,7 @@ def run_test(options, argv):
     assert isinstance(options, Options)
 
     tmpdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
+    os.chmod(tmpdir, 0o744)
     basename = os.path.basename(options.p4filename)  # Name of the p4 test
     base, ext = os.path.splitext(basename)           # Name without the type
     dirname = os.path.dirname(options.p4filename)    # Directory of the file
@@ -92,30 +116,37 @@ def run_test(options, argv):
         # If no stf file is present just use the empty file
         stffile = dirname + "/empty.stf"
 
-    if options.verbose:
-        print("Writing temporary files into ", tmpdir)
-
     template = tmpdir + "/" + "test"
     output = {}
     output["stderr"] = tmpdir + "/" + basename + "-stderr"
     output["stdout"] = tmpdir + "/" + basename + "-stdout"
+    report_output(output["stdout"], options.verbose,
+                  "Writing temporary files into ", tmpdir)
 
     ebpf = EBPFFactory.create(tmpdir, options, template, output)
-
+    if ebpf is None:
+        return FAILURE
     # Compile the p4 file to the specified target
     result, expected_error = ebpf.compile_p4(argv)
 
     # Compile and run the generated output
     if result == SUCCESS and not expected_error:
-        result = run_model(ebpf, stffile)
+        # If no empty.stf present, don't try to run the model at all
+        if not os.path.isfile(stffile):
+            msg = "No stf file present!"
+            report_output(output["stdout"],
+                          options.verbose, msg)
+            result = SUCCESS
+        else:
+            result = run_model(ebpf, stffile)
     # Only if we did not expect it to fail
     if result != SUCCESS:
         return result
 
     # Remove the tmp folder
     if options.cleanupTmp:
-        if options.verbose:
-            print("Removing", tmpdir)
+        report_output(output["stdout"],
+                      options.verbose, "Removing", tmpdir)
         shutil.rmtree(tmpdir)
     return result
 
@@ -145,17 +176,17 @@ def parse_options(argv):
 
     if argv[1] == '-t':
         if len(argv) == 0:
-            report_error("Missing argument for -t option")
+            report_err("Missing argument for -t option")
             usage(options)
             sys.exit(FAILURE)
         else:
             options.target = argv[2]
             argv = argv[1:]
     argv = argv[1:]
-    options.compilerSrcDir = argv[1]
+    options.compilerdir = argv[1]
     argv = argv[2:]
-    if not os.path.isdir(options.compilerSrcDir):
-        print(options.compilerSrcDir + " is not a folder", file=sys.stderr)
+    if not os.path.isdir(options.compilerdir):
+        print(options.compilerdir + " is not a folder", file=sys.stderr)
         usage(options)
         sys.exit(FAILURE)
 
@@ -173,8 +204,8 @@ def parse_options(argv):
     options.p4filename = argv[-1]
     argv = argv[1:]
     options.testName = None
-    if options.p4filename.startswith(options.compilerSrcDir):
-        options.testName = options.p4filename[len(options.compilerSrcDir):]
+    if options.p4filename.startswith(options.compilerdir):
+        options.testName = options.p4filename[len(options.compilerdir):]
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):

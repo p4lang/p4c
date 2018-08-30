@@ -85,7 +85,7 @@ def compare_pkt(outputs, expected, received):
             report_err(outputs["stderr"], "Received packet ", received)
             report_err(outputs["stderr"], "Packet different at position", i,
                        ": expected", expected[i], ", received", received[i])
-            report_err(outputs["stderr"], "Full received packed is ", received)
+            report_err(outputs["stderr"], "Expected packet ", expected)
             return FAILURE
     return SUCCESS
 
@@ -94,7 +94,7 @@ def open_process(verbose, args, outputs):
     """ Run the given arguments as a subprocess. Time out after TIMEOUT
         seconds and report failures or stdout. """
     report_output(outputs["stdout"],
-                  verbose, "Writing ", args)
+                  verbose, "Writing", args)
     proc = None
     if outputs["stderr"] is not None:
         try:
@@ -128,7 +128,7 @@ def run_process(verbose, proc, timeout, outputs, errmsg):
     else:
         # Also report non fatal warnings in stdout
         if err:
-            report_err(outputs["stderr"], verbose, err)
+            report_err(outputs["stderr"], err)
     return proc.returncode
 
 
@@ -136,6 +136,8 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
     proc = open_process(verbose, args, outputs)
     if proc is None:
         return FAILURE
+    report_output(outputs["stdout"],
+                  verbose, "Executing", args)
     return run_process(verbose, proc, timeout, outputs, errmsg)
 
 

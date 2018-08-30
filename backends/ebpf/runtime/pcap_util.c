@@ -18,7 +18,8 @@ limitations under the License.
 #include <string.h>     // memcpy()
 #include "pcap_util.h"
 
-#define DLT_EN10MB 1  // Ethernet Link Type, see also 'man pcap-linktype'
+#define DLT_EN10MB 1        // Ethernet Link Type, see also 'man pcap-linktype'
+
 
 /* Dynamically-allocated list of packets.
  */
@@ -238,4 +239,18 @@ static int compare_pkt_time(const void *s1, const void *s2) {
 void sort_pcap_list(pcap_list_t *pkt_list) {
     /* Sort the master list and return the meta information*/
     qsort(pkt_list->pkts, pkt_list->len, sizeof(pcap_pkt *), compare_pkt_time);
+}
+
+char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
+    int max_10_uint32  = 10;     // Max size of uint32 in base 10
+    /* Dynamic string length plus max decimal representation of uint16_t */
+    int file_length = strlen(pcap_base) + strlen(suffix) + max_10_uint32 + 1;
+    char *pcap_name = malloc(file_length);
+    int offset = snprintf(pcap_name, file_length,"%s%hu%s",
+                    pcap_base, index, suffix);
+    if (offset >= file_length) {
+        fprintf(stderr, "Name %s%d%s too long.\n", pcap_base, index, suffix);
+        exit(EXIT_FAILURE);
+    }
+    return pcap_name;
 }

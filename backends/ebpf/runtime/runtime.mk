@@ -4,7 +4,7 @@ BPFOBJ=
 # Get the source name of the object to match targets
 BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
-INCLUDES+= -I$(dir $(BPFOBJ))
+override INCLUDES+= -I$(dir $(BPFOBJ))
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -20,14 +20,13 @@ P4ARGS=
 GCC ?= gcc
 SRCDIR=.
 BUILDDIR:= $(BPFDIR)build
-INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
+override INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
-CFLAGS+=-O2 -g # -Wall -Werror
+override CFLAGS+=-O2 -g # -Wall -Werror
 LIBS+=-lpcap
 SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c
 SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
 SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c
-# HDRS := $(BPFNAME).h $(SRCDIR)/ebpf_user.h $(SRCDIR)/ebpf_map.h $(SRCDIR)/ebpf_registry.h $(SRCDIR)/pcap_util.h
 OBJECTS = $(SRC_BASE:%.c=$(BUILDDIR)/%.o)
 DEPS = $(OBJECTS:.o=.d)
 
@@ -55,7 +54,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 # If the target file is missing, generate .c files with the P4 compiler
 $(BPFNAME).c: $(P4FILE)
 	@if ! ($(P4C) --help > /dev/null 2>&1); then \
-		echo "*** ERROR: Cannot find p4c-ebpf"; \
+		echo "*** ERROR: Cannot find $(P4C)"; \
 		exit 1;\
 	fi;
 	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS)
