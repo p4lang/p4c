@@ -272,7 +272,7 @@ class ParserException {}
 abstract Attached : IInstance, IAnnotated {
     optional ID                 name;
     optional Annotations        annotations = Annotations::empty;
-    cstring Name() const override { return name; }
+    ID Name() const override { return name; }
     virtual const char *kind() const = 0;
     Type getType() const override { return Type_Unknown::get(); }
     Annotations getAnnotations() const override { return annotations; }
@@ -407,7 +407,7 @@ class V1Table : IInstance, IAnnotated {
     void addProperty(Property prop) { properties.push_back(prop); }
     Annotations getAnnotations() const override { return annotations; }
     toString { return node_type_name() + " " + name; }
-    cstring Name() const override { return name; }
+    ID Name() const override { return name; }
     Type getType() const override { return Type_AnyTable::get(); }
 }
 
@@ -449,7 +449,8 @@ class GlobalRef : Expression {
                                 // FIXME -- interface references directly in the IR
     GlobalRef { type = obj->to<IInstance>()->getType(); }
     validate { obj->is<IInstance>(); }
-    toString { return obj->to<IInstance>()->Name(); }
+    toString { return obj->to<IInstance>()->toString(); }
+    ID Name() const { return obj->to<IInstance>()->Name(); }
     dbprint { out << obj->to<IInstance>()->Name(); }
 }
 
