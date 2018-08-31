@@ -81,17 +81,17 @@ endmacro(p4c_test_set_name)
 # program with command line arguments ${args}
 # Sets the timeout on tests at 300s (for the slow Travis machines)
 #
-macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
+macro(p4c_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
   set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
   file (WRITE  ${__testfile} "#! /bin/bash\n")
   file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} ${args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
+  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} ${test_args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
   execute_process(COMMAND chmod +x ${__testfile})
   p4c_test_set_name(__testname ${tag} ${alias})
-  separate_arguments(__args UNIX_COMMAND ${args})
+  separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test (NAME ${__testname}
-    COMMAND ${tag}/${p4test}.test
+    COMMAND ${tag}/${p4test}.test ${__args}
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
   if (NOT DEFINED ${tag}_timeout)
     set (${tag}_timeout 300)
@@ -127,10 +127,10 @@ macro(p4c_add_test_list tag driver tests xfail)
   foreach(t ${__test_list})
     list (FIND __xfail_list ${t} __xfail_test)
     if(__xfail_test GREATER -1)
-      p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}")
+      p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}" "")
       math (EXPR __xfailCounter "${__xfailCounter} + 1")
     else()
-      p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}")
+      p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}" "")
     endif() # __xfail_test
   endforeach() # tests
   math (EXPR __testCounter "${__testCounter} + ${__nTests}")
