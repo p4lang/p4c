@@ -245,7 +245,7 @@ state transition | `goto` statement
 `extract` | load/shift/mask data from packet buffer
 
 #### Translating match-action pipelines
-## 
+##
 P4 Construct | C Translation
 ----------|------------
 table     | 2 eBPF tables: second one used just for the default action
@@ -272,12 +272,19 @@ data-plane.  This C file can be manipulated using clang or BCC tools;
 please refer to the BCC project documentation and sample test files of
 the P4 to eBPF source code for an in-depth understanding.
 
-The general C-file alone will not compile. It depends on headers specific to the generated target. For the default target, this is the `kernel_ebpf.h` file which can be found in the P4 backend under `p4c/backends/ebpf/runtime`.
-The P4 backend also provides a makefile and sample header which allow for quick generation and automatic compilation of the generated file.
+The general C-file alone will not compile. It depends on headers
+specific to the generated target. For the default target, this is the
+`kernel_ebpf.h` file which can be found in the P4 backend under
+`p4c/backends/ebpf/runtime`.  The P4 backend also provides a makefile
+and sample header which allow for quick generation and automatic
+compilation of the generated file.
 
 `make -f p4c/backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=PROGRAM.p4`
 
-where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input P4 program. This command sequence will generate an eBPF program, which can be loaded into the kernel using TC.
+where -f path is the path to the makefile, BPFOBJ is the output ebpf
+byte code and P4FILE is the input P4 program. This command sequence
+will generate an eBPF program, which can be loaded into the kernel
+using TC.
 
 ##### Connecting the generated program with the TC
 
@@ -289,17 +296,35 @@ used to control the program behavior.
 
 `tc qdisc add dev IFACE clsact`
 
-Creates a classifier qdisc on the respective interface. Once created, eBPF programs can be attached to it using the following command:
+Creates a classifier qdisc on the respective interface. Once created,
+eBPF programs can be attached to it using the following command:
 
 `tc filter add dev IFACE egress bpf da obj YOUREBPFCODE section prog verbose`
 
-`da` implies that tc takes action input directly from the return codes provided by the eBPF program. We currently support `TC_ACT_SHOT` and `TC_ACT_OK`. For more information, see this link:
+`da` implies that tc takes action input directly from the return codes
+provided by the eBPF program. We currently support `TC_ACT_SHOT` and
+`TC_ACT_OK`. For more information, see this link:
 
 http://docs.cilium.io/en/latest/bpf/#tc-traffic-control
 
 # How to run the generated eBPF program
-Once the eBPF program is loaded, various methods exist to manipulate the tables. The easiest and simplest way is to use the [bpftool](http://docs.cilium.io/en/latest/bpf/#bpftool) provided by the kernel.
 
-An alternative is to use explicit syscalls (an example can be found in the [kernel tools folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
+Once the eBPF program is loaded, various methods exist to manipulate
+the tables. The easiest and simplest way is to use the
+[bpftool](http://docs.cilium.io/en/latest/bpf/#bpftool) provided by
+the kernel.
 
-The P4 compiler automatically provides a set of table initializers, which may also serve as example, in the header of the generated C-file.
+An alternative is to use explicit syscalls (an example can be found in
+the [kernel tools
+folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
+
+The P4 compiler automatically provides a set of table initializers,
+which may also serve as example, in the header of the generated
+C-file.
+
+The following tests run ebpf programs:
+
+- `make check-ebpf`: runs the basic ebpf user-space tests
+- `make check-ebpf-bcc`: runs the user-space tests using bcc to compile ebpf
+- `sudo make check-ebpf-kernel`: runs the kernel-level tests.
+   Requires root privileges to install the ebpf program in the Linux kernel.
