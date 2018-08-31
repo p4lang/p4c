@@ -27,7 +27,7 @@ import os
 TIMEOUT = 10 * 60
 SUCCESS = 0
 FAILURE = 1
-
+SKIPPED = 2  # used occasionally to indicate that a test was not executed
 
 def is_err(p4filename):
     """ True if the filename represents a p4 program that should fail. """
@@ -141,10 +141,7 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
     return run_process(verbose, proc, timeout, outputs, errmsg)
 
 
-def require_root(outputs):
-    """ Some calls may require root, this is how we check for it.
+def check_root():
+    """ This function returns False if the user does not have root privileges.
         Caution: Only works on Unix systems """
-    if not (os.getuid() == 0):
-        errmsg = "This test requires root privileges! Failing..."
-        report_err(outputs["stderr"], errmsg)
-        sys.exit(FAILURE)
+    return (os.getuid() == 0)

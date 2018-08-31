@@ -79,7 +79,6 @@ def isdir(path):
 
 
 def run_model(ebpf, stffile):
-
     result = ebpf.generate_model_inputs(stffile)
     if result != SUCCESS:
         return result
@@ -89,6 +88,8 @@ def run_model(ebpf, stffile):
         return result
 
     result = ebpf.run()
+    if result == SKIPPED:
+        return SUCCESS
     if result != SUCCESS:
         return result
 

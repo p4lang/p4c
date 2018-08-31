@@ -160,7 +160,11 @@ class Target(EBPFTarget):
 
     def run(self):
         # Root is necessary to load ebpf into the kernel
-        require_root(self.outputs)
+        if check_root():
+            errmsg = "This test requires root privileges; skipping execution."
+            report_err(self.outputs["stderr"], errmsg)
+            return SKIPPED
+
         result = self._create_runtime()
         if result != SUCCESS:
             return result
