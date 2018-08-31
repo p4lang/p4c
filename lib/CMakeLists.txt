@@ -19,6 +19,7 @@ set (LIBP4CTOOLKIT_SRCS
 	cstring.cpp
 	gc.cpp
 	gmputil.cpp
+	hash.cpp
 	hex.cpp
 	indent.cpp
 	json.cpp
@@ -46,6 +47,7 @@ set (LIBP4CTOOLKIT_HDRS
 	exceptions.h
 	gc.h
 	gmputil.h
+	hash.h
 	hex.h
 	indent.h
 	json.h
