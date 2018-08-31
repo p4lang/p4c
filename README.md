@@ -168,7 +168,7 @@ Most dependencies can be installed using `apt-get install`:
 `sudo apt-get install g++ git automake libtool libgc-dev bison flex
 libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev
 libboost-graph-dev pkg-config python python-scapy python-ipaddr python-ply
-tcpdump cmake`
+tcpdump cmake llvm`
 
 For documentation building:
 `sudo apt-get install -y doxygen graphviz texlive-full`
