@@ -163,7 +163,7 @@ class Target(EBPFTarget):
         if check_root():
             errmsg = "This test requires root privileges; skipping execution."
             report_err(self.outputs["stderr"], errmsg)
-            return SUCCESS
+            return SKIPPED
 
         result = self._create_runtime()
         if result != SUCCESS:

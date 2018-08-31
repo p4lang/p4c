@@ -27,7 +27,7 @@ import os
 TIMEOUT = 10 * 60
 SUCCESS = 0
 FAILURE = 1
-
+SKIPPED = 2  # used occasionally to indicate that a test was not executed
 
 def is_err(p4filename):
     """ True if the filename represents a p4 program that should fail. """
@@ -144,4 +144,4 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
 def check_root():
     """ This function returns False if the user does not have root privileges.
         Caution: Only works on Unix systems """
-    return (os.getuid() == 0):
+    return (os.getuid() == 0)
