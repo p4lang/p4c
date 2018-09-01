@@ -97,6 +97,11 @@ class DataplaneInterfaceServiceImpl
     }
   }
 
+  bool get_packet_stream_status() {
+    Lock lock(mutex);
+    return active;
+  }
+
  private:
   using Lock = std::lock_guard<std::mutex>;
 
@@ -403,6 +408,14 @@ SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id,
 void
 SimpleSwitchGrpcRunner::block_until_all_packets_processed() {
   simple_switch->block_until_no_more_packets();
+}
+
+bool
+SimpleSwitchGrpcRunner::is_dp_service_active() {
+  if (dp_service != nullptr) {
+    return dp_service->get_packet_stream_status();
+  }
+  return false;
 }
 
 SimpleSwitchGrpcRunner::~SimpleSwitchGrpcRunner() {

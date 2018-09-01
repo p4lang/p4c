@@ -71,6 +71,7 @@ class SimpleSwitchGrpcRunner {
   int mirroring_mapping_add(int mirror_id,
                             bm::DevMgrIface::port_t egress_port);
   void block_until_all_packets_processed();
+  bool is_dp_service_active();
 
  private:
   SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port = 512,
