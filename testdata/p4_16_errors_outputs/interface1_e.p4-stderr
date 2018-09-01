@@ -1,9 +1,6 @@
-interface1_e.p4(25): error: x.f: Interface X does not have a method named f with 0 arguments
+interface1_e.p4(25): error: x.f: extern X does not have method matching this call
         x.f();
         ^^^
 interface1_e.p4(16)
 extern X {
        ^
-interface1_e.p4(25)
-        x.f();
-          ^

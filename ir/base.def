@@ -66,6 +66,16 @@ interface IGeneralNamespace : INamespace {
     validate{ checkDuplicateDeclarations(); }
 }
 
+/// Interface implemented by something that can be called
+/// like a function.
+interface IFunctional {
+    /// The parameters of the functional object
+    virtual ParameterList getParameters() const = 0;
+    /// Returns true if the parameters can be matched with the
+    /// supplied arguments.
+    bool callMatches(Vector<Argument> arguments) const;
+}
+
 /// Implemented by things that look like type variables
 interface ITypeVar {
     virtual cstring getVarName() const = 0;
@@ -74,10 +84,12 @@ interface ITypeVar {
 }
 
 /// Implemented by P4Parser, P4Control and Type_Package
-interface IContainer : IMayBeGenericType, IDeclaration {
+interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
     /// The type of the constructor as a method
     virtual Type_Method getConstructorMethodType() const = 0;
     virtual ParameterList getConstructorParameters() const = 0;
+    // The IFunctional interface
+    ParameterList getParameters() const { return getConstructorParameters(); }
 }
 
 /// This represents a primitive type

@@ -48,9 +48,43 @@ const Type_Method* Type_Package::getConstructorMethodType() const {
 }
 
 Util::Enumerator<const IR::IDeclaration*>* IGeneralNamespace::getDeclsByName(cstring name) const {
-    std::function<bool(const IDeclaration*)> filter = [name](const IDeclaration* d)
-            { return name == d->getName().name; };
+    std::function<bool(const IDeclaration*)> filter =
+            [name](const IDeclaration* d)
+            { CHECK_NULL(d); return name == d->getName().name; };
     return getDeclarations()->where(filter);
+}
+
+bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
+    auto paramList = getParameters()->parameters;
+    std::map<cstring, const IR::Parameter*> paramNames;
+    for (auto param : paramList)
+        paramNames.emplace(param->name.name, param);
+
+    size_t index = 0;
+    for (auto arg : *arguments) {
+        if (paramNames.size() == 0)
+            // Too many arguments
+            return false;
+        cstring argName = arg->name;
+        if (argName.isNullOrEmpty())
+            argName = paramList.at(index)->name.name;
+
+        auto it = paramNames.find(argName);
+        if (it == paramNames.end())
+            // Argument name does not match a parameter
+            return false;
+        else
+            paramNames.erase(it);
+        index++;
+    }
+    // Check if all remaining parameters have default values
+    // or are optional.
+    for (auto it : paramNames) {
+        auto param = it.second;
+        if (!param->isOptional() && !param->defaultValue)
+            return false;
+    }
+    return true;
 }
 
 void IGeneralNamespace::checkDuplicateDeclarations() const {
@@ -90,17 +124,16 @@ unsigned Type_Stack::getSize() const {
     return static_cast<unsigned>(size);
 }
 
-const Method* Type_Extern::lookupMethod(cstring name, int paramCount) const {
+const Method* Type_Extern::lookupMethod(IR::ID name, const Vector<Argument>* arguments) const {
     const Method* result = nullptr;
-    size_t upc = paramCount;
-
     bool reported = false;
     for (auto m : methods) {
-        if (m->name == name && m->minParameterCount() <= upc && m->maxParameterCount() >= upc) {
+        if (m->name != name) continue;
+        if (m->callMatches(arguments)) {
             if (result == nullptr) {
                 result = m;
             } else {
-                ::error("Ambiguous method %1% with %2% parameters", name, paramCount);
+                ::error("Ambiguous method %1%", name);
                 if (!reported) {
                     ::error("Candidate is %1%", result);
                     reported = true;
@@ -188,11 +221,23 @@ Util::Enumerator<const IDeclaration*>* P4Action::getDeclarations() const
 const IDeclaration* P4Action::getDeclByName(cstring name) const
 { return body->components.getDeclaration(name); }
 
+Util::Enumerator<const IDeclaration*>* P4Program::getDeclarations() const {
+    return objects.getEnumerator()
+            ->as<const IDeclaration*>()
+            ->where([](const IDeclaration* d) { return d != nullptr; });
+}
+
 const IR::PackageBlock* ToplevelBlock::getMain() const {
     auto program = getProgram();
-    auto main = program->getDeclByName(IR::P4Program::main);
-    if (main == nullptr) {
+    auto mainDecls = program->getDeclsByName(IR::P4Program::main)->toVector();
+    if (mainDecls->size() == 0) {
         ::warning("Program does not contain a `%s' module", IR::P4Program::main);
+        return nullptr;
+    }
+    auto main = mainDecls->at(0);
+    if (mainDecls->size() > 1) {
+        ::error("Program has multiple `%s' modules: %1%, %2%",
+                IR::P4Program::main, main->getNode(), mainDecls->at(1)->getNode());
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {

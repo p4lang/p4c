@@ -146,7 +146,7 @@ void EBPFProgram::emitH(CodeBuilder* builder, cstring) {
 }
 
 void EBPFProgram::emitTypes(CodeBuilder* builder) {
-    for (auto d : program->declarations) {
+    for (auto d : program->objects) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
             !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
             !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&

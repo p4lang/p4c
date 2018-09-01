@@ -780,10 +780,10 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         typeError("%1%: Type parameters must be supplied for constructor", errorPosition);
         return nullptr;
     }
-    auto constructor = ext->lookupConstructor(arguments->size());
+    auto constructor = ext->lookupConstructor(arguments);
     if (constructor == nullptr) {
-        typeError("%1%: type %2% has no constructor with %3% arguments",
-                  errorPosition, ext, arguments->size());
+        typeError("%1%: type %2% has no matching constructor",
+                  errorPosition, ext);
         return nullptr;
     }
     auto mt = getType(constructor);
@@ -1263,9 +1263,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {
                     return type;
                 }
             }
-            auto m = te->lookupMethod(method->name, method->type->parameters->size());
-            if (m == nullptr)  // duplicate method with this signature
-                return type;
         }
     }
     return type;
@@ -2371,18 +2368,15 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     if (type->is<IR::Type_Extern>()) {
         auto ext = type->to<IR::Type_Extern>();
 
-        if (methodArguments.size() == 0) {
-            // we are not within a call expression
+        auto call = findContext<IR::MethodCallExpression>();
+        if (call == nullptr) {
             typeError("%1%: Methods can only be called", expression);
             return expression;
         }
-
-        // Use number of arguments to disambiguate
-        int argCount = methodArguments.back();
-        auto method = ext->lookupMethod(expression->member, argCount);
+        auto method = ext->lookupMethod(expression->member, call->arguments);
         if (method == nullptr) {
-            typeError("%1%: Interface %2% does not have a method named %3% with %4% arguments",
-                      expression, ext->name, expression->member, argCount);
+            typeError("%1%: extern %2% does not have method matching this call",
+                      expression, ext->name);
             return expression;
         }
 
@@ -2539,12 +2533,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     typeError("Cannot extract field %1% from %2% which has type %3%",
               expression->member, expression->expr, type->toString());
     // unreachable
-    return expression;
-}
-
-const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
-    // enable method resolution based on number of arguments
-    methodArguments.push_back(expression->arguments->size());
     return expression;
 }
 
@@ -2786,8 +2774,6 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
 const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done()) return expression;
-    methodArguments.pop_back();
-
     LOG2("Solving method call " << dbp(expression));
     auto methodType = getType(expression->method);
     if (methodType == nullptr)

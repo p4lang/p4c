@@ -84,7 +84,7 @@ bool Evaluator::preorder(const IR::P4Program* program) {
     toplevelBlock = new IR::ToplevelBlock(program->srcInfo, program);
 
     pushBlock(toplevelBlock);
-    for (auto d : program->declarations) {
+    for (auto d : program->objects) {
         if (d->is<IR::Type_Declaration>())
             // we will visit various containers and externs only when we instantiated them
             continue;
@@ -169,7 +169,7 @@ Evaluator::processConstructor(
         if (canon->is<IR::Type_SpecializedCanonical>())
             canon = canon->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
         BUG_CHECK(canon->is<IR::Type_Extern>(), "%1%: expected an extern", canon);
-        auto constructor = canon->to<IR::Type_Extern>()->lookupConstructor(arguments->size());
+        auto constructor = canon->to<IR::Type_Extern>()->lookupConstructor(arguments);
         BUG_CHECK(constructor != nullptr,
                   "Type %1% has no constructor with %2% arguments",
                   exttype, arguments->size());

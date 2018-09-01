@@ -136,13 +136,14 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
 }
 
 /// A P4-16 action
-class P4Action : Declaration, ISimpleNamespace, IAnnotated {
+class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
     optional Annotations        annotations = Annotations::empty;
     ParameterList               parameters;
     BlockStatement              body;
     Util::Enumerator<IDeclaration>* getDeclarations() const override;
     IDeclaration getDeclByName(cstring name) const override;
     Annotations getAnnotations() const override { return annotations; }
+    ParameterList getParameters() const override { return parameters; }
 }
 
 class Type_Error : ISimpleNamespace, Type_Declaration {
@@ -389,12 +390,14 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
 }
 
 /// Toplevel program representation
-class P4Program : ISimpleNamespace {
-    optional inline IndexedVector<Node> declarations;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return declarations.getDeclarations(); }
-    IDeclaration getDeclByName(cstring name) const override {
-        return declarations.getDeclaration(name); }
+class P4Program : IGeneralNamespace {
+    /// Top-level program objects.
+    /// This is not an IndexedVector because:
+    /// - we allow overloaded function-like objects.
+    /// - not all objects in a P4Program are declarations (e.g., match_kind is not).
+    optional inline Vector<Node> objects;
+    Util::Enumerator<IDeclaration>* getDeclarations() const override;
+    validate{ objects.check_null(); }
     static const cstring main;
 #apply
 }
@@ -482,9 +485,12 @@ class SwitchStatement : Statement {
         v.parallel_visit(cases, "cases"); }
 }
 
-class Function : Declaration {
+class Function : Declaration, IFunctional {
     Type_Method    type;
     BlockStatement body;
+    ParameterList getParameters() const {
+        return type->parameters;
+    }
 }
 
 /////////////////////////////////////////////////////////////

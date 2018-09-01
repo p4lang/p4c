@@ -510,7 +510,7 @@ class Type_Action : Type_MethodBase {
 #nodbprint
 }
 
-class Method : Declaration, IAnnotated {
+class Method : Declaration, IAnnotated, IFunctional {
     Type_Method type;
     optional bool isAbstract = false;
     optional Annotations annotations = Annotations::empty;
@@ -518,6 +518,7 @@ class Method : Declaration, IAnnotated {
     size_t minParameterCount() const { return type->minParameterCount(); }
     void setAbstract() { isAbstract = true; }
     Annotations getAnnotations() const override { return annotations; }
+    ParameterList getParameters() const override { return type->parameters; }
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
@@ -552,11 +553,17 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnn
         return methods.getEnumerator()->as<const IDeclaration*>()
             ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
-    Method lookupMethod(cstring name, int argCount) const;
-    Method lookupConstructor(int argCount) const
-    { return lookupMethod(name.name, argCount); }
     validate{ methods.check_null(); }
     Annotations getAnnotations() const override { return annotations; }
+    /// Returns the method that matches the specified arguments.
+    /// Returns nullptr if no method or more than one method match.
+    /// In the latter case it also reports an error.
+    Method lookupMethod(IR::ID name, Vector<Argument> arguments) const;
+    /// Returns the constructor that matches the specified arguments.
+    /// Returns nullptr if no constructor or more than one constructor matches.
+    /// In the latter case it also reports an error.
+    Method lookupConstructor(Vector<Argument> arguments) const
+    { return lookupMethod(name, arguments); }
 }
 
 /** @} *//* end group irdefs */

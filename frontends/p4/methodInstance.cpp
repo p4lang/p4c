@@ -90,7 +90,9 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
                 auto et = type->to<IR::Type_Extern>();
                 auto methodType = mt->to<IR::Type_Method>();
                 CHECK_NULL(methodType);
-                auto method = et->lookupMethod(mem->member, mce->arguments->size());
+                auto method = et->lookupMethod(mem->member, mce->arguments);
+                if (method == nullptr)
+                    return nullptr;
                 // TODO: do we need to also substitute the extern instantiation type
                 // parameters into actualMethodType?
                 return new ExternMethod(mce, decl, method, et, methodType,
@@ -146,7 +148,7 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
         auto decl = refMap->getDeclaration(type->path, true);
         auto ext = decl->to<IR::Type_Extern>();
         BUG_CHECK(ext, "%1%: expected an extern type", dbp(decl));
-        auto constr = ext->lookupConstructor(cce->arguments->size());
+        auto constr = ext->lookupConstructor(cce->arguments);
         result = new ExternConstructorCall(cce, ext->to<IR::Type_Extern>(), constr);
         BUG_CHECK(constr, "%1%: constructor not found", ext);
         constructorParameters = constr->type->parameters;

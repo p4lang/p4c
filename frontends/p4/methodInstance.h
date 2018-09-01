@@ -281,7 +281,7 @@ class ExternInstantiation : public Instantiation {
                         const IR::Vector<IR::Type>* typeArguments,
                         const IR::Type_Extern* type) :
             Instantiation(instance, typeArguments), type(type) {
-        auto constructor = type->lookupConstructor(constructorArguments->size());
+        auto constructor = type->lookupConstructor(constructorArguments);
         BUG_CHECK(constructor, "%1%: could not find constructor", type);
         constructorParameters = constructor->type->parameters;
         substitute();
