@@ -132,20 +132,22 @@ namespace std {
     class hash<table_entry> {
     public:
         std::size_t operator()(const table_entry &entry) const {
-            return Util::Hash::fnv1a(entry.string(), entry.length());
+            return Util::Hash::murmur(entry.string(), entry.length());
         }
     };
 }
 
 namespace {
-
 std::unordered_set<table_entry>& cache() {
-    static std::unordered_set<table_entry> s_cache;
+    static std::unordered_set<table_entry> g_cache;
 
-    return s_cache;
+    return g_cache;
 }
 
 const char *save_to_cache(const char *string, std::size_t length, table_entry_flags flags) {
+    if ((flags & table_entry_flags::no_need_copy) == table_entry_flags::no_need_copy) {
+        return cache().emplace(string, length, flags).first->string();
+    }
 
     // temporary table_entry, used for searching only. no need to copy string
     auto found = cache().find(table_entry(string, length, table_entry_flags::no_need_copy));
@@ -158,16 +160,6 @@ const char *save_to_cache(const char *string, std::size_t length, table_entry_fl
 }
 
 } // namespace
-
-cstring cstring::own(const char *string, std::size_t length) {
-    if (string == nullptr) {
-        return{};
-    }
-
-    cstring result;
-    result.construct_from_unique(string, length);
-    return result;
-}
 
 void cstring::construct_from_shared(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::none);

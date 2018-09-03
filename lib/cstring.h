@@ -122,7 +122,15 @@ class cstring {
 
     // String was created outside and cstring is unique owner of it.
     // cstring will control lifetime of passed object
-    static cstring own(const char *string, std::size_t length);
+    static cstring own(const char *string, std::size_t length) {
+        if (string == nullptr) {
+            return{};
+        }
+
+        cstring result;
+        result.construct_from_unique(string, length);
+        return result;
+    }
 
 private:
     // passed string is shared, we not unique owners
