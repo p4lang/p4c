@@ -17,7 +17,8 @@ limitations under the License.
 #ifndef P4C_LIB_CSTRING_H_
 #define P4C_LIB_CSTRING_H_
 
-#include <string.h>
+#include <cstring>
+#include <cstddef>
 
 #include <functional>
 #include <iostream>
@@ -69,25 +70,82 @@ limitations under the License.
  * that mixing the two types of strings can trigger a lot of implicit copies.
  */
 class cstring {
-    const char *str;
+    const char *str = nullptr;
 
  public:
-    cstring() : str(0) {}
+    cstring() = default;
+    // TODO (DanilLutsenko): Enable when initialization with 0 will be eliminated
+    // cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
 
-    // Copy and assignment from cstrings. The underlying string doesn't have to
-    // be copied, so these are constant-time operations.
-    cstring(const cstring &) = default;
-    cstring(cstring &&) = default;
-    cstring &operator=(const cstring &) = default;
-    cstring &operator=(cstring &&) = default;
+    // Copy and assignment from other kinds of strings
 
-    // Copy and assignment from other kinds of strings. These are linear time
-    // operations because the underlying string must be copied.
-    cstring(const std::stringstream&);                      // NOLINT(runtime/explicit)
-    cstring(const char *s) { *this = s; }                   // NOLINT(runtime/explicit)
-    cstring(const std::string &a) { *this = a; }            // NOLINT(runtime/explicit)
-    cstring &operator=(const char *);
-    cstring &operator=(const std::string&);
+    // Owner of string is someone else, but we know size of string.
+    // Do not use if possible, this is linear time operation if string
+    // not exists in table, because the underlying string must be copied.
+    cstring(const char *string, std::size_t length) {  // NOLINT(runtime/explicit)
+        if (string != nullptr) {
+            construct_from_shared(string, length);
+        }
+    }
+
+    // Owner of string is someone else, we do not know size of string.
+    // Do not use if possible, this is linear time operation if string
+    // not exists in table, because the underlying string must be copied.
+    cstring(const char *string) {  // NOLINT(runtime/explicit)
+        if (string != nullptr) {
+            construct_from_shared(string, std::strlen(string));
+        }
+    }
+
+    // construct cstring from std::string. Do not use if possible, this is linear
+    // time operation if string not exists in table, because the underlying string must be copied.
+    cstring(const std::string &string) {  // NOLINT(runtime/explicit)
+        construct_from_shared(string.data(), string.length());
+    }
+
+    // TODO (DanilLutsenko): Make special case for r-value std::string?
+
+    // Just helper function, for lazies, who do not like to write .str()
+    // Do not use it, implicit std::string construction with implicit overhead
+    // TODO (DanilLutsenko): Remove it?
+    cstring(const std::stringstream& stream)  // NOLINT(runtime/explicit)
+        : cstring(stream.str()) {
+    }
+
+    // TODO (DanilLutsenko): Construct from StringRef?
+
+    // String was created outside and cstring is unique owner of it.
+    // cstring will control lifetime of passed object
+    static cstring own(const char *string, std::size_t length) {
+        if (string == nullptr) {
+            return{};
+        }
+
+        cstring result;
+        result.construct_from_unique(string, length);
+        return result;
+    }
+
+    // construct cstring wrapper for literal
+    template<typename T, std::size_t N,
+        typename = typename std::enable_if<std::is_same<T, const char>::value>::type>
+    static cstring literal(T (&string)[N]) {  // NOLINT(runtime/explicit)
+        cstring result;
+        result.construct_from_literal(string, N - 1  /* String length without null terminator */);
+        return result;
+    }
+
+ private:
+    // passed string is shared, we not unique owners
+    void construct_from_shared(const char *string, std::size_t length);
+
+    // we are unique owners of passed string
+    void construct_from_unique(const char *string, std::size_t length);
+
+    // string is literal
+    void construct_from_literal(const char *string, std::size_t length);
+
+ public:
     /// @return a version of the string where all necessary characters
     /// are properly escaped to make this into a json string (without
     /// the enclosing quotes).
@@ -102,7 +160,12 @@ class cstring {
     operator const char *() const { return str; }
 
     // Size tests. Constant time except for size(), which is linear time.
-    size_t size() const { return str ? strlen(str) : 0; }
+    size_t size() const {
+        // TODO (DanilLutsenko): We store size of string in table on object construction,
+        // compiler cannot optimize strlen if str not points to string literal.
+        // Probably better fetch size from table or store it to cstring on construction.
+        return str ? strlen(str) : 0;
+    }
     bool isNull() const { return str == nullptr; }
     bool isNullOrEmpty() const { return str == nullptr ? true : str[0] == 0; }
 
@@ -111,19 +174,19 @@ class cstring {
     const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
 
     // Equality tests with other cstrings. Constant time.
-    bool operator==(const cstring &a) const { return str == a.str; }
-    bool operator!=(const cstring &a) const { return str != a.str; }
+    bool operator==(cstring a) const { return str == a.str; }
+    bool operator!=(cstring a) const { return str != a.str; }
 
     // Other comparisons and tests. Linear time.
     bool operator==(const char *a) const { return str ? a && !strcmp(str, a) : !a; }
     bool operator!=(const char *a) const { return str ? !a || !!strcmp(str, a) : !!a; }
-    bool operator<(const cstring &a) const { return *this < a.str; }
+    bool operator<(cstring a) const { return *this < a.str; }
     bool operator<(const char *a) const { return str ? a && strcmp(str, a) < 0 : !!a; }
-    bool operator<=(const cstring &a) const { return *this <= a.str; }
+    bool operator<=(cstring a) const { return *this <= a.str; }
     bool operator<=(const char *a) const { return str ? a && strcmp(str, a) <= 0 : true; }
-    bool operator>(const cstring &a) const { return *this > a.str; }
+    bool operator>(cstring a) const { return *this > a.str; }
     bool operator>(const char *a) const { return str ? !a || strcmp(str, a) > 0 : false; }
-    bool operator>=(const cstring &a) const { return *this >= a.str; }
+    bool operator>=(cstring a) const { return *this >= a.str; }
     bool operator>=(const char *a) const { return str ? !a || strcmp(str, a) >= 0 : !a; }
 
     bool operator==(const std::string &a) const { return *this == a.c_str(); }
@@ -135,6 +198,10 @@ class cstring {
 
     bool startsWith(const cstring& prefix) const;
     bool endsWith(const cstring& suffix) const;
+
+    // FIXME (DanilLutsenko): We really need mutations for immutable string?
+    // Probably better do transformation in std::string-like containter and
+    // then place result to cstring if needed.
 
     // Mutation operations. These are linear time and always trigger a copy,
     // since the underlying string is immutable. (Note that this is true even

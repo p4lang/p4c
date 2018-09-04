@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace Util {
 cstring toString(bool value) {
-    return value ? "true" : "false";
+    return value ? cstring::literal("true") : cstring::literal("false");
 }
 
 cstring toString(std::string value) {
@@ -28,13 +28,13 @@ cstring toString(std::string value) {
 
 cstring toString(const char* value) {
     if (value == nullptr)
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     return cstring(value);
 }
 
 cstring toString(const void* value) {
     if (value == nullptr)
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     std::stringstream result;
     result << value;
     return result.str();
@@ -42,13 +42,13 @@ cstring toString(const void* value) {
 
 cstring toString(const mpz_class* value) {
     if (value == nullptr)
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     return cstring(value->get_str());
 }
 
 cstring toString(cstring value) {
     if (value.isNull())
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     return value;
 }
 
@@ -80,9 +80,7 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
     if (static_cast<size_t>(size) >= sizeof(buf)) {
         char* formatted = new char[size + 1];
         vsnprintf(formatted, size + 1, fmt_str, ap_copy);
-        cstring result(formatted);
-        delete[] formatted;
-        return result;
+        return cstring::own(formatted, size);
     }
     va_end(ap_copy);
     return cstring(buf);
