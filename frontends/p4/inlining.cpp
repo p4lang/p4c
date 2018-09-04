@@ -465,7 +465,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
            control D() { apply { } }
            control C()(D d) { apply { d.apply(); }}
            control I() {
-               D() d;  // we can't delete this instantiation here after, because it is used below
+               D() d;  // we can't delete this instantiation after inlining, since it's used below
                C(d) c;
                apply { c.apply(); }
            }
