@@ -1,4 +1,4 @@
-dupConst.p4(17): error: Duplicate declaration of a a
+dupConst.p4(17): error: Duplicate declaration of a: a
 const bit<4> a = 2;
              ^
 dupConst.p4(16)
