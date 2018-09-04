@@ -357,16 +357,26 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                 LOG3("table apply method call " << mc->method);
                 apply_table(&tables[obj]);
                 return mc;
-            } else if (mem->expr->type->is<IR::Type_Extern>()) {
+            } else if (mem->expr->type->is<IR::Type_Extern>() ||
+                       mem->expr->type->is<IR::Type_Specialized>() ||
+                       mem->expr->type->is<IR::Type_SpecializedCanonical>()) {
                 auto name = obj + '.' + mem->member;
                 if (methods.count(name)) {
                     LOG3("concrete method call " << name);
                     apply_function(&methods[name]);
                     return mc;
                 } else {
-                    LOG3("extern method call " << mc->method << " does nothing");
-                    // FIXME -- is this safe? If an abstract method in outer scope that
-                    // we haven't seen a definition for, it might affects non-locals?
+                    // extern method call might trigger any concrete implementation
+                    // method in the object, so act as if all of them are applied
+                    // FIXME -- Could it invoke methods on other objects or otherwise affect
+                    // global values?  Not clear -- we probably need a hook for backends
+                    // to provide per-extern flow info to this (and other) frontend passes.
+                    LOG3("extern method call " << name);
+                    name = obj + '.';
+                    for (auto it = methods.upper_bound(obj); it != methods.end(); ++it) {
+                        if (!it->first.startsWith(obj)) break;
+                        LOG4("  might call" << it->first);
+                        apply_function(&it->second); }
                     return mc; }
             } else if (mem->expr->type->is<IR::Type_Header>()) {
                 if (mem->member == "isValid") {
@@ -398,10 +408,14 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
             apply_function(&actions[fn->path->name]);
             return mc; } }
     LOG3("unknown method call " << mc->method << " clears all nonlocal saved values");
-    for (auto &var : Values(available)) {
-        if (!var.local) {
-            var.val = nullptr;
-            var.live = true; } }
+    for (auto &var : available) {
+        if (!var.second.local) {
+            LOG7("    may access non-local " << var.first);
+            var.second.val = nullptr;
+            var.second.live = true;
+            if (inferForFunc) {
+                inferForFunc->reads.insert(var.first);
+                inferForFunc->writes.insert(var.first); } } }
     return mc;
 }
 
@@ -495,11 +509,15 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
 }
 
 void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *act) {
+    LOG7("apply_function reads=" << act->reads << " writes=" << act->writes);
     for (auto write : act->writes)
         dropValuesUsing(write);
     for (auto read : act->reads)
         forOverlapAvail(read, [](cstring, VarInfo *var) {
             var->live = true; });
+    if (inferForFunc) {
+        inferForFunc->reads.insert(act->reads.begin(), act->reads.end());
+        inferForFunc->writes.insert(act->writes.begin(), act->writes.end()); }
 }
 
 void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
