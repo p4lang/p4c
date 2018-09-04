@@ -74,7 +74,8 @@ class cstring {
 
  public:
     cstring() = default;
-    cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
+    // TODO (DanilLutsenko): Enable when initialization with 0 will be eliminated
+    //cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
 
     // Copy and assignment from other kinds of strings
 
@@ -87,18 +88,10 @@ class cstring {
         }
     }
 
-    // construct cstring wrapper for literal
-    template<std::size_t N>
-    cstring(const char (&string)[N]) { // NOLINT(runtime/explicit)
-        construct_from_literal(string, N - 1 /* String length without null terminator */);
-    }
-
     // Owner of string is someone else, we do not know size of string.
     // Do not use if possible, this is linear time operation if string
     // not exists in table, because the underlying string must be copied.
-    template<typename T, // Trick to disable this ctor for literals and nullptr
-                typename = typename std::enable_if<std::is_same<T, char *>::value || std::is_same<T, const char *>::value>::type>
-    cstring(T string) { // NOLINT(runtime/explicit)
+    cstring(const char *string) { // NOLINT(runtime/explicit)
         if (string != nullptr) {
             construct_from_shared(string, std::strlen(string));
         }
@@ -115,7 +108,8 @@ class cstring {
     // Just helper function, for lazies, who do not like to write .str()
     // Do not use it, implicit std::string construction with implicit overhead
     // TODO (DanilLutsenko): Remove it?
-    cstring(const std::stringstream& stream) : cstring(stream.str()) { // NOLINT(runtime/explicit)
+    cstring(const std::stringstream& stream) // NOLINT(runtime/explicit)
+        : cstring(stream.str()) {
     }
 
     // TODO (DanilLutsenko): Construct from StringRef?
@@ -129,6 +123,15 @@ class cstring {
 
         cstring result;
         result.construct_from_unique(string, length);
+        return result;
+    }
+
+    // construct cstring wrapper for literal
+    template<typename T, std::size_t N,
+        typename = typename std::enable_if<std::is_same<T, const char>::value>::type>
+    static cstring literal(T (&string)[N]) { // NOLINT(runtime/explicit)
+        cstring result;
+        result.construct_from_literal(string, N - 1 /* String length without null terminator */);
         return result;
     }
 

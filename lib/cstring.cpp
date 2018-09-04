@@ -88,7 +88,7 @@ public:
         // if object was moved, so do not zero other.m_length here
 
         if (is_inplace()) {
-            std::memcpy(m_inplace_string, other.m_inplace_string, m_length);
+            std::memcpy(m_inplace_string, other.m_inplace_string, sizeof(m_inplace_string));
         } else {
             m_string = other.string();
             other.m_string = nullptr;
