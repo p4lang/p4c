@@ -132,7 +132,7 @@ ProgramStructure::ProgramStructure()
           debugStream(nullptr),
           rootNamespace(nullptr),
           currentNamespace(nullptr) {
-    rootNamespace = new Namespace("", Util::SourceInfo(), false);
+    rootNamespace = new Namespace("", Util::SourceInfo(), true);
     currentNamespace = rootNamespace;
     // We use stderr because we want debugging output
     // to be the same as the bison debugging output.

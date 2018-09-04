@@ -150,7 +150,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
 
     bool first = true;
     dump(2);
-    for (auto a : program->declarations) {
+    for (auto a : program->objects) {
         // Check where this declaration originates
         cstring sourceFile = ifSystemFile(a);
         if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
@@ -184,7 +184,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
         first = false;
         visit(a);
     }
-    if (!program->declarations.empty())
+    if (!program->objects.empty())
         builder.newline();
     return false;
 }

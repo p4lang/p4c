@@ -1,13 +1,6 @@
-dupConst.p4(17): error: Duplicate declaration of a; previous at 
+dupConst.p4(17): error: Duplicate declaration of a: a
 const bit<4> a = 2;
              ^
 dupConst.p4(16)
 const bit<4> a = 1;
              ^
-dupConst.p4(16): error: a: Duplicates declaration a
-const bit<4> a = 1;
-                   ^
-dupConst.p4(16)
-const bit<4> a = 1;
-                 ^
-error: 2 errors encountered, aborting compilation

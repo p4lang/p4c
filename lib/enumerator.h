@@ -280,7 +280,8 @@ class AsEnumerator final : public Enumerator<S> {
     }
 
     S getCurrent() const {
-        return dynamic_cast<S>(input->getCurrent());
+        T current = input->getCurrent();
+        return dynamic_cast<S>(current);
     }
 };
 

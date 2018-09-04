@@ -38,8 +38,11 @@ class ResolutionContext : public IHasDbPrint {
     /// Root namespace for the program.
     const IR::INamespace* rootNamespace;
     /// Stack of namespaces for global declarations (e.g., match_kind)
-    /// @todo: what about errors?
     std::vector<const IR::INamespace*> globals;
+    // Note that all errors have been merged by the parser into
+    // a single error { } namespace.
+
+    std::vector<const IR::Vector<IR::Argument>*> argumentStack;
 
  public:
     explicit ResolutionContext(const IR::INamespace* rootNamespace) :
@@ -51,6 +54,16 @@ class ResolutionContext : public IHasDbPrint {
     /// Add name space @p e to `globals`.
     void addGlobal(const IR::INamespace* e) {
         globals.push_back(e);
+    }
+
+    /// We are resolving a method call.  Remember the arguments.
+    void enterMethodCall(const IR::Vector<IR::Argument>* args) {
+        argumentStack.push_back(args);
+    }
+
+    /// We are done resolving a method call.
+    void exitMethodCall() {
+        argumentStack.pop_back();
     }
 
     /// Add name space @p element to `stack`.
@@ -159,6 +172,7 @@ class ResolveReferences : public Inspector {
     DECLARE(BlockStatement)
 #undef DECLARE
 
+    bool preorder(const IR::MethodCallExpression* mce) override;
     bool preorder(const IR::P4Table* table) override;
     bool preorder(const IR::Declaration_MatchKind* d) override;
     bool preorder(const IR::Declaration* d) override

@@ -70,9 +70,6 @@ class TypeInference : public Transform {
     TypeMap* typeMap;
     // If true we expect to leave the program unchanged
     bool readOnly;
-    // Stack: Save here method arguments count on each method visit.
-    // They are used in type resolution.
-    std::vector<int> methodArguments;
     const IR::Node* initialNode;
 
  public:
@@ -254,7 +251,6 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
-    const IR::Node* preorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
     const IR::Node* postorder(IR::SelectExpression* expression) override;
