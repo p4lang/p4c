@@ -11,20 +11,18 @@ template<std::size_t Size = sizeof(std::size_t)>
 struct fnv1a_traits;
 
 template<>
-struct fnv1a_traits<sizeof(std::uint32_t)>
-{
+struct fnv1a_traits<sizeof(std::uint32_t)> {
     static const std::size_t offset_basis = static_cast<std::size_t>(2166136261);
     static const std::size_t prime = static_cast<std::size_t>(16777619);
 };
 
 template<>
-struct fnv1a_traits<sizeof(std::uint64_t)>
-{
+struct fnv1a_traits<sizeof(std::uint64_t)> {
     static const std::size_t offset_basis = static_cast<std::size_t>(14695981039346656037ULL);
     static const std::size_t prime = static_cast<std::size_t>(1099511628211ULL);
 };
 
-} // namespace Detail
+}  // namespace Detail
 
 std::size_t fnv1a(const void *data, std::size_t size) {
     auto raw = reinterpret_cast<const unsigned char *>(data);
@@ -46,8 +44,7 @@ std::uint32_t murmur32(const void* data, std::uint32_t size) {
     std::uint32_t result = seed ^ size;
     const char* raw = static_cast<const char*>(data);
 
-    while (size >= sizeof(std::uint32_t))
-    {
+    while (size >= sizeof(std::uint32_t)) {
         std::uint32_t k;
         std::memcpy(&k, raw, sizeof(k));
         k *= m;
@@ -59,8 +56,7 @@ std::uint32_t murmur32(const void* data, std::uint32_t size) {
         size -= 4;
     }
 
-    switch (size)
-    {
+    switch (size) {
     case 3:
         result ^= static_cast<unsigned char>(raw[2]) << 16;
         // fallthrough
@@ -139,10 +135,10 @@ struct murmur<sizeof(std::uint64_t)> {
         return murmur64(data, size);
     }
 };
-} // namespace Detail
+}  // namespace Detail
 
 std::size_t murmur(const void *data, std::size_t size) {
     return Detail::murmur<>::hash(data, size);
 }
-} // namespace Hash
-} // namespace Util
+}  // namespace Hash
+}  // namespace Util

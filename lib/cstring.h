@@ -75,14 +75,14 @@ class cstring {
  public:
     cstring() = default;
     // TODO (DanilLutsenko): Enable when initialization with 0 will be eliminated
-    //cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
+    // cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
 
     // Copy and assignment from other kinds of strings
 
     // Owner of string is someone else, but we know size of string.
     // Do not use if possible, this is linear time operation if string
     // not exists in table, because the underlying string must be copied.
-    cstring(const char *string, std::size_t length) { // NOLINT(runtime/explicit)
+    cstring(const char *string, std::size_t length) {  // NOLINT(runtime/explicit)
         if (string != nullptr) {
             construct_from_shared(string, length);
         }
@@ -91,7 +91,7 @@ class cstring {
     // Owner of string is someone else, we do not know size of string.
     // Do not use if possible, this is linear time operation if string
     // not exists in table, because the underlying string must be copied.
-    cstring(const char *string) { // NOLINT(runtime/explicit)
+    cstring(const char *string) {  // NOLINT(runtime/explicit)
         if (string != nullptr) {
             construct_from_shared(string, std::strlen(string));
         }
@@ -99,7 +99,7 @@ class cstring {
 
     // construct cstring from std::string. Do not use if possible, this is linear
     // time operation if string not exists in table, because the underlying string must be copied.
-    cstring(const std::string &string) { // NOLINT(runtime/explicit)
+    cstring(const std::string &string) {  // NOLINT(runtime/explicit)
         construct_from_shared(string.data(), string.length());
     }
 
@@ -108,7 +108,7 @@ class cstring {
     // Just helper function, for lazies, who do not like to write .str()
     // Do not use it, implicit std::string construction with implicit overhead
     // TODO (DanilLutsenko): Remove it?
-    cstring(const std::stringstream& stream) // NOLINT(runtime/explicit)
+    cstring(const std::stringstream& stream)  // NOLINT(runtime/explicit)
         : cstring(stream.str()) {
     }
 
@@ -129,23 +129,23 @@ class cstring {
     // construct cstring wrapper for literal
     template<typename T, std::size_t N,
         typename = typename std::enable_if<std::is_same<T, const char>::value>::type>
-    static cstring literal(T (&string)[N]) { // NOLINT(runtime/explicit)
+    static cstring literal(T (&string)[N]) {  // NOLINT(runtime/explicit)
         cstring result;
-        result.construct_from_literal(string, N - 1 /* String length without null terminator */);
+        result.construct_from_literal(string, N - 1  /* String length without null terminator */);
         return result;
     }
 
-private:
+ private:
     // passed string is shared, we not unique owners
     void construct_from_shared(const char *string, std::size_t length);
 
-    // we are unique owners of passed string 
+    // we are unique owners of passed string
     void construct_from_unique(const char *string, std::size_t length);
 
-    // string is literal 
+    // string is literal
     void construct_from_literal(const char *string, std::size_t length);
 
-public:
+ public:
     /// @return a version of the string where all necessary characters
     /// are properly escaped to make this into a json string (without
     /// the enclosing quotes).

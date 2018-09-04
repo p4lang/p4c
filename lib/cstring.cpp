@@ -15,10 +15,11 @@ limitations under the License.
 */
 
 #include "cstring.h"
-#include "hash.h"
 
 #include <string>
 #include <unordered_set>
+
+#include "hash.h"
 
 namespace {
 enum class table_entry_flags {
@@ -36,7 +37,7 @@ inline table_entry_flags operator |(table_entry_flags l, table_entry_flags r) {
     return static_cast<table_entry_flags>(static_cast<int>(l) | static_cast<int>(r));
 }
 
-//cache entry, ordered by string length
+// cache entry, ordered by string length
 class table_entry {
     std::size_t m_length = 0;
     table_entry_flags m_flags = table_entry_flags::none;
@@ -46,9 +47,10 @@ class table_entry {
         char m_inplace_string[sizeof(const char *)];
     };
 
-public:
+ public:
     // entry ctor, makes copy of passed string
-    table_entry(const char *string, std::size_t length, table_entry_flags flags) : m_length(length) {
+    table_entry(const char *string, std::size_t length, table_entry_flags flags)
+        : m_length(length) {
         if ((flags & table_entry_flags::no_need_copy) == table_entry_flags::no_need_copy) {
             // No need to copy object, it's view of string, string literal or string allocated
             // on heap and wrapped with cstring.
@@ -96,7 +98,8 @@ public:
     }
 
     ~table_entry() {
-        if ((m_flags & table_entry_flags::require_destruction) == table_entry_flags::require_destruction) {
+        if ((m_flags & table_entry_flags::require_destruction) ==
+                table_entry_flags::require_destruction) {
             // null pointer checked in operator delete [], so we don't need
             // to check it explicitly
 
@@ -120,21 +123,21 @@ public:
         return length() == other.length() && std::memcmp(string(), other.string(), length()) == 0;
     }
 
-private:
+ private:
     bool is_inplace() const {
         return (m_flags & table_entry_flags::inplace) == table_entry_flags::inplace;
     }
 };
-} // namespace
+}  // namespace
 
 namespace std {
-    template<>
-    class hash<table_entry> {
-    public:
-        std::size_t operator()(const table_entry &entry) const {
-            return Util::Hash::murmur(entry.string(), entry.length());
-        }
-    };
+template<>
+class hash<table_entry> {
+ public:
+    std::size_t operator()(const table_entry &entry) const {
+        return Util::Hash::murmur(entry.string(), entry.length());
+    }
+};
 }
 
 namespace {
@@ -159,14 +162,15 @@ const char *save_to_cache(const char *string, std::size_t length, table_entry_fl
     return found->string();
 }
 
-} // namespace
+}  // namespace
 
 void cstring::construct_from_shared(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::none);
 }
 
 void cstring::construct_from_unique(const char *string, std::size_t length) {
-    str = save_to_cache(string, length, table_entry_flags::no_need_copy | table_entry_flags::require_destruction);
+    str = save_to_cache(string, length,
+        table_entry_flags::no_need_copy | table_entry_flags::require_destruction);
 }
 
 void cstring::construct_from_literal(const char *string, std::size_t length) {
