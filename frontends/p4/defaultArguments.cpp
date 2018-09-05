@@ -53,6 +53,14 @@ const IR::Node* DoDefaultArguments::postorder(IR::MethodCallExpression* mce) {
     return mce;
 }
 
+const IR::Node* DoDefaultArguments::postorder(IR::ConstructorCallExpression* cce) {
+    auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
+    auto args = fillDefaults(&cc->substitution);
+    if (args != nullptr)
+        cce->arguments = args;
+    return cce;
+}
+
 const IR::Node* DoDefaultArguments::postorder(IR::Declaration_Instance* inst) {
     auto ii = Instantiation::resolve(inst, refMap, typeMap);
     auto args = fillDefaults(&ii->substitution);

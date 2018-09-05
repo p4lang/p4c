@@ -41,6 +41,7 @@ class DoDefaultArguments : public Transform {
     { setName("DoDefaultArguments"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::Declaration_Instance* inst) override;
+    const IR::Node* postorder(IR::ConstructorCallExpression* ccc) override;
 };
 
 class DefaultArguments : public PassManager {

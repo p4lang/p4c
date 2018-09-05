@@ -39,8 +39,8 @@ static IR::Vector<IR::Argument>* reorder(const ParameterSubstitution &substituti
 }
 
 const IR::Node* DoOrderArguments::postorder(IR::MethodCallExpression* expression) {
-    MethodCallDescription mcd(expression, refMap, typeMap);
-    expression->arguments = reorder(mcd.substitution);
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    expression->arguments = reorder(mi->substitution);
     return expression;
 }
 

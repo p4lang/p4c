@@ -359,9 +359,8 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::MethodCallExpression* expression) override {
         LOG3("FU Visiting " << dbp(expression));
         visit(expression->method);
-        MethodCallDescription mcd(expression, refMap, typeMap);
-        if (mcd.instance->is<BuiltInMethod>()) {
-            auto bim = mcd.instance->to<BuiltInMethod>();
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (auto bim = mi->to<BuiltInMethod>()) {
             auto base = getReads(bim->appliedTo, true);
             cstring name = bim->name.name;
             if (name == IR::Type_Stack::push_front ||
@@ -380,11 +379,11 @@ class FindUninitialized : public Inspector {
 
         // Symbolically call some methods (actions and tables)
         const IR::Node* callee = nullptr;
-        if (mcd.instance->is<ActionCall>()) {
-            auto action = mcd.instance->to<ActionCall>()->action;
+        if (mi->is<ActionCall>()) {
+            auto action = mi->to<ActionCall>()->action;
             callee = action;
-        } else if (mcd.instance->isApply()) {
-            auto am = mcd.instance->to<ApplyMethod>();
+        } else if (mi->isApply()) {
+            auto am = mi->to<ApplyMethod>();
             if (am->isTableApply()) {
                 auto table = am->object->to<IR::P4Table>();
                 callee = table;
@@ -397,8 +396,8 @@ class FindUninitialized : public Inspector {
             (void)callee->apply(fu);
         }
 
-        for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
-            auto expr = mcd.substitution.lookup(p);
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto expr = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::Out) {
                 // out parameters are not read; they behave as if they are on
                 // the LHS of an assignment
