@@ -36,7 +36,7 @@ class DoDefaultArguments : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
 
-  public:
+ public:
     DoDefaultArguments(ReferenceMap* refMap, TypeMap* typeMap): refMap(refMap), typeMap(typeMap)
     { setName("DoDefaultArguments"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
@@ -45,7 +45,7 @@ class DoDefaultArguments : public Transform {
 };
 
 class DefaultArguments : public PassManager {
-  public:
+ public:
     DefaultArguments(ReferenceMap* refMap, TypeMap* typeMap) {
         setName("DefaultArguments");
         passes.push_back(new TypeChecking(refMap, typeMap));

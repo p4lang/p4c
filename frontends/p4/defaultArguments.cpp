@@ -43,7 +43,7 @@ static const IR::Vector<IR::Argument>* fillDefaults(const ParameterSubstitution*
     if (changed)
         return args;
     return nullptr;
- }
+}
 
 const IR::Node* DoDefaultArguments::postorder(IR::MethodCallExpression* mce) {
     auto mi = MethodInstance::resolve(mce, refMap, typeMap);
