@@ -59,6 +59,11 @@ class MethodInstance : public InstanceBase {
             actualMethodType(actualMethodType)
     { CHECK_NULL(mce); CHECK_NULL(originalMethodType); CHECK_NULL(actualMethodType); }
 
+    ParameterSubstitution substitution;
+    void bindParameters() {
+        auto params = getActualParameters();
+        substitution.populate(params, expr->arguments);
+    }
  public:
     const IR::MethodCallExpression* expr;
     /** Declaration of object that method is applied to.
@@ -146,7 +151,7 @@ class ActionCall final : public MethodInstance {
                const IR::Type_Action* actionType) :
             // Actions are never generic
             MethodInstance(expr, nullptr, actionType, actionType), action(action)
-    { CHECK_NULL(action); }
+    { CHECK_NULL(action); bindParameters(); }
     friend class MethodInstance;
  public:
     const IR::P4Action* action;
@@ -185,21 +190,6 @@ class BuiltInMethod final : public MethodInstance {
  public:
     const IR::ID name;
     const IR::Expression* appliedTo;  // object is an expression
-};
-
-/**
-   Abstraction for a method call: in addition to information about the
-   MethodInstance, this class also maintains a mapping between
-   arguments and the corresponding parameters.
-*/
-class MethodCallDescription {
- public:
-    MethodInstance       *instance;
-    /// For each callee parameter the corresponding argument
-    ParameterSubstitution substitution;
-
-    MethodCallDescription(const IR::MethodCallExpression* mce,
-                          ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 ////////////////////////////////////////////////////

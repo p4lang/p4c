@@ -28,8 +28,10 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 // Passes
 #include "actionsInlining.h"
-#include "createBuiltins.h"
+#include "checkConstants.h"
 #include "checkNamedArgs.h"
+#include "createBuiltins.h"
+#include "defaultArguments.h"
 #include "deprecated.h"
 #include "directCalls.h"
 #include "dontcareArgs.h"
@@ -58,7 +60,6 @@ limitations under the License.
 #include "unusedDeclarations.h"
 #include "uselessCasts.h"
 #include "validateParsedProgram.h"
-#include "checkConstants.h"
 
 namespace P4 {
 
@@ -143,6 +144,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.
         new ClearTypeMap(&typeMap),
+        new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
