@@ -1107,6 +1107,10 @@ bool ToP4::preorder(const IR::Parameter* p) {
     visit(p->type);
     builder.spc();
     builder.append(p->name);
+    if (p->defaultValue != nullptr) {
+        builder.append("=");
+        visit(p->defaultValue);
+    }
     return false;
 }
 
