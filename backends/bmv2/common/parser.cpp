@@ -382,7 +382,8 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
     for (auto state : parser->states) {
         if (state->name == IR::ParserState::reject || state->name == IR::ParserState::accept)
             continue;
-        auto state_id = ctxt->json->add_parser_state(parser_id, state->controlPlaneName());
+        // For the state we use the internal name, not the control-plane name
+        auto state_id = ctxt->json->add_parser_state(parser_id, state->name);
         // convert statements
         for (auto s : state->components) {
             auto op = convertParserStatement(s);
