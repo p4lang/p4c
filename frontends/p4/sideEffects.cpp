@@ -539,7 +539,7 @@ class DismantleExpression : public Transform {
 
         auto copyBack = new IR::IndexedVector<IR::StatOrDecl>();
         auto args = new IR::Vector<IR::Argument>();
-        MethodCallDescription desc(orig, refMap, typeMap);
+        auto mi = MethodInstance::resolve(orig, refMap, typeMap);
         bool savelv = leftValue;
         bool savenu = resultNotUsed;
         resultNotUsed = false;
@@ -553,12 +553,12 @@ class DismantleExpression : public Transform {
         std::set<const IR::Parameter*> useTemporary;
 
         bool anyOut = false;
-        for (auto p : *desc.substitution.getParametersInArgumentOrder()) {
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             if (p->direction == IR::Direction::None)
                 continue;
             if (p->hasOut())
                 anyOut = true;
-            auto arg = desc.substitution.lookup(p);
+            auto arg = mi->substitution.lookup(p);
             // If an argument evaluation has side-effects then
             // always use a temporary to hold the argument value.
             if (SideEffects::check(arg->expression, refMap, typeMap)) {
@@ -588,9 +588,9 @@ class DismantleExpression : public Transform {
         if (anyOut) {
             // Check aliasing between all pairs of arguments where at
             // least one of them is out or inout.
-            for (auto p1 : *desc.substitution.getParametersInArgumentOrder()) {
-                auto arg1 = desc.substitution.lookup(p1);
-                for (auto p2 : *desc.substitution.getParametersInArgumentOrder()) {
+            for (auto p1 : *mi->substitution.getParametersInArgumentOrder()) {
+                auto arg1 = mi->substitution.lookup(p1);
+                for (auto p2 : *mi->substitution.getParametersInArgumentOrder()) {
                     if (p2 == p1)
                         break;
                     if (!p1->hasOut() && !p2->hasOut())
@@ -599,7 +599,7 @@ class DismantleExpression : public Transform {
                         continue;
                     if (useTemporary.find(p2) != useTemporary.end())
                         continue;
-                    auto arg2 = desc.substitution.lookup(p2);
+                    auto arg2 = mi->substitution.lookup(p2);
                     if (mayAlias(arg1->expression, arg2->expression)) {
                         LOG3("Using temporary for " << dbp(mce) <<
                              " param " << dbp(p1) << " aliasing" << dbp(p2));
@@ -615,8 +615,8 @@ class DismantleExpression : public Transform {
         auto method = result->final;
 
         ClonePathExpressions cloner;  // a cheap version of deep copy
-        for (auto p : *desc.substitution.getParametersInArgumentOrder()) {
-            auto arg = desc.substitution.lookup(p);
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto arg = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::None) {
                 args->push_back(arg);
                 continue;

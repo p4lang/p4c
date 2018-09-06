@@ -167,13 +167,6 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
     return result;
 }
 
-MethodCallDescription::MethodCallDescription(const IR::MethodCallExpression* mce,
-                                             ReferenceMap* refMap, TypeMap* typeMap) {
-    instance = MethodInstance::resolve(mce, refMap, typeMap);
-    auto params = instance->getActualParameters();
-    substitution.populate(params, mce->arguments);
-}
-
 Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
                                       ReferenceMap* ,
                                       TypeMap* typeMap) {

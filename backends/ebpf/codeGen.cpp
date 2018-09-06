@@ -169,9 +169,8 @@ bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
 }
 
 bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
-    P4::MethodCallDescription mcd(expression, refMap, typeMap);
-
-    auto bim = mcd.instance->to<P4::BuiltInMethod>();
+    auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+    auto bim = mi->to<P4::BuiltInMethod>();
     if (bim != nullptr) {
         builder->emitIndent();
         if (bim->name == IR::Type_Header::isValid) {
@@ -192,7 +191,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
     visit(expression->method);
     builder->append("(");
     bool first = true;
-    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (!first)
             builder->append(", ");
         first = false;
@@ -200,7 +199,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
         if (p->direction == IR::Direction::Out ||
             p->direction == IR::Direction::InOut)
             builder->append("&");
-        auto arg = mcd.substitution.lookup(p);
+        auto arg = mi->substitution.lookup(p);
         visit(arg);
     }
     builder->append(")");

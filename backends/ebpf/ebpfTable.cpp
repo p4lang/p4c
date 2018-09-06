@@ -333,10 +333,10 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
               "%1%: expected an action call", defaultAction);
     auto mce = defaultAction->to<IR::MethodCallExpression>();
-    P4::MethodCallDescription mcd(mce, program->refMap, program->typeMap);
+    auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
 
-    BUG_CHECK(mcd.instance->is<P4::ActionCall>(), "%1%: expected an action call", mce);
-    auto ac = mcd.instance->to<P4::ActionCall>();
+    auto ac = mi->to<P4::ActionCall>();
+    BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
     auto action = ac->action;
     cstring name = EBPFObject::externalName(action);
     cstring fd = "tableFileDescriptor";
@@ -367,8 +367,8 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 
     builder->emitIndent();
     builder->appendFormat(".u = {.%s = {", name.c_str());
-    for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
-        auto arg = mcd.substitution.lookup(p);
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(p);
         arg->apply(cg);
         builder->append(",");
     }
@@ -419,10 +419,10 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
         BUG_CHECK(entryAction->is<IR::MethodCallExpression>(),
                   "%1%: expected an action call", defaultAction);
         auto mce = entryAction->to<IR::MethodCallExpression>();
-        P4::MethodCallDescription mcd(mce, program->refMap, program->typeMap);
+        auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
 
-        BUG_CHECK(mcd.instance->is<P4::ActionCall>(), "%1%: expected an action call", mce);
-        auto ac = mcd.instance->to<P4::ActionCall>();
+        auto ac = mi->to<P4::ActionCall>();
+        BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
         auto action = ac->action;
         cstring name = EBPFObject::externalName(action);
 
@@ -439,8 +439,8 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 
         builder->emitIndent();
         builder->appendFormat(".u = {.%s = {", name.c_str());
-        for (auto p : *mcd.substitution.getParametersInArgumentOrder()) {
-            auto arg = mcd.substitution.lookup(p);
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto arg = mi->substitution.lookup(p);
             arg->apply(cg);
             builder->append(",");
         }

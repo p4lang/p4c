@@ -123,9 +123,9 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
             ++paramIt;
     }
 
-    // Check remaining parameters: they must be all optional
+    // Check remaining parameters: they must be all optional or have default values
     for (auto p : left) {
-        bool opt = p.second->isOptional();
+        bool opt = p.second->isOptional() || p.second->defaultValue != nullptr;
         if (opt) continue;
         if (reportErrors)
             ::error("%1%: No argument for parameter %2%", errorPosition, p.second);

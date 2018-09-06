@@ -59,6 +59,11 @@ class MethodInstance : public InstanceBase {
             actualMethodType(actualMethodType)
     { CHECK_NULL(mce); CHECK_NULL(originalMethodType); CHECK_NULL(actualMethodType); }
 
+    void bindParameters() {
+        auto params = getActualParameters();
+        substitution.populate(params, expr->arguments);
+    }
+
  public:
     const IR::MethodCallExpression* expr;
     /** Declaration of object that method is applied to.
@@ -70,6 +75,8 @@ class MethodInstance : public InstanceBase {
     /** Type of called method,
         with instantiated type parameters. */
     const IR::Type_MethodBase* actualMethodType;
+    /// For each callee parameter the corresponding argument
+    ParameterSubstitution substitution;
 
     virtual bool isApply() const { return false; }
 
@@ -81,7 +88,7 @@ class MethodInstance : public InstanceBase {
                                    bool useExpressionType = false);
     static MethodInstance* resolve(const IR::MethodCallStatement* mcs,
                                    ReferenceMap* refMap, TypeMap* typeMap)
-        { return resolve(mcs->methodCall, refMap, typeMap); }
+    { return resolve(mcs->methodCall, refMap, typeMap); }
     const IR::ParameterList* getOriginalParameters() const
     { return originalMethodType->parameters; }
     const IR::ParameterList* getActualParameters() const
@@ -93,11 +100,10 @@ class MethodInstance : public InstanceBase {
 class ApplyMethod final : public MethodInstance {
     ApplyMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
                 const IR::IApply* applyObject) :
-            // TODO: is this correct?
             MethodInstance(expr, decl, applyObject->getApplyMethodType(),
                            applyObject->getApplyMethodType()),
             applyObject(applyObject)
-    { CHECK_NULL(applyObject); }
+            { CHECK_NULL(applyObject); bindParameters(); }
     friend class MethodInstance;
  public:
     const IR::IApply* applyObject;
@@ -114,8 +120,10 @@ class ExternMethod final : public MethodInstance {
                  const IR::Type_Extern* actualExternType,
                  const IR::Type_Method* actualMethodType) :
             MethodInstance(expr, decl, originalMethodType, actualMethodType), method(method),
-            originalExternType(originalExternType), actualExternType(actualExternType)
-    { CHECK_NULL(method); CHECK_NULL(originalExternType); CHECK_NULL(actualExternType); }
+            originalExternType(originalExternType), actualExternType(actualExternType) {
+        CHECK_NULL(method); CHECK_NULL(originalExternType); CHECK_NULL(actualExternType);
+        bindParameters();
+    }
     friend class MethodInstance;
  public:
     const IR::Method*      method;
@@ -130,7 +138,7 @@ class ExternFunction final : public MethodInstance {
                    const IR::Type_Method* originalMethodType,
                    const IR::Type_Method* actualMethodType) :
             MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method)
-    { CHECK_NULL(method); }
+    { CHECK_NULL(method); bindParameters(); }
     friend class MethodInstance;
  public:
     const IR::Method* method;
@@ -146,7 +154,7 @@ class ActionCall final : public MethodInstance {
                const IR::Type_Action* actionType) :
             // Actions are never generic
             MethodInstance(expr, nullptr, actionType, actionType), action(action)
-    { CHECK_NULL(action); }
+    { CHECK_NULL(action); bindParameters(); }
     friend class MethodInstance;
  public:
     const IR::P4Action* action;
@@ -161,7 +169,7 @@ class FunctionCall final : public MethodInstance {
                  const IR::Type_Method* originalMethodType,
                  const IR::Type_Method* actualMethodType) :
             MethodInstance(expr, nullptr, originalMethodType, actualMethodType), function(function)
-    { CHECK_NULL(function); }
+    { CHECK_NULL(function); bindParameters(); }
     friend class MethodInstance;
  public:
     const IR::Function* function;
@@ -181,25 +189,10 @@ class BuiltInMethod final : public MethodInstance {
     BuiltInMethod(const IR::MethodCallExpression* expr, IR::ID name,
                   const IR::Expression* appliedTo, const IR::Type_Method* methodType) :
             MethodInstance(expr, nullptr, methodType, methodType), name(name), appliedTo(appliedTo)
-    { CHECK_NULL(appliedTo); }
+    { CHECK_NULL(appliedTo); bindParameters(); }
  public:
     const IR::ID name;
     const IR::Expression* appliedTo;  // object is an expression
-};
-
-/**
-   Abstraction for a method call: in addition to information about the
-   MethodInstance, this class also maintains a mapping between
-   arguments and the corresponding parameters.
-*/
-class MethodCallDescription {
- public:
-    MethodInstance       *instance;
-    /// For each callee parameter the corresponding argument
-    ParameterSubstitution substitution;
-
-    MethodCallDescription(const IR::MethodCallExpression* mce,
-                          ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 ////////////////////////////////////////////////////

@@ -799,7 +799,8 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
-            BUG_CHECK(pi->isOptional(), "Missing nonoptional arg %s", pi);
+            BUG_CHECK(pi->isOptional() || pi->defaultValue != nullptr,
+                      "Missing nonoptional arg %s", pi);
             break; }
         auto arg = arguments->at(i++);
         if (!isCompileTimeConstant(arg->expression))
@@ -1405,6 +1406,14 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
     if (paramType == nullptr)
         return param;
     BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: unexpected type", paramType);
+
+    if (param->defaultValue != nullptr) {
+        auto init = assignment(param, paramType, param->defaultValue);
+        if (init == nullptr)
+            return param;
+        if (param->defaultValue != init)
+            param->defaultValue = init;
+    }
 
     if (paramType->is<IR::P4Control>() || paramType->is<IR::P4Parser>()) {
         typeError("%1%: parameter cannot have type %2%", param, paramType);
@@ -2837,7 +2846,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         // construct types for the specMethodType, use a new typeChecker
         // that uses the same tables!
         TypeInference learn(refMap, typeMap, true);
-        (void)specMethodType->apply(learn);  // TODO: should this be set as the type of the method?
+        (void)specMethodType->apply(learn);
 
         auto canon = getType(specMethodType);
         if (canon == nullptr)
@@ -2860,7 +2869,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             returnType->is<IR::P4Control>() ||
             returnType->is<IR::Type_Package>() ||
             (returnType->is<IR::Type_Extern>() && !constArgs)) {
-            // Expermental: methods with all constant arguments can return an extern
+            // Experimental: methods with all constant arguments can return an extern
             // instance as a factory method evaluated at compile time.
             typeError("%1%: illegal return type %2%", expression, returnType);
             return expression;
