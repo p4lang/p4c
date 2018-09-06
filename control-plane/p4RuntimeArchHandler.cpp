@@ -136,7 +136,7 @@ std::string serializeOneAnnotation(const IR::Annotation* annotation) {
     for (auto it = kvs.begin(); it != kvs.end();) {
         serializedAnnotation.append(it->first);
         serializedAnnotation.append("=");
-        serializedAnnotation.append(serializeAnnotationExpression(it->second));
+        serializedAnnotation.append(serializeAnnotationExpression(it->second->expression));
         if (++it != kvs.end()) serializedAnnotation.append(", ");
     }
     serializedAnnotation.append(")");

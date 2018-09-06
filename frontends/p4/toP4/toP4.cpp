@@ -1078,7 +1078,7 @@ bool ToP4::preorder(const IR::Annotation * a) {
             first = false;
             builder.append(kvp.first);
             builder.append("=");
-            visit(kvp.second);
+            visit(kvp.second->expression);
         }
         builder.append(")");
     }

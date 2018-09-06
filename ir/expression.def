@@ -404,6 +404,18 @@ class ListExpression : Expression {
     void push_back(Expression e) { components.push_back(e); }
 }
 
+/// IR representation of an initializer for a struct.
+/// Currently it does not have a direct representation as P4 source.
+class StructInitializerExpression : Expression {
+    inline NameMap<NamedExpression, ordered_map> components = {};
+    /// Type of the struct that is being intialized.
+    /// May only be known after type checking; so it can be nullptr.
+    optional Type_Name                     structType;
+    validate { components.check_null(); }
+    size_t size() const { return components.size(); }
+    void add(NamedExpression e) { components.addUnique(e->name, e); }
+}
+
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {

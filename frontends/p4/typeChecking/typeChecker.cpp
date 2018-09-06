@@ -713,6 +713,56 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
     return false;
 }
 
+/// Given an expression and a destination type, convert ListExpressions
+/// that occur within expression to StructInitializerExpression if the
+/// destination type matches.
+static const IR::Expression*
+convertStructInitializers(const IR::Expression* expression, const IR::Type* type) {
+    bool modified = false;
+    if (auto st = type->to<IR::Type_StructLike>()) {
+        auto si = new IR::StructInitializerExpression();
+        if (auto le = expression->to<IR::ListExpression>()) {
+            size_t index = 0;
+            for (auto f : st->fields) {
+                auto expr = le->components.at(index);
+                auto conv = convertStructInitializers(expr, f->type);
+                auto ne = new IR::NamedExpression(conv->srcInfo, f->name, conv);
+                si->add(ne);
+                index++;
+            }
+            return si;
+        } else if (auto sli = expression->to<IR::StructInitializerExpression>()) {
+            for (auto f : st->fields) {
+                auto ne = sli->components.getUnique(f->name.name);
+                BUG_CHECK(ne != nullptr, "%1%: no initializer for %2%", expression, f);
+                auto convNe = convertStructInitializers(ne->expression, f->type);
+                if (convNe != ne->expression)
+                    modified = true;
+                ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
+                si->add(ne);
+            }
+            if (modified)
+                return si;
+        }
+    } else if (auto tup = type->to<IR::Type_Tuple>()) {
+        auto le = expression->to<IR::ListExpression>();
+        if (le == nullptr)
+            return expression;
+
+        auto vec = new IR::Vector<IR::Expression>();
+        for (size_t i = 0; i < le->size(); i++) {
+            auto expr = le->components.at(i);
+            auto type = tup->components.at(i);
+            auto conv = convertStructInitializers(expr, type);
+            vec->push_back(conv);
+            modified |= (conv != expr);
+        }
+        if (modified)
+            return new IR::ListExpression(expression->srcInfo, *vec);
+    }
+    return expression;
+}
+
 const IR::Expression*
 TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destType,
                           const IR::Expression* sourceExpression) {
@@ -742,7 +792,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap);
     auto newInit = cts.convert(sourceExpression);  // sets type
-    return newInit;
+    return convertStructInitializers(newInit, destType);
 }
 
 const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
