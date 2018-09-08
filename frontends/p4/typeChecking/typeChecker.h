@@ -103,6 +103,8 @@ class TypeInference : public Transform {
         const IR::Node* errorPosition, const IR::Type* destType,
         const IR::Type* srcType, bool reportErrors);
 
+    const IR::Expression* convertStructInitializers(
+        const IR::Expression* expression, const IR::Type* type);
     /** Tries to assign sourceExpression to a destination with type destType.
         This may rewrite the sourceExpression, in particular converting InfInt values
         to values with concrete types.
@@ -256,6 +258,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
+    const IR::Node* postorder(IR::StructInitializerExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
     const IR::Node* postorder(IR::SelectExpression* expression) override;

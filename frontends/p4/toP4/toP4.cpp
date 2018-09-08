@@ -839,6 +839,31 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::NamedExpression* e) {
+    builder.append(e->name.name);
+    builder.append(" = ");
+    visit(e->expression);
+    return false;
+}
+
+bool ToP4::preorder(const IR::StructInitializerExpression* e) {
+    // Currently the P4 language does not have a syntax
+    // for struct initializers, so we use the same syntax as for list expressions.
+    builder.append("{");
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
+    bool first = true;
+    for (auto c : e->components) {
+        if (!first)
+            builder.append(",");
+        first = false;
+        visit(c.second->expression);
+    }
+    expressionPrecedence = prec;
+    builder.append("}");
+    return false;
+}
+
 bool ToP4::preorder(const IR::MethodCallExpression* e) {
     int prec = expressionPrecedence;
     bool useParens = (prec > DBPrint::Prec_Postfix) ||

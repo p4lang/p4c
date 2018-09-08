@@ -716,11 +716,11 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
 /// Given an expression and a destination type, convert ListExpressions
 /// that occur within expression to StructInitializerExpression if the
 /// destination type matches.
-static const IR::Expression*
-convertStructInitializers(const IR::Expression* expression, const IR::Type* type) {
+const IR::Expression*
+TypeInference::convertStructInitializers(const IR::Expression* expression, const IR::Type* type) {
     bool modified = false;
     if (auto st = type->to<IR::Type_StructLike>()) {
-        auto si = new IR::StructInitializerExpression();
+        auto si = new IR::StructInitializerExpression(expression->srcInfo, st->name);
         if (auto le = expression->to<IR::ListExpression>()) {
             size_t index = 0;
             for (auto f : st->fields) {
@@ -730,6 +730,7 @@ convertStructInitializers(const IR::Expression* expression, const IR::Type* type
                 si->add(ne);
                 index++;
             }
+            setType(si, type);
             return si;
         } else if (auto sli = expression->to<IR::StructInitializerExpression>()) {
             for (auto f : st->fields) {
@@ -741,8 +742,10 @@ convertStructInitializers(const IR::Expression* expression, const IR::Type* type
                 ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
                 si->add(ne);
             }
-            if (modified)
+            if (modified) {
+                setType(si, type);
                 return si;
+            }
         }
     } else if (auto tup = type->to<IR::Type_Tuple>()) {
         auto le = expression->to<IR::ListExpression>();
@@ -757,8 +760,11 @@ convertStructInitializers(const IR::Expression* expression, const IR::Type* type
             vec->push_back(conv);
             modified |= (conv != expr);
         }
-        if (modified)
-            return new IR::ListExpression(expression->srcInfo, *vec);
+        if (modified) {
+            auto result = new IR::ListExpression(expression->srcInfo, *vec);
+            setType(result, type);
+            return result;
+        }
     }
     return expression;
 }
@@ -1771,6 +1777,33 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
 
     auto tupleType = new IR::Type_Tuple(expression->srcInfo, *components);
     auto type = canonicalize(tupleType);
+    if (type == nullptr)
+        return expression;
+    setType(getOriginal(), type);
+    setType(expression, type);
+    if (constant) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
+    return expression;
+}
+
+const IR::Node* TypeInference::postorder(IR::StructInitializerExpression* expression) {
+    if (done()) return expression;
+    bool constant = true;
+    auto components = new IR::IndexedVector<IR::StructField>();
+    for (auto c : expression->components) {
+        if (!isCompileTimeConstant(c.second->expression))
+            constant = false;
+        auto type = getType(c.second->expression);
+        if (type == nullptr)
+            return expression;
+        components->push_back(new IR::StructField(c.second->name, type));
+    }
+
+    auto structType = new IR::Type_Struct(
+        expression->srcInfo, expression->name, *components);
+    auto type = canonicalize(structType);
     if (type == nullptr)
         return expression;
     setType(getOriginal(), type);

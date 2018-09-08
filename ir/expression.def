@@ -408,9 +408,9 @@ class ListExpression : Expression {
 /// Currently it does not have a direct representation as P4 source.
 class StructInitializerExpression : Expression {
     inline NameMap<NamedExpression, ordered_map> components = {};
-    /// Type of the struct that is being intialized.
-    /// May only be known after type checking; so it can be nullptr.
-    optional Type_Name                     structType;
+    /// Name of the struct type that is being intialized.
+    /// May only be known after type checking; so it can be empty.
+    ID name;
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void add(NamedExpression e) { components.addUnique(e->name, e); }
