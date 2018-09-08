@@ -39,7 +39,7 @@ class Bridge(object):
         """ Initialize the namespace. """
         cmd = "ip netns add %s" % self.ns_name
         errmsg = "Failed to create namespace %s :" % self.ns_name
-        result = run_timeout(True, cmd, TIMEOUT,
+        result = run_timeout(self.verbose, cmd, TIMEOUT,
                              self.outputs, errmsg)
         self.ns_exec("ip link set dev lo up")
         return result
@@ -48,7 +48,7 @@ class Bridge(object):
         """ Delete the namespace. """
         cmd = "ip netns del %s" % self.ns_name
         errmsg = "Failed to delete namespace %s :" % self.ns_name
-        return run_timeout(True, cmd, TIMEOUT,
+        return run_timeout(self.verbose, cmd, TIMEOUT,
                            self.outputs, errmsg)
 
     def get_ns_prefix(self):
@@ -61,7 +61,8 @@ class Bridge(object):
         prefix = self.get_ns_prefix()
         # bash -c allows us to run multiple commands at once
         cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
-        errmsg = "Failed to run command in namespace %s:" % self.ns_name
+        errmsg = "Failed to run command %s in namespace %s:" % (
+            cmd, self.ns_name)
         return run_timeout(self.verbose, cmd, TIMEOUT,
                            self.outputs, errmsg)
 

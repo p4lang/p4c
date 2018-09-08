@@ -164,7 +164,12 @@ class Target(EBPFTarget):
             errmsg = "This test requires root privileges; skipping execution."
             report_err(self.outputs["stderr"], errmsg)
             return SKIPPED
-
+        # Sadly the Travis environment does not work with ip netns yet
+        if check_travis():
+            errmsg = ("The travis build currently does not support virtual"
+                      "namespaces; skipping execution.")
+            report_err(self.outputs["stderr"], errmsg)
+            return SKIPPED
         result = self._create_runtime()
         if result != SUCCESS:
             return result
