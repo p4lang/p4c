@@ -140,19 +140,31 @@ class TypeCheck::AssignInitialTypes : public Transform {
     const IR::Node *postorder(IR::PathExpression *ref) override {
         if (!global) return ref;
         IR::Node *new_node = ref;
-        if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->path->name)) {
+        // There might be multiple different objects in the program with this name.
+        // If there are, we need to infer which to use based on the context.
+        auto hdr = global->get<IR::HeaderOrMetadata>(ref->path->name);
+        auto obj = global->get<IR::IInstance>(ref->path->name);
+        auto ext = global->get<IR::Declaration_Instance>(ref->path->name);
+        bool preferHdr = getParent<IR::Member>()     // context is a member reference
+                      || getParent<IR::HeaderStackItemRef>();  // or header stack
+        auto prim = getParent<IR::Primitive>();         // context is a primitive call
+        static const std::set<cstring> header_prims = {
+            // primitives that operate on headers or header stacks
+            "add_header", "copy_header", "emit", "extract", "push", "pop",
+            "remove_header", "valid" };
+        if (hdr && (!obj || preferHdr || (prim && header_prims.count(prim->name)))) {
+            // prefer header to object only if in a simple member reference or in a
+            // header stack reference or a primitive that is valid on headers.
             visit(hdr);
             new_node = new IR::ConcreteHeaderRef(ref->srcInfo, hdr);
-        } else if (auto obj = global->get<IR::IInstance>(ref->path->name)) {
-            if (auto prim = getParent<IR::Primitive>()) {
-                auto ext = global->get<IR::Declaration_Instance>(ref->path->name);
-                if (ext && ext != obj && getContext()->child_index == 0) {
-                    // prefer a blackbox if it has the method in question
-                    if (auto et = ext->type->to<IR::Type_Extern>()) {
-                        for (auto m : et->methods) {
-                            if (m->name == prim->name) {
-                                obj = ext;
-                                break; } } } } }
+        } else if (obj) {
+            if (prim && ext && ext != obj && getContext()->child_index == 0) {
+                // prefer a blackbox if it has the method in question
+                if (auto et = ext->type->to<IR::Type_Extern>()) {
+                    for (auto m : et->methods) {
+                        if (m->name == prim->name) {
+                            obj = ext;
+                            break; } } } }
             const IR::Node *tmp = obj->getNode();  // FIXME -- can't visit an interface directly
             visit(tmp);
             obj = tmp->to<IR::IInstance>();
