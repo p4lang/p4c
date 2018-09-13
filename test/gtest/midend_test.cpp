@@ -52,7 +52,7 @@ TEST_F(P4CMidend, convertEnums_pass) {
         control m() { C(E.A) ctr; apply{} }
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     // Example to enable logging in source
     // Log::addDebugSpec("convertEnums:0");
@@ -63,7 +63,7 @@ TEST_F(P4CMidend, convertEnums_pass) {
         convertEnums
     };
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && errorCount() == 0);
 }
 
 TEST_F(P4CMidend, convertEnums_used_before_declare) {
@@ -72,7 +72,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
         enum E { A, B, C, D };
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm && ::errorCount() == 0);
 
     ReferenceMap  refMap;
     TypeMap       typeMap;
@@ -80,9 +80,9 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
     PassManager passes = {
         convertEnums
     };
-    auto result = pgm->apply(passes);
+    pgm = pgm->apply(passes);
     // use enum before declaration should fail
-    ASSERT_TRUE(result == nullptr);
+    ASSERT_GT(::errorCount(), 0U);
 }
 
 // use enumMap in convertEnums directly
@@ -102,7 +102,7 @@ TEST_F(P4CMidend, getEnumMapping) {
         convertEnums
     };
     auto result = pgm->apply(passes_);
-    ASSERT_TRUE(result != nullptr);
+    ASSERT_TRUE(result != nullptr && ::errorCount() == 0);
 
     enumMap = convertEnums->getEnumMapping();
     ASSERT_EQ(enumMap.size(), (unsigned long)1);
