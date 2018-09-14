@@ -1154,7 +1154,7 @@ TEST_F(P4RuntimeDataTypeSpec, Struct) {
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1180,7 +1180,7 @@ TEST_F(P4RuntimeDataTypeSpec, Header) {
         my_extern_t<my_header>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1207,7 +1207,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnion) {
         my_extern_t<my_header_union>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1237,7 +1237,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
         my_extern_t<my_header[3]>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1259,7 +1259,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnionStack) {
         my_extern_t<my_header_union[3]>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1281,7 +1281,7 @@ TEST_F(P4RuntimeDataTypeSpec, Enum) {
         my_extern_t<my_enum>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1304,7 +1304,7 @@ TEST_F(P4RuntimeDataTypeSpec, Error) {
         my_extern_t<error>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
@@ -1326,7 +1326,7 @@ TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);

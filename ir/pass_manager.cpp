@@ -28,6 +28,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
     } nest_log_indent(log_indent);
 
     early_exit_flag = false;
+    int initial_error_count = ::errorCount();
     BUG_CHECK(running, "not calling apply properly");
     for (auto it = passes.begin(); it != passes.end();) {
         Visitor* v = *it;
@@ -38,13 +39,12 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
             try {
                 size_t maxmem;
                 LOG1(log_indent << name() << " invoking " << v->name());
-                program = program->apply(**it);
+                auto after = program->apply(**it);
                 LOG3(log_indent << "heap after " << v->name() << ": in use " <<
                      n4(gc_mem_inuse(&maxmem)) << "B, max " << n4(maxmem) << "B");
-                int errors = ::errorCount();
-                if (stop_on_error && errors > 0)
-                    program = nullptr;
-                if (program == nullptr) break;
+                if (stop_on_error && ::errorCount() > initial_error_count)
+                    break;
+                if ((program = after) == nullptr) break;
             } catch (Backtrack::trigger::type_t &trig_type) {
                 throw Backtrack::trigger(trig_type);
             }
@@ -99,15 +99,15 @@ void PassManager::runDebugHooks(const char* visitorName, const IR::Node* program
 const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char *name) {
     bool done = false;
     unsigned iterations = 0;
+    int initial_error_count = ::errorCount();
     while (!done) {
         LOG5("PassRepeated state is:\n" << dumpToString(program));
         running = true;
         auto newprogram = PassManager::apply_visitor(program, name);
         if (program == newprogram || newprogram == nullptr)
             done = true;
-        int errors = ::errorCount();
-        if (stop_on_error && errors > 0)
-            return nullptr;
+        if (stop_on_error && ::errorCount() > initial_error_count)
+            return program;
         iterations++;
         if (repeats != 0 && iterations > repeats)
             done = true;
