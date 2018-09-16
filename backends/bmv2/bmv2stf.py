@@ -387,6 +387,14 @@ class RunBMV2(object):
             self.do_cli_command(self.parse_table_add(cmd))
         elif first == "setdefault":
             self.do_cli_command(self.parse_table_set_default(cmd))
+        elif first == "mirroring_add":
+            # Pass through mirroring_add commands unchanged, with same
+            # arguments as expected by simple_switch_CLI
+            self.do_cli_command(first + " " + cmd)
+        elif first == "mc_mgrp_create" or first == "mc_node_create" or first == "mc_node_associate":
+            # Pass through multicast group commands unchanged, with
+            # same arguments as expected by simple_switch_CLI
+            self.do_cli_command(first + " " + cmd)
         elif first == "packet":
             interface, data = nextWord(cmd)
             interface = int(interface)
