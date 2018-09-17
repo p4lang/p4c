@@ -178,10 +178,7 @@ control fill_ipv4_address(out bit<32> ipv4_address,
                           in bit<8> byte3)    // least significant byte
 {
     apply {
-        ipv4_address = (((bit<32>) byte0 << 24) |
-            ((bit<32>) byte1 << 16) |
-            ((bit<32>) byte2 << 8) |
-            (bit<32>) byte3);
+        ipv4_address = byte0 ++ byte1 ++ byte2 ++ byte3;
     }
 }
 

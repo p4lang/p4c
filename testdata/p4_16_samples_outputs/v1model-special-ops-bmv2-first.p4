@@ -74,7 +74,7 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 
 control fill_ipv4_address(out bit<32> ipv4_address, in bit<8> byte0, in bit<8> byte1, in bit<8> byte2, in bit<8> byte3) {
     apply {
-        ipv4_address = (bit<32>)byte0 << 24 | (bit<32>)byte1 << 16 | (bit<32>)byte2 << 8 | (bit<32>)byte3;
+        ipv4_address = byte0 ++ byte1 ++ byte2 ++ byte3;
     }
 }
 

@@ -117,7 +117,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             byte1 = 8w252;
             byte2 = 8w129;
             byte3 = 8w2;
-            ipv4_address = (bit<32>)byte0 << 24 | (bit<32>)byte1 << 16 | (bit<32>)byte2 << 8 | (bit<32>)byte3;
+            ipv4_address = byte0 ++ byte1 ++ byte2 ++ byte3;
             hdr.ipv4.srcAddr = ipv4_address;
             meta.fwd.l2ptr = 32w0xe50b;
         }
@@ -127,7 +127,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
                 byte1 = 8w199;
                 byte2 = 8w86;
                 byte3 = 8w99;
-                ipv4_address = (bit<32>)byte0 << 24 | (bit<32>)byte1 << 16 | (bit<32>)byte2 << 8 | (bit<32>)byte3;
+                ipv4_address = byte0 ++ byte1 ++ byte2 ++ byte3;
                 hdr.ipv4.srcAddr = ipv4_address;
                 meta.fwd.l2ptr = 32w0xec1c;
             }
