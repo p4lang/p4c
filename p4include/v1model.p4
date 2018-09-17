@@ -35,6 +35,15 @@ struct standard_metadata_t {
     bit<9>  egress_port;
     bit<32> clone_spec;
     bit<32> instance_type;
+    // The drop and recirculate_port fields are not used at all by the
+    // behavioral-model simple_switch software switch as of September
+    // 2018, and perhaps never was.  They may be considered
+    // deprecated, at least for that P4 target device.  simple_switch
+    // uses the value of the egress_spec field to determine whether a
+    // packet is dropped or not, and it is recommended to use the
+    // P4_14 drop() primitive action, or the P4_16 + v1model
+    // mark_to_drop() primitive action, to cause that field to be
+    // changed so the packet will be dropped.
     bit<1>  drop;
     bit<16> recirculate_port;
     bit<32> packet_length;
