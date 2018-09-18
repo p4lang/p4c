@@ -15,7 +15,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".drop") action drop_0(out standard_metadata_t smeta_1) {
-        smeta_1.drop = 1w1;
+        mark_to_drop();
     }
     @name("IngressI.forward") table forward {
         key = {

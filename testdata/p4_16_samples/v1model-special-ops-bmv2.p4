@@ -123,13 +123,17 @@ control debug_std_meta(in standard_metadata_t standard_metadata)
             // parser_error is commented out because the p4c back end
             // for bmv2 as of that date gives an error if you include
             // a field of type 'error' in a table key.
+
+            // drop and recirculate_port are commented out because
+            // they are not used by BMv2 simple_switch, and we may
+            // want to delete them from v1model.p4 in the future.
             standard_metadata.ingress_port : exact;
             standard_metadata.egress_spec : exact;
             standard_metadata.egress_port : exact;
             standard_metadata.clone_spec : exact;
             standard_metadata.instance_type : exact;
-            standard_metadata.drop : exact;
-            standard_metadata.recirculate_port : exact;
+            //standard_metadata.drop : exact;
+            //standard_metadata.recirculate_port : exact;
             standard_metadata.packet_length : exact;
             standard_metadata.enq_timestamp : exact;
             standard_metadata.enq_qdepth : exact;

@@ -51,7 +51,7 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     apply {
-        standard_meta.drop = 1w0;
+        standard_meta.egress_spec = 9w0;
     }
 }
 
