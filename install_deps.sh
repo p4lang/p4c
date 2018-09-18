@@ -1,5 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 set -e
+ubuntu_release=`lsb_release -s -r`
+if [[ "${ubuntu_release}" > "18" ]]
+then
+    # This older package libssl1.0-dev enables compiling Thrift 0.9.2
+    # on Ubuntu 18.04.  Package libssl-dev exists, but Thrift 0.9.2
+    # fails to compile when it is installed.
+    LIBSSL_DEV="libssl1.0-dev"
+else
+    LIBSSL_DEV="libssl-dev"
+fi
 sudo apt-get install -y \
     automake \
     cmake \
@@ -18,7 +28,7 @@ sudo apt-get install -y \
     bison \
     pkg-config \
     g++ \
-    libssl-dev \
+    $LIBSSL_DEV \
     libffi-dev \
     python-dev \
     python-pip \
