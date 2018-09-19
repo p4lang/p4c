@@ -14,8 +14,6 @@ match_kind {
     PortId_t egress_port;
     bit<32>  clone_spec;
     bit<32>  instance_type;
-    bit<1>   drop;
-    bit<16>  recirculate_port;
     bit<32>  packet_length;
     @alias("queueing_metadata.enq_timestamp") 
     bit<32>  enq_timestamp;

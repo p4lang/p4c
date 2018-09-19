@@ -14,8 +14,6 @@ match_kind {
     PortId_t egress_port;
     bit<32>  clone_spec;
     bit<32>  instance_type;
-    bit<1>   drop;
-    bit<16>  recirculate_port;
     bit<32>  packet_length;
     @alias("queueing_metadata.enq_timestamp") 
     bit<32>  enq_timestamp;
@@ -157,10 +155,10 @@ parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_met
 }
 
 control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    @name(".drop") action drop_0() {
+    @name(".drop") action drop() {
         mark_to_drop();
     }
-    @name(".drop") action drop_3() {
+    @name(".drop") action drop_0() {
         mark_to_drop();
     }
     @name(".nop") action nop() {
@@ -174,7 +172,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         actions = {
-            drop_0();
+            drop();
             nop();
             @defaultonly NoAction_0();
         }
@@ -189,7 +187,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            drop_3();
+            drop_0();
             forwarding_fwd();
             @defaultonly NoAction_3();
         }

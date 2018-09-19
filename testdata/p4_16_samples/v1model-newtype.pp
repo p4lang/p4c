@@ -37,8 +37,11 @@ struct standard_metadata_t {
     PortId_t egress_port;
     bit<32> clone_spec;
     bit<32> instance_type;
-    bit<1>  drop;
-    bit<16> recirculate_port;
+    // deleted deprecated drop and recirculate_port fields from this
+    // slightly modified copy of v1model.p4, since this file is only
+    // #include'd in one test program that makes no mention of them.
+    //bit<1>  drop;
+    //bit<16> recirculate_port;
     bit<32> packet_length;
     //
     // @alias is used to generate the field_alias section of the BMV2 JSON.
