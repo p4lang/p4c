@@ -25,8 +25,8 @@
 #include "lib/safe_vector.h"
 
 namespace P4 {
-    // Forward declaration to avoid includes
-    class TypeMap;
+// Forward declaration to avoid includes
+class TypeMap;
 }  // end namespace P4
 
 namespace graphs {
