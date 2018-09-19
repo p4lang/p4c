@@ -51,6 +51,8 @@ set (GTEST_UNITTEST_SOURCES
   gtest/json_test.cpp
   gtest/midend_test.cpp
   gtest/opeq_test.cpp
+  gtest/ordered_map.cpp
+  gtest/ordered_set.cpp
   gtest/path_test.cpp
   gtest/p4runtime.cpp
   gtest/source_file_test.cpp
