@@ -119,18 +119,21 @@ endmacro(p4c_add_test_label)
 # The macro generates the test files in a directory prefixed by tag.
 #
 macro(p4c_add_test_list tag driver tests xfail)
-  set (__xfail_list "${xfail}")
-  set (__test_list "${tests}")
+  # Sanitize the input lists to account for mixed path input
+  p4c_set_abs_path("${xfail}" __xfail_list)
+  p4c_set_abs_path("${tests}" __test_list)
   set (__testCounter 0)
   set (__xfailCounter 0)
   list (LENGTH __test_list __nTests)
   foreach(t ${__test_list})
     list (FIND __xfail_list ${t} __xfail_test)
+    # Convert back to relative path for all files
+    file(RELATIVE_PATH rel_t ${P4C_SOURCE_DIR} ${t})
     if(__xfail_test GREATER -1)
-      p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}" "")
+      p4c_add_test_with_args (${tag} ${driver} TRUE ${rel_t} ${rel_t} "${ARGN}" "")
       math (EXPR __xfailCounter "${__xfailCounter} + 1")
     else()
-      p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}" "")
+      p4c_add_test_with_args (${tag} ${driver} FALSE ${rel_t} ${rel_t} "${ARGN}" "")
     endif() # __xfail_test
   endforeach() # tests
   math (EXPR __testCounter "${__testCounter} + ${__nTests}")
@@ -146,6 +149,18 @@ function(p4c_find_test_names testsuites tests)
     list (APPEND __tests ${__testfiles})
   endforeach()
   set(${tests} "${__tests}" PARENT_SCOPE)
+endfunction()
+
+# convert the paths from a list of input files to their absolute value
+#   - files is a list of explicit (relative) file paths
+#   - abs_files is the return set of absolute file paths
+function(p4c_set_abs_path files abs_files)
+  foreach(file ${files})
+  get_filename_component(__file "${file}"
+                       REALPATH BASE_DIR "${P4C_SOURCE_DIR}")
+    list (APPEND __abs_files ${__file})
+  endforeach()
+  set(${abs_files} "${__abs_files}" PARENT_SCOPE)
 endfunction()
 
 # generate all the tests specified in the testsuites: builds a list of tests
