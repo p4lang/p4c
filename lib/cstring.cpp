@@ -132,8 +132,7 @@ class table_entry {
 
 namespace std {
 template<>
-class hash<table_entry> {
- public:
+struct hash<table_entry> {
     std::size_t operator()(const table_entry &entry) const {
         return Util::Hash::murmur(entry.string(), entry.length());
     }

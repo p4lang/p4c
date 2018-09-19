@@ -488,7 +488,7 @@ class SwitchStatement : Statement {
 class Function : Declaration, IFunctional {
     Type_Method    type;
     BlockStatement body;
-    ParameterList getParameters() const {
+    ParameterList getParameters() const override {
         return type->parameters;
     }
 }

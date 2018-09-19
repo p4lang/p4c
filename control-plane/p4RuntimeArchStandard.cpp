@@ -289,7 +289,6 @@ struct Register {
     static boost::optional<Register>
     from(const IR::ExternBlock* instance,
          const ReferenceMap* refMap,
-         const TypeMap* typeMap,
          p4configv1::P4TypeInfo* p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
@@ -313,7 +312,7 @@ struct Register {
         BUG_CHECK(type->arguments->size() > typeParamIdx,
                   "%1%: expected at least %2% type arguments", instance, typeParamIdx + 1);
         auto typeArg = type->arguments->at(typeParamIdx);
-        auto typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(refMap, typeArg, p4RtTypeInfo);
         CHECK_NULL(typeSpec);
 
         return Register{declaration->controlPlaneName(),
@@ -524,7 +523,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto meter = Helpers::Counterlike<ArchMeterExtern>::from(externBlock);
             if (meter) addMeter(symbols, p4info, *meter);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
-            auto register_ = Register::from<arch>(externBlock, refMap, typeMap, p4RtTypeInfo);
+            auto register_ = Register::from<arch>(externBlock, refMap, p4RtTypeInfo);
             if (register_) addRegister(symbols, p4info, *register_);
         } else if (externBlock->type->name == ActionProfileTraits<arch>::typeName() ||
                    externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
@@ -777,7 +776,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
 
     void collectExternFunction(P4RuntimeSymbolTableIface* symbols,
                                const P4::ExternFunction* externFunction) override {
-        auto digest = getDigestCall(externFunction, refMap, typeMap, nullptr);
+        auto digest = getDigestCall(externFunction, refMap, nullptr);
         if (digest) symbols->add(SymbolType::DIGEST(), digest->name);
     }
 
@@ -801,7 +800,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
                            p4configv1::P4Info* p4info,
                            const P4::ExternFunction* externFunction) override {
         auto p4RtTypeInfo = p4info->mutable_type_info();
-        auto digest = getDigestCall(externFunction, refMap, typeMap, p4RtTypeInfo);
+        auto digest = getDigestCall(externFunction, refMap, p4RtTypeInfo);
         if (digest) addDigest(symbols, p4info, *digest);
     }
 
@@ -810,7 +809,6 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     static boost::optional<Digest>
     getDigestCall(const P4::ExternFunction* function,
                   ReferenceMap* refMap,
-                  TypeMap* typeMap,
                   p4configv1::P4TypeInfo* p4RtTypeInfo) {
         if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
             return boost::none;
@@ -849,7 +847,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         }
 
         // Convert the generic type for the digest method call to a P4DataTypeSpec
-        auto* typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
+        auto* typeSpec = TypeSpecConverter::convert(refMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr, "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
         return Digest{controlPlaneName, typeSpec, nullptr};
     }
@@ -938,7 +936,7 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         auto type = decl->type->to<IR::Type_Specialized>();
         BUG_CHECK(type->arguments->size() == 1, "%1%: expected one type argument", decl);
         auto typeArg = type->arguments->at(0);
-        auto typeSpec = TypeSpecConverter::convert(typeMap, refMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(refMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
 
