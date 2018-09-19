@@ -17,7 +17,6 @@
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
-#include "frontends/p4/typeMap.h"
 #include "lib/nullstream.h"
 #include "parsers.h"
 

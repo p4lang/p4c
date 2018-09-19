@@ -28,7 +28,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
     } nest_log_indent(log_indent);
 
     early_exit_flag = false;
-    int initial_error_count = ::errorCount();
+    unsigned initial_error_count = ::errorCount();
     BUG_CHECK(running, "not calling apply properly");
     for (auto it = passes.begin(); it != passes.end();) {
         Visitor* v = *it;
@@ -99,7 +99,7 @@ void PassManager::runDebugHooks(const char* visitorName, const IR::Node* program
 const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char *name) {
     bool done = false;
     unsigned iterations = 0;
-    int initial_error_count = ::errorCount();
+    unsigned initial_error_count = ::errorCount();
     while (!done) {
         LOG5("PassRepeated state is:\n" << dumpToString(program));
         running = true;
