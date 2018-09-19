@@ -73,7 +73,7 @@ TEST(ordered_set, set_not_equal) {
 
     a.insert(1);
     a.insert(2);
-    
+
     b.insert(1);
     b.insert(2);
     b.insert(3);

@@ -73,7 +73,7 @@ TEST(ordered_map, map_not_equal) {
 
     a[1] = 111;
     a[2] = 222;
-    
+
     b[1] = 111;
     b[2] = 222;
     b[3] = 333;
