@@ -10,10 +10,6 @@ const pair y = { 30, 40 };
 const bool z = x == y;
 const bool w = x == x;
 const S s = { 10, 20 };
-const bool v = s == x;
-const bool o = s == y;
-const bool vnot = s != x;
-const bool onot = s != y;
 
 control c(out bool z);
 package top(c _c);

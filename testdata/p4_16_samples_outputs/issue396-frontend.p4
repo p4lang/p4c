@@ -9,6 +9,7 @@ struct S {
 control c(out bool b);
 package top(c _c);
 control d(out bool b) {
+<<<<<<< c32cb7a0dac7bb9d5abd1dbee292690508bf513c
     H h_0;
     H[2] h3_0;
     S s_0;
@@ -26,6 +27,17 @@ control d(out bool b) {
         tmp = { 32w0 };
         eout_0 = tmp.isValid();
         b = h_0.isValid() && eout_0;
+=======
+    H h_1;
+    bool eout;
+    H tmp_0;
+    apply {
+        h_1 = {32w0};
+        tmp_0.setValid();
+        tmp_0 = { 32w0 };
+        eout = tmp_0.isValid();
+        b = h_1.isValid() && eout;
+>>>>>>> Implemented struct initializers - currently inferred by type inference
     }
 }
 

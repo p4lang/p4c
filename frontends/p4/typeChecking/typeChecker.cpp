@@ -720,31 +720,34 @@ const IR::Expression*
 TypeInference::convertStructInitializers(const IR::Expression* expression, const IR::Type* type) {
     bool modified = false;
     if (auto st = type->to<IR::Type_StructLike>()) {
-        auto si = new IR::StructInitializerExpression(expression->srcInfo, st->name);
+        auto si = new IR::IndexedVector<IR::NamedExpression>();
         if (auto le = expression->to<IR::ListExpression>()) {
             size_t index = 0;
             for (auto f : st->fields) {
                 auto expr = le->components.at(index);
                 auto conv = convertStructInitializers(expr, f->type);
                 auto ne = new IR::NamedExpression(conv->srcInfo, f->name, conv);
-                si->add(ne);
+                si->push_back(ne);
                 index++;
             }
-            setType(si, type);
-            return si;
+            auto result = new IR::StructInitializerExpression(expression->srcInfo, st->name, *si);
+            setType(result, type);
+            return result;
         } else if (auto sli = expression->to<IR::StructInitializerExpression>()) {
             for (auto f : st->fields) {
-                auto ne = sli->components.getUnique(f->name.name);
+                auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
                 BUG_CHECK(ne != nullptr, "%1%: no initializer for %2%", expression, f);
                 auto convNe = convertStructInitializers(ne->expression, f->type);
                 if (convNe != ne->expression)
                     modified = true;
                 ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
-                si->add(ne);
+                si->push_back(ne);
             }
             if (modified) {
-                setType(si, type);
-                return si;
+                auto result = new IR::StructInitializerExpression(
+                    expression->srcInfo, st->name, *si);
+                setType(result, type);
+                return result;
             }
         }
     } else if (auto tup = type->to<IR::Type_Tuple>()) {
@@ -793,11 +796,11 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (tvs == nullptr)
         // error already signalled
         return sourceExpression;
-    if (tvs->isIdentity())
-        return sourceExpression;
-
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
-    auto newInit = cts.convert(sourceExpression);  // sets type
+    auto newInit = sourceExpression;
+    if (!tvs->isIdentity()) {
+        ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+        newInit = cts.convert(sourceExpression);  // sets type
+    }
     return convertStructInitializers(newInit, destType);
 }
 
@@ -1565,9 +1568,12 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
             }
             defined = true;
         } else {
-            // comparison between structs and list expressions is allowed
-            if ((ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_Tuple>()) ||
-                (ltype->is<IR::Type_Tuple>() && rtype->is<IR::Type_StructLike>())) {
+            // comparison between structs and list expressions is allowed only
+            // if the expression with tuple type is a list expression
+            if ((ltype->is<IR::Type_StructLike>() &&
+                 rtype->is<IR::Type_Tuple>() && expression->right->is<IR::ListExpression>()) ||
+                 (ltype->is<IR::Type_Tuple>() && expression->left->is<IR::ListExpression>()
+                  && rtype->is<IR::Type_StructLike>())) {
                 if (!ltype->is<IR::Type_StructLike>()) {
                     // swap
                     auto type = ltype;
@@ -1584,6 +1590,10 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                     expression->left = cts.convert(expression->left);
                     expression->right = cts.convert(expression->right);
                 }
+                if (ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_Tuple>())
+                    expression->right = convertStructInitializers(expression->right, ltype);
+                if (rtype->is<IR::Type_StructLike>() && ltype->is<IR::Type_Tuple>())
+                    expression->left = convertStructInitializers(expression->left, rtype);
                 defined = true;
             }
         }
@@ -1793,12 +1803,12 @@ const IR::Node* TypeInference::postorder(IR::StructInitializerExpression* expres
     bool constant = true;
     auto components = new IR::IndexedVector<IR::StructField>();
     for (auto c : expression->components) {
-        if (!isCompileTimeConstant(c.second->expression))
+        if (!isCompileTimeConstant(c->expression))
             constant = false;
-        auto type = getType(c.second->expression);
+        auto type = getType(c->expression);
         if (type == nullptr)
             return expression;
-        components->push_back(new IR::StructField(c.second->name, type));
+        components->push_back(new IR::StructField(c->name, type));
     }
 
     auto structType = new IR::Type_Struct(

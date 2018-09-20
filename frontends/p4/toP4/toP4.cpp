@@ -849,6 +849,8 @@ bool ToP4::preorder(const IR::NamedExpression* e) {
 bool ToP4::preorder(const IR::StructInitializerExpression* e) {
     // Currently the P4 language does not have a syntax
     // for struct initializers, so we use the same syntax as for list expressions.
+    // TODO: this is incorrect if the fields are not in the same order as
+    // in the type.
     builder.append("{");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
@@ -857,7 +859,7 @@ bool ToP4::preorder(const IR::StructInitializerExpression* e) {
         if (!first)
             builder.append(",");
         first = false;
-        visit(c.second->expression);
+        visit(c->expression);
     }
     expressionPrecedence = prec;
     builder.append("}");
@@ -1027,7 +1029,7 @@ bool ToP4::preorder(const IR::EmptyStatement*) {
 }
 
 bool ToP4::preorder(const IR::IfStatement* s) {
-    dump(1);
+    dump(2);
     builder.append("if (");
     visit(s->condition);
     builder.append(") ");
@@ -1101,9 +1103,9 @@ bool ToP4::preorder(const IR::Annotation * a) {
             if (!first)
                 builder.append(", ");
             first = false;
-            builder.append(kvp.first);
+            builder.append(kvp->name);
             builder.append("=");
-            visit(kvp.second->expression);
+            visit(kvp->expression);
         }
         builder.append(")");
     }

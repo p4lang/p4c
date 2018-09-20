@@ -407,13 +407,12 @@ class ListExpression : Expression {
 /// IR representation of an initializer for a struct.
 /// Currently it does not have a direct representation as P4 source.
 class StructInitializerExpression : Expression {
-    inline NameMap<NamedExpression, ordered_map> components = {};
     /// Name of the struct type that is being intialized.
     /// May only be known after type checking; so it can be empty.
     ID name;
+    inline IndexedVector<NamedExpression> components;
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
-    void add(NamedExpression e) { components.addUnique(e->name, e); }
 }
 
 /// A ListExpression where all the components are compile-time values.

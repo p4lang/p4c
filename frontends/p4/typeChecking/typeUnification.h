@@ -56,8 +56,8 @@ class TypeUnification final {
      * Return false if unification fails right away.
      * Generates a set of type constraints.
      * If it returns true unification could still fail later.
-     * @param dest Destination type.
-     * @param src  Source type.
+     * @param dest         Destination type.
+     * @param src          Source type.
      * @param reportErrors If true report errors caused by unification.
      * @return     False if unification fails immediately.
      */

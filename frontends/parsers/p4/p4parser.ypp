@@ -222,7 +222,7 @@ typedef const IR::Type ConstType;
 %type<IR::Entry*>           entry
 %type<IR::Vector<IR::Entry>*>  entriesList
 %type<IR::MethodCallExpression*>  actionBinding
-%type<IR::NameMap<IR::NamedExpression>*> kvList
+%type<IR::IndexedVector<IR::NamedExpression>*> kvList
 %type<IR::NamedExpression*> kvPair
 
 %left COMMA
@@ -321,8 +321,8 @@ annotation
     ;
 
 kvList
-    : kvPair                          { $$ = new IR::NameMap<IR::NamedExpression>; $$->addUnique($1->name, $1); }
-    | kvList "," kvPair               { $$ = $1; $$->addUnique($3->name, $3); }
+    : kvPair                          { $$ = new IR::IndexedVector<IR::NamedExpression>; $$->push_back($1); }
+    | kvList "," kvPair               { $$ = $1; $$->push_back($3); }
     ;
 
 kvPair

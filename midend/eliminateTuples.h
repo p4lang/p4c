@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
 
@@ -99,6 +100,12 @@ class EliminateTuples final : public PassManager {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoReplaceTuples(repl));
         passes.push_back(new ClearTypeMap(typeMap));
+        // We do a round of type-checking which may mutate the program.
+        // This will convert some ListExpressions
+        // into StructInitializerExpression where tuples were converted
+        // to structs.
+        passes.push_back(new ResolveReferences(refMap)),
+        passes.push_back(new TypeInference(refMap, typeMap, false));
         setName("EliminateTuples");
     }
 };

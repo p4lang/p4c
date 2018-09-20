@@ -195,13 +195,13 @@ class Annotation {
     /// Annotations that are simple expressions
     inline Vector<Expression> expr;
     /// Annotations described as key-value pairs
-    inline NameMap<NamedExpression> kv;
+    inline IndexedVector<NamedExpression> kv;
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const Expression *> &a)
     : Node(si), name(n), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a)
     : Node(si), name(n), expr(a) {}
-    Annotation(Util::SourceInfo si, ID n, const NameMap<NamedExpression> &kv)
+    Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv)
     : Node(si), name(n), kv(kv) {}
     Annotation(ID n, const std::initializer_list<const Expression *> &a) : name(n), expr(a) {}
     Annotation(ID n, const IR::Vector<Expression> &a) : name(n), expr(a) {}
