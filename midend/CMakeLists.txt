@@ -44,6 +44,7 @@ set (MIDEND_SRCS
 
 set (MIDEND_HDRS
   actionSynthesis.h
+  checkSize.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
