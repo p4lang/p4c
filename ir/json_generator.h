@@ -80,11 +80,18 @@ class JSONGenerator {
 
     template<typename T, typename U>
     void generate(const std::pair<T, U> &v) {
-        out << "{" << std::endl << ++indent << "\"first\" : ";
+        ++indent;
+        out << "{" << std::endl;
+        toJSON(v);
+        out << std::endl << --indent << "}";
+    }
+
+    template<typename T, typename U>
+    void toJSON(const std::pair<T, U> &v) {
+        out << indent << "\"first\" : ";
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
         generate(v.second);
-        out << std::endl << --indent << "}";
     }
 
     template<typename T>
