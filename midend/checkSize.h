@@ -22,21 +22,32 @@ limitations under the License.
 namespace P4 {
 
 /// Checks some possible misuses of the table size property
-class CheckTableSize : public Inspector {
+class CheckTableSize : public Modifier {
  public:
     CheckTableSize() { setName("CheckTableSize"); }
-    bool preorder(const IR::P4Table* table) override {
+    bool preorder(IR::P4Table* table) override {
         auto size = table->getSizeProperty();
         if (size == nullptr)
             return false;
+
+        bool deleteSize = false;
         auto key = table->getKey();
         if (key == nullptr) {
-            if (size->value != 1)
+            if (size->value != 1) {
                 ::warning("%1%: Size specified for table without keys", size);
+                deleteSize = true;
+            }
         }
         auto entries = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
-        if (entries != nullptr && entries->isConstant)
+        if (entries != nullptr && entries->isConstant) {
             ::warning("%1%: Size specified for table with constant entries", size);
+            deleteSize = true;
+        }
+        if (deleteSize) {
+            auto props = IR::IndexedVector<IR::Property>(table->properties->properties);
+            props.removeByName(IR::TableProperties::sizePropertyName);
+            table->properties = new IR::TableProperties(table->properties->srcInfo, props);
+        }
         return false;
     }
 };
