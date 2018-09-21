@@ -79,7 +79,7 @@ class IndexedVector : public Vector<T> {
     explicit IndexedVector(JSONLoader &json);
 
     void clear() { IR::Vector<T>::clear(); declarations.clear(); }
-    // Although this is not a const_iterator, it should NOT
+    // TODO: Although this is not a const_iterator, it should NOT
     // be used to modify the vector directly.  I don't know
     // how to enforce this property, though.
     typedef typename Vector<T>::iterator iterator;
@@ -120,6 +120,16 @@ class IndexedVector : public Vector<T> {
     template <class... Args> void emplace_back(Args&&... args) {
         auto el = new T(std::forward<Args>(args)...);
         insert(el); }
+    bool removeByName(cstring name) {
+        for (auto it = begin(); it != end(); ++it) {
+            auto decl = (*it)->template to<IDeclaration>();
+            if (decl != nullptr && decl->getName() == name) {
+                erase(it);
+                return true;
+            }
+        }
+        return false;
+    }
     void push_back(T *a) { CHECK_NULL(a); Vector<T>::push_back(a); insertInMap(a); }
     void push_back(const T *a) { CHECK_NULL(a); Vector<T>::push_back(a); insertInMap(a); }
     void pop_back() {
