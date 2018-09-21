@@ -400,6 +400,11 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto parsePsaArch = new ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main) return;
+
+    if (main->type->name != "PSA_Switch")
+        ::warning("%1%: the main package should be called PSA_Switch"
+                  "; are you using the wrong architecture?", main->type->name);
+
     main->apply(*parsePsaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
