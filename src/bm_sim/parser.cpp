@@ -1003,11 +1003,12 @@ Parser::add_checksum(const Checksum *checksum) {
 }
 
 void
-Parser::verify_checksums(const Packet &pkt) const {
+Parser::verify_checksums(Packet *pkt) const {
   for (auto checksum : checksums) {
-    auto is_correct = checksum->verify(pkt);
+    auto is_correct = checksum->verify(*pkt);
     if (!is_correct) {
-      BMLOG_ERROR_PKT(pkt, "Checksum '{}' is not correct",
+      pkt->set_checksum_error(true);
+      BMLOG_ERROR_PKT(*pkt, "Checksum '{}' is not correct",
                       checksum->get_name());
     }
   }
@@ -1022,8 +1023,10 @@ Parser::parse(Packet *pkt) const {
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_PARSER | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Parser '{}': start", get_name());
-  // at the beginning of parsing, we "reset" the error code to Core::NoError
+  // at the beginning of parsing, we "reset" the error code to
+  // Core::NoError and the checksum_error to false
   pkt->set_error_code(no_error);
+  pkt->set_checksum_error(false);
   const char *data = pkt->data();
   if (!init_state) return;
   const ParseState *next_state = init_state;
@@ -1043,7 +1046,7 @@ Parser::parse(Packet *pkt) const {
     BMLOG_TRACE_PKT(*pkt, "Bytes parsed: {}", bytes_parsed);
   }
   pkt->remove(bytes_parsed);
-  verify_checksums(*pkt);
+  verify_checksums(pkt);
   BMELOG(parser_done, *pkt, *this);
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),

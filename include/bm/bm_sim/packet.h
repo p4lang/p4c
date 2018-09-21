@@ -242,6 +242,12 @@ class Packet final {
   //! be set to "NoError".
   ErrorCode get_error_code() const { return error_code; }
 
+  void set_checksum_error(const bool b) { checksum_error = b; }
+  //! Get the checksum error flag for this Packet, as set by the most
+  //! recent Parser object the packet went through. For most packets,
+  //! this error flag should be set to "false".
+  bool get_checksum_error() const { return checksum_error; }
+
   //! Mark the packet for exit by setting an exit flag. If this is called from
   //! an action, the current pipeline will be interrupted as soon as the current
   //! table is done processing the packet. This effectively skips the rest of
@@ -376,6 +382,8 @@ class Packet final {
   size_t entry_index{INVALID_ENTRY_INDEX};
 
   ErrorCode error_code{ErrorCode::make_invalid()};
+
+  bool checksum_error{false};
 
  private:
   static CopyIdGenerator *copy_id_gen;

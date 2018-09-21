@@ -337,7 +337,7 @@ class Parser : public NamedP4Object {
   Parser &operator=(Parser &&other) /*noexcept*/ = default;
 
  private:
-  void verify_checksums(const Packet &pkt) const;
+  void verify_checksums(Packet *pkt) const;
 
   const ParseState *init_state;
   const ErrorCodeMap *error_codes;
