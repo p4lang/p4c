@@ -88,6 +88,11 @@ Here are the fields:
   what error occurred during parsing.
 - `parser_error_location` (sm14) - Not present in v1model.p4, and not
   implemented in simple_switch.
+- `checksum_error` (v1m) - Read only. 1 if a call to the
+  `verify_checksum` primitive action finds a checksum error, otherwise
+  0.  Calls to `verify_checksum` should be in the `VerifyChecksum`
+  control in v1model, which is executed after the parser and before
+  ingress.
 - `clone_spec` (v1m): should not be accessed directly. It is set by
   the `clone` and `clone3` action primitives and is required for the
   packet clone (aka mirror) feature. The "ingress to egress" clone
