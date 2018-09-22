@@ -49,9 +49,18 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     bool backtrack(trigger &trig) override;
     bool never_backtracks() override;
     void setStopOnError(bool stop) { stop_on_error = stop; }
-    void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
-    void addDebugHooks(std::vector<DebugHook> hooks)
-    { debugHooks.insert(debugHooks.end(), hooks.begin(), hooks.end()); }
+    void addDebugHook(DebugHook h, bool recursive = false) {
+        debugHooks.push_back(h);
+        if (recursive)
+            for (auto pass : passes)
+                if (auto child = dynamic_cast<PassManager *>(pass))
+                    child->addDebugHook(h, recursive); }
+    void addDebugHooks(std::vector<DebugHook> hooks, bool recursive = false) {
+        debugHooks.insert(debugHooks.end(), hooks.begin(), hooks.end());
+        if (recursive)
+            for (auto pass : passes)
+                if (auto child = dynamic_cast<PassManager *>(pass))
+                    child->addDebugHooks(hooks, recursive); }
     void early_exit() { early_exit_flag = true; }
 };
 

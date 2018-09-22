@@ -38,7 +38,7 @@ try:
 except ImportError:
     pass
 from bmv2stf import RunBMV2
-
+import pdb
 SUCCESS = 0
 FAILURE = 1
 
@@ -51,9 +51,13 @@ class Options(object):
         self.verbose = False
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
+        self.switchOptions = []
+        self.switchTargetSpecificOptions = []
         self.hasBMv2 = False            # Is the behavioral model installed?
+        self.usePsa = False             # Use the psa switch behavioral model?
         self.runDebugger = False
         self.observationLog = None           # Log packets produced by the BMV2 model if path to log is supplied
+        self.initCommands = []
 
 def nextWord(text, sep = " "):
     # Split a text at the indicated separator.
@@ -108,11 +112,16 @@ def usage(options):
     print("options:")
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
+    print("          -p: use psa switch")
     print("          -f: replace reference outputs with newly generated ones")
     print("          -a option: pass this option to the compiler")
+    print("          --switch-arg option: pass this general option to the switch")
+    print("          --target-specific-switch-arg option: pass this target-specific option to the switch")
     print("          -gdb: run compiler under gdb")
     print("          --pp file: pass this option to the compiler")
     print("          -observation-log <file>: save packet output to <file>")
+    print("          --init <cmd>: Run <cmd> before the start of the test")
+
 
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
@@ -170,7 +179,6 @@ def run_model(options, tmpdir, jsonfile):
     if not os.path.isfile(testfile):
         # If no empty.stf present, don't try to run the model at all
         return SUCCESS
-
     bmv2 = RunBMV2(tmpdir, options, jsonfile)
     result = bmv2.generate_model_inputs(testfile)
     if result != SUCCESS:
@@ -181,9 +189,21 @@ def run_model(options, tmpdir, jsonfile):
     result = bmv2.checkOutputs()
     return result
 
+def run_init_commands(options):
+    if not options.initCommands:
+        return SUCCESS
+    for cmd in options.initCommands:
+        args = cmd.split()
+        result = run_timeout(options, args, timeout, None)
+        if result != SUCCESS:
+            return FAILURE
+    return SUCCESS
+
 def process_file(options, argv):
     assert isinstance(options, Options)
 
+    if (run_init_commands(options) != SUCCESS):
+        return FAILURE
     tmpdir = tempfile.mkdtemp(dir=".")
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
@@ -200,7 +220,13 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-bm2-ss", "-o", jsonfile] + options.compilerOptions
+
+    if options.usePsa:
+        binary = "./p4c-bm2-psa"
+    else:
+        binary = "./p4c-bm2-ss"
+
+    args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"]);
     args.extend(argv)  # includes p4filename
@@ -208,6 +234,7 @@ def process_file(options, argv):
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
+    #result = SUCCESS
 
     if result != SUCCESS:
         print("Error compiling")
@@ -257,6 +284,8 @@ def main(argv):
             options.verbose = True
         elif argv[0] == "-f":
             options.replace = True
+        elif argv[0] == "-p":
+            options.usePsa = True
         elif argv[0] == "-a":
             if len(argv) == 0:
                 reportError("Missing argument for -a option")
@@ -264,6 +293,22 @@ def main(argv):
                 sys.exit(FAILURE)
             else:
                 options.compilerOptions += argv[1].split();
+                argv = argv[1:]
+        elif argv[0] == "--switch-arg":
+            if len(argv) == 0:
+                reportError("Missing argument for --switch-arg option")
+                usage(options)
+                sys.exit(FAILURE)
+            else:
+                options.switchOptions += argv[1].split();
+                argv = argv[1:]
+        elif argv[0] == "--target-specific-switch-arg":
+            if len(argv) == 0:
+                reportError("Missing argument for --target-specific-switch-arg option")
+                usage(options)
+                sys.exit(FAILURE)
+            else:
+                options.switchTargetSpecificOptions += argv[1].split();
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0])
@@ -281,6 +326,14 @@ def main(argv):
             options.compilerOptions.append(argv[0])
             argv = argv[1:]
             options.compilerOptions.append(argv[0])
+        elif argv[0] == "--init":
+            if len(argv) == 0:
+                reportError("Missing argument for --init option")
+                usage(options)
+                sys.exit(FAILURE)
+            else:
+                options.initCommands.append(argv[1])
+                argv = argv[1:]
         else:
             reportError("Unknown option ", argv[0])
             usage(options)

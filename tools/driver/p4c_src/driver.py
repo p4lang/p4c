@@ -115,6 +115,11 @@ class BackendDriver:
             self.add_command_option('preprocessor', "-D"+d)
             self.add_command_option('compiler', "-D"+d)
 
+        # Preserve comments: -C
+        # Unix and std C keywords should be allowed in P4 (-undef and -nostdinc)
+        # Allow using ' for constants rather than delimiters for strings (-x assembler-with-cpp)
+        self.add_command_option('preprocessor', '-C -undef -nostdinc -x assembler-with-cpp')
+
         # default search path
         if opts.language == 'p4-16':
             self.add_command_option('preprocessor',
@@ -206,8 +211,7 @@ class BackendDriver:
 
         args = shlex.split(" ".join(cmd))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+            p = subprocess.Popen(args)
         except:
             import traceback
             print >> sys.stderr, "error invoking {}".format(" ".join(cmd))
@@ -215,9 +219,7 @@ class BackendDriver:
             return 1
 
         if self._verbose: print 'running {}'.format(' '.join(cmd))
-        out, err = p.communicate() # now wait
-        if len(out) > 0: print out
-        if len(err) > 0: print >> sys.stderr, err
+        p.communicate() # now wait
         return p.returncode
 
 

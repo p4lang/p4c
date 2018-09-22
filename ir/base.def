@@ -66,6 +66,16 @@ interface IGeneralNamespace : INamespace {
     validate{ checkDuplicateDeclarations(); }
 }
 
+/// Interface implemented by something that can be called
+/// like a function.
+interface IFunctional {
+    /// The parameters of the functional object
+    virtual ParameterList getParameters() const = 0;
+    /// Returns true if the parameters can be matched with the
+    /// supplied arguments.
+    bool callMatches(Vector<Argument> arguments) const;
+}
+
 /// Implemented by things that look like type variables
 interface ITypeVar {
     virtual cstring getVarName() const = 0;
@@ -74,10 +84,12 @@ interface ITypeVar {
 }
 
 /// Implemented by P4Parser, P4Control and Type_Package
-interface IContainer : IMayBeGenericType, IDeclaration {
+interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
     /// The type of the constructor as a method
     virtual Type_Method getConstructorMethodType() const = 0;
     virtual ParameterList getConstructorParameters() const = 0;
+    // The IFunctional interface
+    ParameterList getParameters() const { return getConstructorParameters(); }
 }
 
 /// This represents a primitive type
@@ -175,11 +187,20 @@ class Path {
 /// Most P4 entities can be optionally annotated
 class Annotation {
     ID name;
+    /// Annotations that are simple expressions
     inline Vector<Expression> expr;
+    /// Annotations described as key-value pairs
+    // TODO: this should be a map from ID not from cstring
+    inline NameMap<Expression> kv;
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const IR::Expression *> &a)
     : Node(si), name(n), expr(a) {}
+    Annotation(Util::SourceInfo si, ID n, const IR::Vector<IR::Expression> &a)
+    : Node(si), name(n), expr(a) {}
+    Annotation(Util::SourceInfo si, ID n, const NameMap<IR::Expression> &kv)
+    : Node(si), name(n), kv(kv) {}
     Annotation(ID n, const std::initializer_list<const IR::Expression *> &a) : name(n), expr(a) {}
+    Annotation(ID n, const IR::Vector<IR::Expression> &a) : name(n), expr(a) {}
     Annotation(ID n, intmax_t v) : name(n) {
         expr.push_back(new IR::Constant(v)); }
     /// Predefined annotations used by the compiler
@@ -189,6 +210,7 @@ class Annotation {
     static const cstring atomicAnnotation;  /// Code should be executed atomically.
     static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
+    static const cstring optionalAnnotation;  /// Optional parameter annotation
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 

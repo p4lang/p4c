@@ -37,6 +37,7 @@ const cstring IR::Annotation::defaultOnlyAnnotation = "defaultonly";
 const cstring IR::Annotation::atomicAnnotation = "atomic";
 const cstring IR::Annotation::hiddenAnnotation = "hidden";
 const cstring IR::Annotation::lengthAnnotation = "length";
+const cstring IR::Annotation::optionalAnnotation = "optional";
 
 std::map<int, const IR::Type_Bits*> *Type_Bits::signedTypes = nullptr;
 std::map<int, const IR::Type_Bits*> *Type_Bits::unsignedTypes = nullptr;
@@ -132,7 +133,7 @@ bool Type_ActionEnum::contains(cstring name) const {
 size_t Type_MethodBase::minParameterCount() const {
     size_t rv = 0;
     for (auto p : *parameters)
-        if (!p->getAnnotation("optional"))
+        if (!p->isOptional())
             ++rv;
     return rv;
 }
@@ -141,6 +142,7 @@ const Type* Type_Tuple::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : components) {
         auto at = a->getP4Type();
+        if (!at) return nullptr;
         args->push_back(at);
     }
     return new IR::Type_Tuple(srcInfo, *args);

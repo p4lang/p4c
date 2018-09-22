@@ -35,6 +35,7 @@ OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" 
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
+OPTION (ENABLE_GC "Use libgc" ON)
 
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
   # Allow the version to be set from outside
@@ -76,14 +77,16 @@ endif ()
 find_package (Boost REQUIRED COMPONENTS iostreams)
 # otherwise ordered_map code tries to use boost::get (graph)
 add_definitions ("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
-find_package (LibGc 7.2.0 REQUIRED)
+if (ENABLE_GC)
+  find_package (LibGc 7.2.0 REQUIRED)
+  set (HAVE_LIBGC 1)
+endif ()
 find_package (LibGmp REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${LIBGMP_INCLUDE_DIR})
 include_directories(${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
-set (HAVE_LIBGC 1)
 set (HAVE_LIBGMP 1)
 set (HAVE_LIBGMPXX 1)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES};${LIBGMP_LIBRARIES};${LIBGC_LIBRARIES}")
@@ -191,7 +194,10 @@ set (IR_GENERATED_SRCS
   ${P4C_BINARY_DIR}/ir/ir-generated.h
   ${P4C_BINARY_DIR}/ir/ir-generated.cpp
   ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
-set (IR_GENERATOR ${P4C_BINARY_DIR}/tools/ir-generator/irgenerator)
+# IR_GENERATOR_DIRECTORY is used to set the RUNTIME_OUTPUT_DIRECTORY property
+# of the irgenerator target to the matching path
+set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
+set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
@@ -276,7 +282,7 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h.fixup
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
   MAIN_DEPENDENCY ${IR_GENERATOR}
-  DEPENDS ${IR_DEF_FILES}
+  DEPENDS irgenerator ${IR_DEF_FILES}
   COMMENT "Generating IR class files")
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
@@ -285,7 +291,6 @@ add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 add_custom_target(update_includes ALL
   #FIXME -- should only run this when headers change -- how to accomplish that?
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4_14include ${P4C_BINARY_DIR}/p4_14include
 )
 
 # Installation

@@ -149,6 +149,8 @@ class ProgramStructure {
     /// pass to cope with varbit fields.
     std::map<const IR::MethodCallExpression*, const IR::Type_Header*> extractsSynthesized;
 
+    std::map<cstring, const IR::ParserState*> parserEntryPoints;
+
     struct ConversionContext {
         const IR::Expression* header;
         const IR::Expression* userMetadata;

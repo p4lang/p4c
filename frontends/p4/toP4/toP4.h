@@ -51,7 +51,9 @@ class ToP4 : public Inspector {
 
     // maintained as stacks
     std::vector<VecPrint> vectorSeparator;
+    size_t      vectorSeparator_init_apply_size;
     std::vector<ListPrint> listTerminators;
+    size_t      listTerminators_init_apply_size;
 
     void setVecSep(const char* sep, const char* term = nullptr) {
         vectorSeparator.push_back(VecPrint(sep, term));
@@ -138,7 +140,9 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Stack* t) override;
     bool preorder(const IR::Type_Specialized* t) override;
     bool preorder(const IR::Type_Enum* t) override;
+    bool preorder(const IR::Type_SerEnum* t) override;
     bool preorder(const IR::Type_Typedef* t) override;
+    bool preorder(const IR::Type_Newtype* t) override;
     bool preorder(const IR::Type_Extern* t) override;
     bool preorder(const IR::Type_Unknown* t) override;
     bool preorder(const IR::Type_Tuple* t) override;

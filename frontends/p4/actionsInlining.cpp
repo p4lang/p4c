@@ -23,58 +23,6 @@ limitations under the License.
 
 namespace P4 {
 
-void AInlineWorkList::dbprint(std::ostream& out) const {
-    for (auto t : sites) {
-        out << t.first;
-        for (auto c : t.second) {
-            out << std::endl << "\t" << c.first << " => " << c.second;
-        }
-    }
-}
-
-void ActionsInlineList::analyze() {
-    P4::CallGraph<const IR::P4Action*> cg("Actions call-graph");
-
-    for (auto c : toInline)
-        cg.calls(c->caller, c->callee);
-
-    // must inline from leaves up
-    std::vector<const IR::P4Action*> order;
-    cg.sort(order);
-    for (auto c : order) {
-        // This is quadratic, but hopefully the call graph is not too large
-        for (auto ci : toInline) {
-            if (ci->caller == c)
-                inlineOrder.push_back(ci);
-        }
-    }
-
-    std::reverse(inlineOrder.begin(), inlineOrder.end());
-}
-
-AInlineWorkList* ActionsInlineList::next() {
-    if (inlineOrder.size() == 0)
-        return nullptr;
-
-    std::set<const IR::P4Action*> callers;
-    auto result = new AInlineWorkList();
-
-    // Find actions that can be inlined simultaneously.
-    // This traversal is in topological order starting from leaf callees.
-    // We stop at the first action which calls one of the actions
-    // we have already selected.
-    while (!inlineOrder.empty()) {
-        auto last = inlineOrder.back();
-        if (callers.find(last->callee) != callers.end())
-            break;
-        inlineOrder.pop_back();
-        result->add(last);
-        callers.emplace(last->caller);
-    }
-    BUG_CHECK(!result->empty(), "Empty list of methods to inline");
-    return result;
-}
-
 void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     auto mi = P4::MethodInstance::resolve(mcs, refMap, typeMap);
     CHECK_NULL(mi);
@@ -95,26 +43,10 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     toInline->add(aci);
 }
 
-const IR::Node* InlineActionsDriver::preorder(IR::P4Program* program) {
-    LOG1("Inline actions driver");
-    const IR::P4Program* prog = program;
-    toInline->analyze();
-    while (auto todo = toInline->next()) {
-        LOG1("Processing " << todo);
-        inliner->prepare(toInline, todo);
-        prog = prog->apply(*inliner);
-        if (::errorCount() > 0)
-            break;
-    }
-
-    prune();
-    return prog;
-}
-
 Visitor::profile_t ActionsInliner::init_apply(const IR::Node* node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);
-    LOG1("ActionsInliner " << toInline);
+    LOG2("ActionsInliner " << toInline);
     return Transform::init_apply(node);
 }
 
@@ -122,7 +54,7 @@ const IR::Node* ActionsInliner::preorder(IR::P4Action* action) {
     if (toInline->sites.count(getOriginal<IR::P4Action>()) == 0)
         prune();
     replMap = &toInline->sites[getOriginal<IR::P4Action>()];
-    LOG1("Visiting: " << getOriginal());
+    LOG2("Visiting: " << getOriginal());
     return action;
 }
 
@@ -135,7 +67,7 @@ const IR::Node* ActionsInliner::postorder(IR::P4Action* action) {
 
 const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     auto orig = getOriginal<IR::MethodCallStatement>();
-    LOG1("Visiting " << orig);
+    LOG2("Visiting " << orig);
     if (replMap == nullptr)
         return statement;
 
@@ -143,39 +75,41 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     if (callee == nullptr)
         return statement;
 
-    LOG1("Inlining: " << toInline);
+    LOG2("Inlining: " << callee);
     IR::IndexedVector<IR::StatOrDecl> body;
     ParameterSubstitution subst;
     TypeVariableSubstitution tvs;  // empty
 
     std::map<const IR::Parameter*, cstring> paramRename;
+    ParameterSubstitution substitution;
+    substitution.populate(callee->parameters, statement->methodCall->arguments);
 
     // evaluate in and inout parameters in order
-    auto it = statement->methodCall->arguments->begin();
     for (auto param : callee->parameters->parameters) {
-        auto initializer = (*it)->expression;
+        auto argument = substitution.lookup(param);
         cstring newName = refMap->newName(param->name);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations,
-                                                        param->type, initializer);
+                                                        param->type, argument->expression);
             body.push_back(vardecl);
-            subst.add(param, new IR::PathExpression(newName));
+            subst.add(param, new IR::Argument(
+                argument->srcInfo, argument->name, new IR::PathExpression(newName)));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
-            subst.add(param, initializer);
+            subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
             auto vardecl = new IR::Declaration_Variable(newName,
                                                         param->annotations, param->type);
-            subst.add(param, new IR::PathExpression(newName));
+            subst.add(param, new IR::Argument(
+                argument->srcInfo, argument->name, new IR::PathExpression(newName)));
             body.push_back(vardecl);
         }
-        ++it;
     }
 
-    P4::SubstituteParameters sp(refMap, &subst, &tvs);
+    SubstituteParameters sp(refMap, &subst, &tvs);
     auto clone = callee->apply(sp);
     if (::errorCount() > 0)
         return statement;
@@ -185,22 +119,20 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     body.append(actclone->body->components);
 
     // copy out and inout parameters
-    it = statement->methodCall->arguments->begin();
     for (auto param : callee->parameters->parameters) {
-        auto left = (*it)->expression;
+        auto left = substitution.lookup(param);
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(left, right);
+            auto copyout = new IR::AssignmentStatement(left->expression, right);
             body.push_back(copyout);
         }
-        ++it;
     }
 
     auto annotations = callee->annotations->where(
         [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; });
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
-    LOG1("Replacing " << orig << " with " << result);
+    LOG2("Replacing " << orig << " with " << result);
     return result;
 }
 

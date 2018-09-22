@@ -29,6 +29,8 @@ void TypeMap::dbprint(std::ostream& out) const {
     out << "Constants" << std::endl;
     for (auto it : constants)
         out << "\t" << dbp(it) << std::endl;
+    out << "Type variables" << std::endl;
+    out << allTypeVariables << std::endl;
     out << "--------------" << std::endl;
 }
 
@@ -112,7 +114,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         return false;
 
     // Below we are sure that it's the same Node class
-    if (left->is<IR::Type_Base>())
+    if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>())
         return *left == *right;
     if (left->is<IR::Type_Type>())
         return equivalent(left->to<IR::Type_Type>()->type, right->to<IR::Type_Type>()->type);
@@ -137,10 +139,12 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         return equivalent(ls->elementType, rs->elementType) &&
                 ls->getSize() == rs->getSize();
     }
-    if (left->is<IR::Type_Enum>()) {
-        auto le = left->to<IR::Type_Enum>();
+    if (auto le = left->to<IR::Type_Enum>()) {
         auto re = right->to<IR::Type_Enum>();
-        // only one enum with the same name allowed
+        return le->name == re->name;
+    }
+    if (auto le = left->to<IR::Type_SerEnum>()) {
+        auto re = right->to<IR::Type_SerEnum>();
         return le->name == re->name;
     }
     if (left->is<IR::Type_StructLike>()) {

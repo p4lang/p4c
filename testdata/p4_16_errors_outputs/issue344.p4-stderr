@@ -1,6 +1,0 @@
-issue344.p4(24): error: C: cannot infer type for type parameter H
-top(C()) c;
-    ^^^
-issue344.p4(17)
-control C<H>() {
-          ^

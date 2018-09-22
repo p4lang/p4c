@@ -45,11 +45,19 @@ class Evaluator final : public Inspector, public IHasBlock {
     IR::ToplevelBlock* getToplevelBlock() override { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
+    /// Map a node to value.  The value can be nullptr, e.g., for an
+    /// optional parameter.
     void setValue(const IR::Node* node, const IR::CompileTimeValue* constant);
+    /// True if the node is mapped to a value, even if the value is
+    /// nullptr.
+    bool hasValue(const IR::Node* node) const;
     const IR::CompileTimeValue* getValue(const IR::Node* node) const;
 
+    /// Evaluates the arguments and returns a vector of parameter values
+    /// ordered in the parameter order.
     std::vector<const IR::CompileTimeValue*>*
-            evaluateArguments(const IR::Vector<IR::Argument>* arguments,
+            evaluateArguments(const IR::ParameterList* parameters,
+                              const IR::Vector<IR::Argument>* arguments,
                               IR::Block* context);
 
     profile_t init_apply(const IR::Node* node) override;

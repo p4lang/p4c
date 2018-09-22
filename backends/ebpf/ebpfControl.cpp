@@ -138,7 +138,7 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression* expr, cstring
 
     for (unsigned i=0; i < (widthToEmit + 7) / 8; i++) {
         builder->emitIndent();
-        builder->appendFormat("%s = ((char*)(&", program->byteVar);
+        builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
         visit(expr);
         builder->appendFormat(".%s))[%d]", field.c_str(), i);
         builder->endOfStatement(true);
@@ -151,12 +151,12 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression* expr, cstring
         if (alignment == 0)
             builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s) << %d)",
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
-                                  program->byteVar, 8 - bitsToWrite);
+                                  program->byteVar.c_str(), 8 - bitsToWrite);
         else
             builder->appendFormat("write_partial(%s + BYTES(%s) + %d, %d, (%s) << %d)",
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
                                   alignment,
-                                  program->byteVar, 8 - bitsToWrite);
+                                  program->byteVar.c_str(), 8 - bitsToWrite);
         builder->endOfStatement(true);
         left -= bitsToWrite;
         bitsInCurrentByte -= bitsToWrite;
@@ -166,7 +166,7 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression* expr, cstring
             builder->appendFormat(
                 "write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
                 program->packetStartVar.c_str(),
-                program->offsetVar.c_str(), i, program->byteVar, 8 - alignment % 8);
+                program->offsetVar.c_str(), i, program->byteVar.c_str(), 8 - alignment % 8);
             builder->endOfStatement(true);
             left -= bitsInCurrentByte;
         }
@@ -212,7 +212,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument>* args) {
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("return %s;", builder->target->abortReturnCode());
+    builder->appendFormat("return %s;", builder->target->abortReturnCode().c_str());
     builder->newline();
     builder->blockEnd(true);
 
@@ -264,7 +264,8 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     if (!saveAction.empty()) {
         actionVariableName = saveAction.at(saveAction.size() - 1);
         if (!actionVariableName.isNullOrEmpty()) {
-            builder->appendFormat("enum %s %s;\n", table->actionEnumName, actionVariableName);
+            builder->appendFormat("enum %s %s;\n",
+                                  table->actionEnumName.c_str(), actionVariableName.c_str());
             builder->emitIndent();
         }
     }
@@ -276,7 +277,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
         builder->emitIndent();
         builder->appendLine("/* construct key */");
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = {}", table->keyTypeName, keyname);
+        builder->appendFormat("struct %s %s = {}", table->keyTypeName.c_str(), keyname.c_str());
         builder->endOfStatement(true);
         table->emitKey(builder, keyname);
     }
@@ -284,7 +285,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->appendLine("/* value */");
     builder->emitIndent();
     cstring valueName = "value";
-    builder->appendFormat("struct %s *%s = NULL", table->valueTypeName, valueName);
+    builder->appendFormat("struct %s *%s = NULL", table->valueTypeName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 
     if (table->keyGenerator != nullptr) {
@@ -296,13 +297,13 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     }
 
     builder->emitIndent();
-    builder->appendFormat("if (%s == NULL) ", valueName);
+    builder->appendFormat("if (%s == NULL) ", valueName.c_str());
     builder->blockStart();
 
     builder->emitIndent();
     builder->appendLine("/* miss; find default action */");
     builder->emitIndent();
-    builder->appendFormat("%s = 0", control->hitVariable);
+    builder->appendFormat("%s = 0", control->hitVariable.c_str());
     builder->endOfStatement(true);
 
     builder->emitIndent();
@@ -313,26 +314,27 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->append(" else ");
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("%s = 1", control->hitVariable);
+    builder->appendFormat("%s = 1", control->hitVariable.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
     builder->emitIndent();
-    builder->appendFormat("if (%s != NULL) ", valueName);
+    builder->appendFormat("if (%s != NULL) ", valueName.c_str());
     builder->blockStart();
     builder->emitIndent();
     builder->appendLine("/* run action */");
     table->emitAction(builder, valueName);
     if (!actionVariableName.isNullOrEmpty()) {
         builder->emitIndent();
-        builder->appendFormat("%s = %s->action", actionVariableName, valueName);
+        builder->appendFormat("%s = %s->action",
+                              actionVariableName.c_str(), valueName.c_str());
         builder->endOfStatement(true);
     }
     toDereference.clear();
 
     builder->blockEnd(true);
     builder->emitIndent();
-    builder->appendFormat("else return %s", builder->target->abortReturnCode());
+    builder->appendFormat("else return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
 
     builder->blockEnd(true);

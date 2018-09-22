@@ -35,7 +35,7 @@ class IrField;
 class IrNamespace {
     std::map<cstring, IrClass *>        classes;
     std::map<cstring, IrNamespace *>    children;
-    static IrNamespace                  global;
+    static IrNamespace& global();
     IrNamespace(IrNamespace *p, cstring n) : parent(p), name(n) {
         if (p) p->children[name] = this; }
     IrNamespace() = delete;
@@ -123,14 +123,16 @@ class IrField : public IrElement {
     const bool isStatic = false;
     const bool isConst = false;
 
-    static IrField *srcInfoField;
+    static IrField* srcInfoField();
 
     IrField(Util::SourceInfo info, const Type *type, cstring name, cstring init, int flags = 0)
     : IrElement(info), type(type), name(name), initializer(init), nullOK(flags & NullOK),
       optional(flags & Optional), isInline(flags & Inline), isStatic(flags & Static),
       isConst(flags & Const) {}
-    IrField(const Type *type, cstring name, cstring init = cstring())
-    : type(type), name(name), initializer(init) {}
+    IrField(const Type *type, cstring name, cstring init = cstring(), int flags = 0)
+    : IrField(Util::SourceInfo(), type, name, init, flags) {}
+    IrField(const Type *type, cstring name, int flags)
+    : IrField(Util::SourceInfo(), type, name, cstring(), flags) {}
     void generate(std::ostream &out, bool asField) const;
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override;
@@ -215,8 +217,8 @@ class IrClass : public IrElement {
 
  public:
     const IrClass *getParent() const {
-        if (concreteParent == nullptr && this != nodeClass && kind != NodeKind::Nested)
-            return IrClass::nodeClass;
+        if (concreteParent == nullptr && this != nodeClass() && kind != NodeKind::Nested)
+            return IrClass::nodeClass();
         return concreteParent; }
 
     std::vector<const CommentBlock *> comments;
@@ -248,12 +250,16 @@ class IrClass : public IrElement {
         IrNamespace::add_class(this); }
     IrClass(NodeKind kind, cstring name) : IrClass(Util::SourceInfo(), nullptr, kind, name) {}
     IrClass(NodeKind kind, cstring name, const std::initializer_list<IrElement *> &elements)
-    : concreteParent(nullptr), elements(elements), containedIn(&IrNamespace::global),
+    : concreteParent(nullptr), elements(elements), containedIn(&IrNamespace::global()),
       local(containedIn, name), kind(kind), name(name) {
         IrNamespace::add_class(this); }
 
-    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass,
-                   *ideclaration, *indexedVectorClass;
+    static IrClass* nodeClass();
+    static IrClass* vectorClass();
+    static IrClass* namemapClass();
+    static IrClass* nodemapClass();
+    static IrClass* ideclaration();
+    static IrClass* indexedVectorClass();
 
     void declare(std::ostream &out) const;
     void generate_hdr(std::ostream &out) const override;
@@ -273,12 +279,12 @@ class IrDefinitions {
  public:
     explicit IrDefinitions(std::vector<IrElement*> classes) : elements(classes) {}
     void resolve() {
-        IrClass::nodeClass->resolve();
-        IrClass::vectorClass->resolve();
-        IrClass::namemapClass->resolve();
-        IrClass::nodemapClass->resolve();
-        IrClass::ideclaration->resolve();
-        IrClass::indexedVectorClass->resolve();
+        IrClass::nodeClass()->resolve();
+        IrClass::vectorClass()->resolve();
+        IrClass::namemapClass()->resolve();
+        IrClass::nodemapClass()->resolve();
+        IrClass::ideclaration()->resolve();
+        IrClass::indexedVectorClass()->resolve();
         for (auto cls : *getClasses())
             cls->resolve(); }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;

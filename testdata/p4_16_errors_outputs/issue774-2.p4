@@ -1,21 +1,48 @@
 #include <core.p4>
+#include <v1model.p4>
 
 header Header {
     bit<32> data;
 }
 
-parser p0(packet_in p, out Header h) {
+struct M {
+}
+
+parser ParserI(packet_in b, out Header p, inout M m, inout standard_metadata_t s) {
     state start {
-        p.extract(_);
+        b.extract(_);
         transition next;
     }
     state next {
-        p.extract(h);
+        b.extract(p);
         transition accept;
     }
 }
 
-parser proto(packet_in p, out Header h);
-package top(proto p);
-top(p0()) main;
+control IngressI(inout Header p, inout M meta, inout standard_metadata_t s) {
+    apply {
+    }
+}
+
+control EgressI(inout Header hdr, inout M meta, inout standard_metadata_t smeta) {
+    apply {
+    }
+}
+
+control DeparserI(packet_out pk, in Header hdr) {
+    apply {
+    }
+}
+
+control VerifyChecksumI(inout Header hdr, inout M meta) {
+    apply {
+    }
+}
+
+control ComputeChecksumI(inout Header hdr, inout M meta) {
+    apply {
+    }
+}
+
+V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
 

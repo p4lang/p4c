@@ -136,13 +136,14 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
 }
 
 /// A P4-16 action
-class P4Action : Declaration, ISimpleNamespace, IAnnotated {
+class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
     optional Annotations        annotations = Annotations::empty;
     ParameterList               parameters;
     BlockStatement              body;
     Util::Enumerator<IDeclaration>* getDeclarations() const override;
     IDeclaration getDeclByName(cstring name) const override;
     Annotations getAnnotations() const override { return annotations; }
+    ParameterList getParameters() const override { return parameters; }
 }
 
 class Type_Error : ISimpleNamespace, Type_Declaration {
@@ -389,20 +390,21 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
 }
 
 /// Toplevel program representation
-class P4Program : ISimpleNamespace {
-    optional inline IndexedVector<Node> declarations;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return declarations.getDeclarations(); }
-    IDeclaration getDeclByName(cstring name) const override {
-        return declarations.getDeclaration(name); }
+class P4Program : IGeneralNamespace {
+    /// Top-level program objects.
+    /// This is not an IndexedVector because:
+    /// - we allow overloaded function-like objects.
+    /// - not all objects in a P4Program are declarations (e.g., match_kind is not).
+    optional inline Vector<Node> objects;
+    Util::Enumerator<IDeclaration>* getDeclarations() const override;
+    validate{ objects.check_null(); }
     static const cstring main;
 #apply
 }
 
 ///////////////////////////// Statements //////////////////////////
 
-abstract Statement : StatOrDecl {
-}
+abstract Statement : StatOrDecl {}
 
 class ExitStatement : Statement {
     toString{ return "exit"; }
@@ -411,7 +413,8 @@ class ExitStatement : Statement {
 
 class ReturnStatement : Statement {
     NullOK Expression expression;
-    toString{ return "return"; }
+    toString{ return cstring("return ") +
+                (expression != nullptr ? expression->toString() : cstring("")); }
 }
 
 class EmptyStatement : Statement {
@@ -482,38 +485,46 @@ class SwitchStatement : Statement {
         v.parallel_visit(cases, "cases"); }
 }
 
-class Function : Declaration {
+class Function : Declaration, IFunctional {
     Type_Method    type;
     BlockStatement body;
+    ParameterList getParameters() const override {
+        return type->parameters;
+    }
 }
 
 /////////////////////////////////////////////////////////////
 
-// Block is the base class for IR nodes produced by the evaluator.
-// A block represents a compile-time allocated resource.
-// Blocks are not visited using visitors, so the visit_children()
-// method is empty.  Users have to write custom visitors to
-// traverse the constantValue map.
+/**
+ * Block is the base class for IR nodes produced by the evaluator.
+ * A block represents a compile-time allocated resource.
+ * Blocks are not visited using visitors, so the visit_children()
+ * method is empty.  Users have to write custom visitors to
+ * traverse the constantValue map.
+ */
 abstract Block : CompileTimeValue {
-    Node node;  // Node that evaluates to this block.
-    // It's either a Declaration_Instance or a ConstructorCallExpression.
+    Node node;  /// Node that evaluates to this block.
+    /// This is either a Declaration_Instance or a ConstructorCallExpression.
 
-    // One value for each Node inside that evaluates to a compile-time constant.
-    // This includes all constructor parameters, and all inner nested blocks.
+    /// One value for each Node inside that evaluates to a compile-time constant.
+    /// This includes all constructor parameters, and all inner nested blocks.
     ordered_map<Node, CompileTimeValue> constantValue = {};
 
     virtual void dbprint(std::ostream& out) const override;
     virtual void dbprint_recursive(std::ostream& out) const;
+    /// value can be null for parameters which are optional
     void setValue(Node node, CompileTimeValue value) {
-        CHECK_NULL(node); CHECK_NULL(value);
+        CHECK_NULL(node);
         auto it = constantValue.find(node);
         BUG_CHECK(it == constantValue.end(), "%1% already set", node);
         constantValue[node] = value; }
+    bool hasValue(Node node) const {
+        return constantValue.find(node) != constantValue.end();
+    }
     CompileTimeValue getValue(Node node) const {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
-        if (it == constantValue.end())
-            return nullptr;
+        BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
     visit_children { (void)v; }
 }
@@ -523,8 +534,7 @@ class TableBlock : Block {
 #nodbprint
 }
 
-// An object that has been instantiated
-// The substitution holds the constructor arguments.
+/// An object that has been instantiated
 abstract InstantiatedBlock : Block {
     Type instanceType;  // May be a SpecializedType
 
@@ -574,11 +584,12 @@ class ExternBlock : InstantiatedBlock {
 #nodbprint
 }
 
-// Represents the program as a whole
+/// Represents the program as a whole
 class ToplevelBlock : Block {
     P4Program getProgram() const { return node->to<IR::P4Program>(); }
     PackageBlock getMain() const;
 #nodbprint
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }
+
 /** @} *//* end group irdefs */

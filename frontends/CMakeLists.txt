@@ -16,17 +16,21 @@ set (P4_FRONTEND_SRCS
   p4/actionsInlining.cpp
   p4/callGraph.cpp
   p4/checkConstants.cpp
+  p4/checkNamedArgs.cpp
   p4/createBuiltins.cpp
   p4/def_use.cpp
+  p4/defaultArguments.cpp
   p4/deprecated.cpp
   p4/directCalls.cpp
   p4/dontcareArgs.cpp
+  p4/enumInstance.cpp
   p4/evaluator/evaluator.cpp
   p4/evaluator/substituteParameters.cpp
   p4/externInstance.cpp
   p4/fromv1.0/converters.cpp
   p4/fromv1.0/programStructure.cpp
   p4/frontend.cpp
+  p4/functionsInlining.cpp
   p4/hierarchicalNames.cpp
   p4/inlining.cpp
   p4/localizeActions.cpp
@@ -34,6 +38,7 @@ set (P4_FRONTEND_SRCS
   p4/modelInstances.cpp
   p4/moveConstructors.cpp
   p4/moveDeclarations.cpp
+  p4/parameterSubstitution.cpp
   p4/parserCallGraph.cpp
   p4/parserControlFlow.cpp
   p4/removeReturns.cpp
@@ -68,10 +73,13 @@ set (P4_FRONTEND_HDRS
   p4/actionsInlining.h
   p4/callGraph.h
   p4/checkConstants.h
+  p4/checkNamedArgs.h
   p4/cloner.h
+  p4/commonInlining.h
   p4/coreLibrary.h
   p4/createBuiltins.h
   p4/def_use.h
+  p4/defaultArguments.h
   p4/deprecated.h
   p4/directCalls.h
   p4/dontcareArgs.h
@@ -83,6 +91,7 @@ set (P4_FRONTEND_HDRS
   p4/fromv1.0/programStructure.h
   p4/fromv1.0/v1model.h
   p4/frontend.h
+  p4/functionsInlining.h
   p4/hierarchicalNames.h
   p4/inlining.h
   p4/localizeActions.h

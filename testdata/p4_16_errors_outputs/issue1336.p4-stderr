@@ -1,0 +1,4 @@
+issue1336.p4(3):syntax error, unexpected (
+type id<type> (
+              ^
+error: 1 errors encountered, aborting compilation

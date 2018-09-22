@@ -56,13 +56,21 @@ bool EBPFProgram::build() {
 void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitGeneratedComment(builder);
 
-    builder->appendFormat("#include \"%s\"", header);
+    // Find the last occurrence of a folder slash (Linux only)
+    const char* header_stripped = header.findlast('/');
+    if (header_stripped)
+        // Remove the path from the header
+        builder->appendFormat("#include \"%s\"", header_stripped + 1);
+    else
+        // There is no prepended path, just include the header
+        builder->appendFormat("#include \"%s\"", header.c_str());
     builder->newline();
 
     builder->target->emitIncludes(builder);
     emitPreamble(builder);
+    builder->append("REGISTER_START()\n");
     control->emitTableInstances(builder);
-
+    builder->append("REGISTER_END()\n");
     builder->newline();
     builder->emitIndent();
     builder->target->emitCodeSection(builder, functionName);
@@ -75,14 +83,6 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     parser->headerType->emitInitializer(builder);
     builder->endOfStatement(true);
 
-    // HACK to force LLVM to put the headers on the stack.
-    // This should not be needed, but the llvm bpf back-end seems to be broken.
-    builder->emitIndent();
-    builder->append("printk(\"%p\", ");
-    builder->append(parser->headers->name);
-    builder->append(")");
-    builder->endOfStatement(true);
-
     emitLocalVariables(builder);
     builder->newline();
     builder->emitIndent();
@@ -93,12 +93,19 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitPipeline(builder);
 
     builder->emitIndent();
-    builder->append(endLabel);
-    builder->appendLine(":");
+    builder->appendFormat("%s:\n", endLabel.c_str());
     builder->emitIndent();
-    builder->append("return ");
-    builder->append(control->accept->name.name);
-    builder->appendLine(";");
+    builder->appendFormat("if (%s)\n", control->accept->name.name.c_str());
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
+    builder->decreaseIndent();
+    builder->emitIndent();
+    builder->appendLine("else");
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
+    builder->decreaseIndent();
     builder->blockEnd(true);  // end of function
 
     builder->target->emitLicense(builder, license);
@@ -127,7 +134,7 @@ void EBPFProgram::emitH(CodeBuilder* builder, cstring) {
     emitTypes(builder);
     control->emitTableTypes(builder);
     builder->appendLine("#if CONTROL_PLANE");
-    builder->appendLine("void initialize_tables() ");
+    builder->appendLine("static void init_tables() ");
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
@@ -139,7 +146,7 @@ void EBPFProgram::emitH(CodeBuilder* builder, cstring) {
 }
 
 void EBPFProgram::emitTypes(CodeBuilder* builder) {
-    for (auto d : program->declarations) {
+    for (auto d : program->objects) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
             !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
             !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
@@ -196,33 +203,35 @@ void EBPFProgram::emitPreamble(CodeBuilder* builder) {
 
 void EBPFProgram::emitLocalVariables(CodeBuilder* builder) {
     builder->emitIndent();
-    builder->appendFormat("unsigned %s = 0;", offsetVar);
+    builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("enum %s %s = %s;", errorEnum, errorVar,
+    builder->appendFormat("enum %s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance.noError.str());
     builder->newline();
 
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;",
-                          packetStartVar, builder->target->dataOffset(model.CPacketName.str()));
+                          packetStartVar.c_str(),
+                          builder->target->dataOffset(model.CPacketName.str()).c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;",
-                          packetEndVar, builder->target->dataEnd(model.CPacketName.str()));
+                          packetEndVar.c_str(),
+                          builder->target->dataEnd(model.CPacketName.str()).c_str());
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("u8 %s = 0;", control->accept->name.name);
+    builder->appendFormat("u8 %s = 0;", control->accept->name.name.c_str());
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("u32 %s = 0;", zeroKey);
+    builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("unsigned char %s;", byteVar);
+    builder->appendFormat("unsigned char %s;", byteVar.c_str());
     builder->newline();
 }
 

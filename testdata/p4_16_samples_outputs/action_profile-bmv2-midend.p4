@@ -20,10 +20,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".NoAction") action NoAction_3() {
     }
     @name("IngressI.drop") action drop_0() {
-        smeta.drop = 1w1;
+        mark_to_drop();
     }
     @name("IngressI.drop") action drop_3() {
-        smeta.drop = 1w1;
+        mark_to_drop();
     }
     @name("IngressI.indirect") table indirect {
         key = {

@@ -41,8 +41,8 @@ class CheckDeprecated : public Inspector {
 class Deprecated : public PassManager {
  public:
     explicit Deprecated(ReferenceMap* refMap) {
-        passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::CheckDeprecated(refMap));
+        passes.push_back(new ResolveReferences(refMap));
+        passes.push_back(new CheckDeprecated(refMap));
         setName("Deprecated");
     }
 };

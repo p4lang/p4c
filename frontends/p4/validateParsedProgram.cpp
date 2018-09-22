@@ -57,10 +57,21 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
 /// Width of a bit<> type is at least 0
 /// Width of an int<> type is at least 1
 void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
+    if (type->expression)
+        // cannot validate yet
+        return;
     if (type->size <= 0)
-        ::error("%1%: Illegal bit size", type);
+        ::error("%1%: Illegal type size", type);
     if (type->size == 1 && type->isSigned)
         ::error("%1%: Signed types cannot be 1-bit wide", type);
+}
+
+void ValidateParsedProgram::postorder(const IR::Type_Varbits* type) {
+    if (type->expression)
+        // cannot validate yet
+        return;
+    if (type->size <= 0)
+        ::error("%1%: Illegal type size", type);
 }
 
 /// The accept and reject states cannot be implemented
@@ -78,8 +89,7 @@ void ValidateParsedProgram::container(const IR::IContainer* type) {
             ::error("%1%: constructor parameters cannot have a direction", p);
 }
 
-/// Tables must have an 'actions' and a 'default_action' properties.
-/// The latter is just a warning.
+/// Tables must have an 'actions' property.
 void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     auto ac = t->getActionList();
     if (ac == nullptr)
@@ -179,11 +189,29 @@ void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
         ::error("%1%: return statements not allowed in parsers", statement);
 }
 
-/// Exit statements are not allowed in parsers
+/// Exit statements are not allowed in parsers or functions
 void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error("%1%: exit statements not allowed in parsers", statement);
+    if (findContext<IR::Function>())
+        ::error("%1%: exit statements not allowed in functions", statement);
+}
+
+void ValidateParsedProgram::postorder(const IR::P4Program* program) {
+    IR::IndexedVector<IR::Node> declarations;
+    for (auto decl : *program->getDeclarations()) {
+        cstring name = decl->getName();
+        auto existing = declarations.getDeclaration(name);
+        if (existing != nullptr) {
+            if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>()) {
+                ::error("Duplicate declaration of %1%: %2%",
+                        decl->getName(), existing->getName());
+            }
+        } else {
+            declarations.push_back(decl->getNode());
+        }
+    }
 }
 
 }  // namespace P4

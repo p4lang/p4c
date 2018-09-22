@@ -75,6 +75,9 @@ class ordered_set {
     ordered_set(ordered_set &&a) = default; /* move is ok? */
     ordered_set &operator=(const ordered_set &a) { data = a.data; init_data_map(); return *this; }
     ordered_set &operator=(ordered_set &&a) = default; /* move is ok? */
+    bool operator==(const ordered_set &a) const { return data == a.data; }
+    bool operator!=(const ordered_set &a) const { return data != a.data; }
+
     // FIXME add allocator and comparator ctors...
 
     iterator                    begin() noexcept { return data.begin(); }

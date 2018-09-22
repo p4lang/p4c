@@ -94,7 +94,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     }
     @name(".rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
-        hdr.ethernet.dstAddr[47:23] = 25w0x0;
+        hdr.ethernet.dstAddr[47:23] = 25w0x200bc;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac(bit<48> smac) {
@@ -104,7 +104,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     }
     @name(".rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
-        hdr.ethernet.dstAddr[47:32] = 16w0x0;
+        hdr.ethernet.dstAddr[47:32] = 16w0x3333;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
     @name(".mac_rewrite") table mac_rewrite {

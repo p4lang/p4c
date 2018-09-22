@@ -27,9 +27,6 @@ namespace P4 {
 This inspector detects whether an IR tree contains
 'return' or 'exit' statements.
 It sets a boolean flag for each of them.
-
-It treats exceptionally Functions - it claims that
-returns do not exist in Functions.
 */
 class HasExits : public Inspector {
  public:
@@ -37,8 +34,6 @@ class HasExits : public Inspector {
     bool hasReturns;
     HasExits() : hasExits(false), hasReturns(false) { setName("HasExits"); }
 
-    bool preorder(const IR::Function*) override
-    { return false; }
     void postorder(const IR::ExitStatement*) override
     { hasExits = true; }
     void postorder(const IR::ReturnStatement*) override
@@ -66,7 +61,9 @@ class DoRemoveReturns : public Transform {
  protected:
     P4::ReferenceMap* refMap;
     IR::ID            returnVar;  // one for each context
+    IR::ID            returnedValue;  // only for functions that return expressions
     cstring           variableName;
+    cstring           retValName;
 
     enum class Returns {
         Yes,
@@ -81,12 +78,13 @@ class DoRemoveReturns : public Transform {
     Returns hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
 
  public:
-    explicit DoRemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned") :
-            refMap(refMap), variableName(varName)
+    explicit DoRemoveReturns(P4::ReferenceMap* refMap,
+                             cstring varName = "hasReturned",
+                             cstring retValName = "retval") :
+            refMap(refMap), variableName(varName), retValName(retValName)
     { visitDagOnce = false; CHECK_NULL(refMap); setName("DoRemoveReturns"); }
 
-    const IR::Node* preorder(IR::Function* function) override
-    { prune(); return function; }  // We leave returns in functions alone
+    const IR::Node* preorder(IR::Function* function) override;
     const IR::Node* preorder(IR::BlockStatement* statement) override;
     const IR::Node* preorder(IR::ReturnStatement* statement) override;
     const IR::Node* preorder(IR::ExitStatement* statement) override;

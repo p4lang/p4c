@@ -321,7 +321,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 copy->visit_children(*this);
                 visitCurrentOnce = visited->refVisitOnce(n);
                 final_result = copy->apply_visitor_postorder(*this); }
-            if (final_result
+            if (final_result == copy
                 && final_result != preorder_result
                 && *final_result == *preorder_result)
                 final_result = preorder_result;

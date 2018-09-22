@@ -33,7 +33,7 @@ enum flags {
 };
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
-{ "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + INCL_NESTED + OVERRIDE + CLASSREF,
+{ "operator==", { &NamedType::Bool(), {}, CONST + IN_IMPL + INCL_NESTED + OVERRIDE + CLASSREF,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl << cl->indent << cl->indent << "return ";
@@ -46,13 +46,50 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                     << parent->name << " &>(a))";
             first = false; }
         for (auto f : *cl->getFields()) {
-            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
+            if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
             if (!first)
                 buf << std::endl << cl->indent << cl->indent << "&& ";
             first = false;
             buf << f->name << " == a." << f->name; }
         if (first) {  // a nested class with no fields?
             buf << "false"; }
+        buf << ";" << std::endl;
+        buf << cl->indent << "}";
+        return buf.str(); } } },
+{ "equiv", { &NamedType::Bool(),
+             { new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_") },
+             CONST + IN_IMPL + OVERRIDE,
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+        std::stringstream buf;
+        buf << "{" << std::endl;
+        buf << cl->indent << cl->indent
+            << "if (static_cast<const Node *>(this) == &a_) return true;\n";
+        buf << cl->indent << cl->indent << "if (typeid(*this) != typeid(a_)) return false;\n";
+        if (auto parent = cl->getParent()) {
+            if (parent && parent->name != "Node")
+                buf << cl->indent << cl->indent << "if (!" << parent->name
+                    << "::equiv(a_)) return false;\n"; }
+        bool first = true;
+        for (auto f : *cl->getFields()) {
+            if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
+            if (first) {
+                buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                                                << " &>(a_);\n";
+                buf << cl->indent << cl->indent << "return ";
+                first = false;
+            } else {
+                buf << std::endl << cl->indent << cl->indent << "&& "; }
+            if (f->type->resolve(cl->containedIn) == nullptr) {
+                // This is not an IR pointer
+                buf << f->name << " == a." << f->name;
+            } else if (f->isInline) {
+                buf << f->name << ".equiv(a." << f->name << ")";
+            } else {
+                buf << "(" << f->name << " ? a." << f->name << " ? "
+                    << f->name << "->equiv(*a." << f->name << ")"
+                    << " : false : a." << f->name << " == nullptr)"; } }
+        if (first) {  // no fields?
+            buf << cl->indent << cl->indent << "return true"; }
         buf << ";" << std::endl;
         buf << cl->indent << "}";
         return buf.str(); } } },
@@ -64,7 +101,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         if (body) buf << LineDirective(srcInfo, true) << body;
         buf << LineDirective(true) << cl->indent << "return out; }";
         return buf.str(); } } },
-{ "visit_children", { &NamedType::Void, { new IrField(&ReferenceType::VisitorRef, "v") },
+{ "visit_children", { &NamedType::Void(), { new IrField(&ReferenceType::VisitorRef, "v") },
   IN_IMPL + OVERRIDE,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         bool needed = false;
@@ -84,7 +121,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             needed = true; }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "validate", { &NamedType::Void, {}, CONST + IN_IMPL + EXTEND + OVERRIDE,
+{ "validate", { &NamedType::Void(), {}, CONST + IN_IMPL + EXTEND + OVERRIDE,
     [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
         bool needed = false;
         std::stringstream buf;
@@ -105,16 +142,16 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             needed = true; }
         buf << " }";
         return needed ? buf.str() : cstring(); } } },
-{ "node_type_name", { &NamedType::Cstring, {}, CONST + OVERRIDE,
+{ "node_type_name", { &NamedType::Cstring(), {}, CONST + OVERRIDE,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return \"" << cl->containedIn << cl->name << "\"; }";
         return buf.str(); } } },
-{ "dbprint", { &NamedType::Void, { new IrField(&ReferenceType::OstreamRef, "out") },
+{ "dbprint", { &NamedType::Void(), { new IrField(&ReferenceType::OstreamRef, "out") },
   CONST + IN_IMPL + OVERRIDE + CONCRETE_ONLY,
     [](IrClass *, Util::SourceInfo, cstring) -> cstring {
         return ""; } } },
-{ "dump_fields", { &NamedType::Void, { new IrField(&ReferenceType::OstreamRef, "out") },
+{ "dump_fields", { &NamedType::Void(), { new IrField(&ReferenceType::OstreamRef, "out") },
   CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
@@ -123,7 +160,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             buf << cl->indent << parent->name << "::dump_fields(out);" << std::endl;
         bool needed = false;
         for (auto f : *cl->getFields()) {
-            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
+            if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
             if (f->type->resolve(cl->containedIn) == nullptr &&
                 !dynamic_cast<const TemplateInstantiation*>(f->type)) {
                 // not an IR pointer
@@ -132,8 +169,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 needed = true; } }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "toJSON", { &NamedType::Void, {
-        new IrField(new ReferenceType(&NamedType::JSONGenerator), "json")
+{ "toJSON", { &NamedType::Void(), {
+        new IrField(new ReferenceType(&NamedType::JSONGenerator()), "json")
     }, CONST + IN_IMPL + OVERRIDE + INCL_NESTED,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
@@ -141,14 +178,14 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         if (auto parent = cl->getParent())
             buf << cl->indent << parent->name << "::toJSON(json);" << std::endl;
         for (auto f : *cl->getFields()) {
-            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
+            if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
             if (!f->isInline && f->nullOK)
                 buf << cl->indent << "if (" << f->name << " != nullptr) ";
             buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\""
                 << f->name << "\\\" : \" << " << "this->" << f->name << ";" << std::endl; }
         buf << "}";
         return buf.str(); } } },
-{ nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
+{ nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader()), "json")
     }, IN_IMPL + CONSTRUCTOR + INCL_NESTED,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
@@ -156,25 +193,25 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             buf << ": " << parent->name << "(json)";
         buf << " {" << std::endl;
         for (auto f : *cl->getFields()) {
-            if (*f->type == NamedType::SourceInfo) continue;  // FIXME -- deal with SourcInfo
+            if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
             buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
                 << std::endl; }
         buf << "}";
         return buf.str(); } } },
 { "fromJSON", { nullptr, {
-        new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
+        new IrField(new ReferenceType(&NamedType::JSONLoader()), "json"),
     }, FACTORY + IN_IMPL + CONCRETE_ONLY + INCL_NESTED,
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return new " << cl->name << "(json); }";
         return buf.str();
     } } },
-{ "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
+{ "toString", { &NamedType::Cstring(), {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, Util::SourceInfo, cstring) -> cstring { return cstring(); } } },
 };
 
 void IrClass::generateMethods() {
-    if (this == nodeClass || this == vectorClass) return;
+    if (this == nodeClass() || this == vectorClass()) return;
     if (kind != NodeKind::Interface) {
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
@@ -217,7 +254,7 @@ void IrClass::generateMethods() {
             auto eq_overload = new IrMethod("operator==", "{ return a == *this; }");
             eq_overload->clss = this;
             eq_overload->isOverride = true;
-            eq_overload->rtype = &NamedType::Bool;
+            eq_overload->rtype = &NamedType::Bool();
             eq_overload->args.push_back(
                 new IrField(new ReferenceType(new NamedType(parent), true), "a"));
             eq_overload->isConst = true;
@@ -247,7 +284,7 @@ void IrClass::generateMethods() {
                 // This is a factory method. These return an IR:Node*. The
                 // exception is nested classes, which typically aren't IR::Nodes
                 // and therefore just return a pointer to their concrete type.
-                m->rtype = new PointerType(new NamedType(IrClass::nodeClass));
+                m->rtype = new PointerType(new NamedType(IrClass::nodeClass()));
             } else {
                 // By default predefined methods return a pointer to their
                 // concrete type.

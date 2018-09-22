@@ -22,11 +22,11 @@ limitations under the License.
 
 namespace P4 {
 
-// Convert
-// state s { transition select (e) { ... } }
-// into
-// state s { transition select (e) { ... default: noMatch; }}
-// state noMatch { verify(false, error.NoMatch); transition reject; }
+/// Convert
+/// state s { transition select (e) { ... } }
+/// into
+/// state s { transition select (e) { ... default: noMatch; }}
+/// state noMatch { verify(false, error.NoMatch); transition reject; }
 class DoHandleNoMatch : public Transform {
     const IR::ParserState* noMatch = nullptr;
     NameGenerator* nameGen;

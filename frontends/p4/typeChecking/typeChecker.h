@@ -70,9 +70,6 @@ class TypeInference : public Transform {
     TypeMap* typeMap;
     // If true we expect to leave the program unchanged
     bool readOnly;
-    // Stack: Save here method arguments count on each method visit.
-    // They are used in type resolution.
-    std::vector<int> methodArguments;
     const IR::Node* initialNode;
 
  public:
@@ -197,6 +194,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Base* type) override;
     const IR::Node* postorder(IR::Type_Var* type) override;
     const IR::Node* postorder(IR::Type_Enum* type) override;
+    const IR::Node* postorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Extern* type) override;
     const IR::Node* postorder(IR::StructField* field) override;
     const IR::Node* postorder(IR::Type_Header* type) override;
@@ -209,6 +207,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Tuple* type) override;
     const IR::Node* postorder(IR::Type_Set* type) override;
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
+    const IR::Node* postorder(IR::Type_Newtype* type) override;
     const IR::Node* postorder(IR::Type_Package* type) override;
     const IR::Node* postorder(IR::Type_ActionEnum* type) override;
     const IR::Node* postorder(IR::P4Table* type) override;
@@ -218,6 +217,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Entry* e) override;
 
     const IR::Node* postorder(IR::Argument* arg) override;
+    const IR::Node* postorder(IR::SerEnumMember* member) override;
     const IR::Node* postorder(IR::Parameter* param) override;
     const IR::Node* postorder(IR::Constant* expression) override;
     const IR::Node* postorder(IR::BoolLiteral* expression) override;
@@ -251,7 +251,6 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
-    const IR::Node* preorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
     const IR::Node* postorder(IR::SelectExpression* expression) override;

@@ -16,7 +16,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout SM smeta) {
 
 control IngressI(inout H hdr, inout M meta, inout SM smeta) {
     apply {
-        smeta.drop = 1w1;
+        smeta.egress_spec = 9w1;
     }
 }
 

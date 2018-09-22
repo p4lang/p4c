@@ -30,6 +30,8 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     // Type variables that represent Type_InfInt can only be unified to bit<> types
     // or to other Type_InfInt types.
     if (var->is<IR::Type_InfInt>()) {
+        while (substitution->is<IR::Type_Newtype>())
+            substitution = substitution->to<IR::Type_Newtype>()->type;
         if (!substitution->is<IR::Type_InfInt>() && !substitution->is<IR::Type_Bits>()) {
             ::error("%1%: Cannot unify type %2% with %3%", errorLocation, var, substitution);
             return false;

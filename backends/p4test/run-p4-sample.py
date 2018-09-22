@@ -43,6 +43,7 @@ class Options(object):
         self.dumpToJson = False
         self.compilerOptions = []
         self.runDebugger = False
+        self.generateP4Runtime = False
 
 def usage(options):
     name = options.binary
@@ -55,6 +56,7 @@ def usage(options):
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
     print("          -a \"args\": pass args to the compiler")
+    print("          --p4runtime: generate P4Info message in text format")
 
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
@@ -149,6 +151,8 @@ def recompile_file(options, produced, mustBeIdentical):
 def check_generated_files(options, tmpdir, expecteddir):
     files = os.listdir(tmpdir)
     for file in files:
+        if "p4info" in file:
+            continue
         if options.verbose:
             print("Checking", file)
         produced = tmpdir + "/" + file
@@ -196,6 +200,7 @@ def process_file(options, argv):
     ppfile = tmpdir + "/" + basename                  # after parsing
     referenceOutputs = ",".join(rename.keys())
     stderr = tmpdir + "/" + basename + "-stderr"
+    p4runtimefile = tmpdir + "/" + basename + ".p4info.txt"
 
     # Create the `json_outputs` directory if it doesn't already exist. There's a
     # race here since multiple tests may run this code in parallel, so we can't
@@ -210,10 +215,29 @@ def process_file(options, argv):
 
     jsonfile = "./json_outputs" + "/" + basename + ".json"
 
+    # P4Info generation requires knowledge of the architecture, so we must
+    # invoke the compiler with a valid --arch.
+    def getArch(path):
+        v1Pattern = re.compile('include.*v1model\.p4')
+        psaPattern = re.compile('include.*psa\.p4')
+        with open(path, 'r') as f:
+            for line in f:
+                if v1Pattern.search(line):
+                    return "v1model"
+                elif psaPattern.search(line):
+                    return "psa"
+            return None
+
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
     args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
             "--testJson"] + options.compilerOptions
+    arch = getArch(options.p4filename)
+    if arch is not None:
+        args.extend(["--arch", arch])
+        if options.generateP4Runtime:
+            args.extend(["--p4runtime-format", "text"])
+            args.extend(["--p4runtime-file", p4runtimefile])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"]);
@@ -312,6 +336,8 @@ def main(argv):
             options.compilerOptions.append(argv[0])
         elif argv[0] == "-gdb":
             options.runDebugger = "gdb --args"
+        elif argv[0] == "--p4runtime":
+            options.generateP4Runtime = True
         else:
             print("Uknown option ", argv[0], file=sys.stderr)
             usage(options)

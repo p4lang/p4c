@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ limitations under the License.
     M(Vector, D(Node), template<class T>, <T>, ##__VA_ARGS__)                                   \
     M(IndexedVector, D(Vector<T>) B(Node), template<class T>, <T>, ##__VA_ARGS__)               \
     M(NameMap, D(Node),                                                                         \
-      COPY(template<class T, template<class, class, class, class> class MAP TDA(= std::map),    \
-                    class COMP TDA(= std::less<cstring>),                                       \
-                    class ALLOC TDA(= std::allocator<std::pair<cstring, const T*>>) >),         \
-      COPY(<T, MAP, COMP, ALLOC>), ##__VA_ARGS__)                                               \
+      IR_TREE_COPY(template<class T, template<class, class, class, class>                       \
+                   class MAP TDA(= std::map),                                                   \
+                   class COMP TDA(= std::less<cstring>),                                        \
+                   class ALLOC TDA(= std::allocator<std::pair<cstring, const T*>>) >),          \
+      IR_TREE_COPY(<T, MAP, COMP, ALLOC>), ##__VA_ARGS__)                                       \
 
-#define COPY(...)       __VA_ARGS__
-#define IGNORE(...)
+#define IR_TREE_COPY(...)       __VA_ARGS__
+#define IR_TREE_IGNORE(...)
 
 /* all IR classes, including Node */
 #define IRNODE_ALL_CLASSES_AND_BASES(M, B, ...)                                                 \
@@ -47,31 +48,33 @@ limitations under the License.
 
 #define IRNODE_ALL_NON_TEMPLATE_CLASSES_AND_BASES(M, B, ...)                                    \
     M(Node, , ##__VA_ARGS__)                                                                    \
-        IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, IGNORE, B, B, ##__VA_ARGS__)
+        IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, IR_TREE_IGNORE, B, B, ##__VA_ARGS__)
 
 /* all the subclasses with just the immediate bases */
 #define IRNODE_ALL_SUBCLASSES(M, ...)   \
-    IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, M, COPY, IGNORE, ##__VA_ARGS__)
+    IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, M, IR_TREE_COPY, IR_TREE_IGNORE, \
+                                                        ##__VA_ARGS__)
 #define IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(M, ...)      \
-    IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, IGNORE, COPY, IGNORE, ##__VA_ARGS__)
+    IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, IR_TREE_IGNORE, IR_TREE_COPY, \
+                                                        IR_TREE_IGNORE, ##__VA_ARGS__)
 #define IRNODE_ALL_TEMPLATES_AND_BASES(M, ...) \
-    IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(M, COPY, IGNORE, IGNORE, ##__VA_ARGS__)
+    IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(M, IR_TREE_COPY, IR_TREE_IGNORE, \
+                                                       IR_TREE_IGNORE, ##__VA_ARGS__)
 
 /* all classes with no bases */
-#define REMOVE_BASES_ARG(CLASS, BASES, M, ...) M(COPY(CLASS), ##__VA_ARGS__)
+#define REMOVE_BASES_ARG(CLASS, BASES, M, ...) M(IR_TREE_COPY(CLASS), ##__VA_ARGS__)
 #define IRNODE_ALL_CLASSES(M, ...)      \
-    IRNODE_ALL_CLASSES_AND_BASES(REMOVE_BASES_ARG, IGNORE, M, ##__VA_ARGS__)
+    IRNODE_ALL_CLASSES_AND_BASES(REMOVE_BASES_ARG, IR_TREE_IGNORE, M, ##__VA_ARGS__)
 #define IRNODE_ALL_NON_TEMPLATE_CLASSES(M, ...) \
-    IRNODE_ALL_NON_TEMPLATE_CLASSES_AND_BASES(REMOVE_BASES_ARG, IGNORE, M, ##__VA_ARGS__)
+    IRNODE_ALL_NON_TEMPLATE_CLASSES_AND_BASES(REMOVE_BASES_ARG, IR_TREE_IGNORE, M, ##__VA_ARGS__)
 
 #define REMOVE_TEMPLATE_BASES_ARG(CLASS, BASES, TEMPLATE, TARGS, M, ...)         \
-    M(COPY(CLASS), COPY(TEMPLATE), COPY(TARGS), ##__VA_ARGS__)
+    M(IR_TREE_COPY(CLASS), IR_TREE_COPY(TEMPLATE), IR_TREE_COPY(TARGS), ##__VA_ARGS__)
 #define IRNODE_ALL_TEMPLATES(M, ...) \
     IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(REMOVE_TEMPLATE_BASES_ARG,       \
-                                IGNORE, IGNORE, IGNORE, M, ##__VA_ARGS__)
+                                IR_TREE_IGNORE, IR_TREE_IGNORE, IR_TREE_IGNORE, M, ##__VA_ARGS__)
 #define IRNODE_ALL_TEMPLATES_WITH_DEFAULTS(M, ...) \
     IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(REMOVE_TEMPLATE_BASES_ARG,       \
-                                IGNORE, IGNORE, COPY, M, ##__VA_ARGS__)
-
+                                IR_TREE_IGNORE, IR_TREE_IGNORE, IR_TREE_COPY, M, ##__VA_ARGS__)
 
 #endif /* IR_IR_TREE_MACROS_H_ */

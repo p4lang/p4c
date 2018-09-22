@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2018-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <map>
 
+#include "p4/config/v1/p4types.pb.h"
+
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
@@ -32,24 +34,23 @@ class P4TypeInfo;
 namespace P4 {
 
 class TypeMap;
-class RefMap;
+class ReferenceMap;
 
 namespace ControlPlaneAPI {
 
 /// Generates the appropriate p4.P4DataTypeSpec for a given IR::Type node.
 class TypeSpecConverter : public Inspector {
  private:
-    const P4::TypeMap* typeMap;
     const P4::ReferenceMap* refMap;
     /// type_info field of the P4Info message: includes information about P4
     /// named types (struct, header, header union, enum, error).
-    p4::P4TypeInfo* p4RtTypeInfo;
-    /// after translating an Expression to p4::P4DataTypeSpec, save the result
-    /// to 'map'.
-    std::map<const IR::Type*, p4::P4DataTypeSpec*> map;
+    ::p4::config::v1::P4TypeInfo* p4RtTypeInfo;
+    /// after translating an Expression to P4DataTypeSpec, save the result to
+    /// 'map'.
+    std::map<const IR::Type*, ::p4::config::v1::P4DataTypeSpec*> map;
 
-    TypeSpecConverter(const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap,
-                      p4::P4TypeInfo* p4RtTypeInfo);
+    TypeSpecConverter(const P4::ReferenceMap* refMap,
+                      ::p4::config::v1::P4TypeInfo* p4RtTypeInfo);
 
     // fallback for unsupported types, should be unreachable
     bool preorder(const IR::Type* type) override;
@@ -75,9 +76,9 @@ class TypeSpecConverter : public Inspector {
     /// Generates the appropriate p4.P4DataTypeSpec message for @type. If
     /// @typeInfo is nullptr, then the relevant information is not generated for
     /// named types.
-    static const p4::P4DataTypeSpec* convert(
-        const P4::TypeMap* typeMap, const P4::ReferenceMap* refMap,
-        const IR::Type* type, p4::P4TypeInfo* typeInfo);
+    static const ::p4::config::v1::P4DataTypeSpec* convert(
+        const P4::ReferenceMap* refMap,
+        const IR::Type* type, ::p4::config::v1::P4TypeInfo* typeInfo);
 };
 
 }  // namespace ControlPlaneAPI

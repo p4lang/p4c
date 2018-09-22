@@ -23,6 +23,8 @@ namespace P4 {
 
 Visitor::profile_t ToP4::init_apply(const IR::Node* node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
+    listTerminators_init_apply_size = listTerminators.size();
+    vectorSeparator_init_apply_size = vectorSeparator.size();
     return Inspector::init_apply(node);
 }
 
@@ -32,6 +34,10 @@ void ToP4::end_apply(const IR::Node*) {
         *outStream << result.c_str();
         outStream->flush();
     }
+    BUG_CHECK(listTerminators.size() == listTerminators_init_apply_size,
+              "inconsistent listTerminators");
+    BUG_CHECK(vectorSeparator.size() == vectorSeparator_init_apply_size,
+              "inconsistent vectorSeparator");
 }
 
 // Try to guess whether a file is a "system" file
@@ -144,7 +150,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
 
     bool first = true;
     dump(2);
-    for (auto a : program->declarations) {
+    for (auto a : program->objects) {
         // Check where this declaration originates
         cstring sourceFile = ifSystemFile(a);
         if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
@@ -178,18 +184,24 @@ bool ToP4::preorder(const IR::P4Program* program) {
         first = false;
         visit(a);
     }
-    if (!program->declarations.empty())
+    if (!program->objects.empty())
         builder.newline();
     return false;
 }
 
 bool ToP4::preorder(const IR::Type_Bits* t) {
-    builder.appendFormat(t->toString());
+    if (t->expression) {
+        builder.append("bit<(");
+        visit(t->expression);
+        builder.append(")>");
+    } else {
+        builder.append(t->toString());
+    }
     return false;
 }
 
 bool ToP4::preorder(const IR::Type_InfInt* t) {
-    builder.appendFormat(t->toString());
+    builder.append(t->toString());
     return false;
 }
 
@@ -258,6 +270,17 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Type_Newtype* t) {
+    dump(2);
+    visit(t->annotations);
+    builder.append("type ");
+    visit(t->type);
+    builder.spc();
+    builder.append(t->name);
+    builder.endOfStatement();
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Tuple* t) {
     dump(3);
     builder.append("tuple<");
@@ -293,6 +316,7 @@ bool ToP4::preorder(const IR::P4ValueSet* t) {
 
 bool ToP4::preorder(const IR::Type_Enum* t) {
     dump(1);
+    visit(t->annotations);
     builder.append("enum ");
     builder.append(t->name);
     builder.spc();
@@ -305,6 +329,31 @@ bool ToP4::preorder(const IR::Type_Enum* t) {
         first = false;
         builder.emitIndent();
         builder.append(a->getName());
+    }
+    builder.newline();
+    builder.blockEnd(true);
+    return false;
+}
+
+bool ToP4::preorder(const IR::Type_SerEnum* t) {
+    dump(1);
+    visit(t->annotations);
+    builder.append("enum ");
+    visit(t->type);
+    builder.spc();
+    builder.append(t->name);
+    builder.spc();
+    builder.blockStart();
+    bool first = true;
+    for (auto a : t->members) {
+        dump(2, a->getNode(), 1);
+        if (!first)
+            builder.append(",\n");
+        first = false;
+        builder.emitIndent();
+        builder.append(a->getName());
+        builder.append(" = ");
+        visit(a->value);
     }
     builder.newline();
     builder.blockEnd(true);
@@ -396,7 +445,13 @@ bool ToP4::preorder(const IR::Type_Boolean*) {
 }
 
 bool ToP4::preorder(const IR::Type_Varbits* t) {
-    builder.appendFormat("varbit<%d>", t->size);
+    if (t->expression) {
+        builder.append("varbit<(");
+        visit(t->expression);
+        builder.append(")>");
+    } else {
+        builder.appendFormat("varbit<%d>", t->size);
+    }
     return false;
 }
 
@@ -1014,6 +1069,19 @@ bool ToP4::preorder(const IR::Annotation * a) {
         doneVec();
         builder.append(")");
     }
+    if (!a->kv.empty()) {
+        builder.append("(");
+        bool first = true;
+        for (auto kvp : a->kv) {
+            if (!first)
+                builder.append(", ");
+            first = false;
+            builder.append(kvp.first);
+            builder.append("=");
+            visit(kvp.second);
+        }
+        builder.append(")");
+    }
     builder.spc();
     return false;
 }
@@ -1039,6 +1107,10 @@ bool ToP4::preorder(const IR::Parameter* p) {
     visit(p->type);
     builder.spc();
     builder.append(p->name);
+    if (p->defaultValue != nullptr) {
+        builder.append("=");
+        visit(p->defaultValue);
+    }
     return false;
 }
 
@@ -1242,6 +1314,7 @@ bool ToP4::preorder(const IR::Entry *e) {
     else
         setListTerm("(", ")");
     visit(e->keys);
+    doneList();
     builder.append(" : ");
     visit(e->action);
     visit(e->annotations);

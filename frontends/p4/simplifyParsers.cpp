@@ -56,11 +56,6 @@ class RemoveUnreachableStates : public Transform {
             state->name == IR::ParserState::reject)
             return state;
 
-        // Do not eliminate states with annotations other than name.
-        for (const auto* anno : state->getAnnotations()->annotations) {
-            if (anno->name.name != "name") {
-                return state; } }
-
         auto orig = getOriginal<IR::ParserState>();
         if (reachable.find(orig) == reachable.end()) {
             if (state->name == IR::ParserState::accept) {

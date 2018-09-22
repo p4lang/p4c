@@ -89,7 +89,9 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
         return action;
     auto args = invocation->arguments;
 
-    auto argit = args->begin();
+    ParameterSubstitution substitution;
+    substitution.populate(action->parameters, args);
+
     bool removeAll = invocations->removeAllParameters(getOriginal<IR::P4Action>());
     for (auto p : action->parameters->parameters) {
         if (p->direction == IR::Direction::None && !removeAll) {
@@ -99,9 +101,12 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                                                      p->annotations, p->type, nullptr);
             LOG3("Added declaration " << decl << " annotations " << p->annotations);
             result->push_back(decl);
-            BUG_CHECK(argit != args->end(), "%1%: too few arguments", invocation);
-            auto arg = *argit;
-            ++argit;
+            auto arg = substitution.lookup(p);
+            if (arg == nullptr) {
+                ::error("action %1%: parameter %2% must be bound", invocation, p);
+                continue;
+            }
+
             if (p->direction == IR::Direction::In ||
                 p->direction == IR::Direction::InOut ||
                 p->direction == IR::Direction::None) {

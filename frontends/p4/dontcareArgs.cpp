@@ -22,18 +22,23 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
     bool changes = false;
     auto vec = new IR::Vector<IR::Argument>();
 
-    MethodCallDescription mcd(expression, refMap, typeMap);
-    for (auto p : *mcd.substitution.getParameters()) {
-        auto a = mcd.substitution.lookup(p);
-        if (a->is<IR::DefaultExpression>()) {
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto a = mi->substitution.lookup(p);
+        if (a->expression->is<IR::DefaultExpression>()) {
             cstring name = refMap->newName("arg");
             auto ptype = p->type;
+            if (ptype->is<IR::Type_Dontcare>()) {
+                ::error("Could not infer type for %1%", a);
+                return expression;
+            }
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
             toAdd.push_back(decl);
             changes = true;
-            vec->push_back(new IR::Argument(a->srcInfo, new IR::PathExpression(IR::ID(name))));
+            vec->push_back(new IR::Argument(
+                a->srcInfo, a->name, new IR::PathExpression(IR::ID(name))));
         } else {
-            vec->push_back(new IR::Argument(a->srcInfo, a));
+            vec->push_back(a);
         }
     }
     if (changes)

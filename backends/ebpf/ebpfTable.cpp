@@ -46,9 +46,11 @@ class ActionTranslationVisitor : public CodeGenInspector {
                 cstring name = EBPFObject::externalName(action);
                 builder->append(name);
                 builder->append(".");
+                builder->append(expression->path->toString());  // original name
+                return false;
             }
         }
-        builder->append(expression->path->toString());
+        visit(expression->path);
         return false;
     }
 
@@ -77,7 +79,7 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
 
 void EBPFTable::emitKeyType(CodeBuilder* builder) {
     builder->emitIndent();
-    builder->appendFormat("struct %s ", keyTypeName);
+    builder->appendFormat("struct %s ", keyTypeName.c_str());
     builder->blockStart();
 
     CodeGenInspector commentGen(program->refMap, program->typeMap);
@@ -168,11 +170,11 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
 
     // a type-safe union: a struct with a tag and an union
     builder->emitIndent();
-    builder->appendFormat("struct %s ", valueTypeName);
+    builder->appendFormat("struct %s ", valueTypeName.c_str());
     builder->blockStart();
 
     builder->emitIndent();
-    builder->appendFormat("enum %s action;", actionEnumName);
+    builder->appendFormat("enum %s action;", actionEnumName.c_str());
     builder->newline();
 
     builder->emitIndent();
@@ -295,7 +297,7 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
 
 void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     builder->emitIndent();
-    builder->appendFormat("switch (%s->action) ", valueName);
+    builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
 
     for (auto a : actionList->actionList) {
@@ -303,7 +305,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
         cstring name = EBPFObject::externalName(action);
-        builder->appendFormat("case %s: ", name);
+        builder->appendFormat("case %s: ", name.c_str());
         builder->newline();
         builder->emitIndent();
 
@@ -318,7 +320,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     }
 
     builder->emitIndent();
-    builder->appendFormat("default: return %s", builder->target->abortReturnCode());
+    builder->appendFormat("default: return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
 
     builder->blockEnd(true);
@@ -331,24 +333,26 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
               "%1%: expected an action call", defaultAction);
     auto mce = defaultAction->to<IR::MethodCallExpression>();
-    P4::MethodCallDescription mcd(mce, program->refMap, program->typeMap);
+    auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
 
-    BUG_CHECK(mcd.instance->is<P4::ActionCall>(), "%1%: expected an action call", mce);
-    auto ac = mcd.instance->to<P4::ActionCall>();
+    auto ac = mi->to<P4::ActionCall>();
+    BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
     auto action = ac->action;
     cstring name = EBPFObject::externalName(action);
     cstring fd = "tableFileDescriptor";
-    cstring table = defaultActionMapName;
+    cstring defaultTable = defaultActionMapName;
     cstring value = "value";
+    cstring key = "key";
 
     builder->emitIndent();
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("int %s = bpf_obj_get(MAP_PATH \"/%s\")", fd.c_str(), table.c_str());
+    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")",
+                          fd.c_str(), defaultTable.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\"); exit(1); }",
-                          fd.c_str(), table.c_str());
+    builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
+                          fd.c_str(), defaultTable.c_str());
     builder->newline();
 
     builder->emitIndent();
@@ -361,13 +365,14 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
-    for (auto p : *mcd.substitution.getParameters()) {
-        builder->emitIndent();
-        builder->appendFormat(".%s = ", p->name.name.c_str());
-        auto arg = mcd.substitution.lookup(p);
+    builder->emitIndent();
+    builder->appendFormat(".u = {.%s = {", name.c_str());
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(p);
         arg->apply(cg);
-        builder->appendLine(",");
+        builder->append(",");
     }
+    builder->append("}},\n");
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
@@ -380,8 +385,82 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("if (ok != 0) { "
                           "perror(\"Could not write in %s\"); exit(1); }",
-                          table);
+                          defaultTable.c_str());
     builder->newline();
+    builder->blockEnd(true);
+
+    // Emit code for table initializer
+    auto entries = t->getEntries();
+    if (entries == nullptr)
+        return;
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("int %s = BPF_OBJ_GET(MAP_PATH \"/%s\")",
+                          fd.c_str(), dataMapName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
+                          fd.c_str(), dataMapName.c_str());
+    builder->newline();
+
+    for (auto e : entries->entries) {
+        builder->emitIndent();
+        builder->blockStart();
+
+        auto entryAction = e->getAction();
+        builder->emitIndent();
+        builder->appendFormat("struct %s %s = {", keyTypeName.c_str(), key.c_str());
+        e->getKeys()->apply(cg);
+        builder->append("}");
+        builder->endOfStatement(true);
+
+        BUG_CHECK(entryAction->is<IR::MethodCallExpression>(),
+                  "%1%: expected an action call", defaultAction);
+        auto mce = entryAction->to<IR::MethodCallExpression>();
+        auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
+
+        auto ac = mi->to<P4::ActionCall>();
+        BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
+        auto action = ac->action;
+        cstring name = EBPFObject::externalName(action);
+
+        builder->emitIndent();
+        builder->appendFormat("struct %s %s = ",
+                              valueTypeName.c_str(), value.c_str());
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat(".action = %s,", name.c_str());
+        builder->newline();
+
+        CodeGenInspector cg(program->refMap, program->typeMap);
+        cg.setBuilder(builder);
+
+        builder->emitIndent();
+        builder->appendFormat(".u = {.%s = {", name.c_str());
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto arg = mi->substitution.lookup(p);
+            arg->apply(cg);
+            builder->append(",");
+        }
+        builder->append("}},\n");
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->append("int ok = ");
+        builder->target->emitUserTableUpdate(builder, fd, key, value);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("if (ok != 0) { "
+                              "perror(\"Could not write in %s\"); exit(1); }",
+                              t->name.name.c_str());
+        builder->newline();
+        builder->blockEnd(true);
+    }
     builder->blockEnd(true);
 }
 

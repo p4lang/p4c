@@ -38,7 +38,15 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
         LOG3("Removing " << type);
         return nullptr;
     }
+    return type;
+}
 
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_SerEnum* type) {
+    prune();  // never remove individual enum members
+    if (!refMap->isUsed(getOriginal<IR::Type_SerEnum>())) {
+        LOG3("Removing " << type);
+        return nullptr;
+    }
     return type;
 }
 
@@ -127,11 +135,6 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
         state->name == IR::ParserState::reject ||
         state->name == IR::ParserState::start)
         return state;
-
-    // Do not eliminate states with annotations other than name.
-    for (const auto* anno : state->getAnnotations()->annotations) {
-        if (anno->name.name != "name") {
-            return state; } }
 
     if (refMap->isUsed(getOriginal<IR::ParserState>()))
         return state;

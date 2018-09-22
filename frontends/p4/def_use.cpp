@@ -34,13 +34,16 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type->is<IR::Type_Boolean>() ||
         type->is<IR::Type_Varbits>() ||
         type->is<IR::Type_Enum>() ||
+        type->is<IR::Type_SerEnum>() ||
         type->is<IR::Type_Error>() ||
         // Since we don't have any operations except assignment for a
         // type described by a type variable, we treat is as a base type.
         type->is<IR::Type_Var>() ||
         // Similarly for tuples.  This may need to be revisited if we
         // add tuple field accessors.
-        type->is<IR::Type_Tuple>())
+        type->is<IR::Type_Tuple>() ||
+        // Also for newtype
+        type->is<IR::Type_Newtype>())
         return new BaseLocation(type, name);
     if (type->is<IR::Type_StructLike>()) {
         type = typeMap->getTypeType(type, true);  // get the canonical version
@@ -627,9 +630,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     // The method call may modify the object, which is part of the method
     visit(expression->method);
     lhs = save;
-    MethodCallDescription mcd(expression, storageMap->refMap, storageMap->typeMap);
-    if (mcd.instance->is<BuiltInMethod>()) {
-        auto bim = mcd.instance->to<BuiltInMethod>();
+    auto mi = MethodInstance::resolve(expression, storageMap->refMap, storageMap->typeMap);
+    if (auto bim = mi->to<BuiltInMethod>()) {
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
         if (name == IR::Type_Header::setInvalid) {
@@ -655,11 +657,11 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 
     // Symbolically call some apply methods (actions and tables)
     const IR::Node* callee = nullptr;
-    if (mcd.instance->is<ActionCall>()) {
-        auto action = mcd.instance->to<ActionCall>()->action;
+    if (mi->is<ActionCall>()) {
+        auto action = mi->to<ActionCall>()->action;
         callee = action;
-    } else if (mcd.instance->isApply()) {
-        auto am = mcd.instance->to<ApplyMethod>();
+    } else if (mi->isApply()) {
+        auto am = mi->to<ApplyMethod>();
         if (am->isTableApply()) {
             auto table = am->object->to<IR::P4Table>();
             callee = table;
@@ -678,15 +680,15 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 
     auto result = LocationSet::empty;
     // For all methods out/inout arguments are written
-    for (auto p : *mcd.substitution.getParameters()) {
-        auto expr = mcd.substitution.lookup(p);
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(p);
         bool save = lhs;
         // pretend we are on the lhs
         lhs = true;
-        visit(expr);
+        visit(arg);
         lhs = save;
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-            auto val = get(expr);
+            auto val = get(arg->expression);
             result = result->join(val);
         }
     }
@@ -854,8 +856,9 @@ bool ComputeWriteSet::preorder(const IR::P4Action* action) {
     ProgramPoint pt(callingContext, action);
     enterScope(action->parameters, decls, pt, false);
     visit(action->body);
-    exitScope(action->parameters, decls);
     currentDefinitions = currentDefinitions->join(returnedDefinitions);
+    setDefinitions(currentDefinitions, action->body);
+    exitScope(action->parameters, decls);
     returnedDefinitions = saveReturned;
     return false;
 }
@@ -881,8 +884,13 @@ bool ComputeWriteSet::preorder(const IR::Function* function) {
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
-
     enterScope(function->type->parameters, locals, point, false);
+
+    // The return value is uninitialized
+    auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
+    auto retVal = definitions->storageMap->addRetVal();
+    currentDefinitions->set(retVal, uninit);
+
     returnedDefinitions = new Definitions();
     visit(function->body);
     currentDefinitions = currentDefinitions->join(returnedDefinitions);

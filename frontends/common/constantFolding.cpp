@@ -27,12 +27,18 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
         return expr;
     if (expr->is<IR::BoolLiteral>())
         return expr;
-    if (expr->is<IR::ListExpression>()) {
-        auto list = expr->to<IR::ListExpression>();
+    if (auto list = expr->to<IR::ListExpression>()) {
         for (auto e : list->components)
             if (getConstant(e) == nullptr)
                 return nullptr;
         return expr;
+    }
+    if (auto cast = expr->to<IR::Cast>()) {
+        // Casts of a constant to a value with type Type_Newtype
+        // are constants, but we cannot fold them.
+        if (getConstant(cast->expr))
+            return expr;
+        return nullptr;
     }
     if (typesKnown) {
         auto ei = EnumInstance::resolve(expr, typeMap);
@@ -82,6 +88,40 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
     return e;
 }
 
+const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
+    if (type->expression != nullptr) {
+        if (auto cst = type->expression->to<IR::Constant>()) {
+            type->size = cst->asInt();
+            type->expression = nullptr;
+            if (type->size <= 0) {
+                ::error("%1%: Illegal type size", type);
+                // Convert it to something legal so we don't get
+                // weird errors elsewhere.
+                type->size = 64;
+            }
+            if (type->size == 1 && type->isSigned)
+                ::error("%1%: Signed types cannot be 1-bit wide", type);
+        } else {
+            ::error("Could not evaluate %1% to a constant", type->expression);
+        }
+    }
+    return type;
+}
+
+const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
+    if (type->expression != nullptr) {
+        if (auto cst = type->expression->to<IR::Constant>()) {
+            type->size = cst->asInt();
+            type->expression = nullptr;
+            if (type->size <= 0)
+                ::error("%1%: Illegal type size", type);
+        } else {
+            ::error("Could not evaluate %1% to a constant", type->expression);
+        }
+    }
+    return type;
+}
+
 const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
     auto init = getConstant(d->initializer);
     if (init == nullptr) {
@@ -109,6 +149,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
         if (init != d->initializer)
             d = new IR::Declaration_Constant(d->srcInfo, d->name, d->annotations, d->type, init);
     }
+    LOG3("Constant " << d << " set to " << init);
     constants.emplace(getOriginal<IR::Declaration_Constant>(), init);
     return d;
 }
@@ -462,7 +503,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     }
     mpz_class value = cbase->value >> l;
     mpz_class mask = 1;
-    mask = mask << (m - l + 1) - 1;
+    mask = (mask << (m - l + 1)) - 1;
     value = value & mask;
     auto resultType = typeMap->getType(getOriginal(), true);
     if (!resultType->is<IR::Type_Bits>())
@@ -621,7 +662,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     if (typesKnown)
         etype = typeMap->getType(getOriginal(), true);
     else
-        etype = e->type;
+        etype = e->destType;
 
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();
@@ -795,10 +836,16 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
 
 const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
-        if (cond->value)
+        if (cond->value) {
             return ifstmt->ifTrue;
-        else
-            return ifstmt->ifFalse; }
+        } else {
+            if (ifstmt->ifFalse == nullptr) {
+                return new IR::EmptyStatement(ifstmt->srcInfo);
+            } else {
+                return ifstmt->ifFalse;
+            }
+        }
+    }
     return ifstmt;
 }
 

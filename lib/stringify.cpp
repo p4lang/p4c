@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace Util {
 cstring toString(bool value) {
-    return value ? "true" : "false";
+    return value ? cstring::literal("true") : cstring::literal("false");
 }
 
 cstring toString(std::string value) {
@@ -28,13 +28,13 @@ cstring toString(std::string value) {
 
 cstring toString(const char* value) {
     if (value == nullptr)
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     return cstring(value);
 }
 
 cstring toString(const void* value) {
     if (value == nullptr)
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     std::stringstream result;
     result << value;
     return result.str();
@@ -42,13 +42,13 @@ cstring toString(const void* value) {
 
 cstring toString(const mpz_class* value) {
     if (value == nullptr)
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     return cstring(value->get_str());
 }
 
 cstring toString(cstring value) {
     if (value.isNull())
-        return cstring("<nullptr>");
+        return cstring::literal("<nullptr>");
     return value;
 }
 
@@ -59,28 +59,18 @@ cstring toString(StringRef value) {
 cstring printf_format(const char* fmt_str, ...) {
     if (fmt_str == nullptr)
         throw std::runtime_error("Null format string");
-
-    int final_n, n = (strlen(fmt_str)) * 2;
-    /* Reserve two times as much as the length of the fmt_str */
-    char* formatted;
     va_list ap;
-    while (1) {
-        formatted = new char[n];
-        strncpy(formatted, fmt_str, n);
-        va_start(ap, fmt_str);
-        final_n = vsnprintf(formatted, n, fmt_str, ap);
-        va_end(ap);
-        if (final_n < 0 || final_n >= n)
-            n += abs(final_n - n + 1);
-        else
-            break;
-    }
-    return cstring(formatted);
+    va_start(ap, fmt_str);
+    cstring formatted = vprintf_format(fmt_str, ap);
+    va_end(ap);
+    return formatted;
 }
 
 // printf into a string
 cstring vprintf_format(const char* fmt_str, va_list ap) {
     static char buf[128];
+    va_list ap_copy;
+    va_copy(ap_copy, ap);
     if (fmt_str == nullptr)
         throw std::runtime_error("Null format string");
 
@@ -89,9 +79,10 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
         throw std::runtime_error("Error in vsnprintf");
     if (static_cast<size_t>(size) >= sizeof(buf)) {
         char* formatted = new char[size + 1];
-        vsnprintf(formatted, size, fmt_str, ap);
-        return cstring(formatted);
+        vsnprintf(formatted, size + 1, fmt_str, ap_copy);
+        return cstring::own(formatted, size);
     }
+    va_end(ap_copy);
     return cstring(buf);
 }
 

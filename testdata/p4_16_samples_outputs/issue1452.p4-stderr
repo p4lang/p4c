@@ -1,0 +1,3 @@
+issue1452.p4(9): [--Wwarn=uninitialized_use] warning: x may be uninitialized
+        a(x);
+          ^

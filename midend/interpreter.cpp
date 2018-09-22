@@ -832,9 +832,7 @@ void ExpressionEvaluator::postorder(const IR::PathExpression* expression) {
 }
 
 void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) {
-    MethodCallDescription mcd(expression, refMap, typeMap);
-    auto mi = mcd.instance;
-
+    MethodInstance* mi = MethodInstance::resolve(expression, refMap, typeMap);
     for (auto arg : *expression->arguments) {
         auto argValue = get(arg->expression);
         CHECK_NULL(argValue);
@@ -961,10 +959,10 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
 
     // For all other methods we act conservatively:
     // in arguments are unchanged, and the out arguments have an unknown value.
-    for (auto p : *mcd.substitution.getParameters()) {
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-            auto expr = mcd.substitution.lookup(p);
-            auto val = get(expr);
+            auto arg = mi->substitution.lookup(p);
+            auto val = get(arg->expression);
             val->setAllUnknown();
         }
     }

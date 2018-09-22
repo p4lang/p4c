@@ -25,6 +25,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
 #include "ir.h"
@@ -78,11 +80,18 @@ class JSONGenerator {
 
     template<typename T, typename U>
     void generate(const std::pair<T, U> &v) {
-        out << "{" << std::endl << ++indent << "\"first\" : ";
+        ++indent;
+        out << "{" << std::endl;
+        toJSON(v);
+        out << std::endl << --indent << "}";
+    }
+
+    template<typename T, typename U>
+    void toJSON(const std::pair<T, U> &v) {
+        out << indent << "\"first\" : ";
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
         generate(v.second);
-        out << std::endl << --indent << "}";
     }
 
     template<typename T>
@@ -96,6 +105,52 @@ class JSONGenerator {
         out << "\"value\" : ";
         generate(*v);
         out << std::endl << --indent << "}";
+    }
+
+    template<typename T>
+    void generate(const std::set<T> &v) {
+        out << "[" << std::endl;
+        if (v.size() > 0) {
+            auto it = v.begin();
+            out << ++indent;
+            generate(*it);
+            for (it++; it != v.end(); ++it) {
+                out << "," << std::endl << indent;
+                generate(*it);
+            }
+            out << std::endl << --indent;
+        }
+        out << "]";
+    }
+
+    template<typename T>
+    void generate(const ordered_set<T> &v) {
+        out << "[" << std::endl;
+        if (v.size() > 0) {
+            auto it = v.begin();
+            out << ++indent;
+            generate(*it);
+            for (it++; it != v.end(); ++it) {
+                out << "," << std::endl << indent;
+                generate(*it);
+            }
+            out << std::endl << --indent;
+        }
+        out << "]";
+    }
+
+    template<typename K, typename V>
+    void generate(const std::map<K, V> &v) {
+        out << "[" << std::endl;
+        if (v.size() > 0) {
+            auto it = v.begin();
+            out << ++indent;
+            generate(*it);
+            for (it++; it != v.end(); ++it) {
+                out << "," << std::endl << indent;
+                generate(*it); }
+            out << std::endl << --indent; }
+        out << "]";
     }
 
     template<typename K, typename V>

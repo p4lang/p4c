@@ -36,13 +36,16 @@ using Parser = P4::P4Parser;
 %x LINE1 LINE2 LINE3
 %s NORMAL
 
+
 %%
 
 [ \t\r]+              ;
 [\n]                  { BEGIN INITIAL; }
 "//".*                { driver.onReadComment(yytext+2, true); }
 "/*"                  { BEGIN COMMENT; }
-<COMMENT>([^*]|[*][*]*[^/])*"*/"  { driver.onReadComment(yytext, false); BEGIN NORMAL; }
+<COMMENT>([^*]|[*]+[^/*])*[*]+"/" {
+                         /* http://www.cs.dartmouth.edu/~mckeeman/cs118/assignments/comment.html */
+                         driver.onReadComment(yytext, false); BEGIN NORMAL; }
 
 <INITIAL>"#line"      { BEGIN(LINE1); }
 <INITIAL>"# "         { BEGIN(LINE1); }
@@ -88,6 +91,7 @@ using Parser = P4::P4Parser;
 "int"           { BEGIN(NORMAL); return Parser::make_INT(driver.yylloc); }
 "key"           { BEGIN(NORMAL); return Parser::make_KEY(driver.yylloc); }
 "match_kind"    { BEGIN(NORMAL); return Parser::make_MATCH_KIND(driver.yylloc); }
+"type"          { BEGIN(NORMAL); return Parser::make_TYPE(driver.yylloc); }
 "out"           { BEGIN(NORMAL); return Parser::make_OUT(driver.yylloc); }
 "parser"        { BEGIN(NORMAL); return Parser::make_PARSER(driver.yylloc); }
 "package"       { BEGIN(NORMAL); return Parser::make_PACKAGE(driver.yylloc); }
@@ -118,7 +122,7 @@ using Parser = P4::P4Parser;
                       driver.onReadIdentifier(name);
                       return Parser::make_IDENTIFIER(name, driver.yylloc);
                   case Util::ProgramStructure::SymbolKind::Type:
-                      return Parser::make_TYPE(name, driver.yylloc);
+                      return Parser::make_TYPE_IDENTIFIER(name, driver.yylloc);
                   default:
                       BUG("Unexpected symbol kind");
                   }
@@ -198,6 +202,6 @@ using Parser = P4::P4Parser;
 ";"            { BEGIN(NORMAL); return Parser::make_SEMICOLON(driver.yylloc); }
 "@"            { BEGIN(NORMAL); return Parser::make_AT(driver.yylloc); }
 
-.              { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
+<*>.|\n        { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
 
 %%

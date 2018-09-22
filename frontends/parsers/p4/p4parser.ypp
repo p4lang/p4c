@@ -59,6 +59,11 @@ inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) 
     return out;
 }
 
+struct KV {
+    cstring name;
+    const IR::Expression* expression;
+};
+
 // Bison uses the types you provide to %type to make constructors for the
 // variant type it uses under the hood, but its code generation is a little
 // naive and it always prepends 'const' to the type. This is problematic when
@@ -149,13 +154,13 @@ typedef const IR::Type ConstType;
 %token      TRUE FALSE THIS
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
             ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-            INT KEY SELECT MATCH_KIND OUT PACKAGE PARSER RETURN STATE STRUCT
+            INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER RETURN STATE STRUCT
             SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
-%token<cstring> IDENTIFIER TYPE STRING_LITERAL
+%token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
 
-%type<IR::ID*>              name nonTypeName
+%type<IR::ID*>              name nonTypeName nonTableKwName
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
@@ -209,6 +214,8 @@ typedef const IR::Type ConstType;
 %type<IR::IndexedVector<IR::Declaration>*>  parserLocalElements controlLocalDeclarations
 %type<IR::StructField*>     structField
 %type<IR::IndexedVector<IR::StructField>*>  structFieldList
+%type<IR::IndexedVector<IR::SerEnumMember>*> specifiedIdentifierList
+%type<IR::SerEnumMember*>   specifiedIdentifier
 %type<IR::Method*>          methodPrototype functionPrototype
 %type<IR::Vector<IR::Method>*>  methodPrototypes
 %type<IR::Property*>        tableProperty
@@ -220,6 +227,8 @@ typedef const IR::Type ConstType;
 %type<IR::Entry*>           entry
 %type<IR::Vector<IR::Entry>*>  entriesList
 %type<IR::MethodCallExpression*>  actionBinding
+%type<IR::NameMap<IR::Expression>*> kvList
+%type<KV*> kvPair
 
 %left COMMA
 %nonassoc QUESTION
@@ -269,6 +278,7 @@ declaration
     | instantiation           { $$ = $1; }
     | errorDeclaration        { driver.onReadErrorDeclaration($1); $$ = nullptr; }
     | matchKindDeclaration    { $$ = $1; }
+    | functionDeclaration     { $$ = $1; }
     ;
 
 nonTypeName
@@ -278,11 +288,20 @@ nonTypeName
     | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
     | STATE       { $$ = new IR::ID(@1, "state"); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
+    | TYPE        { $$ = new IR::ID(@1, "type"); }
     ;
 
 name
     : nonTypeName { $$ = $1; }
-    | TYPE        { $$ = new IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    ;
+
+nonTableKwName
+    : IDENTIFIER       { $$ = new IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | APPLY            { $$ = new IR::ID(@1, "apply"); }
+    | STATE            { $$ = new IR::ID(@1, "state"); }
+    | TYPE             { $$ = new IR::ID(@1, "type"); }
     ;
 
 optCONST
@@ -303,6 +322,17 @@ annotations
 annotation
     : "@" name                        { $$ = new IR::Annotation(@1, *$2, {}); }
     | "@" name "(" expressionList ")" { $$ = new IR::Annotation(@1, *$2, *$4); }
+    | "@" name "(" kvList ")"         { $$ = new IR::Annotation(@1, *$2, *$4); }
+    ;
+
+kvList
+    : kvPair                          { $$ = new IR::NameMap<IR::Expression>;
+                                        $$->add($1->name, $1->expression); }
+    | kvList "," kvPair               { $$ = $1; $$->add($3->name, $3->expression); }
+    ;
+
+kvPair
+    : name "=" expression             { $$ = new KV; $$->name = $1->name; $$->expression = $3; }
     ;
 
 parameterList
@@ -317,7 +347,8 @@ nonEmptyParameterList
     ;
 
 parameter
-    : optAnnotations direction typeRef name { $$ = new IR::Parameter(@4, *$4, $1, $2, $3); }
+    : optAnnotations direction typeRef name { $$ = new IR::Parameter(@4, *$4, $1, $2, $3, nullptr); }
+    | optAnnotations direction typeRef name "=" expression { $$ = new IR::Parameter(@4, *$4, $1, $2, $3, $6); }
     ;
 
 direction
@@ -492,7 +523,6 @@ simpleKeysetExpression
     | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
-// experimental
 valueSetDeclaration
     : optAnnotations
         VALUESET "<" baseType ">" "(" expression ")" name ";"
@@ -575,7 +605,7 @@ methodPrototype
     : optAnnotations functionPrototype ";" { $$ = $2; $2->annotations = $1; }
     | optAnnotations ABSTRACT functionPrototype ";"    { $$ = $3; $$->setAbstract();
                                                          $3->annotations = $1; }  // experimental
-    | optAnnotations TYPE "(" parameterList ")" ";"  // constructor
+    | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@4, *$4);
                                           auto mt = new IR::Type_Method(@2, par);
                                           $$ = new IR::Method(@2, IR::ID(@2, $2), mt, $1); }
@@ -597,8 +627,8 @@ namedType
     ;
 
 prefixedType
-    : TYPE                             { $$ = new IR::Path(IR::ID(@1, $1)); }
-    | dotPrefix TYPE                   { $$ = new IR::Path(IR::ID(@2, $2), true);
+    : TYPE_IDENTIFIER                  { $$ = new IR::Path(IR::ID(@1, $1)); }
+    | dotPrefix TYPE_IDENTIFIER        { $$ = new IR::Path(IR::ID(@2, $2), true);
                                          driver.structure->clearPath(); }
     ;
 
@@ -623,17 +653,24 @@ baseType
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | BIT "<" INTEGER ">"
-      { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), false); }
+      { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), false); }
     | INT "<" INTEGER ">"
-      { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
+      { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), true); }
     | VARBIT "<" INTEGER ">"
-      { $$ = IR::Type::Varbits::get(@3, parseConstant(@3, $3, 0)->asInt()); }
+      { $$ = IR::Type::Varbits::get(@1+@4, parseConstant(@3, $3, 0)->asInt()); }
+
+    | BIT "<" "(" expression ")" ">"
+      { $$ = new IR::Type_Bits(@1+@6, $4, false); }
+    | INT "<" "(" expression ")" ">"
+      { $$ = new IR::Type_Bits(@1+@6, $4, true); }
+    | VARBIT "<" "(" expression ")" ">"
+      { $$ = new IR::Type_Varbits(@1+@6, $4); }
     ;
 
 typeOrVoid
-    : typeRef                          { $$ = $1; }
-    | VOID                             { $$ = IR::Type_Void::get(); }
-    | nonTypeName                      { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
+    : typeRef     { $$ = $1; }
+    | VOID        { $$ = IR::Type_Void::get(); }
+    | IDENTIFIER  { $$ = new IR::Type_Name(@1, new IR::Path(*(new IR::ID(@1, $1)))); }
         // This is necessary because template arguments may introduce the return type
     ;
 
@@ -666,7 +703,7 @@ realTypeArg
     ;
 
 // For use in contexts where the `<` might be a less-than rather than introducing a type
-// argument list -- we only allow the token after `<` to be a TYPE, not an ID
+// argument list -- we only allow the token after `<` to be a TYPE_IDENTIFIER, not an ID
 realTypeArgumentList
     : realTypeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
     | realTypeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
@@ -717,7 +754,20 @@ structField
 enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
-        "{" identifierList "}" { $$ = new IR::Type_Enum(@2, *$3, *$6); }
+        "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
+    | optAnnotations ENUM BIT "<" INTEGER ">" name { driver.structure->declareType(*$7); }
+        "{" specifiedIdentifierList "}" {
+            auto type = IR::Type::Bits::get(@3+@6, parseConstant(@5, $5, 0)->asInt());
+            $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
+    ;
+
+specifiedIdentifierList
+    : specifiedIdentifier     { $$ = new IR::IndexedVector<IR::SerEnumMember>(); $$->push_back($1); }
+    | specifiedIdentifierList "," specifiedIdentifier { $$ = $1; $1->push_back($3); }
+    ;
+
+specifiedIdentifier
+    : name "=" initializer    { $$ = new IR::SerEnumMember(@1+@3, *$1, $3); }
     ;
 
 errorDeclaration
@@ -741,6 +791,10 @@ typedefDeclaration
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
+    | optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
+          $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
+    | optAnnotations TYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+                        $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
     ;
 
 /*************************** STATEMENTS *************************/
@@ -867,10 +921,10 @@ tableProperty
         { auto l = new IR::EntriesList(@3, *$6);
           auto id = IR::ID(@3+@7, "entries");
           $$ = new IR::Property(@3, id, $1, l, $2.isConst); }
-    | optAnnotations optCONST IDENTIFIER "=" initializer ";"
+    | optAnnotations optCONST nonTableKwName "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
-          auto id = IR::ID(@3, $3);
-          $$ = new IR::Property(@3, id, $1, v, $2.isConst); }
+          auto id = *$3;
+          $$ = new IR::Property($3->srcInfo, id, $1, v, $2.isConst); }
     ;
 
 keyElementList
@@ -963,9 +1017,8 @@ initializer
 
 /**************** Expressions ****************/
 
-// experimental
 functionDeclaration
-    : functionPrototype blockStatement   { $$ = new IR::Function(@1+@2, $1->name, $1->type, $2); }
+    : functionPrototype blockStatement   { $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
     ;
 
 argumentList
@@ -1013,7 +1066,7 @@ expression
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
     | THIS                               { $$ = new IR::This(@1); }  // experimental
     | nonTypeName                        { $$ = new IR::PathExpression(*$1); }
-    | "." nonTypeName                    { $$ = new IR::PathExpression(new IR::Path(*$2, true)); }
+    | dotPrefix nonTypeName              { $$ = new IR::PathExpression(new IR::Path(*$2, true)); driver.structure->clearPath(); }
     | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }

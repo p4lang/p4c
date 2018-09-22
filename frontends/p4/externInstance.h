@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <boost/optional.hpp>
 #include "lib/cstring.h"
+#include "frontends/p4/parameterSubstitution.h"
 
 namespace IR {
 class ConstructorCallExpression;
@@ -50,6 +51,7 @@ struct ExternInstance final {
     const IR::Expression* expression;     // The original expression passed to resolve().
     const IR::Type_Extern* type;          // The type of the instance.
     const IR::Vector<IR::Argument>* arguments;  // The instance's constructor arguments.
+    ParameterSubstitution substitution;   // Mapping from parameter names to arguments
     const IR::IAnnotated* annotations;    // If non-null, the instance's annotations.
 
     /**

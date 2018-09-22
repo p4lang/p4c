@@ -54,21 +54,18 @@ TEST(cstring, compare) {
     cstring c = "simple";
     cstring c1 = "";
 
-    // I will disable lint, because I want
-    // out specific overload to be used, and I have
-    // no idea what EXPECT_EQ does.
-    EXPECT_TRUE(c == "simple");  // NOLINT
-    EXPECT_TRUE(c == c);
-    EXPECT_FALSE(c == c1);
+    EXPECT_EQ(c, "simple");
+    EXPECT_EQ(c, c);
+    EXPECT_NE(c, c1);
     EXPECT_EQ(c.size(), strlen("simple"));
 
     std::string s = "simple";
     std::stringstream str;
     str << s;
     c = str;
-    EXPECT_TRUE(c == "simple");  // NOLINT
-    EXPECT_TRUE(c == c);
-    EXPECT_FALSE(c == c1);
+    EXPECT_EQ(c, "simple");
+    EXPECT_EQ(c, c);
+    EXPECT_NE(c, c1);
     EXPECT_EQ(c.size(), strlen("simple"));
     EXPECT_FALSE(c != "simple");  // NOLINT
     EXPECT_FALSE(c == "other");   // NOLINT
@@ -98,11 +95,19 @@ TEST(cstring, find) {
 
 TEST(cstring, substr) {
     cstring c = "simplest";
-    ASSERT_TRUE(c.substr(3) == "plest");  // NOLINT
-    ASSERT_TRUE(c.substr(3, 2) == "pl");  // NOLINT
-    ASSERT_TRUE(c.substr(10) == "");      // NOLINT
-    ASSERT_TRUE(c.substr(3, 10) == "plest");  // NOLINT
-    ASSERT_TRUE(c.exceptLast(2) == "simple"); // NOLINT
+    EXPECT_EQ(c.substr(3), "plest");
+    EXPECT_EQ(c.substr(3, 2), "pl");
+    EXPECT_EQ(c.substr(10), "");
+    EXPECT_EQ(c.substr(3, 10), "plest");
+    EXPECT_EQ(c.exceptLast(2), "simple");
+}
+
+TEST(cstring, replace) {
+    cstring c = "Original";
+    EXPECT_EQ(c.replace("in", "out"), "Origoutal");
+    EXPECT_EQ(c.replace("", "out"), c);
+    EXPECT_EQ(c.replace("i", "o"), "Orogonal");
+    EXPECT_EQ(c.replace("i", ""), "Orgnal");
 }
 
 }  // namespace Test

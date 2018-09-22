@@ -42,9 +42,9 @@ class PathName final {
 #endif
     }
 
-    PathName(cstring str) : str(str)  {}        // NOLINT(runtime/explicit)
-    PathName(const char* str) : str(str) {}     // NOLINT(runtime/explicit)
-    PathName(std::string str) : str(str) {}     // NOLINT(runtime/explicit)
+    PathName(cstring str) : str(str)  {}             // NOLINT(runtime/explicit)
+    PathName(const char* str) : str(str) {}          // NOLINT(runtime/explicit)
+    PathName(const std::string &str) : str(str) {}   // NOLINT(runtime/explicit)
     // get the file name extension.  It starts at the last dot.
     // e.g, exe
     cstring getExtension() const;

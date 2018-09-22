@@ -18,12 +18,15 @@ set (MIDEND_SRCS
   convertEnums.cpp
   copyStructures.cpp
   eliminateTuples.cpp
+  eliminateNewtype.cpp
+  eliminateSerEnums.cpp
   expandEmit.cpp
   expandLookahead.cpp
   interpreter.cpp
   local_copyprop.cpp
   nestedStructs.cpp
   noMatch.cpp
+  orderArguments.cpp
   parserUnroll.cpp
   predication.cpp
   removeExits.cpp
@@ -35,18 +38,20 @@ set (MIDEND_SRCS
   simplifyKey.cpp
   simplifySelectCases.cpp
   simplifySelectList.cpp
-  synthesizeValidField.cpp
   tableHit.cpp
   validateProperties.cpp
   )
 
 set (MIDEND_HDRS
   actionSynthesis.h
+  checkSize.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
   copyStructures.h
   eliminateTuples.h
+  eliminateNewtype.h
+  eliminateSerEnums.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h
@@ -56,6 +61,7 @@ set (MIDEND_HDRS
   midEndLast.h
   nestedStructs.h
   noMatch.h
+  orderArguments.h
   parserUnroll.h
   predication.h
   removeExits.h
@@ -67,7 +73,6 @@ set (MIDEND_HDRS
   simplifyKey.h
   simplifySelectCases.h
   simplifySelectList.h
-  synthesizeValidField.h
   tableHit.h
   validateProperties.h
   )

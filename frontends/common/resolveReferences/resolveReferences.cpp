@@ -28,7 +28,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
 
     for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
         const IR::INamespace* current = *it;
-        LOG2("Trying to resolve in " << current->toString());
+        LOG3("Trying to resolve in " << current->toString());
 
         if (current->is<IR::IGeneralNamespace>()) {
             auto gen = current->to<IR::IGeneralNamespace>();
@@ -61,7 +61,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                     Util::SourceInfo nsi = name.srcInfo;
                     Util::SourceInfo dsi = d->getNode()->srcInfo;
                     bool before = dsi <= nsi;
-                    LOG2("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                    LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
                     return before;
                 };
                 decls = decls->where(locationFilter);
@@ -69,7 +69,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
 
             auto vector = decls->toVector();
             if (!vector->empty()) {
-                LOG2("Resolved in " << dbp(current->getNode()));
+                LOG3("Resolved in " << dbp(current->getNode()));
                 return vector;
             } else {
                 continue;
@@ -100,12 +100,12 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 Util::SourceInfo nsi = name.srcInfo;
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
-                LOG2("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
                 if (!before)
                     continue;
             }
 
-            LOG2("Resolved in " << dbp(current->getNode()));
+            LOG3("Resolved in " << dbp(current->getNode()));
             auto result = new std::vector<const IR::IDeclaration*>();
             result->push_back(decl);
             return result;
@@ -124,23 +124,36 @@ const IR::IDeclaration*
 ResolutionContext::resolveUnique(IR::ID name,
                                  P4::ResolutionType type,
                                  bool forwardOK) const {
-    auto decls = resolve(name, type, forwardOK);
+    const std::vector<const IR::IDeclaration*> *decls = resolve(name, type, forwardOK);
+    // Check overloaded symbols.
+    if (!argumentStack.empty() && decls->size() > 1) {
+        auto arguments = argumentStack.back();
+        decls = Util::Enumerator<const IR::IDeclaration*>::createEnumerator(*decls)->
+                where([arguments](const IR::IDeclaration* d) {
+                        auto func = d->to<IR::IFunctional>();
+                        if (func == nullptr)
+                            return true;
+                        return func->callMatches(arguments); })->
+                toVector();
+    }
+
     if (decls->empty()) {
         ::error("Could not find declaration for %1%", name);
         return nullptr;
     }
-    if (decls->size() > 1) {
-        ::error("Multiple matching declarations for %1%", name);
-        for (auto a : *decls)
-            ::error("Candidate: %1%", a);
-        return nullptr;
-    }
-    return decls->at(0);
+    if (decls->size() == 1)
+        return decls->at(0);
+
+    ::error("Multiple matching declarations for %1%", name);
+    for (auto a : *decls)
+        ::error("Candidate: %1%", a);
+    return nullptr;
 }
 
 const IR::Type *
 ResolutionContext::resolveType(const IR::Type *type) const {
-    /// @todo: why is `true` supplied for `forwardOK` here?
+    // We allow lookups forward for type variables, which are declared after they are used
+    // in function returns.  forwardOK = true below.
     if (auto tname = type->to<IR::Type_Name>())
         return resolveUnique(tname->path->name, ResolutionType::Type, true)->to<IR::Type>();
     return type;
@@ -177,7 +190,7 @@ ResolveReferences::ResolveReferences(ReferenceMap* refMap,
 }
 
 void ResolveReferences::addToContext(const IR::INamespace* ns) {
-    LOG1("Adding to context " << dbp(ns));
+    LOG2("Adding to context " << dbp(ns));
     BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     checkShadowing(ns);
     context->push(ns);
@@ -189,13 +202,13 @@ void ResolveReferences::addToGlobals(const IR::INamespace* ns) {
 }
 
 void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
-    LOG1("Removing from context " << dbp(ns));
+    LOG2("Removing from context " << dbp(ns));
     BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     context->pop(ns);
 }
 
 void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
-    LOG1("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
+    LOG2("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
     ResolutionContext* ctx = context;
     if (path->absolute)
         ctx = new ResolutionContext(rootNamespace);
@@ -226,10 +239,13 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
         for (auto p : *prev) {
             const IR::Node* pnode = p->getNode();
             if (pnode == node) continue;
-            if ((pnode->is<IR::Method>() || pnode->is<IR::Type_Extern>()) &&
-                (node->is<IR::Method>() || node->is<IR::Function>()))
-                // Methods can overload each other if they have a different number of arguments
-                // Also, the constructor is supposed to have the same name as the class
+            if ((pnode->is<IR::Method>() || pnode->is<IR::Type_Extern>() ||
+                 pnode->is<IR::P4Program>()) &&
+                (node->is<IR::Method>() || node->is<IR::Function>() ||
+                 node->is<IR::P4Control>() || node->is<IR::P4Parser>() ||
+                 node->is<IR::Type_Package>()))
+                // These can overload each other.
+                // Also, the constructor is supposed to have the same name as the class.
                 continue;
             if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
                 // attribute locals often match attributes
@@ -271,7 +287,7 @@ void ResolveReferences::postorder(const IR::P4Program*) {
     resolveForward.pop_back();
     BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
     context = nullptr;
-    LOG1("Reference map " << refMap);
+    LOG2("Reference map " << refMap);
 }
 
 bool ResolveReferences::preorder(const IR::This* pointer) {
@@ -280,6 +296,18 @@ bool ResolveReferences::preorder(const IR::This* pointer) {
         ::error("%1%: can only be used in the definition of an abstract method", pointer);
     refMap->setDeclaration(pointer, decl);
     return true;
+}
+
+bool ResolveReferences::preorder(const IR::MethodCallExpression* call) {
+    LOG2("Adding to context " << dbp(call));
+    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
+    context->enterMethodCall(call->arguments);
+    visit(call->method);
+    LOG2("Removing from context " << dbp(call));
+    context->exitMethodCall();
+    visit(call->typeArguments);
+    visit(call->arguments);
+    return false;
 }
 
 bool ResolveReferences::preorder(const IR::PathExpression* path) {
@@ -422,8 +450,19 @@ void ResolveReferences::postorder(const IR::BlockStatement *b)
 { removeFromContext(b); }
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
+    visit(decl->annotations);
     refMap->usedName(decl->name.name);
-    return true;
+
+    // This looks a lot like a method call
+    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
+    context->enterMethodCall(decl->arguments);
+    visit(decl->type);
+    context->exitMethodCall();
+    visit(decl->arguments);
+    visit(decl->properties);
+    if (decl->initializer)
+        visit(decl->initializer);
+    return false;
 }
 
 #undef PROCESS_NAMESPACE

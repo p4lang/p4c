@@ -1,17 +1,18 @@
 #ifndef LIB_N4_H_
 #define LIB_N4_H_
 
+#include <cstdint>
 #include <iomanip>
 #include <ostream>
 
 class n4 {
     /* format a value as 4 chars */
-    unsigned long val, div;
+    uint64_t val, div;
 
  public:
-    explicit n4(unsigned long v, unsigned long d = 1) : val(v), div(d) {}
+    explicit n4(uint64_t v, uint64_t d = 1) : val(v), div(d) {}
     std::ostream &print(std::ostream &os) const {
-        unsigned long v;
+        uint64_t v;
         if (val % div && val < div * 100) {
             if ((v = val * 1000 + div/2) < div*1000) {
                 char ofill = os.fill('0');
@@ -29,18 +30,18 @@ class n4 {
         v = (val + div/2) / div;
         if (v < 10000) {
             os << std::setw(4) << v;
-        } else if (v < 999500L) {
+        } else if (v < UINT64_C(999500)) {
             os << std::setw(3) << (v + 500)/1000 << 'K';
-        } else if (v < 9950000L) {
-            v = (v + 50000L)/100000L;
+        } else if (v < UINT64_C(9950000)) {
+            v = (v + UINT64_C(50000))/UINT64_C(100000);
             os << v/10 << '.' << v%10 << 'M';
-        } else if (v < 999500000L) {
-            os << std::setw(3) << (v + 500000L)/1000000L << 'M';
-        } else if (v < 9950000000L) {
-            v = (v + 50000000L)/100000000L;
+        } else if (v < UINT64_C(999500000)) {
+            os << std::setw(3) << (v + UINT64_C(500000))/UINT64_C(1000000) << 'M';
+        } else if (v < UINT64_C(9950000000)) {
+            v = (v + UINT64_C(50000000))/UINT64_C(100000000);
             os << v/10 << '.' << v%10 << 'G';
         } else {
-            os << std::setw(3) << (v + 500000000L)/1000000000L << 'G';
+            os << std::setw(3) << (v + UINT64_C(500000000))/UINT64_C(1000000000) << 'G';
         }
         return os; }
 };

@@ -55,6 +55,7 @@ class Options(object):
         self.verbose = False
         self.preserveTmp = False
         self.observationLog = None
+        self.usePsa = False
 
 def nextWord(text, sep = None):
     # Split a text at the indicated separator.
@@ -104,8 +105,8 @@ def FindExe(dirname, exe):
         dir = os.path.dirname(dir)
     return exe
 
-def run_timeout(options, args, timeout, stderr):
-    if options.verbose:
+def run_timeout(verbose, args, timeout, stderr):
+    if verbose:
         print("Executing ", " ".join(args))
     local = Local()
     local.process = None
@@ -126,7 +127,7 @@ def run_timeout(options, args, timeout, stderr):
         # never even started
         reportError("Process failed to start")
         return -1
-    if options.verbose:
+    if verbose:
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
@@ -354,6 +355,9 @@ class RunBMV2(object):
         self.actions = []
         self.switchLogFile = "switch.log"  # .txt is added by BMv2
         self.readJson()
+        self.cmd_line_args = getattr(options, 'switchOptions', ())
+        self.target_specific_cmd_line_args = getattr(options, 'switchTargetSpecificOptions', ())
+
     def readJson(self):
         with open(self.jsonfile) as jf:
             self.json = json.load(jf)
@@ -383,6 +387,14 @@ class RunBMV2(object):
             self.do_cli_command(self.parse_table_add(cmd))
         elif first == "setdefault":
             self.do_cli_command(self.parse_table_set_default(cmd))
+        elif first == "mirroring_add":
+            # Pass through mirroring_add commands unchanged, with same
+            # arguments as expected by simple_switch_CLI
+            self.do_cli_command(first + " " + cmd)
+        elif first == "mc_mgrp_create" or first == "mc_node_create" or first == "mc_node_associate":
+            # Pass through multicast group commands unchanged, with
+            # same arguments as expected by simple_switch_CLI
+            self.do_cli_command(first + " " + cmd)
         elif first == "packet":
             interface, data = nextWord(cmd)
             interface = int(interface)
@@ -537,6 +549,13 @@ class RunBMV2(object):
             print("Running model")
         wait = 0  # Time to wait before model starts running
 
+        if self.options.usePsa:
+            switch = "psa_switch"
+            switch_cli = "psa_switch_CLI"
+        else:
+            switch = "simple_switch"
+            switch_cli = "simple_switch_CLI"
+
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
         if rand is None:
@@ -549,10 +568,14 @@ class RunBMV2(object):
         except OSError:
             pass
         try:
-            runswitch = [FindExe("behavioral-model", "simple_switch"),
+            runswitch = [FindExe("behavioral-model", switch),
                          "--log-file", self.switchLogFile, "--log-flush",
                          "--use-files", str(wait), "--thrift-port", thriftPort,
                          "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
+            if self.cmd_line_args:
+                runswitch += self.cmd_line_args
+            if self.target_specific_cmd_line_args:
+                runswitch += ['--',] + self.target_specific_cmd_line_args
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
@@ -598,7 +621,7 @@ class RunBMV2(object):
                 return FAILURE
             time.sleep(0.1)
 
-            runcli = [FindExe("behavioral-model", "simple_switch_CLI"), "--thrift-port", thriftPort]
+            runcli = [FindExe("behavioral-model", switch_cli), "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
 
@@ -625,10 +648,10 @@ class RunBMV2(object):
             # This only works on Unix: negative returncode is
             # minus the signal number that killed the process.
             if sw.returncode != 0 and sw.returncode != -15:  # 15 is SIGTERM
-                reportError("simple_switch died with return code", sw.returncode);
+                reportError(switch, "died with return code", sw.returncode);
                 rv = FAILURE
             elif self.options.verbose:
-                print("simple_switch exit code", sw.returncode)
+                print(switch, "exit code", sw.returncode)
             cli.wait()
             if cli.returncode != 0 and cli.returncode != -15:
                 reportError("CLI process failed with exit code", cli.returncode)
@@ -730,7 +753,7 @@ def run_model(options, tmpdir, jsonfile, testfile):
 ######################### main
 
 def usage(options):
-    print("usage:", options.binary, "[-v] [-observation-log <file>] <json file> <stf file>");
+    print("usage:", options.binary, "[-v] [-p] [-observation-log <file>] <json file> <stf file>");
 
 def main(argv):
     options = Options()
@@ -741,6 +764,8 @@ def main(argv):
             options.preserveTmp = True
         elif argv[0] == "-v":
             options.verbose = True
+        elif argv[0] == "-p":
+            options.usePsa = True
         elif argv[0] == '-observation-log':
             if len(argv) == 1:
                 reportError("Missing argument", argv[0])

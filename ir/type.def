@@ -78,7 +78,8 @@ class Type_State : Type_Base {
 
 /// Represents both bit<> and int<> types in P4 v1.1+
 class Type_Bits : Type_Base {
-    int size;
+    optional int size;
+    NullOK optional Expression expression; // only used temporarily
     bool isSigned;
     static Type_Bits get(Util::SourceInfo si, int sz, bool isSigned = false);
     static Type_Bits get(int sz, bool isSigned = false);
@@ -93,7 +94,8 @@ class Type_Bits : Type_Base {
 }
 
 class Type_Varbits : Type_Base {
-    int         size;   // if zero it means "unknown"
+    optional int         size;   // if zero it means "unknown"
+    NullOK optional Expression  expression;  // only used temporarily
     static Type_Varbits get(Util::SourceInfo si, int size = 0);
     static Type_Varbits get();
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
@@ -104,8 +106,12 @@ class Parameter : Declaration, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Direction           direction;
     Type                type;
+    optional NullOK Expression defaultValue;
     Annotations getAnnotations() const override { return annotations; }
-    bool hasOut() const { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
+    bool hasOut() const
+    { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
+    bool isOptional() const {
+        return getAnnotation(Annotation::optionalAnnotation) != nullptr; }
     dbprint { out << annotations << direction << ' ' << type << ' ' << name; }
 }
 
@@ -392,15 +398,38 @@ class Type_String : Type_Base {
     toString{ return "string"; }
 }
 
-class Type_Enum : Type_Declaration, ISimpleNamespace {
+class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
     inline IndexedVector<Declaration_ID> members;
+    Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
- }
+}
+
+/// A member of a serializable enum with a backing value
+class SerEnumMember : Declaration, CompileTimeValue {
+    Expression value;
+    validate { CHECK_NULL(value); }
+#nodbprint
+}
+
+/** A serializable enumeration with a backing type */
+class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
+    Type_Bits type;
+    inline IndexedVector<SerEnumMember> members;
+    Annotations getAnnotations() const override { return annotations; }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return members.getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return members.getDeclaration(name); }
+#nodbprint
+    validate{ members.check_null(); }
+}
 
 class Type_Table : Type, IApply {
     P4Table  table;
@@ -459,6 +488,7 @@ class ArgumentInfo {
     bool leftValue;
     bool compileTimeConstant;
     Type type;
+    ID   name;  // only present if using named arguments
 #nodbprint
 }
 
@@ -480,7 +510,7 @@ class Type_Action : Type_MethodBase {
 #nodbprint
 }
 
-class Method : Declaration, IAnnotated {
+class Method : Declaration, IAnnotated, IFunctional {
     Type_Method type;
     optional bool isAbstract = false;
     optional Annotations annotations = Annotations::empty;
@@ -488,9 +518,23 @@ class Method : Declaration, IAnnotated {
     size_t minParameterCount() const { return type->minParameterCount(); }
     void setAbstract() { isAbstract = true; }
     Annotations getAnnotations() const override { return annotations; }
+    ParameterList getParameters() const override { return type->parameters; }
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
+    Type                 type;
+    int width_bits() const override { return type->width_bits(); }
+    Annotations getAnnotations() const override { return annotations; }
+#nodbprint
+}
+
+/// A newtype is similar to typedef, but it introduces a new type; the
+/// the new type does not inherit any
+/// of the operations of the original type.  The new type has
+/// assignment, equality, and casts to/from the original type.
+/// The keyword for newtype is actually `type'.
+class Type_Newtype : Type_Declaration, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
@@ -509,9 +553,17 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType, IAnn
         return methods.getEnumerator()->as<const IDeclaration*>()
             ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
-    Method lookupMethod(cstring name, int argCount) const;
     validate{ methods.check_null(); }
     Annotations getAnnotations() const override { return annotations; }
+    /// Returns the method that matches the specified arguments.
+    /// Returns nullptr if no method or more than one method match.
+    /// In the latter case it also reports an error.
+    Method lookupMethod(IR::ID name, Vector<Argument> arguments) const;
+    /// Returns the constructor that matches the specified arguments.
+    /// Returns nullptr if no constructor or more than one constructor matches.
+    /// In the latter case it also reports an error.
+    Method lookupConstructor(Vector<Argument> arguments) const
+    { return lookupMethod(name, arguments); }
 }
 
 /** @} *//* end group irdefs */

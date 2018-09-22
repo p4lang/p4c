@@ -36,12 +36,16 @@ namespace P4 {
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
    - tables have an actions property
+   - table entries lists are const
    - instantiations appear at the top-level only
    - switch statements do not occur in actions
    - instantiations do not occur in actions
    - constructors are not invoked in actions
    - returns and exits do not appear in parsers
+   - exits do not appear in functions
    - extern constructors have the same name as the enclosing extern
+   - names of all parameters are distinct
+   - no duplicate declarations in toplevel program
  */
 class ValidateParsedProgram final : public Inspector {
     void container(const IR::IContainer* type);
@@ -54,6 +58,7 @@ class ValidateParsedProgram final : public Inspector {
  public:
     ValidateParsedProgram()
     { setName("ValidateParsedProgram"); }
+    void postorder(const IR::P4Program* program) override;
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;
     void postorder(const IR::Method* t) override;
@@ -61,6 +66,7 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::ParserState* s) override;
     void postorder(const IR::P4Table* t) override;
     void postorder(const IR::Type_Bits* type) override;
+    void postorder(const IR::Type_Varbits* type) override;
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Variable* decl) override;
     void postorder(const IR::Declaration_Instance* inst) override;

@@ -119,7 +119,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        return true; },
                    "Choose output format for the P4Runtime API description (default is binary).");
     registerOption("--Wdisable", "diagnostic",
-        [this](const char *diagnostic) {
+        [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic,
                                                       DiagnosticAction::Ignore);
@@ -132,7 +132,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
            "diagnostic is specified.",
         OptionFlags::OptionalArgument);
     registerOption("--Wwarn", "diagnostic",
-        [this](const char *diagnostic) {
+        [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic,
                                                       DiagnosticAction::Warn);
@@ -145,7 +145,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
            "as warnings (the default) if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
     registerOption("--Werror", "diagnostic",
-        [this](const char *diagnostic) {
+        [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic,
                                                       DiagnosticAction::Error);
@@ -164,7 +164,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [](const char* arg) { Log::addDebugSpec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
     registerOption("-v", nullptr,
-                   [this](const char*) { Log::increaseVerbosity(); return true; },
+                   [](const char*) { Log::increaseVerbosity(); return true; },
                    "[Compiler debugging] Increase verbosity level (can be repeated)");
     registerOption("--top4", "pass1[,pass2]",
                    [this](const char* arg) {
@@ -292,7 +292,7 @@ FILE* CompilerOptions::preprocess() {
         // line for the preprocessor
         char * driverP4IncludePath =
           isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
-        cmd += cstring(" -C -undef -nostdinc") + " " + preprocessor_options
+        cmd += cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " + preprocessor_options
             + (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "")
             + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
 

@@ -46,6 +46,51 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
     return result;
 }
 
+const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
+    // We leave returns in abstract functions alone
+    if (findContext<IR::Declaration_Instance>()) {
+        prune();
+        return function;
+    }
+
+    HasExits he;
+    (void)function->apply(he);
+    if (!he.hasReturns) {
+        // don't pollute the code unnecessarily
+        prune();
+        return function;
+    }
+
+    bool returnsVal = function->type->returnType != nullptr &&
+                      !function->type->returnType->is<IR::Type_Void>();
+
+    cstring var = refMap->newName(variableName);
+    returnVar = IR::ID(var, nullptr);
+    IR::Declaration_Variable* retvalDecl = nullptr;
+    if (returnsVal) {
+        var = refMap->newName(retValName);
+        returnedValue = IR::ID(var, nullptr);
+        retvalDecl = new IR::Declaration_Variable(returnedValue, function->type->returnType);
+    }
+    auto f = new IR::BoolLiteral(false);
+    auto decl = new IR::Declaration_Variable(returnVar, IR::Type_Boolean::get(), f);
+    BUG_CHECK(stack.empty(), "Non-empty stack");
+    push();
+    visit(function->body);
+    auto body = new IR::BlockStatement(function->body->srcInfo, function->body->annotations);
+    body->push_back(decl);
+    if (retvalDecl != nullptr)
+        body->push_back(retvalDecl);
+    body->components.append(function->body->components);
+    if (returnsVal)
+        body->push_back(new IR::ReturnStatement(new IR::PathExpression(returnedValue)));
+    auto result = new IR::Function(function->srcInfo, function->name, function->type, body);
+    pop();
+    BUG_CHECK(stack.empty(), "Non-empty stack");
+    prune();
+    return result;
+}
+
 const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
     visit(control->controlLocals, "controlLocals");
 
@@ -77,10 +122,17 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
 
 const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
     set(Returns::Yes);
+    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+
     auto left = new IR::PathExpression(returnVar);
-    return new IR::AssignmentStatement(statement->srcInfo, left,
-                                       new IR::BoolLiteral(true));
-    return statement;
+    vec->push_back(new IR::AssignmentStatement(statement->srcInfo, left,
+                                               new IR::BoolLiteral(true)));
+    if (statement->expression != nullptr) {
+        left = new IR::PathExpression(returnedValue);
+        vec->push_back(new IR::AssignmentStatement(statement->srcInfo, left,
+                                                   statement->expression));
+    }
+    return new IR::BlockStatement(*vec);
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::ExitStatement* statement) {

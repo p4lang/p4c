@@ -363,7 +363,7 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
 
 static const IR::Expression*
 explodeLabel(const IR::Constant* value, const IR::Constant* mask,
-             const std::vector<int> &sizes) {
+             const std::vector<const IR::Type::Bits *> &fieldTypes) {
     if (mask->value == 0)
         return new IR::DefaultExpression(value->srcInfo);
     bool useMask = mask->value != -1;
@@ -372,14 +372,13 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     mpz_class m = mask->value;
 
     auto rv = new IR::ListExpression(value->srcInfo, {});
-    for (auto it = sizes.rbegin(); it != sizes.rend(); ++it) {
-        int s = *it;
-        auto bits = Util::ripBits(v, s);
-        auto type = IR::Type_Bits::get(s);
-        const IR::Expression* expr = new IR::Constant(value->srcInfo, type, bits, value->base);
+    for (auto it = fieldTypes.rbegin(); it != fieldTypes.rend(); ++it) {
+        int sz = (*it)->width_bits();
+        auto bits = Util::ripBits(v, sz);
+        const IR::Expression* expr = new IR::Constant(value->srcInfo, *it, bits, value->base);
         if (useMask) {
-            auto maskbits = Util::ripBits(m, s);
-            auto maskcst = new IR::Constant(mask->srcInfo, type, maskbits, mask->base);
+            auto maskbits = Util::ripBits(m, sz);
+            auto maskcst = new IR::Constant(mask->srcInfo, *it, maskbits, mask->base);
             expr = new IR::Mask(mask->srcInfo, expr, maskcst);
         }
         rv->components.insert(rv->components.begin(), expr);
@@ -390,12 +389,10 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
 }
 
 static const IR::Type*
-explodeType(const std::vector<int> &sizes) {
+explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes) {
     auto rv = new IR::Vector<IR::Type>();
-    for (auto it = sizes.begin(); it != sizes.end(); ++it) {
-        int s = *it;
-        auto type = IR::Type_Bits::get(s);
-        rv->push_back(type);
+    for (auto it = fieldTypes.begin(); it != fieldTypes.end(); ++it) {
+        rv->push_back(*it);
     }
     if (rv->size() == 1)
         return rv->at(0);
@@ -421,13 +418,17 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     const IR::Expression* select = nullptr;
     if (parser->select != nullptr) {
         auto list = new IR::ListExpression(parser->select->srcInfo, {});
-        std::vector<int> sizes;
+        std::vector<const IR::Type::Bits *> fieldTypes;
         for (auto e : *parser->select) {
             auto c = conv.convert(e);
             list->components.push_back(c);
-            int w = c->type->width_bits();
-            BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
-            sizes.push_back(w);
+            if (auto *t = c->type->to<IR::Type::Bits>()) {
+                fieldTypes.push_back(t);
+            } else {
+                auto w = c->type->width_bits();
+                BUG_CHECK(w > 0, "Unknown width for expression %1%", e);
+                fieldTypes.push_back(IR::Type::Bits::get(w));
+            }
         }
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
@@ -449,7 +450,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     return nullptr;
                 }
 
-                auto type = explodeType(sizes);
+                auto type = explodeType(fieldTypes);
                 auto sizeAnnotation = value_set->getAnnotation("size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {
@@ -473,14 +474,12 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             }
             for (auto v : c->values) {
                 if (auto first = v.first->to<IR::Constant>()) {
-                    auto expr = explodeLabel(first, v.second, sizes);
+                    auto expr = explodeLabel(first, v.second, fieldTypes);
                     auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
                     cases.push_back(sc);
-                } else if (auto first = v.first->to<IR::PathExpression>()) {
-                    auto sc = new IR::SelectCase(c->srcInfo, first, deststate);
-                    cases.push_back(sc);
                 } else {
-                    ::error("Expected constant or parser value set in %1%", v.first);
+                    auto sc = new IR::SelectCase(c->srcInfo, v.first, deststate);
+                    cases.push_back(sc);
                 }
             }
         }
@@ -564,13 +563,15 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
         options.preprocessor_options += ppoptions; }
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
-    if (FILE* file = options.preprocess()) {
-        if (!::errorCount()) {
+    if (!::errorCount()) {
+        if (FILE* file = options.preprocess()) {
             auto code = P4::P4ParserDriver::parse(file, options.file);
             if (code && !::errorCount())
-                for (auto decl : code->declarations)
-                    declarations->push_back(decl); }
-        options.closeInput(file); }
+                for (auto decl : code->objects)
+                    declarations->push_back(decl);
+            options.closeInput(file);
+        }
+    }
 }
 
 void ProgramStructure::loadModel() {
@@ -758,6 +759,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     auto ctr = get(directCounters, table->name);
     const std::vector<IR::ID> &actionsToDo =
             action_profile ? action_profile->actions : table->actions;
+    cstring default_action = table->default_action;
     for (auto a : actionsToDo) {
         auto action = actions.get(a);
         cstring newname;
@@ -773,14 +775,17 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         }
         auto ale = new IR::ActionListElement(a.srcInfo, new IR::PathExpression(newname));
         actionList->push_back(ale);
+        if (table->default_action.name == action->name.name) {
+            default_action = newname;
+        }
     }
     if (!table->default_action.name.isNullOrEmpty() &&
-        !actionList->getDeclaration(actions.newname(table->default_action))) {
+        !actionList->getDeclaration(default_action)) {
         actionList->push_back(
             new IR::ActionListElement(
                 new IR::Annotations(
                     {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
-                new IR::PathExpression(actions.newname(table->default_action)))); }
+                new IR::PathExpression(default_action))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
 
@@ -838,7 +843,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     }
 
     if (!table->default_action.name.isNullOrEmpty()) {
-        auto act = new IR::PathExpression(actions.newname(table->default_action));
+        auto act = new IR::PathExpression(default_action);
         auto args = new IR::Vector<IR::Argument>();
         if (table->default_action_args != nullptr) {
             for (auto e : *table->default_action_args) {
@@ -1836,6 +1841,11 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     auto kindarg = counterType(m);
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(m->name, m->annotations);
+    if (m->pre_color != nullptr) {
+        auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
+        if (meterPreColor != nullptr)
+            annos = annos->addAnnotation("pre_color", meterPreColor);
+    }
     auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
     return decl;
 }
@@ -2139,7 +2149,6 @@ const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculat
         }
         result->fields.insert(result->fields.end(), fl->fields.begin(), fl->fields.end());
         result->payload = result->payload || fl->payload;
-        /* FIXME -- do something with fl->annotations? */
     }
     return result;
 }
@@ -2194,6 +2203,13 @@ void ProgramStructure::createChecksumVerifications() {
 
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
+
+            for (auto annot : cf->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
+            for (auto annot : flc->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
             LOG3("Converted " << flc);
         }
     }
@@ -2252,6 +2268,13 @@ void ProgramStructure::createChecksumUpdates() {
             args->push_back(new IR::Argument(algo));
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
+
+            for (auto annot : cf->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
+            for (auto annot : flc->annotations->annotations)
+                body->annotations = body->annotations->add(annot);
+
             LOG3("Converted " << flc);
         }
     }

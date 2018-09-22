@@ -126,7 +126,8 @@ class FindUninitialized : public Inspector {
     }
 
     void checkOutParameters(const IR::IDeclaration* block,
-                            const IR::ParameterList* parameters, Definitions* defs) {
+                            const IR::ParameterList* parameters,
+                            Definitions* defs, bool checkReturn = false) {
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
@@ -145,6 +146,15 @@ class FindUninitialized : public Inspector {
                                   "out parameter %1% may be uninitialized when "
                                   "%2% terminates", p, block->getName());
             }
+        }
+
+        if (checkReturn) {
+            // check returned value
+            auto storage = definitions->storageMap->getRetVal();
+            if (storage != nullptr && defs->has(storage))
+                // If this definition is "live" it means that we have
+                // not returned on all paths; returns kill this definition.
+                ::error("Function %1% does not return a value on all paths", block);
         }
     }
 
@@ -165,7 +175,8 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << dbp(func));
         currentPoint = ProgramPoint(func);
         visit(func->body);
-        checkOutParameters(func, func->type->parameters, getCurrentDefinitions());
+        bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
+        checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), checkReturn);
         return false;
     }
 
@@ -348,9 +359,8 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::MethodCallExpression* expression) override {
         LOG3("FU Visiting " << dbp(expression));
         visit(expression->method);
-        MethodCallDescription mcd(expression, refMap, typeMap);
-        if (mcd.instance->is<BuiltInMethod>()) {
-            auto bim = mcd.instance->to<BuiltInMethod>();
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (auto bim = mi->to<BuiltInMethod>()) {
             auto base = getReads(bim->appliedTo, true);
             cstring name = bim->name.name;
             if (name == IR::Type_Stack::push_front ||
@@ -369,11 +379,11 @@ class FindUninitialized : public Inspector {
 
         // Symbolically call some methods (actions and tables)
         const IR::Node* callee = nullptr;
-        if (mcd.instance->is<ActionCall>()) {
-            auto action = mcd.instance->to<ActionCall>()->action;
+        if (mi->is<ActionCall>()) {
+            auto action = mi->to<ActionCall>()->action;
             callee = action;
-        } else if (mcd.instance->isApply()) {
-            auto am = mcd.instance->to<ApplyMethod>();
+        } else if (mi->isApply()) {
+            auto am = mi->to<ApplyMethod>();
             if (am->isTableApply()) {
                 auto table = am->object->to<IR::P4Table>();
                 callee = table;
@@ -386,8 +396,8 @@ class FindUninitialized : public Inspector {
             (void)callee->apply(fu);
         }
 
-        for (auto p : *mcd.substitution.getParameters()) {
-            auto expr = mcd.substitution.lookup(p);
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto expr = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::Out) {
                 // out parameters are not read; they behave as if they are on
                 // the LHS of an assignment
