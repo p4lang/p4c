@@ -146,9 +146,3 @@ def check_root():
     """ This function returns False if the user does not have root privileges.
         Caution: Only works on Unix systems """
     return (os.getuid() == 0)
-
-
-def check_travis():
-    """ This function returns True if the tests are being run in a
-    travis environment."""
-    return (os.environ.get('TRAVIS') == 'true')
