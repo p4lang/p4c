@@ -21,9 +21,6 @@ src/action_helpers.cpp \
 src/direct_res_spec.h \
 src/direct_res_spec.cpp
 
-libbmpi_la_LIBADD = \
-$(top_builddir)/src/bm_sim/libbmsim.la
-
 lib_LTLIBRARIES = libbmpi.la
 
 nobase_include_HEADERS = bm/PI/pi.h

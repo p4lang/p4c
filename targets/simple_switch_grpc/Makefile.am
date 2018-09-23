@@ -41,9 +41,7 @@ endif
 libsimple_switch_grpc_la_LIBADD = \
 $(builddir)/../simple_switch/libsimpleswitch.la \
 $(builddir)/../../PI/libbmpi.la \
-libbm_grpc_dataplane.la \
--lpifeproto -lpigrpcserver -lpi \
-$(GRPC_LIBS) $(PROTOBUF_LIBS)
+libbm_grpc_dataplane.la
 
 if WITH_THRIFT
 libsimple_switch_grpc_la_LIBADD += \
@@ -51,6 +49,10 @@ $(builddir)/../../src/bm_runtime/libbmruntime.la \
 $(builddir)/../../thrift_src/libruntimestubs.la \
 $(builddir)/../simple_switch/libsimpleswitch_thrift.la
 endif
+
+libsimple_switch_grpc_la_LIBADD += \
+-lpifeproto -lpigrpcserver -lpi \
+$(GRPC_LIBS) $(PROTOBUF_LIBS)
 
 # dataplane_interface.proto
 
