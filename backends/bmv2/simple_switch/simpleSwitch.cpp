@@ -128,8 +128,7 @@ CONVERT_EXTERN_FUNCTION(clone) {
     auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto primitive = mkPrimitive(prim);
     auto parameters = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     parameters->append(session);
 
     if (id >= 0) {
@@ -162,8 +161,7 @@ CONVERT_EXTERN_FUNCTION(clone3) {
     auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto primitive = mkPrimitive(prim);
     auto parameters = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     parameters->append(session);
 
     if (id >= 0) {
@@ -219,8 +217,7 @@ CONVERT_EXTERN_FUNCTION(digest) {
     }
     auto primitive = mkPrimitive("generate_digest");
     auto parameters = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(dest);
     cstring listName = "digest";
@@ -255,8 +252,7 @@ CONVERT_EXTERN_FUNCTION(resubmit) {
     }
     auto primitive = mkPrimitive("resubmit");
     auto parameters = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     cstring listName = "resubmit";
     // If we are supplied a type argument that is a named type use
     // that for the list name.
@@ -288,8 +284,7 @@ CONVERT_EXTERN_FUNCTION(recirculate) {
     }
     auto primitive = mkPrimitive("recirculate");
     auto parameters = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     cstring listName = "recirculate";
     // If we are supplied a type argument that is a named type use
     // that for the list name.
@@ -334,8 +329,7 @@ CONVERT_EXTERN_FUNCTION(random) {
     auto primitive =
         mkPrimitive(v1model.random.modify_field_rng_uniform.name);
     auto params = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
@@ -352,8 +346,7 @@ CONVERT_EXTERN_FUNCTION(truncate) {
     }
     auto primitive = mkPrimitive(v1model.truncate.name);
     auto params = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     auto len = ctxt->conv->convert(mc->arguments->at(0)->expression);
     params->append(len);
     return primitive;
@@ -538,9 +531,9 @@ CONVERT_EXTERN_INSTANCE(direct_counter) {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name", name);
         jctr->emplace("id", nextId("counter_arrays"));
-        // TODO(jafingerhut) - add line/col here?
         jctr->emplace("is_direct", true);
         jctr->emplace("binding", it->second->controlPlaneName());
+        jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
         ctxt->json->counters->append(jctr);
     }
 }
@@ -605,7 +598,7 @@ CONVERT_EXTERN_INSTANCE(action_profile) {
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
-    // TODO(jafingerhut) - add line/col here?
+    action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
@@ -660,7 +653,7 @@ CONVERT_EXTERN_INSTANCE(action_selector) {
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
-    // TODO(jafingerhut) - add line/col here?
+    action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
@@ -783,7 +776,7 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                         calculations, usePayload, mc);
                     cksum->emplace("name", refMap->newName("cksum_"));
                     cksum->emplace("id", nextId("checksums"));
-                    // TODO(jafingerhut) - add line/col here?
+                    cksum->emplace_non_null("source_info", stat->sourceInfoJsonObj());
                     auto jleft = conv->convert(mi->expr->arguments->at(2)->expression);
                     cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
                     cksum->emplace("type", "generic");
