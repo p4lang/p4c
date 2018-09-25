@@ -126,6 +126,10 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
 
 const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
     if (ref->path->name.name == "latest") {
+        if (structure->latest == nullptr) {
+            ::error("%1%: latest not yet defined", ref);
+            return ref;
+        }
         return structure->latest;
     }
     if (ref->path->name.name == "next") {
