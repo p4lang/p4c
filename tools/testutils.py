@@ -29,6 +29,7 @@ SUCCESS = 0
 FAILURE = 1
 SKIPPED = 2  # used occasionally to indicate that a test was not executed
 
+
 def is_err(p4filename):
     """ True if the filename represents a p4 program that should fail. """
     return "_errors" in p4filename

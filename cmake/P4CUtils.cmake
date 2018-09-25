@@ -141,11 +141,26 @@ endmacro(p4c_add_test_list)
 
 # generate a list of test name suffixes based on specified testsuites
 function(p4c_find_test_names testsuites tests)
-  foreach(ts "${testsuites}")
+  set(__tests "")
+  p4c_sanitize_path("${testsuites}" abs_paths)
+  foreach(ts ${abs_paths})
     file (GLOB __testfiles RELATIVE ${P4C_SOURCE_DIR} ${ts})
     list (APPEND __tests ${__testfiles})
   endforeach()
   set(${tests} "${__tests}" PARENT_SCOPE)
+endfunction()
+
+# convert the paths from a list of input files to their absolute paths
+# does not follow symlinks.
+#   - files is a list of (relative) file paths
+#   - abs_files is the return set of absolute file paths
+function(p4c_sanitize_path files abs_files)
+  foreach(file ${files})
+    get_filename_component(__file "${file}"
+                       ABSOLUTE BASE_DIR "${P4C_SOURCE_DIR}")
+    list (APPEND __abs_files ${__file})
+  endforeach()
+  set(${abs_files} "${__abs_files}" PARENT_SCOPE)
 endfunction()
 
 # generate all the tests specified in the testsuites: builds a list of tests
@@ -159,21 +174,26 @@ endfunction()
 #
 # The macro generates the test files in a directory prefixed by tag.
 #
-macro(p4c_add_tests tag driver testsuites xfail)
+macro(p4c_add_tests tag driver testsuites xfails)
   set(__tests "")
+  set(__xfails "")
   p4c_find_test_names("${testsuites}" __tests)
-  p4c_add_test_list (${tag} ${driver} "${__tests}" "${xfail}" "${ARGN}")
+  p4c_find_test_names("${xfails}" __xfails)
+  p4c_add_test_list (${tag} ${driver} "${__tests}" "${__xfails}" "${ARGN}")
 endmacro(p4c_add_tests)
 
 # same as p4c_add_tests but adds --p4runtime flag when invoking test driver
 # unless test is listed in p4rt_exclude
-macro(p4c_add_tests_w_p4runtime tag driver testsuites xfail p4rt_exclude)
+macro(p4c_add_tests_w_p4runtime tag driver testsuites xfails p4rt_exclude)
+  set(__tests "")
+  set(__xfails "")
   p4c_find_test_names("${testsuites}" __tests)
+  p4c_find_test_names("${xfails}" __xfails)
   set(__tests_no_p4runtime "${p4rt_exclude}")
   set(__tests_p4runtime "${__tests}")
   list (REMOVE_ITEM __tests_p4runtime ${__tests_no_p4runtime})
-  p4c_add_test_list (${tag} ${driver} "${__tests_no_p4runtime}" "${xfail}" "${ARGN}")
-  p4c_add_test_list (${tag} ${driver} "${__tests_p4runtime}" "${xfail}" "--p4runtime ${ARGN}")
+  p4c_add_test_list (${tag} ${driver} "${__tests_no_p4runtime}" "${__xfails}" "${ARGN}")
+  p4c_add_test_list (${tag} ${driver} "${__tests_p4runtime}" "${__xfails}" "--p4runtime ${ARGN}")
 endmacro(p4c_add_tests_w_p4runtime)
 
 # add rules to make check and recheck for a specific test suite

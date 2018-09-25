@@ -22,7 +22,7 @@ from ebpfenv import Bridge
 from target import EBPFTarget
 # path to the tools folder of the compiler
 sys.path.insert(0, os.path.dirname(
-    os.path.abspath(__file__)) + '/../../../tools')
+    os.path.realpath(__file__)) + '/../../../tools')
 from testutils import *
 
 
@@ -160,11 +160,10 @@ class Target(EBPFTarget):
 
     def run(self):
         # Root is necessary to load ebpf into the kernel
-        if !check_root():
+        if not check_root():
             errmsg = "This test requires root privileges; skipping execution."
             report_err(self.outputs["stderr"], errmsg)
             return SKIPPED
-
         result = self._create_runtime()
         if result != SUCCESS:
             return result

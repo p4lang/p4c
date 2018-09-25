@@ -18,7 +18,7 @@ import os
 import sys
 from target import EBPFTarget
 sys.path.insert(0, os.path.dirname(
-    os.path.abspath(__file__)) + '/../../../tools')
+    os.path.realpath(__file__)) + '/../../../tools')
 from testutils import *
 
 
