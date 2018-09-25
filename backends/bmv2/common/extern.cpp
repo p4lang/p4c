@@ -172,7 +172,7 @@ ExternConverter::createFieldList(ConversionContext* ctxt,
     int id = nextId(group);
     fl->emplace("id", id);
     fl->emplace("name", listName);
-    // TODO(jafingerhut) - add line/col here?
+    fl->emplace_non_null("source_info", expr->sourceInfoJsonObj());
     auto elements = mkArrayField(fl, "elements");
     addToFieldList(ctxt, expr, elements);
     return id;
