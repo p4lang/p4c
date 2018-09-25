@@ -20,7 +20,7 @@ from glob import glob
 from target import EBPFTarget
 # path to the tools folder of the compiler
 sys.path.insert(0, os.path.dirname(
-    os.path.abspath(__file__)) + '/../../../tools')
+    os.path.realpath(__file__)) + '/../../../tools')
 from testutils import *
 
 
