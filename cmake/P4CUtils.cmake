@@ -150,7 +150,7 @@ function(p4c_find_test_names testsuites tests)
   set(${tests} "${__tests}" PARENT_SCOPE)
 endfunction()
 
-# convert the paths from a list of input files to their absolute value,
+# convert the paths from a list of input files to their absolute paths
 # does not follow symlinks.
 #   - files is a list of (relative) file paths
 #   - abs_files is the return set of absolute file paths
