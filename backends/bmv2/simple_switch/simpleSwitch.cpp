@@ -818,6 +818,11 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto parseV1Arch = new ParseV1Architecture(structure);
     auto main = tlb->getMain();
     if (!main) return;  // no main
+
+    if (main->type->name != "V1Switch")
+        ::warning("%1%: the main package should be called V1Switch"
+                  "; are you using the wrong architecture?", main->type->name);
+
     main->apply(*parseV1Arch);
     if (::errorCount() > 0)
         return;

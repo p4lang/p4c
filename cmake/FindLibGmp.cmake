@@ -26,6 +26,7 @@
 #   LIBGMP_LIBRARIES - The libraries needed to use LibGmp
 #   LIBGMP_DEFINITIONS - Compiler switches required for using LibGmp
 find_package(PkgConfig QUIET)
+find_package(Threads)
 PKG_CHECK_MODULES(PC_LIBGMP QUIET gmp)
 set(LIBGMP_DEFINITIONS ${PC_LIBGMP_CFLAGS_OTHER})
 
@@ -55,6 +56,5 @@ find_package_handle_standard_args(LibGmp
 mark_as_advanced(LIBGMP_INCLUDE_DIR LIBGMP_LIBRARY LIBGMPXX_LIBRARY)
 
 if(LIBGMP_FOUND)
-    set(LIBGMP_LIBRARIES ${LIBGMP_LIBRARY} ${LIBGMPXX_LIBRARY})
+    set(LIBGMP_LIBRARIES ${LIBGMPXX_LIBRARY} ${LIBGMP_LIBRARY})
 endif()
-
