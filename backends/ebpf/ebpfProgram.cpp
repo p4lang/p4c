@@ -29,6 +29,10 @@ namespace EBPF {
 
 bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
+    if (pack->type->name != "ebpfFilter")
+        ::warning("%1%: the main ebpf package should be called ebpfFilter"
+                  "; are you using the wrong architecture?", pack->type->name);
+
     if (pack->getConstructorParameters()->size() != 2) {
         ::error("Expected toplevel package %1% to have 2 parameters", pack->type);
         return false;
