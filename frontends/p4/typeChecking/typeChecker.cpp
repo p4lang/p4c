@@ -39,16 +39,21 @@ class ConstantTypeSubstitution : public Transform {
                              ReferenceMap* refMap,
                              TypeMap* typeMap) : subst(subst), refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(subst); CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        LOG3("ConstantTypeSubstitution " << subst);
         setName("ConstantTypeSubstitution"); }
     const IR::Node* postorder(IR::Constant* cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
         if (!cstType->is<IR::ITypeVar>())
             return cst;
-        auto repl = subst->get(cstType->to<IR::ITypeVar>());
+        auto repl = cstType;
+        while (repl != nullptr && repl->is<IR::ITypeVar>())
+            repl = subst->get(repl->to<IR::ITypeVar>());
         if (repl != nullptr && !repl->is<IR::ITypeVar>()) {
             // maybe the substitution could not infer a width...
             LOG2("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
+        } else {
+            LOG2("No type inferred for " << cst << " repl is " << repl);
         }
         return cst;
     }
