@@ -48,7 +48,7 @@ control d(out bool b) {
 
         bool eout;
         einst.apply({ 0 }, eout);
-        b = h.isValid() && eout;
+        b = h.isValid() && eout && h3[1].isValid() && s1.h.isValid();
     }
 }
 top(d()) main;

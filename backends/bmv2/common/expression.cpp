@@ -535,6 +535,21 @@ void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
     }
 }
 
+void ExpressionConverter::postorder(const IR::StructInitializerExpression* expression)  {
+    // Handle like a ListExpression
+    auto result = new Util::JsonArray();
+    mapExpression(expression, result);
+    if (simpleExpressionsOnly) {
+        ::error("%1%: expression to complex for this target", expression);
+        return;
+    }
+
+    for (auto e : expression->components) {
+        auto t = get(e->expression);
+        result->append(t);
+    }
+}
+
 void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);

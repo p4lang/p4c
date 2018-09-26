@@ -19,11 +19,17 @@ struct tuple_0 {
 
 extern bit<16> get<T>(in T data);
 control cc() {
+<<<<<<< 8af0e6b445341eac6e0f948de9f7331dab1b9c46
     headers hdr_0;
     headers tmp;
     apply {
         tmp = { hdr_0.ipv4_option_timestamp };
         get<headers>(tmp);
+=======
+    headers hdr_1;
+    apply {
+        get<headers>({hdr_1.ipv4_option_timestamp});
+>>>>>>> Moved structure initializer creation to a separate pass
     }
 }
 

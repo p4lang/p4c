@@ -411,6 +411,8 @@ class StructInitializerExpression : Expression {
     /// May only be known after type checking; so it can be empty.
     ID name;
     inline IndexedVector<NamedExpression> components;
+    /// If true this represents a header.
+    bool isHeader;
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
 }

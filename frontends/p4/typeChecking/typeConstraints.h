@@ -28,13 +28,16 @@ namespace P4 {
 
 // A list of equality constraints on types.
 class TypeConstraints final {
-    // Requires two types to be equal.
+    /// Requires two types to be equal.
     class EqualityConstraint : public IHasDbPrint {
      public:
         const IR::Type* left;
         const IR::Type* right;
-        EqualityConstraint(const IR::Type* left, const IR::Type* right)
-                : left(left), right(right) {
+        /// Constraint which produced this one.  May be nullptr.
+        const EqualityConstraint* derivedFrom;
+        EqualityConstraint(const IR::Type* left, const IR::Type* right,
+                           EqualityConstraint* derivedFrom)
+                : left(left), right(right), derivedFrom(derivedFrom) {
             CHECK_NULL(left); CHECK_NULL(right);
             if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
                 BUG("Unifying type names %1% and %2%", left, right);
@@ -77,19 +80,19 @@ class TypeConstraints final {
     /// A variable is unifiable if it is marked so and it not already
     /// part of definedVariables.
     bool isUnifiableTypeVariable(const IR::Type* type);
-    void addEqualityConstraint(const IR::Type* left, const IR::Type* right);
+    void addEqualityConstraint(
+        const IR::Type* left, const IR::Type* right, EqualityConstraint* derivedFrom = nullptr);
 
     /*
      * Solve the specified constraint.
      * @param root       Element where error is signalled if necessary.
      * @param subst      Variable substitution which is updated with new constraints.
      * @param constraint Constraint to solve.
-     * @param reportErrors If true report errors.
      * @return           True on success.
      */
     bool solve(const IR::Node* root, EqualityConstraint *constraint,
-               TypeVariableSubstitution *subst, bool reportErrors);
-    TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors);
+               TypeVariableSubstitution *subst);
+    TypeVariableSubstitution* solve(const IR::Node* root);
     void dbprint(std::ostream& out) const;
 };
 }  // namespace P4

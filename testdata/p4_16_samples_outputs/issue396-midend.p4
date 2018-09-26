@@ -29,15 +29,29 @@ control d(out bool b) {
         b = h_0.isValid() && eout_0;
 =======
     H h_1;
+    H[2] h3;
+    H s_h;
+    H s1_h;
     bool eout;
     H tmp_0;
     @hidden action act() {
+        h_1.setValid();
         h_1.x = 32w0;
+        s_h.setValid();
+        s1_h.setValid();
+        s1_h.x = 32w0;
+        h3[0].setValid();
+        h3[1].setValid();
+        h3[1].x = 32w1;
         tmp_0.setValid();
         tmp_0.x = 32w0;
         eout = tmp_0.isValid();
+<<<<<<< 8af0e6b445341eac6e0f948de9f7331dab1b9c46
         b = h_1.isValid() && eout;
 >>>>>>> Implemented struct initializers - currently inferred by type inference
+=======
+        b = h_1.isValid() && eout && h3[1].isValid() && s1_h.isValid();
+>>>>>>> Moved structure initializer creation to a separate pass
     }
     @hidden table tbl_act {
         actions = {

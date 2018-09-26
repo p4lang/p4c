@@ -53,6 +53,7 @@ limitations under the License.
 #include "simplifyParsers.h"
 #include "specialize.h"
 #include "strengthReduction.h"
+#include "structInitializers.h"
 #include "tableKeyNames.h"
 #include "toP4/toP4.h"
 #include "typeChecking/typeChecker.h"
@@ -142,6 +143,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckNamedArgs(),
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new BindTypeVariables(&typeMap),
+        new StructInitializers(&refMap, &typeMap),
         // Another round of constant folding, using type information.
         new ClearTypeMap(&typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters

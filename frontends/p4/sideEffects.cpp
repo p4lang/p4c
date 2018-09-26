@@ -482,6 +482,15 @@ class DismantleExpression : public Transform {
             rw.emplace(expression, result);
         }
 
+        void postorder(const IR::StructInitializerExpression* expression) override {
+            const SetOfLocations* result = new SetOfLocations();
+            for (auto e : expression->components) {
+                auto s = ::get(rw, e->expression);
+                result = result->join(s);
+            }
+            rw.emplace(expression, result);
+        }
+
         void postorder(const IR::ListExpression* expression) override {
             const SetOfLocations* result = new SetOfLocations();
             for (auto e : expression->components) {
@@ -568,16 +577,16 @@ class DismantleExpression : public Transform {
                 continue;
             }
             // If the parameter contains header values and the
-            // argument is a list expression then we also use a
-            // temporary.  This makes the job of the SetHeaders pass
-            // later simpler (otherwise we have to handle this case
-            // there).
+            // argument is a list expression or a struct initializer
+            // then we also use a temporary.  This makes the job of
+            // the SetHeaders pass later simpler (otherwise we have to
+            // handle this case there).
             auto ptype = typeMap->getType(p, true);
             if (!containsHeaderType(ptype))
                 continue;
 
-            auto argType = typeMap->getType(arg, true);
-            if (argType->is<IR::Type_Tuple>()) {
+            if (arg->expression->is<IR::ListExpression>() ||
+                arg->expression->is<IR::StructInitializerExpression>()) {
                 LOG3("Using temporary for " << dbp(mce) <<
                      " param " << dbp(p) << " assigning tuple to header");
                 useTemporary.emplace(p);

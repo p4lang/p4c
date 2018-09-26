@@ -28,8 +28,8 @@ control d(out bool b) {
         h3[0] = {32w0};
         h3[1] = {32w1};
         bool eout;
-        einst.apply({ 32w0 }, eout);
-        b = h.isValid() && eout;
+        einst.apply({32w0}, eout);
+        b = h.isValid() && eout && h3[1].isValid() && s1.h.isValid();
     }
 }
 

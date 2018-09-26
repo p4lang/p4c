@@ -50,7 +50,8 @@ const IR::Expression* DoExpandLookahead::expand(
             auto e = expand(base, t, offset);
             vec->push_back(new IR::NamedExpression(f->srcInfo, f->name, e));
         }
-        return new IR::StructInitializerExpression(base->srcInfo, st->name, *vec);
+        return new IR::StructInitializerExpression(
+            base->srcInfo, st->name, *vec, type->is<IR::Type_Header>());
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
