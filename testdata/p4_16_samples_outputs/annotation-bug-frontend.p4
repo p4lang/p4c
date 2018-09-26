@@ -27,9 +27,15 @@ control cc() {
         get<headers>(tmp);
 =======
     headers hdr_1;
+    headers tmp_0;
     apply {
+<<<<<<< d74514ef5e6617902dc0c751b56267b983591d4b
         get<headers>({hdr_1.ipv4_option_timestamp});
 >>>>>>> Moved structure initializer creation to a separate pass
+=======
+        tmp_0 = {hdr_1.ipv4_option_timestamp};
+        get<headers>(tmp_0);
+>>>>>>> Handle StructInitializerExpression in the back-end
     }
 }
 

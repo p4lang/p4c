@@ -21,11 +21,15 @@ extern bit<16> get<T>(in T data);
 control cc() {
     ipv4_option_timestamp_t hdr_0_ipv4_option_timestamp;
     @hidden action act() {
+<<<<<<< d74514ef5e6617902dc0c751b56267b983591d4b
 <<<<<<< 8af0e6b445341eac6e0f948de9f7331dab1b9c46
         get<headers>({ hdr_0_ipv4_option_timestamp });
 =======
         get<headers>({hdr_1_ipv4_option_timestamp});
 >>>>>>> Moved structure initializer creation to a separate pass
+=======
+        get<headers>({ hdr_1_ipv4_option_timestamp });
+>>>>>>> Handle StructInitializerExpression in the back-end
     }
     @hidden table tbl_act {
         actions = {
