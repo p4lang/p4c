@@ -41,7 +41,7 @@ class Evaluator final : public Inspector, public IHasBlock {
  public:
     Evaluator(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); visitDagOnce = false; }
     IR::ToplevelBlock* getToplevelBlock() override { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
