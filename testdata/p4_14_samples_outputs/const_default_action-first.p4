@@ -12,6 +12,7 @@ header ingress_metadata_t {
     bit<14> bd;
     bit<14> rid;
     bit<1>  drop_flag;
+    bit<2>  padding;
 }
 
 header vlan_tag_t {
