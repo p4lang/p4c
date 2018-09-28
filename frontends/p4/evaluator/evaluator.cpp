@@ -315,9 +315,8 @@ bool Evaluator::preorder(const IR::ListExpression *list) {
 //////////////////////////////////////
 
 EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap) {
-    setName("Evaluator");
+    setName("EvaluatorPass");
     evaluator = new P4::Evaluator(refMap, typeMap);
-    setStopOnError(true);
     passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
     passes.emplace_back(evaluator);
 }

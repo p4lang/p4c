@@ -513,11 +513,7 @@ abstract Block : CompileTimeValue {
     virtual void dbprint(std::ostream& out) const override;
     virtual void dbprint_recursive(std::ostream& out) const;
     /// value can be null for parameters which are optional
-    void setValue(Node node, CompileTimeValue value) {
-        CHECK_NULL(node);
-        auto it = constantValue.find(node);
-        BUG_CHECK(it == constantValue.end(), "%1% already set", node);
-        constantValue[node] = value; }
+    void setValue(Node node, CompileTimeValue value);
     bool hasValue(Node node) const {
         return constantValue.find(node) != constantValue.end();
     }
@@ -535,7 +531,7 @@ class TableBlock : Block {
 }
 
 /// An object that has been instantiated
-abstract InstantiatedBlock : Block {
+abstract InstantiatedBlock : Block, IDeclaration {
     Type instanceType;  // May be a SpecializedType
 
     virtual ParameterList getConstructorParameters() const = 0;
@@ -557,6 +553,7 @@ class ParserBlock : InstantiatedBlock {
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
     toString { return container->toString(); }
+    ID getName() const { return container->getName(); }
 #nodbprint
 }
 
@@ -565,6 +562,7 @@ class ControlBlock : InstantiatedBlock {
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
     toString { return container->toString(); }
+    ID getName() const { return container->getName(); }
 #nodbprint
 }
 
@@ -572,6 +570,7 @@ class PackageBlock : InstantiatedBlock {
     Type_Package type;
     ParameterList getConstructorParameters() const override { return type->constructorParams; }
     toString { return type->toString(); }
+    ID getName() const { return type->getName(); }
 #nodbprint
 }
 
@@ -581,13 +580,15 @@ class ExternBlock : InstantiatedBlock {
     ParameterList getConstructorParameters() const override {
         return constructor->type->parameters; }
     toString { return type->toString(); }
+    ID getName() const { return type->getName(); }
 #nodbprint
 }
 
 /// Represents the program as a whole
-class ToplevelBlock : Block {
+class ToplevelBlock : Block, IDeclaration {
     P4Program getProgram() const { return node->to<IR::P4Program>(); }
     PackageBlock getMain() const;
+    ID getName() const { return "main"; }
 #nodbprint
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }

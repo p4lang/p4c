@@ -187,6 +187,17 @@ P4Table::getApplyMethodType() const {
 const Type_Method* Type_Table::getApplyMethodType() const
 { return table->getApplyMethodType(); }
 
+void Block::setValue(const Node* node, const CompileTimeValue* value) {
+    CHECK_NULL(node);
+    auto it = constantValue.find(node);
+    if (it != constantValue.end())
+        BUG_CHECK(value == constantValue[node],
+                      "%1% already set in %2% to %3%, not %4%",
+                  node, this, value, constantValue[node]);
+    else
+        constantValue[node] = value;
+}
+
 void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) {
     CHECK_NULL(args);
     auto it = args->begin();
