@@ -111,6 +111,8 @@ using Parser = V1::V1Parser;
                   return Parser::make_DEFAULT(cstring(yytext), driver.yylloc); }
 "default_action" {BEGIN(driver.saveState);
                   return Parser::make_DEFAULT_ACTION(cstring(yytext), driver.yylloc); }
+"const"         {BEGIN(driver.saveState);
+                  return Parser::make_CONST(cstring(yytext), driver.yylloc); }
 "direct"        { BEGIN(driver.saveState);
                   return Parser::make_DIRECT(cstring(yytext), driver.yylloc); }
 "drop"          { BEGIN(driver.saveState);

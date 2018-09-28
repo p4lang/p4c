@@ -160,7 +160,7 @@ typedef const IR::Type ConstType;
 %token      NEWLINE
 %token<cstring> ACTION ACTIONS ACTION_PROFILE ACTION_SELECTOR ALGORITHM APPLY
                 ATTRIBUTE ATTRIBUTES BIT BLACKBOX BLACKBOX_TYPE BLOCK BOOL
-                CALCULATED_FIELD CONTROL COUNTER CURRENT DEFAULT DEFAULT_ACTION
+                CALCULATED_FIELD CONTROL COUNTER CONST CURRENT DEFAULT DEFAULT_ACTION
                 DIRECT DROP DYNAMIC_ACTION_SELECTION ELSE EXTRACT EXPRESSION
                 EXPRESSION_LOCAL_VARIABLES FALSE FIELD_LIST FIELD_LIST_CALCULATION
                 FIELDS HEADER HEADER_TYPE IF IMPLEMENTATION IN INPUT INSTANCE_COUNT
@@ -739,6 +739,13 @@ table_body: /* epsilon */
     | table_body DEFAULT_ACTION ":" name "(" opt_expression_list ")" ";"
         { ($$=$1)->default_action = IR::ID(@4, $4);
           $$->default_action_args = $6; }
+    | table_body CONST DEFAULT_ACTION ":" name ";"
+      { ($$=$1)->default_action = IR::ID(@5, $5);
+          $$->default_action_is_const = true; }
+    | table_body CONST DEFAULT_ACTION ":" name "(" opt_expression_list ")" ";"
+        { ($$=$1)->default_action = IR::ID(@5, $5);
+          $$->default_action_args = $7;
+	  $$->default_action_is_const = true; }
     | table_body IDENTIFIER ":" expression ";"
       { auto exp = new IR::ExpressionValue(@4, $4);
         auto prop = new IR::Property(@2, IR::ID(@2, $2), exp, false);
@@ -1021,6 +1028,7 @@ name: IDENTIFIER { $$ = IR::ID(@1, $1); }
     | CONTROL { $$ = IR::ID(@1, $1); }
     | COUNTER { $$ = IR::ID(@1, $1); }
     | DEFAULT_ACTION { $$ = IR::ID(@1, $1); }
+    | CONST { $$ = IR::ID(@1, $1); }
     | DIRECT { $$ = IR::ID(@1, $1); }
     | DROP { $$ = IR::ID(@1, $1); }
     | DYNAMIC_ACTION_SELECTION { $$ = IR::ID(@1, $1); }

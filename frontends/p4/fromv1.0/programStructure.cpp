@@ -855,7 +855,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto prop = new IR::Property(
             IR::ID(IR::TableProperties::defaultActionPropertyName),
             new IR::ExpressionValue(methodCall),
-            /* isConstant = */ false);
+            table->default_action_is_const);
         props->push_back(prop);
     }
 
