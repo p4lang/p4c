@@ -69,7 +69,7 @@ table port_vlan_to_bd_mapping {
         vlan_tag_[0].vid : ternary;
     }
     action_profile: bd_action_profile;
-    const_default_action: no_op();
+    const default_action: no_op();
     size : 1024;
 }
 
@@ -78,7 +78,7 @@ table vlan_to_bd_mapping {
         vlan_tag_[0].vid : exact;
     }
     action_profile: bd_action_profile;
-    const_default_action: no_op();
+    const default_action: no_op();
     size : 1024;
 }
 
