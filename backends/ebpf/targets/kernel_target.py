@@ -100,10 +100,13 @@ class Target(EBPFTarget):
     def _load_filter(self, bridge, proc, port_name):
         # Load the specified eBPF object to "port_name" egress
         # As a side-effect, this may create maps in /sys/fs/bpf/
-        cmd_egress = ("tc filter add dev %s egress"
-                      " bpf da obj %s section prog "
-                      "verbose" % (port_name, self.template + ".o"))
-        return bridge.ns_proc_write(proc, cmd_egress)
+
+        # Add the qdisc. MUST be clsact layer.
+        bridge.ns_proc_write(proc, "tc qdisc add dev %s clsacst" % port_name)
+        cmd = ("tc filter add dev %s egress"
+               " bpf da obj %s section prog "
+               "verbose" % (port_name, self.template + ".o"))
+        return bridge.ns_proc_append(proc, cmd)
 
     def _attach_filters(self, bridge, proc):
         # Get the command to load eBPF code to all the attached ports
