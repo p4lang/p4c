@@ -29,9 +29,42 @@ import os
 import stat
 import tempfile
 import shutil
+import argparse
 sys.path.insert(0, os.path.dirname(
     os.path.realpath(__file__)) + '/../../tools')
 from testutils import *
+
+
+class FullPaths(argparse.Action):
+    """Expand user- and relative-paths"""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, os.path.abspath(
+            os.path.expanduser(values)))
+
+
+def is_dir(dirname):
+    """Checks if a path is an actual directory"""
+    if not os.path.isdir(dirname):
+        msg = "{0} is not a directory".format(dirname)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return dirname
+
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("rootdir", action=FullPaths, type=is_dir,
+                    help="the root directory of the compiler source tree")
+PARSER.add_argument("p4filename", action=FullPaths,
+                    help="the p4 file to process")
+PARSER.add_argument("-b", "--nocleanup", action="store_false",
+                    help="do not remove temporary results for failing tests")
+PARSER.add_argument("-v", "--verbose", action="store_true",
+                    help="verbose operation")
+PARSER.add_argument("-f", "--replace", action="store_true",
+                    help="replace reference outputs with newly generated ones")
+PARSER.add_argument("-t", "--target", dest="target", default="test",
+                    help="Specify the compiler backend target, default is test")
 
 
 def import_from(module, name):
@@ -83,7 +116,7 @@ def run_model(ebpf, stffile):
     if result != SUCCESS:
         return result
 
-    result = ebpf.create_filter()
+    result = ebpf.compile_dataplane()
     if result != SUCCESS:
         return result
 
@@ -152,76 +185,17 @@ def run_test(options, argv):
     return result
 
 
-def usage(options):
-    name = options.binary
-    print(name, "usage:")
-    print(name, "[-t] rootdir [options] file.p4")
-    print("Invokes compiler on the supplied file, possibly adding extra arguments")
-    print("`rootdir` is the root directory of the compiler source tree")
-    print("-t: Specify the compiler backend target, default is bcc")
-    print("options:")
-    print("          -b: do not remove temporary results for failing tests")
-    print("          -v: verbose operation")
-    print("          -f: replace reference outputs with newly generated ones")
-
-
-def parse_options(argv):
-    """ Parses the input arguments and stores them in the options object
-        which is passed to target objects.
-        TODO: This function should use the default python parse package """
-    options = Options()
-    options.binary = argv[0]
-    if len(argv) <= 2:
-        usage(options)
-        sys.exit(FAILURE)
-
-    if argv[1] == '-t':
-        if len(argv) == 0:
-            report_err("Missing argument for -t option")
-            usage(options)
-            sys.exit(FAILURE)
-        else:
-            options.target = argv[2]
-            argv = argv[1:]
-    argv = argv[1:]
-    options.compilerdir = argv[1]
-    argv = argv[2:]
-    if not os.path.isdir(options.compilerdir):
-        print(options.compilerdir + " is not a folder", file=sys.stderr)
-        usage(options)
-        sys.exit(FAILURE)
-
-    while argv[0][0] == '-':
-        if argv[0] == "-b":
-            options.cleanupTmp = False
-        elif argv[0] == "-v":
-            options.verbose = True
-        elif argv[0] == "-f":
-            options.replace = True
-        else:
-            print("Unknown option ", argv[0], file=sys.stderr)
-            usage(options)
-        argv = argv[1:]
-    options.p4filename = argv[-1]
-    argv = argv[1:]
-    options.testName = None
-    if options.p4filename.startswith(options.compilerdir):
-        options.testName = options.p4filename[len(options.compilerdir):]
-        if options.testName.startswith('/'):
-            options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
-            options.testName = options.testName[:-3]
-    return options, argv
-
-
-def main(argv):
+if __name__ == '__main__':
     """ main """
     # Parse options and process argv
-    options, argv = parse_options(argv)
+    args, argv = PARSER.parse_known_args()
+    options = Options()
+    options.compilerdir = args.rootdir
+    options.p4filename = args.p4filename
+    options.verbose = args.verbose
+    options.replace = args.replace
+    options.cleanupTmp = args.nocleanup
+    options.target = args.target
     # Run the test with the extracted options and modified argv
     result = run_test(options, argv)
     sys.exit(result)
-
-
-if __name__ == "__main__":
-    main(sys.argv)
