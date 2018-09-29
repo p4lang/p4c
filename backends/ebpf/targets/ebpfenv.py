@@ -100,12 +100,13 @@ class Bridge(object):
     def _configure_bridge(self, br_name):
         """ Set the bridge active and load the qdisc. We also disable IPv6 to
             avoid ICMPv6 spam. """
-        cmd = "ip link set dev %s up && " % br_name
+        # We do not care about failures here
+        self.ns_exec("ip link set dev %s up" % br_name)
         # Prevent the broadcasting of ipv6 link discovery messages
-        cmd += "sysctl -w net.ipv6.conf.all.disable_ipv6=1 && "
-        cmd += "sysctl -w net.ipv6.conf.default.disable_ipv6=1 && "
+        self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+        self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
         # Add the qdisc. MUST be clsact layer.
-        cmd += "tc qdisc add dev %s clsact" % br_name
+        cmd = "tc qdisc add dev %s clsact" % br_name
         return self.ns_exec(cmd)
 
     def create_bridge(self):
