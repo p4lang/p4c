@@ -1,18 +1,17 @@
 #include <core.p4>
 #include <v1model.p4>
 
-header ethernet_t {
-    bit<48> dstAddr;
-    bit<48> srcAddr;
-    bit<16> etherType;
-}
-
-header ingress_metadata_t {
+struct ingress_metadata_t {
     bit<9>  ingress_port;
     bit<14> bd;
     bit<14> rid;
     bit<1>  drop_flag;
-    bit<2>  padding;
+}
+
+header ethernet_t {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header vlan_tag_t {
@@ -23,15 +22,15 @@ header vlan_tag_t {
 }
 
 struct metadata {
+    @name(".ingress_metadata") 
+    ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
     @name(".ethernet") 
-    ethernet_t         ethernet;
-    @name(".ingress_metadata") 
-    ingress_metadata_t ingress_metadata;
+    ethernet_t    ethernet;
     @name(".vlan_tag_") 
-    vlan_tag_t[2]      vlan_tag_;
+    vlan_tag_t[2] vlan_tag_;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -63,18 +62,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".no_op") action _no_op_2() {
     }
     @name(".set_bd_properties") action _set_bd_properties(bit<14> bd, bit<14> ingress_rid) {
-        hdr.ingress_metadata.bd = bd;
-        hdr.ingress_metadata.rid = ingress_rid;
+        meta.ingress_metadata.bd = bd;
+        meta.ingress_metadata.rid = ingress_rid;
     }
     @name(".set_bd_properties") action _set_bd_properties_2(bit<14> bd, bit<14> ingress_rid) {
-        hdr.ingress_metadata.bd = bd;
-        hdr.ingress_metadata.rid = ingress_rid;
+        meta.ingress_metadata.bd = bd;
+        meta.ingress_metadata.rid = ingress_rid;
     }
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss() {
-        hdr.ingress_metadata.drop_flag = 1w1;
+        meta.ingress_metadata.drop_flag = 1w1;
     }
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_2() {
-        hdr.ingress_metadata.drop_flag = 1w1;
+        meta.ingress_metadata.drop_flag = 1w1;
     }
     @name(".port_vlan_to_bd_mapping") table _port_vlan_to_bd_mapping_0 {
         actions = {

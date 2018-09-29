@@ -22,14 +22,13 @@ header_type ingress_metadata_t {
         bd : 14;
         rid : 14;
         drop_flag : 1;
-        padding : 2;
     }
 }
 
 #define VLAN_DEPTH 2
 header vlan_tag_t vlan_tag_[VLAN_DEPTH];
 header ethernet_t ethernet;
-header ingress_metadata_t ingress_metadata;
+metadata ingress_metadata_t ingress_metadata;
 
 parser start {
     extract(ethernet);
