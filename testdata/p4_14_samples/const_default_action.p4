@@ -22,7 +22,6 @@ header_type ingress_metadata_t {
         bd : 14;
         rid : 14;
         drop_flag : 1;
-        padding : 2;
     }
 }
 
