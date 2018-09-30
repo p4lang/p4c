@@ -18,7 +18,7 @@ header_type ethernet_t {
     fields {
         dstAddr   : 48;
         srcAddr   : 48;
-        ethertype : 15;
+        ethertype : 16;
     }
 }
 
