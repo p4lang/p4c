@@ -102,11 +102,31 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
     ```
     mkdir build
     cd build
-    cmake .. [-DCMAKE_BUILD_TYPE=RELEASE|DEBUG] [-DCMAKE_INSTALL_PREFIX=<path>] [-DENABLE_DOCS=ON (default off)] [-DENABLE_P4RUNTIME_TO_PD=OFF (default on)] [-DENABLE_PROTOBUF_STATIC=OFF (default on)] [-DENABLE_GC=OFF (default on)]
+    cmake .. <optional arguments>
     make -j4
     make -j4 check
     ```
-    If adding new targets to this build system, please see [instructions](#defining-new-cmake-targets).
+    The cmake command takes the following optional arguments to
+    further customize the build:
+     - `-DCMAKE_BUILD_TYPE=RELEASE|DEBUG` -- set CMAKE_BUILD_TYPE to
+      RELEASE or DEBUG to build with optimizations or with debug
+      symbols to run in gdb. Default is RELEASE.
+     - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
+       `make install` installs the compiler. Defaults to /usr/local.
+     - `-DENABLE_BMV2=ON|OFF`. Enable the bmv2 backend. Default ON.
+     - `-DENABLE_EBPF=ON|OFF`. Enable the ebpf backend. Default ON.
+     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable the p4c-graphs backend. Default ON.
+     - `-DENABLE_P4TEST=ON|OFF`. Enable the p4test backend. Default ON.
+     - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
+     - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
+       library. Default is ON.
+     - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
+       Default is ON.
+     - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static
+       protobuf libraries. Default is ON.
+
+    If adding new targets to this build system, please see
+    [instructions](#defining-new-cmake-targets).
 
 4.  (Optional) Install the compiler and the P4 shared headers globally.
     ```

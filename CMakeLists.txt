@@ -37,6 +37,10 @@ OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 
+if (NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE "RELEASE")
+endif()
+
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
   # Allow the version to be set from outside
   set (P4C_VERSION $ENV{P4C_VERSION})
