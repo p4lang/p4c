@@ -26,7 +26,6 @@
 from __future__ import print_function
 import sys
 import os
-import stat
 import tempfile
 import shutil
 import argparse
@@ -35,28 +34,10 @@ sys.path.insert(0, os.path.dirname(
 from testutils import *
 
 
-class FullPaths(argparse.Action):
-    """Expand user- and relative-paths"""
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, os.path.abspath(
-            os.path.expanduser(values)))
-
-
-def is_dir(dirname):
-    """Checks if a path is an actual directory"""
-    if not os.path.isdir(dirname):
-        msg = "{0} is not a directory".format(dirname)
-        raise argparse.ArgumentTypeError(msg)
-    else:
-        return dirname
-
-
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("rootdir", action=FullPaths, type=is_dir,
-                    help="the root directory of the compiler source tree")
-PARSER.add_argument("p4filename", action=FullPaths,
-                    help="the p4 file to process")
+PARSER.add_argument("rootdir", help="the root directory of "
+                    "the compiler source tree")
+PARSER.add_argument("p4filename", help="the p4 file to process")
 PARSER.add_argument("-b", "--nocleanup", action="store_false",
                     help="do not remove temporary results for failing tests")
 PARSER.add_argument("-v", "--verbose", action="store_true",
@@ -64,7 +45,8 @@ PARSER.add_argument("-v", "--verbose", action="store_true",
 PARSER.add_argument("-f", "--replace", action="store_true",
                     help="replace reference outputs with newly generated ones")
 PARSER.add_argument("-t", "--target", dest="target", default="test",
-                    help="Specify the compiler backend target, default is test")
+                    help="Specify the compiler backend target, "
+                    "default is test")
 
 
 def import_from(module, name):
@@ -104,11 +86,14 @@ class Options(object):
         self.testdir = os.path.dirname(os.path.realpath(__file__))
 
 
-def isdir(path):
-    try:
-        return stat.S_ISDIR(os.stat(path).st_mode)
-    except OSError:
-        return False
+def check_path(path):
+    """Checks if a path is an actual directory and converts the input
+        to an absolute path"""
+    if not os.path.exists(path):
+        msg = "{0} does not exist".format(path)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return os.path.abspath(os.path.expanduser(path))
 
 
 def run_model(ebpf, stffile):
@@ -140,12 +125,11 @@ def run_test(options, argv):
     basename = os.path.basename(options.p4filename)  # Name of the p4 test
     base, ext = os.path.splitext(basename)           # Name without the type
     dirname = os.path.dirname(options.p4filename)    # Directory of the file
-    expected_dirname = dirname + "_outputs"          # Expected outputs folder
 
     # We can do this if an *.stf file is present
     stffile = dirname + "/" + base + ".stf"
     if options.verbose:
-        print("Check for ", stffile)
+        print("Checking for ", stffile)
     if not os.path.isfile(stffile):
         # If no stf file is present just use the empty file
         stffile = dirname + "/empty.stf"
@@ -190,12 +174,15 @@ if __name__ == '__main__':
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
     options = Options()
-    options.compilerdir = args.rootdir
-    options.p4filename = args.p4filename
+    options.compilerdir = check_path(args.rootdir)
+    options.p4filename = check_path(args.p4filename)
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
     options.target = args.target
+
+    # All args after '--' are intended for the p4 compiler
+    argv = argv[1:]
     # Run the test with the extracted options and modified argv
     result = run_test(options, argv)
     sys.exit(result)
