@@ -140,15 +140,8 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
 
 void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode)) {
-        if (::Log::verbose()) {
-            ToP4 top4(&std::cout, true, nullptr);
-            std::cout << "Initial program" << std::endl;
-            initialNode->apply(top4);
-            std::cout << "============\nFinal program" << std::endl;
-            ToP4 top41(&std::cout, true, nullptr);
-            node->apply(top41);
-        }
-        BUG("typechecker mutated program");
+        BUG("At this point in the compilation typechecking "
+            "should not infer new types anymore, but it did.");
     }
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
