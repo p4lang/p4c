@@ -1471,10 +1471,9 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
     auto max = conv.convert(primitive->operands.at(3));
     auto args = new IR::Vector<IR::Argument>();
 
-    auto nr = primitive->operands.at(2)->to<IR::PathExpression>();
-    auto flc = structure->field_list_calculations.get(nr->path->name);
+    auto flc = structure->getFieldListCalculation(primitive->operands.at(2));
     if (flc == nullptr) {
-        ::error("%1%: Expected a field_list_calculation", primitive->operands.at(1));
+        ::error("%1%: Expected a field_list_calculation", primitive->operands.at(2));
         return nullptr;
     }
     auto ttype = IR::Type_Bits::get(flc->output_width);
@@ -2121,6 +2120,17 @@ void ProgramStructure::createMain() {
 
     auto result = new IR::Declaration_Instance(name, type, args, nullptr);
     declarations->push_back(result);
+}
+
+// Get a field_list_calculation from a name
+const IR::FieldListCalculation* ProgramStructure::getFieldListCalculation(const IR::Expression *e) {
+    if (auto *pe = e->to<IR::PathExpression>()) {
+        return field_list_calculations.get(pe->path->name); }
+    if (auto *gref = e->to<IR::GlobalRef>()) {
+        // an instance of a global object, but in P4_14, there might be a field_list_calculation
+        // with the same name
+        return field_list_calculations.get(gref->toString()); }
+    return nullptr;
 }
 
 // if a FieldListCalculation contains multiple field lists concatenate them all
