@@ -15,8 +15,7 @@
 
 """ Virtual environment which models a simple bridge with n attached
     interfaces. The bridge runs in a completely isolated namespace.
-    Allows the loading and testing of eBPF programs by initializing every
-    interface with a qdisc. """
+    Allows the loading and testing of eBPF programs. """
 
 import os
 import sys
@@ -98,15 +97,14 @@ class Bridge(object):
         return run_process(self.verbose, proc, TIMEOUT, self.outputs, errmsg)
 
     def _configure_bridge(self, br_name):
-        """ Set the bridge active and load the qdisc. We also disable IPv6 to
+        """ Set the bridge active. We also disable IPv6 to
             avoid ICMPv6 spam. """
-        cmd = "ip link set dev %s up && " % br_name
+        # We do not care about failures here
+        self.ns_exec("ip link set dev %s up" % br_name)
         # Prevent the broadcasting of ipv6 link discovery messages
-        cmd += "sysctl -w net.ipv6.conf.all.disable_ipv6=1 && "
-        cmd += "sysctl -w net.ipv6.conf.default.disable_ipv6=1 && "
-        # Add the qdisc. MUST be clsact layer.
-        cmd += "tc qdisc add dev %s clsact" % br_name
-        return self.ns_exec(cmd)
+        self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+        self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
+        return SUCCESS
 
     def create_bridge(self):
         """ Create the central bridge of the environment and configure it. """
@@ -116,9 +114,8 @@ class Bridge(object):
         return self._configure_bridge(self.br_name)
 
     def _configure_bridge_port(self, port_name):
-        """ Set a bridge port active and load the qdisc. """
-        cmd = "ip link set dev %s up && " % port_name
-        cmd += "tc qdisc add dev %s clsact" % port_name
+        """ Set a bridge port active. """
+        cmd = "ip link set dev %s up" % port_name
         return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces):

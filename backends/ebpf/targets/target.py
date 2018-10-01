@@ -150,7 +150,7 @@ class EBPFTarget(object):
                 return result
         return SUCCESS
 
-    def create_filter(self, argv=""):
+    def compile_dataplane(self, argv=""):
         # To override
         """ Compiles a filter from the previously generated template """
         raise NotImplementedError("Method create_filter not implemented!")

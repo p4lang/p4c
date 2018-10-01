@@ -32,7 +32,7 @@ class Target(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def create_filter(self):
+    def compile_dataplane(self):
         # Use clang to compile the generated C code to a LLVM IR
         args = "make "
         # target makefile
@@ -100,10 +100,13 @@ class Target(EBPFTarget):
     def _load_filter(self, bridge, proc, port_name):
         # Load the specified eBPF object to "port_name" egress
         # As a side-effect, this may create maps in /sys/fs/bpf/
-        cmd_egress = ("tc filter add dev %s egress"
-                      " bpf da obj %s section prog "
-                      "verbose" % (port_name, self.template + ".o"))
-        return bridge.ns_proc_write(proc, cmd_egress)
+
+        # Add the qdisc. MUST be clsact layer.
+        bridge.ns_exec("tc qdisc add dev %s clsact" % port_name)
+        cmd = ("tc filter add dev %s egress"
+               " bpf da obj %s section prog "
+               "verbose" % (port_name, self.template + ".o"))
+        return bridge.ns_proc_write(proc, cmd)
 
     def _attach_filters(self, bridge, proc):
         # Get the command to load eBPF code to all the attached ports
