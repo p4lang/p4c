@@ -1349,9 +1349,9 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t) {
+    auto validator = [this] (const IR::Type* t) {
         while (t->is<IR::Type_Newtype>())
-            t = t->to<IR::Type_Newtype>()->type;
+            t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
                t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
@@ -1376,9 +1376,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t) {
+    auto validator = [this] (const IR::Type* t) {
         while (t->is<IR::Type_Newtype>())
-            t = t->to<IR::Type_Newtype>()->type;
+            t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
         t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
