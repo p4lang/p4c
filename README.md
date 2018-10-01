@@ -110,7 +110,7 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
     further customize the build:
      - `-DCMAKE_BUILD_TYPE=RELEASE|DEBUG` -- set CMAKE_BUILD_TYPE to
       RELEASE or DEBUG to build with optimizations or with debug
-      symbols to run in gdb.
+      symbols to run in gdb. Default is RELEASE.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
        `make install` installs the compiler. Defaults to /usr/local.
      - `-DENABLE_BMV2=ON|OFF`. Enable the bmv2 backend. Default ON.
@@ -120,7 +120,7 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.
-     - `-DENABLE_GTESTS=ON|OFF`. Enable the building and running GTest unit tests.
+     - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static
        protobuf libraries. Default is ON.
