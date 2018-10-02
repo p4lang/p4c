@@ -22,35 +22,35 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    headers tmp_3;
-    bit<8> tmp_4;
-    headers tmp_5;
-    bit<8> tmp_6;
-    headers hdr_1;
-    bit<8> op;
+    headers tmp;
+    bit<8> tmp_0;
+    headers tmp_1;
+    bit<8> tmp_2;
+    headers hdr_0;
+    bit<8> op_0;
     apply {
-        tmp_3 = hdr;
-        tmp_4 = hdr.h1.op1;
-        hdr_1 = tmp_3;
-        op = tmp_4;
-        if (op == 8w0x0) 
+        tmp = hdr;
+        tmp_0 = hdr.h1.op1;
+        hdr_0 = tmp;
+        op_0 = tmp_0;
+        if (op_0 == 8w0x0) 
             ;
         else 
-            if (op[7:4] == 4w1) 
-                hdr_1.h1.out1 = 8w4;
-        tmp_3 = hdr_1;
-        hdr = tmp_3;
-        tmp_5 = hdr;
-        tmp_6 = hdr.h1.op2;
-        hdr_1 = tmp_5;
-        op = tmp_6;
-        if (op == 8w0x0) 
+            if (op_0[7:4] == 4w1) 
+                hdr_0.h1.out1 = 8w4;
+        tmp = hdr_0;
+        hdr = tmp;
+        tmp_1 = hdr;
+        tmp_2 = hdr.h1.op2;
+        hdr_0 = tmp_1;
+        op_0 = tmp_2;
+        if (op_0 == 8w0x0) 
             ;
         else 
-            if (op[7:4] == 4w1) 
-                hdr_1.h1.out1 = 8w4;
-        tmp_5 = hdr_1;
-        hdr = tmp_5;
+            if (op_0[7:4] == 4w1) 
+                hdr_0.h1.out1 = 8w4;
+        tmp_1 = hdr_0;
+        hdr = tmp_1;
     }
 }
 

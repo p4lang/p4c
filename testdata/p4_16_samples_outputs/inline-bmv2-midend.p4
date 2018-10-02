@@ -31,7 +31,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("IngressI.do_aux.adjust_lkp_fields") table do_aux_adjust_lkp_fields_0 {
+    @name("IngressI.do_aux.adjust_lkp_fields") table do_aux_adjust_lkp_fields {
         key = {
             hdr.ipv4.isValid(): exact @name("hdr.ipv4.$valid$") ;
         }
@@ -41,7 +41,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         default_action = NoAction_0();
     }
     apply {
-        do_aux_adjust_lkp_fields_0.apply();
+        do_aux_adjust_lkp_fields.apply();
     }
 }
 

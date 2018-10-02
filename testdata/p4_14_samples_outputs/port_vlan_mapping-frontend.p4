@@ -474,8 +474,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<24> tmp_1;
-    bit<4> tmp_2;
+    bit<24> tmp;
+    bit<4> tmp_0;
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -641,8 +641,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls") state parse_mpls {
-        tmp_1 = packet.lookahead<bit<24>>();
-        transition select(tmp_1[0:0]) {
+        tmp = packet.lookahead<bit<24>>();
+        transition select(tmp[0:0]) {
             1w0: parse_mpls_not_bos;
             1w1: parse_mpls_bos;
             default: accept;
@@ -650,8 +650,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
-        tmp_2 = packet.lookahead<bit<4>>();
-        transition select(tmp_2[3:0]) {
+        tmp_0 = packet.lookahead<bit<4>>();
+        transition select(tmp_0[3:0]) {
             4w0x4: parse_inner_ipv4;
             4w0x6: parse_inner_ipv6;
             default: parse_eompls;
@@ -729,7 +729,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".set_bd") action set_bd_0(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
+    @name(".set_bd") action set_bd(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.ipv4_unicast_enabled = ipv4_unicast_enabled;
         meta.ingress_metadata.igmp_snooping_enabled = igmp_snooping_enabled;
@@ -741,7 +741,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd = outer_vlan_bd;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name(".set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags") action set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags_0(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
+    @name(".set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags") action set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -765,7 +765,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name(".set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags") action set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags_0(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
+    @name(".set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags") action set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -789,7 +789,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name(".set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags") action set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags_0(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
+    @name(".set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags") action set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -813,7 +813,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name(".set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags") action set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags_0(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
+    @name(".set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags") action set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -837,13 +837,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.bd_label = bd_label;
         meta.ingress_metadata.stp_group = stp_group;
     }
-    @name(".port_vlan_mapping") table port_vlan_mapping {
+    @name(".port_vlan_mapping") table port_vlan_mapping_0 {
         actions = {
-            set_bd_0();
-            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags_0();
-            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags_0();
-            set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags_0();
-            set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags_0();
+            set_bd();
+            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags();
+            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags();
+            set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags();
+            set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags();
             @defaultonly NoAction_0();
         }
         key = {
@@ -858,7 +858,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        port_vlan_mapping.apply();
+        port_vlan_mapping_0.apply();
     }
 }
 

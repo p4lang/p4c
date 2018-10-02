@@ -16,11 +16,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".pvs") value_set<bit<16>>(4) pvs;
+    @name(".pvs") value_set<bit<16>>(4) pvs_0;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            pvs: accept;
+            pvs_0: accept;
             default: accept;
         }
     }
@@ -32,11 +32,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
-    @name(".dummy") table dummy {
+    @name(".dummy") table dummy_0 {
         actions = {
-            noop_0();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        dummy.apply();
+        dummy_0.apply();
     }
 }
 

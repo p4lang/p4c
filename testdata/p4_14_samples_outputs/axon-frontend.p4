@@ -34,7 +34,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<64> tmp_0;
+    bit<64> tmp;
     @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
@@ -68,8 +68,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_next_revHop;
     }
     @name(".start") state start {
-        tmp_0 = packet.lookahead<bit<64>>();
-        transition select(tmp_0[63:0]) {
+        tmp = packet.lookahead<bit<64>>();
+        transition select(tmp[63:0]) {
             64w0: parse_head;
             default: accept;
         }
@@ -86,13 +86,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("._drop") action _drop_0() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
     @name("._drop") action _drop_2() {
         mark_to_drop();
     }
-    @name(".route") action route_0() {
+    @name(".route") action route() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);
@@ -101,18 +101,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_revHop[0].setValid();
         hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
-    @name(".drop_pkt") table drop_pkt {
+    @name(".drop_pkt") table drop_pkt_0 {
         actions = {
-            _drop_0();
+            _drop();
             @defaultonly NoAction_0();
         }
         size = 1;
         default_action = NoAction_0();
     }
-    @name(".route_pkt") table route_pkt {
+    @name(".route_pkt") table route_pkt_0 {
         actions = {
             _drop_2();
-            route_0();
+            route();
             @defaultonly NoAction_3();
         }
         key = {
@@ -124,9 +124,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
-            drop_pkt.apply();
+            drop_pkt_0.apply();
         else 
-            route_pkt.apply();
+            route_pkt_0.apply();
     }
 }
 

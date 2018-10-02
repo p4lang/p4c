@@ -32,11 +32,11 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.a1") action a1_0() {
+    @name("MyIC.a1") action a1() {
     }
-    @name("MyIC.a2") action a2_0() {
+    @name("MyIC.a2") action a2() {
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
             b.data1  : selector @name("b.data1") ;
@@ -44,13 +44,13 @@ control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metad
         }
         actions = {
             NoAction_0();
-            a1_0();
-            a2_0();
+            a1();
+            a2();
         }
         default_action = NoAction_0();
     }
     apply {
-        tbl.apply();
+        tbl_0.apply();
     }
 }
 

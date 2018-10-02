@@ -21,21 +21,21 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("pipe.match") action match_0(bool act) {
+    @name("pipe.match") action match(bool act) {
         pass = act;
     }
-    @name("pipe.tbl") table tbl {
+    @name("pipe.tbl") table tbl_0 {
         key = {
             headers.ethernet.protocol: exact @name("headers.ethernet.protocol") ;
         }
         actions = {
-            match_0();
+            match();
             NoAction_0();
         }
         const entries = {
-                        16w0x800 : match_0(true);
+                        16w0x800 : match(true);
 
-                        16w0xd000 : match_0(false);
+                        16w0xd000 : match(false);
 
         }
 
@@ -53,7 +53,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     apply {
         tbl_act.apply();
-        tbl.apply();
+        tbl_0.apply();
     }
 }
 

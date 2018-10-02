@@ -19,11 +19,11 @@ struct tuple_0 {
 
 extern bit<16> get<T>(in T data);
 control cc() {
-    headers hdr_1;
-    headers tmp_0;
+    headers hdr_0;
+    headers tmp;
     apply {
-        tmp_0 = { hdr_1.ipv4_option_timestamp };
-        get<headers>(tmp_0);
+        tmp = { hdr_0.ipv4_option_timestamp };
+        get<headers>(tmp);
     }
 }
 

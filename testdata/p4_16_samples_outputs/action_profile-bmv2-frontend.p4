@@ -19,23 +19,23 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("IngressI.drop") action drop_0() {
+    @name("IngressI.drop") action drop_1() {
         mark_to_drop();
     }
     @name("IngressI.drop") action drop_3() {
         mark_to_drop();
     }
-    @name("IngressI.indirect") table indirect {
+    @name("IngressI.indirect") table indirect_0 {
         key = {
         }
         actions = {
-            drop_0();
+            drop_1();
             NoAction_0();
         }
         const default_action = NoAction_0();
         @name("ap") implementation = action_profile(32w128);
     }
-    @name("IngressI.indirect_ws") table indirect_ws {
+    @name("IngressI.indirect_ws") table indirect_ws_0 {
         key = {
             meta.hash1: selector @name("meta.hash1") ;
         }
@@ -47,8 +47,8 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         @name("ap_ws") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     apply {
-        indirect.apply();
-        indirect_ws.apply();
+        indirect_0.apply();
+        indirect_ws_0.apply();
     }
 }
 

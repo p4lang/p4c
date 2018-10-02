@@ -1,13 +1,13 @@
 control c() {
-    bit<32> x;
-    @name("c.a") action a_0() {
-        x = 32w1;
+    bit<32> x_0;
+    @name("c.a") action a() {
+        x_0 = 32w1;
     }
     @hidden table tbl_a {
         actions = {
-            a_0();
+            a();
         }
-        const default_action = a_0();
+        const default_action = a();
     }
     apply {
         tbl_a.apply();

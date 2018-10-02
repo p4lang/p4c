@@ -9,10 +9,10 @@ extern E {
 control ctrl();
 package top(ctrl _c);
 control c_0() {
-    @name("c_0.e") E(x = 32w0) e;
+    @name("c_0.e") E(x = 32w0) e_0;
     apply {
         f(a = 32w0, b = 32w4);
-        e.f(z = 16w2);
+        e_0.f(z = 16w2);
     }
 }
 

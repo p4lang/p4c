@@ -17,7 +17,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".drop") action drop_0(out standard_metadata_t smeta_1) {
         mark_to_drop();
     }
-    @name("IngressI.forward") table forward {
+    @name("IngressI.forward") table forward_0 {
         key = {
         }
         actions = {
@@ -26,7 +26,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = drop_0(smeta);
     }
     apply {
-        forward.apply();
+        forward_0.apply();
     }
 }
 

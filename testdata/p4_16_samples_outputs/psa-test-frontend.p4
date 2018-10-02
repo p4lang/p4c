@@ -9,11 +9,11 @@ header hdr_t {
 }
 
 parser MyIP(packet_in buffer, out hdr_t a, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
-    @name("MyIP.pvs") value_set<bit<16>>(4) pvs;
+    @name("MyIP.pvs") value_set<bit<16>>(4) pvs_0;
     state start {
         buffer.extract<hdr_t>(a);
         transition select(a.field) {
-            pvs: accept;
+            pvs_0: accept;
             default: accept;
         }
     }

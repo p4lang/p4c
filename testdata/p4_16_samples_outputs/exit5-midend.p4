@@ -1,16 +1,16 @@
 control ctrl() {
     bool hasExited;
-    @name("ctrl.e") action e_0() {
+    @name("ctrl.e") action e() {
         hasExited = true;
     }
-    @name("ctrl.f") action f_0() {
+    @name("ctrl.f") action f() {
     }
-    @name("ctrl.t") table t {
+    @name("ctrl.t") table t_0 {
         actions = {
-            e_0();
-            f_0();
+            e();
+            f();
         }
-        default_action = e_0();
+        default_action = e();
     }
     @hidden action act() {
         hasExited = false;
@@ -23,14 +23,14 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        switch (t.apply().action_run) {
-            e_0: {
+        switch (t_0.apply().action_run) {
+            e: {
                 if (!hasExited) 
-                    t.apply();
+                    t_0.apply();
             }
-            f_0: {
+            f: {
                 if (!hasExited) 
-                    t.apply();
+                    t_0.apply();
             }
         }
 

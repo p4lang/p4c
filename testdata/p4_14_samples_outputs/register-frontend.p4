@@ -50,15 +50,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".m_action") action m_action_0(bit<8> register_idx) {
+    @name(".m_action") action m_action(bit<8> register_idx) {
         my_register.read(meta.meta.register_tmp, (bit<32>)register_idx);
     }
-    @name("._nop") action _nop_0() {
+    @name("._nop") action _nop() {
     }
-    @name(".m_table") table m_table {
+    @name(".m_table") table m_table_0 {
         actions = {
-            m_action_0();
-            _nop_0();
+            m_action();
+            _nop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        m_table.apply();
+        m_table_0.apply();
     }
 }
 

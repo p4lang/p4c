@@ -54,20 +54,20 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("cIngress.hash_drop_decision") action hash_drop_decision_0() {
+    @name("cIngress.hash_drop_decision") action hash_drop_decision() {
         hash<bit<16>, bit<16>, tuple<bit<32>, bit<32>, bit<8>>, bit<32>>(meta.mystruct1.hash1, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol }, 32w0xffff);
         meta.mystruct1.hash_drop = meta.mystruct1.hash1 < 16w0x8000;
     }
-    @name("cIngress.guh") table guh {
+    @name("cIngress.guh") table guh_0 {
         key = {
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            hash_drop_decision_0();
+            hash_drop_decision();
         }
-        default_action = hash_drop_decision_0();
+        default_action = hash_drop_decision();
     }
-    @name("cIngress.debug_table") table debug_table {
+    @name("cIngress.debug_table") table debug_table_0 {
         key = {
             meta.mystruct1.hash1    : exact @name("meta.mystruct1.hash1") ;
             meta.mystruct1.hash_drop: exact @name("meta.mystruct1.hash_drop") ;
@@ -79,8 +79,8 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            guh.apply();
-            debug_table.apply();
+            guh_0.apply();
+            debug_table_0.apply();
             if (meta.mystruct1.hash_drop) 
                 hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>)meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
             else 

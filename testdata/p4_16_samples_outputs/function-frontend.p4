@@ -1,22 +1,22 @@
 control c(out bit<16> b) {
-    bit<16> tmp_0;
+    bit<16> tmp;
     apply {
         {
-            bit<16> left = 16w10;
-            bit<16> right = 16w12;
-            bool hasReturned_0 = false;
-            bit<16> retval_0;
-            if (left > right) {
-                hasReturned_0 = true;
-                retval_0 = left;
+            bit<16> left_0 = 16w10;
+            bit<16> right_0 = 16w12;
+            bool hasReturned = false;
+            bit<16> retval;
+            if (left_0 > right_0) {
+                hasReturned = true;
+                retval = left_0;
             }
-            if (!hasReturned_0) {
-                hasReturned_0 = true;
-                retval_0 = right;
+            if (!hasReturned) {
+                hasReturned = true;
+                retval = right_0;
             }
-            tmp_0 = retval_0;
+            tmp = retval;
         }
-        b = tmp_0;
+        b = tmp;
     }
 }
 

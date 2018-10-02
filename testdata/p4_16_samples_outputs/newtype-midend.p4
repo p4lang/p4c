@@ -12,20 +12,20 @@ header H {
 }
 
 control c(out B32 x) {
-    N32 k;
+    N32 k_0;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("c.t") table t {
+    @name("c.t") table t_0 {
         actions = {
             NoAction_0();
         }
         key = {
-            k: exact @name("k") ;
+            k_0: exact @name("k") ;
         }
         default_action = NoAction_0();
     }
     @hidden action act() {
-        k = 32w0;
+        k_0 = 32w0;
         x = 32w0;
     }
     @hidden action act_0() {
@@ -45,7 +45,7 @@ control c(out B32 x) {
     }
     apply {
         tbl_act.apply();
-        t.apply();
+        t_0.apply();
         tbl_act_0.apply();
     }
 }

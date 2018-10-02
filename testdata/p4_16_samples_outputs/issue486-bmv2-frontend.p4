@@ -31,24 +31,24 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata m, inout sta
 }
 
 control cIngress(inout Parsed_packet hdr, inout metadata m, inout standard_metadata_t stdmeta) {
-    bit<32> z_1;
-    @name("cIngress.foo") action foo_0() {
+    bit<32> z_0;
+    @name("cIngress.foo") action foo() {
     }
-    @name("cIngress.t") table t {
+    @name("cIngress.t") table t_0 {
         key = {
             hdr.x.add1: exact @name("hdr.x.add1") ;
             m.x.add2  : exact @name("m.x.add2") ;
             m.z       : exact @name("m.z") ;
-            z_1       : exact @name("z") ;
+            z_0       : exact @name("z") ;
         }
         actions = {
-            foo_0();
+            foo();
         }
-        default_action = foo_0();
+        default_action = foo();
     }
     apply {
-        z_1 = 32w5;
-        t.apply();
+        z_0 = 32w5;
+        t_0.apply();
     }
 }
 

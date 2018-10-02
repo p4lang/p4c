@@ -44,20 +44,20 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    IPv4Address address;
-    bool pass_1;
-    bool hasReturned_0;
+    IPv4Address address_0;
+    bool pass_0;
+    bool hasReturned;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("pipe.c1.Reject") action c1_Reject() {
-        pass_1 = false;
+    @name("pipe.c1.Reject") action c1_Reject_0() {
+        pass_0 = false;
     }
-    @name("pipe.c1.Check_ip") table c1_Check_ip_0 {
+    @name("pipe.c1.Check_ip") table c1_Check_ip {
         key = {
-            address: exact @name("address") ;
+            address_0: exact @name("address") ;
         }
         actions = {
-            c1_Reject();
+            c1_Reject_0();
             NoAction_0();
         }
         implementation = hash_table(32w1024);
@@ -65,22 +65,22 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @hidden action act() {
         pass = false;
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     @hidden action act_0() {
-        hasReturned_0 = false;
+        hasReturned = false;
         pass = true;
     }
     @hidden action act_1() {
-        address = headers.ipv4.srcAddr;
-        pass_1 = pass;
+        address_0 = headers.ipv4.srcAddr;
+        pass_0 = pass;
     }
     @hidden action act_2() {
-        pass = pass_1;
-        address = headers.ipv4.dstAddr;
+        pass = pass_0;
+        address_0 = headers.ipv4.dstAddr;
     }
     @hidden action act_3() {
-        pass = pass_1;
+        pass = pass_0;
     }
     @hidden table tbl_act {
         actions = {
@@ -117,11 +117,11 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned_0) {
+        if (!hasReturned) {
             tbl_act_1.apply();
-            c1_Check_ip_0.apply();
+            c1_Check_ip.apply();
             tbl_act_2.apply();
-            c1_Check_ip_0.apply();
+            c1_Check_ip.apply();
             tbl_act_3.apply();
         }
     }

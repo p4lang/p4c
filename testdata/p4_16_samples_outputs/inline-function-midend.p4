@@ -1,13 +1,13 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_6;
+    bit<32> tmp_2;
     @hidden action act() {
-        tmp_6 = x;
+        tmp_2 = x;
     }
     @hidden action act_0() {
-        tmp_6 = x;
+        tmp_2 = x;
     }
     @hidden action act_1() {
-        x = x + tmp_6;
+        x = x + tmp_2;
     }
     @hidden table tbl_act {
         actions = {

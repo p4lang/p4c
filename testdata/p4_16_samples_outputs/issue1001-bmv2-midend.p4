@@ -16,9 +16,9 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Meta x;
+    Meta x_0;
     @hidden action act() {
-        clone3<Meta>(CloneType.I2E, 32w64, x);
+        clone3<Meta>(CloneType.I2E, 32w64, x_0);
     }
     @hidden table tbl_act {
         actions = {

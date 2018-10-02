@@ -39,7 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         ethernet_2.count();
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name(".ethernet") table ethernet_4 {
+    @name(".ethernet") table ethernet_5 {
         actions = {
             ethernet_3();
             @defaultonly NoAction_0();
@@ -48,7 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        ethernet_4.apply();
+        ethernet_5.apply();
     }
 }
 

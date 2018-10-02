@@ -39,7 +39,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.recirculate_flag = smeta_1.recirculate_flag;
         smeta.parser_error = smeta_1.parser_error;
     }
-    @name("IngressI.forward") table forward {
+    @name("IngressI.forward") table forward_0 {
         key = {
         }
         actions = {
@@ -48,7 +48,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = drop_0();
     }
     apply {
-        forward.apply();
+        forward_0.apply();
     }
 }
 

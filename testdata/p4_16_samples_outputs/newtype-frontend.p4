@@ -14,32 +14,32 @@ header H {
 control c(out B32 x) {
     @name(".NoAction") action NoAction_0() {
     }
-    N32 k;
-    bit<32> b_1;
-    N32 n_1;
-    N32 n1;
-    S s;
-    @name("c.t") table t {
+    N32 k_0;
+    bit<32> b_0;
+    N32 n_0;
+    N32 n1_0;
+    S s_0;
+    @name("c.t") table t_0 {
         actions = {
             NoAction_0();
         }
         key = {
-            k: exact @name("k") ;
+            k_0: exact @name("k") ;
         }
         default_action = NoAction_0();
     }
     apply {
-        b_1 = 32w0;
-        n_1 = (N32)b_1;
-        k = n_1;
-        x = (B32)n_1;
-        n1 = (N32)32w1;
-        if (n_1 == n1) 
+        b_0 = 32w0;
+        n_0 = (N32)b_0;
+        k_0 = n_0;
+        x = (B32)n_0;
+        n1_0 = (N32)32w1;
+        if (n_0 == n1_0) 
             x = 32w2;
-        s.b = b_1;
-        s.n = n_1;
-        t.apply();
-        if (s.b == (B32)s.n) 
+        s_0.b = b_0;
+        s_0.n = n_0;
+        t_0.apply();
+        if (s_0.b == (B32)s_0.n) 
             x = 32w3;
     }
 }

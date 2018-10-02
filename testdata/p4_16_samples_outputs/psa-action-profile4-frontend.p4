@@ -29,36 +29,36 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIC.ap") ActionProfile(32w1024) ap;
-    @name("MyIC.a1") action a1_0() {
+    @name("MyIC.ap") ActionProfile(32w1024) ap_0;
+    @name("MyIC.a1") action a1() {
     }
-    @name("MyIC.a2") action a2_0() {
+    @name("MyIC.a2") action a2() {
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
-            a2_0();
+            a2();
         }
-        psa_implementation = ap;
+        psa_implementation = ap_0;
         default_action = NoAction_0();
     }
-    @name("MyIC.tbl2") table tbl2 {
+    @name("MyIC.tbl2") table tbl2_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_3();
-            a1_0();
+            a1();
         }
-        psa_implementation = ap;
+        psa_implementation = ap_0;
         default_action = NoAction_3();
     }
     apply {
-        tbl.apply();
-        tbl2.apply();
+        tbl_0.apply();
+        tbl2_0.apply();
     }
 }
 

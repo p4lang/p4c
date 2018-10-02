@@ -44,9 +44,9 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.counters") CounterArray(32w10, true) counters;
+    @name("pipe.counters") CounterArray(32w10, true) counters_0;
     @hidden action act() {
-        counters.increment(headers.ipv4.dstAddr);
+        counters_0.increment(headers.ipv4.dstAddr);
         pass = true;
     }
     @hidden action act_0() {

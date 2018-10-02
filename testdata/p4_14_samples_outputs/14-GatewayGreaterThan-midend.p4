@@ -36,18 +36,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".nop") action nop_0() {
+    @name(".nop") action nop() {
     }
-    @name(".t1") table t1 {
+    @name(".t1") table t1_0 {
         actions = {
-            nop_0();
+            nop();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
     apply {
         if (hdr.h.f1 > 13w1) 
-            t1.apply();
+            t1_0.apply();
     }
 }
 
