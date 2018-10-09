@@ -41,9 +41,9 @@ parser.add_argument('--socket', help='Nanomsg socket to which to subscribe',
                     action="store", required=False)
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
                     type=int, action="store", default=9090)
-parser.add_argument('--thrift-ip', help='Thrift IP address for table updates',
+parser.add_argument('--thrift-ip', help='Thrift IP address for table updates. If both --socket and --json are provided, then Thrift will not be used.',
                     type=str, action="store", default='localhost')
-parser.add_argument('--json', help='JSON description of P4 program [deprecated]',
+parser.add_argument('--json', help='JSON description of P4 program',
                     action="store", required=False)
 
 args = parser.parse_args()
@@ -562,7 +562,7 @@ class DebuggerAPI(cmd.Cmd):
     prompt = 'P4DBG: '
     intro = "Prototype for Debugger UI"
 
-    def __init__(self, addr, standard_client=None):
+    def __init__(self, addr, standard_client=None, json_cfg=None):
         cmd.Cmd.__init__(self)
         self.addr = addr
         self.sok = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
@@ -579,16 +579,18 @@ class DebuggerAPI(cmd.Cmd):
         self.reset()
 
         # creates new attributes
+        self.json_cfg = json_cfg
         self.standard_client = standard_client
         self.json_dependent_init()
 
     def json_dependent_init(self):
-        self.json_cfg = utils.get_json_config(
-            standard_client=self.standard_client)
+        if not self.json_cfg:
+            self.json_cfg = utils.get_json_config(
+                    standard_client=self.standard_client)
         field_map.load_names(self.json_cfg)
         obj_map.load_names(self.json_cfg)
 
-        if not with_runtime_CLI:
+        if not with_runtime_CLI or not self.standard_client:
             self.with_CLI = False
         else:
             self.with_CLI = True
@@ -672,8 +674,14 @@ class DebuggerAPI(cmd.Cmd):
         self.reset()
         print "We have been notified that the JSON config has changed on the",
         print "switch. The debugger state has therefore been reset."
+
+        if not self.standard_client:
+            print "Unable to request new config from switch because Thrift is unavailable"
+            sys.exit(0)
+
         print "You can request the new config and keep debugging,",
         print "or we will exit."
+
         v = prompt_yes_no("Do you want to request the new config?", True)
         if v:
            self.json_dependent_init()
@@ -1103,8 +1111,10 @@ class DebuggerAPI(cmd.Cmd):
 
     def do_CLI(self, line):
         "Connects to the bmv2 using the CLI, e.g. CLI table_dump <table_name>"
-        if not with_runtime_CLI or not self.standard_client:
-            return UIn_Error("Runtime CLI not available")
+        if not with_runtime_CLI:
+            raise UIn_Error("Runtime CLI not available")
+        if not self.standard_client:
+            raise UIn_Error("Runtime CLI not available (because Thrift is unavailable)")
         self.runtime_CLI.onecmd(line)
 
     def complete_CLI(self, text, line, start_index, end_index):
@@ -1150,25 +1160,35 @@ for long_name, short_name in shortcuts.items():
         setattr(DebuggerAPI, "complete_" + short_name, f_complete)
 
 def main():
-    deprecated_args = ["json"]
+    deprecated_args = []
     for a in deprecated_args:
         if getattr(args, a) is not None:
             print "Command line option '--{}' is deprecated".format(a),
             print "and will be ignored"
 
-    client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
-    info = client.bm_mgmt_get_info()
-    socket_addr = info.debugger_socket
-    if socket_addr is None:
-        print "The debugger is not enabled on the switch"
-        sys.exit(1)
+    client = None
+    socket_addr = None
+
     if args.socket is not None:
         socket_addr = args.socket
-    else:
-        print "'--socket' not provided, using", socket_addr,
-        print "(obtained from switch)"
 
-    c = DebuggerAPI(socket_addr, standard_client=client)
+    if not args.json and not args.socket:
+        client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
+        info = client.bm_mgmt_get_info()
+        if not args.socket:
+            socket_addr = info.debugger_socket
+            if socket_addr is None:
+                print "The debugger is not enabled on the switch"
+                sys.exit(1)
+            print "'--socket' not provided, using", socket_addr,
+            print "(obtained from switch)"
+
+    json_cfg = None
+    if args.json:
+        with open(args.json, 'r') as f:
+            json_cfg = f.read()
+
+    c = DebuggerAPI(socket_addr, standard_client=client, json_cfg=json_cfg)
     try:
         c.attach()
         c.cmdloop()
