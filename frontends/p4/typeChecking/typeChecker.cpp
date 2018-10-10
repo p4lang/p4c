@@ -2206,13 +2206,13 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (decl->is<IR::Function>()) {
         auto func = findContext<IR::Function>();
         if (func != nullptr && func->name == decl->getName()) {
-            typeError("%1%: Recursive function", expression);
+            typeError("%1%: Recursive function call", expression);
             return expression;
         }
     } else if (decl->is<IR::P4Action>()) {
         auto act = findContext<IR::P4Action>();
         if (act != nullptr && act->name == decl->getName()) {
-            typeError("%1%: Recursive action", expression);
+            typeError("%1%: Recursive action call", expression);
             return expression;
         }
     }
