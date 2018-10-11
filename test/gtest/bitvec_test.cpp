@@ -45,8 +45,8 @@ TEST(Bitvec, bigval) {
     (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
     bv.setraw(val, 2);
     EXPECT_EQ(bv.getbit(238), true);
-#endif // (defined(__GNUC__) && !defined(__clang__)) ||
-       // (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
+#endif  // (defined(__GNUC__) && !defined(__clang__)) ||
+        // (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
 }
 #else
 TEST(Bitvec, bigval) {
