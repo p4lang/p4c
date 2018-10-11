@@ -2201,8 +2201,21 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
 
 const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
-    auto decl = refMap->getDeclaration(expression->path, true)->getNode();
+    auto decl = refMap->getDeclaration(expression->path, true);
     const IR::Type* type = nullptr;
+    if (decl->is<IR::Function>()) {
+        auto func = findContext<IR::Function>();
+        if (func != nullptr && func->name == decl->getName()) {
+            typeError("%1%: Recursive function call", expression);
+            return expression;
+        }
+    } else if (decl->is<IR::P4Action>()) {
+        auto act = findContext<IR::P4Action>();
+        if (act != nullptr && act->name == decl->getName()) {
+            typeError("%1%: Recursive action call", expression);
+            return expression;
+        }
+    }
 
     if (decl->is<IR::ParserState>()) {
         type = IR::Type_State::get();
@@ -2224,13 +2237,13 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
     } else if (decl->is<IR::Method>()) {
-        type = getType(decl);
+        type = getType(decl->getNode());
         // Each method invocation uses fresh type variables
         type = cloneWithFreshTypeVariables(type->to<IR::Type_MethodBase>());
     }
 
     if (type == nullptr) {
-        type = getType(decl);
+        type = getType(decl->getNode());
         if (type == nullptr)
             return expression;
     }
