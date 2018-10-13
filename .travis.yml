@@ -25,8 +25,8 @@ before_install:
 install:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then tools/start_ccache; fi
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test . ; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE && cd build && make -j 4 ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE && cd build && make -j 2 ; fi
 
 script:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker run -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then make check ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "ebpf$" ; fi
