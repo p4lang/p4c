@@ -29,4 +29,4 @@ install:
 
 script:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker run -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then cd build && make check ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then make check ; fi

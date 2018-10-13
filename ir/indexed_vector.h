@@ -173,7 +173,8 @@ class IndexedVector : public Vector<T> {
     void check_valid() const {
         for (auto el : *this) {
             auto it = declarations.find(el->getName());
-            assert(it != declarations.end() && it->second == el); } }
+            BUG_CHECK(it != declarations.end() && it->second == el, "invalid element %1%", el); }
+    }
 };
 
 }  // namespace IR
