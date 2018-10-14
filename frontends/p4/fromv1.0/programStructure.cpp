@@ -945,6 +945,20 @@ static bool sameBitsType(
     return true;  // to prevent inserting a cast
 }
 
+static bool isSaturatedField(const IR::Expression *expr) {
+    auto member = expr->to<IR::Member>();
+    if (!member)
+        return false;
+    auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
+    if (!header_type)
+        return false;
+    auto field = header_type->getField(member->member.name);
+    if (field && field->getAnnotation("saturating")) {
+        return true;
+    }
+    return false;
+}
+
 // Implement modify_field(left, right, mask)
 const IR::Statement* ProgramStructure::sliceAssign(
     const IR::Primitive* primitive, const IR::Expression* left,
@@ -1090,9 +1104,17 @@ CONVERT_PRIMITIVE(bit_xnor) {
 CONVERT_PRIMITIVE(add) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
+    bool isSaturated = false;
+    for (auto a : args)
+        isSaturated = isSaturated || isSaturatedField(a);  // any of the fields
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Add(primitive->srcInfo, args[1], args[2]);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::AddSat(primitive->srcInfo, args[1], args[2]);
+    else
+        op = new IR::Add(primitive->srcInfo, args[1], args[2]);
+    LOG3("add: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1162,9 +1184,17 @@ CONVERT_PRIMITIVE(bit_and) {
 CONVERT_PRIMITIVE(subtract) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
+    bool isSaturated = false;
+    for (auto a : args)
+        isSaturated = isSaturated || isSaturatedField(a);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Sub(primitive->srcInfo, args[1], args[2]);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::SubSat(primitive->srcInfo, args[1], args[2]);
+    else
+        op = new IR::Sub(primitive->srcInfo, args[1], args[2]);
+    LOG3("subtract: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1202,7 +1232,13 @@ CONVERT_PRIMITIVE(add_to_field) {
     auto left2 = conv.convert(primitive->operands.at(0));
     // convert twice, so we have different expression trees on RHS and LHS
     auto right = conv.convert(primitive->operands.at(1));
-    auto op = new IR::Add(primitive->srcInfo, left, right);
+    bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::AddSat(primitive->srcInfo, left, right);
+    else
+        op = new IR::Add(primitive->srcInfo, left, right);
+    LOG3("add_to_field: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }
 
@@ -1213,7 +1249,13 @@ CONVERT_PRIMITIVE(subtract_from_field) {
     auto left2 = conv.convert(primitive->operands.at(0));
     // convert twice, so we have different expression trees on RHS and LHS
     auto right = conv.convert(primitive->operands.at(1));
-    auto op = new IR::Sub(primitive->srcInfo, left, right);
+    bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::SubSat(primitive->srcInfo, left, right);
+    else
+        op = new IR::Sub(primitive->srcInfo, left, right);
+    LOG3("subtract_form_field: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }
 
