@@ -6,10 +6,11 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     if [[ ! -x $BREW ]]; then
         /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     fi
+    # Update PATH to prefer Homebrew's bison over the macOS-provided version
+    export PATH="/usr/local/opt/bison/bin:$PATH"
 
     $BREW update
     $BREW install autoconf automake bdw-gc bison boost ccache cmake git libtool openssl pkg-config protobuf
-    $BREW link --force bison
     $BREW install gmp --c++11
 
     # install pip and required pip packages
