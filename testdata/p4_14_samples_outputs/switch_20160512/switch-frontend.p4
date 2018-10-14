@@ -1877,10 +1877,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta.l3_metadata.l3_mtu_check = 16w0xffff;
     }
     @name(".ipv4_mtu_check") action _ipv4_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu - hdr.ipv4.totalLen;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| hdr.ipv4.totalLen;
     }
     @name(".ipv6_mtu_check") action _ipv6_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu - hdr.ipv6.payloadLen;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| hdr.ipv6.payloadLen;
     }
     @name(".mtu") table _mtu_0 {
         actions = {
@@ -2684,7 +2684,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta.tunnel_metadata.tunnel_index = tunnel_index;
     }
     @name(".tunnel_mtu_check") action _tunnel_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu - meta.egress_metadata.payload_length;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| meta.egress_metadata.payload_length;
     }
     @name(".tunnel_mtu_miss") action _tunnel_mtu_miss() {
         meta.l3_metadata.l3_mtu_check = 16w0xffff;
@@ -4302,7 +4302,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action _nop_39() {
     }
     @name(".sflow_ing_session_enable") action _sflow_ing_session_enable(bit<32> rate_thr, bit<16> session_id) {
-        meta.ingress_metadata.sflow_take_sample = rate_thr + meta.ingress_metadata.sflow_take_sample;
+        meta.ingress_metadata.sflow_take_sample = rate_thr |+| meta.ingress_metadata.sflow_take_sample;
         meta.sflow_metadata.sflow_session_id = session_id;
     }
     @name(".nop") action _nop_40() {

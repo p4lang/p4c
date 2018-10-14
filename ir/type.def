@@ -86,9 +86,6 @@ class Type_Bits : Type_Base {
     cstring baseName() const { return isSigned ? "int" : "bit"; }
     int width_bits() const override { return size; }
 
-    /// canonical types: no source-level information
-    static std::map<int, IR::Type_Bits> *signedTypes;
-    static std::map<int, IR::Type_Bits> *unsignedTypes;
     toString{ return baseName() + "<" + Util::toString(size) + ">"; }
     dbprint { out << toString(); }
 }
