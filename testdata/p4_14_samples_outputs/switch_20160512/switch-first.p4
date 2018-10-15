@@ -70,6 +70,7 @@ struct ingress_metadata_t {
     bit<8>  drop_reason;
     bit<1>  control_frame;
     bit<16> bypass_lookups;
+    @saturating 
     bit<32> sflow_take_sample;
 }
 
@@ -164,6 +165,7 @@ struct l3_metadata_t {
     bit<1>  outer_routed;
     bit<8>  mtu_index;
     bit<1>  l3_copy;
+    @saturating 
     bit<16> l3_mtu_check;
 }
 
