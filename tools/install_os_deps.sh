@@ -9,8 +9,11 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
 
     $BREW update
     $BREW install autoconf automake bdw-gc bison boost ccache cmake git libtool openssl pkg-config protobuf
-    $BREW link --force bison
     $BREW install gmp --c++11
+
+    # Prefer Homebrew's bison over the macOS-provided version
+    $BREW link --force bison
+    echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' > ~/.bash_profile
 
     # install pip and required pip packages
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
