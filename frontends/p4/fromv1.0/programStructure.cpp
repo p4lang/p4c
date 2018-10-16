@@ -451,7 +451,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 }
 
                 auto type = explodeType(fieldTypes);
-                auto sizeAnnotation = value_set->getAnnotation("size");
+                auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {
@@ -464,7 +464,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                         return nullptr;
                     }
                 } else {
-                    WARNING("parser_value_set has no @size annotation, default to @size(4).");
+                    ::warning("parser_value_set has no @parser_value_set_size annotation");
+                    ::warning("using default size 4");
                     sizeConstant = new IR::Constant(4);
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
