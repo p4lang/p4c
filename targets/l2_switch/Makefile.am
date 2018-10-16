@@ -1,4 +1,8 @@
-SUBDIRS = . learn_client
+if COND_NANOMSG
+MAYBE_LEARN_CLIENT = learn_client
+endif
+
+SUBDIRS = . $(MAYBE_LEARN_CLIENT)
 
 noinst_PROGRAMS = l2_switch
 l2_switch_SOURCES = l2_switch.cpp primitives.cpp
