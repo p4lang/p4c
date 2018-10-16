@@ -66,8 +66,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node* inlineBefore(
         const IR::Node* calleeNode, const IR::MethodCallExpression* call,
         const IR::Statement* before);
-    /// Preorder function for a potential caller
-    const IR::Node* preCaller(const IR::Node* caller);
+    bool preCaller();
     const IR::Node* postCaller(const IR::Node* caller);
     const ReplacementMap* getReplacementMap() const;
     void dumpReplacementMap() const;

@@ -213,7 +213,7 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     InlineSummary::PerCaller* workToDo;
  public:
     explicit GeneralInliner(bool isv1) :
-            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {      
+            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {
         setName("GeneralInliner");
         refMap->setIsV1(isv1);
     }

@@ -57,13 +57,15 @@ Visitor::profile_t FunctionsInliner::init_apply(const IR::Node* node) {
     return Transform::init_apply(node);
 }
 
-const IR::Node* FunctionsInliner::preCaller(const IR::Node* node) {
+bool FunctionsInliner::preCaller() {
     LOG2("Visiting: " << dbp(getOriginal()));
-    if (toInline->sites.count(getOriginal()) == 0)
+    if (toInline->sites.count(getOriginal()) == 0) {
         prune();
+        return false;
+    }
     auto replMap = &toInline->sites[getOriginal()];
     replacementStack.push_back(replMap);
-    return node;
+    return true;
 }
 
 const IR::Node* FunctionsInliner::postCaller(const IR::Node* node) {
@@ -120,27 +122,39 @@ const IR::Node* FunctionsInliner::preorder(IR::AssignmentStatement* statement) {
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
-    preCaller(parser);
-    parser->visit_children(*this);
-    return postCaller(parser);
+    if (preCaller()) {
+        parser->visit_children(*this);
+        return postCaller(parser);
+    } else {
+        return parser;
+    }
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::P4Control* control) {
-    preCaller(control);
-    control->visit_children(*this);
-    return postCaller(control);
+    if (preCaller()) {
+        control->visit_children(*this);
+        return postCaller(control);
+    } else {
+        return control;
+    }
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
-    preCaller(function);
-    function->visit_children(*this);
-    return postCaller(function);
+    if (preCaller()) {
+        function->visit_children(*this);
+        return postCaller(function);
+    } else {
+        return function;
+    }
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::P4Action* action) {
-    preCaller(action);
-    action->visit_children(*this);
-    return postCaller(action);
+    if (preCaller()) {
+        action->visit_children(*this);
+        return postCaller(action);
+    } else {
+        return action;
+    }
 }
 
 const IR::Expression* FunctionsInliner::cloneBody(
