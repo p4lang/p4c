@@ -41,6 +41,9 @@ int get_mf_id(const p4::config::v1::P4Info &p4info,
 int get_param_id(const p4::config::v1::P4Info &p4info,
                  const std::string &a_name, const std::string &param_name);
 
+int get_digest_id(const p4::config::v1::P4Info &p4info,
+                  const std::string &digest_name);
+
 p4::config::v1::P4Info parse_p4info(const char *path);
 
 }  // namespace testing

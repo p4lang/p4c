@@ -21,6 +21,7 @@
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/options_parse.h>
+#include <bm/bm_sim/transport.h>
 
 #include <bm/PI/pi.h>
 
@@ -29,8 +30,10 @@
 
 #include <PI/proto/pi_server.h>
 
+#include <PI/p4info/digests.h>
 #include <PI/pi.h>
 #include <PI/target/pi_imp.h>
+#include <PI/target/pi_learn_imp.h>
 
 #include <grpc++/grpc++.h>
 
@@ -245,6 +248,190 @@ class DataplaneInterfaceServiceImpl
   std::unordered_map<packet_id_t, uint64_t> packet_id_translation{};
 };
 
+// P4Runtime supports sending notifications to the client which are
+// "traditionally" sent using nanomsg PUBSUB messages: table entry idle time
+// notifications & learning notifications. simple_switch_grpc "captures" these
+// notifications by providing a custom TransportIface implementation to the
+// Switch base class. At the moment we capture all notifications (include port
+// oper status notifications), but we only process (i.e. send through P4Runtime)
+// learning notifications. This should not be a problem as users of
+// simple_switch_grpc usually disable nanomsg anyway.
+class NotificationsCapture : public bm::TransportIface {
+ public:
+  explicit NotificationsCapture(bm::SwitchWContexts *sw)
+      : sw(sw) { }
+
+ private:
+  static constexpr size_t hdr_size = 32u;
+
+  using Lock = std::lock_guard<std::mutex>;
+
+  struct LEA_hdr_t {
+    char sub_topic[4];
+    uint64_t switch_id;
+    uint32_t cxt_id;
+    int list_id;
+    uint64_t buffer_id;
+    unsigned int num_samples;
+  } __attribute__((packed));
+
+  struct AGE_hdr_t {
+    char sub_topic[4];
+    uint64_t switch_id;
+    uint32_t cxt_id;
+    uint64_t buffer_id;
+    int table_id;
+    unsigned int num_entries;
+  } __attribute__((packed));
+
+  struct PRT_hdr_t {
+    char sub_topic[4];
+    uint64_t switch_id;
+    unsigned int num_statuses;
+    char _padding[16];
+  } __attribute__((packed));
+
+  struct SWP_hdr_t {
+    char sub_topic[4];
+    uint64_t switch_id;
+    uint32_t cxt_id;
+    int status;
+    char _padding[12];
+  } __attribute__((packed));
+
+  static_assert(sizeof(LEA_hdr_t) == hdr_size,
+                "Invalid size for notification header");
+  static_assert(sizeof(AGE_hdr_t) == hdr_size,
+                "Invalid size for notification header");
+  static_assert(sizeof(PRT_hdr_t) == hdr_size,
+                "Invalid size for notification header");
+  static_assert(sizeof(SWP_hdr_t) == hdr_size,
+                "Invalid size for notification header");
+
+  int send_generic(const std::string &msg) const {
+    if (msg.size() < hdr_size) return 1;
+    // all notification headers have size 32 bytes, padded at the end if needed
+    std::aligned_storage<hdr_size>::type storage;
+    std::memcpy(&storage, msg.data(), sizeof(storage));
+    const char *data = msg.data() + hdr_size;
+    Lock lock(mutex);
+    if (!memcmp("SWP|", msg.data(), 4)) {
+      handle_SWP(reinterpret_cast<const SWP_hdr_t *>(&storage));
+    } else if (!memcmp("LEA|", msg.data(), 4)) {
+      handle_LEA(reinterpret_cast<const LEA_hdr_t *>(&storage),
+                 data, msg.size() - hdr_size);
+    }
+    return 0;
+  }
+
+  // we use Swap notifications to ensure that learning & ageing notificaitons
+  // are not sent to PI / P4Runtime during the config swap process, which is a
+  // requirement of the p4lang P4Runtime implementation.
+  void handle_SWP(const SWP_hdr_t *hdr) const {
+    if (hdr->cxt_id != 0) {
+      return;
+    }
+    enum SwapStatus {
+      NEW_CONFIG_LOADED = 0,
+      SWAP_REQUESTED = 1,
+      SWAP_COMPLETED = 2,
+      SWAP_CANCELLED = 3
+    };
+    if (static_cast<SwapStatus>(hdr->status) == NEW_CONFIG_LOADED) {
+      ongoing_swap = true;
+    } else if (static_cast<SwapStatus>(hdr->status) == SWAP_COMPLETED ||
+               static_cast<SwapStatus>(hdr->status) == SWAP_CANCELLED) {
+      ongoing_swap = false;
+    }
+  }
+
+  void handle_LEA(const LEA_hdr_t *hdr, const char *data, size_t size) const {
+    // do not send notifications to PI if there is an ongoing swap; this is a
+    // requirement of the p4lang P4Runtime implementation.
+    if (ongoing_swap) {
+      BMLOG_TRACE(
+          "Ignoring LEA notification because of ongoing dataplane swap");
+      return;
+    }
+    const auto *learn_engine = sw->get_learn_engine(0);
+    std::string list_name;
+    if (learn_engine->list_get_name_from_id(hdr->list_id, &list_name) !=
+        bm::LearnEngineIface::LearnErrorCode::SUCCESS) {
+      bm::Logger::get()->error(
+          "Ignoring LEA notification with unknown learn list id {}",
+          hdr->list_id);
+      return;
+    }
+    auto *p4info = pi_get_device_p4info(hdr->switch_id);
+    if (p4info == nullptr) {
+      bm::Logger::get()->error(
+          "Ignoring LEA notification for device {} which has no p4info",
+          hdr->switch_id);
+      return;
+    }
+    pi_p4_id_t pi_id = pi_p4info_digest_id_from_name(p4info, list_name.c_str());
+    if (pi_id == PI_INVALID_ID) {
+      bm::Logger::get()->error(
+          "Ignoring LEA notification whose name '{}' cannot be found in p4info",
+          list_name);
+      return;
+    }
+    size_t data_size = pi_p4info_digest_data_size(p4info, pi_id);
+    if (data_size != size / hdr->num_samples) {
+      bm::Logger::get()->error(
+          "Dropping LEA notification with name '{}' because of unexpected "
+          "digest size", list_name);
+      return;
+    }
+    // Arguably this part of the code should be in PI/src/pi_learn_imp.cpp,
+    // along with the pi_learn_msg_done implementation (which releases the
+    // memory allocated here).
+    pi_learn_msg_t *pi_msg = new pi_learn_msg_t;
+    pi_msg->dev_tgt.dev_id = hdr->switch_id;
+    pi_msg->dev_tgt.dev_pipe_mask = hdr->cxt_id;
+    pi_msg->learn_id = pi_id;
+    pi_msg->msg_id = hdr->buffer_id;
+    pi_msg->num_entries = hdr->num_samples;
+    pi_msg->entry_size = data_size;
+    pi_msg->entries = new char[size];
+    std::memcpy(pi_msg->entries, data, size);
+    pi_learn_new_msg(pi_msg);
+  }
+
+  int open_() override {
+    return 0;
+  }
+
+  int send_(const std::string &msg) const override {
+    return send_generic(msg);
+  }
+
+  int send_(const char *msg, int len) const override {
+    return send_generic(std::string(msg, len));
+  }
+
+  int send_msgs_(
+      const std::initializer_list<std::string> &msgs) const override {
+    std::string buf;
+    for (const auto &msg : msgs) buf.append(msg);
+    return send_generic(buf);
+  }
+
+  int send_msgs_(const std::initializer_list<MsgBuf> &msgs) const override {
+    // TODO(antonin): since this is the method which is actually used by the
+    // bm_sim library when generating notifications, it may make sense to
+    // optimize the implementation for this case...
+    std::string buf;
+    for (const auto &msg : msgs) buf.append(msg.buf, msg.len);
+    return send_generic(buf);
+  }
+
+  mutable std::mutex mutex{};
+  mutable bool ongoing_swap{false};
+  bm::SwitchWContexts *sw;
+};
+
+
 SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port,
                                                bool enable_swap,
                                                std::string grpc_server_addr,
@@ -302,9 +489,17 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   parser_ptr = &parser;
 #endif  // WITH_SYSREPO
 
+  auto my_transport = std::make_shared<NotificationsCapture>(
+      simple_switch.get());
   int status = simple_switch->init_from_options_parser(
-      *parser_ptr, nullptr, std::move(my_dev_mgr));
+      *parser_ptr, std::move(my_transport), std::move(my_dev_mgr));
   if (status != 0) return status;
+
+  if (parser.option_was_provided("notifications-addr")) {
+    bm::Logger::get()->warn(
+        "You provided --notifications-addr but this target captures all "
+        "notifications and does not generate nanomsg messages");
+  }
 
   // PortMonitor saves the CB by reference so we cannot use this code; it seems
   // that at this stage we do not need the CB any way.

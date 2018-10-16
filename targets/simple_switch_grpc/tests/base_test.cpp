@@ -105,6 +105,7 @@ grpc::Status
 SimpleSwitchGrpcBaseTest::Write(ClientContext *context,
                                 p4v1::WriteRequest &request,
                                 p4v1::WriteResponse *response) const {
+  request.set_device_id(device_id);
   set_election_id(request.mutable_election_id());
   return p4runtime_stub->Write(context, request, response);
 }

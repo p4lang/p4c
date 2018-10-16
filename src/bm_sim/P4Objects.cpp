@@ -2061,9 +2061,10 @@ P4Objects::init_learn_lists(const Json::Value &cfg_root) {
   for (const auto &cfg_learn_list : cfg_learn_lists) {
     LearnEngineIface::list_id_t list_id = cfg_learn_list["id"].asInt();
     dup_id_checker.add(list_id);
-    learn_engine->list_create(list_id, 16);  // 16 is max nb of samples
-    learn_engine->list_set_learn_writer(list_id, notifications_transport);
     auto list_name = cfg_learn_list["name"].asString();
+    // 16 is max nb of samples
+    learn_engine->list_create(list_id, list_name, 16);
+    learn_engine->list_set_learn_writer(list_id, notifications_transport);
     // does not compile with g++4.8
     // learn_lists.emplace(
     //     list_name, new P4Objects::LearnList(list_name, list_id));

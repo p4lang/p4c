@@ -94,7 +94,7 @@ class LearningTest : public ::testing::Test {
 
   void learn_on_test1_f16(LearnEngineIface::list_id_t list_id,
                           size_t max_samples, unsigned timeout_ms) {
-    learn_engine->list_create(list_id, max_samples, timeout_ms);
+    learn_engine->list_create(list_id, "test_digest", max_samples, timeout_ms);
     learn_engine->list_set_learn_writer(list_id, learn_writer);
     learn_engine->list_push_back_field(list_id, testHeader1, 0);  // test1.f16
     learn_engine->list_init(list_id);
@@ -209,7 +209,7 @@ TEST_F(LearningTest, OneSampleConstData) {
   char buffer[sizeof(LearnEngineIface::msg_hdr_t) + 2];
   std::shared_ptr<MemoryAccessor> learn_writer(new
   MemoryAccessor(sizeof(buffer)));
-  learn_engine->list_create(list_id, max_samples, timeout_ms);
+  learn_engine->list_create(list_id, "test_digest", max_samples, timeout_ms);
   learn_engine->list_set_learn_writer(list_id, learn_writer);
   learn_engine->list_push_back_constant(list_id, "0xaba");  // 2 bytes
   learn_engine->list_init(list_id);
@@ -526,7 +526,7 @@ TEST_F(LearningTest, MaxSamplesChangeBadList) {
 TEST_F(LearningTest, OneSampleCbMode) {
   LearnEngineIface::list_id_t list_id = 1;
   size_t max_samples = 1; unsigned timeout_ms = 100;
-  learn_engine->list_create(list_id, max_samples, timeout_ms);
+  learn_engine->list_create(list_id, "test_digest", max_samples, timeout_ms);
   learn_engine->list_set_learn_cb(list_id, LearningTest::learn_cb, this);
   learn_engine->list_push_back_field(list_id, testHeader1, 0);  // test1.f16
   learn_engine->list_init(list_id);

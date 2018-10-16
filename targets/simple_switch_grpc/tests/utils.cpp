@@ -74,6 +74,15 @@ int get_param_id(const p4configv1::P4Info &p4info,
   return -1;
 }
 
+int get_digest_id(const p4::config::v1::P4Info &p4info,
+                  const std::string &digest_name) {
+  for (const auto &digest : p4info.digests()) {
+    const auto &pre = digest.preamble();
+    if (pre.name() == digest_name) return pre.id();
+  }
+  return 0;
+}
+
 p4configv1::P4Info parse_p4info(const char *path) {
   p4configv1::P4Info p4info;
   std::ifstream istream(path);

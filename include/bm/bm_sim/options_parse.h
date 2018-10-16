@@ -24,8 +24,9 @@
 #define BM_BM_SIM_OPTIONS_PARSE_H_
 
 #include <iosfwd>
-#include <string>
 #include <map>
+#include <string>
+#include <unordered_set>
 
 #include "device_id.h"
 #include "logger.h"
@@ -64,6 +65,8 @@ class OptionsParser {
 
   void parse(int argc, char *argv[], TargetParserIface *tp);
 
+  bool option_was_provided(const std::string &option) const;
+
   std::string config_file_path{};
   bool no_p4{false};
   InterfaceList ifaces{};
@@ -90,6 +93,7 @@ class OptionsParser {
   std::string debugger_addr{};
   std::string state_file_path{};
   size_t dump_packet_data{0};
+  std::unordered_set<std::string> options_provided{};
 };
 
 }  // namespace bm

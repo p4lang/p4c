@@ -49,6 +49,7 @@ class LearnEngineIface {
   enum LearnErrorCode {
     SUCCESS = 0,
     INVALID_LIST_ID,
+    INVALID_LIST_NAME,
     ERROR
   };
 
@@ -67,7 +68,8 @@ class LearnEngineIface {
 
   virtual ~LearnEngineIface() { }
 
-  virtual void list_create(list_id_t list_id, size_t max_samples = 1,
+  virtual void list_create(list_id_t list_id, const std::string &list_name,
+                           size_t max_samples = 1,
                            unsigned int timeout_ms = 1000) = 0;
 
   virtual void list_set_learn_writer(
@@ -89,6 +91,12 @@ class LearnEngineIface {
 
   virtual LearnErrorCode list_set_max_samples(list_id_t list_id,
                                               size_t max_samples) = 0;
+
+  virtual LearnErrorCode list_get_name_from_id(
+      list_id_t list_id, std::string *list_name) const = 0;
+
+  virtual LearnErrorCode list_get_id_from_name(
+      const std::string &list_name, list_id_t *list_id) const = 0;
 
   //! Performs learning on the packet. Needs to be called by the target after a
   //! learning-enabled pipeline has been applied on the packet. See the simple

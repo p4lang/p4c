@@ -181,7 +181,8 @@ exception InvalidParseVSetOperation {
 
 enum LearnOperationErrorCode {
   INVALID_LIST_ID = 1,
-  ERROR = 2
+  INVALID_LIST_NAME = 2,
+  ERROR = 3
 }
 
 exception InvalidLearnOperation {

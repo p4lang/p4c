@@ -20,10 +20,11 @@
 
 #include <bm/bm_sim/context.h>
 
+#include <cstring>
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 namespace bm {
 
@@ -761,6 +762,7 @@ Context::load_new_config(
   if (p4objects != p4objects_rt) return ErrorCode::ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>(std::cout, true);
   init_objects(is, lookup_factory, required_fields, arith_objects);
+  send_swap_status_notification(SwapStatus::NEW_CONFIG_LOADED);
   return ErrorCode::SUCCESS;
 }
 
@@ -770,6 +772,7 @@ Context::swap_configs() {
   // no ongoing swap
   if (p4objects == p4objects_rt) return ErrorCode::NO_ONGOING_SWAP;
   swap_ordered = true;
+  send_swap_status_notification(SwapStatus::SWAP_REQUESTED);
   return ErrorCode::SUCCESS;
 }
 
@@ -805,6 +808,7 @@ Context::do_swap() {
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   p4objects = p4objects_rt;
   swap_ordered = false;
+  send_swap_status_notification(SwapStatus::SWAP_COMPLETED);
   return 0;
 }
 
@@ -818,6 +822,26 @@ ErrorCodeMap
 Context::get_error_codes() const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   return p4objects->get_error_codes();
+}
+
+void
+Context::send_swap_status_notification(SwapStatus status) {
+  // header for config swap notification
+  struct swap_msg_hdr_t {
+    char sub_topic[4];
+    s_device_id_t switch_id;
+    s_cxt_id_t cxt_id;
+    int status;
+    char _padding[12];
+  } __attribute__((packed));
+
+  swap_msg_hdr_t msg_hdr;
+  char *msg_hdr_ = reinterpret_cast<char *>(&msg_hdr);
+  memset(msg_hdr_, 0, sizeof(msg_hdr));
+  memcpy(msg_hdr_, "SWP|", 4);
+  msg_hdr.switch_id = device_id;
+  msg_hdr.cxt_id = cxt_id;
+  msg_hdr.status = static_cast<int>(status);
 }
 
 }  // namespace bm

@@ -1,0 +1,73 @@
+tables {
+  preamble {
+    id: 33610141
+    name: "ingress.smac"
+    alias: "smac"
+  }
+  match_fields {
+    id: 1
+    name: "h.ethernet.smac"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16783753
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 4096
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16783753
+    name: "ingress.send_digest"
+    alias: "send_digest"
+  }
+}
+digests {
+  preamble {
+    id: 385912120
+    name: "L2_digest"
+    alias: "L2_digest"
+  }
+  type_spec {
+    struct {
+      name: "L2_digest"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "L2_digest"
+    value {
+      members {
+        name: "smac"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+      members {
+        name: "ig_port"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 9
+            }
+          }
+        }
+      }
+    }
+  }
+}

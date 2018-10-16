@@ -411,6 +411,13 @@ class Context final {
   Context &operator=(const Context &other) = delete;
 
  private:
+  enum SwapStatus {
+    NEW_CONFIG_LOADED = 0,
+    SWAP_REQUESTED = 1,
+    SWAP_COMPLETED = 2,
+    SWAP_CANCELLED = 3
+  };
+
   MatchErrorCode get_mt_indirect(const std::string &table_name,
                                  MatchTableIndirect **table) const;
   MatchErrorCode get_mt_indirect_ws(const std::string &table_name,
@@ -468,6 +475,8 @@ class Context final {
   //! Return a copy of the error codes map (a bi-directional map between an
   //! error code's integral value and its name / description).
   ErrorCodeMap get_error_codes() const;
+
+  void send_swap_status_notification(SwapStatus status);
 
  private:  // data members
   cxt_id_t cxt_id{};
