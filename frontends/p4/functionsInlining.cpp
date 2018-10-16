@@ -46,6 +46,10 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression* mce) {
     toInline->add(aci);
 }
 
+void FunctionsInliner::end_apply(const IR::Node*) {
+    BUG_CHECK(replacementStack.empty(), "Non-empty replacement stack");
+}
+
 Visitor::profile_t FunctionsInliner::init_apply(const IR::Node* node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);
@@ -57,20 +61,24 @@ const IR::Node* FunctionsInliner::preCaller(const IR::Node* node) {
     LOG2("Visiting: " << dbp(getOriginal()));
     if (toInline->sites.count(getOriginal()) == 0)
         prune();
-    replMap = &toInline->sites[getOriginal()];
+    auto replMap = &toInline->sites[getOriginal()];
+    replacementStack.push_back(replMap);
     return node;
 }
 
 const IR::Node* FunctionsInliner::postCaller(const IR::Node* node) {
+    LOG2("Ending: " << dbp(getOriginal()));
     if (toInline->sites.count(getOriginal()) > 0)
         list->replace(getOriginal(), node);
-    replMap = nullptr;
+    BUG_CHECK(!replacementStack.empty(), "Empty replacement stack");
+    replacementStack.pop_back();
     return node;
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::MethodCallStatement* statement) {
     auto orig = getOriginal<IR::MethodCallStatement>();
     LOG2("Visiting " << dbp(orig));
+    auto replMap = getReplacementMap();
     if (replMap == nullptr)
         return statement;
 
@@ -80,9 +88,25 @@ const IR::Node* FunctionsInliner::preorder(IR::MethodCallStatement* statement) {
     return inlineBefore(callee, statement->methodCall, statement);
 }
 
+const FunctionsInliner::ReplacementMap* FunctionsInliner::getReplacementMap() const {
+    if (replacementStack.empty())
+        return nullptr;
+    return replacementStack.back();
+}
+
+void FunctionsInliner::dumpReplacementMap() const {
+    auto replMap = getReplacementMap();
+    LOG2("Replacement map contents");
+    if (replMap == nullptr)
+        return;
+    for (auto it : *replMap)
+        LOG2("\t" << it.first << " with " << it.second);
+}
+
 const IR::Node* FunctionsInliner::preorder(IR::AssignmentStatement* statement) {
     auto orig = getOriginal<IR::AssignmentStatement>();
     LOG2("Visiting " << dbp(orig));
+    auto replMap = getReplacementMap();
     if (replMap == nullptr)
         return statement;
 
@@ -93,6 +117,30 @@ const IR::Node* FunctionsInliner::preorder(IR::AssignmentStatement* statement) {
     BUG_CHECK(call != nullptr,
               "%1%: expected a method call", statement->right);
     return inlineBefore(callee, call, statement);
+}
+
+const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
+    preCaller(parser);
+    parser->visit_children(*this);
+    return postCaller(parser);
+}
+
+const IR::Node* FunctionsInliner::preorder(IR::P4Control* control) {
+    preCaller(control);
+    control->visit_children(*this);
+    return postCaller(control);
+}
+
+const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
+    preCaller(function);
+    function->visit_children(*this);
+    return postCaller(function);
+}
+
+const IR::Node* FunctionsInliner::preorder(IR::P4Action* action) {
+    preCaller(action);
+    action->visit_children(*this);
+    return postCaller(action);
 }
 
 const IR::Expression* FunctionsInliner::cloneBody(
