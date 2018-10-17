@@ -3219,7 +3219,10 @@ void TypeInference::validateActionInitializer(
     }
 
     auto call = actionCall->to<IR::MethodCallExpression>();
-    CHECK_NULL(call);
+    if (call == nullptr) {
+        typeError("%1%: expected an action call", actionCall);
+        return;
+    }
     auto method = call->method;
     if (!method->is<IR::PathExpression>())
         BUG("%1%: unexpected expression", method);
@@ -3253,13 +3256,30 @@ void TypeInference::validateActionInitializer(
     }
 
     SameExpression se(refMap, typeMap);
-    for (unsigned i=0; i < actionListCall->arguments->size(); i++) {
-        auto aa = actionListCall->arguments->at(i);
-        auto da = call->arguments->at(i);
+    auto callInstance = MethodInstance::resolve(call, refMap, typeMap);
+    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap);
+
+    for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
+        auto aa = listInstance->substitution.lookup(param);
+        auto da = callInstance->substitution.lookup(param);
+        if (da == nullptr) {
+            typeError("%1%: parameter should be assigned in call %2%",
+                      param, call);
+            return;
+        }
         bool same = se.sameExpression(aa->expression, da->expression);
         if (!same) {
             typeError("%1%: argument does not match declaration in actions list: %2%",
                       da, aa);
+            return;
+        }
+    }
+
+    for (auto param : *callInstance->substitution.getParametersInOrder()) {
+        auto da = callInstance->substitution.lookup(param);
+        if (da == nullptr) {
+            typeError("%1%: parameter should be assigned in call %2%",
+                      param, call);
             return;
         }
     }
