@@ -298,6 +298,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             if (!dontForwardChildrenBeforePreorder) {
                 ForwardChildren forward_children(*visited);
                 copy->visit_children(forward_children); }
+            bool save_prune_flag = prune_flag;
             prune_flag = false;
             visitCurrentOnce = visited->refVisitOnce(n);
             bool extra_clone = false;
@@ -321,6 +322,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 copy->visit_children(*this);
                 visitCurrentOnce = visited->refVisitOnce(n);
                 final_result = copy->apply_visitor_postorder(*this); }
+            prune_flag = save_prune_flag;
             if (final_result == copy
                 && final_result != preorder_result
                 && *final_result == *preorder_result)
