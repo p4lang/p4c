@@ -908,7 +908,12 @@ class P4RuntimeAnalyzer {
         vs->mutable_preamble()->set_alias(symbols.getAlias(name));
         vs->set_bitwidth(bitwidth);
         vs->set_size(size);
-        addAnnotations(vs->mutable_preamble(), inst, [](cstring name){ return name == "size"; });
+    }
+
+    /// To be called after all objects have been added to P4Info. Calls the
+    /// architecture-specific postAdd method for post-processing.
+    void postAdd() const {
+        archHandler->postAdd(symbols, p4Info);
     }
 
  private:
@@ -1278,7 +1283,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
         });
     });
 
-    archHandler->postCollect(symbols);
+    archHandler->postCollect(&symbols);
 
     // Construct a P4Runtime control plane API from the program.
     P4RuntimeAnalyzer analyzer(symbols, typeMap, refMap, archHandler);
@@ -1298,6 +1303,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
             analyzer.addControllerHeader(type);
         }
     });
+
+    analyzer.postAdd();
 
     P4RuntimeEntriesConverter entriesConverter(symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
