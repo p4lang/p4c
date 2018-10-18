@@ -143,32 +143,29 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
                 rv = o->type;
                 break; }
             infer >>= 1; }
-        return rv;
-    } else {
-        if (name == "truncate")
-            return IR::Type::Bits::get(32);
-        if ((name == "count" || name == "execute_meter") && operand == 1)
-            return IR::Type::Bits::get(32);
-        if (name.startsWith("execute_stateful") && operand == 1)
-            return IR::Type::Bits::get(32);
-        if ((name == "clone_ingress_pkt_to_egress" || name == "clone_i2e" ||
-             name == "clone_egress_pkt_to_egress" || name == "clone_e2e") &&
-            operand == 0) {
-            return IR::Type::Bits::get(32);
-        }
-        if ((name == "execute") && operand == 2)
-            return IR::Type::Bits::get(32);
-        if (name == "modify_field_conditionally" && operand == 1)
-            return IR::Type::Boolean::get();
-        if (name == "shift_left" && operand == 1) {
-            if (operands.at(0)->type->width_bits() > operands.at(1)->type->width_bits())
-                return operands.at(0)->type;
-            return IR::Type::Unknown::get(); }
-        if (name == "shift_right" && operand == 1) {
-            if (operands.at(0)->type->width_bits() > operands.at(1)->type->width_bits())
-                return operands.at(0)->type;
-            return IR::Type::Unknown::get(); }
-    }
+        return rv; }
+    if (name == "truncate")
+        return IR::Type::Bits::get(32);
+    if ((name == "count" || name == "execute_meter") && operand == 1)
+        return IR::Type::Bits::get(32);
+    if (name.startsWith("execute_stateful") && operand == 1)
+        return IR::Type::Bits::get(32);
+    if ((name == "clone_ingress_pkt_to_egress" || name == "clone_i2e" ||
+         name == "clone_egress_pkt_to_egress" || name == "clone_e2e") &&
+        operand == 0) {
+        return IR::Type::Bits::get(32); }
+    if ((name == "execute") && operand == 2)
+        return IR::Type::Bits::get(32);
+    if (name == "modify_field_conditionally" && operand == 1)
+        return IR::Type::Boolean::get();
+    if (name == "shift_left" && operand == 1) {
+        if (operands.at(0)->type->width_bits() > operands.at(1)->type->width_bits())
+            return operands.at(0)->type;
+        return IR::Type::Unknown::get(); }
+    if (name == "shift_right" && operand == 1) {
+        if (operands.at(0)->type->width_bits() > operands.at(1)->type->width_bits())
+            return operands.at(0)->type;
+        return IR::Type::Unknown::get(); }
     return rv;
 }
 
