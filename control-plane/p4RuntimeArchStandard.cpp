@@ -455,7 +455,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         (void)externFunction;
     }
 
-    void postCollect(const P4RuntimeSymbolTableIface& symbols) override {
+    void postCollect(P4RuntimeSymbolTableIface* symbols) override {
         (void)symbols;
         // analyze action profiles and build a mapping from action profile name
         // to the set of tables referencing them
@@ -539,6 +539,13 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         (void)symbols;
         (void)p4info;
         (void)externFunction;
+    }
+
+    void postAdd(const P4RuntimeSymbolTableIface& symbols,
+                 ::p4::config::v1::P4Info* p4info) override {
+        // nothing to do
+        (void)symbols;
+        (void)p4info;
     }
 
     static boost::optional<ActionProfile>
