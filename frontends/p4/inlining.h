@@ -233,7 +233,7 @@ class InlinePass : public PassManager {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
         passes.push_back(new InlineDriver<InlineList, InlineSummary>(
-            &toInline, new P4::GeneralInliner(refMap->isV1())));
+            &toInline, new GeneralInliner(refMap->isV1())));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap));
         setName("InlinePass");
     }
