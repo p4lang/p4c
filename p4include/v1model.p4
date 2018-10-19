@@ -28,7 +28,7 @@ match_kind {
 }
 
 // Are these correct?
-@metadata @name("standard_metadata")
+@name("standard_metadata")
 struct standard_metadata_t {
     bit<9>  ingress_port;
     bit<9>  egress_spec;
@@ -232,11 +232,9 @@ verify_checksum and verify_checksum_with_payload methods,
 and return statements. */
 control VerifyChecksum<H, M>(inout H hdr,
                              inout M meta);
-@pipeline
 control Ingress<H, M>(inout H hdr,
                       inout M meta,
                       inout standard_metadata_t standard_metadata);
-@pipeline
 control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
@@ -247,7 +245,6 @@ update_checksum and update_checksum_with_payload methods,
 and return statements. */
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
-@deparser
 control Deparser<H>(packet_out b, in H hdr);
 
 package V1Switch<H, M>(Parser<H, M> p,
