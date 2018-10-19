@@ -234,8 +234,8 @@ At this time, we are aware of the following unsupported P4_14 features:
 - direct registers
 
 If you find more missing features or if you would like to request that a
-specific feature be added, please send us an email (p4-dev@p4.org) or submit an
-issue with the appropriate label on
+specific feature be added, please send us an email (p4-dev@lists.p4.org) or
+submit an issue with the appropriate label on
 [Github](https://github.com/p4lang/behavioral-model/issues). Do not hesitate to
 contribute code yourself!
 
