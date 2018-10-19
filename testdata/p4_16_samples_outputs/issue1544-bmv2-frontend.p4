@@ -25,37 +25,37 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".my_drop") action my_drop() {
         mark_to_drop();
     }
-    bit<16> tmp_0;
-    @name("ingress.set_port") action set_port_0(bit<9> output_port) {
+    bit<16> tmp;
+    @name("ingress.set_port") action set_port(bit<9> output_port) {
         standard_metadata.egress_spec = output_port;
     }
-    @name("ingress.mac_da") table mac_da {
+    @name("ingress.mac_da") table mac_da_0 {
         key = {
             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         actions = {
-            set_port_0();
+            set_port();
             my_drop();
         }
         default_action = my_drop();
     }
     apply {
-        mac_da.apply();
+        mac_da_0.apply();
         {
-            bit<16> x = hdr.ethernet.srcAddr[15:0];
-            bool hasReturned_0 = false;
-            bit<16> retval_0;
-            if (x > 16w5) {
-                hasReturned_0 = true;
-                retval_0 = x + 16w65535;
+            bit<16> x_0 = hdr.ethernet.srcAddr[15:0];
+            bool hasReturned = false;
+            bit<16> retval;
+            if (x_0 > 16w5) {
+                hasReturned = true;
+                retval = x_0 + 16w65535;
             }
             else {
-                hasReturned_0 = true;
-                retval_0 = x;
+                hasReturned = true;
+                retval = x_0;
             }
-            tmp_0 = retval_0;
+            tmp = retval;
         }
-        hdr.ethernet.srcAddr[15:0] = tmp_0;
+        hdr.ethernet.srcAddr[15:0] = tmp;
     }
 }
 

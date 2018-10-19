@@ -27,21 +27,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".maintain_2bit_variable") action maintain_2bit_variable_0() {
+    @name(".maintain_2bit_variable") action maintain_2bit_variable() {
         meta.md.status_cycle = (bit<2>)(meta.md.pkt_count << 2);
     }
-    @name(".incr_global_count") action incr_global_count_0() {
+    @name(".incr_global_count") action incr_global_count() {
         meta.md.global_count = (bit<64>)meta.md.pkt_count << 2;
     }
-    @name(".tb_maintain_2bit_variable") table tb_maintain_2bit_variable {
+    @name(".tb_maintain_2bit_variable") table tb_maintain_2bit_variable_0 {
         actions = {
-            maintain_2bit_variable_0();
-            incr_global_count_0();
+            maintain_2bit_variable();
+            incr_global_count();
         }
-        default_action = maintain_2bit_variable_0();
+        default_action = maintain_2bit_variable();
     }
     apply {
-        tb_maintain_2bit_variable.apply();
+        tb_maintain_2bit_variable_0.apply();
     }
 }
 

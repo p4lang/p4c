@@ -1,12 +1,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-bit<16> incr(in bit<16> x) {
-    return x + 16w1;
-}
-bit<16> twoxplus1(in bit<16> x) {
-    return x + (x + 16w1);
-}
 struct metadata {
     bit<16> tmp_port;
 }
@@ -23,37 +17,34 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<16> tmp_port_0;
-    bit<16> tmp_1;
-    bit<16> tmp_2;
+    bit<16> tmp;
+    bit<16> tmp_0;
+    bit<16> x_0;
+    bool hasReturned;
+    bit<16> retval;
     bit<16> x_1;
-    bool hasReturned_4;
-    bit<16> retval_4;
-    bit<16> x_2;
-    bool hasReturned_5;
-    bit<16> retval_5;
+    bool hasReturned_0;
+    bit<16> retval_0;
     state start {
-        x_1 = (bit<16>)standard_metadata.ingress_port;
-        hasReturned_4 = false;
-        hasReturned_4 = true;
-        retval_4 = x_1 + 16w1;
-        tmp_1 = retval_4;
-        tmp_port_0 = tmp_1;
+        x_0 = (bit<16>)standard_metadata.ingress_port;
+        hasReturned = false;
+        hasReturned = true;
+        retval = x_0 + 16w1;
+        tmp = retval;
+        tmp_port_0 = tmp;
         packet.extract<ethernet_t>(hdr.ethernet);
-        x_2 = hdr.ethernet.etherType;
-        hasReturned_5 = false;
-        hasReturned_5 = true;
-        retval_5 = x_2 + 16w1;
-        tmp_2 = retval_5;
-        hdr.ethernet.etherType = tmp_2;
+        x_1 = hdr.ethernet.etherType;
+        hasReturned_0 = false;
+        hasReturned_0 = true;
+        retval_0 = x_1 + 16w1;
+        tmp_0 = retval_0;
+        hdr.ethernet.etherType = tmp_0;
         meta.tmp_port = tmp_port_0;
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_3;
-    bit<16> tmp_4;
-    bit<16> tmp_5;
     @name(".my_drop") action my_drop() {
         mark_to_drop();
     }
@@ -71,12 +62,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = my_drop();
     }
     @hidden action act() {
-        tmp_3 = twoxplus1(hdr.ethernet.srcAddr[15:0]);
-        hdr.ethernet.srcAddr[15:0] = tmp_3;
-        tmp_4 = incr(hdr.ethernet.srcAddr[15:0]);
-        hdr.ethernet.srcAddr[15:0] = tmp_4;
-        tmp_5 = incr(hdr.ethernet.etherType);
-        hdr.ethernet.etherType = tmp_5;
+        hdr.ethernet.srcAddr[15:0] = hdr.ethernet.srcAddr[15:0] + (hdr.ethernet.srcAddr[15:0] + 16w1);
+        hdr.ethernet.srcAddr[15:0] = hdr.ethernet.srcAddr[15:0] + 16w1;
+        hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
     }
     @hidden table tbl_act {
         actions = {
