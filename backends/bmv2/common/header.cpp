@@ -367,14 +367,13 @@ bool HeaderConverter::preorder(const IR::Parameter* param) {
     LOG3("convert param " << param);
     //// keep track of which headers we've already generated the ctxt->json for
     auto ft = ctxt->typeMap->getType(param->getNode(), true);
-    if (ft->is<IR::Type_Struct>()) {
-        auto st = ft->to<IR::Type_Struct>();
+    if (auto st = ft->to<IR::Type_Struct>()) {
         if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
             return false;  // already seen
         else
             visitedHeaders.emplace(st->getName());
 
-        if (st->getAnnotation("metadata")) {
+        if (st->name == "standard_metadata") {
             addHeaderType(st);
         } else {
             auto isHeader = isHeaders(st);
@@ -385,6 +384,7 @@ bool HeaderConverter::preorder(const IR::Parameter* param) {
                 addTypesAndInstances(st, true);
             }
         }
+        return true;
     }
     return false;
 }
