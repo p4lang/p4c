@@ -1,12 +1,12 @@
 control c() {
-    bit<32> x;
-    @name("c.a") action a_0(inout bit<32> arg) {
-        bool hasReturned_0 = false;
+    bit<32> x_0;
+    @name("c.a") action a(inout bit<32> arg) {
+        bool hasReturned = false;
         arg = 32w1;
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     apply {
-        a_0(x);
+        a(x_0);
     }
 }
 

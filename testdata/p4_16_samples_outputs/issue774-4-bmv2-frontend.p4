@@ -13,9 +13,9 @@ struct M {
 }
 
 parser prs(packet_in p, out Headers h, inout M meta, inout standard_metadata_t s) {
-    Header arg_0;
+    Header arg;
     state start {
-        p.extract<Header>(arg_0);
+        p.extract<Header>(arg);
         p.extract<Header>(h.h);
         transition accept;
     }

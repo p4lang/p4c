@@ -45,33 +45,33 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("ingress.a") action a_0() {
+    @name("ingress.a") action a() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("ingress.t_lpm") table t_lpm {
+    @name("ingress.t_lpm") table t_lpm_0 {
         key = {
             h.h.l: lpm @name("h.h.l") ;
         }
         actions = {
-            a_0();
-            a_with_control_params_0();
+            a();
+            a_with_control_params();
         }
-        default_action = a_0();
+        default_action = a();
         const entries = {
-                        8w0x11 &&& 8w0xf0 : a_with_control_params_0(9w11);
+                        8w0x11 &&& 8w0xf0 : a_with_control_params(9w11);
 
-                        8w0x12 : a_with_control_params_0(9w12);
+                        8w0x12 : a_with_control_params(9w12);
 
-                        default : a_with_control_params_0(9w13);
+                        default : a_with_control_params(9w13);
 
         }
 
     }
     apply {
-        t_lpm.apply();
+        t_lpm_0.apply();
     }
 }
 

@@ -1,13 +1,13 @@
 control ctrl(out bit<32> c) {
     bool hasExited;
-    @name("ctrl.e") action e_0() {
+    @name("ctrl.e") action e() {
         hasExited = true;
     }
-    @name("ctrl.t") table t {
+    @name("ctrl.t") table t_0 {
         actions = {
-            e_0();
+            e();
         }
-        default_action = e_0();
+        default_action = e();
     }
     @hidden action act() {
         hasExited = false;
@@ -30,7 +30,7 @@ control ctrl(out bit<32> c) {
     }
     apply {
         tbl_act.apply();
-        t.apply();
+        t_0.apply();
         if (!hasExited) 
             tbl_act_0.apply();
     }

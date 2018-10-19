@@ -167,7 +167,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("FabricIngress.filtering.t") table filtering_t_0 {
+    @name("FabricIngress.filtering.t") table filtering_t {
         key = {
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
@@ -178,17 +178,17 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         default_action = NoAction_0();
     }
-    PortId_t forwarding_mask_0;
-    @name("FabricIngress.forwarding.fwd") action forwarding_fwd(PortId_t next_port) {
+    PortId_t forwarding_mask;
+    @name("FabricIngress.forwarding.fwd") action forwarding_fwd_0(PortId_t next_port) {
         standard_metadata.egress_spec = next_port;
     }
-    @name("FabricIngress.forwarding.t") table forwarding_t_0 {
+    @name("FabricIngress.forwarding.t") table forwarding_t {
         key = {
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
             drop_0();
-            forwarding_fwd();
+            forwarding_fwd_0();
             @defaultonly NoAction_3();
         }
         default_action = NoAction_3();
@@ -199,11 +199,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             hdr.packet_out.setInvalid();
             exit;
         }
-        filtering_t_0.apply();
-        forwarding_t_0.apply();
+        filtering_t.apply();
+        forwarding_t.apply();
         standard_metadata.egress_spec = (PortId_t)((PortIdUInt_t)standard_metadata.egress_spec + 9w1);
-        forwarding_mask_0 = (PortId_t)9w0xf;
-        standard_metadata.egress_spec = (PortId_t)((PortIdUInt_t)standard_metadata.egress_spec & (PortIdUInt_t)forwarding_mask_0);
+        forwarding_mask = (PortId_t)9w0xf;
+        standard_metadata.egress_spec = (PortId_t)((PortIdUInt_t)standard_metadata.egress_spec & (PortIdUInt_t)forwarding_mask);
     }
 }
 

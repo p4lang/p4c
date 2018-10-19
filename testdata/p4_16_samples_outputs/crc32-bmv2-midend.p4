@@ -26,12 +26,12 @@ struct metadata {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    p4calc_t tmp_3;
-    p4calc_t tmp_4;
-    p4calc_t tmp_5;
-    bit<128> tmp;
-    bit<128> tmp_0;
-    bit<128> tmp_1;
+    p4calc_t tmp;
+    p4calc_t tmp_0;
+    p4calc_t tmp_1;
+    bit<128> tmp_3;
+    bit<128> tmp_4;
+    bit<128> tmp_5;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -40,34 +40,34 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         }
     }
     state check_p4calc {
-        tmp = packet.lookahead<bit<128>>();
-        tmp_3.setValid();
-        tmp_3.p = tmp[127:120];
-        tmp_3.four = tmp[119:112];
-        tmp_3.ver = tmp[111:104];
-        tmp_3.op = tmp[103:96];
-        tmp_3.operand_a = tmp[95:64];
-        tmp_3.operand_b = tmp[63:32];
-        tmp_3.res = tmp[31:0];
-        tmp_0 = packet.lookahead<bit<128>>();
-        tmp_4.setValid();
-        tmp_4.p = tmp_0[127:120];
-        tmp_4.four = tmp_0[119:112];
-        tmp_4.ver = tmp_0[111:104];
-        tmp_4.op = tmp_0[103:96];
-        tmp_4.operand_a = tmp_0[95:64];
-        tmp_4.operand_b = tmp_0[63:32];
-        tmp_4.res = tmp_0[31:0];
-        tmp_1 = packet.lookahead<bit<128>>();
-        tmp_5.setValid();
-        tmp_5.p = tmp_1[127:120];
-        tmp_5.four = tmp_1[119:112];
-        tmp_5.ver = tmp_1[111:104];
-        tmp_5.op = tmp_1[103:96];
-        tmp_5.operand_a = tmp_1[95:64];
-        tmp_5.operand_b = tmp_1[63:32];
-        tmp_5.res = tmp_1[31:0];
-        transition select(tmp_3.p, tmp_4.four, tmp_5.ver) {
+        tmp_3 = packet.lookahead<bit<128>>();
+        tmp.setValid();
+        tmp.p = tmp_3[127:120];
+        tmp.four = tmp_3[119:112];
+        tmp.ver = tmp_3[111:104];
+        tmp.op = tmp_3[103:96];
+        tmp.operand_a = tmp_3[95:64];
+        tmp.operand_b = tmp_3[63:32];
+        tmp.res = tmp_3[31:0];
+        tmp_4 = packet.lookahead<bit<128>>();
+        tmp_0.setValid();
+        tmp_0.p = tmp_4[127:120];
+        tmp_0.four = tmp_4[119:112];
+        tmp_0.ver = tmp_4[111:104];
+        tmp_0.op = tmp_4[103:96];
+        tmp_0.operand_a = tmp_4[95:64];
+        tmp_0.operand_b = tmp_4[63:32];
+        tmp_0.res = tmp_4[31:0];
+        tmp_5 = packet.lookahead<bit<128>>();
+        tmp_1.setValid();
+        tmp_1.p = tmp_5[127:120];
+        tmp_1.four = tmp_5[119:112];
+        tmp_1.ver = tmp_5[111:104];
+        tmp_1.op = tmp_5[103:96];
+        tmp_1.operand_a = tmp_5[95:64];
+        tmp_1.operand_b = tmp_5[63:32];
+        tmp_1.res = tmp_5[31:0];
+        transition select(tmp.p, tmp_0.four, tmp_1.ver) {
             (8w0x50, 8w0x34, 8w0x1): parse_p4calc;
             default: accept;
         }
@@ -88,83 +88,83 @@ struct tuple_0 {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<48> tmp_6;
-    bit<32> nselect;
-    @name("MyIngress.operation_add") action operation_add_0() {
+    bit<48> tmp_2;
+    bit<32> nselect_0;
+    @name("MyIngress.operation_add") action operation_add() {
         hdr.p4calc.res = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_sub") action operation_sub_0() {
+    @name("MyIngress.operation_sub") action operation_sub() {
         hdr.p4calc.res = hdr.p4calc.operand_a - hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_and") action operation_and_0() {
+    @name("MyIngress.operation_and") action operation_and() {
         hdr.p4calc.res = hdr.p4calc.operand_a & hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_or") action operation_or_0() {
+    @name("MyIngress.operation_or") action operation_or() {
         hdr.p4calc.res = hdr.p4calc.operand_a | hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_xor") action operation_xor_0() {
+    @name("MyIngress.operation_xor") action operation_xor() {
         hdr.p4calc.res = hdr.p4calc.operand_a ^ hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_crc") action operation_crc_0() {
-        hash<bit<32>, bit<32>, tuple_0, bit<64>>(nselect, HashAlgorithm.crc32, hdr.p4calc.operand_b, { hdr.p4calc.operand_a }, 64w8589934592);
-        hdr.p4calc.res = nselect;
-        tmp_6 = hdr.ethernet.dstAddr;
+    @name("MyIngress.operation_crc") action operation_crc() {
+        hash<bit<32>, bit<32>, tuple_0, bit<64>>(nselect_0, HashAlgorithm.crc32, hdr.p4calc.operand_b, { hdr.p4calc.operand_a }, 64w8589934592);
+        hdr.p4calc.res = nselect_0;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_drop") action operation_drop_0() {
+    @name("MyIngress.operation_drop") action operation_drop() {
         mark_to_drop();
     }
     @name("MyIngress.operation_drop") action operation_drop_2() {
         mark_to_drop();
     }
-    @name("MyIngress.calculate") table calculate {
+    @name("MyIngress.calculate") table calculate_0 {
         key = {
             hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
         }
         actions = {
-            operation_add_0();
-            operation_sub_0();
-            operation_and_0();
-            operation_or_0();
-            operation_xor_0();
-            operation_crc_0();
-            operation_drop_0();
+            operation_add();
+            operation_sub();
+            operation_and();
+            operation_or();
+            operation_xor();
+            operation_crc();
+            operation_drop();
         }
-        const default_action = operation_drop_0();
+        const default_action = operation_drop();
         const entries = {
-                        8w0x2b : operation_add_0();
+                        8w0x2b : operation_add();
 
-                        8w0x2d : operation_sub_0();
+                        8w0x2d : operation_sub();
 
-                        8w0x26 : operation_and_0();
+                        8w0x26 : operation_and();
 
-                        8w0x7c : operation_or_0();
+                        8w0x7c : operation_or();
 
-                        8w0x5e : operation_xor_0();
+                        8w0x5e : operation_xor();
 
-                        8w0x3e : operation_crc_0();
+                        8w0x3e : operation_crc();
 
         }
 
@@ -177,7 +177,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     apply {
         if (hdr.p4calc.isValid()) 
-            calculate.apply();
+            calculate_0.apply();
         else 
             tbl_operation_drop.apply();
     }

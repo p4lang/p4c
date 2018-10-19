@@ -15,11 +15,11 @@ struct my_packet {
 control c(in my_packet hdr) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("c.nop") action nop_0() {
+    @name("c.nop") action nop() {
     }
-    @name("c.t") table t {
+    @name("c.t") table t_0 {
         actions = {
-            nop_0();
+            nop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -29,7 +29,7 @@ control c(in my_packet hdr) {
     }
     apply {
         if (hdr.data.da == 32w1) 
-            t.apply();
+            t_0.apply();
     }
 }
 

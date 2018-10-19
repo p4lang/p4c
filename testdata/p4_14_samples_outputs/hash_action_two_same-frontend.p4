@@ -45,20 +45,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
-    @name(".meter1") meter(32w1024, MeterType.bytes) meter1;
-    @name(".set_index") action set_index_0(bit<16> index, bit<9> port) {
+    @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1_0;
+    @name(".meter1") meter(32w1024, MeterType.bytes) meter1_0;
+    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
         meta.meter_metadata.meter_index = index;
         standard_metadata.egress_spec = port;
     }
-    @name(".count_entries") action count_entries_0() {
-        count1.count((bit<32>)meta.counter_metadata.counter_index);
-        meter1.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, hdr.data.color_1);
+    @name(".count_entries") action count_entries() {
+        count1_0.count((bit<32>)meta.counter_metadata.counter_index);
+        meter1_0.execute_meter<bit<8>>((bit<32>)meta.meter_metadata.meter_index, hdr.data.color_1);
     }
-    @name(".index_setter") table index_setter {
+    @name(".index_setter") table index_setter_0 {
         actions = {
-            set_index_0();
+            set_index();
             @defaultonly NoAction_0();
         }
         key = {
@@ -68,16 +68,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 2048;
         default_action = NoAction_0();
     }
-    @name(".stats") table stats {
+    @name(".stats") table stats_0 {
         actions = {
-            count_entries_0();
+            count_entries();
             @defaultonly NoAction_3();
         }
         default_action = NoAction_3();
     }
     apply {
-        index_setter.apply();
-        stats.apply();
+        index_setter_0.apply();
+        stats_0.apply();
     }
 }
 

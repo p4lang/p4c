@@ -28,21 +28,21 @@ control IngressImpl(inout headers_t hdr, inout metadata meta, inout standard_met
 control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_metadata_t ostd) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("EgressImpl.set_true") action set_true_0() {
+    @name("EgressImpl.set_true") action set_true() {
         meta.cond = (meta.field == 8w0 ? true : meta.cond);
     }
-    @name("EgressImpl.change_cond") table change_cond {
+    @name("EgressImpl.change_cond") table change_cond_0 {
         key = {
             ostd.egress_spec: exact @name("ostd.egress_spec") ;
         }
         actions = {
-            set_true_0();
+            set_true();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
     apply {
-        change_cond.apply();
+        change_cond_0.apply();
     }
 }
 

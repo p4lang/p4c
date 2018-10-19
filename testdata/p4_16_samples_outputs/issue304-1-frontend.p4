@@ -5,27 +5,27 @@ extern X {
 }
 
 control t(inout bit<32> b) {
-    @name("t.c1.x") X() c1_x_0 = {
+    @name("t.c1.x") X() c1_x = {
         void a(inout bit<32> arg) {
-            bit<32> c1_tmp_1;
-            bit<32> c1_tmp_2;
-            c1_tmp_1 = this.b();
-            c1_tmp_2 = arg + c1_tmp_1;
-            arg = c1_tmp_2;
+            bit<32> c1_tmp;
+            bit<32> c1_tmp_0;
+            c1_tmp = this.b();
+            c1_tmp_0 = arg + c1_tmp;
+            arg = c1_tmp_0;
         }
     };
-    @name("t.c2.x") X() c2_x_0 = {
+    @name("t.c2.x") X() c2_x = {
         void a(inout bit<32> arg) {
-            bit<32> c2_tmp_1;
-            bit<32> c2_tmp_2;
-            c2_tmp_1 = this.b();
-            c2_tmp_2 = arg + c2_tmp_1;
-            arg = c2_tmp_2;
+            bit<32> c2_tmp;
+            bit<32> c2_tmp_0;
+            c2_tmp = this.b();
+            c2_tmp_0 = arg + c2_tmp;
+            arg = c2_tmp_0;
         }
     };
     apply {
-        c1_x_0.a(b);
-        c2_x_0.a(b);
+        c1_x.a(b);
+        c2_x.a(b);
     }
 }
 

@@ -11,20 +11,20 @@ extern Overloaded {
 }
 
 control c() {
-    bit<32> z;
-    @name("c.o") Overloaded() o;
+    bit<32> z_0;
+    @name("c.o") Overloaded() o_0;
     apply {
         f();
         f(a = 32w2);
         f(b = 16w1);
         f(a = 32w1, b = 16w2);
         f(b = 16w2, a = 32w1);
-        o.f();
-        o.f(a = 32w2);
-        o.f(b = 16w1);
-        o.f(a = 32w1, b = 16w2);
-        o.f(b = 16w2, a = 32w1);
-        z = 32w4294967294;
+        o_0.f();
+        o_0.f(a = 32w2);
+        o_0.f(b = 16w1);
+        o_0.f(a = 32w1, b = 16w2);
+        o_0.f(b = 16w2, a = 32w1);
+        z_0 = 32w4294967294;
     }
 }
 

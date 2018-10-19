@@ -1,23 +1,23 @@
 control ctrl() {
-    @name("ctrl.e") action e_0() {
+    @name("ctrl.e") action e() {
         exit;
     }
-    @name("ctrl.f") action f_0() {
+    @name("ctrl.f") action f() {
     }
-    @name("ctrl.t") table t {
+    @name("ctrl.t") table t_0 {
         actions = {
-            e_0();
-            f_0();
+            e();
+            f();
         }
-        default_action = e_0();
+        default_action = e();
     }
     apply {
-        switch (t.apply().action_run) {
-            e_0: {
-                t.apply();
+        switch (t_0.apply().action_run) {
+            e: {
+                t_0.apply();
             }
-            f_0: {
-                t.apply();
+            f: {
+                t_0.apply();
             }
         }
 

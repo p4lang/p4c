@@ -1,16 +1,16 @@
 control p(inout bit<1> bt) {
-    @name("p.b") action b_0() {
+    @name("p.b") action b() {
         bt = bt | 1w1;
         bt = bt | 1w1;
     }
-    @name("p.t") table t {
+    @name("p.t") table t_0 {
         actions = {
-            b_0();
+            b();
         }
-        default_action = b_0();
+        default_action = b();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

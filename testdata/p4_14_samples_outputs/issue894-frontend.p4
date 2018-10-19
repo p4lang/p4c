@@ -85,16 +85,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name(".rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("._drop") action _drop_0() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name(".send_frame") table send_frame {
+    @name(".send_frame") table send_frame_0 {
         actions = {
-            rewrite_mac_0();
-            _drop_0();
+            rewrite_mac();
+            _drop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -104,7 +104,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction_0();
     }
     apply {
-        send_frame.apply();
+        send_frame_0.apply();
     }
 }
 
@@ -121,7 +121,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_9() {
     }
-    @name("._drop") action _drop_1() {
+    @name("._drop") action _drop_2() {
         mark_to_drop();
     }
     @name("._drop") action _drop_5() {
@@ -130,15 +130,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop_6() {
         mark_to_drop();
     }
-    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
+    @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
+    @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.custom_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name(".set_heavy_hitter_count") action set_heavy_hitter_count_0() {
+    @name(".set_heavy_hitter_count") action set_heavy_hitter_count() {
         hash<bit<16>, bit<16>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>>, bit<32>>(meta.custom_metadata.hash_val1, HashAlgorithm.csum16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
         heavy_hitter_counter1.read(meta.custom_metadata.count_val1, (bit<32>)meta.custom_metadata.hash_val1);
         meta.custom_metadata.count_val1 = meta.custom_metadata.count_val1 + 16w1;
@@ -148,17 +148,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.custom_metadata.count_val2 = meta.custom_metadata.count_val2 + 16w1;
         heavy_hitter_counter2.write((bit<32>)meta.custom_metadata.hash_val2, meta.custom_metadata.count_val2);
     }
-    @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table {
+    @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table_0 {
         actions = {
-            _drop_1();
+            _drop_2();
             @defaultonly NoAction_1();
         }
         size = 1;
         default_action = NoAction_1();
     }
-    @name(".forward") table forward {
+    @name(".forward") table forward_0 {
         actions = {
-            set_dmac_0();
+            set_dmac();
             _drop_5();
             @defaultonly NoAction_7();
         }
@@ -168,9 +168,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_7();
     }
-    @name(".ipv4_lpm") table ipv4_lpm {
+    @name(".ipv4_lpm") table ipv4_lpm_0 {
         actions = {
-            set_nhop_0();
+            set_nhop();
             _drop_6();
             @defaultonly NoAction_8();
         }
@@ -180,21 +180,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_8();
     }
-    @name(".set_heavy_hitter_count_table") table set_heavy_hitter_count_table {
+    @name(".set_heavy_hitter_count_table") table set_heavy_hitter_count_table_0 {
         actions = {
-            set_heavy_hitter_count_0();
+            set_heavy_hitter_count();
             @defaultonly NoAction_9();
         }
         size = 1;
         default_action = NoAction_9();
     }
     apply {
-        set_heavy_hitter_count_table.apply();
+        set_heavy_hitter_count_table_0.apply();
         if (meta.custom_metadata.count_val1 > 16w100 && meta.custom_metadata.count_val2 > 16w100) 
-            drop_heavy_hitter_table.apply();
+            drop_heavy_hitter_table_0.apply();
         else {
-            ipv4_lpm.apply();
-            forward.apply();
+            ipv4_lpm_0.apply();
+            forward_0.apply();
         }
     }
 }

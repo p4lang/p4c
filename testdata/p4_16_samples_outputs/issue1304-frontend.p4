@@ -29,11 +29,11 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIngress.set_data") action set_data_0() {
+    @name("MyIngress.set_data") action set_data() {
     }
-    @name("MyIngress.t") table t {
+    @name("MyIngress.t") table t_0 {
         actions = {
-            set_data_0();
+            set_data();
             @defaultonly NoAction_0();
         }
         key = {
@@ -42,7 +42,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
         default_action = NoAction_0();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

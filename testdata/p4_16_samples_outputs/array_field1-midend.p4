@@ -6,31 +6,31 @@ extern bit<1> f(inout bit<1> x, in bit<1> b);
 control c(out H[2] h);
 package top(c _c);
 control my(out H[2] s) {
-    bit<32> tmp_12;
-    bit<1> tmp_13;
-    bit<32> tmp_15;
-    bit<1> tmp_16;
-    bit<1> tmp_17;
-    @name("my.act") action act_0() {
+    bit<32> tmp_2;
+    bit<1> tmp_3;
+    bit<32> tmp_5;
+    bit<1> tmp_6;
+    bit<1> tmp_8;
+    @name("my.act") action act() {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;
-        tmp_12 = 32w0;
-        tmp_13 = s[32w0].z;
-        tmp_17 = f(tmp_13, 1w0);
-        s[tmp_12].z = tmp_13;
-        tmp_15 = (bit<32>)tmp_17;
-        tmp_16 = s[(bit<32>)tmp_17].z;
-        f(tmp_16, 1w1);
-        s[tmp_15].z = tmp_16;
+        tmp_2 = 32w0;
+        tmp_3 = s[32w0].z;
+        tmp_8 = f(tmp_3, 1w0);
+        s[tmp_2].z = tmp_3;
+        tmp_5 = (bit<32>)tmp_8;
+        tmp_6 = s[(bit<32>)tmp_8].z;
+        f(tmp_6, 1w1);
+        s[tmp_5].z = tmp_6;
     }
-    @name("my.tbl_act") table tbl_act {
+    @name("my.tbl_act") table tbl_act_0 {
         actions = {
-            act_0();
+            act();
         }
-        const default_action = act_0();
+        const default_action = act();
     }
     apply {
-        tbl_act.apply();
+        tbl_act_0.apply();
     }
 }
 

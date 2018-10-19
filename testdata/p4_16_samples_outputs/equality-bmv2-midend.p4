@@ -29,7 +29,7 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    H[2] tmp;
+    H[2] tmp_0;
     @hidden action act() {
         hdr.same.same = 8w1;
     }
@@ -48,8 +48,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.same.same = hdr.same.same | 8w8;
     }
     @hidden action act_4() {
-        tmp[0] = hdr.h;
-        tmp[1] = hdr.a[0];
+        tmp_0[0] = hdr.h;
+        tmp_0[1] = hdr.a[0];
     }
     @hidden table tbl_act {
         actions = {
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (!hdr.h.isValid() && !hdr.a[0].isValid() || hdr.h.isValid() && hdr.a[0].isValid() && hdr.h.s == hdr.a[0].s && hdr.h.v == hdr.a[0].v) 
             tbl_act_2.apply();
         tbl_act_3.apply();
-        if ((!tmp[0].isValid() && !hdr.a[0].isValid() || tmp[0].isValid() && hdr.a[0].isValid() && tmp[0].s == hdr.a[0].s && tmp[0].v == hdr.a[0].v) && (!tmp[1].isValid() && !hdr.a[1].isValid() || tmp[1].isValid() && hdr.a[1].isValid() && tmp[1].s == hdr.a[1].s && tmp[1].v == hdr.a[1].v)) 
+        if ((!tmp_0[0].isValid() && !hdr.a[0].isValid() || tmp_0[0].isValid() && hdr.a[0].isValid() && tmp_0[0].s == hdr.a[0].s && tmp_0[0].v == hdr.a[0].v) && (!tmp_0[1].isValid() && !hdr.a[1].isValid() || tmp_0[1].isValid() && hdr.a[1].isValid() && tmp_0[1].s == hdr.a[1].s && tmp_0[1].v == hdr.a[1].v)) 
             tbl_act_4.apply();
     }
 }

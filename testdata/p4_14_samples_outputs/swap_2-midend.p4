@@ -30,16 +30,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".a21") action a21_0() {
+    @name(".a21") action a21() {
         standard_metadata.egress_spec = 9w3;
     }
-    @name(".a22") action a22_0() {
+    @name(".a22") action a22() {
         standard_metadata.egress_spec = 9w4;
     }
-    @name(".t_ingress_2") table t_ingress_0 {
+    @name(".t_ingress_2") table t_ingress {
         actions = {
-            a21_0();
-            a22_0();
+            a21();
+            a22();
             @defaultonly NoAction_0();
         }
         key = {
@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        t_ingress_0.apply();
+        t_ingress.apply();
     }
 }
 

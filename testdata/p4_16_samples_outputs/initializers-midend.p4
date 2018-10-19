@@ -6,19 +6,19 @@ extern Fake {
 }
 
 parser P() {
-    bit<32> x;
-    @name("P.fake") Fake() fake;
+    bit<32> x_0;
+    @name("P.fake") Fake() fake_0;
     state start {
-        x = 32w0;
-        fake.call(x);
+        x_0 = 32w0;
+        fake_0.call(x_0);
         transition accept;
     }
 }
 
 control C() {
-    @name("C.fake") Fake() fake_2;
+    @name("C.fake") Fake() fake_1;
     @hidden action act() {
-        fake_2.call(32w1);
+        fake_1.call(32w1);
     }
     @hidden table tbl_act {
         actions = {

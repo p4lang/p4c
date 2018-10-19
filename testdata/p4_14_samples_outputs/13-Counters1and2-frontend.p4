@@ -32,30 +32,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".c1") counter(32w1024, CounterType.packets) c1;
-    @name(".count_c1_1") action count_c1() {
-        c1.count(32w1);
+    @name(".c1") counter(32w1024, CounterType.packets) c1_0;
+    @name(".count_c1_1") action count_c1_1() {
+        c1_0.count(32w1);
     }
-    @name(".count_c1_2") action count_c1_0() {
-        c1.count(32w2);
+    @name(".count_c1_2") action count_c1_2() {
+        c1_0.count(32w2);
     }
-    @name(".t1") table t1 {
+    @name(".t1") table t1_0 {
         actions = {
-            count_c1();
+            count_c1_1();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
-    @name(".t2") table t2 {
+    @name(".t2") table t2_0 {
         actions = {
-            count_c1_0();
+            count_c1_2();
             @defaultonly NoAction_3();
         }
         default_action = NoAction_3();
     }
     apply {
-        t1.apply();
-        t2.apply();
+        t1_0.apply();
+        t2_0.apply();
     }
 }
 

@@ -27,19 +27,19 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.PACKETS) meter0;
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.PACKETS) meter0_0;
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
         }
-        psa_direct_meter = meter0;
+        psa_direct_meter = meter0_0;
         default_action = NoAction_0();
     }
     apply {
-        tbl.apply();
+        tbl_0.apply();
     }
 }
 

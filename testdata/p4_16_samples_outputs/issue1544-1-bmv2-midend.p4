@@ -22,31 +22,31 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_2;
+    bit<16> tmp_0;
     @name(".my_drop") action my_drop() {
         mark_to_drop();
     }
-    @name("ingress.set_port") action set_port_0(bit<9> output_port) {
+    @name("ingress.set_port") action set_port(bit<9> output_port) {
         standard_metadata.egress_spec = output_port;
     }
-    @name("ingress.mac_da") table mac_da {
+    @name("ingress.mac_da") table mac_da_0 {
         key = {
             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         actions = {
-            set_port_0();
+            set_port();
             my_drop();
         }
         default_action = my_drop();
     }
     @hidden action act() {
-        tmp_2 = hdr.ethernet.srcAddr[15:0] + 16w65535;
+        tmp_0 = hdr.ethernet.srcAddr[15:0] + 16w65535;
     }
     @hidden action act_0() {
-        tmp_2 = hdr.ethernet.srcAddr[15:0];
+        tmp_0 = hdr.ethernet.srcAddr[15:0];
     }
     @hidden action act_1() {
-        hdr.ethernet.srcAddr[15:0] = tmp_2;
+        hdr.ethernet.srcAddr[15:0] = tmp_0;
     }
     @hidden table tbl_act {
         actions = {
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         const default_action = act_1();
     }
     apply {
-        mac_da.apply();
+        mac_da_0.apply();
         if (hdr.ethernet.srcAddr[15:0] > 16w5) 
             tbl_act.apply();
         else 

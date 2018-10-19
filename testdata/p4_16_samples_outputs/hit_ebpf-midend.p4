@@ -44,20 +44,20 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool tmp_0;
-    bool hasReturned_0;
+    bool tmp;
+    bool hasReturned;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("pipe.Reject") action Reject_0(IPv4Address add) {
+    @name("pipe.Reject") action Reject(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    @name("pipe.Check_src_ip") table Check_src_ip {
+    @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
             headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
         actions = {
-            Reject_0();
+            Reject();
             NoAction_0();
         }
         implementation = hash_table(32w1024);
@@ -65,17 +65,17 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @hidden action act() {
         pass = false;
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     @hidden action act_0() {
-        hasReturned_0 = false;
+        hasReturned = false;
         pass = true;
     }
     @hidden action act_1() {
-        tmp_0 = true;
+        tmp = true;
     }
     @hidden action act_2() {
-        tmp_0 = false;
+        tmp = false;
     }
     @hidden table tbl_act {
         actions = {
@@ -106,8 +106,8 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned_0) 
-            if (Check_src_ip.apply().hit) 
+        if (!hasReturned) 
+            if (Check_src_ip_0.apply().hit) 
                 tbl_act_1.apply();
             else 
                 tbl_act_2.apply();

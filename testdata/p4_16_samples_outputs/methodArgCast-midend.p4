@@ -4,9 +4,9 @@ extern E {
 }
 
 control c() {
-    @name("c.e") E() e;
+    @name("c.e") E() e_0;
     @hidden action act() {
-        e.setValue(32w10);
+        e_0.setValue(32w10);
     }
     @hidden table tbl_act {
         actions = {

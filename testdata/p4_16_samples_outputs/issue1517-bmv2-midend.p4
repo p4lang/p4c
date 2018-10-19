@@ -22,12 +22,12 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    bit<16> rand_int;
+    bit<16> rand_int_0;
     @hidden action act() {
         mark_to_drop();
     }
     @hidden action act_0() {
-        random<bit<16>>(rand_int, 16w0, 16w49151);
+        random<bit<16>>(rand_int_0, 16w0, 16w49151);
     }
     @hidden table tbl_act {
         actions = {
@@ -43,7 +43,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     apply {
         tbl_act.apply();
-        if (rand_int < 16w32768) 
+        if (rand_int_0 < 16w32768) 
             tbl_act_0.apply();
     }
 }

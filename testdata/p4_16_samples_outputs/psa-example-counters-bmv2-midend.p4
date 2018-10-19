@@ -41,79 +41,79 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    ethernet_t parsed_hdr_2_ethernet;
-    ipv4_t parsed_hdr_2_ipv4;
-    fwd_metadata_t user_meta_2_fwd_metadata;
+    ethernet_t parsed_hdr_0_ethernet;
+    ipv4_t parsed_hdr_0_ipv4;
+    fwd_metadata_t user_meta_0_fwd_metadata;
     state start {
-        parsed_hdr_2_ethernet.setInvalid();
-        parsed_hdr_2_ipv4.setInvalid();
-        buffer.extract<ethernet_t>(parsed_hdr_2_ethernet);
-        transition select(parsed_hdr_2_ethernet.etherType) {
+        parsed_hdr_0_ethernet.setInvalid();
+        parsed_hdr_0_ipv4.setInvalid();
+        buffer.extract<ethernet_t>(parsed_hdr_0_ethernet);
+        transition select(parsed_hdr_0_ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;
             default: start_0;
         }
     }
     state CommonParser_parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr_2_ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr_0_ipv4);
         transition start_0;
     }
     state start_0 {
-        parsed_hdr.ethernet = parsed_hdr_2_ethernet;
-        parsed_hdr.ipv4 = parsed_hdr_2_ipv4;
+        parsed_hdr.ethernet = parsed_hdr_0_ethernet;
+        parsed_hdr.ipv4 = parsed_hdr_0_ipv4;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
-    ethernet_t parsed_hdr_3_ethernet;
-    ipv4_t parsed_hdr_3_ipv4;
-    fwd_metadata_t user_meta_3_fwd_metadata;
+    ethernet_t parsed_hdr_1_ethernet;
+    ipv4_t parsed_hdr_1_ipv4;
+    fwd_metadata_t user_meta_1_fwd_metadata;
     state start {
-        parsed_hdr_3_ethernet.setInvalid();
-        parsed_hdr_3_ipv4.setInvalid();
-        buffer.extract<ethernet_t>(parsed_hdr_3_ethernet);
-        transition select(parsed_hdr_3_ethernet.etherType) {
+        parsed_hdr_1_ethernet.setInvalid();
+        parsed_hdr_1_ipv4.setInvalid();
+        buffer.extract<ethernet_t>(parsed_hdr_1_ethernet);
+        transition select(parsed_hdr_1_ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4_0;
             default: start_1;
         }
     }
     state CommonParser_parse_ipv4_0 {
-        buffer.extract<ipv4_t>(parsed_hdr_3_ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr_1_ipv4);
         transition start_1;
     }
     state start_1 {
-        parsed_hdr.ethernet = parsed_hdr_3_ethernet;
-        parsed_hdr.ipv4 = parsed_hdr_3_ipv4;
+        parsed_hdr.ethernet = parsed_hdr_1_ethernet;
+        parsed_hdr.ipv4 = parsed_hdr_1_ipv4;
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_in;
-    @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count;
-    @name("ingress.next_hop") action next_hop_0(PortId_t oport) {
-        per_prefix_pkt_byte_count.count();
+    @name("ingress.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_in_0;
+    @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
+    @name("ingress.next_hop") action next_hop(PortId_t oport) {
+        per_prefix_pkt_byte_count_0.count();
         ostd.drop = false;
         ostd.multicast_group = 10w0;
         ostd.egress_port = oport;
     }
-    @name("ingress.default_route_drop") action default_route_drop_0() {
-        per_prefix_pkt_byte_count.count();
+    @name("ingress.default_route_drop") action default_route_drop() {
+        per_prefix_pkt_byte_count_0.count();
         ostd.drop = true;
     }
-    @name("ingress.ipv4_da_lpm") table ipv4_da_lpm {
+    @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            next_hop_0();
-            default_route_drop_0();
+            next_hop();
+            default_route_drop();
         }
-        default_action = default_route_drop_0();
-        psa_direct_counter = per_prefix_pkt_byte_count;
+        default_action = default_route_drop();
+        psa_direct_counter = per_prefix_pkt_byte_count_0;
     }
     @hidden action act() {
-        port_bytes_in.count(istd.ingress_port);
+        port_bytes_in_0.count(istd.ingress_port);
     }
     @hidden table tbl_act {
         actions = {
@@ -124,14 +124,14 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     apply {
         tbl_act.apply();
         if (hdr.ipv4.isValid()) 
-            ipv4_da_lpm.apply();
+            ipv4_da_lpm_0.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("egress.port_bytes_out") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_out;
+    @name("egress.port_bytes_out") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_out_0;
     @hidden action act_0() {
-        port_bytes_out.count(istd.egress_port);
+        port_bytes_out_0.count(istd.egress_port);
     }
     @hidden table tbl_act_0 {
         actions = {

@@ -25,11 +25,11 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    PSA_MeterColor_t tmp_1;
+    PSA_MeterColor_t tmp;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0;
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
@@ -39,7 +39,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
         default_action = NoAction_0();
     }
     @hidden action act() {
-        tmp_1 = meter0.execute(12w0);
+        tmp = meter0_0.execute(12w0);
     }
     @hidden table tbl_act {
         actions = {
@@ -49,8 +49,8 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     }
     apply {
         tbl_act.apply();
-        if (tmp_1 == PSA_MeterColor_t.GREEN) 
-            tbl.apply();
+        if (tmp == PSA_MeterColor_t.GREEN) 
+            tbl_0.apply();
     }
 }
 

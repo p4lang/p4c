@@ -29,33 +29,33 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.PACKETS) meter0;
-    @name("MyIC.execute_meter") action execute_meter_0() {
-        meter0.execute();
+    @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.PACKETS) meter0_0;
+    @name("MyIC.execute_meter") action execute_meter() {
+        meter0_0.execute();
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
         }
-        psa_direct_meter = meter0;
+        psa_direct_meter = meter0_0;
         default_action = NoAction_0();
     }
-    @name("MyIC.tbl2") table tbl2 {
+    @name("MyIC.tbl2") table tbl2_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_3();
-            execute_meter_0();
+            execute_meter();
         }
         default_action = NoAction_3();
     }
     apply {
-        tbl.apply();
-        tbl2.apply();
+        tbl_0.apply();
+        tbl2_0.apply();
     }
 }
 

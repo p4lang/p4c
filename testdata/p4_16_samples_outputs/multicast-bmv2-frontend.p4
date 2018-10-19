@@ -68,16 +68,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name(".rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("._drop") action _drop_0() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name("egress.send_frame") table send_frame {
+    @name("egress.send_frame") table send_frame_0 {
         actions = {
-            rewrite_mac_0();
-            _drop_0();
+            rewrite_mac();
+            _drop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -87,7 +87,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction_0();
     }
     apply {
-        send_frame.apply();
+        send_frame_0.apply();
     }
 }
 
@@ -98,35 +98,35 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_7() {
     }
-    @name(".bcast") action bcast_0() {
+    @name(".bcast") action bcast() {
         meta.intrinsic_metadata.mcast_grp = 16w1;
     }
-    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
+    @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("._drop") action _drop_1() {
+    @name("._drop") action _drop_2() {
         mark_to_drop();
     }
     @name("._drop") action _drop_4() {
         mark_to_drop();
     }
-    @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
+    @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("ingress.broadcast") table broadcast {
+    @name("ingress.broadcast") table broadcast_0 {
         actions = {
-            bcast_0();
+            bcast();
             @defaultonly NoAction_1();
         }
         size = 1;
         default_action = NoAction_1();
     }
-    @name("ingress.forward") table forward {
+    @name("ingress.forward") table forward_0 {
         actions = {
-            set_dmac_0();
-            _drop_1();
+            set_dmac();
+            _drop_2();
             @defaultonly NoAction_6();
         }
         key = {
@@ -135,9 +135,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_6();
     }
-    @name("ingress.ipv4_lpm") table ipv4_lpm {
+    @name("ingress.ipv4_lpm") table ipv4_lpm_0 {
         actions = {
-            set_nhop_0();
+            set_nhop();
             _drop_4();
             @defaultonly NoAction_7();
         }
@@ -149,11 +149,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            ipv4_lpm.apply();
-            forward.apply();
+            ipv4_lpm_0.apply();
+            forward_0.apply();
         }
         else 
-            broadcast.apply();
+            broadcast_0.apply();
     }
 }
 

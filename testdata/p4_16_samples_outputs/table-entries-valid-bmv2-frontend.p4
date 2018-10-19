@@ -45,32 +45,32 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("ingress.a") action a_0() {
+    @name("ingress.a") action a() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("ingress.t_valid") table t_valid {
+    @name("ingress.t_valid") table t_valid_0 {
         key = {
             h.h.isValid(): exact @name("h.h.$valid$") ;
             h.h.e        : exact @name("h.h.e") ;
         }
         actions = {
-            a_0();
-            a_with_control_params_0();
+            a();
+            a_with_control_params();
         }
-        default_action = a_0();
+        default_action = a();
         const entries = {
-                        (true, 8w0x1) : a_with_control_params_0(9w1);
+                        (true, 8w0x1) : a_with_control_params(9w1);
 
-                        (false, 8w0x2) : a_with_control_params_0(9w2);
+                        (false, 8w0x2) : a_with_control_params(9w2);
 
         }
 
     }
     apply {
-        t_valid.apply();
+        t_valid_0.apply();
     }
 }
 

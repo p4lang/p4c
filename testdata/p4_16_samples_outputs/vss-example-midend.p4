@@ -54,10 +54,10 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    bit<16> tmp_3;
-    bool tmp_4;
-    bool tmp_5;
-    @name("TopParser.ck") Ck16() ck;
+    bit<16> tmp;
+    bool tmp_0;
+    bool tmp_1;
+    @name("TopParser.ck") Ck16() ck_0;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -69,12 +69,12 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         b.extract<Ipv4_h>(p.ip);
         verify(p.ip.version == 4w4, error.IPv4IncorrectVersion);
         verify(p.ip.ihl == 4w5, error.IPv4OptionsNotSupported);
-        ck.clear();
-        ck.update<Ipv4_h>(p.ip);
-        tmp_3 = ck.get();
-        tmp_4 = tmp_3 == 16w0;
-        tmp_5 = tmp_4;
-        verify(tmp_5, error.IPv4ChecksumError);
+        ck_0.clear();
+        ck_0.update<Ipv4_h>(p.ip);
+        tmp = ck_0.get();
+        tmp_0 = tmp == 16w0;
+        tmp_1 = tmp_0;
+        verify(tmp_1, error.IPv4ChecksumError);
         transition accept;
     }
     state noMatch {
@@ -84,11 +84,11 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    IPv4Address nextHop;
-    bool hasReturned_0;
+    IPv4Address nextHop_0;
+    bool hasReturned;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("TopPipe.Drop_action") action Drop_action_0() {
+    @name("TopPipe.Drop_action") action Drop_action() {
         outCtrl.outputPort = 4w0xf;
     }
     @name("TopPipe.Drop_action") action Drop_action_4() {
@@ -100,77 +100,77 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("TopPipe.Drop_action") action Drop_action_6() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("TopPipe.Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
-        nextHop = ipv4_dest;
+    @name("TopPipe.Set_nhop") action Set_nhop(IPv4Address ipv4_dest, PortId port) {
+        nextHop_0 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
     }
-    @name("TopPipe.ipv4_match") table ipv4_match {
+    @name("TopPipe.ipv4_match") table ipv4_match_0 {
         key = {
             headers.ip.dstAddr: lpm @name("headers.ip.dstAddr") ;
         }
         actions = {
-            Drop_action_0();
-            Set_nhop_0();
+            Drop_action();
+            Set_nhop();
         }
         size = 1024;
-        default_action = Drop_action_0();
+        default_action = Drop_action();
     }
-    @name("TopPipe.Send_to_cpu") action Send_to_cpu_0() {
+    @name("TopPipe.Send_to_cpu") action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
     }
-    @name("TopPipe.check_ttl") table check_ttl {
+    @name("TopPipe.check_ttl") table check_ttl_0 {
         key = {
             headers.ip.ttl: exact @name("headers.ip.ttl") ;
         }
         actions = {
-            Send_to_cpu_0();
+            Send_to_cpu();
             NoAction_0();
         }
         const default_action = NoAction_0();
     }
-    @name("TopPipe.Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
+    @name("TopPipe.Set_dmac") action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    @name("TopPipe.dmac") table dmac_1 {
+    @name("TopPipe.dmac") table dmac_0 {
         key = {
-            nextHop: exact @name("nextHop") ;
+            nextHop_0: exact @name("nextHop") ;
         }
         actions = {
             Drop_action_4();
-            Set_dmac_0();
+            Set_dmac();
         }
         size = 1024;
         default_action = Drop_action_4();
     }
-    @name("TopPipe.Set_smac") action Set_smac_0(EthernetAddress smac) {
+    @name("TopPipe.Set_smac") action Set_smac(EthernetAddress smac) {
         headers.ethernet.srcAddr = smac;
     }
-    @name("TopPipe.smac") table smac_1 {
+    @name("TopPipe.smac") table smac_0 {
         key = {
             outCtrl.outputPort: exact @name("outCtrl.outputPort") ;
         }
         actions = {
             Drop_action_5();
-            Set_smac_0();
+            Set_smac();
         }
         size = 16;
         default_action = Drop_action_5();
     }
     @hidden action act() {
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     @hidden action act_0() {
-        hasReturned_0 = false;
+        hasReturned = false;
     }
     @hidden action act_1() {
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     @hidden action act_2() {
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     @hidden action act_3() {
-        hasReturned_0 = true;
+        hasReturned = true;
     }
     @hidden table tbl_act {
         actions = {
@@ -214,35 +214,35 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             tbl_Drop_action.apply();
             tbl_act_0.apply();
         }
-        if (!hasReturned_0) {
-            ipv4_match.apply();
+        if (!hasReturned) {
+            ipv4_match_0.apply();
             if (outCtrl.outputPort == 4w0xf) 
                 tbl_act_1.apply();
         }
-        if (!hasReturned_0) {
-            check_ttl.apply();
+        if (!hasReturned) {
+            check_ttl_0.apply();
             if (outCtrl.outputPort == 4w0xe) 
                 tbl_act_2.apply();
         }
-        if (!hasReturned_0) {
-            dmac_1.apply();
+        if (!hasReturned) {
+            dmac_0.apply();
             if (outCtrl.outputPort == 4w0xf) 
                 tbl_act_3.apply();
         }
-        if (!hasReturned_0) 
-            smac_1.apply();
+        if (!hasReturned) 
+            smac_0.apply();
     }
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    bit<16> tmp_6;
-    @name("TopDeparser.ck") Ck16() ck_2;
+    bit<16> tmp_2;
+    @name("TopDeparser.ck") Ck16() ck_1;
     @hidden action act_4() {
-        ck_2.clear();
+        ck_1.clear();
         p.ip.hdrChecksum = 16w0;
-        ck_2.update<Ipv4_h>(p.ip);
-        tmp_6 = ck_2.get();
-        p.ip.hdrChecksum = tmp_6;
+        ck_1.update<Ipv4_h>(p.ip);
+        tmp_2 = ck_1.get();
+        p.ip.hdrChecksum = tmp_2;
     }
     @hidden action act_5() {
         b.emit<Ethernet_h>(p.ethernet);

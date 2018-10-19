@@ -31,17 +31,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".copyb1") action copyb1_0() {
+    @name(".copyb1") action copyb1() {
         hdr.data.b1 = meta.meta.val;
     }
-    @name(".output") table output {
+    @name(".output") table output_0 {
         actions = {
-            copyb1_0();
+            copyb1();
         }
-        default_action = copyb1_0();
+        default_action = copyb1();
     }
     apply {
-        output.apply();
+        output_0.apply();
     }
 }
 
@@ -50,18 +50,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1(bit<8> val, bit<9> port) {
         meta.meta.val = val;
         standard_metadata.egress_spec = port;
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
     @name(".noop") action noop_2() {
     }
-    @name(".test1") table test1 {
+    @name(".test1") table test1_0 {
         actions = {
-            setb1_0();
-            noop_0();
+            setb1();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".test2") table test2 {
+    @name(".test2") table test2_0 {
         actions = {
             noop_2();
             @defaultonly NoAction_3();
@@ -80,8 +80,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        test1.apply();
-        test2.apply();
+        test1_0.apply();
+        test2_0.apply();
     }
 }
 

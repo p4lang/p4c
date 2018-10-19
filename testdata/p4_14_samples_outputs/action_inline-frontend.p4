@@ -22,27 +22,27 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".b") action b_0() {
+    @name(".b") action b_1() {
         {
-            bit<1> y0_0 = meta.md.b;
-            y0_0 = y0_0 + 1w1;
-            meta.md.b = y0_0;
+            bit<1> y0 = meta.md.b;
+            y0 = y0 + 1w1;
+            meta.md.b = y0;
         }
         {
-            bit<1> y0_2 = meta.md.b;
-            y0_2 = y0_2 + 1w1;
-            meta.md.b = y0_2;
+            bit<1> y0_1 = meta.md.b;
+            y0_1 = y0_1 + 1w1;
+            meta.md.b = y0_1;
         }
     }
-    @name(".t") table t {
+    @name(".t") table t_0 {
         actions = {
-            b_0();
+            b_1();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

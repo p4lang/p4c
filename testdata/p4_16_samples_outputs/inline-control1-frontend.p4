@@ -4,17 +4,17 @@ extern Y {
 }
 
 control d(out bit<32> x) {
-    bit<32> y;
-    bit<32> x_1;
-    @name("d.cinst.y") Y(32w16) cinst_y_0;
-    bit<32> cinst_tmp_0;
+    bit<32> y_0;
+    bit<32> x_0;
+    @name("d.cinst.y") Y(32w16) cinst_y;
+    bit<32> cinst_tmp;
     apply {
-        cinst_tmp_0 = cinst_y_0.get();
-        x_1 = cinst_tmp_0;
-        x = x_1;
-        cinst_tmp_0 = cinst_y_0.get();
-        x_1 = cinst_tmp_0;
-        y = x_1;
+        cinst_tmp = cinst_y.get();
+        x_0 = cinst_tmp;
+        x = x_0;
+        cinst_tmp = cinst_y.get();
+        x_0 = cinst_tmp;
+        y_0 = x_0;
     }
 }
 

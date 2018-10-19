@@ -46,32 +46,32 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     @name(".NoAction") action NoAction_0() {
     }
-    bool tmp_0;
-    @name("pipe.Reject") action Reject_0(IPv4Address add) {
+    bool tmp;
+    @name("pipe.Reject") action Reject(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    @name("pipe.Check_src_ip") table Check_src_ip {
+    @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
             headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
         actions = {
-            Reject_0();
+            Reject();
             NoAction_0();
         }
         implementation = hash_table(32w1024);
         const default_action = NoAction_0();
     }
     apply {
-        bool hasReturned_0 = false;
+        bool hasReturned = false;
         pass = true;
         if (!headers.ipv4.isValid()) {
             pass = false;
-            hasReturned_0 = true;
+            hasReturned = true;
         }
-        if (!hasReturned_0) {
-            tmp_0 = Check_src_ip.apply().hit;
-            if (tmp_0) 
+        if (!hasReturned) {
+            tmp = Check_src_ip_0.apply().hit;
+            if (tmp) 
                 pass = pass;
         }
     }
