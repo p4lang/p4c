@@ -1,5 +1,5 @@
 # Here is a created-by-hand walkthrough of what the P4 program
-# prog5-bmv2.p4 _should_ do when it receives a packet with an
+# issue1566-bmv2.p4 _should_ do when it receives a packet with an
 # etherType field of 0xcafe:
 
 # cIngress call E.apply(0xcafe)
