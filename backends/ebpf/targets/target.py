@@ -51,7 +51,7 @@ class EBPFTarget(object):
         # location of the runtime folder
         self.runtimedir = self.options.testdir + "/runtime"
         # location of the p4c compiler binary
-        self.compiler = self.options.compilerdir + "/build/p4c-ebpf"
+        self.compiler = self.options.compiler
 
     def get_make_args(self, runtimedir, target):
         args = "make "

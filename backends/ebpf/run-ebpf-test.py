@@ -40,6 +40,9 @@ PARSER.add_argument("rootdir", help="the root directory of "
 PARSER.add_argument("p4filename", help="the p4 file to process")
 PARSER.add_argument("-b", "--nocleanup", action="store_false",
                     help="do not remove temporary results for failing tests")
+PARSER.add_argument("-c", "--compiler", dest="compiler", default="p4c-ebpf",
+                    help="Specify the path to the compiler binary, "
+                    "default is p4c-ebpf")
 PARSER.add_argument("-v", "--verbose", action="store_true",
                     help="verbose operation")
 PARSER.add_argument("-f", "--replace", action="store_true",
@@ -77,8 +80,8 @@ class Options(object):
     def __init__(self):
         self.binary = ""                # This program's name
         self.cleanupTmp = True          # Remove tmp folder?
+        self.compiler = ""              # Path to the P4 compiler binary
         self.p4Filename = ""            # File that is being compiled
-        self.compilerdir = ""              # Path to the P4 compiler
         self.verbose = False            # Enable verbose output
         self.replace = False            # Replace previous outputs
         self.target = "test"            # The name of the target compiler
@@ -174,7 +177,7 @@ if __name__ == '__main__':
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
     options = Options()
-    options.compilerdir = check_path(args.rootdir)
+    options.compiler = check_path(args.compiler)
     options.p4filename = check_path(args.p4filename)
     options.verbose = args.verbose
     options.replace = args.replace
