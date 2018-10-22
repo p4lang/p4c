@@ -70,6 +70,7 @@ struct ingress_metadata_t {
     bit<8>  drop_reason;
     bit<1>  control_frame;
     bit<16> bypass_lookups;
+    @saturating 
     bit<32> sflow_take_sample;
 }
 
@@ -164,6 +165,7 @@ struct l3_metadata_t {
     bit<1>  outer_routed;
     bit<8>  mtu_index;
     bit<1>  l3_copy;
+    @saturating 
     bit<16> l3_mtu_check;
 }
 
@@ -1877,10 +1879,10 @@ control process_mtu(inout headers hdr, inout metadata meta, inout standard_metad
         meta.l3_metadata.l3_mtu_check = 16w0xffff;
     }
     @name(".ipv4_mtu_check") action ipv4_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu - hdr.ipv4.totalLen;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| hdr.ipv4.totalLen;
     }
     @name(".ipv6_mtu_check") action ipv6_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu - hdr.ipv6.payloadLen;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| hdr.ipv6.payloadLen;
     }
     @name(".mtu") table mtu {
         actions = {
@@ -2571,7 +2573,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         meta.tunnel_metadata.tunnel_index = tunnel_index;
     }
     @name(".tunnel_mtu_check") action tunnel_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu - meta.egress_metadata.payload_length;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| meta.egress_metadata.payload_length;
     }
     @name(".tunnel_mtu_miss") action tunnel_mtu_miss() {
         meta.l3_metadata.l3_mtu_check = 16w0xffff;
@@ -4272,7 +4274,7 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
         clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
     }
     @name(".sflow_ing_session_enable") action sflow_ing_session_enable(bit<32> rate_thr, bit<16> session_id) {
-        meta.ingress_metadata.sflow_take_sample = rate_thr + meta.ingress_metadata.sflow_take_sample;
+        meta.ingress_metadata.sflow_take_sample = rate_thr |+| meta.ingress_metadata.sflow_take_sample;
         meta.sflow_metadata.sflow_session_id = session_id;
     }
     @name(".nop") action nop_1() {

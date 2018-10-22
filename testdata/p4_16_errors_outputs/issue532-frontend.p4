@@ -29,20 +29,20 @@ extern s1_t choose_entry(in choices_t choices);
 control ingress(inout parsed_packet_t hdr, inout my_meta_t my_meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    s1_t tmp_0;
-    @name("ingress.select_entry") action select_entry_0(choices_t choices) {
-        tmp_0 = choose_entry(choices);
-        my_meta.entry = tmp_0;
+    s1_t tmp;
+    @name("ingress.select_entry") action select_entry(choices_t choices) {
+        tmp = choose_entry(choices);
+        my_meta.entry = tmp;
     }
-    @name("ingress.t") table t {
+    @name("ingress.t") table t_0 {
         actions = {
-            select_entry_0();
+            select_entry();
             NoAction_0();
         }
         const default_action = NoAction_0();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

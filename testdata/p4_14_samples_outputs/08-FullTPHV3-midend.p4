@@ -508,7 +508,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_11() {
     }
-    @name(".a1") action a1_0() {
+    @name(".a1") action a1() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -734,7 +734,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.h_8_2.setInvalid();
         hdr.h_32_15.setInvalid();
     }
-    @name(".set_egress_spec") action set_egress_spec_0(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name(".set_egress_spec") action set_egress_spec_5(bit<9> port) {
@@ -749,16 +749,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_egress_spec") action set_egress_spec_8(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name(".t1") table t1 {
+    @name(".t1") table t1_0 {
         actions = {
-            a1_0();
+            a1();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
-    @name(".use_16bit_fields_1") table use_16bit_fields_1 {
+    @name(".use_16bit_fields_1") table use_16bit_fields {
         actions = {
-            set_egress_spec_0();
+            set_egress_spec();
             @defaultonly NoAction_7();
         }
         key = {
@@ -829,7 +829,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name(".use_16bit_fields_2") table use_16bit_fields_2 {
+    @name(".use_16bit_fields_2") table use_16bit_fields_0 {
         actions = {
             set_egress_spec_5();
             @defaultonly NoAction_8();
@@ -870,7 +870,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name(".use_32bit_fields_1") table use_32bit_fields_1 {
+    @name(".use_32bit_fields_1") table use_32bit_fields {
         actions = {
             set_egress_spec_6();
             @defaultonly NoAction_9();
@@ -911,7 +911,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_9();
     }
-    @name(".use_32bit_fields_2") table use_32bit_fields_2 {
+    @name(".use_32bit_fields_2") table use_32bit_fields_0 {
         actions = {
             set_egress_spec_7();
             @defaultonly NoAction_10();
@@ -951,7 +951,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_10();
     }
-    @name(".use_8bit_fields") table use_8bit_fields {
+    @name(".use_8bit_fields") table use_8bit_fields_0 {
         actions = {
             set_egress_spec_8();
             @defaultonly NoAction_11();
@@ -1025,12 +1025,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_11();
     }
     apply {
-        t1.apply();
-        use_8bit_fields.apply();
-        use_16bit_fields_1.apply();
-        use_16bit_fields_2.apply();
-        use_32bit_fields_1.apply();
-        use_32bit_fields_2.apply();
+        t1_0.apply();
+        use_8bit_fields_0.apply();
+        use_16bit_fields.apply();
+        use_16bit_fields_0.apply();
+        use_32bit_fields.apply();
+        use_32bit_fields_0.apply();
     }
 }
 

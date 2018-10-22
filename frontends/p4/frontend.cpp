@@ -177,6 +177,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new InlineFunctions(&refMap, &typeMap),
         // Check for constants only after inlining
         new CheckConstants(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new RemoveParserControlFlow(&refMap, &typeMap),
+        new UniqueNames(&refMap),
         new LocalizeAllActions(&refMap),
         new UniqueNames(&refMap),  // needed again after inlining
         new UniqueParameters(&refMap, &typeMap),

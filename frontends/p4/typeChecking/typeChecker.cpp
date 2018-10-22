@@ -140,15 +140,8 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
 
 void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode)) {
-        if (::Log::verbose()) {
-            ToP4 top4(&std::cout, true, nullptr);
-            std::cout << "Initial program" << std::endl;
-            initialNode->apply(top4);
-            std::cout << "============\nFinal program" << std::endl;
-            ToP4 top41(&std::cout, true, nullptr);
-            node->apply(top41);
-        }
-        BUG("typechecker mutated program");
+        BUG("At this point in the compilation typechecking "
+            "should not infer new types anymore, but it did.");
     }
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
@@ -1356,9 +1349,9 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t) {
+    auto validator = [this] (const IR::Type* t) {
         while (t->is<IR::Type_Newtype>())
-            t = t->to<IR::Type_Newtype>()->type;
+            t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
                t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
@@ -1383,9 +1376,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t) {
+    auto validator = [this] (const IR::Type* t) {
         while (t->is<IR::Type_Newtype>())
-            t = t->to<IR::Type_Newtype>()->type;
+            t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
         t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
@@ -1659,7 +1652,6 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
  *
  *  Moreover, the EntriesList visitor should have checked for the table
  *  invariants.
- *
  */
 const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     if (done()) return entry;
@@ -1710,26 +1702,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
                               ks->to<IR::ListExpression>(), entry->action);
 
     auto actionRef = entry->getAction();
-    if (!actionRef->is<IR::MethodCallExpression>()) {
-        typeError("Invalid action %1% in entry");
-        return entry;
-    }
-    auto actionCall = actionRef->to<IR::MethodCallExpression>();
-    auto actionName = actionCall->method->to<IR::PathExpression>()->path->name;
-    bool found = false;
-    for (auto ale : table->getActionList()->actionList) {
-        auto expr = ale->expression;
-        if (expr->is<IR::MethodCallExpression>())
-            expr = expr->to<IR::MethodCallExpression>()->method;
-        if (expr->is<IR::PathExpression>() &&
-            expr->to<IR::PathExpression>()->path->name == actionName) {
-            found = true;
-            break;
-        }
-    }
-    if (!found)
-         typeError("%1%: action not in the table action list", actionRef);
-
+    validateActionInitializer(actionRef, table);
     return entry;
 }
 
@@ -2208,8 +2181,21 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
 
 const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
-    auto decl = refMap->getDeclaration(expression->path, true)->getNode();
+    auto decl = refMap->getDeclaration(expression->path, true);
     const IR::Type* type = nullptr;
+    if (decl->is<IR::Function>()) {
+        auto func = findContext<IR::Function>();
+        if (func != nullptr && func->name == decl->getName()) {
+            typeError("%1%: Recursive function call", expression);
+            return expression;
+        }
+    } else if (decl->is<IR::P4Action>()) {
+        auto act = findContext<IR::P4Action>();
+        if (act != nullptr && act->name == decl->getName()) {
+            typeError("%1%: Recursive action call", expression);
+            return expression;
+        }
+    }
 
     if (decl->is<IR::ParserState>()) {
         type = IR::Type_State::get();
@@ -2231,13 +2217,13 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
     } else if (decl->is<IR::Method>()) {
-        type = getType(decl);
+        type = getType(decl->getNode());
         // Each method invocation uses fresh type variables
         type = cloneWithFreshTypeVariables(type->to<IR::Type_MethodBase>());
     }
 
     if (type == nullptr) {
-        type = getType(decl);
+        type = getType(decl->getNode());
         if (type == nullptr)
             return expression;
     }
@@ -3221,6 +3207,84 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     return elem;
 }
 
+void TypeInference::validateActionInitializer(
+    const IR::Expression* actionCall,
+    const IR::P4Table* table) {
+
+    auto al = table->getActionList();
+    if (al == nullptr) {
+        typeError("%1% has no action list, so it cannot have %2%",
+                  table, actionCall);
+        return;
+    }
+
+    auto call = actionCall->to<IR::MethodCallExpression>();
+    if (call == nullptr) {
+        typeError("%1%: expected an action call", actionCall);
+        return;
+    }
+    auto method = call->method;
+    if (!method->is<IR::PathExpression>())
+        BUG("%1%: unexpected expression", method);
+    auto pe = method->to<IR::PathExpression>();
+    auto decl = refMap->getDeclaration(pe->path, true);
+    auto ale = al->actionList.getDeclaration(decl->getName());
+    if (ale == nullptr) {
+        typeError("%1% not present in action list", call);
+        return;
+    }
+
+    BUG_CHECK(ale->is<IR::ActionListElement>(),
+              "%1%: expected an ActionListElement", ale);
+    auto elem = ale->to<IR::ActionListElement>();
+    auto entrypath = elem->getPath();
+    auto entrydecl = refMap->getDeclaration(entrypath, true);
+    if (entrydecl != decl) {
+        typeError("%1% and %2% refer to different actions", actionCall, elem);
+        return;
+    }
+
+    // Check that the data-plane parameters
+    // match the data-plane parameters for the same action in
+    // the actions list.
+    auto actionListCall = elem->expression->to<IR::MethodCallExpression>();
+    CHECK_NULL(actionListCall);
+
+    if (actionListCall->arguments->size() > call->arguments->size()) {
+        typeError("%1%: not enough arguments", call);
+        return;
+    }
+
+    SameExpression se(refMap, typeMap);
+    auto callInstance = MethodInstance::resolve(call, refMap, typeMap);
+    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap);
+
+    for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
+        auto aa = listInstance->substitution.lookup(param);
+        auto da = callInstance->substitution.lookup(param);
+        if (da == nullptr) {
+            typeError("%1%: parameter should be assigned in call %2%",
+                      param, call);
+            return;
+        }
+        bool same = se.sameExpression(aa->expression, da->expression);
+        if (!same) {
+            typeError("%1%: argument does not match declaration in actions list: %2%",
+                      da, aa);
+            return;
+        }
+    }
+
+    for (auto param : *callInstance->substitution.getParametersInOrder()) {
+        auto da = callInstance->substitution.lookup(param);
+        if (da == nullptr) {
+            typeError("%1%: parameter should be assigned in call %2%",
+                      param, call);
+            return;
+        }
+    }
+}
+
 const IR::Node* TypeInference::postorder(IR::Property* prop) {
     // Handle the default_action
     if (prop->name == IR::TableProperties::defaultActionPropertyName) {
@@ -3244,57 +3308,7 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
             // Check that the default action appears in the list of actions.
             BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
             auto def = prop->value->to<IR::ExpressionValue>()->expression;
-            auto al = table->getActionList();
-            if (al == nullptr) {
-                typeError("%1%: no action list, but %2% %3%",
-                          table, IR::TableProperties::defaultActionPropertyName, prop);
-                return prop;
-            }
-
-            auto default_call = def->to<IR::MethodCallExpression>();
-            CHECK_NULL(default_call);
-            def = default_call->method;
-            if (!def->is<IR::PathExpression>())
-                BUG("%1%: unexpected expression", def);
-            auto pe = def->to<IR::PathExpression>();
-            auto defdecl = refMap->getDeclaration(pe->path, true);
-            auto ale = al->actionList.getDeclaration(defdecl->getName());
-            if (ale == nullptr) {
-                typeError("%1% not present in action list", def);
-                return prop;
-            }
-            BUG_CHECK(ale->is<IR::ActionListElement>(),
-                      "%1%: expected an ActionListElement", ale);
-            auto elem = ale->to<IR::ActionListElement>();
-            auto entrypath = elem->getPath();
-            auto entrydecl = refMap->getDeclaration(entrypath, true);
-            if (entrydecl != defdecl) {
-                typeError("%1% and %2% refer to different actions", def, elem);
-                return prop;
-            }
-
-            // Check that the default_action data-plane parameters
-            // match the data-plane parameters for the same action in
-            // the actions list.
-            auto actionListCall = elem->expression->to<IR::MethodCallExpression>();
-            CHECK_NULL(actionListCall);
-
-            if (actionListCall->arguments->size() > default_call->arguments->size()) {
-                typeError("%1%: not enough arguments", default_call);
-                return prop;
-            }
-
-            SameExpression se(refMap, typeMap);
-            for (unsigned i=0; i < actionListCall->arguments->size(); i++) {
-                auto aa = actionListCall->arguments->at(i);
-                auto da = default_call->arguments->at(i);
-                bool same = se.sameExpression(aa->expression, da->expression);
-                if (!same) {
-                    typeError("%1%: argument does not match declaration in actions list: %2%",
-                              da, aa);
-                    return prop;
-                }
-            }
+            validateActionInitializer(def, table);
         }
     }
     return prop;

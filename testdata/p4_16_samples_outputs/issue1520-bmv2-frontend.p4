@@ -21,11 +21,11 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyIngress.h.c1.r") register<bit<16>>(32w8) h_c1_r_0;
-    @name("MyIngress.h.c2.r") register<bit<16>>(32w8) h_c2_r_0;
+    @name("MyIngress.h.c1.r") register<bit<16>>(32w8) h_c1_r;
+    @name("MyIngress.h.c2.r") register<bit<16>>(32w8) h_c2_r;
     apply {
-        h_c1_r_0.read(hdr.x, 32w0);
-        h_c2_r_0.read(hdr.x, 32w0);
+        h_c1_r.read(hdr.x, 32w0);
+        h_c2_r.read(hdr.x, 32w0);
     }
 }
 

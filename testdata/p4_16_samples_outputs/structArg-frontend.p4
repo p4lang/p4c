@@ -3,10 +3,10 @@ struct S {
 }
 
 control caller() {
-    S data;
+    S data_0;
     apply {
-        data.f = 32w0;
-        data.f = 32w0;
+        data_0.f = 32w0;
+        data_0.f = 32w0;
     }
 }
 

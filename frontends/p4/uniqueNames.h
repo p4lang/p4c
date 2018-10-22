@@ -99,8 +99,10 @@ class RenameSymbols : public Transform {
     IR::ID* getName() const;
  public:
     RenameSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
-            refMap(refMap), renameMap(renameMap)
-    { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("RenameSymbols"); }
+            refMap(refMap), renameMap(renameMap) {
+        CHECK_NULL(refMap); CHECK_NULL(renameMap);
+        visitDagOnce = false;
+        setName("RenameSymbols"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;

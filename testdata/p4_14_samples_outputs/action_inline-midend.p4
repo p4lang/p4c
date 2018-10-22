@@ -22,19 +22,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".b") action b_0() {
+    @name(".b") action b_1() {
         meta.md.b = meta.md.b + 1w1;
         meta.md.b = meta.md.b + 1w1;
     }
-    @name(".t") table t {
+    @name(".t") table t_0 {
         actions = {
-            b_0();
+            b_1();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

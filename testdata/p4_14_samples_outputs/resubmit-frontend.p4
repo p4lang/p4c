@@ -51,21 +51,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("._nop") action _nop_0() {
+    @name("._nop") action _nop() {
     }
     @name("._nop") action _nop_2() {
     }
-    @name(".set_port") action set_port_0(bit<9> port) {
+    @name(".set_port") action set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("._resubmit") action _resubmit_0() {
+    @name("._resubmit") action _resubmit() {
         meta.mymeta.f1 = 8w1;
         resubmit<tuple<standard_metadata_t, mymeta_t>>({ standard_metadata, meta.mymeta });
     }
-    @name(".t_ingress_1") table t_ingress_1 {
+    @name(".t_ingress_1") table t_ingress {
         actions = {
-            _nop_0();
-            set_port_0();
+            _nop();
+            set_port();
             @defaultonly NoAction_0();
         }
         key = {
@@ -74,10 +74,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 128;
         default_action = NoAction_0();
     }
-    @name(".t_ingress_2") table t_ingress_2 {
+    @name(".t_ingress_2") table t_ingress_0 {
         actions = {
             _nop_2();
-            _resubmit_0();
+            _resubmit();
             @defaultonly NoAction_3();
         }
         key = {
@@ -87,8 +87,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        t_ingress_1.apply();
-        t_ingress_2.apply();
+        t_ingress.apply();
+        t_ingress_0.apply();
     }
 }
 

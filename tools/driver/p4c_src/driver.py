@@ -276,6 +276,7 @@ class BackendDriver:
             # run the cleanup whether the command succeeded or failed
             postrc = self.postRun(c)
 
-            # if the main command failed, exit with its error code
+            # if the main command failed, stop and return its error code so that
+            # backends that override run can chose what to do on error
             if rc != 0:
-                sys.exit(rc)
+                return rc

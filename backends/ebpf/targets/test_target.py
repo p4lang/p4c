@@ -28,7 +28,7 @@ class Target(EBPFTarget):
   def __init__(self, tmpdir, options, template, outputs):
     EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-  def create_filter(self):
+  def compile_dataplane(self):
     args = self.get_make_args(self.runtimedir, self.options.target)
     # List of bpf programs to attach to the interface
     args += "BPFOBJ=" + self.template + " "

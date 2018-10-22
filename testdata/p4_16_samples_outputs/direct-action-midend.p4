@@ -1,10 +1,10 @@
 control c(inout bit<16> y) {
-    bit<32> x;
-    @name("c.a") action a_0() {
-        y = (bit<16>)x;
+    bit<32> x_0;
+    @name("c.a") action a() {
+        y = (bit<16>)x_0;
     }
     @hidden action act() {
-        x = 32w2;
+        x_0 = 32w2;
     }
     @hidden table tbl_act {
         actions = {
@@ -14,9 +14,9 @@ control c(inout bit<16> y) {
     }
     @hidden table tbl_a {
         actions = {
-            a_0();
+            a();
         }
-        const default_action = a_0();
+        const default_action = a();
     }
     apply {
         tbl_act.apply();

@@ -19,18 +19,18 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    bit<64> res;
-    bit<32> tmp_0;
+    bit<64> res_0;
+    bit<32> tmp;
     bit<64> val;
-    @name("Eg.update") action update_0() {
-        val = res;
-        tmp_0 = res[31:0];
-        tmp_0 = tmp_0;
-        val[31:0] = tmp_0;
-        res = val;
+    @name("Eg.update") action update() {
+        val = res_0;
+        tmp = res_0[31:0];
+        tmp = tmp;
+        val[31:0] = tmp;
+        res_0 = val;
     }
     @hidden action act() {
-        res = 64w0;
+        res_0 = 64w0;
     }
     @hidden table tbl_act {
         actions = {
@@ -40,9 +40,9 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     }
     @hidden table tbl_update {
         actions = {
-            update_0();
+            update();
         }
-        const default_action = update_0();
+        const default_action = update();
     }
     apply {
         tbl_act.apply();

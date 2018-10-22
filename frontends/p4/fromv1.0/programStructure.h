@@ -245,6 +245,7 @@ class ProgramStructure {
     virtual const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName,
                                                     const IR::Type *regElementType = nullptr);
     virtual const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
+    virtual const IR::FieldListCalculation* getFieldListCalculation(const IR::Expression *);
     virtual const IR::FieldList* getFieldLists(const IR::FieldListCalculation* flc);
     virtual const IR::Expression* paramReference(const IR::Parameter* param);
     const IR::Statement* sliceAssign(const IR::Primitive* prim, const IR::Expression* left,

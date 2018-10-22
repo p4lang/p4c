@@ -553,7 +553,7 @@ class ParserBlock : InstantiatedBlock {
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
     toString { return container->toString(); }
-    ID getName() const { return container->getName(); }
+    ID getName() const override { return container->getName(); }
 #nodbprint
 }
 
@@ -562,7 +562,7 @@ class ControlBlock : InstantiatedBlock {
     ParameterList getConstructorParameters() const override {
         return container->constructorParams; }
     toString { return container->toString(); }
-    ID getName() const { return container->getName(); }
+    ID getName() const override { return container->getName(); }
 #nodbprint
 }
 
@@ -570,7 +570,7 @@ class PackageBlock : InstantiatedBlock {
     Type_Package type;
     ParameterList getConstructorParameters() const override { return type->constructorParams; }
     toString { return type->toString(); }
-    ID getName() const { return type->getName(); }
+    ID getName() const override { return type->getName(); }
 #nodbprint
 }
 
@@ -580,7 +580,7 @@ class ExternBlock : InstantiatedBlock {
     ParameterList getConstructorParameters() const override {
         return constructor->type->parameters; }
     toString { return type->toString(); }
-    ID getName() const { return type->getName(); }
+    ID getName() const override { return type->getName(); }
 #nodbprint
 }
 
@@ -588,7 +588,7 @@ class ExternBlock : InstantiatedBlock {
 class ToplevelBlock : Block, IDeclaration {
     P4Program getProgram() const { return node->to<IR::P4Program>(); }
     PackageBlock getMain() const;
-    ID getName() const { return "main"; }
+    ID getName() const override { return "main"; }
 #nodbprint
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }

@@ -48,6 +48,18 @@ struct HeaderType {
     IR::Vector<IR::Annotation>* annotations;
     IR::IndexedVector<IR::StructField>* fields;
 };
+
+struct Attributes {
+    bool signed_ = false;
+    bool saturating = false;
+    IR::Vector<IR::Annotation> annotations;
+    Attributes &merge(const Attributes &a) {
+        signed_ |= a.signed_;
+        saturating |= a.saturating;
+        annotations.append(a.annotations);
+        return *this; }
+};
+
 }  // namespace V1
 
 inline std::ostream& operator<<(std::ostream& out, const V1::BBoxType& bboxType) {
@@ -59,6 +71,10 @@ inline std::ostream& operator<<(std::ostream& out, const V1::HeaderType& headerT
     out << "HeaderType(" << headerType.annotations << ',' << headerType.fields << ')';
     return out;
 }
+
+inline std::ostream& operator<<(std::ostream& out, const V1::Attributes& a) {
+    return out << "Attributes(" << (a.signed_ ? "signed," : "") <<
+                  (a.saturating ? "saturating," : "") << a.annotations << ')'; }
 
 typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
 
@@ -113,7 +129,7 @@ typedef const IR::Type ConstType;
 // produce null pointers, so we need to have two printers: one for non-pointer
 // types, and another with null checking for pointer types.
 %printer { yyoutput << $$; } <BBoxType> <CaseValue> <cstring> <HeaderType>
-                             <int> <IR::Direction> <IR::ID> <UnparsedConstant>
+                             <IR::Direction> <IR::ID> <UnparsedConstant> <Attributes>
 %printer {
     auto val = $$;
     if (val != nullptr) {
@@ -189,7 +205,7 @@ typedef const IR::Type ConstType;
 %precedence IF
 %precedence ELSE
 
-%type<int>                          opt_field_modifiers attributes attrib
+%type<Attributes>                   opt_field_modifiers attributes attrib
 %type<IR::ID>                       name
 %type<IR::ActionFunction*>          action_function_body action_statement_list
 %type<IR::ActionProfile*>           action_profile_body
@@ -280,35 +296,39 @@ header_dec_body: FIELDS "{" field_declarations "}" opt_length opt_max_length
 field_declarations: /* epsilon */
       { $$.annotations = new IR::Vector<IR::Annotation>;
         $$.fields = new IR::IndexedVector<IR::StructField>; }
-    | field_declarations name ":" bit_width ";"
-      { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2), $4)); }
+    | field_declarations name ":" bit_width opt_field_modifiers ";" {
+        auto *type = $4;
+        if ($5.signed_ && type->is<IR::Type::Bits>())
+            type = IR::Type::Bits::get(type->to<IR::Type::Bits>()->size, true);
+        ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2),
+                new IR::Annotations($5.annotations), type)); }
     | field_declarations type name ";"
       { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
 ;
 
 bit_width:
-      const_expression opt_field_modifiers
+      const_expression
       { if ($1)
-            $$ = IR::Type::Bits::get(@1, $1->asInt(), $2 & 1);
+            $$ = IR::Type::Bits::get(@1, $1->asInt());
         else
             $$ = IR::Type::Unknown::get(); }
-    | "*" opt_field_modifiers
+    | "*"
       { $$ = IR::Type::Varbits::get(); }
 ;
 
-opt_field_modifiers: /* epsilon */ { $$ = 0;}
+opt_field_modifiers: /* epsilon */ { $$ = Attributes(); }
     | "(" attributes ")" { $$ = $2; }
 ;
 
 attributes:
       attrib { $$ = $1; }
-    | attributes "," attrib { $$ = $1 | $3; }
+    | attributes "," attrib { ($$ = $1).merge($3); }
 ;
 
 attrib:
-      SIGNED     { $$ = 1; }
-      // TODO: these seem to be currently ignored
-    | SATURATING { $$ = 2; }
+      SIGNED     { $$.signed_ = true; }
+    | SATURATING { $$.annotations.push_back(new IR::Annotation(@1, IR::ID(@1, $1), {}));
+                   $$.saturating = true; }
 ;
 
 opt_length: /* epsilon */
@@ -621,8 +641,8 @@ register_spec_list:
     | register_spec_list INSTANCE_COUNT ":" const_expression ";"
       { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
     | register_spec_list ATTRIBUTES ":" attributes ";"
-      { ($$=$1)->signed_ = ($4 & 1) ? true : false;
-        $1->saturating = ($4 & 2) ? true : false; }
+      { ($$=$1)->signed_ = $4.signed_;
+        $1->saturating = $4.saturating; }
     | register_spec_list error ";" { $$ = $1; }
     | register_spec_list error { $$ = $1; }
 ;

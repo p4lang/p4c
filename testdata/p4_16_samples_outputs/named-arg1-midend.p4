@@ -1,43 +1,43 @@
 #include <core.p4>
 
 parser par(out bool b) {
-    bit<32> x;
-    bit<32> y;
-    bit<32> x_4;
+    bit<32> x_0;
+    bit<32> y_0;
+    bit<32> x_1;
     state start {
-        y = 32w0;
-        x_4 = y + 32w6;
-        x = x_4;
-        b = x == 32w0;
+        y_0 = 32w0;
+        x_1 = y_0 + 32w6;
+        x_0 = x_1;
+        b = x_0 == 32w0;
         transition accept;
     }
 }
 
 control c(out bool b) {
-    bit<16> xv;
-    bool b_3;
-    @name("c.a") action a_0() {
-        xv = 16w65533;
+    bit<16> xv_0;
+    bool b_1;
+    @name("c.a") action a() {
+        xv_0 = 16w65533;
     }
     @name("c.a") action a_2() {
-        xv = 16w0;
+        xv_0 = 16w0;
     }
     @hidden action act() {
-        b = xv == 16w0;
-        b_3 = xv == 16w1;
-        b = b_3;
-        xv = 16w1;
-        xv = 16w1;
+        b = xv_0 == 16w0;
+        b_1 = xv_0 == 16w1;
+        b = b_1;
+        xv_0 = 16w1;
+        xv_0 = 16w1;
         b = false;
-        b_3 = true;
+        b_1 = true;
         b = true;
-        xv = 16w1;
+        xv_0 = 16w1;
     }
     @hidden table tbl_a {
         actions = {
-            a_0();
+            a();
         }
-        const default_action = a_0();
+        const default_action = a();
     }
     @hidden table tbl_a_0 {
         actions = {

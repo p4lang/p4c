@@ -6,7 +6,7 @@ action b() {}
        ^
 default_action1.p4(23): error: .b and b refer to different actions
         default_action = .b(); // not the same b
-                          ^
+                         ^^^^
 default_action1.p4(22)
         actions = { a; b; }
                        ^

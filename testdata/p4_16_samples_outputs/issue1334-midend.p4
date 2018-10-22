@@ -11,18 +11,18 @@ extern Overloaded {
 }
 
 control c() {
-    @name("c.o") Overloaded() o;
+    @name("c.o") Overloaded() o_0;
     @hidden action act() {
         f();
         f(a = 32w2);
         f(b = 16w1);
         f(a = 32w1, b = 16w2);
         f(b = 16w2, a = 32w1);
-        o.f();
-        o.f(a = 32w2);
-        o.f(b = 16w1);
-        o.f(a = 32w1, b = 16w2);
-        o.f(b = 16w2, a = 32w1);
+        o_0.f();
+        o_0.f(a = 32w2);
+        o_0.f(b = 16w1);
+        o_0.f(a = 32w1, b = 16w2);
+        o_0.f(b = 16w2, a = 32w1);
     }
     @hidden table tbl_act {
         actions = {

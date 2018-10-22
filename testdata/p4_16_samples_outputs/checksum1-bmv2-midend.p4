@@ -64,12 +64,12 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp_4;
-    bit<9> tmp_5;
-    bit<9> tmp_6;
-    bit<9> tmp_7;
-    bit<32> tmp_8;
-    bit<8> tmp;
+    IPv4_up_to_ihl_only_h tmp;
+    bit<9> tmp_0;
+    bit<9> tmp_1;
+    bit<9> tmp_2;
+    bit<32> tmp_3;
+    bit<8> tmp_4;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -78,15 +78,15 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        tmp = pkt.lookahead<bit<8>>();
-        tmp_4.setValid();
-        tmp_4.version = tmp[7:4];
-        tmp_4.ihl = tmp[3:0];
-        tmp_5 = (bit<9>)tmp_4.ihl << 2;
-        tmp_6 = tmp_5 + 9w492;
-        tmp_7 = tmp_6 << 3;
-        tmp_8 = (bit<32>)tmp_7;
-        pkt.extract<ipv4_t>(hdr.ipv4, tmp_8);
+        tmp_4 = pkt.lookahead<bit<8>>();
+        tmp.setValid();
+        tmp.version = tmp_4[7:4];
+        tmp.ihl = tmp_4[3:0];
+        tmp_0 = (bit<9>)tmp.ihl << 2;
+        tmp_1 = tmp_0 + 9w492;
+        tmp_2 = tmp_1 << 3;
+        tmp_3 = (bit<32>)tmp_2;
+        pkt.extract<ipv4_t>(hdr.ipv4, tmp_3);
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         transition select(hdr.ipv4.protocol) {
@@ -101,22 +101,22 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @name("cIngress.foo") action foo_0() {
+    @name("cIngress.foo") action foo() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
-    @name("cIngress.guh") table guh {
+    @name("cIngress.guh") table guh_0 {
         key = {
             hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
         }
         actions = {
-            foo_0();
+            foo();
         }
-        default_action = foo_0();
+        default_action = foo();
     }
     apply {
-        guh.apply();
+        guh_0.apply();
     }
 }
 

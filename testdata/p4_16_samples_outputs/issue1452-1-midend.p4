@@ -1,11 +1,11 @@
 control c() {
-    @name("c.b") action b_0() {
+    @name("c.b") action b() {
     }
     @hidden table tbl_b {
         actions = {
-            b_0();
+            b();
         }
-        const default_action = b_0();
+        const default_action = b();
     }
     apply {
         tbl_b.apply();

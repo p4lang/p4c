@@ -22,10 +22,10 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    bit<16> rand_int;
+    bit<16> rand_int_0;
     apply {
-        random<bit<16>>(rand_int, 16w0, 16w49151);
-        if (rand_int < 16w32768) 
+        random<bit<16>>(rand_int_0, 16w0, 16w49151);
+        if (rand_int_0 < 16w32768) 
             mark_to_drop();
     }
 }

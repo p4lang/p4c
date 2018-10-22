@@ -45,35 +45,35 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("ingress.a") action a_0() {
+    @name("ingress.a") action a() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("ingress.a_with_control_params") action a_with_control_params_0(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params(bit<9> x) {
         standard_meta.egress_spec = x;
     }
-    @name("ingress.t_ternary") table t_ternary {
+    @name("ingress.t_ternary") table t_ternary_0 {
         key = {
             h.h.t: ternary @name("h.h.t") ;
         }
         actions = {
-            a_0();
-            a_with_control_params_0();
+            a();
+            a_with_control_params();
         }
-        default_action = a_0();
+        default_action = a();
         const entries = {
-                        16w0x1111 &&& 16w0xf : a_with_control_params_0(9w1);
+                        16w0x1111 &&& 16w0xf : a_with_control_params(9w1);
 
-                        16w0x1187 : a_with_control_params_0(9w2);
+                        16w0x1187 : a_with_control_params(9w2);
 
-                        16w0x1111 &&& 16w0xf000 : a_with_control_params_0(9w3);
+                        16w0x1111 &&& 16w0xf000 : a_with_control_params(9w3);
 
-                        default : a_with_control_params_0(9w4);
+                        default : a_with_control_params(9w4);
 
         }
 
     }
     apply {
-        t_ternary.apply();
+        t_ternary_0.apply();
     }
 }
 

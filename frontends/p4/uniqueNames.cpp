@@ -80,8 +80,8 @@ addNameAnnotation(cstring name, const IR::Annotations* annos) {
 }
 
 UniqueNames::UniqueNames(ReferenceMap* refMap) : renameMap(new RenameMap) {
-    setStopOnError(true);
     setName("UniqueNames");
+    visitDagOnce = false;
     CHECK_NULL(refMap);
     passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new FindSymbols(refMap, renameMap));

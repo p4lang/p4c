@@ -26,7 +26,7 @@ class Target(EBPFTarget):
     def __init__(self, tmpdir, options, template, outputs):
         EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-    def create_filter(self):
+    def compile_dataplane(self):
         # Not implemented yet, just pass the test
         return SUCCESS
 

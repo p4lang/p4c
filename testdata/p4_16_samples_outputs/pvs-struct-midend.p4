@@ -19,11 +19,11 @@ struct value_set_t {
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    @name("MyParser.pvs") value_set<value_set_t>(4) pvs;
+    @name("MyParser.pvs") value_set<value_set_t>(4) pvs_0;
     state start {
         b.extract<data_h>(p.data);
         transition select(p.data.da) {
-            pvs: accept;
+            pvs_0: accept;
             32w0x810: foo;
             default: noMatch;
         }
@@ -45,11 +45,11 @@ control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIngress.set_data") action set_data_0() {
+    @name("MyIngress.set_data") action set_data() {
     }
-    @name("MyIngress.t") table t {
+    @name("MyIngress.t") table t_0 {
         actions = {
-            set_data_0();
+            set_data();
             @defaultonly NoAction_0();
         }
         key = {
@@ -58,7 +58,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
         default_action = NoAction_0();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

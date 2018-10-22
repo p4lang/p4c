@@ -1,9 +1,9 @@
 control c(inout bit<32> x) {
-    @name("c.a") action a_0(in bit<32> arg_1) {
+    @name("c.a") action a(in bit<32> arg_1) {
         x = arg_1;
     }
     apply {
-        a_0(32w15);
+        a(32w15);
     }
 }
 

@@ -1,7 +1,7 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp_3;
-    bit<32> tmp_5;
+    bit<32> tmp;
+    bit<32> tmp_1;
     @hidden action act() {
         r = 32w1;
     }
@@ -9,13 +9,13 @@ control c(inout bit<32> r) {
         r = 32w3;
     }
     @hidden action act_1() {
-        tmp_3 = f(32w2);
+        tmp = f(32w2);
     }
     @hidden action act_2() {
         r = 32w2;
     }
     @hidden action act_3() {
-        tmp_5 = f(32w2);
+        tmp_1 = f(32w2);
     }
     @hidden table tbl_act {
         actions = {
@@ -49,9 +49,9 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_5 > 32w0) {
+        if (tmp_1 > 32w0) {
             tbl_act_0.apply();
-            if (tmp_3 < 32w2) 
+            if (tmp < 32w2) 
                 tbl_act_1.apply();
             else 
                 tbl_act_2.apply();

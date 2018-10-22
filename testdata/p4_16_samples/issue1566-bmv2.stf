@@ -1,0 +1,24 @@
+# Here is a created-by-hand walkthrough of what the P4 program
+# issue1566-bmv2.p4 _should_ do when it receives a packet with an
+# etherType field of 0xcafe:
+
+# cIngress call E.apply(0xcafe)
+# E calls c2.apply(0xcafe)
+# c2 does x = x << 1    (bit<16>) (0xcafe << 1) = 0x95fc = 38396
+# c2 does c.apply(0x95fc)
+# c does x = x + 1      x becomes 0x95fd = 38397
+# c does stats.count(38397)
+# c returns back to c2
+# c2 returns back to E
+# E calls c3.apply(0x95fd)
+# c3 does x = x << 3    (bit<16>) (0x95fd << 3) = 0xafe8 = 45032
+# c3 does c.apply(0xafe8)
+# c does x= x + 1       x becomes 0xafe9 = 45033
+# c does stats.count(45033)
+# c returns back to c3
+# c3 returns back to E
+# E returns back to cIngress
+# packet goes to cEgress, then deparser, with etherType modified to 0xafe9
+
+packet 0  0000 0000 0000  0000 0000 0000  cafe
+expect 0  0000 0000 0000  0000 0000 0000  afe9

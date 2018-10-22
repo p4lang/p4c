@@ -451,7 +451,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 }
 
                 auto type = explodeType(fieldTypes);
-                auto sizeAnnotation = value_set->getAnnotation("size");
+                auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size");
                 const IR::Constant* sizeConstant;
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {
@@ -464,7 +464,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                         return nullptr;
                     }
                 } else {
-                    WARNING("parser_value_set has no @size annotation, default to @size(4).");
+                    ::warning("parser_value_set has no @parser_value_set_size annotation");
+                    ::warning("using default size 4");
                     sizeConstant = new IR::Constant(4);
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
@@ -945,6 +946,20 @@ static bool sameBitsType(
     return true;  // to prevent inserting a cast
 }
 
+static bool isSaturatedField(const IR::Expression *expr) {
+    auto member = expr->to<IR::Member>();
+    if (!member)
+        return false;
+    auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
+    if (!header_type)
+        return false;
+    auto field = header_type->getField(member->member.name);
+    if (field && field->getAnnotation("saturating")) {
+        return true;
+    }
+    return false;
+}
+
 // Implement modify_field(left, right, mask)
 const IR::Statement* ProgramStructure::sliceAssign(
     const IR::Primitive* primitive, const IR::Expression* left,
@@ -1090,9 +1105,17 @@ CONVERT_PRIMITIVE(bit_xnor) {
 CONVERT_PRIMITIVE(add) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
+    bool isSaturated = false;
+    for (auto a : args)
+        isSaturated = isSaturated || isSaturatedField(a);  // any of the fields
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Add(primitive->srcInfo, args[1], args[2]);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::AddSat(primitive->srcInfo, args[1], args[2]);
+    else
+        op = new IR::Add(primitive->srcInfo, args[1], args[2]);
+    LOG3("add: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1162,9 +1185,17 @@ CONVERT_PRIMITIVE(bit_and) {
 CONVERT_PRIMITIVE(subtract) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
+    bool isSaturated = false;
+    for (auto a : args)
+        isSaturated = isSaturated || isSaturatedField(a);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Sub(primitive->srcInfo, args[1], args[2]);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::SubSat(primitive->srcInfo, args[1], args[2]);
+    else
+        op = new IR::Sub(primitive->srcInfo, args[1], args[2]);
+    LOG3("subtract: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1202,7 +1233,13 @@ CONVERT_PRIMITIVE(add_to_field) {
     auto left2 = conv.convert(primitive->operands.at(0));
     // convert twice, so we have different expression trees on RHS and LHS
     auto right = conv.convert(primitive->operands.at(1));
-    auto op = new IR::Add(primitive->srcInfo, left, right);
+    bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::AddSat(primitive->srcInfo, left, right);
+    else
+        op = new IR::Add(primitive->srcInfo, left, right);
+    LOG3("add_to_field: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }
 
@@ -1213,7 +1250,13 @@ CONVERT_PRIMITIVE(subtract_from_field) {
     auto left2 = conv.convert(primitive->operands.at(0));
     // convert twice, so we have different expression trees on RHS and LHS
     auto right = conv.convert(primitive->operands.at(1));
-    auto op = new IR::Sub(primitive->srcInfo, left, right);
+    bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
+    IR::Operation_Binary *op = nullptr;
+    if (isSaturated)
+        op = new IR::SubSat(primitive->srcInfo, left, right);
+    else
+        op = new IR::Sub(primitive->srcInfo, left, right);
+    LOG3("subtract_form_field: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }
 
@@ -1471,10 +1514,9 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
     auto max = conv.convert(primitive->operands.at(3));
     auto args = new IR::Vector<IR::Argument>();
 
-    auto nr = primitive->operands.at(2)->to<IR::PathExpression>();
-    auto flc = structure->field_list_calculations.get(nr->path->name);
+    auto flc = structure->getFieldListCalculation(primitive->operands.at(2));
     if (flc == nullptr) {
-        ::error("%1%: Expected a field_list_calculation", primitive->operands.at(1));
+        ::error("%1%: Expected a field_list_calculation", primitive->operands.at(2));
         return nullptr;
     }
     auto ttype = IR::Type_Bits::get(flc->output_width);
@@ -2121,6 +2163,17 @@ void ProgramStructure::createMain() {
 
     auto result = new IR::Declaration_Instance(name, type, args, nullptr);
     declarations->push_back(result);
+}
+
+// Get a field_list_calculation from a name
+const IR::FieldListCalculation* ProgramStructure::getFieldListCalculation(const IR::Expression *e) {
+    if (auto *pe = e->to<IR::PathExpression>()) {
+        return field_list_calculations.get(pe->path->name); }
+    if (auto *gref = e->to<IR::GlobalRef>()) {
+        // an instance of a global object, but in P4_14, there might be a field_list_calculation
+        // with the same name
+        return field_list_calculations.get(gref->toString()); }
+    return nullptr;
 }
 
 // if a FieldListCalculation contains multiple field lists concatenate them all

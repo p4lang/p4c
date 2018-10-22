@@ -320,7 +320,10 @@ void InlineList::analyze() {
 
     for (auto m : inlineMap) {
         auto inl = m.second;
-        if (inl->invocations.size() == 0) continue;
+        if (inl->invocations.size() == 0) {
+            LOG3("Callee " << inl->callee << " in " << inl->caller << " is never invoked");
+            continue;
+        }
         auto it = inl->invocations.begin();
         auto first = *it;
         if (!allowMultipleCalls && inl->invocations.size() > 1) {
@@ -368,7 +371,7 @@ InlineSummary* InlineList::next() {
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
-    LOG4("Visiting " << statement);
+    LOG4("Visiting " << dbp(statement) << statement);
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->isApply())
         return;

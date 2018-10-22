@@ -19,25 +19,25 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("IngressI.drop") action drop_0() {
+    @name("IngressI.drop") action drop_1() {
         mark_to_drop();
     }
     @name("IngressI.drop") action drop_3() {
         mark_to_drop();
     }
-    @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as;
-    @name("IngressI.indirect_ws") table indirect_ws {
+    @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as_0;
+    @name("IngressI.indirect_ws") table indirect_ws_0 {
         key = {
             meta.hash1: selector @name("meta.hash1") ;
         }
         actions = {
-            drop_0();
+            drop_1();
             NoAction_0();
         }
         const default_action = NoAction_0();
-        @name("ap_ws") implementation = as;
+        @name("ap_ws") implementation = as_0;
     }
-    @name("IngressI.indirect_ws_1") table indirect_ws_1 {
+    @name("IngressI.indirect_ws_1") table indirect_ws_2 {
         key = {
             meta.hash1: selector @name("meta.hash1") ;
         }
@@ -46,11 +46,11 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             NoAction_3();
         }
         const default_action = NoAction_3();
-        @name("ap_ws") implementation = as;
+        @name("ap_ws") implementation = as_0;
     }
     apply {
-        indirect_ws.apply();
-        indirect_ws_1.apply();
+        indirect_ws_0.apply();
+        indirect_ws_2.apply();
     }
 }
 

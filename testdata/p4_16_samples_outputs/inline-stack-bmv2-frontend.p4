@@ -30,12 +30,12 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    H hdr_1;
+    H hdr_0;
     apply {
-        hdr_1 = hdr;
-        hdr = hdr_1;
-        hdr_1 = hdr;
-        hdr = hdr_1;
+        hdr_0 = hdr;
+        hdr = hdr_0;
+        hdr_0 = hdr;
+        hdr = hdr_0;
     }
 }
 

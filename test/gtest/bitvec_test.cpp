@@ -38,8 +38,15 @@ TEST(Bitvec, bigval) {
     val[1] <<= 10;
     bv.setraw(val[1]);
     EXPECT_EQ(bv.getbit(110), true);
+// older clang (<= 3.8) does not understand 'std::enable_if' in template function.
+// anyone trying to use setraw() on a large int will run into compilation error with
+// older clang, not a problem for gcc though.
+#if (defined(__GNUC__) && !defined(__clang__)) || \
+    (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
     bv.setraw(val, 2);
     EXPECT_EQ(bv.getbit(238), true);
+#endif   // (defined(__GNUC__) && !defined(__clang__)) ||
+         // (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
 }
 #else
 TEST(Bitvec, bigval) {

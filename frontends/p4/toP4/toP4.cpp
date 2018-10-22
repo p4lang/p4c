@@ -618,7 +618,7 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
 }
 
 bool ToP4::preorder(const IR::Declaration_Variable* v) {
-    dump(1);
+    dump(2);
     visit(v->annotations);
     auto type = v->type->getP4Type();
     CHECK_NULL(type);

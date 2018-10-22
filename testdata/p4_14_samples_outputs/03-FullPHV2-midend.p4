@@ -269,7 +269,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_11() {
     }
-    @name(".a1") action a1_0() {
+    @name(".a1") action a1() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -367,7 +367,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_63 = 32w63;
         meta.m.field_32_64 = 32w64;
     }
-    @name(".a2_1") action a2() {
+    @name(".a2_1") action a2_1() {
         meta.m.field_16_01 = 16w1;
         meta.m.field_16_02 = 16w2;
         meta.m.field_16_03 = 16w3;
@@ -417,7 +417,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_47 = 16w47;
         meta.m.field_16_48 = 16w48;
     }
-    @name(".a2_2") action a2_0() {
+    @name(".a2_2") action a2_2() {
         meta.m.field_16_49 = 16w49;
         meta.m.field_16_50 = 16w50;
         meta.m.field_16_51 = 16w51;
@@ -442,7 +442,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_71 = 16w71;
         meta.m.field_16_72 = 16w72;
     }
-    @name(".a2_3") action a2_4() {
+    @name(".a2_3") action a2_3() {
         meta.m.field_16_73 = 16w73;
         meta.m.field_16_74 = 16w74;
         meta.m.field_16_75 = 16w75;
@@ -468,20 +468,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_95 = 16w95;
         meta.m.field_16_96 = 16w96;
     }
-    @name(".a3_1") action a3() {
+    @name(".a3_1") action a3_0() {
     }
-    @name(".a4_1") action a4() {
+    @name(".a4_1") action a4_0() {
     }
-    @name(".t1") table t1 {
+    @name(".t1") table t1_0 {
         actions = {
-            a1_0();
+            a1();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
-    @name(".t2_1") table t2_1 {
+    @name(".t2_1") table t2 {
         actions = {
-            a2();
+            a2_1();
             @defaultonly NoAction_7();
         }
         key = {
@@ -552,9 +552,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name(".t2_2") table t2_2 {
+    @name(".t2_2") table t2_0 {
         actions = {
-            a2_0();
+            a2_2();
             @defaultonly NoAction_8();
         }
         key = {
@@ -577,9 +577,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name(".t2_3") table t2_3 {
+    @name(".t2_3") table t2_4 {
         actions = {
-            a2_4();
+            a2_3();
             @defaultonly NoAction_9();
         }
         key = {
@@ -602,9 +602,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_9();
     }
-    @name(".t3_1") table t3_0 {
+    @name(".t3_1") table t3 {
         actions = {
-            a3();
+            a3_0();
             @defaultonly NoAction_10();
         }
         key = {
@@ -630,9 +630,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_10();
     }
-    @name(".t4_1") table t4_0 {
+    @name(".t4_1") table t4 {
         actions = {
-            a4();
+            a4_0();
             @defaultonly NoAction_11();
         }
         key = {
@@ -666,12 +666,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_11();
     }
     apply {
-        t1.apply();
-        t2_1.apply();
-        t2_2.apply();
-        t2_3.apply();
-        t3_0.apply();
-        t4_0.apply();
+        t1_0.apply();
+        t2.apply();
+        t2_0.apply();
+        t2_4.apply();
+        t3.apply();
+        t4.apply();
     }
 }
 

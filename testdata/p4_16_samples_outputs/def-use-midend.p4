@@ -20,19 +20,19 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @name("EgressI.a") action a_0() {
+    @name("EgressI.a") action a() {
     }
-    @name("EgressI.t") table t {
+    @name("EgressI.t") table t_0 {
         key = {
         }
         actions = {
-            a_0();
+            a();
         }
-        default_action = a_0();
+        default_action = a();
     }
     apply {
-        switch (t.apply().action_run) {
-            a_0: {
+        switch (t_0.apply().action_run) {
+            a: {
             }
             default: {
             }
