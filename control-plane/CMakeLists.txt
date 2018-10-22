@@ -14,7 +14,7 @@
 
 # The standard P4Runtime protocol buffers message definitions live in the PI
 # repo, which is included in this repo as a submodule.
-set (P4RUNTIME_STD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PI/proto)
+set (P4RUNTIME_STD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/p4runtime/proto)
 set (P4RUNTIME_INFO_PROTO ${P4RUNTIME_STD_DIR}/p4/config/v1/p4info.proto)
 set (P4RUNTIME_INFO_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/v1/p4info.pb.cc)
 set (P4RUNTIME_INFO_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/v1/p4info.pb.h)
@@ -31,7 +31,7 @@ set (P4RUNTIME_DATA_PROTO ${P4RUNTIME_STD_DIR}/p4/v1/p4data.proto)
 set (P4RUNTIME_DATA_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/v1/p4data.pb.cc)
 set (P4RUNTIME_DATA_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/v1/p4data.pb.h)
 
-set (P4RUNTIME_DEPS_PROTO ${P4RUNTIME_STD_DIR}/google/rpc/status.proto)
+set (P4RUNTIME_DEPS_PROTO ${CMAKE_CURRENT_SOURCE_DIR}/google/rpc/status.proto)
 set (P4RUNTIME_DEPS_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/google/rpc/status.pb.cc)
 set (P4RUNTIME_DEPS_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/google/rpc/status.pb.h)
 
@@ -54,7 +54,8 @@ set (P4RUNTIME_GEN_PYTHON "control-plane")
 add_custom_target (mkP4configdir
   ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/p4/config)
 add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
-  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I ${P4RUNTIME_STD_DIR}
+  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+          -I ${P4RUNTIME_STD_DIR} -I${CMAKE_CURRENT_SOURCE_DIR}
           --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
           --python_out ${CMAKE_CURRENT_BINARY_DIR}
           ${P4RUNTIME_PROTO}
@@ -92,7 +93,7 @@ set (CONTROLPLANE_HDRS
 # handle this case.
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS}")
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/PI/include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
 build_unified(CONTROLPLANE_SOURCES)
