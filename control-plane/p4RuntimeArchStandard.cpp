@@ -519,7 +519,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         if (externBlock->type->name == CounterTraits::typeName()) {
             auto counter = Helpers::Counterlike<ArchCounterExtern>::from(externBlock);
             if (counter) addCounter(symbols, p4info, *counter);
-        } else if (externBlock->type->name == CounterTraits::typeName()) {
+        } else if (externBlock->type->name == MeterTraits::typeName()) {
             auto meter = Helpers::Counterlike<ArchMeterExtern>::from(externBlock);
             if (meter) addMeter(symbols, p4info, *meter);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
