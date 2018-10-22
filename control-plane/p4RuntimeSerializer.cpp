@@ -879,6 +879,16 @@ class P4RuntimeAnalyzer {
                 }
             });
         });
+
+        // Generate P4Info for any extern function invoked directly from control.
+        forAllMatching<IR::MethodCallExpression>(control->body,
+                                                 [&](const IR::MethodCallExpression* call) {
+            auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+            if (instance->is<P4::ExternFunction>()) {
+                archHandler->addExternFunction(
+                    symbols, p4Info, instance->to<P4::ExternFunction>());
+            }
+        });
     }
 
     void addValueSet(const IR::P4ValueSet* inst) {
@@ -953,6 +963,14 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
             if (instance->is<P4::ExternFunction>())
                 archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
         });
+    });
+
+    // Collect any extern function invoked directly from the control.
+    forAllMatching<IR::MethodCallExpression>(control->body,
+                                             [&](const IR::MethodCallExpression* call) {
+        auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+        if (instance->is<P4::ExternFunction>())
+                archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
     });
 }
 
