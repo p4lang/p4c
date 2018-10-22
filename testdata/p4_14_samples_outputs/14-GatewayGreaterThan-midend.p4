@@ -47,7 +47,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.h.f1 > 16w1) 
-            t1.apply();
+            t1_0.apply();
     }
 }
 
