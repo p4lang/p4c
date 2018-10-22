@@ -8,7 +8,7 @@ header ethernet_t {
 }
 
 header h_t {
-    bit<13> f1;
+    bit<16> f1;
 }
 
 struct metadata {
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        if (hdr.h.f1 > 13w1) 
+        if (hdr.h.f1 > 16w1) 
             t1_0.apply();
     }
 }

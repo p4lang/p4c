@@ -3,7 +3,7 @@
 
 typedef standard_metadata_t std_meta_t;
 header h_t {
-    bit<1> f;
+    bit<8> f;
 }
 
 struct H {

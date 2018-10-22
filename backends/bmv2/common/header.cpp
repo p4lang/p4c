@@ -227,14 +227,27 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
         }
     }
 
-    // must add padding
+    // must add padding to structs
     unsigned padding = max_length % 8;
     if (padding != 0) {
-        cstring name = ctxt->refMap->newName("_padding");
-        auto field = pushNewArray(fields);
-        field->append(name);
-        field->append(8 - padding);
-        field->append(false);
+        if (st->is<IR::Type_Header>()) {
+            ::error("%1%: Found header with fields totaling %2% bits."
+                    "  BMv2 target only supports headers with fields"
+                    " totaling a multiple of 8 bits.",
+                    st, max_length);
+        } else if (st->is<IR::Type_Struct>()) {
+            cstring name = ctxt->refMap->newName("_padding");
+            auto field = pushNewArray(fields);
+            field->append(name);
+            field->append(8 - padding);
+            field->append(false);
+        } else {
+            BUG("%1%: Found struct-like object with fields totaling %2% bits."
+                "  This type is not expected here.  Add a case to handle it."
+                "  BMv2 target only supports headers with fields"
+                " totaling a multiple of 8 bits.",
+                st, max_length);
+        }
     }
 
     unsigned max_length_bytes = (max_length + padding) / 8;
