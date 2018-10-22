@@ -662,7 +662,6 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         meter->mutable_preamble()->set_alias(symbols.getAlias(meterInstance.name));
         addAnnotations(meter->mutable_preamble(), meterInstance.annotations);
         auto meter_spec = meter->mutable_spec();
-        meter_spec->set_type(MeterSpec::COLOR_UNAWARE);  // A default; this isn't exposed.
         meter_spec->set_unit(MeterTraits::mapUnitName(meterInstance.unit));
     }
 
