@@ -78,9 +78,9 @@ add_dependencies(p4c_driver linkp4cebpf)
 
 # Tests
 
-set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel")
-set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc")
-set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
+set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
+set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
+set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 
 set (XFAIL_TESTS_KERNEL)
 set (XFAIL_TESTS_BCC)
