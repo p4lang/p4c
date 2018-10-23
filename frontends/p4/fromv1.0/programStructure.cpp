@@ -851,6 +851,17 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                 auto arg = new IR::Argument(e);
                 args->push_back(arg);
             }
+        } else {
+            // Since no default action arguments are added in the p4 program we
+            // add zero initialized arguments
+            for (auto a : actions) {
+                if (a.second == table->default_action.name) {
+                    for (auto aa : a.first->args) {
+                        args->push_back(new IR::Argument(aa->name, new IR::Constant(0)));
+                        break;
+                    }
+                }
+            }
         }
         auto methodCall = new IR::MethodCallExpression(act, args);
         auto prop = new IR::Property(
