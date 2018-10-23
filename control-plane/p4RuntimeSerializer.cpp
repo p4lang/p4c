@@ -1114,7 +1114,8 @@ class P4RuntimeEntriesConverter {
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
                 addRange(protoMatch, k, keyWidth);
             } else {
-                ::error("%1%: match type not supported by P4Runtime serializer", matchType);
+                if (!k->is<IR::DefaultExpression>())
+                    ::error("%1%: match type not supported by P4Runtime serializer", matchType);
                 continue;
             }
         }
