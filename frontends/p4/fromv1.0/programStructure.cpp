@@ -858,8 +858,8 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                 if (a.second == table->default_action.name) {
                     for (auto aa : a.first->args) {
                         args->push_back(new IR::Argument(aa->name, new IR::Constant(0)));
-                        break;
                     }
+                    break;
                 }
             }
         }
