@@ -24,20 +24,12 @@ control c(inout bit<1> r) {
     T s_0_f1_field_0;
     T s_0_f2;
     @hidden action act() {
-<<<<<<< c32cb7a0dac7bb9d5abd1dbee292690508bf513c
         s_0_f1_field.f = 1w0;
         s_0_f1_field_0.f = 1w1;
         s_0_f2.f = 1w0;
-        f<tuple_0>({ s_0_f1_field, s_0_f1_field_0 });
+        f<tuple_1>({ s_0_f1_field, s_0_f1_field_0 });
+        f<tuple_0>({{1w0},{1w1}});
         r = s_0_f2.f & 1w1;
-=======
-        s_f1_field.f = 1w0;
-        s_f1_field_0.f = 1w1;
-        s_f2.f = 1w0;
-        f<tuple_1>({ s_f1_field, s_f1_field_0 });
-        f<tuple_0>({ { 1w0 }, { 1w1 } });
-        r = s_f2.f & 1w1;
->>>>>>> Implemented struct initializers - currently inferred by type inference
     }
     @hidden table tbl_act {
         actions = {
