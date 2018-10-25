@@ -25,15 +25,16 @@
 #include <bm/bm_sim/bytecontainer.h>
 #include <bm/bm_sim/transport.h>
 
-#include <string>
-#include <vector>
 #include <algorithm>
+#include <chrono>
+#include <condition_variable>
+#include <functional>  // for std::reference_wrapper
+#include <mutex>
+#include <string>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <chrono>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+#include <vector>
 
 #include <cassert>
 
@@ -127,7 +128,12 @@ class LearnEngine final : public LearnEngineIface {
  private:
   struct FilterPtrs {
     size_t unacked_count{0};
-    std::vector<LearnFilter::iterator> buffer{};
+    // According to the standard, iterators are invalidated in case of a
+    // re-hash when performing an insert. While I haven't observed this with
+    // recent STL versions, its is probably safer to store a reference to the
+    // key instead.
+    // std::vector<LearnFilter::iterator> buffer{};
+    std::vector<std::reference_wrapper<const LearnFilter::key_type> > buffer{};
   };
 
   class LearnList {
@@ -353,8 +359,7 @@ LearnEngine::LearnList::process_full_buffer(LockType &lock) {
 
 void
 LearnEngine::LearnList::add_sample(const PHV &phv) {
-  static thread_local ByteContainer sample;
-  sample.clear();
+  ByteContainer sample;
   builder(phv, &sample);
 
   BMLOG_TRACE("Learning sample for list id {}", list_id);
@@ -369,7 +374,7 @@ LearnEngine::LearnList::add_sample(const PHV &phv) {
   auto filter_it = filter.insert(filter.end(), std::move(sample));
   FilterPtrs &filter_ptrs = old_buffers[buffer_id];
   filter_ptrs.unacked_count++;
-  filter_ptrs.buffer.push_back(filter_it);
+  filter_ptrs.buffer.emplace_back(*filter_it);
 
   if (num_samples == 1 && max_samples > 1) {
     buffer_started = clock::now();
@@ -468,13 +473,15 @@ LearnEngine::LearnList::ack(buffer_id_t buffer_id,
                             const std::vector<int> &sample_ids) {
   LockType lock(mutex);
   auto it = old_buffers.find(buffer_id);
-  // assert(it != old_buffers.end());
   // we assume that this was acked already, and simply return
   if (it == old_buffers.end())
     return;
   FilterPtrs &filter_ptrs = it->second;
   for (int sample_id : sample_ids) {
-    // what happens if bad input :(
+    // Invalid sample_id?
+    if (sample_id < 0 ||
+        static_cast<size_t>(sample_id) >= filter_ptrs.buffer.size())
+      continue;
     filter.erase(filter_ptrs.buffer[sample_id]);
     if (--filter_ptrs.unacked_count == 0) {
       old_buffers.erase(it);
@@ -491,8 +498,8 @@ LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id) {
   if (it == old_buffers.end())
     return;
   FilterPtrs &filter_ptrs = it->second;
-  // we optimize for this case (no learning occured since the buffer as sent out
-  // and the ack clears out the filter
+  // we optimize for this case (no learning occured since the buffer was sent
+  // out) and the ack clears out the entire filter
   if (filter_ptrs.unacked_count == filter.size()) {
     filter.clear();
   } else {  // slow: linear in the number of elements acked

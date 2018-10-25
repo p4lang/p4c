@@ -25,13 +25,15 @@
 #include <bm/bm_sim/phv_source.h>
 #include <bm/bm_sim/packet.h>
 
-#include <memory>
-#include <string>
-#include <mutex>
-#include <thread>
-#include <condition_variable>
-#include <chrono>
 #include <algorithm>  // for std::copy
+#include <chrono>
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <utility>  // for std::pair
+#include <vector>
 
 #include <cassert>
 
@@ -143,8 +145,8 @@ TEST_F(LearningTest, OneSample) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
 
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
 }
 
 TEST_F(LearningTest, OneSampleTimeout) {
@@ -172,8 +174,8 @@ TEST_F(LearningTest, OneSampleTimeout) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
 
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
 
   // check that the timeout was on time :)
   unsigned int elapsed = duration_cast<milliseconds>(end - start).count();
@@ -228,8 +230,8 @@ TEST_F(LearningTest, OneSampleConstData) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
 
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
 }
 
 TEST_F(LearningTest, TwoSampleTimeout) {
@@ -257,10 +259,10 @@ TEST_F(LearningTest, TwoSampleTimeout) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(2u, msg_hdr->num_samples);
 
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
-  ASSERT_EQ((char) 0xa, data[2]);
-  ASSERT_EQ((char) 0xbb, data[3]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
+  EXPECT_EQ(data[2], '\x0a');
+  EXPECT_EQ(data[3], '\xbb');
 
   // check that the timeout was on time :)
   unsigned int elapsed = duration_cast<milliseconds>(end - start).count();
@@ -293,10 +295,10 @@ TEST_F(LearningTest, Filter) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(2u, msg_hdr->num_samples);
 
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
-  ASSERT_EQ((char) 0xa, data[2]);
-  ASSERT_EQ((char) 0xbb, data[3]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
+  EXPECT_EQ(data[2], '\x0a');
+  EXPECT_EQ(data[3], '\xbb');
 }
 
 TEST_F(LearningTest, FilterAck) {
@@ -315,8 +317,8 @@ TEST_F(LearningTest, FilterAck) {
   learn_writer->read(buffer, sizeof(buffer));
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
 
   learn_engine->learn(list_id, pkt);  // cannot learn a second time
   sleep_for(milliseconds(100));
@@ -328,8 +330,8 @@ TEST_F(LearningTest, FilterAck) {
   learn_writer->read(buffer, sizeof(buffer));
   ASSERT_EQ(1u, msg_hdr->buffer_id);  // buffer id was incremented
   ASSERT_EQ(1u, msg_hdr->num_samples);
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
 }
 
 TEST_F(LearningTest, FilterAcks) {
@@ -550,6 +552,54 @@ TEST_F(LearningTest, OneSampleCbMode) {
   ASSERT_EQ(0u, cb_hdr.buffer_id);
   ASSERT_EQ(1u, cb_hdr.num_samples);
 
-  ASSERT_EQ((char) 0xa, data[0]);
-  ASSERT_EQ((char) 0xba, data[1]);
+  EXPECT_EQ(data[0], '\x0a');
+  EXPECT_EQ(data[1], '\xba');
+}
+
+TEST_F(LearningTest, FilterStress) {
+  LearnEngineIface::list_id_t list_id = 1;
+  size_t max_samples = 2; unsigned timeout_ms = 0;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+
+  auto msg_hdr = reinterpret_cast<LearnEngineIface::msg_hdr_t *>(buffer);
+
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+
+  uint16_t v;
+  v = 0;
+  std::vector<std::pair<LearnEngineIface::buffer_id_t, int> > samples_to_ack;
+  for (int i = 0; i < 1000; i++) {
+    f.set(v++);
+    learn_engine->learn(list_id, pkt);
+    f.set(v++);
+    learn_engine->learn(list_id, pkt);
+    learn_writer->read(buffer, sizeof(buffer));
+    ASSERT_EQ(msg_hdr->num_samples, 2u);
+    // we will ack the first sample but not the second one
+    samples_to_ack.emplace_back(
+        static_cast<LearnEngineIface::buffer_id_t>(msg_hdr->buffer_id), 0);
+  }
+
+  for (const auto &p : samples_to_ack) {
+    ASSERT_EQ(learn_engine->ack(list_id, p.first, p.second),
+              LearnEngineIface::SUCCESS);
+  }
+
+  ASSERT_EQ(learn_engine->list_set_max_samples(list_id, 1),
+            LearnEngineIface::SUCCESS);
+  v = 0;
+  for (int i = 0; i < 1000; i++) {
+    f.set(v++);
+    learn_engine->learn(list_id, pkt);
+    f.set(v++);
+    learn_engine->learn(list_id, pkt);
+    learn_writer->read(buffer, sizeof(buffer));
+    ASSERT_EQ(msg_hdr->num_samples, 1u);
+    const auto data = reinterpret_cast<unsigned char *>(buffer)
+        + sizeof(LearnEngineIface::msg_hdr_t);
+    auto learned_v =
+        static_cast<uint16_t>(data[0]) << 8 | static_cast<uint16_t>(data[1]);
+    EXPECT_EQ(learned_v, v - 2);
+  }
 }
