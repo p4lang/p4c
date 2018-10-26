@@ -90,6 +90,11 @@ void dump(std::ostream &out, const Visitor::Context *ctxt) {
     if (!ctxt) return;
     dump(ctxt->parent);
     out << indent_t(ctxt->depth-1);
+    if (ctxt->parent) {
+        if (ctxt->parent->child_name)
+            out << ctxt->parent->child_name << ": ";
+        else
+            out << ctxt->parent->child_index << ": "; }
     if (ctxt->original != ctxt->node) {
         out << "<" << static_cast<const void *>(ctxt->original) << ":["
             << ctxt->original->id << "] " << ctxt->original->node_type_name();
