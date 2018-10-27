@@ -90,8 +90,8 @@ bitvec bitvec::getslice(size_t idx, size_t sz) const {
             rv.expand((sz-1)/bits_per_unit + 1);
             for (size_t i = 0; i < rv.size; i++) {
                 if (shift != 0 && i != 0)
-                    rv.ptr[i-1] |= ptr[idx + 1] << (bits_per_unit - shift);
-                rv.ptr[i] = ptr[idx] >> shift; }
+                    rv.ptr[i-1] |= ptr[idx + i] << (bits_per_unit - shift);
+                rv.ptr[i] = ptr[idx + i] >> shift; }
             if ((sz %= bits_per_unit))
                 rv.ptr[rv.size-1] &= ~(~(uintptr_t)1 << (sz-1));
         } else {
