@@ -86,10 +86,11 @@ TEST(Bitvec, getslice) {
         }
     }
     auto slice = bv.getslice(16, 112);
-    EXPECT_EQ(bv.ffz(0), 16);
-    EXPECT_EQ(bv.ffs(16), 32);
-    EXPECT_EQ(bv.ffz(32), 48);
-    EXPECT_EQ(bv.ffs(48), 80);
+    EXPECT_EQ(slice.ffs(0), 16);
+    EXPECT_EQ(slice.ffz(16), 32);
+    EXPECT_EQ(slice.ffs(32), 64);
+    EXPECT_EQ(slice.ffz(64), 80);
+    EXPECT_EQ(slice.ffs(80), 96);
 }
 
 }  // namespace Test
