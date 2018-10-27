@@ -76,4 +76,21 @@ TEST(Bitvec, ranges) {
     EXPECT_EQ(bv.ffs(100), -1);
 }
 
+TEST(Bitvec, getslice) {
+    bitvec bv;
+    for (int i = 0; i < 256; i += 32) {
+        if (((i / 64) % 2) == 0) {
+            bv.setrange(i, 16);
+        } else {
+            bv.setrange(i + 16, 16);
+        }
+    }
+    auto slice = bv.getslice(16, 112);
+    EXPECT_EQ(slice.ffs(0), 16);
+    EXPECT_EQ(slice.ffz(16), 32);
+    EXPECT_EQ(slice.ffs(32), 64);
+    EXPECT_EQ(slice.ffz(64), 80);
+    EXPECT_EQ(slice.ffs(80), 96);
+}
+
 }  // namespace Test
