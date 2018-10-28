@@ -76,10 +76,9 @@ std::uint32_t murmur32(const void* data, std::uint32_t size) {
 }
 
 std::uint64_t murmur64(const void *data, std::uint64_t size) {
-    const std::size_t mul = (static_cast<std::size_t>(0xc6a4a793UL) << 32UL)
-                + static_cast<std::size_t>(0x5bd1e995UL);
+    const std::uint64_t mul = (UINT64_C(0xc6a4a793) << 32) + UINT64_C(0x5bd1e995);
 
-    const std::uint64_t seed = 0xc70f6907UL;
+    const std::uint64_t seed = UINT64_C(0xc70f6907);
 
     const char* const buf = static_cast<const char*>(data);
 

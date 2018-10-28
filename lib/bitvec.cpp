@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -105,12 +105,12 @@ bitvec bitvec::getslice(size_t idx, size_t sz) const {
 }
 
 int bitvec::ffs(unsigned start) const {
-    uintptr_t val = ~0ULL;
+    uintptr_t val = ~(uintptr_t)0;
     unsigned idx = start / bits_per_unit;
     val <<= (start % bits_per_unit);
     while (idx < size && !(val &= word(idx))) {
         ++idx;
-        val = ~0ULL; }
+        val = ~(uintptr_t)0; }
     if (idx >= size) return -1;
     unsigned rv = idx * bits_per_unit;
 #if defined(__GNUC__) || defined(__clang__)
