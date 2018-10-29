@@ -156,9 +156,10 @@ class TypeInference : public Transform {
     const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
     /// This is used to validate the initializer for the default_action
-    /// or for actions in the entries list.
-    void validateActionInitializer(const IR::Expression* actionCall,
-                                   const IR::P4Table* table);
+    /// or for actions in the entries list.  Returns the action list element
+    /// on success.
+    const IR::ActionListElement* validateActionInitializer(const IR::Expression* actionCall,
+                                                           const IR::P4Table* table);
 
     //////////////////////////////////////////////////////////////
 
