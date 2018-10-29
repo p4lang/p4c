@@ -45,12 +45,16 @@ limitations under the License.
 #if defined(__GNUC__) || defined(__clang__)
 /* use builtin count leading/trailing bits of type-approprite size */
 static inline int builtin_ctz(unsigned x) { return __builtin_ctz(x); }
+static inline int builtin_ctz(unsigned long x) { return __builtin_ctzl(x); }
 static inline int builtin_ctz(unsigned long long x) { return __builtin_ctzll(x); }
 static inline int builtin_clz(unsigned x) { return __builtin_clz(x); }
+static inline int builtin_clz(unsigned long x) { return __builtin_clzl(x); }
 static inline int builtin_clz(unsigned long long x) { return __builtin_clzll(x); }
 static inline int builtin_popcount(unsigned x) { return __builtin_popcount(x); }
+static inline int builtin_popcount(unsigned long x) { return __builtin_popcountl(x); }
 static inline int builtin_popcount(unsigned long long x) { return __builtin_popcountll(x); }
 #endif
+
 
 class bitvec {
     size_t              size;

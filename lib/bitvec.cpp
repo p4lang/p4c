@@ -93,24 +93,24 @@ bitvec bitvec::getslice(size_t idx, size_t sz) const {
                     rv.ptr[i-1] |= ptr[idx + i] << (bits_per_unit - shift);
                 rv.ptr[i] = ptr[idx + i] >> shift; }
             if ((sz %= bits_per_unit))
-                rv.ptr[rv.size-1] &= ~(~(uintptr_t)1 << (sz-1));
+                rv.ptr[rv.size-1] &= ~(~UINTPTR_C(1) << (sz-1));
         } else {
             rv.data = ptr[idx] >> shift;
             if (shift != 0 && idx + 1 < size)
                 rv.data |= ptr[idx + 1] << (bits_per_unit - shift);
-            rv.data &= ~(~(uintptr_t)1 << (sz-1)); }
+            rv.data &= ~(~UINTPTR_C(1) << (sz-1)); }
         return rv;
     } else {
-        return bitvec((data >> idx) & ~(~(uintptr_t)1 << (sz-1))); }
+        return bitvec((data >> idx) & ~(~UINTPTR_C(1) << (sz-1))); }
 }
 
 int bitvec::ffs(unsigned start) const {
-    uintptr_t val = ~(uintptr_t)0;
+    uintptr_t val = ~UINTPTR_C(0);
     unsigned idx = start / bits_per_unit;
     val <<= (start % bits_per_unit);
     while (idx < size && !(val &= word(idx))) {
         ++idx;
-        val = ~(uintptr_t)0; }
+        val = ~UINTPTR_C(0); }
     if (idx >= size) return -1;
     unsigned rv = idx * bits_per_unit;
 #if defined(__GNUC__) || defined(__clang__)
@@ -123,7 +123,7 @@ int bitvec::ffs(unsigned start) const {
 }
 
 unsigned bitvec::ffz(unsigned start) const {
-    uintptr_t val = 0;
+    uintptr_t val = UINTPTR_C(0);
     unsigned idx = start / bits_per_unit;
     val = ~(~val << (start % bits_per_unit));
     while (!~(val |= word(idx))) {
