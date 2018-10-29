@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ static inline int builtin_popcount(unsigned x) { return __builtin_popcount(x); }
 static inline int builtin_popcount(unsigned long x) { return __builtin_popcountl(x); }
 static inline int builtin_popcount(unsigned long long x) { return __builtin_popcountll(x); }
 #endif
+
 
 class bitvec {
     size_t              size;
@@ -478,6 +479,5 @@ inline bitvec operator^(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a)); rv ^= b; return rv; }
 inline bitvec operator-(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a)); rv -= b; return rv; }
-
 
 #endif  // P4C_LIB_BITVEC_H_

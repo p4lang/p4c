@@ -44,4 +44,26 @@ mpz_class maskFromSlice(unsigned m, unsigned l);
 mpz_class mask(unsigned bits);
 }  // namespace Util
 
+
+#include "exceptions.h"
+static inline unsigned bitcount(mpz_class value) {
+    mpz_class v = value;
+    if (sgn(v) < 0)
+        BUG("bitcount of negative number %1%", value);
+    unsigned rv = 0;
+    while (v != 0) { v &= v-1; ++rv; }
+    return rv;
+}
+
+static inline int ffs(mpz_class v) {
+    if (v == 0) return -1;
+    return mpz_scan1(v.get_mpz_t(), 0);
+}
+
+static inline int floor_log2(mpz_class v) {
+    int rv = -1;
+    while (v > 0) { rv++; v /= 2; }
+    return rv;
+}
+
 #endif /* _LIB_GMPUTIL_H_ */
