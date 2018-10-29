@@ -366,10 +366,16 @@ class bitvec {
         rv |= ((*t | a) != *t);
         *t |= a;
         return rv; }
+    template<typename T, typename = typename
+             std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    bool operator|=(T a) { return (*this) |= bitvec(a); }
     bitvec operator|(const bitvec &a) const {
         bitvec rv(*this); rv |= a; return rv; }
     bitvec operator|(uintptr_t a) const {
         bitvec rv(*this); rv |= a; return rv; }
+    template<typename T, typename = typename
+             std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    bitvec operator|(T a) { bitvec rv(*this); rv |= bitvec(a); return rv; }
     bitvec &operator^=(const bitvec &a) {
         if (size < a.size) expand(a.size);
         if (size > 1) {
