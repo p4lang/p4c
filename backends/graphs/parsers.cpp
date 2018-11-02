@@ -47,12 +47,12 @@ void ParserGraphs::postorder(const IR::P4Parser *parser) {
             label += "\n" + toString(
                 state->selectExpression->to<IR::SelectExpression>()->select);
         }
-        (*out) << state->name << " [shape=rectangle,label=\"" <<
+        (*out) << state->name.name << " [shape=rectangle,label=\"" <<
                 label << "\"]" << std::endl;
     }
 
     for (auto edge : transitions[parser]) {
-        *out << edge->sourceState->name << " -> " << edge->destState->name <<
+        *out << edge->sourceState->name.name << " -> " << edge->destState->name.name <<
                 " [label=\"" << edge->label << "\"]" << std::endl;
     }
     *out << "}" << std::endl;
