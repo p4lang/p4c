@@ -3311,7 +3311,8 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
             }
             auto at = type->to<IR::Type_Action>();
             if (at->parameters->size() != 0) {
-                typeError("Action for %1% has some unbound arguments", prop->value);
+                typeError("%1%: parameter %2% does not have a corresponding argument",
+                          prop->value, at->parameters->parameters.at(0));
                 return prop;
             }
 
