@@ -89,6 +89,10 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::SimplifyKey(&refMap, &typeMap,
+                            new P4::OrPolicy(
+                                new P4::IsValid(&refMap, &typeMap),
+                                new P4::IsMask())),
         new P4::MoveDeclarations(),
         new P4::ValidateTableProperties({ "implementation",
                                           "size",

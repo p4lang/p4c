@@ -172,6 +172,13 @@ class TableKey(object):
         self.fields = OrderedDict()
     def append(self, name, type):
         self.fields[name] = type
+    def __str__(self):
+        result = ""
+        for f in self.fields.keys():
+            if result != "":
+                result += " "
+            result += f + ":" + self.fields[f]
+        return result
 
 class TableKeyInstance(object):
     def __init__(self, tableKey):
@@ -221,6 +228,7 @@ class TableKeyInstance(object):
             key = "$valid$"
             found = True
         if not found:
+            print(self.key.fields)
             raise Exception("Unexpected key field " + key)
         if self.key.fields[key] == "ternary":
             self.values[key] = self.makeMask(value)
@@ -315,7 +323,9 @@ class BMV2Table(object):
         self.key = TableKey()
         self.actions = {}
         for k in jsonTable["key"]:
-            name = k["target"]
+            name = k["name"]
+            if name is None:
+                name = k["target"]
             if isinstance(name, list):
                 name = ""
                 for t in k["target"]:
