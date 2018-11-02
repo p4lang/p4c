@@ -40,6 +40,7 @@ set (MIDEND_SRCS
   simplifySelectList.cpp
   tableHit.cpp
   validateProperties.cpp
+  expandMirror.cpp
   )
 
 set (MIDEND_HDRS
@@ -75,6 +76,7 @@ set (MIDEND_HDRS
   simplifySelectList.h
   tableHit.h
   validateProperties.h
+  expandMirror.h
   )
 
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")
