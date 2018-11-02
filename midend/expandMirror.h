@@ -22,7 +22,10 @@ limitations under the License.
 
 namespace P4 {
 
- /* TODO...
+ /* 
+  * the 2nd argument to a mirror call can be a header instance. The
+  * objective of this pass is to expand the header instance to a list
+  * expression
  */
 class ExpandMirror : public Modifier {
     ReferenceMap* refMap;
