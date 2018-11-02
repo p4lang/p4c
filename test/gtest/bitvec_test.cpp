@@ -87,9 +87,9 @@ TEST(Bitvec, getslice) {
     }
     auto slice = bv.getslice(16, 112);
     EXPECT_EQ(slice.ffs(0), 16);
-    EXPECT_EQ(slice.ffz(16), 32);
+    EXPECT_EQ(slice.ffz(16), 32u);
     EXPECT_EQ(slice.ffs(32), 64);
-    EXPECT_EQ(slice.ffz(64), 80);
+    EXPECT_EQ(slice.ffz(64), 80u);
     EXPECT_EQ(slice.ffs(80), 96);
 }
 

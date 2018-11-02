@@ -1703,7 +1703,15 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
                               ks->to<IR::ListExpression>(), entry->action);
 
     auto actionRef = entry->getAction();
-    validateActionInitializer(actionRef, table);
+    auto ale = validateActionInitializer(actionRef, table);
+    if (ale != nullptr) {
+        auto anno = ale->getAnnotation(IR::Annotation::defaultOnlyAnnotation);
+        if (anno != nullptr) {
+            typeError("%1%: Action marked with %2% used in table",
+                      entry, IR::Annotation::defaultOnlyAnnotation);
+            return entry;
+        }
+    }
     return entry;
 }
 
@@ -3242,7 +3250,7 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     return elem;
 }
 
-void TypeInference::validateActionInitializer(
+const IR::ActionListElement* TypeInference::validateActionInitializer(
     const IR::Expression* actionCall,
     const IR::P4Table* table) {
 
@@ -3250,13 +3258,13 @@ void TypeInference::validateActionInitializer(
     if (al == nullptr) {
         typeError("%1% has no action list, so it cannot have %2%",
                   table, actionCall);
-        return;
+        return nullptr;
     }
 
     auto call = actionCall->to<IR::MethodCallExpression>();
     if (call == nullptr) {
         typeError("%1%: expected an action call", actionCall);
-        return;
+        return nullptr;
     }
     auto method = call->method;
     if (!method->is<IR::PathExpression>())
@@ -3266,7 +3274,7 @@ void TypeInference::validateActionInitializer(
     auto ale = al->actionList.getDeclaration(decl->getName());
     if (ale == nullptr) {
         typeError("%1% not present in action list", call);
-        return;
+        return nullptr;
     }
 
     BUG_CHECK(ale->is<IR::ActionListElement>(),
@@ -3276,7 +3284,7 @@ void TypeInference::validateActionInitializer(
     auto entrydecl = refMap->getDeclaration(entrypath, true);
     if (entrydecl != decl) {
         typeError("%1% and %2% refer to different actions", actionCall, elem);
-        return;
+        return nullptr;
     }
 
     // Check that the data-plane parameters
@@ -3287,7 +3295,7 @@ void TypeInference::validateActionInitializer(
 
     if (actionListCall->arguments->size() > call->arguments->size()) {
         typeError("%1%: not enough arguments", call);
-        return;
+        return nullptr;
     }
 
     SameExpression se(refMap, typeMap);
@@ -3300,13 +3308,13 @@ void TypeInference::validateActionInitializer(
         if (da == nullptr) {
             typeError("%1%: parameter should be assigned in call %2%",
                       param, call);
-            return;
+            return nullptr;
         }
         bool same = se.sameExpression(aa->expression, da->expression);
         if (!same) {
             typeError("%1%: argument does not match declaration in actions list: %2%",
                       da, aa);
-            return;
+            return nullptr;
         }
     }
 
@@ -3315,9 +3323,11 @@ void TypeInference::validateActionInitializer(
         if (da == nullptr) {
             typeError("%1%: parameter should be assigned in call %2%",
                       param, call);
-            return;
+            return nullptr;
         }
     }
+
+    return elem;
 }
 
 const IR::Node* TypeInference::postorder(IR::Property* prop) {
@@ -3335,15 +3345,26 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
                 return prop;
             }
             auto at = type->to<IR::Type_Action>();
-            if (at->parameters->size() != 0)
-                typeError("Action for %1% has some unbound arguments", prop->value);
+            if (at->parameters->size() != 0) {
+                typeError("%1%: parameter %2% does not have a corresponding argument",
+                          prop->value, at->parameters->parameters.at(0));
+                return prop;
+            }
 
             auto table = findContext<IR::P4Table>();
             BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
             // Check that the default action appears in the list of actions.
             BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
             auto def = prop->value->to<IR::ExpressionValue>()->expression;
-            validateActionInitializer(def, table);
+            auto ale = validateActionInitializer(def, table);
+            if (ale != nullptr) {
+                auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
+                if (anno != nullptr) {
+                    typeError("%1%: Action marked with %2% used as default action",
+                              prop, IR::Annotation::tableOnlyAnnotation);
+                    return prop;
+                }
+            }
         }
     }
     return prop;
