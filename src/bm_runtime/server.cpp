@@ -42,6 +42,7 @@ namespace thrift_provider = apache::thrift;
 #include <mutex>
 #include <thread>
 
+#include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/simple_pre.h>
 #include <bm/bm_sim/simple_pre_lag.h>
@@ -145,11 +146,12 @@ int serve(int port) {
 
 int start_server(bm::SwitchWContexts *sw, int port) {
   switch_ = sw;
+  bm::Logger::get()->info("Starting Thrift server on port {}", port);
   std::thread server_thread(serve, port);
-  printf("Thrift server was started\n");
   std::unique_lock<std::mutex> lock(m_ready);
   while(!ready) cv_ready.wait(lock);
   server_thread.detach();
+  bm::Logger::get()->info("Thrift server was started");
   return 0;
 }
 

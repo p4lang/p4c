@@ -576,6 +576,13 @@ SimpleSwitchGrpcRunner::init_and_start(const bm::OptionsParser &parser) {
   using ::sswitch_runtime::SimpleSwitchProcessor;
   bm_runtime::add_service<SimpleSwitchIf, SimpleSwitchProcessor>(
           "simple_switch", sswitch_runtime::get_handler(simple_switch.get()));
+#else
+  if (parser.option_was_provided("thrift-port")) {
+    bm::Logger::get()->warn(
+        "You used the '--thrift-port' command-line option, but this target was "
+        "compiled without Thrift support. You can enable Thrift support (not "
+        "recommended) by providing '--with-thrift' to configure.");
+  }
 #endif  // WITH_THRIFT
 
   simple_switch->start_and_return();

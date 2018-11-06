@@ -382,9 +382,6 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
   if (vm.count("thrift-port")) {
     thrift_port = vm["thrift-port"].as<int>();
   } else {
-    outstream << "Thrift port was not specified, will use "
-              << default_thrift_port
-              << std::endl;
     thrift_port = default_thrift_port;
   }
 #endif
