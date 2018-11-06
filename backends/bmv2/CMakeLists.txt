@@ -15,6 +15,11 @@
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
 # compiling for the simple_switch target.
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/simple_switch/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/simple_switch/version.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/psa_switch/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/psa_switch/version.h" @ONLY)
+
 # sources for backend executable
 set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/main.cpp

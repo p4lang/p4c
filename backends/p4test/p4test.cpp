@@ -17,6 +17,7 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 
+#include "backends/p4test/version.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
 #include "ir/json_loader.h"
@@ -80,7 +81,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto& options = P4TestContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = "0.0.5";
+    options.compilerVersion = P4TEST_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();

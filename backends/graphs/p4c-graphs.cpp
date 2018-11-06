@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "backends/graphs/version.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/error.h"
@@ -79,7 +80,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoGraphsContext(new ::graphs::GraphsContext);
     auto& options = ::graphs::GraphsContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = "0.0.5";
+    options.compilerVersion = P4C_GRAPHS_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();

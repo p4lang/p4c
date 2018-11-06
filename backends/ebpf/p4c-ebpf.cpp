@@ -18,6 +18,7 @@ limitations under the License.
 #include <string>
 #include <iostream>
 
+#include "backends/ebpf/version.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/crash.h"
@@ -69,7 +70,7 @@ int main(int argc, char *const argv[]) {
 
     AutoCompileContext autoEbpfContext(new EbpfContext);
     auto& options = EbpfContext::get().options();
-    options.compilerVersion = "0.0.1";
+    options.compilerVersion = P4C_EBPF_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();
