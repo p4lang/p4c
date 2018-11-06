@@ -27,7 +27,6 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
-#include <future>
 #include <memory>
 #include <set>
 #include <string>
@@ -70,6 +69,9 @@ template <typename Entry,
           Entry *(::p4v1::PacketReplicationEngineEntry::*Accessor)()>
 class SimpleSwitchGrpcTest_PreBase : public SimpleSwitchGrpcBaseTest {
  protected:
+  using StreamType = grpc::ClientReaderWriter<p4::bm::PacketStreamRequest,
+                                              p4::bm::PacketStreamResponse>;
+
   SimpleSwitchGrpcTest_PreBase(const char *json_path, const char *proto_path)
       : SimpleSwitchGrpcBaseTest(proto_path),
         dataplane_channel(grpc::CreateChannel(
@@ -81,6 +83,16 @@ class SimpleSwitchGrpcTest_PreBase : public SimpleSwitchGrpcBaseTest {
   void SetUp() override {
     SimpleSwitchGrpcBaseTest::SetUp();
     update_json(json_path);
+    dp_stream = dataplane_stub->PacketStream(&context);
+    stream_receiver.reset(
+        new StreamReceiver<StreamType, p4::bm::PacketStreamResponse>(
+            dp_stream.get()));
+  }
+
+  void TearDown() override {
+    dp_stream->WritesDone();
+    dp_stream->Finish();
+    SimpleSwitchGrpcBaseTest::TearDown();
   }
 
   Status create_entry(const Entry &entry) {
@@ -122,32 +134,16 @@ class SimpleSwitchGrpcTest_PreBase : public SimpleSwitchGrpcBaseTest {
     Entry *entry;
   };
 
-  using StreamType = grpc::ClientReaderWriter<p4::bm::PacketStreamRequest,
-                                              p4::bm::PacketStreamResponse>;
-
-  // For the sake of simplicity we use a synchronous gRPC client which means we
-  // cannot give a deadline for the Read call. We therefore wrap the Read call
-  // in a std::future object and use std::future::wait_for() to specify a
-  // timeout. When the timeout expires the Read call is not cancelled. However,
-  // as soon as the client calls WritesDone on the stream, Read will return
-  // false and the future will complete.
-  std::future<bool> &ReadFuture(StreamType *stream,
-                                p4::bm::PacketStreamResponse *rep) {
-    futures.emplace_back(std::async(
-        std::launch::async, [stream, rep]{ return stream->Read(rep); }));
-    return futures.back();
-  }
-
-  std::set<Replica> receive_packets(StreamType *stream, size_t count) {
+  std::set<Replica> receive_packets(size_t count) {
     std::set<Replica> received;
     for (size_t i = 0; i < count; i++) {
-      p4::bm::PacketStreamResponse rep;
-      auto &f = ReadFuture(stream, &rep);
-      if (f.wait_for(timeout) != std::future_status::ready) break;
+      auto msg = stream_receiver->get(
+          [](const p4::bm::PacketStreamResponse &) { return true; }, timeout);
+      if (msg == nullptr) break;
       auto rid = static_cast<int32_t>(
-          static_cast<unsigned char>(rep.packet()[0] << 8) +
-          static_cast<unsigned char>(rep.packet()[1]));
-      received.emplace(rep.port(), rid);
+          static_cast<unsigned char>(msg->packet()[0] << 8) +
+          static_cast<unsigned char>(msg->packet()[1]));
+      received.emplace(msg->port(), rid);
     }
     return received;
   }
@@ -156,6 +152,10 @@ class SimpleSwitchGrpcTest_PreBase : public SimpleSwitchGrpcBaseTest {
   const milliseconds timeout{500};
   std::shared_ptr<grpc::Channel> dataplane_channel{nullptr};
   std::unique_ptr<p4::bm::DataplaneInterface::Stub> dataplane_stub{nullptr};
+  ClientContext context;
+  std::unique_ptr<StreamType> dp_stream;
+  std::unique_ptr<StreamReceiver<StreamType, p4::bm::PacketStreamResponse> >
+  stream_receiver{nullptr};
 
  private:
   Status write_entry(const Entry &entry, p4v1::Update::Type type) {
@@ -172,7 +172,6 @@ class SimpleSwitchGrpcTest_PreBase : public SimpleSwitchGrpcBaseTest {
   }
 
   const char *json_path;
-  std::vector<std::future<bool> > futures;
 };
 
 // The multicast program parsers the first 16 bits of the packet and sets the
@@ -202,7 +201,7 @@ class SimpleSwitchGrpcTest_Multicast : public SimpleSwitchGrpcTest_PreBase<
     return delete_entry(group);
   }
 
-  void send_packet(StreamType *stream, int16_t group_id, int32_t port = 1) {
+  void send_packet(int16_t group_id, int32_t port = 1) {
     p4::bm::PacketStreamRequest packet_request;
     packet_request.set_device_id(device_id);
     packet_request.set_port(port);
@@ -211,32 +210,24 @@ class SimpleSwitchGrpcTest_Multicast : public SimpleSwitchGrpcTest_PreBase<
     payload[1] = group_id & 0xff;
     packet_request.set_packet(
         reinterpret_cast<char *>(payload), sizeof(payload));
-    stream->Write(packet_request);
+    dp_stream->Write(packet_request);
   }
 };
 
 TEST_F(SimpleSwitchGrpcTest_Multicast, 2Rids3Ports) {
-  ClientContext context;
-  auto stream = dataplane_stub->PacketStream(&context);
-
   int16_t group_id = 10;
   GroupEntry group;
   group.set_multicast_group_id(group_id);
   ReplicaMgr replicas(&group);
-
-  // we use ASSERT_EQ instead of EXPECT_EQ to ensure that the test is killed in
-  // case of failure; otherwise because of ReadFuture (our poor-man async read)
-  // we would proceed through the test with outstanding Read calls which would
-  // cause issues anyway.
 
   Replica r1(1, 1), r2(2, 2);
   replicas.push_back(r1).push_back(r2);
   {
     auto status = create_group(group);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), group_id);
-    auto received = receive_packets(stream.get(), replicas.size());
-    ASSERT_EQ(replicas.as_set(), received);
+    send_packet(group_id);
+    auto received = receive_packets(replicas.size());
+    EXPECT_EQ(replicas.as_set(), received);
   }
 
   Replica r3(3, r1.rid);
@@ -244,30 +235,27 @@ TEST_F(SimpleSwitchGrpcTest_Multicast, 2Rids3Ports) {
   {
     auto status = modify_group(group);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), group_id);
-    auto received = receive_packets(stream.get(), replicas.size());
-    ASSERT_EQ(replicas.as_set(), received);
+    send_packet(group_id);
+    auto received = receive_packets(replicas.size());
+    EXPECT_EQ(replicas.as_set(), received);
   }
 
   replicas.pop_back();
   {
     auto status = modify_group(group);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), group_id);
-    auto received = receive_packets(stream.get(), replicas.size());
-    ASSERT_EQ(replicas.as_set(), received);
+    send_packet(group_id);
+    auto received = receive_packets(replicas.size());
+    EXPECT_EQ(replicas.as_set(), received);
   }
 
   {
     auto status = delete_group(group);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), group_id);
-    auto received = receive_packets(stream.get(), 1);
-    ASSERT_TRUE(received.empty());
+    send_packet(group_id);
+    auto received = receive_packets(1);
+    EXPECT_TRUE(received.empty());
   }
-
-  stream->WritesDone();
-  stream->Finish();
 }
 
 // The multicast program parsers the first 16 bits of the packet and clones
@@ -298,7 +286,7 @@ class SimpleSwitchGrpcTest_Clone : public SimpleSwitchGrpcTest_PreBase<
     return delete_entry(session);
   }
 
-  void send_packet(StreamType *stream, int16_t session_id, int32_t port = 1) {
+  void send_packet(int16_t session_id, int32_t port = 1) {
     p4::bm::PacketStreamRequest packet_request;
     packet_request.set_device_id(device_id);
     packet_request.set_port(port);
@@ -307,14 +295,11 @@ class SimpleSwitchGrpcTest_Clone : public SimpleSwitchGrpcTest_PreBase<
     payload[1] = session_id & 0xff;
     packet_request.set_packet(
         reinterpret_cast<char *>(payload), sizeof(payload));
-    stream->Write(packet_request);
+    dp_stream->Write(packet_request);
   }
 };
 
 TEST_F(SimpleSwitchGrpcTest_Clone, SingletonAndMulticast) {
-  ClientContext context;
-  auto stream = dataplane_stub->PacketStream(&context);
-
   int16_t session_id = 10;
   SessionEntry session;
   session.set_session_id(session_id);
@@ -322,22 +307,17 @@ TEST_F(SimpleSwitchGrpcTest_Clone, SingletonAndMulticast) {
 
   int ig_port = 1;
 
-  // we use ASSERT_EQ instead of EXPECT_EQ to ensure that the test is killed in
-  // case of failure; otherwise because of ReadFuture (our poor-man async read)
-  // we would proceed through the test with outstanding Read calls which would
-  // cause issues anyway.
-
   Replica r1(2  /* port */, 1  /* rid */);
   replicas.push_back(r1);
   {
     auto status = create_session(session);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), session_id, ig_port);
+    send_packet(session_id, ig_port);
     // + 1 for original packet
-    auto received = receive_packets(stream.get(), replicas.size() + 1);
+    auto received = receive_packets(replicas.size() + 1);
     auto expected = replicas.as_set();
     expected.emplace(ig_port, 0  /* rid */);
-    ASSERT_EQ(expected, received);
+    EXPECT_EQ(expected, received);
   }
 
   Replica r2(3  /* port */, 2  /* rid */);
@@ -345,24 +325,21 @@ TEST_F(SimpleSwitchGrpcTest_Clone, SingletonAndMulticast) {
   {
     auto status = modify_session(session);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), session_id);
-    auto received = receive_packets(stream.get(), replicas.size() + 1);
+    send_packet(session_id);
+    auto received = receive_packets(replicas.size() + 1);
     auto expected = replicas.as_set();
     expected.emplace(ig_port, 0  /* rid */);
-    ASSERT_EQ(expected, received);
+    EXPECT_EQ(expected, received);
   }
 
   {
     auto status = delete_session(session);
     EXPECT_TRUE(status.ok());
-    send_packet(stream.get(), session_id);
-    auto received = receive_packets(stream.get(), 1);
+    send_packet(session_id);
+    auto received = receive_packets(1);
     std::set<Replica> expected({Replica(ig_port, 0  /* rid */)});
-    ASSERT_EQ(expected, received);
+    EXPECT_EQ(expected, received);
   }
-
-  stream->WritesDone();
-  stream->Finish();
 }
 
 }  // namespace

@@ -28,13 +28,13 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
-#include <future>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "base_test.h"
+#include "utils.h"
 
 namespace sswitch_grpc {
 
@@ -109,9 +109,7 @@ class SimpleSwitchGrpcTest_gNMI : public SimpleSwitchGrpcBaseTest {
     update_json(loopback_json);
   }
 
-  void TearDown() override {
-    clear_futures();
-  }
+  void TearDown() override { }
 
   gnmi::SetRequest create_iface_req(const std::string &name,
                                     bool enabled = false) {
@@ -166,24 +164,6 @@ class SimpleSwitchGrpcTest_gNMI : public SimpleSwitchGrpcBaseTest {
     return dataplane_stub->SetPortOperStatus(&context, req, &rep);
   }
 
-  // For the sake of simplicity we use a synchronous gRPC client which means we
-  // cannot give a deadline for the Read call. We therefore wrap the Read call
-  // in a std::future object and use std::future::wait_for() to specify a
-  // timeout. When the timeout expires the Read call is not cancelled. However,
-  // as soon as the client calls WritesDone on the stream, Read will return
-  // false and the future will complete.
-  std::future<bool> &ReadFuture(StreamType *stream,
-                                gnmi::SubscribeResponse *rep) {
-    futures.emplace_back(std::async(
-        std::launch::async, [stream, rep]{ return stream->Read(rep); }));
-    return futures.back();
-  }
-
-  // destroying the futures will not block if the client has called WritesDone
-  void clear_futures() {
-    futures.clear();
-  }
-
   static std::string make_iface_name(int port, const std::string &name) {
     return std::to_string(device_id) + "-" + std::to_string(port) + "@" + name;
   }
@@ -222,7 +202,6 @@ class SimpleSwitchGrpcTest_gNMI : public SimpleSwitchGrpcBaseTest {
 
   using milliseconds = std::chrono::milliseconds;
   const milliseconds timeout{500};
-  std::vector<std::future<bool> > futures;
 };
 
 // Change a port's operational status using the
@@ -245,9 +224,20 @@ TEST_F(SimpleSwitchGrpcTest_gNMI, PortOperStatusUpdates) {
   sub->set_mode(gnmi::ON_CHANGE);
   ClientContext context;
   auto stream = gnmi_stub->Subscribe(&context);
+  StreamReceiver<StreamType, gnmi::SubscribeResponse> stream_receiver(
+      stream.get());
+
+  auto read_from_stream = [&]() {
+    auto msg = stream_receiver.get(
+        [](const gnmi::SubscribeResponse &) { return true; }, timeout);
+    if (msg == nullptr) return false;
+    rep.CopyFrom(*msg);
+    return true;
+  };
+
   EXPECT_TRUE(stream->Write(req));
 
-  EXPECT_TRUE(stream->Read(&rep));
+  EXPECT_TRUE(read_from_stream());
   EXPECT_TRUE(rep.sync_response());
 
   auto check_status_update = [&](const std::string &expected) {
@@ -265,16 +255,14 @@ TEST_F(SimpleSwitchGrpcTest_gNMI, PortOperStatusUpdates) {
 
   {
     EXPECT_TRUE(set_port_oper_status(port, p4::bm::OPER_STATUS_DOWN).ok());
-    auto &f = ReadFuture(stream.get(), &rep);
-    ASSERT_EQ(f.wait_for(timeout), std::future_status::ready);
+    EXPECT_TRUE(read_from_stream());
     check_status_update("DOWN");
     check_last_change_update();
   }
 
   {
     EXPECT_TRUE(set_port_oper_status(port, p4::bm::OPER_STATUS_UP).ok());
-    auto &f = ReadFuture(stream.get(), &rep);
-    ASSERT_EQ(f.wait_for(timeout), std::future_status::ready);
+    EXPECT_TRUE(read_from_stream());
     check_status_update("UP");
     check_last_change_update();
   }

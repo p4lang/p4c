@@ -27,11 +27,7 @@
 
 #include <chrono>
 #include <memory>
-#include <mutex>
 #include <string>
-#include <thread>
-#include <queue>
-#include <vector>
 
 #include "base_test.h"
 #include "utils.h"
@@ -43,59 +39,6 @@ namespace sswitch_grpc {
 namespace testing {
 
 namespace {
-
-// TODO(antonin): use this class for PRE & gNMI tests rather than hack with
-// std::future.
-template <typename StreamType, typename MessageType>
-class StreamReceiver {
- public:
-  using Clock = std::chrono::steady_clock;
-
-  explicit StreamReceiver(StreamType *stream)
-      : stream(stream) {
-    read_thread = std::thread(
-        &StreamReceiver<StreamType, MessageType>::receive, this);
-  }
-
-  ~StreamReceiver() {
-    read_thread.join();
-  }
-
-  void receive() {
-    MessageType msg;
-    while (stream->Read(&msg)) {
-      Lock lock(mutex);
-      messages.push(
-          std::unique_ptr<MessageType>(new MessageType(std::move(msg))));
-      cvar.notify_one();
-    }
-  }
-
-  template<typename Predicate, typename Rep, typename Period>
-  std::unique_ptr<MessageType> get(
-      Predicate predicate,
-      const std::chrono::duration<Rep, Period> &timeout) {
-    Lock lock(mutex);
-    if (cvar.wait_until(
-            lock, Clock::now() + timeout,
-            [this, predicate] {
-              return !messages.empty() && predicate(*messages.front()); })) {
-      auto msg = std::move(messages.front());
-      messages.pop();
-      return msg;
-    }
-    return nullptr;
-  }
-
- private:
-  using Lock = std::unique_lock<std::mutex>;
-
-  StreamType *stream;
-  mutable std::mutex mutex{};
-  mutable std::condition_variable cvar{};
-  std::thread read_thread;
-  std::queue<std::unique_ptr<MessageType> > messages;
-};
 
 constexpr char digest_json[] = TESTDATADIR "/digest.json";
 constexpr char digest_proto[] = TESTDATADIR "/digest.proto.txt";
