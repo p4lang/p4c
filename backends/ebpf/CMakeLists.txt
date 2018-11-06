@@ -15,6 +15,9 @@
 # Makefile for the EBPF P4-16 back-end.
 # To be included in the main P4C compiler makefile
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
+
 set (P4C_EBPF_SRCS
   p4c-ebpf.cpp
   ebpfBackend.cpp
