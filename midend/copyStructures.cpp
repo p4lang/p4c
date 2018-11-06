@@ -31,14 +31,20 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
 
         auto retval = new IR::IndexedVector<IR::StatOrDecl>();
         auto strct = ltype->to<IR::Type_StructLike>();
-        if (statement->right->is<IR::ListExpression>()) {
-            auto list = statement->right->to<IR::ListExpression>();
+        if (auto list = statement->right->to<IR::ListExpression>()) {
             unsigned index = 0;
             for (auto f : strct->fields) {
                 auto right = list->components.at(index);
                 auto left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
                 index++;
+            }
+        } else if (auto si = statement->right->to<IR::StructInitializerExpression>()) {
+            for (auto f : strct->fields) {
+                auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
+                auto left = new IR::Member(statement->left, f->name);
+                retval->push_back(new IR::AssignmentStatement(
+                    statement->srcInfo, left, right->expression));
             }
         } else {
             if (ltype->is<IR::Type_Header>())

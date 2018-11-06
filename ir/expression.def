@@ -404,6 +404,19 @@ class ListExpression : Expression {
     void push_back(Expression e) { components.push_back(e); }
 }
 
+/// IR representation of an initializer for a struct.
+/// Currently it does not have a direct representation as P4 source.
+class StructInitializerExpression : Expression {
+    /// Name of the struct type that is being intialized.
+    /// May only be known after type checking; so it can be empty.
+    ID name;
+    inline IndexedVector<NamedExpression> components;
+    /// If true this represents a header.
+    bool isHeader;
+    validate { components.check_null(); }
+    size_t size() const { return components.size(); }
+}
+
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {

@@ -41,16 +41,17 @@ void DoExpandLookahead::expandSetValid(const IR::Expression* base, const IR::Typ
 const IR::Expression* DoExpandLookahead::expand(
     const IR::PathExpression* base, const IR::Type* type, unsigned* offset) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Header>()) {
-        auto vec = new IR::ListExpression({});
+        auto vec = new IR::IndexedVector<IR::NamedExpression>();
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : st->fields) {
             auto t = typeMap->getTypeType(f->type, true);
             if (t == nullptr)
                 continue;
             auto e = expand(base, t, offset);
-            vec->push_back(e);
+            vec->push_back(new IR::NamedExpression(f->srcInfo, f->name, e));
         }
-        return vec;
+        return new IR::StructInitializerExpression(
+            base->srcInfo, st->name, *vec, type->is<IR::Type_Header>());
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);

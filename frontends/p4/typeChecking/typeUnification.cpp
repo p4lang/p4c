@@ -143,7 +143,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                                      bool reportErrors,
                                      bool skipReturnValues) {
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG3("Unifying functions " << dest << " to " << src);
+    LOG3("Unifying functions " << dest << " with " << src);
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
@@ -195,7 +195,7 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
                                   bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG3("Unifying blocks " << dest << " to " << src);
+    LOG3("Unifying blocks " << dest << " with " << src);
     if (typeid(*dest) != typeid(*src)) {
         if (reportErrors)
             ::error("%1%: Cannot unify %2% to %3%",
@@ -240,7 +240,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                             bool reportErrors) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
-    LOG3("Unifying " << dest << " to " << src);
+    LOG3("Unifying " << dest << " with " << src);
 
     if (src->is<IR::ITypeVar>())
         src = src->apply(constraints->replaceVariables)->to<IR::Type>();
@@ -309,8 +309,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
-        if (src->is<IR::Type_Tuple>()) {
-            const IR::Type_Tuple* tpl = src->to<IR::Type_Tuple>();
+        if (auto tpl = src->to<IR::Type_Tuple>()) {
             if (strct->fields.size() != tpl->components.size()) {
                 if (reportErrors)
                     ::error("%1%: Number of fields %2% in initializer different "
@@ -329,6 +328,29 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                 if (!success)
                     return false;
                 index++;
+            }
+            return true;
+        } else if (auto st = src->to<IR::Type_StructLike>()) {
+            // There is another case, in which each field of the source is unifiable with the
+            // corresponding field of the destination, e.g., a struct containing tuples.
+            if (strct->fields.size() != st->fields.size()) {
+                if (reportErrors)
+                    ::error("%1%: Number of fields %2% in initializer different "
+                            "than number of fields in structure %3%: %4% to %5%",
+                            errorPosition, st->fields.size(),
+                            strct->fields.size(), st, strct);
+                return false;
+            }
+
+            for (const IR::StructField* f : strct->fields) {
+                auto stField = st->getField(f->name);
+                if (stField == nullptr) {
+                    ::error("%1%: No initializer for field %2%", errorPosition, f);
+                    return false;
+                }
+                bool success = unify(errorPosition, f->type, stField->type, reportErrors);
+                if (!success)
+                    return false;
             }
             return true;
         }

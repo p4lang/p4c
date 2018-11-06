@@ -19,20 +19,20 @@ limitations under the License.
 
 namespace P4 {
 
-void TypeConstraints::addEqualityConstraint(const IR::Type* left, const IR::Type* right) {
-    auto c = new EqualityConstraint(left, right);
-    LOG2(c);
+void TypeConstraints::addEqualityConstraint(
+    const IR::Type* left, const IR::Type* right, EqualityConstraint* derivedFrom) {
+    auto c = new EqualityConstraint(left, right, derivedFrom);
     constraints.push_back(c);
 }
 
-TypeVariableSubstitution* TypeConstraints::solve(const IR::Node* root, bool reportErrors) {
+TypeVariableSubstitution* TypeConstraints::solve(const IR::Node* root) {
     LOG3("Solving constraints:\n" << *this);
 
     auto tvs = new TypeVariableSubstitution();
     while (!constraints.empty()) {
         auto last = constraints.back();
         constraints.pop_back();
-        bool success = solve(root, last, tvs, reportErrors);
+        bool success = solve(root, last, tvs);
         if (!success)
                 return nullptr;
     }
@@ -53,7 +53,7 @@ bool TypeConstraints::isUnifiableTypeVariable(const IR::Type* type) {
 }
 
 bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint,
-                            TypeVariableSubstitution *subst, bool reportErrors) {
+                            TypeVariableSubstitution *subst) {
     if (isUnifiableTypeVariable(constraint->left)) {
         auto leftTv = constraint->left->to<IR::ITypeVar>();
         if (constraint->left == constraint->right)
@@ -66,7 +66,7 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
             LOG3("Binding " << leftTv << " => " << right);
             return subst->compose(root, leftTv, right);
         } else {
-            addEqualityConstraint(leftSubst, constraint->right);
+            addEqualityConstraint(leftSubst, constraint->right, constraint);
             return true;
         }
     }
@@ -79,12 +79,12 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
             LOG3("Binding " << rightTv << " => " << left);
             return subst->compose(root, rightTv, left);
         } else {
-            addEqualityConstraint(constraint->left, rightSubst);
+            addEqualityConstraint(constraint->left, rightSubst, constraint);
             return true;
         }
     }
 
-    bool success = unification->unify(root, constraint->left, constraint->right, reportErrors);
+    bool success = unification->unify(root, constraint->left, constraint->right, true);
     // this may add more constraints
     return success;
 }

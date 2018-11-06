@@ -24,7 +24,6 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
-#include "typeConstraints.h"
 #include "typeUnification.h"
 #include "frontends/p4/methodInstance.h"
 
@@ -99,9 +98,11 @@ class TypeInference : public Transform {
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
     bool done() const;
+    /// Unifies two types.  Returns nullptr if unification fails.
+    /// Populates the typeMap with values for the type variables.
     TypeVariableSubstitution* unify(
         const IR::Node* errorPosition, const IR::Type* destType,
-        const IR::Type* srcType, bool reportErrors);
+        const IR::Type* srcType);
 
     /** Tries to assign sourceExpression to a destination with type destType.
         This may rewrite the sourceExpression, in particular converting InfInt values
@@ -257,6 +258,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
+    const IR::Node* postorder(IR::StructInitializerExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
     const IR::Node* postorder(IR::SelectExpression* expression) override;

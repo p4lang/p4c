@@ -19,38 +19,58 @@ limitations under the License.
 namespace P4 {
 
 void DoSetHeaders::generateSetValid(
-    const IR::Type* destType, const IR::Type* srcType,
-    const IR::Expression* dest, IR::Vector<IR::StatOrDecl>* insert) {
-    auto tt = srcType->to<IR::Type_Tuple>();
-    if (tt == nullptr)
+    const IR::Expression* dest, const IR::Expression* src,
+    const IR::Type* destType,
+    IR::Vector<IR::StatOrDecl>* insert) {
+
+    auto structType = destType->to<IR::Type_StructLike>();
+    if (structType == nullptr)
         return;
 
-    // The source is either a tuple, or a list expression
-    if (destType->is<IR::Type_Struct>()) {
-        auto it = tt->components.begin();
-        auto sl = destType->to<IR::Type_Struct>();
-        for (auto f : sl->fields) {
-            auto ftype = typeMap->getType(f, true);
-            auto stype = *it;
-            auto member = new IR::Member(dest, f->name);
-            generateSetValid(ftype, stype, member, insert);
-            ++it;
-        }
-    } else if (destType->is<IR::Type_Header>()) {
+    auto srcType = typeMap->getType(src, true);
+    auto list = src->to<IR::ListExpression>();
+    auto si = src->to<IR::StructInitializerExpression>();
+    if (list == nullptr && si == nullptr)
+        return;
+
+    if (structType->is<IR::Type_Header>()) {
         LOG3("Inserting setValid for " << dest);
         auto method = new IR::Member(dest->srcInfo, dest, IR::Type_Header::setValid);
         auto mc = new IR::MethodCallExpression(
             dest->srcInfo, method, new IR::Vector<IR::Argument>());
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
         insert->push_back(stat);
+        return;
+    }
+
+    // Recurse on fields of structType
+    if (list != nullptr) {
+        auto tt = srcType->to<IR::Type_Tuple>();
+        CHECK_NULL(tt);
+        auto it = list->components.begin();
+        for (auto f : structType->fields) {
+            auto member = new IR::Member(dest, f->name);
+            auto ft = typeMap->getType(f);
+            generateSetValid(member, *it, ft, insert);
+            ++it;
+        }
+        return;
+    }
+
+    CHECK_NULL(si);
+    for (auto f : structType->fields) {
+        auto member = new IR::Member(dest, f->name);
+        auto srcMember = si->components.getDeclaration<IR::NamedExpression>(f->name);
+        auto ft = typeMap->getType(f);
+        CHECK_NULL(srcMember);
+        generateSetValid(member, srcMember->expression, ft, insert);
     }
 }
 
 const IR::Node* DoSetHeaders::postorder(IR::AssignmentStatement* statement) {
     auto vec = new IR::Vector<IR::StatOrDecl>();
-    auto ltype = typeMap->getType(statement->left, true);
-    auto rtype = typeMap->getType(statement->right, true);
-    generateSetValid(ltype, rtype, statement->left, vec);
+    auto destType = typeMap->getType(statement->left, true);
+    generateSetValid(statement->left, statement->right, destType, vec);
     if (vec->empty())
         return statement;
     vec->push_back(statement);

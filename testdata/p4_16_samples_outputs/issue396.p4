@@ -29,7 +29,7 @@ control d(out bool b) {
         h3[1] = { 1 };
         bool eout;
         einst.apply({ 0 }, eout);
-        b = h.isValid() && eout;
+        b = h.isValid() && eout && h3[1].isValid() && s1.h.isValid();
     }
 }
 

@@ -22,7 +22,7 @@ control cc() {
     headers hdr_0;
     headers tmp;
     apply {
-        tmp = { hdr_0.ipv4_option_timestamp };
+        tmp = {hdr_0.ipv4_option_timestamp};
         get<headers>(tmp);
     }
 }

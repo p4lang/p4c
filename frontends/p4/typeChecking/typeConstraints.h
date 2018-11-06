@@ -28,31 +28,21 @@ namespace P4 {
 
 // A list of equality constraints on types.
 class TypeConstraints final {
-    class IConstraint {
-     public:
-        virtual ~IConstraint() {}
-        virtual void dbprint(std::ostream& out) const = 0;
-    };
-
-    class TwoTypeConstraint : public IConstraint {
+    /// Requires two types to be equal.
+    class EqualityConstraint : public IHasDbPrint {
      public:
         const IR::Type* left;
         const IR::Type* right;
-
-     protected:
-        TwoTypeConstraint(const IR::Type* left, const IR::Type* right) :
-                left(left), right(right) {
+        /// Constraint which produced this one.  May be nullptr.
+        const EqualityConstraint* derivedFrom;
+        EqualityConstraint(const IR::Type* left, const IR::Type* right,
+                           EqualityConstraint* derivedFrom)
+                : left(left), right(right), derivedFrom(derivedFrom) {
             CHECK_NULL(left); CHECK_NULL(right);
             if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
                 BUG("Unifying type names %1% and %2%", left, right);
+            LOG3(this);
         }
-    };
-
-    // Requires two types to be equal.
-    class EqualityConstraint : public TwoTypeConstraint {
-     public:
-        EqualityConstraint(const IR::Type* left, const IR::Type* right)
-                : TwoTypeConstraint(left, right) {}
         void dbprint(std::ostream& out) const override
         { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
     };
@@ -71,7 +61,7 @@ class TypeConstraints final {
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
     std::set<const IR::ITypeVar*> unifiableTypeVariables;
-    std::vector<IConstraint*> constraints;
+    std::vector<EqualityConstraint*> constraints;
     TypeUnification *unification;
     const TypeVariableSubstitution* definedVariables;
 
@@ -90,27 +80,19 @@ class TypeConstraints final {
     /// A variable is unifiable if it is marked so and it not already
     /// part of definedVariables.
     bool isUnifiableTypeVariable(const IR::Type* type);
-    void addEqualityConstraint(const IR::Type* left, const IR::Type* right);
+    void addEqualityConstraint(
+        const IR::Type* left, const IR::Type* right, EqualityConstraint* derivedFrom = nullptr);
 
     /*
      * Solve the specified constraint.
      * @param root       Element where error is signalled if necessary.
      * @param subst      Variable substitution which is updated with new constraints.
      * @param constraint Constraint to solve.
-     * @param reportErrors If true report errors.
      * @return           True on success.
      */
-    bool solve(const IR::Node* root, IConstraint* constraint,
-               TypeVariableSubstitution *subst, bool reportErrors) {
-        auto eq = dynamic_cast<EqualityConstraint*>(constraint);
-        if (eq != nullptr)
-            return solve(root, eq, subst, reportErrors);
-        BUG("unexpected type constraint");
-    }
-
     bool solve(const IR::Node* root, EqualityConstraint *constraint,
-               TypeVariableSubstitution *subst, bool reportErrors);
-    TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors);
+               TypeVariableSubstitution *subst);
+    TypeVariableSubstitution* solve(const IR::Node* root);
     void dbprint(std::ostream& out) const;
 };
 }  // namespace P4
