@@ -36,11 +36,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".nop") action nop_0() {
+    @name(".nop") action nop() {
     }
-    @name(".e_t1") table e_t1 {
+    @name(".e_t1") table e_t1_0 {
         actions = {
-            nop_0();
+            nop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -49,7 +49,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction_0();
     }
     apply {
-        e_t1.apply();
+        e_t1_0.apply();
     }
 }
 
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_9() {
     }
-    @name(".nop") action nop_1() {
+    @name(".nop") action nop_2() {
     }
     @name(".nop") action nop_6() {
     }
@@ -70,38 +70,38 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop_8() {
     }
-    @name(".ing_drop") action ing_drop_0() {
+    @name(".ing_drop") action ing_drop() {
         meta.ing_metadata.drop = 8w1;
     }
-    @name(".set_f1") action set_f1_0(bit<8> f1) {
+    @name(".set_f1") action set_f1(bit<8> f1) {
         meta.ing_metadata.f1 = f1;
     }
-    @name(".set_f2") action set_f2_0(bit<16> f2) {
+    @name(".set_f2") action set_f2(bit<16> f2) {
         meta.ing_metadata.f2 = f2;
     }
     @name(".set_f2") action set_f2_2(bit<16> f2) {
         meta.ing_metadata.f2 = f2;
     }
-    @name(".set_f3") action set_f3_0(bit<32> f3) {
+    @name(".set_f3") action set_f3(bit<32> f3) {
         meta.ing_metadata.f3 = f3;
     }
     @name(".set_f3") action set_f3_2(bit<32> f3) {
         meta.ing_metadata.f3 = f3;
     }
-    @name(".set_egress_port") action set_egress_port_0(bit<8> egress_port) {
+    @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name(".set_f4") action set_f4_0(bit<64> f4) {
+    @name(".set_f4") action set_f4(bit<64> f4) {
         meta.ing_metadata.f4 = f4;
     }
-    @name(".i_t1") table i_t1 {
+    @name(".i_t1") table i_t1_0 {
         actions = {
-            nop_1();
-            ing_drop_0();
-            set_f1_0();
-            set_f2_0();
-            set_f3_0();
-            set_egress_port_0();
+            nop_2();
+            ing_drop();
+            set_f1();
+            set_f2();
+            set_f3();
+            set_egress_port();
             @defaultonly NoAction_1();
         }
         key = {
@@ -109,7 +109,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_1();
     }
-    @name(".i_t2") table i_t2 {
+    @name(".i_t2") table i_t2_0 {
         actions = {
             nop_6();
             set_f2_2();
@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name(".i_t3") table i_t3 {
+    @name(".i_t3") table i_t3_0 {
         actions = {
             nop_7();
             set_f3_2();
@@ -131,10 +131,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name(".i_t4") table i_t4 {
+    @name(".i_t4") table i_t4_0 {
         actions = {
             nop_8();
-            set_f4_0();
+            set_f4();
             @defaultonly NoAction_9();
         }
         key = {
@@ -143,15 +143,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_9();
     }
     apply {
-        switch (i_t1.apply().action_run) {
+        switch (i_t1_0.apply().action_run) {
             default: {
-                i_t4.apply();
+                i_t4_0.apply();
             }
-            nop_1: {
-                i_t2.apply();
+            nop_2: {
+                i_t2_0.apply();
             }
-            set_egress_port_0: {
-                i_t3.apply();
+            set_egress_port: {
+                i_t3_0.apply();
             }
         }
 

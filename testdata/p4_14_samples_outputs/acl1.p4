@@ -92,6 +92,7 @@ struct l3_metadata_t {
     bit<1>  routed;
     bit<1>  outer_routed;
     bit<8>  mtu_index;
+    @saturating 
     bit<16> l3_mtu_check;
 }
 

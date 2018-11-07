@@ -55,19 +55,19 @@ struct tuple_0 {
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("._nop") action _nop_0() {
+    @name("._nop") action _nop() {
     }
-    @name("._recirculate") action _recirculate_0() {
+    @name("._recirculate") action _recirculate() {
         recirculate<tuple_0>({ standard_metadata, meta.metaA });
     }
-    @name("._clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
+    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name(".t_egress") table t_egress {
+    @name(".t_egress") table t_egress_0 {
         actions = {
-            _nop_0();
-            _recirculate_0();
-            _clone_e2e_0();
+            _nop();
+            _recirculate();
+            _clone_e2e();
             @defaultonly NoAction_0();
         }
         key = {
@@ -78,7 +78,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction_0();
     }
     apply {
-        t_egress.apply();
+        t_egress_0.apply();
     }
 }
 
@@ -87,28 +87,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_5() {
     }
-    @name("._nop") action _nop_1() {
+    @name("._nop") action _nop_2() {
     }
     @name("._nop") action _nop_4() {
     }
-    @name("._set_port") action _set_port_0(bit<9> port) {
+    @name("._set_port") action _set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
         meta.metaA.f1 = 8w1;
     }
-    @name("._multicast") action _multicast_0(bit<4> mgrp) {
+    @name("._multicast") action _multicast(bit<4> mgrp) {
         meta.intrinsic_metadata.mcast_grp = mgrp;
     }
-    @name("._resubmit") action _resubmit_0() {
+    @name("._resubmit") action _resubmit() {
         resubmit<tuple_0>({ standard_metadata, meta.metaA });
     }
-    @name("._clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
+    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
     }
-    @name(".t_ingress_1") table t_ingress_1 {
+    @name(".t_ingress_1") table t_ingress {
         actions = {
-            _nop_1();
-            _set_port_0();
-            _multicast_0();
+            _nop_2();
+            _set_port();
+            _multicast();
             @defaultonly NoAction_1();
         }
         key = {
@@ -118,11 +118,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 128;
         default_action = NoAction_1();
     }
-    @name(".t_ingress_2") table t_ingress_2 {
+    @name(".t_ingress_2") table t_ingress_0 {
         actions = {
             _nop_4();
-            _resubmit_0();
-            _clone_i2e_0();
+            _resubmit();
+            _clone_i2e();
             @defaultonly NoAction_5();
         }
         key = {
@@ -133,8 +133,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_5();
     }
     apply {
-        t_ingress_1.apply();
-        t_ingress_2.apply();
+        t_ingress.apply();
+        t_ingress_0.apply();
     }
 }
 

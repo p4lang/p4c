@@ -37,15 +37,29 @@ OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 
+if (NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE "RELEASE")
+endif()
+
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
   # Allow the version to be set from outside
   set (P4C_VERSION $ENV{P4C_VERSION})
 else()
+  # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
+  # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
+  set (P4C_SEM_VERSION_STRING "1.1.0-rc1")
+  string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
+    __p4c_version ${P4C_SEM_VERSION_STRING})
+  set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
+  set (P4C_VERSION_MINOR ${CMAKE_MATCH_2})
+  set (P4C_VERSION_PATCH ${CMAKE_MATCH_3})
+  set (P4C_VERSION_RC ${CMAKE_MATCH_4})
   execute_process (COMMAND git rev-parse --short HEAD
     OUTPUT_VARIABLE P4C_GIT_SHA
     OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE rc)
-  set (P4C_VERSION "0.5 (SHA: ${P4C_GIT_SHA})")
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA})")
 endif()
 include(P4CUtils)
 include(UnifiedBuild)

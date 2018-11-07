@@ -33,7 +33,7 @@ limitations under the License.
 namespace P4 {
 
 /// Describes information about a caller-callee pair
-struct CallInfo {
+struct CallInfo : public IHasDbPrint {
     const IR::IContainer* caller;
     const IR::IContainer* callee;
     const IR::Declaration_Instance* instantiation;  // callee instantiation
@@ -47,7 +47,8 @@ struct CallInfo {
     void addInvocation(const IR::MethodCallStatement* statement)
     { invocations.emplace(statement); }
     void dbprint(std::ostream& out) const
-    { out << "Inline " << callee << " into " << caller; }
+    { out << "Inline " << callee << " into " << caller <<
+                " with " << invocations.size() << " invocations"; }
 };
 
 class SymRenameMap {
@@ -148,6 +149,10 @@ class InlineList {
         inlineMap[instantiation] = inst;
     }
 
+    size_t size() const {
+        return inlineMap.size();
+    }
+
     void addInvocation(const IR::Declaration_Instance* instance,
                        const IR::MethodCallStatement* statement) {
         CHECK_NULL(instance); CHECK_NULL(statement);
@@ -189,7 +194,7 @@ class DiscoverInlining : public Inspector {
             inlineList(inlineList), refMap(refMap), typeMap(typeMap),
             evaluator(evaluator), toplevel(nullptr) {
         CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(evaluator);
-        setName("DiscoverInlining");
+        setName("DiscoverInlining"); visitDagOnce = false;
     }
     Visitor::profile_t init_apply(const IR::Node* node) override {
         toplevel = evaluator->getToplevelBlock();
@@ -216,6 +221,7 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
             refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {
         setName("GeneralInliner");
         refMap->setIsV1(isv1);
+        visitDagOnce = false;
     }
     // controlled visiting order
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
@@ -233,7 +239,7 @@ class InlinePass : public PassManager {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
         passes.push_back(new InlineDriver<InlineList, InlineSummary>(
-            &toInline, new P4::GeneralInliner(refMap->isV1())));
+            &toInline, new GeneralInliner(refMap->isV1())));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap));
         setName("InlinePass");
     }

@@ -1,26 +1,26 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp_7;
-    bool tmp_9;
-    bit<32> tmp_10;
-    bool tmp_12;
-    bit<32> tmp_13;
+    bit<32> tmp;
+    bool tmp_1;
+    bit<32> tmp_2;
+    bool tmp_4;
+    bit<32> tmp_5;
     @hidden action act() {
-        tmp_9 = false;
+        tmp_1 = false;
     }
     @hidden action act_0() {
-        tmp_10 = f(32w3);
-        tmp_9 = tmp_10 < 32w0;
+        tmp_2 = f(32w3);
+        tmp_1 = tmp_2 < 32w0;
     }
     @hidden action act_1() {
-        tmp_7 = f(32w2);
+        tmp = f(32w2);
     }
     @hidden action act_2() {
-        tmp_12 = true;
+        tmp_4 = true;
     }
     @hidden action act_3() {
-        tmp_13 = f(32w5);
-        tmp_12 = tmp_13 == 32w2;
+        tmp_5 = f(32w5);
+        tmp_4 = tmp_5 == 32w2;
     }
     @hidden action act_4() {
         r = 32w1;
@@ -72,17 +72,17 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (!(tmp_7 > 32w0)) 
+        if (!(tmp > 32w0)) 
             tbl_act_0.apply();
         else {
             tbl_act_1.apply();
         }
-        if (tmp_9) 
+        if (tmp_1) 
             tbl_act_2.apply();
         else {
             tbl_act_3.apply();
         }
-        if (tmp_12) 
+        if (tmp_4) 
             tbl_act_4.apply();
         else 
             tbl_act_5.apply();

@@ -36,13 +36,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".mooneys") action mooneys_0() {
+    @name(".mooneys") action mooneys() {
         hdr.expressivenesss.breasted = hdr.expressivenesss.breasted - hdr.expressivenesss.peptides;
         hdr.kilometer.sleeting = hdr.kilometer.sleeting + 16w65529;
     }
-    @name(".conceptualization") table conceptualization {
+    @name(".conceptualization") table conceptualization_0 {
         actions = {
-            mooneys_0();
+            mooneys();
             @defaultonly NoAction_0();
         }
         key = {
@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        conceptualization.apply();
+        conceptualization_0.apply();
     }
 }
 

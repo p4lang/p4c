@@ -45,15 +45,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<32> key_0;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.c.a") action c_a() {
+    @name("ingress.c.a") action c_a_0() {
         h.h.b = h.h.a;
     }
-    @name("ingress.c.t") table c_t_0 {
+    @name("ingress.c.t") table c_t {
         key = {
             key_0: exact @name("e") ;
         }
         actions = {
-            c_a();
+            c_a_0();
             NoAction_0();
         }
         default_action = NoAction_0();
@@ -78,7 +78,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        c_t_0.apply();
+        c_t.apply();
         tbl_act_0.apply();
     }
 }

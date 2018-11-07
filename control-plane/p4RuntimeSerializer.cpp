@@ -25,10 +25,13 @@ limitations under the License.
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <google/protobuf/text_format.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <google/protobuf/util/json_util.h>
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/config/v1/p4types.pb.h"
 #include "p4/v1/p4runtime.pb.h"
+#pragma GCC diagnostic pop
 
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -876,6 +879,16 @@ class P4RuntimeAnalyzer {
                 }
             });
         });
+
+        // Generate P4Info for any extern function invoked directly from control.
+        forAllMatching<IR::MethodCallExpression>(control->body,
+                                                 [&](const IR::MethodCallExpression* call) {
+            auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+            if (instance->is<P4::ExternFunction>()) {
+                archHandler->addExternFunction(
+                    symbols, p4Info, instance->to<P4::ExternFunction>());
+            }
+        });
     }
 
     void addValueSet(const IR::P4ValueSet* inst) {
@@ -905,7 +918,12 @@ class P4RuntimeAnalyzer {
         vs->mutable_preamble()->set_alias(symbols.getAlias(name));
         vs->set_bitwidth(bitwidth);
         vs->set_size(size);
-        addAnnotations(vs->mutable_preamble(), inst, [](cstring name){ return name == "size"; });
+    }
+
+    /// To be called after all objects have been added to P4Info. Calls the
+    /// architecture-specific postAdd method for post-processing.
+    void postAdd() const {
+        archHandler->postAdd(symbols, p4Info);
     }
 
  private:
@@ -945,6 +963,14 @@ static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
             if (instance->is<P4::ExternFunction>())
                 archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
         });
+    });
+
+    // Collect any extern function invoked directly from the control.
+    forAllMatching<IR::MethodCallExpression>(control->body,
+                                             [&](const IR::MethodCallExpression* call) {
+        auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+        if (instance->is<P4::ExternFunction>())
+                archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
     });
 }
 
@@ -1111,7 +1137,8 @@ class P4RuntimeEntriesConverter {
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
                 addRange(protoMatch, k, keyWidth);
             } else {
-                ::error("%1%: match type not supported by P4Runtime serializer", matchType);
+                if (!k->is<IR::DefaultExpression>())
+                    ::error("%1%: match type not supported by P4Runtime serializer", matchType);
                 continue;
             }
         }
@@ -1275,7 +1302,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
         });
     });
 
-    archHandler->postCollect(symbols);
+    archHandler->postCollect(&symbols);
 
     // Construct a P4Runtime control plane API from the program.
     P4RuntimeAnalyzer analyzer(symbols, typeMap, refMap, archHandler);
@@ -1295,6 +1322,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
             analyzer.addControllerHeader(type);
         }
     });
+
+    analyzer.postAdd();
 
     P4RuntimeEntriesConverter entriesConverter(symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {

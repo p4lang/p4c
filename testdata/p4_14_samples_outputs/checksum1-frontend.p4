@@ -72,18 +72,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".drop") action drop_0() {
+    @name(".drop") action drop_1() {
     }
-    @name(".forward") action forward_0(bit<48> to) {
+    @name(".forward") action forward(bit<48> to) {
         hdr.ethernet.dstAddr = to;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name(".do_setup") action do_setup_0() {
+    @name(".do_setup") action do_setup() {
     }
-    @name(".route") table route {
+    @name(".route") table route_0 {
         actions = {
-            drop_0();
-            forward_0();
+            drop_1();
+            forward();
             @defaultonly NoAction_0();
         }
         key = {
@@ -91,9 +91,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".setup") table setup {
+    @name(".setup") table setup_0 {
         actions = {
-            do_setup_0();
+            do_setup();
             @defaultonly NoAction_3();
         }
         key = {
@@ -102,8 +102,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        setup.apply();
-        route.apply();
+        setup_0.apply();
+        route_0.apply();
     }
 }
 

@@ -27,48 +27,6 @@ limitations under the License.
 #include "ebpf_runtime_kernel.h"
 
 
-#define FILE_NAME_MAX 256
-#define MAX_10_UINT16 5
-#define PCAPOUT "_out.pcap"
-
-/**
- * @brief Create a pcap file name from a given base name, interface index,
- * and suffix. Return value must be deallocated after usage.
- * @param pcap_base The file base name.
- * @param index The index of the file, represent an interface.
- * @param suffix  Filename suffix (e.g., _in.pcap)
- * @return An allocated string containing the file name.
- */
-char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
-    /* Dynamic string length plus max decimal representation of uint16_t */
-    int file_length = strlen(pcap_base) + strlen(suffix) + MAX_10_UINT16 + 1;
-    char *pcap_name = malloc(file_length);
-    int offset = snprintf(pcap_name, file_length,"%s%d%s",
-                    pcap_base, index, suffix);
-    if (offset >= FILE_NAME_MAX) {
-        fprintf(stderr, "Name %s%d%s too long.\n", pcap_base, index, suffix);
-        exit(EXIT_FAILURE);
-    }
-    return pcap_name;
-}
-
-void run_tcpdump(char *filename, char *interface) {
-    int len = 64 + strlen(filename) + strlen(interface);
-    char *cmd = malloc(len);
-    /* Write to file "filename" and listen on interface "interface" */
-    snprintf(cmd, len, "tcpdump -w %s -i %s &", filename, interface);
-    int ret = system(cmd);
-    if (ret < 0)
-        perror("tcpdump failed:");
-    free(cmd);
-}
-
-void kill_tcpdump() {
-    int ret = system("pkill --ns $$ tcpdump");
-    if (ret < 0)
-        perror("killing tcpdump failed:");
-}
-
 int open_socket(char *iface_name) {
     struct sockaddr_ll iface;
     int sockfd;
@@ -100,15 +58,12 @@ void close_sockets(int *sockfds, int num_pcaps) {
 
 int *init_sockets(char *pcap_base, uint16_t num_pcaps){
     int *sockfds = malloc(sizeof(int) * num_pcaps);
-    for (int i = 0; i < num_pcaps; i++) {
-        char iface_name[MAX_10_UINT16 + 1];
-        snprintf(iface_name, MAX_10_UINT16, "%d", i);
+    int max_10_uint16  = 5;     // Max size of uint16 in base 10
+    for (uint16_t i = 0; i < num_pcaps; i++) {
+        char iface_name[max_10_uint16 + 1];
+        snprintf(iface_name, max_10_uint16, "%hu", i);
         sockfds[i] = open_socket(iface_name);
-        /* Start up tcpdump while we open each socket */
-        run_tcpdump(generate_pcap_name(pcap_base, i, PCAPOUT), iface_name);
     }
-    /* Wait a bit to let tcpdump initialize */
-    sleep(2);
     return sockfds;
 }
 
@@ -127,8 +82,7 @@ void feed_packets(int *sockfds, pcap_list_t *pkt_list) {
 void run_and_record_output(pcap_list_t *pkt_list, char *pcap_base, uint16_t num_pcaps, int debug) {
     int *sockfds = init_sockets(pcap_base, num_pcaps);
     feed_packets(sockfds, pkt_list);
-    /* Wait a bit to let tcpdump finish recording */
-    sleep(2);
     close_sockets(sockfds, num_pcaps);
-    kill_tcpdump();
+    /* Sleep a bit to allow the remaining processes to finish */
+    sleep(2);
 }

@@ -1,6 +1,6 @@
 control ctrl(out bit<32> c) {
     bool hasExited;
-    @name("ctrl.e") action e_0() {
+    @name("ctrl.e") action e() {
         hasExited = true;
     }
     @name("ctrl.e") action e_2() {
@@ -21,9 +21,9 @@ control ctrl(out bit<32> c) {
     }
     @hidden table tbl_e {
         actions = {
-            e_0();
+            e();
         }
-        const default_action = e_0();
+        const default_action = e();
     }
     @hidden table tbl_act_0 {
         actions = {

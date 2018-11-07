@@ -41,20 +41,20 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.c") direct_counter(CounterType.packets) c;
-    @name("ingress.c1") direct_counter(CounterType.packets) c1;
-    @name("ingress.my_action") action my_action_0(bit<9> a) {
+    @name("ingress.c") direct_counter(CounterType.packets) c_0;
+    @name("ingress.c1") direct_counter(CounterType.packets) c1_0;
+    @name("ingress.my_action") action my_action(bit<9> a) {
         sm.egress_spec = a;
     }
-    @name("ingress.t") table t {
+    @name("ingress.t") table t_0 {
         actions = {
-            my_action_0();
+            my_action();
         }
-        const default_action = my_action_0(9w0);
-        counters = c;
+        const default_action = my_action(9w0);
+        counters = c_0;
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

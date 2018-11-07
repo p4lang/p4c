@@ -62,7 +62,7 @@ TEST_F(P4CArchitecture, packet_out) {
     });
 
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 // Potential bug
@@ -96,7 +96,7 @@ TEST_F(P4CArchitecture, duplicatedDeclarationBug) {
     });
 
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm == nullptr);
+    ASSERT_GT(::errorCount(), 0U);
 }
 
 TEST_F(P4CArchitecture, instantiation) {
@@ -143,7 +143,7 @@ TEST_F(P4CArchitecture, instantiation) {
     });
 
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 TEST_F(P4CArchitecture, psa_package_with_body) {
@@ -173,7 +173,7 @@ TEST_F(P4CArchitecture, psa_package_with_body) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm == nullptr);
+    ASSERT_GT(::errorCount(), 0U);
 }
 
 TEST_F(P4CArchitecture, psa_control_in_control) {
@@ -209,7 +209,7 @@ TEST_F(P4CArchitecture, psa_control_in_control) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 TEST_F(P4CArchitecture, psa_clone_as_param_to_package) {
@@ -234,7 +234,7 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_package) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 TEST_F(P4CArchitecture, psa_clone_as_param_to_control) {
@@ -268,7 +268,7 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_control) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 TEST_F(P4CArchitecture, psa_clone_as_param_to_extern) {
@@ -310,7 +310,7 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_extern) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 TEST_F(P4CArchitecture, clone_as_extern_method) {
@@ -341,7 +341,7 @@ TEST_F(P4CArchitecture, clone_as_extern_method) {
         new TypeChecking(&refMap, &typeMap)
     });
     pgm = pgm->apply(passes);
-    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
 }  // namespace Test

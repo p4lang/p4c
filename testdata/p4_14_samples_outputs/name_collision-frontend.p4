@@ -38,20 +38,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".B") counter(32w1024, CounterType.packets_and_bytes) B_2;
-    @name(".A") action A_1(bit<8> val, bit<9> port, bit<10> idx) {
+    @name(".A") action A_2(bit<8> val, bit<9> port, bit<10> idx) {
         hdr.A.b1 = val;
         standard_metadata.egress_spec = port;
         meta.meta.B = idx;
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
-    @name(".B") action B_3() {
+    @name(".B") action B_4() {
         B_2.count((bit<32>)meta.meta.B);
     }
-    @name(".A") table A_4 {
+    @name(".A") table A_3 {
         actions = {
-            A_1();
-            noop_0();
+            A_2();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -59,15 +59,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".B") table B_4 {
+    @name(".B") table B_5 {
         actions = {
-            B_3();
+            B_4();
         }
-        default_action = B_3();
+        default_action = B_4();
     }
     apply {
-        A_4.apply();
-        B_4.apply();
+        A_3.apply();
+        B_5.apply();
     }
 }
 

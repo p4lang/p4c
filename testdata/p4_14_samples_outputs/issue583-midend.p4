@@ -195,21 +195,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".cnt1") counter(32w32, CounterType.packets) cnt1;
-    @name(".drop_pkt") action drop_pkt_0() {
+    @name(".cnt1") counter(32w32, CounterType.packets) cnt1_0;
+    @name(".drop_pkt") action drop_pkt() {
         mark_to_drop();
     }
-    @name(".hop_ipv4") action hop_ipv4_0(bit<9> egress_spec) {
+    @name(".hop_ipv4") action hop_ipv4(bit<9> egress_spec) {
         standard_metadata.egress_spec[8:0] = egress_spec[8:0];
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name(".act") action act_0() {
-        cnt1.count(32w10);
+    @name(".act") action act() {
+        cnt1_0.count(32w10);
     }
-    @name(".ipv4_routing") table ipv4_routing {
+    @name(".ipv4_routing") table ipv4_routing_0 {
         actions = {
-            drop_pkt_0();
-            hop_ipv4_0();
+            drop_pkt();
+            hop_ipv4();
             @defaultonly NoAction_0();
         }
         key = {
@@ -217,9 +217,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".table_2") table table_1 {
+    @name(".table_2") table table_0 {
         actions = {
-            act_0();
+            act();
             @defaultonly NoAction_3();
         }
         key = {
@@ -228,8 +228,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        ipv4_routing.apply();
-        table_1.apply();
+        ipv4_routing_0.apply();
+        table_0.apply();
     }
 }
 

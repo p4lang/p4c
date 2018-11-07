@@ -126,6 +126,10 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
 
 const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
     if (ref->path->name.name == "latest") {
+        if (structure->latest == nullptr) {
+            ::error("%1%: latest not yet defined", ref);
+            return ref;
+        }
         return structure->latest;
     }
     if (ref->path->name.name == "next") {
@@ -416,7 +420,7 @@ class FixupExtern : public Modifier {
             type->name = extname; }
         // FIXME -- should create ctors based on attributes?  For now just create a
         // FIXME -- 0-arg one if needed
-        if (!type->lookupMethod(type->name, 0)) {
+        if (!type->lookupMethod(type->name, new IR::Vector<IR::Argument>())) {
             type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
                                                 new IR::ParameterList()))); } }
     void postorder(IR::Method *meth) override {
@@ -823,7 +827,7 @@ class FixExtracts final : public Transform {
     /// All newly-introduced types.
     // The following contains IR::Type_Header, but it is easier
     // to append if the elements are Node.
-    IR::IndexedVector<IR::Node>        allTypeDecls;
+    IR::Vector<IR::Node>               allTypeDecls;
     /// All newly-introduced variables, for each parser.
     IR::IndexedVector<IR::Declaration> varDecls;
     /// Map each newly created header with a varbit field
@@ -898,8 +902,8 @@ class FixExtracts final : public Transform {
     const IR::Node* postorder(IR::P4Program* program) override {
         // P4-14 headers cannot refer to other types, so it is safe
         // to prepend them to the list of declarations.
-        allTypeDecls.append(program->declarations);
-        program->declarations = allTypeDecls;
+        allTypeDecls.append(program->objects);
+        program->objects = allTypeDecls;
         return program;
     }
 
@@ -1123,8 +1127,8 @@ class InsertCompilerGeneratedStartState: public Transform {
     }
 
     const IR::Node* postorder(IR::P4Program* program) override {
-        allTypeDecls.append(program->declarations);
-        program->declarations = allTypeDecls;
+        allTypeDecls.append(program->objects);
+        program->objects = allTypeDecls;
         return program;
     }
 

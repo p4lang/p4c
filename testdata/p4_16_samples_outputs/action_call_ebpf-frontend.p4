@@ -11,13 +11,13 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool x;
-    @name("pipe.Reject") action Reject_0(bool rej) {
+    bool x_0;
+    @name("pipe.Reject") action Reject(bool rej) {
         pass = rej;
     }
     apply {
-        x = true;
-        Reject_0(x);
+        x_0 = true;
+        Reject(x_0);
     }
 }
 

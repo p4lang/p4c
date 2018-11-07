@@ -141,7 +141,7 @@ class P4ParserDriver final : public AbstractParserDriver {
     Util::ProgramStructure* structure = nullptr;
 
     /// The top level declarations that make up the P4 program we're parsing.
-    IR::IndexedVector<IR::Node>* declarations = nullptr;
+    IR::Vector<IR::Node>* declarations = nullptr;
 
     /// A scratch buffer to hold the current string literal. (They're lexed
     /// incrementally, so we need to hold some state between tokens.)

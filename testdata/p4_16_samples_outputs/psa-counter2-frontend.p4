@@ -27,24 +27,24 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter0;
-    @name("MyIC.counter1") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1;
-    @name("MyIC.execute") action execute_0() {
-        counter0.count(12w1024);
-        counter1.count(12w1024);
+    @name("MyIC.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter0_0;
+    @name("MyIC.counter1") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
+    @name("MyIC.execute") action execute_1() {
+        counter0_0.count(12w1024);
+        counter1_0.count(12w1024);
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
-            execute_0();
+            execute_1();
         }
         default_action = NoAction_0();
     }
     apply {
-        tbl.apply();
+        tbl_0.apply();
     }
 }
 

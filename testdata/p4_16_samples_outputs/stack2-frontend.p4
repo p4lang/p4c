@@ -4,10 +4,10 @@ header h {
 }
 
 control c(out bit<32> x) {
-    bit<32> sz;
+    bit<32> sz_0;
     apply {
-        sz = 32w4;
-        x = sz;
+        sz_0 = 32w4;
+        x = sz_0;
     }
 }
 

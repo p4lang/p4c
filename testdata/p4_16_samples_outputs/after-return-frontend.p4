@@ -1,12 +1,12 @@
 control ctrl() {
-    bit<32> a;
+    bit<32> a_0;
     apply {
-        bool hasReturned_0 = false;
-        a = 32w0;
-        if (a == 32w0) 
-            hasReturned_0 = true;
+        bool hasReturned = false;
+        a_0 = 32w0;
+        if (a_0 == 32w0) 
+            hasReturned = true;
         else 
-            hasReturned_0 = true;
+            hasReturned = true;
     }
 }
 

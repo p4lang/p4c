@@ -18,7 +18,7 @@ action empty() {
 }
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     action drop() {
-        smeta.drop = 1;
+        mark_to_drop();
     }
     action_selector(HashAlgorithm.identity, 32w1024, 32w10) as;
     table indirect_ws {

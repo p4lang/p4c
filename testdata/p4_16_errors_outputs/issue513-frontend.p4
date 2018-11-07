@@ -31,22 +31,22 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @name("cIngress.foo") action foo_0() {
+    @name("cIngress.foo") action foo() {
         meta.b = meta.b + 4w5;
         if (meta.b > 4w10) 
             mark_to_drop();
     }
-    @name("cIngress.guh") table guh {
+    @name("cIngress.guh") table guh_0 {
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
-            foo_0();
+            foo();
         }
-        default_action = foo_0();
+        default_action = foo();
     }
     apply {
-        guh.apply();
+        guh_0.apply();
     }
 }
 

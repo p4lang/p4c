@@ -189,11 +189,17 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Argument>* ar
 
 const IR::Expression*
 RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression, bool force) {
-    if (expression->is<IR::ListExpression>()) {
-        auto list = expression->to<IR::ListExpression>();
+    // Note that 'force' is not applied recursively
+    if (auto list = expression->to<IR::ListExpression>()) {
         auto simpl = simplifyExpressions(&list->components);
         if (simpl != &list->components)
             return new IR::ListExpression(expression->srcInfo, *simpl);
+        return expression;
+    } else if (auto si = expression->to<IR::StructInitializerExpression>()) {
+        auto simpl = simplifyExpressions(&si->components);
+        if (simpl != &si->components)
+            return new IR::StructInitializerExpression(
+                si->srcInfo, si->name, *simpl, si->isHeader);
         return expression;
     } else {
         ComplexExpression ce;
@@ -220,6 +226,25 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
         if (r != e)
             changes = true;
         result->push_back(r);
+    }
+    if (changes)
+        return result;
+    return vec;
+}
+
+const IR::IndexedVector<IR::NamedExpression>*
+RemoveComplexExpressions::simplifyExpressions(
+    const IR::IndexedVector<IR::NamedExpression>* vec) {
+    auto result = new IR::IndexedVector<IR::NamedExpression>();
+    bool changes = false;
+    for (auto e : *vec) {
+        auto r = simplifyExpression(e->expression, true);
+        if (r != e->expression) {
+            changes = true;
+            result->push_back(new IR::NamedExpression(e->srcInfo, e->name, r));
+        } else {
+            result->push_back(e);
+        }
     }
     if (changes)
         return result;
@@ -272,9 +297,14 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
             // It should be a list expression.
             vec->push_back(expression->arguments->at(0));
             auto arg1 = expression->arguments->at(1)->expression;
-            if (arg1->is<IR::ListExpression>()) {
-                auto list = simplifyExpressions(&arg1->to<IR::ListExpression>()->components, true);
-                arg1 = new IR::ListExpression(arg1->srcInfo, *list);
+            if (auto list = arg1->to<IR::ListExpression>()) {
+                auto simplified = simplifyExpressions(&list->components, true);
+                arg1 = new IR::ListExpression(arg1->srcInfo, *simplified);
+                vec->push_back(new IR::Argument(arg1));
+            } else if (auto si = arg1->to<IR::StructInitializerExpression>()) {
+                auto list = simplifyExpressions(&si->components);
+                arg1 = new IR::StructInitializerExpression(
+                    si->srcInfo, si->name, *list, si->isHeader);
                 vec->push_back(new IR::Argument(arg1));
             } else {
                 auto tmp = new IR::Argument(

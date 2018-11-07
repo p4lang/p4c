@@ -29,25 +29,25 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIC.counter0") DirectCounter<bit<12>>(PSA_CounterType_t.PACKETS) counter0;
-    @name("MyIC.execute") action execute_0() {
-        counter0.count();
+    @name("MyIC.counter0") DirectCounter<bit<12>>(PSA_CounterType_t.PACKETS) counter0_0;
+    @name("MyIC.execute") action execute_1() {
+        counter0_0.count();
     }
     @name("MyIC.execute") action execute_3() {
-        counter0.count();
+        counter0_0.count();
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
-            execute_0();
+            execute_1();
         }
-        psa_direct_counter = counter0;
+        psa_direct_counter = counter0_0;
         default_action = NoAction_0();
     }
-    @name("MyIC.tbl2") table tbl2 {
+    @name("MyIC.tbl2") table tbl2_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
@@ -55,12 +55,12 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
             NoAction_3();
             execute_3();
         }
-        psa_direct_counter = counter0;
+        psa_direct_counter = counter0_0;
         default_action = NoAction_3();
     }
     apply {
-        tbl.apply();
-        tbl2.apply();
+        tbl_0.apply();
+        tbl2_0.apply();
     }
 }
 

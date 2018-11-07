@@ -35,53 +35,53 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    TArg1 p1_tArg1_0;
-    TArg2 p1_aArg2_0;
+    TArg1 p1_tArg1;
+    TArg2 p1_aArg2;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action(BParamType bData) {
-        p1_tArg1_0.field1 = bData;
+    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(BParamType bData) {
+        p1_tArg1.field1 = bData;
     }
-    @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action(bit<9> cData) {
-        p1_tArg1_0.field1 = cData;
+    @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action_0(bit<9> cData) {
+        p1_tArg1.field1 = cData;
     }
-    @name("Q_pipe.p1.thost.T") table p1_thost_T_0 {
+    @name("Q_pipe.p1.thost.T") table p1_thost_T {
         key = {
-            p1_tArg1_0.field1: ternary @name("tArg1.field1") ;
-            p1_aArg2_0.field2: exact @name("aArg2.field2") ;
+            p1_tArg1.field1: ternary @name("tArg1.field1") ;
+            p1_aArg2.field2: exact @name("aArg2.field2") ;
         }
         actions = {
-            p1_thost_B_action();
-            p1_thost_C_action();
+            p1_thost_B_action_0();
+            p1_thost_C_action_0();
         }
         size = 32w5;
-        const default_action = p1_thost_C_action(9w5);
+        const default_action = p1_thost_C_action_0(9w5);
     }
-    @name("Q_pipe.p1.Drop") action p1_Drop() {
+    @name("Q_pipe.p1.Drop") action p1_Drop_0() {
         qArg1.drop = true;
     }
-    @name("Q_pipe.p1.Tinner") table p1_Tinner_0 {
+    @name("Q_pipe.p1.Tinner") table p1_Tinner {
         key = {
-            p1_tArg1_0.field1: ternary @name("pArg1.field1") ;
+            p1_tArg1.field1: ternary @name("pArg1.field1") ;
         }
         actions = {
-            p1_Drop();
+            p1_Drop_0();
             NoAction_0();
         }
         const default_action = NoAction_0();
     }
     @hidden action act() {
-        p1_tArg1_0.field1 = qArg1.field1;
-        p1_tArg1_0.drop = qArg1.drop;
-        p1_aArg2_0.field2 = qArg2.field2;
+        p1_tArg1.field1 = qArg1.field1;
+        p1_tArg1.drop = qArg1.drop;
+        p1_aArg2.field2 = qArg2.field2;
     }
     @hidden action act_0() {
-        qArg1.field1 = p1_tArg1_0.field1;
-        p1_tArg1_0.drop = qArg1.drop;
-        p1_aArg2_0.field2 = qArg2.field2;
+        qArg1.field1 = p1_tArg1.field1;
+        p1_tArg1.drop = qArg1.drop;
+        p1_aArg2.field2 = qArg2.field2;
     }
     @hidden action act_1() {
-        qArg1.field1 = p1_tArg1_0.field1;
+        qArg1.field1 = p1_tArg1.field1;
     }
     @hidden table tbl_act {
         actions = {
@@ -103,11 +103,11 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     apply {
         tbl_act.apply();
-        p1_thost_T_0.apply();
+        p1_thost_T.apply();
         tbl_act_0.apply();
-        p1_thost_T_0.apply();
+        p1_thost_T.apply();
         tbl_act_1.apply();
-        p1_Tinner_0.apply();
+        p1_Tinner.apply();
     }
 }
 

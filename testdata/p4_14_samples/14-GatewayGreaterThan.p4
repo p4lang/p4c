@@ -26,7 +26,7 @@ header ethernet_t ethernet;
 
 header_type h_t {
     fields {
-        f1 : 13;
+        f1 : 16;
     }
 }
 

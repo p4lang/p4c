@@ -58,16 +58,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name(".rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("._drop") action _drop_0() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name(".send_frame") table send_frame {
+    @name(".send_frame") table send_frame_0 {
         actions = {
-            rewrite_mac_0();
-            _drop_0();
+            rewrite_mac();
+            _drop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -77,14 +77,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction_0();
     }
     apply {
-        send_frame.apply();
+        send_frame_0.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_1() {
     }
-    @name("._drop") action _drop_1() {
+    @name("._drop") action _drop_2() {
         mark_to_drop();
     }
     @name("._drop") action _drop_5() {
@@ -93,26 +93,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop_6() {
         mark_to_drop();
     }
-    @name(".set_dmac") action set_dmac_0(bit<48> dmac) {
+    @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name(".set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
+    @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name(".drop_all") table drop_all {
+    @name(".drop_all") table drop_all_0 {
         actions = {
-            _drop_1();
+            _drop_2();
         }
         key = {
         }
         size = 1;
-        default_action = _drop_1();
+        default_action = _drop_2();
     }
-    @name(".forward") table forward {
+    @name(".forward") table forward_0 {
         actions = {
-            set_dmac_0();
+            set_dmac();
             _drop_5();
             @defaultonly NoAction_1();
         }
@@ -122,9 +122,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_1();
     }
-    @name(".ipv4_lpm") table ipv4_lpm {
+    @name(".ipv4_lpm") table ipv4_lpm_0 {
         actions = {
-            set_nhop_0();
+            set_nhop();
             _drop_6();
         }
         key = {
@@ -135,11 +135,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
-            ipv4_lpm.apply();
-            forward.apply();
+            ipv4_lpm_0.apply();
+            forward_0.apply();
         }
         else 
-            drop_all.apply();
+            drop_all_0.apply();
     }
 }
 

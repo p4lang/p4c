@@ -8,13 +8,19 @@ struct S {
     bit<1>      z;
 }
 
+struct tuple_0 {
+    T field;
+    T field_0;
+}
+
 extern void f<T>(in T data);
 control c(inout bit<1> r) {
-    S s;
+    S s_0;
     apply {
-        s = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
-        f<tuple<T, T>>(s.f1);
-        r = s.f2.f & s.z;
+        s_0 = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
+        f<tuple<T, T>>(s_0.f1);
+        f<tuple_0>({{1w0},{1w1}});
+        r = s_0.f2.f & s_0.z;
     }
 }
 

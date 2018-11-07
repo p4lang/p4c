@@ -126,10 +126,14 @@ ExternConverter::modelError(const char* format, const IR::Node* node) const {
 void
 ExternConverter::addToFieldList(ConversionContext* ctxt,
                                 const IR::Expression* expr, Util::JsonArray* fl) {
-    if (expr->is<IR::ListExpression>()) {
-        auto le = expr->to<IR::ListExpression>();
+    if (auto le = expr->to<IR::ListExpression>()) {
         for (auto e : le->components) {
             addToFieldList(ctxt, e, fl);
+        }
+        return;
+    } else if (auto si = expr->to<IR::StructInitializerExpression>()) {
+        for (auto e : si->components) {
+            addToFieldList(ctxt, e->expression, fl);
         }
         return;
     }
@@ -172,7 +176,7 @@ ExternConverter::createFieldList(ConversionContext* ctxt,
     int id = nextId(group);
     fl->emplace("id", id);
     fl->emplace("name", listName);
-    // TODO(jafingerhut) - add line/col here?
+    fl->emplace_non_null("source_info", expr->sourceInfoJsonObj());
     auto elements = mkArrayField(fl, "elements");
     addToFieldList(ctxt, expr, elements);
     return id;

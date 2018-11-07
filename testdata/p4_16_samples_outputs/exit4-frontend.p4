@@ -1,20 +1,20 @@
 control ctrl() {
-    bool tmp_0;
-    @name("ctrl.e") action e_0() {
+    bool tmp;
+    @name("ctrl.e") action e() {
         exit;
     }
-    @name("ctrl.t") table t {
+    @name("ctrl.t") table t_0 {
         actions = {
-            e_0();
+            e();
         }
-        default_action = e_0();
+        default_action = e();
     }
     apply {
-        tmp_0 = t.apply().hit;
-        if (tmp_0) 
-            t.apply();
+        tmp = t_0.apply().hit;
+        if (tmp) 
+            t_0.apply();
         else 
-            t.apply();
+            t_0.apply();
     }
 }
 

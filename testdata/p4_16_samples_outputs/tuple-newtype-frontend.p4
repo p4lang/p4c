@@ -6,9 +6,9 @@ header H {
 
 type tuple<bit<1>> T;
 control c(out bit<32> x) {
-    T tt2;
+    T tt2_0;
     apply {
-        tt2 = (T){ 1w0 };
+        tt2_0 = (T){ 1w0 };
         x = 32w0;
     }
 }

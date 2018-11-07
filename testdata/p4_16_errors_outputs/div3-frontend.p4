@@ -1,8 +1,8 @@
 control c(inout bit<8> a) {
-    bit<8> b;
+    bit<8> b_0;
     apply {
-        b = 8w3;
-        a = a / b;
+        b_0 = 8w3;
+        a = a / b_0;
     }
 }
 

@@ -4,11 +4,11 @@ header H {
 }
 
 control c(inout bit<32> r) {
-    H[2] h;
-    bit<32> tmp_1;
+    H[2] h_0;
+    bit<32> tmp;
     @hidden action act() {
-        tmp_1 = f(32w2);
-        h[tmp_1].setValid();
+        tmp = f(32w2);
+        h_0[tmp].setValid();
     }
     @hidden table tbl_act {
         actions = {

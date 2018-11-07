@@ -16,13 +16,13 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     standard_metadata_t smeta_1;
     @name(".drop") action drop_0() {
-        smeta_1.drop = 1w1;
+        mark_to_drop();
         smeta.ingress_port = smeta_1.ingress_port;
         smeta.egress_spec = smeta_1.egress_spec;
         smeta.egress_port = smeta_1.egress_port;
         smeta.clone_spec = smeta_1.clone_spec;
         smeta.instance_type = smeta_1.instance_type;
-        smeta.drop = 1w1;
+        smeta.drop = smeta_1.drop;
         smeta.recirculate_port = smeta_1.recirculate_port;
         smeta.packet_length = smeta_1.packet_length;
         smeta.enq_timestamp = smeta_1.enq_timestamp;
@@ -37,8 +37,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.egress_rid = smeta_1.egress_rid;
         smeta.checksum_error = smeta_1.checksum_error;
         smeta.recirculate_flag = smeta_1.recirculate_flag;
+        smeta.parser_error = smeta_1.parser_error;
     }
-    @name("IngressI.forward") table forward {
+    @name("IngressI.forward") table forward_0 {
         key = {
         }
         actions = {
@@ -47,7 +48,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = drop_0();
     }
     apply {
-        forward.apply();
+        forward_0.apply();
     }
 }
 

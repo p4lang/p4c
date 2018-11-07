@@ -198,4 +198,20 @@ void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
         ::error("%1%: exit statements not allowed in functions", statement);
 }
 
+void ValidateParsedProgram::postorder(const IR::P4Program* program) {
+    IR::IndexedVector<IR::Node> declarations;
+    for (auto decl : *program->getDeclarations()) {
+        cstring name = decl->getName();
+        auto existing = declarations.getDeclaration(name);
+        if (existing != nullptr) {
+            if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>()) {
+                ::error("Duplicate declaration of %1%: %2%",
+                        decl->getName(), existing->getName());
+            }
+        } else {
+            declarations.push_back(decl->getNode());
+        }
+    }
+}
+
 }  // namespace P4

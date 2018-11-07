@@ -15,6 +15,9 @@
 # Makefile for the EBPF P4-16 back-end.
 # To be included in the main P4C compiler makefile
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
+
 set (P4C_EBPF_SRCS
   p4c-ebpf.cpp
   ebpfBackend.cpp
@@ -78,9 +81,9 @@ add_dependencies(p4c_driver linkp4cebpf)
 
 # Tests
 
-set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel")
-set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc")
-set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test")
+set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
+set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
+set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 
 set (XFAIL_TESTS_KERNEL)
 set (XFAIL_TESTS_BCC)
@@ -125,4 +128,4 @@ endif()
 # ToDo Add check which verifies that BCC is installed
 # Ideally, this is done via check for the python package
 p4c_add_tests("ebpf-bcc" ${EBPF_DRIVER_BCC} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_BCC}")
-p4c_add_tests("ebpf-test" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST}")
+p4c_add_tests("ebpf" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST}")

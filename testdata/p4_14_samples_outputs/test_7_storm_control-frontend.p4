@@ -105,15 +105,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".no_action") action no_action_0() {
+    @name(".no_action") action no_action() {
     }
-    @name(".ing_meter_set") action ing_meter_set_0(bit<16> meter_) {
+    @name(".ing_meter_set") action ing_meter_set(bit<16> meter_) {
         meta.ingress_metadata.ing_meter = meter_;
     }
-    @name(".storm_control") table storm_control {
+    @name(".storm_control") table storm_control_0 {
         actions = {
-            no_action_0();
-            ing_meter_set_0();
+            no_action();
+            ing_meter_set();
             @defaultonly NoAction_0();
         }
         key = {
@@ -124,7 +124,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        storm_control.apply();
+        storm_control_0.apply();
     }
 }
 

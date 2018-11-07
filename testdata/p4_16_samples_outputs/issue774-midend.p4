@@ -5,9 +5,9 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    Header arg_0;
+    Header arg;
     state start {
-        p.extract<Header>(arg_0);
+        p.extract<Header>(arg);
         p.extract<Header>(h);
         transition accept;
     }

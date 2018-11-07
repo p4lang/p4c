@@ -31,22 +31,22 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.reg") Register<bit<16>, bit<10>>(32w1024) reg;
-    @name("MyIC.execute_register") action execute_register_0(bit<10> idx) {
-        reg.write(idx, b.data);
+    @name("MyIC.reg") Register<bit<16>, bit<10>>(32w1024) reg_0;
+    @name("MyIC.execute_register") action execute_register(bit<10> idx) {
+        reg_0.write(idx, b.data);
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
-            execute_register_0();
+            execute_register();
         }
         default_action = NoAction_0();
     }
     apply {
-        tbl.apply();
+        tbl_0.apply();
     }
 }
 

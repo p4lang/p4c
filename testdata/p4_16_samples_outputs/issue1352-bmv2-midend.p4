@@ -65,56 +65,56 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name(".NoAction") action NoAction_1() {
     }
-    @name("MyIngress.drop") action drop_0() {
+    @name("MyIngress.drop") action drop_1() {
         mark_to_drop();
     }
     @name("MyIngress.drop") action drop_3() {
         mark_to_drop();
     }
-    @name("MyIngress.set_dmac") action set_dmac_0(macAddr_t dstAddr) {
+    @name("MyIngress.set_dmac") action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
     }
-    @name("MyIngress.forward") table forward {
+    @name("MyIngress.forward") table forward_0 {
         key = {
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            set_dmac_0();
-            drop_0();
+            set_dmac();
+            drop_1();
             NoAction_0();
         }
         size = 1024;
         default_action = NoAction_0();
     }
-    @name("MyIngress.set_nhop") action set_nhop_0(ip4Addr_t dstAddr, egressSpec_t port) {
+    @name("MyIngress.set_nhop") action set_nhop(ip4Addr_t dstAddr, egressSpec_t port) {
         hdr.ipv4.dstAddr = dstAddr;
         standard_metadata.egress_spec = port;
     }
-    @name("MyIngress.ipv4_lpm") table ipv4_lpm {
+    @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            set_nhop_0();
+            set_nhop();
             drop_3();
             NoAction_1();
         }
         size = 1024;
         default_action = NoAction_1();
     }
-    @name("MyIngress.send_digest") action send_digest_0() {
+    @name("MyIngress.send_digest") action send_digest() {
         meta.test_digest.in_mac_srcAddr = hdr.ethernet.srcAddr;
         digest<test_digest_t>(32w1, meta.test_digest);
     }
     @hidden table tbl_send_digest {
         actions = {
-            send_digest_0();
+            send_digest();
         }
-        const default_action = send_digest_0();
+        const default_action = send_digest();
     }
     apply {
-        ipv4_lpm.apply();
-        forward.apply();
+        ipv4_lpm_0.apply();
+        forward_0.apply();
         tbl_send_digest.apply();
     }
 }
@@ -122,23 +122,23 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_5() {
     }
-    @name("MyEgress.rewrite_mac") action rewrite_mac_0(macAddr_t srcAddr) {
+    @name("MyEgress.rewrite_mac") action rewrite_mac(macAddr_t srcAddr) {
         hdr.ethernet.srcAddr = srcAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("MyEgress.send_frame") table send_frame {
+    @name("MyEgress.send_frame") table send_frame_0 {
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         actions = {
-            rewrite_mac_0();
+            rewrite_mac();
             NoAction_5();
         }
         size = 1024;
         default_action = NoAction_5();
     }
     apply {
-        send_frame.apply();
+        send_frame_0.apply();
     }
 }
 

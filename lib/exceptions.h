@@ -35,10 +35,12 @@ constexpr char ANSI_CLR[]  = "\e[0m";
 class P4CExceptionBase : public std::exception {
  protected:
     cstring message;
+    void traceCreation() { }
 
  public:
     template <typename... T>
     P4CExceptionBase(const char* format, T... args) {
+        traceCreation();
         boost::format fmt(format);
         message = ::bug_helper(fmt, "", "", "", std::forward<T>(args)...);
     }

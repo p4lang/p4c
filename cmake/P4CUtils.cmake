@@ -7,11 +7,11 @@ MACRO (add_cxx_compiler_option option)
   string (REPLACE "-" "" escaped_option ${escaped_option1})
   set (_success "_HAVE_OPTION_${escaped_option}_")
   set (__required_flags_backup "${CMAKE_REQUIRED_FLAGS}")
-  set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${P4C_CXX_FLAGS}")
+  set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${${PROJECT_NAME}_CXX_FLAGS}")
   check_cxx_compiler_flag (${option} ${_success})
   set (CMAKE_REQUIRED_FLAGS ${__required_flags_backup})
   if (${_success})
-    set (P4C_CXX_FLAGS "${P4C_CXX_FLAGS} ${option}")
+    set (${PROJECT_NAME}_CXX_FLAGS "${${PROJECT_NAME}_CXX_FLAGS} ${option}")
   endif (${_success})
 endmacro (add_cxx_compiler_option)
 
@@ -81,15 +81,15 @@ endmacro(p4c_test_set_name)
 # program with command line arguments ${args}
 # Sets the timeout on tests at 300s (for the slow Travis machines)
 #
-macro(p4c_add_test_with_args tag driver isXfail alias p4test args)
+macro(p4c_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
   set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
   file (WRITE  ${__testfile} "#! /bin/bash\n")
   file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
+  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} ${test_args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
   execute_process(COMMAND chmod +x ${__testfile})
   p4c_test_set_name(__testname ${tag} ${alias})
-  separate_arguments(__args UNIX_COMMAND ${args})
+  separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test (NAME ${__testname}
     COMMAND ${tag}/${p4test}.test ${__args}
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
@@ -127,10 +127,10 @@ macro(p4c_add_test_list tag driver tests xfail)
   foreach(t ${__test_list})
     list (FIND __xfail_list ${t} __xfail_test)
     if(__xfail_test GREATER -1)
-      p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}")
+      p4c_add_test_with_args (${tag} ${driver} TRUE ${t} ${t} "${ARGN}" "")
       math (EXPR __xfailCounter "${__xfailCounter} + 1")
     else()
-      p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}")
+      p4c_add_test_with_args (${tag} ${driver} FALSE ${t} ${t} "${ARGN}" "")
     endif() # __xfail_test
   endforeach() # tests
   math (EXPR __testCounter "${__testCounter} + ${__nTests}")
@@ -141,11 +141,26 @@ endmacro(p4c_add_test_list)
 
 # generate a list of test name suffixes based on specified testsuites
 function(p4c_find_test_names testsuites tests)
-  foreach(ts "${testsuites}")
+  set(__tests "")
+  p4c_sanitize_path("${testsuites}" abs_paths)
+  foreach(ts ${abs_paths})
     file (GLOB __testfiles RELATIVE ${P4C_SOURCE_DIR} ${ts})
     list (APPEND __tests ${__testfiles})
   endforeach()
   set(${tests} "${__tests}" PARENT_SCOPE)
+endfunction()
+
+# convert the paths from a list of input files to their absolute paths
+# does not follow symlinks.
+#   - files is a list of (relative) file paths
+#   - abs_files is the return set of absolute file paths
+function(p4c_sanitize_path files abs_files)
+  foreach(file ${files})
+    get_filename_component(__file "${file}"
+                       ABSOLUTE BASE_DIR "${P4C_SOURCE_DIR}")
+    list (APPEND __abs_files ${__file})
+  endforeach()
+  set(${abs_files} "${__abs_files}" PARENT_SCOPE)
 endfunction()
 
 # generate all the tests specified in the testsuites: builds a list of tests
@@ -159,21 +174,26 @@ endfunction()
 #
 # The macro generates the test files in a directory prefixed by tag.
 #
-macro(p4c_add_tests tag driver testsuites xfail)
+macro(p4c_add_tests tag driver testsuites xfails)
   set(__tests "")
+  set(__xfails "")
   p4c_find_test_names("${testsuites}" __tests)
-  p4c_add_test_list (${tag} ${driver} "${__tests}" "${xfail}" "${ARGN}")
+  p4c_find_test_names("${xfails}" __xfails)
+  p4c_add_test_list (${tag} ${driver} "${__tests}" "${__xfails}" "${ARGN}")
 endmacro(p4c_add_tests)
 
 # same as p4c_add_tests but adds --p4runtime flag when invoking test driver
 # unless test is listed in p4rt_exclude
-macro(p4c_add_tests_w_p4runtime tag driver testsuites xfail p4rt_exclude)
+macro(p4c_add_tests_w_p4runtime tag driver testsuites xfails p4rt_exclude)
+  set(__tests "")
+  set(__xfails "")
   p4c_find_test_names("${testsuites}" __tests)
+  p4c_find_test_names("${xfails}" __xfails)
   set(__tests_no_p4runtime "${p4rt_exclude}")
   set(__tests_p4runtime "${__tests}")
   list (REMOVE_ITEM __tests_p4runtime ${__tests_no_p4runtime})
-  p4c_add_test_list (${tag} ${driver} "${__tests_no_p4runtime}" "${xfail}" "${ARGN}")
-  p4c_add_test_list (${tag} ${driver} "${__tests_p4runtime}" "${xfail}" "--p4runtime ${ARGN}")
+  p4c_add_test_list (${tag} ${driver} "${__tests_no_p4runtime}" "${__xfails}" "${ARGN}")
+  p4c_add_test_list (${tag} ${driver} "${__tests_p4runtime}" "${__xfails}" "--p4runtime ${ARGN}")
 endmacro(p4c_add_tests_w_p4runtime)
 
 # add rules to make check and recheck for a specific test suite

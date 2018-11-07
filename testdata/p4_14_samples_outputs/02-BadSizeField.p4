@@ -9,7 +9,7 @@ struct ingress_metadata_t {
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
-    bit<15> ethertype;
+    bit<16> ethertype;
 }
 
 header vag_t {

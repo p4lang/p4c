@@ -4,9 +4,9 @@
 control p();
 package top(p _p);
 control c() {
-    bit<16> var;
+    bit<16> var_0;
     @hidden action act() {
-        hash<bit<16>, bit<16>, bit<32>, bit<16>>(var, HashAlgorithm.crc16, 16w0, 32w0, 16w0xffff);
+        hash<bit<16>, bit<16>, bit<32>, bit<16>>(var_0, HashAlgorithm.crc16, 16w0, 32w0, 16w0xffff);
     }
     @hidden table tbl_act {
         actions = {

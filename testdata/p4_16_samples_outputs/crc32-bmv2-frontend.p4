@@ -26,9 +26,9 @@ struct metadata {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    p4calc_t tmp_3;
-    p4calc_t tmp_4;
-    p4calc_t tmp_5;
+    p4calc_t tmp;
+    p4calc_t tmp_0;
+    p4calc_t tmp_1;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -37,10 +37,10 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         }
     }
     state check_p4calc {
-        tmp_3 = packet.lookahead<p4calc_t>();
-        tmp_4 = packet.lookahead<p4calc_t>();
-        tmp_5 = packet.lookahead<p4calc_t>();
-        transition select(tmp_3.p, tmp_4.four, tmp_5.ver) {
+        tmp = packet.lookahead<p4calc_t>();
+        tmp_0 = packet.lookahead<p4calc_t>();
+        tmp_1 = packet.lookahead<p4calc_t>();
+        transition select(tmp.p, tmp_0.four, tmp_1.ver) {
             (8w0x50, 8w0x34, 8w0x1): parse_p4calc;
             default: accept;
         }
@@ -57,96 +57,96 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<48> tmp_6;
-    bit<32> nbase;
-    bit<64> ncount;
-    bit<32> nselect;
-    bit<32> ninput;
-    @name("MyIngress.operation_add") action operation_add_0() {
+    bit<48> tmp_2;
+    bit<32> nbase_0;
+    bit<64> ncount_0;
+    bit<32> nselect_0;
+    bit<32> ninput_0;
+    @name("MyIngress.operation_add") action operation_add() {
         hdr.p4calc.res = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_sub") action operation_sub_0() {
+    @name("MyIngress.operation_sub") action operation_sub() {
         hdr.p4calc.res = hdr.p4calc.operand_a - hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_and") action operation_and_0() {
+    @name("MyIngress.operation_and") action operation_and() {
         hdr.p4calc.res = hdr.p4calc.operand_a & hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_or") action operation_or_0() {
+    @name("MyIngress.operation_or") action operation_or() {
         hdr.p4calc.res = hdr.p4calc.operand_a | hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_xor") action operation_xor_0() {
+    @name("MyIngress.operation_xor") action operation_xor() {
         hdr.p4calc.res = hdr.p4calc.operand_a ^ hdr.p4calc.operand_b;
-        tmp_6 = hdr.ethernet.dstAddr;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_crc") action operation_crc_0() {
-        nbase = hdr.p4calc.operand_b;
-        ncount = 64w8589934592;
-        ninput = hdr.p4calc.operand_a;
-        hash<bit<32>, bit<32>, tuple<bit<32>>, bit<64>>(nselect, HashAlgorithm.crc32, nbase, { ninput }, ncount);
-        hdr.p4calc.res = nselect;
-        tmp_6 = hdr.ethernet.dstAddr;
+    @name("MyIngress.operation_crc") action operation_crc() {
+        nbase_0 = hdr.p4calc.operand_b;
+        ncount_0 = 64w8589934592;
+        ninput_0 = hdr.p4calc.operand_a;
+        hash<bit<32>, bit<32>, tuple<bit<32>>, bit<64>>(nselect_0, HashAlgorithm.crc32, nbase_0, { ninput_0 }, ncount_0);
+        hdr.p4calc.res = nselect_0;
+        tmp_2 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-        hdr.ethernet.srcAddr = tmp_6;
+        hdr.ethernet.srcAddr = tmp_2;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @name("MyIngress.operation_drop") action operation_drop_0() {
+    @name("MyIngress.operation_drop") action operation_drop() {
         mark_to_drop();
     }
     @name("MyIngress.operation_drop") action operation_drop_2() {
         mark_to_drop();
     }
-    @name("MyIngress.calculate") table calculate {
+    @name("MyIngress.calculate") table calculate_0 {
         key = {
             hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
         }
         actions = {
-            operation_add_0();
-            operation_sub_0();
-            operation_and_0();
-            operation_or_0();
-            operation_xor_0();
-            operation_crc_0();
-            operation_drop_0();
+            operation_add();
+            operation_sub();
+            operation_and();
+            operation_or();
+            operation_xor();
+            operation_crc();
+            operation_drop();
         }
-        const default_action = operation_drop_0();
+        const default_action = operation_drop();
         const entries = {
-                        8w0x2b : operation_add_0();
+                        8w0x2b : operation_add();
 
-                        8w0x2d : operation_sub_0();
+                        8w0x2d : operation_sub();
 
-                        8w0x26 : operation_and_0();
+                        8w0x26 : operation_and();
 
-                        8w0x7c : operation_or_0();
+                        8w0x7c : operation_or();
 
-                        8w0x5e : operation_xor_0();
+                        8w0x5e : operation_xor();
 
-                        8w0x3e : operation_crc_0();
+                        8w0x3e : operation_crc();
 
         }
 
     }
     apply {
         if (hdr.p4calc.isValid()) 
-            calculate.apply();
+            calculate_0.apply();
         else 
             operation_drop_2();
     }

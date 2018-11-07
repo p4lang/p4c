@@ -61,279 +61,279 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    h2_t[5] hdr_1_h2;
+    h2_t[5] hdr_0_h2;
     @hidden action act() {
-        hdr_1_h2.push_front(1);
+        hdr_0_h2.push_front(1);
     }
     @hidden action act_0() {
-        hdr_1_h2.push_front(2);
+        hdr_0_h2.push_front(2);
     }
     @hidden action act_1() {
-        hdr_1_h2.push_front(3);
+        hdr_0_h2.push_front(3);
     }
     @hidden action act_2() {
-        hdr_1_h2.push_front(4);
+        hdr_0_h2.push_front(4);
     }
     @hidden action act_3() {
-        hdr_1_h2.push_front(5);
+        hdr_0_h2.push_front(5);
     }
     @hidden action act_4() {
-        hdr_1_h2.push_front(6);
+        hdr_0_h2.push_front(6);
     }
     @hidden action act_5() {
-        hdr_1_h2.pop_front(1);
+        hdr_0_h2.pop_front(1);
     }
     @hidden action act_6() {
-        hdr_1_h2.pop_front(2);
+        hdr_0_h2.pop_front(2);
     }
     @hidden action act_7() {
-        hdr_1_h2.pop_front(3);
+        hdr_0_h2.pop_front(3);
     }
     @hidden action act_8() {
-        hdr_1_h2.pop_front(4);
+        hdr_0_h2.pop_front(4);
     }
     @hidden action act_9() {
-        hdr_1_h2.pop_front(5);
+        hdr_0_h2.pop_front(5);
     }
     @hidden action act_10() {
-        hdr_1_h2.pop_front(6);
+        hdr_0_h2.pop_front(6);
     }
     @hidden action act_11() {
-        hdr_1_h2[0].setValid();
-        hdr_1_h2[0].hdr_type = 8w2;
-        hdr_1_h2[0].f1 = 8w0xa0;
-        hdr_1_h2[0].f2 = 8w0xa;
-        hdr_1_h2[0].next_hdr_type = 8w9;
+        hdr_0_h2[0].setValid();
+        hdr_0_h2[0].hdr_type = 8w2;
+        hdr_0_h2[0].f1 = 8w0xa0;
+        hdr_0_h2[0].f2 = 8w0xa;
+        hdr_0_h2[0].next_hdr_type = 8w9;
     }
     @hidden action act_12() {
-        hdr_1_h2[1].setValid();
-        hdr_1_h2[1].hdr_type = 8w2;
-        hdr_1_h2[1].f1 = 8w0xa1;
-        hdr_1_h2[1].f2 = 8w0x1a;
-        hdr_1_h2[1].next_hdr_type = 8w9;
+        hdr_0_h2[1].setValid();
+        hdr_0_h2[1].hdr_type = 8w2;
+        hdr_0_h2[1].f1 = 8w0xa1;
+        hdr_0_h2[1].f2 = 8w0x1a;
+        hdr_0_h2[1].next_hdr_type = 8w9;
     }
     @hidden action act_13() {
-        hdr_1_h2[2].setValid();
-        hdr_1_h2[2].hdr_type = 8w2;
-        hdr_1_h2[2].f1 = 8w0xa2;
-        hdr_1_h2[2].f2 = 8w0x2a;
-        hdr_1_h2[2].next_hdr_type = 8w9;
+        hdr_0_h2[2].setValid();
+        hdr_0_h2[2].hdr_type = 8w2;
+        hdr_0_h2[2].f1 = 8w0xa2;
+        hdr_0_h2[2].f2 = 8w0x2a;
+        hdr_0_h2[2].next_hdr_type = 8w9;
     }
     @hidden action act_14() {
-        hdr_1_h2[3].setValid();
-        hdr_1_h2[3].hdr_type = 8w2;
-        hdr_1_h2[3].f1 = 8w0xa3;
-        hdr_1_h2[3].f2 = 8w0x3a;
-        hdr_1_h2[3].next_hdr_type = 8w9;
+        hdr_0_h2[3].setValid();
+        hdr_0_h2[3].hdr_type = 8w2;
+        hdr_0_h2[3].f1 = 8w0xa3;
+        hdr_0_h2[3].f2 = 8w0x3a;
+        hdr_0_h2[3].next_hdr_type = 8w9;
     }
     @hidden action act_15() {
-        hdr_1_h2[4].setValid();
-        hdr_1_h2[4].hdr_type = 8w2;
-        hdr_1_h2[4].f1 = 8w0xa4;
-        hdr_1_h2[4].f2 = 8w0x4a;
-        hdr_1_h2[4].next_hdr_type = 8w9;
+        hdr_0_h2[4].setValid();
+        hdr_0_h2[4].hdr_type = 8w2;
+        hdr_0_h2[4].f1 = 8w0xa4;
+        hdr_0_h2[4].f2 = 8w0x4a;
+        hdr_0_h2[4].next_hdr_type = 8w9;
     }
     @hidden action act_16() {
-        hdr_1_h2[0].setInvalid();
+        hdr_0_h2[0].setInvalid();
     }
     @hidden action act_17() {
-        hdr_1_h2[1].setInvalid();
+        hdr_0_h2[1].setInvalid();
     }
     @hidden action act_18() {
-        hdr_1_h2[2].setInvalid();
+        hdr_0_h2[2].setInvalid();
     }
     @hidden action act_19() {
-        hdr_1_h2[3].setInvalid();
+        hdr_0_h2[3].setInvalid();
     }
     @hidden action act_20() {
-        hdr_1_h2[4].setInvalid();
+        hdr_0_h2[4].setInvalid();
     }
     @hidden action act_21() {
-        hdr_1_h2 = hdr.h2;
+        hdr_0_h2 = hdr.h2;
     }
     @hidden action act_22() {
-        hdr_1_h2.push_front(1);
+        hdr_0_h2.push_front(1);
     }
     @hidden action act_23() {
-        hdr_1_h2.push_front(2);
+        hdr_0_h2.push_front(2);
     }
     @hidden action act_24() {
-        hdr_1_h2.push_front(3);
+        hdr_0_h2.push_front(3);
     }
     @hidden action act_25() {
-        hdr_1_h2.push_front(4);
+        hdr_0_h2.push_front(4);
     }
     @hidden action act_26() {
-        hdr_1_h2.push_front(5);
+        hdr_0_h2.push_front(5);
     }
     @hidden action act_27() {
-        hdr_1_h2.push_front(6);
+        hdr_0_h2.push_front(6);
     }
     @hidden action act_28() {
-        hdr_1_h2.pop_front(1);
+        hdr_0_h2.pop_front(1);
     }
     @hidden action act_29() {
-        hdr_1_h2.pop_front(2);
+        hdr_0_h2.pop_front(2);
     }
     @hidden action act_30() {
-        hdr_1_h2.pop_front(3);
+        hdr_0_h2.pop_front(3);
     }
     @hidden action act_31() {
-        hdr_1_h2.pop_front(4);
+        hdr_0_h2.pop_front(4);
     }
     @hidden action act_32() {
-        hdr_1_h2.pop_front(5);
+        hdr_0_h2.pop_front(5);
     }
     @hidden action act_33() {
-        hdr_1_h2.pop_front(6);
+        hdr_0_h2.pop_front(6);
     }
     @hidden action act_34() {
-        hdr_1_h2[0].setValid();
-        hdr_1_h2[0].hdr_type = 8w2;
-        hdr_1_h2[0].f1 = 8w0xa0;
-        hdr_1_h2[0].f2 = 8w0xa;
-        hdr_1_h2[0].next_hdr_type = 8w9;
+        hdr_0_h2[0].setValid();
+        hdr_0_h2[0].hdr_type = 8w2;
+        hdr_0_h2[0].f1 = 8w0xa0;
+        hdr_0_h2[0].f2 = 8w0xa;
+        hdr_0_h2[0].next_hdr_type = 8w9;
     }
     @hidden action act_35() {
-        hdr_1_h2[1].setValid();
-        hdr_1_h2[1].hdr_type = 8w2;
-        hdr_1_h2[1].f1 = 8w0xa1;
-        hdr_1_h2[1].f2 = 8w0x1a;
-        hdr_1_h2[1].next_hdr_type = 8w9;
+        hdr_0_h2[1].setValid();
+        hdr_0_h2[1].hdr_type = 8w2;
+        hdr_0_h2[1].f1 = 8w0xa1;
+        hdr_0_h2[1].f2 = 8w0x1a;
+        hdr_0_h2[1].next_hdr_type = 8w9;
     }
     @hidden action act_36() {
-        hdr_1_h2[2].setValid();
-        hdr_1_h2[2].hdr_type = 8w2;
-        hdr_1_h2[2].f1 = 8w0xa2;
-        hdr_1_h2[2].f2 = 8w0x2a;
-        hdr_1_h2[2].next_hdr_type = 8w9;
+        hdr_0_h2[2].setValid();
+        hdr_0_h2[2].hdr_type = 8w2;
+        hdr_0_h2[2].f1 = 8w0xa2;
+        hdr_0_h2[2].f2 = 8w0x2a;
+        hdr_0_h2[2].next_hdr_type = 8w9;
     }
     @hidden action act_37() {
-        hdr_1_h2[3].setValid();
-        hdr_1_h2[3].hdr_type = 8w2;
-        hdr_1_h2[3].f1 = 8w0xa3;
-        hdr_1_h2[3].f2 = 8w0x3a;
-        hdr_1_h2[3].next_hdr_type = 8w9;
+        hdr_0_h2[3].setValid();
+        hdr_0_h2[3].hdr_type = 8w2;
+        hdr_0_h2[3].f1 = 8w0xa3;
+        hdr_0_h2[3].f2 = 8w0x3a;
+        hdr_0_h2[3].next_hdr_type = 8w9;
     }
     @hidden action act_38() {
-        hdr_1_h2[4].setValid();
-        hdr_1_h2[4].hdr_type = 8w2;
-        hdr_1_h2[4].f1 = 8w0xa4;
-        hdr_1_h2[4].f2 = 8w0x4a;
-        hdr_1_h2[4].next_hdr_type = 8w9;
+        hdr_0_h2[4].setValid();
+        hdr_0_h2[4].hdr_type = 8w2;
+        hdr_0_h2[4].f1 = 8w0xa4;
+        hdr_0_h2[4].f2 = 8w0x4a;
+        hdr_0_h2[4].next_hdr_type = 8w9;
     }
     @hidden action act_39() {
-        hdr_1_h2[0].setInvalid();
+        hdr_0_h2[0].setInvalid();
     }
     @hidden action act_40() {
-        hdr_1_h2[1].setInvalid();
+        hdr_0_h2[1].setInvalid();
     }
     @hidden action act_41() {
-        hdr_1_h2[2].setInvalid();
+        hdr_0_h2[2].setInvalid();
     }
     @hidden action act_42() {
-        hdr_1_h2[3].setInvalid();
+        hdr_0_h2[3].setInvalid();
     }
     @hidden action act_43() {
-        hdr_1_h2[4].setInvalid();
+        hdr_0_h2[4].setInvalid();
     }
     @hidden action act_44() {
-        hdr.h2 = hdr_1_h2;
+        hdr.h2 = hdr_0_h2;
     }
     @hidden action act_45() {
-        hdr_1_h2.push_front(1);
+        hdr_0_h2.push_front(1);
     }
     @hidden action act_46() {
-        hdr_1_h2.push_front(2);
+        hdr_0_h2.push_front(2);
     }
     @hidden action act_47() {
-        hdr_1_h2.push_front(3);
+        hdr_0_h2.push_front(3);
     }
     @hidden action act_48() {
-        hdr_1_h2.push_front(4);
+        hdr_0_h2.push_front(4);
     }
     @hidden action act_49() {
-        hdr_1_h2.push_front(5);
+        hdr_0_h2.push_front(5);
     }
     @hidden action act_50() {
-        hdr_1_h2.push_front(6);
+        hdr_0_h2.push_front(6);
     }
     @hidden action act_51() {
-        hdr_1_h2.pop_front(1);
+        hdr_0_h2.pop_front(1);
     }
     @hidden action act_52() {
-        hdr_1_h2.pop_front(2);
+        hdr_0_h2.pop_front(2);
     }
     @hidden action act_53() {
-        hdr_1_h2.pop_front(3);
+        hdr_0_h2.pop_front(3);
     }
     @hidden action act_54() {
-        hdr_1_h2.pop_front(4);
+        hdr_0_h2.pop_front(4);
     }
     @hidden action act_55() {
-        hdr_1_h2.pop_front(5);
+        hdr_0_h2.pop_front(5);
     }
     @hidden action act_56() {
-        hdr_1_h2.pop_front(6);
+        hdr_0_h2.pop_front(6);
     }
     @hidden action act_57() {
-        hdr_1_h2[0].setValid();
-        hdr_1_h2[0].hdr_type = 8w2;
-        hdr_1_h2[0].f1 = 8w0xa0;
-        hdr_1_h2[0].f2 = 8w0xa;
-        hdr_1_h2[0].next_hdr_type = 8w9;
+        hdr_0_h2[0].setValid();
+        hdr_0_h2[0].hdr_type = 8w2;
+        hdr_0_h2[0].f1 = 8w0xa0;
+        hdr_0_h2[0].f2 = 8w0xa;
+        hdr_0_h2[0].next_hdr_type = 8w9;
     }
     @hidden action act_58() {
-        hdr_1_h2[1].setValid();
-        hdr_1_h2[1].hdr_type = 8w2;
-        hdr_1_h2[1].f1 = 8w0xa1;
-        hdr_1_h2[1].f2 = 8w0x1a;
-        hdr_1_h2[1].next_hdr_type = 8w9;
+        hdr_0_h2[1].setValid();
+        hdr_0_h2[1].hdr_type = 8w2;
+        hdr_0_h2[1].f1 = 8w0xa1;
+        hdr_0_h2[1].f2 = 8w0x1a;
+        hdr_0_h2[1].next_hdr_type = 8w9;
     }
     @hidden action act_59() {
-        hdr_1_h2[2].setValid();
-        hdr_1_h2[2].hdr_type = 8w2;
-        hdr_1_h2[2].f1 = 8w0xa2;
-        hdr_1_h2[2].f2 = 8w0x2a;
-        hdr_1_h2[2].next_hdr_type = 8w9;
+        hdr_0_h2[2].setValid();
+        hdr_0_h2[2].hdr_type = 8w2;
+        hdr_0_h2[2].f1 = 8w0xa2;
+        hdr_0_h2[2].f2 = 8w0x2a;
+        hdr_0_h2[2].next_hdr_type = 8w9;
     }
     @hidden action act_60() {
-        hdr_1_h2[3].setValid();
-        hdr_1_h2[3].hdr_type = 8w2;
-        hdr_1_h2[3].f1 = 8w0xa3;
-        hdr_1_h2[3].f2 = 8w0x3a;
-        hdr_1_h2[3].next_hdr_type = 8w9;
+        hdr_0_h2[3].setValid();
+        hdr_0_h2[3].hdr_type = 8w2;
+        hdr_0_h2[3].f1 = 8w0xa3;
+        hdr_0_h2[3].f2 = 8w0x3a;
+        hdr_0_h2[3].next_hdr_type = 8w9;
     }
     @hidden action act_61() {
-        hdr_1_h2[4].setValid();
-        hdr_1_h2[4].hdr_type = 8w2;
-        hdr_1_h2[4].f1 = 8w0xa4;
-        hdr_1_h2[4].f2 = 8w0x4a;
-        hdr_1_h2[4].next_hdr_type = 8w9;
+        hdr_0_h2[4].setValid();
+        hdr_0_h2[4].hdr_type = 8w2;
+        hdr_0_h2[4].f1 = 8w0xa4;
+        hdr_0_h2[4].f2 = 8w0x4a;
+        hdr_0_h2[4].next_hdr_type = 8w9;
     }
     @hidden action act_62() {
-        hdr_1_h2[0].setInvalid();
+        hdr_0_h2[0].setInvalid();
     }
     @hidden action act_63() {
-        hdr_1_h2[1].setInvalid();
+        hdr_0_h2[1].setInvalid();
     }
     @hidden action act_64() {
-        hdr_1_h2[2].setInvalid();
+        hdr_0_h2[2].setInvalid();
     }
     @hidden action act_65() {
-        hdr_1_h2[3].setInvalid();
+        hdr_0_h2[3].setInvalid();
     }
     @hidden action act_66() {
-        hdr_1_h2[4].setInvalid();
+        hdr_0_h2[4].setInvalid();
     }
     @hidden action act_67() {
-        hdr.h2 = hdr_1_h2;
+        hdr.h2 = hdr_0_h2;
     }
     @hidden action act_68() {
         hdr.h1.h2_valid_bits[0:0] = 1w1;
     }
     @hidden action act_69() {
-        hdr.h2 = hdr_1_h2;
+        hdr.h2 = hdr_0_h2;
         hdr.h1.h2_valid_bits = 8w0;
     }
     @hidden action act_70() {

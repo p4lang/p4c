@@ -11,19 +11,19 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.Reject") action Reject_0(bit<8> rej, bit<8> bar) {
+    @name("pipe.Reject") action Reject(bit<8> rej, bit<8> bar) {
         pass = (rej == 8w0 ? true : pass);
         pass = (!(rej == 8w0) ? false : pass);
         pass = (bar == 8w0 ? false : pass);
     }
-    @name("pipe.t") table t {
+    @name("pipe.t") table t_0 {
         actions = {
-            Reject_0();
+            Reject();
         }
-        default_action = Reject_0(8w1, 8w0);
+        default_action = Reject(8w1, 8w0);
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

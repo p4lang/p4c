@@ -214,4 +214,14 @@ void delete_array(pcap_list_array_t *pkt_list_array);
  */
 void sort_pcap_list(pcap_list_t *pkt_list);
 
+/**
+ * @brief Create a pcap file name from a given base name, interface index,
+ * and suffix. Return value must be deallocated after usage.
+ * @param pcap_base The file base name.
+ * @param index The index of the file, represent an interface.
+ * @param suffix  Filename suffix (e.g., _in.pcap)
+ * @return An allocated string containing the file name.
+ */
+char *generate_pcap_name(const char *pcap_base, int index, const char *suffix);
+
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_PCAP_UTIL_H_

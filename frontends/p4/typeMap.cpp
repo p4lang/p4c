@@ -29,6 +29,8 @@ void TypeMap::dbprint(std::ostream& out) const {
     out << "Constants" << std::endl;
     for (auto it : constants)
         out << "\t" << dbp(it) << std::endl;
+    out << "Type variables" << std::endl;
+    out << allTypeVariables << std::endl;
     out << "--------------" << std::endl;
 }
 

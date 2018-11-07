@@ -4,13 +4,13 @@
 control empty();
 package top(empty e);
 control Ing() {
-    @name("Ing.cond") action cond_0() {
+    @name("Ing.cond") action cond() {
     }
     @hidden table tbl_cond {
         actions = {
-            cond_0();
+            cond();
         }
-        const default_action = cond_0();
+        const default_action = cond();
     }
     apply {
         tbl_cond.apply();

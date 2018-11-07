@@ -38,6 +38,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/bitvec_test.cpp
   gtest/call_graph_test.cpp
   gtest/complex_bitwise.cpp
+  gtest/constant_expr_test.cpp
   gtest/cstring.cpp
   gtest/diagnostics.cpp
   gtest/dumpjson.cpp
@@ -50,6 +51,8 @@ set (GTEST_UNITTEST_SOURCES
   gtest/json_test.cpp
   gtest/midend_test.cpp
   gtest/opeq_test.cpp
+  gtest/ordered_map.cpp
+  gtest/ordered_set.cpp
   gtest/path_test.cpp
   gtest/p4runtime.cpp
   gtest/source_file_test.cpp

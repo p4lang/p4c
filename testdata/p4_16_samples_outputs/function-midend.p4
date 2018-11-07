@@ -1,15 +1,15 @@
 control c(out bit<16> b) {
-    bool hasReturned_0;
-    bit<16> retval_0;
+    bool hasReturned;
+    bit<16> retval;
     @hidden action act() {
-        hasReturned_0 = true;
-        retval_0 = 16w12;
+        hasReturned = true;
+        retval = 16w12;
     }
     @hidden action act_0() {
-        hasReturned_0 = false;
+        hasReturned = false;
     }
     @hidden action act_1() {
-        b = retval_0;
+        b = retval;
     }
     @hidden table tbl_act {
         actions = {
@@ -31,7 +31,7 @@ control c(out bit<16> b) {
     }
     apply {
         tbl_act.apply();
-        if (!hasReturned_0) {
+        if (!hasReturned) {
             tbl_act_0.apply();
         }
         tbl_act_1.apply();

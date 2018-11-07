@@ -172,7 +172,7 @@ class GenericEnumerator : public Enumerator<typename Iter::value_type> {
                 return true;
         }
 
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 
     typename Iter::value_type getCurrent() const {
@@ -184,7 +184,7 @@ class GenericEnumerator : public Enumerator<typename Iter::value_type> {
             case EnumeratorState::Valid:
                 return *this->current;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 };
 
@@ -233,7 +233,7 @@ class FilterEnumerator final : public Enumerator<T> {
             case EnumeratorState::PastEnd:
                 return false;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 
     T getCurrent() const {
@@ -245,7 +245,7 @@ class FilterEnumerator final : public Enumerator<T> {
             case EnumeratorState::Valid:
                 return this->current;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 };
 
@@ -280,7 +280,8 @@ class AsEnumerator final : public Enumerator<S> {
     }
 
     S getCurrent() const {
-        return dynamic_cast<S>(input->getCurrent());
+        T current = input->getCurrent();
+        return dynamic_cast<S>(current);
     }
 };
 
@@ -326,7 +327,7 @@ class MapEnumerator final : public Enumerator<S> {
             case EnumeratorState::PastEnd:
                 return false;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 
     S getCurrent() const {
@@ -338,7 +339,7 @@ class MapEnumerator final : public Enumerator<S> {
             case EnumeratorState::Valid:
                 return this->current;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 };
 
@@ -404,7 +405,7 @@ class ConcatEnumerator final : public Enumerator<T> {
             case EnumeratorState::PastEnd:
                 return false;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 
     T getCurrent() const {
@@ -416,7 +417,7 @@ class ConcatEnumerator final : public Enumerator<T> {
             case EnumeratorState::Valid:
                 return this->currentResult;
         }
-        throw new std::runtime_error("Unexpected enumerator state");
+        throw std::runtime_error("Unexpected enumerator state");
     }
 };
 

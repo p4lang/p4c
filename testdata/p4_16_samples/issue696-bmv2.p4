@@ -73,7 +73,7 @@ control Ing(inout Headers headers,
             inout Metadata meta,
             inout standard_metadata_t standard_meta) {
     apply {
-        standard_meta.drop = 0;
+        standard_meta.egress_spec = 1;
     }
 }
 

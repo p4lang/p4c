@@ -58,16 +58,16 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         s[79:48] = s[79:48] + 32w1;
         s[47:0] = s[47:0] + (bit<48>)ip_length_bytes;
     }
-    PacketByteCountState_t tmp_1;
-    bit<80> tmp_2;
-    @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in;
+    PacketByteCountState_t tmp;
+    bit<80> tmp_0;
+    @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
     apply {
         ostd.egress_port = 10w0;
         if (hdr.ipv4.isValid()) @atomic {
-            tmp_2 = port_pkt_ip_bytes_in.read(istd.ingress_port);
-            tmp_1 = tmp_2;
-            update_pkt_ip_byte_count(tmp_1, hdr.ipv4.totalLen);
-            port_pkt_ip_bytes_in.write(istd.ingress_port, tmp_1);
+            tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
+            tmp = tmp_0;
+            update_pkt_ip_byte_count(tmp, hdr.ipv4.totalLen);
+            port_pkt_ip_bytes_in_0.write(istd.ingress_port, tmp);
         }
     }
 }

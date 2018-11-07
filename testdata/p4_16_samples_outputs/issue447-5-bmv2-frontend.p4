@@ -35,11 +35,11 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    varbit<32> s;
+    varbit<32> s_0;
     apply {
-        s = hdr.h1.var;
+        s_0 = hdr.h1.var;
         hdr.h1.var = hdr.h2.var;
-        hdr.h2.var = s;
+        hdr.h2.var = s_0;
     }
 }
 

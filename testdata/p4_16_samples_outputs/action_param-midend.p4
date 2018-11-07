@@ -1,15 +1,15 @@
 control c(inout bit<32> x) {
-    @name("c.a") action a_0() {
+    @name("c.a") action a() {
         x = 32w10;
     }
-    @name("c.t") table t {
+    @name("c.t") table t_0 {
         actions = {
-            a_0();
+            a();
         }
-        default_action = a_0();
+        default_action = a();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

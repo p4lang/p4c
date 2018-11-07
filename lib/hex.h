@@ -33,7 +33,9 @@ class hex {
 
 inline std::ostream &operator<<(std::ostream &os, const hex &h) {
     auto save = os.flags();
+    auto save_fill = os.fill();
     os << std::hex << std::setw(h.width) << std::setfill(h.fill) << h.val;
+    os.fill(save_fill);
     os.flags(save);
     return os; }
 

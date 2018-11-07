@@ -40,13 +40,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_11() {
     }
-    @name(".do_b") action do_b_0() {
+    @name(".do_b") action do_b() {
     }
-    @name(".do_d") action do_d_0() {
+    @name(".do_d") action do_d() {
     }
-    @name(".do_e") action do_e_0() {
+    @name(".do_e") action do_e() {
     }
-    @name(".nop") action nop_0() {
+    @name(".nop") action nop() {
     }
     @name(".nop") action nop_5() {
     }
@@ -56,11 +56,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop_8() {
     }
-    @name(".A") table A {
+    @name(".A") table A_0 {
         actions = {
-            do_b_0();
-            do_d_0();
-            do_e_0();
+            do_b();
+            do_d();
+            do_e();
             @defaultonly NoAction_0();
         }
         key = {
@@ -68,35 +68,35 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".B") table B {
+    @name(".B") table B_0 {
         actions = {
-            nop_0();
+            nop();
             @defaultonly NoAction_7();
         }
         default_action = NoAction_7();
     }
-    @name(".C") table C {
+    @name(".C") table C_0 {
         actions = {
             nop_5();
             @defaultonly NoAction_8();
         }
         default_action = NoAction_8();
     }
-    @name(".D") table D_1 {
+    @name(".D") table D_0 {
         actions = {
             nop_6();
             @defaultonly NoAction_9();
         }
         default_action = NoAction_9();
     }
-    @name(".E") table E {
+    @name(".E") table E_0 {
         actions = {
             nop_7();
             @defaultonly NoAction_10();
         }
         default_action = NoAction_10();
     }
-    @name(".F") table F {
+    @name(".F") table F_0 {
         actions = {
             nop_8();
             @defaultonly NoAction_11();
@@ -104,21 +104,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_11();
     }
     apply {
-        switch (A.apply().action_run) {
-            do_b_0: {
-                B.apply();
-                C.apply();
+        switch (A_0.apply().action_run) {
+            do_b: {
+                B_0.apply();
+                C_0.apply();
             }
-            do_d_0: {
-                D_1.apply();
-                C.apply();
+            do_d: {
+                D_0.apply();
+                C_0.apply();
             }
-            do_e_0: {
-                E.apply();
+            do_e: {
+                E_0.apply();
             }
         }
 
-        F.apply();
+        F_0.apply();
     }
 }
 

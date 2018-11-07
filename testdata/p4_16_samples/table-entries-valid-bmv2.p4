@@ -22,7 +22,7 @@ header hdr {
     bit<16> t;
     bit<8>  l;
     bit<8>  r;
-    bit<1>  v;
+    bit<8>  v;
 }
 
 struct Header_t {

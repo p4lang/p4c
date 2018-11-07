@@ -25,16 +25,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".route_eth") action route_eth_0(bit<9> egress_spec, bit<48> src_addr) {
+    @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
         standard_metadata.egress_spec = egress_spec;
         hdr.ethernet.src_addr = src_addr;
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
-    @name(".routing") table routing {
+    @name(".routing") table routing_0 {
         actions = {
-            route_eth_0();
-            noop_0();
+            route_eth();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        routing.apply();
+        routing_0.apply();
     }
 }
 

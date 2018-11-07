@@ -28,19 +28,19 @@ void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
     builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &%s)",
-                          value, tblName, key);
+                          value.c_str(), tblName.c_str(), key.c_str());
 }
 
 void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
     builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
-                          tblName, key, value);
+                          tblName.c_str(), key.c_str(), value.c_str());
 }
 
 void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
     builder->appendFormat("BPF_USER_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);",
-                          tblName, key, value);
+                          tblName.c_str(), key.c_str(), value.c_str());
 }
 
 void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
@@ -48,26 +48,28 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                                         cstring keyType, cstring valueType,
                                         unsigned size) const {
     cstring kind = isHash ? "BPF_MAP_TYPE_HASH" : "BPF_MAP_TYPE_ARRAY";
-    builder->appendFormat("REGISTER_TABLE(%s, %s, ", tblName, kind);
-    builder->appendFormat("sizeof(%s), sizeof(%s), %d)", keyType, valueType, size);
+    builder->appendFormat("REGISTER_TABLE(%s, %s, ", tblName.c_str(), kind.c_str());
+    builder->appendFormat("sizeof(%s), sizeof(%s), %d)",
+                          keyType.c_str(), valueType.c_str(), size);
     builder->newline();
 }
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
     builder->emitIndent();
-    builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license);
+    builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license.c_str());
     builder->newline();
 }
 
 void KernelSamplesTarget::emitCodeSection(
     Util::SourceCodeBuilder* builder, cstring sectionName) const {
-    builder->appendFormat("SEC(\"prog\")\n", sectionName);
+    builder->appendFormat("SEC(\"prog\")\n", sectionName.c_str());
 }
 
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(SK_BUFF *%s)", functionName, argName);
+    builder->appendFormat("int %s(SK_BUFF *%s)",
+                          functionName.c_str(), argName.c_str());
 }
 
 //////////////////////////////////////////////////////////////
@@ -82,19 +84,19 @@ void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
 void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                 cstring key, cstring value) const {
     builder->appendFormat("%s = %s.lookup(&%s)",
-                          value, tblName, key);
+                          value.c_str(), tblName.c_str(), key.c_str());
 }
 
 void BccTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                 cstring key, cstring value) const {
     builder->appendFormat("%s.update(&%s, &%s);",
-                          tblName, key, value);
+                          tblName.c_str(), key.c_str(), value.c_str());
 }
 
 void BccTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                     cstring key, cstring value) const {
     builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
-                          tblName, key, value);
+                          tblName.c_str(), key.c_str(), value.c_str());
 }
 
 void BccTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
@@ -111,14 +113,15 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                               cstring keyType, cstring valueType, unsigned size) const {
     cstring kind = isHash ? "hash" : "array";
     builder->appendFormat("BPF_TABLE(\"%s\", %s, %s, %s, %d);",
-                      kind, keyType, valueType, tblName, size);
+                          kind.c_str(), keyType.c_str(), valueType.c_str(), tblName.c_str(), size);
     builder->newline();
 }
 
 void BccTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+    builder->appendFormat("int %s(struct __sk_buff* %s)",
+                          functionName.c_str(), argName.c_str());
 }
 
 }  // namespace EBPF

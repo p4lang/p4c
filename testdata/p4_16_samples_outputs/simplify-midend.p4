@@ -1,14 +1,14 @@
 #include <core.p4>
 
 control c(out bool x) {
-    bool tmp_2;
-    bool tmp_3;
-    bool tmp_4;
+    bool tmp;
+    bool tmp_0;
+    bool tmp_1;
     @name(".NoAction") action NoAction_0() {
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("c.t1") table t1 {
+    @name("c.t1") table t1_0 {
         key = {
             x: exact @name("x") ;
         }
@@ -17,7 +17,7 @@ control c(out bool x) {
         }
         default_action = NoAction_0();
     }
-    @name("c.t2") table t2 {
+    @name("c.t2") table t2_0 {
         key = {
             x: exact @name("x") ;
         }
@@ -27,25 +27,25 @@ control c(out bool x) {
         default_action = NoAction_3();
     }
     @hidden action act() {
-        tmp_2 = true;
+        tmp = true;
     }
     @hidden action act_0() {
-        tmp_2 = false;
+        tmp = false;
     }
     @hidden action act_1() {
         x = true;
     }
     @hidden action act_2() {
-        tmp_3 = false;
+        tmp_0 = false;
     }
     @hidden action act_3() {
-        tmp_4 = true;
+        tmp_1 = true;
     }
     @hidden action act_4() {
-        tmp_4 = false;
+        tmp_1 = false;
     }
     @hidden action act_5() {
-        tmp_3 = tmp_4;
+        tmp_0 = tmp_1;
     }
     @hidden action act_6() {
         x = false;
@@ -100,20 +100,20 @@ control c(out bool x) {
     }
     apply {
         tbl_act.apply();
-        if (t1.apply().hit) 
+        if (t1_0.apply().hit) 
             tbl_act_0.apply();
         else 
             tbl_act_1.apply();
-        if (!tmp_2) 
+        if (!tmp) 
             tbl_act_2.apply();
         else {
-            if (t2.apply().hit) 
+            if (t2_0.apply().hit) 
                 tbl_act_3.apply();
             else 
                 tbl_act_4.apply();
             tbl_act_5.apply();
         }
-        if (tmp_3) 
+        if (tmp_0) 
             tbl_act_6.apply();
     }
 }

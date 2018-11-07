@@ -1,9 +1,9 @@
 control p() {
-    bit<1> x_1;
-    @name("p.b") action b_0() {
+    bit<1> x_3;
+    @name("p.b") action b() {
     }
     @hidden action act() {
-        x_1 = 1w0;
+        x_3 = 1w0;
     }
     @hidden table tbl_act {
         actions = {
@@ -13,9 +13,9 @@ control p() {
     }
     @hidden table tbl_b {
         actions = {
-            b_0();
+            b();
         }
-        const default_action = b_0();
+        const default_action = b();
     }
     apply {
         tbl_act.apply();

@@ -27,14 +27,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bool tmp_0;
+    bool tmp;
     @name(".NoAction") action NoAction_0() {
     }
     @name(".NoAction") action NoAction_4() {
     }
     @name(".NoAction") action NoAction_5() {
     }
-    @name(".setb1") action setb1_0(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
@@ -42,16 +42,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
     @name(".noop") action noop_3() {
     }
     @name(".noop") action noop_4() {
     }
-    @name(".test1") table test1 {
+    @name(".test1") table test1_0 {
         actions = {
-            setb1_0();
-            noop_0();
+            setb1();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".test2") table test2 {
+    @name(".test2") table test2_0 {
         actions = {
             setb1_2();
             noop_3();
@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_4();
     }
-    @name(".test4") table test4 {
+    @name(".test4") table test4_0 {
         actions = {
             noop_4();
             @defaultonly NoAction_5();
@@ -78,10 +78,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_5();
     }
     @hidden action act() {
-        tmp_0 = true;
+        tmp = true;
     }
     @hidden action act_0() {
-        tmp_0 = false;
+        tmp = false;
     }
     @hidden table tbl_act {
         actions = {
@@ -96,13 +96,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         const default_action = act_0();
     }
     apply {
-        if (test1.apply().hit) 
+        if (test1_0.apply().hit) 
             tbl_act.apply();
         else 
             tbl_act_0.apply();
-        if (tmp_0) 
-            test2.apply();
-        test4.apply();
+        if (tmp) 
+            test2_0.apply();
+        test4_0.apply();
     }
 }
 

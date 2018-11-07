@@ -54,22 +54,22 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    PacketByteCountState_t tmp_1;
-    bit<80> tmp_2;
+    PacketByteCountState_t tmp;
+    bit<80> tmp_0;
     PacketByteCountState_t s;
     @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count() {
-        s = tmp_1;
-        s[79:48] = tmp_1[79:48] + 32w1;
+        s = tmp;
+        s[79:48] = tmp[79:48] + 32w1;
         s[47:0] = s[47:0] + (bit<48>)hdr.ipv4.totalLen;
-        tmp_1 = s;
+        tmp = s;
     }
-    @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in;
+    @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
     @hidden action act() {
-        tmp_2 = port_pkt_ip_bytes_in.read(istd.ingress_port);
-        tmp_1 = tmp_2;
+        tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
+        tmp = tmp_0;
     }
     @hidden action act_0() {
-        port_pkt_ip_bytes_in.write(istd.ingress_port, tmp_1);
+        port_pkt_ip_bytes_in_0.write(istd.ingress_port, tmp);
     }
     @hidden action act_1() {
         ostd.egress_port = 10w0;

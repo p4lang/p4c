@@ -49,38 +49,38 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".copy_queueing_data") action copy_queueing_data_0() {
+    @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
         hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
         hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
         hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
         hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
     }
-    @name(".t_egress") table t_egress {
+    @name(".t_egress") table t_egress_0 {
         actions = {
-            copy_queueing_data_0();
+            copy_queueing_data();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
     apply {
-        t_egress.apply();
+        t_egress_0.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_1() {
     }
-    @name(".set_port") action set_port_0(bit<9> port) {
+    @name(".set_port") action set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("._drop") action _drop_0() {
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name(".t_ingress") table t_ingress {
+    @name(".t_ingress") table t_ingress_0 {
         actions = {
-            set_port_0();
-            _drop_0();
+            set_port();
+            _drop();
             @defaultonly NoAction_1();
         }
         key = {
@@ -90,7 +90,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_1();
     }
     apply {
-        t_ingress.apply();
+        t_ingress_0.apply();
     }
 }
 

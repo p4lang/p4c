@@ -14,10 +14,10 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("IngressI.aux.a") action aux_a() {
+    @name("IngressI.aux.a") action aux_a_0() {
     }
     apply {
-        aux_a();
+        aux_a_0();
     }
 }
 

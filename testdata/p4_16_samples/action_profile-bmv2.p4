@@ -30,7 +30,7 @@ action empty() { }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 
-    action drop() { smeta.drop = 1; }
+    action drop() { mark_to_drop(); }
 
     table indirect {
         key = { }

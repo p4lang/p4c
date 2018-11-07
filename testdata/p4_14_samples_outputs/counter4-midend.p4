@@ -31,14 +31,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".cntDum") counter(32w200, CounterType.packets) cntDum;
-    @name(".act") action act_0(bit<9> port, bit<32> idx) {
+    @name(".cntDum") counter(32w200, CounterType.packets) cntDum_0;
+    @name(".act") action act(bit<9> port, bit<32> idx) {
         standard_metadata.egress_spec = port;
-        cntDum.count(idx);
+        cntDum_0.count(idx);
     }
-    @name(".tab1") table tab1 {
+    @name(".tab1") table tab1_0 {
         actions = {
-            act_0();
+            act();
             @defaultonly NoAction_0();
         }
         key = {
@@ -48,7 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        tab1.apply();
+        tab1_0.apply();
     }
 }
 

@@ -50,19 +50,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_9() {
     }
-    @name(".set0b1") action set0b1_0(bit<8> val) {
+    @name(".set0b1") action set0b1(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name(".act1") action act1_0(bit<8> val) {
+    @name(".act1") action act1(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name(".act2") action act2_0(bit<8> val) {
+    @name(".act2") action act2(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name(".act3") action act3_0(bit<8> val) {
+    @name(".act3") action act3(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
     @name(".noop") action noop_5() {
     }
@@ -72,26 +72,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop_8() {
     }
-    @name(".setb2") action setb2_0(bit<8> val) {
+    @name(".setb2") action setb2(bit<8> val) {
         hdr.data.b2 = val;
     }
-    @name(".set1b1") action set1b1_0(bit<8> val) {
+    @name(".set1b1") action set1b1(bit<8> val) {
         hdr.extra[1].b1 = val;
     }
-    @name(".set2b2") action set2b2_0(bit<8> val) {
+    @name(".set2b2") action set2b2(bit<8> val) {
         hdr.extra[2].b2 = val;
     }
-    @name(".setb1") action setb1_0(bit<9> port, bit<8> val) {
+    @name(".setb1") action setb1(bit<9> port, bit<8> val) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name(".ex1") table ex1 {
+    @name(".ex1") table ex1_0 {
         actions = {
-            set0b1_0();
-            act1_0();
-            act2_0();
-            act3_0();
-            noop_0();
+            set0b1();
+            act1();
+            act2();
+            act3();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -99,9 +99,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".tbl1") table tbl1 {
+    @name(".tbl1") table tbl1_0 {
         actions = {
-            setb2_0();
+            setb2();
             noop_5();
             @defaultonly NoAction_6();
         }
@@ -110,9 +110,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_6();
     }
-    @name(".tbl2") table tbl2 {
+    @name(".tbl2") table tbl2_0 {
         actions = {
-            set1b1_0();
+            set1b1();
             noop_6();
             @defaultonly NoAction_7();
         }
@@ -121,9 +121,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name(".tbl3") table tbl3 {
+    @name(".tbl3") table tbl3_0 {
         actions = {
-            set2b2_0();
+            set2b2();
             noop_7();
             @defaultonly NoAction_8();
         }
@@ -132,9 +132,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_8();
     }
-    @name(".test1") table test1 {
+    @name(".test1") table test1_0 {
         actions = {
-            setb1_0();
+            setb1();
             noop_8();
             @defaultonly NoAction_9();
         }
@@ -144,16 +144,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_9();
     }
     apply {
-        test1.apply();
-        switch (ex1.apply().action_run) {
-            act1_0: {
-                tbl1.apply();
+        test1_0.apply();
+        switch (ex1_0.apply().action_run) {
+            act1: {
+                tbl1_0.apply();
             }
-            act2_0: {
-                tbl2.apply();
+            act2: {
+                tbl2_0.apply();
             }
-            act3_0: {
-                tbl3.apply();
+            act3: {
+                tbl3_0.apply();
             }
         }
 

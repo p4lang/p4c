@@ -21,31 +21,7 @@ limitations under the License.
 #include "ebpf_test.h"
 #include "ebpf_runtime_test.h"
 
-
-#define FILE_NAME_MAX 256
-#define MAX_10_UINT16 5
 #define PCAPOUT "_out.pcap"
-
-/**
- * @brief Create a pcap file name from a given base name, interface index,
- * and suffix. Return value must be deallocated after usage.
- * @param pcap_base The file base name.
- * @param index The index of the file, represent an interface.
- * @param suffix  Filename suffix (e.g., _in.pcap)
- * @return An allocated string containing the file name.
- */
-char *generate_pcap_name(const char *pcap_base, int index, const char *suffix) {
-    /* Dynamic string length plus max decimal representation of uint16_t */
-    int file_length = strlen(pcap_base) + strlen(suffix) + MAX_10_UINT16 + 1;
-    char *pcap_name = malloc(file_length);
-    int offset = snprintf(pcap_name, file_length,"%s%d%s",
-                    pcap_base, index, suffix);
-    if (offset >= FILE_NAME_MAX) {
-        fprintf(stderr, "Name %s%d%s too long.\n", pcap_base, index, suffix);
-        exit(EXIT_FAILURE);
-    }
-    return pcap_name;
-}
 
 /**
  * @brief Feed a list packets into an eBPF program.

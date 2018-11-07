@@ -2,6 +2,20 @@
 
 namespace P4 {
 
+class FindUntypedInt : public Inspector {
+    const IR::Node *pos;
+    bool preorder(const IR::Node *) override { return pos == nullptr; }
+    bool preorder(const IR::Type *) override { return false; }
+    void postorder(const IR::Constant *c) override { if (c->type->is<IR::Type_InfInt>()) pos = c; }
+    Visitor::profile_t init_apply(const IR::Node *root) override {
+        pos = nullptr;
+        return Inspector::init_apply(root); }
+
+ public:
+    explicit FindUntypedInt(const IR::Node *n) { n->apply(*this); }
+    operator const IR::Node *() const { return pos; }
+};
+
 /// Lookup a type variable
 const IR::Type* BindTypeVariables::getVarValue(
     const IR::Type_Var* var, const IR::Node* errorPosition) const {
@@ -13,12 +27,21 @@ const IR::Type* BindTypeVariables::getVarValue(
         rtype = new IR::Type_Dontcare;
     if (rtype == nullptr) {
         cstring errorMessage;
-        if (type != nullptr && type->is<IR::Type_InfInt>())
-            errorMessage = "%1%: cannot infer bitwidth for integer-valued type parameter %2%";
-        else
-            errorMessage = "%1%: cannot infer type for type parameter %2%";
-        ::error(errorMessage.c_str(), errorPosition, var);
-    }
+        errorMessage = "%1%: cannot infer type for type parameter %2%";
+        if (type != nullptr) {
+            // FIXME -- what we really want here for the error message is the expression which
+            // caused us to be unable to infer a usable type -- generally an untyped integer
+            // constant in the code.  There's no easy way to extract that, however.  We need
+            // to keep a map<Type_Var, set<Expression>> from type inferencing containing all
+            // the expressions used to infer the type of the Type Var.  For now we use a best
+            // guess trying to print something relevant.
+            if (type->is<IR::Type_InfInt>()) {
+                errorMessage = "%1%: cannot infer bitwidth for integer-valued type parameter %2%";
+            } else if (const IR::Node *pos = FindUntypedInt(errorPosition)) {
+                errorMessage = "%1%: cannot infer bitwidth for untyped integer constant used "
+                               "in type parameter %2%";
+                errorPosition = pos; } }
+        ::error(errorMessage.c_str(), errorPosition, var); }
     return rtype;  // This may be nullptr
 }
 

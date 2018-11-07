@@ -78,8 +78,9 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
             annos = IR::Annotations::empty;
         annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                   new IR::StringLiteral(action->name));
-        auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
-                                            annos, params, replBody);
+        auto replacement = new IR::P4Action(action->srcInfo,
+                    IR::ID(action->name.srcInfo, newName, action->name.originalName),
+                    annos, params, replBody);
         repl->addReplacement(action, control, replacement);
     }
     return false;
@@ -112,7 +113,8 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
     auto replacement = repl->getReplacement(action, control);
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
-        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name));
+        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name,
+                                                   expression->path->name.originalName));
     }
     return expression;
 }
@@ -166,8 +168,9 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
             annos = IR::Annotations::empty;
         annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                   new IR::StringLiteral(action->name));
-        replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
-                                       annos, params, replBody);
+        replacement = new IR::P4Action(action->srcInfo,
+                IR::ID(action->name.srcInfo, newName, action->name.originalName),
+                annos, params, replBody);
         repl->createReplacement(action, actionUser, replacement);
     }
     repl->setRefReplacement(expression, replacement);
@@ -202,7 +205,8 @@ const IR::Node* DuplicateActions::postorder(IR::PathExpression* expression) {
     auto replacement = ::get(repl->repl, getOriginal<IR::PathExpression>());
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
-        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name));
+        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name,
+                                                   expression->path->name.originalName));
     }
     return expression;
 }

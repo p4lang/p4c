@@ -137,8 +137,7 @@ EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->append(kind);
     if (asPointer)
         builder->append("*");
-    const char* n = name.c_str();
-    builder->appendFormat(" %s %s", n, id.c_str());
+    builder->appendFormat(" %s %s", name.c_str(), id.c_str());
 }
 
 void EBPFStructType::emitInitializer(CodeBuilder* builder) {

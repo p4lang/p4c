@@ -196,4 +196,5 @@ def main():
     # set all configuration and command line options for backend
     backend.process_command_line_options(opts)
     # run all commands
-    backend.run()
+    rc = backend.run()
+    sys.exit(rc)

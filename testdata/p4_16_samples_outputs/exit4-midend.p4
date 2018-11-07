@@ -1,20 +1,20 @@
 control ctrl() {
     bool hasExited;
-    bool tmp_0;
-    @name("ctrl.e") action e_0() {
+    bool tmp;
+    @name("ctrl.e") action e() {
         hasExited = true;
     }
-    @name("ctrl.t") table t {
+    @name("ctrl.t") table t_0 {
         actions = {
-            e_0();
+            e();
         }
-        default_action = e_0();
+        default_action = e();
     }
     @hidden action act() {
-        tmp_0 = true;
+        tmp = true;
     }
     @hidden action act_0() {
-        tmp_0 = false;
+        tmp = false;
     }
     @hidden action act_1() {
         hasExited = false;
@@ -39,15 +39,15 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        if (t.apply().hit) 
+        if (t_0.apply().hit) 
             tbl_act_0.apply();
         else 
             tbl_act_1.apply();
         if (!hasExited) 
-            if (tmp_0) 
-                t.apply();
+            if (tmp) 
+                t_0.apply();
             else 
-                t.apply();
+                t_0.apply();
     }
 }
 

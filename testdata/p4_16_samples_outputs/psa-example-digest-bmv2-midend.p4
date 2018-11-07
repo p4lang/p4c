@@ -42,63 +42,63 @@ struct metadata {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    ethernet_t parsed_hdr_2_ethernet;
-    ipv4_t parsed_hdr_2_ipv4;
-    bool meta_0_send_mac_learn_msg;
-    mac_learn_digest_t meta_0_mac_learn_msg;
+    ethernet_t parsed_hdr_0_ethernet;
+    ipv4_t parsed_hdr_0_ipv4;
+    bool meta_1_send_mac_learn_msg;
+    mac_learn_digest_t meta_1_mac_learn_msg;
     state start {
-        parsed_hdr_2_ethernet.setInvalid();
-        parsed_hdr_2_ipv4.setInvalid();
-        meta_0_send_mac_learn_msg = meta.send_mac_learn_msg;
-        meta_0_mac_learn_msg.srcAddr = meta.mac_learn_msg.srcAddr;
-        meta_0_mac_learn_msg.ingress_port = meta.mac_learn_msg.ingress_port;
-        buffer.extract<ethernet_t>(parsed_hdr_2_ethernet);
-        transition select(parsed_hdr_2_ethernet.etherType) {
+        parsed_hdr_0_ethernet.setInvalid();
+        parsed_hdr_0_ipv4.setInvalid();
+        meta_1_send_mac_learn_msg = meta.send_mac_learn_msg;
+        meta_1_mac_learn_msg.srcAddr = meta.mac_learn_msg.srcAddr;
+        meta_1_mac_learn_msg.ingress_port = meta.mac_learn_msg.ingress_port;
+        buffer.extract<ethernet_t>(parsed_hdr_0_ethernet);
+        transition select(parsed_hdr_0_ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;
             default: start_0;
         }
     }
     state CommonParser_parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr_2_ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr_0_ipv4);
         transition start_0;
     }
     state start_0 {
-        parsed_hdr.ethernet = parsed_hdr_2_ethernet;
-        parsed_hdr.ipv4 = parsed_hdr_2_ipv4;
-        meta.send_mac_learn_msg = meta_0_send_mac_learn_msg;
-        meta.mac_learn_msg.srcAddr = meta_0_mac_learn_msg.srcAddr;
-        meta.mac_learn_msg.ingress_port = meta_0_mac_learn_msg.ingress_port;
+        parsed_hdr.ethernet = parsed_hdr_0_ethernet;
+        parsed_hdr.ipv4 = parsed_hdr_0_ipv4;
+        meta.send_mac_learn_msg = meta_1_send_mac_learn_msg;
+        meta.mac_learn_msg.srcAddr = meta_1_mac_learn_msg.srcAddr;
+        meta.mac_learn_msg.ingress_port = meta_1_mac_learn_msg.ingress_port;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
-    ethernet_t parsed_hdr_3_ethernet;
-    ipv4_t parsed_hdr_3_ipv4;
-    bool meta_4_send_mac_learn_msg;
-    mac_learn_digest_t meta_4_mac_learn_msg;
+    ethernet_t parsed_hdr_1_ethernet;
+    ipv4_t parsed_hdr_1_ipv4;
+    bool meta_2_send_mac_learn_msg;
+    mac_learn_digest_t meta_2_mac_learn_msg;
     state start {
-        parsed_hdr_3_ethernet.setInvalid();
-        parsed_hdr_3_ipv4.setInvalid();
-        meta_4_send_mac_learn_msg = meta.send_mac_learn_msg;
-        meta_4_mac_learn_msg.srcAddr = meta.mac_learn_msg.srcAddr;
-        meta_4_mac_learn_msg.ingress_port = meta.mac_learn_msg.ingress_port;
-        buffer.extract<ethernet_t>(parsed_hdr_3_ethernet);
-        transition select(parsed_hdr_3_ethernet.etherType) {
+        parsed_hdr_1_ethernet.setInvalid();
+        parsed_hdr_1_ipv4.setInvalid();
+        meta_2_send_mac_learn_msg = meta.send_mac_learn_msg;
+        meta_2_mac_learn_msg.srcAddr = meta.mac_learn_msg.srcAddr;
+        meta_2_mac_learn_msg.ingress_port = meta.mac_learn_msg.ingress_port;
+        buffer.extract<ethernet_t>(parsed_hdr_1_ethernet);
+        transition select(parsed_hdr_1_ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4_0;
             default: start_1;
         }
     }
     state CommonParser_parse_ipv4_0 {
-        buffer.extract<ipv4_t>(parsed_hdr_3_ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr_1_ipv4);
         transition start_1;
     }
     state start_1 {
-        parsed_hdr.ethernet = parsed_hdr_3_ethernet;
-        parsed_hdr.ipv4 = parsed_hdr_3_ipv4;
-        meta.send_mac_learn_msg = meta_4_send_mac_learn_msg;
-        meta.mac_learn_msg.srcAddr = meta_4_mac_learn_msg.srcAddr;
-        meta.mac_learn_msg.ingress_port = meta_4_mac_learn_msg.ingress_port;
+        parsed_hdr.ethernet = parsed_hdr_1_ethernet;
+        parsed_hdr.ipv4 = parsed_hdr_1_ipv4;
+        meta.send_mac_learn_msg = meta_2_send_mac_learn_msg;
+        meta.mac_learn_msg.srcAddr = meta_2_mac_learn_msg.srcAddr;
+        meta.mac_learn_msg.ingress_port = meta_2_mac_learn_msg.ingress_port;
         transition accept;
     }
 }
@@ -108,32 +108,32 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("ingress.unknown_source") action unknown_source_0() {
+    @name("ingress.unknown_source") action unknown_source() {
         meta.send_mac_learn_msg = true;
         meta.mac_learn_msg.srcAddr = hdr.ethernet.srcAddr;
         meta.mac_learn_msg.ingress_port = istd.ingress_port;
     }
-    @name("ingress.learned_sources") table learned_sources {
+    @name("ingress.learned_sources") table learned_sources_0 {
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
             NoAction_0();
-            unknown_source_0();
+            unknown_source();
         }
-        default_action = unknown_source_0();
+        default_action = unknown_source();
     }
-    @name("ingress.do_L2_forward") action do_L2_forward_0(PortId_t egress_port) {
+    @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
         ostd.drop = false;
         ostd.multicast_group = 10w0;
         ostd.egress_port = egress_port;
     }
-    @name("ingress.l2_tbl") table l2_tbl {
+    @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {
             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         actions = {
-            do_L2_forward_0();
+            do_L2_forward();
             NoAction_3();
         }
         default_action = NoAction_3();
@@ -149,8 +149,8 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     apply {
         tbl_act.apply();
-        learned_sources.apply();
-        l2_tbl.apply();
+        learned_sources_0.apply();
+        l2_tbl_0.apply();
     }
 }
 
@@ -160,9 +160,9 @@ control egress(inout headers hdr, inout metadata meta, in psa_egress_input_metad
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @name("IngressDeparserImpl.mac_learn_digest") Digest<mac_learn_digest_t>() mac_learn_digest;
+    @name("IngressDeparserImpl.mac_learn_digest") Digest<mac_learn_digest_t>() mac_learn_digest_0;
     @hidden action act_0() {
-        mac_learn_digest.pack(meta.mac_learn_msg);
+        mac_learn_digest_0.pack(meta.mac_learn_msg);
     }
     @hidden action act_1() {
         packet.emit<ethernet_t>(hdr.ethernet);

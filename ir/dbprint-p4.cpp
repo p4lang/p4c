@@ -231,7 +231,7 @@ void IR::V1Program::dbprint(std::ostream &out) const {
 }
 
 void IR::P4Program::dbprint(std::ostream &out) const {
-    for (auto obj : declarations)
+    for (auto obj : objects)
         out << obj << endl;
 }
 

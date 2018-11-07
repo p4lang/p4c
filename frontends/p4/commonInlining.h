@@ -93,6 +93,10 @@ class SimpleInlineList {
         std::reverse(inlineOrder.begin(), inlineOrder.end());
     }
 
+    size_t size() const {
+        return toInline.size();
+    }
+
     /// Get next batch of objects to inline
     InlineWorkList* next() {
         if (inlineOrder.size() == 0)
@@ -168,6 +172,7 @@ class InlineDriver : public Transform {
         LOG2("InlineDriver");
         const IR::P4Program* prog = program;
         toInline->analyze();
+        LOG3("InlineList size " << toInline->size());
         while (auto todo = toInline->next()) {
             LOG2("Processing " << todo);
             inliner->prepare(toInline, todo);

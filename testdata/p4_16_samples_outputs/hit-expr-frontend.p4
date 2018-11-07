@@ -16,7 +16,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("IngressI.t") table t {
+    @name("IngressI.t") table t_0 {
         key = {
         }
         actions = {
@@ -25,7 +25,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         default_action = NoAction_0();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 

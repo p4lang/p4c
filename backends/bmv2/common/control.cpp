@@ -28,8 +28,8 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
     auto entries = mkArrayField(jsonTable, "entries");
     int entryPriority = 1;  // default priority is defined by index position
     for (auto e : entriesList->entries) {
-        // TODO(jafingerhut) - add line/col here?
         auto entry = new Util::JsonObject();
+        entry->emplace_non_null("source_info", e->sourceInfoJsonObj());
 
         auto keyset = e->getKeys();
         auto matchKeys = mkArrayField(entry, "match_key");
@@ -195,6 +195,7 @@ ControlConverter::handleTableImplementation(const IR::Property* implementation,
         action_profiles->append(action_profile);
         action_profile->emplace("name", apname);
         action_profile->emplace("id", nextId("action_profiles"));
+        action_profile->emplace_non_null("source_info", propv->expression->sourceInfoJsonObj());
         // TODO(jafingerhut) - add line/col here?
         // TBD what about the else if cases below?
 
@@ -411,10 +412,9 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 cstring ctrname = ctrs->controlPlaneName("counter");
                 jctr->emplace("name", ctrname);
                 jctr->emplace("id", nextId("counter_arrays"));
+                jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
                 // TODO(jafingerhut) - what kind of P4_16 code causes this
                 // code to run, if any?
-                // TODO(jafingerhut):
-                // jctr->emplace_non_null("source_info", ctrs->sourceInfoJsonObj());
                 bool direct = te->name == "direct_counter";
                 jctr->emplace("is_direct", direct);
                 jctr->emplace("binding", table->controlPlaneName());

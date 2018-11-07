@@ -170,6 +170,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::SelectCase* e) override;
     bool preorder(const IR::SelectExpression* e) override;
     bool preorder(const IR::ListExpression* e) override;
+    bool preorder(const IR::StructInitializerExpression* e) override;
     bool preorder(const IR::MethodCallExpression* e) override;
     bool preorder(const IR::DefaultExpression* e) override;
     bool preorder(const IR::This* e) override;
@@ -204,6 +205,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::IfStatement* s) override;
 
     // misc
+    bool preorder(const IR::NamedExpression* ne) override;
     bool preorder(const IR::Argument* arg) override;
     bool preorder(const IR::Path* p) override;
     bool preorder(const IR::Parameter* p) override;

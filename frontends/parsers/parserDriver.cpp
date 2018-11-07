@@ -120,7 +120,7 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo& location,
 
 P4ParserDriver::P4ParserDriver()
   : structure(new Util::ProgramStructure)
-  , declarations(new IR::IndexedVector<IR::Node>())
+  , declarations(new IR::Vector<IR::Node>())
 { }
 
 /* static */ const IR::P4Program*

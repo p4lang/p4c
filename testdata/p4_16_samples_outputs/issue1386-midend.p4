@@ -41,12 +41,12 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool c_hasReturned_0;
+    bool c_hasReturned;
     @hidden action act() {
-        c_hasReturned_0 = true;
+        c_hasReturned = true;
     }
     @hidden action act_0() {
-        c_hasReturned_0 = false;
+        c_hasReturned = false;
     }
     @hidden action act_1() {
         sm.egress_spec = 9w0;

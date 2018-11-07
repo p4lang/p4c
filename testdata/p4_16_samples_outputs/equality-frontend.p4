@@ -9,25 +9,25 @@ struct S {
 }
 
 control c(out bit<1> x) {
-    varbit<32> a_1;
-    varbit<32> b_1;
-    H h1;
-    H h2;
-    S s1;
-    S s2;
-    H[2] a1;
-    H[2] a2;
+    varbit<32> a_0;
+    varbit<32> b_0;
+    H h1_0;
+    H h2_0;
+    S s1_0;
+    S s2_0;
+    H[2] a1_0;
+    H[2] a2_0;
     apply {
-        if (a_1 == b_1) 
+        if (a_0 == b_0) 
             x = 1w1;
         else 
-            if (h1 == h2) 
+            if (h1_0 == h2_0) 
                 x = 1w1;
             else 
-                if (s1 == s2) 
+                if (s1_0 == s2_0) 
                     x = 1w1;
                 else 
-                    if (a1 == a2) 
+                    if (a1_0 == a2_0) 
                         x = 1w1;
                     else 
                         x = 1w0;

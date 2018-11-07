@@ -56,23 +56,23 @@ control verifyChecksum(inout headers hdr, inout metadata meta) {
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.drop") action drop_0() {
+    @name("ingress.drop") action drop_1() {
         mark_to_drop();
     }
     @name("ingress.drop") action drop_3() {
         mark_to_drop();
     }
-    @name("ingress.ipv4_forward") action ipv4_forward_0(macAddr_t dstAddr, egressSpec_t port) {
+    @name("ingress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         meta.test_bool = true;
     }
-    @name("ingress.ipv4_lpm") table ipv4_lpm {
+    @name("ingress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
             NoAction_0();
-            ipv4_forward_0();
-            drop_0();
+            ipv4_forward();
+            drop_1();
         }
         size = 1024;
         default_action = NoAction_0();
@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         meta.test_bool = false;
         if (hdr.ipv4.isValid()) 
-            ipv4_lpm.apply();
+            ipv4_lpm_0.apply();
         if (!meta.test_bool) 
             drop_3();
     }

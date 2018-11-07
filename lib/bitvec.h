@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ static inline int builtin_popcount(unsigned x) { return __builtin_popcount(x); }
 static inline int builtin_popcount(unsigned long x) { return __builtin_popcountl(x); }
 static inline int builtin_popcount(unsigned long long x) { return __builtin_popcountll(x); }
 #endif
+
 
 class bitvec {
     size_t              size;
@@ -365,10 +366,16 @@ class bitvec {
         rv |= ((*t | a) != *t);
         *t |= a;
         return rv; }
+    template<typename T, typename = typename
+             std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    bool operator|=(T a) { return (*this) |= bitvec(a); }
     bitvec operator|(const bitvec &a) const {
         bitvec rv(*this); rv |= a; return rv; }
     bitvec operator|(uintptr_t a) const {
         bitvec rv(*this); rv |= a; return rv; }
+    template<typename T, typename = typename
+             std::enable_if<std::is_integral<T>::value && (sizeof(T) > sizeof(uintptr_t))>::type>
+    bitvec operator|(T a) { bitvec rv(*this); rv |= bitvec(a); return rv; }
     bitvec &operator^=(const bitvec &a) {
         if (size < a.size) expand(a.size);
         if (size > 1) {
@@ -478,6 +485,5 @@ inline bitvec operator^(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a)); rv ^= b; return rv; }
 inline bitvec operator-(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a)); rv -= b; return rv; }
-
 
 #endif  // P4C_LIB_BITVEC_H_

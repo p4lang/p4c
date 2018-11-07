@@ -22,21 +22,21 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    h1_t hdr_1_h1;
+    h1_t hdr_0_h1;
     @hidden action act() {
-        hdr_1_h1.out1 = 8w4;
+        hdr_0_h1.out1 = 8w4;
     }
     @hidden action act_0() {
-        hdr_1_h1 = hdr.h1;
+        hdr_0_h1 = hdr.h1;
     }
     @hidden action act_1() {
-        hdr_1_h1.out1 = 8w4;
+        hdr_0_h1.out1 = 8w4;
     }
     @hidden action act_2() {
-        hdr.h1 = hdr_1_h1;
+        hdr.h1 = hdr_0_h1;
     }
     @hidden action act_3() {
-        hdr.h1 = hdr_1_h1;
+        hdr.h1 = hdr_0_h1;
     }
     @hidden table tbl_act {
         actions = {

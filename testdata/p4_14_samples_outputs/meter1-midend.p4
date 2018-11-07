@@ -50,16 +50,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter;
-    @name("._drop") action _drop_0() {
+    @name(".my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter_0;
+    @name("._drop") action _drop() {
         mark_to_drop();
     }
-    @name("._nop") action _nop_1() {
+    @name("._nop") action _nop() {
     }
-    @name(".m_filter") table m_filter {
+    @name(".m_filter") table m_filter_0 {
         actions = {
-            _drop_0();
-            _nop_1();
+            _drop();
+            _nop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -68,29 +68,29 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction_0();
     }
-    @name(".m_action") action m_action(bit<9> meter_idx) {
-        my_meter.read(meta.meta.meter_tag);
+    @name(".m_action") action m_action_0(bit<9> meter_idx) {
+        my_meter_0.read(meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }
-    @name("._nop") action _nop_2() {
-        my_meter.read(meta.meta.meter_tag);
+    @name("._nop") action _nop_0() {
+        my_meter_0.read(meta.meta.meter_tag);
     }
-    @name(".m_table") table m_table {
+    @name(".m_table") table m_table_0 {
         actions = {
-            m_action();
-            _nop_2();
+            m_action_0();
+            _nop_0();
             @defaultonly NoAction_3();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         size = 16384;
-        meters = my_meter;
+        meters = my_meter_0;
         default_action = NoAction_3();
     }
     apply {
-        m_table.apply();
-        m_filter.apply();
+        m_table_0.apply();
+        m_filter_0.apply();
     }
 }
 

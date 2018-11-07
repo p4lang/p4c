@@ -19,6 +19,7 @@ limitations under the License.
 
 header ipv4_t {
     bit<4> ihl;
+    bit<4> version;
     bit<16> hdrChecksum;
 }
 

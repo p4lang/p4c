@@ -9,17 +9,17 @@ extern Random2 {
 }
 
 parser caller() {
-    @name("caller.rand1") Random2() rand1;
+    @name("caller.rand1") Random2() rand1_0;
     state start {
-        rand1.read();
+        rand1_0.read();
         transition accept;
     }
 }
 
 control ingress() {
-    @name("ingress.rand1") Random2() rand1_2;
+    @name("ingress.rand1") Random2() rand1_1;
     @hidden action act() {
-        rand1_2.read();
+        rand1_1.read();
     }
     @hidden table tbl_act {
         actions = {

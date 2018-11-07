@@ -30,12 +30,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".set_egress_port") action set_egress_port_0(bit<9> port) {
+    @name(".set_egress_port") action set_egress_port(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name(".t1") table t1 {
+    @name(".t1") table t1_0 {
         actions = {
-            set_egress_port_0();
+            set_egress_port();
             @defaultonly NoAction_0();
         }
         key = {
@@ -45,7 +45,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        t1.apply();
+        t1_0.apply();
     }
 }
 

@@ -16,14 +16,14 @@ extern E {
 }
 
 control c(inout S s) {
-    bit<32> tmp_0;
-    @name("c.e") E() e;
+    bit<32> tmp;
+    @name("c.e") E() e_0;
     @hidden action act() {
         s.h.data3 = 32w0;
     }
     @hidden action act_0() {
-        tmp_0 = e.get<bit<32>>(s.h.data2);
-        s.h.data1 = tmp_0;
+        tmp = e_0.get<bit<32>>(s.h.data2);
+        s.h.data1 = tmp;
     }
     @hidden table tbl_act {
         actions = {

@@ -21,6 +21,31 @@ limitations under the License.
 
 namespace P4 {
 
+class CloneConstants : public Transform {
+ public:
+    CloneConstants() = default;
+    const IR::Node* postorder(IR::Constant* constant) override {
+        // We clone the constant.  This is necessary because the same
+        // the type associated with the constant may participate in
+        // type unification, and thus we want to have different type
+        // objects for different constant instances.
+        const IR::Type* type = constant->type;
+        if (type->is<IR::Type_Bits>()) {
+            type = constant->type->clone();
+        } else if (auto ii = type->to<IR::Type_InfInt>()) {
+            // You can't just clone a InfInt value, because
+            // you get the same declid.  We want a new declid.
+            type = new IR::Type_InfInt(ii->srcInfo);
+        } else {
+            BUG("unexpected type %2% for constant %2%", type, constant);
+        }
+        return new IR::Constant(constant->srcInfo, type, constant->value, constant->base);
+    }
+    static const IR::Expression* clone(const IR::Expression* expression) {
+        return expression->apply(CloneConstants())->to<IR::Expression>();
+    }
+};
+
 const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>())
@@ -32,12 +57,16 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
             if (getConstant(e) == nullptr)
                 return nullptr;
         return expr;
-    }
-    if (auto cast = expr->to<IR::Cast>()) {
+    } else if (auto si = expr->to<IR::StructInitializerExpression>()) {
+        for (auto e : si->components)
+            if (getConstant(e->expression) == nullptr)
+                return nullptr;
+        return expr;
+    } else if (auto cast = expr->to<IR::Cast>()) {
         // Casts of a constant to a value with type Type_Newtype
         // are constants, but we cannot fold them.
         if (getConstant(cast->expr))
-            return expr;
+            return CloneConstants::clone(expr);
         return nullptr;
     }
     if (typesKnown) {
@@ -64,26 +93,7 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
                 // type checking; maybe it's wrong.
                 return e;
         }
-        if (cst->is<IR::Constant>()) {
-            // We clone the constant.  This is necessary because the same
-            // the type associated with the constant may participate in
-            // type unification, and thus we want to have different type
-            // objects for different constant instances.
-            auto cc = cst->to<IR::Constant>();
-            const IR::Type* type = nullptr;
-            if (cc->type->is<IR::Type_Bits>()) {
-                type = cc->type->clone();
-            } else if (cc->type->is<IR::Type_InfInt>()) {
-                // You can't just clone a InfInt value, because
-                // you get the same declid.  We want a new declid.
-                auto ii = cc->type->to<IR::Type_InfInt>();
-                type = new IR::Type_InfInt(ii->srcInfo);
-            } else {
-                BUG("unexpected type %2% for constant %2%", cc->type, cst);
-            }
-            return new IR::Constant(cc->srcInfo, type, cc->value, cc->base);
-        }
-        return cst;
+        return CloneConstants::clone(cst);
     }
     return e;
 }
@@ -527,27 +537,32 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
         auto expr = getConstant(e->expr);
         if (expr == nullptr)
             return e;
-        if (!type->is<IR::Type_StructLike>())
-            BUG("Expected a struct type, got %1%", type);
-        if (!expr->is<IR::ListExpression>())
-            BUG("Expected a list of constants, got %1%", expr);
-
-        auto list = expr->to<IR::ListExpression>();
         auto structType = type->to<IR::Type_StructLike>();
-
-        bool found = false;
-        int index = 0;
-        for (auto f : structType->fields) {
-            if (f->name.name == e->member.name) {
-                found = true;
-                break;
+        if (structType == nullptr)
+            BUG("Expected a struct type, got %1%", type);
+        if (auto list = expr->to<IR::ListExpression>()) {
+            bool found = false;
+            int index = 0;
+            for (auto f : structType->fields) {
+                if (f->name.name == e->member.name) {
+                    found = true;
+                    break;
+                }
+                index++;
             }
-            index++;
-        }
 
-        if (!found)
-            BUG("Could not find field %1% in type %2%", e->member, type);
-        result = list->components.at(index)->clone();
+            if (!found)
+                BUG("Could not find field %1% in type %2%", e->member, type);
+            result = CloneConstants::clone(list->components.at(index));
+        } else if (auto si = expr->to<IR::StructInitializerExpression>()) {
+            if (si->isHeader && e->member.name == IR::Type_Header::isValid)
+                return e;
+            auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
+            BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
+            return CloneConstants::clone(ne->expression);
+        } else {
+            BUG("Unexpected initializer: %1%", expr);
+        }
     }
     return result;
 }
@@ -705,7 +720,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             return new IR::BoolLiteral(e->srcInfo, v == 1);
         }
     } else if (etype->is<IR::Type_StructLike>()) {
-        return expr->clone();
+        return CloneConstants::clone(expr);
     }
     return e;
 }

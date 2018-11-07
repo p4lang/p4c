@@ -7,11 +7,11 @@ struct tuple_0 {
 }
 
 control c() {
-    tuple_0 x_0;
+    tuple_0 x;
     @hidden action act() {
-        x_0.field = 32w10;
-        x_0.field_0 = false;
-        f<tuple_0>(x_0);
+        x.field = 32w10;
+        x.field_0 = false;
+        f<tuple_0>(x);
     }
     @hidden table tbl_act {
         actions = {

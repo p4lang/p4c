@@ -33,7 +33,6 @@ limitations under the License.
 #define PCAPIN  "_in.pcap"
 #define DELIM   '_'
 
-
 static int debug = 0;
 
 void usage(char *name) {

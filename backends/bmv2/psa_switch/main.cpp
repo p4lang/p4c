@@ -31,6 +31,7 @@ limitations under the License.
 #include "backends/bmv2/common/JsonObjects.h"
 #include "backends/bmv2/psa_switch/midend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "backends/bmv2/psa_switch/version.h"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -38,7 +39,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoBMV2Context(new BMV2::BMV2Context);
     auto& options = BMV2::BMV2Context::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = "0.0.5";
+    options.compilerVersion = BMV2_PSA_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();

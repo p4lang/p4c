@@ -14,6 +14,9 @@
 
 # Makefile for a fake backend that is used for testing the P4-16 front-end.
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
+
 set (P4TEST_SRCS
   p4test.cpp
   midend.cpp

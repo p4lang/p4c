@@ -48,31 +48,31 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter;
-    @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
-    @name(".m_action") action m_action(bit<32> idx) {
-        my_direct_counter.count();
-        my_indirect_counter.count(idx);
+    @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter_0;
+    @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter_0;
+    @name(".m_action") action m_action_0(bit<32> idx) {
+        my_direct_counter_0.count();
+        my_indirect_counter_0.count(idx);
         mark_to_drop();
     }
-    @name("._nop") action _nop() {
-        my_direct_counter.count();
+    @name("._nop") action _nop_0() {
+        my_direct_counter_0.count();
     }
-    @name(".m_table") table m_table {
+    @name(".m_table") table m_table_0 {
         actions = {
-            m_action();
-            _nop();
+            m_action_0();
+            _nop_0();
             @defaultonly NoAction_0();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         size = 16384;
-        counters = my_direct_counter;
+        counters = my_direct_counter_0;
         default_action = NoAction_0();
     }
     apply {
-        m_table.apply();
+        m_table_0.apply();
     }
 }
 

@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _MIDEND_ACTIONSYNTHESIS_H_
 #define _MIDEND_ACTIONSYNTHESIS_H_
 
+#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 

@@ -51,26 +51,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_5() {
     }
-    @name(".route_eth") action route_eth_0(bit<9> egress_spec, bit<48> src_addr) {
+    @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
         standard_metadata.egress_spec = egress_spec;
         hdr.ethernet.src_addr = src_addr;
     }
-    @name(".noop") action noop_0() {
+    @name(".noop") action noop() {
     }
     @name(".noop") action noop_3() {
     }
     @name(".noop") action noop_4() {
     }
-    @name(".setf2") action setf2_0(bit<32> val) {
+    @name(".setf2") action setf2(bit<32> val) {
         hdr.data.f2 = val;
     }
-    @name(".setf1") action setf1_0(bit<32> val) {
+    @name(".setf1") action setf1(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name(".routing") table routing {
+    @name(".routing") table routing_0 {
         actions = {
-            route_eth_0();
-            noop_0();
+            route_eth();
+            noop();
             @defaultonly NoAction_0();
         }
         key = {
@@ -78,9 +78,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".test1") table test1 {
+    @name(".test1") table test1_0 {
         actions = {
-            setf2_0();
+            setf2();
             noop_3();
             @defaultonly NoAction_4();
         }
@@ -89,9 +89,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_4();
     }
-    @name(".test2") table test2 {
+    @name(".test2") table test2_0 {
         actions = {
-            setf1_0();
+            setf1();
             noop_4();
             @defaultonly NoAction_5();
         }
@@ -101,11 +101,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_5();
     }
     apply {
-        routing.apply();
+        routing_0.apply();
         if (hdr.data.f5 != hdr.data.f6) 
-            test1.apply();
+            test1_0.apply();
         else 
-            test2.apply();
+            test2_0.apply();
     }
 }
 

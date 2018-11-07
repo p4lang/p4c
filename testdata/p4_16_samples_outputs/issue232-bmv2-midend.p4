@@ -27,16 +27,16 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Value val_2;
-    @name("Eg.test") action test_0() {
-        val_2.field1 = val_2.field1;
-        val_2.field1 = val_2.field1;
+    Value val_0;
+    @name("Eg.test") action test() {
+        val_0.field1 = val_0.field1;
+        val_0.field1 = val_0.field1;
     }
     @hidden table tbl_test {
         actions = {
-            test_0();
+            test();
         }
-        const default_action = test_0();
+        const default_action = test();
     }
     apply {
         tbl_test.apply();

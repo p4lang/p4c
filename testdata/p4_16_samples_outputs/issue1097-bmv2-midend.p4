@@ -16,9 +16,9 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 register<bit<8>>(32w2) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> x;
+    bit<8> x_0;
     @hidden action act() {
-        r.read(x, 32w0);
+        r.read(x_0, 32w0);
     }
     @hidden table tbl_act {
         actions = {

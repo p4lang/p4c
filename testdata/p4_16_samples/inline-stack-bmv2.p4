@@ -20,7 +20,7 @@ limitations under the License.
 typedef standard_metadata_t std_meta_t;
 
 header h_t {
-    bit<1> f;
+    bit<8> f;
 }
 struct H { h_t[1] stack; }
 struct M {}

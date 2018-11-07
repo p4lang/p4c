@@ -45,6 +45,8 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     { return 32; }
 
  public:
+    /// Convert all enums except all the ones appearing in the
+    /// specified file.
     explicit EnumOn32Bits(cstring filename) : filename(filename) { }
 };
 

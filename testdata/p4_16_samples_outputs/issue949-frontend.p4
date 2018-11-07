@@ -48,22 +48,22 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    bool tmp_0;
-    @name("ingress.setDest") action setDest_0() {
+    bool tmp;
+    @name("ingress.setDest") action setDest() {
         hdr.ethernet.dstAddr = 48w0x6af3400426d3;
     }
-    @name("ingress.someTable") table someTable {
+    @name("ingress.someTable") table someTable_0 {
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
-            setDest_0();
+            setDest();
             @defaultonly NoAction_0();
         }
         default_action = NoAction_0();
     }
     apply {
-        tmp_0 = someTable.apply().hit;
+        tmp = someTable_0.apply().hit;
     }
 }
 

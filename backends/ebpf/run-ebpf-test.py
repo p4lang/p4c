@@ -14,58 +14,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# Runs the p4c-ebpf compiler on a P4-16 program
-# and then runs the program on specified input packets
+""" Contains different eBPF models and specifies their individual behavior
+    Currently five phases are defined:
+   1. Invokes the specified compiler on a provided p4 file.
+   2. Parses an stf file and generates an pcap output.
+   3. Loads the generated template or compiles it to a runnable binary.
+   4. Feeds the generated pcap test packets into the P4 "filter"
+   5. Evaluates the output with the expected result from the .stf file
+"""
 
 from __future__ import print_function
 import sys
 import os
-import stat
 import tempfile
 import shutil
-from ebpftargets import EBPFFactory
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
+import argparse
+sys.path.insert(0, os.path.dirname(
+    os.path.realpath(__file__)) + '/../../tools')
 from testutils import *
+
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("rootdir", help="the root directory of "
+                    "the compiler source tree")
+PARSER.add_argument("p4filename", help="the p4 file to process")
+PARSER.add_argument("-b", "--nocleanup", action="store_false",
+                    help="do not remove temporary results for failing tests")
+PARSER.add_argument("-c", "--compiler", dest="compiler", default="p4c-ebpf",
+                    help="Specify the path to the compiler binary, "
+                    "default is p4c-ebpf")
+PARSER.add_argument("-v", "--verbose", action="store_true",
+                    help="verbose operation")
+PARSER.add_argument("-f", "--replace", action="store_true",
+                    help="replace reference outputs with newly generated ones")
+PARSER.add_argument("-t", "--target", dest="target", default="test",
+                    help="Specify the compiler backend target, "
+                    "default is test")
+
+
+def import_from(module, name):
+    """ Try to import a module and class directly instead of the typical
+        Python method. Allows for dynamic imports. """
+    module = __import__(module, fromlist=[name])
+    return getattr(module, name)
+
+
+class EBPFFactory(object):
+    """ Generator class.
+     Returns a target subclass based on the provided target option."""
+    @staticmethod
+    def create(tmpdir, options, template, outputs):
+        target_name = "targets." + options.target + "_target"
+        target_class = "Target"
+        report_output(outputs["stdout"], options.verbose,
+                      "Loading target ", target_name)
+        try:
+            EBPFTarget = import_from(target_name, target_class)
+        except ImportError as e:
+            report_err(outputs["stderr"], e)
+            return None
+        return EBPFTarget(tmpdir, options, template, outputs)
 
 
 class Options(object):
     def __init__(self):
         self.binary = ""                # This program's name
         self.cleanupTmp = True          # Remove tmp folder?
+        self.compiler = ""              # Path to the P4 compiler binary
         self.p4Filename = ""            # File that is being compiled
-        self.compilerSrcDir = ""        # Path to compiler source tree
         self.verbose = False            # Enable verbose output
         self.replace = False            # Replace previous outputs
-        self.target = "bcc"             # The name of the target compiler
+        self.target = "test"            # The name of the target compiler
+        # Actual location of the test framework
+        self.testdir = os.path.dirname(os.path.realpath(__file__))
 
 
-def isdir(path):
-    try:
-        return stat.S_ISDIR(os.stat(path).st_mode)
-    except OSError:
-        return False
-
-
-def report_error(*message):
-    print("***", *message)
+def check_path(path):
+    """Checks if a path is an actual directory and converts the input
+        to an absolute path"""
+    if not os.path.exists(path):
+        msg = "{0} does not exist".format(path)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return os.path.abspath(os.path.expanduser(path))
 
 
 def run_model(ebpf, stffile):
-
-    if not os.path.isfile(stffile):
-        # If no empty.stf present, don't try to run the model at all
-        return SUCCESS
-
     result = ebpf.generate_model_inputs(stffile)
     if result != SUCCESS:
         return result
 
-    result = ebpf.create_filter()
+    result = ebpf.compile_dataplane()
     if result != SUCCESS:
         return result
 
     result = ebpf.run()
+    if result == SKIPPED:
+        return SUCCESS
     if result != SUCCESS:
         return result
 
@@ -79,117 +124,68 @@ def run_test(options, argv):
     assert isinstance(options, Options)
 
     tmpdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
+    os.chmod(tmpdir, 0o744)
     basename = os.path.basename(options.p4filename)  # Name of the p4 test
     base, ext = os.path.splitext(basename)           # Name without the type
     dirname = os.path.dirname(options.p4filename)    # Directory of the file
-    expected_dirname = dirname + "_outputs"          # Expected outputs folder
 
     # We can do this if an *.stf file is present
     stffile = dirname + "/" + base + ".stf"
     if options.verbose:
-        print("Check for ", stffile)
+        print("Checking for ", stffile)
     if not os.path.isfile(stffile):
         # If no stf file is present just use the empty file
         stffile = dirname + "/empty.stf"
-
-    if options.verbose:
-        print("Writing temporary files into ", tmpdir)
 
     template = tmpdir + "/" + "test"
     output = {}
     output["stderr"] = tmpdir + "/" + basename + "-stderr"
     output["stdout"] = tmpdir + "/" + basename + "-stdout"
+    report_output(output["stdout"], options.verbose,
+                  "Writing temporary files into ", tmpdir)
 
     ebpf = EBPFFactory.create(tmpdir, options, template, output)
-
+    if ebpf is None:
+        return FAILURE
     # Compile the p4 file to the specified target
     result, expected_error = ebpf.compile_p4(argv)
 
     # Compile and run the generated output
     if result == SUCCESS and not expected_error:
-        result = run_model(ebpf, stffile)
+        # If no empty.stf present, don't try to run the model at all
+        if not os.path.isfile(stffile):
+            msg = "No stf file present!"
+            report_output(output["stdout"],
+                          options.verbose, msg)
+            result = SUCCESS
+        else:
+            result = run_model(ebpf, stffile)
     # Only if we did not expect it to fail
     if result != SUCCESS:
         return result
 
     # Remove the tmp folder
     if options.cleanupTmp:
-        if options.verbose:
-            print("Removing", tmpdir)
+        report_output(output["stdout"],
+                      options.verbose, "Removing", tmpdir)
         shutil.rmtree(tmpdir)
     return result
 
 
-def usage(options):
-    name = options.binary
-    print(name, "usage:")
-    print(name, "[-t] rootdir [options] file.p4")
-    print("Invokes compiler on the supplied file, possibly adding extra arguments")
-    print("`rootdir` is the root directory of the compiler source tree")
-    print("-t: Specify the compiler backend target, default is bcc")
-    print("options:")
-    print("          -b: do not remove temporary results for failing tests")
-    print("          -v: verbose operation")
-    print("          -f: replace reference outputs with newly generated ones")
-
-
-def parse_options(argv):
-    """ Parses the input arguments and stores them in the options object
-        which is passed to target objects.
-        TODO: This function should use the default python parse package """
-    options = Options()
-    options.binary = argv[0]
-    if len(argv) <= 2:
-        usage(options)
-        sys.exit(FAILURE)
-
-    if argv[1] == '-t':
-        if len(argv) == 0:
-            report_error("Missing argument for -t option")
-            usage(options)
-            sys.exit(FAILURE)
-        else:
-            options.target = argv[2]
-            argv = argv[1:]
-    argv = argv[1:]
-    options.compilerSrcDir = argv[1]
-    argv = argv[2:]
-    if not os.path.isdir(options.compilerSrcDir):
-        print(options.compilerSrcDir + " is not a folder", file=sys.stderr)
-        usage(options)
-        sys.exit(FAILURE)
-
-    while argv[0][0] == '-':
-        if argv[0] == "-b":
-            options.cleanupTmp = False
-        elif argv[0] == "-v":
-            options.verbose = True
-        elif argv[0] == "-f":
-            options.replace = True
-        else:
-            print("Unknown option ", argv[0], file=sys.stderr)
-            usage(options)
-        argv = argv[1:]
-    options.p4filename = argv[-1]
-    argv = argv[1:]
-    options.testName = None
-    if options.p4filename.startswith(options.compilerSrcDir):
-        options.testName = options.p4filename[len(options.compilerSrcDir):]
-        if options.testName.startswith('/'):
-            options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
-            options.testName = options.testName[:-3]
-    return options, argv
-
-
-def main(argv):
+if __name__ == '__main__':
     """ main """
     # Parse options and process argv
-    options, argv = parse_options(argv)
+    args, argv = PARSER.parse_known_args()
+    options = Options()
+    options.compiler = check_path(args.compiler)
+    options.p4filename = check_path(args.p4filename)
+    options.verbose = args.verbose
+    options.replace = args.replace
+    options.cleanupTmp = args.nocleanup
+    options.target = args.target
+
+    # All args after '--' are intended for the p4 compiler
+    argv = argv[1:]
     # Run the test with the extracted options and modified argv
     result = run_test(options, argv)
     sys.exit(result)
-
-
-if __name__ == "__main__":
-    main(sys.argv)

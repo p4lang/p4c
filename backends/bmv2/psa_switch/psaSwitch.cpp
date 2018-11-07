@@ -400,6 +400,11 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto parsePsaArch = new ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main) return;
+
+    if (main->type->name != "PSA_Switch")
+        ::warning("%1%: the main package should be called PSA_Switch"
+                  "; are you using the wrong architecture?", main->type->name);
+
     main->apply(*parsePsaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -559,8 +564,7 @@ CONVERT_EXTERN_OBJECT(Random) {
     auto primitive =
         mkPrimitive("modify_field_rng_uniform");
     auto params = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", em->method->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     /* TODO */
     // auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
@@ -578,8 +582,7 @@ CONVERT_EXTERN_OBJECT(Digest) {
     }
     auto primitive = mkPrimitive("generate_digest");
     auto parameters = mkParameters(primitive);
-    // TODO(jafingerhut):
-    // primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info", em->method->sourceInfoJsonObj());
     cstring listName = "digest";
     // If we are supplied a type argument that is a named type use
     // that for the list name.
@@ -635,7 +638,7 @@ CONVERT_EXTERN_INSTANCE(DirectCounter) {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name", name);
         jctr->emplace("id", nextId("counter_arrays"));
-        // TODO(jafingerhut) - add line/col here?
+        jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
         jctr->emplace("is_direct", true);
         jctr->emplace("binding", it->second->controlPlaneName());
         ctxt->json->counters->append(jctr);
@@ -763,7 +766,7 @@ CONVERT_EXTERN_INSTANCE(ActionProfile) {
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
-    // TODO(jafingerhut) - add line/col here?
+    action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
@@ -783,7 +786,7 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
-    // TODO(jafingerhut) - add line/col here?
+    action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {

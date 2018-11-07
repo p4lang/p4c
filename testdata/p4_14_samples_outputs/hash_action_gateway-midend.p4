@@ -35,18 +35,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
-    @name(".set_index") action set_index_0(bit<16> index, bit<9> port) {
+    @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1_0;
+    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
         standard_metadata.egress_spec = port;
         meta.counter_metadata.counter_run = 4w1;
     }
-    @name(".count_entries") action count_entries_0() {
-        count1.count((bit<32>)meta.counter_metadata.counter_index);
+    @name(".count_entries") action count_entries() {
+        count1_0.count((bit<32>)meta.counter_metadata.counter_index);
     }
-    @name(".index_setter") table index_setter {
+    @name(".index_setter") table index_setter_0 {
         actions = {
-            set_index_0();
+            set_index();
             @defaultonly NoAction_0();
         }
         key = {
@@ -56,16 +56,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 2048;
         default_action = NoAction_0();
     }
-    @name(".stats") table stats {
+    @name(".stats") table stats_0 {
         actions = {
-            count_entries_0();
+            count_entries();
         }
-        default_action = count_entries_0();
+        default_action = count_entries();
     }
     apply {
-        index_setter.apply();
+        index_setter_0.apply();
         if (meta.counter_metadata.counter_run == 4w1) 
-            stats.apply();
+            stats_0.apply();
     }
 }
 

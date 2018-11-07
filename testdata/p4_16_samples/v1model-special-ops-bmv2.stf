@@ -1,0 +1,263 @@
+# Comment lines beginning with "### " show the corresponding
+# simple_switch_CLI command.
+
+######################################################################
+
+# Syntax of STF 'add' line (reference: parse_table_add Python function
+# in file bmv2stf.py):
+
+#     add <tableName> [ <priority> ]  <keyFieldExprs> <actionName> ( <actionParameterList> )
+
+# Square brackets around <priority> indicate that it is optional.
+
+# <keyFieldExprs> is 0 or more occurrences of:  <keyFieldName>:<keyMatchExpr>
+
+# <actionParameterList> is 0 or more occurrences of the following,
+# separated by commas:
+
+# <actionParameterName>:<actionParameterValue>
+
+######################################################################
+
+# test resubmit operation
+
+# first time through ingress
+###    table_add ipv4_da_lpm do_resubmit 10.1.0.101/32 => 10.1.0.1
+add ipv4_da_lpm ipv4.dstAddr:0x0a010065 ingress.do_resubmit(new_ipv4_dstAddr:0x0a010001)
+# second time through ingress
+# Code outside of tables assigns to hdr.ipv4.srcAddr the value of 10.252.129.2 = 0x0afc8102
+###    table_add mac_da set_bd_dmac_intf 0xe50b => 9 02:13:57:0b:e5:ff 2
+add mac_da fwd.l2ptr:0xe50b ingress.set_bd_dmac_intf(bd:9, dmac:0x0213570be5ff, intf:2)
+# first and only time through egress
+###    table_add send_frame rewrite_mac 9 => 00:11:22:33:44:55
+add send_frame fwd.out_bd:9 rewrite_mac(smac:0x001122334455)
+
+# Ether(dst='52:54:00:12:35:02', src='08:00:27:f8:7b:ea') / IP(dst='10.1.0.101', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 645c 0a00020f 0a010065 16a100500008d278
+
+# Ether(dst='02:13:57:0b:e5:ff', src='00:11:22:33:44:55') / IP(dst='10.1.0.101', src='10.252.129.2', ttl=63) / UDP(sport=5793, dport=80)
+# Note: Except that UDP checksum is not updated by the P4 program, so
+# that field of output packet is same as input packet, which is
+# incorrect because of changes in IPv4 header fields.
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+expect 2 0213570be5ff 001122334455 0800 4500 001c 0001 0000 3f11 e56c 0afc8102 0a010065 16a100500008d278
+
+######################################################################
+
+# test recirculate operation
+
+# first time through ingress
+###    table_add ipv4_da_lpm set_l2ptr 10.1.0.201/32 => 0xcafe
+add ipv4_da_lpm ipv4.dstAddr:0x0a0100c9 ingress.set_l2ptr(l2ptr:0xcafe)
+###    table_add mac_da set_bd_dmac_intf 0xcafe => 14 02:13:57:fe:ca:ff 3
+add mac_da fwd.l2ptr:0xcafe ingress.set_bd_dmac_intf(bd:14, dmac:0x021357fecaff, intf:3)
+# first time through egress
+###    table_add send_frame do_recirculate 14 => 10.1.0.2
+add send_frame fwd.out_bd:14 do_recirculate(new_ipv4_dstAddr:0x0a010002)
+# second time through ingress
+# Code outside of tables assigns to hdr.ipv4.srcAddr the value of 10.199.86.99 = 0x0ac75663
+###    table_add mac_da set_bd_dmac_intf 0xec1c => 9 02:13:57:1c:ec:ff 2
+add mac_da fwd.l2ptr:0xec1c ingress.set_bd_dmac_intf(bd:9, dmac:0x0213571cecff, intf:2)
+# this entry is also used by earlier resubmit test
+###    table_add send_frame rewrite_mac 9 => 00:11:22:33:44:55
+# This entry appears above, and so need not be added again here.
+#add send_frame fwd.out_bd:9 rewrite_mac(smac:0x001122334455)
+
+# Ether(dst='52:54:00:12:35:02', src='08:00:27:f8:7b:ea') / IP(dst='10.1.0.201', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 63f8 0a00020f 0a0100c9 16a100500008d214
+
+# Ether(dst='02:13:57:1c:ec:ff', src='00:11:22:33:44:55') / IP(dst='10.1.0.2', src='10.199.86.99', ttl=62) / UDP(sport=5793, dport=80)
+# Note: Except that UDP checksum is not updated by the P4 program, so
+# that field of output packet is same as input packet, which is
+# incorrect because of changes in IPv4 header fields.
+# Note: TTL decremented twice because of two executions of action set_bd_dmac_intf
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+expect 2 0213571cecff 001122334455 0800 4500 001c 0001 0000 3e11 11a4 0ac75663 0a010002 16a100500008d214
+
+######################################################################
+
+# test clone operation from ingress to egress
+
+# first and only time through ingress
+###    table_add ipv4_da_lpm do_clone_i2e 10.3.0.55/32 => 0xd00d
+add ipv4_da_lpm ipv4.dstAddr:0x0a030037 ingress.do_clone_i2e(l2ptr:0xd00d)
+###    table_add mac_da set_bd_dmac_intf 0xd00d => 9 02:13:57:0d:d0:ff 1
+add mac_da fwd.l2ptr:0xd00d ingress.set_bd_dmac_intf(bd:9, dmac:0x0213570dd0ff, intf:1)
+
+# original packet through egress
+# this entry is also used by earlier resubmit test
+###    table_add send_frame rewrite_mac 9 => 00:11:22:33:44:55
+# This entry appears above, and so need not be added again here.
+#add send_frame fwd.out_bd:9 rewrite_mac(smac:0x001122334455)
+
+# cloned packet through egress
+# no table entries matched
+###    mirroring_add 5 4
+# The mirroring_add command causes packets cloned to clone session id
+# 5, to be copied to egress_port 4.
+mirroring_add 5 4
+
+# Ether(dst='52:54:00:12:35:02', src='08:00:27:f8:7b:ea') / IP(dst='10.3.0.55', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6488 0a00020f 0a030037 16a100500008d2a4
+
+# original packet out:
+# Ether(dst='02:13:57:0d:d0:ff', src='00:11:22:33:44:55') / IP(dst='10.3.0.55', src='10.0.2.15', ttl=63) / UDP(sport=5793, dport=80)
+# Note: Except that UDP checksum is not updated by the P4 program, so
+# that field of output packet is same as input packet, which is
+# incorrect because of changes in IPv4 header fields.
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+expect 1 0213570dd0ff 001122334455 0800 4500 001c 0001 0000 3f11 6588 0a00020f 0a030037 16a100500008d2a4
+
+# cloned packet out:
+# 8-byte switch-to-cpu header containing data 0x012e012e5a5a5a5a, followed by:
+# Ether(dst='52:54:00:12:35:02', src='08:00:27:f8:7b:ea') / IP(dst='10.3.0.55', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+# Note that cloned packet has same contents as original packet, except
+# for the 8-byte header added in egress code.  Even the TTL decrement
+# and dest MAC address change made during ingress processing to the
+# original packet are not made in the clone.
+
+#        switch_to_cpu       MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#        header                                        VVVV                     VV
+#        -----------------   ------------ ------------ ---- ------------------- --        -------- --------
+expect 4 012e012e 5a5a5a5a   525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6488 0a00020f 0a030037 16a100500008d2a4
+
+######################################################################
+
+# test clone operation from egress to egress
+
+# first and only time through ingress
+###    table_add ipv4_da_lpm set_l2ptr 10.47.1.1/32 => 0xbeef
+add ipv4_da_lpm ipv4.dstAddr:0x0a2f0101 ingress.set_l2ptr(l2ptr:0xbeef)
+###    table_add mac_da set_bd_dmac_intf 0xbeef => 26 02:13:57:ef:be:ff 0
+add mac_da fwd.l2ptr:0xbeef ingress.set_bd_dmac_intf(bd:26, dmac:0x021357efbeff, intf:0)
+
+# original packet through egress
+###    table_add send_frame do_clone_e2e 26 => 00:11:22:33:55:44
+add send_frame fwd.out_bd:26 do_clone_e2e(smac:0x001122335544)
+
+###    mirroring_add 11 5
+# The mirroring_add command causes packets cloned to clone session id
+# 11, to be copied to egress_port 5.
+mirroring_add 11 5
+
+# cloned packet through egress
+# no table entries matched
+
+# packet in:
+# Ether(dst='52:54:00:12:35:02', src='08:00:27:f8:7b:ea') / IP(dst='10.47.1.1', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6392 0a00020f 0a2f0101 16a100500008d1ae
+
+# original packet out:
+# Ether(dst='02:13:57:ef:be:ff', src='00:11:22:33:55:44') / IP(dst='10.47.1.1', src='10.0.2.15', ttl=63) / UDP(sport=5793, dport=80)
+# Note: Except that UDP checksum is not updated by the P4 program, so
+# that field of output packet is same as input packet, which is
+# incorrect because of changes in IPv4 header fields.
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+expect 0 021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0a2f0101 16a100500008d1ae
+
+# cloned packet out:
+# 8-byte switch-to-cpu header containing data 0x0e2e0e2e5a5a5a5a, followed by:
+# Ether(dst='02:13:57:ef:be:ff', src='00:11:22:33:55:44') / IP(dst='10.47.1.1', src='10.0.2.15', ttl=63) / UDP(sport=5793, dport=80)
+# Note that cloned packet has same contents as original packet, except
+# for the 8-byte header added in egress code.  Even the TTL decrement
+# and dest MAC address change made during ingress processing to the
+# original packet are not made in the clone.
+#        switch_to_cpu       MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#        header                                        VVVV                     VV
+#        -----------------   ------------ ------------ ---- ------------------- --        -------- --------
+expect 5 0e2e0e2e 5a5a5a5a   021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0a2f0101 16a100500008d1ae
+
+######################################################################
+
+# test multicast replication
+
+# first and only time through ingress
+###    table_add ipv4_da_lpm set_mcast_grp 225.1.2.3/32 => 1113
+add ipv4_da_lpm ipv4.dstAddr:0xe1010203 ingress.set_mcast_grp(mcast_grp:1113)
+
+# create multicast group 1113 in packet replication engine
+# It replicates packets to this set of (egress_port, egress_rid) pairs:
+# (6, 400)
+# (7, 401)
+# (8, 402)
+###    mc_mgrp_create 1113
+###    mc_node_create 400 6
+###    mc_node_create 401 7
+###    mc_node_create 402 8
+mc_mgrp_create 1113
+mc_node_create 400 6
+mc_node_create 401 7
+mc_node_create 402 8
+#    # Note: The 0, 1, and 2 below should be the "handles" created when
+#    # the mc_node_create commands above were performed.  If they were
+#    # the only such commands performed, and they were done in that
+#    # order, they should have been assigned handles 0, 1, and 2.
+###    mc_node_associate 1113 0
+###    mc_node_associate 1113 1
+###    mc_node_associate 1113 2
+mc_node_associate 1113 0
+mc_node_associate 1113 1
+mc_node_associate 1113 2
+
+# first copy of packet through egress
+###    table_add get_multicast_copy_out_bd set_out_bd 1113 400 => 10
+add get_multicast_copy_out_bd mcast_grp:1113 egress_rid:400 egress.set_out_bd(bd:10)
+###    table_add send_frame rewrite_mac 10 => 00:11:22:33:0a:55
+add send_frame fwd.out_bd:10 rewrite_mac(smac:0x001122330a55)
+
+# second copy of packet through egress
+###    table_add get_multicast_copy_out_bd set_out_bd 1113 401 => 11
+add get_multicast_copy_out_bd mcast_grp:1113 egress_rid:401 egress.set_out_bd(bd:11)
+###    table_add send_frame rewrite_mac 11 => 00:11:22:33:0b:55
+add send_frame fwd.out_bd:11 rewrite_mac(smac:0x001122330b55)
+
+# third copy of packet through egress
+###    table_add get_multicast_copy_out_bd set_out_bd 1113 402 => 12
+add get_multicast_copy_out_bd mcast_grp:1113 egress_rid:402 egress.set_out_bd(bd:12)
+###    table_add send_frame rewrite_mac 12 => 00:11:22:33:0c:55
+add send_frame fwd.out_bd:12 rewrite_mac(smac:0x001122330c55)
+
+#mcast_pkt_in=Ether() / IP(dst='225.1.2.3') / UDP(sport=5793, dport=80)
+
+# packet in:
+# Ether(dst='52:54:00:12:35:02', src='08:00:27:f8:7b:ea') / IP(dst='225.1.2.3', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+#        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
+#                                  VVVV                     VV
+#        ------------ ------------ ---- ------------------- --        -------- --------
+packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9
+
+# copy #1 packet out to port 6:
+# Ether(dst='52:54:00:12:35:02', src='00:11:22:33:0a:55') / IP(dst='225.1.2.3', src='10.0.2.15', ttl=64) / UDP(sport=5793, dport=80)
+# Note that the output packets have TTL the same as the input packet.
+# This is because of the way the P4 program was written.  It is not
+# the correct behavior for an RFC compliant router forwarding IP
+# multicast packets.
+expect 6 525400123502 001122330a55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9
+
+# copy #2 packet out to port 7:
+# only difference with copy #1 above is output port and Ethernet source MAC address
+expect 7 525400123502 001122330b55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9
+
+# copy #3 packet out to port 8:
+# only difference with copy #1 above is output port and Ethernet source MAC address
+expect 8 525400123502 001122330c55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9

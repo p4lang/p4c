@@ -45,6 +45,7 @@ namespace P4 {
    - exits do not appear in functions
    - extern constructors have the same name as the enclosing extern
    - names of all parameters are distinct
+   - no duplicate declarations in toplevel program
  */
 class ValidateParsedProgram final : public Inspector {
     void container(const IR::IContainer* type);
@@ -57,6 +58,7 @@ class ValidateParsedProgram final : public Inspector {
  public:
     ValidateParsedProgram()
     { setName("ValidateParsedProgram"); }
+    void postorder(const IR::P4Program* program) override;
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;
     void postorder(const IR::Method* t) override;

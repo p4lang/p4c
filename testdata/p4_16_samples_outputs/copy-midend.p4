@@ -3,14 +3,14 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    @name("c.a") action a_0() {
+    @name("c.a") action a() {
         b = 32w0;
     }
     @hidden table tbl_a {
         actions = {
-            a_0();
+            a();
         }
-        const default_action = a_0();
+        const default_action = a();
     }
     apply {
         tbl_a.apply();

@@ -21,7 +21,10 @@ limitations under the License.
 
 #include <set>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "p4/config/v1/p4info.pb.h"
+#pragma GCC diagnostic pop
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
@@ -143,7 +146,7 @@ class P4RuntimeArchHandlerIface {
                                        const P4::ExternFunction* externFunction) = 0;
     /// This method is called between the two passes (collect and add) in case
     /// the architecture requires some logic to be performed then.
-    virtual void postCollect(const P4RuntimeSymbolTableIface& symbols) = 0;
+    virtual void postCollect(P4RuntimeSymbolTableIface* symbols) = 0;
     /// Adds architecture-specific properties for @tableBlock to the @table
     /// Protobuf message.
     virtual void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
@@ -160,6 +163,10 @@ class P4RuntimeArchHandlerIface {
     virtual void addExternFunction(const P4RuntimeSymbolTableIface& symbols,
                                    ::p4::config::v1::P4Info* p4info,
                                    const P4::ExternFunction* externFunction) = 0;
+    /// This method is called after the add pass in case the architecture
+    /// requires some logic to be performed then.
+    virtual void postAdd(const P4RuntimeSymbolTableIface& symbols,
+                         ::p4::config::v1::P4Info* p4info) = 0;
 };
 
 /// A functor interface that needs to be implemented for each

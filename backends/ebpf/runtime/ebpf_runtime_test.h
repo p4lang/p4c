@@ -29,7 +29,6 @@ limitations under the License.
 typedef int (*packet_filter)(SK_BUFF* s);
 
 void *run_and_record_output(packet_filter ebpf_filter, const char *pcap_base, pcap_list_t *pkt_list, int debug);
-char *generate_pcap_name(const char *pcap_base, int index, const char *suffix);
 void init_ebpf_tables(int debug);
 void delete_ebpf_tables(int debug);
 

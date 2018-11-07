@@ -19,6 +19,7 @@ set (P4_FRONTEND_SRCS
   p4/checkNamedArgs.cpp
   p4/createBuiltins.cpp
   p4/def_use.cpp
+  p4/defaultArguments.cpp
   p4/deprecated.cpp
   p4/directCalls.cpp
   p4/dontcareArgs.cpp
@@ -50,6 +51,7 @@ set (P4_FRONTEND_SRCS
   p4/simplifyParsers.cpp
   p4/specialize.cpp
   p4/strengthReduction.cpp
+  p4/structInitializers.cpp
   p4/symbol_table.cpp
   p4/tableApply.cpp
   p4/tableKeyNames.cpp
@@ -78,6 +80,7 @@ set (P4_FRONTEND_HDRS
   p4/coreLibrary.h
   p4/createBuiltins.h
   p4/def_use.h
+  p4/defaultArguments.h
   p4/deprecated.h
   p4/directCalls.h
   p4/dontcareArgs.h
@@ -109,6 +112,7 @@ set (P4_FRONTEND_HDRS
   p4/simplifyParsers.h
   p4/specialize.h
   p4/strengthReduction.h
+  p4/structInitializers.h
   p4/symbol_table.h
   p4/tableApply.h
   p4/tableKeyNames.h
@@ -238,6 +242,9 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${FRONTEND_CPPLINT_FILES}")
 
 build_unified(FRONTEND_SOURCES)
 build_unified(EXTENSION_FRONTEND_SOURCES)
+if (FLEX_INCLUDE_DIRS)
+  include_directories(${FLEX_INCLUDE_DIRS})
+endif ()
 add_library (frontend STATIC ${FRONTEND_SOURCES} ${EXTENSION_FRONTEND_SOURCES})
 add_dependencies (frontend genIR)
 add_dependencies (frontend mkp4dirs mkv1dirs)

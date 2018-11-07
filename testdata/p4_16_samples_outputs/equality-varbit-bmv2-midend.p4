@@ -21,13 +21,13 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    H h_1;
+    H h_0;
     @hidden action act() {
         stdmeta.egress_spec = 9w1;
     }
     @hidden action act_0() {
         stdmeta.egress_spec = 9w0;
-        h_1 = hdr.h;
+        h_0 = hdr.h;
     }
     @hidden table tbl_act {
         actions = {
@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         tbl_act.apply();
-        if (hdr.h.v == h_1.v) 
+        if (hdr.h.v == h_0.v) 
             tbl_act_0.apply();
     }
 }

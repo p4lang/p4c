@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <utility>
 #include "ir.h"
 
 namespace IR {
@@ -39,19 +40,18 @@ const cstring IR::Annotation::hiddenAnnotation = "hidden";
 const cstring IR::Annotation::lengthAnnotation = "length";
 const cstring IR::Annotation::optionalAnnotation = "optional";
 
-std::map<int, const IR::Type_Bits*> *Type_Bits::signedTypes = nullptr;
-std::map<int, const IR::Type_Bits*> *Type_Bits::unsignedTypes = nullptr;
-
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;
 
 Annotations* Annotations::empty = new Annotations(Vector<Annotation>());
 
 const Type_Bits* Type_Bits::get(int width, bool isSigned) {
-    std::map<int, const IR::Type_Bits*> *&map = isSigned ? signedTypes : unsignedTypes;
-    if (map == nullptr)
-        map = new std::map<int, const IR::Type_Bits*>();
-    auto &result = (*map)[width];
+    // map (width, signed) to type
+    using bit_type_key = std::pair<int, bool>;
+    static std::map<bit_type_key, const IR::Type_Bits*> *type_map = nullptr;
+    if (type_map == nullptr)
+        type_map = new std::map<bit_type_key, const IR::Type_Bits*>();
+    auto &result = (*type_map)[std::make_pair(width, isSigned)];
     if (!result)
         result = new Type_Bits(width, isSigned);
     return result;
@@ -142,6 +142,7 @@ const Type* Type_Tuple::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : components) {
         auto at = a->getP4Type();
+        if (!at) return nullptr;
         args->push_back(at);
     }
     return new IR::Type_Tuple(srcInfo, *args);

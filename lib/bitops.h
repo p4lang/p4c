@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ limitations under the License.
 #define P4C_LIB_BITOPS_H_
 
 #include <limits.h>
-#include "gmputil.h"
-#include "exceptions.h"
+#include "bitvec.h"
 
 static inline unsigned bitcount(unsigned v) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -28,18 +27,7 @@ static inline unsigned bitcount(unsigned v) {
     unsigned rv = 0;
     while (v) { v &= v-1; ++rv; }
 #endif
-    return rv; }
-static inline unsigned bitcount(mpz_class value) {
-    mpz_class v = value;
-    if (sgn(v) < 0)
-        BUG("bitcount of negative number %1%", value);
-    unsigned rv = 0;
-    while (v != 0) { v &= v-1; ++rv; }
-    return rv; }
-
-static inline int ffs(mpz_class v) {
-    if (v == 0) return -1;
-    return mpz_scan1(v.get_mpz_t(), 0);
+    return rv;
 }
 
 static inline int floor_log2(unsigned v) {
@@ -49,14 +37,21 @@ static inline int floor_log2(unsigned v) {
 #else
     while (v) { rv++; v >>= 1; }
 #endif
-    return rv; }
-static inline int floor_log2(mpz_class v) {
-    int rv = -1;
-    while (v > 0) { rv++; v /= 2; }
-    return rv; }
+    return rv;
+}
 
 static inline int ceil_log2(unsigned v) {
     return v ? floor_log2(v-1) + 1 : -1;
+}
+
+static inline unsigned bitmask2bytemask(const bitvec &a) {
+    int max = a.max().index();
+    if (max < 0) return 0;
+    unsigned rv = 0;
+    for (unsigned i = 0; i <= max/8U; i++)
+        if (a.getrange(i*8, 8))
+            rv |= 1 << i;
+    return rv;
 }
 
 #endif /* P4C_LIB_BITOPS_H_ */

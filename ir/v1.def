@@ -405,6 +405,7 @@ class V1Table : IInstance {
     ID                          action_profile = {};
     safe_vector<ID>             actions = {};
     ID                          default_action = {};
+    bool                        default_action_is_const = false;
     NullOK Vector<Expression>   default_action_args = 0;
     inline TableProperties      properties = {};  // non-standard properties
     optional Annotations        annotations = Annotations::empty;

@@ -29,26 +29,26 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    bit<16> tmp_0;
+    bit<16> tmp;
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.rand") Random<bit<16>>(16w200, 16w400) rand;
-    @name("MyIC.execute_random") action execute_random_0() {
-        tmp_0 = rand.read();
-        b.data = tmp_0;
+    @name("MyIC.rand") Random<bit<16>>(16w200, 16w400) rand_0;
+    @name("MyIC.execute_random") action execute_random() {
+        tmp = rand_0.read();
+        b.data = tmp;
     }
-    @name("MyIC.tbl") table tbl {
+    @name("MyIC.tbl") table tbl_0 {
         key = {
             a.srcAddr: exact @name("a.srcAddr") ;
         }
         actions = {
             NoAction_0();
-            execute_random_0();
+            execute_random();
         }
         default_action = NoAction_0();
     }
     apply {
-        tbl.apply();
+        tbl_0.apply();
     }
 }
 

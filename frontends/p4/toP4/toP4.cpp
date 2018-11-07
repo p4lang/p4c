@@ -150,7 +150,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
 
     bool first = true;
     dump(2);
-    for (auto a : program->declarations) {
+    for (auto a : program->objects) {
         // Check where this declaration originates
         cstring sourceFile = ifSystemFile(a);
         if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
@@ -184,7 +184,7 @@ bool ToP4::preorder(const IR::P4Program* program) {
         first = false;
         visit(a);
     }
-    if (!program->declarations.empty())
+    if (!program->objects.empty())
         builder.newline();
     return false;
 }
@@ -618,7 +618,7 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
 }
 
 bool ToP4::preorder(const IR::Declaration_Variable* v) {
-    dump(1);
+    dump(2);
     visit(v->annotations);
     auto type = v->type->getP4Type();
     CHECK_NULL(type);
@@ -839,6 +839,33 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::NamedExpression* e) {
+    builder.append(e->name.name);
+    builder.append(" = ");
+    visit(e->expression);
+    return false;
+}
+
+bool ToP4::preorder(const IR::StructInitializerExpression* e) {
+    // Currently the P4 language does not have a syntax
+    // for struct initializers, so we use the same syntax as for list expressions.
+    // TODO: this is incorrect if the fields are not in the same order as
+    // in the type.
+    builder.append("{");
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
+    bool first = true;
+    for (auto c : e->components) {
+        if (!first)
+            builder.append(",");
+        first = false;
+        visit(c->expression);
+    }
+    expressionPrecedence = prec;
+    builder.append("}");
+    return false;
+}
+
 bool ToP4::preorder(const IR::MethodCallExpression* e) {
     int prec = expressionPrecedence;
     bool useParens = (prec > DBPrint::Prec_Postfix) ||
@@ -1002,7 +1029,7 @@ bool ToP4::preorder(const IR::EmptyStatement*) {
 }
 
 bool ToP4::preorder(const IR::IfStatement* s) {
-    dump(1);
+    dump(2);
     builder.append("if (");
     visit(s->condition);
     builder.append(") ");
@@ -1076,9 +1103,9 @@ bool ToP4::preorder(const IR::Annotation * a) {
             if (!first)
                 builder.append(", ");
             first = false;
-            builder.append(kvp.first);
+            builder.append(kvp->name);
             builder.append("=");
-            visit(kvp.second);
+            visit(kvp->expression);
         }
         builder.append(")");
     }
@@ -1107,6 +1134,10 @@ bool ToP4::preorder(const IR::Parameter* p) {
     visit(p->type);
     builder.spc();
     builder.append(p->name);
+    if (p->defaultValue != nullptr) {
+        builder.append("=");
+        visit(p->defaultValue);
+    }
     return false;
 }
 

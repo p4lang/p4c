@@ -5,6 +5,10 @@ branches:
   - master
   - stable
 
+os:
+  - linux
+  - osx
+
 services:
   - docker
 
@@ -15,10 +19,14 @@ cache:
 env:
   - CTEST_PARALLEL_LEVEL=4
 
+before_install:
+  - tools/install_os_deps.sh
+
 install:
-  - tools/start_ccache
-  - docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test .
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then tools/start_ccache; fi
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test . ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE && cd build && make -j 2 ; fi
 
 script:
-  - docker run -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
-  - ls $HOME/.ccache
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker run -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "ebpf$" ; fi

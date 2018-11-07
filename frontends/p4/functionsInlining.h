@@ -51,8 +51,10 @@ class DiscoverFunctionsInlining : public Inspector {
 */
 class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsInlineWorkList> {
     P4::ReferenceMap* refMap;
-    /// All elements in the replacement map are actually IR::Function objects
-    std::map<const IR::Statement*, const IR::Node*>* replMap;
+    // All elements in the replacement map are actually IR::Function objects
+    typedef std::map<const IR::Statement*, const IR::Node*> ReplacementMap;
+    /// A stack of replacement maps
+    std::vector<ReplacementMap*> replacementStack;
 
     /// Clones the body of a function without the return statement;
     /// returns the expression of a return statement.  This assumes
@@ -64,30 +66,20 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node* inlineBefore(
         const IR::Node* calleeNode, const IR::MethodCallExpression* call,
         const IR::Statement* before);
-    /// Preorder function for a potentiall caller
-    const IR::Node* preCaller(const IR::Node* caller);
+    bool preCaller();
     const IR::Node* postCaller(const IR::Node* caller);
+    const ReplacementMap* getReplacementMap() const;
+    void dumpReplacementMap() const;
 
  public:
-    explicit FunctionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr)
+    explicit FunctionsInliner(bool isv1) : refMap(new P4::ReferenceMap())
     { refMap->setIsV1(isv1); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
-    const IR::Node* preorder(IR::Function* function) override
-    { return preCaller(function); }
-    const IR::Node* postorder(IR::Function* function) override
-    { return postCaller(function); }
-    const IR::Node* preorder(IR::P4Control* control) override
-    { return preCaller(control); }
-    const IR::Node* postorder(IR::P4Control* control) override
-    { return postCaller(control); }
-    const IR::Node* preorder(IR::P4Parser* parser) override
-    { return preCaller(parser); }
-    const IR::Node* postorder(IR::P4Parser* parser) override
-    { return postCaller(parser); }
-    const IR::Node* preorder(IR::P4Action* action) override
-    { return preCaller(action); }
-    const IR::Node* postorder(IR::P4Action* action) override
-    { return postCaller(action); }
+    void end_apply(const IR::Node* node) override;
+    const IR::Node* preorder(IR::Function* function) override;
+    const IR::Node* preorder(IR::P4Control* control) override;
+    const IR::Node* preorder(IR::P4Parser* parser) override;
+    const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
 };

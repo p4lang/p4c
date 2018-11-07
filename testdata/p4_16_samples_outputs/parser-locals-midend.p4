@@ -12,12 +12,12 @@ struct S {
 }
 
 parser p() {
-    H s_h1;
-    H s_h2;
-    bit<32> s_c;
+    H s_0_h1;
+    H s_0_h2;
+    bit<32> s_0_c;
     state start {
-        s_h1.setInvalid();
-        s_h2.setInvalid();
+        s_0_h1.setInvalid();
+        s_0_h2.setInvalid();
         transition accept;
     }
 }

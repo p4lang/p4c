@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
+
 set (GRAPHS_SRCS
   graphs.cpp
   controls.cpp

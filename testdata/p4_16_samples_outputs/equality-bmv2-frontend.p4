@@ -29,7 +29,7 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    H[2] tmp;
+    H[2] tmp_0;
     apply {
         hdr.same.setValid();
         hdr.same.same = 8w0;
@@ -40,9 +40,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.same.same = hdr.same.same | 8w2;
         if (hdr.h == hdr.a[0]) 
             hdr.same.same = hdr.same.same | 8w4;
-        tmp[0] = hdr.h;
-        tmp[1] = hdr.a[0];
-        if (tmp == hdr.a) 
+        tmp_0[0] = hdr.h;
+        tmp_0[1] = hdr.a[0];
+        if (tmp_0 == hdr.a) 
             hdr.same.same = hdr.same.same | 8w8;
     }
 }

@@ -42,17 +42,17 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.c.add") action c_add(bit<32> data) {
+    @name("ingress.c.add") action c_add_0(bit<32> data) {
         h.h.b = h.h.a + data;
     }
-    @name("ingress.c.t") table c_t_0 {
+    @name("ingress.c.t") table c_t {
         actions = {
-            c_add();
+            c_add_0();
         }
-        const default_action = c_add(32w10);
+        const default_action = c_add_0(32w10);
     }
     apply {
-        c_t_0.apply();
+        c_t.apply();
         sm.egress_spec = 9w0;
     }
 }

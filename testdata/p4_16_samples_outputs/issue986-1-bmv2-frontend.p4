@@ -39,13 +39,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name("ingress.t1") table t1 {
+    @name("ingress.t1") table t1_0 {
         actions = {
             NoAction_0();
         }
         default_action = NoAction_0();
     }
-    @name("ingress.t2") table t2 {
+    @name("ingress.t2") table t2_0 {
         actions = {
             NoAction_3();
         }
@@ -53,10 +53,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         if (m.b == 1w0) 
-            t1.apply();
+            t1_0.apply();
         else 
-            t1.apply();
-        t2.apply();
+            t1_0.apply();
+        t2_0.apply();
     }
 }
 

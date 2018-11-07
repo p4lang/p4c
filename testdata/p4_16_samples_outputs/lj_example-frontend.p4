@@ -38,30 +38,30 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("LjPipe.Drop_action") action Drop_action_0(out PortId port) {
+    @name("LjPipe.Drop_action") action Drop_action(out PortId port) {
         port = 4w0xf;
     }
-    @name("LjPipe.Drop_1") action Drop() {
+    @name("LjPipe.Drop_1") action Drop_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("LjPipe.Forward") action Forward_0(PortId outPort) {
+    @name("LjPipe.Forward") action Forward(PortId outPort) {
         outCtrl.outputPort = outPort;
     }
-    @name("LjPipe.Enet_lkup") table Enet_lkup {
+    @name("LjPipe.Enet_lkup") table Enet_lkup_0 {
         key = {
             p.arpa_pak.dest: exact @name("p.arpa_pak.dest") ;
         }
         actions = {
-            Drop_action_0(outCtrl.outputPort);
-            Drop();
-            Forward_0();
+            Drop_action(outCtrl.outputPort);
+            Drop_0();
+            Forward();
         }
-        default_action = Drop();
+        default_action = Drop_0();
     }
     apply {
         outCtrl.outputPort = 4w0xf;
         if (p.arpa_pak.isValid()) 
-            Enet_lkup.apply();
+            Enet_lkup_0.apply();
     }
 }
 

@@ -1,4 +1,4 @@
-# header hdr { bit<8>  e; bit<16> t; bit<8>  l; bit<8> r; bit<1>  v; }
+# header hdr { bit<8>  e; bit<16> t; bit<8>  l; bit<8> r; bit<8>  v; }
 
 # t_ternary tests: if packets come on port 0, we missed!
 

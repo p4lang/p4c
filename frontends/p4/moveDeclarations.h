@@ -42,7 +42,7 @@ class MoveDeclarations : public Transform {
     { getMoves()->push_back(decl); }
 
  public:
-    MoveDeclarations() { setName("MoveDeclarations"); }
+    MoveDeclarations() { setName("MoveDeclarations"); visitDagOnce = false; }
     void end_apply(const IR::Node*) override
     { BUG_CHECK(toMove.empty(), "Non empty move stack"); }
     const IR::Node* preorder(IR::P4Action* action) override {
