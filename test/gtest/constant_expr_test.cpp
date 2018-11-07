@@ -115,5 +115,30 @@ TEST_F(ConstantExpr, TestUint64) {
     EXPECT_EQ(res, val);
 }
 
+TEST_F(ConstantExpr, TestIntegerFuncs) {
+    unsigned int val1 = 0x03030303U;
+    unsigned int val2 = 0x06060606U;
+
+    IR::Constant c1(val1);
+    IR::Constant c2(val2);
+
+    auto lsh_res = c1 << 1;
+    auto rsh_res = c2 >> 1;
+    auto and_res = c1 & c2;
+    auto ior_res = c1 | c2;
+    auto xor_res = c1 ^ c2;
+    auto sub_res = c2 - c1;
+
+    EXPECT_EQ(lsh_res.asUnsigned(), 0x06060606U);
+    EXPECT_EQ(rsh_res.asUnsigned(), 0x03030303U);
+    EXPECT_EQ(and_res.asUnsigned(), 0x02020202U);
+    EXPECT_EQ(ior_res.asUnsigned(), 0x07070707U);
+    EXPECT_EQ(xor_res.asUnsigned(), 0x05050505U);
+    EXPECT_EQ(sub_res.asUnsigned(), 0x03030303U);
+
+    IR::Constant c(int(123));
+    auto neg_res = -c;
+    EXPECT_EQ(neg_res.asInt(), -123);
+}
 
 }  // namespace Test
