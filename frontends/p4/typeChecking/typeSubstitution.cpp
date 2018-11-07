@@ -49,7 +49,7 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     if (containsKey(var)) {
         const IR::Type* bound = lookup(var);
         BUG("Two constraints on the same variable %1%: %2% and %3%",
-                                var->toString(), substitution->toString(), bound->toString());
+            var->toString(), substitution->toString(), bound->toString());
     }
 
     // Replace var with substitution everywhere
@@ -59,7 +59,7 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
         BUG("Cannot set binding");
 
     TypeVariableSubstitutionVisitor visitor(tvs);
-    for (auto bound : binding) {
+    for (auto &bound : binding) {
         const IR::Type* type = bound.second;
         const IR::Node* newType = type->apply(visitor);
         if (newType == nullptr)
