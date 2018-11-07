@@ -126,6 +126,20 @@ IR::Constant::operator&(const IR::Constant &c) const {
 }
 
 IR::Constant
+IR::Constant::operator|(const IR::Constant &c) const {
+  mpz_class v;
+  mpz_ior(v.get_mpz_t(), value.get_mpz_t(), c.value.get_mpz_t());
+  return IR::Constant(v);
+}
+
+IR::Constant
+IR::Constant::operator^(const IR::Constant &c) const {
+  mpz_class v;
+  mpz_xor(v.get_mpz_t(), value.get_mpz_t(), c.value.get_mpz_t());
+  return IR::Constant(v);
+}
+
+IR::Constant
 IR::Constant::operator-(const IR::Constant &c) const {
   mpz_class v;
   mpz_sub(v.get_mpz_t(), value.get_mpz_t(), c.value.get_mpz_t());

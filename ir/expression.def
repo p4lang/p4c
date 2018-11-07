@@ -213,6 +213,8 @@ class Constant : Literal {
     Constant operator<<(const unsigned &shift) const;
     Constant operator>>(const unsigned &shift) const;
     Constant operator&(const Constant &c) const;
+    Constant operator|(const Constant &c) const;
+    Constant operator^(const Constant &c) const;
     Constant operator-(const Constant &c) const;
     Constant operator-() const;
 #end
