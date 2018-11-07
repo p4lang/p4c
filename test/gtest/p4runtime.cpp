@@ -584,10 +584,10 @@ TEST_F(P4Runtime, P4_14_MatchFields) {
         { 12, "hStack[3].headerField", 16, MatchField::RANGE },
         { 13, "h.$valid$", 1, MatchField::EXACT },
         { 14, "hStack[3].$valid$", 1, MatchField::EXACT },
-        { 15, "h.headerField[3:2]", 2, MatchField::EXACT },
-        { 16, "h.headerField[3:2]", 2, MatchField::TERNARY },
-        { 17, "h.headerField & 13", 16, MatchField::EXACT },
-        { 18, "h.headerField & 13", 16, MatchField::TERNARY },
+        { 15, "h.headerField", 2, MatchField::EXACT },
+        { 16, "h.headerField", 2, MatchField::TERNARY },
+        { 17, "h.headerField", 16, MatchField::EXACT },
+        { 18, "h.headerField", 16, MatchField::TERNARY },
     };
 
     for (auto i = 0; i < igTable->match_fields_size(); i++) {
