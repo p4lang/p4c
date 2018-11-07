@@ -41,7 +41,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            key_0: exact @name("data.f1 & 16711935") ;
+            key_0: exact @name("data.f1") ;
         }
         default_action = NoAction_0();
     }
