@@ -1762,8 +1762,8 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
         key = {
             hdr.ipv4.isValid()       : exact;
             hdr.ipv6.isValid()       : exact;
-            hdr.ipv4.dstAddr[31:28]  : ternary;
-            hdr.ipv6.dstAddr[127:120]: ternary;
+            hdr.ipv4.dstAddr[31:28]  : ternary @name("ipv4.dstAddr") ;
+            hdr.ipv6.dstAddr[127:120]: ternary @name("ipv6.dstAddr") ;
         }
     }
     apply {
@@ -1836,8 +1836,8 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
             hdr.ipv4.isValid()       : exact;
             hdr.ipv6.isValid()       : exact;
             hdr.mpls[0].isValid()    : exact;
-            hdr.ipv4.dstAddr[31:28]  : ternary;
-            hdr.ipv6.dstAddr[127:120]: ternary;
+            hdr.ipv4.dstAddr[31:28]  : ternary @name("ipv4.dstAddr") ;
+            hdr.ipv6.dstAddr[127:120]: ternary @name("ipv6.dstAddr") ;
         }
     }
     @name(".smac_rewrite") table smac_rewrite {
@@ -3099,7 +3099,7 @@ control validate_outer_ipv4_header(inout headers hdr, inout metadata meta, inout
         key = {
             hdr.ipv4.version       : ternary;
             hdr.ipv4.ttl           : ternary;
-            hdr.ipv4.srcAddr[31:24]: ternary;
+            hdr.ipv4.srcAddr[31:24]: ternary @name("ipv4.srcAddr") ;
         }
         size = 512;
     }
@@ -3126,7 +3126,7 @@ control validate_outer_ipv6_header(inout headers hdr, inout metadata meta, inout
         key = {
             hdr.ipv6.version         : ternary;
             hdr.ipv6.hopLimit        : ternary;
-            hdr.ipv6.srcAddr[127:112]: ternary;
+            hdr.ipv6.srcAddr[127:112]: ternary @name("ipv6.srcAddr") ;
         }
         size = 512;
     }
@@ -4295,13 +4295,13 @@ control process_validate_packet(inout headers hdr, inout metadata meta, inout st
             set_malformed_packet;
         }
         key = {
-            meta.l2_metadata.lkp_mac_sa[40:40]     : ternary;
+            meta.l2_metadata.lkp_mac_sa[40:40]     : ternary @name("l2_metadata.lkp_mac_sa") ;
             meta.l2_metadata.lkp_mac_da            : ternary;
             meta.l3_metadata.lkp_ip_type           : ternary;
             meta.l3_metadata.lkp_ip_ttl            : ternary;
             meta.l3_metadata.lkp_ip_version        : ternary;
-            meta.ipv4_metadata.lkp_ipv4_sa[31:24]  : ternary;
-            meta.ipv6_metadata.lkp_ipv6_sa[127:112]: ternary;
+            meta.ipv4_metadata.lkp_ipv4_sa[31:24]  : ternary @name("ipv4_metadata.lkp_ipv4_sa") ;
+            meta.ipv6_metadata.lkp_ipv6_sa[127:112]: ternary @name("ipv6_metadata.lkp_ipv6_sa") ;
         }
         size = 512;
     }

@@ -48,7 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         key = {
             hdr.kilometer.isValid()      : exact @name("kilometer.$valid$") ;
-            key_0                        : lpm @name("0") ;
+            key_0                        : lpm @name("kilometer.flaccidly") ;
             hdr.expressivenesss.isValid(): exact @name("expressivenesss.$valid$") ;
         }
         default_action = NoAction_0();

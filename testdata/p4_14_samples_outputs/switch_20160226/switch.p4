@@ -2892,7 +2892,7 @@ control validate_outer_ipv4_header(inout headers hdr, inout metadata meta, inout
         key = {
             hdr.ipv4.version                     : ternary;
             meta.l3_metadata.lkp_ip_ttl          : ternary;
-            meta.ipv4_metadata.lkp_ipv4_sa[31:24]: ternary;
+            meta.ipv4_metadata.lkp_ipv4_sa[31:24]: ternary @name("ipv4_metadata.lkp_ipv4_sa") ;
         }
         size = 512;
     }
@@ -2919,7 +2919,7 @@ control validate_outer_ipv6_header(inout headers hdr, inout metadata meta, inout
         key = {
             hdr.ipv6.version                       : ternary;
             meta.l3_metadata.lkp_ip_ttl            : ternary;
-            meta.ipv6_metadata.lkp_ipv6_sa[127:112]: ternary;
+            meta.ipv6_metadata.lkp_ipv6_sa[127:112]: ternary @name("ipv6_metadata.lkp_ipv6_sa") ;
         }
         size = 512;
     }
@@ -3605,13 +3605,13 @@ control process_validate_packet(inout headers hdr, inout metadata meta, inout st
             set_malformed_packet;
         }
         key = {
-            meta.l2_metadata.lkp_mac_sa[40:40]     : ternary;
+            meta.l2_metadata.lkp_mac_sa[40:40]     : ternary @name("l2_metadata.lkp_mac_sa") ;
             meta.l2_metadata.lkp_mac_da            : ternary;
             meta.l3_metadata.lkp_ip_type           : ternary;
             meta.l3_metadata.lkp_ip_ttl            : ternary;
             meta.l3_metadata.lkp_ip_version        : ternary;
-            meta.ipv4_metadata.lkp_ipv4_sa[31:24]  : ternary;
-            meta.ipv6_metadata.lkp_ipv6_sa[127:112]: ternary;
+            meta.ipv4_metadata.lkp_ipv4_sa[31:24]  : ternary @name("ipv4_metadata.lkp_ipv4_sa") ;
+            meta.ipv6_metadata.lkp_ipv6_sa[127:112]: ternary @name("ipv6_metadata.lkp_ipv6_sa") ;
         }
         size = 512;
     }
