@@ -25,16 +25,15 @@ import struct
 import sys
 import json
 import argparse
-import bmpy_utils as utils
 
 parser = argparse.ArgumentParser(description='BM nanomsg event logger client')
-parser.add_argument('--socket', help='IPC socket to which to subscribe',
+parser.add_argument('--socket', help='Nanomsg socket to which to subscribe',
                     action="store", required=False)
-parser.add_argument('--json', help='JSON description of P4 program [deprecated]',
+parser.add_argument('--json', help='JSON description of P4 program',
                     action="store", required=False)
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
                     type=int, action="store", default=9090)
-parser.add_argument('--thrift-ip', help='Thrift IP address for table updates',
+parser.add_argument('--thrift-ip', help='Thrift IP address for table updates. If both --socket and --json are provided, then Thrift will not be used.',
                     type=str, action="store", default='localhost')
 
 args = parser.parse_args()
@@ -416,6 +415,10 @@ class ConfigChange(Msg):
         return "type: %s, switch_id: %d" % (self.type_str, self.switch_id)
 
 def json_init(client):
+    if client is None:
+        print "Unable to request new config from switch because Thrift is unavailable"
+        sys.exit(0)
+    import bmpy_utils as utils
     json_cfg = utils.get_json_config(standard_client=client)
     name_map.load_names(json_cfg)
 
@@ -423,8 +426,6 @@ def recv_msgs(socket_addr, client):
     def get_msg_type(msg):
         type_, = struct.unpack('i', msg[:4])
         return type_
-
-    json_init(client)
 
     sub = nnpy.Socket(nnpy.AF_SP, nnpy.SUB)
     sub.connect(socket_addr)
@@ -449,24 +450,44 @@ def recv_msgs(socket_addr, client):
             json_init(client)
 
 def main():
-    deprecated_args = ["json"]
+    deprecated_args = []
     for a in deprecated_args:
         if getattr(args, a) is not None:
             print "Command line option '--{}' is deprecated".format(a),
             print "and will be ignored"
 
-    client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
-    info = client.bm_mgmt_get_info()
-    socket_addr = info.elogger_socket
-    if socket_addr is None:
-        print "The event logger is not enabled on the switch,",
-        print "run with '--nanolog <ip addr>'"
-        sys.exit(1)
+    client = None
+    socket_addr = None
+    json_cfg = None
+
     if args.socket is not None:
         socket_addr = args.socket
-    else:
-        print "'--socket' not provided, using", socket_addr,
-        print "(obtained from switch)"
+
+    if not args.json or not args.socket:
+        try:
+            import bmpy_utils as utils
+        except:
+            print "When '--json' or '--socket' is not provided, the client needs bmpy_utils"
+            print "bmpy_utils is not available when building bmv2 without Thrift support"
+            sys.exit(1)
+        client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
+        info = client.bm_mgmt_get_info()
+        if info.elogger_socket is None:
+            print "The event logger is not enabled on the switch,",
+            print "run with '--nanolog <addr>'"
+            sys.exit(1)
+        if args.socket is None:
+            socket_addr = info.elogger_socket
+            print "'--socket' not provided, using", socket_addr,
+            print "(obtained from switch)"
+
+        if args.json is None:
+            json_cfg = utils.get_json_config(standard_client=client)
+
+    if args.json is not None:
+        with open(args.json, 'r') as f:
+            json_cfg = f.read()
+    name_map.load_names(json_cfg)
 
     recv_msgs(socket_addr, client)
 

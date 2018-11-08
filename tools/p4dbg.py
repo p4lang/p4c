@@ -28,7 +28,6 @@ import argparse
 import cmd
 from collections import defaultdict
 from functools import wraps
-import bmpy_utils as utils
 
 try:
     import runtime_CLI
@@ -585,6 +584,7 @@ class DebuggerAPI(cmd.Cmd):
 
     def json_dependent_init(self):
         if not self.json_cfg:
+            import bmpy_utils as utils
             self.json_cfg = utils.get_json_config(
                     standard_client=self.standard_client)
         field_map.load_names(self.json_cfg)
@@ -1172,19 +1172,25 @@ def main():
     if args.socket is not None:
         socket_addr = args.socket
 
-    if not args.json and not args.socket:
+    if not args.json or not args.socket:
+        try:
+            import bmpy_utils as utils
+        except:
+            print "When '--json' or '--socket' is not provided, the debugger needs bmpy_utils"
+            print "bmpy_utils is not available when building bmv2 without Thrift support"
+            sys.exit(1)
         client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
         info = client.bm_mgmt_get_info()
-        if not args.socket:
+        if info.debugger_socket is None:
+            print "The debugger is not enabled on the switch"
+            sys.exit(1)
+        if args.socket is None:
             socket_addr = info.debugger_socket
-            if socket_addr is None:
-                print "The debugger is not enabled on the switch"
-                sys.exit(1)
             print "'--socket' not provided, using", socket_addr,
             print "(obtained from switch)"
 
     json_cfg = None
-    if args.json:
+    if args.json is not None:
         with open(args.json, 'r') as f:
             json_cfg = f.read()
 
