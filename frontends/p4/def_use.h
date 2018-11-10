@@ -325,20 +325,20 @@ class Definitions : public IHasDbPrint {
  public:
     Definitions() = default;
     Definitions(const Definitions& other) : definitions(other.definitions) {}
-    Definitions* join(const Definitions* other) const;
+    Definitions* joinDefinitions(const Definitions* other) const;
     /// Point writes the specified LocationSet.
     Definitions* writes(ProgramPoint point, const LocationSet* locations) const;
-    void set(const BaseLocation* loc, const ProgramPoints* point)
+    void setDefintion(const BaseLocation* loc, const ProgramPoints* point)
     { CHECK_NULL(loc); CHECK_NULL(point); definitions[loc] = point; }
-    void set(const StorageLocation* loc, const ProgramPoints* point);
-    void set(const LocationSet* loc, const ProgramPoints* point);
-    bool has(const BaseLocation* location) const
+    void setDefinition(const StorageLocation* loc, const ProgramPoints* point);
+    void setDefinition(const LocationSet* loc, const ProgramPoints* point);
+    bool hasLocation(const BaseLocation* location) const
     { return definitions.find(location) != definitions.end(); }
-    const ProgramPoints* get(const BaseLocation* location) const {
+    const ProgramPoints* getPoints(const BaseLocation* location) const {
         auto r = ::get(definitions, location);
         BUG_CHECK(r != nullptr, "%1%: no definitions", location);
         return r; }
-    const ProgramPoints* get(const LocationSet* locations) const;
+    const ProgramPoints* getPoints(const LocationSet* locations) const;
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {
         if (definitions.empty())
@@ -351,8 +351,8 @@ class Definitions : public IHasDbPrint {
             first = false;
         }
     }
-    Definitions* clone() const { return new Definitions(*this); }
-    void remove(const StorageLocation* loc);
+    Definitions* cloneDefinitions() const { return new Definitions(*this); }
+    void removeLocation(const StorageLocation* loc);
     bool empty() const { return definitions.empty(); }
 };
 
@@ -366,19 +366,19 @@ class AllDefinitions : public IHasDbPrint {
     StorageMap* storageMap;
     AllDefinitions(ReferenceMap* refMap, TypeMap* typeMap) :
             storageMap(new StorageMap(refMap, typeMap)) {}
-    Definitions* get(ProgramPoint point, bool emptyIfNotFound = false) {
+    Definitions* getDefinitions(ProgramPoint point, bool emptyIfNotFound = false) {
         auto it = atPoint.find(point);
         if (it == atPoint.end()) {
             if (emptyIfNotFound) {
                 auto defs = new Definitions();
-                set(point, defs);
+                setDefinitionsAt(point, defs);
                 return defs;
             }
             BUG("Unknown point %1% for definitions", &point);
         }
         return it->second;
     }
-    void set(ProgramPoint point, Definitions* defs)
+    void setDefinitionsAt(ProgramPoint point, Definitions* defs)
     { atPoint[point] = defs; }
     void dbprint(std::ostream& out) const {
         for (auto e : atPoint)
@@ -398,7 +398,7 @@ class AllDefinitions : public IHasDbPrint {
  */
 class ComputeWriteSet : public Inspector {
  protected:
-    AllDefinitions*     definitions;  /// Result computed by this pass.
+    AllDefinitions*     allDefinitions;  /// Result computed by this pass.
     Definitions*        currentDefinitions;  /// Before statement currently processed.
     Definitions*        returnedDefinitions;  /// Definitions after return statements.
     Definitions*        exitDefinitions;  /// Definitions after exit statements.
@@ -412,7 +412,7 @@ class ComputeWriteSet : public Inspector {
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
-            definitions(source->definitions), currentDefinitions(definitions),
+            allDefinitions(source->allDefinitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
             callingContext(context), storageMap(source->storageMap), lhs(false) {
         setName("ComputeWriteSet");
@@ -425,22 +425,22 @@ class ComputeWriteSet : public Inspector {
     Definitions* getDefinitionsAfter(const IR::ParserState* state);
     bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr);
     ProgramPoint getProgramPoint(const IR::Node* node = nullptr) const;
-    const LocationSet* get(const IR::Expression* expression) const {
+    const LocationSet* getWrites(const IR::Expression* expression) const {
         auto result = ::get(writes, expression);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
-    void set(const IR::Expression* expression, const LocationSet* loc) {
+    void expressionWrites(const IR::Expression* expression, const LocationSet* loc) {
         CHECK_NULL(expression); CHECK_NULL(loc);
         writes.emplace(expression, loc);
     }
 
  public:
-    explicit ComputeWriteSet(AllDefinitions* definitions) :
-            definitions(definitions), currentDefinitions(nullptr),
+    explicit ComputeWriteSet(AllDefinitions* allDefinitions) :
+            allDefinitions(allDefinitions), currentDefinitions(nullptr),
             returnedDefinitions(nullptr), exitDefinitions(nullptr),
-            storageMap(definitions->storageMap), lhs(false)
-    { CHECK_NULL(definitions); setName("ComputeWriteSet"); }
+            storageMap(allDefinitions->storageMap), lhs(false)
+    { CHECK_NULL(allDefinitions); setName("ComputeWriteSet"); }
 
     // expressions
     bool preorder(const IR::Literal* expression) override;
@@ -474,7 +474,7 @@ class ComputeWriteSet : public Inspector {
 
     const LocationSet* writtenLocations(const IR::Expression* expression) {
         expression->apply(*this);
-        return get(expression);
+        return getWrites(expression);
     }
 };
 

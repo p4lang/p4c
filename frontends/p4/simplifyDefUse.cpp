@@ -121,7 +121,7 @@ class FindUninitialized : public Inspector {
 
     Definitions* getCurrentDefinitions() const {
         LOG3("FU Current point is (after) " << currentPoint);
-        auto defs = definitions->get(currentPoint, true);
+        auto defs = definitions->getDefinitions(currentPoint, true);
         return defs;
     }
 
@@ -135,12 +135,12 @@ class FindUninitialized : public Inspector {
                     continue;
 
                 const LocationSet* loc = new LocationSet(storage);
-                auto points = defs->get(loc);
+                auto points = defs->getPoints(loc);
                 hasUses->add(points);
                 // Check uninitialized non-headers (headers can be invalid).
                 // inout parameters can never match here, so we could skip them.
                 loc = storage->removeHeaders();
-                points = defs->get(loc);
+                points = defs->getPoints(loc);
                 if (points->containsBeforeStart())
                     DIAGNOSE_WARN("uninitialized_out_param",
                                   "out parameter %1% may be uninitialized when "
@@ -151,7 +151,7 @@ class FindUninitialized : public Inspector {
         if (checkReturn) {
             // check returned value
             auto storage = definitions->storageMap->getRetVal();
-            if (storage != nullptr && defs->has(storage))
+            if (storage != nullptr && defs->hasLocation(storage))
                 // If this definition is "live" it means that we have
                 // not returned on all paths; returns kill this definition.
                 ::error("Function %1% does not return a value on all paths", block);
@@ -184,7 +184,7 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << dbp(parser));
         visit(parser->states, "states");
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
-        auto acceptdefs = definitions->get(accept, true);
+        auto acceptdefs = definitions->getDefinitions(accept, true);
         if (!acceptdefs->empty())
             // acceptdefs is empty when the accept state is unreachable
             checkOutParameters(parser, parser->getApplyMethodType()->parameters, acceptdefs);
@@ -235,6 +235,7 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::SwitchStatement* statement) override {
         LOG3("FU Visiting " << dbp(statement));
         visit(statement->expression);
+        currentPoint = ProgramPoint(statement->expression);
         auto saveCurrent = currentPoint;
         for (auto c : statement->cases) {
             if (c->statement != nullptr) {
@@ -295,7 +296,7 @@ class FindUninitialized : public Inspector {
         if (read == nullptr || read->isEmpty())
             return;
         auto currentDefinitions = getCurrentDefinitions();
-        auto points = currentDefinitions->get(read);
+        auto points = currentDefinitions->getPoints(read);
         if (reportUninitialized && !lhs && points->containsBeforeStart()) {
             // Do not report uninitialized values on the LHS.
             // This could happen if we are writing to an array element
