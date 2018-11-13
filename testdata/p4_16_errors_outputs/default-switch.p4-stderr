@@ -1,0 +1,6 @@
+default-switch.p4(30): error: SwitchCase: label following default label
+            b: { return; }
+            ^^^^^^^^^^^^^^
+default-switch.p4(31): error: SwitchCase: label following default label
+            c:
+            ^

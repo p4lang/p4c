@@ -180,6 +180,13 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error("%1%: switch statements not allowed in actions", statement);
+    bool defaultFound = false;
+    for (auto c : statement->cases) {
+        if (defaultFound)
+            ::error("%1%: label following default label", c);
+        if (c->label->is<IR::DefaultExpression>())
+            defaultFound = true;
+    }
 }
 
 /// Return statements are not allowed in parsers
