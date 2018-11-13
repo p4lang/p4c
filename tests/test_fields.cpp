@@ -92,15 +92,17 @@ class FieldSerializeTest : public TestWithParam< std::tuple<int, int> > {
     if (WITH_VALGRIND && bitwidth > 10) step = 10;
   }
 
+  void run_parse_test(int preceding_bit = 0);
   void run_deparse_test(int sent_bit = 0);
 };
 
-TEST_P(FieldSerializeTest, Extract) {
+void
+FieldSerializeTest::run_parse_test(int preceding_bit) {
   int max_input = 1 << bitwidth;
   for (int v = 0; v < max_input; v += step) {
     BitInStream input;
     for (int i = 0; i < hdr_offset; i++) {
-      input.append_one(0);
+      input.append_one(preceding_bit);
     }
     for (int i = bitwidth - 1; i >= 0; i--) {
       input.append_one(v & (1 << i));
@@ -113,6 +115,21 @@ TEST_P(FieldSerializeTest, Extract) {
 
     ASSERT_EQ(v, f.get_int());
   }
+}
+
+TEST_P(FieldSerializeTest, Extract) {
+  run_parse_test();
+}
+
+// The run_parse_method used to always prepend the value under test with '0'
+// bits in the BitInStream. But for some sub-byte fields which had to be shifted
+// left, some bits preceding the actual value were found in the extracted Data
+// value. This was going unnoticed in the test because of the '0' bits being
+// prepended. In this version of the Extract test, we prepend the value with '1'
+// bits.
+// See https://github.com/p4lang/behavioral-model/issues/685
+TEST_P(FieldSerializeTest, ExtractWPreceding) {
+  run_parse_test(1);
 }
 
 void
