@@ -392,7 +392,8 @@ class ConstructorCallExpression : Expression {
 }
 
 /// Represents a list of expressions separated by commas
-class ListExpression : Expression {
+class ListExpression : Expression, IAnnotated {
+    optional Annotations annotations = Annotations::empty;
     inline Vector<Expression> components;
     ListExpression {
         validate();
@@ -404,6 +405,7 @@ class ListExpression : Expression {
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 /// IR representation of an initializer for a struct.

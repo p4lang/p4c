@@ -70,7 +70,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
 
 const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
     // Field lists may contain other field lists
-    return new IR::ListExpression(fl->srcInfo, fl->fields);
+    return new IR::ListExpression(fl->srcInfo, fl->annotations, fl->fields);
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::Member* field) {
