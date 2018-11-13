@@ -73,7 +73,8 @@ class DoConstantFolding : public Transform {
 
     /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node* binary(const IR::Operation_Binary* op,
-                           std::function<mpz_class(mpz_class, mpz_class)> func);
+                           std::function<mpz_class(mpz_class, mpz_class)> func,
+                           bool saturating = false);
     /// Statically evaluate comparison operation @p e.
     /// Note that this only handles the case where @p e represents `==` or `!=`.
     const IR::Node* compare(const IR::Operation_Binary* op);
@@ -114,7 +115,9 @@ class DoConstantFolding : public Transform {
     const IR::Node* postorder(IR::LOr* e) override;
     const IR::Node* postorder(IR::Slice* e) override;
     const IR::Node* postorder(IR::Add* e) override;
+    const IR::Node* postorder(IR::AddSat* e) override;
     const IR::Node* postorder(IR::Sub* e) override;
+    const IR::Node* postorder(IR::SubSat* e) override;
     const IR::Node* postorder(IR::Mul* e) override;
     const IR::Node* postorder(IR::Div* e) override;
     const IR::Node* postorder(IR::Mod* e) override;

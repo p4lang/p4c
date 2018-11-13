@@ -225,8 +225,16 @@ const IR::Node* DoConstantFolding::postorder(IR::Add* e) {
     return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a + b; });
 }
 
+const IR::Node* DoConstantFolding::postorder(IR::AddSat* e) {
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a + b; }, true);
+}
+
 const IR::Node* DoConstantFolding::postorder(IR::Sub* e) {
     return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a - b; });
+}
+
+const IR::Node* DoConstantFolding::postorder(IR::SubSat* e) {
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a - b; }, true);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mul* e) {
@@ -366,7 +374,8 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
 
 const IR::Node*
 DoConstantFolding::binary(const IR::Operation_Binary* e,
-                          std::function<mpz_class(mpz_class, mpz_class)> func) {
+                          std::function<mpz_class(mpz_class, mpz_class)> func,
+                          bool saturating) {
     auto eleft = getConstant(e->left);
     auto eright = getConstant(e->right);
     if (eleft == nullptr || eright == nullptr)
@@ -428,6 +437,23 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
         } else {
             resultType = ltb;
             right = cast(right, left->base, ltb);
+        }
+    }
+    if (saturating) {
+        if ((rtb = resultType->to<IR::Type::Bits>())) {
+            mpz_class limit = 1;
+            if (rtb->isSigned) {
+                limit <<= rtb->size-1;
+                if (value < -limit)
+                    value = -limit;
+            } else {
+                limit <<= rtb->size;
+                if (value < 0)
+                    value = 0; }
+            if (value >= limit)
+                value = limit - 1;
+        } else {
+            ::error("%1%: saturating operation on untyped values", e);
         }
     }
 
