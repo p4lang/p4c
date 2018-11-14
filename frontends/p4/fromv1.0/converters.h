@@ -17,6 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_FROMV1_0_CONVERTERS_H_
 #define _FRONTENDS_P4_FROMV1_0_CONVERTERS_H_
 
+#include <typeindex>
+#include <typeinfo>
+
 #include "ir/ir.h"
 #include "lib/safe_vector.h"
 #include "frontends/p4/coreLibrary.h"
@@ -30,6 +33,8 @@ class ExpressionConverter : public Transform {
  protected:
     ProgramStructure* structure;
     P4::P4CoreLibrary &p4lib;
+    using funcType = std::function<const IR::Node*(const IR::Node*)>;
+    static std::map<cstring, funcType> *cvtForType;
 
  public:
     bool replaceNextWithLast;  // if true p[next] becomes p.last
@@ -53,6 +58,8 @@ class ExpressionConverter : public Transform {
         auto result = node->apply(*this);
         return result->to<IR::Expression>();
     }
+    static void addConverter(cstring type, funcType);
+    static funcType get(cstring type);
 };
 
 class StatementConverter : public ExpressionConverter {
