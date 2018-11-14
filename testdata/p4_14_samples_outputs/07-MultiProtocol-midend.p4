@@ -310,15 +310,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         switch (ethertype_match_0.apply().action_run) {
-            default: {
-                l2_match_0.apply();
-            }
             ipv4_packet: {
                 ipv4_match_0.apply();
             }
             mpls_packet: 
             ipv6_packet: {
                 ipv6_match_0.apply();
+            }
+            default: {
+                l2_match_0.apply();
             }
         }
 

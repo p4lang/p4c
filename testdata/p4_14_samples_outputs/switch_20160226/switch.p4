@@ -3097,6 +3097,8 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
     @name(".validate_mpls_header") validate_mpls_header() validate_mpls_header_0;
     apply {
         switch (validate_outer_ethernet.apply().action_run) {
+            malformed_outer_ethernet_packet: {
+            }
             default: {
                 if (hdr.ipv4.isValid()) {
                     validate_outer_ipv4_header_0.apply(hdr, meta, standard_metadata);
@@ -3111,8 +3113,6 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
                         }
                     }
                 }
-            }
-            malformed_outer_ethernet_packet: {
             }
         }
 

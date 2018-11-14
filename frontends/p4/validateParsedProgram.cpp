@@ -175,11 +175,21 @@ void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
         ::error("%1%: table initializers must be constant", l);
 }
 
-/// Switch statements are not allowed in actions
+/// Switch statements are not allowed in actions.
+/// Default label in switch statement is always the last one.
 void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error("%1%: switch statements not allowed in actions", statement);
+    bool defaultFound = false;
+    for (auto c : statement->cases) {
+        if (defaultFound) {
+            ::warning("%1%: label following default label", c);
+            break;
+        }
+        if (c->label->is<IR::DefaultExpression>())
+            defaultFound = true;
+    }
 }
 
 /// Return statements are not allowed in parsers
