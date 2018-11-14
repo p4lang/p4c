@@ -70,6 +70,8 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
 
 const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
     // Field lists may contain other field lists
+    if (auto func = get(std::type_index(typeid(*fl)).name())) {
+        return func(fl); }
     return new IR::ListExpression(fl->srcInfo, fl->fields);
 }
 
@@ -240,6 +242,20 @@ const IR::Node* ExpressionConverter::postorder(IR::Neq *neq) {
         return new IR::BoolLiteral(neq->srcInfo, true);  // everything else is true
 }
 
+std::map<cstring, ExpressionConverter::funcType>* ExpressionConverter::cvtForType = nullptr;
+
+void ExpressionConverter::addConverter(cstring type, ExpressionConverter::funcType cvt) {
+    static std::map<cstring, ExpressionConverter::funcType> tbl;
+    cvtForType = &tbl;
+    tbl[type] = cvt;
+}
+
+ExpressionConverter::funcType ExpressionConverter::get(cstring type) {
+    if (cvtForType && cvtForType->count(type))
+        return cvtForType->at(type);
+    return nullptr;
+}
+
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
@@ -313,7 +329,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
 const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
     auto control = structure->controls.get(primitive->name);
     if (control != nullptr) {
-        auto instanceName = get(renameMap, control->name);
+        auto instanceName = ::get(renameMap, control->name);
         auto ctrl = new IR::PathExpression(IR::ID(instanceName));
         auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
         auto args = new IR::Vector<IR::Argument>();
