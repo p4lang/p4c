@@ -3,15 +3,12 @@ control ctrl() {
     }
     action b() {
     }
-    action c() {
-    }
     table t {
         actions = {
-            a;
-            b;
-            c;
+            a();
+            b();
         }
-        default_action = a;
+        default_action = a();
     }
     apply {
         switch (t.apply().action_run) {
@@ -19,7 +16,6 @@ control ctrl() {
             b: {
                 return;
             }
-            c: 
         }
 
     }
