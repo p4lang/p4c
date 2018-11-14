@@ -70,7 +70,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
 
 const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
     // Field lists may contain other field lists
-    if (auto func = get(typeid(fl))) {
+    if (auto func = get(std::type_index(typeid(*fl)).name())) {
         return func(fl); }
     return new IR::ListExpression(fl->srcInfo, fl->fields);
 }
@@ -242,15 +242,15 @@ const IR::Node* ExpressionConverter::postorder(IR::Neq *neq) {
         return new IR::BoolLiteral(neq->srcInfo, true);  // everything else is true
 }
 
-std::map<std::type_index, ExpressionConverter::funcType>* ExpressionConverter::cvtForType = nullptr;
+std::map<cstring, ExpressionConverter::funcType>* ExpressionConverter::cvtForType = nullptr;
 
-void ExpressionConverter::addConverter(const std::type_info& type, ExpressionConverter::funcType cvt) {
-    static std::map<std::type_index, ExpressionConverter::funcType> tbl;
+void ExpressionConverter::addConverter(cstring type, ExpressionConverter::funcType cvt) {
+    static std::map<cstring, ExpressionConverter::funcType> tbl;
     cvtForType = &tbl;
-    tbl.emplace(type, cvt);
+    tbl[type] = cvt;
 }
 
-ExpressionConverter::funcType ExpressionConverter::get(const std::type_info& type) {
+ExpressionConverter::funcType ExpressionConverter::get(cstring type) {
     if (cvtForType && cvtForType->count(type))
         return cvtForType->at(type);
     return nullptr;

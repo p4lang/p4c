@@ -34,7 +34,7 @@ class ExpressionConverter : public Transform {
     ProgramStructure* structure;
     P4::P4CoreLibrary &p4lib;
     using funcType = std::function<const IR::Node*(const IR::Node*)>;
-    static std::map<std::type_index, funcType> *cvtForType;
+    static std::map<cstring, funcType> *cvtForType;
 
  public:
     bool replaceNextWithLast;  // if true p[next] becomes p.last
@@ -58,8 +58,8 @@ class ExpressionConverter : public Transform {
         auto result = node->apply(*this);
         return result->to<IR::Expression>();
     }
-    static void addConverter(const std::type_info& type, funcType);
-    static funcType get(const std::type_info& type);
+    static void addConverter(cstring type, funcType);
+    static funcType get(cstring type);
 };
 
 class StatementConverter : public ExpressionConverter {
