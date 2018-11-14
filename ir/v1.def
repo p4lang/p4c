@@ -158,7 +158,7 @@ class NamedCond : If {
 
 class Apply : Expression {
     optional ID                         name;
-    inline NameMap<Vector<Expression>>  actions = {};
+    inline NameMap<Vector<Expression>, ordered_map>  actions = {};
     visit_children {
         auto &clone(v.flow_clone());
         // HACK -- temp sort actions into program (source) order, so that condition names are

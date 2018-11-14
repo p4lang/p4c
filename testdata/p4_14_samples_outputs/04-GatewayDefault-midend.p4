@@ -144,14 +144,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         switch (i_t1_0.apply().action_run) {
-            default: {
-                i_t4_0.apply();
-            }
             nop_2: {
                 i_t2_0.apply();
             }
             set_egress_port: {
                 i_t3_0.apply();
+            }
+            default: {
+                i_t4_0.apply();
             }
         }
 

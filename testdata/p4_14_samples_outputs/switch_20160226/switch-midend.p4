@@ -4693,7 +4693,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action _nop_78() {
     }
     @name(".generate_learn_notify") action _generate_learn_notify_0() {
-        digest<mac_learn_digest>(32w1024, { meta.ingress_metadata.bd, meta.l2_metadata.lkp_mac_sa, meta.ingress_metadata.ifindex });
+        digest<mac_learn_digest>(32w1024, {meta.ingress_metadata.bd,meta.l2_metadata.lkp_mac_sa,meta.ingress_metadata.ifindex});
     }
     @name(".learn_notify") table _learn_notify {
         actions = {
@@ -4816,6 +4816,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         _ingress_port_mapping.apply();
         switch (_validate_outer_ethernet.apply().action_run) {
+            _malformed_outer_ethernet_packet_0: {
+            }
             default: {
                 if (hdr.ipv4.isValid()) 
                     _validate_outer_ipv4_packet_0.apply();
@@ -4825,8 +4827,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                     else 
                         if (hdr.mpls[0].isValid()) 
                             _validate_mpls_packet_0.apply();
-            }
-            _malformed_outer_ethernet_packet_0: {
             }
         }
 
