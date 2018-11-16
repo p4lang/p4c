@@ -30,7 +30,8 @@ class StateTranslationVisitor : public CodeGenInspector {
 
     void compileExtractField(const IR::Expression* expr, cstring name,
                              unsigned alignment, EBPFType* type);
-    void compileExtract(const IR::Vector<IR::Argument>* args);
+    void compileExtract(const IR::Expression* destination);
+    void compileLookahead(const IR::Expression* destination);
 
  public:
     explicit StateTranslationVisitor(const EBPFParserState* state) :
@@ -43,8 +44,50 @@ class StateTranslationVisitor : public CodeGenInspector {
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::MethodCallStatement* stat) override
     { visit(stat->methodCall); return false; }
+    bool preorder(const IR::AssignmentStatement* stat) override;
 };
 }  // namespace
+
+void
+StateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("%s_save = %s",
+                          state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    compileExtract(destination);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save",
+                          state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
+bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement) {
+    if (auto mce = statement->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(mce,
+                                              state->parser->program->refMap,
+                                              state->parser->program->typeMap);
+        auto extMethod = mi->to<P4::ExternMethod>();
+        if (extMethod == nullptr)
+            BUG("Unhandled method %1%", mce);
+
+        auto decl = extMethod->object;
+        if (decl == state->parser->packet) {
+            if (extMethod->method->name.name == p4lib.packetIn.lookahead.name) {
+                compileLookahead(statement->left);
+                return false;
+            }
+        }
+        ::error("Unexpected method call in parser %1%", statement->right);
+    }
+
+    CodeGenInspector::visit(statement);
+    return false;
+}
 
 bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     if (parserState->isBuiltin()) return false;
@@ -211,17 +254,11 @@ StateTranslationVisitor::compileExtractField(
 }
 
 void
-StateTranslationVisitor::compileExtract(const IR::Vector<IR::Argument>* args) {
-    if (args->size() != 1) {
-        ::error("Variable-sized header fields not yet supported %1%", args);
-        return;
-    }
-
-    auto expr = args->at(0)->expression;
-    auto type = state->parser->typeMap->getType(expr);
-    auto ht = type->to<IR::Type_Header>();
+StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
+    auto type = state->parser->typeMap->getType(destination);
+    auto ht = type->to<IR::Type_StructLike>();
     if (ht == nullptr) {
-        ::error("Cannot extract to a non-header type %1%", expr);
+        ::error("Cannot extract to a non-struct type %1%", destination);
         return;
     }
 
@@ -253,15 +290,16 @@ StateTranslationVisitor::compileExtract(const IR::Vector<IR::Argument>* args) {
             ::error("Only headers with fixed widths supported %1%", f);
             return;
         }
-        compileExtractField(expr, f->name, alignment, etype);
+        compileExtractField(destination, f->name, alignment, etype);
         alignment += et->widthInBits();
         alignment %= 8;
     }
 
-    builder->emitIndent();
-    visit(expr);
-    builder->appendLine(".ebpf_valid = 1;");
-    return;
+    if (ht->is<IR::Type_Header>()) {
+        builder->emitIndent();
+        visit(destination);
+        builder->appendLine(".ebpf_valid = 1;");
+    }
 }
 
 bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
@@ -287,10 +325,13 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
         auto decl = extMethod->object;
         if (decl == state->parser->packet) {
             if (extMethod->method->name.name == p4lib.packetIn.extract.name) {
-                compileExtract(expression->arguments);
+                if (expression->arguments->size() != 1) {
+                    ::error("Variable-sized header fields not yet supported %1%", expression);
+                    return false;
+                }
+                compileExtract(expression->arguments->at(0)->expression);
                 return false;
             }
-
             BUG("Unhandled packet method %1%", expression->method);
             return false;
         }
@@ -329,7 +370,24 @@ EBPFParser::EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
         program(program), typeMap(typeMap), parserBlock(block),
         packet(nullptr), headers(nullptr), headerType(nullptr) {}
 
+void EBPFParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
+    if (decl->is<IR::Declaration_Variable>()) {
+        auto vd = decl->to<IR::Declaration_Variable>();
+        auto etype = EBPFTypeFactory::instance->create(vd->type);
+        builder->emitIndent();
+        etype->declare(builder, vd->name, false);
+        builder->endOfStatement(true);
+        BUG_CHECK(vd->initializer == nullptr,
+                  "%1%: declarations with initializers not supported", decl);
+        return;
+    }
+    BUG("%1%: not yet handled", decl);
+}
+
+
 void EBPFParser::emit(CodeBuilder* builder) {
+    for (auto l : parserBlock->container->parserLocals)
+        emitDeclaration(builder, l);
     for (auto s : states)
         s->emit(builder);
     builder->newline();

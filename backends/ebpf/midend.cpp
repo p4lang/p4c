@@ -38,9 +38,11 @@ limitations under the License.
 #include "midend/removeExits.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeParameters.h"
+#include "midend/removeSelectBooleans.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
+#include "midend/singleArgumentSelect.h"
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 #include "lower.h"
@@ -90,6 +92,9 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
+        new P4::RemoveSelectBooleans(&refMap, &typeMap),
+        new P4::SingleArgumentSelect(),
+        new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TableHit(&refMap, &typeMap),
         new P4::ValidateTableProperties({"implementation"}),
