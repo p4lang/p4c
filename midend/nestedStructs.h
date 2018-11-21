@@ -25,7 +25,7 @@ namespace P4 {
 class ComplexValues final {
  public:
     /**
-     * Represents a field or a collectino of fields of a value that
+     * Represents a field or a collection of fields of a value that
      * has a struct type.
      */
     struct Component : public IHasDbPrint {

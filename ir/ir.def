@@ -371,6 +371,8 @@ class Declaration_Constant : Declaration, IAnnotated {
 
 /// Like a variable, but for a statically allocated instance.
 /// The syntax is Contructor(args) name = initializer;
+/// Initializers are an experimental features, used for externs with
+/// abstract methods.
 class Declaration_Instance : Declaration, IAnnotated, IInstance {
     optional Annotations  annotations = Annotations::empty;
     Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern

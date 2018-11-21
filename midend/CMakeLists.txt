@@ -22,6 +22,7 @@ set (MIDEND_SRCS
   eliminateSerEnums.cpp
   expandEmit.cpp
   expandLookahead.cpp
+  flattenInterfaceStructs.cpp
   interpreter.cpp
   local_copyprop.cpp
   nestedStructs.cpp
@@ -55,6 +56,7 @@ set (MIDEND_HDRS
   expandEmit.h
   expandLookahead.h
   expr_uses.h
+  flattenInterfaceStructs.h
   has_side_effects.h
   interpreter.h
   local_copyprop.h
