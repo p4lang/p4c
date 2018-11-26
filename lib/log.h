@@ -21,6 +21,12 @@ limitations under the License.
 #include <iostream>
 #include <set>
 #include <vector>
+#include "indent.h"
+
+#include "config.h"
+#ifdef MULTITHREAD
+#include <mutex>
+#endif  // MULTITHREAD
 
 #ifndef __GNUC__
 #define __attribute__(X)
@@ -36,16 +42,30 @@ extern int maximumLogLevel;
 
 // Look up the log level of @file.
 int fileLogLevel(const char* file);
+std::ostream &fileLogOutput(const char *file);
 
 // A utility class used to prepend file and log level information to logging output.
+// also controls indent control and locking for multithreaded use
 class OutputLogPrefix {
     const char* fn;
     int level;
+    static int ostream_xalloc;
+    static void setup_ostream_xalloc(std::ostream &);
     friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
+#ifdef MULTITHREAD
+    mutable std::mutex *lock = nullptr;
+#endif  // MULTITHREAD
  public:
     OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
+    ~OutputLogPrefix();
+    static void indent(std::ostream &out);
 };
 }  // namespace Detail
+
+inline std::ostream &endl(std::ostream &out) {
+    out << std::endl << indent_t::getindent(out);
+    Detail::OutputLogPrefix::indent(out);
+    return out; }
 
 inline bool fileLogLevelIsAtLeast(const char* file, int level) {
     // If there's no file with a log level of at least @level, we don't need to do
@@ -67,9 +87,10 @@ void increaseVerbosity();
 }  // namespace Log
 
 #define LOGGING(N) (::Log::fileLogLevelIsAtLeast(__FILE__, N))
-#define LOGN(N, X) (LOGGING(N)                                                   \
-                      ? std::clog << ::Log::Detail::OutputLogPrefix(__FILE__, N) \
-                                  << X << std::endl                              \
+#define LOGN(N, X) (LOGGING(N)                                                  \
+                      ? ::Log::Detail::fileLogOutput(__FILE__)                  \
+                          << ::Log::Detail::OutputLogPrefix(__FILE__, N)        \
+                          << X << std::endl                                     \
                       : std::clog)
 #define LOG1(X) LOGN(1, X)
 #define LOG2(X) LOGN(2, X)

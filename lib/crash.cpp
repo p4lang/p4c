@@ -44,7 +44,7 @@ char *program_name;
 
 #ifdef MULTITHREAD
 #include <pthread.h>
-std::vector<pthread_t *>        thread_ids;
+std::vector<pthread_t>          thread_ids;
 __thread        int             my_id;
 
 void register_thread() {
@@ -191,7 +191,7 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
         lock.lock();
         if (!killed_all_threads) {
             killed_all_threads = true;
-            for (int i = 0; i < num_threads; i++)
+            for (int i = 0; i < int(thread_ids.size()); i++)
                 if (i != my_id-1) {
                     pthread_kill(thread_ids[i], SIGABRT); } } )
     LOG1(MTONLY("Thread #" << my_id << " " <<) "exiting with SIG" <<
@@ -219,7 +219,7 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
         free(strings); }
 #endif
     MTONLY(
-        if (++threads_dumped < num_threads) {
+        if (++threads_dumped < int(thread_ids.size())) {
             lock.unlock();
             pthread_exit(0);
         } else {
