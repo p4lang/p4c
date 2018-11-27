@@ -153,7 +153,7 @@ class Visitor {
     const T* getOriginal() const {
         CHECK_NULL(ctxt->original);
         BUG_CHECK(ctxt->original->is<T>(), "%1% does not have the expected type %2%",
-                  ctxt->original, typeid(T).name());
+                  ctxt->original, demangle(typeid(T).name()));
         return ctxt->original->to<T>();
     }
     const Context *getChildContext() const { return ctxt; }
@@ -331,7 +331,7 @@ class Backtrack : public virtual Visitor {
     struct trigger {
         enum type_t { OK, OTHER }       type;
         explicit trigger(type_t t) : type(t) {}
-        virtual void dbprint(std::ostream &out) const { out << typeid(*this).name(); }
+        virtual void dbprint(std::ostream &out) const { out << demangle(typeid(*this).name()); }
         template<class T> T *to() { return dynamic_cast<T *>(this); }
         template<class T> const T *to() const { return dynamic_cast<const T *>(this); }
         template<class T> bool is() { return to<T>() != nullptr; }
