@@ -10,6 +10,11 @@ new code and recompile every time a modification is done to the P4 program) and
 written in C++11. For information on why we decided to write a new version of
 the behavioral model, please look at the FAQ below.
 
+This repository contains code for several variations of the behavioral
+model, e.g. `simple_switch`, `simple_switch_grpc`, `psa_switch`, etc.
+See [here](targets/README.md) for more details on the differences
+between these.
+
 ## Dependencies
 
 On Ubuntu 14.04, the following packages are required:
