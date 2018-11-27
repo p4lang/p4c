@@ -176,6 +176,10 @@ def main():
     if not opts.source_file:
         parser.error('No input specified.')
 
+    if not os.path.isfile(opts.source_file):
+        print >> sys.stderr, 'Input file ' + opts.source_file + ' does not exist'
+        sys.exit(1)
+
     # check that the tuple value is correct
     backend = (opts.target, opts.arch)
     if (len(backend) != 2):
