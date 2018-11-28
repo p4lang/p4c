@@ -144,9 +144,12 @@ class P4RuntimeArchHandlerIface {
     /// needs to be exposed to the control-plane (e.g. digest call for v1model).
     virtual void collectExternFunction(P4RuntimeSymbolTableIface* symbols,
                                        const P4::ExternFunction* externFunction) = 0;
+    /// Collects any extra symbols you may want to include in the symbol table
+    /// and that are not covered by the above collection methods.
+    virtual void collectExtra(P4RuntimeSymbolTableIface* symbols) = 0;
     /// This method is called between the two passes (collect and add) in case
     /// the architecture requires some logic to be performed then.
-    virtual void postCollect(P4RuntimeSymbolTableIface* symbols) = 0;
+    virtual void postCollect(const P4RuntimeSymbolTableIface& symbols) = 0;
     /// Adds architecture-specific properties for @tableBlock to the @table
     /// Protobuf message.
     virtual void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
