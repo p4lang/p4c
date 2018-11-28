@@ -24,9 +24,13 @@ namespace P4 {
 
 class ComplexValues final {
  public:
+    /**
+     * Represents a field or a collection of fields of a value that
+     * has a struct type.
+     */
     struct Component : public IHasDbPrint {
         virtual const IR::Expression* convertToExpression() = 0;
-        virtual Component* get(cstring name) = 0;
+        virtual Component* getComponent(cstring name) = 0;
         virtual void dbprint(std::ostream& out) const = 0;
     };
 
@@ -35,7 +39,7 @@ class ComplexValues final {
         explicit FinalName(cstring name) : newName(name) {}
         const IR::Expression* convertToExpression() override
         { return new IR::PathExpression(IR::ID(newName)); }
-        Component* get(cstring) override
+        Component* getComponent(cstring) override
         { return nullptr; }
         void dbprint(std::ostream& out) const override
         { out << newName << IndentCtl::endl; }
@@ -52,7 +56,7 @@ class ComplexValues final {
             }
             return vec;
         }
-        Component* get(cstring name) override
+        Component* getComponent(cstring name) override
         { return ::get(members, name); }
         void dbprint(std::ostream& out) const override {
             out << IndentCtl::indent;

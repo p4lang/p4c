@@ -60,7 +60,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
     auto left = values->getTranslation(expression->expr);
     if (left == nullptr)
         return expression;
-    auto comp = left->get(expression->member.name);
+    auto comp = left->getComponent(expression->member.name);
     if (comp == nullptr) {
         auto l = left->convertToExpression();
         auto e = new IR::Member(expression->srcInfo, l, expression->member);
