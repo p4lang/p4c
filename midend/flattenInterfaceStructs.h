@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_FLATTENINTERFACESTRUCT_H_
-#define _MIDEND_FLATTENINTERFACESTRUCT_H_
+#ifndef _MIDEND_FLATTENINTERFACESTRUCTS_H_
+#define _MIDEND_FLATTENINTERFACESTRUCTS_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -23,18 +23,63 @@ limitations under the License.
 namespace P4 {
 
 /**
-   Describes how a type is replaced: the new type to
-   replace it and how each field is renamed.
+Describes how a nested struct type is replaced: the new type to
+replace it and how each field is renamed.  For example, consider
+the following:
+
+struct S {
+   bit a;
+   bool b;
+}
+
+struct T {
+   S s;
+   bit<6> y;
+}
+
+struct M {
+   T t;
+   bit<3> x;
+}
 */
-struct Replacement : public IHasDbPrint {
-    // The keys are strings of the form field.field.field.  If
-    // something is mapped to the null string it does not really have
-    // a replacement: this is true for fields whose types are structs.
+struct StructTypeReplacement : public IHasDbPrint {
+    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_Struct* type);
+
+    // Maps nested field names to final field names.
+    // In our example this could be:
+    // .t.s.a -> _t_s_a0;
+    // .t.s.b -> _t_s_b1;
+    // .t.y -> _t_y2;
+    // .x -> _x3;
     std::map<cstring, cstring> fieldNameRemap;
-    const IR::Type* type;
+    // Maps internal fields names to types.
+    // .t -> T
+    // .t.s -> S
+    std::map<cstring, const IR::Type_Struct*> structFieldMap;
+    // Holds a new flat type
+    // struct M {
+    //    bit _t_s_a0;
+    //    bool _t_s_b1;
+    //    bit<6> _t_y2;
+    //    bit<3> _x3;
+    // }
+    const IR::Type* replacementType;
     virtual void dbprint(std::ostream& out) const {
-        out << type;
+        out << replacementType;
     }
+
+    // Helper for constructor
+    void flatten(const P4::TypeMap* typeMap,
+                 cstring prefix,
+                 const IR::Type* type,
+                 IR::IndexedVector<IR::StructField> *fields);
+
+    /// Returns a StructInitializerExpression suitable for
+    /// initializing a struct for the fields that start with the
+    /// given prefix.  For example, for prefix .t and root R this returns
+    /// { .s = { .a = R._t_s_a0, .b = R._t_s_b1 }, .y = R._t_y2 }
+    const IR::StructInitializerExpression* explode(
+        const IR::Expression* root, cstring prefix);
 };
 
 /**
@@ -45,19 +90,20 @@ struct NestedStructMap {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
 
-    ordered_map<const IR::Type*, Replacement*> replacement;
+    ordered_map<const IR::Type*, StructTypeReplacement*> replacement;
 
     NestedStructMap(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     void createReplacement(const IR::Type_Struct* type);
-    Replacement* getReplacement(const IR::Type* type) const
+    StructTypeReplacement* getReplacement(const IR::Type* type) const
     { return ::get(replacement, type); }
     bool empty() const { return replacement.empty(); }
 };
 
 /**
 Find the types to replace and insert them in the nested struct map.
+This pass only looks at type arguments used in package instantiations.
  */
 class FindTypesToReplace : public Inspector {
     NestedStructMap* map;
@@ -73,7 +119,7 @@ class FindTypesToReplace : public Inspector {
 This pass transforms the type signatures of instantiated controls,
 parsers, and packages.  It does not transform methods, functions or
 actions.  It starts from package instantiations: every type argument
-that is a nested structure is replaced with "simpler" flatter type.
+that is a nested structure is replaced with "simpler" flat type.
 
 Should be run after the NestedStructs pass.
 
@@ -94,14 +140,13 @@ top<T>(c()) main;
 This is transformed into:
 
 struct S { bit b; }
-struct T { S s; }
-struct Tflat {
-   bit s_b;
+struct T {
+   bit _s_b0;
 }
 
-control c(inout Tflat arg) {
+control c(inout T arg) {
     apply {
-        ... arg.s_b; ...
+        ... arg._s_b0; ...
     }
 }
 
@@ -110,10 +155,10 @@ top<TFlat>(c()) main;
  */
 class ReplaceStructs : public Transform {
     NestedStructMap* replacementMap;
-    std::map<const IR::Parameter*, Replacement*> toReplace;
+    std::map<const IR::Parameter*, StructTypeReplacement*> toReplace;
 
  public:
-    ReplaceStructs(NestedStructMap* sm): replacementMap(sm) {
+    explicit ReplaceStructs(NestedStructMap* sm): replacementMap(sm) {
         CHECK_NULL(sm);
         setName("ReplaceStructs");
     }
@@ -141,4 +186,4 @@ class FlattenInterfaceStructs final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_FLATTENINTERFACESTRUCT_H_ */
+#endif /* _MIDEND_FLATTENINTERFACESTRUCTS_H_ */
