@@ -173,7 +173,7 @@ set (PARSERS_SRCS
   parsers/parserDriver.cpp
   )
 
-set (PARSER_HDRS
+set (PARSERS_HDRS
   parsers/parserDriver.h
   )
 
