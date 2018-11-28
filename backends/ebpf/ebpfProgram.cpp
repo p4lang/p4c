@@ -208,6 +208,7 @@ void EBPFProgram::emitPreamble(CodeBuilder* builder) {
 void EBPFProgram::emitLocalVariables(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
+    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
     builder->newline();
 
     builder->emitIndent();

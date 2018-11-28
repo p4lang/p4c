@@ -47,6 +47,7 @@ class EBPFParser : public EBPFObject {
 
     explicit EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
                         const P4::TypeMap* typeMap);
+    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
     void emit(CodeBuilder* builder);
     bool build();
 };
