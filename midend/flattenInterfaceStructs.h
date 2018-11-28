@@ -167,7 +167,6 @@ class ReplaceStructs : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     const IR::Node* preorder(IR::P4Parser* parser) override;
     const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Type_Struct* type) override;
 };
 

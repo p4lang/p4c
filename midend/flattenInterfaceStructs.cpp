@@ -112,14 +112,6 @@ const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
     return type;
 }
 
-const IR::Node* ReplaceStructs::postorder(IR::Type_Name* type) {
-    auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
-    auto repl = replacementMap->getReplacement(canon);
-    if (repl != nullptr)
-        return repl->replacementType->getP4Type();
-    return type;
-}
-
 const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     // Find out if this applies to one of the parameters that are being replaced.
     if (getParent<IR::Member>() != nullptr)
