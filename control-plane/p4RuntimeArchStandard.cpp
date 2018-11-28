@@ -455,7 +455,12 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         (void)externFunction;
     }
 
-    void postCollect(P4RuntimeSymbolTableIface* symbols) override {
+    void collectExtra(P4RuntimeSymbolTableIface* symbols) override {
+        // nothing to do for standard architectures
+        (void)symbols;
+    }
+
+    void postCollect(const P4RuntimeSymbolTableIface& symbols) override {
         (void)symbols;
         // analyze action profiles and build a mapping from action profile name
         // to the set of tables referencing them

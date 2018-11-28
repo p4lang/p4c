@@ -1300,9 +1300,10 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
                 symbols.add(P4RuntimeSymbolType::CONTROLLER_HEADER(), type);
             }
         });
+        archHandler->collectExtra(&symbols);
     });
 
-    archHandler->postCollect(&symbols);
+    archHandler->postCollect(symbols);
 
     // Construct a P4Runtime control plane API from the program.
     P4RuntimeAnalyzer analyzer(symbols, typeMap, refMap, archHandler);
