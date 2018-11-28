@@ -370,7 +370,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("left", Util::JsonValue::null);
             e->emplace("right", l);
         } else {
-            result->emplace("type", "field");
+            const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
+            result->emplace("type", fieldRef);
             auto e = mkArrayField(result, "value");
             if (l->is<Util::JsonObject>()) {
                 auto lv = l->to<Util::JsonObject>()->get("value");
