@@ -176,7 +176,7 @@ P4ParserDriver::parse(P4AnnotationLexer::Type type,
         return nullptr;
     }
 
-    return nodes[0].to<T>();
+    return nodes->front()->to<T>();
 }
 
 /* static */ const IR::Vector<IR::Expression>*

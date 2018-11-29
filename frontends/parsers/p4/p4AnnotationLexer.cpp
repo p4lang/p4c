@@ -32,16 +32,13 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
     switch (cur->token_type) {
     case P4Parser::token_type::TOK_IDENTIFIER:
     case P4Parser::token_type::TOK_TYPE_IDENTIFIER:
+    case P4Parser::token_type::TOK_STRING_LITERAL:
         return Token((P4Parser::token_type) cur->token_type,
                      cstring(cur->text), Util::SourceInfo(cur->srcInfo));
 
     case P4Parser::token_type::TOK_INTEGER:
         return Token((P4Parser::token_type) cur->token_type,
                      unparsedConstant(cur), Util::SourceInfo(cur->srcInfo));
-
-    case P4Parser::token_type::TOK_STRING_LITERAL:
-        return Token((P4Parser::token_type) cur->token_type, cur->text,
-                     Util::SourceInfo(cur->srcInfo));
 
     default:
         return Token((P4Parser::token_type) cur->token_type,
