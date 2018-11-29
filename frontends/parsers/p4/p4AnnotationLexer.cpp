@@ -9,43 +9,37 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
 
     if (needStart) {
         needStart = false;
-        auto& srcInfo = body.srcInfo;
-        return P4Parser::symbol_type((P4Parser::token_type) type, srcInfo);
+        return P4Parser::symbol_type((P4Parser::token_type) type,
+                                     Util::SourceInfo(body.srcInfo));
     }
 
     if (it == body.end()) {
-        auto& srcInfo = body.srcInfo;
-        return P4Parser::make_END(srcInfo);
+        return P4Parser::make_END(Util::SourceInfo(body.srcInfo));
     }
 
     auto cur = *(it++);
     switch (cur->token_type) {
     case P4Parser::token_type::TOK_IDENTIFIER:
     case P4Parser::token_type::TOK_TYPE_IDENTIFIER:
-        {
-            auto& text = cur->text;
-            auto& srcInfo = cur->srcInfo;
-            return Token((P4Parser::token_type) cur->token_type, text,
-                         srcInfo);
-        }
+        return Token((P4Parser::token_type) cur->token_type,
+                     cstring(cur->text), Util::SourceInfo(cur->srcInfo));
 
     case P4Parser::token_type::TOK_INTEGER:
         {
-            UnparsedConstant unparsedConst {
+            UnparsedConstant&& unparsedConst {
                 cur->text,
                 cur->constInfo->skip,
                 cur->constInfo->base,
                 cur->constInfo->hasWidth
             };
-            auto& srcInfo = cur->srcInfo;
             return Token((P4Parser::token_type) cur->token_type, unparsedConst,
-                         srcInfo);
+                         Util::SourceInfo(cur->srcInfo));
         }
 
     default:
         return Token((P4Parser::token_type) cur->token_type,
                      P4::Token(cur->token_type, cur->text),
-                     cur->srcInfo);
+                     Util::SourceInfo(cur->srcInfo));
     }
 }
 
