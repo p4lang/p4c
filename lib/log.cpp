@@ -26,7 +26,9 @@ limitations under the License.
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
