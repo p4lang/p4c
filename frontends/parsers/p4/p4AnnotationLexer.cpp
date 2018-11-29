@@ -3,7 +3,7 @@
 
 namespace P4 {
 
-UnparsedConstant unparsedConstant(P4AnnotationToken token) {
+UnparsedConstant unparsedConstant(const IR::AnnotationToken* token) {
     UnparsedConstant result {
         token->text,
         token->constInfo->skip,
