@@ -57,7 +57,7 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
     // @pkginfo has a key-value list argument.
     if (annotation->name == IR::Annotation::pkginfoAnnotation) {
         annotation->kv.append(
-                P4ParserDriver::parseKvList(&annotation->body));
+                *P4ParserDriver::parseKvList(&annotation->body));
         return;
     }
 

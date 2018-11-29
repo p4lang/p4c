@@ -9,20 +9,25 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
 
     if (needStart) {
         needStart = false;
-        return P4Parser::symbol_type((P4Parser::token_type) type,
-                                     body.srcInfo);
+        auto srcInfo = body.srcInfo;
+        return P4Parser::symbol_type((P4Parser::token_type) type, srcInfo);
     }
 
     if (it == body.end()) {
-        return P4Parser::make_END(body.srcInfo);
+        auto srcInfo = body.srcInfo;
+        return P4Parser::make_END(srcInfo);
     }
 
     auto cur = *(it++);
     switch (cur->token_type) {
     case P4Parser::token_type::TOK_IDENTIFIER:
     case P4Parser::token_type::TOK_TYPE_IDENTIFIER:
-        return Token((P4Parser::token_type) cur->token_type, cur->text,
-                     cur->srcInfo);
+        {
+            auto text = cur->text;
+            auto srcInfo = cur->srcInfo;
+            return Token((P4Parser::token_type) cur->token_type, text,
+                         srcInfo);
+        }
 
     case P4Parser::token_type::TOK_INTEGER:
         {
@@ -32,8 +37,9 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
                 cur->constInfo->base,
                 cur->constInfo->hasWidth
             };
+            auto srcInfo = cur->srcInfo;
             return Token((P4Parser::token_type) cur->token_type, unparsedConst,
-                         cur->srcInfo);
+                         srcInfo);
         }
 
     default:
