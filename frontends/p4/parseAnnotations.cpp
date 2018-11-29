@@ -42,25 +42,34 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
     
     // @name has a string literal argument.
     if (annotation->name == IR::Annotation::nameAnnotation) {
-        annotation->expr.push_back(
+        const IR::StringLiteral* parsed =
                 P4ParserDriver::parseStringLiteral(annotation->srcInfo,
-                                                   &annotation->body));
+                                                   &annotation->body);
+        if (parsed != nullptr) {
+            annotation->expr.push_back(parsed);
+        }
         return;
     }
 
     // @length has an int literal argument.
     if (annotation->name == IR::Annotation::lengthAnnotation) {
-        annotation->expr.push_back(
+        const IR::Constant* parsed =
                 P4ParserDriver::parseInteger(annotation->srcInfo,
-                                             &annotation->body));
+                                             &annotation->body);
+        if (parsed != nullptr) {
+            annotation->expr.push_back(parsed);
+        }
         return;
     }
 
     // @pkginfo has a key-value list argument.
     if (annotation->name == IR::Annotation::pkginfoAnnotation) {
-        annotation->kv.append(
-                *P4ParserDriver::parseKvList(annotation->srcInfo,
-                                             &annotation->body));
+        const IR::IndexedVector<IR::NamedExpression>* parsed =
+                P4ParserDriver::parseKvList(annotation->srcInfo,
+                                            &annotation->body);
+        if (parsed != nullptr) {
+            annotation->kv.append(*parsed);
+        }
         return;
     }
 

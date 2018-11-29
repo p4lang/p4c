@@ -392,100 +392,100 @@ annotationBody
     ;
 
 annotationToken
-    : UNEXPECTED_TOKEN
-    | ABSTRACT
-    | ACTION
-    | ACTIONS
-    | APPLY
-    | BOOL
-    | BIT
-    | CONST
-    | CONTROL
-    | DEFAULT
-    | ELSE
-    | ENTRIES
-    | ENUM
-    | ERROR
-    | EXIT
-    | EXTERN
-    | FALSE
-    | HEADER
-    | HEADER_UNION
-    | IF
-    | IN
-    | INOUT
-    | INT
-    | KEY
-    | MATCH_KIND
-    | TYPE
-    | OUT
-    | PARSER
-    | PACKAGE
-    | RETURN
-    | SELECT
-    | STATE
-    | STRUCT
-    | SWITCH
-    | TABLE
-    | THIS
-    | TRANSITION
-    | TRUE
-    | TUPLE
-    | TYPEDEF
-    | VARBIT
-    | VALUESET
-    | VOID
-    | "_"
+    : UNEXPECTED_TOKEN { $$ = $1; }
+    | ABSTRACT         { $$ = $1; }
+    | ACTION           { $$ = $1; }
+    | ACTIONS          { $$ = $1; }
+    | APPLY            { $$ = $1; }
+    | BOOL             { $$ = $1; }
+    | BIT              { $$ = $1; }
+    | CONST            { $$ = $1; }
+    | CONTROL          { $$ = $1; }
+    | DEFAULT          { $$ = $1; }
+    | ELSE             { $$ = $1; }
+    | ENTRIES          { $$ = $1; }
+    | ENUM             { $$ = $1; }
+    | ERROR            { $$ = $1; }
+    | EXIT             { $$ = $1; }
+    | EXTERN           { $$ = $1; }
+    | FALSE            { $$ = $1; }
+    | HEADER           { $$ = $1; }
+    | HEADER_UNION     { $$ = $1; }
+    | IF               { $$ = $1; }
+    | IN               { $$ = $1; }
+    | INOUT            { $$ = $1; }
+    | INT              { $$ = $1; }
+    | KEY              { $$ = $1; }
+    | MATCH_KIND       { $$ = $1; }
+    | TYPE             { $$ = $1; }
+    | OUT              { $$ = $1; }
+    | PARSER           { $$ = $1; }
+    | PACKAGE          { $$ = $1; }
+    | RETURN           { $$ = $1; }
+    | SELECT           { $$ = $1; }
+    | STATE            { $$ = $1; }
+    | STRUCT           { $$ = $1; }
+    | SWITCH           { $$ = $1; }
+    | TABLE            { $$ = $1; }
+    | THIS             { $$ = $1; }
+    | TRANSITION       { $$ = $1; }
+    | TRUE             { $$ = $1; }
+    | TUPLE            { $$ = $1; }
+    | TYPEDEF          { $$ = $1; }
+    | VARBIT           { $$ = $1; }
+    | VALUESET         { $$ = $1; }
+    | VOID             { $$ = $1; }
+    | "_"              { $$ = $1; }
 
-    | IDENTIFIER { $$ = Token(token::TOK_IDENTIFIER, $1); }
-    | TYPE_IDENTIFIER { $$ = Token(token::TOK_TYPE_IDENTIFIER, $1); }
-    | STRING_LITERAL { $$ = Token(token::TOK_STRING_LITERAL, $1); }
-    | INTEGER { $$ = Token(token::TOK_INTEGER, $1); }
+    | IDENTIFIER       { $$ = Token(token::TOK_IDENTIFIER, $1); }
+    | TYPE_IDENTIFIER  { $$ = Token(token::TOK_TYPE_IDENTIFIER, $1); }
+    | STRING_LITERAL   { $$ = Token(token::TOK_STRING_LITERAL, $1); }
+    | INTEGER          { $$ = Token(token::TOK_INTEGER, $1); }
 
-    | "&&&"
-    | ".."
-    | "<<"
-    | "&&"
-    | "||"
-    | "=="
-    | "!="
-    | ">="
-    | "<="
-    | "++"
+    | "&&&"            { $$ = $1; }
+    | ".."             { $$ = $1; }
+    | "<<"             { $$ = $1; }
+    | "&&"             { $$ = $1; }
+    | "||"             { $$ = $1; }
+    | "=="             { $$ = $1; }
+    | "!="             { $$ = $1; }
+    | ">="             { $$ = $1; }
+    | "<="             { $$ = $1; }
+    | "++"             { $$ = $1; }
 
-    | "+"
-    | "|+|"
-    | "-"
-    | "|-|"
-    | "*"
-    | "/"
-    | "%"
+    | "+"              { $$ = $1; }
+    | "|+|"            { $$ = $1; }
+    | "-"              { $$ = $1; }
+    | "|-|"            { $$ = $1; }
+    | "*"              { $$ = $1; }
+    | "/"              { $$ = $1; }
+    | "%"              { $$ = $1; }
 
-    | "|"
-    | "&"
-    | "^"
-    | "~"
+    | "|"              { $$ = $1; }
+    | "&"              { $$ = $1; }
+    | "^"              { $$ = $1; }
+    | "~"              { $$ = $1; }
 
     // Omit parens. These are handled in annotationBody, since they must be
     // balanced.
-    // | "("
-    // | ")"
+    // | "("              { $$ = $1; }
+    // | ")"              { $$ = $1; }
 
-    | "["
-    | "]"
-    | "{"
-    | "}"
-    | "<"
-    | ">"
+    | "["              { $$ = $1; }
+    | "]"              { $$ = $1; }
+    | "{"              { $$ = $1; }
+    | "}"              { $$ = $1; }
+    | "<"              { $$ = $1; }
+    | ">"              { $$ = $1; }
 
-    | "!"
-    | ":"
-    | ","
-    | "?"
-    | "."
-    | "="
-    | ";"
-    | "@"
+    | "!"              { $$ = $1; }
+    | ":"              { $$ = $1; }
+    | ","              { $$ = $1; }
+    | "?"              { $$ = $1; }
+    | "."              { $$ = $1; }
+    | "="              { $$ = $1; }
+    | ";"              { $$ = $1; }
+    | "@"              { $$ = $1; }
     ;
 
 kvList
