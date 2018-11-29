@@ -81,25 +81,24 @@ class Token {
  public:
     int type;
     cstring text;
+    UnparsedConstant* unparsedConstant;
 
     explicit Token() { }
-    explicit Token(int type, cstring text) : type(type), text(text) { }
+    explicit Token(int type, cstring text) : Token(type, text, nullptr) { }
+    explicit Token(int type, UnparsedConstant unparsedConstant)
+            : Token(type, unparsedConstant.text,
+                    new UnparsedConstant(unparsedConstant)) { }
 
     virtual UnparsedConstant getConst() {
-        BUG("Not a const");
+        if (unparsedConstant == nullptr) BUG("Not a const");
+        return *unparsedConstant;
     }
-};
 
-class ConstToken : public Token {
  private:
-    UnparsedConstant unparsedConst;
-
- public:
-    explicit ConstToken(int type, UnparsedConstant unparsedConst)
-        : Token(type, unparsedConst.text), unparsedConst(unparsedConst) { }
-
-    UnparsedConstant getConst() { return unparsedConst; }
+    explicit Token(int type, cstring text, UnparsedConstant* unparsedConstant)
+            : type(type), text(text), unparsedConstant(unparsedConstant) { }
 };
+
 } // namespace P4
 
 inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
@@ -440,7 +439,8 @@ annotationToken
 
     | IDENTIFIER { $$ = Token(token::TOK_IDENTIFIER, $1); }
     | TYPE_IDENTIFIER { $$ = Token(token::TOK_TYPE_IDENTIFIER, $1); }
-    | INTEGER { $$ = ConstToken(token::TOK_INTEGER, $1); }
+    | STRING_LITERAL { $$ = Token(token::TOK_STRING_LITERAL, $1); }
+    | INTEGER { $$ = Token(token::TOK_INTEGER, $1); }
 
     | "&&&"
     | ".."
