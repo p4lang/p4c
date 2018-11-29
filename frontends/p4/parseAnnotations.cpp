@@ -37,7 +37,14 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
     }
 
     if (!annotation->expr.empty() || !annotation->kv.empty()) {
-        BUG("Annotation has been parsed already");
+        // We already have an expression or a key-value list. This happens when
+        // we have a P4₁₄ program, in which case the annotation body had better
+        // be empty.
+        if (!annotation->body.empty()) {
+            BUG("Annotation has been parsed already");
+        }
+
+        return;
     }
     
     // @name has a string literal argument.
