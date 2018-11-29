@@ -22,6 +22,8 @@ limitations under the License.
 #include <string>
 
 #include "frontends/p4/symbol_table.h"
+#include "frontends/parsers/p4/abstractP4Lexer.hpp"
+#include "frontends/parsers/p4/p4AnnotationLexer.hpp"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
@@ -111,6 +113,24 @@ class P4ParserDriver final : public AbstractParserDriver {
     static const IR::P4Program* parse(FILE* in, const char* sourceFile,
                                       unsigned sourceLine = 1);
 
+    /**
+     * Parses a P4-16 annotation body.
+     *
+     * @param body  The unparsed annotation body.
+     * @returns an AST node if parsing was successful, or null otherwise.
+     */
+    static const IR::Vector<IR::Expression>* parseExpressionList(
+        IR::Vector<IR::AnnotationToken>* body);
+
+    static const IR::IndexedVector<IR::NamedExpression>* parseKvList(
+        IR::Vector<IR::AnnotationToken>* body);
+
+    static const IR::Constant* parseInteger(
+        IR::Vector<IR::AnnotationToken>* body);
+
+    static const IR::StringLiteral* parseStringLiteral(
+        IR::Vector<IR::AnnotationToken>* body);
+
  protected:
     friend class P4::P4Lexer;
     friend class P4::P4Parser;
@@ -140,8 +160,9 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// Semantic information about the program being parsed.
     Util::ProgramStructure* structure = nullptr;
 
-    /// The top level declarations that make up the P4 program we're parsing.
-    IR::Vector<IR::Node>* declarations = nullptr;
+    /// The top-level nodes that make up the P4 program (or program fragment)
+    /// we're parsing.
+    IR::Vector<IR::Node>* nodes = nullptr;
 
     /// A scratch buffer to hold the current string literal. (They're lexed
     /// incrementally, so we need to hold some state between tokens.)
@@ -149,6 +170,14 @@ class P4ParserDriver final : public AbstractParserDriver {
 
  private:
     P4ParserDriver();
+
+    /// Common functionality for parsing.
+    bool parse(AbstractP4Lexer& lexer, const char* sourceFile,
+               unsigned sourceLine = 1);
+
+    /// Common functionality for parsing annotation bodies.
+    template<typename T> const T* parse(P4AnnotationLexer::Type type,
+                                        IR::Vector<IR::AnnotationToken>* body);
 
     /// All P4 `error` declarations are merged together in the node, which is
     /// lazily created the first time we see an `error` declaration. (This node

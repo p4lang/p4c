@@ -12,6 +12,11 @@ using Parser = P4::P4Parser;
 #define YY_USER_ACTION driver.onReadToken(yytext);
 #define yyterminate() return Parser::make_END(driver.yylloc);
 
+#define makeToken(symbol) \
+    Parser::make_ ## symbol( \
+        P4::Token(Parser::token::TOK_ ## symbol, yytext), \
+        driver.yylloc)
+
 // Silence the warnings triggered by the code flex generates.
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -22,6 +27,7 @@ using Parser = P4::P4Parser;
 #pragma clang diagnostic ignored "-Wnull-conversion"
 #endif
 
+bool need_start_token = true;
 %}
 
 %option c++
@@ -38,6 +44,15 @@ using Parser = P4::P4Parser;
 
 
 %%
+
+%{
+    // Insert a token at the beginning of the stream to tell the parser that
+    // the stream should be parsed as a program.
+    if (need_start_token) {
+        need_start_token = false;
+        return Parser::make_START_PROGRAM(driver.yylloc);
+    }
+%}
 
 [ \t\r]+              ;
 [\n]                  { BEGIN INITIAL; }
@@ -67,49 +82,49 @@ using Parser = P4::P4Parser;
 <STRING>.       { driver.stringLiteral += yytext; }
 <STRING>\n      { driver.stringLiteral += yytext; }
 
-"abstract"      { BEGIN(NORMAL); return Parser::make_ABSTRACT(driver.yylloc); }
-"action"        { BEGIN(NORMAL); return Parser::make_ACTION(driver.yylloc); }
-"actions"       { BEGIN(NORMAL); return Parser::make_ACTIONS(driver.yylloc); }
-"apply"         { BEGIN(NORMAL); return Parser::make_APPLY(driver.yylloc); }
-"bool"          { BEGIN(NORMAL); return Parser::make_BOOL(driver.yylloc); }
-"bit"           { BEGIN(NORMAL); return Parser::make_BIT(driver.yylloc); }
-"const"         { BEGIN(NORMAL); return Parser::make_CONST(driver.yylloc); }
-"control"       { BEGIN(NORMAL); return Parser::make_CONTROL(driver.yylloc); }
-"default"       { BEGIN(NORMAL); return Parser::make_DEFAULT(driver.yylloc); }
-"else"          { BEGIN(NORMAL); return Parser::make_ELSE(driver.yylloc); }
-"entries"       { BEGIN(NORMAL); return Parser::make_ENTRIES(driver.yylloc); }
-"enum"          { BEGIN(NORMAL); return Parser::make_ENUM(driver.yylloc); }
-"error"         { BEGIN(NORMAL); return Parser::make_ERROR(driver.yylloc); }
-"exit"          { BEGIN(NORMAL); return Parser::make_EXIT(driver.yylloc); }
-"extern"        { BEGIN(NORMAL); return Parser::make_EXTERN(driver.yylloc); }
-"false"         { BEGIN(NORMAL); return Parser::make_FALSE(driver.yylloc); }
-"header"        { BEGIN(NORMAL); return Parser::make_HEADER(driver.yylloc); }
-"header_union"  { BEGIN(NORMAL); return Parser::make_HEADER_UNION(driver.yylloc); }
-"if"            { BEGIN(NORMAL); return Parser::make_IF(driver.yylloc); }
-"in"            { BEGIN(NORMAL); return Parser::make_IN(driver.yylloc); }
-"inout"         { BEGIN(NORMAL); return Parser::make_INOUT(driver.yylloc); }
-"int"           { BEGIN(NORMAL); return Parser::make_INT(driver.yylloc); }
-"key"           { BEGIN(NORMAL); return Parser::make_KEY(driver.yylloc); }
-"match_kind"    { BEGIN(NORMAL); return Parser::make_MATCH_KIND(driver.yylloc); }
-"type"          { BEGIN(NORMAL); return Parser::make_TYPE(driver.yylloc); }
-"out"           { BEGIN(NORMAL); return Parser::make_OUT(driver.yylloc); }
-"parser"        { BEGIN(NORMAL); return Parser::make_PARSER(driver.yylloc); }
-"package"       { BEGIN(NORMAL); return Parser::make_PACKAGE(driver.yylloc); }
-"return"        { BEGIN(NORMAL); return Parser::make_RETURN(driver.yylloc); }
-"select"        { BEGIN(NORMAL); return Parser::make_SELECT(driver.yylloc); }
-"state"         { BEGIN(NORMAL); return Parser::make_STATE(driver.yylloc); }
-"struct"        { BEGIN(NORMAL); return Parser::make_STRUCT(driver.yylloc); }
-"switch"        { BEGIN(NORMAL); return Parser::make_SWITCH(driver.yylloc); }
-"table"         { BEGIN(NORMAL); return Parser::make_TABLE(driver.yylloc); }
-"this"          { BEGIN(NORMAL); return Parser::make_THIS(driver.yylloc); }
-"transition"    { BEGIN(NORMAL); return Parser::make_TRANSITION(driver.yylloc); }
-"true"          { BEGIN(NORMAL); return Parser::make_TRUE(driver.yylloc); }
-"tuple"         { BEGIN(NORMAL); return Parser::make_TUPLE(driver.yylloc); }
-"typedef"       { BEGIN(NORMAL); return Parser::make_TYPEDEF(driver.yylloc); }
-"varbit"        { BEGIN(NORMAL); return Parser::make_VARBIT(driver.yylloc); }
-"value_set"     { BEGIN(NORMAL); return Parser::make_VALUESET(driver.yylloc); }
-"void"          { BEGIN(NORMAL); return Parser::make_VOID(driver.yylloc); }
-"_"             { BEGIN(NORMAL); return Parser::make_DONTCARE(driver.yylloc); }
+"abstract"      { BEGIN(NORMAL); return makeToken(ABSTRACT); }
+"action"        { BEGIN(NORMAL); return makeToken(ACTION); }
+"actions"       { BEGIN(NORMAL); return makeToken(ACTIONS); }
+"apply"         { BEGIN(NORMAL); return makeToken(APPLY); }
+"bool"          { BEGIN(NORMAL); return makeToken(BOOL); }
+"bit"           { BEGIN(NORMAL); return makeToken(BIT); }
+"const"         { BEGIN(NORMAL); return makeToken(CONST); }
+"control"       { BEGIN(NORMAL); return makeToken(CONTROL); }
+"default"       { BEGIN(NORMAL); return makeToken(DEFAULT); }
+"else"          { BEGIN(NORMAL); return makeToken(ELSE); }
+"entries"       { BEGIN(NORMAL); return makeToken(ENTRIES); }
+"enum"          { BEGIN(NORMAL); return makeToken(ENUM); }
+"error"         { BEGIN(NORMAL); return makeToken(ERROR); }
+"exit"          { BEGIN(NORMAL); return makeToken(EXIT); }
+"extern"        { BEGIN(NORMAL); return makeToken(EXTERN); }
+"false"         { BEGIN(NORMAL); return makeToken(FALSE); }
+"header"        { BEGIN(NORMAL); return makeToken(HEADER); }
+"header_union"  { BEGIN(NORMAL); return makeToken(HEADER_UNION); }
+"if"            { BEGIN(NORMAL); return makeToken(IF); }
+"in"            { BEGIN(NORMAL); return makeToken(IN); }
+"inout"         { BEGIN(NORMAL); return makeToken(INOUT); }
+"int"           { BEGIN(NORMAL); return makeToken(INT); }
+"key"           { BEGIN(NORMAL); return makeToken(KEY); }
+"match_kind"    { BEGIN(NORMAL); return makeToken(MATCH_KIND); }
+"type"          { BEGIN(NORMAL); return makeToken(TYPE); }
+"out"           { BEGIN(NORMAL); return makeToken(OUT); }
+"parser"        { BEGIN(NORMAL); return makeToken(PARSER); }
+"package"       { BEGIN(NORMAL); return makeToken(PACKAGE); }
+"return"        { BEGIN(NORMAL); return makeToken(RETURN); }
+"select"        { BEGIN(NORMAL); return makeToken(SELECT); }
+"state"         { BEGIN(NORMAL); return makeToken(STATE); }
+"struct"        { BEGIN(NORMAL); return makeToken(STRUCT); }
+"switch"        { BEGIN(NORMAL); return makeToken(SWITCH); }
+"table"         { BEGIN(NORMAL); return makeToken(TABLE); }
+"this"          { BEGIN(NORMAL); return makeToken(THIS); }
+"transition"    { BEGIN(NORMAL); return makeToken(TRANSITION); }
+"true"          { BEGIN(NORMAL); return makeToken(TRUE); }
+"tuple"         { BEGIN(NORMAL); return makeToken(TUPLE); }
+"typedef"       { BEGIN(NORMAL); return makeToken(TYPEDEF); }
+"varbit"        { BEGIN(NORMAL); return makeToken(VARBIT); }
+"value_set"     { BEGIN(NORMAL); return makeToken(VALUESET); }
+"void"          { BEGIN(NORMAL); return makeToken(VOID); }
+"_"             { BEGIN(NORMAL); return makeToken(DONTCARE); }
 [A-Za-z_][A-Za-z0-9_]* {
                   BEGIN(NORMAL);
                   cstring name = yytext;
@@ -160,48 +175,48 @@ using Parser = P4::P4Parser;
                           UnparsedConstant constant{yytext, 0, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
-"&&&"           { BEGIN(NORMAL); return Parser::make_MASK(driver.yylloc); }
-".."            { BEGIN(NORMAL); return Parser::make_RANGE(driver.yylloc); }
-"<<"            { BEGIN(NORMAL); return Parser::make_SHL(driver.yylloc); }
-"&&"            { BEGIN(NORMAL); return Parser::make_AND(driver.yylloc); }
-"||"            { BEGIN(NORMAL); return Parser::make_OR(driver.yylloc); }
-"=="            { BEGIN(NORMAL); return Parser::make_EQ(driver.yylloc); }
-"!="            { BEGIN(NORMAL); return Parser::make_NE(driver.yylloc); }
-">="            { BEGIN(NORMAL); return Parser::make_GE(driver.yylloc); }
-"<="            { BEGIN(NORMAL); return Parser::make_LE(driver.yylloc); }
-"++"            { BEGIN(NORMAL); return Parser::make_PP(driver.yylloc); }
+"&&&"           { BEGIN(NORMAL); return makeToken(MASK); }
+".."            { BEGIN(NORMAL); return makeToken(RANGE); }
+"<<"            { BEGIN(NORMAL); return makeToken(SHL); }
+"&&"            { BEGIN(NORMAL); return makeToken(AND); }
+"||"            { BEGIN(NORMAL); return makeToken(OR); }
+"=="            { BEGIN(NORMAL); return makeToken(EQ); }
+"!="            { BEGIN(NORMAL); return makeToken(NE); }
+">="            { BEGIN(NORMAL); return makeToken(GE); }
+"<="            { BEGIN(NORMAL); return makeToken(LE); }
+"++"            { BEGIN(NORMAL); return makeToken(PP); }
 
-"+"            { BEGIN(NORMAL); return Parser::make_PLUS(driver.yylloc); }
-"|+|"          { BEGIN(NORMAL); return Parser::make_PLUS_SAT(driver.yylloc); }
-"-"            { BEGIN(NORMAL); return Parser::make_MINUS(driver.yylloc); }
-"|-|"          { BEGIN(NORMAL); return Parser::make_MINUS_SAT(driver.yylloc); }
-"*"            { BEGIN(NORMAL); return Parser::make_MUL(driver.yylloc); }
-"/"            { BEGIN(NORMAL); return Parser::make_DIV(driver.yylloc); }
-"%"            { BEGIN(NORMAL); return Parser::make_MOD(driver.yylloc); }
+"+"            { BEGIN(NORMAL); return makeToken(PLUS); }
+"|+|"          { BEGIN(NORMAL); return makeToken(PLUS_SAT); }
+"-"            { BEGIN(NORMAL); return makeToken(MINUS); }
+"|-|"          { BEGIN(NORMAL); return makeToken(MINUS_SAT); }
+"*"            { BEGIN(NORMAL); return makeToken(MUL); }
+"/"            { BEGIN(NORMAL); return makeToken(DIV); }
+"%"            { BEGIN(NORMAL); return makeToken(MOD); }
 
-"|"            { BEGIN(NORMAL); return Parser::make_BIT_OR(driver.yylloc); }
-"&"            { BEGIN(NORMAL); return Parser::make_BIT_AND(driver.yylloc); }
-"^"            { BEGIN(NORMAL); return Parser::make_BIT_XOR(driver.yylloc); }
-"~"            { BEGIN(NORMAL); return Parser::make_COMPLEMENT(driver.yylloc); }
+"|"            { BEGIN(NORMAL); return makeToken(BIT_OR); }
+"&"            { BEGIN(NORMAL); return makeToken(BIT_AND); }
+"^"            { BEGIN(NORMAL); return makeToken(BIT_XOR); }
+"~"            { BEGIN(NORMAL); return makeToken(COMPLEMENT); }
 
-"("            { BEGIN(NORMAL); return Parser::make_L_PAREN(driver.yylloc); }
-")"            { BEGIN(NORMAL); return Parser::make_R_PAREN(driver.yylloc); }
-"["            { BEGIN(NORMAL); return Parser::make_L_BRACKET(driver.yylloc); }
-"]"            { BEGIN(NORMAL); return Parser::make_R_BRACKET(driver.yylloc); }
-"{"            { BEGIN(NORMAL); return Parser::make_L_BRACE(driver.yylloc); }
-"}"            { BEGIN(NORMAL); return Parser::make_R_BRACE(driver.yylloc); }
-"<"            { BEGIN(NORMAL); return Parser::make_L_ANGLE(driver.yylloc); }
-">"            { BEGIN(NORMAL); return Parser::make_R_ANGLE(driver.yylloc); }
+"("            { BEGIN(NORMAL); return makeToken(L_PAREN); }
+")"            { BEGIN(NORMAL); return makeToken(R_PAREN); }
+"["            { BEGIN(NORMAL); return makeToken(L_BRACKET); }
+"]"            { BEGIN(NORMAL); return makeToken(R_BRACKET); }
+"{"            { BEGIN(NORMAL); return makeToken(L_BRACE); }
+"}"            { BEGIN(NORMAL); return makeToken(R_BRACE); }
+"<"            { BEGIN(NORMAL); return makeToken(L_ANGLE); }
+">"            { BEGIN(NORMAL); return makeToken(R_ANGLE); }
 
-"!"            { BEGIN(NORMAL); return Parser::make_NOT(driver.yylloc); }
-":"            { BEGIN(NORMAL); return Parser::make_COLON(driver.yylloc); }
-","            { BEGIN(NORMAL); return Parser::make_COMMA(driver.yylloc); }
-"?"            { BEGIN(NORMAL); return Parser::make_QUESTION(driver.yylloc); }
-"."            { BEGIN(NORMAL); return Parser::make_DOT(driver.yylloc); }
-"="            { BEGIN(NORMAL); return Parser::make_ASSIGN(driver.yylloc); }
-";"            { BEGIN(NORMAL); return Parser::make_SEMICOLON(driver.yylloc); }
-"@"            { BEGIN(NORMAL); return Parser::make_AT(driver.yylloc); }
+"!"            { BEGIN(NORMAL); return makeToken(NOT); }
+":"            { BEGIN(NORMAL); return makeToken(COLON); }
+","            { BEGIN(NORMAL); return makeToken(COMMA); }
+"?"            { BEGIN(NORMAL); return makeToken(QUESTION); }
+"."            { BEGIN(NORMAL); return makeToken(DOT); }
+"="            { BEGIN(NORMAL); return makeToken(ASSIGN); }
+";"            { BEGIN(NORMAL); return makeToken(SEMICOLON); }
+"@"            { BEGIN(NORMAL); return makeToken(AT); }
 
-<*>.|\n        { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
+<*>.|\n        { return makeToken(UNEXPECTED_TOKEN); }
 
 %%

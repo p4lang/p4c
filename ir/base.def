@@ -188,15 +188,38 @@ class NamedExpression : Declaration {
     Expression expression;
 }
 
+/// Really, we should #include "constantParsing.h" and use the UnparsedConstant
+/// defined there, but ir-generator doesn't seem to support this.
+class UnparsedConstant {
+    unsigned skip;
+    unsigned base;
+    bool hasWidth;
+    dbprint { }
+}
+
+/// A token in an unparsed annotation.
+/// This should really be P4::P4Parser::symbol_type, but ir-generator doesn't
+/// support this.
+class AnnotationToken {
+    int token_type;  // P4Parser::token_type in disguise.
+    cstring text;
+    optional NullOK UnparsedConstant constInfo = NULL;
+    dbprint { out << text; }
+}
+
 /// Annotations are used to provide additional information to the compiler
 /// Most P4 entities can be optionally annotated
 class Annotation {
     ID name;
+    /// An unparsed annotation body
+    inline Vector<AnnotationToken> body;
     /// Annotations that are simple expressions
     inline Vector<Expression> expr;
     /// Annotations described as key-value pairs
     inline IndexedVector<NamedExpression> kv;
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
+    Annotation(Util::SourceInfo si, ID n, const Vector<AnnotationToken> &a)
+    : Node(si), name(n), body(a) {}
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const Expression *> &a)
     : Node(si), name(n), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a)
@@ -215,6 +238,7 @@ class Annotation {
     static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
     static const cstring optionalAnnotation;  /// Optional parameter annotation
+    static const cstring pkginfoAnnotation;  /// Package documentation annotation.
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 
