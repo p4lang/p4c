@@ -3,6 +3,17 @@
 
 namespace P4 {
 
+UnparsedConstant unparsedConstant(P4AnnotationToken token) {
+    UnparsedConstant result {
+        token->text,
+        token->constInfo->skip,
+        token->constInfo->base,
+        token->constInfo->hasWidth
+    };
+
+    return result;
+}
+
 P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
     // Driver not used here. Suppress compiler warning.
     (void) driver;
@@ -25,16 +36,8 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
                      cstring(cur->text), Util::SourceInfo(cur->srcInfo));
 
     case P4Parser::token_type::TOK_INTEGER:
-        {
-            UnparsedConstant&& unparsedConst {
-                cur->text,
-                cur->constInfo->skip,
-                cur->constInfo->base,
-                cur->constInfo->hasWidth
-            };
-            return Token((P4Parser::token_type) cur->token_type, unparsedConst,
-                         Util::SourceInfo(cur->srcInfo));
-        }
+        return Token((P4Parser::token_type) cur->token_type,
+                     unparsedConstant(cur), Util::SourceInfo(cur->srcInfo));
 
     default:
         return Token((P4Parser::token_type) cur->token_type,
