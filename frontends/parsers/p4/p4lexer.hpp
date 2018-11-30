@@ -19,11 +19,13 @@ class P4ParserDriver;
 
 class P4Lexer : public AbstractP4Lexer, public p4FlexLexer {
  public:
-    explicit P4Lexer(std::istream& input) : p4FlexLexer(&input) { }
+    explicit P4Lexer(std::istream& input)
+        : p4FlexLexer(&input), needStartToken(true) { }
 
     virtual Token yylex(P4::P4ParserDriver& driver) override;
 
  private:
+    bool needStartToken;
     int yylex() override { return p4FlexLexer::yylex(); }
 };
 

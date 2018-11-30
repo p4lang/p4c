@@ -27,7 +27,6 @@ using Parser = P4::P4Parser;
 #pragma clang diagnostic ignored "-Wnull-conversion"
 #endif
 
-bool need_start_token = true;
 %}
 
 %option c++
@@ -48,8 +47,8 @@ bool need_start_token = true;
 %{
     // Insert a token at the beginning of the stream to tell the parser that
     // the stream should be parsed as a program.
-    if (need_start_token) {
-        need_start_token = false;
+    if (needStartToken) {
+        needStartToken = false;
         return Parser::make_START_PROGRAM(driver.yylloc);
     }
 %}
