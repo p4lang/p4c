@@ -46,7 +46,7 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
 
         return;
     }
-    
+
     // @name has a string literal argument.
     if (annotation->name == IR::Annotation::nameAnnotation) {
         const IR::StringLiteral* parsed =
@@ -82,4 +82,5 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
 
     // Unknown annotation. Leave as is.
 }
-}
+
+} // namespace P4

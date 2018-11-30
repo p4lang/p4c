@@ -1119,7 +1119,12 @@ bool ToP4::preorder(const IR::Annotation * a) {
         for (auto tok : a->body) {
             if (!first) builder.append(" ");
             first = false;
+
+            bool haveStringLiteral =
+                tok->token_type == P4Parser::token_type::TOK_STRING_LITERAL;
+            if (haveStringLiteral) builder.append("\"");
             builder.append(tok->text);
+            if (haveStringLiteral) builder.append("\"");
         }
         builder.append(")");
     }
