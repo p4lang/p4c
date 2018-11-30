@@ -36,7 +36,9 @@ namespace P4 {
 
 #define PARSE(aname, tname)                                         \
     if (annotation->name == aname) {                                \
-        if (!needsParsing(annotation)) return;                      \
+        if (!needsParsing(annotation)) {                            \
+            return;                                                 \
+        }                                                           \
                                                                     \
         const IR::tname* parsed =                                   \
             P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
@@ -49,7 +51,9 @@ namespace P4 {
 
 #define PARSE_EXPRESSION_LIST(aname)                                     \
     if (annotation->name == aname) {                                     \
-        if (!needsParsing(annotation)) return;                           \
+        if (!needsParsing(annotation)) {                                 \
+            return;                                                      \
+        }                                                                \
                                                                          \
         const IR::Vector<IR::Expression>* parsed =                       \
             P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, \
@@ -62,7 +66,9 @@ namespace P4 {
 
 #define PARSE_KV_LIST(aname)                                     \
     if (annotation->name == aname) {                             \
-        if (!needsParsing(annotation)) return;                   \
+        if (!needsParsing(annotation)) {                         \
+            return;                                              \
+        }                                                        \
                                                                  \
         const IR::IndexedVector<IR::NamedExpression>* parsed =   \
             P4::P4ParserDriver::parseKvList(annotation->srcInfo, \
