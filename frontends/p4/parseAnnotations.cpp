@@ -15,11 +15,25 @@ limitations under the License.
 */
 
 #include "parseAnnotations.h"
-#include "ir/ir.h"
-#include "frontends/p4/coreLibrary.h"
 #include "frontends/parsers/parserDriver.h"
 
 namespace P4 {
+
+bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
+    if (!annotation->expr.empty() || !annotation->kv.empty()) {
+        // We already have an expression or a key-value list. This happens when
+        // we have a P4₁₄ program, in which case the annotation body had better
+        // be empty.
+        if (!annotation->body.empty()) {
+            BUG("Annotation has been parsed already");
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
     // @tableonly, @defaultonly, @hidden, @atomic, and @optional have no
     // arguments.
@@ -30,25 +44,16 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
             || annotation->name == IR::Annotation::optionalAnnotation) {
         if (!annotation->body.empty()) {
             ::error("%1% should not have any arguments", annotation);
-            return;
         }
 
         return;
     }
 
-    if (!annotation->expr.empty() || !annotation->kv.empty()) {
-        // We already have an expression or a key-value list. This happens when
-        // we have a P4₁₄ program, in which case the annotation body had better
-        // be empty.
-        if (!annotation->body.empty()) {
-            BUG("Annotation has been parsed already");
-        }
+    if (!needsParsing(annotation)) return;
 
-        return;
-    }
-
-    // @name has a string literal argument.
-    if (annotation->name == IR::Annotation::nameAnnotation) {
+    // @name and @deprecated have a string literal argument.
+    if (annotation->name == IR::Annotation::nameAnnotation
+            || annotation->name == IR::Annotation::deprecatedAnnotation) {
         const IR::StringLiteral* parsed =
                 P4ParserDriver::parseStringLiteral(annotation->srcInfo,
                                                    &annotation->body);

@@ -852,6 +852,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
     PassManager simplify = {
+        new ParseAnnotations(),
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,

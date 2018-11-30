@@ -23,11 +23,21 @@ limitations under the License.
  * Parses known/predefined annotations used by the compiler.
  */
 namespace P4 {
-class ParseAnnotations final : public Modifier {
+class ParseAnnotations : public Modifier {
  public:
-   using Modifier::postorder;
-   ParseAnnotations() { setName("ParseAnnotations"); }
-   void postorder(IR::Annotation* annotation) override;
+    using Modifier::postorder;
+    ParseAnnotations() { setName("ParseAnnotations"); }
+    ParseAnnotations(const char* targetName) {
+        cstring s = cstring(targetName) + cstring("__ParseAnnotations");
+        setName(s);
+    }
+    virtual void postorder(IR::Annotation* annotation) override;
+
+ protected:
+    /// Checks if the annotation needs parsing. An annotation needs parsing if
+    /// it was derived from P4₁₆. A BUG is thrown if the annotation is derived
+    /// from P4₁₆ and is already parsed.
+    bool needsParsing(IR::Annotation* annotation);
 };
 } // namespace P4
 
