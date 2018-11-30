@@ -169,7 +169,7 @@ class Type_InfInt : Type, ITypeVar {
     dbprint { out << "int/" << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
-    const Type* getP4Type() const override { return nullptr; }
+    const Type* getP4Type() const override { return this; }
 }
 
 class Type_Dontcare : Type_Base {
