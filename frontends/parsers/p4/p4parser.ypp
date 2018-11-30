@@ -137,7 +137,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 
 %define api.token.prefix {TOK_}
 %token             START_PROGRAM START_EXPRESSION_LIST START_KV_LIST
-                   START_INTEGER START_STRING_LITERAL
+                   START_EXPRESSION START_INTEGER START_STRING_LITERAL
 %token             END
 %token<Token>      UNEXPECTED_TOKEN
 %token<Token>      LE "<="
@@ -300,6 +300,7 @@ start
 fragment
     : START_EXPRESSION_LIST expressionList { $$ = $2; }
     | START_KV_LIST kvList                 { $$ = $2; }
+    | START_EXPRESSION expression          { $$ = $2; }
     | START_INTEGER INTEGER                { $$ = parseConstant(@2, $2, 0); }
     | START_STRING_LITERAL STRING_LITERAL  { $$ = new IR::StringLiteral(@2, $2); }
     ;

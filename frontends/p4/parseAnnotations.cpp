@@ -58,11 +58,11 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
         return;
     }
 
-    // @length has an int literal argument.
+    // @length has an expression argument.
     if (annotation->name == IR::Annotation::lengthAnnotation) {
-        const IR::Constant* parsed =
-                P4ParserDriver::parseInteger(annotation->srcInfo,
-                                             &annotation->body);
+        const IR::Expression* parsed =
+                P4ParserDriver::parseExpression(annotation->srcInfo,
+                                                &annotation->body);
         if (parsed != nullptr) {
             annotation->expr.push_back(parsed);
         }

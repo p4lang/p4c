@@ -11,6 +11,7 @@ class P4AnnotationLexer : public AbstractP4Lexer {
     enum Type {
         EXPRESSION_LIST = P4Parser::token_type::TOK_START_EXPRESSION_LIST,
         KV_LIST = P4Parser::token_type::TOK_START_KV_LIST,
+        EXPRESSION = P4Parser::token_type::TOK_START_EXPRESSION,
         INTEGER = P4Parser::token_type::TOK_START_INTEGER,
         STRING_LITERAL = P4Parser::token_type::TOK_START_STRING_LITERAL,
     };

@@ -125,9 +125,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager passes = {
-        new PrettyPrint(options),
         // Parse annotations
         new ParseAnnotations(),
+        new PrettyPrint(options),
         // Simple checks on parsed program
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs

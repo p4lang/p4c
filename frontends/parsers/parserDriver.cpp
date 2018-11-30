@@ -195,6 +195,14 @@ P4ParserDriver::parseKvList(Util::SourceInfo srcInfo,
             P4AnnotationLexer::KV_LIST, srcInfo, body);
 }
 
+/* static */ const IR::Expression*
+P4ParserDriver::parseExpression(Util::SourceInfo srcInfo,
+                                IR::Vector<IR::AnnotationToken>* body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Expression>(
+            P4AnnotationLexer::EXPRESSION, srcInfo, body);
+}
+
 /* static */ const IR::Constant*
 P4ParserDriver::parseInteger(Util::SourceInfo srcInfo,
                              IR::Vector<IR::AnnotationToken>* body) {

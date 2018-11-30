@@ -127,6 +127,10 @@ class P4ParserDriver final : public AbstractParserDriver {
         Util::SourceInfo srcInfo,
         IR::Vector<IR::AnnotationToken>* body);
 
+    static const IR::Expression* parseExpression(
+        Util::SourceInfo srcInfo,
+        IR::Vector<IR::AnnotationToken>* body);
+
     static const IR::Constant* parseInteger(
         Util::SourceInfo srcInfo,
         IR::Vector<IR::AnnotationToken>* body);
