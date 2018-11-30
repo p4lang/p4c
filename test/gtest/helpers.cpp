@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
+#include "frontends/p4/parseAnnotations.h"
 
 namespace detail {
 
@@ -126,6 +127,16 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
 namespace Test {
 
+class ParseAnnotations : public P4::ParseAnnotations {
+ public:
+    ParseAnnotations() : P4::ParseAnnotations("FrontendTest") { }
+    void postorder(IR::Annotation* annotation) override {
+        PARSE_EXPRESSION_LIST("diagnostic")
+        PARSE("id", Constant)
+        PARSE("my_anno", StringLiteral)
+    }
+};
+
 /* static */ boost::optional<FrontendTestCase>
 FrontendTestCase::create(const std::string& source,
                          CompilerOptions::FrontendVersion langVersion
@@ -140,6 +151,8 @@ FrontendTestCase::create(const std::string& source,
                   << " errors while parsing test case" << std::endl;
         return boost::none;
     }
+
+    program = program->apply(ParseAnnotations());
 
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
