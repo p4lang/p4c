@@ -23,15 +23,16 @@ limitations under the License.
  * Parses known/predefined annotations used by the compiler.
  */
 namespace P4 {
+
 class ParseAnnotations : public Modifier {
  public:
     using Modifier::postorder;
     ParseAnnotations() { setName("ParseAnnotations"); }
-    ParseAnnotations(const char* targetName) {
+    explicit ParseAnnotations(const char* targetName) {
         cstring s = cstring(targetName) + cstring("__ParseAnnotations");
         setName(s);
     }
-    virtual void postorder(IR::Annotation* annotation) override;
+    void postorder(IR::Annotation* annotation) override;
 
  protected:
     /// Checks if the annotation needs parsing. An annotation needs parsing if
@@ -39,6 +40,7 @@ class ParseAnnotations : public Modifier {
     /// from P4₁₆ and is already parsed.
     bool needsParsing(IR::Annotation* annotation);
 };
-} // namespace P4
+
+}  // namespace P4
 
 #endif /* _P4_PARSEANNOTATIONS_H_ */

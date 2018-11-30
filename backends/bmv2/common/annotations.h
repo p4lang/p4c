@@ -28,7 +28,7 @@ namespace BMV2 {
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations() : P4::ParseAnnotations("BMV2") { }
-    virtual void postorder(IR::Annotation* annotation) override;
+    void postorder(IR::Annotation* annotation) override;
 };
 
 }  // namespace BMV2

@@ -88,4 +88,4 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
     // Unknown annotation. Leave as is.
 }
 
-} // namespace P4
+}  // namespace P4
